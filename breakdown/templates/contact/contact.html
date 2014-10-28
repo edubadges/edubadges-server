@@ -1,0 +1,58 @@
+{% extends "base_interior.html" %}
+
+
+{% set page_title=snippet('contact-page-title')|striptags|default('Contact Us', true) %}
+
+
+{% block content %}		
+	<div class="content_area">	
+		{{snippet('contact-intro')|default('<p>Please submit the form below.</p>', true)|safe}}
+		<form class="contact" action="" method="post">
+			<fieldset>
+				<ol>
+					<li>
+						<label for="id_name">{{form.name.label}}</label>
+						{% if form.name.errors %}
+							<span class="error">{{form.name.errors|safe}}</span>
+						{% endif %}
+						{{form.name|safe}}
+					</li>
+					<li>
+						<label for="id_email">{{form.email.label}}</label>
+						{% if form.email.errors %}
+							<span class="error">{{form.email.errors|safe}}</span>
+						{% endif %}
+						{{form.email|safe}}
+					</li>
+					<li>
+						<label for="id_phone">{{form.phone.label}}</label>
+						{% if form.phone.errors %}
+							<span class="error">{{form.phone.errors|safe}}</span>
+						{% endif %}
+						{{form.phone|safe}}
+					</li>
+				</ol>
+				<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+			</fieldset>
+			<fieldset>
+				<ol>
+					<li>
+						<label for="id_message">{{form.message.label}}</label>
+						{% if form.message.errors %}
+							<span class="error">{{form.message.errors|safe}}</span>
+						{% endif %}
+						{{form.message|safe}}
+					</li>
+				</ol>
+			</fieldset>
+			<fieldset>
+				<ol>
+					<li>
+						<button type="submit">Send</button>
+					</li>
+				</ol>
+			</fieldset>
+		</form>
+	</div>
+
+{% endblock %}

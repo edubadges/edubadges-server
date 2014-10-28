@@ -1,0 +1,36 @@
+{% extends "base_interior.html" %}
+
+
+{% set page_title="Create a certificate" %}
+
+
+{% block content %}		
+	<div class="content_area">	
+		{{snippet('create-certificate-intro')|default('<p>Please submit the form below to generate your certificate.</p>', true)|safe}}
+		<form class="contact" action="" method="post" enctype='multipart/form-data'>
+			<fieldset>
+				<ol>
+				{% for field in form %}
+					<li>
+						<label for="id_name">{{field.label}}</label>
+						{% if field.errors %}
+							<span class="error">{{field.errors|safe}}</span>
+						{% endif %}
+						{{field|safe}}
+					</li>
+				{% endfor %}
+				</ol>
+				{{ csrf() }}
+			</fieldset>
+			
+			<fieldset>
+				<ol>
+					<li>
+						<button type="submit">Send</button>
+					</li>
+				</ol>
+			</fieldset>
+		</form>
+	</div>
+
+{% endblock %}

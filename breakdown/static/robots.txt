@@ -1,0 +1,3 @@
+# www.robotstxt.org/
+# https://developers.google.com/webmasters/control-crawl-index/
+

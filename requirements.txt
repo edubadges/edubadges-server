@@ -1,0 +1,45 @@
+# Django stuff
+Django==1.7
+# Timezone support
+pytz==2014.7
+# PIL support
+Pillow==2.6.1
+# jinja2 templates
+Jinja2==2.7.3
+git+ssh://git@github.com/concentricsky/jingo.git@v0.4
+# mysql database
+MySQL-python==1.2.5
+# Email support
+boto==2.33.0
+django-ses==0.6.0
+# CSky models
+git+ssh://git@github.com/concentricsky/django-cachemodel.git@v2.0.0
+git+ssh://git@github.com/concentricsky/django-basic-models.git@v2.1.0
+# CSky Sphinx search lib
+git+https://github.com/concentricsky/django-sphinx.git@v2.3.0
+# CSky Client Admin and CMS
+git+ssh://git@github.com/concentricsky/django-skycms.git@v1.0.0
+git+ssh://git@github.com/concentricsky/django-sky-ckeditor.git@v0.9.8
+git+ssh://git@github.com/concentricsky/django-client-admin.git@v1.1.0
+git+ssh://git@github.com/concentricsky/django-skythumbnails.git@v0.2.5
+git+ssh://git@github.com/concentricsky/django-sky-redirects.git@v0.8.1
+# CSky visitor
+git+ssh://git@github.com/concentricsky/django-emailtemplates.git@v0.10.4
+git+ssh://git@github.com/concentricsky/django-sky-visitor.git@v1.2.0
+# Revision and deleted object recovery
+django-reversion==1.8.0
+# Memcached cache
+python-memcached==1.53
+
+# Some extra things that got installed (noted here as output from a pip freeze)
+pytz==2014.7
+Django-Select2==4.2.2
+MarkupSafe==0.23
+django-autoslug==1.7.2
+jingo==0.4
+wsgiref==0.1.2
+
+# Utilities for working with badges
+jsonschema==2.5.0-dev
+simplejson==3.6.4
+

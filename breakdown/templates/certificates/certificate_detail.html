@@ -1,0 +1,13 @@
+{% extends "base_interior.html" %}
+
+
+{% set page_title=object.id %}
+
+
+{% block content %}
+	
+	{% if object.image  %}
+		<img src="{{object.image.url}}" alt="Badge Image" />
+	{% endif %}
+	
+{% endblock %}

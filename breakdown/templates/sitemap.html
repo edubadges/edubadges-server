@@ -1,0 +1,11 @@
+{% extends "base_interior.html" %}
+
+
+{% set page_title=snippet('sitemap-page-title')|striptags|default('Sitemap', true) %}
+
+
+{% block content %} 
+    <div class="content_listing">  
+        {{cms_menu('main-menu', id='sitemap')}}
+    </div>
+{% endblock %}

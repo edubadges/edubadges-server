@@ -1,0 +1,14 @@
+Run the following in a terminal:
+
+mkdir <PROJECT>
+cd <PROJECT>
+virtualenv env-<CURRENT DATE>
+ln -s env-<CURRENT DATE> env
+source env/bin/activate
+git clone git@github.com:concentricsky/csky-django-template.git code
+pip install -r code/requirements.txt
+cp code/apps/mainsite/settings_local.py.example code/apps/mainsite/settings_local.py
+
+Edit the settings_local.py file and insert local credentials for DATABASES, then run the following:
+
+code/manage.py migrate

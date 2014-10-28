@@ -1,0 +1,11 @@
+*.pyc
+settings_local.py
+.*.sw*
+*~
+.DS_Store
+AppleDouble
+*.sqlite*
+*.sass-cache
+staticfiles/*
+mediafiles/*
+logs/*

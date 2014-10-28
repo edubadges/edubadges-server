@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+
+{% block body_class %}interior{% endblock %}
+
+
+{% block pre_content %}
+    
+    {{super()}}
+
+    <h2>{% block content_title %}{{ title }}{% endblock %}</h2>
+
+    {% block breadcrumbs %}{% endblock %}
+
+{% endblock %}
