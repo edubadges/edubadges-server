@@ -4,7 +4,7 @@ import json
 import os
 from jsonschema import Draft4Validator
 
-from utils import is_json, is_schemable, test_against_schema, test_against_schema_tree, test_for_errors_against_schema
+from utils import is_json, is_schemable, test_against_schema, test_against_schema_tree, test_for_errors_against_schema, has_context, try_json_load
 
 # Some test assertions of different sorts
 junky_assertion = {
@@ -66,6 +66,16 @@ class BadgeSchemaTests(TestCase):
 		someDict = { 'key': True }
 		self.assertFalse(is_json(someDict))
 
+	def test_try_json_load_good(self):
+		self.assertEqual(try_json_load('{ "key": 42 }'), {'key': 42}) 
+		
+	def test_try_json_load_already_obj(self):
+		self.assertEqual(try_json_load({ 'key': 42 }), { 'key': 42 })
+
+	def test_try_json_load_junk(self):
+		self.assertEqual(try_json_load("{ holey guacamole batman"), "{ holey guacamole batman")
+		self.assertEqual(try_json_load(23311233), 23311233)
+
 	def test_schemable_things_should_be_schemable(self):
 		"""
 		Make sure that is_json will return true for a real chunk of json or a string URL
@@ -95,8 +105,6 @@ class BadgeSchemaTests(TestCase):
 		schemaList = ['plainuri.json','backpack-error-from-valid-1.0.json','OBI-v0.5-assertion.json','OBI-v1.0-linked-badgeclass.json']
 		for schema in schemaList:
 			self.assertEqual(Draft4Validator.check_schema(json.loads(open(os.path.join(os.path.dirname(__file__),'schema',schema),'r').read())), None)
-
-
 
 	def test_against_schema_true_urlstring(self):
 		"""
@@ -134,6 +142,19 @@ class BadgeSchemaTests(TestCase):
 
 
 class BadgeContextTests(TestCase):
-	def nothing(self):
-		return
+	def test_has_context(self):
+		self.assertTrue(has_context({"@context": "http://someurl.com/context", "someprop": 42}))
+		self.assertFalse(has_context({"howdy": "stranger"}))
 
+	def test_has_context_handle_nonObjects(self):
+		""" 
+		This test isn't working right, but it's supposed to make sure has_context doesn't choke on things.
+		"""
+		exceptage = None
+		try:
+			self.assertFalse(has_context("Hahaha, I'm a string."))
+			self.assertFalse(has_context([{"@context": "http://someurl.com/context"}]))
+		except AssertionError as e:
+			exceptage = e
+		finally:
+			self.assertEqual(exceptage,None)
