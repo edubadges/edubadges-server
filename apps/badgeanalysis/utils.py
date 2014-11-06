@@ -2,12 +2,12 @@
 Utilities to deal with understanding badges from an unspecified issuer
 """
 import json
-from jsonschema import validate, Draft4Validator, FormatChecker
+from jsonschema import validate, Draft4Validator, draft4_format_checker
 from jsonschema.exceptions import FormatError, ValidationError
 import os
 import re
 import collections
-from models import InfoObject
+from badgeanalysis.models import *
 from pyld import jsonld
 
 
@@ -68,7 +68,7 @@ SCHEMA_TREE = {
 def schema_filename(schemaKey):
 	return SCHEMA_META[schemaKey]['schemaFile']
 def schema_type(schemaKey):
-	return SCHEMA_META[schemaKey]['type']
+	return SCHEMA_META[schemaKey]['defaultType']
 def schema_context(schemaKey):
 	return SCHEMA_META[schemaKey]['context']
 def schema_contextFile(schemaKey):
@@ -178,7 +178,7 @@ def test_against_schema(badgeObject, schemaKey):
 def test_for_errors_against_schema(badgeObject, schemaKey):
 	currentSchema = load_schema_from_filesystem(schemaKey)
 	try:
-		validate(badgeObject, currentSchema, Draft4Validator, format_checker=FormatChecker())
+		validate(badgeObject, currentSchema, Draft4Validator, format_checker=draft4_format_checker)
 	except ValidationError as e:
 		return e
 	else: 
@@ -229,11 +229,11 @@ def redumps_object_input(badgeInput):
 	return None
 
 
-def start_analysis(badgeObject, infoObject=None):
+def start_analysis(badgeObject):
 	"""
 	Takes what's extracted from a badge image (or potentially other badge objects), 
-	ensures they're loaded up as python dictionaries and sets up an InfoObject
-	to contain generated metadata about the badge.
+	ensures they're loaded up as python dictionaries and sets up an OpenBadge object
+	to contain a full representation of the badge and generated metadata about it.
 	"""
 	# Step 1: Try to get this in native dictionary format
 	badgeObject = try_json_load(badgeObject)
@@ -244,90 +244,62 @@ def start_analysis(badgeObject, infoObject=None):
 		# TODO
 		return
 
-	infoObject = InfoObject(badgeObject)
+	openBadge = OpenBadge(badgeObject)
 
 	# Step 2: Gather JSON-LD information: context, type
-	if has_context(badgeObject):
-		context = badgeObject.get('@context')
-
-		# Determine if the existing context has a suitable main OBI context within it. (This will return true for strings, objects and arrays)
-		if isinstance(context, collections.Iterable):
-			for contextElement in context:
-				infoObject.setContext(contextElement)
-
-		if '@type' in badgeObject:
-			#TODO this is likely not going to be the full expanded IRI, likely a namespaced fragment
-			infoObject.setType(badgeObject['@type'])
-		else:
-			#TODO schema currying for badge Classes that declared context but not type? Seems rare.
-			infoObject.setType('assertion')
-
-	else:
-		matchingSchemaKey = test_against_schema_tree(badgeObject)
-
-		if matchingSchemaKey == None:
-			raise TypeError("Could not determine type of badge object with known schema set")
-			return
-
-		# TODO: Implement case for 'plainurl' to fetch assertion then start_analysis(fetched_assertion)
-		else:
-			infoObject.setContext( SCHEMA_META[matchingSchemaKey]['context'] )
-			infoObject.setType( SCHEMA_META[matchingSchemaKey]['defaultType'] )
-
-	# Step 3: Gather linked resources
-	buildFullBadgeObject(infoObject)
+	
+	
 
 
-def buildFullBadgeObject(infoObject):
+def buildFullBadgeObject(openBadge):
 
 	# Step 1: Set up a shell to drop badge objects into
-	infoObject.initFullBadgeObject()
+	openBadge.initFullBadgeObject()
 
 	# Step 2: Drop the input badge object into the right spot in that shell.
-	if not infoObject.inputObjectType:
+	if not openBadge.inputObjectType:
 		#protect against missing default
-		infoObject.inputObjectType = 'assertion'
-	shortType = identify_badgeObject_type(infoObject.inputObjectType)
-	#TODO What if shortType is None?
-	infoObject.fullBadgeObject[shortType] = infoObject.inputObject
+		openBadge.setType('assertion')
 
 	# Step 3: Start pulling in linked components
-	linked_components_missing(infoObject)
+	fill_missing_components(openBadge)
 
 
-def linked_components_missing(infoObject):
-	fullObject = infoObject.fullBadgeObject
+def fill_missing_components(openBadge):
+	fullObject = openBadge.fullBadgeObject
 	#TODO: refactor. This is kind of clunky. Will it hold up if the input isn't an assertion?
 	try:
 		if isinstance(fullObject['assertion'], dict):
+			# For 1.0 etc compliant badges with linked badgeclass
 			if isinstance(fullObject['assertion']['badge'], str):
-				fullObject['badge'] = fetch_linked_component(fullObject['assertion']['badge'])
+				fullObject['badgeclass'] = fetch_linked_component(fullObject['assertion']['badge'])
+			# for nested badges (backpack-wonky!)
 			elif isinstance(fullObject['assertion']['badge'], dict):
-				fullObject['badge'] = fullObject['assertion']['badge']
+				fullObject['badgeclass'] = fullObject['assertion']['badge']
 
-		if isinstance(fullObject['badge'], dict):
-			if isinstance(fullObject['badge']['issuer'], str):
-				fullObject['issuer'] = fetch_linked_component(fullObject['badge']['issuer'])
-			elif isinstance(fullObject['badge']['issuer'], dict):
-				fullObject['issuer'] = fullObject['badge']['issuer']
+		if isinstance(fullObject['badgeclass'], dict):
+			if isinstance(fullObject['badgeclass']['issuer'], str):
+				fullObject['issuer'] = fetch_linked_component(fullObject['badgeclass']['issuer'])
+			elif isinstance(fullObject['badgeclass']['issuer'], dict):
+				fullObject['issuer'] = fullObject['badgeclass']['issuer']
 	except Exception as e:
-		#TODO Add errors to infoObject instead
+		#TODO Add errors to openBadge instead
 		raise e
-	validate_object(infoObject)
+	validate_object(openBadge)
 
 def fetch_linked_component(url):
 	try:
 		result = jsonld.load_document(url)
 		result = result.document
-	except jsonld.JsonLdError as e:
+	except (jsonld.JsonLdError, Exception) as e:
 		raise IOError("error loading document " + url, cause=e)
 		return None
 	else: 
 		 return result
 
 
-def validate_object(infoObject):
-	# TODO: NOW
+def validate_object(openBadge):
+	# TODO
 	pass
 
 

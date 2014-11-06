@@ -4,7 +4,8 @@ import json
 import os
 from jsonschema import Draft4Validator
 
-from utils import is_json, is_schemable, test_against_schema, test_against_schema_tree, test_for_errors_against_schema, has_context, try_json_load
+from badgeanalysis.utils import is_json, is_schemable, test_against_schema, test_against_schema_tree, test_for_errors_against_schema, has_context, try_json_load, schema_context
+from badgeanalysis.models import OpenBadge
 
 # Some test assertions of different sorts
 junky_assertion = {
@@ -111,6 +112,8 @@ class BadgeSchemaTests(TestCase):
 		Make sure that a url string returns a pass against the plainurl is_schema.
 		"""
 		self.assertTrue(test_against_schema('http://url.com/badgeUrl', 'plainurl'))
+		self.assertFalse(test_against_schema("a stinkin' turnip", 'plainurl'))
+		self.assertFalse(test_against_schema("", 'plainurl'))
 
 	def test_against_schema_tree_urlstring(self):
 		"""
@@ -139,6 +142,8 @@ class BadgeSchemaTests(TestCase):
 		"""
 		self.assertEqual(test_against_schema_tree(valid_1_0_assertion), 'v1_0strict')
 
+	def test_schema_context(self):
+		self.assertEqual( schema_context('v1_0strict'), 'http://openbadges.org/standard/1.0/context' )
 
 
 class BadgeContextTests(TestCase):
@@ -158,3 +163,83 @@ class BadgeContextTests(TestCase):
 			exceptage = e
 		finally:
 			self.assertEqual(exceptage,None)
+
+simpleOneOne = {
+	"@context": "http://standard.openbadges.org/1.1/context",
+	"@type": "assertion",
+	"@id": "http://example.org/assertion25",
+	"uid": 25
+}
+
+oneOneArrayType = {
+	"@context": "http://standard.openbadges.org/1.1/context",
+	"@type": ["assertion", "http://othertype.com/type"],
+	"@id": "http://example.org/assertion25",
+	"uid": 25
+}
+
+oneOneNonUrlID = {
+	"@context": "http://standard.openbadges.org/1.1/context",
+	"@type": "assertion",
+	"@id": "assertion25",
+	"uid": 25
+}
+simpleOneOneNoId = {
+	"@context": "http://standard.openbadges.org/1.1/context",
+	"@type": "assertion",
+	"verify": { "type": "hosted", "url": "http://example.org/assertion25" },
+	"uid": 25
+}
+
+
+
+class OpenBadgeTests(TestCase):
+	def test_validateMainContext(self):
+		context = "http://standard.openbadges.org/1.1/context"
+		a = OpenBadge.validateMainContext(OpenBadge(simpleOneOne),context)
+		self.assertEqual(a,context)
+
+	def test_simple_OpenBadge_construction_noErrors(self):
+		try:
+			openBadge = OpenBadge(simpleOneOne)
+		except Exception as e:
+			self.assertEqual(e,None)
+		self.assertEqual(openBadge.getProp('assertion', 'uid'), 25)
+		self.assertEqual(openBadge.getProp('assertion', '@type'), 'assertion')
+
+	def test_oneOneArrayType(self):
+		try:
+			openBadge = OpenBadge(oneOneArrayType)
+		except Exception as e:
+			self.assertEqual(e,None)
+		self.assertEqual(openBadge.getProp('assertion','uid'),25)
+
+	def test_oneOneNonUrlID(self):
+		#TODO, both implement id validation and then make this test actually pass
+		try:
+			openBadge = OpenBadge(oneOneNonUrlID)
+		except Exception as e:
+
+			self.assertFalse(e == None)
+		self.assertEqual(openBadge.getProp('assertion','uid'),25)
+
+	def test_id_from_verify_url(self):
+		try:
+			openBadge = OpenBadge(simpleOneOne)
+		except Exception as e:
+			self.assertEqual(e,None)
+		self.assertEqual(openBadge.getProp('assertion', '@id'), "http://example.org/assertion25")
+
+	def test_valid_1_0_construction(self):
+		try:
+			openBadge = OpenBadge(valid_1_0_assertion)
+		except Exception as e:
+			self.assertEqual(e,None)
+		self.assertEqual(openBadge.getProp('assertion','@type'),'assertion')
+		self.assertEqual(openBadge.getProp('assertion','@id'),'http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205')
+		self.assertEqual(openBadge.getProp('assertion','issuedOn'),1406747839)
+
+
+
+
+
