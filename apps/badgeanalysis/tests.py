@@ -143,7 +143,7 @@ class BadgeSchemaTests(TestCase):
 		self.assertEqual(test_against_schema_tree(valid_1_0_assertion), 'v1_0strict')
 
 	def test_schema_context(self):
-		self.assertEqual( schema_context('v1_0strict'), 'http://openbadges.org/standard/1.0/context' )
+		self.assertEqual( schema_context('v1_0strict'), 'http://standard.openbadges.org/1.0/context' )
 
 
 class BadgeContextTests(TestCase):
@@ -168,7 +168,8 @@ simpleOneOne = {
 	"@context": "http://standard.openbadges.org/1.1/context",
 	"@type": "assertion",
 	"@id": "http://example.org/assertion25",
-	"uid": 25
+	"uid": 25,
+	"badge": "http://example.org/badge1"
 }
 
 oneOneArrayType = {
@@ -219,7 +220,7 @@ class OpenBadgeTests(TestCase):
 		try:
 			openBadge = OpenBadge(oneOneNonUrlID)
 		except Exception as e:
-
+			# What is this doing?
 			self.assertFalse(e == None)
 		self.assertEqual(openBadge.getProp('assertion','uid'),25)
 
@@ -239,7 +240,22 @@ class OpenBadgeTests(TestCase):
 		self.assertEqual(openBadge.getProp('assertion','@id'),'http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205')
 		self.assertEqual(openBadge.getProp('assertion','issuedOn'),1406747839)
 
+	def test_junky_construction(self):
+		try:
+			openBadge = OpenBadge(junky_assertion)
+		except Exception as e:
+			self.assertEqual(e,None)
+		self.assertEqual(openBadge.getProp('assertion','@type'),'assertion')
+		self.assertEqual(openBadge.getProp('assertion','@id'),'http://badges.schoolofdata.org/badge/data-to-diagrams/instance/100')
+		self.assertEqual(openBadge.getProp('assertion','issuedOn'),1395112143)
 
+	def test_getting_prop_by_iri_simpleOneOne(self):
+		try:
+			openBadge = OpenBadge(simpleOneOne)
+		except Exception as e:
+			self.assertEqual(e,None)
+		self.assertEqual(openBadge.getLdProp('assertion','http://standard.openbadges.org/definitions#AssertionUid'),25)
+		self.assertEqual(openBadge.getLdProp('assertion','http://standard.openbadges.org/definitions#BadgeClass'), "http://example.org/badge1")
 
 
 

@@ -14,45 +14,55 @@ from pyld import jsonld
 SCHEMA_META= {
 	'plainurl': {
 		'schemaFile': 'plainuri.json',
-		'schemaUrl': 'http://openbadges.org/standard/0.5/schema/v0.5-plainuri',
+		'schemaUrl': 'http://standard.openbadges.org/0.5/schema/v0.5-plainuri',
 		'defaultType': 'assertion',
-		'context': 'http://openbadges.org/standard/context/0.5',
-		'contextFile': '0.5'
-			
+		'context': 'http://standard.openbadges.org/0.5/context',
+		'contextFile': '0.5.json'	
 	},
 	'v0_5': {
 		'schemaFile': 'OBI-v0.5-assertion.json',
-		'schemaUrl': 'http://openbadges.org/standard/0.5/schema/v0.5-assertion',
+		'schemaUrl': 'http://standard.openbadges.org/0.5/schema/v0.5-assertion',
 		'defaultType': 'assertion',
-		'context': 'http://openbadges.org/standard/context/0.5',
-		'contextFile': '0.5'
-		
+		'context': 'http://standard.openbadges.org/0.5/context',
+		'contextFile': '0.5.json'	
 	},
 	'v1_0strict': {
 		'schemaFile': 'OBI-v1.0-linked-badgeclass.json',
-		'schemaUrl': 'http://openbadges.org/standard/1.0/schema/v1.0-assertion-linked-badgeclass',
+		'schemaUrl': 'http://standard.openbadges.org/1.0/schema/v1.0-assertion-linked-badgeclass',
 		'defaultType': 'assertion',
-		'context': 'http://openbadges.org/standard/1.0/context',
-		'contextFile': '1.0'
+		'context': 'http://standard.openbadges.org/1.0/context',
+		'contextFile': '1.0.json'
 	},
 	'backpack_error_1_0': {
 		'schemaFile': 'backpack-error-from-valid-1.0.json',
-		'schemaUrl': 'http://openbadges.org/standard/0.5/schema/v0.5-1.0-mashed-up',
+		'schemaUrl': 'http://standard.openbadges.org/0.5/schema/v0.5-1.0-mashed-up',
 		'defaultType': 'assertion',
-		'context': 'http://openbadges.org/standard/0.5/context/',
+		'context': 'http://standard.openbadges.org/0.5/context/',
 		'contextFile': '0.5'
 	},
 	'v1_1': {
 		'schemaFile': 'OBI-v1.1-assertion',
-		'schemaUrl': 'http://openabadges.org/standard/1.1/schema/1.1-assertion',
+		'schemaUrl': 'http://standard.openbadges.org/1.1/schema/1.1-assertion',
 		'defaultType': 'assertion',
-		'context': 'http://openbadges.org/standard/1.1/context',
-		'contextFile': '1.1'
+		'context': 'http://standard.openbadges.org/1.1/context',
+		'contextFile': '1.1.json'
+	},
+	'badgeClass_generic': {
+		'schemaFile': 'OBI-v1.0-badgeclass.json',
+		'defaultType': 'badgeclass',
+		'context': 'http://standard.openbadges.org/1.0/context',
+		'contextFile': '1.0.json'
+	},
+	'issuer_generic': {
+		'schemaFile': 'OBI-v1.0-issuer.json',
+		'defaultType': 'issuerorg',
+		'context': 'http://standard.openbadges.org/1.0/context',
+		'contextFile': '1.0.json'
 	}
 }
 schemaFiles = {}
 
-SCHEMA_TREE = {
+ASSERTION_TREE = {
 	'test': 'plainurl',
 	'noMatch': {
 		'test': 'backpack_error_1_0',
@@ -64,6 +74,13 @@ SCHEMA_TREE = {
 		}
 	}
 }
+BADGECLASS_TREE = {
+	'test': 'badgeClass_generic'
+}
+ISSUER_TREE = {
+	'test': 'issuer_generic'
+}
+
 
 def schema_filename(schemaKey):
 	return SCHEMA_META[schemaKey]['schemaFile']
@@ -82,12 +99,14 @@ def load_schema_from_filesystem(schemaKey):
 		schemaFiles[schemaKey] = json.loads(open(os.path.join(os.path.dirname(__file__),'schema',schema_filename(schemaKey)),'r').read())
 	return schemaFiles[schemaKey]
 
+contextFiles = {}
 def load_context_from_filesystem(schemaKey):
 	"""
 	Loads a context from the file system based on the filename specified in SCHEMA_META
 	"""
-	return json.loads(open(os.path.join(os.path.dirname(__file__),'context',schema_contextFile(schemaKey)),'r').read())
-	 
+	if not schemaKey in contextFiles:
+		return json.loads(open(os.path.join(os.path.dirname(__file__),'context',schema_contextFile(schemaKey)),'r').read())
+	return contextFiles[schemaKey]
 
 def of_badgeObject_type(guess, typeString):
 	reggie = re.compile(re.compile('%s'%guess), flags=re.I)
@@ -146,8 +165,7 @@ def is_schemable(input):
 	else:
 		return False
 
-
-def test_against_schema_tree(badgeObject, testTree=SCHEMA_TREE):
+def test_against_schema_tree(badgeObject, testTree=ASSERTION_TREE):
 	if 'test' in testTree:
 		schemaKey = testTree['test']
 	else: 
@@ -163,6 +181,17 @@ def test_against_schema_tree(badgeObject, testTree=SCHEMA_TREE):
 		return test_against_schema_tree(badgeObject, testTree['noMatch'])
 	else:
 		return None
+
+def tree_for(objectType):
+	if objectType == 'assertion':
+		return SCHEMA_TREE
+	elif objectType == 'badgeclass':
+		return BADGECLASS_TREE
+	elif objectType == 'issuerorg':
+		return ISSUER_TREE
+	else:
+		return ASSERTION_TREE
+
 
 def test_against_schema(badgeObject, schemaKey):
 	"""
@@ -202,7 +231,7 @@ def has_context(badgeObject):
 
 def custom_context_docloader(url):
 	for schemaSet in SCHEMA_META:
-		if url == SCHEMA_META[schemaSet].context:
+		if url == SCHEMA_META[schemaSet]['context']:
 			doc = {
                 'contextUrl': None,
                 'documentUrl': None,
@@ -225,7 +254,7 @@ def redumps_object_input(badgeInput):
 		badgeObject = badgeInput
 
 	if is_json(badgeObject):
-		schemaMatch = test_against_schema_tree(SCHEMA_TREE,badgeObject)
+		schemaMatch = test_against_schema_tree(ASSERTION_TREE,badgeObject)
 	return None
 
 
@@ -246,46 +275,6 @@ def start_analysis(badgeObject):
 
 	openBadge = OpenBadge(badgeObject)
 
-	# Step 2: Gather JSON-LD information: context, type
-	
-	
-
-
-def buildFullBadgeObject(openBadge):
-
-	# Step 1: Set up a shell to drop badge objects into
-	openBadge.initFullBadgeObject()
-
-	# Step 2: Drop the input badge object into the right spot in that shell.
-	if not openBadge.inputObjectType:
-		#protect against missing default
-		openBadge.setType('assertion')
-
-	# Step 3: Start pulling in linked components
-	fill_missing_components(openBadge)
-
-
-def fill_missing_components(openBadge):
-	fullObject = openBadge.fullBadgeObject
-	#TODO: refactor. This is kind of clunky. Will it hold up if the input isn't an assertion?
-	try:
-		if isinstance(fullObject['assertion'], dict):
-			# For 1.0 etc compliant badges with linked badgeclass
-			if isinstance(fullObject['assertion']['badge'], str):
-				fullObject['badgeclass'] = fetch_linked_component(fullObject['assertion']['badge'])
-			# for nested badges (backpack-wonky!)
-			elif isinstance(fullObject['assertion']['badge'], dict):
-				fullObject['badgeclass'] = fullObject['assertion']['badge']
-
-		if isinstance(fullObject['badgeclass'], dict):
-			if isinstance(fullObject['badgeclass']['issuer'], str):
-				fullObject['issuer'] = fetch_linked_component(fullObject['badgeclass']['issuer'])
-			elif isinstance(fullObject['badgeclass']['issuer'], dict):
-				fullObject['issuer'] = fullObject['badgeclass']['issuer']
-	except Exception as e:
-		#TODO Add errors to openBadge instead
-		raise e
-	validate_object(openBadge)
 
 def fetch_linked_component(url):
 	try:
@@ -298,9 +287,6 @@ def fetch_linked_component(url):
 		 return result
 
 
-def validate_object(openBadge):
-	# TODO
-	pass
 
 
 
