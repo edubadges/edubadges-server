@@ -1,11 +1,12 @@
 from django.views.generic import *
+from django.views.generic.edit import FormMixin
 from certificates.models import *
-from mainsite.views import ActiveTabMixin
+# from mainsite.views import ActiveTabMixin
 
 
-class CertificateCreate(ActiveTabMixin, CreateView):
+class CertificateCreate(FormMixin, CreateView):
     model = Certificate
-    active_tab = 'certificates'
+    # active_tab = 'certificates'
     
 
 class CertificateDetail(ActiveTabMixin, DetailView):

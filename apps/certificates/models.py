@@ -12,3 +12,7 @@ class Certificate(basic_models.TimestampedModel):
 
     def __unicode__(self):
         return "%s: %s" % (self.created_at, self.image.url)
+
+    def save(self):
+    	# don't save stuff
+    	pass

@@ -4,8 +4,9 @@ import json
 import os
 from jsonschema import Draft4Validator
 
-from badgeanalysis.utils import is_json, is_schemable, test_against_schema, test_against_schema_tree, test_for_errors_against_schema, has_context, try_json_load, schema_context
+from badgeanalysis.utils import is_json, is_schemable, test_against_schema, test_against_schema_tree, test_for_errors_against_schema, has_context, try_json_load, schema_context, analyze_image_upload
 from badgeanalysis.models import OpenBadge
+import pngutils
 
 # Some test assertions of different sorts
 junky_assertion = {
@@ -257,5 +258,18 @@ class OpenBadgeTests(TestCase):
 		self.assertEqual(openBadge.getLdProp('assertion','http://standard.openbadges.org/definitions#AssertionUid'),25)
 		self.assertEqual(openBadge.getLdProp('assertion','http://standard.openbadges.org/definitions#BadgeClass'), "http://example.org/badge1")
 
+class ImageExtractionTests(TestCase):
+	def test_basic_image_extract(self):
+		imgFile = open(os.path.join(os.path.dirname(__file__),'testfiles','1.png'),'r')
+		assertion = pngutils.extract(imgFile)
+		self.assertTrue(is_json(assertion))
+		
+		assertion = try_json_load(assertion)
+		self.assertEqual(assertion.get("uid"), "2f900c7c-f473-4bff-8173-71b57472a97f")
 
+	def test_analyze_image_upload(self):
+		imgFile = open(os.path.join(os.path.dirname(__file__),'testfiles','1.png'),'r')
+
+		openBadge = analyze_image_upload(imgFile)
+		self.assertEqual(openBadge.getProp("assertion", "uid"), "2f900c7c-f473-4bff-8173-71b57472a97f")
 

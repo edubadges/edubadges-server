@@ -7,8 +7,9 @@ from jsonschema.exceptions import FormatError, ValidationError
 import os
 import re
 import collections
-from badgeanalysis.models import *
+import models
 from pyld import jsonld
+import pngutils
 
 
 SCHEMA_META= {
@@ -246,17 +247,10 @@ def custom_context_docloader(url):
 """
 Main badge analysis procedure
 """
-# an orphan method probably not needed anymore.
-def redumps_object_input(badgeInput):
-	if isinstance(badgeInput, dict): 
-		badgeObject = json.dumps(badgeObject)
-	else: 
-		badgeObject = badgeInput
+def analyze_image_upload(inputFile):
+	assertion = pngutils.extract(inputFile)
 
-	if is_json(badgeObject):
-		schemaMatch = test_against_schema_tree(ASSERTION_TREE,badgeObject)
-	return None
-
+	return start_analysis(assertion)
 
 def start_analysis(badgeObject):
 	"""
@@ -273,10 +267,19 @@ def start_analysis(badgeObject):
 		# TODO
 		return
 
-	openBadge = OpenBadge(badgeObject)
+	openBadge = models.OpenBadge(badgeObject)
 
+	return openBadge
 
 def fetch_linked_component(url):
+	"""
+	Uses the PyLD package document loader, which returns a loaded document in a wrapper object. 
+	{
+		'document': (The document we wanted)
+		'documentUrl': the input url
+		'contextUrl': context link if provided in a link header from the http request.
+	}
+	"""
 	try:
 		result = jsonld.load_document(url)
 		result = result.document
