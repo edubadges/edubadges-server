@@ -35,6 +35,7 @@ urlpatterns = patterns('',
     # Local Apps
     url(r'^contact', include('contact.urls')),
     url(r'^search', include('search.urls')),
+    url(r'^badgeanalysis', include('badgeanalysis.urls')),
     url(r'^', include('certificates.urls')),
     url(r'^', include('skycms.structure.urls')),
 )

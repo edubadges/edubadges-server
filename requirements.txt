@@ -46,4 +46,5 @@ simplejson==3.6.4
 PyLD==0.6.3
 rfc3987==1.3.4
 pypng==0.0.17
+jsonfield==1.0.0
 

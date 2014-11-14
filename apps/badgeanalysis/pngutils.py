@@ -2,7 +2,7 @@ import png
 import re
 import hashlib
 
-def extract(src):
+def extract(imageFile):
 	"""
 	Return the openbadges content contained in a baked PNG file. 
 	If this doesn't work, return None.
@@ -14,7 +14,7 @@ def extract(src):
 	#if isinstance(src, basestring):
 		# src = open(src, 'rb')
 
-	reader = png.Reader(file=src)
+	reader = png.Reader(file=imageFile)
 	for chunktype, content in reader.chunks():
 		if chunktype == 'iTXt' and content.startswith('openbadges\x00'):
 			return re.sub('openbadges[\x00]+', '', content)

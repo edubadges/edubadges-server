@@ -1,0 +1,17 @@
+{% extends "base_interior.html" %}
+
+
+{% set page_title="Define a Badge Scheme" %}
+
+
+{% block content %}		
+	<div class="content_area">	
+		{{snippet('create-certificate-intro')|default('<p>Please create or update a badge scheme with the following form.</p>', true)|safe}}
+		<form action="" method="post">
+			{{ csrf() }}
+		    <p>Are you sure you want to delete "{{ object }}"?</p>
+		    <input type="submit" value="Confirm" />
+		</form>
+	</div>
+
+{% endblock %}
