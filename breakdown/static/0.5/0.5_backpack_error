@@ -16,10 +16,10 @@
     "_location": "@id",
  
     "uid": { "@id": "assertion:Uid", "type": "xsd:string" },
-    "recipient": { "@id": "assertion:Recipient", "type": "@id" },
+    "recipient": { "@id": "assertion:Recipient" },
     "hashed": { "@id": "obi:hashed", "type": "xsd:boolean" },
     "salt": { "@id": "obi:salt", "@type": "xsd:string" },
-    "identity": { "@id": "obi:identityHash", "@type": "@id" },
+    "identity": { "@id": "obi:identityHash" },
     "issued_on": { "@id": "assertion:IssueDate", "@type": "xsd:dateTime" },
     "expires": { "@id": "assertion:ExpirationDate", "@type": "xsd:dateTime" },
     "evidence": { "@id": "assertion:Evidence", "@type": "@id" },
@@ -27,18 +27,18 @@
  
     "badge": { "@id": "badgeclass", "@type": "badgeclass" },
     "criteria": { "@id": "badgeclass:Criteria", "@type": "@id" },
-    "tags": { "@id": "badgeclass:Tags", "@type": "@id" },
-    "alignment": { "@id": "badgeclass:Alignment", "@type": "@id" },
+    "tags": { "@id": "badgeclass:Tags", "@type": "schema:keywords" },
+    "alignment": { "@id": "badgeclass:Alignment" },
  
     "issuer": { "@id": "issuerorg", "@type": "issuerorg" },
-    "email": { "@id": "schema:email", "@type": "@id" },
+    "email": { "@id": "schema:email", "@type": "schema:email" },
     "revocationList": { "@id": "issuerorg:RecovationList", "@type": "@id" }
  
   },
   "obi:validation": [
     {
       "obi:validatesType": "assertion",
-      "obi:validationSchema": "http://openbadges.org/schema/0.5/nestedBadge"
+      "obi:validationSchema": "http://localhost:8000/static/0.5/schema/backpack_error_assertion"
     }
   ]
 }

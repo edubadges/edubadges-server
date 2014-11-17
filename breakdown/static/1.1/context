@@ -37,19 +37,19 @@
   "obi:validation": [
     {
       "obi:validatesType": "assertion",
-      "obi:validationSchema": "http://openbadges.org/schema/1.1/assertion"
+      "obi:validationSchema": "http://localhost:8000/static/1.1/schema/assertion"
     },
     {
       "obi:validatesType": "badgeclass",
-      "obi:validationSchema": "http://openbadges.org/schema/1.1/badgeclass"
+      "obi:validationSchema": "http://localhost:8000/static/1.1/schema/badgeclass"
     },
     {
       "obi:validatesType": "issuer",
-      "obi:validationSchema": "http://openbadges.org/schema/1.1/issuer"
+      "obi:validationSchema": "http://localhost:8000/static/1.1/schema/issuer"
     },
     {
       "obi:validatesType": "extension",
-      "obi:validationSchema": "http://openbadges.org/schema/1.1/extension-core"
+      "obi:validationSchema": "http://localhost:8000/static/1.1/schema/extension"
     }
   ]
 }
