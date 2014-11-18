@@ -95,7 +95,7 @@
     },
 
     "allOf": [{
-        "description": "Characteristics shared between late 2011 and early 2012 iterations of the 0.5.0 Open Badges specification"
+        "description": "Characteristics shared between late 2011 and early 2012 iterations of the 0.5.0 Open Badges specification",
         "type": "object",
         "properties": {
             "badge": { "$ref": "#/definitions/BadgeObject" },

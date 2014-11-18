@@ -303,7 +303,7 @@ class OpenBadge(basic_models.SlugModel):
 		if isinstance(badgeObject, (str, unicode)) and badgeanalysis.utils.test_probable_url(badgeObject):
 			structureMeta['id'] = badgeObject
 			try: 
-				badgeObject = badgeanalysis.utils.test_probable_url(badgeObject):
+				badgeObject = badgeanalysis.utils.test_probable_url(badgeObject)
 			except Exception as e:
 				raise TypeError("Couldn't fetch badgeObject on input. We tried to load " + badgeObject + " -- got error " + e)
 				return
@@ -325,6 +325,7 @@ class OpenBadge(basic_models.SlugModel):
 			elif isinstance(context, dict):
 				raise TypeError("OBI context not linked at top level of input object. This isn't a declared OBI object. Here's the context: " + context)
 
+
 			if '@type' in badgeObject:
 				#TODO this is likely not going to be the full expanded IRI, likely a fragment
 				structureMeta['type'] = self.validateObiType(badgeObject['@type'])
@@ -334,7 +335,7 @@ class OpenBadge(basic_models.SlugModel):
 				structureMeta['type'] = probableType
 				structureMeta['badgeObject']['@type'] = probableType
 
-		""" CASE 2: For OBI versions 0.5 and 1.0, we will have to deterimine how to add JSON-LD context information. """
+			# """ CASE 2: For OBI versions 0.5 and 1.0, we will have to deterimine how to add JSON-LD context information. """
 		else:
 
 			#TODO: In progress, Use the BadgeScheme class to divine which of the old formats it might be.

@@ -34,7 +34,7 @@
             "type": "array",
             "items": { "type": "string" },
             "uniqueness": true
-        },
+        }
     },
     "properties": {
         "name": { "type": "string" },
@@ -47,3 +47,4 @@
     },
     "required": ["name", "description", "image", "criteria", "issuer"],
     "additionalProperties": true
+}

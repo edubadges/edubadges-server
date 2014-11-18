@@ -37,15 +37,15 @@
   "obi:validation": [
     {
       "obi:validatesType": "assertion",
-      "obi:validationSchema": "http://localhost:8000/static/schema/OBI-v1.0-linked-badgeclass.json"
+      "obi:validationSchema": "http://localhost:8000/static/1.0/schema/assertion"
     },
     {
       "obi:validatesType": "badgeclass",
-      "obi:validationSchema": "http://localhost:8000/static/schema/1_0_badgeclass"
+      "obi:validationSchema": "http://localhost:8000/static/1.0/schema/badgeclass"
     },
     {
       "obi:validatesType": "issuer",
-      "obi:validationSchema": "http://localhost:8000/static/schema/1_0_issuer"
+      "obi:validationSchema": "http://localhost:8000/static/1.0/schema/issuer"
     }
   ]
 }
