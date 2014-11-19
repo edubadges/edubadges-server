@@ -28,7 +28,6 @@ class BadgeScheme(basic_models.SlugModel):
 	def registerValidators(self):
 		# TODO: Use JSON-LD for this?
 		contextObj = json.loads(self.context_json)
-		#import pdb; pdb.set_trace();
 		validators = contextObj.get('obi:validation')
 		if validators is not None and isinstance(validators, list):
 			for validator in validators:
@@ -72,8 +71,8 @@ class BadgeScheme(basic_models.SlugModel):
 
 	@classmethod
 	def get_legacy_scheme_match(cls, badgeObject, badgeObjectType):
-		LEGACY_SLUGS = ['0_5_assertion', 'backpack_error', '1_0_strict']
-		VALID_TYPES = ['assertion', 'badgeclass', 'issuerorg']
+		LEGACY_SLUGS = ['0_5', '1_0-backpack-misbaked', '1_0']
+		VALID_TYPES = ['assertion', 'badgeclass', 'issuer', 'issuerorg']
 
 		if not badgeObjectType in VALID_TYPES:
 			raise TypeError("Input type " + badgeObjectType + " isn't one of the valid options.")
@@ -89,29 +88,29 @@ class BadgeScheme(basic_models.SlugModel):
 		# build a dict of schema_json that match our type
 		schemaTree = {}
 		schemaTree['assertion'] = {
-			'test': '0_5_assertion',
+			'test': '0_5', # 'http://localhost:8000/static/0.5/schema/assertion',
 			'noMatch': {
-				'test': 'backpack_error',
+				'test': '1_0-backpack-misbaked', # 'http://localhost:8000/static/0.5/schema/backpack_error_assertion',
 				'noMatch': { 
-					'test': '1_0strict'
+					'test': '1_0', # 'http://localhost:8000/static/1.0/schema/assertion'
 				}
 			}
 		}
 		schemaTree['badgeclass'] = {
-			'test': '1_0strict'
+			'test': '1_0'
 		}
 		schemaTree['issuerorg'] = {
-			'test': '1_0strict'
+			'test': '1_0'
 		}
 		
 		def insert_into_tree(schemaSlug, contextUrl, schemaJson, tree=schemaTree[badgeObjectType]):
-			if tree['test'] == schemaSlug:
+			if 'test' in tree and tree['test'] == schemaSlug:
 				tree['context_url'] = contextUrl
 				tree['schema_json'] = schemaJson
 				return tree
-			elif tree['noMatch']: 
+			elif 'noMatch' in tree: 
 				return insert_into_tree(schemaSlug, contextUrl, schemaJson, tree['noMatch'])
-
+			return None
 
 
 		for scheme in schemes:
@@ -121,48 +120,49 @@ class BadgeScheme(basic_models.SlugModel):
 					currentSchemaJson = validator.schema_json
 
 			if insert_into_tree(scheme.slug, scheme.context_url, currentSchemaJson) is None:
-				raise LookupError("Could not insert schema json for " + scheme.slug + " into tree")
-
+				#raise LookupError("Could not insert schema json for " + scheme.slug + " into tree")
+				pass
+			import pdb; pdb.set_trace();
 		try:
-			slugMatch = cls.test_against_schema_tree(badgeObject, schemaTree[badgeObjectType])
+			treeMatch = cls.test_against_schema_tree(badgeObject, schemaTree[badgeObjectType])
 		except LookupError as e:
 			raise e
 
-		if slugMatch:
+		if treeMatch:
 			return {
-				"context_url": slugMatch['context_url'],
+				"context_url": treeMatch['context_url'],
 				"type": badgeObjectType,
-				"schemeSlug": slugMatch['test']
+				"schemeSlug": treeMatch['test']
 			}
 		else:
 			return None
 
+	@classmethod
+	def test_against_schema_tree(cls, badgeObject, testTree):
+		if not 'test' in testTree:
+			raise LookupError("Schema Tree malformed, could not find a test reference when needed. " + str(testTree))
+			return None
 
-		def test_against_schema_tree(cls, badgeObject, testTree):
-			if not 'test' in testTree:
-				raise LookupError("Schema Tree malformed, could not find a test reference when needed. " + str(testTree))
-				return None
+		if cls.test_against_schema(badgeObject, testTree['schema_json']):
+			# There are only more tests down the noMatch path, so we can return right here.
+			return testTree
+		elif 'noMatch' in testTree:
+			return cls.test_against_schema_tree(badgeObject, testTree['noMatch'])
+		else:
+			return None
 
-			if cls.test_against_schema(badgeObject, testTree['schema_json']):
-				# There are only more tests down the noMatch path, so we can return right here.
-				return testTree
-			elif 'noMatch' in testTree:
-				return test_against_schema_tree(badgeObject, testTree['noMatch'])
-			else:
-				return None
-
-
-		def test_against_schema(cls, badgeObject, schemaJson):
-			"""
-			Reads the specified schema based on the filename registered for schemaKey, and processes it into an object with json.loads()
-			Then validates the badge object against it.
-			"""
-			try:
-				validate(badgeObject, schemaJson, Draft4Validator, format_checker=draft4_format_checker)
-			except ValidationError as e:
-				return False
-			else:
-				return True
+	@classmethod
+	def test_against_schema(cls, badgeObject, schemaJson):
+		"""
+		Reads the specified schema based on the filename registered for schemaKey, and processes it into an object with json.loads()
+		Then validates the badge object against it.
+		"""
+		try:
+			validate(badgeObject, schemaJson, Draft4Validator, format_checker=draft4_format_checker)
+		except ValidationError as e:
+			return False
+		else:
+			return True
 
 
 
@@ -264,7 +264,7 @@ class OpenBadge(basic_models.SlugModel):
 			# place the validated input object into 
 			full[structureMeta['type']] = structureMeta['badgeObject'].copy()
 		
-			
+
 			"""
 			# Build out the full badge object by fetching missing components.
 			
@@ -275,23 +275,33 @@ class OpenBadge(basic_models.SlugModel):
 			try:
 				if isinstance(full['assertion'], dict) and not 'badgeclass' in full:
 					# For 1.0 etc compliant badges with linked badgeclass
-					if isinstance(full['assertion']['badge'], str):
-						full['badgeclass'] = self.processBadgeObject(badgeanalysis.utils.fetch_linked_component(full['assertion']['badge']), 'badgeclass')
+					if isinstance(full['assertion']['badge'], (str, unicode)):
+						theBadgeClass = badgeanalysis.utils.fetch_linked_component(full['assertion']['badge'])
+						
+
+
+						full['badgeclass'] = self.processBadgeObject(theBadgeClass, 'badgeclass')
 					# for nested badges (0.5 & backpack-wonky!)
 					elif isinstance(full['assertion']['badge'], dict):
 						full['badgeclass'] = full['assertion']['badge']
 
 				if isinstance(full['badgeclass'], dict) and not 'issuerorg' in full:
-					if isinstance(full['badgeclass']['issuer'], str):
-						full['issuerorg'] = self.processBadgeObject(badgeanalysis.utils.fetch_linked_component(full['badgeclass']['issuer']), 'issuerorg')
+					if isinstance(full['badgeclass']['issuer'], (str, unicode)):
+						theIssuerOrg = badgeanalysis.utils.fetch_linked_component(full['badgeclass']['issuer'])
+
+						full['issuerorg'] = self.processBadgeObject(theIssuerOrg, 'issuerorg')
 					elif isinstance(full['badgeclass']['issuer'], dict):
 						full['issuerorg'] = full['badgeclass']['issuer']
-			except Exception as e:
-				#TODO Add errors to openBadge instead
-				self.errors.append(e)
+			except TypeError as e:
+				self.errors.append({ "typeError": str(e)})
+				raise e
 
+			
 			# Store results
 			self.full_badge_object = full
+
+
+
 
 		#finally, save the OpenBadge after doing all that stuff in case it's a new one
 		super(OpenBadge, self).save(*args, **kwargs)
@@ -299,6 +309,10 @@ class OpenBadge(basic_models.SlugModel):
 
 	def processBadgeObject(self, badgeObject, probableType='assertion'):
 		structureMeta = {}
+
+		if not isinstance(badgeObject, dict):
+			badgeObject = badgeanalysis.utils.try_json_load(badgeObject)
+
 
 		if isinstance(badgeObject, (str, unicode)) and badgeanalysis.utils.test_probable_url(badgeObject):
 			structureMeta['id'] = badgeObject
@@ -308,9 +322,7 @@ class OpenBadge(basic_models.SlugModel):
 				raise TypeError("Couldn't fetch badgeObject on input. We tried to load " + badgeObject + " -- got error " + e)
 				return
 
-		if not isinstance(badgeObject, dict):
-			badgeObject = badgeanalysis.utils.try_json_load(badgeObject)
-
+		
 		structureMeta['badgeObject'] = badgeObject
 
 		""" CASE 1: For OBI version 1.1 and later, the badgeObject will have JSON-LD context information. """
@@ -339,17 +351,17 @@ class OpenBadge(basic_models.SlugModel):
 		else:
 
 			#TODO: In progress, Use the BadgeScheme class to divine which of the old formats it might be.
-			matchingScheme = BadgeScheme.test_against_schema_tree(badgeObject, probableType)
+			matchingScheme = BadgeScheme.get_legacy_scheme_match(badgeObject, probableType)
 			if matchingScheme == None:
 				raise TypeError("Could not determine type of badge object with known schema set")
 				return None
 
 			else:
-				potentialContext = badgeSchemes.schema_context( matchingSchemaKey )
+				potentialContext = matchingScheme['context_url']
 				structureMeta['context'] =  potentialContext
 				structureMeta['badgeObject']['@context'] = potentialContext
 
-				potentialType = badgeSchemes.schema_type( matchingScheme.context_url )
+				potentialType = matchingScheme['type']
 				structureMeta['type'] = potentialType
 				structureMeta['badgeObject']['@type'] = potentialType
 

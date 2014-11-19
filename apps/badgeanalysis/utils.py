@@ -60,7 +60,7 @@ def is_json(string):
 def try_json_load(input):
 	if isinstance(input, dict) or isinstance(input, (int, long, float, complex)):
 		return input
-	if isinstance(input, str):
+	if isinstance(input, (str, unicode)):
 		try:
 			json_result = json.loads(input)
 		except ValueError as e:
@@ -109,6 +109,12 @@ def has_context(badgeObject):
 def extract_assertion_from_image(imageFile):
 	return pngutils.extract(imageFile)
 
+def is_image_data_uri(imageString):
+	dataRe = re.compile(r'^data:', flags=re.I)
+	if dataRe.match(imageString):
+		return True
+	else:
+		return False
 
 def fetch_linked_component(url):
 	"""
