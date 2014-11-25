@@ -9,7 +9,7 @@
             "pattern": "^data:"
         },
         "BadgeImage": {
-            "oneOf": [
+            "anyOf": [
                 { "$ref": "#/definitions/ImageDataUrl" },
                 { "type": "string", "format": "uri" }
             ]

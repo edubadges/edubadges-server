@@ -6,12 +6,31 @@
 
 {% block content %}
 	
-	{% if object.image  %}
-		<img src="{{object.image.url}}" alt="Badge Image" />
+	{% if badge_image %}
+		<img src="{{badge_image}}" alt="Badge Image for {{badge_name}}" />
+	{% endif %}
+	{% if qrcode and baked_image_url %}
+		<a href="{{baked_image_url}}"><img src="{{qrcode}}" alt="You can scan this to download the baked badge image to your device." /></a>
 	{% endif %}
 
-	{% if object.analysis %}
-		<pre>object.analysis</pre>
+	{% if badge_name %}
+		<h2> {{badge_name}} </h2>
 	{% endif %}
-	
+
+	{% if badge_name %}
+		<p> Name: {{badge_name}} </p>
+	{% endif %}
+
+	{% if badge_description %}
+		<p> Description: {{badge_description}} </p>
+	{% endif %}	
+
+	{% if badge_issuer and issuer_url %}
+		<p> Issuer: <a href="{{issuer_url}}">{{badge_issuer}}</a> </p>
+	{% endif %}	
+
+	{% if badge_recipient and issue_date %}
+		<p>Issued to {{badge_recipient}} on {{issue_date}} </p>
+	{% endif %}	
+
 {% endblock %}

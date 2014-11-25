@@ -25,13 +25,12 @@ class CertificateForm(forms.ModelForm):
 	def save(self, *args, **kwargs):
 		#On save, create an Open Badge Item for the image uploaded for this certificate
 
-	# try:
+		certificate = super(CertificateForm, self).save(commit=False)
+
 		badge = OpenBadge(image=self.cleaned_data['image'], recipient_input=self.cleaned_data['recipient'])
 		badge.save()
-	# except Exception as e:
-	# 	raise e
-	# else:
-		self.open_badge = badge
 
-		super(CertificateForm, self).save()
-
+		certificate.open_badge = badge
+		
+		certificate.save()
+		return certificate

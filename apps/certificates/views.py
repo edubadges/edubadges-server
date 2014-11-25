@@ -14,10 +14,26 @@ class CertificateCreate(ActiveTabMixin, CreateView):
 class CertificateDetail(ActiveTabMixin, DetailView):
     model = Certificate
     active_tab = 'certificates'
-    # analysis = json.dumps(analyze_image_upload(object.image))
+    
 
     def get_context_data(self, **kwargs):
     	context = super(CertificateDetail, self).get_context_data(**kwargs)
+
+    	certificate = context['object']
+    	badge = certificate.open_badge
+    	context['badge_name'] = badge.getProp('badgeclass', 'name')
+    	context['badge_description'] = badge.getProp('badgeclass', 'description')
+    	context['badge_image'] = badge.getProp('badgeclass', 'image')
+    	context['issue_date'] = badge.getProp('assertion', 'issuedOn')
+    	context['badge_issuer'] = badge.getProp('issuerorg', 'name')
+    	context['issuer_url'] = badge.getProp('issuerorg', 'url')
+
+    	context['recipient'] = badge.recipient_input
+
+    	context['baked_image_url'] = badge.getProp('assertion', 'image')
+    	if context['baked_image_url']:
+    		context['qrcode'] = "http://chart.googleapis.com/chart?cht=qr&chs=400x400&chl=" + context['baked_image_url']
+    	import pdb; pdb.set_trace();
     	return context
 
 

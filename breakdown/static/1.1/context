@@ -44,7 +44,7 @@
       "obi:validationSchema": "http://localhost:8000/static/1.1/schema/badgeclass"
     },
     {
-      "obi:validatesType": "issuer",
+      "obi:validatesType": "issuerorg",
       "obi:validationSchema": "http://localhost:8000/static/1.1/schema/issuer"
     },
     {

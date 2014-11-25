@@ -13,9 +13,6 @@ class Certificate(basic_models.TimestampedModel):
 		from certificates.forms import CertificateForm
 		return CertificateForm(instance=self)
 
-	# analysis = models.TextField
-
-	# def save(self, *args, )
 	def get_absolute_url(self):
 		return reverse('certificate_detail', kwargs= {'pk': self.id} )
 

@@ -83,7 +83,7 @@ def test_probable_url(string):
 Utilities for matching badge objects with schema
 """ 
 def is_schemable(input):
-	if is_json(input) or isinstance(input, list) or isinstance(input, str):
+	if is_json(input) or isinstance(input, list) or isinstance(input, (str, unicode)):
 		return True
 	else:
 		return False
@@ -116,19 +116,23 @@ def is_image_data_uri(imageString):
 	else:
 		return False
 
-def fetch_linked_component(url):
+def fetch_linked_component(url, documentLoader=None):
 	"""
-	Uses the PyLD package document loader, which returns a loaded document in a wrapper object. 
+	Unless overridden, this uses the PyLD package document loader, 
+	which returns a loaded document in a wrapper object. 
 	{
 		'document': (The document we wanted)
 		'documentUrl': the input url
 		'contextUrl': context link if provided in a link header from the http request.
 	}
 	"""
+	if documentLoader:
+		loadDoc = documentLoader
+	else: 
+		loadDoc = jsonld.load_document
 
 	try:
-
-		result = jsonld.load_document(url)
+		result = loadDoc(url)
 		result = result['document']
 
 	except (jsonld.JsonLdError, Exception) as e:

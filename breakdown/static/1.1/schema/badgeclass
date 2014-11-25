@@ -38,7 +38,7 @@
       "pattern": "^data:"
     },
     "BadgeImage": {
-      "oneOf": [
+      "anyOf": [
         {
           "$ref": "#/definitions/ImageDataUrl"
         },
