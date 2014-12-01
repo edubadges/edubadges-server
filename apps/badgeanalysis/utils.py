@@ -142,4 +142,6 @@ def fetch_linked_component(url, documentLoader=None):
 		 return result
 
 
-
+    
+def image_upload_to():
+  return 'uploads/badges/received'

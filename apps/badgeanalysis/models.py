@@ -1,6 +1,9 @@
 from django.db import models
+from django.conf import settings
+from urlparse import urljoin
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.core.urlresolvers import reverse
+
 import re
 from pyld import jsonld
 import json
@@ -191,10 +194,6 @@ class BadgeSchemaValidator(basic_models.DefaultModel):
         else:
             super(BadgeSchemaValidator, self).save(*args, **kwargs)
 
-    # TODO: implement like the save override in OpenBadge
-    # def __init__(self, scheme, validator_json, *args,**kwargs):
-    #   self.scheme = scheme
-
 
 class OpenBadge(basic_models.DefaultModel):
     """
@@ -206,10 +205,11 @@ class OpenBadge(basic_models.DefaultModel):
     self.errors: list -- a list of critical OpenBadgeErrors
     self.notes: list -- a list of validation passes and noncritical failures
     """
-    image = models.ImageField(upload_to='uploads/badges/received', blank=True)
+    image = models.ImageField(upload_to=badgeanalysis.utils.image_upload_to(), blank=True)
     badge_input = models.TextField(blank=True, null=True)
     recipient_input = models.CharField(blank=True, max_length=2048)
     full_badge_object = JSONField()
+    full_ld_expanded = JSONField()
     verify_method = models.CharField(max_length=48, blank=True)
     errors = JSONField()
     notes = JSONField()
@@ -227,83 +227,88 @@ class OpenBadge(basic_models.DefaultModel):
     # Core procedure for filling out an OpenBadge from an initial badgeObject follows:
     def save(self, *args, **kwargs):
         if not self.pk:
-
-            """
-            Stores the input object and sets up a fullBadgeObject to fill out
-            and analyze
-            """
-            if not self.image and self.recipient_input:
-                raise IOError("Invalid input to OpenBadge create: " + kwargs['image'])
-
-            self.errors = []
-            self.notes = []
-
-            try:
-                self.badge_input = badgeanalysis.utils.extract_assertion_from_image(self.image)
-            except Exception as e:
-                self.errors.append(e)
-                raise e
-                return
-
-            self.verify_method = 'hosted' #signed not yet supported.
-
-            # Process the initial input
-            # Returns a dict with badgeObject property for processed object and 'type', 'context', 'id' properties
-            try:
-                structureMeta = self.processBadgeObject(self.badge_input,'assertion')
-            except TypeError as e:
-                self.errors.append(e)
-                raise e
-                return
-
-            if not structureMeta['badgeObject']:
-                raise IOError("Could not build a full badge object without having a properly stored inputObject")
-
-            full = {
-                '@context': structureMeta['context'] or 'http://standard.openbadges.org/1.1/context',
-                '@type': 'obi:OpenBadge'
-            }
-            # place the validated input object into 
-            full[structureMeta['type']] = structureMeta['badgeObject'].copy()
-
-            """
-            # Build out the full badge object by fetching missing components.
-
-            #TODO: refactor. This is kind of clunky. Maybe some recursion would help
-            #TODO: refactor to consider the future possibility of issuer defined in the assertion 
-            #(or separate issuers defined in assertion & issuer, both cases requiring authorization)
-            """
-            try:
-                if isinstance(full['assertion'], dict) and not 'badgeclass' in full:
-                    # For 1.0 etc compliant badges with linked badgeclass
-                    if isinstance(full['assertion']['badge'], (str, unicode)):
-                        theBadgeClass = badgeanalysis.utils.fetch_linked_component(full['assertion']['badge'])
-                        theBadgeClass = self.processBadgeObject(theBadgeClass, 'badgeclass')
-                        if theBadgeClass['type'] == 'badgeclass':
-                            full['badgeclass'] = theBadgeClass['badgeObject']
-                    # for nested badges (0.5 & backpack-wonky!) (IS THIS REALLY A GOOD IDEA?? It won't have a schema to match up against.)
-                    elif isinstance(full['assertion']['badge'], dict):
-                        full['badgeclass'] = full['assertion']['badge']
-
-                if isinstance(full['badgeclass'], dict) and not 'issuerorg' in full:
-                    if isinstance(full['badgeclass']['issuer'], (str, unicode)):
-                        theIssuerOrg = badgeanalysis.utils.fetch_linked_component(full['badgeclass']['issuer'])
-                        theIssuerOrg = self.processBadgeObject(theIssuerOrg, 'issuerorg')
-                        if theIssuerOrg['type'] == 'issuerorg':
-                            full['issuerorg'] = theIssuerOrg['badgeObject']
-                    # Again, this is probably a bad idea like this?:
-                    elif isinstance(full['badgeclass']['issuer'], dict):
-                        full['issuerorg'] = full['badgeclass']['issuer']
-            except TypeError as e:
-                #TODO: refactor to call a function to process the error. Raise it again for now.
-                #self.errors.append({ "typeError": str(e)})
-                raise e
-
-            # Store results
-            self.full_badge_object = full
+            self.init_badge_analysis(*args, **kwargs)
 
         # finally, save the OpenBadge after doing all that stuff in case it's a new one
         super(OpenBadge, self).save(*args, **kwargs)
+
+    def init_badge_analysis(self, *args, **kwargs):
+        """
+        Stores the input object and sets up a fullBadgeObject to fill out
+        and analyze
+        """
+        if not self.image and self.recipient_input:
+            raise IOError("Invalid input to OpenBadge create: " + kwargs['image'])
+
+        self.errors = []
+        self.notes = []
+
+        try:
+            self.badge_input = badgeanalysis.utils.extract_assertion_from_image(self.image)
+        except Exception as e:
+            self.errors.append(e)
+            raise e
+            return
+
+        self.verify_method = 'hosted'  # signed not yet supported.
+
+        # Process the initial input
+        # Returns a dict with badgeObject property for processed object and 'type', 'context', 'id' properties
+        try:
+            structureMeta = self.processBadgeObject(self.badge_input,'assertion')
+        except TypeError as e:
+            self.errors.append(e)
+            raise e
+            return
+
+        if not structureMeta['badgeObject']:
+            raise IOError("Could not build a full badge object without having a properly stored inputObject")
+
+        full = {
+            '@context': structureMeta['context'] or 'http://standard.openbadges.org/1.1/context',
+            '@type': 'obi:OpenBadge'
+        }
+        # place the validated input object into 
+        full[structureMeta['type']] = structureMeta['badgeObject'].copy()
+
+        """
+        # Build out the full badge object by fetching missing components.
+
+        #TODO: refactor. This is kind of clunky. Maybe some recursion would help
+        #TODO: refactor to consider the future possibility of issuer defined in the assertion 
+        #(or separate issuers defined in assertion & issuer, both cases requiring authorization)
+        """
+        try:
+            if isinstance(full['assertion'], dict) and not 'badgeclass' in full:
+                # For 1.0 etc compliant badges with linked badgeclass
+                if isinstance(full['assertion']['badge'], (str, unicode)):
+                    theBadgeClass = badgeanalysis.utils.fetch_linked_component(full['assertion']['badge'])
+                    theBadgeClass = self.processBadgeObject(theBadgeClass, 'badgeclass')
+                    if theBadgeClass['type'] == 'badgeclass':
+                        full['badgeclass'] = theBadgeClass['badgeObject']
+                # for nested badges (0.5 & backpack-wonky!) (IS THIS REALLY A GOOD IDEA?? It won't have a schema to match up against.)
+                elif isinstance(full['assertion']['badge'], dict):
+                    full['badgeclass'] = full['assertion']['badge']
+
+            if isinstance(full['badgeclass'], dict) and not 'issuerorg' in full:
+                if isinstance(full['badgeclass']['issuer'], (str, unicode)):
+                    theIssuerOrg = badgeanalysis.utils.fetch_linked_component(full['badgeclass']['issuer'])
+                    theIssuerOrg = self.processBadgeObject(theIssuerOrg, 'issuerorg')
+                    if theIssuerOrg['type'] == 'issuerorg':
+                        full['issuerorg'] = theIssuerOrg['badgeObject']
+                # Again, this is probably a bad idea like this?:
+                elif isinstance(full['badgeclass']['issuer'], dict):
+                    full['issuerorg'] = full['badgeclass']['issuer']
+        except TypeError as e:
+            #TODO: refactor to call a function to process the error. Raise it again for now.
+            #self.errors.append({ "typeError": str(e)})
+            raise e
+
+        # Store results
+        self.full_badge_object = full
+        self.truncate_images()
+
+        self.full_ld_expanded = jsonld.expand(full)
 
     def processBadgeObject(self, badgeObject, probableType='assertion'):
         structureMeta = {}
@@ -371,6 +376,22 @@ class OpenBadge(basic_models.DefaultModel):
             structureMeta['id'] = potentialId
 
         return structureMeta
+
+    def truncate_images(self):
+        dataUri = re.compile(r'^data:')
+
+        full = self.full_badge_object
+        if 'assertion' in full and 'image' in full['assertion']:
+            if dataUri.match(full['assertion']['image']):
+                del full['assertion']['image']  # remove dataUri from assertion. It would be totally weird to have one here anyway.
+        if 'badgeclass' in full and 'image' in full['badgeclass']:
+            if dataUri.match(full['badgeclass']['image']):
+                full['badgeclass']['image'] = self.eventualImageUrl()
+
+    def eventualImageUrl(self):
+        # A dirty workaround for a 7-year old Django bug that filefields can't access the upload_to
+        # parameter before they are saved.
+        return urljoin(getattr(settings, 'MEDIA_URL'), badgeanalysis.utils.image_upload_to() + '/' + self.image.name)
 
     def validateMainContext(self, contextInput):
         url = re.compile(r"standard\.openbadges\.org/[\d\.]+/context$")
