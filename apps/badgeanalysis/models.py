@@ -311,7 +311,6 @@ class OpenBadge(basic_models.DefaultModel):
         if not isinstance(badgeObject, dict):
             badgeObject = badgeanalysis.utils.try_json_load(badgeObject)
 
-
         if isinstance(badgeObject, (str, unicode)) and badgeanalysis.utils.test_probable_url(badgeObject):
             structureMeta['id'] = badgeObject
             try:
@@ -326,7 +325,7 @@ class OpenBadge(basic_models.DefaultModel):
         if badgeanalysis.utils.has_context(badgeObject):
             context = badgeObject.get('@context')
 
-            # Determine if the existing context has a suitable main OBI context within it. 
+            # Determine if the existing context has a suitable main OBI context within it.
             if isinstance(context, (str, list)):
                 structureMeta['context'] = self.validateMainContext(context)
 
