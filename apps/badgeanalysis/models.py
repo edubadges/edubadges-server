@@ -6,7 +6,7 @@ from pyld import jsonld
 import json
 
 from jsonschema import validate, Draft4Validator, draft4_format_checker
-from jsonschema.exceptions import FormatError, ValidationError
+from jsonschema.exceptions import ValidationError  # , FormatError
 
 import basic_models
 from djangosphinx.models import SphinxSearch
@@ -34,15 +34,15 @@ class BadgeScheme(basic_models.SlugModel):
                 validationSchema = validator.get('obi:validationSchema')
                 validatesType = validator.get('obi:validatesType')
                 schema_json = json.loads(badgeanalysis.utils.fetch_linked_component(validationSchema))
-                
+
                 bsv = BadgeSchemaValidator(validation_schema=validationSchema, validates_type=validatesType, schema_json=schema_json, scheme=self)
-                
+
                 bsv.save()
         elif isinstance(validators, dict):
             bsv = BadgeSchemaValidator(self, validation_schema=validators.get('obi:validationSchema'), validates_type=validators.get('obi:validatesType'), scheme=self)
             bsv.save()
 
-    def save(self, *args, **kwargs): 
+    def save(self, *args, **kwargs):
         if not self.pk:
             if self.context_json is None:
                 self.context_json = badgeanalysis.utils.fetch_linked_component(self.context_url)
@@ -50,7 +50,6 @@ class BadgeScheme(basic_models.SlugModel):
             super(BadgeScheme, self).save(*args, **kwargs)
 
             self.registerValidators()
-        
 
         else:
             super(BadgeScheme, self).save(*args, **kwargs)
@@ -66,7 +65,7 @@ class BadgeScheme(basic_models.SlugModel):
             raise e
         except ObjectDoesNotExist:
             return None
-        else: 
+        else:
             return result.context_json
 
     @classmethod
@@ -84,17 +83,17 @@ class BadgeScheme(basic_models.SlugModel):
         # Here's the first schema_json:
         schemes[0]._prefetched_objects_cache['schemes']._result_cache[0].schema_json
 
-        # heres the type one validates: 
+        # heres the type one validates:
         schemes[0]._prefetched_objects_cache['schemes']._result_cache[0].validates_type
 
         # build a dict of schema_json that match our type
         schemaTree = {}
         schemaTree['assertion'] = {
-            'test': '0_5', # 'http://localhost:8000/static/0.5/schema/assertion',
+            'test': '0_5',  # 'http://localhost:8000/static/0.5/schema/assertion',
             'noMatch': {
-                'test': '1_0-backpack-misbaked', # 'http://localhost:8000/static/0.5/schema/backpack_error_assertion',
+                'test': '1_0-backpack-misbaked',  # 'http://localhost:8000/static/0.5/schema/backpack_error_assertion',
                 'noMatch': { 
-                    'test': '1_0', # 'http://localhost:8000/static/1.0/schema/assertion'
+                    'test': '1_0',  # 'http://localhost:8000/static/1.0/schema/assertion'
                 }
             }
         }
@@ -104,17 +103,16 @@ class BadgeScheme(basic_models.SlugModel):
         schemaTree['issuerorg'] = {
             'test': '1_0'
         }
-        
+
         # A function to put the JSON of the schema into the tree structure so it can be easily accessed.
         def insert_into_tree(schemaSlug, contextUrl, schemaJson, tree=schemaTree[badgeObjectType]):
             if 'test' in tree and tree['test'] == schemaSlug:
                 tree['context_url'] = contextUrl
                 tree['schema_json'] = schemaJson
                 return tree
-            elif 'noMatch' in tree: 
+            elif 'noMatch' in tree:
                 return insert_into_tree(schemaSlug, contextUrl, schemaJson, tree['noMatch'])
             return None
-
 
         for scheme in schemes:
             currentSchemaJson = None
@@ -123,7 +121,7 @@ class BadgeScheme(basic_models.SlugModel):
                     currentSchemaJson = validator.schema_json
 
                 if insert_into_tree(scheme.slug, scheme.context_url, currentSchemaJson) is None:
-                #raise LookupError("Could not insert schema json for " + scheme.slug + " into tree")
+                    # raise LookupError("Could not insert schema json for " + scheme.slug + " into tree")
                     pass
 
         try:
@@ -162,12 +160,10 @@ class BadgeScheme(basic_models.SlugModel):
         """
         try:
             validate(badgeObject, schemaJson, Draft4Validator, format_checker=draft4_format_checker)
-        except ValidationError as e:
+        except ValidationError:
             return False
         else:
             return True
-
-
 
 
 class BadgeSchemaValidator(basic_models.DefaultModel):
@@ -175,10 +171,10 @@ class BadgeSchemaValidator(basic_models.DefaultModel):
     validates_type = models.CharField(max_length=2048)
     validation_schema = models.URLField(verbose_name='URL location of the validation schema', max_length=2048)
     schema_json = JSONField(blank=True)
-    
+
     def save(self, *args, **kwargs):
         if not self.pk:
-            
+
             try:
                 result = BadgeSchemaValidator.objects.get(validation_schema=self.validation_schema)
             except MultipleObjectsReturned:
@@ -188,7 +184,7 @@ class BadgeSchemaValidator(basic_models.DefaultModel):
                     Draft4Validator.check_schema(self.schema_json)
                 except Exception as e:
                     raise e
-                else: 
+                else:
                     super(BadgeSchemaValidator, self).save(*args, **kwargs)
 
         # Save the model if it's an update.
@@ -198,8 +194,6 @@ class BadgeSchemaValidator(basic_models.DefaultModel):
     # TODO: implement like the save override in OpenBadge
     # def __init__(self, scheme, validator_json, *args,**kwargs):
     #   self.scheme = scheme
-        
-        
 
 
 class OpenBadge(basic_models.DefaultModel):
@@ -209,7 +203,7 @@ class OpenBadge(basic_models.DefaultModel):
     self.badge_input: string -- The badgeObject input to the library to analyze
     self.full_badge_object: (JSONField) dict of dicts -- of badgeObjects composed to add up to this badgeObject
     self.verify_method: string -- 'hosted' or 'signed'
-    self.errors: list -- a list of critical OpenBadgeErrors 
+    self.errors: list -- a list of critical OpenBadgeErrors
     self.notes: list -- a list of validation passes and noncritical failures
     """
     image = models.ImageField(upload_to='uploads/badges/received', blank=True)
@@ -224,7 +218,6 @@ class OpenBadge(basic_models.DefaultModel):
 
     search = SphinxSearch()
 
-
     def __unicode__(self):
         badge_name = self.getProp('badgeclass', 'name')
         badge_issuer = self.getProp('issuerorg', 'name')
@@ -236,7 +229,8 @@ class OpenBadge(basic_models.DefaultModel):
         if not self.pk:
 
             """
-            Stores the input object and sets up a fullBadgeObject to fill out and analyze
+            Stores the input object and sets up a fullBadgeObject to fill out
+            and analyze
             """
             if not self.image and self.recipient_input:
                 raise IOError("Invalid input to OpenBadge create: " + kwargs['image'])
@@ -252,7 +246,6 @@ class OpenBadge(basic_models.DefaultModel):
                 return
 
             self.verify_method = 'hosted' #signed not yet supported.
-            
 
             # Process the initial input
             # Returns a dict with badgeObject property for processed object and 'type', 'context', 'id' properties
@@ -272,11 +265,10 @@ class OpenBadge(basic_models.DefaultModel):
             }
             # place the validated input object into 
             full[structureMeta['type']] = structureMeta['badgeObject'].copy()
-        
 
             """
             # Build out the full badge object by fetching missing components.
-            
+
             #TODO: refactor. This is kind of clunky. Maybe some recursion would help
             #TODO: refactor to consider the future possibility of issuer defined in the assertion 
             #(or separate issuers defined in assertion & issuer, both cases requiring authorization)
@@ -307,16 +299,11 @@ class OpenBadge(basic_models.DefaultModel):
                 #self.errors.append({ "typeError": str(e)})
                 raise e
 
-            
             # Store results
             self.full_badge_object = full
 
-
-
-
-        #finally, save the OpenBadge after doing all that stuff in case it's a new one
+        # finally, save the OpenBadge after doing all that stuff in case it's a new one
         super(OpenBadge, self).save(*args, **kwargs)
-
 
     def processBadgeObject(self, badgeObject, probableType='assertion'):
         structureMeta = {}
@@ -327,13 +314,12 @@ class OpenBadge(basic_models.DefaultModel):
 
         if isinstance(badgeObject, (str, unicode)) and badgeanalysis.utils.test_probable_url(badgeObject):
             structureMeta['id'] = badgeObject
-            try: 
+            try:
                 badgeObject = badgeanalysis.utils.test_probable_url(badgeObject)
             except Exception as e:
                 raise TypeError("Couldn't fetch badgeObject on input. We tried to load " + badgeObject + " -- got error " + e)
                 return
 
-        
         structureMeta['badgeObject'] = badgeObject
 
         """ CASE 1: For OBI version 1.1 and later, the badgeObject will have JSON-LD context information. """
@@ -347,7 +333,6 @@ class OpenBadge(basic_models.DefaultModel):
             # Raise error if OBI context is not linked in the badge. Might still be a valid JSON-LD document otherwise
             elif isinstance(context, dict):
                 raise TypeError("OBI context not linked at top level of input object. This isn't a declared OBI object. Here's the context: " + context)
-
 
             if '@type' in badgeObject:
                 #TODO this is likely not going to be the full expanded IRI, likely a fragment
@@ -363,13 +348,13 @@ class OpenBadge(basic_models.DefaultModel):
 
             #TODO: In progress, Use the BadgeScheme class to divine which of the old formats it might be.
             matchingScheme = BadgeScheme.get_legacy_scheme_match(badgeObject, probableType)
-            if matchingScheme == None:
+            if matchingScheme is None:
                 raise TypeError("Could not determine type of badge object with known schema set")
                 return None
 
             else:
                 potentialContext = matchingScheme['context_url']
-                structureMeta['context'] =  potentialContext
+                structureMeta['context'] = potentialContext
                 structureMeta['badgeObject']['@context'] = potentialContext
 
                 potentialType = matchingScheme['type']
@@ -388,13 +373,12 @@ class OpenBadge(basic_models.DefaultModel):
 
         return structureMeta
 
-
     def validateMainContext(self, contextInput):
         url = re.compile(r"standard\.openbadges\.org/[\d\.]+/context$")
         if isinstance(contextInput, str) and url.search(contextInput):
             return contextInput
         elif isinstance(contextInput, list):
-            for contextElement in context:
+            for contextElement in contextInput:
                 if self.validateMainContext(contextElement):
                     return contextElement
         elif isinstance(contextInput, dict):
@@ -412,16 +396,14 @@ class OpenBadge(basic_models.DefaultModel):
         elif isinstance(typeInput, list):
             for typeElement in typeInput:
                 elType = self.validateObiType(typeElement)
-                if elType != None:
+                if elType is not None:
                     return elType
         return None
-        
 
     def validateId(self, idString):
         if badgeanalysis.utils.test_probable_url(idString):
             return idString
         return None
-
 
     # Tools to inspect an initialized badge object
     def getProp(self, parent, prop):
@@ -430,33 +412,27 @@ class OpenBadge(basic_models.DefaultModel):
 
     def getLdProp(self, parent, iri):
         sourceObject = self.full_badge_object.get(parent)
-        options = { "documentLoader": self.custom_context_docloader }
+        options = {"documentLoader": self.custom_context_docloader}
         expanded = jsonld.expand(sourceObject, options)
         temp = expanded[0].get(iri)
 
-
-        if len(temp) ==1:
+        if len(temp) == 1:
             if '@value' in temp[0]:
                 return temp[0]['@value']
             elif '@id' in temp[0]:
                 return temp[0]['@id']
-        else: 
-            return temp 
+        else:
+            return temp
 
-    def custom_context_docloader(self, url):
-        filename = BadgeScheme.get_context_file_by_url(url)
-        if filename is not None:
-            doc = {
-                'contextUrl': None,
-                'documentUrl': url,
-                'document': load_context_from_filesystem(filename)
-            }
-            return doc
+    # def custom_context_docloader(self, url):
+    #     filename = BadgeScheme.get_context_file_by_url(url)
+    #     if filename is not None:
+    #         doc = {
+    #             'contextUrl': None,
+    #             'documentUrl': url,
+    #             'document': load_context_from_filesystem(filename)
+    #         }
+    #         return doc
 
-        #fall back to default document loader
-        return jsonld.load_document(url)
-
-
-
-
-
+    #     #fall back to default document loader
+    #     return jsonld.load_document(url)
