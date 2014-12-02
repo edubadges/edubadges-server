@@ -453,7 +453,7 @@ class OpenBadge(basic_models.DefaultModel):
         sourceObject = self.full_badge_object.get(parent)
         return sourceObject.get(prop)
 
-    # A wrapper for getLdProp that 
+    # A wrapper for getLdProp that allows you to ask for the short version of a term in the 1.1 context.
     def ldProp(self, shortParent, shortProp):
         # normalize parent aliases to proper badge object IRI
         if shortParent in ("bc", "badgeclass"):
@@ -464,9 +464,9 @@ class OpenBadge(basic_models.DefaultModel):
             parent = "http://standard.openbadges.org/definitions#Issuer"
 
         iri = badgeanalysis.utils.get_iri_for_prop_in_current_context(shortProp)
-        import pdb; pdb.set_trace();
+        # import pdb; pdb.set_trace();
 
-        getLdProp(self, parent, iri)
+        return self.getLdProp(parent, iri)
 
     # TODO maybe: wrap this method to allow LD querying using the latest context's shorthand.
     # (so as to get the property we currently understand no matter what version the input object was)
@@ -489,6 +489,6 @@ class OpenBadge(basic_models.DefaultModel):
         if len(temp) == 1:
             if '@value' in temp[0]:
                 return temp[0]['@value']
-            elif isinstance(temp[0], dict) and '@id' in temp[0] and len(temp[0].keys() < 2):
+            elif isinstance(temp[0], dict) and '@id' in temp[0] and len(temp[0].keys()) < 2:
                 return temp[0]['@id']
         return temp
