@@ -8,6 +8,7 @@ import os
 import re
 from pyld import jsonld
 import pngutils
+from cur_context import current_context
 
 
 """
@@ -143,7 +144,14 @@ def fetch_linked_component(url, documentLoader=None):
 	else: 
 		 return result
 
+def get_iri_for_prop_in_current_context(shortProp):
+	vessel = {
+		'@context': current_context(),
+	}
+	vessel[shortProp] = "TEMPVALUE, McDAWG!"
+	crunk_cup = jsonld.expand(vessel);
+	if isinstance(crunk_cup, list):
+		return crunk_cup[0].keys()[0]
 
-    
 def image_upload_to():
-  return 'uploads/badges/received'
+	return 'uploads/badges/received'

@@ -16,11 +16,11 @@ class CertificateDetail(ActiveTabMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(CertificateDetail, self).get_context_data(**kwargs)
-
+        
         certificate = context['object']
         badge = certificate.open_badge
-        context['badge_name'] = badge.getLdProp('http://standard.openbadges.org/definitions#BadgeClass', 'http://schema.org/name')
-        context['badge_description'] = badge.getProp('badgeclass', 'description')
+        context['badge_name'] = badge.ldProp('bc', 'name')
+        context['badge_description'] = badge.getProp(bc, 'description')
         context['badge_image'] = badge.getProp('badgeclass', 'image')
         context['issue_date'] = badge.getProp('assertion', 'issuedOn')
         context['badge_issuer'] = badge.getProp('issuerorg', 'name')

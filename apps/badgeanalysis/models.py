@@ -18,6 +18,7 @@ from jsonfield import JSONField
 import badgeanalysis.utils
 
 
+
 class BadgeScheme(basic_models.SlugModel):
     default_type = models.CharField(max_length=64)
     context_url = models.URLField(verbose_name='URL location of the JSON-LD context file core to this scheme', max_length=2048)
@@ -452,10 +453,24 @@ class OpenBadge(basic_models.DefaultModel):
         sourceObject = self.full_badge_object.get(parent)
         return sourceObject.get(prop)
 
+    # A wrapper for getLdProp that 
+    def ldProp(self, shortParent, shortProp):
+        # normalize parent aliases to proper badge object IRI
+        if shortParent in ("bc", "badgeclass"):
+            parent = "http://standard.openbadges.org/definitions#BadgeClass"
+        elif shortParent in ("asn", "assertion"):
+            parent = "http://standard.openbadges.org/definitions#Assertion"
+        elif shortParent in ("iss", "issuer", "issuerorg"):
+            parent = "http://standard.openbadges.org/definitions#Issuer"
+
+        iri = badgeanalysis.utils.get_iri_for_prop_in_current_context(shortProp)
+        import pdb; pdb.set_trace();
+
+        getLdProp(self, parent, iri)
+
     # TODO maybe: wrap this method to allow LD querying using the latest context's shorthand.
     # (so as to get the property we currently understand no matter what version the input object was)
     def getLdProp(self, parent, iri):
-        import pdb; pdb.set_trace();
         if not parent in ('http://standard.openbadges.org/definitions#Assertion',
                           'http://standard.openbadges.org/definitions#BadgeClass',
                           'http://standard.openbadges.org/definitions#Issuer'):
