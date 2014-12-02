@@ -414,6 +414,7 @@ class OpenBadge(basic_models.DefaultModel):
         # parameter before they are saved.
         return urljoin(getattr(settings, 'MEDIA_URL'), badgeanalysis.utils.image_upload_to() + '/' + self.image.name)
 
+    # TODO: This approach will not be able to handle issuers who redirect to an OBI context.
     def validateMainContext(self, contextInput):
         url = re.compile(r"standard\.openbadges\.org/[\d\.]+/context$")
         if isinstance(contextInput, str) and url.search(contextInput):
