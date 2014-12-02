@@ -19,7 +19,7 @@ class CertificateDetail(ActiveTabMixin, DetailView):
 
         certificate = context['object']
         badge = certificate.open_badge
-        context['badge_name'] = badge.getProp('badgeclass', 'name')
+        context['badge_name'] = badge.getLdProp('http://standard.openbadges.org/definitions#BadgeClass', 'http://schema.org/name')
         context['badge_description'] = badge.getProp('badgeclass', 'description')
         context['badge_image'] = badge.getProp('badgeclass', 'image')
         context['issue_date'] = badge.getProp('assertion', 'issuedOn')

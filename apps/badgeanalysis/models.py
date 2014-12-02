@@ -168,6 +168,22 @@ class BadgeScheme(basic_models.SlugModel):
         else:
             return True
 
+    @classmethod
+    def custom_context_docloader(cls, url):
+        # TODO: This is called from OpenBadge.init_badge_analysis, and might be called multiple times,
+        # with a DB hit for each.
+        context_json = cls.get_context_file_by_url(url)
+        if context_json is not None:
+            doc = {
+                'contextUrl': None,
+                'documentUrl': url,
+                'document': context_json
+            }
+            return doc
+
+        #fall back to default document loader
+        return jsonld.load_document(url)
+
 
 class BadgeSchemaValidator(basic_models.DefaultModel):
     scheme = models.ForeignKey(BadgeScheme, related_name='schemes')
@@ -286,7 +302,10 @@ class OpenBadge(basic_models.DefaultModel):
                     theBadgeClass = self.processBadgeObject(theBadgeClass, 'badgeclass')
                     if theBadgeClass['type'] == 'badgeclass':
                         full['badgeclass'] = theBadgeClass['badgeObject']
-                # for nested badges (0.5 & backpack-wonky!) (IS THIS REALLY A GOOD IDEA?? It won't have a schema to match up against.)
+                # for nested badges (0.5 & backpack-wonky!) (IS THIS REALLY A GOOD IDEA??
+                # It won't have a schema to match up against.)
+                # For backpack-wonky, we should instead build our badge object based on the originally issued assertion,
+                # not the baked one.
                 elif isinstance(full['assertion']['badge'], dict):
                     full['badgeclass'] = full['assertion']['badge']
 
@@ -308,7 +327,8 @@ class OpenBadge(basic_models.DefaultModel):
         self.full_badge_object = full
         self.truncate_images()
 
-        self.full_ld_expanded = jsonld.expand(full)
+        expand_options = {"documentLoader": BadgeScheme.custom_context_docloader}
+        self.full_ld_expanded = jsonld.expand(full, expand_options)
 
     def processBadgeObject(self, badgeObject, probableType='assertion'):
         structureMeta = {}
@@ -426,33 +446,34 @@ class OpenBadge(basic_models.DefaultModel):
         return None
 
     # Tools to inspect an initialized badge object
+
+    # Dangerous: We should use LD-based methods when possible to reduce cross-version problems.
     def getProp(self, parent, prop):
         sourceObject = self.full_badge_object.get(parent)
         return sourceObject.get(prop)
 
+    # TODO maybe: wrap this method to allow LD querying using the latest context's shorthand.
+    # (so as to get the property we currently understand no matter what version the input object was)
     def getLdProp(self, parent, iri):
-        sourceObject = self.full_badge_object.get(parent)
-        options = {"documentLoader": self.custom_context_docloader}
-        expanded = jsonld.expand(sourceObject, options)
-        temp = expanded[0].get(iri)
+        import pdb; pdb.set_trace();
+        if not parent in ('http://standard.openbadges.org/definitions#Assertion',
+                          'http://standard.openbadges.org/definitions#BadgeClass',
+                          'http://standard.openbadges.org/definitions#Issuer'):
+            raise TypeError(parent + " isn't a known type of core badge object to search in")
 
+        if not isinstance(self.full_ld_expanded, list) or not parent in self.full_ld_expanded[0]:
+            return None
+        parent_object = self.full_ld_expanded[0].get(parent)
+
+        if not iri in parent_object[0]:
+            return None
+        temp = parent_object[0].get(iri)
+
+        # TODO: With 1 property value for this IRI, either return the @value o
+        # If there is more than one property value for this IRI, just return all
         if len(temp) == 1:
             if '@value' in temp[0]:
                 return temp[0]['@value']
-            elif '@id' in temp[0]:
+            elif isinstance(temp[0], dict) and '@id' in temp[0] and len(temp[0].keys() < 2):
                 return temp[0]['@id']
-        else:
-            return temp
-
-    # def custom_context_docloader(self, url):
-    #     filename = BadgeScheme.get_context_file_by_url(url)
-    #     if filename is not None:
-    #         doc = {
-    #             'contextUrl': None,
-    #             'documentUrl': url,
-    #             'document': load_context_from_filesystem(filename)
-    #         }
-    #         return doc
-
-    #     #fall back to default document loader
-    #     return jsonld.load_document(url)
+        return temp

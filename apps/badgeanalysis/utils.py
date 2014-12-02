@@ -109,12 +109,14 @@ def has_context(badgeObject):
 def extract_assertion_from_image(imageFile):
 	return pngutils.extract(imageFile)
 
+
 def is_image_data_uri(imageString):
 	dataRe = re.compile(r'^data:', flags=re.I)
 	if dataRe.match(imageString):
 		return True
 	else:
 		return False
+
 
 def fetch_linked_component(url, documentLoader=None):
 	"""

@@ -1,7 +1,7 @@
 {% extends "base_interior.html" %}
 
 
-{% set page_title=object.id %}
+{% set page_title="Print Badge Certificate" %}
 
 
 {% block content %}
@@ -15,10 +15,6 @@
 
 	{% if badge_name %}
 		<h2> {{badge_name}} </h2>
-	{% endif %}
-
-	{% if badge_name %}
-		<p> Name: {{badge_name}} </p>
 	{% endif %}
 
 	{% if badge_description %}
