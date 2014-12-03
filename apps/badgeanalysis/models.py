@@ -18,7 +18,6 @@ from jsonfield import JSONField
 import badgeanalysis.utils
 
 
-
 class BadgeScheme(basic_models.SlugModel):
     default_type = models.CharField(max_length=64)
     context_url = models.URLField(verbose_name='URL location of the JSON-LD context file core to this scheme', max_length=2048)
@@ -210,6 +209,26 @@ class BadgeSchemaValidator(basic_models.DefaultModel):
         # Save the model if it's an update.
         else:
             super(BadgeSchemaValidator, self).save(*args, **kwargs)
+
+
+class BadgeValidationMessage():
+    message_type = "message"
+
+    def __init__(self, message_string):
+        if not isinstance(message_string, (str, unicode)):
+            raise TypeError("Can't add " + self.message_type + " to Open Badge. Not of type string: " + message_string)
+        self.message_content = message_string
+
+    def __unicode__(self):
+        return "<Badge Validation " + self.message_type + ": " + self.message_content + ">"
+
+
+class BadgeValidationSuccess(BadgeValidationMessage):
+    message_type = "success"
+
+
+class BadgeValidationError(BadgeValidationMessage):
+    message_type = "error"
 
 
 class OpenBadge(basic_models.DefaultModel):
@@ -493,3 +512,16 @@ class OpenBadge(basic_models.DefaultModel):
             elif isinstance(temp[0], dict) and '@id' in temp[0] and len(temp[0].keys()) < 2:
                 return temp[0]['@id']
         return temp
+
+    """
+    Methods for storing errors and messages that result from processing validators.
+    Remember to save the Open Badge afterward.
+    """
+    def record_message(self, message):
+        if not isinstance(message, BadgeValidationMessage):
+            raise TypeError("The message to record wasn't really a Badge Message: " + message)
+
+        if isinstance(message, BadgeValidationSuccess):
+            self.notes.append(message)
+        elif isinstance(message, BadgeValidationError):
+            self.errors.append(message)

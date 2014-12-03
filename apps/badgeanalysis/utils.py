@@ -94,7 +94,6 @@ def is_schemable(input):
 """
 Utilities for JSON-LD + badge objects
 """
-
 def has_context(badgeObject):
     context = None
     try:
@@ -131,7 +130,7 @@ def fetch_linked_component(url, documentLoader=None):
     """
     if documentLoader:
         loadDoc = documentLoader
-    else: 
+    else:
         loadDoc = jsonld.load_document
 
     try:
@@ -141,15 +140,16 @@ def fetch_linked_component(url, documentLoader=None):
     except (jsonld.JsonLdError, Exception) as e:
         raise IOError("error loading document " + url + " " + e)
         return None
-    else: 
-         return result
+    else:
+        return result
+
 
 def get_iri_for_prop_in_current_context(shortProp):
     vessel = {
         '@context': current_context(),
     }
     vessel[shortProp] = "TEMPVALUE, McDAWG!"
-    crunk_cup = jsonld.expand(vessel);
+    crunk_cup = jsonld.expand(vessel)
     if isinstance(crunk_cup, list):
         return crunk_cup[0].keys()[0]
 
