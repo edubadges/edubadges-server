@@ -1,14 +1,14 @@
 from django.views.generic import CreateView, DetailView
-from django.http import HttpResponse
+from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
+
 from issuer.models import *
 from mainsite.views import ActiveTabMixin
 from issuer.forms import IssuerForm
+from badgeanalysis.models import OpenBadge
 
-from django.db.models.query import EmptyQuerySet
-# from django.core.exceptions import DoesNotExist
 import django.template.loader
-from django.shortcuts import render_to_response
+# from django.shortcuts import render_to_response
 
 
 class IssuerCreate(ActiveTabMixin, CreateView):
@@ -33,12 +33,20 @@ class EarnerNotificationCreate(ActiveTabMixin, CreateView):
 
     def form_valid(self, form):
 
+        import pdb; pdb.set_trace();
+
+        try:
+            ob = OpenBadge(recipient_input=form.cleaned_data['email'], badge_input=form.cleaned_data['url'])
+            ob.save()
+        except Exception as e: 
+            raise e
+
         email_context = {
-            'badge_name': 'TEST BADGE #1',
-            'badge_description': "A description of the test badge. This description is most accurate and complete!",
-            'issuer_name': "Distinctive Badges, Inc.",
-            'issuer_url': 'http://silly-willy.com',
-            'image_url': "http://placekitten.com/300/300"
+            'badge_name': ob.ldProp('bc', 'name'),
+            'badge_description': ob.ldProp('bc', 'description'),
+            'issuer_name': ob.ldProp('iss', 'name'),
+            'issuer_url': ob.ldProp('iss', 'url'),
+            'image_url': form.cleaned_data['url'] + '/image'
         }
         t = django.template.loader.get_template('issuer/notify_earner_email.txt')
         ht = django.template.loader.get_template('issuer/notify_earner_email.html')
@@ -46,8 +54,8 @@ class EarnerNotificationCreate(ActiveTabMixin, CreateView):
         html_output_message = ht.render(email_context)
         mail_meta = {
             'subject': 'Congratulations, you earned a badge!',
-            'from_address': 'OregonASK Badges <noreply@Doregonbadgealliance.org>',
-            'to_addresses': ['ottonomy+test@gmail.com']
+            'from_address': email_context['issuer_name'] + ' Badges <noreply@oregonbadgealliance.org>',
+            'to_addresses': [form.cleaned_data['email']]
         }
 
         try:
@@ -62,10 +70,9 @@ class EarnerNotificationCreate(ActiveTabMixin, CreateView):
             )
         except Exception as e:
             response_context = {"error": str(e)}
-            import pdb; pdb.set_trace();
             self.form_invalid(form)
 
-        return HttpResponse.HttpResponseRedirect(self.get_success_url())
+        return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse('notify_earner')

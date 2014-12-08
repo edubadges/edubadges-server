@@ -8,15 +8,17 @@
     <form class="contact notify-earner" action="" method="post">
       <fieldset>
         <ol>
+        {% for field in form %}
           <li>
-            <label for="id_url">{{form.url.label}}</label>
-            {% if form.url.errors %}
-              <span class="error">{{form.url.errors|safe}}</span>
+            <label for="id_name">{{field.label}}</label>
+            {% if field.errors %}
+              <span class="error">{{field.errors|safe}}</span>
             {% endif %}
-            {{form.url|safe}}
+            {{field|safe}}
           </li>
+        {% endfor %}
         </ol>
-        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        {{ csrf() }}
       </fieldset>
       <fieldset>
         <ol>

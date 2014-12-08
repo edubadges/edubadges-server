@@ -11,18 +11,18 @@
 <body bgcolor="#FFFFFF" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; width: 100% !important; height: 100%; margin: 0; padding: 0;">
 
 <!-- HEADER -->
-<table class="head-wrap" bgcolor="#999999" style="width: 100%; margin: 0; padding: 0;">
+<table class="head-wrap" bgcolor="#D1D1D1" style="width: 100%; margin: 0; padding: 0;">
   <tr style="margin: 0; padding: 0;">
     <td style="margin: 0; padding: 0;"></td>
     <td class="header container" style="display: block !important; max-width: 600px !important; clear: both !important; margin: 0 auto; padding: 0;">
 
       <div class="content" style="margin: 0 auto; padding: 15px;">
-        <table bgcolor="#999999" style="margin: 0; padding: 0;">
+        <table bgcolor="#D1D1D1" style="margin: 0; padding: 0;">
           <tr style="margin: 0; padding: 0;">
             <td style="margin: 0; padding: 0;"><a href="http://oregonbadgealliance.org" style="margin: 0; padding: 0;">
-             <img src="http://oregonbadgealliance.org/static/css/images/oba_logo.png" alt="Oregon Badge Alliance" style="max-width: 250px; height: auto;">
-            </a></td>
-            <td align="right"></td>
+            <div style="margin: 0 auto;">
+             <img src="http://oregonbadgealliance.org/static/css/images/oba_logo.png" alt="Oregon Badge Alliance" style="max-width: 180px; height: auto;">
+            </a></div></td>
           </tr>
         </table>
       </div>
@@ -46,23 +46,22 @@
 
               <h3 style="font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif; line-height: 1.1; color: #000; font-weight: 500; font-size: 27px; margin: 0 0 15px; padding: 0;">Congratulations! You earned a badge</h3>
               <p>
-              <p class="lead" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; font-weight: normal; font-size: 17px; line-height: 1.6; margin: 0 0 10px; padding: 0;">The badge you earned is this one! The one that I have lots of details about from <a href="{{ issuer_url }}" style="color: #2BA6CB; margin: 0; padding: 0;">{{ issuer_name }}</a>.</p>
 
               <!-- Save this badge image! -->
-              <div style="margin: 0 0 10px; padding: 0;"><p><img src="{{ image_url }}" style="max-width: 100%; height: auto; margin: 0 auto; padding: 0;" alt="Your portable badge image for {{ badge_name }}. Save this image!" /></p>
+              <div style="margin: 0 0 10px; padding: 0;"><p><a href="{{ image_url }}"><img src="{{ image_url }}" style="max-width: 100%; height: auto; margin: 0 auto; padding: 0;" alt="Your portable badge image for {{ badge_name }}. Save this image!" /></a></p>
                 <h3 style="font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif; line-height: 1.1; color: #000; font-weight: 500; font-size: 27px; margin: 25px 0 15px 0; padding: 0;">{{badge_name}}</h3>
-                <p class="lead" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; font-weight: normal; font-size: 17px; line-height: 1.6; margin: 0 0 10px; padding: 0;">{{ badge_description }} -- Issued by <a href="{{ issuer_url }}" style="color: #2BA6CB; margin: 0; padding: 0;">{{ issuer_name }}</a>.</p>
+                <p class="lead" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; font-weight: normal; font-size: 17px; line-height: 1.6; margin: 0 0 10px; padding: 0;">{{ badge_description }} <br /><small> Issued by <a href="{{ issuer_url }}" style="color: #2BA6CB; margin: 0; padding: 0;">{{ issuer_name }}</a>.</small></p>
               </div><!-- /badge image -->
 
               <!-- Callout Panel -->
               <p class="callout" style="font-weight: normal; font-size: 14px; line-height: 1.6; background-color: #ECF8FF; margin: 0 0 15px; padding: 15px;">
-                You can save this image and store it wherever you keep your Open Digital Badges. We suggest <a href="http://badgrapp.com/" style="color: #185E73; font-weight: bold;">Badgr</a> or the <a href="http://backpack.openbadges.org" style="color: #185E73; font-weight: bold; ">Open Badges Backpack.</a> Wherever you take it, portable information about your achievement will be locked inside. <a href="{{ image_url }}" style="color: #2BA6CB; font-weight: bold; margin: 0; padding: 0;">Download your badge. &raquo;</a>
+                You can save this image and store it wherever you keep your Open Digital Badges. We suggest <a href="http://badgrapp.com/" style="color: #185E73; font-weight: bold;">Badgr</a> or the <a href="http://backpack.openbadges.org" style="color: #185E73; font-weight: bold; ">Open Badges Backpack.</a> Wherever you take it, portable information about your achievement will be locked inside. <a href="{{ image_url }}" class="btn" style="color: #FFF; text-decoration: none; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; background-color: #3B8252; margin: 0 10px 0 0; padding: 8px 16px;">Download your badge! &raquo;</a>
               </p><!-- /Callout Panel -->
 
               <h3 style="font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif; line-height: 1.1; color: #000; font-weight: 500; font-size: 27px; margin: 25px 0 15px 0; padding: 0;">Open Badges <small style="font-size: 60%; color: #6f6f6f; line-height: 0; text-transform: none; margin: 0; padding: 0;">Portable digital credentials</small></h3>
               <p style="font-weight: normal; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;">Open digital badges let you take your credentials from the many places you learn, and combine them to tell a cohesive story about your learning.</p>
-              <p style="font-weight: normal; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;">This credential issued through the Oregon Badge Alliance and the Oregon Center for Digital Learning.&nbsp;&nbsp;&nbsp;
-                <a href="http://orlearning.org/" class="btn" style="color: #FFF; text-decoration: none; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; background-color: #666; margin: 0 10px 0 0; padding: 8px 16px;">Learn more</a>
+              <p style="font-weight: normal; font-size: 12px; line-height: 1.6; margin: 0 0 10px; padding: 0;">This credential issued through the Oregon Badge Alliance and the Oregon Center for Digital Learning. In 2015, the OCDL and its partners will offer a variety of programs that award digital badges and will be building software to help earners turn their credentials into jobs and opportunities. &nbsp;&nbsp;&nbsp;
+                <br /><a href="http://orlearning.org/" class="btn" style="color: #FFF; text-decoration: none; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; background-color: #3B8252; margin: 0 10px 0 0; padding: 8px 16px;">Learn more</a>
 
                 <br />
                 <br />
