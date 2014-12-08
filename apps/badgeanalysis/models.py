@@ -16,6 +16,9 @@ from djangosphinx.models import SphinxSearch
 from jsonfield import JSONField
 
 import badgeanalysis.utils
+from functional_validators import BadgeFunctionalValidator, FunctionalValidatorList
+from validation_messages import BadgeValidationSuccess, BadgeValidationError, BadgeValidationMessage
+
 
 
 class BadgeScheme(basic_models.SlugModel):
@@ -95,7 +98,7 @@ class BadgeScheme(basic_models.SlugModel):
             'test': '0_5',  # 'http://localhost:8000/static/0.5/schema/assertion',
             'noMatch': {
                 'test': '1_0-backpack-misbaked',  # 'http://localhost:8000/static/0.5/schema/backpack_error_assertion',
-                'noMatch': { 
+                'noMatch': {
                     'test': '1_0',  # 'http://localhost:8000/static/1.0/schema/assertion'
                 }
             }
@@ -211,26 +214,6 @@ class BadgeSchemaValidator(basic_models.DefaultModel):
             super(BadgeSchemaValidator, self).save(*args, **kwargs)
 
 
-class BadgeValidationMessage():
-    message_type = "message"
-
-    def __init__(self, message_string):
-        if not isinstance(message_string, (str, unicode)):
-            raise TypeError("Can't add " + self.message_type + " to Open Badge. Not of type string: " + message_string)
-        self.message_content = message_string
-
-    def __unicode__(self):
-        return "<Badge Validation " + self.message_type + ": " + self.message_content + ">"
-
-
-class BadgeValidationSuccess(BadgeValidationMessage):
-    message_type = "success"
-
-
-class BadgeValidationError(BadgeValidationMessage):
-    message_type = "error"
-
-
 class OpenBadge(basic_models.DefaultModel):
     """
     Each OpenBadge contains an input Badge Object and corresponding metadata built up as a result of analysis.
@@ -255,6 +238,8 @@ class OpenBadge(basic_models.DefaultModel):
     search = SphinxSearch()
 
     def __unicode__(self):
+        if self.full_badge_object == u'':
+            return "Unsaved Open Badge"
         badge_name = self.getProp('badgeclass', 'name')
         badge_issuer = self.getProp('issuerorg', 'name')
 
@@ -273,24 +258,31 @@ class OpenBadge(basic_models.DefaultModel):
         Stores the input object and sets up a fullBadgeObject to fill out
         and analyze
         """
-        if not self.image and self.recipient_input:
-            raise IOError("Invalid input to OpenBadge create: " + kwargs['image'])
+        # In either case, we must know the input email address to permit badge creation
+        if not self.recipient_input:
+            raise IOError("Invalid input to OpenBadge create: missing expected recipient.")
+        # For when we create a badge with an image and recipient as input
+        if self.badge_input == u'':
 
-        self.errors = []
-        self.notes = []
+            if not self.image:
+                raise IOError("Invalid input to create an OpenBadge. Missing image or badge_input.")
 
-        try:
-            self.badge_input = badgeanalysis.utils.extract_assertion_from_image(self.image)
-        except Exception as e:
-            self.errors.append(e)
-            raise e
-            return
+            self.errors = []
+            self.notes = []
 
-        self.verify_method = 'hosted'  # signed not yet supported.
+            try:
+                self.badge_input = badgeanalysis.utils.extract_assertion_from_image(self.image)
+            except Exception as e:
+                self.errors.append(e)
+                raise e
+                return
+
+            self.verify_method = 'hosted'  # signed not yet supported.
 
         # Process the initial input
         # Returns a dict with badgeObject property for processed object and 'type', 'context', 'id' properties
         try:
+            import pdb; pdb.set_trace();
             structureMeta = self.processBadgeObject(self.badge_input,'assertion')
         except TypeError as e:
             self.errors.append(e)
@@ -359,7 +351,7 @@ class OpenBadge(basic_models.DefaultModel):
         if isinstance(badgeObject, (str, unicode)) and badgeanalysis.utils.test_probable_url(badgeObject):
             structureMeta['id'] = badgeObject
             try:
-                badgeObject = badgeanalysis.utils.test_probable_url(badgeObject)
+                badgeObject = json.loads(badgeanalysis.utils.fetch_linked_component(badgeObject))
             except Exception as e:
                 raise TypeError("Couldn't fetch badgeObject on input. We tried to load " + badgeObject + " -- got error " + e)
                 return
@@ -525,3 +517,6 @@ class OpenBadge(basic_models.DefaultModel):
             self.notes.append(message)
         elif isinstance(message, BadgeValidationError):
             self.errors.append(message)
+
+    def validated_by():
+        pass

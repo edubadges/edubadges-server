@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'contact',
     'certificates',
     'badgeanalysis',
+    'issuer',
 ]
 
 MIDDLEWARE_CLASSES = [

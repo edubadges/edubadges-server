@@ -155,3 +155,4 @@ def get_iri_for_prop_in_current_context(shortProp):
 
 def image_upload_to():
     return 'uploads/badges/received'
+

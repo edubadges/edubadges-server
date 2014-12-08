@@ -1,0 +1,31 @@
+{% extends "base_interior.html" %}
+
+{% set page_title='Notify a Badge Earner' %}
+
+{% block content %}   
+  <div class="content_area">  
+    To send a manual email notification to a badge earner, please enter the URL of the assertion below. 
+    <form class="contact notify-earner" action="" method="post">
+      <fieldset>
+        <ol>
+          <li>
+            <label for="id_url">{{form.url.label}}</label>
+            {% if form.url.errors %}
+              <span class="error">{{form.url.errors|safe}}</span>
+            {% endif %}
+            {{form.url|safe}}
+          </li>
+        </ol>
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+      </fieldset>
+      <fieldset>
+        <ol>
+          <li>
+            <button type="submit">Send</button>
+          </li>
+        </ol>
+      </fieldset>
+    </form>
+  </div>
+
+{% endblock %}
