@@ -282,7 +282,6 @@ class OpenBadge(basic_models.DefaultModel):
         # Process the initial input
         # Returns a dict with badgeObject property for processed object and 'type', 'context', 'id' properties
         try:
-            import pdb; pdb.set_trace();
             structureMeta = self.processBadgeObject(self.badge_input,'assertion')
         except TypeError as e:
             self.errors.append(e)
