@@ -33,8 +33,6 @@ class EarnerNotificationCreate(ActiveTabMixin, CreateView):
 
     def form_valid(self, form):
 
-        import pdb; pdb.set_trace();
-
         try:
             ob = OpenBadge(recipient_input=form.cleaned_data['email'], badge_input=form.cleaned_data['url'])
             ob.save()
