@@ -33,13 +33,13 @@ class BadgeScheme(basic_models.SlugModel):
 
     def registerValidators(self):
         # TODO: Use JSON-LD for this?
-        contextObj = json.loads(self.context_json)
+        contextObj = badgeanalysis.utils.try_json_load(self.context_json)
         validators = contextObj.get('obi:validation')
         if validators is not None and isinstance(validators, list):
             for validator in validators:
                 validationSchema = validator.get('obi:validationSchema')
                 validatesType = validator.get('obi:validatesType')
-                schema_json = json.loads(badgeanalysis.utils.fetch_linked_component(validationSchema))
+                schema_json = badgeanalysis.utils.try_json_load(badgeanalysis.utils.fetch_linked_component(validationSchema))
 
                 bsv = BadgeSchemaValidator(validation_schema=validationSchema, validates_type=validatesType, schema_json=schema_json, scheme=self)
 
@@ -49,9 +49,14 @@ class BadgeScheme(basic_models.SlugModel):
             bsv.save()
 
     def save(self, *args, **kwargs):
+        import pdb; pdb.set_trace();
         if not self.pk:
             if self.context_json is None:
-                self.context_json = badgeanalysis.utils.fetch_linked_component(self.context_url)
+                # TODO: add validation step
+                self.context_json = badgeanalysis.utils.try_json_load(badgeanalysis.utils.fetch_linked_component(self.context_url))
+
+            elif isinstance(self.context_json, (str, unicode)):
+                self.context_json = badgeanalysis.utils.try_json_load(self.context_json)
 
             super(BadgeScheme, self).save(*args, **kwargs)
 
@@ -404,6 +409,8 @@ class OpenBadge(basic_models.DefaultModel):
             potentialId = self.validateId(badgeObject['verify']['url'])
             structureMeta['badgeObject']['@id'] = potentialId
             structureMeta['id'] = potentialId
+
+
 
         return structureMeta
 
