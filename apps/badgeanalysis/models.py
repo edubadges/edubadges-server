@@ -49,7 +49,6 @@ class BadgeScheme(basic_models.SlugModel):
             bsv.save()
 
     def save(self, *args, **kwargs):
-        import pdb; pdb.set_trace();
         if not self.pk:
             if self.context_json is None:
                 # TODO: add validation step
@@ -80,8 +79,10 @@ class BadgeScheme(basic_models.SlugModel):
             return result.context_json
 
     @classmethod
-    def get_legacy_scheme_match(cls, badgeObject, badgeObjectType):
+    def get_legacy_scheme_match(cls, badgeObject, badgeObjectType, known_slug=None):
         LEGACY_SLUGS = ['0_5', '1_0-backpack-misbaked', '1_0']
+
+        search_slug = [known_slug] if known_slug is not None else LEGACY_SLUGS
         if badgeObjectType == 'issuer':
             badgeObjectType = 'issuerorg'
         VALID_TYPES = ['assertion', 'badgeclass', 'issuerorg']
@@ -116,13 +117,14 @@ class BadgeScheme(basic_models.SlugModel):
         }
 
         # A function to put the JSON of the schema into the tree structure so it can be easily accessed.
-        def insert_into_tree(schemaSlug, contextUrl, schemaJson, tree=schemaTree[badgeObjectType]):
+        def insert_into_tree(scheme, schemaSlug, contextUrl, schemaJson, tree=schemaTree[badgeObjectType]):
             if 'test' in tree and tree['test'] == schemaSlug:
                 tree['context_url'] = contextUrl
                 tree['schema_json'] = schemaJson
+                tree['scheme'] = scheme
                 return tree
             elif 'noMatch' in tree:
-                return insert_into_tree(schemaSlug, contextUrl, schemaJson, tree['noMatch'])
+                return insert_into_tree(scheme, schemaSlug, contextUrl, schemaJson, tree['noMatch'])
             return None
 
         for scheme in schemes:
@@ -131,7 +133,7 @@ class BadgeScheme(basic_models.SlugModel):
                 if validator.validates_type == badgeObjectType:
                     currentSchemaJson = validator.schema_json
 
-                if insert_into_tree(scheme.slug, scheme.context_url, currentSchemaJson) is None:
+                if insert_into_tree(scheme, scheme.slug, scheme.context_url, currentSchemaJson) is None:
                     # raise LookupError("Could not insert schema json for " + scheme.slug + " into tree")
                     pass
 
@@ -144,7 +146,8 @@ class BadgeScheme(basic_models.SlugModel):
             return {
                 "context_url": treeMatch['context_url'],
                 "type": badgeObjectType,
-                "schemeSlug": treeMatch['test']
+                "schemeSlug": treeMatch['test'],
+                "scheme": treeMatch['scheme']
             }
         else:
             return None
@@ -302,6 +305,9 @@ class OpenBadge(basic_models.DefaultModel):
         }
         # place the validated input object into 
         full[structureMeta['type']] = structureMeta['badgeObject'].copy()
+        import pdb; pdb.set_trace();
+        # record the badge version (scheme), as determined from the assertion
+        self.scheme = structureMeta['scheme']
 
         """
         # Build out the full badge object by fetching missing components.
@@ -400,6 +406,8 @@ class OpenBadge(basic_models.DefaultModel):
                 structureMeta['type'] = potentialType
                 structureMeta['badgeObject']['@type'] = potentialType
 
+                structureMeta['scheme'] = matchingScheme['scheme']
+
         """ Finalize badge object by adding the @id if possible """
         if 'id' in structureMeta and not '@id' in badgeObject:
             structureMeta['badgeObject']['@id'] = self.validateId(structureMeta['id'])
@@ -409,8 +417,6 @@ class OpenBadge(basic_models.DefaultModel):
             potentialId = self.validateId(badgeObject['verify']['url'])
             structureMeta['badgeObject']['@id'] = potentialId
             structureMeta['id'] = potentialId
-
-
 
         return structureMeta
 
