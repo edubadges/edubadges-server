@@ -67,10 +67,9 @@ class EarnerNotificationCreate(ActiveTabMixin, CreateView):
                 html_message=html_output_message
             )
         except Exception as e:
-            response_context = {"error": str(e)}
             self.form_invalid(form)
 
-        return HttpResponseRedirect(self.get_success_url())
+        return super(EarnerNotificationCreate, self).form_valid(form)
 
     def get_success_url(self):
         return reverse('notify_earner')

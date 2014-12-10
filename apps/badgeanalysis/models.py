@@ -87,10 +87,10 @@ class BadgeScheme(basic_models.SlugModel):
         schemes = cls.objects.filter(slug__in=LEGACY_SLUGS).prefetch_related('schemes')
 
         # Here's the first schema_json:
-        schemes[0]._prefetched_objects_cache['schemes']._result_cache[0].schema_json
+        # schemes[0]._prefetched_objects_cache['schemes']._result_cache[0].schema_json
 
         # heres the type one validates:
-        schemes[0]._prefetched_objects_cache['schemes']._result_cache[0].validates_type
+        # schemes[0]._prefetched_objects_cache['schemes']._result_cache[0].validates_type
 
         # build a dict of schema_json that match our type
         schemaTree = {}
@@ -258,17 +258,17 @@ class OpenBadge(basic_models.DefaultModel):
         Stores the input object and sets up a fullBadgeObject to fill out
         and analyze
         """
+        self.errors = []
+        self.notes = []
+
         # In either case, we must know the input email address to permit badge creation
         if not self.recipient_input:
             raise IOError("Invalid input to OpenBadge create: missing expected recipient.")
         # For when we create a badge with an image and recipient as input
-        if self.badge_input == u'':
+        if self.badge_input == u'' or self.badge_input is None:
 
             if not self.image:
                 raise IOError("Invalid input to create an OpenBadge. Missing image or badge_input.")
-
-            self.errors = []
-            self.notes = []
 
             try:
                 self.badge_input = badgeanalysis.utils.extract_assertion_from_image(self.image)
@@ -309,8 +309,7 @@ class OpenBadge(basic_models.DefaultModel):
             if isinstance(full['assertion'], dict) and not 'badgeclass' in full:
                 # For 1.0 etc compliant badges with linked badgeclass
                 if isinstance(full['assertion']['badge'], (str, unicode)):
-                    theBadgeClass = badgeanalysis.utils.fetch_linked_component(full['assertion']['badge'])
-                    theBadgeClass = self.processBadgeObject(theBadgeClass, 'badgeclass')
+                    theBadgeClass = self.processBadgeObject(full['assertion']['badge'], 'badgeclass')
                     if theBadgeClass['type'] == 'badgeclass':
                         full['badgeclass'] = theBadgeClass['badgeObject']
                 # for nested badges (0.5 & backpack-wonky!) (IS THIS REALLY A GOOD IDEA??
@@ -322,10 +321,10 @@ class OpenBadge(basic_models.DefaultModel):
 
             if isinstance(full['badgeclass'], dict) and not 'issuerorg' in full:
                 if isinstance(full['badgeclass']['issuer'], (str, unicode)):
-                    theIssuerOrg = badgeanalysis.utils.fetch_linked_component(full['badgeclass']['issuer'])
-                    theIssuerOrg = self.processBadgeObject(theIssuerOrg, 'issuerorg')
+                    theIssuerOrg = self.processBadgeObject(full['badgeclass']['issuer'], 'issuerorg')
                     if theIssuerOrg['type'] == 'issuerorg':
                         full['issuerorg'] = theIssuerOrg['badgeObject']
+
                 # Again, this is probably a bad idea like this?:
                 elif isinstance(full['badgeclass']['issuer'], dict):
                     full['issuerorg'] = full['badgeclass']['issuer']
@@ -340,6 +339,7 @@ class OpenBadge(basic_models.DefaultModel):
 
         expand_options = {"documentLoader": BadgeScheme.custom_context_docloader}
         self.full_ld_expanded = jsonld.expand(full, expand_options)
+        # control resumes in save()
 
     def processBadgeObject(self, badgeObject, probableType='assertion'):
         structureMeta = {}
@@ -378,9 +378,8 @@ class OpenBadge(basic_models.DefaultModel):
                 structureMeta['type'] = probableType
                 structureMeta['badgeObject']['@type'] = probableType
 
-            # """ CASE 2: For OBI versions 0.5 and 1.0, we will have to deterimine how to add JSON-LD context information. """
+        # CASE 2: For OBI versions 0.5 and 1.0, we will have to deterimine how to add JSON-LD context information. 
         else:
-
             #TODO: In progress, Use the BadgeScheme class to divine which of the old formats it might be.
             matchingScheme = BadgeScheme.get_legacy_scheme_match(badgeObject, probableType)
             if matchingScheme is None:
@@ -475,7 +474,6 @@ class OpenBadge(basic_models.DefaultModel):
             parent = "http://standard.openbadges.org/definitions#Issuer"
 
         iri = badgeanalysis.utils.get_iri_for_prop_in_current_context(shortProp)
-        # import pdb; pdb.set_trace();
 
         return self.getLdProp(parent, iri)
 
@@ -503,6 +501,28 @@ class OpenBadge(basic_models.DefaultModel):
             elif isinstance(temp[0], dict) and '@id' in temp[0] and len(temp[0].keys()) < 2:
                 return temp[0]['@id']
         return temp
+
+    def get_baked_image_url(self):
+        # for saved objects that originated from a baked upload, 
+        # we have the baked image already, and can thus serve it.
+        if self.pk and self.image:
+            return self.image.url
+        # if we're calling this before saving it, use our special handler function
+        elif self.image:
+            return self.eventualImageUrl()
+        # For cases where we started with a URL or pasted assertion...
+        else:
+            imgUrl = self.ldProp('asn', 'image')
+            if imgUrl:
+                return imgUrl
+            # for cases where the baked image isn't linked from the assertion
+            else: 
+                pass
+
+    @classmethod
+    def baker_api_url(assertion_url):
+        # TODO: build this service internally.
+        return "http://backpack.openbadges.org/baker?assertion=" + assertion_url
 
     """
     Methods for storing errors and messages that result from processing validators.

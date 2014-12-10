@@ -12,6 +12,7 @@ class NotifyEarnerForm(forms.ModelForm):
 
     class Meta:
         model = EarnerNotification
+        exclude = []
 
     def clean_url(self):
         try:
