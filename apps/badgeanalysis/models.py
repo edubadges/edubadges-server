@@ -305,7 +305,7 @@ class OpenBadge(basic_models.DefaultModel):
         }
         # place the validated input object into 
         full[structureMeta['type']] = structureMeta['badgeObject'].copy()
-        import pdb; pdb.set_trace();
+
         # record the badge version (scheme), as determined from the assertion
         self.scheme = structureMeta['scheme']
 
@@ -530,7 +530,7 @@ class OpenBadge(basic_models.DefaultModel):
                 return imgUrl
             # for cases where the baked image isn't linked from the assertion
             else: 
-                pass
+                return baker_api_url(self.ldProp('bc', 'image'))
 
     @classmethod
     def baker_api_url(assertion_url):
