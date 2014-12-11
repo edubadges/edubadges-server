@@ -36,6 +36,7 @@ urlpatterns = patterns('',
     url(r'^issue', include('issuer.urls')),
     url(r'^earn', include('earner.urls')),
     url(r'^understand', include('issuer.urls')),
+
     url(r'^contact', include('contact.urls')),
     url(r'^search', include('search.urls')),
     url(r'^badgeanalysis', include('badgeanalysis.urls')),

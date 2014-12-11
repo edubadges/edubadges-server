@@ -1,8 +1,10 @@
 from django import http
 from django import template
 from django.conf import settings
+# from django.core.urlresolvers import reverse
 from django.template.response import SimpleTemplateResponse
 from django.views.generic.base import TemplateView
+from django.contrib.auth import authenticate, login, logout
 
 
 class ActiveTabMixin(object):
@@ -15,7 +17,6 @@ class ActiveTabMixin(object):
 class SitemapView(ActiveTabMixin, TemplateView):
     template_name = 'sitemap.html'
     active_tab = 'home'
-    
 
 ##
 #
