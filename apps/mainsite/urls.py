@@ -33,7 +33,7 @@ urlpatterns = patterns('',
     url(r'^staff/', include(admin.site.urls)),
 
     # Local Apps
-    url(r'^issuer', include('issuer.urls')),
+    url(r'^issue', include('issuer.urls')),
     url(r'^earn', include('earner.urls')),
     url(r'^understand', include('issuer.urls')),
     url(r'^contact', include('contact.urls')),
