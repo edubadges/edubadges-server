@@ -3,12 +3,13 @@ import basic_models
 import django.template.loader
 
 from badgeanalysis.models import OpenBadge
-
+from badgeuser.models import BadgeUser
 
 class Issuer(basic_models.SlugModel):
     url = models.URLField(verbose_name='Issuer\'s homepage', max_length=2048)
     issuer_object_url = models.URLField(max_length=2048, verbose_name='URL Location of the OBI Issuer file in JSON')
     description = models.TextField(blank=True)
+    owner_user = models.ForeignKey(BadgeUser, related_name='owner', on_delete=models.PROTECT, null=False)
 
     def get_form(self):
         from issuer.forms import IssuerForm
