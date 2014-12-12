@@ -31,5 +31,4 @@ class EarnerPortal(ActiveTabMixin, DetailView):
             # TODO: use reverse()
             return redirect('/login')
         context = self.get_context_data(object=self.object)
-        import pdb; pdb.set_trace();
         return self.render_to_response(context)
