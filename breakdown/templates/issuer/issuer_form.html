@@ -1,0 +1,33 @@
+{% extends "base_interior.html" %}
+
+{% set page_title='Add a badge to your passport' %}
+
+{% block content %}   
+  <div class="content_area">  
+    <h3>Add an issuer to your account so you can issue statements of trust.</h3>
+    <form class="contact notify-earner" action="" method="post">
+      <fieldset>
+        <ol>
+          {% for field in form %}
+          <li>
+            {{ field.label_tag() }}
+            {% if field.errors %}
+              <span class="error">{{field.errors|safe}}</span>
+            {% endif %}
+            {{field|safe}}
+          </li>
+          {% endfor %}
+        </ol>
+        {{ csrf() }}
+      </fieldset>
+      <fieldset>
+        <ol>
+          <li>
+            <button type="submit">Send</button>
+          </li>
+        </ol>
+      </fieldset>
+    </form>
+  </div>
+
+{% endblock %}
