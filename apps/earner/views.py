@@ -1,5 +1,5 @@
 from django.views.generic import CreateView, DetailView
-from django.contrib.auth.models import User
+from badgeuser.models import BadgeUser
 from django.http import Http404
 
 from mainsite.views import ActiveTabMixin
@@ -14,19 +14,22 @@ class EarnerBadgeCreate(ActiveTabMixin, CreateView):
 
 
 class EarnerPortal(ActiveTabMixin, DetailView):
-    model = User
+    model = BadgeUser
     active_tab = 'earn'
     template_name = 'earner/earner_home.html'
 
     def get_object(self):
         current_user = self.request.user
-        if curr is not None:
+        if current_user is not None:
             return current_user
         raise Http404
 
-    def get(self):
+    def get(self, request):
         try:
             self.object = self.get_object()
         except Http404:
             # TODO: use reverse()
             return redirect('/login')
+        context = self.get_context_data(object=self.object)
+        import pdb; pdb.set_trace();
+        return self.render_to_response(context)

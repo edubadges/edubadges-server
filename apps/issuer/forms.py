@@ -6,6 +6,7 @@ class IssuerForm(forms.ModelForm):
 
     class Meta:
         model = Issuer
+        exclude = []
 
 
 class NotifyEarnerForm(forms.ModelForm):
