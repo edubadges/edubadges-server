@@ -1,0 +1,12 @@
+{% extends "sky_visitor/base.html" %}
+
+
+{% block content %}
+    <h1>Register</h1>
+
+    <form method="post">
+        {{ form.as_p()|safe }}
+        {{ csrf() }}
+        <button type="submit">Submit</button>
+    </form>
+{% endblock %}

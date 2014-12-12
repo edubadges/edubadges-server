@@ -10,6 +10,7 @@ from django.conf import settings
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('badgeanalysis', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -21,6 +22,8 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('url', models.URLField(max_length=2048, verbose_name=b'Assertion URL')),
+                ('email', models.EmailField(max_length=254)),
+                ('badge', models.ForeignKey(blank=True, to='badgeanalysis.OpenBadge', null=True)),
             ],
             options={
                 'abstract': False,
@@ -39,8 +42,8 @@ class Migration(migrations.Migration):
                 ('url', models.URLField(max_length=2048, verbose_name=b"Issuer's homepage")),
                 ('issuer_object_url', models.URLField(max_length=2048, verbose_name=b'URL Location of the OBI Issuer file in JSON')),
                 ('description', models.TextField(blank=True)),
-                ('created_by', models.ForeignKey(related_name=b'issuer_created', on_delete=django.db.models.deletion.SET_NULL, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('updated_by', models.ForeignKey(related_name=b'issuer_updated', on_delete=django.db.models.deletion.SET_NULL, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='issuer_created', on_delete=django.db.models.deletion.SET_NULL, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('updated_by', models.ForeignKey(related_name='issuer_updated', on_delete=django.db.models.deletion.SET_NULL, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
                 'abstract': False,

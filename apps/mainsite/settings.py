@@ -22,10 +22,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.admin',
 
+    'badgeuser',
+
+    'skycms.structure',
     'reversion',
     'jingo',
     'djangosphinx',
-    'skycms.structure',
     'sky_thumbnails',
     'ckeditor',
     'sky_redirects',
@@ -39,6 +41,8 @@ INSTALLED_APPS = [
     'certificates',
     'badgeanalysis',
     'issuer',
+    'earner',
+    'consumer',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -105,6 +109,15 @@ STATICFILES_DIRS = [
     os.path.join(TOP_DIR, 'breakdown', 'static'),
 ]
 
+##
+#
+#  User / Login / Auth
+#
+##
+
+AUTH_USER_MODEL = 'badgeuser.BadgeUser'
+LOGIN_URL = '/login'
+LOGIN_REDIRECT_URL = '/earn'
 
 ##
 #
