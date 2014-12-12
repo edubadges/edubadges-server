@@ -22,6 +22,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.admin',
 
+    'mainsite',
+
     'reversion',
     'jingo',
     'djangosphinx',
@@ -32,7 +34,6 @@ INSTALLED_APPS = [
     'emailtemplates',
     'sky_visitor',
 
-    'mainsite',
     'homepage',
     'search',
     'contact',
@@ -107,6 +108,15 @@ STATICFILES_DIRS = [
     os.path.join(TOP_DIR, 'breakdown', 'static'),
 ]
 
+##
+#
+#  User / Login / Auth
+#
+##
+
+AUTH_USER_MODEL = 'mainsite.models.BadgeUser'
+LOGIN_URL = '/login'
+LOGIN_REDIRECT_URL = '/earn'
 
 ##
 #
