@@ -27,8 +27,8 @@ class BadgeUserAdmin(UserAdmin):
     )
     form = BadgeUserChangeForm
     add_form = BadgeUserCreationForm
-    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff')
-    search_fields = ('username', 'email', 'first_name', 'last_name')
+    list_display = ('username', 'email', 'name', 'short_name', 'is_staff')
+    search_fields = ('username', 'email', 'name', 'short_name')
     ordering = ('username',)
 
 admin.site.register(BadgeUser, BadgeUserAdmin)

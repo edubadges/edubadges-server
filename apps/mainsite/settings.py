@@ -22,18 +22,19 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.admin',
 
-    'mainsite',
+    'badgeuser',
 
+    'skycms.structure',
     'reversion',
     'jingo',
     'djangosphinx',
-    'skycms.structure',
     'sky_thumbnails',
     'ckeditor',
     'sky_redirects',
     'emailtemplates',
     'sky_visitor',
 
+    'mainsite',
     'homepage',
     'search',
     'contact',
@@ -114,7 +115,7 @@ STATICFILES_DIRS = [
 #
 ##
 
-AUTH_USER_MODEL = 'mainsite.models.BadgeUser'
+AUTH_USER_MODEL = 'badgeuser.BadgeUser'
 LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = '/earn'
 

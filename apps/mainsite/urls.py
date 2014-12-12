@@ -3,6 +3,11 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.shortcuts import redirect
+
+admin.autodiscover()
+#make sure that any view/model/form imports occur AFTER admin.autodiscover
+
+
 from django.views.generic.base import RedirectView
 from mainsite.views import Error404, Error500, SitemapView
 from homepage.sitemap import HomeSitemap
@@ -11,8 +16,6 @@ from sky_visitor.views import *
 
 TOKEN_REGEX = '(?P<uidb36>[0-9A-Za-z]{1,13})-(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})'
 
-admin.autodiscover()
-#make sure that any view/model/form imports occur AFTER admin.autodiscover
 
 sitemaps = {
     'index': HomeSitemap,
@@ -52,7 +55,7 @@ urlpatterns = patterns('',
     url(r'^search', include('search.urls')),
     url(r'^badgeanalysis', include('badgeanalysis.urls')),
     url(r'^', include('certificates.urls')),
-    url(r'^', include('skycms.structure.urls')),
+    # url(r'^', include('skycms.structure.urls')),
 )
 
 

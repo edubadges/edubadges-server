@@ -47,7 +47,7 @@ class BadgeUser(AbstractBaseUser, PermissionsMixin):
             validators.RegexValidator(r'^[\w.@+-]+$', _('Enter a valid username.'), 'invalid')
         ])
 
-    name = models.CharField(_('name'), max_length=48, help_text=_('Full name'))
+    name = models.CharField(_('name'), max_length=128, help_text=_('Full name'))
     short_name = models.CharField(max_length=48, 
         help_text=_('Nickname, first name, or short name. Optional.'), 
         blank=True
@@ -70,8 +70,12 @@ class BadgeUser(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ['email']
 
     class Meta:
-        verbose_name = _('user')
-        verbose_name_plural = _('users')
+        verbose_name = _('badgeuser')
+        verbose_name_plural = _('badgeusers')
+        db_table = 'users'
+
+    def __unicode__(self):
+        return self.username
 
     def get_absolute_url(self):
         return "/users/%s/" % urlquote(self.username)
