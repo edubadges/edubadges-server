@@ -10,7 +10,7 @@
         <ol>
           {% for field in form %}
           <li>
-            <label for="{{field.label}}">{{field.label}}</label>
+            {{ field.label_tag() }}
             {% if field.errors %}
               <span class="error">{{field.errors|safe}}</span>
             {% endif %}
