@@ -1,5 +1,6 @@
 from django.views.generic import CreateView, DetailView
 from django.contrib.auth.models import User
+from django.http import Http404
 
 from mainsite.views import ActiveTabMixin
 from earner.models import *  # EarnerBadge
@@ -18,4 +19,14 @@ class EarnerPortal(ActiveTabMixin, DetailView):
     template_name = 'earner/earner_home.html'
 
     def get_object(self):
-        return self.request.user
+        current_user = self.request.user
+        if curr is not None:
+            return current_user
+        raise Http404
+
+    def get(self):
+        try:
+            self.object = self.get_object()
+        except Http404:
+            # TODO: use reverse()
+            return redirect('/login')

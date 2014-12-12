@@ -7,7 +7,9 @@ from django.views.generic.base import RedirectView
 from mainsite.views import Error404, Error500, SitemapView
 from homepage.sitemap import HomeSitemap
 from skycms.structure.sitemap import PageSitemap
+from sky_visitor.views import *
 
+TOKEN_REGEX = '(?P<uidb36>[0-9A-Za-z]{1,13})-(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})'
 
 admin.autodiscover()
 #make sure that any view/model/form imports occur AFTER admin.autodiscover
@@ -31,6 +33,15 @@ urlpatterns = patterns('',
     # https://github.com/concentricsky/django-client-admin
     url(r'^staff/', include('client_admin.urls')),
     url(r'^staff/', include(admin.site.urls)),
+
+    # Visitor account urls:
+    url(r'^register$', RegisterView.as_view(), name='register'),
+    url(r'^login$', LoginView.as_view(), name='login'),
+    url(r'^logout$', LogoutView.as_view(), name='logout'),
+    url(r'^forgot_password$', ForgotPasswordView.as_view(), name='forgot_password'),
+    url(r'^forgot_password/check_email$', ForgotPasswordCheckEmailView.as_view(), name='forgot_password_check_email'),
+    url(r'^reset_password/%s/$' % TOKEN_REGEX, ResetPasswordView.as_view(), name='reset_password'),
+    url(r'^change_password$', ChangePasswordView.as_view(), name='change_password'),
 
     # Local Apps
     url(r'^issue', include('issuer.urls')),
