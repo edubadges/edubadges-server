@@ -49,7 +49,7 @@ urlpatterns = patterns('',
     # Local Apps
     url(r'^issue', include('issuer.urls')),
     url(r'^earn', include('earner.urls')),
-    url(r'^understand', include('issuer.urls')),
+    url(r'^understand', include('consumer.urls')),
 
     url(r'^contact', include('contact.urls')),
     url(r'^search', include('search.urls')),
