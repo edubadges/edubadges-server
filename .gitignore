@@ -9,3 +9,4 @@ AppleDouble
 staticfiles/*
 mediafiles/*
 logs/*
+node_modules/*
