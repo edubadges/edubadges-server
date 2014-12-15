@@ -10,3 +10,4 @@ staticfiles/*
 mediafiles/*
 logs/*
 node_modules/*
+npm_debug.log
