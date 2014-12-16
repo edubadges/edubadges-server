@@ -1,0 +1,4 @@
+.sidebar-nav li ul {
+  margin-left: 2em; }
+.sidebar-nav li.expanded-false ul {
+  display: none; }
