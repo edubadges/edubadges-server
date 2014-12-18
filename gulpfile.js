@@ -1,7 +1,7 @@
 var gulp = require('gulp');
-var browserify = require('gulp-browserify');  // Bundles JS.
+var browserify = require('browserify');  // Bundles JS.
 var del = require('del');  // Deletes files.
-var reactify = require('reactify');  // Transforms React JSX to JS.
+// var reactify = require('reactify');  // Transforms React JSX to JS.
 var source = require('vinyl-source-stream');
 var sass = require('gulp-sass');
 var rename = require('gulp-rename');
@@ -10,7 +10,7 @@ var livereload = require('gulp-livereload');
 // Define some paths.
 var sourcePaths = {
   sass: ['./build/sass/style.scss'],
-  app_js: ['./build/js/app.jsx']
+  app_js: ['./build/js/**/*.jsx', './build/js/**/*.js']
 };
 var destPaths = {
   css: './breakdown/static/css',
@@ -27,11 +27,15 @@ gulp.task('sass', function(){
 // Our JS task. It will Browserify our code and compile React JSX files.
 gulp.task('js', function() {
   // Browserify/bundle the JS.
-  gulp.src(sourcePaths.app_js)
-    .pipe(browserify({
-      transform: reactify
-    })).
-    pipe(rename("script.js"))
+  var bundle = browserify({
+    entries: ['./build/js/app.jsx'],
+    transform: 'reactify',
+    debug: true
+  });
+
+  bundle.bundle()
+    .pipe(source('script.js'))
+    .pipe(rename("script.js"))
     .pipe(gulp.dest(destPaths.js))
     .pipe(livereload());
 });
