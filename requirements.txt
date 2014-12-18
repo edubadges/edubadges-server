@@ -30,6 +30,8 @@ git+ssh://git@github.com/concentricsky/django-sky-visitor.git@v1.2.0
 django-reversion==1.8.5
 # Memcached cache
 python-memcached==1.53
+# Django Rest Framework
+djangorestframework==3.0.2
 
 # Some extra things that got installed (noted here as output from a pip freeze)
 Django-Select2==4.2.2
