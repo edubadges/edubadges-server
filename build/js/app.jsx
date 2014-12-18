@@ -18,6 +18,5 @@ React.render(
  
 $(document).on('click', function(e){
   if (!$(e.target).closest("li.open").length)
-    // TODO: refactor this to put the action creation in an Action Creator ./actions
     clickActions.createOffMenuClickAction($(e.target));
 }); 
