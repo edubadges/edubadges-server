@@ -89,7 +89,8 @@ var TopLinks = React.createClass({
       );
   },
   _hideMenu: function(){
-    this.setState({active: null});
+    if (this.state.active != null)
+      this.setState({active: null});
   }
 });
 
