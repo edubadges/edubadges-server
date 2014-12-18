@@ -5,11 +5,11 @@
             <meta charset="utf-8">
             <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     
-            <title>{% block title %}Badge Nexus{% endblock %}</title>
+            <title>{% block title %}Badge Trust{% endblock %}</title>
             <link rel="shortcut icon" href="{{STATIC_URL}}favicon.png" />
         
             <meta name="viewport" content="width=device-width,initial-scale=1">
-        
+
             <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/bootstrap/css/bootstrap.css">
             <!-- TODO: replace with min later: 
             <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/bootstrap/bootstrap.min.css">
@@ -23,6 +23,9 @@
 
             <!-- Custom Fonts -->
             <link href="{{STATIC_URL}}css/plugins/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+            <!-- main stylesheet -->
+            <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/style.css">
 
             <!-- TODO: create print stylesheet
             <link rel="stylesheet" media="print" type="text/css" href="{{STATIC_URL}}css/print.css">
@@ -55,102 +58,17 @@
                             </button>
                             <a class="navbar-brand" href="index.html">{{ self.title() }}</a>
 
-
-                            <ul class="nav navbar-top-links navbar-right">
-
-                                <!-- TODO: Implement these other dropdown menus
-                                <li class="dropdown">
-                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                                        <i class="fa fa-envelope fa-fw"></i>  <i class="fa fa-caret-down"></i>
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-messages">
-                                    {$ block messages $}{$ endblock $}
-                                    </ul>
-                                    <!-- /.dropdown-messages -/->
-                                </li>
-
-                                <li class="dropdown">
-                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                                        <i class="fa fa-tasks fa-fw"></i>  <i class="fa fa-caret-down"></i>
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-tasks">
-                                        {$ block tasks $}{$ endblock $}
-                                    </ul>
-                                    <!-- /.dropdown-tasks -/->
-                                </li>
-
-                                <li class="dropdown">
-                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                                        <i class="fa fa-bell fa-fw"></i>  <i class="fa fa-caret-down"></i>
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-alerts">
-                                        {$ block alerts $}{$ endblock $}
-                                    </ul>
-                                    <!-- /.dropdown-alerts -/->
-                                </li>
-                                END TODO -->
-
-                                <li class="dropdown">
-                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                                        <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-user">
-                                        <li><a href="/user"><i class="fa fa-user fa-fw"></i> User Profile</a>
-                                        </li>
-                                        <li><a href="/user/settings"><i class="fa fa-gear fa-fw"></i> Settings</a>
-                                        </li>
-                                        <li class="divider"></li>
-                                        <li><a href="/logout"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
-                                        </li>
-                                    </ul>
-                                    <!-- /.dropdown-user -->
-                                </li>
-                                <!-- /.dropdown -->
-                            </ul>
-                            <!-- /.navbar-top-links -->
-
+                            <div id="top-links" class="navbar-right">
+                                <!-- insert top-links component here -->
+                            </div>
 
                         </div>
                         <!-- /.navbar-header -->
 
-
-                        <div class="navbar-default sidebar" role="navigation">
-                            <div class="sidebar-nav navbar-collapse">
-                                <ul class="nav" id="side-menu">
-                                    <li class="sidebar-search">
-                                        <div class="input-group custom-search-form">
-                                            <input type="text" class="form-control" placeholder="Search...">
-                                            <span class="input-group-btn">
-                                                <button class="btn btn-default" type="button">
-                                                    <i class="fa fa-search"></i>
-                                                </button>
-                                            </span>
-                                        </div>
-                                        <!-- /input-group -->
-                                    </li>
-
-                                    <li>
-                                        <a href="/earn"><i class="fa fa-certificate fa-fw"></i>Earn</a>
-                                    </li>
-
-                                    <li>
-                                        <a href="#"><i class="fa fa-mail-forward fa-fw"></i>Issue<span class="fa arrow"></span></a>
-                                        <ul class="nav nav-second-level">
-                                            <li>
-                                                <a href="/issue"><i class="fa fa-bookmark fa-fw"></i>Award Badges</a>
-                                            </li>
-                                            <li>
-                                                <i class="fa fa-newspaper-o fa-fw"></i><a href="/certificates">Print Certificates</a>
-                                            </li>
-                                        </ul>
-                                    </li>
-
-                                    <li>
-                                        <a href="/understand"><i class="fa fa-info-circle fa-fw"></i>Understand</a>
-                                    </li>
-                                </ul>
-                            </div>
+                        <div id="sidebar" class="navbar-default sidebar" role="navigation">
+                            <!-- insert main navigation here -->
                         </div>
+
                         <!-- /.navbar-static-side -->
                     </nav>
                 </header>
