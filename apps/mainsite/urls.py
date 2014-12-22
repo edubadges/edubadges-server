@@ -46,6 +46,9 @@ urlpatterns = patterns('',
     url(r'^reset_password/%s/$' % TOKEN_REGEX, ResetPasswordView.as_view(), name='reset_password'),
     url(r'^change_password$', ChangePasswordView.as_view(), name='change_password'),
 
+    # REST Framework
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+
     # Local Apps
     url(r'^issue', include('issuer.urls')),
     url(r'^earn', include('earner.urls')),

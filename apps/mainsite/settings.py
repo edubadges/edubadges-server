@@ -34,6 +34,8 @@ INSTALLED_APPS = [
     'emailtemplates',
     'sky_visitor',
 
+    'rest_framework',
+
     'mainsite',
     'homepage',
     'search',
@@ -236,6 +238,20 @@ CKEDITOR_CONFIGS = {
 
 CKEDITOR_EMBED_CONTENT = ['structure.page', 'structure.fileupload']
 
+
+##
+#
+#  REST Framework
+#
+##
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
 
 ##
 #
