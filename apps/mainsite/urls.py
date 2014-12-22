@@ -7,14 +7,17 @@ from django.shortcuts import redirect
 admin.autodiscover()
 #make sure that any view/model/form imports occur AFTER admin.autodiscover
 
-
 from django.views.generic.base import RedirectView
 from mainsite.views import Error404, Error500, SitemapView
 from homepage.sitemap import HomeSitemap
 from skycms.structure.sitemap import PageSitemap
 from sky_visitor.views import *
 
+# Django REST Framework router
+from api_urls import router
+
 TOKEN_REGEX = '(?P<uidb36>[0-9A-Za-z]{1,13})-(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})'
+
 
 
 sitemaps = {
@@ -47,7 +50,8 @@ urlpatterns = patterns('',
     url(r'^change_password$', ChangePasswordView.as_view(), name='change_password'),
 
     # REST Framework
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^api/', include(router.urls)),
+    
 
     # Local Apps
     url(r'^issue', include('issuer.urls')),
