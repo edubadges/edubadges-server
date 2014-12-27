@@ -1,0 +1,29 @@
+[
+    {
+        "fields": {
+            "model": "badgeuser",
+            "name": "badgeuser",
+            "app_label": "badgeuser"
+        },
+        "model": "contenttypes.contenttype",
+        "pk": 9
+    },
+    {
+        "fields": {
+            "username": "user",
+            "name": "User McUser",
+            "short_name": "User",
+            "is_active": true,
+            "is_superuser": true,
+            "is_staff": true,
+            "last_login": "2014-12-19T04:59:29Z",
+            "groups": [],
+            "user_permissions": [],
+            "password": "pbkdf2_sha256$12000$mJdmKyuD96wD$DRA6Nbnh3XAC0EQ99Der71+d0csk8i5l2tvM9MWOt1g=",
+            "email": "test@example.com",
+            "date_joined": "2014-12-12T22:01:10Z"
+        },
+        "model": "badgeuser.badgeuser",
+        "pk": 1
+    }
+]
