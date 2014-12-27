@@ -105,6 +105,41 @@ def has_context(badgeObject):
             return True
         return False
 
+# TODO: This approach will not be able to handle issuers who redirect to an OBI context.
+def validateMainContext(contextInput):
+    url = re.compile(r"standard\.openbadges\.org/[\d\.]+/context$")
+    if isinstance(contextInput, str) and url.search(contextInput):
+        return contextInput
+    elif isinstance(contextInput, list):
+        for contextElement in contextInput:
+            if validateMainContext(contextElement):
+                return contextElement
+    elif isinstance(contextInput, dict):
+        # no need to accept these for now
+        pass
+    return None
+
+
+# Gets a simple string (compact IRI in the OBI context of the OBI object type)
+def validateObiType(typeInput):
+    #TODO rework this with JSON-LD compaction instead of a simple in set operation. Gotta handle full IRIs
+
+    if isinstance(typeInput, str) and typeInput in ('assertion', 'badgeclass', 'issuerorg'):
+        return typeInput
+
+    elif isinstance(typeInput, list):
+        for typeElement in typeInput:
+            elType = validateObiType(typeElement)
+            if elType is not None:
+                return elType
+    return None
+
+
+def validateId(idString):
+    if test_probable_url(idString):
+        return idString
+    return None
+
 
 def extract_assertion_from_image(imageFile):
     return pngutils.extract(imageFile)

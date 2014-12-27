@@ -1,6 +1,7 @@
 from validation_messages import BadgeValidationSuccess, BadgeValidationError
 from django.conf import settings
 from django.utils.importlib import import_module
+import hashlib
 
 
 class FunctionalValidatorList():
@@ -106,7 +107,6 @@ class AssertionRecipientValidator(BadgeFunctionalValidator):
         Check if a badge recipient is indeed the expected recipient (email address)
         """
         if hash_string.startswith('sha256$'):
-            return hash_string == 'sha256$' + hashlib.sha256(email+salt).hexdigest()
+            return hash_string == 'sha256$' + hashlib.sha256(identity_string+salt).hexdigest()
         elif hash_string.startswith('md5$'):
-            return hash_string == 'md5$' + hashlib.md5(email+salt).hexdigest()
-
+            return hash_string == 'md5$' + hashlib.md5(identity_string+salt).hexdigest()

@@ -2,11 +2,9 @@ from django.db import models
 from django.conf import settings
 from urlparse import urljoin
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
-from django.core.urlresolvers import reverse
 
 import re
 from pyld import jsonld
-import json
 
 from jsonschema import validate, Draft4Validator, draft4_format_checker
 from jsonschema.exceptions import ValidationError  # , FormatError
@@ -16,210 +14,17 @@ from djangosphinx.models import SphinxSearch
 from jsonfield import JSONField
 
 import badgeanalysis.utils
+
 from functional_validators import BadgeFunctionalValidator, FunctionalValidatorList
 from validation_messages import BadgeValidationSuccess, BadgeValidationError, BadgeValidationMessage
+from badge_objects import badge_object_class
 
 
-
-class BadgeScheme(basic_models.SlugModel):
-    default_type = models.CharField(max_length=64)
-    context_url = models.URLField(verbose_name='URL location of the JSON-LD context file core to this scheme', max_length=2048)
-    description = models.TextField(blank=True)
-    context_json = JSONField(blank=True)
-
-    def get_form(self):
-        from badges.forms import BadgeSchemeForm
-        return BadgeSchemeForm(instance=self)
-
-    def registerValidators(self):
-        # TODO: Use JSON-LD for this?
-        contextObj = badgeanalysis.utils.try_json_load(self.context_json)
-        validators = contextObj.get('obi:validation')
-        if validators is not None and isinstance(validators, list):
-            for validator in validators:
-                validationSchema = validator.get('obi:validationSchema')
-                validatesType = validator.get('obi:validatesType')
-                schema_json = badgeanalysis.utils.try_json_load(badgeanalysis.utils.fetch_linked_component(validationSchema))
-
-                bsv = BadgeSchemaValidator(validation_schema=validationSchema, validates_type=validatesType, schema_json=schema_json, scheme=self)
-
-                bsv.save()
-        elif isinstance(validators, dict):
-            bsv = BadgeSchemaValidator(self, validation_schema=validators.get('obi:validationSchema'), validates_type=validators.get('obi:validatesType'), scheme=self)
-            bsv.save()
-
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            if self.context_json is None:
-                # TODO: add validation step
-                self.context_json = badgeanalysis.utils.try_json_load(badgeanalysis.utils.fetch_linked_component(self.context_url))
-
-            elif isinstance(self.context_json, (str, unicode)):
-                self.context_json = badgeanalysis.utils.try_json_load(self.context_json)
-
-            super(BadgeScheme, self).save(*args, **kwargs)
-
-            self.registerValidators()
-
-        else:
-            super(BadgeScheme, self).save(*args, **kwargs)
-
-    def get_absolute_url(self):
-        return reverse('badgescheme_detail', args=[self.slug])
-
-    @classmethod
-    def get_context_file_by_url(cls, url):
-        try:
-            result = cls.objects.get(context_url=url)
-        except MultipleObjectsReturned as e:
-            raise e
-        except ObjectDoesNotExist:
-            return None
-        else:
-            return result.context_json
-
-    @classmethod
-    def get_legacy_scheme_match(cls, badgeObject, badgeObjectType, known_slug=None):
-        LEGACY_SLUGS = ['0_5', '1_0-backpack-misbaked', '1_0']
-
-        search_slug = [known_slug] if known_slug is not None else LEGACY_SLUGS
-        if badgeObjectType == 'issuer':
-            badgeObjectType = 'issuerorg'
-        VALID_TYPES = ['assertion', 'badgeclass', 'issuerorg']
-
-        if not badgeObjectType in VALID_TYPES:
-            raise TypeError("Input type " + badgeObjectType + " isn't one of the valid options: " + VALID_TYPES)
-
-        schemes = cls.objects.filter(slug__in=LEGACY_SLUGS).prefetch_related('schemes')
-
-        # Here's the first schema_json:
-        # schemes[0]._prefetched_objects_cache['schemes']._result_cache[0].schema_json
-
-        # heres the type one validates:
-        # schemes[0]._prefetched_objects_cache['schemes']._result_cache[0].validates_type
-
-        # build a dict of schema_json that match our type
-        schemaTree = {}
-        schemaTree['assertion'] = {
-            'test': '0_5',  # 'http://localhost:8000/static/0.5/schema/assertion',
-            'noMatch': {
-                'test': '1_0-backpack-misbaked',  # 'http://localhost:8000/static/0.5/schema/backpack_error_assertion',
-                'noMatch': {
-                    'test': '1_0',  # 'http://localhost:8000/static/1.0/schema/assertion'
-                }
-            }
-        }
-        schemaTree['badgeclass'] = {
-            'test': '1_0'
-        }
-        schemaTree['issuerorg'] = {
-            'test': '1_0'
-        }
-
-        # A function to put the JSON of the schema into the tree structure so it can be easily accessed.
-        def insert_into_tree(scheme, schemaSlug, contextUrl, schemaJson, tree=schemaTree[badgeObjectType]):
-            if 'test' in tree and tree['test'] == schemaSlug:
-                tree['context_url'] = contextUrl
-                tree['schema_json'] = schemaJson
-                tree['scheme'] = scheme
-                return tree
-            elif 'noMatch' in tree:
-                return insert_into_tree(scheme, schemaSlug, contextUrl, schemaJson, tree['noMatch'])
-            return None
-
-        for scheme in schemes:
-            currentSchemaJson = None
-            for validator in scheme._prefetched_objects_cache['schemes']._result_cache:
-                if validator.validates_type == badgeObjectType:
-                    currentSchemaJson = validator.schema_json
-
-                if insert_into_tree(scheme, scheme.slug, scheme.context_url, currentSchemaJson) is None:
-                    # raise LookupError("Could not insert schema json for " + scheme.slug + " into tree")
-                    pass
-
-        try:
-            treeMatch = cls.test_against_schema_tree(badgeObject, schemaTree[badgeObjectType])
-        except LookupError as e:
-            raise e
-
-        if treeMatch:
-            return {
-                "context_url": treeMatch['context_url'],
-                "type": badgeObjectType,
-                "schemeSlug": treeMatch['test'],
-                "scheme": treeMatch['scheme']
-            }
-        else:
-            return None
-
-    @classmethod
-    def test_against_schema_tree(cls, badgeObject, testTree):
-        if not 'test' in testTree:
-            raise LookupError("Schema Tree malformed, could not find a test reference when needed. " + str(testTree))
-            return None
-
-        if cls.test_against_schema(badgeObject, testTree['schema_json']):
-            # There are only more tests down the noMatch path, so we can return right here.
-            return testTree
-        elif 'noMatch' in testTree:
-            return cls.test_against_schema_tree(badgeObject, testTree['noMatch'])
-        else:
-            return None
-
-    @classmethod
-    def test_against_schema(cls, badgeObject, schemaJson):
-        """
-        Reads the specified schema based on the filename registered for schemaKey, and processes it into an object with json.loads()
-        Then validates the badge object against it.
-        """
-        try:
-            validate(badgeObject, schemaJson, Draft4Validator, format_checker=draft4_format_checker)
-        except ValidationError:
-            return False
-        else:
-            return True
-
-    @classmethod
-    def custom_context_docloader(cls, url):
-        # TODO: This is called from OpenBadge.init_badge_analysis, and might be called multiple times,
-        # with a DB hit for each.
-        context_json = cls.get_context_file_by_url(url)
-        if context_json is not None:
-            doc = {
-                'contextUrl': None,
-                'documentUrl': url,
-                'document': context_json
-            }
-            return doc
-
-        #fall back to default document loader
-        return jsonld.load_document(url)
-
-
-class BadgeSchemaValidator(basic_models.DefaultModel):
-    scheme = models.ForeignKey(BadgeScheme, related_name='schemes')
-    validates_type = models.CharField(max_length=2048)
-    validation_schema = models.URLField(verbose_name='URL location of the validation schema', max_length=2048)
-    schema_json = JSONField(blank=True)
-
-    def save(self, *args, **kwargs):
-        if not self.pk:
-
-            try:
-                result = BadgeSchemaValidator.objects.get(validation_schema=self.validation_schema)
-            except MultipleObjectsReturned:
-                pass
-            except ObjectDoesNotExist:
-                try:
-                    Draft4Validator.check_schema(self.schema_json)
-                except Exception as e:
-                    raise e
-                else:
-                    super(BadgeSchemaValidator, self).save(*args, **kwargs)
-
-        # Save the model if it's an update.
-        else:
-            super(BadgeSchemaValidator, self).save(*args, **kwargs)
+"""
+Two Django Models are also defined in scheme_models.py but not included here 
+to avoid circular dependency in badge_objects.py
+"""
+from scheme_models import BadgeScheme, BadgeSchemaValidator
 
 
 class OpenBadge(basic_models.DefaultModel):
@@ -269,9 +74,14 @@ class OpenBadge(basic_models.DefaultModel):
         self.errors = []
         self.notes = []
 
-        # In either case, we must know the input email address to permit badge creation
-        if not self.recipient_input:
-            raise IOError("Invalid input to OpenBadge create: missing expected recipient.")
+        # Local utility method. TODO: consider pulling this out if useful elsewhere
+        def handle_critical_errors(badgeMetaObject):
+            if len(badgeMetaObject['errors']) > 0:
+                self.errors += badgeMetaObject['errors']
+                raise BadgeValidationError(badgeMetaObject['errors'][0])
+            if len(badgeMetaObject['notes']) > 0:
+                self.notes += badgeMetaObject['notes']
+
         # For when we create a badge with an image and recipient as input
         if self.badge_input == u'' or self.badge_input is None:
 
@@ -289,40 +99,44 @@ class OpenBadge(basic_models.DefaultModel):
 
         # Process the initial input
         # Returns a dict with badgeObject property for processed object and 'type', 'context', 'id' properties
-        try:
-            structureMeta = self.processBadgeObject(self.badge_input,'assertion')
-        except TypeError as e:
-            self.errors.append(e)
-            raise e
-            return
+        assertionMeta = badge_object_class('assertion').processBadgeObject(
+            {'badgeObject': self.badge_input},
+            **{'recipient_input': self.recipient_input}
+        )
+        handle_critical_errors(assertionMeta)
 
-        if not structureMeta['badgeObject']:
+        if not assertionMeta['badgeObject']:
             raise IOError("Could not build a full badge object without having a properly stored inputObject")
 
         full = {
-            '@context': structureMeta['context'] or 'http://standard.openbadges.org/1.1/context',
+            '@context': assertionMeta['context'] or 'http://standard.openbadges.org/1.1/context',
             '@type': 'obi:OpenBadge'
         }
-        # place the validated input object into 
-        full[structureMeta['type']] = structureMeta['badgeObject'].copy()
+
+        # place the validated input object into the fullBadgeObject where it belongs (a key for its type)
+        full[assertionMeta['type']] = assertionMeta['badgeObject'].copy()
 
         # record the badge version (scheme), as determined from the assertion
-        self.scheme = structureMeta['scheme']
+        self.scheme = assertionMeta['scheme']
 
         """
         # Build out the full badge object by fetching missing components.
 
         #TODO: refactor. This is kind of clunky. Maybe some recursion would help
-        #TODO: refactor to consider the future possibility of issuer defined in the assertion 
+        #TODO: refactor to consider the future possibility of issuer defined in the assertion
         #(or separate issuers defined in assertion & issuer, both cases requiring authorization)
         """
         try:
             if isinstance(full['assertion'], dict) and not 'badgeclass' in full:
                 # For 1.0 etc compliant badges with linked badgeclass
                 if isinstance(full['assertion']['badge'], (str, unicode)):
-                    theBadgeClass = self.processBadgeObject(full['assertion']['badge'], 'badgeclass')
-                    if theBadgeClass['type'] == 'badgeclass':
-                        full['badgeclass'] = theBadgeClass['badgeObject']
+                    theBadgeClassMeta = badge_object_class('badgeclass').processBadgeObject(
+                        {'badgeObject': full['assertion']['badge']}
+                    )
+                    handle_critical_errors(theBadgeClassMeta)
+
+                    if theBadgeClassMeta['type'] == 'badgeclass':
+                        full['badgeclass'] = theBadgeClassMeta['badgeObject']
                 # for nested badges (0.5 & backpack-wonky!) (IS THIS REALLY A GOOD IDEA??
                 # It won't have a schema to match up against.)
                 # For backpack-wonky, we should instead build our badge object based on the originally issued assertion,
@@ -332,9 +146,13 @@ class OpenBadge(basic_models.DefaultModel):
 
             if isinstance(full['badgeclass'], dict) and not 'issuerorg' in full:
                 if isinstance(full['badgeclass']['issuer'], (str, unicode)):
-                    theIssuerOrg = self.processBadgeObject(full['badgeclass']['issuer'], 'issuerorg')
-                    if theIssuerOrg['type'] == 'issuerorg':
-                        full['issuerorg'] = theIssuerOrg['badgeObject']
+                    theIssuerOrgMeta = badge_object_class('issuerorg').processBadgeObject(
+                        {'badgeObject': full['badgeclass']['issuer']}
+                    )
+                    handle_critical_errors(theIssuerOrgMeta)
+
+                    if theIssuerOrgMeta['type'] == 'issuerorg':
+                        full['issuerorg'] = theIssuerOrgMeta['badgeObject']
 
                 # Again, this is probably a bad idea like this?:
                 elif isinstance(full['badgeclass']['issuer'], dict):
@@ -353,70 +171,22 @@ class OpenBadge(basic_models.DefaultModel):
         # control resumes in save()
 
     def processBadgeObject(self, badgeObject, probableType='assertion'):
-        structureMeta = {}
+        pass
 
-        if not isinstance(badgeObject, dict):
-            badgeObject = badgeanalysis.utils.try_json_load(badgeObject)
+    """ Make conditional modifications to a badge object that is annotated within a structureMeta container. 
+    structureMeta = {
+        badgeObject: dict
+        scheme: BadgeScheme
+        type: string (OBI-namespace JSON-LD type)
+        context: string (JSON-LD context URL for badge version)
+        ... maybe more (not done documenting here)
+    }
+    """
+    def process_known_type_object(structureMeta):
 
-        if isinstance(badgeObject, (str, unicode)) and badgeanalysis.utils.test_probable_url(badgeObject):
-            structureMeta['id'] = badgeObject
-            try:
-                badgeObject = json.loads(badgeanalysis.utils.fetch_linked_component(badgeObject))
-            except Exception as e:
-                raise TypeError("Couldn't fetch badgeObject on input. We tried to load " + badgeObject + " -- got error " + e)
-                return
-
-        structureMeta['badgeObject'] = badgeObject
-
-        """ CASE 1: For OBI version 1.1 and later, the badgeObject will have JSON-LD context information. """
-        if badgeanalysis.utils.has_context(badgeObject):
-            context = badgeObject.get('@context')
-
-            # Determine if the existing context has a suitable main OBI context within it.
-            if isinstance(context, (str, list)):
-                structureMeta['context'] = self.validateMainContext(context)
-
-            # Raise error if OBI context is not linked in the badge. Might still be a valid JSON-LD document otherwise
-            elif isinstance(context, dict):
-                raise TypeError("OBI context not linked at top level of input object. This isn't a declared OBI object. Here's the context: " + context)
-
-            if '@type' in badgeObject:
-                #TODO this is likely not going to be the full expanded IRI, likely a fragment
-                structureMeta['type'] = self.validateObiType(badgeObject['@type'])
-            else:
-                #TODO schema-based matching for badge Classes that declared context but not type? Seems rare.
-                # For now, assume we can guess the type correctly
-                structureMeta['type'] = probableType
-                structureMeta['badgeObject']['@type'] = probableType
-
-        # CASE 2: For OBI versions 0.5 and 1.0, we will have to deterimine how to add JSON-LD context information. 
-        else:
-            #TODO: In progress, Use the BadgeScheme class to divine which of the old formats it might be.
-            matchingScheme = BadgeScheme.get_legacy_scheme_match(badgeObject, probableType)
-            if matchingScheme is None:
-                raise TypeError("Could not determine type of badge object with known schema set")
-                return None
-
-            else:
-                potentialContext = matchingScheme['context_url']
-                structureMeta['context'] = potentialContext
-                structureMeta['badgeObject']['@context'] = potentialContext
-
-                potentialType = matchingScheme['type']
-                structureMeta['type'] = potentialType
-                structureMeta['badgeObject']['@type'] = potentialType
-
-                structureMeta['scheme'] = matchingScheme['scheme']
-
-        """ Finalize badge object by adding the @id if possible """
-        if 'id' in structureMeta and not '@id' in badgeObject:
-            structureMeta['badgeObject']['@id'] = self.validateId(structureMeta['id'])
-        elif '@id' in badgeObject:
-            structureMeta['id'] = self.validateId(badgeObject['@id'])
-        elif 'verify' in badgeObject and 'type' in badgeObject['verify'] and badgeObject['verify']['type'] == 'hosted' and 'url' in badgeObject['verify']:
-            potentialId = self.validateId(badgeObject['verify']['url'])
-            structureMeta['badgeObject']['@id'] = potentialId
-            structureMeta['id'] = potentialId
+        #Add JSON-LD properties to object
+        structureMeta['badgeObject']['@context'] = structureMeta['context']
+        structureMeta['badgeObject']['@type'] = structureMeta['type']
 
         return structureMeta
 
@@ -435,39 +205,6 @@ class OpenBadge(basic_models.DefaultModel):
         # A dirty workaround for a 7-year old Django bug that filefields can't access the upload_to
         # parameter before they are saved.
         return urljoin(getattr(settings, 'MEDIA_URL'), badgeanalysis.utils.image_upload_to() + '/' + self.image.name)
-
-    # TODO: This approach will not be able to handle issuers who redirect to an OBI context.
-    def validateMainContext(self, contextInput):
-        url = re.compile(r"standard\.openbadges\.org/[\d\.]+/context$")
-        if isinstance(contextInput, str) and url.search(contextInput):
-            return contextInput
-        elif isinstance(contextInput, list):
-            for contextElement in contextInput:
-                if self.validateMainContext(contextElement):
-                    return contextElement
-        elif isinstance(contextInput, dict):
-            # no need to accept these for now
-            pass
-        return None
-
-    # Gets a simple string (compact IRI in the OBI context of the OBI object type)
-    def validateObiType(self, typeInput):
-        #TODO rework this with JSON-LD compaction instead of a simple in set operation. Gotta handle full IRIs
-
-        if isinstance(typeInput, str) and typeInput in ('assertion', 'badgeclass', 'issuerorg'):
-            return typeInput
-
-        elif isinstance(typeInput, list):
-            for typeElement in typeInput:
-                elType = self.validateObiType(typeElement)
-                if elType is not None:
-                    return elType
-        return None
-
-    def validateId(self, idString):
-        if badgeanalysis.utils.test_probable_url(idString):
-            return idString
-        return None
 
     # Tools to inspect an initialized badge object
 
@@ -516,7 +253,7 @@ class OpenBadge(basic_models.DefaultModel):
         return temp
 
     def get_baked_image_url(self):
-        # for saved objects that originated from a baked upload, 
+        # for saved objects that originated from a baked upload,
         # we have the baked image already, and can thus serve it.
         if self.pk and self.image:
             return self.image.url
@@ -529,8 +266,8 @@ class OpenBadge(basic_models.DefaultModel):
             if imgUrl:
                 return imgUrl
             # for cases where the baked image isn't linked from the assertion
-            else: 
-                return baker_api_url(self.ldProp('bc', 'image'))
+            else:
+                return self.baker_api_url(self.ldProp('bc', 'image'))
 
     @classmethod
     def baker_api_url(assertion_url):

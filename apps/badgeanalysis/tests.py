@@ -7,6 +7,7 @@ import pngutils
 
 import utils
 from badgeanalysis.models import OpenBadge
+from badgeanalysis.badge_objects import Assertion, BadgeClass, IssuerOrg, Extension, BadgeObject, badge_object_class
 
 
 # Some test assertions of different sorts
@@ -61,8 +62,16 @@ valid_1_0_assertion = {
     "image": "http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205/image"
 }
 
+# Construct a docloader function that will return preloaded responses for predetermined URLs
+# Load in a dict of urls and the response bodies you want them to deliver: 
+# response_list = {'http://google.com': 'Hacked by the lizard overlords, hahaha!'}
+def mock_docloader_factory(response_list):
+    def mock_docloader(url):
+        return response_list[url]
+    return mock_docloader
 
-class BadgeSchemaTests(TestCase):
+
+class BadgeUtilsTests(TestCase):
     def test_does_is_json_process_dicts(self):
         """
         Make sure we can determine that a dict is not json
@@ -91,15 +100,20 @@ class BadgeSchemaTests(TestCase):
         """
         Make sure that is_json doesn't cause no problems if we throw some other junk at it.
         """
-        error = None
+
         try:
-            result = utils.is_json(list(("1", 2, "three")))
-            result = utils.is_json(set(["a", "bee", "C"]))
-            result = utils.is_json(tuple(("strings", "planes", "automobiles")))
+            utils.is_json(list(("1", 2, "three")))
+            utils.is_json(set(["a", "bee", "C"]))
+            utils.is_json(tuple(("strings", "planes", "automobiles")))
         except:
             error = str(sys.exc_info()[0])
-        self.assertEqual(error, None)
+        else:
+            error = None
+        finally:
+            self.assertEqual(error, None)
 
+
+class BadgeSchemaTests(TestCase):
     # def test_check_schema(self):
     #   """
     #   Make sure some schema that we're using doesn't make the validator choke. This tests them all but the
@@ -173,8 +187,36 @@ simpleOneOne = {
     "@type": "assertion",
     "@id": "http://example.org/assertion25",
     "uid": 25,
+    "recipient": {
+        "identity": "testuser@example.org",
+        "hashed": False
+    },
     "badge": "http://example.org/badge1"
 }
+simpleOneOneBC = {
+    "@context": "http://standard.openbadges.org/1.1/context",
+    "@type": "badgeclass",
+    "@id": "http://example.org/badge1",
+    "name": "Badge of Awesome",
+    "description": "Awesomest badge for awesome people.",
+    "image": "http://placekitten.com/300/300",
+    "criteria": "http://example.org/badge1criteria",
+    "issuer": "http://example.org/issuer"
+}
+simpleOneOneIssuer = {
+    "@context": "http://standard.openbadges.org/1.1/context",
+    "@type": "issuerorg",
+    "@id": "http://example.org/issuer",
+    "name": "Issuer of Awesome",
+    "url": "http://example.org"
+}
+def oneone_docloader():
+    response_list = {
+        'http://example.org/assertion25': simpleOneOne,
+        'http://example.org/badge1': simpleOneOneBC,
+        'http://example.org/issuer': simpleOneOneIssuer
+    }
+    return mock_docloader_factory(response_list)
 
 oneOneArrayType = {
     "@context": "http://standard.openbadges.org/1.1/context",
@@ -197,81 +239,102 @@ simpleOneOneNoId = {
 }
 
 
-class OpenBadgeTests(TestCase):
-    def test_validateMainContext(self):
-        context = "http://standard.openbadges.org/1.1/context"
-        a = OpenBadge.validateMainContext(OpenBadge(simpleOneOne), context)
-        self.assertEqual(a, context)
+# class OpenBadgeTests(TestCase):
+#     def test_validateMainContext(self):
+#         context = "http://standard.openbadges.org/1.1/context"
+#         a = OpenBadge.validateMainContext(OpenBadge(simpleOneOne), context)
+#         self.assertEqual(a, context)
 
-    def test_simple_OpenBadge_construction_noErrors(self):
-        try:
-            openBadge = OpenBadge(simpleOneOne)
-        except Exception as e:
-            self.assertEqual(e, None)
-        self.assertEqual(openBadge.getProp('assertion', 'uid'), 25)
-        self.assertEqual(openBadge.getProp('assertion', '@type'), 'assertion')
+#     def test_simple_OpenBadge_construction_noErrors(self):
+#         try:
+#             openBadge = OpenBadge(simpleOneOne)
+#         except Exception as e:
+#             self.assertEqual(e, None)
+#         self.assertEqual(openBadge.getProp('assertion', 'uid'), 25)
+#         self.assertEqual(openBadge.getProp('assertion', '@type'), 'assertion')
 
-    def test_oneOneArrayType(self):
-        try:
-            openBadge = OpenBadge(oneOneArrayType)
-        except Exception as e:
-            self.assertEqual(e, None)
-        self.assertEqual(openBadge.getProp('assertion', 'uid'), 25)
+#     def test_oneOneArrayType(self):
+#         try:
+#             openBadge = OpenBadge(oneOneArrayType)
+#         except Exception as e:
+#             self.assertEqual(e, None)
+#         self.assertEqual(openBadge.getProp('assertion', 'uid'), 25)
 
-    def test_oneOneNonUrlID(self):
-        #TODO, both implement id validation and then make this test actually pass
-        try:
-            openBadge = OpenBadge(oneOneNonUrlID)
-        except Exception as e:
-            # What is this doing?
-            self.assertFalse(e is None)
-        self.assertEqual(openBadge.getProp('assertion', 'uid'), 25)
+#     def test_oneOneNonUrlID(self):
+#         #TODO, both implement id validation and then make this test actually pass
+#         try:
+#             openBadge = OpenBadge(oneOneNonUrlID)
+#         except Exception as e:
+#             # What is this doing?
+#             self.assertFalse(e is None)
+#         self.assertEqual(openBadge.getProp('assertion', 'uid'), 25)
 
-    def test_id_from_verify_url(self):
-        try:
-            openBadge = OpenBadge(simpleOneOne)
-        except Exception as e:
-            self.assertEqual(e, None)
-        self.assertEqual(openBadge.getProp('assertion', '@id'), "http://example.org/assertion25")
+#     def test_id_from_verify_url(self):
+#         try:
+#             openBadge = OpenBadge(simpleOneOne)
+#         except Exception as e:
+#             self.assertEqual(e, None)
+#         self.assertEqual(openBadge.getProp('assertion', '@id'), "http://example.org/assertion25")
 
-    def test_valid_1_0_construction(self):
-        try:
-            openBadge = OpenBadge(valid_1_0_assertion)
-        except Exception as e:
-            self.assertEqual(e, None)
-        self.assertEqual(openBadge.getProp('assertion', '@type'), 'assertion')
-        self.assertEqual(openBadge.getProp('assertion', '@id'), 'http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205')
-        self.assertEqual(openBadge.getProp('assertion', 'issuedOn'), 1406747839)
+#     def test_valid_1_0_construction(self):
+#         try:
+#             openBadge = OpenBadge(valid_1_0_assertion)
+#         except Exception as e:
+#             self.assertEqual(e, None)
+#         self.assertEqual(openBadge.getProp('assertion', '@type'), 'assertion')
+#         self.assertEqual(openBadge.getProp('assertion', '@id'), 'http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205')
+#         self.assertEqual(openBadge.getProp('assertion', 'issuedOn'), 1406747839)
 
-    def test_junky_construction(self):
-        try:
-            openBadge = OpenBadge(junky_assertion)
-        except Exception as e:
-            self.assertEqual(e, None)
-        self.assertEqual(openBadge.getProp('assertion', '@type'), 'assertion')
-        self.assertEqual(openBadge.getProp('assertion', '@id'), 'http://badges.schoolofdata.org/badge/data-to-diagrams/instance/100')
-        self.assertEqual(openBadge.getProp('assertion', 'issuedOn'), 1395112143)
+#     def test_junky_construction(self):
+#         try:
+#             openBadge = OpenBadge(junky_assertion)
+#         except Exception as e:
+#             self.assertEqual(e, None)
+#         self.assertEqual(openBadge.getProp('assertion', '@type'), 'assertion')
+#         self.assertEqual(openBadge.getProp('assertion', '@id'), 'http://badges.schoolofdata.org/badge/data-to-diagrams/instance/100')
+#         self.assertEqual(openBadge.getProp('assertion', 'issuedOn'), 1395112143)
 
-    def test_getting_prop_by_iri_simpleOneOne(self):
-        try:
-            openBadge = OpenBadge(simpleOneOne)
-        except Exception as e:
-            self.assertEqual(e, None)
-        self.assertEqual(openBadge.getLdProp('assertion', 'http://standard.openbadges.org/definitions#AssertionUid'), 25)
-        self.assertEqual(openBadge.getLdProp('assertion', 'http://standard.openbadges.org/definitions#BadgeClass'), "http://example.org/badge1")
+#     def test_getting_prop_by_iri_simpleOneOne(self):
+#         try:
+#             openBadge = OpenBadge(simpleOneOne)
+#         except Exception as e:
+#             self.assertEqual(e, None)
+#         self.assertEqual(openBadge.getLdProp('assertion', 'http://standard.openbadges.org/definitions#AssertionUid'), 25)
+#         self.assertEqual(openBadge.getLdProp('assertion', 'http://standard.openbadges.org/definitions#BadgeClass'), "http://example.org/badge1")
 
 
-class ImageExtractionTests(TestCase):
-    def test_basic_image_extract(self):
-        imgFile = open(os.path.join(os.path.dirname(__file__), 'testfiles', '1.png'), 'r')
-        assertion = pngutils.extract(imgFile)
-        self.assertTrue(utils.is_json(assertion))
+# class ImageExtractionTests(TestCase):
+#     def test_basic_image_extract(self):
+#         imgFile = open(os.path.join(os.path.dirname(__file__), 'testfiles', '1.png'), 'r')
+#         assertion = pngutils.extract(imgFile)
+#         self.assertTrue(utils.is_json(assertion))
 
-        assertion = utils.try_json_load(assertion)
-        self.assertEqual(assertion.get("uid"), "2f900c7c-f473-4bff-8173-71b57472a97f")
+#         assertion = utils.try_json_load(assertion)
+#         self.assertEqual(assertion.get("uid"), "2f900c7c-f473-4bff-8173-71b57472a97f")
 
-    def test_analyze_image_upload(self):
-        imgFile = open(os.path.join(os.path.dirname(__file__), 'testfiles', '1.png'), 'r')
+#     def test_analyze_image_upload(self):
+#         imgFile = open(os.path.join(os.path.dirname(__file__), 'testfiles', '1.png'), 'r')
 
-        openBadge = utils.analyze_image_upload(imgFile)
-        self.assertEqual(openBadge.getProp("assertion", "uid"), "2f900c7c-f473-4bff-8173-71b57472a97f")
+#         openBadge = utils.analyze_image_upload(imgFile)
+#         self.assertEqual(openBadge.getProp("assertion", "uid"), "2f900c7c-f473-4bff-8173-71b57472a97f")
+
+
+class BadgeObjectsTests(TestCase):
+
+    def test_mock_docloader_factory(self):
+        response_list = {'http://google.com': 'Hahahaha, hacked by the lizard overlords.'}
+        docloader = mock_docloader_factory(response_list)
+        self.assertEqual(docloader('http://google.com'), 'Hahahaha, hacked by the lizard overlords.')
+
+    def test_assertion_processing_oneone(self):
+        self.maxDiff = None
+        docloader = oneone_docloader()
+        badgeMetaObject = badge_object_class('assertion').processBadgeObject({'badgeObject': simpleOneOne}, docloader)
+        expected_result = {
+            'badgeObject': simpleOneOne,
+            'context': 'http://standard.openbadges.org/1.1/context',
+            'id': 'http://example.org/assertion25',
+            'notes': ['<Badge Validation success (RecipientRequiredValidator): Recipient input not needed, embedded recipient identity is not hashed>'],
+            'type': 'assertion'
+        }
+        self.assertEqual(badgeMetaObject, expected_result)
