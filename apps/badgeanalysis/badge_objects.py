@@ -8,7 +8,7 @@ import json
 from validation_messages import BadgeValidationSuccess, BadgeValidationError
 import badgeanalysis.utils
 from scheme_models import BadgeScheme
-
+from badgeanalysis.functional_validators import assertionRecipientValidator
 
 class BadgeObject(object):
     CLASS_TYPE = 'unknown'
@@ -60,7 +60,6 @@ class BadgeObject(object):
             # Determine if the existing context has a suitable main OBI context within it.
             if isinstance(context, (str, list)):
                 badgeMetaObject['context'] = badgeanalysis.utils.validateMainContext(context)
-
             # Raise error if OBI context is not linked in the badge. Might still be a valid JSON-LD document otherwise
             elif isinstance(context, dict):
                 raise TypeError(
@@ -76,6 +75,8 @@ class BadgeObject(object):
                 # For now, assume we can guess the type correctly
                 badgeMetaObject['type'] = cls.CLASS_TYPE
                 badgeMetaObject['badgeObject']['@type'] = cls.CLASS_TYPE
+
+            badgeMetaObject['scheme'] = BadgeScheme.objects.get(slug='1_1')
 
         # CASE 2: For OBI versions 0.5 and 1.0, we will have to deterimine how to add JSON-LD context information.
         else:
@@ -113,6 +114,7 @@ class Assertion(BadgeObject):
         Might require kwargs['recipient_input'] if assertion.recipient.hashed == true.
         Return error if recipient_input is missing when required or doesn't match hash.
         """
+        recipient_input = badgeMetaObject.get('recipient_input')
         # perform base processing unless override flag is present
         if not kwargs.get('already_base_processed', False):
             badgeMetaObject = super(Assertion, cls).processBadgeObject(badgeMetaObject, docloader, **kwargs)
@@ -120,6 +122,7 @@ class Assertion(BadgeObject):
         # for assertion objects, we must always fetch the original and use that for validation,
         # rather than relying on what is supplied in a baked image or input JSON.
         try:
+            # TODO, make sure id is included in all possible badgeMetaObjects
             real_assertion = docloader(badgeMetaObject.get('id'))
         except:
             badgeMetaObject['errors'] = badgeMetaObject.get('errors', [])
@@ -135,11 +138,12 @@ class Assertion(BadgeObject):
             return badgeMetaObject
         else:
             # We're overwriting the original here. For some advanced future validation, we may want to diff the two.
-            badgeMetaObject = super(Assertion, cls).processBadgeObject({'badgeObject': real_assertion}, **kwargs)
+            badgeMetaObject['badgeObject'] = real_assertion
+            badgeMetaObject = super(Assertion, cls).processBadgeObject(badgeMetaObject, **kwargs)
 
         # Deterimine if identifier is included (unhashed) or must be provided:
         # Case 1: identifier is missing
-        if kwargs.get('recipient_input') is None:
+        if recipient_input is None:
             # determine if we have an ambiguous hashed identifier
             def id_needed():
                 try:
@@ -181,8 +185,15 @@ class Assertion(BadgeObject):
 
         # If recipient_input is provided, make sure it matches the hashed string.
         else:
-            # TODO Add AssertionRecipientValidator to the list of validators to be run on this badge.
-            pass
+            # if not badgeMetaObject.get('recipient_input'):
+            recipient_hash_validation = assertionRecipientValidator.validate(assertionRecipientValidator, badgeMetaObject)
+
+            if isinstance(recipient_hash_validation, BadgeValidationSuccess): 
+                badgeMetaObject['notes'] = badgeMetaObject.get('notes', [])
+                badgeMetaObject['notes'].append(str(recipient_hash_validation))
+            else:
+                badgeMetaObject['errors'] = badgeMetaObject.get('errors', [])
+                badgeMetaObject['errors'].append(str(recipient_hash_validation))
 
         return badgeMetaObject
 

@@ -10,60 +10,8 @@ from badgeanalysis.models import OpenBadge
 from badgeanalysis.badge_objects import Assertion, BadgeClass, IssuerOrg, Extension, BadgeObject, badge_object_class
 
 
-# Some test assertions of different sorts
-junky_assertion = {
-    "uid": "100",
-    "issuedOn": 1395112143,
-    "recipient": "sha256$c56e0383f16d3bd4705c11e4eff7002ca27540b2ba0b32d7b389377f9e4d68e2",
-    "evidence": "http://someevidence.org",
-    "verify": {
-        "url": "http://badges.schoolofdata.org/badge/data-to-diagrams/instance/100",
-        "type": "hosted"
-    },
-    "badge": {
-        "issuer": {
-            "url": "http://schoolofdata.org",
-            "image": "http://assets.okfn.org/p/schoolofdata/img/logo.png",
-            "name": "School of Data",
-            "email": "michael.bauer@okfn.org",
-            "contact": "michael.bauer@okfn.org",
-            "revocationList": "http://badges.schoolofdata.org/revocation",
-            "description": "School of Data works to empower civil society organizations, journalists and citizens with the skills they need to use data effectively-evidence is power!",
-            "_location": "http://badges.schoolofdata.org/issuer/school-of-data",
-            "origin": "http://schoolofdata.org"
-        },
-        "description": "You have completed the Data to Diagrams module on the School of Data",
-        "image": "http://p2pu.schoolofdata.org/badges/School_Of_Data_Badges/Badges/Badge_Data_to_Diagrams.png",
-        "criteria": "http://badges.schoolofdata.org/badge/data-to-diagrams/criteria",
-        "name": "Data to Diagrams",
-        "_location": "http://badges.schoolofdata.org/badge/data-to-diagrams"
-    },
-    "_originalRecipient": {
-        "identity": "sha256$c56e0383f16d3bd4705c11e4eff7002ca27540b2ba0b32d7b389377f9e4d68e2",
-        "type": "email",
-        "hashed": True
-    },
-    "issued_on": 1395112143
-}
-valid_1_0_assertion = {
-    "uid": "2f900c7c-f473-4bff-8173-71b57472a97f",
-    "recipient": {
-        "identity": "sha256$1665bc8985e802067453647c1676b07a1834c327bfea24c67f3dbb721eb84d22",
-        "type": "email",
-        "hashed": True,
-        "salt": "UYMA1ybJ4UfqHJO4r3x7LjpGE0LEog"
-    },
-    "badge": "http://openbadges.oregonbadgealliance.org/api/badges/53d727a11f04f3a84a99b002",
-    "verify": {
-        "type": "hosted",
-        "url": "http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205"
-    },
-    "issuedOn": 1406747839,
-    "image": "http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205/image"
-}
-
 # Construct a docloader function that will return preloaded responses for predetermined URLs
-# Load in a dict of urls and the response bodies you want them to deliver: 
+# Load in a dict of urls and the response bodies you want them to deliver:
 # response_list = {'http://google.com': 'Hacked by the lizard overlords, hahaha!'}
 def mock_docloader_factory(response_list):
     def mock_docloader(url):
@@ -182,6 +130,120 @@ class BadgeContextTests(TestCase):
         finally:
             self.assertEqual(exceptage, None)
 
+# Some test assertions of different sorts
+junky_assertion = {
+    "uid": "100",
+    "issuedOn": 1395112143,
+    "recipient": "sha256$c56e0383f16d3bd4705c11e4eff7002ca27540b2ba0b32d7b389377f9e4d68e2",
+    "evidence": "http://someevidence.org",
+    "verify": {
+        "url": "http://badges.schoolofdata.org/badge/data-to-diagrams/instance/100",
+        "type": "hosted"
+    },
+    "badge": {
+        "issuer": {
+            "url": "http://schoolofdata.org",
+            "image": "http://assets.okfn.org/p/schoolofdata/img/logo.png",
+            "name": "School of Data",
+            "email": "michael.bauer@okfn.org",
+            "contact": "michael.bauer@okfn.org",
+            "revocationList": "http://badges.schoolofdata.org/revocation",
+            "description": "School of Data works to empower civil society organizations, journalists and citizens with the skills they need to use data effectively-evidence is power!",
+            "_location": "http://badges.schoolofdata.org/issuer/school-of-data",
+            "origin": "http://schoolofdata.org"
+        },
+        "description": "You have completed the Data to Diagrams module on the School of Data",
+        "image": "http://p2pu.schoolofdata.org/badges/School_Of_Data_Badges/Badges/Badge_Data_to_Diagrams.png",
+        "criteria": "http://badges.schoolofdata.org/badge/data-to-diagrams/criteria",
+        "name": "Data to Diagrams",
+        "_location": "http://badges.schoolofdata.org/badge/data-to-diagrams"
+    },
+    "_originalRecipient": {
+        "identity": "sha256$c56e0383f16d3bd4705c11e4eff7002ca27540b2ba0b32d7b389377f9e4d68e2",
+        "type": "email",
+        "hashed": True
+    },
+    "issued_on": 1395112143
+}
+junky_original_assertion = {
+    "evidence": "http://someevidence.org",
+    "recipient": {
+        "hashed": True,
+        "identity": "sha256$c56e0383f16d3bd4705c11e4eff7002ca27540b2ba0b32d7b389377f9e4d68e2",
+        "type": "email"
+    },
+    "uid": "100",
+    "badge": "http://badges.schoolofdata.org/badge/data-to-diagrams",
+    "verify": {
+        "url": "http://badges.schoolofdata.org/badge/data-to-diagrams/instance/100",
+        "type": "hosted"
+    },
+    "issuedOn": 1395112143
+}
+junky_badgeclass = {
+    "criteria": "http://badges.schoolofdata.org/badge/data-to-diagrams/criteria",
+    "issuer": "http://badges.schoolofdata.org/issuer/school-of-data",
+    "description": "You have completed the \"Data to Diagrams\" module on the School of Data",
+    "name": "Data to Diagrams",
+    "image": "http://p2pu.schoolofdata.org/badges/School_Of_Data_Badges/Badges/Badge_Data_to_Diagrams.png"
+}
+junky_issuer = {
+    "description": "School of Data works to empower civil society organizations",
+    "image": "http://assets.okfn.org/p/schoolofdata/img/logo.png",
+    "revocationList": "http://badges.schoolofdata.org/revocation",
+    "contact": "michael.bauer@okfn.org", "email": "michael.bauer@okfn.org",
+    "url": "http://schoolofdata.org",
+    "name": "School of Data"
+}
+junky_docloader = mock_docloader_factory(
+    {
+        'http://badges.schoolofdata.org/badge/data-to-diagrams/instance/100': junky_original_assertion,
+        'http://badges.schoolofdata.org/badge/data-to-diagrams': junky_badgeclass,
+        'http://badges.schoolofdata.org/issuer/school-of-data': junky_issuer
+    }
+)
+
+valid_1_0_assertion = {
+    "uid": "2f900c7c-f473-4bff-8173-71b57472a97f",
+    "recipient": {
+        "identity": "sha256$1665bc8985e802067453647c1676b07a1834c327bfea24c67f3dbb721eb84d22",
+        "type": "email",
+        "hashed": True,
+        "salt": "UYMA1ybJ4UfqHJO4r3x7LjpGE0LEog"
+    },
+    "badge": "http://openbadges.oregonbadgealliance.org/api/badges/53d727a11f04f3a84a99b002",
+    "verify": {
+        "type": "hosted",
+        "url": "http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205"
+    },
+    "issuedOn": 1406747839,
+    "image": "http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205/image"
+}
+valid_1_0_badgeclass = {
+    "_id": {"$oid": "53d727a11f04f3a84a99b002"},
+    "name": "Oregon Open Badges Working Group Initial Meeting",
+    "description": "Invited participant to the first meeting of Oregon's Open Badges Working Group in July 2014.",
+    "image": "http://placekitten.com/300/300",
+    "criteria": "http://openbadges.oregonbadgealliance.org/assets/criteria/obwg-initial-meeting.html",
+    "issuer": "http://openbadges.oregonbadgealliance.org/api/issuers/53d41603f93ae94a733ae554",
+    "tags": ["participation"]
+}
+valid_1_0_issuer = {
+    "_id": {"$oid": "53d41603f93ae94a733ae554"},
+    "name": "Oregon Badge Alliance",
+    "url": "http://oregonbadgealliance.org",
+    "description": "The Oregon Badge Alliance serves as a focal point for collaborations between state institutions, employers, and the education community as we work together to build a vibrant ecosystem for badges and micro-certifications in Oregon.",
+    "email": "oregonbadgealliance@gmail.com",
+    "fullyQualifiedUrl": "http://openbadges.oregonbadgealliance.org/api/issuers/53d41603f93ae94a733ae554"
+}
+valid_1_0_docloader = mock_docloader_factory(
+    {
+        'http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205': valid_1_0_assertion,
+        'http://openbadges.oregonbadgealliance.org/api/badges/53d727a11f04f3a84a99b002': valid_1_0_badgeclass,
+        'http://openbadges.oregonbadgealliance.org/api/issuers/53d41603f93ae94a733ae554': valid_1_0_issuer
+    }
+)
+
 simpleOneOne = {
     "@context": "http://standard.openbadges.org/1.1/context",
     "@type": "assertion",
@@ -210,13 +272,13 @@ simpleOneOneIssuer = {
     "name": "Issuer of Awesome",
     "url": "http://example.org"
 }
-def oneone_docloader():
-    response_list = {
+oneone_docloader = mock_docloader_factory(
+    {
         'http://example.org/assertion25': simpleOneOne,
         'http://example.org/badge1': simpleOneOneBC,
         'http://example.org/issuer': simpleOneOneIssuer
     }
-    return mock_docloader_factory(response_list)
+)
 
 oneOneArrayType = {
     "@context": "http://standard.openbadges.org/1.1/context",
@@ -320,6 +382,7 @@ simpleOneOneNoId = {
 
 
 class BadgeObjectsTests(TestCase):
+    fixtures = ['0001_initial_superuser', '0002_initial_schemes_and_validators']
 
     def test_mock_docloader_factory(self):
         response_list = {'http://google.com': 'Hahahaha, hacked by the lizard overlords.'}
@@ -328,13 +391,27 @@ class BadgeObjectsTests(TestCase):
 
     def test_assertion_processing_oneone(self):
         self.maxDiff = None
-        docloader = oneone_docloader()
-        badgeMetaObject = badge_object_class('assertion').processBadgeObject({'badgeObject': simpleOneOne}, docloader)
-        expected_result = {
-            'badgeObject': simpleOneOne,
-            'context': 'http://standard.openbadges.org/1.1/context',
-            'id': 'http://example.org/assertion25',
-            'notes': ['<Badge Validation success (RecipientRequiredValidator): Recipient input not needed, embedded recipient identity is not hashed>'],
-            'type': 'assertion'
-        }
-        self.assertEqual(badgeMetaObject, expected_result)
+        badgeMetaObject = badge_object_class('assertion').processBadgeObject(
+            {'badgeObject': simpleOneOne},
+            oneone_docloader
+            )
+        expected_result = {'notes': ['<Badge Validation success (RecipientRequiredValidator): Recipient input not needed, embedded recipient identity is not hashed>']}
+        self.assertEqual(badgeMetaObject.get('notes'), expected_result['notes'])
+
+    def test_assertion_processing_valid_1_0(self):
+        badgeMetaObject = badge_object_class('assertion').processBadgeObject(
+            {'badgeObject': valid_1_0_assertion},
+            valid_1_0_docloader
+            )
+        expected_result = {'errors': ['<Badge Validation error (RecipientRequiredValidator): Recipient ID is hashed and no recipient_input provided>']}
+        self.assertEqual(badgeMetaObject.get('errors', []), expected_result['errors'])
+
+    def test_assertion_processing_valid_1_0_with_identifier(self):
+        self.maxDiff = None
+        # import pdb; pdb.set_trace();
+        badgeMetaObject = badge_object_class('assertion').processBadgeObject(
+            {'badgeObject': valid_1_0_assertion, 'recipient_input': 'nate@ottonomy.net'},
+            valid_1_0_docloader
+            )
+        expected_result = {'notes': ['<Badge Validation success (BadgeObjectFunctionalValidator AssertionRecipientValidator): Provided recipient identity string matched assertion recipient.>']}
+        self.assertEqual(badgeMetaObject.get('notes', []), expected_result['notes'])
