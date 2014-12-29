@@ -191,3 +191,6 @@ def get_iri_for_prop_in_current_context(shortProp):
 def image_upload_to():
     return 'uploads/badges/received'
 
+def baker_api_url(assertion_url):
+    # TODO: build this service internally.
+    return "http://backpack.openbadges.org/baker?assertion=" + assertion_url

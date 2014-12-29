@@ -8,6 +8,7 @@ import pngutils
 import utils
 from badgeanalysis.models import OpenBadge
 from badgeanalysis.badge_objects import Assertion, BadgeClass, IssuerOrg, Extension, BadgeObject, badge_object_class
+from badgeanalysis.validation_messages import BadgeValidationError
 
 
 # Construct a docloader function that will return preloaded responses for predetermined URLs
@@ -395,7 +396,7 @@ class BadgeObjectsTests(TestCase):
             {'badgeObject': simpleOneOne},
             oneone_docloader
             )
-        expected_result = {'notes': ['<Badge Validation success (RecipientRequiredValidator): Recipient input not needed, embedded recipient identity is not hashed>']}
+        expected_result = {'notes': ['<RecipientRequiredValidator: Recipient input not needed, embedded recipient identity is not hashed>']}
         self.assertEqual(str(badgeMetaObject.get('notes', [0])[0]), expected_result['notes'][0])
 
     def test_assertion_processing_valid_1_0(self):
@@ -403,7 +404,7 @@ class BadgeObjectsTests(TestCase):
             {'badgeObject': valid_1_0_assertion},
             valid_1_0_docloader
             )
-        expected_result = {'errors': ['<Badge Validation error (RecipientRequiredValidator): Recipient ID is hashed and no recipient_input provided>']}
+        expected_result = {'errors': ['<RecipientRequiredValidator: Recipient ID is hashed and no recipient_input provided>']}
         self.assertEqual(str(badgeMetaObject.get('errors', [0])[0]), expected_result['errors'][0])
 
     def test_assertion_processing_valid_1_0_with_identifier(self):
@@ -413,5 +414,32 @@ class BadgeObjectsTests(TestCase):
             {'badgeObject': valid_1_0_assertion, 'recipient_input': 'nate@ottonomy.net'},
             valid_1_0_docloader
             )
-        expected_result = {'notes': ['<Badge Validation success (BadgeObjectFunctionalValidator AssertionRecipientValidator): Provided recipient identity string matched assertion recipient.>']}
-        self.assertEqual(str(badgeMetaObject.get('notes', [0])[0]), expected_result['notes'][0])
+        expected_result = {'notes': [{'message': 'Provided recipient identity string matched assertion recipient.', 'validator': 'Functional:AssertionRecipientValidator', 'result': 'success'}] }
+        self.assertEqual(badgeMetaObject.get('notes', [0])[0], expected_result['notes'][0])
+
+
+class OpenBadgeIntegrationTests(TestCase):
+    fixtures = ['0001_initial_superuser', '0002_initial_schemes_and_validators']
+
+    def test_successful_OpenBadge_save(self):
+        badge_input = valid_1_0_assertion
+        recipient_input = 'nate@ottonomy.net'
+        b = OpenBadge(badge_input=badge_input, recipient_input=recipient_input)
+        try:
+            b.save()
+        except Exception as e:
+            self.assertEqual(e, None)
+        else: 
+            self.assertTrue(True) # Yay, no errors!
+
+    def test_OpenBadge_save_bad_recipient(self):
+        badge_input = valid_1_0_assertion
+        recipient_input = 'nate@ottonomy.newt'
+        b = OpenBadge(badge_input=badge_input, recipient_input=recipient_input)
+        try:
+            b.save()
+        except Exception as e:
+            self.assertTrue(isinstance(e, BadgeValidationError))
+            self.assertEqual(e.to_dict()['validator'], 'Functional:AssertionRecipientValidator')
+        else: 
+            self.assertTrue(False) # Boo, there should have been an error!

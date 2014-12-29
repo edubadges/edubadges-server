@@ -253,12 +253,7 @@ class OpenBadge(basic_models.DefaultModel):
                 return imgUrl
             # for cases where the baked image isn't linked from the assertion
             else:
-                return self.baker_api_url(self.ldProp('bc', 'image'))
-
-    @classmethod
-    def baker_api_url(assertion_url):
-        # TODO: build this service internally.
-        return "http://backpack.openbadges.org/baker?assertion=" + assertion_url
+                return badgeanalysis.utils.baker_api_url(self.ldProp('bc', 'image'))
 
     """
     Methods for storing errors and messages that result from processing validators.
