@@ -396,7 +396,7 @@ class BadgeObjectsTests(TestCase):
             oneone_docloader
             )
         expected_result = {'notes': ['<Badge Validation success (RecipientRequiredValidator): Recipient input not needed, embedded recipient identity is not hashed>']}
-        self.assertEqual(badgeMetaObject.get('notes'), expected_result['notes'])
+        self.assertEqual(str(badgeMetaObject.get('notes', [0])[0]), expected_result['notes'][0])
 
     def test_assertion_processing_valid_1_0(self):
         badgeMetaObject = badge_object_class('assertion').processBadgeObject(
@@ -404,7 +404,7 @@ class BadgeObjectsTests(TestCase):
             valid_1_0_docloader
             )
         expected_result = {'errors': ['<Badge Validation error (RecipientRequiredValidator): Recipient ID is hashed and no recipient_input provided>']}
-        self.assertEqual(badgeMetaObject.get('errors', []), expected_result['errors'])
+        self.assertEqual(str(badgeMetaObject.get('errors', [0])[0]), expected_result['errors'][0])
 
     def test_assertion_processing_valid_1_0_with_identifier(self):
         self.maxDiff = None
@@ -414,4 +414,4 @@ class BadgeObjectsTests(TestCase):
             valid_1_0_docloader
             )
         expected_result = {'notes': ['<Badge Validation success (BadgeObjectFunctionalValidator AssertionRecipientValidator): Provided recipient identity string matched assertion recipient.>']}
-        self.assertEqual(badgeMetaObject.get('notes', []), expected_result['notes'])
+        self.assertEqual(str(badgeMetaObject.get('notes', [0])[0]), expected_result['notes'][0])

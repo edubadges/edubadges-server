@@ -56,6 +56,7 @@ class OpenBadge(basic_models.DefaultModel):
         badge_name = self.getProp('badgeclass', 'name')
         badge_issuer = self.getProp('issuerorg', 'name')
 
+        # TODO: consider whether the recipient_input should not be included in this representation.
         return "Open Badge: " + badge_name + ", issued by " + badge_issuer + " to " + self.recipient_input
 
     # Core procedure for filling out an OpenBadge from an initial badgeObject follows:
@@ -75,12 +76,15 @@ class OpenBadge(basic_models.DefaultModel):
         self.notes = []
 
         # Local utility method. TODO: consider pulling this out if useful elsewhere
-        def handle_critical_errors(badgeMetaObject):
-            if len(badgeMetaObject['errors']) > 0:
-                self.errors += badgeMetaObject['errors']
-                raise BadgeValidationError(badgeMetaObject['errors'][0])
-            if len(badgeMetaObject['notes']) > 0:
+        def handle_init_errors(badgeMetaObject):
+            if len(badgeMetaObject.get('notes', [])) > 0:
                 self.notes += badgeMetaObject['notes']
+            if len(badgeMetaObject.get('errors', [])) > 0:
+                self.errors += badgeMetaObject['errors']
+                raise BadgeValidationError(
+                    badgeMetaObject['errors'][0]['message'],
+                    badgeMetaObject['errors'][0]['validator']
+                )
 
         # For when we create a badge with an image and recipient as input
         if self.badge_input == u'' or self.badge_input is None:
@@ -95,15 +99,15 @@ class OpenBadge(basic_models.DefaultModel):
                 raise e
                 return
 
-            self.verify_method = 'hosted'  # signed not yet supported.
+            self.verify_method = 'hosted'  # TODO: signed not yet supported.
 
         # Process the initial input
         # Returns a dict with badgeObject property for processed object and 'type', 'context', 'id' properties
-        assertionMeta = badge_object_class('assertion').processBadgeObject(
-            {'badgeObject': self.badge_input},
-            **{'recipient_input': self.recipient_input}
-        )
-        handle_critical_errors(assertionMeta)
+        assertionMeta = badge_object_class('assertion').processBadgeObject({
+            'badgeObject': self.badge_input,
+            'recipient_input': self.recipient_input
+        })
+        handle_init_errors(assertionMeta)
 
         if not assertionMeta['badgeObject']:
             raise IOError("Could not build a full badge object without having a properly stored inputObject")
@@ -133,7 +137,7 @@ class OpenBadge(basic_models.DefaultModel):
                     theBadgeClassMeta = badge_object_class('badgeclass').processBadgeObject(
                         {'badgeObject': full['assertion']['badge']}
                     )
-                    handle_critical_errors(theBadgeClassMeta)
+                    handle_init_errors(theBadgeClassMeta)
 
                     if theBadgeClassMeta['type'] == 'badgeclass':
                         full['badgeclass'] = theBadgeClassMeta['badgeObject']
@@ -149,7 +153,7 @@ class OpenBadge(basic_models.DefaultModel):
                     theIssuerOrgMeta = badge_object_class('issuerorg').processBadgeObject(
                         {'badgeObject': full['badgeclass']['issuer']}
                     )
-                    handle_critical_errors(theIssuerOrgMeta)
+                    handle_init_errors(theIssuerOrgMeta)
 
                     if theIssuerOrgMeta['type'] == 'issuerorg':
                         full['issuerorg'] = theIssuerOrgMeta['badgeObject']
@@ -157,7 +161,8 @@ class OpenBadge(basic_models.DefaultModel):
                 # Again, this is probably a bad idea like this?:
                 elif isinstance(full['badgeclass']['issuer'], dict):
                     full['issuerorg'] = full['badgeclass']['issuer']
-        except TypeError as e:
+        # except TypeError as e:
+        except NameError as e:
             #TODO: refactor to call a function to process the error. Raise it again for now.
             #self.errors.append({ "typeError": str(e)})
             raise e
@@ -166,29 +171,10 @@ class OpenBadge(basic_models.DefaultModel):
         self.full_badge_object = full
         self.truncate_images()
 
+        # TODO: allow custom docloader to be passed into save in kwargs, pass it along to processBadgeObject and here.
         expand_options = {"documentLoader": BadgeScheme.custom_context_docloader}
         self.full_ld_expanded = jsonld.expand(full, expand_options)
         # control resumes in save()
-
-    def processBadgeObject(self, badgeObject, probableType='assertion'):
-        pass
-
-    """ Make conditional modifications to a badge object that is annotated within a structureMeta container. 
-    structureMeta = {
-        badgeObject: dict
-        scheme: BadgeScheme
-        type: string (OBI-namespace JSON-LD type)
-        context: string (JSON-LD context URL for badge version)
-        ... maybe more (not done documenting here)
-    }
-    """
-    def process_known_type_object(structureMeta):
-
-        #Add JSON-LD properties to object
-        structureMeta['badgeObject']['@context'] = structureMeta['context']
-        structureMeta['badgeObject']['@type'] = structureMeta['type']
-
-        return structureMeta
 
     def truncate_images(self):
         dataUri = re.compile(r'^data:')

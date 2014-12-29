@@ -83,7 +83,7 @@ class BadgeScheme(basic_models.SlugModel):
         VALID_TYPES = ['assertion', 'badgeclass', 'issuerorg']
 
         if not badgeObjectType in VALID_TYPES:
-            raise TypeError("Input type " + badgeObjectType + " isn't one of the valid options: " + VALID_TYPES)
+            raise TypeError("Input type " + badgeObjectType + " isn't one of the valid options: " + str(VALID_TYPES))
 
         schemes = cls.objects.filter(slug__in=LEGACY_SLUGS).prefetch_related('schemes')
 

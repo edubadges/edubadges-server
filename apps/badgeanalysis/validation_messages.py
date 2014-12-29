@@ -13,18 +13,25 @@ badge_validation_message = BadgeValidationError("Recipient ID is hashed and no r
 class BadgeValidationMessage(Exception):
     message_type = "message"
 
-    def __init__(self, message_string, validator_string):
+    def __init__(self, message_string, validator_string=''):
         if not isinstance(message_string, (str, unicode)):
             message_string = "Can't add " + self.message_type + " to Open Badge. Not of type string: " + message_string
 
         if not isinstance(validator_string, (str, unicode)):
             validator_string = "Validator string should be of type string: " + validator_string
 
-        # Call the base class constructor with the parameters it needs
-        super(BadgeValidationMessage, self).__init__(
-            "<Badge Validation " + self.message_type
-            + " (" + validator_string + "): " + message_string + ">"
-        )
+        self.validator = validator_string
+        self.message = message_string
+
+    def __str__(self):
+        return "<%s: %s>" % (self.validator, self.message)
+
+    def to_dict(self):
+        return {
+            'result': self.message_type,
+            'validator': self.validator,
+            'message': self.message
+        }
 
 
 class BadgeValidationSuccess(BadgeValidationMessage):

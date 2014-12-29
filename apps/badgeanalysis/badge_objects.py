@@ -35,27 +35,26 @@ class BadgeObject(object):
 
         TODO: add above structures as processing result.
         """
-        badgeObject = badgeMetaObject.get('badgeObject')
 
         # If we have JSON as a string, try to load it before treating it as a potential URL
-        if not isinstance(badgeObject, dict):
-            badgeObject = badgeanalysis.utils.try_json_load(badgeObject)
+        if not isinstance(badgeMetaObject['badgeObject'], dict):
+            badgeMetaObject['badgeObject'] = badgeanalysis.utils.try_json_load(badgeMetaObject['badgeObject'])
 
-        # In the likely event that we have a url string as our input badgeObject
-        if isinstance(badgeObject, (str, unicode)) and badgeanalysis.utils.test_probable_url(badgeObject):
-            badgeMetaObject['id'] = badgeObject
+        # In the likely event that we have a url string as our input badgeMetaObject['badgeObject']
+        if isinstance(badgeMetaObject['badgeObject'], (str, unicode)) and badgeanalysis.utils.test_probable_url(badgeMetaObject['badgeObject']):
+            badgeMetaObject['id'] = badgeMetaObject['badgeObject']
             try:
-                badgeObject = json.loads(docloader(badgeObject))
+                badgeMetaObject['badgeObject'] = json.loads(docloader(badgeMetaObject['id']))
             except Exception as e:
                 raise TypeError(
-                    "Couldn't fetch badgeObject on input. We tried to load "
-                    + badgeObject + " -- got error " + e
+                    "Couldn't fetch badgeMetaObject['badgeObject'] on input. We tried to load "
+                    + badgeMetaObject['badgeObject'] + " -- got error " + e
                 )
                 return
 
-        #CASE 1: For OBI version 1.1 and later, the badgeObject will have JSON-LD context information.
-        if badgeanalysis.utils.has_context(badgeObject):
-            context = badgeObject.get('@context')
+        #CASE 1: For OBI version 1.1 and later, the badgeMetaObject['badgeObject'] will have JSON-LD context information.
+        if badgeanalysis.utils.has_context(badgeMetaObject['badgeObject']):
+            context = badgeMetaObject['badgeObject'].get('@context')
 
             # Determine if the existing context has a suitable main OBI context within it.
             if isinstance(context, (str, list)):
@@ -67,9 +66,9 @@ class BadgeObject(object):
                     + context
                 )
 
-            if '@type' in badgeObject:
+            if '@type' in badgeMetaObject['badgeObject']:
                 #TODO this is likely not going to be the full expanded IRI, likely a fragment
-                badgeMetaObject['type'] = badgeanalysis.utils.validateObiType(badgeObject['@type'])
+                badgeMetaObject['type'] = badgeanalysis.utils.validateObiType(badgeMetaObject['badgeObject']['@type'])
             else:
                 #TODO schema-based matching for badge Classes that declared context but not type? Seems rare.
                 # For now, assume we can guess the type correctly
@@ -81,7 +80,8 @@ class BadgeObject(object):
         # CASE 2: For OBI versions 0.5 and 1.0, we will have to deterimine how to add JSON-LD context information.
         else:
             #TODO: In progress, Use the BadgeScheme class to divine which of the old formats it might be.
-            matchingScheme = BadgeScheme.get_legacy_scheme_match(badgeObject, cls.CLASS_TYPE)
+
+            matchingScheme = BadgeScheme.get_legacy_scheme_match(badgeMetaObject['badgeObject'], cls.CLASS_TYPE)
             if matchingScheme is None:
                 raise TypeError("Could not determine type of badge object with known schema set")
                 return None
@@ -93,12 +93,12 @@ class BadgeObject(object):
                 badgeMetaObject['scheme'] = matchingScheme['scheme']
 
         """ Finalize badge object by adding the @id if possible """
-        if 'id' in badgeMetaObject and not '@id' in badgeObject:
+        if 'id' in badgeMetaObject and not '@id' in badgeMetaObject['badgeObject']:
             badgeMetaObject['badgeObject']['@id'] = badgeanalysis.utils.validateId(badgeMetaObject['id'])
-        elif '@id' in badgeObject:
-            badgeMetaObject['id'] = badgeanalysis.utils.validateId(badgeObject['@id'])
-        elif 'verify' in badgeObject and 'type' in badgeObject['verify'] and badgeObject['verify']['type'] == 'hosted' and 'url' in badgeObject['verify']:
-            potentialId = badgeanalysis.utils.validateId(badgeObject['verify']['url'])
+        elif '@id' in badgeMetaObject['badgeObject']:
+            badgeMetaObject['id'] = badgeanalysis.utils.validateId(badgeMetaObject['badgeObject']['@id'])
+        elif 'verify' in badgeMetaObject['badgeObject'] and 'type' in badgeMetaObject['badgeObject']['verify'] and badgeMetaObject['badgeObject']['verify']['type'] == 'hosted' and 'url' in badgeMetaObject['badgeObject']['verify']:
+            potentialId = badgeanalysis.utils.validateId(badgeMetaObject['badgeObject']['verify']['url'])
             badgeMetaObject['badgeObject']['@id'] = potentialId
             badgeMetaObject['id'] = potentialId
 
@@ -127,12 +127,10 @@ class Assertion(BadgeObject):
         except:
             badgeMetaObject['errors'] = badgeMetaObject.get('errors', [])
             badgeMetaObject['errors'].append(
-                str(
-                    BadgeValidationError(
-                        "Could not fetch the original assertion of supplied badge: "
-                        + badgeMetaObject.get('id', json.dumps(badgeMetaObject)),
-                        "RecipientRequiredValidator"
-                    )
+                BadgeValidationError(
+                    "Could not fetch the original assertion of supplied badge: "
+                    + badgeMetaObject.get('id', json.dumps(badgeMetaObject)),
+                    "RecipientRequiredValidator"
                 )
             )
             return badgeMetaObject
@@ -164,22 +162,18 @@ class Assertion(BadgeObject):
                 # record error in log
                 badgeMetaObject['errors'] = badgeMetaObject.get('errors', [])
                 badgeMetaObject['errors'].append(
-                    str(
-                        BadgeValidationError(
-                            "Recipient ID is hashed and no recipient_input provided",
-                            "RecipientRequiredValidator"
-                        )
+                    BadgeValidationError(
+                        "Recipient ID is hashed and no recipient_input provided",
+                        "RecipientRequiredValidator"
                     )
                 )
 
             else:
                 badgeMetaObject['notes'] = badgeMetaObject.get('notes', [])
                 badgeMetaObject['notes'].append(
-                    str(
-                        BadgeValidationSuccess(
-                            "Recipient input not needed, embedded recipient identity is not hashed",
-                            "RecipientRequiredValidator"
-                        )
+                    BadgeValidationSuccess(
+                        "Recipient input not needed, embedded recipient identity is not hashed",
+                        "RecipientRequiredValidator"
                     )
                 )
 
@@ -187,13 +181,12 @@ class Assertion(BadgeObject):
         else:
             # if not badgeMetaObject.get('recipient_input'):
             recipient_hash_validation = assertionRecipientValidator.validate(assertionRecipientValidator, badgeMetaObject)
-
-            if isinstance(recipient_hash_validation, BadgeValidationSuccess): 
+            if isinstance(recipient_hash_validation, BadgeValidationSuccess):
                 badgeMetaObject['notes'] = badgeMetaObject.get('notes', [])
-                badgeMetaObject['notes'].append(str(recipient_hash_validation))
+                badgeMetaObject['notes'].append(recipient_hash_validation.to_dict())
             else:
                 badgeMetaObject['errors'] = badgeMetaObject.get('errors', [])
-                badgeMetaObject['errors'].append(str(recipient_hash_validation))
+                badgeMetaObject['errors'].append(recipient_hash_validation.to_dict())
 
         return badgeMetaObject
 
@@ -203,7 +196,7 @@ class BadgeClass(BadgeObject):
 
 
 class IssuerOrg(BadgeObject):
-    CLASS_TYPE = 'issuerOrg'
+    CLASS_TYPE = 'issuerorg'
 
 
 class Extension(BadgeObject):

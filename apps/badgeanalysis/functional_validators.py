@@ -128,7 +128,7 @@ class BadgeObjectFunctionalValidator(object):
         self.validate = kwargs.get('validation_function')
 
     def __unicode__(self):
-        return "BadgeObjectFunctionalValidator %s" % (self.slug)
+        return "Functional:%s" % (self.slug)
 
 
 """
