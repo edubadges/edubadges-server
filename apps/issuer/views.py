@@ -35,13 +35,14 @@ class EarnerNotificationCreate(ActiveTabMixin, CreateView):
         import pdb; pdb.set_trace();
         self.object = form.save(commit=False)
         self.object.badge = form.cleaned_data['badge']
-        self.object.save()
 
         try:
-            self.object.send_email()
+            self.object.send_email(**{'request': self.request})
         except Exception:
             # TODO: make this work
             self.form_invalid(form)
+        else:
+            self.object.save()
 
         return HttpResponseRedirect(self.get_success_url())
 

@@ -1,7 +1,7 @@
 def current_context():
   return {
     "@context": {
-      "obi": "http://standard.openbadges.org/definitions#",
+      "obi": "http://standard.openbadges.org/#",
       "assertion": "obi:Assertion",
       "badgeclass": "obi:BadgeClass",
       "issuerorg": "obi:Issuer",

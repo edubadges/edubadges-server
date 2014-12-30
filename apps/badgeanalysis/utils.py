@@ -193,4 +193,5 @@ def image_upload_to():
 
 def baker_api_url(assertion_url):
     # TODO: build this service internally.
-    return "http://backpack.openbadges.org/baker?assertion=" + assertion_url
+    if assertion_url:
+        return "http://backpack.openbadges.org/baker?assertion=" + assertion_url

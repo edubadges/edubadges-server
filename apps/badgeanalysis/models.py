@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from urlparse import urljoin
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+import os
 
 import re
 from pyld import jsonld
@@ -176,23 +177,82 @@ class OpenBadge(basic_models.DefaultModel):
         self.full_ld_expanded = jsonld.expand(full, expand_options)
         # control resumes in save()
 
+    """
+    Tools for badge images
+    """
+
     def truncate_images(self):
         dataUri = re.compile(r'^data:')
 
         full = self.full_badge_object
         if 'assertion' in full and 'image' in full['assertion']:
             if dataUri.match(full['assertion']['image']):
-                del full['assertion']['image']  # remove dataUri from assertion. It would be totally weird to have one here anyway.
+                # Put the file in our file storage, not the JSON in the db if assertion image was encoded as data-uri
+                if not self.image:
+                    import base64
+                    # from django.core.files import File
+                    try:
+                        imgfile = base64.decodestring(full['assertion']['image'].rsplit(',')[1])
+                        f = open('temp.png', 'w+')
+                        f.write(imgfile)
+                        self.image.save(os.path.basename('dataUriImg.png'), f)
+                    # TODO: figure out why it's raising an error that doesn't break anything 
+                    # 'file' object has no attribute 'size'
+                    except AttributeError:
+                        pass
+                    finally:
+                        f.close()
+                        os.remove('temp.png')
+                # remove dataUri from assertion. It would be totally weird to have one here anyway.
+                del full['assertion']['image']  
         if 'badgeclass' in full and 'image' in full['badgeclass']:
-            if dataUri.match(full['badgeclass']['image']):
+            if self.image and dataUri.match(full['badgeclass']['image']):
                 full['badgeclass']['image'] = self.eventualImageUrl()
 
     def eventualImageUrl(self):
         # A dirty workaround for a 7-year old Django bug that filefields can't access the upload_to
         # parameter before they are saved.
-        return urljoin(getattr(settings, 'MEDIA_URL'), badgeanalysis.utils.image_upload_to() + '/' + self.image.name)
+        if not self.pk:
+            return urljoin(getattr(settings, 'MEDIA_URL'), badgeanalysis.utils.image_upload_to() + '/' + self.image.name)
+        elif self.image:
+            return self.image.url
+        # TODO: I Don't know if this case would ever be triggered
+        else: 
+            raise NotImplementedError("It seems this badge is saved but doesn't have an image. How can I get it's image url?")
 
-    # Tools to inspect an initialized badge object
+    def absoluteLocalImageUrl(self, **kwargs):
+        special_case = self.obaImageUrl(**kwargs)
+        if special_case:
+            return special_case
+        else:
+            origin = kwargs.get('origin','')
+            return urljoin(origin, self.eventualImageUrl())
+
+    # For the unfortunate special case of Oregon Badge Alliance assertions while this is running on localhost
+    # TODO: remove this as soon as we're hosted.
+    def obaImageUrl(self, **kwargs):
+        oba = re.compile(r'^http://openbadges\.oregonbadgealliance\.org')
+        if oba.match(self.ldProp('bc', 'issuer')):
+            return self.full_badge_object['assertion']['@id'] + '/image'
+
+    def get_baked_image_url(self, **kwargs):
+        # for saved objects that originated from a baked upload,
+        # we have the baked image already, and can thus serve it.
+        # kwargs['origin'] may contain 'http://server.domain:80' etc
+        if self.image:
+            return self.absoluteLocalImageUrl(**kwargs)
+        # For cases where we started with a URL or pasted assertion...
+        else:
+            imgUrl = self.ldProp('asn', 'image')
+            if imgUrl:
+                return imgUrl
+            # for cases where the baked image isn't linked from the assertion
+            else:
+                return badgeanalysis.utils.baker_api_url(self.ldProp('bc', 'image'))
+
+    """
+    Tools to inspect an initialized badge object
+    """ 
 
     # Dangerous: We should use LD-based methods when possible to reduce cross-version problems.
     def getProp(self, parent, prop):
@@ -203,11 +263,11 @@ class OpenBadge(basic_models.DefaultModel):
     def ldProp(self, shortParent, shortProp):
         # normalize parent aliases to proper badge object IRI
         if shortParent in ("bc", "badgeclass"):
-            parent = "http://standard.openbadges.org/definitions#BadgeClass"
+            parent = "http://standard.openbadges.org/#BadgeClass"
         elif shortParent in ("asn", "assertion"):
-            parent = "http://standard.openbadges.org/definitions#Assertion"
+            parent = "http://standard.openbadges.org/#Assertion"
         elif shortParent in ("iss", "issuer", "issuerorg"):
-            parent = "http://standard.openbadges.org/definitions#Issuer"
+            parent = "http://standard.openbadges.org/#Issuer"
 
         iri = badgeanalysis.utils.get_iri_for_prop_in_current_context(shortProp)
 
@@ -216,9 +276,9 @@ class OpenBadge(basic_models.DefaultModel):
     # TODO maybe: wrap this method to allow LD querying using the latest context's shorthand.
     # (so as to get the property we currently understand no matter what version the input object was)
     def getLdProp(self, parent, iri):
-        if not parent in ('http://standard.openbadges.org/definitions#Assertion',
-                          'http://standard.openbadges.org/definitions#BadgeClass',
-                          'http://standard.openbadges.org/definitions#Issuer'):
+        if not parent in ('http://standard.openbadges.org/#Assertion',
+                          'http://standard.openbadges.org/#BadgeClass',
+                          'http://standard.openbadges.org/#Issuer'):
             raise TypeError(parent + " isn't a known type of core badge object to search in")
 
         if not isinstance(self.full_ld_expanded, list) or not parent in self.full_ld_expanded[0]:
@@ -237,23 +297,6 @@ class OpenBadge(basic_models.DefaultModel):
             elif isinstance(temp[0], dict) and '@id' in temp[0] and len(temp[0].keys()) < 2:
                 return temp[0]['@id']
         return temp
-
-    def get_baked_image_url(self):
-        # for saved objects that originated from a baked upload,
-        # we have the baked image already, and can thus serve it.
-        if self.pk and self.image:
-            return self.image.url
-        # if we're calling this before saving it, use our special handler function
-        elif self.image:
-            return self.eventualImageUrl()
-        # For cases where we started with a URL or pasted assertion...
-        else:
-            imgUrl = self.ldProp('asn', 'image')
-            if imgUrl:
-                return imgUrl
-            # for cases where the baked image isn't linked from the assertion
-            else:
-                return badgeanalysis.utils.baker_api_url(self.ldProp('bc', 'image'))
 
     """
     Methods for storing errors and messages that result from processing validators.

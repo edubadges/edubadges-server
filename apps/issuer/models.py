@@ -25,14 +25,15 @@ class EarnerNotification(basic_models.TimestampedModel):
         from issuer.forms import NotifyEarnerForm
         return NotifyEarnerForm(instance=self)
 
-    def send_email(self):
+    def send_email(self, **kwargs):
+        http_origin = kwargs.get('request',{}).META.get('HTTP_ORIGIN', '')
         ob = self.badge
         email_context = {
             'badge_name': ob.ldProp('bc', 'name'),
             'badge_description': ob.ldProp('bc', 'description'),
             'issuer_name': ob.ldProp('iss', 'name'),
             'issuer_url': ob.ldProp('iss', 'url'),
-            'image_url': ob.get_baked_image_url()
+            'image_url': ob.get_baked_image_url(**{'origin': http_origin})
         }
         t = django.template.loader.get_template('issuer/notify_earner_email.txt')
         ht = django.template.loader.get_template('issuer/notify_earner_email.html')
