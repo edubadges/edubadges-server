@@ -18,17 +18,13 @@ class NotifyEarnerForm(forms.ModelForm):
         exclude = []
 
     def clean_url(self):
-        try:
-            EarnerNotification.objects.get(url=self.cleaned_data['url'])
-
-        except EarnerNotification.DoesNotExist:
-            pass
-        else:
+        if EarnerNotification.detect_existing(self.cleaned_data['url']):
             raise forms.ValidationError(
                 "The earner of this assertion has already been notified: %(url)s",
                 code='invalid',
                 params={'url': self.cleaned_data['url']}
             )
+            
         return self.cleaned_data['url']
 
     def clean(self):

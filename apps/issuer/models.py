@@ -26,6 +26,17 @@ class EarnerNotification(basic_models.TimestampedModel):
         from issuer.forms import NotifyEarnerForm
         return NotifyEarnerForm(instance=self)
 
+    @classmethod
+    def detect_existing(cls, url):
+        try:
+            cls.objects.get(url=url)
+        except EarnerNotification.DoesNotExist:
+            return False
+        except EarnerNotification.MultipleObjectsReturned:
+            return False
+        else:
+            return True
+
     def send_email(self):
         http_origin = getattr(settings, 'HTTP_ORIGIN', None)
         ob = self.badge
