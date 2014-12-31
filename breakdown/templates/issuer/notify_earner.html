@@ -6,12 +6,23 @@
   <div class="content_area">  
     To send a manual email notification to a badge earner, please enter the URL of the assertion below. 
     <form class="contact notify-earner" action="" method="post">
+      {% if form.non_field_errors() %}
+        <div class="alert alert-danger" role="alert">
+          <i class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></i>
+          <span class="sr-only">Error:</span>
+          {{form.non_field_errors()|striptags}}
+        </div>
+      {% endif %}
       <fieldset>
         <ol>
           <li>
             <label for="id_name">{{form.url.label}}</label>
             {% if form.url.errors %}
-              <span class="error">{{form.url.errors|safe}}</span>
+              <div class="alert alert-danger" role="alert">
+                <i class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></i>
+                <span class="sr-only">Error:</span>
+                {{form.url.errors|striptags}}
+              </div>
             {% endif %}
             {{form.url|safe}}
           </li>

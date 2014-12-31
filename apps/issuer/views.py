@@ -4,8 +4,7 @@ from django.core.urlresolvers import reverse
 
 from issuer.models import *
 from mainsite.views import ActiveTabMixin
-from issuer.forms import IssuerForm
-from badgeanalysis.models import OpenBadge
+from issuer.forms import IssuerForm, NotifyEarnerForm
 
 
 # from django.shortcuts import render_to_response
@@ -27,28 +26,28 @@ class EarnerNotificationCreate(ActiveTabMixin, CreateView):
     active_tab = 'issuer'
     template_name = 'issuer/notify_earner.html'
     model = EarnerNotification
+    form_class = NotifyEarnerForm
 
     def form_invalid(self, form):
         return super(EarnerNotificationCreate, self).form_invalid(form)
 
     def form_valid(self, form):
-
-        try:
-            badge = OpenBadge(recipient_input=form.cleaned_data['email'], badge_input=form.cleaned_data['url'])
-            badge.save()
-        except Exception:
-            self.form_invalid()
-
         self.object = form.save(commit=False)
-        self.object.badge = badge
-        self.object.save()
+        self.object.badge = form.cleaned_data['badge']
 
         try:
             self.object.send_email()
         except Exception:
+            # TODO: make this work
             self.form_invalid(form)
+        else:
+            self.object.save()
 
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse('notify_earner')
+
+    def get_context_data(self, **kwargs):
+        context = super(EarnerNotificationCreate, self).get_context_data(**kwargs)
+        return context

@@ -7,62 +7,20 @@ import pngutils
 
 import utils
 from badgeanalysis.models import OpenBadge
+from badgeanalysis.badge_objects import Assertion, BadgeClass, IssuerOrg, Extension, BadgeObject, badge_object_class
+from badgeanalysis.validation_messages import BadgeValidationError
 
 
-# Some test assertions of different sorts
-junky_assertion = {
-    "uid": "100",
-    "issuedOn": 1395112143,
-    "recipient": "sha256$c56e0383f16d3bd4705c11e4eff7002ca27540b2ba0b32d7b389377f9e4d68e2",
-    "evidence": "http://someevidence.org",
-    "verify": {
-        "url": "http://badges.schoolofdata.org/badge/data-to-diagrams/instance/100",
-        "type": "hosted"
-    },
-    "badge": {
-        "issuer": {
-            "url": "http://schoolofdata.org",
-            "image": "http://assets.okfn.org/p/schoolofdata/img/logo.png",
-            "name": "School of Data",
-            "email": "michael.bauer@okfn.org",
-            "contact": "michael.bauer@okfn.org",
-            "revocationList": "http://badges.schoolofdata.org/revocation",
-            "description": "School of Data works to empower civil society organizations, journalists and citizens with the skills they need to use data effectively-evidence is power!",
-            "_location": "http://badges.schoolofdata.org/issuer/school-of-data",
-            "origin": "http://schoolofdata.org"
-        },
-        "description": "You have completed the Data to Diagrams module on the School of Data",
-        "image": "http://p2pu.schoolofdata.org/badges/School_Of_Data_Badges/Badges/Badge_Data_to_Diagrams.png",
-        "criteria": "http://badges.schoolofdata.org/badge/data-to-diagrams/criteria",
-        "name": "Data to Diagrams",
-        "_location": "http://badges.schoolofdata.org/badge/data-to-diagrams"
-    },
-    "_originalRecipient": {
-        "identity": "sha256$c56e0383f16d3bd4705c11e4eff7002ca27540b2ba0b32d7b389377f9e4d68e2",
-        "type": "email",
-        "hashed": True
-    },
-    "issued_on": 1395112143
-}
-valid_1_0_assertion = {
-    "uid": "2f900c7c-f473-4bff-8173-71b57472a97f",
-    "recipient": {
-        "identity": "sha256$1665bc8985e802067453647c1676b07a1834c327bfea24c67f3dbb721eb84d22",
-        "type": "email",
-        "hashed": True,
-        "salt": "UYMA1ybJ4UfqHJO4r3x7LjpGE0LEog"
-    },
-    "badge": "http://openbadges.oregonbadgealliance.org/api/badges/53d727a11f04f3a84a99b002",
-    "verify": {
-        "type": "hosted",
-        "url": "http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205"
-    },
-    "issuedOn": 1406747839,
-    "image": "http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205/image"
-}
+# Construct a docloader function that will return preloaded responses for predetermined URLs
+# Load in a dict of urls and the response bodies you want them to deliver:
+# response_list = {'http://google.com': 'Hacked by the lizard overlords, hahaha!'}
+def mock_docloader_factory(response_list):
+    def mock_docloader(url):
+        return response_list[url]
+    return mock_docloader
 
 
-class BadgeSchemaTests(TestCase):
+class BadgeUtilsTests(TestCase):
     def test_does_is_json_process_dicts(self):
         """
         Make sure we can determine that a dict is not json
@@ -91,15 +49,20 @@ class BadgeSchemaTests(TestCase):
         """
         Make sure that is_json doesn't cause no problems if we throw some other junk at it.
         """
-        error = None
+
         try:
-            result = utils.is_json(list(("1", 2, "three")))
-            result = utils.is_json(set(["a", "bee", "C"]))
-            result = utils.is_json(tuple(("strings", "planes", "automobiles")))
+            utils.is_json(list(("1", 2, "three")))
+            utils.is_json(set(["a", "bee", "C"]))
+            utils.is_json(tuple(("strings", "planes", "automobiles")))
         except:
             error = str(sys.exc_info()[0])
-        self.assertEqual(error, None)
+        else:
+            error = None
+        finally:
+            self.assertEqual(error, None)
 
+
+class BadgeSchemaTests(TestCase):
     # def test_check_schema(self):
     #   """
     #   Make sure some schema that we're using doesn't make the validator choke. This tests them all but the
@@ -168,13 +131,155 @@ class BadgeContextTests(TestCase):
         finally:
             self.assertEqual(exceptage, None)
 
+# Some test assertions of different sorts
+junky_assertion = {
+    "uid": "100",
+    "issuedOn": 1395112143,
+    "recipient": "sha256$c56e0383f16d3bd4705c11e4eff7002ca27540b2ba0b32d7b389377f9e4d68e2",
+    "evidence": "http://someevidence.org",
+    "verify": {
+        "url": "http://badges.schoolofdata.org/badge/data-to-diagrams/instance/100",
+        "type": "hosted"
+    },
+    "badge": {
+        "issuer": {
+            "url": "http://schoolofdata.org",
+            "image": "http://assets.okfn.org/p/schoolofdata/img/logo.png",
+            "name": "School of Data",
+            "email": "michael.bauer@okfn.org",
+            "contact": "michael.bauer@okfn.org",
+            "revocationList": "http://badges.schoolofdata.org/revocation",
+            "description": "School of Data works to empower civil society organizations, journalists and citizens with the skills they need to use data effectively-evidence is power!",
+            "_location": "http://badges.schoolofdata.org/issuer/school-of-data",
+            "origin": "http://schoolofdata.org"
+        },
+        "description": "You have completed the Data to Diagrams module on the School of Data",
+        "image": "http://p2pu.schoolofdata.org/badges/School_Of_Data_Badges/Badges/Badge_Data_to_Diagrams.png",
+        "criteria": "http://badges.schoolofdata.org/badge/data-to-diagrams/criteria",
+        "name": "Data to Diagrams",
+        "_location": "http://badges.schoolofdata.org/badge/data-to-diagrams"
+    },
+    "_originalRecipient": {
+        "identity": "sha256$c56e0383f16d3bd4705c11e4eff7002ca27540b2ba0b32d7b389377f9e4d68e2",
+        "type": "email",
+        "hashed": True
+    },
+    "issued_on": 1395112143
+}
+junky_original_assertion = {
+    "evidence": "http://someevidence.org",
+    "recipient": {
+        "hashed": True,
+        "identity": "sha256$c56e0383f16d3bd4705c11e4eff7002ca27540b2ba0b32d7b389377f9e4d68e2",
+        "type": "email"
+    },
+    "uid": "100",
+    "badge": "http://badges.schoolofdata.org/badge/data-to-diagrams",
+    "verify": {
+        "url": "http://badges.schoolofdata.org/badge/data-to-diagrams/instance/100",
+        "type": "hosted"
+    },
+    "issuedOn": 1395112143
+}
+junky_badgeclass = {
+    "criteria": "http://badges.schoolofdata.org/badge/data-to-diagrams/criteria",
+    "issuer": "http://badges.schoolofdata.org/issuer/school-of-data",
+    "description": "You have completed the \"Data to Diagrams\" module on the School of Data",
+    "name": "Data to Diagrams",
+    "image": "http://p2pu.schoolofdata.org/badges/School_Of_Data_Badges/Badges/Badge_Data_to_Diagrams.png"
+}
+junky_issuer = {
+    "description": "School of Data works to empower civil society organizations",
+    "image": "http://assets.okfn.org/p/schoolofdata/img/logo.png",
+    "revocationList": "http://badges.schoolofdata.org/revocation",
+    "contact": "michael.bauer@okfn.org", "email": "michael.bauer@okfn.org",
+    "url": "http://schoolofdata.org",
+    "name": "School of Data"
+}
+junky_docloader = mock_docloader_factory(
+    {
+        'http://badges.schoolofdata.org/badge/data-to-diagrams/instance/100': junky_original_assertion,
+        'http://badges.schoolofdata.org/badge/data-to-diagrams': junky_badgeclass,
+        'http://badges.schoolofdata.org/issuer/school-of-data': junky_issuer
+    }
+)
+
+valid_1_0_assertion = {
+    "uid": "2f900c7c-f473-4bff-8173-71b57472a97f",
+    "recipient": {
+        "identity": "sha256$1665bc8985e802067453647c1676b07a1834c327bfea24c67f3dbb721eb84d22",
+        "type": "email",
+        "hashed": True,
+        "salt": "UYMA1ybJ4UfqHJO4r3x7LjpGE0LEog"
+    },
+    "badge": "http://openbadges.oregonbadgealliance.org/api/badges/53d727a11f04f3a84a99b002",
+    "verify": {
+        "type": "hosted",
+        "url": "http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205"
+    },
+    "issuedOn": 1406747839,
+    "image": "http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205/image"
+}
+valid_1_0_badgeclass = {
+    "_id": {"$oid": "53d727a11f04f3a84a99b002"},
+    "name": "Oregon Open Badges Working Group Initial Meeting",
+    "description": "Invited participant to the first meeting of Oregon's Open Badges Working Group in July 2014.",
+    "image": "http://placekitten.com/300/300",
+    "criteria": "http://openbadges.oregonbadgealliance.org/assets/criteria/obwg-initial-meeting.html",
+    "issuer": "http://openbadges.oregonbadgealliance.org/api/issuers/53d41603f93ae94a733ae554",
+    "tags": ["participation"]
+}
+valid_1_0_issuer = {
+    "_id": {"$oid": "53d41603f93ae94a733ae554"},
+    "name": "Oregon Badge Alliance",
+    "url": "http://oregonbadgealliance.org",
+    "description": "The Oregon Badge Alliance serves as a focal point for collaborations between state institutions, employers, and the education community as we work together to build a vibrant ecosystem for badges and micro-certifications in Oregon.",
+    "email": "oregonbadgealliance@gmail.com",
+    "fullyQualifiedUrl": "http://openbadges.oregonbadgealliance.org/api/issuers/53d41603f93ae94a733ae554"
+}
+valid_1_0_docloader = mock_docloader_factory(
+    {
+        'http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205': valid_1_0_assertion,
+        'http://openbadges.oregonbadgealliance.org/api/badges/53d727a11f04f3a84a99b002': valid_1_0_badgeclass,
+        'http://openbadges.oregonbadgealliance.org/api/issuers/53d41603f93ae94a733ae554': valid_1_0_issuer
+    }
+)
+
 simpleOneOne = {
     "@context": "http://standard.openbadges.org/1.1/context",
     "@type": "assertion",
     "@id": "http://example.org/assertion25",
     "uid": 25,
+    "recipient": {
+        "identity": "testuser@example.org",
+        "hashed": False
+    },
     "badge": "http://example.org/badge1"
 }
+simpleOneOneBC = {
+    "@context": "http://standard.openbadges.org/1.1/context",
+    "@type": "badgeclass",
+    "@id": "http://example.org/badge1",
+    "name": "Badge of Awesome",
+    "description": "Awesomest badge for awesome people.",
+    "image": "http://placekitten.com/300/300",
+    "criteria": "http://example.org/badge1criteria",
+    "issuer": "http://example.org/issuer"
+}
+simpleOneOneIssuer = {
+    "@context": "http://standard.openbadges.org/1.1/context",
+    "@type": "issuerorg",
+    "@id": "http://example.org/issuer",
+    "name": "Issuer of Awesome",
+    "url": "http://example.org"
+}
+oneone_docloader = mock_docloader_factory(
+    {
+        'http://example.org/assertion25': simpleOneOne,
+        'http://example.org/badge1': simpleOneOneBC,
+        'http://example.org/issuer': simpleOneOneIssuer
+    }
+)
 
 oneOneArrayType = {
     "@context": "http://standard.openbadges.org/1.1/context",
@@ -197,81 +302,144 @@ simpleOneOneNoId = {
 }
 
 
-class OpenBadgeTests(TestCase):
-    def test_validateMainContext(self):
-        context = "http://standard.openbadges.org/1.1/context"
-        a = OpenBadge.validateMainContext(OpenBadge(simpleOneOne), context)
-        self.assertEqual(a, context)
+# class OpenBadgeTests(TestCase):
+#     def test_validateMainContext(self):
+#         context = "http://standard.openbadges.org/1.1/context"
+#         a = OpenBadge.validateMainContext(OpenBadge(simpleOneOne), context)
+#         self.assertEqual(a, context)
 
-    def test_simple_OpenBadge_construction_noErrors(self):
+#     def test_simple_OpenBadge_construction_noErrors(self):
+#         try:
+#             openBadge = OpenBadge(simpleOneOne)
+#         except Exception as e:
+#             self.assertEqual(e, None)
+#         self.assertEqual(openBadge.getProp('assertion', 'uid'), 25)
+#         self.assertEqual(openBadge.getProp('assertion', '@type'), 'assertion')
+
+#     def test_oneOneArrayType(self):
+#         try:
+#             openBadge = OpenBadge(oneOneArrayType)
+#         except Exception as e:
+#             self.assertEqual(e, None)
+#         self.assertEqual(openBadge.getProp('assertion', 'uid'), 25)
+
+#     def test_oneOneNonUrlID(self):
+#         #TODO, both implement id validation and then make this test actually pass
+#         try:
+#             openBadge = OpenBadge(oneOneNonUrlID)
+#         except Exception as e:
+#             # What is this doing?
+#             self.assertFalse(e is None)
+#         self.assertEqual(openBadge.getProp('assertion', 'uid'), 25)
+
+#     def test_id_from_verify_url(self):
+#         try:
+#             openBadge = OpenBadge(simpleOneOne)
+#         except Exception as e:
+#             self.assertEqual(e, None)
+#         self.assertEqual(openBadge.getProp('assertion', '@id'), "http://example.org/assertion25")
+
+#     def test_valid_1_0_construction(self):
+#         try:
+#             openBadge = OpenBadge(valid_1_0_assertion)
+#         except Exception as e:
+#             self.assertEqual(e, None)
+#         self.assertEqual(openBadge.getProp('assertion', '@type'), 'assertion')
+#         self.assertEqual(openBadge.getProp('assertion', '@id'), 'http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205')
+#         self.assertEqual(openBadge.getProp('assertion', 'issuedOn'), 1406747839)
+
+#     def test_junky_construction(self):
+#         try:
+#             openBadge = OpenBadge(junky_assertion)
+#         except Exception as e:
+#             self.assertEqual(e, None)
+#         self.assertEqual(openBadge.getProp('assertion', '@type'), 'assertion')
+#         self.assertEqual(openBadge.getProp('assertion', '@id'), 'http://badges.schoolofdata.org/badge/data-to-diagrams/instance/100')
+#         self.assertEqual(openBadge.getProp('assertion', 'issuedOn'), 1395112143)
+
+#     def test_getting_prop_by_iri_simpleOneOne(self):
+#         try:
+#             openBadge = OpenBadge(simpleOneOne)
+#         except Exception as e:
+#             self.assertEqual(e, None)
+#         self.assertEqual(openBadge.getLdProp('assertion', 'http://standard.openbadges.org/definitions#AssertionUid'), 25)
+#         self.assertEqual(openBadge.getLdProp('assertion', 'http://standard.openbadges.org/definitions#BadgeClass'), "http://example.org/badge1")
+
+
+# class ImageExtractionTests(TestCase):
+#     def test_basic_image_extract(self):
+#         imgFile = open(os.path.join(os.path.dirname(__file__), 'testfiles', '1.png'), 'r')
+#         assertion = pngutils.extract(imgFile)
+#         self.assertTrue(utils.is_json(assertion))
+
+#         assertion = utils.try_json_load(assertion)
+#         self.assertEqual(assertion.get("uid"), "2f900c7c-f473-4bff-8173-71b57472a97f")
+
+#     def test_analyze_image_upload(self):
+#         imgFile = open(os.path.join(os.path.dirname(__file__), 'testfiles', '1.png'), 'r')
+
+#         openBadge = utils.analyze_image_upload(imgFile)
+#         self.assertEqual(openBadge.getProp("assertion", "uid"), "2f900c7c-f473-4bff-8173-71b57472a97f")
+
+
+class BadgeObjectsTests(TestCase):
+    fixtures = ['0001_initial_superuser', '0002_initial_schemes_and_validators']
+
+    def test_mock_docloader_factory(self):
+        response_list = {'http://google.com': 'Hahahaha, hacked by the lizard overlords.'}
+        docloader = mock_docloader_factory(response_list)
+        self.assertEqual(docloader('http://google.com'), 'Hahahaha, hacked by the lizard overlords.')
+
+    def test_assertion_processing_oneone(self):
+        self.maxDiff = None
+        badgeMetaObject = badge_object_class('assertion').processBadgeObject(
+            {'badgeObject': simpleOneOne},
+            oneone_docloader
+            )
+        expected_result = {'notes': ['<RecipientRequiredValidator: Recipient input not needed, embedded recipient identity is not hashed>']}
+        self.assertEqual(str(badgeMetaObject.get('notes', [0])[0]), expected_result['notes'][0])
+
+    def test_assertion_processing_valid_1_0(self):
+        badgeMetaObject = badge_object_class('assertion').processBadgeObject(
+            {'badgeObject': valid_1_0_assertion},
+            valid_1_0_docloader
+            )
+        expected_result = {'errors': ['<RecipientRequiredValidator: Recipient ID is hashed and no recipient_input provided>']}
+        self.assertEqual(str(badgeMetaObject.get('errors', [0])[0]), expected_result['errors'][0])
+
+    def test_assertion_processing_valid_1_0_with_identifier(self):
+        self.maxDiff = None
+        # import pdb; pdb.set_trace();
+        badgeMetaObject = badge_object_class('assertion').processBadgeObject(
+            {'badgeObject': valid_1_0_assertion, 'recipient_input': 'nate@ottonomy.net'},
+            valid_1_0_docloader
+            )
+        expected_result = {'notes': [{'message': 'Provided recipient identity string matched assertion recipient.', 'validator': 'Functional:AssertionRecipientValidator', 'result': 'success'}] }
+        self.assertEqual(badgeMetaObject.get('notes', [0])[0], expected_result['notes'][0])
+
+
+class OpenBadgeIntegrationTests(TestCase):
+    fixtures = ['0001_initial_superuser', '0002_initial_schemes_and_validators']
+
+    def test_successful_OpenBadge_save(self):
+        badge_input = valid_1_0_assertion
+        recipient_input = 'nate@ottonomy.net'
+        b = OpenBadge(badge_input=badge_input, recipient_input=recipient_input)
         try:
-            openBadge = OpenBadge(simpleOneOne)
+            b.save()
         except Exception as e:
             self.assertEqual(e, None)
-        self.assertEqual(openBadge.getProp('assertion', 'uid'), 25)
-        self.assertEqual(openBadge.getProp('assertion', '@type'), 'assertion')
+        else: 
+            self.assertTrue(True) # Yay, no errors!
 
-    def test_oneOneArrayType(self):
+    def test_OpenBadge_save_bad_recipient(self):
+        badge_input = valid_1_0_assertion
+        recipient_input = 'nate@ottonomy.newt'
+        b = OpenBadge(badge_input=badge_input, recipient_input=recipient_input)
         try:
-            openBadge = OpenBadge(oneOneArrayType)
+            b.save()
         except Exception as e:
-            self.assertEqual(e, None)
-        self.assertEqual(openBadge.getProp('assertion', 'uid'), 25)
-
-    def test_oneOneNonUrlID(self):
-        #TODO, both implement id validation and then make this test actually pass
-        try:
-            openBadge = OpenBadge(oneOneNonUrlID)
-        except Exception as e:
-            # What is this doing?
-            self.assertFalse(e is None)
-        self.assertEqual(openBadge.getProp('assertion', 'uid'), 25)
-
-    def test_id_from_verify_url(self):
-        try:
-            openBadge = OpenBadge(simpleOneOne)
-        except Exception as e:
-            self.assertEqual(e, None)
-        self.assertEqual(openBadge.getProp('assertion', '@id'), "http://example.org/assertion25")
-
-    def test_valid_1_0_construction(self):
-        try:
-            openBadge = OpenBadge(valid_1_0_assertion)
-        except Exception as e:
-            self.assertEqual(e, None)
-        self.assertEqual(openBadge.getProp('assertion', '@type'), 'assertion')
-        self.assertEqual(openBadge.getProp('assertion', '@id'), 'http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205')
-        self.assertEqual(openBadge.getProp('assertion', 'issuedOn'), 1406747839)
-
-    def test_junky_construction(self):
-        try:
-            openBadge = OpenBadge(junky_assertion)
-        except Exception as e:
-            self.assertEqual(e, None)
-        self.assertEqual(openBadge.getProp('assertion', '@type'), 'assertion')
-        self.assertEqual(openBadge.getProp('assertion', '@id'), 'http://badges.schoolofdata.org/badge/data-to-diagrams/instance/100')
-        self.assertEqual(openBadge.getProp('assertion', 'issuedOn'), 1395112143)
-
-    def test_getting_prop_by_iri_simpleOneOne(self):
-        try:
-            openBadge = OpenBadge(simpleOneOne)
-        except Exception as e:
-            self.assertEqual(e, None)
-        self.assertEqual(openBadge.getLdProp('assertion', 'http://standard.openbadges.org/definitions#AssertionUid'), 25)
-        self.assertEqual(openBadge.getLdProp('assertion', 'http://standard.openbadges.org/definitions#BadgeClass'), "http://example.org/badge1")
-
-
-class ImageExtractionTests(TestCase):
-    def test_basic_image_extract(self):
-        imgFile = open(os.path.join(os.path.dirname(__file__), 'testfiles', '1.png'), 'r')
-        assertion = pngutils.extract(imgFile)
-        self.assertTrue(utils.is_json(assertion))
-
-        assertion = utils.try_json_load(assertion)
-        self.assertEqual(assertion.get("uid"), "2f900c7c-f473-4bff-8173-71b57472a97f")
-
-    def test_analyze_image_upload(self):
-        imgFile = open(os.path.join(os.path.dirname(__file__), 'testfiles', '1.png'), 'r')
-
-        openBadge = utils.analyze_image_upload(imgFile)
-        self.assertEqual(openBadge.getProp("assertion", "uid"), "2f900c7c-f473-4bff-8173-71b57472a97f")
+            self.assertTrue(isinstance(e, BadgeValidationError))
+            self.assertEqual(e.to_dict()['validator'], 'Functional:AssertionRecipientValidator')
+        else: 
+            self.assertTrue(False) # Boo, there should have been an error!

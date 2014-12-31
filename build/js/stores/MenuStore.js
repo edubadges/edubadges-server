@@ -26,7 +26,8 @@ MenuStore.defaultItems = {
       { title: "Earn", url: "/earn", icon: "fa-certificate", children: [] },
       { title: "Issue", url: "#", icon: "fa-mail-forward", children: [
         { title: "Award Badges", url: "/issue", icon: "fa-bookmark", children: [] },
-        { title: "Print Certificates", url: "/certificates", icon: "fa-photo", children: []}
+        { title: "Notify Earners", url: "/issue/notify", icon: "fa-envelope", children: [] },
+        { title: "Print Certificates", url: "/certificates", icon: "fa-file", children: []}
       ]},
       { title: "Understand", url: "/understand", icon: "fa-info-circle", children: [] }
     ]

@@ -1,9 +1,10 @@
-from validation_messages import BadgeValidationSuccess, BadgeValidationError
+from validation_messages import BadgeValidationSuccess, BadgeValidationError, BadgeValidationMessage
 from django.conf import settings
 from django.utils.importlib import import_module
+import hashlib
 
 
-class FunctionalValidatorList():
+class FunctionalValidatorList(object):
     """
     A list of validators that can return validators for a certain pairing of scheme_slug and validates_type IRI
     """
@@ -19,7 +20,7 @@ class FunctionalValidatorList():
         self.validators.append(validator)
 
     def register_default_validators(self):
-        self.register(AssertionRecipientValidator())
+        pass
 
     def find_by_slug(self, slug):
         for validator in self.validators:
@@ -43,28 +44,41 @@ class FunctionalValidatorList():
 
         return success_list
 
+# Gets a custom validator list from settings or instantiates a default.
 
 def get_current_validator_list():
-    list_cls = getattr(settings, 'BADGEANALYSIS_VALIDATOR_LIST', None)
-    if list_cls:
-        try:
-            mod, inst = list_cls.rsplit('.', 1)
-            mod = import_module(mod)
-            validator_list = getattr(mod, inst)()
-        except:
+    try:
+        if isinstance(current_validator_list, FunctionalValidatorList):
+            return current_validator_list
+    except NameError:
+        list_cls = getattr(settings, 'BADGEANALYSIS_VALIDATOR_LIST', None)
+        if list_cls:
+            try:
+                mod, inst = list_cls.rsplit('.', 1)
+                mod = import_module(mod)
+                validator_list = getattr(mod, inst)()
+            except:
+                validator_list = FunctionalValidatorList()
+        else:
             validator_list = FunctionalValidatorList()
-    else:
-        validator_list = FunctionalValidatorList()
-    return validator_list
+        return validator_list
 
+current_validator_list = get_current_validator_list()
 
-class BadgeFunctionalValidator():
+class BadgeFunctionalValidator(object):
     """
     The second type of validator an open badge scheme may have is a Functional Validator,
-    which can make sure badge objects pass more precise tests than schema allow.
+    which can make sure badges pass more precise tests than schema allow.
     """
-    def __init__(self, scheme_slugs, validates_types, slug, description="Functional Badge Validator"):
-        def validate_str_or_list(entry):
+    def __init__(self, **kwargs):
+        # Pass in these kwargs:
+        scheme_slugs = kwargs.get('scheme_slugs')
+        validates_types = kwargs.get('validates_types')
+        slug = kwargs.get('slug')
+        description = kwargs.get('description', "Functional Badge Validator")
+        validation_function = kwargs.get('validation_function')
+
+        def accept_str_or_list(entry):
             if isinstance(entry, (str, unicode)):
                 return [entry]
             if isinstance(entry, (list, set)):
@@ -75,8 +89,8 @@ class BadgeFunctionalValidator():
             else:
                 raise TypeError("Unknown type of input: " + entry)
 
-        self.scheme_slug = validate_str_or_list(scheme_slugs)
-        self.validates_type = validate_str_or_list(validates_types)
+        self.scheme_slug = accept_str_or_list(scheme_slugs)
+        self.validates_type = accept_str_or_list(validates_types)
 
         if not isinstance(description, (str, unicode)):
             raise TypeError("Description should be a string. Got: " + description)
@@ -86,27 +100,75 @@ class BadgeFunctionalValidator():
             raise TypeError("Slug should be a string. Got: " + slug)
         self.slug = slug
 
+        if not hasattr(validation_function, '__call__'):
+            raise TypeError("Validation_method should be a function. Got: " + validation_function)
+        self.validate = validation_function
+
     def __unicode__(self):
-        return "<BadgeFunctionalValidator %s: %s >" % (self.slug, self.description)
+        return "BadgeFunctionalValidator %s: %s" % (self.slug, self.description)
 
-    def validate(self, badge):
-        return BadgeValidationSuccess("No validation function implemented, so we'll call it good.", self.__unicode__())
+    """
+    Follow this function signature to validate an Open Badge.
+    Return a BadgeValidationSuccess, BadgeValidationError or BadgeValidationMessage
+    (badge is expected to be an OpenBadge)
+    """
+    # def validate(self, badge):
+       # return BadgeValidationSuccess("No validation function implemented, so we'll call it good.", self.__unicode__())
 
 
-class AssertionRecipientValidator(BadgeFunctionalValidator):
-    def __init__(self):
-        super(AssertionRecipientValidator)
+class BadgeObjectFunctionalValidator(object):
+    """
+    A validator just for badge objects at the processBadgeObject stage. These validators cannot rely on 
+    methods of OpenBadge instances. Their validate method takes a badgeMetaObject as input and returns either a
+    BadgeValidationSuccess (positive), BadgeValidationMessage (neutral) or BadgeValidationError (negative)
+    """
+    def __init__(self, **kwargs):
+        # TODO test these inputs to make sure slug is a string and validation method is a method
+        self.slug = kwargs.get('slug')
+        self.validate = kwargs.get('validation_function')
 
-    def validate(self, badge):
-        if badge.scheme.slug in ('1_0', '1_1'):
-            identity_string = badge.getLd('asn', 'recipient')
+    def __unicode__(self):
+        return "Functional:%s" % (self.slug)
 
-    def verify_recipient(identity_string, hash_string, salt):
+
+"""
+A BadgeObjectFunctionalValidator that determines if the badge recipient is the one the user expected.
+"""
+def assertion_recipient_validator_function(self, badgeMetaObject):
+    def verify_recipient(identity_string, hash_string, salt=''):
         """
         Check if a badge recipient is indeed the expected recipient (email address)
         """
         if hash_string.startswith('sha256$'):
-            return hash_string == 'sha256$' + hashlib.sha256(email+salt).hexdigest()
+            return hash_string == 'sha256$' + hashlib.sha256(identity_string+salt).hexdigest()
         elif hash_string.startswith('md5$'):
-            return hash_string == 'md5$' + hashlib.md5(email+salt).hexdigest()
+            return hash_string == 'md5$' + hashlib.md5(identity_string+salt).hexdigest()
+        else:
+            return hash_string == identity_string
 
+    if badgeMetaObject['scheme'].slug in ('1_0', '1_1', '1_0-backpack-misbaked'):
+        hash_string = badgeMetaObject['badgeObject'].get('recipient').get('identity')
+        salt = badgeMetaObject['badgeObject'].get('recipient').get('salt', '')
+    elif badgeMetaObject['scheme'].slug in ('0_5'):
+        hash_string = badgeMetaObject['badgeObject'].get('recipient')
+        salt = badgeMetaObject['badgeObject'].get('salt','')
+
+    recipient_input = badgeMetaObject['recipient_input']
+
+    if verify_recipient(recipient_input, hash_string, salt):
+        return BadgeValidationSuccess(
+            "Provided recipient identity string matched assertion recipient.",
+            self.__unicode__()
+        )
+    else:
+        return BadgeValidationError(
+            "Recipient input %s didn't match hashed string: %s" % (recipient_input, hash_string),
+            self.__unicode__()
+        )
+
+assertionRecipientValidator = BadgeObjectFunctionalValidator(**{
+    'slug': 'AssertionRecipientValidator',
+    'validation_function': assertion_recipient_validator_function,
+    'scheme_slugs': ['0_5', '1_0', '1_1', '1_0-backpack-misbaked'],
+    'validates_types': ['assertion']
+})

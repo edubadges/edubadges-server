@@ -37,6 +37,8 @@ CACHES = {
     }
 }
 
+HTTP_ORIGIN = 'http://localhost:8000'
+
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # debug_toolbar settings
