@@ -36,7 +36,7 @@ class EarnerNotificationCreate(ActiveTabMixin, CreateView):
         self.object.badge = form.cleaned_data['badge']
 
         try:
-            self.object.send_email(**{'request': self.request})
+            self.object.send_email()
         except Exception:
             # TODO: make this work
             self.form_invalid(form)

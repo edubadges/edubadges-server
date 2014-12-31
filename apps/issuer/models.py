@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 import basic_models
 import django.template.loader
 
@@ -25,8 +26,8 @@ class EarnerNotification(basic_models.TimestampedModel):
         from issuer.forms import NotifyEarnerForm
         return NotifyEarnerForm(instance=self)
 
-    def send_email(self, **kwargs):
-        http_origin = kwargs.get('request',{}).META.get('HTTP_ORIGIN', '')
+    def send_email(self):
+        http_origin = getattr(settings, 'HTTP_ORIGIN', None)
         ob = self.badge
         email_context = {
             'badge_name': ob.ldProp('bc', 'name'),
