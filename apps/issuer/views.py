@@ -32,7 +32,6 @@ class EarnerNotificationCreate(ActiveTabMixin, CreateView):
         return super(EarnerNotificationCreate, self).form_invalid(form)
 
     def form_valid(self, form):
-        import pdb; pdb.set_trace();
         self.object = form.save(commit=False)
         self.object.badge = form.cleaned_data['badge']
 

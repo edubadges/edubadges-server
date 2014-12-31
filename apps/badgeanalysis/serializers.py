@@ -4,6 +4,6 @@ from badgeanalysis.models import OpenBadge
 
 
 class BadgeSerializer(serializers.Serializer):
-    recipient_identifier = serializers.CharField(max_length=2048)
+    recipient_input = serializers.CharField(max_length=2048)
     image = serializers.CharField(max_length=512)
     full_badge_object = serializers.CharField(max_length=16384)
