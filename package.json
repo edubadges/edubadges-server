@@ -30,7 +30,8 @@
     "jshint-stylish": "~1.0.0",
     "gulp-uglify": "~1.0.2",
     "vinyl-buffer": "~1.0.0",
-    "gulp-size": "~1.1.0"
+    "gulp-size": "~1.1.0",
+    "path-to-regexp": "~1.0.2"
   },
   "readmeFilename": "README"
 }

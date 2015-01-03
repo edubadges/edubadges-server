@@ -40,7 +40,7 @@ var MenuList = React.createClass({
 });
 
 
-var Menu = React.createClass({
+var SideBarNav = React.createClass({
   getDefaultProps: function() {
     return ItemsStore.getAllItems('sidebarMenu');
   },
@@ -54,4 +54,4 @@ var Menu = React.createClass({
 });
 
 // Export the Menu class for rendering:
-module.exports = Menu;
+module.exports = SideBarNav;

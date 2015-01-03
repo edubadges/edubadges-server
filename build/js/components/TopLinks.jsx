@@ -31,10 +31,10 @@ var MenuList = React.createClass({
 var FirstLevelItem = React.createClass({
   handleClick: function(event) {
     if ( this.props.active ){
-      this.props.setActive(null);
+      this.props.setActive(null); // setActive is a method passed in from App as a property
     }
     else {
-      this.props.setActive(this.props.title );
+      this.props.setActive(this.props.title);
     }
     event.stopPropagation();
   }, 
@@ -45,8 +45,10 @@ var FirstLevelItem = React.createClass({
     }
     return (
       <li className={this.props.active ? 'nav-menu-item expanded-true active open' : 'nav-menu-item' }>
-        <a href={this.props.url} onClick={this.handleClick} alt={this.title}><i className={'fa fa-fw ' + this.props.iconClass}></i> <i className='fa fa-fw fa-caret-down'></i></a>
-          {anyChildren}
+        <a href={this.props.url} onClick={this.handleClick} alt={this.title}>
+          <i className={'fa fa-fw ' + this.props.iconClass}></i> <i className='fa fa-fw fa-caret-down'></i>
+        </a>
+        {anyChildren}
       </li>
     );
   }
@@ -54,20 +56,6 @@ var FirstLevelItem = React.createClass({
 
 
 var TopLinks = React.createClass({
-  getDefaultProps: function() {
-    return ItemsStore.getAllItems('topMenu');
-  },
-  getInitialState: function() {
-    return {
-      active: null 
-    };
-  },
-  componentDidMount: function() {
-    ItemsStore.addListener('uncaught_document_click', this._hideMenu);
-  },
-  setActive: function(key){
-    this.setState({active: key});
-  },
   render: function() {
     var firstLevelItems = this.props.items.map(function(item, i) {
       return (
@@ -77,8 +65,8 @@ var TopLinks = React.createClass({
             title={item.title} 
             iconClass={item.icon} 
             children={item.children} 
-            active={ this.state.active == item.title ? true : false } 
-            setActive={this.setActive} 
+            active={this.props.active == item.title ? true : false} 
+            setActive={this.props.setActive}
           />
         );
     }.bind(this));
@@ -87,10 +75,6 @@ var TopLinks = React.createClass({
         {firstLevelItems}
       </ul>
       );
-  },
-  _hideMenu: function(){
-    if (this.state.active != null)
-      this.setState({active: null});
   }
 });
 

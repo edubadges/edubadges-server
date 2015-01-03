@@ -1,2 +1,5 @@
 .sidebar-nav li.expanded-false ul {
   display: none; }
+
+.navbar-static-top {
+  margin-bottom: 0; }

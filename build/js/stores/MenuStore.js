@@ -42,9 +42,9 @@ MenuStore.addListener = function(type, callback) {
   MenuStore.on(type, callback);
 };
 
-MenuStore.removeListener = function(type, callback) {
-  MenuStore.removeListener(type, callback);
-};
+// MenuStore.removeListener = function(type, callback) {
+//   MenuStore.removeListener(type, callback);
+// };
 
 // Register with the dispatcher
 MenuStore.dispatchToken = appDispatcher.register(function(payload){
@@ -52,16 +52,13 @@ MenuStore.dispatchToken = appDispatcher.register(function(payload){
 
   switch(action.type){
     case 'CLICK_CLOSE_MENU':
-      MenuStore.emit('uncaught_document_click');
+      MenuStore.emit('UNCAUGHT_DOCUMENT_CLICK');
       break;
 
     default:
       // do naaathing.
   }
 });
-
-console.log("OMG I'M GOING TO LOG THE EVENT EMITTER");
-console.log(MenuStore);
 
 module.exports = {
   getAllItems: MenuStore.getAllItems,
