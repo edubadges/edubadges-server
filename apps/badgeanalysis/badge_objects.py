@@ -46,9 +46,10 @@ class BadgeObject(object):
             try:
                 badgeMetaObject['badgeObject'] = json.loads(docloader(badgeMetaObject['id']))
             except Exception as e:
+                import pdb; pdb.set_trace();
                 raise TypeError(
                     "Couldn't fetch badgeMetaObject['badgeObject'] on input. We tried to load "
-                    + badgeMetaObject['badgeObject'] + " -- got error " + e
+                    + badgeMetaObject['badgeObject'] + " -- got error " + e.message
                 )
                 return
 

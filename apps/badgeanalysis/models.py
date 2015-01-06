@@ -41,6 +41,7 @@ class OpenBadge(basic_models.DefaultModel):
     image = models.ImageField(upload_to=badgeanalysis.utils.image_upload_to(), blank=True)
     badge_input = models.TextField(blank=True, null=True)
     recipient_input = models.CharField(blank=True, max_length=2048)
+    
     full_badge_object = JSONField()
     full_ld_expanded = JSONField()
     verify_method = models.CharField(max_length=48, blank=True)

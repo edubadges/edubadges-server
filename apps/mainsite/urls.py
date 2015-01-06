@@ -13,12 +13,7 @@ from homepage.sitemap import HomeSitemap
 from skycms.structure.sitemap import PageSitemap
 from sky_visitor.views import *
 
-# Django REST Framework router
-from api_urls import router
-
 TOKEN_REGEX = '(?P<uidb36>[0-9A-Za-z]{1,13})-(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})'
-
-
 
 sitemaps = {
     'index': HomeSitemap,
@@ -50,8 +45,10 @@ urlpatterns = patterns('',
     url(r'^change_password$', ChangePasswordView.as_view(), name='change_password'),
 
     # REST Framework
-    url(r'^api/', include(router.urls)),
-    
+    # url(r'^api/issuer', include('issuer.api_urls')),
+    url(r'^api/earner', include('earner.api_urls')),
+    # url(r'^api/consumer', include('consumer.api_urls')),
+    # url(r'^api/badges', include('badgeanalysis.api_urls')),
 
     # Local Apps
     url(r'^issue', include('issuer.urls')),
