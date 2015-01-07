@@ -15,7 +15,7 @@ class EarnerBadge(cachemodel.CacheModel):
     earner_accepted = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return "EarnerBadge: " + str(self.badge)
+        return str(self.badge)
 
 # class EarnerRegisteredEmail(basic_models.ActiveModel):
 #     email = models.CharField(max_length=254)

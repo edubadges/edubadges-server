@@ -55,7 +55,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'mainsite.middleware.MaintenanceMiddleware',
-    'mainsite.middleware.TrailingSlashMiddleware',
+    # 'mainsite.middleware.TrailingSlashMiddleware',
 ]
 
 ROOT_URLCONF = 'mainsite.urls'

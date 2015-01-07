@@ -6,24 +6,26 @@ from rest_framework.response import Response
 from models import EarnerBadge
 from badgeanalysis.models import OpenBadge
 from serializers import EarnerBadgeSerializer
+from mainsite.permissions import IsOwner
 
 
 class EarnerBadgesList(APIView):
     """
     GET: Viewing a list of earners' badges. (and their annotations) or POST to create a new one
     """
-    authentication_classes = (authentication.TokenAuthentication,)
-
-    # TODO: Implement ability to restrict this action
+    model = EarnerBadge
+    
+    # authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (IsOwner,)
 
     def get(self, request):
         """
         return a list of earned badges in the requesting user's account
         """
-        import pdb; pdb.set_trace();
+        # TODO Use request.user
         try:
-            user_badges = EarnerNotification.objects.filter(earner=request.user)
-        except Earner.DoesNotExist:
+            user_badges = EarnerBadge.objects.filter(earner=1)
+        except EarnerBadge.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         serializer = EarnerBadgeSerializer(user_badges, many=True)
@@ -41,7 +43,8 @@ class EarnerBadgesList(APIView):
         Must have (either badge_input or image) and request.user
         """
         import pdb; pdb.set_trace();
-        new_earner_badge = EarnerBadge(earner=request.user, earner_description=request.data['earner_description'])
+        # TODO: use request.user
+        new_earner_badge = EarnerBadge(earner=1, earner_description=request.data['earner_description'])
         new_earner_badge.badge = OpenBadge(
             badge_input=request.data['badge_input'],
             recipient_input=request.data['recipient_input'],
