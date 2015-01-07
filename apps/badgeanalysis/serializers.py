@@ -21,6 +21,7 @@ class WritableJSONField(serializers.CharField):
 
 
 class BadgeSerializer(serializers.Serializer):
+    pk = serializers.IntegerField()
     recipient_input = serializers.CharField(max_length=2048)
     image = serializers.CharField(max_length=512)
     full_badge_object = WritableJSONField(max_length=16384)

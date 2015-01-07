@@ -3,36 +3,58 @@ from rest_framework.exceptions import ValidationError
 from models import EarnerNotification
 from badgeanalysis.validation_messages import BadgeValidationError
 from badgeanalysis.models import OpenBadge
+from badgeanalysis.serializers import BadgeSerializer
 
 
 class EarnerNotificationSerializer(serializers.Serializer):
     url = serializers.CharField(max_length=2048)
     email = serializers.CharField(max_length=254)
+    badge = BadgeSerializer(required=False)
 
-    def create(self, validated_data):
-        if EarnerNotification.detect_existing(validated_data.get('url')):
+    def validate_url(self, value):
+        if not value or value == '':
+            raise ValidationError("Value is required.")
+        if EarnerNotification.detect_existing(value):
             raise ValidationError(
-                "The earner of this assertion has already been notified: " + validated_data.get('url')
+                "The earner of this assertion has already been notified: " + value
             )
-        else:
-            notification = EarnerNotification(**validated_data)
-            # notification.save(commit=False)
+        return value
 
+    def validate(self, data):
+        if not data.get('badge'):
             try:
-                notification.badge = OpenBadge(
-                    recipient_input=validated_data.get('email'),
-                    badge_input=validated_data.get('url')
+                badge = OpenBadge(
+                    recipient_input=data.get('email'),
+                    badge_input=data.get('url')
                 )
-                notification.badge.save()
+                badge.save()
             except BadgeValidationError as e:
                 raise ValidationError(
                     e.to_dict()['message']  # This error's likely that the earner email address != intended notification target
                 )
+            except Exception as e:
+                raise ValidationError(e.message)
             else:
-                try: 
-                    notification.send_email()
-                except Exception as e:
-                    raise e
-                else:
-                    notification.save()
-                    return notification
+                data['badge'] = badge
+                return data
+
+    def create(self):
+        """
+        Create the notification instance and send the email. You must run .is_valid() before calling .create()
+        """
+        if self.errors:
+            raise ValidationError("Tried to create the notification with invalid input.")
+
+        notification = EarnerNotification(
+            url = self.data.get('url'),
+            badge_id = self.data.get('badge').get('pk'),
+            email = self.data.get('email')
+        )
+
+        try: 
+            notification.send_email()
+        except Exception as e:
+            raise e
+        else:
+            notification.save()
+            return notification

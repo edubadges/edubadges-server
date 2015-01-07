@@ -45,7 +45,7 @@ urlpatterns = patterns('',
     url(r'^change_password$', ChangePasswordView.as_view(), name='change_password'),
 
     # REST Framework
-    # url(r'^api/issuer', include('issuer.api_urls')),
+    url(r'^api/issuer', include('issuer.api_urls')),
     url(r'^api/earner', include('earner.api_urls')),
     # url(r'^api/consumer', include('consumer.api_urls')),
     # url(r'^api/badges', include('badgeanalysis.api_urls')),

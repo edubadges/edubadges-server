@@ -1,5 +1,5 @@
 # Views for Earner API endpoints. Earners collect, annotate, share and export badges.
-from rest_framework import viewsets, authentication, permissions, status
+from rest_framework import authentication, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -14,7 +14,8 @@ class EarnerBadgesList(APIView):
     GET: Viewing a list of earners' badges. (and their annotations) or POST to create a new one
     """
     model = EarnerBadge
-    
+
+    # TODO: rich authentication possibilitiesfor remote API clients
     # authentication_classes = (authentication.TokenAuthentication,)
     permission_classes = (IsOwner,)
 
@@ -42,7 +43,7 @@ class EarnerBadgesList(APIView):
         }
         Must have (either badge_input or image) and request.user
         """
-        import pdb; pdb.set_trace();
+
         # TODO: use request.user
         new_earner_badge = EarnerBadge(earner=1, earner_description=request.data['earner_description'])
         new_earner_badge.badge = OpenBadge(
