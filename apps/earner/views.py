@@ -1,10 +1,12 @@
 from django.views.generic import CreateView, DetailView
 from badgeuser.models import BadgeUser
 from django.http import Http404
+import json
 
 from mainsite.views import ActiveTabMixin
-from earner.models import *  # EarnerBadge
-from earner.forms import *  # EarnerBadgeCreateForm
+from earner.models import EarnerBadge
+from earner.forms import EarnerBadgeCreateForm
+from earner.serializers import EarnerBadgeSerializer
 
 
 class EarnerBadgeCreate(ActiveTabMixin, CreateView):
@@ -30,5 +32,16 @@ class EarnerPortal(ActiveTabMixin, DetailView):
         except Http404:
             # TODO: use reverse()
             return redirect('/login')
-        context = self.get_context_data(object=self.object)
+        context = self.get_context_data(user=self.object)
         return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+
+        context_data = super(EarnerPortal, self).get_context_data(**kwargs)
+
+        # Add the earner's badges to the context
+        earner_badges_raw = EarnerBadge.objects.filter(earner=kwargs['user'])
+        serializer = EarnerBadgeSerializer(earner_badges_raw, many=True)
+        context_data['earner_badges'] = json.dumps(serializer.data)
+        
+        return context_data

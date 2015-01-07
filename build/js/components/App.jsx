@@ -11,6 +11,9 @@ var TopLinks = require('../components/TopLinks.jsx');
 var SideBarNav = require('../components/SideBarNav.jsx');
 var OpenBadgeList = require('../components/OpenBadgeList.jsx');
 
+// Actions
+var LifeCycleActions = require('../actions/lifecycle');
+
 var App = React.createClass({
   mixins: [RouterMixin],
 
@@ -44,6 +47,9 @@ var App = React.createClass({
       activeTopMenu: null,
       path: window.location.pathname
     };
+  },
+  componentWillMount: function() {
+    LifeCycleActions.appWillMount();
   },
   componentDidMount: function() {
     ItemsStore.addListener('UNCAUGHT_DOCUMENT_CLICK', this._hideMenu);
