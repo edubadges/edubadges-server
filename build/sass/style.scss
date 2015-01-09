@@ -13,12 +13,13 @@
   margin-top: 0.5em;
   margin-bottom: 0.5em;
   padding: 0.25em;
-}
-.badge-display-thumbnail {
-  width: 33.33333%;
+  float: left;
   border: 1px solid #ccc;
   border-radius: 4px;
+}
+.badge-display-thumbnail {
   overflow-x: hidden;
+
 
   .badgeProperty {
     span.propertyValue { font-weight: bold; }
