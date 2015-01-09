@@ -38,6 +38,14 @@
         {% endblock %}
 
         {% block extrahead %}{% endblock %}
+
+        {% block initial_data %}
+            {% if initial_data %}
+                <script type="text/javascript">
+                    var initialData = {{ initial_data | safe }}
+                </script>
+            {% endif %}
+        {% endblock %}
     </head>
 
     <body class="{% block bodyclass %}{% endblock %}">
@@ -148,9 +156,6 @@
                     <script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.2/CFInstall.min.js"></script>
                     <script>window.attachEvent("onload",function(){CFInstall.check({mode:"overlay"})})</script>
                 <![endif]-->
-            {% endblock %}
-
-            {% block initial_data %}
             {% endblock %}
 
         {% endblock %}

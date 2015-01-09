@@ -41,6 +41,5 @@ RouteStore.dispatchToken = appDispatcher.register(function(payload){
 
 module.exports = {
   getCurrentRoute: RouteStore.getCurrentRoute,
-  addListener: RouteStore.addListener,
-  removeListener: RouteStore.removeListener
+  addListener: RouteStore.addListener
 }

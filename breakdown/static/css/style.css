@@ -3,3 +3,20 @@
 
 .navbar-static-top {
   margin-bottom: 0; }
+
+.badge-display {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  padding: 0.25em; }
+
+.badge-display-thumbnail {
+  width: 33.33333%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  overflow-x: hidden; }
+  .badge-display-thumbnail .badgeProperty span.propertyValue {
+    font-weight: bold; }
+
+img {
+  max-width: 100%;
+  height: auto; }

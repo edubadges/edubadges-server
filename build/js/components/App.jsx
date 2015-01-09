@@ -3,8 +3,9 @@ var RouterMixin = require('react-mini-router').RouterMixin;
 var navigate = require('react-mini-router').navigate;
 
 // Stores
-var RouteStore = require('../stores/RouteStore.js');
-var ItemsStore = require('../stores/MenuStore.js');
+var RouteStore = require('../stores/RouteStore');
+var ItemsStore = require('../stores/MenuStore');
+var APIStore = require('../stores/APIStore');
 
 // Components
 var TopLinks = require('../components/TopLinks.jsx');
@@ -45,6 +46,7 @@ var App = React.createClass({
   getInitialState: function() {
     return {
       activeTopMenu: null,
+      activeBadgeId: null,
       path: window.location.pathname
     };
   },
@@ -63,6 +65,12 @@ var App = React.createClass({
   _hideMenu: function(){
     if (this.state.activeTopMenu != null)
       this.setState({activeTopMenu: null});
+  },
+
+  // Badge inspection tools
+  setActiveBadgeId: function(key){
+    console.log("Setting the activeBadgeId now to " + key);
+    this.setState({activeBadgeId: key});
   },
 
   /***   ---   RENDERING   ---   ***/
@@ -116,7 +124,13 @@ var App = React.createClass({
   },
 
   earnerHome: function() {
-    var mainComponent = ( <OpenBadgeList /> );
+    var mainComponent = (
+      <OpenBadgeList
+        badgeList={APIStore.getCollection("earnerBadges")}
+        activeBadgeId={this.state.activeBadgeId}
+        setActiveBadgeId={this.setActiveBadgeId}
+      /> 
+    );
     return this.render_base(mainComponent);
   },
 

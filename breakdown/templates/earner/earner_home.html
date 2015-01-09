@@ -8,9 +8,3 @@
   <p>Name: {{ user.name }}</p>
   <p>Email: {{ user.email }}</p>
 {% endblock %}
-
-{% block initial_data %}
-  <script type="text/javascript">
-  var initialData = {{ earner_badges | safe }}
-  </script>
-{% endblock %}

@@ -208,7 +208,8 @@ class OpenBadge(basic_models.DefaultModel):
                 del full['assertion']['image']  
         if 'badgeclass' in full and 'image' in full['badgeclass']:
             if self.image and dataUri.match(full['badgeclass']['image']):
-                full['badgeclass']['image'] = self.eventualImageUrl()
+                import pdb; pdb.set_trace();
+                full['badgeclass']['image'] = self.image.url
 
     def eventualImageUrl(self):
         # A dirty workaround for a 7-year old Django bug that filefields can't access the upload_to
