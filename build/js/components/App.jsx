@@ -11,6 +11,7 @@ var APIStore = require('../stores/APIStore');
 var TopLinks = require('../components/TopLinks.jsx');
 var SideBarNav = require('../components/SideBarNav.jsx');
 var OpenBadgeList = require('../components/OpenBadgeList.jsx');
+var EarnerBadgeForm = require('../components/Form.jsx').EarnerBadgeForm;
 
 // Actions
 var LifeCycleActions = require('../actions/lifecycle');
@@ -22,6 +23,8 @@ var App = React.createClass({
   routes: {
     '/': 'home',
     '/earn': 'earnerHome',
+    '/earn/badges': 'earnerBadgeCreate',
+    '/earn/badges/:id': 'earnerBadgeEdit',
     '/issue/notifications/new': 'issuerNotificationForm',
     '/issue/notifications/:id': 'issuerNotificationView',
     '/issuer/certificates/new': 'issuerCertificateForm',
@@ -130,6 +133,17 @@ var App = React.createClass({
         activeBadgeId={this.state.activeBadgeId}
         setActiveBadgeId={this.setActiveBadgeId}
       /> 
+    );
+    return this.render_base(mainComponent);
+  },
+
+  earnerBadgeCreate: function() {
+    var props = {
+      recipientIds: ['nate@ottonomy.net', 'ottonomy@gmail.com'],
+      formState: 'active'
+    }
+    var mainComponent = (
+      <EarnerBadgeForm {...props} />
     );
     return this.render_base(mainComponent);
   },

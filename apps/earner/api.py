@@ -1,4 +1,6 @@
 # Views for Earner API endpoints. Earners collect, annotate, share and export badges.
+from django.contrib.auth import get_user_model
+
 from rest_framework import authentication, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -16,13 +18,18 @@ class EarnerBadgesList(APIView):
     model = EarnerBadge
 
     # TODO: rich authentication possibilitiesfor remote API clients
-    # authentication_classes = (authentication.TokenAuthentication,)
+    authentication_classes = (
+        # authentication.TokenAuthentication,
+        authentication.SessionAuthentication,
+        authentication.BasicAuthentication,
+    )
     permission_classes = (IsOwner,)
 
     def get(self, request):
         """
         return a list of earned badges in the requesting user's account
         """
+        import pdb; pdb.set_trace();
         # TODO Use request.user
         try:
             user_badges = EarnerBadge.objects.filter(earner=1)
@@ -34,6 +41,7 @@ class EarnerBadgesList(APIView):
         return Response(serializer.data)
 
     def post(self, request):
+        import pdb; pdb.set_trace();
         """
         Add a new badge to an earner's collection
         request.data: {
@@ -43,18 +51,39 @@ class EarnerBadgesList(APIView):
         }
         Must have (either badge_input or image) and request.user
         """
+        if not isinstance(request.user, get_user_model()):
+            #TODO change this to 401 unauthenticated
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
-        # TODO: use request.user
-        new_earner_badge = EarnerBadge(earner=1, earner_description=request.data['earner_description'])
-        new_earner_badge.badge = OpenBadge(
-            badge_input=request.data['badge_input'],
-            recipient_input=request.data['recipient_input'],
-            image=request.data['image']
-        )
+        try:
+            the_actual_badge = OpenBadge(
+                badge_input=request.data.get('badge_input', None),
+                recipient_input=request.data.get('recipient_input', request.user.email),
+                image=request.data.get('image', None)
+            )
+            the_actual_badge.save()
+        except Exception as e:
+            raise e
 
-        new_earner_badge.save()
+        try:
+            new_earner_badge = EarnerBadge(
+                earner=request.user,
+                earner_description=request.data.get('earner_description', ''),
+                earner_accepted=True,
+                badge=the_actual_badge
+            )
+        except ValueError as e:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
-        return Response(new_earner_badge)
+        
+
+        try:
+            new_earner_badge.save()
+        except Exception as e:
+            raise e
+
+        serializer = EarnerBadgeSerializer(new_earner_badge)
+        return Response(serializer.data)
 
 
 class EarnerBadgeDetail(APIView):

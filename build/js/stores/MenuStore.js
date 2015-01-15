@@ -23,10 +23,13 @@ MenuStore.defaultItems = {
   },
   sidebarMenu: {
     items: [
-      { title: "Earn", url: "/earn", icon: "fa-certificate", children: [] },
+      { title: "Earn", url: "#", icon: "fa-certificate", children: [
+        { title: "View Badges", url: "/earn", icon: "fa-certificate", children: [] },
+        { title: "Add Badge", url: "/earn/badges", icon: "fa-certificate", children: [] }
+      ] },
       { title: "Issue", url: "#", icon: "fa-mail-forward", children: [
         { title: "Award Badges", url: "/issue", icon: "fa-bookmark", children: [] },
-        { title: "Notify Earners", url: "/issue/notify", icon: "fa-envelope", children: [] },
+        { title: "Notify Earners", url: "/issue/notifications", icon: "fa-envelope", children: [] },
         { title: "Print Certificates", url: "/certificates", icon: "fa-file", children: []}
       ]},
       { title: "Understand", url: "/understand", icon: "fa-info-circle", children: [] }

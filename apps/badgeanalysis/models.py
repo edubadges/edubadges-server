@@ -208,7 +208,6 @@ class OpenBadge(basic_models.DefaultModel):
                 del full['assertion']['image']  
         if 'badgeclass' in full and 'image' in full['badgeclass']:
             if self.image and dataUri.match(full['badgeclass']['image']):
-                import pdb; pdb.set_trace();
                 full['badgeclass']['image'] = self.image.url
 
     def eventualImageUrl(self):
@@ -254,7 +253,7 @@ class OpenBadge(basic_models.DefaultModel):
 
     """
     Tools to inspect an initialized badge object
-    """ 
+    """
 
     # Dangerous: We should use LD-based methods when possible to reduce cross-version problems.
     def getProp(self, parent, prop):

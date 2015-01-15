@@ -5,19 +5,11 @@ import json
 
 from mainsite.views import ActiveTabMixin
 from earner.models import EarnerBadge
-from earner.forms import EarnerBadgeCreateForm
 from earner.serializers import EarnerBadgeSerializer
 
 
-class EarnerBadgeCreate(ActiveTabMixin, CreateView):
-    model = EarnerBadge
-    active_tab = 'earn'
-    form_class = EarnerBadgeCreateForm
-
-
-class EarnerPortal(ActiveTabMixin, DetailView):
+class EarnerPortal(DetailView):
     model = BadgeUser
-    active_tab = 'earn'
     template_name = 'base_interior.html'
 
     def get_object(self):
@@ -36,9 +28,8 @@ class EarnerPortal(ActiveTabMixin, DetailView):
         return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
-
         context_data = super(EarnerPortal, self).get_context_data(**kwargs)
-
+        
         # Add the earner's badges to the context
         earner_badges_raw = EarnerBadge.objects.filter(earner=kwargs['user'])
         serializer = EarnerBadgeSerializer(earner_badges_raw, many=True)
