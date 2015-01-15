@@ -149,7 +149,7 @@ var BadgeDisplayThumbnail = React.createClass({
   render: function() {
     return (
       <div className='badge-display badge-display-thumbnail col-sm-4 col-md-3 col-lg-2' onClick={this.handleClick} >
-        <Property name='Badge Image' label={false} property={this.props.badgeclass.image} />
+        <Property name='Badge Image' label={false} property={this.props.image} />
         <Property name='Name' label={false} property={this.props.badgeclass.name} />
         <Property name='Issuer' label={false} property={this.props.issuerorg} linksClickable={false}/>
       </div>
@@ -167,7 +167,7 @@ var BadgeDisplayDetail = React.createClass({
       <div className='badge-display badge-display-detail col-sm-12'>
         <span className="closeLink" onClick={this.handleClick}>X</span>
         <div className='property-group badgeclass'>
-          <Property name='Badge Image' label={false} property={this.props.badgeclass.image} />
+          <Property name='Badge Image' label={false} property={this.props.image} />
           <Property name='Name' property={this.props.badgeclass.name} />
           <Property name='Description' property={this.props.badgeclass.description} />
           <Property name='Criteria' property={this.props.badgeclass.criteria} />
@@ -192,7 +192,7 @@ var BadgeDisplayFull = React.createClass({
     return (
       <div className='badge-display badge-display-full'>
         <div className='property-group badgeclass'>
-          <Property name='Badge Image' label={false} property={this.props.badgeclass.image} />
+          <Property name='Badge Image' label={false} property={this.props.image} />
           <Property name='Name' property={this.props.badgeclass.name} />
           <Property name='Description' property={this.props.badgeclass.description} />
           <Property name='Criteria' property={this.props.badgeclass.criteria} />
@@ -221,20 +221,21 @@ var OpenBadge = React.createClass({
   getDefaultProps: function() {
     return {
       display: 'thumbnail',
-      badge: fakeSerializedBadge
+      badge: fakeSerializedBadge,
+      image: 'http://placekitten.com/g/300/300'
     };
   },
 
   innerRender: function(){
     switch(this.props.display){
       case 'detail':
-        return ( <BadgeDisplayDetail setActiveBadgeId={this.props.setActiveBadgeId} {...this.props.badge } /> );
+        return ( <BadgeDisplayDetail image={this.props.image} pk={this.props.pk} setActiveBadgeId={this.props.setActiveBadgeId} {...this.props.badge } /> );
         break;
       case 'thumbnail': 
-        return ( <BadgeDisplayThumbnail pk={this.props.pk} setActiveBadgeId={this.props.setActiveBadgeId} {...this.props.badge } /> );
+        return ( <BadgeDisplayThumbnail image={this.props.image} pk={this.props.pk} setActiveBadgeId={this.props.setActiveBadgeId} {...this.props.badge } /> );
         break;
       default:  // 'full'
-        return ( <BadgeDisplayFull {...this.props.badge } /> );
+        return ( <BadgeDisplayFull image={this.props.image} pk={this.props.pk} {...this.props.badge } /> );
     }
   },
 

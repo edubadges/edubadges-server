@@ -38,6 +38,7 @@ var OpenBadgeList = React.createClass({
           key={"key-" + item.badge.pk}
           pk={item.badge.pk}
           display={ this.props.activeBadgeId == item.badge.pk ? "detail" : "thumbnail" } 
+          image={ item.badge.image }
           badge={ item.badge.full_badge_object }
           earner={ item.badge.recipient_input }
           setActiveBadgeId={ this.props.setActiveBadgeId }

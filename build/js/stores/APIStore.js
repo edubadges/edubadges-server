@@ -64,14 +64,20 @@ APIStore.storeInitialData = function() {
         APIStore.data[key] = JSON.parse(_initialData[key])
       }
     }
-    ;
   }
 }
 
+APIStore.addCollectionItem = function(collectionKey, item) {
+  console.log("Adding item to " + collectionKey);
+  if (APIStore.collectionTypes.indexOf(key) > -1){
+    APIStore.data[key].push(item);
+    return true;
+  }
+  else
+    return false;
+}
+
 APIStore.postEarnerBadgeForm = function(data, image){
-  console.log("We're going to submit the form: " + JSON.stringify(data));
-  console.log(image.type);
-  console.log(image);
 
   var req = request.post('/api/earner/badges')
     .set('X-CSRFToken', getCookie('csrftoken'))
@@ -81,9 +87,30 @@ APIStore.postEarnerBadgeForm = function(data, image){
     // .attach(image, {type: image.type})
     .attach('image', image, 'earner_badge_upload.png')
     .end(function(error, response){
-      console.log("We got a response to the earner form post!!!!");
-      console.log(error);
       console.log(response);
+      if (error){
+        console.log("THERE WAS SOME KIND OF API REQUEST ERROR.");
+        console.log(error);
+        APIStore.emit('API_STORE_FAILURE');
+      }
+      else if (response.status != 200){
+        console.log("API REQUEST PROBLEM:");
+        console.log(response.text);
+      }
+      else{
+        newBadge = JSON.parse(response.text);
+        console.log("ADDING NEW BADGE:");
+        console.log(newBadge);
+        if (APIStore.addCollectionItem('earnerBadges', newBadge))
+          APIStore.emit('DATA_UPDATED_earnerBadges');
+        else {
+          APIStore.emit('API_STORE_FAILURE');
+          console.log("Failed to add " + response.text + " to earnerBadges");
+        }
+      }
+      
+
+      
     });
 
 };

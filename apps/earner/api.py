@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import authentication, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 
 from models import EarnerBadge
 from badgeanalysis.models import OpenBadge
@@ -30,9 +31,13 @@ class EarnerBadgesList(APIView):
         return a list of earned badges in the requesting user's account
         """
         import pdb; pdb.set_trace();
+        if not isinstance(request.user, get_user_model()):
+            #TODO change this to 401 unauthenticated
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
         # TODO Use request.user
         try:
-            user_badges = EarnerBadge.objects.filter(earner=1)
+            user_badges = EarnerBadge.objects.filter(earner=request.user)
         except EarnerBadge.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -41,7 +46,6 @@ class EarnerBadgesList(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        import pdb; pdb.set_trace();
         """
         Add a new badge to an earner's collection
         request.data: {
@@ -63,7 +67,7 @@ class EarnerBadgesList(APIView):
             )
             the_actual_badge.save()
         except Exception as e:
-            raise e
+            raise ValidationError(e.message)
 
         try:
             new_earner_badge = EarnerBadge(
@@ -80,7 +84,7 @@ class EarnerBadgesList(APIView):
         try:
             new_earner_badge.save()
         except Exception as e:
-            raise e
+            raise ValidationError(e.message)
 
         serializer = EarnerBadgeSerializer(new_earner_badge)
         return Response(serializer.data)

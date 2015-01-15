@@ -48,6 +48,7 @@ var App = React.createClass({
   },
   getInitialState: function() {
     return {
+      earnerBadges: [],
       activeTopMenu: null,
       activeBadgeId: null,
       path: window.location.pathname
@@ -57,11 +58,19 @@ var App = React.createClass({
     LifeCycleActions.appWillMount();
   },
   componentDidMount: function() {
+    this.setState(
+      { earnerBadges: APIStore.getCollection('earnerBadges') }
+    );
+
     ItemsStore.addListener('UNCAUGHT_DOCUMENT_CLICK', this._hideMenu);
     RouteStore.addListener('ROUTE_CHANGED', this.handleRouteChange);
+    APIStore.addListener('DATA_UPDATED_earnerBadges', function(){
+      this.setState( {earnerBadges: APIStore.getCollection('earnerBadges')} );
+    }.bind(this));
   },
 
   // Menu visual display functions:
+
   setActiveTopMenu: function(key){
     this.setState({activeTopMenu: key});
   },
@@ -129,7 +138,7 @@ var App = React.createClass({
   earnerHome: function() {
     var mainComponent = (
       <OpenBadgeList
-        badgeList={APIStore.getCollection("earnerBadges")}
+        badgeList={this.state.earnerBadges}
         activeBadgeId={this.state.activeBadgeId}
         setActiveBadgeId={this.setActiveBadgeId}
       /> 
