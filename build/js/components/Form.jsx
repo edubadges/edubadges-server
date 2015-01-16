@@ -3,8 +3,10 @@ var ReactPropTypes = React.PropTypes;
 var EarnerActions = require('../actions/earner');
 var OpenBadge = require('../components/BadgeDisplay.jsx').OpenBadge;
 var APIStore = require('../stores/APIStore');
+var Dropzone = require('react-dropzone');
 
 
+/* Form components */
 var InputGroup = React.createClass({
   propTypes: {
     name: ReactPropTypes.string,
@@ -57,6 +59,45 @@ var InputGroup = React.createClass({
   }
 });
 
+/* A droppable zone for image files. Must send in handler(file) for when images are dropped and set image prop with that file from above. */
+var ImageDropbox = React.createClass({
+  fileToDataURL: function(file){
+    console.log("converting file type " + file.type);
+    if (file.type && (file.type == 'image/png' || file.type == 'image/svg')){
+      var reader = new FileReader();
+      reader.onload = function(e) { this.setState({ imageData: reader.result}); }.bind(this);
+      reader.readAsDataURL(file);
+    }
+    else
+      return "";
+  },
+  getInitialState: function() {
+    return {
+      imageData: this.props.image ? this.fileToDataURL(this.props.image) : ""
+    };
+  },
+  fileHandler: function(file){
+    console.log("A file has been dropped on the Dropzone!");
+    console.log(file);
+    this.fileToDataURL(file);
+    this.props.onDroppedImage(file);
+
+  },
+  render: function() {
+    var imageDisplay = this.state.imageData ? (<img src={this.state.imageData} />) : "";
+    return (
+      <div className="control-group">
+        <label className="control-label" htmlFor={this.props.name}>{this.props.label}</label>
+        <div className="controls">
+          <Dropzone handler={this.fileHandler} size={200} message="hello, world">
+            {imageDisplay}
+          </Dropzone>
+        </div>
+      </div>
+    );
+  }
+});
+
 
 var SubmitButton = React.createClass({
   handleClick: function(e){
@@ -88,6 +129,10 @@ var LoadingIcon = React.createClass({
 });
 
 
+/* EarnerBadgeForm 
+ * A form that allows the user to upload a new badge, indicate which of their verified email 
+ * addresses the badge belongs to, and then see the uploaded badge.
+ */
 var EarnerBadgeForm = React.createClass({
   propTypes: {
     action: ReactPropTypes.string,
@@ -102,7 +147,6 @@ var EarnerBadgeForm = React.createClass({
     return {
       initialState: "ready", // "ready", "waiting", "disabled", "complete"
       earner_description: "",
-      recipientIds: ['none@example.com'],
       action: '/earn/badges'
     };
   },
@@ -113,7 +157,11 @@ var EarnerBadgeForm = React.createClass({
       earner_description: this.props.earner_description 
     };
   },
-
+  handleImageDrop: function(file){
+    this.setState({
+      image: file
+    });
+  },
   handleChange: function(event){
     //reject change unless form is ready
     if (this.state.actionState != "ready"){
@@ -167,25 +215,29 @@ var EarnerBadgeForm = React.createClass({
 
   render: function(){
     var loadingIcon = this.state.actionState == "waiting" ? (<LoadingIcon />) : "";
-    var badgeImage = this.props.image ? (<img src={this.props.image} />) : "";
     var formResult = "";
     if (this.state.result){
       item = this.state.result;
       formResult = (<OpenBadge 
         pk={item.badge.pk}
-        display="thumbnail"
+        display="detail"
         image={ item.badge.image }
         badge={ item.badge.full_badge_object }
         earner={ item.badge.recipient_input }
         setActiveBadgeId={ function(event){return;} }
       />)
-
+    }
+    var imageDropbox = "";
+    if (this.state.actionState == "ready" || this.state.actionState == "waiting"){
+      imageDropbox = (<ImageDropbox onDroppedImage={this.handleImageDrop} image={this.state.image} />)
     }
     return (
       <div className="earner-badge-form-container">
         <form action={this.props.action} method="POST" className={this.state.actionState == "waiting" ? "form-horizontal disabled" : "form-horizontal"}>
           <fieldset>
-            { badgeImage }
+
+            {imageDropbox}
+            {formResult}
 
             <InputGroup name="image" inputType="filebutton" label="Badge Image" handleChange={this.handleChange} />
 
@@ -205,7 +257,7 @@ var EarnerBadgeForm = React.createClass({
             { loadingIcon }
           </fieldset>
         </form>
-        {formResult}
+        
       </div>
     )
   }
