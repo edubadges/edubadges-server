@@ -3,13 +3,18 @@ var RouterMixin = require('react-mini-router').RouterMixin;
 var navigate = require('react-mini-router').navigate;
 
 // Stores
-var RouteStore = require('../stores/RouteStore.js');
-var ItemsStore = require('../stores/MenuStore.js');
+var RouteStore = require('../stores/RouteStore');
+var ItemsStore = require('../stores/MenuStore');
+var APIStore = require('../stores/APIStore');
 
 // Components
 var TopLinks = require('../components/TopLinks.jsx');
 var SideBarNav = require('../components/SideBarNav.jsx');
 var OpenBadgeList = require('../components/OpenBadgeList.jsx');
+var EarnerBadgeForm = require('../components/Form.jsx').EarnerBadgeForm;
+
+// Actions
+var LifeCycleActions = require('../actions/lifecycle');
 
 var App = React.createClass({
   mixins: [RouterMixin],
@@ -18,6 +23,8 @@ var App = React.createClass({
   routes: {
     '/': 'home',
     '/earn': 'earnerHome',
+    '/earn/badges': 'earnerBadgeCreate',
+    '/earn/badges/:id': 'earnerBadgeEdit',
     '/issue/notifications/new': 'issuerNotificationForm',
     '/issue/notifications/:id': 'issuerNotificationView',
     '/issuer/certificates/new': 'issuerCertificateForm',
@@ -41,22 +48,41 @@ var App = React.createClass({
   },
   getInitialState: function() {
     return {
+      earnerBadges: [],
       activeTopMenu: null,
+      activeBadgeId: null,
       path: window.location.pathname
     };
   },
+  componentWillMount: function() {
+    LifeCycleActions.appWillMount();
+  },
   componentDidMount: function() {
+    this.setState(
+      { earnerBadges: APIStore.getCollection('earnerBadges') }
+    );
+
     ItemsStore.addListener('UNCAUGHT_DOCUMENT_CLICK', this._hideMenu);
     RouteStore.addListener('ROUTE_CHANGED', this.handleRouteChange);
+    APIStore.addListener('DATA_UPDATED_earnerBadges', function(){
+      this.setState( {earnerBadges: APIStore.getCollection('earnerBadges')} );
+    }.bind(this));
   },
 
   // Menu visual display functions:
+
   setActiveTopMenu: function(key){
     this.setState({activeTopMenu: key});
   },
   _hideMenu: function(){
     if (this.state.activeTopMenu != null)
       this.setState({activeTopMenu: null});
+  },
+
+  // Badge inspection tools
+  setActiveBadgeId: function(key){
+    console.log("Setting the activeBadgeId now to " + key);
+    this.setState({activeBadgeId: key});
   },
 
   /***   ---   RENDERING   ---   ***/
@@ -110,7 +136,24 @@ var App = React.createClass({
   },
 
   earnerHome: function() {
-    var mainComponent = ( <OpenBadgeList /> );
+    var mainComponent = (
+      <OpenBadgeList
+        badgeList={this.state.earnerBadges}
+        activeBadgeId={this.state.activeBadgeId}
+        setActiveBadgeId={this.setActiveBadgeId}
+      /> 
+    );
+    return this.render_base(mainComponent);
+  },
+
+  earnerBadgeCreate: function() {
+    var props = {
+      recipientIds: ['nate@ottonomy.net', 'ottonomy@gmail.com'],
+      formState: 'active'
+    }
+    var mainComponent = (
+      <EarnerBadgeForm {...props} />
+    );
     return this.render_base(mainComponent);
   },
 

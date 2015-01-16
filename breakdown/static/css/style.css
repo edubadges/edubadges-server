@@ -3,3 +3,29 @@
 
 .navbar-static-top {
   margin-bottom: 0; }
+
+.badge-display {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  padding: 0.25em;
+  float: left;
+  border: 1px solid #ccc;
+  border-radius: 4px; }
+
+.badge-display-thumbnail {
+  overflow: hidden;
+  height: 310px; }
+  .badge-display-thumbnail .badgeProperty span.propertyValue {
+    font-weight: bold; }
+
+img {
+  max-width: 100%;
+  height: auto; }
+
+.loading-icon {
+  height: 2em;
+  width: 2em;
+  background: transparent url('/static/images/ajax-loader.gif') no-repeat center center; }
+
+form.disabled, form.disabled textarea {
+  background-color: #ddd; }

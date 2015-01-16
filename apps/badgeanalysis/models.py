@@ -41,6 +41,7 @@ class OpenBadge(basic_models.DefaultModel):
     image = models.ImageField(upload_to=badgeanalysis.utils.image_upload_to(), blank=True)
     badge_input = models.TextField(blank=True, null=True)
     recipient_input = models.CharField(blank=True, max_length=2048)
+    
     full_badge_object = JSONField()
     full_ld_expanded = JSONField()
     verify_method = models.CharField(max_length=48, blank=True)
@@ -207,7 +208,7 @@ class OpenBadge(basic_models.DefaultModel):
                 del full['assertion']['image']  
         if 'badgeclass' in full and 'image' in full['badgeclass']:
             if self.image and dataUri.match(full['badgeclass']['image']):
-                full['badgeclass']['image'] = self.eventualImageUrl()
+                full['badgeclass']['image'] = self.image.url
 
     def eventualImageUrl(self):
         # A dirty workaround for a 7-year old Django bug that filefields can't access the upload_to
@@ -252,7 +253,7 @@ class OpenBadge(basic_models.DefaultModel):
 
     """
     Tools to inspect an initialized badge object
-    """ 
+    """
 
     # Dangerous: We should use LD-based methods when possible to reduce cross-version problems.
     def getProp(self, parent, prop):

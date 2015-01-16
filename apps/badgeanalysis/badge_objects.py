@@ -48,7 +48,7 @@ class BadgeObject(object):
             except Exception as e:
                 raise TypeError(
                     "Couldn't fetch badgeMetaObject['badgeObject'] on input. We tried to load "
-                    + badgeMetaObject['badgeObject'] + " -- got error " + e
+                    + badgeMetaObject['badgeObject'] + " -- got error " + e.message
                 )
                 return
 

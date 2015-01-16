@@ -173,7 +173,7 @@ def fetch_linked_component(url, documentLoader=None):
         result = result['document']
 
     except (jsonld.JsonLdError, Exception) as e:
-        raise IOError("error loading document " + url + " " + e)
+        raise IOError("error loading document " + url + " " + e.message)
         return None
     else:
         return result

@@ -34,14 +34,12 @@ var fakeSerializedBadge = {
       text: "awesomeness, exceptionalness, superiority, queenliness"
     }
   }, 
-  issuer: {
+  issuerorg: {
     type: "link",
     text: "Example Issuer",
     href: "http://example.org"
   }
 }
-
-
 
 var Property = React.createClass({
   /* props = {
@@ -54,6 +52,11 @@ var Property = React.createClass({
     }
   }
   */
+  REQUIRED_VALUES_FOR_TYPE: {
+    "text": ["text"],
+    "link": ["href"],
+    "image": ["text", "href"]
+  },
   getDefaultProps: function() {
     var props = {
       label: true,
@@ -69,11 +72,8 @@ var Property = React.createClass({
     var KNOWN_TYPES = {
       "text": this.renderStringValue,
       "link": this.renderLinkValue,
-      "image": this.renderImageValue
-    }
-    // add non-clickable link handling on this.props.clickableLink=false
-
-
+      "image": this.renderImageValue,
+    };
     return KNOWN_TYPES[property.type](property);
   },
   renderStringValue: function(property){
@@ -82,8 +82,11 @@ var Property = React.createClass({
     );
   },
   renderLinkValue: function(value){
+    // TODO: preventDefault() on thumbnail view
+    //if (!this.props.linksClickable)
+
     return (
-        <a href={value.href}>{value.text || value.href }</a>
+        <a href={value.href} >{value.text || value.href }</a>
       );
   },
   renderImageValue: function(value){
@@ -91,13 +94,34 @@ var Property = React.createClass({
       <img className="propertyImage" src={value.href} alt={value.text} />
     );
   },
-  render: function(){
+  hasRequiredValues: function(){
+    var errorExists = false;
+    var necessaryProps = this.REQUIRED_VALUES_FOR_TYPE[this.props.property.type];
+    for (var i=0; i < necessaryProps.length; i++){
+      if (!this.props.property.hasOwnProperty(necessaryProps[i]))
+        errorExists = true;
+    }
+    return !errorExists;
+  },
+  canIRender: function(){
     return (
-      <div className="badgeProperty">
-        { this.props.label ? this.renderPropertyName(this.props.property.name) : null }
-        { this.renderPropertyValue(this.props.property) }
-      </div>
-    );
+      this.props.property &&
+      this.props.name && this.props.property.type &&
+      this.REQUIRED_VALUES_FOR_TYPE.hasOwnProperty(this.props.property.type) &&
+      this.hasRequiredValues()
+    )
+  },
+  render: function(){
+    if (this.canIRender()){
+      return (
+        <div className="badgeProperty">
+          { this.props.label ? this.renderPropertyName(this.props.property.name) : null }
+          { this.renderPropertyValue(this.props.property) }
+        </div>
+      );
+    }
+    else
+      return (<span className="missingProperty badgeProperty"></span>);
   }
 });
 
@@ -119,12 +143,15 @@ var Extension = React.createClass({
 
 
 var BadgeDisplayThumbnail = React.createClass({
+  handleClick: function(){
+    this.props.setActiveBadgeId(this.props.pk);
+  },
   render: function() {
     return (
-      <div className='badge-display badge-display-thumbnail'>
-        <Property name='Badge Image' label={false} property={this.props.badgeclass.image} />
+      <div className='badge-display badge-display-thumbnail col-sm-4 col-md-3 col-lg-2' onClick={this.handleClick} >
+        <Property name='Badge Image' label={false} property={this.props.image} />
         <Property name='Name' label={false} property={this.props.badgeclass.name} />
-        <Property name='Issuer' label={false} property={this.props.issuer} linksClickable={false}/>
+        <Property name='Issuer' label={false} property={this.props.issuerorg} linksClickable={false}/>
       </div>
     );
   }
@@ -132,18 +159,22 @@ var BadgeDisplayThumbnail = React.createClass({
 
 
 var BadgeDisplayDetail = React.createClass({
+  handleClick: function(){
+    this.props.setActiveBadgeId(null);
+  },
   render: function() {
     return (
-      <div className='badge-display badge-display-detail'>
+      <div className='badge-display badge-display-detail col-sm-12'>
+        <span className="closeLink" onClick={this.handleClick}>X</span>
         <div className='property-group badgeclass'>
-          <Property name='Badge Image' label={false} property={this.props.badgeclass.image} />
+          <Property name='Badge Image' label={false} property={this.props.image} />
           <Property name='Name' property={this.props.badgeclass.name} />
           <Property name='Description' property={this.props.badgeclass.description} />
           <Property name='Criteria' property={this.props.badgeclass.criteria} />
         </div>
 
         <div className='property-group issuer'>
-          <Property name='Issuer' property={this.props.issuer} />
+          <Property name='Issuer' property={this.props.issuerorg} />
         </div>
 
         <div className='property-group assertion'>
@@ -161,14 +192,14 @@ var BadgeDisplayFull = React.createClass({
     return (
       <div className='badge-display badge-display-full'>
         <div className='property-group badgeclass'>
-          <Property name='Badge Image' label={false} property={this.props.badgeclass.image} />
+          <Property name='Badge Image' label={false} property={this.props.image} />
           <Property name='Name' property={this.props.badgeclass.name} />
           <Property name='Description' property={this.props.badgeclass.description} />
           <Property name='Criteria' property={this.props.badgeclass.criteria} />
         </div>
 
         <div className='property-group issuer'>
-          <Property name='Issuer' property={this.props.issuer} />
+          <Property name='Issuer' property={this.props.issuerorg} />
         </div>
 
         <div className='property-group assertion'>
@@ -190,20 +221,21 @@ var OpenBadge = React.createClass({
   getDefaultProps: function() {
     return {
       display: 'thumbnail',
-      badge: fakeSerializedBadge
+      badge: fakeSerializedBadge,
+      image: 'http://placekitten.com/g/300/300'
     };
   },
 
   innerRender: function(){
     switch(this.props.display){
       case 'detail':
-        return ( <BadgeDisplayDetail {...this.props.badge} /> );
+        return ( <BadgeDisplayDetail image={this.props.image} pk={this.props.pk} setActiveBadgeId={this.props.setActiveBadgeId} {...this.props.badge } /> );
         break;
       case 'thumbnail': 
-        return ( <BadgeDisplayThumbnail {...this.props.badge } /> );
+        return ( <BadgeDisplayThumbnail image={this.props.image} pk={this.props.pk} setActiveBadgeId={this.props.setActiveBadgeId} {...this.props.badge } /> );
         break;
       default:  // 'full'
-        return ( <BadgeDisplayFull {...this.props.badge } /> );
+        return ( <BadgeDisplayFull image={this.props.image} pk={this.props.pk} {...this.props.badge } /> );
     }
   },
 
