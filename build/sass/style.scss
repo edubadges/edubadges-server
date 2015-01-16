@@ -18,8 +18,8 @@
   border-radius: 4px;
 }
 .badge-display-thumbnail {
-  overflow-x: hidden;
-
+  overflow: hidden;
+  height: 310px;
 
   .badgeProperty {
     span.propertyValue { font-weight: bold; }
@@ -30,4 +30,10 @@ img {
   max-width: 100%;
   height: auto;
 }
+
+.loading-icon {
+  height: 2em; width: 2em;
+  background: transparent url('/static/images/ajax-loader.gif') no-repeat center center;
+}
+form.disabled, form.disabled textarea { background-color: #ddd; }
 

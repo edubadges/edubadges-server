@@ -40,6 +40,13 @@ APIStore.getCollection = function(collectionType) {
     return []
   }
 };
+APIStore.getCollectionLastItem = function(collectionType) {
+  var collection = APIStore.getCollection(collectionType);
+  if (collection.length > 0)
+    return collection[collection.length -1];
+  else
+    return {};
+}
 
 
 // listener utils
@@ -136,5 +143,7 @@ APIStore.dispatchToken = appDispatcher.register(function(payload){
 
 module.exports = {
   addListener: APIStore.addListener,
-  getCollection: APIStore.getCollection
+  removeListener: APIStore.removeListener,
+  getCollection: APIStore.getCollection,
+  getCollectionLastItem: APIStore.getCollectionLastItem
 }

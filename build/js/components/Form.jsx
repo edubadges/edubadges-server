@@ -1,6 +1,8 @@
 var React = require('react');
 var ReactPropTypes = React.PropTypes;
 var EarnerActions = require('../actions/earner');
+var OpenBadge = require('../components/BadgeDisplay.jsx').OpenBadge;
+var APIStore = require('../stores/APIStore');
 
 
 var InputGroup = React.createClass({
@@ -75,6 +77,16 @@ var SubmitButton = React.createClass({
   }
 });
 
+var LoadingIcon = React.createClass({
+  render: function(){
+    return (
+      <div className="loading-icon" >
+        <span className='sr-only'>Loading...</span>
+      </div>
+    )
+  }
+});
+
 
 var EarnerBadgeForm = React.createClass({
   propTypes: {
@@ -88,7 +100,7 @@ var EarnerBadgeForm = React.createClass({
 
   getDefaultProps: function() {
     return {
-      formState: "disabled", // "ready", "waiting", "disabled"
+      initialState: "ready", // "ready", "waiting", "disabled", "complete"
       earner_description: "",
       recipientIds: ['none@example.com'],
       action: '/earn/badges'
@@ -96,11 +108,20 @@ var EarnerBadgeForm = React.createClass({
   },
   getInitialState: function() {
     return {
+      actionState: this.props.initialState,
       recipient_input: this.props.recipientIds[0] || "",
       earner_description: this.props.earner_description 
     };
   },
+
   handleChange: function(event){
+    //reject change unless form is ready
+    if (this.state.actionState != "ready"){
+      event.stopPropagation();
+      event.preventDefault();
+      return;
+    }
+
     var field = event.target.name;
     if (field == 'image'){
       var value = event.target.files[0];
@@ -113,9 +134,7 @@ var EarnerBadgeForm = React.createClass({
     this.setState(theChange);
   },
 
-
   handleSubmit: function(e){
-
     var data = {
       recipient_input: this.state.recipient_input,
       earner_description: this.state.earner_description,
@@ -123,38 +142,71 @@ var EarnerBadgeForm = React.createClass({
     var image = this.state.image;
     if (this.props.pk)
       data['pk'] = this.props.pk;
+
+    this.setState({ actionState: 'waiting' });
     EarnerActions.submitEarnerBadgeForm(data, image);
 
     e.preventDefault(); 
     e.stopPropagation;
   },
 
+  updateWithNewBadge: function(){
+    var newBadge = APIStore.getCollectionLastItem('earnerBadges');
+    console.log(newBadge);
+    this.setState({
+      result: newBadge,
+      actionState: 'complete'
+    });
+  },
+  componentDidMount: function() {
+    APIStore.addListener('DATA_UPDATED_earnerBadges', this.updateWithNewBadge);
+  },
+  componentWillUnmount: function() {
+    APIStore.removeListener('DATA_UPDATED_earnerBadges', this.updateWithNewBadge);
+  },
+
   render: function(){
-    var isDisabled = (this.props.formState == "disabled");
+    var loadingIcon = this.state.actionState == "waiting" ? (<LoadingIcon />) : "";
     var badgeImage = this.props.image ? (<img src={this.props.image} />) : "";
+    var formResult = "";
+    if (this.state.result){
+      item = this.state.result;
+      formResult = (<OpenBadge 
+        pk={item.badge.pk}
+        display="thumbnail"
+        image={ item.badge.image }
+        badge={ item.badge.full_badge_object }
+        earner={ item.badge.recipient_input }
+        setActiveBadgeId={ function(event){return;} }
+      />)
+
+    }
     return (
-      <form action={this.props.action} method="POST" className="form-horizontal">
-        <fieldset>
-          { badgeImage }
+      <div className="earner-badge-form-container">
+        <form action={this.props.action} method="POST" className={this.state.actionState == "waiting" ? "form-horizontal disabled" : "form-horizontal"}>
+          <fieldset>
+            { badgeImage }
 
-          <InputGroup name="image" inputType="filebutton" label="Badge Image" formState={isDisabled} handleChange={this.handleChange} />
+            <InputGroup name="image" inputType="filebutton" label="Badge Image" handleChange={this.handleChange} />
 
-          <InputGroup name="earner_description" inputType="textarea" 
-            label="Earner Annotation" value={this.state.earner_description} 
-            formState={isDisabled}  handleChange={this.handleChange}
+            <InputGroup name="earner_description" inputType="textarea" 
+              label="Earner Annotation" value={this.state.earner_description} 
+              handleChange={this.handleChange}
+              />
+
+            <InputGroup name="recipient_input" 
+              inputType="select" selectOptions={this.props.recipientIds} 
+              value={this.state.recipient_input} 
+              defaultValue={this.props.recipientIds[0]} 
+              handleChange={this.handleChange}
             />
 
-          <InputGroup name="recipient_input" 
-            inputType="select" selectOptions={this.props.recipientIds} 
-            value={this.state.recipient_input} 
-            defaultValue={this.props.recipientIds[0]} 
-            formState={isDisabled} handleChange={this.handleChange}
-          />
-
-          <SubmitButton name="submit" handleClick={this.handleSubmit} formState={isDisabled} />
-
-        </fieldset>
-      </form>
+            <SubmitButton name="submit" handleClick={this.handleSubmit} />
+            { loadingIcon }
+          </fieldset>
+        </form>
+        {formResult}
+      </div>
     )
   }
 });
