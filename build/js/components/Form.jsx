@@ -118,6 +118,19 @@ var SubmitButton = React.createClass({
   }
 });
 
+var ResetButton = React.createClass({
+  render: function() {
+    return (
+      <div className="control-group">
+        <label className="control-label sr-only" htmlFor={this.props.name}>{ this.props.label || "Reset" }</label>
+        <div className="controls">
+          <button name={this.props.name} className="btn btn-danger" onClick={this.props.handleClick}>{this.props.label || "Reset" }</button>
+        </div>
+      </div>
+    );
+  }
+});
+
 var LoadingIcon = React.createClass({
   render: function(){
     return (
@@ -136,27 +149,19 @@ var LoadingIcon = React.createClass({
 var EarnerBadgeForm = React.createClass({
   propTypes: {
     action: ReactPropTypes.string,
+    formId: ReactPropTypes.string,
     recipientIds: ReactPropTypes.arrayOf(ReactPropTypes.string),
-    selectedRecipientId: ReactPropTypes.string,
     pk: ReactPropTypes.number,
-    earner_description: ReactPropTypes.string,
-    imageData: ReactPropTypes.string, 
-    message: ReactPropTypes.string
+    initialState: ReactPropTypes.object
   },
 
   getDefaultProps: function() {
     return {
-      actionState: "ready", // "ready", "waiting", "disabled", "complete"
-      intial_earner_description: "",
       action: '/earn/badges'
     };
   },
   getInitialState: function() {
-    return {
-      recipient_input: this.props.recipientIds[0] || "",
-      earner_description: this.props.earner_description,
-      actionState: this.props.actionState 
-    };
+    return this.props.initialState;
   },
   // NO, this is wrong. The App.jsx should be passing props to this component
   updateFromFormData: function(){
@@ -173,7 +178,8 @@ var EarnerBadgeForm = React.createClass({
     FormStore.removeListener('FORM_DATA_UPDATED_EarnerBadgeForm', this.handlePatch);
   },
   handleImageDrop: function(file){
-    console.log("Handling image drop...");
+    // To make sure any changes within the focused element are recorded in the form state
+    document.activeElement.blur();
 
     var reader = new FileReader();
     reader.onload = function(e) {
@@ -189,7 +195,7 @@ var EarnerBadgeForm = React.createClass({
   // handleChange fires on changes to the DOM value of form elements, updating state locally
   handleChange: function(event){
     //reject change unless form is ready
-    if (this.props.actionState != "ready"){
+    if (this.state.actionState != "ready"){
       event.stopPropagation();
       event.preventDefault();
       return;
@@ -220,7 +226,6 @@ var EarnerBadgeForm = React.createClass({
   // When an input field is blurred, a form patch is submitted if its value has changed.
   // Does not apply to the image upload field
   handleBlur: function(event){
-    console.log("TIME TO PATCH THE FORM");
     var patch = {}
     var field = event.target.name;
     var currentData = FormStore.getFormData(this.props.formId);
@@ -232,23 +237,44 @@ var EarnerBadgeForm = React.createClass({
   // This catches the result from form update and applies it to the formstate. 
   // On submit, it is how the result gets displayed.
   handlePatch: function(){
-    console.log("EarnerBadgesForm sees that its state has been updated in the FormStore.");
     // 'this' is bound: EarnerBadgeForm
-    console.log(FormStore.getFormData(this.props.formId))
-    if (this.isMounted())
-      this.setState(FormStore.getFormData(this.props.formId));
+    
+    if (this.isMounted()){
+      var newState = FormStore.getFormData(this.props.formId);
+      this.setState(newState);
+    }
   },
 
   handleSubmit: function(e){
     e.preventDefault(); 
     e.stopPropagation();
 
-    console.log("GOING TO SUBMIT THE EARNER FORM");
     FormActions.submitForm(this.props.formId);
     
   },
+  handleReset: function(e){
+    e.preventDefault();
+    e.stopPropagation();
+
+    if(!this.props.pk){
+      FormActions.patchForm(this.props.formId, {
+        recipient_input: this.props.recipientIds[0],
+        earner_description: "",
+        image: undefined,
+        imageData: "",
+        actionState: "ready", 
+        result: undefined,
+        message: undefined
+      });
+    }
+    else {
+      // TODO: write case for resetting edited form to the original badge info.
+    }
+      
+  },
 
   render: function(){
+    var messageAlert = (this.state.message) ? (<div className={"alert alert-" + this.state.message.type} >{this.state.message.content}</div>) : "";
     var loadingIcon = this.state.actionState == "waiting" ? (<LoadingIcon />) : "";
     var formResult = "";
     if (this.state.result){
@@ -260,41 +286,46 @@ var EarnerBadgeForm = React.createClass({
         badge={ item.badge.full_badge_object }
         earner={ item.badge.recipient_input }
         setActiveBadgeId={ function(event){return;} }
+        handleCloseClick={this.handleReset}
       />)
     }
-    var imageDropbox = "";
+    var activeInputs = "";
     if (this.state.actionState == "ready" || this.state.actionState == "waiting"){
-      imageDropbox = (<ImageDropbox onDroppedImage={this.handleImageDrop} image={this.state.image} imageData={this.state.imageData} />)
+      activeInputs = (
+        <fieldset>
+          <ImageDropbox onDroppedImage={this.handleImageDrop} image={this.state.image} imageData={this.state.imageData} />
+
+          <InputGroup name="image" inputType="filebutton" 
+            label="Badge Image" handleChange={this.handleChange} 
+            handleBlur={this.handleBlur}
+          />
+
+          <InputGroup name="earner_description" inputType="textarea" 
+            label="Earner Annotation" value={this.state.earner_description} 
+            handleChange={this.handleChange} handleBlur={this.handleBlur}
+          />
+
+          <InputGroup name="recipient_input" 
+            inputType="select" selectOptions={this.props.recipientIds} 
+            value={this.state.recipient_input} 
+            defaultValue={this.props.recipientIds[0]} 
+            handleChange={this.handleChange}
+            handleBlur={this.handleBlur}
+          />
+
+          <SubmitButton name="submit" handleClick={this.handleSubmit} />
+        </fieldset>
+      );
     }
     return (
       <div className="earner-badge-form-container">
         <form action={this.props.action} method="POST" className={this.state.actionState == "waiting" ? "form-horizontal disabled" : "form-horizontal"}>
-          <fieldset>
-
-            {imageDropbox}
+            {messageAlert}
             {formResult}
-
-            <InputGroup name="image" inputType="filebutton" 
-              label="Badge Image" handleChange={this.handleChange} 
-              handleBlur={this.handleBlur}
-            />
-
-            <InputGroup name="earner_description" inputType="textarea" 
-              label="Earner Annotation" value={this.state.earner_description} 
-              handleChange={this.handleChange} handleBlur={this.handleBlur}
-            />
-
-            <InputGroup name="recipient_input" 
-              inputType="select" selectOptions={this.props.recipientIds} 
-              value={this.state.recipient_input} 
-              defaultValue={this.props.recipientIds[0]} 
-              handleChange={this.handleChange}
-              handleBlur={this.handleBlur}
-            />
-
-            <SubmitButton name="submit" handleClick={this.handleSubmit} />
+            {activeInputs}
+            
+            <ResetButton name="reset" handleClick={this.handleReset} />
             { loadingIcon }
-          </fieldset>
         </form>
         
       </div>

@@ -15,5 +15,13 @@ var submitFormAction = function(formId) {
     }});
 }
 
+var resetFormAction = function(formId) {
+  appDispatcher.dispatch({ action: {
+      type: 'FORM_RESET',
+      formId: formId
+    }});
+}
+
 module.exports.patchForm = patchFormAction;
 module.exports.submitForm = submitFormAction;
+module.exports.resetForm = resetFormAction;

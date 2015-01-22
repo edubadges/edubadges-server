@@ -85,13 +85,24 @@ FormStore.dispatchToken = appDispatcher.register(function(payload){
       FormStore.emit('FORM_DATA_UPDATED_' + action.formId);
       break;
 
+    case 'FORM_RESET':
+      FormStore.setFormData(action.formId, FormStore.defaultValues[action.formId]);
+      FormStore.emit('FORM_DATA_UPDATED_' + action.formId);
+      break;
+
     case 'API_FORM_RESULT_SUCCESS':
-      console.log("GONNNA UPDATE THE FORM WITH RESULT!!!");
-      console.log(action);
       FormStore.patchForm(
         action.formId, 
         { actionState: 'complete', message: action.message, result: action.result }
       );
+      FormStore.emit('FORM_DATA_UPDATED_' + action.formId);
+      break;
+
+    case 'API_FORM_RESULT_FAILURE':
+      FormStore.patchForm( action.formId, {
+        actionState: 'ready', 
+        message: action.message
+      });
       FormStore.emit('FORM_DATA_UPDATED_' + action.formId);
       break;
 

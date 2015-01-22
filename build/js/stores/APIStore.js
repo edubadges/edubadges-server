@@ -116,13 +116,21 @@ APIStore.postEarnerBadgeForm = function(data){
       else if (response.status != 200){
         console.log("API REQUEST PROBLEM:");
         console.log(response.text);
+        APIActions.APIFormResultFailure({
+          formId: 'EarnerBadgeForm',
+          message: {type: 'danger', content: "Error adding badge: " + response.text}
+        });
       }
       else{
         console.log(newBadge);
         var newBadge = APIStore.addCollectionItem('earnerBadges', JSON.parse(response.text))
         if (newBadge){
           APIStore.emit('DATA_UPDATED_earnerBadges');
-          APIActions.APIFormResultSuccess({formId: 'EarnerBadgeForm', message: '', result: newBadge });
+          APIActions.APIFormResultSuccess({
+            formId: 'EarnerBadgeForm', 
+            message: {type: 'success', content: "Successfully added badge to your collection."}, 
+            result: newBadge 
+          });
         }
         else {
           APIStore.emit('API_STORE_FAILURE');

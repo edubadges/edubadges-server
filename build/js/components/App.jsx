@@ -161,14 +161,15 @@ var App = React.createClass({
     // If it does, id will be a string like "23"
     props['pk'] = typeof id === 'object' ? 0: parseInt(id);
 
-    var formState = FormStore.getOrInitFormData(
-      formId, 
-      { 'pk': props['pk'], 'recipient_input': props['recipientIds'][0], 'earner_description': '' } 
-      );
+    props['initialState'] = FormStore.getOrInitFormData(formId, { 
+      'pk': props['pk'], 
+      'recipient_input': props['recipientIds'][0], 
+      'earner_description': '' 
+    });
 
-    var formProps = assign(props, formState);
+    
     var mainComponent = (
-      <EarnerBadgeForm {...formProps} />
+      <EarnerBadgeForm {...props} />
     );
     return this.render_base(mainComponent);
   },
