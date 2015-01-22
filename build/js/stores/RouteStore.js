@@ -10,17 +10,19 @@ var _previous = null;
 var _current = window.location.pathname; // "/something/something"
 var _params = {};
 
-RouteStore.addListener = function(type, callback) {
-  RouteStore.on(type, callback);
-}
-
-// RouteStore.removeListener = function(type, callback) {
-//   RouteStore.removeListener(type, callback);
-// };
 
 RouteStore.getCurrentRoute = function() {
   return _current;
-}
+};
+
+// listener utils
+RouteStore.addListener = function(type, callback) {
+  RouteStore.on(type, callback);
+};
+
+// FormStore.removeListener = function(type, callback) {
+//   FormStore.removeListener(type, callback);
+// };
 
 // Register with the dispatcher
 RouteStore.dispatchToken = appDispatcher.register(function(payload){
@@ -41,5 +43,6 @@ RouteStore.dispatchToken = appDispatcher.register(function(payload){
 
 module.exports = {
   getCurrentRoute: RouteStore.getCurrentRoute,
-  addListener: RouteStore.addListener
+  addListener: RouteStore.addListener,
+  removeListener: RouteStore.removeListener
 }

@@ -159,13 +159,10 @@ var BadgeDisplayThumbnail = React.createClass({
 
 
 var BadgeDisplayDetail = React.createClass({
-  handleCloseClick: function(){
-    this.props.setActiveBadgeId(null);
-  },
   render: function() {
     return (
       <div className='badge-display badge-display-detail col-sm-12'>
-        <span className="closeLink" onClick={this.handleCloseClick}>X</span>
+        <span className="closeLink" onClick={this.props.handleCloseClick}>X</span>
         <div className='property-group badgeclass'>
           <Property name='Badge Image' label={false} property={this.props.image} />
           <Property name='Name' property={this.props.badgeclass.name} />
@@ -225,11 +222,18 @@ var OpenBadge = React.createClass({
       image: 'http://placekitten.com/g/300/300'
     };
   },
+  // allows override for displaying detail badges elsewhere than in an OpenBadgeList.
+  handleCloseClick: function(){
+    if (this.props.handleCloseClick)
+      this.props.handleCloseClick();
+    else
+      this.props.setActiveBadgeId(null);
+  },
 
   innerRender: function(){
     switch(this.props.display){
       case 'detail':
-        return ( <BadgeDisplayDetail image={this.props.image} pk={this.props.pk} setActiveBadgeId={this.props.setActiveBadgeId} {...this.props.badge } /> );
+        return ( <BadgeDisplayDetail image={this.props.image} pk={this.props.pk} handleCloseClick={this.handleCloseClick.bind(this)} {...this.props.badge } /> );
         break;
       case 'thumbnail': 
         return ( <BadgeDisplayThumbnail image={this.props.image} pk={this.props.pk} setActiveBadgeId={this.props.setActiveBadgeId} {...this.props.badge } /> );
