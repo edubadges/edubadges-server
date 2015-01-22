@@ -3,7 +3,8 @@ var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
 var request = require('superagent');
 
-var RouteStore = require('../stores/RouteStore');
+var FormStore = require('../stores/FormStore');
+var APIActions = require('../actions/api');
 
 function getCookie(name) {
     var cookieValue = null;
@@ -46,6 +47,26 @@ APIStore.getCollectionLastItem = function(collectionType) {
     return collection[collection.length -1];
   else
     return {};
+};
+APIStore.getFirstItemByPropertyValue = function(collectionType, propName, value){
+  // Will return the first item that matches -- don't use for queries where you want multiple results.
+  var collection = APIStore.getCollection(collectionType);
+  if (collection.length > 0) {
+    for (var i=0; i<collection.length; i++){
+      if (collection[i].hasOwnProperty(propName) && collection[i][propName] == value){
+        return collection[i];
+      }
+    }
+  }
+  return {};
+}
+APIStore.addCollectionItem = function(collectionKey, item) {
+  if (APIStore.collectionTypes.indexOf(collectionKey) > -1){
+    APIStore.data[collectionKey].push(item);
+    return item;
+  }
+  else
+    return false;
 }
 
 
@@ -54,9 +75,9 @@ APIStore.addListener = function(type, callback) {
   APIStore.on(type, callback);
 };
 
-// APIStore.removeListener = function(type, callback) {
-//   APIStore.removeListener(type, callback);
-// };
+// Part of eventemitter
+// APIStore.removeListener = function(type, callback)
+
 
 // on startup
 APIStore.storeInitialData = function() {
@@ -74,17 +95,9 @@ APIStore.storeInitialData = function() {
   }
 }
 
-APIStore.addCollectionItem = function(collectionKey, item) {
-  console.log("Adding item to " + collectionKey);
-  if (APIStore.collectionTypes.indexOf(key) > -1){
-    APIStore.data[key].push(item);
-    return true;
-  }
-  else
-    return false;
-}
 
-APIStore.postEarnerBadgeForm = function(data, image){
+
+APIStore.postEarnerBadgeForm = function(data){
 
   var req = request.post('/api/earner/badges')
     .set('X-CSRFToken', getCookie('csrftoken'))
@@ -92,7 +105,7 @@ APIStore.postEarnerBadgeForm = function(data, image){
     .field('recipient_input',data['recipient_input'])
     .field('earner_description', data['earner_description'])
     // .attach(image, {type: image.type})
-    .attach('image', image, 'earner_badge_upload.png')
+    .attach('image', data['image'], 'earner_badge_upload.png')
     .end(function(error, response){
       console.log(response);
       if (error){
@@ -105,21 +118,19 @@ APIStore.postEarnerBadgeForm = function(data, image){
         console.log(response.text);
       }
       else{
-        newBadge = JSON.parse(response.text);
-        console.log("ADDING NEW BADGE:");
         console.log(newBadge);
-        if (APIStore.addCollectionItem('earnerBadges', newBadge))
+        var newBadge = APIStore.addCollectionItem('earnerBadges', JSON.parse(response.text))
+        if (newBadge){
           APIStore.emit('DATA_UPDATED_earnerBadges');
+          APIActions.APIFormResultSuccess({formId: 'EarnerBadgeForm', message: '', result: newBadge });
+        }
         else {
           APIStore.emit('API_STORE_FAILURE');
           console.log("Failed to add " + response.text + " to earnerBadges");
         }
-      }
-      
-
-      
+      } 
     });
-
+  return req;
 };
 
 // Register with the dispatcher
@@ -132,8 +143,11 @@ APIStore.dispatchToken = appDispatcher.register(function(payload){
       APIStore.emit('INITIAL_DATA_LOADED');
       break;
 
-    case 'SUBMIT_EARNER_BADGE_FORM':
-      APIStore.postEarnerBadgeForm(action.data, action.image);
+    case 'FORM_SUBMIT':
+      if (action.formId == "EarnerBadgeForm")
+        APIStore.postEarnerBadgeForm(FormStore.getFormData(action.formId));
+      else
+        console.log("Unidentified form type to submit: " + action.formId);
       break;
 
     default:
@@ -145,5 +159,6 @@ module.exports = {
   addListener: APIStore.addListener,
   removeListener: APIStore.removeListener,
   getCollection: APIStore.getCollection,
-  getCollectionLastItem: APIStore.getCollectionLastItem
+  getCollectionLastItem: APIStore.getCollectionLastItem,
+  getFirstItemByPropertyValue: APIStore.getFirstItemByPropertyValue
 }

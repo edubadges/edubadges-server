@@ -1,9 +1,18 @@
 var React = require('react');
 var ReactPropTypes = React.PropTypes;
-var EarnerActions = require('../actions/earner');
-var OpenBadge = require('../components/BadgeDisplay.jsx').OpenBadge;
+
+// Stores
 var APIStore = require('../stores/APIStore');
+var FormStore = require('../stores/FormStore');
+
+// Components
+var OpenBadge = require('../components/BadgeDisplay.jsx').OpenBadge;
 var Dropzone = require('react-dropzone');
+
+// Actions
+var EarnerActions = require('../actions/earner');
+var FormActions = require('../actions/forms');
+
 
 
 /* Form components */
@@ -31,17 +40,17 @@ var InputGroup = React.createClass({
       return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="file" onChange={this.props.handleChange} /> );
     }
     else if (this.props.inputType == "text"){
-      ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="text" onChange={this.props.handleChange} /> );
+      ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="text" onChange={this.props.handleChange} onBlur={this.props.handleBlur} /> );
     }
     else if (this.props.inputType == "textarea"){
-      return ( <textarea name={this.props.name} value={this.props.value} onChange={this.props.handleChange} /> );
+      return ( <textarea name={this.props.name} value={this.props.value} onChange={this.props.handleChange} onBlur={this.props.handleBlur} /> );
     }
     else if (this.props.inputType == "select") {
       var selectOptions = this.props.selectOptions.map(function(option, index){
         return ( <option value={option} key={this.props.name + '-' + index}>{option}</option>);
       }.bind(this));
       return ( 
-        <select name={this.props.name} value={this.props.value} className="input-xlarge" onChange={this.props.handleChange}>
+        <select name={this.props.name} value={this.props.value} className="input-xlarge" onChange={this.props.handleChange} onBlur={this.props.handleBlur} >
           { selectOptions }
         </select>
       );
@@ -61,35 +70,26 @@ var InputGroup = React.createClass({
 
 /* A droppable zone for image files. Must send in handler(file) for when images are dropped and set image prop with that file from above. */
 var ImageDropbox = React.createClass({
-  fileToDataURL: function(file){
-    console.log("converting file type " + file.type);
-    if (file.type && (file.type == 'image/png' || file.type == 'image/svg')){
-      var reader = new FileReader();
-      reader.onload = function(e) { this.setState({ imageData: reader.result}); }.bind(this);
-      reader.readAsDataURL(file);
-    }
+  validateFileType: function(file){
+    if (file instanceof File && (file.type && (file.type == 'image/png' || file.type == 'image/svg')))
+      return true;
     else
-      return "";
-  },
-  getInitialState: function() {
-    return {
-      imageData: this.props.image ? this.fileToDataURL(this.props.image) : ""
-    };
+      console.log("FILE DID NOT SEEM TO VALIDATE.")
   },
   fileHandler: function(file){
     console.log("A file has been dropped on the Dropzone!");
     console.log(file);
-    this.fileToDataURL(file);
-    this.props.onDroppedImage(file);
-
+    if (this.validateFileType(file)){
+      this.props.onDroppedImage(file);
+    }
   },
   render: function() {
-    var imageDisplay = this.state.imageData ? (<img src={this.state.imageData} />) : "";
+    var imageDisplay = this.props.imageData ? (<img src={this.props.imageData} />) : "";
     return (
       <div className="control-group">
         <label className="control-label" htmlFor={this.props.name}>{this.props.label}</label>
         <div className="controls">
-          <Dropzone handler={this.fileHandler} size={200} message="hello, world">
+          <Dropzone handler={this.fileHandler} size={200} message="Drop badge image here">
             {imageDisplay}
           </Dropzone>
         </div>
@@ -140,77 +140,112 @@ var EarnerBadgeForm = React.createClass({
     selectedRecipientId: ReactPropTypes.string,
     pk: ReactPropTypes.number,
     earner_description: ReactPropTypes.string,
-    image: ReactPropTypes.string, 
+    imageData: ReactPropTypes.string, 
+    message: ReactPropTypes.string
   },
 
   getDefaultProps: function() {
     return {
-      initialState: "ready", // "ready", "waiting", "disabled", "complete"
-      earner_description: "",
+      actionState: "ready", // "ready", "waiting", "disabled", "complete"
+      intial_earner_description: "",
       action: '/earn/badges'
     };
   },
   getInitialState: function() {
     return {
-      actionState: this.props.initialState,
       recipient_input: this.props.recipientIds[0] || "",
-      earner_description: this.props.earner_description 
+      earner_description: this.props.earner_description,
+      actionState: this.props.actionState 
     };
   },
-  handleImageDrop: function(file){
-    this.setState({
-      image: file
-    });
+  // NO, this is wrong. The App.jsx should be passing props to this component
+  updateFromFormData: function(){
+    formData = FormStore.getFormData(this.props.formId);
+    this.setState(formData);
   },
+
+  // Mount/unmount the change handler based on this component's lifecycle, but use the fn passed 
+  // in as props to mutage state, because App.jsx is where state is managed.
+  componentDidMount: function() {
+    FormStore.addListener('FORM_DATA_UPDATED_EarnerBadgeForm', this.handlePatch);
+  },
+  componentWillUnmount: function() {
+    FormStore.removeListener('FORM_DATA_UPDATED_EarnerBadgeForm', this.handlePatch);
+  },
+  handleImageDrop: function(file){
+    console.log("Handling image drop...");
+
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      if (this.isMounted()){
+        FormActions.patchForm(this.props.formId, { image: file, imageData: reader.result });
+      }
+      else
+        console.log("TRIED TO SET FILE TO STATE, FAILED. WAS BUSY MOUNTING."); 
+    }.bind(this);
+    reader.readAsDataURL(file);
+
+  },
+  // handleChange fires on changes to the DOM value of form elements, updating state locally
   handleChange: function(event){
     //reject change unless form is ready
-    if (this.state.actionState != "ready"){
+    if (this.props.actionState != "ready"){
       event.stopPropagation();
       event.preventDefault();
       return;
     }
 
     var field = event.target.name;
+
+    // if file case, shortcut to image handling
     if (field == 'image'){
       var value = event.target.files[0];
+      this.handleImageDrop(value);
     }
+
+    // for other changes, manage locally
     else{
       var value = event.target.value;
+      var theChange = {};
+      theChange[field] = value;
+      if (this.isMounted())
+        this.setState(theChange);
+      else{
+        console.log("This probably should never fire: form value changed as it was unmounting..")
+        FormActions.patchForm(this.props.formId, theChange);
+      }
     }
-    var theChange = {};
-    theChange[field] = value;
-    this.setState(theChange);
+    
+  },
+  // When an input field is blurred, a form patch is submitted if its value has changed.
+  // Does not apply to the image upload field
+  handleBlur: function(event){
+    console.log("TIME TO PATCH THE FORM");
+    var patch = {}
+    var field = event.target.name;
+    var currentData = FormStore.getFormData(this.props.formId);
+    if (currentData[field] !== event.target.value){
+      patch[field] = event.target.value;
+      FormActions.patchForm(this.props.formId, patch);
+    }
+  },
+  // This catches the result from form update and applies it to the formstate. 
+  // On submit, it is how the result gets displayed.
+  handlePatch: function(){
+    console.log("EarnerBadgesForm sees that its state has been updated in the FormStore.");
+    // 'this' is bound: EarnerBadgeForm
+    console.log(FormStore.getFormData(this.props.formId))
+    if (this.isMounted())
+      this.setState(FormStore.getFormData(this.props.formId));
   },
 
   handleSubmit: function(e){
-    var data = {
-      recipient_input: this.state.recipient_input,
-      earner_description: this.state.earner_description,
-    };
-    var image = this.state.image;
-    if (this.props.pk)
-      data['pk'] = this.props.pk;
-
-    this.setState({ actionState: 'waiting' });
-    EarnerActions.submitEarnerBadgeForm(data, image);
-
     e.preventDefault(); 
-    e.stopPropagation;
-  },
+    e.stopPropagation();
 
-  updateWithNewBadge: function(){
-    var newBadge = APIStore.getCollectionLastItem('earnerBadges');
-    console.log(newBadge);
-    this.setState({
-      result: newBadge,
-      actionState: 'complete'
-    });
-  },
-  componentDidMount: function() {
-    APIStore.addListener('DATA_UPDATED_earnerBadges', this.updateWithNewBadge);
-  },
-  componentWillUnmount: function() {
-    APIStore.removeListener('DATA_UPDATED_earnerBadges', this.updateWithNewBadge);
+    console.log("GOING TO SUBMIT THE EARNER FORM");
+    FormActions.submitForm(this.props.formId);
+    
   },
 
   render: function(){
@@ -229,7 +264,7 @@ var EarnerBadgeForm = React.createClass({
     }
     var imageDropbox = "";
     if (this.state.actionState == "ready" || this.state.actionState == "waiting"){
-      imageDropbox = (<ImageDropbox onDroppedImage={this.handleImageDrop} image={this.state.image} />)
+      imageDropbox = (<ImageDropbox onDroppedImage={this.handleImageDrop} image={this.state.image} imageData={this.state.imageData} />)
     }
     return (
       <div className="earner-badge-form-container">
@@ -239,18 +274,22 @@ var EarnerBadgeForm = React.createClass({
             {imageDropbox}
             {formResult}
 
-            <InputGroup name="image" inputType="filebutton" label="Badge Image" handleChange={this.handleChange} />
+            <InputGroup name="image" inputType="filebutton" 
+              label="Badge Image" handleChange={this.handleChange} 
+              handleBlur={this.handleBlur}
+            />
 
             <InputGroup name="earner_description" inputType="textarea" 
               label="Earner Annotation" value={this.state.earner_description} 
-              handleChange={this.handleChange}
-              />
+              handleChange={this.handleChange} handleBlur={this.handleBlur}
+            />
 
             <InputGroup name="recipient_input" 
               inputType="select" selectOptions={this.props.recipientIds} 
               value={this.state.recipient_input} 
               defaultValue={this.props.recipientIds[0]} 
               handleChange={this.handleChange}
+              handleBlur={this.handleBlur}
             />
 
             <SubmitButton name="submit" handleClick={this.handleSubmit} />

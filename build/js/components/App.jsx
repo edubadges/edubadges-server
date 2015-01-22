@@ -1,11 +1,13 @@
 var React = require('react');
 var RouterMixin = require('react-mini-router').RouterMixin;
 var navigate = require('react-mini-router').navigate;
+var assign = require('object-assign');
 
 // Stores
 var RouteStore = require('../stores/RouteStore');
 var ItemsStore = require('../stores/MenuStore');
 var APIStore = require('../stores/APIStore');
+var FormStore = require('../stores/FormStore');
 
 // Components
 var TopLinks = require('../components/TopLinks.jsx');
@@ -15,6 +17,7 @@ var EarnerBadgeForm = require('../components/Form.jsx').EarnerBadgeForm;
 
 // Actions
 var LifeCycleActions = require('../actions/lifecycle');
+var FormActions = require('../actions/forms');
 
 var App = React.createClass({
   mixins: [RouterMixin],
@@ -23,12 +26,12 @@ var App = React.createClass({
   routes: {
     '/': 'home',
     '/earn': 'earnerHome',
-    '/earn/badges': 'earnerBadgeCreate',
-    '/earn/badges/:id': 'earnerBadgeEdit',
+    '/earn/badges': 'earnerBadgeForm',
+    '/earn/badges/:id': 'earnerBadgeForm',
     '/issue/notifications/new': 'issuerNotificationForm',
-    '/issue/notifications/:id': 'issuerNotificationView',
+    '/issue/notifications/:id': 'issuerNotificationView', 
     '/issuer/certificates/new': 'issuerCertificateForm',
-    '/issuer/certificates/:id': 'issuerCertificateView',
+    '/issuer/certificates/:id': 'issuerCertificateView', 
     '/understand': 'consumerHome'
   },
 
@@ -65,6 +68,7 @@ var App = React.createClass({
     ItemsStore.addListener('UNCAUGHT_DOCUMENT_CLICK', this._hideMenu);
     RouteStore.addListener('ROUTE_CHANGED', this.handleRouteChange);
     APIStore.addListener('DATA_UPDATED_earnerBadges', function(){
+      // TODO: implement test: if (APIStore.routeUsesCollection(RouteStore.getCurrentRoute(), 'earnerBadges'))
       this.setState( {earnerBadges: APIStore.getCollection('earnerBadges')} );
     }.bind(this));
   },
@@ -146,13 +150,25 @@ var App = React.createClass({
     return this.render_base(mainComponent);
   },
 
-  earnerBadgeCreate: function() {
+  earnerBadgeForm: function(id) {
+    var formId = 'EarnerBadgeForm';
     var props = {
+      formId: formId,
+      // TODO: send recipientIds with initialData via a django rest EarnerSerializer
       recipientIds: ['nate@ottonomy.net', 'ottonomy@gmail.com'],
-      formState: 'active'
-    }
+    };
+    // If path doesn't contain a id, id will be { "": undefined }, 
+    // If it does, id will be a string like "23"
+    props['pk'] = typeof id === 'object' ? 0: parseInt(id);
+
+    var formState = FormStore.getOrInitFormData(
+      formId, 
+      { 'pk': props['pk'], 'recipient_input': props['recipientIds'][0], 'earner_description': '' } 
+      );
+
+    var formProps = assign(props, formState);
     var mainComponent = (
-      <EarnerBadgeForm {...props} />
+      <EarnerBadgeForm {...formProps} />
     );
     return this.render_base(mainComponent);
   },
