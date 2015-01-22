@@ -219,18 +219,21 @@ var OpenBadge = React.createClass({
     return {
       display: 'thumbnail',
       badge: fakeSerializedBadge,
-      image: 'http://placekitten.com/g/300/300',
-      handleCloseClick: function(){
-        this.props.setActiveBadgeId(null);
-      }
+      image: 'http://placekitten.com/g/300/300'
     };
   },
-
+  // allows override for displaying detail badges elsewhere than in an OpenBadgeList.
+  handleCloseClick: function(){
+    if (this.props.handleCloseClick)
+      this.props.handleCloseClick();
+    else
+      this.props.setActiveBadgeId(null);
+  },
 
   innerRender: function(){
     switch(this.props.display){
       case 'detail':
-        return ( <BadgeDisplayDetail image={this.props.image} pk={this.props.pk} handleCloseClick={this.props.handleCloseClick.bind(this)} {...this.props.badge } /> );
+        return ( <BadgeDisplayDetail image={this.props.image} pk={this.props.pk} handleCloseClick={this.handleCloseClick.bind(this)} {...this.props.badge } /> );
         break;
       case 'thumbnail': 
         return ( <BadgeDisplayThumbnail image={this.props.image} pk={this.props.pk} setActiveBadgeId={this.props.setActiveBadgeId} {...this.props.badge } /> );
