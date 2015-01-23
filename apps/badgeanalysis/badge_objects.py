@@ -10,6 +10,8 @@ import badgeanalysis.utils
 from scheme_models import BadgeScheme
 from badgeanalysis.functional_validators import assertionRecipientValidator
 
+
+
 class BadgeObject(object):
     CLASS_TYPE = 'unknown'
 
@@ -44,7 +46,7 @@ class BadgeObject(object):
         if isinstance(badgeMetaObject['badgeObject'], (str, unicode)) and badgeanalysis.utils.test_probable_url(badgeMetaObject['badgeObject']):
             badgeMetaObject['id'] = badgeMetaObject['badgeObject']
             try:
-                badgeMetaObject['badgeObject'] = json.loads(docloader(badgeMetaObject['id']))
+                badgeMetaObject['badgeObject'] = badgeanalysis.utils.try_json_load(docloader(badgeMetaObject['id']))
             except Exception as e:
                 raise TypeError(
                     "Couldn't fetch badgeMetaObject['badgeObject'] on input. We tried to load "

@@ -67,6 +67,7 @@ class OpenBadge(basic_models.DefaultModel):
             self.init_badge_analysis(*args, **kwargs)
 
         # finally, save the OpenBadge after doing all that stuff in case it's a new one
+        if 'docloader' in kwargs: del kwargs['docloader']
         super(OpenBadge, self).save(*args, **kwargs)
 
     def init_badge_analysis(self, *args, **kwargs):
@@ -105,17 +106,17 @@ class OpenBadge(basic_models.DefaultModel):
 
         # Process the initial input
         # Returns a dict with badgeObject property for processed object and 'type', 'context', 'id' properties
-        assertionMeta = badge_object_class('assertion').processBadgeObject({
-            'badgeObject': self.badge_input,
-            'recipient_input': self.recipient_input
-        })
+        assertionMeta = badge_object_class('assertion').processBadgeObject(
+            {'badgeObject': self.badge_input, 'recipient_input': self.recipient_input},
+            **{ 'docloader': kwargs.get('docloader', None)}
+        )
         handle_init_errors(assertionMeta)
 
         if not assertionMeta['badgeObject']:
             raise IOError("Could not build a full badge object without having a properly stored inputObject")
 
         full = {
-            '@context': assertionMeta['context'] or 'http://standard.openbadges.org/1.1/context',
+            '@context': assertionMeta['context'] or 'http://standard.openbadges.org/1.1/context.json',
             '@type': 'obi:OpenBadge'
         }
 
@@ -137,7 +138,8 @@ class OpenBadge(basic_models.DefaultModel):
                 # For 1.0 etc compliant badges with linked badgeclass
                 if isinstance(full['assertion']['badge'], (str, unicode)):
                     theBadgeClassMeta = badge_object_class('badgeclass').processBadgeObject(
-                        {'badgeObject': full['assertion']['badge']}
+                        {'badgeObject': full['assertion']['badge']},
+                        **{ 'docloader': kwargs.get('docloader', None)}
                     )
                     handle_init_errors(theBadgeClassMeta)
 
@@ -153,7 +155,8 @@ class OpenBadge(basic_models.DefaultModel):
             if isinstance(full['badgeclass'], dict) and not 'issuerorg' in full:
                 if isinstance(full['badgeclass']['issuer'], (str, unicode)):
                     theIssuerOrgMeta = badge_object_class('issuerorg').processBadgeObject(
-                        {'badgeObject': full['badgeclass']['issuer']}
+                        {'badgeObject': full['badgeclass']['issuer']},
+                        **{ 'docloader': kwargs.get('docloader', None)}
                     )
                     handle_init_errors(theIssuerOrgMeta)
 
@@ -174,7 +177,7 @@ class OpenBadge(basic_models.DefaultModel):
         self.truncate_images()
 
         # TODO: allow custom docloader to be passed into save in kwargs, pass it along to processBadgeObject and here.
-        expand_options = {"documentLoader": BadgeScheme.custom_context_docloader}
+        expand_options = {"documentLoader": kwargs.get('docloader', BadgeScheme.custom_context_docloader)}
         self.full_ld_expanded = jsonld.expand(full, expand_options)
         # control resumes in save()
 

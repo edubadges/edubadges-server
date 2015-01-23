@@ -10,6 +10,7 @@ from badgeanalysis.scheme_models import BadgeScheme, BadgeSchemaValidator
 from badgeanalysis.models import OpenBadge
 from badgeanalysis.badge_objects import Assertion, BadgeClass, IssuerOrg, Extension, BadgeObject, badge_object_class
 from badgeanalysis.validation_messages import BadgeValidationError
+from badgeanalysis.cur_context import current_context
 
 
 # Construct a docloader function that will return preloaded responses for predetermined URLs
@@ -298,7 +299,7 @@ valid_1_0_docloader = mock_docloader_factory(
 )
 
 simpleOneOne = {
-    "@context": "http://standard.openbadges.org/1.1/context",
+    "@context": "http://standard.openbadges.org/1.1/context.json",
     "@type": "assertion",
     "@id": "http://example.org/assertion25",
     "uid": 25,
@@ -309,7 +310,7 @@ simpleOneOne = {
     "badge": "http://example.org/badge1"
 }
 simpleOneOneBC = {
-    "@context": "http://standard.openbadges.org/1.1/context",
+    "@context": "http://standard.openbadges.org/1.1/context.json",
     "@type": "badgeclass",
     "@id": "http://example.org/badge1",
     "name": "Badge of Awesome",
@@ -319,7 +320,7 @@ simpleOneOneBC = {
     "issuer": "http://example.org/issuer"
 }
 simpleOneOneIssuer = {
-    "@context": "http://standard.openbadges.org/1.1/context",
+    "@context": "http://standard.openbadges.org/1.1/context.json",
     "@type": "issuerorg",
     "@id": "http://example.org/issuer",
     "name": "Issuer of Awesome",
@@ -329,36 +330,39 @@ oneone_docloader = mock_docloader_factory(
     {
         'http://example.org/assertion25': simpleOneOne,
         'http://example.org/badge1': simpleOneOneBC,
-        'http://example.org/issuer': simpleOneOneIssuer
+        'http://example.org/issuer': simpleOneOneIssuer,
+        'http://standard.openbadges.org/1.1/context.json': { 'document': current_context(), 'contextUrl': None, 'documentUrl': 'http://standard.openbadges.org/1.1/context.json' }
     }
 )
 
 oneOneArrayType = {
-    "@context": "http://standard.openbadges.org/1.1/context",
+    "@context": "http://standard.openbadges.org/1.1/context.json",
     "@type": ["assertion", "http://othertype.com/type"],
     "@id": "http://example.org/assertion25",
     "uid": 25
 }
 
 oneOneNonUrlID = {
-    "@context": "http://standard.openbadges.org/1.1/context",
+    "@context": "http://standard.openbadges.org/1.1/context.json",
     "@type": "assertion",
     "@id": "assertion25",
     "uid": 25
 }
 simpleOneOneNoId = {
-    "@context": "http://standard.openbadges.org/1.1/context",
+    "@context": "http://standard.openbadges.org/1.1/context.json",
     "@type": "assertion",
     "verify": {"type": "hosted", "url": "http://example.org/assertion25"},
     "uid": 25
 }
 
 
-# class OpenBadgeTests(TestCase):
-#     def test_validateMainContext(self):
-#         context = "http://standard.openbadges.org/1.1/context"
-#         a = OpenBadge.validateMainContext(OpenBadge(simpleOneOne), context)
-#         self.assertEqual(a, context)
+class OpenBadgeTests(TestCase):
+    fixtures = ['0001_initial_superuser','0002_initial_schemes_and_validators']
+
+    def test_save_badge_with_custom_docloader(self):
+        badge = OpenBadge(badge_input=simpleOneOne, recipient_input='testuser@example.org')
+        badge.save(**{'docloader': oneone_docloader})
+        self.assertTrue(badge.pk is not None)
 
 #     def test_simple_OpenBadge_construction_noErrors(self):
 #         try:
