@@ -6,6 +6,7 @@ from jsonschema import validate, Draft4Validator, draft4_format_checker
 from jsonschema.exceptions import FormatError, ValidationError
 import os
 import re
+import hashlib
 from pyld import jsonld
 import pngutils
 from cur_context import current_context
@@ -35,15 +36,14 @@ def load_context_from_filesystem(filename):
     return contextFiles[filename]
 
 
-
 def verify_recipient(identifier, hash_string, salt):
     """
     Check if a badge recipient is indeed the expected recipient (email address)
     """
     if hash_string.startswith('sha256$'):
-        return hash_string == 'sha256$' + hashlib.sha256(email+salt).hexdigest()
+        return hash_string == 'sha256$' + hashlib.sha256(identifier+salt).hexdigest()
     elif hash_string.startswith('md5$'):
-        return hash_string == 'md5$' + hashlib.md5(email+salt).hexdigest()
+        return hash_string == 'md5$' + hashlib.md5(identifier+salt).hexdigest()
 
 
 def is_json(string):

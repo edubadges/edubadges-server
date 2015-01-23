@@ -6,6 +6,7 @@ from jsonschema import Draft4Validator
 import pngutils
 
 import utils
+from badgeanalysis.scheme_models import BadgeScheme, BadgeSchemaValidator
 from badgeanalysis.models import OpenBadge
 from badgeanalysis.badge_objects import Assertion, BadgeClass, IssuerOrg, Extension, BadgeObject, badge_object_class
 from badgeanalysis.validation_messages import BadgeValidationError
@@ -63,6 +64,8 @@ class BadgeUtilsTests(TestCase):
 
 
 class BadgeSchemaTests(TestCase):
+    fixtures = ['0001_initial_superuser','0002_initial_schemes_and_validators']
+
     # def test_check_schema(self):
     #   """
     #   Make sure some schema that we're using doesn't make the validator choke. This tests them all but the
@@ -72,6 +75,55 @@ class BadgeSchemaTests(TestCase):
     #   schemaList = ['plainuri.json','backpack-error-from-valid-1.0.json','OBI-v0.5-assertion.json','OBI-v1.0-linked-badgeclass.json']
     #   for schema in schemaList:
     #       self.assertEqual(Draft4Validator.check_schema(json.loads(open(os.path.join(os.path.dirname(__file__),'schema',schema),'r').read())), None)
+    def test_achievery_assertion_for_schema_match(self):
+        # "issuedOn": "2014-09-05T21:45:09.000Z",
+        assertion = """{
+            "recipient": "sha256$1a29bbe7d65355ce7647793396041c7bebbe333e677222c5ca116f5cc038b9ef",
+            "verify": {
+                "type": "hosted",
+                "url": "http://app.achievery.com/badge-assertion/4613"
+            },
+            "uid": "4613",
+            "issuedOn": "2014-09-05",
+            "expires": null,
+            "badge": {
+                "name": "DPD Project Contributor",
+                "description": "Awarded for team members on the DPD project that studied badge system design from 2012-2014.",
+                "image": "https://images.achievery.com/badgeImages/DPDContributorBadge_1716_1.png",
+                "tags": [
+                    "Higher Education",
+                    "Writing"
+                ],
+                "issuer": {
+                    "name": "Design Principles Documentation Project",
+                    "image": "https://images.achievery.com/organization/badger-icon-transparent.png",
+                    "url": "http://app.achievery.com/passport/id/2515",
+                    "_location": "http://app.achievery.com/badge-issuer/1716",
+                    "origin": "http://app.achievery.com"
+                },
+                "criteria": "http://app.achievery.com/badge/1716",
+                "alignment": [
+                    {
+                        "name": "DPD Project Website",
+                        "url": "http://dpdproject.info",
+                        "description": "The homepage for the DPD Project showcases design principles for using digital badges for learning, related research literature, analysis of common challenges, and badge system design tools developed by the team."
+                    }
+                ],
+                "_location": "http://app.achievery.com/badge-class/1716"
+            },
+            "evidence": "http://app.achievery.com/badge-earned/4613",
+            "image": "https://images.achievery.com/badgeImages/DPDContributorBadge_1716_1.png",
+            "_originalRecipient": {
+                "type": "email",
+                "hashed": true,
+                "salt": "2zjIsSSl12PiZJkiq4Hq33ImLFhHMBHBrSzDyc9DiOtGVg8P7VDVPNa2QgAXHQQ9",
+                "identity": "sha256$1a29bbe7d65355ce7647793396041c7bebbe333e677222c5ca116f5cc038b9ef"
+            },
+            "salt": "2zjIsSSl12PiZJkiq4Hq33ImLFhHMBHBrSzDyc9DiOtGVg8P7VDVPNa2QgAXHQQ9",
+            "issued_on": "2014-09-05T21:45:09.000Z"
+        }"""
+        schema_json = BadgeSchemaValidator.objects.get(pk=2).schema_json
+        self.assertEqual(BadgeScheme.test_against_schema_verbose(json.loads(assertion), schema_json), "None is not valid under any of the given schemas\n\nFailed validating u'anyOf' in schema[u'properties'][u'expires']:\n    {u'anyOf': [{u'$ref': u'#/definitions/ISODateTime'},\n                {u'$ref': u'#/definitions/UNIXTimeStamp'}]}\n\nOn instance[u'expires']:\n    None")
 
     def test_against_schema_true_urlstring(self):
         """

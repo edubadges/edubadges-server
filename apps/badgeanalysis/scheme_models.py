@@ -175,6 +175,19 @@ class BadgeScheme(basic_models.SlugModel):
             return True
 
     @classmethod
+    def test_against_schema_verbose(cls, badgeObject, schemaJson):
+        """
+        Reads the specified schema based on the filename registered for schemaKey, and processes it into an object with json.loads()
+        Then validates the badge object against it.
+        """
+        try:
+            validate(badgeObject, schemaJson, Draft4Validator, format_checker=draft4_format_checker)
+        except ValidationError as e:
+            return str(e)
+        else:
+            return True
+
+    @classmethod
     def custom_context_docloader(cls, url):
         # TODO: This is called from OpenBadge.init_badge_analysis, and might be called multiple times,
         # with a DB hit for each.
