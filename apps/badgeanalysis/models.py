@@ -63,11 +63,16 @@ class OpenBadge(basic_models.DefaultModel):
 
     # Core procedure for filling out an OpenBadge from an initial badgeObject follows:
     def save(self, *args, **kwargs):
+        if kwargs is None:
+            kwargs = {}
+        if not 'docloader' in kwargs: 
+            kwargs['docloader'] = badgeanalysis.utils.fetch_linked_component
+
         if not self.pk:
             self.init_badge_analysis(*args, **kwargs)
 
         # finally, save the OpenBadge after doing all that stuff in case it's a new one
-        if 'docloader' in kwargs: del kwargs['docloader']
+        del kwargs['docloader']
         super(OpenBadge, self).save(*args, **kwargs)
 
     def init_badge_analysis(self, *args, **kwargs):
@@ -108,7 +113,7 @@ class OpenBadge(basic_models.DefaultModel):
         # Returns a dict with badgeObject property for processed object and 'type', 'context', 'id' properties
         assertionMeta = badge_object_class('assertion').processBadgeObject(
             {'badgeObject': self.badge_input, 'recipient_input': self.recipient_input},
-            **{ 'docloader': kwargs.get('docloader', None)}
+            kwargs.get('docloader')
         )
         handle_init_errors(assertionMeta)
 
@@ -139,7 +144,7 @@ class OpenBadge(basic_models.DefaultModel):
                 if isinstance(full['assertion']['badge'], (str, unicode)):
                     theBadgeClassMeta = badge_object_class('badgeclass').processBadgeObject(
                         {'badgeObject': full['assertion']['badge']},
-                        **{ 'docloader': kwargs.get('docloader', None)}
+                        kwargs.get('docloader')
                     )
                     handle_init_errors(theBadgeClassMeta)
 
@@ -156,7 +161,7 @@ class OpenBadge(basic_models.DefaultModel):
                 if isinstance(full['badgeclass']['issuer'], (str, unicode)):
                     theIssuerOrgMeta = badge_object_class('issuerorg').processBadgeObject(
                         {'badgeObject': full['badgeclass']['issuer']},
-                        **{ 'docloader': kwargs.get('docloader', None)}
+                        kwargs.get('docloader')
                     )
                     handle_init_errors(theIssuerOrgMeta)
 

@@ -294,7 +294,8 @@ valid_1_0_docloader = mock_docloader_factory(
     {
         'http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205': valid_1_0_assertion,
         'http://openbadges.oregonbadgealliance.org/api/badges/53d727a11f04f3a84a99b002': valid_1_0_badgeclass,
-        'http://openbadges.oregonbadgealliance.org/api/issuers/53d41603f93ae94a733ae554': valid_1_0_issuer
+        'http://openbadges.oregonbadgealliance.org/api/issuers/53d41603f93ae94a733ae554': valid_1_0_issuer,
+        'http://standard.openbadges.org/1.0/context.json': { 'document': current_context(), 'contextUrl': None, 'documentUrl': 'http://standard.openbadges.org/1.0/context.json' }
     }
 )
 
@@ -331,6 +332,7 @@ oneone_docloader = mock_docloader_factory(
         'http://example.org/assertion25': simpleOneOne,
         'http://example.org/badge1': simpleOneOneBC,
         'http://example.org/issuer': simpleOneOneIssuer,
+        # Gotta duplicate the function of the original pyld docloader here
         'http://standard.openbadges.org/1.1/context.json': { 'document': current_context(), 'contextUrl': None, 'documentUrl': 'http://standard.openbadges.org/1.1/context.json' }
     }
 )
@@ -482,7 +484,7 @@ class OpenBadgeIntegrationTests(TestCase):
         recipient_input = 'nate@ottonomy.net'
         b = OpenBadge(badge_input=badge_input, recipient_input=recipient_input)
         try:
-            b.save()
+            b.save(**{'docloader': valid_1_0_docloader})
         except Exception as e:
             self.assertEqual(e, None)
         else: 
@@ -493,7 +495,7 @@ class OpenBadgeIntegrationTests(TestCase):
         recipient_input = 'nate@ottonomy.newt'
         b = OpenBadge(badge_input=badge_input, recipient_input=recipient_input)
         try:
-            b.save()
+            b.save(**{'docloader': valid_1_0_docloader})
         except Exception as e:
             self.assertTrue(isinstance(e, BadgeValidationError))
             self.assertEqual(e.to_dict()['validator'], 'Functional:AssertionRecipientValidator')
