@@ -4,16 +4,71 @@
 # appropriate validations and manipulations for each case without
 # embedding all that logic in the procedure itself.
 
+from django.db import models
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+from jsonfield import JSONField
 import json
 from validation_messages import BadgeValidationSuccess, BadgeValidationError
 import badgeanalysis.utils
 from scheme_models import BadgeScheme
 from badgeanalysis.functional_validators import assertionRecipientValidator
+import basic_models
 
 
-
-class BadgeObject(object):
+class BadgeObject(basic_models.TimestampedModel):
     CLASS_TYPE = 'unknown'
+    iri = models.CharField(max_length=2048)  # Internationalized Resource Identifier
+    badge_object = JSONField()
+    scheme = models.ForeignKey(BadgeScheme)
+    errors = JSONField()
+    notes = JSONField()
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        docloader = kwargs.get('docloader', badgeanalysis.utils.fetch_linked_component)
+
+        if not badgeanalysis.utils.test_probable_url(self.iri):
+            raise BadgeValidationError("Badge Object input IRI is not a known dereferencable format " + str(self.iri))
+
+        try:
+            self.badge_object = badgeanalysis.utils.try_json_load(docloader(self.iri))
+        except:
+            raise BadgeValidationError("Could not fetch " + self.CLASS_TYPE + " from " + self.iri)
+            return
+
+        try:
+            self.scheme = self.validate_object_scheme()
+        except BadgeValidationError as e:
+            raise e
+        else:
+            self.augment_badge_object_LD()
+
+    def validate_object_scheme(self):
+        context_url = badgeanalysis.utils.validateMainContext(self.badge_object.get('@context', ''))
+        if context_url is not None:
+            scheme = BadgeScheme.objects.get(slug='1_1')
+
+            val_result = scheme.test_against_schema_for(self.badge_object, self.CLASS_TYPE)
+            if isinstance(val_result, str):
+                raise BadgeValidationError(self.CLASS_TYPE + " did not validate against schema. " + val_result)
+            else:
+                self.scheme = scheme
+                return
+
+        legacy_scheme = BadgeScheme.get_legacy_scheme_match(self.badge_object, self.CLASS_TYPE)
+        if legacy_scheme is None:
+            raise TypeError("Could not determine type of badge object with known schema set")
+
+    def augment_badge_object_LD(self):
+        """ Finalize badge object by adding the @id if possible """
+        if '@id' not in self.badge_object:
+            self.badge_object['@id'] = self.iri
+        if '@type' not in self.badge_object:
+            self.badge_object['@type'] = self.CLASS_TYPE
+        if '@context' not in self.badge_object:
+            self.badge_object['@context'] = self.scheme.context_url
 
     @classmethod
     def processBadgeObject(cls, badgeMetaObject, docloader=badgeanalysis.utils.fetch_linked_component, **kwargs):
@@ -109,6 +164,28 @@ class BadgeObject(object):
 
 class Assertion(BadgeObject):
     CLASS_TYPE = 'assertion'
+    badgeclass = models.ForeignKey('badgeanalysis.BadgeClass', blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        # import pdb; pdb.set_trace();
+        try:
+            Assertion.objects.get(iri=self.iri)
+        except ObjectDoesNotExist:
+            pass
+        except MultipleObjectsReturned as e:
+            raise e
+
+        try:
+            super(Assertion, self).save(*args, **kwargs)
+        except Exception as e:
+            raise e
+            return
+
+        badgeclass_iri = self.badge_object.get('badge')
+        self.badgeclass, badgeclass_is_new = BadgeClass.objects.get_or_create(iri=badgeclass_iri)
+
+        # Actually save this to the database
+        super(BadgeObject, self).save(*args, **kwargs)
 
     @classmethod
     def processBadgeObject(cls, badgeMetaObject, docloader=badgeanalysis.utils.fetch_linked_component, **kwargs):
@@ -124,9 +201,13 @@ class Assertion(BadgeObject):
         # for assertion objects, we must always fetch the original and use that for validation,
         # rather than relying on what is supplied in a baked image or input JSON.
         try:
-            # TODO, make sure id is included in all possible badgeMetaObjects
-            real_assertion = docloader(badgeMetaObject.get('id'))
-        except:
+            # Returns existing Assertion instance if we've already stored it.
+            real_assertion, is_fresh = Assertion.objects.get_or_create(iri=badgeMetaObject.get('id'), scheme=badgeMetaObject.get('scheme'))
+        except MultipleObjectsReturned as e:
+            raise e
+        if not is_fresh:
+            badgeMetaObject['errors'].append(BadgeValidationError("Assertion already exists in database with "))
+        else:
             badgeMetaObject['errors'] = badgeMetaObject.get('errors', [])
             badgeMetaObject['errors'].append(
                 BadgeValidationError(
@@ -136,10 +217,11 @@ class Assertion(BadgeObject):
                 )
             )
             return badgeMetaObject
-        else:
-            # We're overwriting the original here. For some advanced future validation, we may want to diff the two.
-            badgeMetaObject['badgeObject'] = real_assertion
-            badgeMetaObject = super(Assertion, cls).processBadgeObject(badgeMetaObject, **kwargs)
+        ## EEP.
+        # else:
+        #     # We're overwriting the original here. For some advanced future validation, we may want to diff the two.
+        #     badgeMetaObject['badgeObject'] = real_assertion
+        #     badgeMetaObject = super(Assertion, cls).processBadgeObject(badgeMetaObject, **kwargs)
 
         # Deterimine if identifier is included (unhashed) or must be provided:
         # Case 1: identifier is missing
@@ -195,13 +277,28 @@ class Assertion(BadgeObject):
 
 class BadgeClass(BadgeObject):
     CLASS_TYPE = 'badgeclass'
+    issuerorg = models.ForeignKey('badgeanalysis.IssuerOrg', blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        try:
+            super(BadgeClass, self).save(*args, **kwargs)
+        except Exception as e:
+            raise e
+            return
+
+        issuerorg_iri = self.badge_object.get('badge')
+        self.issuerorg, issuerorg_is_new = IssuerOrg.objects.get_or_create(iri=issuerorg_iri)
+
+        # Actually save this to the database
+        super(BadgeObject, self).save(*args, **kwargs)
 
 
 class IssuerOrg(BadgeObject):
     CLASS_TYPE = 'issuerorg'
 
 
-class Extension(BadgeObject):
+# TO DO: implement extension
+class Extension():
     CLASS_TYPE = 'extension'
 
 # Grabs the appropriate class, so we can say things like:

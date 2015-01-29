@@ -18,7 +18,7 @@ import badgeanalysis.utils
 
 from functional_validators import BadgeFunctionalValidator, FunctionalValidatorList
 from validation_messages import BadgeValidationSuccess, BadgeValidationError, BadgeValidationMessage
-from badge_objects import badge_object_class
+from badge_objects import badge_object_class, Assertion, BadgeClass, IssuerOrg, Extension
 
 
 """
@@ -42,6 +42,10 @@ class OpenBadge(basic_models.DefaultModel):
     badge_input = models.TextField(blank=True, null=True)
     recipient_input = models.CharField(blank=True, max_length=2048)
     
+    assertion = models.ForeignKey(Assertion, blank=True, null=True)
+    badgeclass = models.ForeignKey(BadgeClass, blank=True, null=True)
+    issuerorg = models.ForeignKey(IssuerOrg, blank=True, null=True)
+
     full_badge_object = JSONField()
     full_ld_expanded = JSONField()
     verify_method = models.CharField(max_length=48, blank=True)

@@ -107,7 +107,7 @@ def has_context(badgeObject):
 
 # TODO: This approach will not be able to handle issuers who redirect to an OBI context.
 def validateMainContext(contextInput):
-    url = re.compile(r"standard\.openbadges\.org/[\d\.]+/context$")
+    url = re.compile(r"standard\.openbadges\.org/[\d\.]+/context")
     if isinstance(contextInput, str) and url.search(contextInput):
         return contextInput
     elif isinstance(contextInput, list):
@@ -152,8 +152,7 @@ def is_image_data_uri(imageString):
     else:
         return False
 
-
-def fetch_linked_component(url, documentLoader=None):
+def custom_docloader(url, documentLoader=None):
     """
     Unless overridden, this uses the PyLD package document loader,
     which returns a loaded document in a wrapper object.
@@ -170,13 +169,21 @@ def fetch_linked_component(url, documentLoader=None):
 
     try:
         result = loadDoc(url)
-        result = result['document']
 
     except (jsonld.JsonLdError, Exception) as e:
         raise IOError("error loading document " + url + " " + e.message)
         return None
     else:
         return result
+
+
+def fetch_linked_component(url, documentLoader=None):
+    try:
+        result = custom_docloader(url, documentLoader)
+    except IOError as e:
+        raise e
+    else:
+        return result['document']
 
 
 def get_iri_for_prop_in_current_context(shortProp):
