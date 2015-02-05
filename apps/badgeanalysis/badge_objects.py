@@ -45,6 +45,17 @@ class BadgeObject(basic_models.TimestampedModel):
         else:
             self.augment_badge_object_LD()
 
+    @classmethod
+    def detect_existing(cls, iri):
+        try:
+            existing_assertion = cls.objects.get(iri=iri)
+        except ObjectDoesNotExist:
+            return None
+        except MultipleObjectsReturned as e:
+            raise e
+        else:
+            return existing_assertion
+
     def validate_object_scheme(self):
         context_url = badgeanalysis.utils.validateMainContext(self.badge_object.get('@context', ''))
         if context_url is not None:
@@ -167,22 +178,20 @@ class Assertion(BadgeObject):
     badgeclass = models.ForeignKey('badgeanalysis.BadgeClass', blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        # import pdb; pdb.set_trace();
-        try:
-            Assertion.objects.get(iri=self.iri)
-        except ObjectDoesNotExist:
-            pass
-        except MultipleObjectsReturned as e:
-            raise e
+        existing_assertion = Assertion.detect_existing(self.iri)
+        if existing_assertion is not None:
+            return existing_assertion
 
         try:
             super(Assertion, self).save(*args, **kwargs)
         except Exception as e:
             raise e
             return
+        return self
 
         badgeclass_iri = self.badge_object.get('badge')
-        self.badgeclass, badgeclass_is_new = BadgeClass.objects.get_or_create(iri=badgeclass_iri)
+        self.badgeclass = BadgeClass(iri=badgeclass_iri)
+        self.badgeclass.save()
 
         # Actually save this to the database
         super(BadgeObject, self).save(*args, **kwargs)
@@ -280,14 +289,19 @@ class BadgeClass(BadgeObject):
     issuerorg = models.ForeignKey('badgeanalysis.IssuerOrg', blank=True, null=True)
 
     def save(self, *args, **kwargs):
+        existing_badgeclass = BadgeClass.detect_existing(self.iri)
+        if existing_badgeclass is not None:
+            return existing_badgeclass
+
         try:
             super(BadgeClass, self).save(*args, **kwargs)
         except Exception as e:
             raise e
             return
 
-        issuerorg_iri = self.badge_object.get('badge')
-        self.issuerorg, issuerorg_is_new = IssuerOrg.objects.get_or_create(iri=issuerorg_iri)
+        issuerorg_iri = self.badge_object.get('issuer')
+        self.issuerorg = IssuerOrg(iri=issuerorg_iri)
+        self.issuerorg.save()
 
         # Actually save this to the database
         super(BadgeObject, self).save(*args, **kwargs)
@@ -296,10 +310,25 @@ class BadgeClass(BadgeObject):
 class IssuerOrg(BadgeObject):
     CLASS_TYPE = 'issuerorg'
 
+    def save(self, *args, **kwargs):
+        existing_issuerorg = IssuerOrg.detect_existing(self.iri)
+        if existing_issuerorg is not None:
+            return existing_issuerorg
+
+        try:
+            super(IssuerOrg, self).save(*args, **kwargs)
+        except Exception as e:
+            raise e
+            return
+
+        # Actually save this to the database
+        super(BadgeObject, self).save(*args, **kwargs)
+
 
 # TO DO: implement extension
 class Extension():
     CLASS_TYPE = 'extension'
+
 
 # Grabs the appropriate class, so we can say things like:
 # badge_object_class('assertion').processBadgeObject(badgeObject)
