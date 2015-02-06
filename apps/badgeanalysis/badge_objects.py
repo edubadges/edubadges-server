@@ -46,6 +46,17 @@ class BadgeObject(basic_models.TimestampedModel):
             self.augment_badge_object_LD()
 
     @classmethod
+    def get_or_create_by_iri(cls, iri, *args, **kwargs):
+        existing_object = cls.detect_existing(iri)
+        if existing_object is not None:
+            return existing_object
+        else:
+            new_object = cls(iri=iri)
+            kwargs[iri] = 'new'
+            new_object.save(*args, **kwargs)
+            return new_object
+
+    @classmethod
     def detect_existing(cls, iri):
         try:
             existing_assertion = cls.objects.get(iri=iri)
@@ -177,16 +188,17 @@ class Assertion(BadgeObject):
     badgeclass = models.ForeignKey('badgeanalysis.BadgeClass', blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        existing_assertion = Assertion.detect_existing(self.iri)
-        if existing_assertion is not None:
-            return existing_assertion
+        # If existing_assertion hasn't already been tested, do that.
+        if kwargs.get(self.iri, None) != 'new':
+            existing_assertion = Assertion.detect_existing(self.iri)
+            if existing_assertion is not None:
+                return existing_assertion
 
         # TODO: What kind of exceptions might be raised here? Anything worth handling?
         super(Assertion, self).save(*args, **kwargs)
 
         badgeclass_iri = self.badge_object.get('badge')
-        self.badgeclass = BadgeClass(iri=badgeclass_iri)
-        self.badgeclass.save(*args, **kwargs)
+        self.badgeclass = BadgeClass.get_or_create_by_iri(badgeclass_iri, *args, **kwargs)
 
         # Actually save this to the database
         super(BadgeObject, self).save()
@@ -279,9 +291,11 @@ class BadgeClass(BadgeObject):
     issuerorg = models.ForeignKey('badgeanalysis.IssuerOrg', blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        existing_badgeclass = BadgeClass.detect_existing(self.iri)
-        if existing_badgeclass is not None:
-            return existing_badgeclass
+        # If existing_badgeclass hasn't already been tested, do that.
+        if kwargs.get(self.iri, None) != 'new':
+            existing_badgeclass = BadgeClass.detect_existing(self.iri)
+            if existing_badgeclass is not None:
+                return existing_badgeclass
 
         try:
             super(BadgeClass, self).save(*args, **kwargs)
@@ -290,8 +304,7 @@ class BadgeClass(BadgeObject):
             return
 
         issuerorg_iri = self.badge_object.get('issuer')
-        self.issuerorg = IssuerOrg(iri=issuerorg_iri)
-        self.issuerorg.save(*args, **kwargs)
+        self.issuerorg = IssuerOrg.get_or_create_by_iri(issuerorg_iri, *args, **kwargs)
 
         # Actually save this to the database
         super(BadgeObject, self).save()
@@ -301,9 +314,11 @@ class IssuerOrg(BadgeObject):
     CLASS_TYPE = 'issuerorg'
 
     def save(self, *args, **kwargs):
-        existing_issuerorg = IssuerOrg.detect_existing(self.iri)
-        if existing_issuerorg is not None:
-            return existing_issuerorg
+        # If existing_issuerorg hasn't already been tested, do that.
+        if kwargs.get(self.iri, None) != 'new':
+            existing_issuerorg = IssuerOrg.detect_existing(self.iri)
+            if existing_issuerorg is not None:
+                return existing_issuerorg
 
         try:
             super(IssuerOrg, self).save(*args, **kwargs)

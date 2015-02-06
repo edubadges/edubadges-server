@@ -316,6 +316,23 @@ simpleOneOne = {
     },
     "issuedOn": "2014-01-31"
 }
+simpleOneOneTwo = {
+    "@context": "http://standard.openbadges.org/1.1/context.json",
+    "@type": "assertion",
+    "@id": "http://example.org/assertion30",
+    "uid": '30',
+    "recipient": {
+        "identity": "testuser@example.org",
+        "type": "email",
+        "hashed": False
+    },
+    "badge": "http://example.org/badge1",
+    "verify": {
+        "type": "hosted",
+        "url": "http://example.org/assertion25"
+    },
+    "issuedOn": "2014-01-31"
+}
 simpleOneOneBC = {
     "@context": "http://standard.openbadges.org/1.1/context.json",
     "@type": "badgeclass",
@@ -336,6 +353,7 @@ simpleOneOneIssuer = {
 oneone_docloader = mock_docloader_factory(
     {
         'http://example.org/assertion25': simpleOneOne,
+        'http://example.org/assertion30': simpleOneOneTwo,
         'http://example.org/badge1': simpleOneOneBC,
         'http://example.org/issuer': simpleOneOneIssuer,
         # Gotta duplicate the function of the original pyld docloader here
@@ -478,6 +496,15 @@ class BadgeObjectsTests(TestCase):
         bb.save(**{'docloader': oneone_docloader})
         self.assertTrue(isinstance(bb.badgeclass, BadgeClass))
         self.assertTrue(isinstance(bb.badgeclass.issuerorg, IssuerOrg))
+
+    # def test_multiple_assertion_same_badgeclass_oneone(self):
+    #     bb = Assertion(iri='http://example.org/assertion25')
+    #     bb.save(**{'docloader': oneone_docloader})
+
+    #     cc = Assertion(iri='http://example.org/assertion30')
+    #     cc.save(**{'docloader': oneone_docloader})
+
+    #     self.assertEqual(bb.badgeclass.pk, cc.badgeclass.pk)
 
     # def create_via_OpenBadge_oneone(self):
         # b = OpenBadge(badge_input='http://example.org/assertion25', recipient_input='testuser@example.org')
