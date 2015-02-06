@@ -186,7 +186,11 @@ class OpenBadge(basic_models.DefaultModel):
         self.truncate_images()
 
         # TODO: allow custom docloader to be passed into save in kwargs, pass it along to processBadgeObject and here.
-        expand_options = {"documentLoader": kwargs.get('docloader', BadgeScheme.custom_context_docloader)}
+        if kwargs.get('docloader', None) is not None:
+            ld_docloader = badgeanalysis.utils.rewrap_docloader(kwargs.get('docloader'))
+        else:
+            ld_docloader = BadgeScheme.custom_context_docloader
+        expand_options = {"documentLoader": ld_docloader}
         self.full_ld_expanded = jsonld.expand(full, expand_options)
         # control resumes in save()
 

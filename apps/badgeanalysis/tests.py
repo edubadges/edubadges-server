@@ -430,11 +430,11 @@ class OpenBadgeTests(TestCase):
 #         self.assertEqual(openBadge.getLdProp('assertion', 'http://standard.openbadges.org/definitions#BadgeClass'), "http://example.org/badge1")
 
 
-# class ImageExtractionTests(TestCase):
-#     def test_basic_image_extract(self):
-#         imgFile = open(os.path.join(os.path.dirname(__file__), 'testfiles', '1.png'), 'r')
-#         assertion = pngutils.extract(imgFile)
-#         self.assertTrue(utils.is_json(assertion))
+class ImageExtractionTests(TestCase):
+    def test_basic_image_extract(self):
+        imgFile = open(os.path.join(os.path.dirname(__file__), 'testfiles', '1.png'), 'r')
+        assertion = pngutils.extract(imgFile)
+        self.assertTrue(utils.is_json(assertion))
 
 #         assertion = utils.try_json_load(assertion)
 #         self.assertEqual(assertion.get("uid"), "2f900c7c-f473-4bff-8173-71b57472a97f")
@@ -474,11 +474,10 @@ class BadgeObjectsTests(TestCase):
     #     self.assertEqual(b.badgeclass.iri, 'http://openbadges.oregonbadgealliance.org/api/badges/53d727a11f04f3a84a99b002')
 
     def test_assertion_badge_assertion_create_oneone(self):
-        # import pdb; pdb.set_trace();
-        b = Assertion(iri='http://example.org/assertion25')
-        b.save(**{'docloader': oneone_docloader})
-        self.assertTrue(isinstance(b.badgeclass, BadgeClass))
-        self.assertTrue(isinstance(b.badgeclass.issuerorg, IssuerOrg))
+        bb = Assertion(iri='http://example.org/assertion25')
+        bb.save(**{'docloader': oneone_docloader})
+        self.assertTrue(isinstance(bb.badgeclass, BadgeClass))
+        self.assertTrue(isinstance(bb.badgeclass.issuerorg, IssuerOrg))
 
     # def create_via_OpenBadge_oneone(self):
         # b = OpenBadge(badge_input='http://example.org/assertion25', recipient_input='testuser@example.org')

@@ -65,8 +65,7 @@ class BadgeObject(basic_models.TimestampedModel):
             if isinstance(val_result, str):
                 raise BadgeValidationError(self.CLASS_TYPE + " did not validate against schema. " + val_result)
             else:
-                self.scheme = scheme
-                return
+                return scheme
 
         legacy_scheme = BadgeScheme.get_legacy_scheme_match(self.badge_object, self.CLASS_TYPE)
         if legacy_scheme is None:
@@ -182,19 +181,15 @@ class Assertion(BadgeObject):
         if existing_assertion is not None:
             return existing_assertion
 
-        try:
-            super(Assertion, self).save(*args, **kwargs)
-        except Exception as e:
-            raise e
-            return
-        return self
+        # TODO: What kind of exceptions might be raised here? Anything worth handling?
+        super(Assertion, self).save(*args, **kwargs)
 
         badgeclass_iri = self.badge_object.get('badge')
         self.badgeclass = BadgeClass(iri=badgeclass_iri)
-        self.badgeclass.save()
+        self.badgeclass.save(*args, **kwargs)
 
         # Actually save this to the database
-        super(BadgeObject, self).save(*args, **kwargs)
+        super(BadgeObject, self).save()
 
     @classmethod
     def processBadgeObject(cls, badgeMetaObject, docloader=badgeanalysis.utils.fetch_linked_component, **kwargs):
@@ -210,13 +205,9 @@ class Assertion(BadgeObject):
         # for assertion objects, we must always fetch the original and use that for validation,
         # rather than relying on what is supplied in a baked image or input JSON.
         try:
-            # Returns existing Assertion instance if we've already stored it.
-            real_assertion, is_fresh = Assertion.objects.get_or_create(iri=badgeMetaObject.get('id'), scheme=badgeMetaObject.get('scheme'))
-        except MultipleObjectsReturned as e:
-            raise e
-        if not is_fresh:
-            badgeMetaObject['errors'].append(BadgeValidationError("Assertion already exists in database with "))
-        else:
+            # TODO, make sure id is included in all possible badgeMetaObjects
+            real_assertion = docloader(badgeMetaObject.get('id'))
+        except:
             badgeMetaObject['errors'] = badgeMetaObject.get('errors', [])
             badgeMetaObject['errors'].append(
                 BadgeValidationError(
@@ -226,11 +217,10 @@ class Assertion(BadgeObject):
                 )
             )
             return badgeMetaObject
-        ## EEP.
-        # else:
-        #     # We're overwriting the original here. For some advanced future validation, we may want to diff the two.
-        #     badgeMetaObject['badgeObject'] = real_assertion
-        #     badgeMetaObject = super(Assertion, cls).processBadgeObject(badgeMetaObject, **kwargs)
+        else:
+            # We're overwriting the original here. For some advanced future validation, we may want to diff the two.
+            badgeMetaObject['badgeObject'] = real_assertion
+            badgeMetaObject = super(Assertion, cls).processBadgeObject(badgeMetaObject, **kwargs)
 
         # Deterimine if identifier is included (unhashed) or must be provided:
         # Case 1: identifier is missing
@@ -301,10 +291,10 @@ class BadgeClass(BadgeObject):
 
         issuerorg_iri = self.badge_object.get('issuer')
         self.issuerorg = IssuerOrg(iri=issuerorg_iri)
-        self.issuerorg.save()
+        self.issuerorg.save(*args, **kwargs)
 
         # Actually save this to the database
-        super(BadgeObject, self).save(*args, **kwargs)
+        super(BadgeObject, self).save()
 
 
 class IssuerOrg(BadgeObject):
@@ -322,7 +312,7 @@ class IssuerOrg(BadgeObject):
             return
 
         # Actually save this to the database
-        super(BadgeObject, self).save(*args, **kwargs)
+        super(BadgeObject, self).save()
 
 
 # TO DO: implement extension

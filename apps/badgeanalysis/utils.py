@@ -186,6 +186,12 @@ def fetch_linked_component(url, documentLoader=None):
         return result['document']
 
 
+def rewrap_docloader(docloader):
+    def wrapped_loader(result):
+        return {'document': result}
+    return wrapped_loader
+
+
 def get_iri_for_prop_in_current_context(shortProp):
     vessel = {
         '@context': current_context(),
