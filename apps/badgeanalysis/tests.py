@@ -492,19 +492,24 @@ class BadgeObjectsTests(TestCase):
     #     self.assertEqual(b.badgeclass.iri, 'http://openbadges.oregonbadgealliance.org/api/badges/53d727a11f04f3a84a99b002')
 
     def test_assertion_badge_assertion_create_oneone(self):
-        bb = Assertion(iri='http://example.org/assertion25')
+        bb = Assertion(iri='http://example.org/assertion25', badge_object={'uid':"toooooooooots"})
         bb.save(**{'docloader': oneone_docloader})
         self.assertTrue(isinstance(bb.badgeclass, BadgeClass))
         self.assertTrue(isinstance(bb.badgeclass.issuerorg, IssuerOrg))
 
-    # def test_multiple_assertion_same_badgeclass_oneone(self):
-    #     bb = Assertion(iri='http://example.org/assertion25')
-    #     bb.save(**{'docloader': oneone_docloader})
+    def test_assertion_badge_assertion_get_or_create_oneone(self):
+        bb = Assertion.get_or_create_by_iri('http://example.org/assertion25', **{'docloader': oneone_docloader})
+        self.assertTrue(isinstance(bb.badgeclass, BadgeClass))
+        self.assertTrue(isinstance(bb.badgeclass.issuerorg, IssuerOrg))
 
-    #     cc = Assertion(iri='http://example.org/assertion30')
-    #     cc.save(**{'docloader': oneone_docloader})
+    def test_multiple_assertion_same_badgeclass_oneone(self):
+        bb = Assertion(iri='http://example.org/assertion25')
+        bb.save(**{'docloader': oneone_docloader})
 
-    #     self.assertEqual(bb.badgeclass.pk, cc.badgeclass.pk)
+        cc = Assertion(iri='http://example.org/assertion30')
+        cc.save(**{'docloader': oneone_docloader})
+
+        self.assertEqual(bb.badgeclass.pk, cc.badgeclass.pk)
 
     # def create_via_OpenBadge_oneone(self):
         # b = OpenBadge(badge_input='http://example.org/assertion25', recipient_input='testuser@example.org')

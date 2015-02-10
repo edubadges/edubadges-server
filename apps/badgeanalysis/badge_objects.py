@@ -3,8 +3,8 @@
 # in general, and for each specific case, allowing us to run the
 # appropriate validations and manipulations for each case without
 # embedding all that logic in the procedure itself.
-
 from django.db import models
+from django.db.models.signals import post_init
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from jsonfield import JSONField
 import json
@@ -33,7 +33,9 @@ class BadgeObject(basic_models.TimestampedModel):
             raise BadgeValidationError("Badge Object input IRI is not a known dereferencable format " + str(self.iri))
 
         try:
-            self.badge_object = badgeanalysis.utils.try_json_load(docloader(self.iri))
+            import pdb; pdb.set_trace();
+            hosted_badge_object = badgeanalysis.utils.try_json_load(docloader(self.iri))
+            self.badge_object = hosted_badge_object
         except:
             raise BadgeValidationError("Could not fetch " + self.CLASS_TYPE + " from " + self.iri)
             return
@@ -57,6 +59,25 @@ class BadgeObject(basic_models.TimestampedModel):
             return new_object
 
     @classmethod
+    def get_or_create_by_badge_object(cls, badge_input, *args, **kwargs):
+        # If we have JSON as a string, try to load it before treating it as a potential URL
+        if not isinstance(badge_input, dict):
+            processed_input = badgeanalysis.utils.try_json_load(badge_input)
+
+        # If we've got a URL, create this object from the URL.
+        if isinstance(processed_input, (str, unicode)) and badgeanalysis.utils.test_probable_url(processed_input):
+            return cls.get_or_create_by_iri(processed_input, *args, **kwargs)
+
+        # Else, figure out the hosted assertion URL, then create by that.
+        if cls.CLASS_TYPE == 'assertion':
+            badge_object_id = processed_input.get('@id', None) or processed_input.get('verify', {}).get('url', None)
+            if badge_object_id is not None:
+                return cls.get_or_create_by_iri(badge_object_id, *args, **kwargs)
+
+        # Cannot create by object unless its an assertion whose id is findable
+        raise BadgeValidationError("Cannot create " + cls.CLASS_TYPE + " by object / verification URL not found.")
+
+    @classmethod
     def detect_existing(cls, iri):
         try:
             existing_assertion = cls.objects.get(iri=iri)
@@ -78,9 +99,11 @@ class BadgeObject(basic_models.TimestampedModel):
             else:
                 return scheme
 
-        legacy_scheme = BadgeScheme.get_legacy_scheme_match(self.badge_object, self.CLASS_TYPE)
+        legacy_scheme = BadgeScheme.get_legacy_scheme_match(self.badge_object, self.CLASS_TYPE).get('scheme', None)
         if legacy_scheme is None:
             raise TypeError("Could not determine type of badge object with known schema set")
+
+        return legacy_scheme
 
     def augment_badge_object_LD(self):
         """ Finalize badge object by adding the @id if possible """

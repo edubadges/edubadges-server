@@ -152,6 +152,7 @@ def is_image_data_uri(imageString):
     else:
         return False
 
+
 def custom_docloader(url, documentLoader=None):
     """
     Unless overridden, this uses the PyLD package document loader,
@@ -188,7 +189,7 @@ def fetch_linked_component(url, documentLoader=None):
 
 def rewrap_docloader(docloader):
     def wrapped_loader(result):
-        return {'document': result}
+        return {'document': docloader(result)}
     return wrapped_loader
 
 
