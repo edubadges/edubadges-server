@@ -40,3 +40,7 @@ class BadgeValidationSuccess(BadgeValidationMessage):
 
 class BadgeValidationError(BadgeValidationMessage):
     message_type = "error"
+
+
+class BadgeValidationWarning(BadgeValidationError):
+    message_type = "warning"

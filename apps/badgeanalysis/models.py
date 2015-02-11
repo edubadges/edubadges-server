@@ -16,7 +16,7 @@ from jsonfield import JSONField
 
 import badgeanalysis.utils
 
-from functional_validators import BadgeFunctionalValidator, FunctionalValidatorList
+import functional_validators
 from validation_messages import BadgeValidationSuccess, BadgeValidationError, BadgeValidationMessage
 from badge_objects import badge_object_class, Assertion, BadgeClass, IssuerOrg, Extension
 
@@ -76,6 +76,7 @@ class OpenBadge(basic_models.DefaultModel):
             # self.init_badge_analysis(*args, **kwargs)
             self.init_badge_object_analysis(*args, **kwargs)
 
+            self.validate(*args, **kwargs)
         # finally, save the OpenBadge after doing all that stuff in case it's a new one
         del kwargs['docloader']
         super(OpenBadge, self).save(*args, **kwargs)
@@ -245,6 +246,24 @@ class OpenBadge(basic_models.DefaultModel):
         expand_options = {"documentLoader": ld_docloader}
         self.full_ld_expanded = jsonld.expand(full, expand_options)
         # control resumes in save()
+
+    def validate(self, *args, **kwargs):
+        """
+        Run standard validations on an OpenBadge (complete with Assertion, BadgeClass, & IssuerOrg)
+        """
+        import pdb; pdb.set_trace();
+        self.process_validation(functional_validators.assertionRecipientValidator.validate(functional_validators.assertionRecipientValidator, self))
+        if self.verify_method == 'hosted':
+            self.process_validation(functional_validators.assertionOriginCheck.validate(functional_validators.assertionOriginCheck,self))
+
+    def process_validation(self, validationResult):
+        if not isinstance(validationResult, BadgeValidationMessage):
+            raise TypeError(str(validationResult) + " wasn't a true badge validation")
+
+        if isinstance(validationResult, BadgeValidationSuccess):
+            self.notes.append(validationResult.to_dict())
+        elif isinstance(validationResult, BadgeValidationError):
+            self.errors.append(validationResult.to_dict())
 
     """
     Tools for badge images
