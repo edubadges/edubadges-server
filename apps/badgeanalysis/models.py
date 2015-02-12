@@ -42,7 +42,7 @@ class OpenBadge(basic_models.DefaultModel):
     badge_input = models.TextField(blank=True, null=True)
     recipient_input = models.CharField(blank=True, max_length=2048)
 
-    assertion = models.ForeignKey(Assertion, blank=True, null=True)
+    assertion = models.OneToOneField(Assertion, related_name='openbadge', blank=True, null=True)
     badgeclass = models.ForeignKey(BadgeClass, blank=True, null=True)
     issuerorg = models.ForeignKey(IssuerOrg, blank=True, null=True)
 
@@ -66,10 +66,10 @@ class OpenBadge(basic_models.DefaultModel):
         return "Open Badge: " + badge_name + ", issued by " + badge_issuer + " to " + self.recipient_input
 
     # Core procedure for filling out an OpenBadge from an initial badgeObject follows:
-    def save(self, *args, **kwargs):        
+    def save(self, *args, **kwargs):
         if kwargs is None:
             kwargs = {}
-        if not 'docloader' in kwargs: 
+        if 'docloader' not in kwargs:
             kwargs['docloader'] = badgeanalysis.utils.fetch_linked_component
 
         if not self.pk:
@@ -81,10 +81,9 @@ class OpenBadge(basic_models.DefaultModel):
         del kwargs['docloader']
         super(OpenBadge, self).save(*args, **kwargs)
 
-
     def init_badge_object_analysis(self, *args, **kwargs):
         """
-        Stores the input object and attaches the appropriate Assertion, 
+        Stores the input object and attaches the appropriate Assertion,
         BadgeClass, and IssuerOrg
         """
         self.errors = []
@@ -102,16 +101,17 @@ class OpenBadge(basic_models.DefaultModel):
                 raise e
                 return
 
-        self.verify_method = 'hosted' # TODO: signed not yet supported.
+        self.verify_method = 'hosted'  # TODO: signed not yet supported.
 
         try:
             # Create Assertion from initial input
+            kwargs['create_only'] = ('assertion')
             self.assertion = Assertion.get_or_create_by_badge_object(self.badge_input, *args, **kwargs)
 
             self.badgeclass = self.assertion.badgeclass
             self.issuerorg = self.badgeclass.issuerorg
             self.scheme = self.assertion.scheme
-        except Exception as e:
+        except BadgeValidationError as e:
             raise e
 
         self.full_badge_object = {
@@ -251,7 +251,6 @@ class OpenBadge(basic_models.DefaultModel):
         """
         Run standard validations on an OpenBadge (complete with Assertion, BadgeClass, & IssuerOrg)
         """
-        import pdb; pdb.set_trace();
         self.process_validation(functional_validators.assertionRecipientValidator.validate(functional_validators.assertionRecipientValidator, self))
         if self.verify_method == 'hosted':
             self.process_validation(functional_validators.assertionOriginCheck.validate(functional_validators.assertionOriginCheck,self))
@@ -264,6 +263,21 @@ class OpenBadge(basic_models.DefaultModel):
             self.notes.append(validationResult.to_dict())
         elif isinstance(validationResult, BadgeValidationError):
             self.errors.append(validationResult.to_dict())
+
+    @classmethod
+    def find_by_assertion_iri(cls, iri, *args, **kwargs):
+        try:
+            assertion = Assertion.objects.get(iri=iri)
+        except ObjectDoesNotExist as e:
+            raise e
+
+        try:
+            badge = assertion.openbadge
+        except ObjectDoesNotExist:
+            badge = cls(badge_input=iri, recipient_input=kwargs.get('recipient_input'))
+            badge.save(*args, **kwargs)
+
+        return badge
 
     """
     Tools for badge images
@@ -284,7 +298,7 @@ class OpenBadge(basic_models.DefaultModel):
                         f = open('temp.png', 'w+')
                         f.write(imgfile)
                         self.image.save(os.path.basename('dataUriImg.png'), f)
-                    # TODO: figure out why it's raising an error that doesn't break anything 
+                    # TODO: figure out why it's raising an error that doesn't break anything
                     # 'file' object has no attribute 'size'
                     except AttributeError:
                         pass

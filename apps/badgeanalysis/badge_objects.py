@@ -33,7 +33,6 @@ class BadgeObject(basic_models.TimestampedModel):
             raise BadgeValidationError("Badge Object input IRI is not a known dereferencable format " + str(self.iri))
 
         try:
-            import pdb; pdb.set_trace();
             hosted_badge_object = badgeanalysis.utils.try_json_load(docloader(self.iri))
             self.badge_object = hosted_badge_object
         except:
@@ -50,8 +49,10 @@ class BadgeObject(basic_models.TimestampedModel):
     @classmethod
     def get_or_create_by_iri(cls, iri, *args, **kwargs):
         existing_object = cls.detect_existing(iri)
-        if existing_object is not None:
+        if existing_object is not None and not cls.CLASS_TYPE in kwargs.get('create_only', ()):
             return existing_object
+        elif existing_object is not None:
+            raise BadgeValidationError("Badge Object (" + cls.CLASS_TYPE + ") already exists with IRI: " + iri, "create_only", iri)
         else:
             new_object = cls(iri=iri)
             kwargs[iri] = 'new'
@@ -209,6 +210,7 @@ class BadgeObject(basic_models.TimestampedModel):
 class Assertion(BadgeObject):
     CLASS_TYPE = 'assertion'
     badgeclass = models.ForeignKey('badgeanalysis.BadgeClass', blank=True, null=True)
+    # openbadge = related OpenBadge (reverse OneToOneField relationship)
 
     def save(self, *args, **kwargs):
         # If existing_assertion hasn't already been tested, do that.
