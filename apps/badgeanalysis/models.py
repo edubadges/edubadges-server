@@ -16,9 +16,9 @@ from jsonfield import JSONField
 
 import badgeanalysis.utils
 
-from functional_validators import BadgeFunctionalValidator, FunctionalValidatorList
+import functional_validators
 from validation_messages import BadgeValidationSuccess, BadgeValidationError, BadgeValidationMessage
-from badge_objects import badge_object_class
+from badge_objects import badge_object_class, Assertion, BadgeClass, IssuerOrg, Extension
 
 
 """
@@ -41,7 +41,11 @@ class OpenBadge(basic_models.DefaultModel):
     image = models.ImageField(upload_to=badgeanalysis.utils.image_upload_to(), blank=True)
     badge_input = models.TextField(blank=True, null=True)
     recipient_input = models.CharField(blank=True, max_length=2048)
-    
+
+    assertion = models.OneToOneField(Assertion, related_name='openbadge', blank=True, null=True)
+    badgeclass = models.ForeignKey(BadgeClass, blank=True, null=True)
+    issuerorg = models.ForeignKey(IssuerOrg, blank=True, null=True)
+
     full_badge_object = JSONField()
     full_ld_expanded = JSONField()
     verify_method = models.CharField(max_length=48, blank=True)
@@ -63,11 +67,72 @@ class OpenBadge(basic_models.DefaultModel):
 
     # Core procedure for filling out an OpenBadge from an initial badgeObject follows:
     def save(self, *args, **kwargs):
-        if not self.pk:
-            self.init_badge_analysis(*args, **kwargs)
+        if kwargs is None:
+            kwargs = {}
+        if 'docloader' not in kwargs:
+            kwargs['docloader'] = badgeanalysis.utils.fetch_linked_component
 
+        if not self.pk:
+            # self.init_badge_analysis(*args, **kwargs)
+            self.init_badge_object_analysis(*args, **kwargs)
+
+            self.validate(*args, **kwargs)
         # finally, save the OpenBadge after doing all that stuff in case it's a new one
+        del kwargs['docloader']
         super(OpenBadge, self).save(*args, **kwargs)
+
+    def init_badge_object_analysis(self, *args, **kwargs):
+        """
+        Stores the input object and attaches the appropriate Assertion,
+        BadgeClass, and IssuerOrg
+        """
+        self.errors = []
+        self.notes = []
+
+        if self.badge_input == u'' or self.badge_input is None:
+            if not self.image:
+                raise IOError("Invalid input to create OpenBadge. Missing image or badge_input.")
+                return
+
+            try:
+                self.badge_input = badgeanalysis.utils.extract_assertion_from_image(self.image)
+            except Exception as e:
+                self.errors.append(e)
+                raise e
+                return
+
+        self.verify_method = 'hosted'  # TODO: signed not yet supported.
+
+        try:
+            # Create Assertion from initial input
+            kwargs['create_only'] = ('assertion')
+            self.assertion = Assertion.get_or_create_by_badge_object(self.badge_input, *args, **kwargs)
+
+            self.badgeclass = self.assertion.badgeclass
+            self.issuerorg = self.badgeclass.issuerorg
+            self.scheme = self.assertion.scheme
+        except BadgeValidationError as e:
+            raise e
+
+        self.full_badge_object = {
+            '@context': self.scheme.context_url,
+            '@type': 'obi:OpenBadge',
+
+            'assertion': self.assertion.badge_object,
+            'badgeclass': self.badgeclass.badge_object,
+            'issuerorg': self.issuerorg.badge_object
+        }
+
+        self.errors += self.assertion.errors + self.badgeclass.errors + self.issuerorg.errors
+        self.notes += self.assertion.notes + self.badgeclass.notes + self.issuerorg.notes
+
+        # JSON-LD Expansion:
+        ld_docloader = kwargs.get('ld_docloader', BadgeScheme.custom_context_docloader)
+        expand_options = {"documentLoader": ld_docloader}
+
+        self.full_ld_expanded = jsonld.expand(self.full_badge_object, expand_options)
+
+        # control resumes in save()
 
     def init_badge_analysis(self, *args, **kwargs):
         """
@@ -101,21 +166,21 @@ class OpenBadge(basic_models.DefaultModel):
                 raise e
                 return
 
-            self.verify_method = 'hosted'  # TODO: signed not yet supported.
+        self.verify_method = 'hosted'  # TODO: signed not yet supported.
 
         # Process the initial input
         # Returns a dict with badgeObject property for processed object and 'type', 'context', 'id' properties
-        assertionMeta = badge_object_class('assertion').processBadgeObject({
-            'badgeObject': self.badge_input,
-            'recipient_input': self.recipient_input
-        })
+        assertionMeta = badge_object_class('assertion').processBadgeObject(
+            {'badgeObject': self.badge_input, 'recipient_input': self.recipient_input},
+            kwargs.get('docloader')
+        )
         handle_init_errors(assertionMeta)
 
         if not assertionMeta['badgeObject']:
             raise IOError("Could not build a full badge object without having a properly stored inputObject")
 
         full = {
-            '@context': assertionMeta['context'] or 'http://standard.openbadges.org/1.1/context',
+            '@context': assertionMeta['context'] or 'http://standard.openbadges.org/1.1/context.json',
             '@type': 'obi:OpenBadge'
         }
 
@@ -137,7 +202,8 @@ class OpenBadge(basic_models.DefaultModel):
                 # For 1.0 etc compliant badges with linked badgeclass
                 if isinstance(full['assertion']['badge'], (str, unicode)):
                     theBadgeClassMeta = badge_object_class('badgeclass').processBadgeObject(
-                        {'badgeObject': full['assertion']['badge']}
+                        {'badgeObject': full['assertion']['badge']},
+                        kwargs.get('docloader')
                     )
                     handle_init_errors(theBadgeClassMeta)
 
@@ -153,7 +219,8 @@ class OpenBadge(basic_models.DefaultModel):
             if isinstance(full['badgeclass'], dict) and not 'issuerorg' in full:
                 if isinstance(full['badgeclass']['issuer'], (str, unicode)):
                     theIssuerOrgMeta = badge_object_class('issuerorg').processBadgeObject(
-                        {'badgeObject': full['badgeclass']['issuer']}
+                        {'badgeObject': full['badgeclass']['issuer']},
+                        kwargs.get('docloader')
                     )
                     handle_init_errors(theIssuerOrgMeta)
 
@@ -174,9 +241,43 @@ class OpenBadge(basic_models.DefaultModel):
         self.truncate_images()
 
         # TODO: allow custom docloader to be passed into save in kwargs, pass it along to processBadgeObject and here.
-        expand_options = {"documentLoader": BadgeScheme.custom_context_docloader}
+        ld_docloader = kwargs.get('ld_docloader', BadgeScheme.custom_context_docloader)
+
+        expand_options = {"documentLoader": ld_docloader}
         self.full_ld_expanded = jsonld.expand(full, expand_options)
         # control resumes in save()
+
+    def validate(self, *args, **kwargs):
+        """
+        Run standard validations on an OpenBadge (complete with Assertion, BadgeClass, & IssuerOrg)
+        """
+        self.process_validation(functional_validators.assertionRecipientValidator.validate(functional_validators.assertionRecipientValidator, self))
+        if self.verify_method == 'hosted':
+            self.process_validation(functional_validators.assertionOriginCheck.validate(functional_validators.assertionOriginCheck,self))
+
+    def process_validation(self, validationResult):
+        if not isinstance(validationResult, BadgeValidationMessage):
+            raise TypeError(str(validationResult) + " wasn't a true badge validation")
+
+        if isinstance(validationResult, BadgeValidationSuccess):
+            self.notes.append(validationResult.to_dict())
+        elif isinstance(validationResult, BadgeValidationError):
+            self.errors.append(validationResult.to_dict())
+
+    @classmethod
+    def find_by_assertion_iri(cls, iri, *args, **kwargs):
+        try:
+            assertion = Assertion.objects.get(iri=iri)
+        except ObjectDoesNotExist as e:
+            raise e
+
+        try:
+            badge = assertion.openbadge
+        except ObjectDoesNotExist:
+            badge = cls(badge_input=iri, recipient_input=kwargs.get('recipient_input'))
+            badge.save(*args, **kwargs)
+
+        return badge
 
     """
     Tools for badge images
@@ -197,7 +298,7 @@ class OpenBadge(basic_models.DefaultModel):
                         f = open('temp.png', 'w+')
                         f.write(imgfile)
                         self.image.save(os.path.basename('dataUriImg.png'), f)
-                    # TODO: figure out why it's raising an error that doesn't break anything 
+                    # TODO: figure out why it's raising an error that doesn't break anything
                     # 'file' object has no attribute 'size'
                     except AttributeError:
                         pass

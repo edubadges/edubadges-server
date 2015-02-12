@@ -10,6 +10,7 @@ from badgeanalysis.scheme_models import BadgeScheme, BadgeSchemaValidator
 from badgeanalysis.models import OpenBadge
 from badgeanalysis.badge_objects import Assertion, BadgeClass, IssuerOrg, Extension, BadgeObject, badge_object_class
 from badgeanalysis.validation_messages import BadgeValidationError
+from badgeanalysis.cur_context import current_context
 
 
 # Construct a docloader function that will return preloaded responses for predetermined URLs
@@ -293,23 +294,47 @@ valid_1_0_docloader = mock_docloader_factory(
     {
         'http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205': valid_1_0_assertion,
         'http://openbadges.oregonbadgealliance.org/api/badges/53d727a11f04f3a84a99b002': valid_1_0_badgeclass,
-        'http://openbadges.oregonbadgealliance.org/api/issuers/53d41603f93ae94a733ae554': valid_1_0_issuer
+        'http://openbadges.oregonbadgealliance.org/api/issuers/53d41603f93ae94a733ae554': valid_1_0_issuer,
+        'http://standard.openbadges.org/1.0/context.json': { 'document': current_context(), 'contextUrl': None, 'documentUrl': 'http://standard.openbadges.org/1.0/context.json' }
     }
 )
 
 simpleOneOne = {
-    "@context": "http://standard.openbadges.org/1.1/context",
+    "@context": "http://standard.openbadges.org/1.1/context.json",
     "@type": "assertion",
     "@id": "http://example.org/assertion25",
-    "uid": 25,
+    "uid": '25',
     "recipient": {
         "identity": "testuser@example.org",
+        "type": "email",
         "hashed": False
     },
-    "badge": "http://example.org/badge1"
+    "badge": "http://example.org/badge1",
+    "verify": {
+        "type": "hosted",
+        "url": "http://example.org/assertion25"
+    },
+    "issuedOn": "2014-01-31"
+}
+simpleOneOneTwo = {
+    "@context": "http://standard.openbadges.org/1.1/context.json",
+    "@type": "assertion",
+    "@id": "http://example.org/assertion30",
+    "uid": '30',
+    "recipient": {
+        "identity": "testuser@example.org",
+        "type": "email",
+        "hashed": False
+    },
+    "badge": "http://example.org/badge1",
+    "verify": {
+        "type": "hosted",
+        "url": "http://example.org/assertion25"
+    },
+    "issuedOn": "2014-01-31"
 }
 simpleOneOneBC = {
-    "@context": "http://standard.openbadges.org/1.1/context",
+    "@context": "http://standard.openbadges.org/1.1/context.json",
     "@type": "badgeclass",
     "@id": "http://example.org/badge1",
     "name": "Badge of Awesome",
@@ -319,7 +344,7 @@ simpleOneOneBC = {
     "issuer": "http://example.org/issuer"
 }
 simpleOneOneIssuer = {
-    "@context": "http://standard.openbadges.org/1.1/context",
+    "@context": "http://standard.openbadges.org/1.1/context.json",
     "@type": "issuerorg",
     "@id": "http://example.org/issuer",
     "name": "Issuer of Awesome",
@@ -328,37 +353,42 @@ simpleOneOneIssuer = {
 oneone_docloader = mock_docloader_factory(
     {
         'http://example.org/assertion25': simpleOneOne,
+        'http://example.org/assertion30': simpleOneOneTwo,
         'http://example.org/badge1': simpleOneOneBC,
-        'http://example.org/issuer': simpleOneOneIssuer
+        'http://example.org/issuer': simpleOneOneIssuer,
+        # Gotta duplicate the function of the original pyld docloader here
+        'http://standard.openbadges.org/1.1/context.json': { 'document': current_context(), 'contextUrl': None, 'documentUrl': 'http://standard.openbadges.org/1.1/context.json' }
     }
 )
 
 oneOneArrayType = {
-    "@context": "http://standard.openbadges.org/1.1/context",
+    "@context": "http://standard.openbadges.org/1.1/context.json",
     "@type": ["assertion", "http://othertype.com/type"],
     "@id": "http://example.org/assertion25",
-    "uid": 25
+    "uid": '25'
 }
 
 oneOneNonUrlID = {
-    "@context": "http://standard.openbadges.org/1.1/context",
+    "@context": "http://standard.openbadges.org/1.1/context.json",
     "@type": "assertion",
     "@id": "assertion25",
-    "uid": 25
+    "uid": '25'
 }
 simpleOneOneNoId = {
-    "@context": "http://standard.openbadges.org/1.1/context",
+    "@context": "http://standard.openbadges.org/1.1/context.json",
     "@type": "assertion",
     "verify": {"type": "hosted", "url": "http://example.org/assertion25"},
-    "uid": 25
+    "uid": '25'
 }
 
 
-# class OpenBadgeTests(TestCase):
-#     def test_validateMainContext(self):
-#         context = "http://standard.openbadges.org/1.1/context"
-#         a = OpenBadge.validateMainContext(OpenBadge(simpleOneOne), context)
-#         self.assertEqual(a, context)
+class OpenBadgeTests(TestCase):
+    fixtures = ['0001_initial_superuser','0002_initial_schemes_and_validators']
+
+    # def test_save_badge_with_custom_docloader(self):
+    #     badge = OpenBadge(badge_input=simpleOneOne, recipient_input='testuser@example.org')
+    #     badge.save(**{'docloader': oneone_docloader})
+    #     self.assertTrue(badge.pk is not None)
 
 #     def test_simple_OpenBadge_construction_noErrors(self):
 #         try:
@@ -418,11 +448,11 @@ simpleOneOneNoId = {
 #         self.assertEqual(openBadge.getLdProp('assertion', 'http://standard.openbadges.org/definitions#BadgeClass'), "http://example.org/badge1")
 
 
-# class ImageExtractionTests(TestCase):
-#     def test_basic_image_extract(self):
-#         imgFile = open(os.path.join(os.path.dirname(__file__), 'testfiles', '1.png'), 'r')
-#         assertion = pngutils.extract(imgFile)
-#         self.assertTrue(utils.is_json(assertion))
+class ImageExtractionTests(TestCase):
+    def test_basic_image_extract(self):
+        imgFile = open(os.path.join(os.path.dirname(__file__), 'testfiles', '1.png'), 'r')
+        assertion = pngutils.extract(imgFile)
+        self.assertTrue(utils.is_json(assertion))
 
 #         assertion = utils.try_json_load(assertion)
 #         self.assertEqual(assertion.get("uid"), "2f900c7c-f473-4bff-8173-71b57472a97f")
@@ -437,61 +467,78 @@ simpleOneOneNoId = {
 class BadgeObjectsTests(TestCase):
     fixtures = ['0001_initial_superuser', '0002_initial_schemes_and_validators']
 
+    def test_badge_object_class(self):
+        self.assertEqual(badge_object_class('assertion'), Assertion)
+
     def test_mock_docloader_factory(self):
         response_list = {'http://google.com': 'Hahahaha, hacked by the lizard overlords.'}
         docloader = mock_docloader_factory(response_list)
         self.assertEqual(docloader('http://google.com'), 'Hahahaha, hacked by the lizard overlords.')
 
-    def test_assertion_processing_oneone(self):
-        self.maxDiff = None
-        badgeMetaObject = badge_object_class('assertion').processBadgeObject(
-            {'badgeObject': simpleOneOne},
-            oneone_docloader
-            )
-        expected_result = {'notes': ['<RecipientRequiredValidator: Recipient input not needed, embedded recipient identity is not hashed>']}
-        self.assertEqual(str(badgeMetaObject.get('notes', [0])[0]), expected_result['notes'][0])
+    # def test_assertion_processing_oneone(self):
+    #     self.maxDiff = None
+    #     badgeMetaObject = badge_object_class('assertion').processBadgeObject(
+    #         {'badgeObject': simpleOneOne},
+    #         oneone_docloader
+    #         )
+    #     expected_result = {'notes': ['<RecipientRequiredValidator: Recipient input not needed, embedded recipient identity is not hashed>']}
+    #     self.assertEqual(str(badgeMetaObject.get('notes', [0])[0]), expected_result['notes'][0])
 
-    def test_assertion_processing_valid_1_0(self):
-        badgeMetaObject = badge_object_class('assertion').processBadgeObject(
-            {'badgeObject': valid_1_0_assertion},
-            valid_1_0_docloader
-            )
-        expected_result = {'errors': ['<RecipientRequiredValidator: Recipient ID is hashed and no recipient_input provided>']}
-        self.assertEqual(str(badgeMetaObject.get('errors', [0])[0]), expected_result['errors'][0])
+    # def test_assertion_processing_valid_1_0_with_identifier(self):
+    #     self.maxDiff = None
+    #     # import pdb; pdb.set_trace();
+    #     b = Assertion(iri='http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205')
+    #     b.save(**{'docloader': valid_1_0_docloader})
+    #     self.assertEqual(b.badgeclass.iri, 'http://openbadges.oregonbadgealliance.org/api/badges/53d727a11f04f3a84a99b002')
 
-    def test_assertion_processing_valid_1_0_with_identifier(self):
-        self.maxDiff = None
-        # import pdb; pdb.set_trace();
-        badgeMetaObject = badge_object_class('assertion').processBadgeObject(
-            {'badgeObject': valid_1_0_assertion, 'recipient_input': 'nate@ottonomy.net'},
-            valid_1_0_docloader
-            )
-        expected_result = {'notes': [{'message': 'Provided recipient identity string matched assertion recipient.', 'validator': 'Functional:AssertionRecipientValidator', 'result': 'success'}] }
-        self.assertEqual(badgeMetaObject.get('notes', [0])[0], expected_result['notes'][0])
+    def test_assertion_badge_assertion_create_oneone(self):
+        bb = Assertion(iri='http://example.org/assertion25', badge_object={'uid':"toooooooooots"})
+        bb.save(**{'docloader': oneone_docloader})
+        self.assertTrue(isinstance(bb.badgeclass, BadgeClass))
+        self.assertTrue(isinstance(bb.badgeclass.issuerorg, IssuerOrg))
+
+    def test_assertion_badge_assertion_get_or_create_oneone(self):
+        bb = Assertion.get_or_create_by_iri('http://example.org/assertion25', **{'docloader': oneone_docloader})
+        self.assertTrue(isinstance(bb.badgeclass, BadgeClass))
+        self.assertTrue(isinstance(bb.badgeclass.issuerorg, IssuerOrg))
+
+    def test_multiple_assertion_same_badgeclass_oneone(self):
+        bb = Assertion(iri='http://example.org/assertion25')
+        bb.save(**{'docloader': oneone_docloader})
+
+        cc = Assertion(iri='http://example.org/assertion30')
+        cc.save(**{'docloader': oneone_docloader})
+
+        self.assertEqual(bb.badgeclass.pk, cc.badgeclass.pk)
+
+    # def create_via_OpenBadge_oneone(self):
+        # b = OpenBadge(badge_input='http://example.org/assertion25', recipient_input='testuser@example.org')
+        # b.save(**{docloader: simple_oneone_docloader})
+        # self.assertTrue(isinstance(Assertion.objects.get(iri='http://example.org/assertion25'), Assertion))
 
 
 class OpenBadgeIntegrationTests(TestCase):
     fixtures = ['0001_initial_superuser', '0002_initial_schemes_and_validators']
 
-    def test_successful_OpenBadge_save(self):
-        badge_input = valid_1_0_assertion
-        recipient_input = 'nate@ottonomy.net'
-        b = OpenBadge(badge_input=badge_input, recipient_input=recipient_input)
-        try:
-            b.save()
-        except Exception as e:
-            self.assertEqual(e, None)
-        else: 
-            self.assertTrue(True) # Yay, no errors!
+    # def test_successful_OpenBadge_save(self):
+    #     badge_input = valid_1_0_assertion
+    #     recipient_input = 'nate@ottonomy.net'
+    #     b = OpenBadge(badge_input=badge_input, recipient_input=recipient_input)
+    #     try:
+    #         b.save(**{'docloader': valid_1_0_docloader})
+    #     except Exception as e:
+    #         self.assertEqual(e, None)
+    #     else:
+    #         self.assertTrue(True) # Yay, no errors!
 
-    def test_OpenBadge_save_bad_recipient(self):
-        badge_input = valid_1_0_assertion
-        recipient_input = 'nate@ottonomy.newt'
-        b = OpenBadge(badge_input=badge_input, recipient_input=recipient_input)
-        try:
-            b.save()
-        except Exception as e:
-            self.assertTrue(isinstance(e, BadgeValidationError))
-            self.assertEqual(e.to_dict()['validator'], 'Functional:AssertionRecipientValidator')
-        else: 
-            self.assertTrue(False) # Boo, there should have been an error!
+    # def test_OpenBadge_save_bad_recipient(self):
+    #     badge_input = valid_1_0_assertion
+    #     recipient_input = 'nate@ottonomy.newt'
+    #     b = OpenBadge(badge_input=badge_input, recipient_input=recipient_input)
+    #     try:
+    #         b.save(**{'docloader': valid_1_0_docloader})
+    #     except Exception as e:
+    #         self.assertTrue(isinstance(e, BadgeValidationError))
+    #         self.assertEqual(e.to_dict()['validator'], 'Functional:AssertionRecipientValidator')
+    #     else: 
+    #         self.assertTrue(False) # Boo, there should have been an error!

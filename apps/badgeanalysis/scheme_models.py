@@ -73,6 +73,15 @@ class BadgeScheme(basic_models.SlugModel):
         else:
             return result.context_json
 
+    def test_against_schema_for(self, badgeObject, objectType):
+        try:
+            validator = BadgeSchemaValidator.objects.get(scheme=self, validates_type=objectType)
+        except (MultipleObjectsReturned, ObjectDoesNotExist) as e:
+            raise e
+
+        return self.test_against_schema_verbose(badgeObject, validator.schema_json)
+
+
     @classmethod
     def get_legacy_scheme_match(cls, badgeObject, badgeObjectType, known_slug=None):
         LEGACY_SLUGS = ['0_5', '1_0-backpack-misbaked', '1_0']
@@ -122,6 +131,11 @@ class BadgeScheme(basic_models.SlugModel):
                 return insert_into_tree(scheme, schemaSlug, contextUrl, schemaJson, tree['noMatch'])
             return None
 
+        def return_scheme_from_queryset(slug):
+            for scheme in schemes:
+                if scheme.slug == slug:
+                    return scheme
+
         for scheme in schemes:
             currentSchemaJson = None
             for validator in scheme._prefetched_objects_cache['schemes']._result_cache:
@@ -142,7 +156,8 @@ class BadgeScheme(basic_models.SlugModel):
                 "context_url": treeMatch['context_url'],
                 "type": badgeObjectType,
                 "schemeSlug": treeMatch['test'],
-                "scheme": treeMatch['scheme']
+                "scheme": treeMatch['scheme'],
+                "scheme_model_instance": return_scheme_from_queryset(treeMatch['scheme'])
             }
         else:
             return None

@@ -1,5 +1,6 @@
 # Views for Earner API endpoints. Earners collect, annotate, share and export badges.
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError
 
 from rest_framework import authentication, permissions, status
 from rest_framework.views import APIView
@@ -8,6 +9,7 @@ from rest_framework.exceptions import ValidationError
 
 from models import EarnerBadge
 from badgeanalysis.models import OpenBadge
+from badgeanalysis.validation_messages import BadgeValidationError
 from serializers import EarnerBadgeSerializer
 from mainsite.permissions import IsOwner
 
@@ -66,6 +68,10 @@ class EarnerBadgesList(APIView):
                 image=request.data.get('image', None)
             )
             the_actual_badge.save()
+        except BadgeValidationError as e:
+            # Catches the case where the OpenBadge could not be saved because it was not new.
+            if e.validator == 'create_only':
+                the_actual_badge = OpenBadge.find_by_assertion_iri(e.data, **{'recipient_input': request.user.email})
         except Exception as e:
             raise ValidationError(e.message)
 
@@ -79,10 +85,10 @@ class EarnerBadgesList(APIView):
         except ValueError as e:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        
-
         try:
             new_earner_badge.save()
+        except IntegrityError:
+            raise ValidationError("This badge has already been uploaded.")
         except Exception as e:
             raise ValidationError(e.message)
 

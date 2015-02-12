@@ -10,7 +10,7 @@ from badgeanalysis.models import OpenBadge
 
 class EarnerBadge(cachemodel.CacheModel):
     earner = models.ForeignKey(settings.AUTH_USER_MODEL, null=False)
-    badge = models.ForeignKey(OpenBadge, null=True, blank=False)
+    badge = models.OneToOneField(OpenBadge, related_name='earnerbadge', null=True, blank=False)
     earner_description = models.TextField(blank=True)
     earner_accepted = models.BooleanField(default=False)
 
