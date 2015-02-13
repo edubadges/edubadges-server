@@ -92,12 +92,23 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'django.core.context_processors.static',
     'django.core.context_processors.request',
     'django.contrib.messages.context_processors.messages',
+    'django.core.context_processors.i18n',
+
     # allauth specific context processors
     "allauth.account.context_processors.account",
     "allauth.socialaccount.context_processors.socialaccount",
 ]
 
-JINGO_EXCLUDE_APPS = ('admin', 'registration', 'debug_toolbar', 'ckeditor', 'reversion', 'rest_framework')
+JINGO_EXCLUDE_APPS = (
+    'admin',
+    'registration',
+    'debug_toolbar',
+    'ckeditor',
+    'reversion',
+    'rest_framework',
+    'allauth',
+    'account',
+)
 
 
 ##
@@ -134,6 +145,8 @@ AUTHENTICATION_BACKENDS = [
     # `allauth` specific authentication methods, such as login by e-mail
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_EMAIL_REQUIRED = True
 
 ##
 #

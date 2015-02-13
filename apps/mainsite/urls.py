@@ -43,6 +43,9 @@ urlpatterns = patterns('',
     url(r'^forgot_password/check_email$', ForgotPasswordCheckEmailView.as_view(), name='forgot_password_check_email'),
     url(r'^reset_password/%s/$' % TOKEN_REGEX, ResetPasswordView.as_view(), name='reset_password'),
     url(r'^change_password$', ChangePasswordView.as_view(), name='change_password'),
+    # accounts:
+    url(r'^accounts/', include('allauth.urls')),
+
 
     # REST Framework
     url(r'^api/issuer', include('issuer.api_urls')),
