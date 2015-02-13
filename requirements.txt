@@ -32,6 +32,11 @@ django-reversion==1.8.5
 python-memcached==1.53
 # Django Rest Framework
 djangorestframework==3.0.2
+# Django Allauth
+django-allauth==0.19.1
+oauthlib==0.7.2
+requests==2.5.1
+requests-oauthlib==0.4.2
 
 # Some extra things that got installed (noted here as output from a pip freeze)
 Django-Select2==4.2.2
@@ -39,6 +44,8 @@ MarkupSafe==0.23
 django-autoslug==1.7.2
 jingo==0.4
 wsgiref==0.1.2
+six==1.8.0
+sqlparse==0.1.14
 
 # Utilities for working with badges
 jsonschema==2.5.0-dev
