@@ -89,7 +89,7 @@ APIStore.storeInitialData = function() {
     _initialData = initialData
     for (key in _initialData){
       if (APIStore.collectionTypes.indexOf(key) > -1) {
-        APIStore.data[key] = JSON.parse(_initialData[key])
+        APIStore.data[key] = _initialData[key]
       }
     }
   }

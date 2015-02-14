@@ -1,11 +1,9 @@
-from django.views.generic import CreateView, DetailView
+from django.views.generic import DetailView
 from badgeuser.models import BadgeUser
 from django.http import Http404
+from django.shortcuts import redirect
+from badgeuser.serializers import BadgeUserSerializer
 import json
-
-from mainsite.views import ActiveTabMixin
-from earner.models import EarnerBadge
-from earner.serializers import EarnerBadgeSerializer
 
 
 class EarnerPortal(DetailView):
@@ -29,12 +27,8 @@ class EarnerPortal(DetailView):
 
     def get_context_data(self, **kwargs):
         context_data = super(EarnerPortal, self).get_context_data(**kwargs)
-        
-        # Add the earner's badges to the context
-        earner_badges_raw = EarnerBadge.objects.filter(earner=kwargs['user'])
-        serializer = EarnerBadgeSerializer(earner_badges_raw, many=True)
-        context_data['initial_data'] = {
-            "earnerBadges": json.dumps(serializer.data)
-        }
-        
+        user_serializer = BadgeUserSerializer(kwargs['user'])
+
+        context_data['initial_data'] = json.dumps(user_serializer.data)
+
         return context_data

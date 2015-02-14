@@ -42,7 +42,7 @@
         {% block initial_data %}
             {% if initial_data %}
                 <script type="text/javascript">
-                    var initialData = {{ initial_data | safe }}
+                    var initialData = {{ initial_data | safe }};
                 </script>
             {% endif %}
         {% endblock %}

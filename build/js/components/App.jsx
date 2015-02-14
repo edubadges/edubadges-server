@@ -8,6 +8,7 @@ var RouteStore = require('../stores/RouteStore');
 var ItemsStore = require('../stores/MenuStore');
 var APIStore = require('../stores/APIStore');
 var FormStore = require('../stores/FormStore');
+var UserStore = require('../stores/UserStore');
 
 // Components
 var TopLinks = require('../components/TopLinks.jsx');
@@ -155,7 +156,7 @@ var App = React.createClass({
     var props = {
       formId: formId,
       // TODO: send recipientIds with initialData via a django rest EarnerSerializer
-      recipientIds: ['nate@ottonomy.net', 'ottonomy@gmail.com'],
+      recipientIds: UserStore.getProperty('earnerIds'),
     };
     // If path doesn't contain a id, id will be { "": undefined }, 
     // If it does, id will be a string like "23"
