@@ -113,7 +113,7 @@ APIStore.postEarnerBadgeForm = function(data){
         console.log(error);
         APIStore.emit('API_STORE_FAILURE');
       }
-      else if (response.status != 200){
+      else if (response.status != 201){
         console.log("API REQUEST PROBLEM:");
         console.log(response.text);
         APIActions.APIFormResultFailure({
@@ -122,7 +122,6 @@ APIStore.postEarnerBadgeForm = function(data){
         });
       }
       else{
-        console.log(newBadge);
         var newBadge = APIStore.addCollectionItem('earnerBadges', JSON.parse(response.text))
         if (newBadge){
           APIStore.emit('DATA_UPDATED_earnerBadges');
@@ -141,6 +140,41 @@ APIStore.postEarnerBadgeForm = function(data){
   return req;
 };
 
+APIStore.postIssuerNotificationForm = function(data){
+  console.log("GOING TO POST THE ISSUER NOTIFICATION FORM WITH DATA:");
+  console.log(data);
+  var req = request.post('/api/issuer/notifications')
+    .set('X-CSRFToken', getCookie('csrftoken'))
+    .accept('application/json')
+    .field('url',data['url'])
+    .field('email', data['email'])
+    .end(function(error, response){
+      console.log(response);
+      if (error){
+        console.log("THERE WAS SOME KIND OF API REQUEST ERROR.");
+        console.log(error);
+        APIStore.emit('API_STORE_FAILURE');
+      }
+      else if (response.status != 201){
+        console.log("API REQUEST PROBLEM:");
+        console.log(response.text);
+        APIActions.APIFormResultFailure({
+          formId: 'IssuerNotificationForm',
+          message: {type: 'danger', content: "Error notifying earner: " + response.text}
+        });
+      }
+      else{
+        APIStore.emit('DATA_UPDATED_issuerNotification');
+        APIActions.APIFormResultSuccess({
+          formId: 'IssuerNotificationForm', 
+          message: {type: 'success', content: "Successfully notified earner " + data['email'] + "." }, 
+          result: {}
+        });
+      } 
+    });
+  return req;
+};
+
 // Register with the dispatcher
 APIStore.dispatchToken = appDispatcher.register(function(payload){
   var action = payload.action;
@@ -154,6 +188,8 @@ APIStore.dispatchToken = appDispatcher.register(function(payload){
     case 'FORM_SUBMIT':
       if (action.formId == "EarnerBadgeForm")
         APIStore.postEarnerBadgeForm(FormStore.getFormData(action.formId));
+      else if (action.formId == "IssuerNotificationForm")
+        APIStore.postIssuerNotificationForm(FormStore.getFormData(action.formId));
       else
         console.log("Unidentified form type to submit: " + action.formId);
       break;

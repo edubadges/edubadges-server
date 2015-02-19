@@ -29,15 +29,17 @@ class EarnerNotificationList(APIView):
         Create a new EarnerNotification as long as you know the right email address for the badge
         assertion, and the earner has not been previously notified.
         """
-        serializer = EarnerNotificationSerializer(data=request.data)
+        data = {'url': request.data.get('url'), 'email': request.data.get('email')}
+        serializer = EarnerNotificationSerializer(data=data)
 
         if serializer.is_valid():
-            notification = serializer.create()
+            try:
+                serializer.create()
+            except Exception as e:
+                return Response(e.message, status=status.HTTP_400_BAD_REQUEST)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 
 
 class EarnerNotificationDetail(APIView):

@@ -49,7 +49,7 @@ class BadgeObject(basic_models.TimestampedModel):
     @classmethod
     def get_or_create_by_iri(cls, iri, *args, **kwargs):
         existing_object = cls.detect_existing(iri)
-        if existing_object is not None and not cls.CLASS_TYPE in kwargs.get('create_only', ()):
+        if existing_object is not None and cls.CLASS_TYPE not in kwargs.get('create_only', ()):
             return existing_object
         elif existing_object is not None:
             raise BadgeValidationError("Badge Object (" + cls.CLASS_TYPE + ") already exists with IRI: " + iri, "create_only", iri)
@@ -66,8 +66,11 @@ class BadgeObject(basic_models.TimestampedModel):
             processed_input = badgeanalysis.utils.try_json_load(badge_input)
 
         # If we've got a URL, create this object from the URL.
-        if isinstance(processed_input, (str, unicode)) and badgeanalysis.utils.test_probable_url(processed_input):
-            return cls.get_or_create_by_iri(processed_input, *args, **kwargs)
+        if isinstance(processed_input, (str, unicode)):
+            if badgeanalysis.utils.test_probable_url(processed_input):
+                return cls.get_or_create_by_iri(processed_input, *args, **kwargs)
+            else:
+                return BadgeValidationError("Did not know how to fetch badge object from " + processed_input, "unreadable URL", processed_input)
 
         # Else, figure out the hosted assertion URL, then create by that.
         if cls.CLASS_TYPE == 'assertion':
@@ -102,7 +105,7 @@ class BadgeObject(basic_models.TimestampedModel):
 
         legacy_scheme = BadgeScheme.get_legacy_scheme_match(self.badge_object, self.CLASS_TYPE).get('scheme', None)
         if legacy_scheme is None:
-            raise TypeError("Could not determine type of badge object with known schema set")
+            raise BadgeValidationError("Could not determine type of badge object with known schema set")
 
         return legacy_scheme
 

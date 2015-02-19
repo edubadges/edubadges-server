@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.files import File
 from urlparse import urljoin
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 import os
@@ -7,7 +8,7 @@ import os
 import re
 from pyld import jsonld
 
-from jsonschema import validate, Draft4Validator, draft4_format_checker
+# from jsonschema import validate, Draft4Validator, draft4_format_checker
 from jsonschema.exceptions import ValidationError  # , FormatError
 
 import basic_models
@@ -15,6 +16,7 @@ from djangosphinx.models import SphinxSearch
 from jsonfield import JSONField
 
 import badgeanalysis.utils
+
 
 import functional_validators
 from validation_messages import BadgeValidationSuccess, BadgeValidationError, BadgeValidationMessage
@@ -65,6 +67,29 @@ class OpenBadge(basic_models.DefaultModel):
         # TODO: consider whether the recipient_input should not be included in this representation.
         return "Open Badge: " + badge_name + ", issued by " + badge_issuer + " to " + self.recipient_input
 
+    """
+    Badge creation flow. Returns a tuple with a saved OpenBadge and True if new or False if not.
+    (badge, new)
+    """
+    @classmethod
+    def get_or_create(cls, badge_input='', recipient_input='', *args, **kwargs):
+        try:
+            kwargs['create_only'] = kwargs.get('create_only', ('assertion',))
+            assertion = Assertion.get_or_create_by_badge_object(badge_input, *args, **kwargs)
+        except BadgeValidationError as e:
+            if e.validator == 'create_only':
+                pass
+            raise e
+        else:
+            try:
+                existing_openbadge = assertion.openbadge
+            except ObjectDoesNotExist:
+                new_badge = cls(badge_input=badge_input, recipient_input=recipient_input)
+                new_badge.save(*args, **kwargs)
+                return (new_badge, True)
+            else:
+                return (existing_openbadge, False)
+
     # Core procedure for filling out an OpenBadge from an initial badgeObject follows:
     def save(self, *args, **kwargs):
         if kwargs is None:
@@ -77,9 +102,11 @@ class OpenBadge(basic_models.DefaultModel):
             self.init_badge_object_analysis(*args, **kwargs)
 
             self.validate(*args, **kwargs)
+
+            # Make sure we have a saved copy of the baked badge image locally
+            self.store_baked_image(*args, **kwargs)
         # finally, save the OpenBadge after doing all that stuff in case it's a new one
-        del kwargs['docloader']
-        super(OpenBadge, self).save(*args, **kwargs)
+        super(OpenBadge, self).save()
 
     def init_badge_object_analysis(self, *args, **kwargs):
         """
@@ -105,14 +132,14 @@ class OpenBadge(basic_models.DefaultModel):
 
         try:
             # Create Assertion from initial input
-            kwargs['create_only'] = ('assertion')
+            kwargs['create_only'] = kwargs.get('create_only', ('assertion',))
             self.assertion = Assertion.get_or_create_by_badge_object(self.badge_input, *args, **kwargs)
-
             self.badgeclass = self.assertion.badgeclass
             self.issuerorg = self.badgeclass.issuerorg
             self.scheme = self.assertion.scheme
         except BadgeValidationError as e:
             raise e
+            return
 
         self.full_badge_object = {
             '@context': self.scheme.context_url,
@@ -126,11 +153,15 @@ class OpenBadge(basic_models.DefaultModel):
         self.errors += self.assertion.errors + self.badgeclass.errors + self.issuerorg.errors
         self.notes += self.assertion.notes + self.badgeclass.notes + self.issuerorg.notes
 
+        # Make sure we're not saving any dataUri images to MySQL database
+        self.truncate_images()
+
         # JSON-LD Expansion:
         ld_docloader = kwargs.get('ld_docloader', BadgeScheme.custom_context_docloader)
         expand_options = {"documentLoader": ld_docloader}
 
         self.full_ld_expanded = jsonld.expand(self.full_badge_object, expand_options)
+
 
         # control resumes in save()
 
@@ -253,7 +284,7 @@ class OpenBadge(basic_models.DefaultModel):
         """
         self.process_validation(functional_validators.assertionRecipientValidator.validate(functional_validators.assertionRecipientValidator, self))
         if self.verify_method == 'hosted':
-            self.process_validation(functional_validators.assertionOriginCheck.validate(functional_validators.assertionOriginCheck,self))
+            self.process_validation(functional_validators.assertionOriginCheck.validate(functional_validators.assertionOriginCheck, self))
 
     def process_validation(self, validationResult):
         if not isinstance(validationResult, BadgeValidationMessage):
@@ -282,7 +313,6 @@ class OpenBadge(basic_models.DefaultModel):
     """
     Tools for badge images
     """
-
     def truncate_images(self):
         dataUri = re.compile(r'^data:')
 
@@ -306,7 +336,7 @@ class OpenBadge(basic_models.DefaultModel):
                         f.close()
                         os.remove('temp.png')
                 # remove dataUri from assertion. It would be totally weird to have one here anyway.
-                del full['assertion']['image']  
+                del full['assertion']['image']
         if 'badgeclass' in full and 'image' in full['badgeclass']:
             if self.image and dataUri.match(full['badgeclass']['image']):
                 full['badgeclass']['image'] = self.image.url
@@ -319,7 +349,7 @@ class OpenBadge(basic_models.DefaultModel):
         elif self.image:
             return self.image.url
         # TODO: I Don't know if this case would ever be triggered
-        else: 
+        else:
             raise NotImplementedError("It seems this badge is saved but doesn't have an image. How can I get it's image url?")
 
     def absoluteLocalImageUrl(self, **kwargs):
@@ -327,7 +357,7 @@ class OpenBadge(basic_models.DefaultModel):
         if special_case:
             return special_case
         else:
-            origin = kwargs.get('origin','')
+            origin = kwargs.get('origin', '')
             return urljoin(origin, self.eventualImageUrl())
 
     # For the unfortunate special case of Oregon Badge Alliance assertions while this is running on localhost
@@ -350,7 +380,68 @@ class OpenBadge(basic_models.DefaultModel):
                 return imgUrl
             # for cases where the baked image isn't linked from the assertion
             else:
-                return badgeanalysis.utils.baker_api_url(self.ldProp('bc', 'image'))
+                return badgeanalysis.utils.baker_api_url(self.assertion.iri)
+
+    # A procedure for ensuring that we have a locally saved copy of a BAKED badge image
+    def store_baked_image(self, *args, **kwargs):
+        # No need to load a baked image if we started with one.
+        if self.image:
+            return
+
+        def save_from_dataUri(data, test_for_assertion=True, bake_assertion=False):
+            # TODO: refactor to combine these two methods. This method is wrong. the next one is more right.
+            try:
+                imgfile = base64.decodestring(img_url)
+                with File(open('temp.png', 'w+')) as f:
+                    f.write(imgfile)
+                if test_for_assertion is True:
+                    assertion = badgeanalysis.utils.extract_assertion_from_image(f)
+                if bake_assertion is True:
+                    baked_image = badgeanalysis.utils.bake(f, self.assertion.badge_object)
+            finally:
+                if test_for_assertion is True and assertion is not None:
+                    self.image.save(os.path.basename('dataUriImg.png'), f)
+                elif test_for_assertion is False and bake_assertion is True:
+                    self.image.save(baked_image.name, baked_image)
+                f.close()
+                os.remove('temp.png')
+
+        def save_from_remote_url(url, test_for_assertion=True, bake_assertion=False):
+            try:
+                import requests
+                r = requests.get(img_url, stream=True)
+                with File(open('temp.png', 'w+')) as f:
+                    for chunk in r.iter_content(100):
+                        f.write(chunk)
+                if test_for_assertion is True:
+                    assertion = badgeanalysis.utils.extract_assertion_from_image(f)
+                if bake_assertion is True:
+                    f.open('r')
+                    baked_image = badgeanalysis.utils.bake(f, self.assertion.badge_object)
+            finally:
+                if test_for_assertion is True and assertion is not None:
+                    self.image = f
+                    f.open('r')
+                elif test_for_assertion is False and bake_assertion is True:
+                    self.image = baked_image
+                    baked_image.open('r')
+                os.remove('temp.png')
+
+        img_url = self.ldProp('asn', 'image')
+        if badgeanalysis.utils.is_image_data_uri(img_url):
+            save_from_dataUri(img_url)
+        elif badgeanalysis.utils.test_probable_url(img_url):
+            save_from_remote_url(img_url)
+
+        if self.image:
+            return
+
+        # If no baked image linked from assertion or assertion image wasn't baked
+        img_url = self.ldProp('bc', 'image')
+        if badgeanalysis.utils.is_image_data_uri(img_url):
+            save_from_dataUri(img_url, bake_assertion=True)
+        elif badgeanalysis.utils.test_probable_url(img_url):
+            save_from_remote_url(img_url, test_for_assertion=False, bake_assertion=True)
 
     """
     Tools to inspect an initialized badge object
@@ -378,7 +469,7 @@ class OpenBadge(basic_models.DefaultModel):
     # TODO maybe: wrap this method to allow LD querying using the latest context's shorthand.
     # (so as to get the property we currently understand no matter what version the input object was)
     def getLdProp(self, parent, iri):
-        if not parent in ('http://standard.openbadges.org/#Assertion',
+        if parent not in ('http://standard.openbadges.org/#Assertion',
                           'http://standard.openbadges.org/#BadgeClass',
                           'http://standard.openbadges.org/#Issuer'):
             raise TypeError(parent + " isn't a known type of core badge object to search in")
@@ -387,7 +478,7 @@ class OpenBadge(basic_models.DefaultModel):
             return None
         parent_object = self.full_ld_expanded[0].get(parent)
 
-        if not iri in parent_object[0]:
+        if iri not in parent_object[0]:
             return None
         temp = parent_object[0].get(iri)
 
@@ -413,5 +504,6 @@ class OpenBadge(basic_models.DefaultModel):
         elif isinstance(message, BadgeValidationError):
             self.errors.append(message)
 
+    # TODO: Return a list of validations run on the badge
     def validated_by():
         pass

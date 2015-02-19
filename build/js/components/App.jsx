@@ -15,6 +15,7 @@ var TopLinks = require('../components/TopLinks.jsx');
 var SideBarNav = require('../components/SideBarNav.jsx');
 var OpenBadgeList = require('../components/OpenBadgeList.jsx');
 var EarnerBadgeForm = require('../components/Form.jsx').EarnerBadgeForm;
+var IssuerNotificationForm = require('../components/Form.jsx').IssuerNotificationForm
 
 // Actions
 var LifeCycleActions = require('../actions/lifecycle');
@@ -29,8 +30,7 @@ var App = React.createClass({
     '/earn': 'earnerHome',
     '/earn/badges': 'earnerBadgeForm',
     '/earn/badges/:id': 'earnerBadgeForm',
-    '/issue/notifications/new': 'issuerNotificationForm',
-    '/issue/notifications/:id': 'issuerNotificationView', 
+    '/issue/notifications': 'issuerNotificationForm',
     '/issuer/certificates/new': 'issuerCertificateForm',
     '/issuer/certificates/:id': 'issuerCertificateView', 
     '/understand': 'consumerHome'
@@ -175,12 +175,17 @@ var App = React.createClass({
     return this.render_base(mainComponent);
   },
 
-  issuerNotificationForm: function() {
-    var mainComponent = "NOTIFICATION FORM"
-    return this.render_base(mainComponent);
-  },
-  issuerNotificationView: function() {
-    var mainComponent = "NOTIFICATION VIEW"
+  issuerNotificationForm: function(id) {
+    var props = {
+      formId: 'IssuerNotificationForm'
+    }
+    props['pk'] = typeof id === 'object' ? 0: parseInt(id);
+    props['initialState'] = FormStore.getOrInitFormData(
+      props.formId,
+      { email: "", url: "", actionState: "ready" }
+    );
+
+    var mainComponent = (<IssuerNotificationForm {...props} />);
     return this.render_base(mainComponent);
   },
 

@@ -10,6 +10,7 @@ import hashlib
 from pyld import jsonld
 import pngutils
 from cur_context import current_context
+import requests
 
 
 """
@@ -141,18 +142,6 @@ def validateId(idString):
     return None
 
 
-def extract_assertion_from_image(imageFile):
-    return pngutils.extract(imageFile)
-
-
-def is_image_data_uri(imageString):
-    dataRe = re.compile(r'^data:', flags=re.I)
-    if dataRe.match(imageString):
-        return True
-    else:
-        return False
-
-
 def custom_docloader(url, documentLoader=None):
     """
     Unless overridden, this uses the PyLD package document loader,
@@ -202,10 +191,32 @@ def get_iri_for_prop_in_current_context(shortProp):
     if isinstance(crunk_cup, list):
         return crunk_cup[0].keys()[0]
 
-def image_upload_to():
-    return 'uploads/badges/received'
 
 def baker_api_url(assertion_url):
     # TODO: build this service internally.
     if assertion_url:
         return "http://backpack.openbadges.org/baker?assertion=" + assertion_url
+
+
+"""
+Image Utilities
+"""
+def extract_assertion_from_image(imageFile):
+    # TODO: Add Image type detection and SVG extraction support
+    return pngutils.extract(imageFile)
+
+
+def bake(imageFile, assertion_json_string):
+    return pngutils.bake(imageFile, assertion_json_string)
+
+
+def is_image_data_uri(imageString):
+    dataRe = re.compile(r'^data:', flags=re.I)
+    if imageString is not None and dataRe.match(imageString):
+        return True
+    else:
+        return False
+
+
+def image_upload_to():
+    return 'uploads/badges/received'

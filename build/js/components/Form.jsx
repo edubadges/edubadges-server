@@ -40,7 +40,7 @@ var InputGroup = React.createClass({
       return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="file" onChange={this.props.handleChange} /> );
     }
     else if (this.props.inputType == "text"){
-      ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="text" onChange={this.props.handleChange} onBlur={this.props.handleBlur} /> );
+      return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="text" onChange={this.props.handleChange} onBlur={this.props.handleBlur} /> );
     }
     else if (this.props.inputType == "textarea"){
       return ( <textarea name={this.props.name} value={this.props.value} onChange={this.props.handleChange} onBlur={this.props.handleBlur} /> );
@@ -249,7 +249,8 @@ var EarnerBadgeForm = React.createClass({
     e.preventDefault(); 
     e.stopPropagation();
 
-    FormActions.submitForm(this.props.formId);
+    if (this.state.actionState != "waiting")
+      FormActions.submitForm(this.props.formId);
     
   },
   handleReset: function(e){
@@ -318,7 +319,7 @@ var EarnerBadgeForm = React.createClass({
       );
     }
     return (
-      <div className="earner-badge-form-container">
+      <div className="form-container earner-badge-form-container">
         <form action={this.props.action} method="POST" className={this.state.actionState == "waiting" ? "form-horizontal disabled" : "form-horizontal"}>
             {messageAlert}
             {formResult}
@@ -333,5 +334,113 @@ var EarnerBadgeForm = React.createClass({
   }
 });
 
+IssuerNotificationForm = React.createClass({
+  getInitialState: function() {
+    return this.props.initialState;
+  },  
+  // Mount/unmount the change handler based on this component's lifecycle, but use the fn passed 
+  // in as props to mutage state, because App.jsx is where state is managed.
+  componentDidMount: function() {
+    FormStore.addListener('FORM_DATA_UPDATED_IssuerNotificationForm', this.handlePatch);
+  },
+  componentWillUnmount: function() {
+    FormStore.removeListener('FORM_DATA_UPDATED_IssuerNotificationForm', this.handlePatch);
+  },
+  handleChange: function(event){
+    
+    //reject change unless form is ready
+    if (this.state.actionState != "ready"){
+      event.stopPropagation();
+      event.preventDefault();
+      return;
+    }
+    var field = event.target.name;
+    var value = event.target.value;
+
+    var theChange = {};
+    theChange[field] = value;
+    if (this.isMounted())
+      this.setState(theChange);
+    else{
+      console.log("This probably should never fire: form value changed as it was unmounting..")
+      FormActions.patchForm(this.props.formId, theChange);
+    }
+  },
+  // When an input field is blurred, a form patch is submitted if its value has changed.
+  // Does not apply to the image upload field
+  handleBlur: function(event){
+    var patch = {}
+    var field = event.target.name;
+    var currentData = FormStore.getFormData(this.props.formId);
+    if (currentData[field] !== event.target.value){
+      patch[field] = event.target.value;
+      FormActions.patchForm(this.props.formId, patch);
+    }
+  },
+  // This catches the result from form update and applies it to the formstate. 
+  // On submit, it is how the result gets displayed.
+  handlePatch: function(){
+    // 'this' is bound: EarnerBadgeForm
+    
+    if (this.isMounted()){
+      var newState = FormStore.getFormData(this.props.formId);
+      this.setState(newState);
+    }
+  },
+  handleSubmit: function(e){
+    e.preventDefault(); 
+    e.stopPropagation();
+    if (this.state.actionState != "waiting")
+      FormActions.submitForm(this.props.formId);
+  },
+  handleReset: function(e){
+    e.preventDefault();
+    e.stopPropagation();
+
+    FormActions.patchForm(this.props.formId, {
+      email: "",
+      url: "",
+      actionState: "ready", 
+      result: undefined,
+      message: undefined
+    });
+      
+  },
+  render: function() {
+    var messageAlert = (this.state.message) ? (<div className={"alert alert-" + this.state.message.type} >{this.state.message.content}</div>) : "";
+    var loadingIcon = this.state.actionState == "waiting" ? (<LoadingIcon />) : "";
+    var activeInputs = "";
+    if (this.state.actionState == "ready" || this.state.actionState == "waiting"){
+      activeInputs = (
+        <fieldset>
+          <InputGroup name="url" inputType="text" value={this.state.url}
+            label="Assertion URL" handleChange={this.handleChange} 
+            handleBlur={this.handleBlur}
+          />
+
+          <InputGroup name="email" inputType="text" 
+            label="Earner Email Address" value={this.state.email} 
+            handleChange={this.handleChange} handleBlur={this.handleBlur}
+          />
+
+          <SubmitButton name="submit" handleClick={this.handleSubmit} />
+        </fieldset>
+      );
+    }
+    return (
+      <div className="form-container issuer-notification-form-container">
+        <form action={this.props.action} method="POST" className={this.state.actionState == "waiting" ? "form-horizontal disabled" : "form-horizontal"}>
+            {messageAlert}
+            {activeInputs}
+            
+            <ResetButton name="reset" handleClick={this.handleReset} />
+            { loadingIcon }
+        </form>
+      </div>
+    );
+  }
+});
+
 // Export the Menu class for rendering:
 module.exports.EarnerBadgeForm = EarnerBadgeForm;
+module.exports.IssuerNotificationForm = IssuerNotificationForm;

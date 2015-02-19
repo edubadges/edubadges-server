@@ -53,7 +53,8 @@ class EarnerNotification(basic_models.TimestampedModel):
         html_output_message = ht.render(email_context)
         mail_meta = {
             'subject': 'Congratulations, you earned a badge!',
-            'from_address': email_context['issuer_name'] + ' Badges <noreply@oregonbadgealliance.org>',
+            # 'from_address': email_context['issuer_name'] + ' Badges <noreply@oregonbadgealliance.org>',
+            'from_address': 'Oregon Badge Alliance' + ' Badges <noreply@oregonbadgealliance.org>',
             'to_addresses': [self.email]
         }
 

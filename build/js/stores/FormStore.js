@@ -9,7 +9,8 @@ var FormStore = assign({}, EventEmitter.prototype);
 
 FormStore.data = {};
 FormStore.formIds = [
-  "EarnerBadgeForm"
+  "EarnerBadgeForm",
+  "IssuerNotificationForm"
 ];
 FormStore.requests = {};
 
@@ -26,11 +27,18 @@ FormStore.getFormData = function(id){
 };
 FormStore.defaultValues = {
   "EarnerBadgeForm": {
-    "actionState": "ready"
+    actionState: "ready"
+  },
+  "IssuerNotificationForm": {
+    email: "",
+    url: "", 
+    actionState: "ready"
   }
 }
 FormStore.getOrInitFormData = function(formId, initialData){
   var formData = FormStore.getFormData(formId);
+  if (!formData)
+    return initialData;
   if (Object.keys(formData).length === 0){
     FormStore.setFormData(
       formId, 

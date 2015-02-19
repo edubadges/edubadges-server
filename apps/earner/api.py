@@ -93,7 +93,7 @@ class EarnerBadgesList(APIView):
             raise ValidationError(e.message)
 
         serializer = EarnerBadgeSerializer(new_earner_badge)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class EarnerBadgeDetail(APIView):

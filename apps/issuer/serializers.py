@@ -23,17 +23,17 @@ class EarnerNotificationSerializer(serializers.Serializer):
     def validate(self, data):
         if not data.get('badge'):
             try:
-                badge = OpenBadge(
+                badge, badge_is_new = OpenBadge.get_or_create(
                     recipient_input=data.get('email'),
-                    badge_input=data.get('url')
+                    badge_input=data.get('url'),
+                    **{'create_only': ()}
                 )
-                badge.save()
             except BadgeValidationError as e:
                 raise ValidationError(
-                    e.to_dict()['message']  # This error's likely that the earner email address != intended notification target
+                    "Badge could not be validated: " + e.to_dict()['message']  # This error's likely that the earner email address != intended notification target
                 )
             except Exception as e:
-                raise ValidationError(e.message)
+                raise ValidationError("Badge could not be validated: " + e.message)
             else:
                 data['badge'] = badge
                 return data
