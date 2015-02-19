@@ -1,53 +1,53 @@
 from django.views.generic import CreateView, DetailView
-from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 from django.core.urlresolvers import reverse
 
 from issuer.models import *
-from mainsite.views import ActiveTabMixin
-from issuer.forms import IssuerForm, NotifyEarnerForm
+
+from badgeuser.serializers import BadgeUserSerializer
+import json
 
 
 # from django.shortcuts import render_to_response
 
 
-class IssuerCreate(ActiveTabMixin, CreateView):
+class IssuerCreate(CreateView):
     model = Issuer
-    active_tab = 'issuer'
     form_class = IssuerForm
 
 
-class IssuerDetail(ActiveTabMixin, DetailView):
+class IssuerDetail(DetailView):
     model = Issuer
-    active_tab = 'issuer'
     form_class = IssuerForm
 
 
-class EarnerNotificationCreate(ActiveTabMixin, CreateView):
-    active_tab = 'issuer'
-    template_name = 'issuer/notify_earner.html'
+class EarnerNotificationCreate(CreateView):
+    template_name = 'base_interior.html'
     model = EarnerNotification
     form_class = NotifyEarnerForm
 
-    def form_invalid(self, form):
-        return super(EarnerNotificationCreate, self).form_invalid(form)
+    def get_current_user(self):
+        current_user = self.request.user
+        if current_user is not None:
+            return current_user
+        raise Http404
 
-    def form_valid(self, form):
-        self.object = form.save(commit=False)
-        self.object.badge = form.cleaned_data['badge']
-
+    def get(self, request):
         try:
-            self.object.send_email()
-        except Exception:
-            # TODO: make this work
-            self.form_invalid(form)
-        else:
-            self.object.save()
+            self.object = self.get_current_user()
+        except Http404:
+            return redirect(reverse('login'))
+        context = self.get_context_data(user=self.object)
 
-        return HttpResponseRedirect(self.get_success_url())
+        return self.render_to_response(context)
 
     def get_success_url(self):
         return reverse('notify_earner')
 
     def get_context_data(self, **kwargs):
         context = super(EarnerNotificationCreate, self).get_context_data(**kwargs)
+        user_serializer = BadgeUserSerializer(kwargs['user'])
+
+        context['initial_data'] = json.dumps(user_serializer.data)
+
         return context
