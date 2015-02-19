@@ -13,18 +13,15 @@ import json
 
 class IssuerCreate(CreateView):
     model = Issuer
-    form_class = IssuerForm
 
 
 class IssuerDetail(DetailView):
     model = Issuer
-    form_class = IssuerForm
 
 
 class EarnerNotificationCreate(CreateView):
     template_name = 'base_interior.html'
     model = EarnerNotification
-    form_class = NotifyEarnerForm
 
     def get_current_user(self):
         current_user = self.request.user
