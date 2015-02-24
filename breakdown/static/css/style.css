@@ -1,3 +1,21 @@
+.navbar-brand img {
+  max-width: 30px;
+  height: auto;
+  display: inline; }
+.navbar-brand span {
+  padding-left: 0.5em; }
+
+.navbar {
+  border: 0; }
+
+.navbar .navbar-header {
+  width: 100%; }
+  .navbar .navbar-header .navbar-right > ul {
+    display: inline-block; }
+
+.badge-display-active {
+  background-color: #d1d1d1; }
+
 .sidebar-nav li.expanded-false ul {
   display: none; }
 
@@ -33,3 +51,32 @@ form.disabled, form.disabled textarea {
 .dropzone img {
   max-width: 200px;
   height: auto; }
+
+#page-wrapper {
+  border-left: 0;
+  margin: 0 auto; }
+
+.wrap {
+  max-width: 1080px;
+  margin: 0 auto; }
+
+.main-header {
+  border-bottom: 1px solid #e7e7e7; }
+
+.badge-display-active {
+  background-color: #d1d1d1; }
+
+.navbar-brand img {
+  max-width: 30px;
+  height: auto;
+  display: inline; }
+.navbar-brand span {
+  padding-left: 0.5em; }
+
+.navbar {
+  border: 0; }
+
+.navbar .navbar-header {
+  width: 100%; }
+  .navbar .navbar-header .navbar-right > ul {
+    display: inline-block; }

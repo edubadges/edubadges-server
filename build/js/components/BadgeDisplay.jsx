@@ -144,11 +144,14 @@ var Extension = React.createClass({
 
 var BadgeDisplayThumbnail = React.createClass({
   handleClick: function(){
-    this.props.setActiveBadgeId(this.props.pk);
+    this.props.setActiveBadgeId(this.props.id);
   },
   render: function() {
+    var className = 'badge-display badge-display-thumbnail col-sm-3 col-md-2 col-lg-2';
+    if (this.props.isActive)
+      className += ' badge-display-active';
     return (
-      <div className='badge-display badge-display-thumbnail col-sm-4 col-md-3 col-lg-2' onClick={this.handleClick} >
+      <div className={className} onClick={this.handleClick} >
         <Property name='Badge Image' label={false} property={this.props.image} />
         <Property name='Name' label={false} property={this.props.badgeclass.name} />
         <Property name='Issuer' label={false} property={this.props.issuerorg} linksClickable={false}/>
@@ -218,8 +221,7 @@ var OpenBadge = React.createClass({
   getDefaultProps: function() {
     return {
       display: 'thumbnail',
-      badge: fakeSerializedBadge,
-      image: 'http://placekitten.com/g/300/300'
+      badge: fakeSerializedBadge
     };
   },
   // allows override for displaying detail badges elsewhere than in an OpenBadgeList.
@@ -236,7 +238,7 @@ var OpenBadge = React.createClass({
         return ( <BadgeDisplayDetail image={this.props.image} pk={this.props.pk} handleCloseClick={this.handleCloseClick.bind(this)} {...this.props.badge } /> );
         break;
       case 'thumbnail': 
-        return ( <BadgeDisplayThumbnail image={this.props.image} pk={this.props.pk} setActiveBadgeId={this.props.setActiveBadgeId} {...this.props.badge } /> );
+        return ( <BadgeDisplayThumbnail image={this.props.image} id={this.props.id} pk={this.props.pk} isActive={this.props.isActive} setActiveBadgeId={this.props.setActiveBadgeId} {...this.props.badge } /> );
         break;
       default:  // 'full'
         return ( <BadgeDisplayFull image={this.props.image} pk={this.props.pk} {...this.props.badge } /> );
@@ -248,5 +250,24 @@ var OpenBadge = React.createClass({
   }
 });
 
+var EarnerBadge = React.createClass({
+  render: function() {
+    return (
+      <div className="earner-badge-display">
+        <OpenBadge
+          display={this.props.display}
+          id={this.props.id}
+          badge={this.props.badge.full_badge_object}
+          image={this.props.badge.image}
+          isActive={this.props.isActive}
+          setActiveBadgeId={this.props.setActiveBadgeId}
+        />
+        <div className="earner-identifier">{this.props.earner}</div>
+      </div>
+    );
+  }
+});
+
 // Export the Menu class for rendering:
 module.exports.OpenBadge = OpenBadge;
+module.exports.EarnerBadge = EarnerBadge;

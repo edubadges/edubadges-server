@@ -21,27 +21,20 @@ var OpenBadgeList = React.createClass({
     };
   },
   render: function(){  
-    var activeItem = [];
-    var inactiveItems = []
+    var activeBadge = "";
 
-    for (var i=0; i < this.props.badgeList.length; i++){
-      if (this.props.activeBadgeId == this.props.badgeList[i].badge.pk)
-        activeItem.push(this.props.badgeList[i]);
-      else
-        inactiveItems.push(this.props.badgeList[i]);
-    }
-
-
-    var badgesInList = activeItem.concat(inactiveItems).map(function(item, i){
+    var badgesInList = this.props.badgeList.map(function(item, i){
       return (
         <OpenBadge 
           key={"key-" + item.badge.pk}
+          id={item.id}
           pk={item.badge.pk}
-          display={ this.props.activeBadgeId == item.badge.pk ? "detail" : "thumbnail" } 
+          display="thumbnail"
           image={ item.badge.image }
           badge={ item.badge.full_badge_object }
           earner={ item.badge.recipient_input }
           setActiveBadgeId={ this.props.setActiveBadgeId }
+          isActive={ (this.props.activeBadgeId ==item.id) }
         />
       );
     }.bind(this));
