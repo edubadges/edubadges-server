@@ -14,6 +14,7 @@ var ActivePanel = React.createClass({
     if (!('type' in this.props))
       return <div className="active-panel empty" />;
 
+    // TODO: refactor for "EarnerBadgeDisplay" instead of "OpenBadgeDisplay"
     if (this.props.type == "OpenBadgeDisplay"){
       return (
         <div className="active-panel open-badge-display clearfix">

@@ -16,6 +16,10 @@
 .badge-display-active {
   background-color: #d1d1d1; }
 
+.action-bar li {
+  display: inline-block;
+  float: right; }
+
 .sidebar-nav li.expanded-false ul {
   display: none; }
 
@@ -62,6 +66,10 @@ form.disabled, form.disabled textarea {
 
 .main-header {
   border-bottom: 1px solid #e7e7e7; }
+
+.action-bar li {
+  display: inline-block;
+  float: right; }
 
 .badge-display-active {
   background-color: #d1d1d1; }

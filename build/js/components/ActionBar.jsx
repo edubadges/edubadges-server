@@ -31,7 +31,7 @@ var ActionBar = React.createClass({
       );
     }.bind(this));
     return (
-      <div className="action-bar">
+      <div className="action-bar clearfix">
         {items}
       </div>
     );

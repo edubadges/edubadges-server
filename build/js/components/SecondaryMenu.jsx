@@ -5,14 +5,16 @@ var SecondaryMenu = React.createClass({
   render: function() {
     var items = this.props.items.map(function(item, index){
       return (
-        <li className="menu-item" key={"secondary-menu-item-" + index}>
-          <i className={'fa fa-fw ' + item.icon}></i>
-          <a href={item.url}>{item.title}</a>
+        <li className="nav-menu-item" key={"secondary-menu-item-" + index}>
+          <a href={item.url}>
+            <i className={'fa fa-fw ' + item.icon}></i>
+            {item.title}
+          </a>
         </li>
       );
     });
     return (
-      <ul className="secondary-menu">
+      <ul className="secondary-menu nav navbar navbar-top-links">
         {items}
       </ul>
     );

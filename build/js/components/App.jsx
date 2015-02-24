@@ -62,7 +62,6 @@ var App = React.createClass({
   getInitialState: function() {
     return {
       earnerBadges: [],
-      activeTopMenu: null,
       activePanels: ActiveActionStore.getAllActiveActions(),
       path: window.location.pathname
     };
@@ -95,11 +94,6 @@ var App = React.createClass({
       this.setState({activeTopMenu: null});
   },
 
-  // // Deprecated: replacing with update Active Panel
-  // setActiveBadgeId: function(key){
-  //   console.log("Setting the activeBadgeId now to " + key);
-  //   this.setState({activeBadgeId: key});
-  // },
   updateActivePanel: function(viewId, update){
     ActiveActions.updateActiveAction(
       viewId,
@@ -194,9 +188,7 @@ var App = React.createClass({
     var viewId = 'earnerHome';
     console.log(this.state.activePanels[viewId]);
     if (this.state.activePanels && viewId in this.state.activePanels && 'content' in this.state.activePanels[viewId]){
-      console.log("It was true!!!!");
       activeBadgeId = this.state.activePanels[viewId].content.badgeId;
-      console.log(activeBadgeId);
     }
 
     var mainComponent = (
