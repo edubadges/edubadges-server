@@ -147,7 +147,7 @@ var BadgeDisplayThumbnail = React.createClass({
     this.props.setActiveBadgeId(this.props.id);
   },
   render: function() {
-    var className = 'badge-display badge-display-thumbnail col-sm-3 col-md-2 col-lg-2';
+    var className = 'badge-display badge-display-thumbnail col-xs-3 col-md-2 col-lg-2';
     if (this.props.isActive)
       className += ' badge-display-active';
     return (
@@ -164,7 +164,7 @@ var BadgeDisplayThumbnail = React.createClass({
 var BadgeDisplayDetail = React.createClass({
   render: function() {
     return (
-      <div className='badge-display badge-display-detail col-sm-12'>
+      <div className='badge-display badge-display-detail col-xs-12'>
         <span className="closeLink" onClick={this.props.handleCloseClick}>X</span>
         <div className='property-group badgeclass'>
           <Property name='Badge Image' label={false} property={this.props.image} />

@@ -1,7 +1,13 @@
 
 @import "components/header";
 @import "components/badge-display";
-@import "./components/action-bar";
+@import "components/action-bar";
+@import "components/active-panel";
+
+// refactoring from this SB2 stylesheet as source, moving things into 
+// components as possible. Eventually this won't be needed:
+@import "components/sb2";
+@import "components/metismenu";
 
 
 .sidebar-nav{
@@ -52,6 +58,7 @@ form.disabled, form.disabled textarea { background-color: #ddd; }
 .wrap {
   max-width: 1080px;
   margin: 0 auto;
+  padding: 0 20px;
 }
 .main-header {
   border-bottom: 1px solid #e7e7e7;

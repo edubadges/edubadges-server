@@ -1,0 +1,13 @@
+.active-panel {
+  border: 1px solid #ccc;
+  .badge-display { border: 0; }
+  &.empty {
+    display: none;
+  }
+}
+
+.active-panel, .badge-display-active {
+  border-color: #9ecaed;
+  box-shadow: 0 0 10px #9ecaed;
+  border-radius: 4px;
+}

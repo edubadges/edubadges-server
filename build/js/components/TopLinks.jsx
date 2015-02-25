@@ -50,7 +50,7 @@ var FirstLevelItem = React.createClass({
         <a href={this.props.url} onClick={this.handleClick} alt={this.title}>  
           <i className={'fa fa-fw ' + this.props.iconClass}></i> 
           {downCaret}
-          {this.props.label}
+          <label>{this.props.label}</label>
         </a>
         {anyChildren}
       </li>

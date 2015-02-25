@@ -32,7 +32,12 @@ var ActionBar = React.createClass({
     }.bind(this));
     return (
       <div className="action-bar clearfix">
-        {items}
+        <div className="main-component-content-title col-xs-6">
+          <h3>{this.props.title}</h3>
+        </div>
+        <ul className="col-xs-6">
+          {items}
+        </ul>
       </div>
     );
   }

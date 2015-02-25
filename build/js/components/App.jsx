@@ -147,10 +147,6 @@ var App = React.createClass({
             <nav className="navbar navbar-default navbar-static-top" role="navigation">
 
               <div className="navbar-header">
-                <button type="button" className="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                  <span className="sr-only">Toggle navigation</span>
-                  <i className="fa fa-fw fa-bars"></i>
-                </button>
                 <a className="navbar-brand" href="/"><img src="/static/images/header-logo-120.png" className="brand-logo" />
                   <span>{ this.props.appTitle }</span>
                 </a>
@@ -164,11 +160,9 @@ var App = React.createClass({
         </header>
 
         <section className="main-section content-container">
-          <div id="page-wrapper" className="wrap page-wrapper">
+          <div className="wrap page-wrapper">
             <div className="container-fluid">
-              <div className="row">
                 { mainComponent }
-              </div>
             </div>
           </div>
         </section>
@@ -186,7 +180,6 @@ var App = React.createClass({
   earnerHome: function() {
     var activeBadgeId = null;
     var viewId = 'earnerHome';
-    console.log(this.state.activePanels[viewId]);
     if (this.state.activePanels && viewId in this.state.activePanels && 'content' in this.state.activePanels[viewId]){
       activeBadgeId = this.state.activePanels[viewId].content.badgeId;
     }
@@ -195,6 +188,7 @@ var App = React.createClass({
       <MainComponent viewId={viewId}>
         <SecondaryMenu viewId={viewId} items={this.props.secondaryMenus[viewId]} />
         <ActionBar 
+          title="My Badges"
           viewId={viewId}
           items={this.props.actionBars[viewId]}
           updateActivePanel={this.updateActivePanel}
