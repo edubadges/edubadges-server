@@ -144,15 +144,18 @@ def validateId(idString):
 
 
 # Document Fetching from Remote sources
-def get_document_direct(url, options=None, params=None):
+def get_document_direct(url, options=None, params=None, stream=False):
     if params is None:
-        r = requests.get(url)
+        r = requests.get(url, stream=stream)
     else:
         raise NotImplementedError("HTTP GET with params not yet supported in badgeanalysis utils.")
 
+    if stream is True:
+        return r
+
     if options is not None and options.get('accept', None) == 'json':
         return r.json()
-    else: 
+    else:
         return r.content
 
 def custom_docloader(url, documentLoader=None, docType=None):

@@ -1,9 +1,16 @@
 from django.test import TestCase
+from django.test.utils import override_settings
+from django.core.files.base import ContentFile
 import sys
 import json
 import os
+import io
 from jsonschema import Draft4Validator
 import pngutils
+import requests
+
+# a mock library for requests
+import responses
 
 from badgeanalysis import testresources
 import utils
@@ -14,11 +21,12 @@ from badgeanalysis.validation_messages import BadgeValidationError
 from badgeanalysis.cur_context import current_context
 
 
+
 # Construct a docloader function that will return preloaded responses for predetermined URLs
 # Load in a dict of urls and the response bodies you want them to deliver:
 # response_list = {'http://google.com': 'Hacked by the lizard overlords, hahaha!'}
 def mock_docloader_factory(response_list):
-    def mock_docloader(url):
+    def mock_docloader(url, params=None, stream=False):
         return response_list[url]
     return mock_docloader
 
@@ -165,7 +173,8 @@ valid_1_0_docloader = mock_docloader_factory(
         'http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205': valid_1_0_assertion,
         'http://openbadges.oregonbadgealliance.org/api/badges/53d727a11f04f3a84a99b002': valid_1_0_badgeclass,
         'http://openbadges.oregonbadgealliance.org/api/issuers/53d41603f93ae94a733ae554': valid_1_0_issuer,
-        'http://standard.openbadges.org/1.0/context.json': { 'document': current_context(), 'contextUrl': None, 'documentUrl': 'http://standard.openbadges.org/1.0/context.json' }
+        'http://standard.openbadges.org/1.0/context.json': { 'document': current_context(), 'contextUrl': None, 'documentUrl': 'http://standard.openbadges.org/1.0/context.json' },
+        'http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205/image': requests.get('http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205/image')
     }
 )
 
@@ -298,23 +307,26 @@ class BadgeObjectsTests(TestCase):
     #     b.save(**{'docloader': valid_1_0_docloader})
     #     self.assertEqual(b.badgeclass.iri, 'http://openbadges.oregonbadgealliance.org/api/badges/53d727a11f04f3a84a99b002')
 
+    @override_settings(REMOTE_DOCUMENT_FETCHER='badgeanalysis.tests.oneone_docloader')
     def test_assertion_badge_assertion_create_oneone(self):
         bb = Assertion(iri='http://example.org/assertion25', badge_object={'uid':"toooooooooots"})
-        bb.save(**{'docloader': oneone_docloader})
+        bb.save()
         self.assertTrue(isinstance(bb.badgeclass, BadgeClass))
         self.assertTrue(isinstance(bb.badgeclass.issuerorg, IssuerOrg))
 
+    @override_settings(REMOTE_DOCUMENT_FETCHER='badgeanalysis.tests.oneone_docloader')
     def test_assertion_badge_assertion_get_or_create_oneone(self):
-        bb = Assertion.get_or_create_by_iri('http://example.org/assertion25', **{'docloader': oneone_docloader})
+        bb = Assertion.get_or_create_by_iri('http://example.org/assertion25')
         self.assertTrue(isinstance(bb.badgeclass, BadgeClass))
         self.assertTrue(isinstance(bb.badgeclass.issuerorg, IssuerOrg))
 
+    @override_settings(REMOTE_DOCUMENT_FETCHER='badgeanalysis.tests.oneone_docloader')
     def test_multiple_assertion_same_badgeclass_oneone(self):
         bb = Assertion(iri='http://example.org/assertion25')
-        bb.save(**{'docloader': oneone_docloader})
+        bb.save()
 
         cc = Assertion(iri='http://example.org/assertion30')
-        cc.save(**{'docloader': oneone_docloader})
+        cc.save()
 
         self.assertEqual(bb.badgeclass.pk, cc.badgeclass.pk)
 
@@ -327,25 +339,39 @@ class BadgeObjectsTests(TestCase):
 class OpenBadgeIntegrationTests(TestCase):
     fixtures = ['0001_initial_superuser', '0002_initial_schemes_and_validators']
 
-    # def test_successful_OpenBadge_save(self):
-    #     badge_input = valid_1_0_assertion
-    #     recipient_input = 'nate@ottonomy.net'
-    #     b = OpenBadge(badge_input=badge_input, recipient_input=recipient_input)
-    #     try:
-    #         b.save(**{'docloader': valid_1_0_docloader})
-    #     except Exception as e:
-    #         self.assertEqual(e, None)
-    #     else:
-    #         self.assertTrue(True) # Yay, no errors!
+    @override_settings(REMOTE_DOCUMENT_FETCHER='badgeanalysis.tests.valid_1_0_docloader')
+    @responses.activate
+    def test_successful_OpenBadge_save(self):
+        responses.add(
+            responses.GET, 'http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205/image',
+            stream=io.open(os.path.join(os.path.dirname(__file__), 'testfiles', '1.png'), 'r'), 
+            status=200, content_type='image/png'
+        )
 
-    # def test_OpenBadge_save_bad_recipient(self):
-    #     badge_input = valid_1_0_assertion
-    #     recipient_input = 'nate@ottonomy.newt'
-    #     b = OpenBadge(badge_input=badge_input, recipient_input=recipient_input)
-    #     try:
-    #         b.save(**{'docloader': valid_1_0_docloader})
-    #     except Exception as e:
-    #         self.assertTrue(isinstance(e, BadgeValidationError))
-    #         self.assertEqual(e.to_dict()['validator'], 'Functional:AssertionRecipientValidator')
-    #     else: 
-    #         self.assertTrue(False) # Boo, there should have been an error!
+        badge_input = valid_1_0_assertion
+        recipient_input = 'nate@ottonomy.net'
+        b = OpenBadge(badge_input=badge_input, recipient_input=recipient_input)
+        # This should not throw an error
+        b.save()
+        self.assertTrue(b.image is not None) # Yay, no errors!
+
+    @override_settings(REMOTE_DOCUMENT_FETCHER='badgeanalysis.tests.valid_1_0_docloader')
+    @responses.activate
+    def test_OpenBadge_save_bad_recipient(self):
+        responses.add(
+            responses.GET, 'http://openbadges.oregonbadgealliance.org/api/assertions/53d944bf1400005600451205/image',
+            stream=io.open(os.path.join(os.path.dirname(__file__), 'testfiles', '1.png'), 'r'), 
+            status=200, content_type='image/png'
+        )
+
+        badge_input = valid_1_0_assertion
+        recipient_input = 'such_an_incorrect_email@aol.com'
+        b = OpenBadge(badge_input=badge_input, recipient_input=recipient_input)
+        # This should not throw an error
+        try:
+            b.save()
+        except Exception as e:
+            self.assertTrue(isinstance(e, BadgeValidationError))
+            self.assertEqual(e.validator, 'BadgeFunctionalValidator AssertionRecipientValidator: Functional Badge Validator')
+        else:
+            self.assertFalse("There should have been a save error, because email address was wrong.") 

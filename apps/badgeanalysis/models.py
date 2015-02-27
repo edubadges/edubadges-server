@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.utils.module_loading import import_string
 from django.core.files import File
 from urlparse import urljoin
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
@@ -7,6 +8,7 @@ import os
 
 import re
 from pyld import jsonld
+
 
 # from jsonschema import validate, Draft4Validator, draft4_format_checker
 from jsonschema.exceptions import ValidationError  # , FormatError
@@ -282,18 +284,25 @@ class OpenBadge(basic_models.DefaultModel):
         """
         Run standard validations on an OpenBadge (complete with Assertion, BadgeClass, & IssuerOrg)
         """
-        self.process_validation(functional_validators.assertionRecipientValidator.validate(functional_validators.assertionRecipientValidator, self))
+        self.process_validation(
+            functional_validators.assertionRecipientValidator.validate(functional_validators.assertionRecipientValidator, self),
+            raiseException=True
+        )
+
         if self.verify_method == 'hosted':
             self.process_validation(functional_validators.assertionOriginCheck.validate(functional_validators.assertionOriginCheck, self))
 
-    def process_validation(self, validationResult):
+    def process_validation(self, validationResult, raiseException=False):
         if not isinstance(validationResult, BadgeValidationMessage):
             raise TypeError(str(validationResult) + " wasn't a true badge validation")
 
         if isinstance(validationResult, BadgeValidationSuccess):
             self.notes.append(validationResult.to_dict())
         elif isinstance(validationResult, BadgeValidationError):
-            self.errors.append(validationResult.to_dict())
+            if raiseException == True:
+                raise(validationResult)
+            else:
+                self.errors.append(validationResult.to_dict())
 
     @classmethod
     def find_by_assertion_iri(cls, iri, *args, **kwargs):
@@ -407,13 +416,15 @@ class OpenBadge(basic_models.DefaultModel):
                 os.remove('temp.png')
 
         def save_from_remote_url(url, test_for_assertion=True, bake_assertion=False):
+            docloader = import_string(getattr(settings, 'REMOTE_DOCUMENT_FETCHER'))
             try:
-                import requests
-                r = requests.get(img_url, stream=True)
+                assertion = None
+                response = docloader(img_url, stream=True)
                 with File(open('temp.png', 'w+')) as f:
-                    for chunk in r.iter_content(100):
+                    for chunk in response.iter_content(100):
                         f.write(chunk)
                 if test_for_assertion is True:
+                    f.open('r')
                     assertion = badgeanalysis.utils.extract_assertion_from_image(f)
                 if bake_assertion is True:
                     f.open('r')
@@ -431,7 +442,7 @@ class OpenBadge(basic_models.DefaultModel):
         if badgeanalysis.utils.is_image_data_uri(img_url):
             save_from_dataUri(img_url)
         elif badgeanalysis.utils.test_probable_url(img_url):
-            save_from_remote_url(img_url)
+            save_from_remote_url(img_url, test_for_assertion=kwargs.get('test_for_assertion', True))
 
         if self.image:
             return
