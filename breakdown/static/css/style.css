@@ -18,8 +18,23 @@
   margin-bottom: 0;
   font-weight: normal; }
 
+.badge-display .propertyName {
+  font-weight: bold;
+  margin-right: 0.5em; }
+  .badge-display .propertyName:after {
+    content: ":"; }
+
+.property-group {
+  margin-bottom: 1em; }
+
 .badge-display-active {
   background-color: #d1d1d1; }
+
+.badgeProperty-type-link .propertyValue {
+  display: inline-block;
+  max-width: 100%; }
+  .badgeProperty-type-link .propertyValue a {
+    text-overflow: hidden; }
 
 .action-bar {
   margin-bottom: 1em; }
@@ -32,16 +47,33 @@
     float: right; }
 
 .active-panel {
-  border: 1px solid #ccc; }
+  border: 1px solid #ccc;
+  padding: 1em; }
   .active-panel .badge-display {
     border: 0; }
   .active-panel.empty {
     display: none; }
+  .active-panel .panel-actions button {
+    float: right; }
 
 .active-panel, .badge-display-active {
   border-color: #9ecaed;
   box-shadow: 0 0 10px #9ecaed;
   border-radius: 4px; }
+
+.dropzone {
+  width: 200px;
+  height: 200px;
+  max-width: 100%; }
+  .dropzone img {
+    max-width: 100%;
+    height: auto; }
+
+.earner-badge-form textarea {
+  max-width: 100%; }
+.earner-badge-form .submit-button {
+  clear: both;
+  padding: 1em; }
 
 /*!
  * Start Bootstrap - SB Admin 2 Bootstrap Admin Theme (http://startbootstrap.com)
@@ -383,19 +415,51 @@ form.disabled, form.disabled textarea {
     float: right; }
 
 .active-panel {
-  border: 1px solid #ccc; }
+  border: 1px solid #ccc;
+  padding: 1em; }
   .active-panel .badge-display {
     border: 0; }
   .active-panel.empty {
     display: none; }
+  .active-panel .panel-actions button {
+    float: right; }
 
 .active-panel, .badge-display-active {
   border-color: #9ecaed;
   box-shadow: 0 0 10px #9ecaed;
   border-radius: 4px; }
 
+.badge-display .propertyName {
+  font-weight: bold;
+  margin-right: 0.5em; }
+  .badge-display .propertyName:after {
+    content: ":"; }
+
+.property-group {
+  margin-bottom: 1em; }
+
 .badge-display-active {
   background-color: #d1d1d1; }
+
+.badgeProperty-type-link .propertyValue {
+  display: inline-block;
+  max-width: 100%; }
+  .badgeProperty-type-link .propertyValue a {
+    text-overflow: hidden; }
+
+.dropzone {
+  width: 200px;
+  height: 200px;
+  max-width: 100%; }
+  .dropzone img {
+    max-width: 100%;
+    height: auto; }
+
+.earner-badge-form textarea {
+  max-width: 100%; }
+.earner-badge-form .submit-button {
+  clear: both;
+  padding: 1em; }
 
 .navbar-brand img {
   max-width: 30px;

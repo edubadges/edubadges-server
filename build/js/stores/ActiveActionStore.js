@@ -25,7 +25,8 @@ ActiveActionStore.data = {};
 
 // Different views that have the concept of an ActiveAction
 ActiveActionStore.knownViews = [
-  'earnerHome'
+  'earnerHome',
+  'issuerMain'
 ];
 
 ActiveActionStore.updateAction = function(viewId, update){

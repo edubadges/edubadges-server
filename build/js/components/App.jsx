@@ -37,7 +37,7 @@ var App = React.createClass({
     '/earn': 'earnerHome',
     // '/earn/badges': 'earnerBadgeForm',
     // '/earn/badges/:id': 'earnerBadgeForm',
-    '/issue/notifications': 'issuerNotificationForm',
+    '/issue/badges': 'issuerMain',
     '/issuer/certificates/new': 'issuerCertificateForm',
     '/issuer/certificates/:id': 'issuerCertificateView', 
     '/understand': 'consumerHome'
@@ -95,6 +95,8 @@ var App = React.createClass({
   },
 
   updateActivePanel: function(viewId, update){
+    console.log("Updating active panel " + viewId);
+    console.log(update);
     ActiveActions.updateActiveAction(
       viewId,
       //updates vary by type; example: { type: "OpenBadgeDisplay", content: { badgeId: id, detailLevel: 'detail' }}
@@ -114,7 +116,8 @@ var App = React.createClass({
     if (!(viewId in this.state.activePanels))
       return {};
 
-    var panel = this.state.activePanels[viewId]
+    var context;
+    var panel = this.state.activePanels[viewId];
     if (panel.type == "EarnerBadgeForm") {
       context = {
         recipientIds: UserStore.getProperty('earnerIds'),
@@ -127,6 +130,10 @@ var App = React.createClass({
         detailLevel: panel.content.detailLevel,
         badge: APIStore.getFirstItemByPropertyValue('earnerBadges', 'id', panel.content.badgeId)
       };
+    }
+    else if (panel.type == "IssuerNotificationForm") {
+      context = {
+      }
     }
     return context;
   },
@@ -213,17 +220,29 @@ var App = React.createClass({
     return this.render_base(mainComponent);
   },
 
-  issuerNotificationForm: function(id) {
-    var props = {
-      formId: 'IssuerNotificationForm'
-    }
-    props['pk'] = typeof id === 'object' ? 0: parseInt(id);
-    props['initialState'] = FormStore.getOrInitFormData(
-      props.formId,
-      { email: "", url: "", actionState: "ready" }
-    );
+  issuerMain: function(id) {
+    var viewId = "issuerMain";
+  
 
-    var mainComponent = (<IssuerNotificationForm {...props} />);
+    var mainComponent = (
+      <MainComponent viewId={viewId}>
+        <SecondaryMenu viewId={viewId} items={this.props.secondaryMenus[viewId]} />
+        <ActionBar
+          title="Issue Badges"
+          viewId={viewId}
+          items={this.props.actionBars[viewId]}
+          updateActivePanel={this.updateActivePanel}
+        />
+        <ActivePanel
+          viewId={viewId}
+          {...this.state.activePanels[viewId]}
+          {...this.contextPropsForActivePanel(viewId)}
+          updateActivePanel={this.updateActivePanel}
+          clearActivePanel={this.clearActivePanel}
+        />
+        
+      </MainComponent>
+    );
     return this.render_base(mainComponent);
   },
 

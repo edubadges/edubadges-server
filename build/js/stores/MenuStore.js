@@ -26,7 +26,7 @@ MenuStore.defaultItems = {
         // { title: "View Badges", url: "/earn", icon: "fa-certificate", children: [] },
         // { title: "Add Badge", url: "/earn/badges", icon: "fa-certificate", children: [] }
       ] },
-      { title: "Issue", url: "/issue/notifications", icon: "fa-mail-forward", children: [
+      { title: "Issue", url: "/issue/badges", icon: "fa-mail-forward", children: [
         // { title: "Award Badges", url: "/issue", icon: "fa-bookmark", children: [] },
         // { title: "Notify Earners", url: "/issue/notifications", icon: "fa-envelope", children: [] },
         // { title: "Print Certificates", url: "/certificates", icon: "fa-file", children: []}
@@ -37,8 +37,12 @@ MenuStore.defaultItems = {
   secondaryMenus: {
       earnerHome: [
         { title: "My Badges", url: "/earn", icon: "fa-certificate", children: [] },
-        { title: "Manage Collections", url: "/earn/collections", icon: "fa-folder-open", children: [] },
-        { title: "Discover Badges", url: "/earn/discover", icon: "fa-certificate", children: [] }
+        { title: "My Collections", url: "/earn/collections", icon: "fa-folder-open", children: [] },
+        { title: "Discover Badges", url: "/earn/discover", icon: "fa-globe", children: [] }
+      ],
+      issuerMain: [
+        { title: "Issue Badges", url: "/issue/badges", icon: "fa-mail-forward", children: [] },
+        { title: "Issuer Settings", url: "/issue/settings", icon: "fa-cog", children: [] }
       ]
   },
   actionBars: {
@@ -48,6 +52,20 @@ MenuStore.defaultItems = {
           buttonType: "primary",
           icon: "fa-certificate", 
           activePanelCommand: { type: "EarnerBadgeForm", content: { badgeId: null } } 
+        }
+      ],
+      issuerMain: [
+        {
+          title: "Define New Badge",
+          buttonType: "primary",
+          icon: "fa-pencil-square-o",
+          activePanelCommand: { type: "IssuerBadgeForm", content: {}}
+        },
+        {
+          title: "Notify Earners",
+          buttonType: "default",
+          icon: "fa-envelope",
+          activePanelCommand: { type: "IssuerNotificationForm", content: {}}
         }
       ]
   }

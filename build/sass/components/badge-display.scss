@@ -1,3 +1,36 @@
+.badge-display {
+  .propertyName {
+    font-weight: bold;
+    margin-right: 0.5em;
+    &:after { content: ":"; }
+
+  }
+  .propertyValue {}
+}
+
+.property-group {
+  margin-bottom: 1em;
+}
+
 .badge-display-active {
   background-color: #d1d1d1;
+}
+
+.badge-display-detail {
+  .badgeclass {
+
+  }
+}
+
+.badge-display-thumbnail {
+
+}
+
+// hide super long linkage
+.badgeProperty-type-link .propertyValue {
+  display: inline-block;
+  max-width: 100%;
+  a { 
+    text-overflow: hidden;
+  }
 }
