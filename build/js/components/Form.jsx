@@ -58,7 +58,7 @@ var InputGroup = React.createClass({
   },
   render: function(){
     return (
-      <div className="control-group">
+      <div className={"control-group form-group-" + this.props.name}>
         <label className="control-label" htmlFor={this.props.name}>{this.props.label}</label>
         <div className="controls">
           { this.theInput() }
@@ -86,10 +86,10 @@ var ImageDropbox = React.createClass({
   render: function() {
     var imageDisplay = this.props.imageData ? (<img src={this.props.imageData} />) : "";
     return (
-      <div className="control-group">
+      <div className="control-group form-group-dropzone">
         <label className="control-label" htmlFor={this.props.name}>{this.props.label}</label>
         <div className="controls">
-          <Dropzone handler={this.fileHandler} size={200} message="Drop badge image here">
+          <Dropzone handler={this.fileHandler} message="Drop badge image here">
             {imageDisplay}
           </Dropzone>
         </div>
@@ -108,7 +108,7 @@ var SubmitButton = React.createClass({
   },
   render: function() {
     return (
-      <div className="control-group">
+      <div className="control-group submit-button">
         <label className="control-label sr-only" htmlFor={this.props.name}>{ this.props.label || "Submit" }</label>
         <div className="controls">
           <button name={this.props.name} className="btn btn-primary" onClick={this.handleClick}>{this.props.label || "Submit" }</button>
@@ -293,26 +293,29 @@ var EarnerBadgeForm = React.createClass({
     var activeInputs = "";
     if (this.state.actionState == "ready" || this.state.actionState == "waiting"){
       activeInputs = (
-        <fieldset>
-          <ImageDropbox onDroppedImage={this.handleImageDrop} image={this.state.image} imageData={this.state.imageData} />
+        <fieldset className="row">
+          <div className="col-xs-5 col-sm-4 col-md-3">
+            <ImageDropbox onDroppedImage={this.handleImageDrop} image={this.state.image} imageData={this.state.imageData} />
 
-          <InputGroup name="image" inputType="filebutton" 
-            label="Badge Image" handleChange={this.handleChange} 
-            handleBlur={this.handleBlur}
-          />
+            <InputGroup name="image" inputType="filebutton" 
+              label="Badge Image" handleChange={this.handleChange} 
+              handleBlur={this.handleBlur}
+            />
+          </div>
+          <div className="col-xs-7 col-sm-8 col-md-9">
+            <InputGroup name="earner_description" inputType="textarea" 
+              label="Earner Annotation" value={this.state.earner_description} 
+              handleChange={this.handleChange} handleBlur={this.handleBlur}
+            />
 
-          <InputGroup name="earner_description" inputType="textarea" 
-            label="Earner Annotation" value={this.state.earner_description} 
-            handleChange={this.handleChange} handleBlur={this.handleBlur}
-          />
-
-          <InputGroup name="recipient_input" 
-            inputType="select" selectOptions={this.props.recipientIds} 
-            value={this.state.recipient_input} 
-            defaultValue={this.props.recipientIds[0]} 
-            handleChange={this.handleChange}
-            handleBlur={this.handleBlur}
-          />
+            <InputGroup name="recipient_input" 
+              inputType="select" selectOptions={this.props.recipientIds} 
+              value={this.state.recipient_input} 
+              defaultValue={this.props.recipientIds[0]} 
+              handleChange={this.handleChange}
+              handleBlur={this.handleBlur}
+            />
+          </div>
 
           <SubmitButton name="submit" handleClick={this.handleSubmit} />
         </fieldset>
@@ -412,7 +415,7 @@ IssuerNotificationForm = React.createClass({
     var activeInputs = "";
     if (this.state.actionState == "ready" || this.state.actionState == "waiting"){
       activeInputs = (
-        <fieldset>
+        <fieldset className="row">
           <InputGroup name="url" inputType="text" value={this.state.url}
             label="Assertion URL" handleChange={this.handleChange} 
             handleBlur={this.handleBlur}

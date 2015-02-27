@@ -1,0 +1,18 @@
+.active-panel {
+  border: 1px solid #ccc;
+  padding: 1em;
+  .badge-display { border: 0; }
+  &.empty {
+    display: none;
+  }
+
+  .panel-actions {
+    button { float: right; }
+  }
+}
+
+.active-panel, .badge-display-active {
+  border-color: #9ecaed;
+  box-shadow: 0 0 10px #9ecaed;
+  border-radius: 4px;
+}

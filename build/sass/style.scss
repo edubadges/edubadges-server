@@ -1,3 +1,16 @@
+
+@import "components/header";
+@import "components/badge-display";
+@import "components/action-bar";
+@import "components/active-panel";
+@import "components/badge-form";
+
+// refactoring from this SB2 stylesheet as source, moving things into 
+// components as possible. Eventually this won't be needed:
+@import "components/sb2";
+@import "components/metismenu";
+
+
 .sidebar-nav{
   li ul {
     //margin-left: 2em; 
@@ -38,3 +51,16 @@ img {
 form.disabled, form.disabled textarea { background-color: #ddd; }
 
 .dropzone img { max-width: 200px; height: auto; }
+
+#page-wrapper {
+  border-left: 0;
+  margin: 0 auto;
+}
+.wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+.main-header {
+  border-bottom: 1px solid #e7e7e7;
+}

@@ -38,15 +38,19 @@ var FirstLevelItem = React.createClass({
     }
     event.stopPropagation();
   }, 
+
   render: function(){
-    var anyChildren = ""
+    var anyChildren = "", downCaret = ""
     if (this.props.children.length > 0) {
       anyChildren = <MenuList items={this.props.children} title={this.props.title} clName="nav nav-second-level" key='nested-menu' />
+      downCaret = (<i className='fa fa-fw fa-caret-down'></i>);
     }
     return (
       <li className={this.props.active ? 'nav-menu-item expanded-true active open' : 'nav-menu-item' }>
-        <a href={this.props.url} onClick={this.handleClick} alt={this.title}>
-          <i className={'fa fa-fw ' + this.props.iconClass}></i> <i className='fa fa-fw fa-caret-down'></i>
+        <a href={this.props.url} onClick={this.handleClick} alt={this.title}>  
+          <i className={'fa fa-fw ' + this.props.iconClass}></i> 
+          {downCaret}
+          <label>{this.props.label}</label>
         </a>
         {anyChildren}
       </li>
@@ -57,12 +61,15 @@ var FirstLevelItem = React.createClass({
 
 var TopLinks = React.createClass({
   render: function() {
+
     var firstLevelItems = this.props.items.map(function(item, i) {
+      var label = this.props.showLabels ? item.title : "";
       return (
           <FirstLevelItem 
             url={item.url} 
             key={'top-menu-' + i} 
-            title={item.title} 
+            title={item.title}
+            label={label} 
             iconClass={item.icon} 
             children={item.children} 
             active={this.props.active == item.title ? true : false} 

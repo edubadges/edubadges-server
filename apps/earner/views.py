@@ -1,7 +1,9 @@
 from django.views.generic import DetailView
+from django.contrib.auth.models import AnonymousUser
 from badgeuser.models import BadgeUser
 from django.http import Http404
 from django.shortcuts import redirect
+from django.core.urlresolvers import reverse
 from badgeuser.serializers import BadgeUserSerializer
 import json
 
@@ -12,7 +14,7 @@ class EarnerPortal(DetailView):
 
     def get_object(self):
         current_user = self.request.user
-        if current_user is not None:
+        if current_user is not None and current_user.is_authenticated():
             return current_user
         raise Http404
 
@@ -21,7 +23,7 @@ class EarnerPortal(DetailView):
             self.object = self.get_object()
         except Http404:
             # TODO: use reverse()
-            return redirect('/login')
+            return redirect(reverse('login'))
         context = self.get_context_data(user=self.object)
         return self.render_to_response(context)
 
