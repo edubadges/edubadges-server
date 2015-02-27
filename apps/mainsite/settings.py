@@ -280,6 +280,17 @@ REST_FRAMEWORK = {
     ]
 }
 
+
+##
+#
+#  Remote document fetcher (designed to be overridden in tests)
+#
+##
+
+REMOTE_DOCUMENT_FETCHER = 'badgeanalysis.utils.get_document_direct'
+LINKED_DATA_DOCUMENT_FETCHER = 'badgeanalysis.utils.custom_docloader'
+
+
 ##
 #
 #  Misc.

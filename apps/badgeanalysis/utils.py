@@ -1,6 +1,7 @@
 """
 Utilities to deal with understanding badges from an unspecified issuer
 """
+from django.conf import settings
 import json
 from jsonschema import validate, Draft4Validator, draft4_format_checker
 from jsonschema.exceptions import FormatError, ValidationError
@@ -142,7 +143,19 @@ def validateId(idString):
     return None
 
 
-def custom_docloader(url, documentLoader=None):
+# Document Fetching from Remote sources
+def get_document_direct(url, options=None, params=None):
+    if params is None:
+        r = requests.get(url)
+    else:
+        raise NotImplementedError("HTTP GET with params not yet supported in badgeanalysis utils.")
+
+    if options is not None and options.get('accept', None) == 'json':
+        return r.json()
+    else: 
+        return r.content
+
+def custom_docloader(url, documentLoader=None, docType=None):
     """
     Unless overridden, this uses the PyLD package document loader,
     which returns a loaded document in a wrapper object.
