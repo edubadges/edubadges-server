@@ -58,8 +58,13 @@ class BadgeObject(basic_models.TimestampedModel):
         else:
             new_object = cls(iri=iri)
             kwargs[iri] = 'new'
-            new_object.save(*args, **kwargs)
-            return new_object
+            try:
+                new_object.save(*args, **kwargs)
+            except BadgeValidationError as e:
+                raise e
+                return
+            else:
+                return new_object
 
     @classmethod
     def get_or_create_by_badge_object(cls, badge_input, *args, **kwargs):
@@ -78,7 +83,12 @@ class BadgeObject(basic_models.TimestampedModel):
         if cls.CLASS_TYPE == 'assertion':
             badge_object_id = badge_input.get('@id', None) or badge_input.get('verify', {}).get('url', None)
             if badge_object_id is not None:
-                return cls.get_or_create_by_iri(badge_object_id, *args, **kwargs)
+                try:
+                    new_object = cls.get_or_create_by_iri(badge_object_id, *args, **kwargs)
+                except BadgeValidationError as e:
+                    raise e
+                    return
+                return new_object
 
         # Cannot create by object unless its an assertion whose id is findable
         raise BadgeValidationError("Cannot create " + cls.CLASS_TYPE + " by object / verification URL not found.")
@@ -105,11 +115,12 @@ class BadgeObject(basic_models.TimestampedModel):
             else:
                 return scheme
 
-        legacy_scheme = BadgeScheme.get_legacy_scheme_match(self.badge_object, self.CLASS_TYPE).get('scheme', None)
+        legacy_scheme = BadgeScheme.get_legacy_scheme_match(self.badge_object, self.CLASS_TYPE)
         if legacy_scheme is None:
             raise BadgeValidationError("Could not determine type of badge object with known schema set")
-
-        return legacy_scheme
+        else:
+            scheme_result = legacy_scheme.get('scheme', None)
+            return scheme_result
 
     def augment_badge_object_LD(self):
         """ Finalize badge object by adding the @id if possible """
@@ -134,7 +145,11 @@ class Assertion(BadgeObject):
                 return existing_assertion
 
         # TODO: What kind of exceptions might be raised here? Anything worth handling?
-        super(Assertion, self).save(*args, **kwargs)
+        try:
+            super(Assertion, self).save(*args, **kwargs)
+        except BadgeValidationError as e:
+            raise e
+            return
 
         badgeclass_iri = self.badge_object.get('badge')
         self.badgeclass = BadgeClass.get_or_create_by_iri(badgeclass_iri, *args, **kwargs)
