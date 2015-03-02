@@ -120,7 +120,7 @@ class OpenBadge(basic_models.DefaultModel):
 
         if self.badge_input == u'' or self.badge_input is None:
             if not self.image:
-                raise IOError("Invalid input to create OpenBadge. Missing image or badge_input.")
+                raise BadgeValidationError("Invalid input to create OpenBadge. Missing image or badge_input.")
                 return
 
             try:
@@ -128,6 +128,10 @@ class OpenBadge(basic_models.DefaultModel):
             except Exception as e:
                 self.errors.append(e)
                 raise e
+                return
+
+            if self.badge_input is None:
+                raise BadgeValidationError("Could not extract assertion from image.")
                 return
 
         self.verify_method = 'hosted'  # TODO: signed not yet supported.
