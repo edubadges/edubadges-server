@@ -57,7 +57,7 @@ class EarnerBadgesList(APIView):
         Must have (either badge_input or image) and request.user
         """
         if not isinstance(request.user, get_user_model()):
-            #TODO change this to 401 unauthenticated
+            # TODO change this to 401 unauthenticated
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         try:

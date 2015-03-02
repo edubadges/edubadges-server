@@ -69,6 +69,7 @@ class BadgeObject(basic_models.TimestampedModel):
     @classmethod
     def get_or_create_by_badge_object(cls, badge_input, *args, **kwargs):
         # If we have JSON as a string, try to load it before treating it as a potential URL
+
         if not isinstance(badge_input, dict):
             badge_input = badgeanalysis.utils.try_json_load(badge_input)
 
@@ -115,6 +116,10 @@ class BadgeObject(basic_models.TimestampedModel):
             else:
                 return scheme
 
+        # Here's a useful debugger point to figure out why a new badge is not finding its legacy scheme
+        # import pdb; pdb.set_trace();
+        # from scheme_models import schema_test
+        # # schema_test(self.badge_object, '1_0', self.CLASS_TYPE)
         legacy_scheme = BadgeScheme.get_legacy_scheme_match(self.badge_object, self.CLASS_TYPE)
         if legacy_scheme is None:
             raise BadgeValidationError("Could not determine type of badge object with known schema set")
