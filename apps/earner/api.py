@@ -32,7 +32,6 @@ class EarnerBadgesList(APIView):
         """
         return a list of earned badges in the requesting user's account
         """
-        import pdb; pdb.set_trace();
         if not isinstance(request.user, get_user_model()):
             #TODO change this to 401 unauthenticated
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -58,7 +57,7 @@ class EarnerBadgesList(APIView):
         Must have (either badge_input or image) and request.user
         """
         if not isinstance(request.user, get_user_model()):
-            #TODO change this to 401 unauthenticated
+            # TODO change this to 401 unauthenticated
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         try:
@@ -72,6 +71,8 @@ class EarnerBadgesList(APIView):
             # Catches the case where the OpenBadge could not be saved because it was not new.
             if e.validator == 'create_only':
                 the_actual_badge = OpenBadge.find_by_assertion_iri(e.data, **{'recipient_input': request.user.email})
+            else:
+                raise ValidationError(e.message)
         except Exception as e:
             raise ValidationError(e.message)
 

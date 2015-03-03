@@ -163,44 +163,45 @@ class BadgeScheme(basic_models.SlugModel):
             return None
 
     @classmethod
-    def test_against_schema_tree(cls, badgeObject, testTree):
+    def test_against_schema_tree(cls, badge_object, testTree):
         if not 'test' in testTree:
             raise LookupError("Schema Tree malformed, could not find a test reference when needed. " + str(testTree))
             return None
 
-        if cls.test_against_schema(badgeObject, testTree['schema_json']):
+        if cls.test_against_schema(badge_object, testTree['schema_json']):
             # There are only more tests down the noMatch path, so we can return right here.
             return testTree
         elif 'noMatch' in testTree:
-            return cls.test_against_schema_tree(badgeObject, testTree['noMatch'])
+            return cls.test_against_schema_tree(badge_object, testTree['noMatch'])
         else:
             return None
 
     @classmethod
-    def test_against_schema(cls, badgeObject, schemaJson):
+    def test_against_schema(cls, badge_object, schemaJson):
         """
         Reads the specified schema based on the filename registered for schemaKey, and processes it into an object with json.loads()
         Then validates the badge object against it.
         """
         try:
-            validate(badgeObject, schemaJson, Draft4Validator, format_checker=draft4_format_checker)
+            validate(badge_object, schemaJson, Draft4Validator, format_checker=draft4_format_checker)
         except ValidationError:
             return False
         else:
             return True
 
     @classmethod
-    def test_against_schema_verbose(cls, badgeObject, schemaJson):
+    def test_against_schema_verbose(cls, badge_object, schemaJson):
         """
         Reads the specified schema based on the filename registered for schemaKey, and processes it into an object with json.loads()
         Then validates the badge object against it.
         """
         try:
-            validate(badgeObject, schemaJson, Draft4Validator, format_checker=draft4_format_checker)
+            validate(badge_object, schemaJson, Draft4Validator, format_checker=draft4_format_checker)
         except ValidationError as e:
             return str(e)
         else:
             return True
+
 
     @classmethod
     def custom_context_docloader(cls, url):
@@ -243,3 +244,18 @@ class BadgeSchemaValidator(basic_models.DefaultModel):
         # Save the model if it's an update.
         else:
             super(BadgeSchemaValidator, self).save(*args, **kwargs)
+
+
+def schema_test(badge_object, scheme_slug, object_type):
+    try:
+        scheme = BadgeScheme.objects.get(slug=scheme_slug)
+    except (ObjectDoesNotExist, MultipleObjectsReturned):
+        pass
+
+    if scheme is not None:
+        try:
+            validator = BadgeSchemaValidator.objects.filter(scheme=scheme, validates_type=object_type)[0]
+        except ObjectDoesNotExist:
+            pass
+
+        return BadgeScheme.test_against_schema_verbose(badge_object, validator.schema_json)
