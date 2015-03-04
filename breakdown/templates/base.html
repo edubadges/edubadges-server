@@ -45,110 +45,41 @@
 
     <body class="{% block bodyclass %}{% endblock %}">
         <div id="app">
-
-            {% block body %}
-                <div id="wrapper">
-
-                    {% block mainnav %}
-                    <header>
-                        <!-- Navigation -->
-                        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
-                            <div class="navbar-header">
-                                <!-- Small screens hamburger button -->
-                                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                                    <span class="sr-only">Toggle navigation</span>
-                                    <span class="icon-bar"></span>
-                                    <span class="icon-bar"></span>
-                                    <span class="icon-bar"></span>
-                                </button>
-                                <a class="navbar-brand" href="/">{{ self.title() }}</a>
-
-                                <div id="top-links" class="navbar-right">
-                                    <!-- insert top-links component here -->
-                                </div>
-
-                            </div>
-                            <!-- /.navbar-header -->
-
-                            <div id="sidebar" class="navbar-default sidebar" role="navigation">
-                                <!-- insert main navigation here -->
-                            </div>
-
-                            <!-- /.navbar-static-side -->
-                        </nav>
-                    </header>
-                    {% endblock %}
-
-                    <section class="main-section content-container">
-                    {% block mainsection %}
-
-                        <div id="page-wrapper" class="page-wrapper">
-                            <div class="container-fluid">
-                                <div class="row">
-                                    <div class="col-lg-12">
-
-                                        {% block precontent %}
-                                            {% block messages %}
-                                                {% if messages %}
-                                                <ul class="messagelist">{% for message in messages %}
-                                                  <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                                                {% endfor %}</ul>
-                                                {% endif %}
-                                            {% endblock messages %}
-                                        {% endblock %}
-
-                                        <h1 class="page-header">{% block pagetitle %}{% endblock %}</h1>
-
-                                        {% block content %}{% endblock %}
-                                    </div>
-                                    <!-- /.col-lg-12 -->
-                                </div>
-                                <!-- /.row -->
-                            </div>
-                            <!-- /.container-fluid -->
-                        </div>
-                        <!-- /#page-wrapper -->
-
-                    {% endblock %}
-                    </section>
-
-                    <footer>
-                        <nav id="bottomnav" class="bottomnav">
-                            {{cms_menu('main-menu', id='nav', active_item=active_tab, depth=0)}}
-                        </nav>
-
-                        {% block footer %}{% endblock %}
-                    </footer>
-
+        <!-- React App renders here -->
+            <div class="container">
+                <div class="jumbotron loading-react">
+                    <h1>{{ self.title() }}</h1>
+                    <p>Loading...</p>
+                    <p class="loading-spinner"><img src="{{STATIC_URL}}images/ajax-loader.gif"></p>
                 </div>
             </div>
-            {% block scripts %}
+        </div>
 
-                <script src="{{STATIC_URL}}js/libs/jquery.min.js"></script>
+        {% block scripts %}
 
-                <!-- Bootstrap Core JavaScript -->
-                <script src="{{STATIC_URL}}css/bootstrap/js/bootstrap.min.js"></script>
+            <script src="{{STATIC_URL}}js/libs/jquery.min.js"></script>
 
-                <!-- Metis Menu Plugin JavaScript -->
-                <script src="{{STATIC_URL}}js/libs/metisMenu.min.js"></script>
+            <!-- Bootstrap Core JavaScript -->
+            <script src="{{STATIC_URL}}css/bootstrap/js/bootstrap.min.js"></script>
 
-                <!-- Custom Theme JavaScript -->
-                <script src="{{STATIC_URL}}js/libs/sb-admin-2.js"></script>
+            <!-- Metis Menu Plugin JavaScript -->
+            <script src="{{STATIC_URL}}js/libs/metisMenu.min.js"></script>
 
-                <script src="{{STATIC_URL}}js/script.js"></script>
-                
-                <script type="text/javascript">
-                  /* var _gaq = _gaq || [];
-                  _gaq.push(['_setAccount', 'UA-#######-#']);
-                  _gaq.push(['_trackPageview']);
-                  (function() {
-                    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-                    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-                    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-                  })(); */
-                </script>
-            {% endblock %}
+            <!-- Custom Theme JavaScript -->
+            <script src="{{STATIC_URL}}js/libs/sb-admin-2.js"></script>
 
+            <script src="{{STATIC_URL}}js/script.js"></script>
+            
+            <script type="text/javascript">
+              /* var _gaq = _gaq || [];
+              _gaq.push(['_setAccount', 'UA-#######-#']);
+              _gaq.push(['_trackPageview']);
+              (function() {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+              })(); */
+            </script>
         {% endblock %}
     </body>
 </html>
