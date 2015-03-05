@@ -66,7 +66,7 @@ class ConsumerBadgesList(APIView):
                 recipient_input=request.data.get('recipient_input', None),
                 image=request.data.get('image', None)
             )
-            the_actual_badge.save(**{'create_only': ()})
+            the_actual_badge.save()
         except BadgeValidationError as e:
             # Catches the case where the OpenBadge could not be saved because it was not new.
             if e.validator == 'create_only':

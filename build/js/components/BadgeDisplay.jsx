@@ -163,8 +163,11 @@ var BadgeDisplayFull = React.createClass({
   render: function() {
     return (
       <div className='badge-display badge-display-full'>
-        <div className='property-group badgeclass'>
+        <div className='property-group image col-xs-4'>
           <Property name='Badge Image' label={false} property={this.props.image} />
+        </div>
+
+        <div className='property-group badgeclass'>
           <Property name='Name' property={this.props.badgeclass.name} />
           <Property name='Description' property={this.props.badgeclass.description} />
           <Property name='Criteria' property={this.props.badgeclass.criteria} />
@@ -175,8 +178,13 @@ var BadgeDisplayFull = React.createClass({
         </div>
 
         <div className='property-group assertion'>
-          <Property name='issue date' property={this.props.assertion.issuedOn} />
-          <Property name='evidence link' property={this.props.assertion.evidence} />
+          <Property name='Issue Date' property={this.props.assertion.issuedOn} />
+          <Property name='Expiration Date' property={this.props.assertion.expires} />
+          <Property name='Evidence Link' property={this.props.assertion.evidence} />
+          <Property name='Recipient' property={this.props.recipientId} />
+        </div>
+
+        <div className='property-group validations'>
         </div>
       </div>
     )
@@ -205,7 +213,7 @@ var OpenBadge = React.createClass({
         return ( <BadgeDisplayThumbnail image={this.props.image} id={this.props.id} pk={this.props.pk} isActive={this.props.isActive} setActiveBadgeId={this.props.setActiveBadgeId} {...this.props.badge } /> );
         break;
       default:  // 'full'
-        return ( <BadgeDisplayFull image={this.props.image} pk={this.props.pk} {...this.props.badge } /> );
+        return ( <BadgeDisplayFull image={this.props.image} pk={this.props.pk} {...this.props.badge } recipientId={this.props.recipientId} /> );
     }
   },
 
