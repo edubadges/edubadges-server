@@ -6,6 +6,7 @@ import django.template.loader
 from badgeanalysis.models import OpenBadge
 from badgeuser.models import BadgeUser
 
+
 class Issuer(basic_models.SlugModel):
     url = models.URLField(verbose_name='Issuer\'s homepage', max_length=2048)
     issuer_object_url = models.URLField(max_length=2048, verbose_name='URL Location of the OBI Issuer file in JSON')
@@ -15,6 +16,10 @@ class Issuer(basic_models.SlugModel):
     def get_form(self):
         from issuer.forms import IssuerForm
         return IssuerForm(instance=self)
+
+    @property
+    def owner(self):
+        return self.owner_user
 
 
 class EarnerNotification(basic_models.TimestampedModel):

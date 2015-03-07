@@ -262,7 +262,7 @@ var App = React.createClass({
   consumerMain: function() {
     var activeBadgeId = null;
     var viewId = "consumerMain";
-    var consumerBadges = APIStore.getCollection('consumerBadges')
+    var consumerBadges = APIStore.getCollection('consumerBadges');
 
     if (this.state.activePanels && viewId in this.state.activePanels && 'content' in this.state.activePanels[viewId]){
       activeBadgeId = this.state.activePanels[viewId].content.badgeId;

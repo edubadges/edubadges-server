@@ -1,11 +1,12 @@
 from rest_framework import serializers
-
-from rest_framework.exceptions import ValidationError
-from badgeanalysis.validation_messages import BadgeValidationError
-from badgeanalysis.models import OpenBadge
-from badgeanalysis.serializers import BadgeSerializer
+from badgeanalysis.serializers import BadgeSerializer, BadgeDetailSerializer
 
 
 class ConsumerBadgeSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     badge = BadgeSerializer()
+
+
+class ConsumerBadgeDetailSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    badge = BadgeDetailSerializer()

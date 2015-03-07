@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 
 from models import ConsumerBadge
-from serializers import ConsumerBadgeSerializer
+from serializers import ConsumerBadgeSerializer, ConsumerBadgeDetailSerializer
 from badgeanalysis.models import OpenBadge
 from badgeanalysis.validation_messages import BadgeValidationError
 from mainsite.permissions import IsOwner
@@ -35,13 +35,13 @@ class ConsumerBadgesList(APIView):
         """
         if not isinstance(request.user, get_user_model()):
             return Response(status=status.HTTP_204_NO_CONTENT)
-        
+
         try:
             consumer_badges = ConsumerBadge.objects.filter(consumer=request.user)
         except ConsumerBadge.DoesNotExist:
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-        serializer = ConsumerBadgeSerializer(consumer_badges, many=True)
+        serializer = ConsumerBadgeDetailSerializer(consumer_badges, many=True)
 
         return Response(serializer.data)
 
@@ -95,7 +95,7 @@ class ConsumerBadgesList(APIView):
                 raise ValidationError(e.message)
 
         # Will return serialization of unsaved ConsumerBadge for anon users.
-        serializer = ConsumerBadgeSerializer(new_consumer_badge)
+        serializer = ConsumerBadgeDetailSerializer(new_consumer_badge)
         if consumer_user is not None:
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -120,7 +120,20 @@ class ConsumerBadgeDetail(APIView):
     permission_classes = (IsOwner,)
 
     def get(self, request, pk):
-        pass
+        """
+        Return full details on a single badge the consumer is currently analyzing.
+        """
+        if not isinstance(request.user, get_user_model()):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            consumer_badge = ConsumerBadge.objects.get(consumer=request.user, pk=pk)
+        except ConsumerBadge.DoesNotExist:
+            return Response("Badge " + pk + " not found.", status=status.HTTP_404_NOT_FOUND)
+
+        serializer = ConsumerBadgeDetailSerializer(consumer_badge)
+
+        return Response(serializer.data)
 
     def put(self, resuest, pk):
         pass
