@@ -142,11 +142,12 @@ var LoadingIcon = React.createClass({
 });
 
 
-/* EarnerBadgeForm 
- * A form that allows the user to upload a new badge, indicate which of their verified email 
- * addresses the badge belongs to, and then see the uploaded badge.
+/* BadgeUploadForm 
+ * Can be used as EarnerBadgeForm or ConsumerBadgeForm: 
+ * A form that allows the user to upload a new badge, indicate recipient email
+ * address the badge belongs to, and then see the uploaded badge.
  */
-var EarnerBadgeForm = React.createClass({
+var BadgeUploadForm = React.createClass({
   propTypes: {
     action: ReactPropTypes.string,
     formId: ReactPropTypes.string,
@@ -154,16 +155,9 @@ var EarnerBadgeForm = React.createClass({
     pk: ReactPropTypes.number,
     initialState: ReactPropTypes.object
   },
-
-  getDefaultProps: function() {
-    return {
-      action: '/earn/badges'
-    };
-  },
   getInitialState: function() {
     return this.props.initialState;
   },
-  // NO, this is wrong. The App.jsx should be passing props to this component
   updateFromFormData: function(){
     formData = FormStore.getFormData(this.props.formId);
     this.setState(formData);
@@ -172,10 +166,10 @@ var EarnerBadgeForm = React.createClass({
   // Mount/unmount the change handler based on this component's lifecycle, but use the fn passed 
   // in as props to mutage state, because App.jsx is where state is managed.
   componentDidMount: function() {
-    FormStore.addListener('FORM_DATA_UPDATED_EarnerBadgeForm', this.handlePatch);
+    FormStore.addListener('FORM_DATA_UPDATED_' + this.props.formId, this.handlePatch);
   },
   componentWillUnmount: function() {
-    FormStore.removeListener('FORM_DATA_UPDATED_EarnerBadgeForm', this.handlePatch);
+    FormStore.removeListener('FORM_DATA_UPDATED_' + this.props.formId, this.handlePatch);
   },
   handleImageDrop: function(file){
     // To make sure any changes within the focused element are recorded in the form state
@@ -259,7 +253,7 @@ var EarnerBadgeForm = React.createClass({
 
     if(!this.props.pk){
       FormActions.patchForm(this.props.formId, {
-        recipient_input: this.props.recipientIds[0],
+        recipient_input: this.props.initialState.recipient_input,
         earner_description: "",
         image: undefined,
         imageData: "",
@@ -292,6 +286,40 @@ var EarnerBadgeForm = React.createClass({
     }
     var activeInputs = "";
     if (this.state.actionState == "ready" || this.state.actionState == "waiting"){
+      var recipientInput;
+      if (this.props.recipientIds){
+        recipientInput = (
+          <InputGroup name="recipient_input" 
+            inputType="select" selectOptions={this.props.recipientIds} 
+            value={this.state.recipient_input} 
+            defaultValue={this.props.recipientIds[0]} 
+            handleChange={this.handleChange}
+            handleBlur={this.handleBlur}
+          />
+        );
+      }
+      else {
+        recipientInput = (
+          <InputGroup name="recipient_input" 
+            inputType="text"
+            label="Recipient Email or Identifier"
+            value={this.state.recipient_input} 
+            handleChange={this.handleChange}
+            handleBlur={this.handleBlur}
+          />
+        );
+      }
+
+      var annotationInput = "";
+      if (this.props.formId == "EarnerBadgeForm"){
+        annotationInput = (
+          <InputGroup name="earner_description" inputType="textarea" 
+            label="Earner Annotation" value={this.state.earner_description} 
+            handleChange={this.handleChange} handleBlur={this.handleBlur}
+          />
+        );
+      } 
+      
       activeInputs = (
         <fieldset className="row">
           <div className="col-xs-5 col-sm-4 col-md-3">
@@ -303,24 +331,16 @@ var EarnerBadgeForm = React.createClass({
             />
           </div>
           <div className="col-xs-7 col-sm-8 col-md-9">
-            <InputGroup name="earner_description" inputType="textarea" 
-              label="Earner Annotation" value={this.state.earner_description} 
-              handleChange={this.handleChange} handleBlur={this.handleBlur}
-            />
+            {annotationInput}
 
-            <InputGroup name="recipient_input" 
-              inputType="select" selectOptions={this.props.recipientIds} 
-              value={this.state.recipient_input} 
-              defaultValue={this.props.recipientIds[0]} 
-              handleChange={this.handleChange}
-              handleBlur={this.handleBlur}
-            />
+            {recipientInput}
           </div>
 
           <SubmitButton name="submit" handleClick={this.handleSubmit} />
         </fieldset>
       );
     }
+
     return (
       <div className="form-container earner-badge-form-container">
         <form action={this.props.action} method="POST" className={this.state.actionState == "waiting" ? "form-horizontal disabled" : "form-horizontal"}>
@@ -336,6 +356,7 @@ var EarnerBadgeForm = React.createClass({
     )
   }
 });
+
 
 IssuerNotificationForm = React.createClass({
   getInitialState: function() {
@@ -445,5 +466,5 @@ IssuerNotificationForm = React.createClass({
 });
 
 // Export the Menu class for rendering:
-module.exports.EarnerBadgeForm = EarnerBadgeForm;
+module.exports.BadgeUploadForm = BadgeUploadForm;
 module.exports.IssuerNotificationForm = IssuerNotificationForm;

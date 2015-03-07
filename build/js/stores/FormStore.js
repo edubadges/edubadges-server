@@ -10,7 +10,8 @@ var FormStore = assign({}, EventEmitter.prototype);
 FormStore.data = {};
 FormStore.formIds = [
   "EarnerBadgeForm",
-  "IssuerNotificationForm"
+  "IssuerNotificationForm",
+  "ConsumerBadgeForm"
 ];
 FormStore.requests = {};
 
@@ -26,10 +27,13 @@ FormStore.getFormData = function(id){
     return FormStore.data[id];
 };
 FormStore.defaultValues = {
-  "EarnerBadgeForm": {
+  EarnerBadgeForm: {
     actionState: "ready"
   },
-  "IssuerNotificationForm": {
+  ConsumerBadgeForm: {
+    actionState: "ready"
+  },
+  IssuerNotificationForm: {
     email: "",
     url: "", 
     actionState: "ready"
@@ -55,6 +59,7 @@ FormStore.setFormData = function(id, data){
 };
 
 FormStore.patchFormProperty = function(id, propName, value){
+  console.log("Patching form property: " + id + ", " + propName + ", " + value);
   if (FormStore.idValid(id))
     FormStore.data[id][propName] = value;
 };
@@ -79,7 +84,7 @@ FormStore.addListener = function(type, callback) {
 
 
 // Register with the dispatcher
-FormStore.dispatchToken = appDispatcher.register(function(payload){
+FormStore.dispatchToken = Dispatcher.register(function(payload){
   var action = payload.action;
 
   switch(action.type){
@@ -126,5 +131,6 @@ module.exports = {
   getFormData: FormStore.getFormData,
   getOrInitFormData: FormStore.getOrInitFormData,
   patchFormData: FormStore.patchFormProperty,
-  listeners: FormStore.listeners
+  listeners: FormStore.listeners,
+  dispatchToken: FormStore.dispatchToken
 }

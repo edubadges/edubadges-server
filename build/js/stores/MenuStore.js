@@ -43,6 +43,10 @@ MenuStore.defaultItems = {
       issuerMain: [
         { title: "Issue Badges", url: "/issue/badges", icon: "fa-mail-forward", children: [] },
         { title: "Issuer Settings", url: "/issue/settings", icon: "fa-cog", children: [] }
+      ],
+      consumerMain: [
+        { title: "Compare Badges", url: "/understand/badges", icon: "fa-mail-forward", children: [] },
+        { title: "Endorse Acceptable Badges", url: "/understand/endorse", icon: "fa-cog", children: [] }
       ]
   },
   actionBars: {
@@ -66,6 +70,14 @@ MenuStore.defaultItems = {
           buttonType: "default",
           icon: "fa-envelope",
           activePanelCommand: { type: "IssuerNotificationForm", content: {}}
+        }
+      ],
+      consumerMain: [
+        { 
+          title: "Analyze Badge",
+          buttonType: "primary",
+          icon: "fa-upload", 
+          activePanelCommand: { type: "ConsumerBadgeForm", content: { badgeId: null } } 
         }
       ]
   }

@@ -76,7 +76,7 @@ class BadgeObject(basic_models.TimestampedModel):
         # If we've got a URL, create this object from the URL.
         if isinstance(badge_input, (str, unicode)):
             if badgeanalysis.utils.test_probable_url(badge_input):
-                return cls.get_or_create_by_iri(processed_input, *args, **kwargs)
+                return cls.get_or_create_by_iri(badge_input, *args, **kwargs)
             else:
                 return BadgeValidationError("Did not know how to fetch badge object from " + badge_input, "unreadable URL", badge_input)
 

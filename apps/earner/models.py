@@ -13,3 +13,7 @@ class EarnerBadge(cachemodel.CacheModel):
 
     def __unicode__(self):
         return str(self.badge)
+
+    @property
+    def owner(self):
+        return self.earner

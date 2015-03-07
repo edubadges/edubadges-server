@@ -185,6 +185,7 @@ def badge_recipient_validator_function(self, badge):
 
 assertionRecipientValidator = BadgeFunctionalValidator(**{
     'slug': 'AssertionRecipientValidator',
+    'description': 'ensures recipient identifier is the one expected',
     'validation_function': badge_recipient_validator_function,
     'scheme_slugs': ['0_5', '1_0', '1_1', '1_0-backpack-misbaked'],
     'validates_types': ['assertion']

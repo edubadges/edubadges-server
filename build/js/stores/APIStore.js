@@ -30,7 +30,8 @@ APIStore.collectionTypes = [
   "earnerBadgeCollections",
   "earnerNotifications",
   "issuerBadgeClasses",
-  "issuerBadges"
+  "issuerBadges",
+  "consumerBadges"
 ]
 
 APIStore.getCollection = function(collectionType) {
@@ -95,45 +96,75 @@ APIStore.storeInitialData = function() {
   }
 }
 
-
-
 APIStore.postEarnerBadgeForm = function(data){
+  var context = {
+    formId: "EarnerBadgeForm",
+    apiCollectionKey: "earnerBadges",
+    actionUrl: "/api/earner/badges",
+    successHttpStatus: [201],
+    successMessage: "Successfully added badge to your collection."
+  }
+  return APIStore.postBadgeForm(data, context);
+};
 
-  var req = request.post('/api/earner/badges')
+APIStore.postConsumerBadgeForm = function(data){
+  var context = {
+    formId: "ConsumerBadgeForm",
+    apiCollectionKey: "consumerBadges",
+    actionUrl: "/api/consumer/badges",
+    successHttpStatus: [200, 201],
+    successMessage: "Badge analysis successful"
+  }
+  return APIStore.postBadgeForm(data, context);
+};
+
+/* postBadgeForm(): a common function to communicate with various API endpoints
+ * to post badges in various contexts. 
+ * Params:
+ *   context is a dictionary providing the API endpoint
+ *   data is the form data from the FormStore
+*/
+APIStore.postBadgeForm = function(data, context){
+
+  var req = request.post(context.actionUrl)
     .set('X-CSRFToken', getCookie('csrftoken'))
     .accept('application/json')
-    .field('recipient_input',data['recipient_input'])
-    .field('earner_description', data['earner_description'])
-    // .attach(image, {type: image.type})
-    .attach('image', data['image'], 'earner_badge_upload.png')
-    .end(function(error, response){
+    .field('recipient_input',data['recipient_input']);
+
+    if ('earner_description' in data)
+      req.field('earner_description', data['earner_description']);
+
+
+    req.attach('image', data['image'], 'earner_badge_upload.png');
+
+    req.end(function(error, response){
       console.log(response);
       if (error){
         console.log("THERE WAS SOME KIND OF API REQUEST ERROR.");
         console.log(error);
         APIStore.emit('API_STORE_FAILURE');
       }
-      else if (response.status != 201){
+      else if (context.successHttpStatus.indexOf(response.status) == -1){
         console.log("API REQUEST PROBLEM:");
         console.log(response.text);
         APIActions.APIFormResultFailure({
-          formId: 'EarnerBadgeForm',
+          formId: context.formId,
           message: {type: 'danger', content: "Error adding badge: " + response.text}
         });
       }
       else{
-        var newBadge = APIStore.addCollectionItem('earnerBadges', JSON.parse(response.text))
+        var newBadge = APIStore.addCollectionItem(context.apiCollectionKey, JSON.parse(response.text))
         if (newBadge){
-          APIStore.emit('DATA_UPDATED_earnerBadges');
+          APIStore.emit('DATA_UPDATED_' + context.apiCollectionKey);
           APIActions.APIFormResultSuccess({
-            formId: 'EarnerBadgeForm', 
-            message: {type: 'success', content: "Successfully added badge to your collection."}, 
+            formId: context.formId, 
+            message: {type: 'success', content: context.successMessage}, 
             result: newBadge 
           });
         }
         else {
           APIStore.emit('API_STORE_FAILURE');
-          console.log("Failed to add " + response.text + " to earnerBadges");
+          console.log("Failed to add " + response.text + " to " + context.apiCollectionKey);
         }
       } 
     });
@@ -176,7 +207,8 @@ APIStore.postIssuerNotificationForm = function(data){
 };
 
 // Register with the dispatcher
-APIStore.dispatchToken = appDispatcher.register(function(payload){
+APIStore.dispatchToken = Dispatcher.register(function(payload){
+  
   var action = payload.action;
 
   switch(action.type){
@@ -186,8 +218,13 @@ APIStore.dispatchToken = appDispatcher.register(function(payload){
       break;
 
     case 'FORM_SUBMIT':
+      // make sure form updates have occurred before processing submits
+      Dispatcher.waitFor([FormStore.dispatchToken]);
+
       if (action.formId == "EarnerBadgeForm")
         APIStore.postEarnerBadgeForm(FormStore.getFormData(action.formId));
+      else if (action.formId == "ConsumerBadgeForm")
+        APIStore.postConsumerBadgeForm(FormStore.getFormData(action.formId));
       else if (action.formId == "IssuerNotificationForm")
         APIStore.postIssuerNotificationForm(FormStore.getFormData(action.formId));
       else

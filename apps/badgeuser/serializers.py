@@ -6,6 +6,7 @@ from rest_framework import serializers
 # from badgeanalysis.models import OpenBadge
 from badgeuser.models import BadgeUser
 from earner.serializers import EarnerBadgeSerializer
+from consumer.serializers import ConsumerBadgeDetailSerializer
 
 
 class VerifiedEmailsField(serializers.Field):
@@ -42,7 +43,8 @@ class BadgeUserSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = BadgeUser
-        fields = ('userProfile', 'earnerBadges')
+        fields = ('userProfile', 'earnerBadges', 'consumerBadges')
 
     userProfile = UserProfileField(source='*', read_only=True)
     earnerBadges = EarnerBadgeSerializer(many=True, read_only=True, source='earnerbadge_set')
+    consumerBadges = ConsumerBadgeDetailSerializer(many=True, read_only=True, source='consumerbadge_set')

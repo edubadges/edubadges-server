@@ -87,6 +87,17 @@ var Property = React.createClass({
   }
 });
 
+var BadgeValidationResult = React.createClass({
+  render: function() {
+    var message_types = {success: "success", error: "danger", warning: "warning"}
+    return (
+      <div className={"badge-validation-result alert alert-" + message_types[this.props.result]}>
+        <div className="validator-name"><strong>{this.props.validator}</strong></div>
+        <div className="validator-message">{this.props.message}</div>
+      </div>
+    );
+  }
+});
 
 var Extension = React.createClass({
   render: function(){
@@ -161,10 +172,25 @@ var BadgeDisplayDetail = React.createClass({
 
 var BadgeDisplayFull = React.createClass({
   render: function() {
+    var validations = this.props.validations.map(function(validation, index){
+      return (
+        <BadgeValidationResult
+          key={"valresult-" + index}
+          validator={validation.validator}
+          result={validation.result}
+          message={validation.message}
+          data={validation.data}
+        />
+      );
+    });
+
     return (
       <div className='badge-display badge-display-full'>
-        <div className='property-group badgeclass'>
+        <div className='property-group image col-xs-4'>
           <Property name='Badge Image' label={false} property={this.props.image} />
+        </div>
+
+        <div className='property-group badgeclass'>
           <Property name='Name' property={this.props.badgeclass.name} />
           <Property name='Description' property={this.props.badgeclass.description} />
           <Property name='Criteria' property={this.props.badgeclass.criteria} />
@@ -175,8 +201,14 @@ var BadgeDisplayFull = React.createClass({
         </div>
 
         <div className='property-group assertion'>
-          <Property name='issue date' property={this.props.assertion.issuedOn} />
-          <Property name='evidence link' property={this.props.assertion.evidence} />
+          <Property name='Issue Date' property={this.props.assertion.issuedOn} />
+          <Property name='Expiration Date' property={this.props.assertion.expires} />
+          <Property name='Evidence Link' property={this.props.assertion.evidence} />
+          <Property name='Recipient' property={this.props.recipientId} />
+        </div>
+
+        <div className='property-group validations'>
+          {validations}
         </div>
       </div>
     )
@@ -205,7 +237,7 @@ var OpenBadge = React.createClass({
         return ( <BadgeDisplayThumbnail image={this.props.image} id={this.props.id} pk={this.props.pk} isActive={this.props.isActive} setActiveBadgeId={this.props.setActiveBadgeId} {...this.props.badge } /> );
         break;
       default:  // 'full'
-        return ( <BadgeDisplayFull image={this.props.image} pk={this.props.pk} {...this.props.badge } /> );
+        return ( <BadgeDisplayFull image={this.props.image} pk={this.props.pk} {...this.props.badge } validations={this.props.validations} recipientId={this.props.recipientId} /> );
     }
   },
 
@@ -216,16 +248,22 @@ var OpenBadge = React.createClass({
 
 var EarnerBadge = React.createClass({
   render: function() {
-    earnerProperty = {
+    var earnerProperty = {
       type: "text",
       text: this.props.earner
-    }
+    };
+
+    var validations = null;
+    if(typeof this.props.badge.errors !== 'undefined' && typeof this.props.badge.notes !== 'undefined')
+      validations = this.props.badge.notes.concat(this.props.badge.errors); 
+    
     return (
       <div className="earner-badge-display">
         <OpenBadge
           display={this.props.display}
           id={this.props.id}
           badge={this.props.badge.full_badge_object}
+          validations={validations}
           image={this.props.badge.image}
           isActive={this.props.isActive}
           setActiveBadgeId={this.props.setActiveBadgeId}

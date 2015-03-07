@@ -1,6 +1,6 @@
 var React = require('react');
 var EarnerBadge = require('./BadgeDisplay.jsx').EarnerBadge;
-var EarnerBadgeForm = require('./Form.jsx').EarnerBadgeForm;
+var BadgeUploadForm = require('./Form.jsx').BadgeUploadForm;
 var FormStore = require('../stores/FormStore');
 
 var PanelActions = React.createClass({
@@ -69,14 +69,15 @@ var ActivePanel = React.createClass({
       );
     }
 
-    if (this.props.type == "EarnerBadgeForm"){
+    else if (this.props.type == "EarnerBadgeForm"){
       defaultFormState = {
         recipient_input: this.props.recipientIds[0], 
         earner_description: '' 
       }
       return (
         <div className="active-panel earner-badge-form clearfix">
-          <EarnerBadgeForm
+          <BadgeUploadForm
+            action='/api/earner/badges'
             formId={this.props.type}
             recipientIds={this.props.recipientIds}
             pk={typeof this.props.badgeId !== 'undefined' ? this.props.badgeId : 0}
@@ -89,7 +90,7 @@ var ActivePanel = React.createClass({
       );
     }
 
-    if (this.props.type == "IssuerNotificationForm"){
+    else if (this.props.type == "IssuerNotificationForm"){
       var formProps = {
         formId: this.props.type
       }
@@ -103,6 +104,25 @@ var ActivePanel = React.createClass({
           <div className="container-fluid">
             <IssuerNotificationForm {...formProps} />
           </div>
+        </div>
+      );
+    }
+
+    else if (this.props.type == "ConsumerBadgeForm"){
+      defaultFormState = {
+        recipient_input: ''
+      }
+      return (
+        <div className="active-panel consumer-badge-form clearfix">
+          <BadgeUploadForm
+            formId={this.props.type}
+            recipientIds={this.props.recipientIds}
+            pk={typeof this.props.badgeId !== 'undefined' ? this.props.badgeId : 0}
+            initialState={FormStore.getOrInitFormData(this.props.type, defaultFormState)}
+          />
+          <PanelActions
+            actions={panelActions}
+          />
         </div>
       );
     }

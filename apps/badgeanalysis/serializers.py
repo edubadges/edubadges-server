@@ -9,15 +9,15 @@ class WritableJSONField(serializers.CharField):
         try:
             internal_value = json.loads(data)
         except Exception:
-            raise serializers.ValidationError("Could not process input into a python dict for storage " + str(data))
+            raise serializers.ValidationError("WriteableJsonField: Could not process input into a python dict for storage " + str(data))
 
         return internal_value
 
     def to_representation(self, value):
-        if isinstance(value, dict):
+        if isinstance(value, (dict, list)):
             return value
         else:
-            raise serializers.ValidationError("Did not get a dict from the JSON stored for this item: " + str(value))
+            raise serializers.ValidationError("WriteableJsonField: Did not get a JSON-serializable datatype from storage for this item: " + str(value))
 
 
 class FullBadgeObjectFieldSerializer(WritableJSONField):
@@ -118,3 +118,12 @@ class BadgeSerializer(serializers.Serializer):
     recipient_input = serializers.CharField(max_length=2048)
     image = BadgeImagePropertySerializer(max_length=2048)
     full_badge_object = FullBadgeObjectFieldSerializer(max_length=16384, read_only=True, required=False)
+
+
+class BadgeDetailSerializer(serializers.Serializer):
+    pk = serializers.IntegerField()
+    recipient_input = serializers.CharField(max_length=2048)
+    image = BadgeImagePropertySerializer(max_length=2048)
+    full_badge_object = FullBadgeObjectFieldSerializer(max_length=16384, read_only=True, required=False)
+    notes = WritableJSONField()
+    errors = WritableJSONField()

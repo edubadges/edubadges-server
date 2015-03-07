@@ -22,6 +22,7 @@ var OpenBadgeList = require('../components/OpenBadgeList.jsx');
 var EarnerBadgeForm = require('../components/Form.jsx').EarnerBadgeForm;
 var IssuerNotificationForm = require('../components/Form.jsx').IssuerNotificationForm
 var EarnerBadgeList = require('../components/EarnerBadgeList.jsx');
+var ConsumerBadgeList = require('../components/ConsumerBadgeList.jsx');
 
 // Actions
 var LifeCycleActions = require('../actions/lifecycle');
@@ -34,13 +35,13 @@ var App = React.createClass({
   // Route configuration: 
   routes: {
     '/': 'home',
-    '/earn': 'earnerHome',
+    '/earn': 'earnerMain',
     // '/earn/badges': 'earnerBadgeForm',
     // '/earn/badges/:id': 'earnerBadgeForm',
     '/issue/badges': 'issuerMain',
     '/issuer/certificates/new': 'issuerCertificateForm',
     '/issuer/certificates/:id': 'issuerCertificateView', 
-    '/understand': 'consumerHome'
+    '/understand': 'consumerMain'
   },
 
   // Route handling:
@@ -117,7 +118,9 @@ var App = React.createClass({
       return {};
 
     var context;
+    var badgeCollectionFor = { 'earnerHome': 'earnerBadges', 'consumerMain': 'consumerBadges' };
     var panel = this.state.activePanels[viewId];
+
     if (panel.type == "EarnerBadgeForm") {
       context = {
         recipientIds: UserStore.getProperty('earnerIds'),
@@ -128,8 +131,9 @@ var App = React.createClass({
       context = {
         badgeId: panel.content.badgeId,
         detailLevel: panel.content.detailLevel,
-        badge: APIStore.getFirstItemByPropertyValue('earnerBadges', 'id', panel.content.badgeId)
+        badge: APIStore.getFirstItemByPropertyValue(badgeCollectionFor[viewId], 'id', panel.content.badgeId)
       };
+    
     }
     else if (panel.type == "IssuerNotificationForm") {
       context = {
@@ -184,7 +188,7 @@ var App = React.createClass({
     return this.render_base(mainComponent);
   },
 
-  earnerHome: function() {
+  earnerMain: function() {
     var activeBadgeId = null;
     var viewId = 'earnerHome';
     if (this.state.activePanels && viewId in this.state.activePanels && 'content' in this.state.activePanels[viewId]){
@@ -255,8 +259,40 @@ var App = React.createClass({
     return this.render_base(mainComponent);
   },
 
-  consumerHome: function() {
-    var mainComponent = "CONSUMER HOME"
+  consumerMain: function() {
+    var activeBadgeId = null;
+    var viewId = "consumerMain";
+    var consumerBadges = APIStore.getCollection('consumerBadges');
+
+    if (this.state.activePanels && viewId in this.state.activePanels && 'content' in this.state.activePanels[viewId]){
+      activeBadgeId = this.state.activePanels[viewId].content.badgeId;
+    }
+
+    var mainComponent = (
+      <MainComponent viewId={viewId}>
+        <SecondaryMenu viewId={viewId} items={this.props.secondaryMenus[viewId]} />
+        <ActionBar 
+          title="Understand Badges"
+          viewId={viewId}
+          items={this.props.actionBars[viewId]}
+          updateActivePanel={this.updateActivePanel}
+        />
+        <ActivePanel
+          viewId={viewId}
+          {...this.state.activePanels[viewId]}
+          {...this.contextPropsForActivePanel(viewId)}
+          updateActivePanel={this.updateActivePanel}
+          clearActivePanel={this.clearActivePanel}
+        />
+        <ConsumerBadgeList
+          viewId={viewId}
+          consumerBadges={consumerBadges}
+          updateActivePanel={this.updateActivePanel}
+          activeBadgeId={activeBadgeId}
+        />
+      </MainComponent>
+    );
+    
     return this.render_base(mainComponent);
   },
 
