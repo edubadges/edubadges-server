@@ -10,7 +10,9 @@
 
 .property-group {
   margin-bottom: 1em;
+  &.validations { clear: both; }
 }
+
 
 .badge-display-active {
   background-color: #d1d1d1;

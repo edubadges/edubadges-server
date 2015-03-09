@@ -26,6 +26,8 @@
 
 .property-group {
   margin-bottom: 1em; }
+  .property-group.validations {
+    clear: both; }
 
 .badge-display-active {
   background-color: #d1d1d1; }
@@ -437,6 +439,8 @@ form.disabled, form.disabled textarea {
 
 .property-group {
   margin-bottom: 1em; }
+  .property-group.validations {
+    clear: both; }
 
 .badge-display-active {
   background-color: #d1d1d1; }

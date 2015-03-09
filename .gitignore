@@ -13,3 +13,4 @@ node_modules/*
 bower_components/*
 npm-debug.log
 breakdown/static/js/script.js
+breakdown/static/css/style.css
