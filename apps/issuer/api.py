@@ -150,7 +150,7 @@ class IssuerBadgeObject(APIView):
     GET the actual OBI badge object for an issuer via the /public/issuers/ endpoint
     """
     model = Issuer
-    renderer_classes = (JSONLDRenderer, JSONRenderer,)
+    renderer_classes = (JSONRenderer, JSONLDRenderer, )
 
     def get(self, request, slug):
         try:
@@ -159,5 +159,5 @@ class IssuerBadgeObject(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         else:
-            return Response(current_issuer.badge_object, content_type="application/json")
+            return Response(current_issuer.badge_object)
 
