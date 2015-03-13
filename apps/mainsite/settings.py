@@ -139,6 +139,9 @@ LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = '/earn'
 
 AUTHENTICATION_BACKENDS = [
+    # Object permissions for issuing badges
+    'rules.permissions.ObjectPermissionBackend',
+
     # Needed to login by username in Django admin, regardless of `allauth`
     "django.contrib.auth.backends.ModelBackend",
 

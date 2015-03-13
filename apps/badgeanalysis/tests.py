@@ -372,6 +372,6 @@ class OpenBadgeIntegrationTests(TestCase):
             b.save()
         except Exception as e:
             self.assertTrue(isinstance(e, BadgeValidationError))
-            self.assertEqual(e.validator, 'BadgeFunctionalValidator AssertionRecipientValidator: Functional Badge Validator')
+            self.assertEqual(e.validator, 'BadgeFunctionalValidator AssertionRecipientValidator: ensures recipient identifier is the one expected')
         else:
             self.assertFalse("There should have been a save error, because email address was wrong.") 

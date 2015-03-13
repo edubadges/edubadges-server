@@ -8,17 +8,6 @@ from badgeuser.serializers import BadgeUserSerializer
 import json
 
 
-# from django.shortcuts import render_to_response
-
-
-class IssuerCreate(CreateView):
-    model = Issuer
-
-
-class IssuerDetail(DetailView):
-    model = Issuer
-
-
 class EarnerNotificationCreate(CreateView):
     template_name = 'base_interior.html'
     model = EarnerNotification

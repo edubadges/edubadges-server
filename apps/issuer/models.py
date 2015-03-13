@@ -1,25 +1,101 @@
 from django.db import models
 from django.conf import settings
+
+import uuid
 import basic_models
+import cachemodel
+from autoslug import AutoSlugField
 import django.template.loader
+from jsonfield import JSONField
 
 from badgeanalysis.models import OpenBadge
-from badgeuser.models import BadgeUser
+from badgeanalysis.utils import test_probable_url
+from badgeanalysis.scheme_models import BadgeScheme
 
 
-class Issuer(basic_models.SlugModel):
-    url = models.URLField(verbose_name='Issuer\'s homepage', max_length=2048)
-    issuer_object_url = models.URLField(max_length=2048, verbose_name='URL Location of the OBI Issuer file in JSON')
-    description = models.TextField(blank=True)
-    owner_user = models.ForeignKey(BadgeUser, related_name='owner', on_delete=models.PROTECT, null=False)
+class AbstractBadgeObject(cachemodel.CacheModel):
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(getattr(settings, 'AUTH_USER_MODEL'), blank=True, null=True)
 
-    def get_form(self):
-        from issuer.forms import IssuerForm
-        return IssuerForm(instance=self)
+    badge_object = JSONField()
+
+    class Meta:
+        abstract = True
+
+    def get_full_url(self):
+        return str(getattr(settings, 'HTTP_ORIGIN')) +  self.get_absolute_url()
+
+class Issuer(AbstractBadgeObject):
+    name = models.CharField(max_length=1024)
+    slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
+
+    owner = models.ForeignKey(getattr(settings, 'AUTH_USER_MODEL'), related_name='owner', on_delete=models.PROTECT, null=False)
+    # editors may define badgeclasses and issue badges
+    editors = models.ManyToManyField(getattr(settings, 'AUTH_USER_MODEL'), db_table='issuer_editors', related_name='issuers_editor_for')
+    # staff may issue badges from badgeclasses that already exist
+    staff = models.ManyToManyField(getattr(settings, 'AUTH_USER_MODEL'), db_table='issuer_staff', related_name='issuers_staff_for')
+
+    image = models.ImageField(upload_to='uploads/issuers', blank=True)
+
+    def get_absolute_url(self):
+        return "/public/issuers/%s" % self.slug
+
+    def save(self):
+        super(Issuer, self).save()
+        object_id = self.badge_object.get('@id')
+        if object_id != self.get_full_url():
+            self.badge_object['@id'] = self.get_full_url()
+            super(Issuer, self).save()
+
+
+class IssuerBadgeClass(AbstractBadgeObject):
+    issuer = models.ForeignKey(Issuer, blank=False, null=False, on_delete=models.PROTECT)
+    name = models.CharField(max_length=255)
+    slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
+    criteria_text = models.TextField(blank=True, null=True)  # TODO: refactor to be a rich text field via ckeditor
+    criteria_url = models.URLField(max_length=1024, blank=True, null=True)
+    image = models.ImageField(upload_to='uploads/badges', blank=True)
 
     @property
     def owner(self):
-        return self.owner_user
+        return self.obi_issuer.owner
+
+    # criteria may either be locally hosted text or a remote UR
+    @property
+    def criteria(self):
+        if self.criteria_url is not None:
+            return self.criteria_url
+        else:
+            return self.criteria_text
+    @criteria.setter
+    def criteria(self, value):
+        if test_probable_url(value):
+            self.criteria_url = value
+            self.criteria_text = None
+        else:
+            self.criteria_url = None
+            self.criteria_text = value
+
+    def get_absolute_url(self):
+        return "/public/badges/%s" % self.slug
+
+
+class IssuerAssertion(AbstractBadgeObject):
+    badgeclass = models.ForeignKey(IssuerBadgeClass, blank=False, null=False, on_delete=models.PROTECT)
+
+    # in the future, obi_issuer might be different from badgeclass.obi_issuer sometimes
+    issuer = models.ForeignKey(Issuer, blank=False, null=False)
+    slug = AutoSlugField(max_length=255, populate_from='get_new_slug', unique=True, blank=False, editable=False)
+
+    @property
+    def owner(self):
+        return self.obi_issuer.owner
+
+    def get_absolute_url(self):
+        return "/public/assertions/%s" % self.slug
+
+    def get_new_slug(self):
+        return str(uuid.uuid4())
 
 
 class EarnerNotification(basic_models.TimestampedModel):

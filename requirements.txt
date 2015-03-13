@@ -38,6 +38,8 @@ oauthlib==0.7.2
 requests==2.5.1
 requests-oauthlib==0.4.2
 responses==0.3.0
+# Permissions framework
+rules==0.4
 
 # Some extra things that got installed (noted here as output from a pip freeze)
 Django-Select2==4.2.2
