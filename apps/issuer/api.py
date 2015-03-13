@@ -145,6 +145,45 @@ class IssuerDetail(APIView):
             return Response(serializer.data)
 
 
+class BadgeClassList(APIView):
+    """
+    GET a list of badgeclasses within one issuer context or 
+    POST to create a new badgeclass within the issuer context
+    """
+    model = IssuerBadgeClass
+
+    authentication_classes = (
+        # authentication.TokenAuthentication,
+        authentication.SessionAuthentication,
+        authentication.BasicAuthentication,
+    )
+
+    def get(self, request, issuerSlug):
+        import pdb; pdb.set_trace();
+        if not isinstance(request.user, get_user_model()):
+            # TODO consider changing this a public API of all issuers (that are public?)
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        # Ensure current user has permissions on current issuer
+        current_issuer = Issuer.objects.filter(
+            slug=issuerSlug
+        ).filter(
+            Q(owner__id=request.user.id) |
+            Q(editors__id=request.user.id) |
+            Q(staff__id=request.user.id)
+        ).prefetch_related('badgeclasses')[0]
+
+        # Get the Issuers this user owns, edits, or staffs:
+        issuer_badge_classes = current_issuer.badgeclasses.all()
+
+        if not issuer_badge_classes.exists():
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = IssuerBadgeClassSerializer(user_badgeclasses, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+
 class IssuerBadgeObject(APIView):
     """
     GET the actual OBI badge object for an issuer via the /public/issuers/ endpoint

@@ -49,7 +49,7 @@ class Issuer(AbstractBadgeObject):
 
 
 class IssuerBadgeClass(AbstractBadgeObject):
-    issuer = models.ForeignKey(Issuer, blank=False, null=False, on_delete=models.PROTECT)
+    issuer = models.ForeignKey(Issuer, blank=False, null=False, on_delete=models.PROTECT, related_name="badgeclasses")
     name = models.CharField(max_length=255)
     slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
     criteria_text = models.TextField(blank=True, null=True)  # TODO: refactor to be a rich text field via ckeditor
@@ -78,6 +78,8 @@ class IssuerBadgeClass(AbstractBadgeObject):
 
     def get_absolute_url(self):
         return "/public/badges/%s" % self.slug
+
+
 
 
 class IssuerAssertion(AbstractBadgeObject):
