@@ -9,6 +9,8 @@ from rest_framework.views import APIView
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
+from rest_framework.renderers import JSONRenderer
+from mainsite.renderers import JSONLDRenderer
 from models import EarnerNotification, Issuer, IssuerBadgeClass, IssuerAssertion
 from serializers import EarnerNotificationSerializer, IssuerSerializer, IssuerBadgeClassSerializer, IssuerAssertionSerializer
 
@@ -148,6 +150,7 @@ class IssuerBadgeObject(APIView):
     GET the actual OBI badge object for an issuer via the /public/issuers/ endpoint
     """
     model = Issuer
+    renderer_classes = (JSONLDRenderer, JSONRenderer,)
 
     def get(self, request, slug):
         try:
