@@ -179,11 +179,42 @@ class BadgeClassList(APIView):
         if not issuer_badge_classes.exists():
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        serializer = IssuerBadgeClassSerializer(user_badgeclasses, many=True, context={'request': request})
+        serializer = IssuerBadgeClassSerializer(issuer_badge_classes, many=True, context={'request': request})
         return Response(serializer.data)
 
+    def post(self, request, issuerSlug):
+        import pdb; pdb.set_trace();
+
+        if not isinstance(request.user, get_user_model()):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        current_issuer = current_issuer = Issuer.objects.filter(
+            slug=issuerSlug
+        ).filter(
+            Q(owner__id=request.user.id) |
+            Q(editors__id=request.user.id) |
+            Q(staff__id=request.user.id)
+        )
+
+        if not current_issuer.exists():
+            return Response('Issuer not found, or improper permissions on issuer', status=status.HTTP_404_NOT_FOUND)
+
+        serializer = IssuerBadgeClassSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+
+        serializer.save(
+            created_by=request.user,
+            description=request.data.get('description'),
+            criteria_text=request.data.get('criteria_text'),
+            criteria_url=request.data.get('criteria_url')
+        )
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+"""
+Public Open Badges Resources
+"""
 class IssuerBadgeObject(APIView):
     """
     GET the actual OBI badge object for an issuer via the /public/issuers/ endpoint
@@ -200,3 +231,16 @@ class IssuerBadgeObject(APIView):
         else:
             return Response(current_issuer.badge_object)
 
+
+class IssuerBadgeClassObject(APIView):
+    """
+    GET the actual OBI badge object for a badgeclass via public/issuers/:slug/badges/:slug endpoint
+    """
+    model = IssuerBadgeClass
+    def get(self, request, issuerSlug, badgeSlug):
+        try:
+            current_badgeclass = IssuerBadgeClass.objects.get(slug=badgeSlug, issuer__slug=issuerSlug)
+        except IssuerBadgeClass.ObjectNotFound:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(current_badgeclass.badge_object)

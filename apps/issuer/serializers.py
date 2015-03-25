@@ -54,14 +54,46 @@ class IssuerSerializer(AbstractBadgeObjectSerializer):
         return new_issuer
 
 
-
 class IssuerBadgeClassSerializer(AbstractBadgeObjectSerializer):
     issuer = serializers.HyperlinkedRelatedField(view_name='issuer_detail', read_only=True)
     badge_object = WritableJSONField(max_length=16384, read_only=True, required=False)
     name = serializers.CharField(max_length=255)
-    slug = serializers.CharField(max_length=255, allow_blank=True)
     image = serializers.ImageField(allow_empty_file=False, use_url=True)
-    criteria = serializers.CharField(allow_blank=False)
+    slug = serializers.CharField(max_length=255, allow_blank=True, required=False)
+    criteria = serializers.CharField(allow_blank=False, required=False)
+
+    def validate_image(self, image):
+        # TODO: Make sure it's a PNG (square if possible), and remove any baked-in badge assertion that exists.
+        return image
+
+    # def validate(self, data, something):
+    #     pass
+
+    def create(self, validated_data, **kwargs):
+        # TODO: except KeyError on pops for invalid keys? or just ensure they're there with validate()
+        validated_data['badge_object'] = {
+            '@context': utils.CURRENT_OBI_CONTEXT_IRI,
+            'name': validated_data.get('name'),
+            'description': validated_data.pop('description'),
+            'criteria': validated_data.pop('criteria')
+        }
+
+
+        criteria_url = validated_data.get('criteria_url')
+        criteria_text = validated_data.get('criteria_text')
+        if criteria_url is not None and criteria_text is None:
+            validated_data['badge_object']['criteria'] = criteria_url
+
+        new_badgeclass = IssuerBadgeClass(**validated_data)
+
+        # Augment with @id and criteria link
+        new_badgeclass.badge_object['@id'] = new_badgeclass.get_full_url()
+
+        if new_badgeclass.badge_object.get('criteria') is None:
+            new_badgeclass.badge_object['criteria'] = new_badgeclass.get_full_url() + '/criteria'
+
+        new_badgeclass.save()
+        return new_badgeclass
 
 
 class IssuerAssertionSerializer(AbstractBadgeObjectSerializer):
