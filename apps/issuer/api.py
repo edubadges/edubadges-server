@@ -177,7 +177,7 @@ class BadgeClassList(APIView):
         issuer_badge_classes = current_issuer.badgeclasses.all()
 
         if not issuer_badge_classes.exists():
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
         serializer = IssuerBadgeClassSerializer(issuer_badge_classes, many=True, context={'request': request})
         return Response(serializer.data)
@@ -199,14 +199,15 @@ class BadgeClassList(APIView):
         if not current_issuer.exists():
             return Response('Issuer not found, or improper permissions on issuer', status=status.HTTP_404_NOT_FOUND)
 
+        current_issuer = current_issuer[0]
+
         serializer = IssuerBadgeClassSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
         serializer.save(
+            issuer=current_issuer,
             created_by=request.user,
-            description=request.data.get('description'),
-            criteria_text=request.data.get('criteria_text'),
-            criteria_url=request.data.get('criteria_url')
+            description=request.data.get('description')
         )
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -215,32 +216,64 @@ class BadgeClassList(APIView):
 """
 Public Open Badges Resources
 """
-class IssuerBadgeObject(APIView):
+# Abstract badge object
+class JSONBadgeObjectView(APIView):
+    renderer_classes = (JSONRenderer, JSONLDRenderer)
+
+    def get(self, request, slug):
+        try:
+            current_object = self.model.objects.get(slug=slug)
+        except self.model.ObjectNotFound:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(current_object.badge_object)
+
+
+class IssuerBadgeObject(JSONBadgeObjectView):
     """
     GET the actual OBI badge object for an issuer via the /public/issuers/ endpoint
     """
     model = Issuer
-    renderer_classes = (JSONRenderer, JSONLDRenderer, )
-
-    def get(self, request, slug):
-        try:
-            current_issuer = Issuer.objects.get(slug=slug)
-        except Issuer.ObjectNotFound:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        else:
-            return Response(current_issuer.badge_object)
 
 
-class IssuerBadgeClassObject(APIView):
+class IssuerBadgeClassObject(JSONBadgeObjectView):
     """
-    GET the actual OBI badge object for a badgeclass via public/issuers/:slug/badges/:slug endpoint
+    GET the actual OBI badge object for a badgeclass via public/badges/:slug endpoint
     """
     model = IssuerBadgeClass
-    def get(self, request, issuerSlug, badgeSlug):
+
+
+class IssuerBadgeClassImage(APIView):
+    """
+    GET the unbaked badge image from a pretty url instead of media path
+    """
+    model = IssuerBadgeClass
+
+    def get(self, request, slug):
+        import pdb; pdb.set_trace();
         try:
-            current_badgeclass = IssuerBadgeClass.objects.get(slug=badgeSlug, issuer__slug=issuerSlug)
+            current_badgeclass = IssuerBadgeClass.objects.get(slug=slug)
         except IssuerBadgeClass.ObjectNotFound:
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response(current_badgeclass.badge_object)
+            return Response(current_badgeclass.image)
+
+
+class IssuerBadgeClassCriteria(APIView):
+    model = IssuerBadgeClass
+
+    def get(self, request, slug):
+        # TODO: This view will display an HTML template if the badgeclass has criteria_text, 
+        # or will 301 redirect to criteria_url
+        return NotImplementedError("Criteria view not implemented.")
+
+
+class IssuerAssertionBadgeObject(JSONBadgeObjectView):
+    model = IssuerAssertion
+
+
+class IssuerAssertionImage(APIView):
+    model = IssuerAssertion
+
+    def get(self, request, slug):
+        return NotImplementedError("Baked badge image view not implemented.")

@@ -55,42 +55,67 @@ class IssuerSerializer(AbstractBadgeObjectSerializer):
 
 
 class IssuerBadgeClassSerializer(AbstractBadgeObjectSerializer):
-    issuer = serializers.HyperlinkedRelatedField(view_name='issuer_detail', read_only=True)
+    issuer = serializers.HyperlinkedRelatedField(view_name='issuer_detail', read_only=True, lookup_field='slug')
     badge_object = WritableJSONField(max_length=16384, read_only=True, required=False)
     name = serializers.CharField(max_length=255)
     image = serializers.ImageField(allow_empty_file=False, use_url=True)
     slug = serializers.CharField(max_length=255, allow_blank=True, required=False)
-    criteria = serializers.CharField(allow_blank=False, required=False)
+    criteria_url = serializers.CharField(allow_blank=True, required=False)
+    criteria_text = serializers.CharField(allow_blank=True, required=False)
 
     def validate_image(self, image):
         # TODO: Make sure it's a PNG (square if possible), and remove any baked-in badge assertion that exists.
         return image
 
-    # def validate(self, data, something):
-    #     pass
+    def validate_criteria_url(self, value):
+        if badgeanalysis.utils.test_probable_url(value):
+            return value
+        else:
+            raise serializers.ValidationError("Criteria URL " + value + " did not appear to be a valid URL.")
+
+    def validate_criteria_text(self, value):
+        if not isinstance(value, (str, unicode)):
+            raise serializers.ValidationError("Provided criteria text could not be properly processed")
+        else:
+            return value
+
+    def validate(self, data):
+        # throw error for multiple competing criteria entries
+        if data.get('criteria_url', u'') != u'' and data.get('criteria_text', u'') != u'':
+            raise serializers.ValidationError(
+                "Both criteria_text and criteria_url were provided. Use one or the other."
+            )
+        return data
 
     def create(self, validated_data, **kwargs):
+        import pdb; pdb.set_trace();
+
         # TODO: except KeyError on pops for invalid keys? or just ensure they're there with validate()
+        # "gets" data that must be in both model and model.badge_object, 
+        # "pops" data that shouldn't be sent to model init
         validated_data['badge_object'] = {
             '@context': utils.CURRENT_OBI_CONTEXT_IRI,
+            '@type': 'BadgeClass',
             'name': validated_data.get('name'),
             'description': validated_data.pop('description'),
-            'criteria': validated_data.pop('criteria')
+            'criteria': validated_data.pop('criteria_url'),
+            'issuer': validated_data.get('issuer').get_full_url()
         }
 
-
-        criteria_url = validated_data.get('criteria_url')
-        criteria_text = validated_data.get('criteria_text')
-        if criteria_url is not None and criteria_text is None:
-            validated_data['badge_object']['criteria'] = criteria_url
+        # remove criteria_text from data before model init
+        criteria_text = validated_data.pop('criteria_text')
 
         new_badgeclass = IssuerBadgeClass(**validated_data)
 
-        # Augment with @id and criteria link
-        new_badgeclass.badge_object['@id'] = new_badgeclass.get_full_url()
+        full_url = new_badgeclass.get_full_url()
+        # Augment with @id, image and criteria link
+        new_badgeclass.badge_object['@id'] = full_url
+        new_badgeclass.badge_object['image'] = full_url + '/image'
 
-        if new_badgeclass.badge_object.get('criteria') is None:
-            new_badgeclass.badge_object['criteria'] = new_badgeclass.get_full_url() + '/criteria'
+        current_criteria_url = new_badgeclass.badge_object.get('criteria')
+        if current_criteria_url is None or current_criteria_url == '':
+            new_badgeclass.badge_object['criteria'] = full_url + '/criteria'
+            new_badgeclass.criteria_text = criteria_text
 
         new_badgeclass.save()
         return new_badgeclass

@@ -8,6 +8,8 @@ from autoslug import AutoSlugField
 import django.template.loader
 from jsonfield import JSONField
 
+from mainsite.utils import slugify
+
 from badgeanalysis.models import OpenBadge
 from badgeanalysis.utils import test_probable_url
 from badgeanalysis.scheme_models import BadgeScheme
@@ -22,8 +24,28 @@ class AbstractBadgeObject(cachemodel.CacheModel):
     class Meta:
         abstract = True
 
+    # Subclasses must implement 'slug' as a field
+    def get_slug(self):
+        if self.slug is None or self.slug == '':
+            # If there isn't a slug, object has been initialized but not saved,
+            # so this change will be saved later in present process; fine not to save now.
+            self.slug = slugify(self.name)
+        return self.slug
+
     def get_full_url(self):
         return str(getattr(settings, 'HTTP_ORIGIN')) +  self.get_absolute_url()
+
+    # Handle updating badge_object in case initial slug guess was modified on save because of a uniqueness constraint
+    def process_real_full_url(self):
+        self.badge_object['@id'] = self.get_full_url()
+
+    def save(self):
+        super(AbstractBadgeObject, self).save()
+        object_id = self.badge_object.get('@id')
+        if object_id != self.get_full_url():
+            self.process_real_full_url()
+            super(AbstractBadgeObject, self).save()
+
 
 class Issuer(AbstractBadgeObject):
     name = models.CharField(max_length=1024)
@@ -38,14 +60,7 @@ class Issuer(AbstractBadgeObject):
     image = models.ImageField(upload_to='uploads/issuers', blank=True)
 
     def get_absolute_url(self):
-        return "/public/issuers/%s" % self.slug
-
-    def save(self):
-        super(Issuer, self).save()
-        object_id = self.badge_object.get('@id')
-        if object_id != self.get_full_url():
-            self.badge_object['@id'] = self.get_full_url()
-            super(Issuer, self).save()
+        return "/public/issuers/%s" % self.get_slug()
 
 
 class IssuerBadgeClass(AbstractBadgeObject):
@@ -53,6 +68,8 @@ class IssuerBadgeClass(AbstractBadgeObject):
     name = models.CharField(max_length=255)
     slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
     criteria_text = models.TextField(blank=True, null=True)  # TODO: refactor to be a rich text field via ckeditor
+
+    # TODO: migrate criteria_url into nothingness, replace with @property method -- duplicates data in badge_object
     criteria_url = models.URLField(max_length=1024, blank=True, null=True)
     image = models.ImageField(upload_to='uploads/badges', blank=True)
 
@@ -60,6 +77,12 @@ class IssuerBadgeClass(AbstractBadgeObject):
     def owner(self):
         return self.obi_issuer.owner
 
+    # TODO: Here's the replacement for criteria_url
+    # @property
+    # def criteria_url(self):
+    #     return self.badge_object.get('criteria')
+
+    # TODO: remove this approach. Replace with criteria_url property getter.
     # criteria may either be locally hosted text or a remote UR
     @property
     def criteria(self):
@@ -77,9 +100,14 @@ class IssuerBadgeClass(AbstractBadgeObject):
             self.criteria_text = value
 
     def get_absolute_url(self):
-        return "/public/badges/%s" % self.slug
+        return "/public/badges/%s" % self.get_slug()
 
+    def process_real_full_url(self):
+        self.badge_object['image'] = self.get_full_url() + '/image'
+        if self.criteria_url is None or self.criteria_url == '':
+            self.badge_object['criteria'] = self.get_full_url() + '/criteria'
 
+        super(IssuerBadgeClass, self).process_real_full_url()
 
 
 class IssuerAssertion(AbstractBadgeObject):
@@ -94,10 +122,15 @@ class IssuerAssertion(AbstractBadgeObject):
         return self.obi_issuer.owner
 
     def get_absolute_url(self):
-        return "/public/assertions/%s" % self.slug
+        return "/public/assertions/%s" % self.get_slug()
 
     def get_new_slug(self):
         return str(uuid.uuid4())
+
+    def get_slug(self):
+        if self.slug is None or self.slug == '':
+            self.slug = self.get_new_slug()
+        return self.slug
 
 
 class EarnerNotification(basic_models.TimestampedModel):
