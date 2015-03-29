@@ -15,6 +15,10 @@ from badgeanalysis.utils import test_probable_url
 from badgeanalysis.scheme_models import BadgeScheme
 
 
+"""
+A base class for Issuer badge objects, those that are part of badges issue
+by users on this system.
+""" 
 class AbstractBadgeObject(cachemodel.CacheModel):
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(getattr(settings, 'AUTH_USER_MODEL'), blank=True, null=True)
@@ -47,6 +51,9 @@ class AbstractBadgeObject(cachemodel.CacheModel):
             super(AbstractBadgeObject, self).save()
 
 
+"""
+Open Badges Specification IssuerOrg object
+"""
 class Issuer(AbstractBadgeObject):
     name = models.CharField(max_length=1024)
     slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
@@ -63,6 +70,9 @@ class Issuer(AbstractBadgeObject):
         return "/public/issuers/%s" % self.get_slug()
 
 
+"""
+Open Badges Specification BadgeClass object
+"""
 class IssuerBadgeClass(AbstractBadgeObject):
     issuer = models.ForeignKey(Issuer, blank=False, null=False, on_delete=models.PROTECT, related_name="badgeclasses")
     name = models.CharField(max_length=255)
@@ -110,6 +120,9 @@ class IssuerBadgeClass(AbstractBadgeObject):
         super(IssuerBadgeClass, self).process_real_full_url()
 
 
+"""
+Open Badges Specification Assertion object
+"""
 class IssuerAssertion(AbstractBadgeObject):
     badgeclass = models.ForeignKey(IssuerBadgeClass, blank=False, null=False, on_delete=models.PROTECT)
 
