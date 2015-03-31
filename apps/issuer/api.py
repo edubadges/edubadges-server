@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.db.models.query import EmptyQuerySet
 from django.utils.text import slugify
+from django.shortcuts import redirect
 
 from rest_framework import status, authentication, permissions
 from rest_framework.views import APIView
@@ -245,7 +246,7 @@ class IssuerBadgeClassImage(APIView):
         except self.model.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response(current_badgeclass.image)
+            return redirect(current_badgeclass.image.url)
 
 
 class IssuerBadgeClassCriteria(APIView):

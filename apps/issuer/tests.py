@@ -142,3 +142,7 @@ class PublicAPITests(APITestCase):
     def test_get_issuer_object_that_doesnt_exist(self):
         response = self.client.get('/public/issuers/imaginary-issuer')
         self.assertEqual(response.status_code, 404)
+
+    def test_get_badgeclass_image_with_redirect(self):
+        response = self.client.get('/public/badges/badge-of-testing/image')
+        self.assertEqual(response.status_code, 302)
