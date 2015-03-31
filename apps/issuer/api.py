@@ -106,23 +106,14 @@ class IssuerList(APIView):
         if not isinstance(request.user, get_user_model()):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        input_data = {
-            'url': request.data.get('url'),
-            'name': request.data.get('name'),
-            'slug': slugify(request.data.get('slug', request.data.get('name'))),
-        }
-        if request.data.get('image') is not None:
-            input_data['image'] = request.data.get('image')
-
-        serializer = IssuerSerializer(data=input_data, context={'request': request})
+        serializer = IssuerSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
         # Pass in user values where we have a real user object instead of a url
         # and non-model-field data to go into badge_object
         serializer.save(
-            owner=request.user, 
-            created_by=request.user, 
-            description=request.data.get('description')
+            owner=request.user,
+            created_by=request.user
         )
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -137,7 +128,7 @@ class IssuerDetail(APIView):
     def get(self, request, slug):
         try:
             current_issuer = Issuer.objects.get(slug=slug)
-        except Issuer.ObjectNotFound:
+        except Issuer.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         else:
@@ -147,7 +138,7 @@ class IssuerDetail(APIView):
 
 class BadgeClassList(APIView):
     """
-    GET a list of badgeclasses within one issuer context or 
+    GET a list of badgeclasses within one issuer context or
     POST to create a new badgeclass within the issuer context
     """
     model = IssuerBadgeClass
@@ -159,7 +150,6 @@ class BadgeClassList(APIView):
     )
 
     def get(self, request, issuerSlug):
-        import pdb; pdb.set_trace();
         if not isinstance(request.user, get_user_model()):
             # TODO consider changing this a public API of all issuers (that are public?)
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -183,11 +173,10 @@ class BadgeClassList(APIView):
         return Response(serializer.data)
 
     def post(self, request, issuerSlug):
-        import pdb; pdb.set_trace();
-
         if not isinstance(request.user, get_user_model()):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
+        # Step 1: Locate the issuer
         current_issuer = current_issuer = Issuer.objects.filter(
             slug=issuerSlug
         ).filter(
@@ -201,6 +190,7 @@ class BadgeClassList(APIView):
 
         current_issuer = current_issuer[0]
 
+        # Step 2: validate, create new Badge Class
         serializer = IssuerBadgeClassSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
@@ -223,7 +213,7 @@ class JSONBadgeObjectView(APIView):
     def get(self, request, slug):
         try:
             current_object = self.model.objects.get(slug=slug)
-        except self.model.ObjectNotFound:
+        except self.model.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
             return Response(current_object.badge_object)
@@ -250,10 +240,9 @@ class IssuerBadgeClassImage(APIView):
     model = IssuerBadgeClass
 
     def get(self, request, slug):
-        import pdb; pdb.set_trace();
         try:
             current_badgeclass = IssuerBadgeClass.objects.get(slug=slug)
-        except IssuerBadgeClass.ObjectNotFound:
+        except self.model.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
             return Response(current_badgeclass.image)

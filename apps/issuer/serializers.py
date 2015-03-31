@@ -16,38 +16,37 @@ class AbstractBadgeObjectSerializer(serializers.Serializer):
 class IssuerSerializer(AbstractBadgeObjectSerializer):
     badge_object = WritableJSONField(max_length=16384, read_only=True, required=False)
     name = serializers.CharField(max_length=1024)
-    slug = serializers.CharField(max_length=255, allow_blank=True)
-    image = serializers.ImageField(allow_empty_file=False, use_url=True, required=False) 
-
+    slug = serializers.CharField(max_length=255, allow_blank=True, required=False)
+    image = serializers.ImageField(allow_empty_file=False, use_url=True, required=False)
+    email = serializers.EmailField(max_length=255, required=True, write_only=True)
+    description = serializers.CharField(max_length=1024, required=True, write_only=True)
+    url = serializers.URLField(max_length=1024, required=True, write_only=True)
     owner = serializers.HyperlinkedRelatedField(view_name='user_detail', lookup_field='username', read_only=True)
     editors = serializers.HyperlinkedRelatedField(many=True, view_name='user_detail', lookup_field='username', read_only=True)
     staff = serializers.HyperlinkedRelatedField(many=True, view_name='user_detail', lookup_field='username', read_only=True)
 
-    def validate_url(self, value):
-        if badgeanalysis.utils.test_probable_url(value):
-            return value
-        else:
-            raise ValidationError("Issuer URL %s did not appear to be valid." % str(value))
+    def validate(self, data):
+        # TODO: ensure email is a confirmed email in owner/creator's account
+        # ^^^ that validation requires the request.user, which might be in self.context
+        return data
 
     def create(self, validated_data, **kwargs):
-
         validated_data['badge_object'] = {
             '@context': utils.CURRENT_OBI_CONTEXT_IRI,
+            'type': 'Issuer',
             'name': validated_data.get('name'),
-            'url': validated_data.get('url'),
-            'email': validated_data.get('email')
+            'url': validated_data.pop('url'),
+            'email': validated_data.pop('email'),
+            'description': validated_data.pop('description')
         }
-
-        # remove keys that would confuse Issuer init from validated_data
-        try:
-            validated_data['badge_object']['description'] = validated_data.pop('description')
-        except KeyError:
-            pass
 
         new_issuer = Issuer(**validated_data)
 
         # Add @id to new issuer, which is depenent on an instance being initiated
         new_issuer.badge_object['@id'] = new_issuer.get_full_url()
+
+        if validated_data.get('image') is not None:
+            new_issuer.badge_object['image'] = new_issuer.get_full_url() + '/image'
 
         new_issuer.save()
 
@@ -60,50 +59,49 @@ class IssuerBadgeClassSerializer(AbstractBadgeObjectSerializer):
     name = serializers.CharField(max_length=255)
     image = serializers.ImageField(allow_empty_file=False, use_url=True)
     slug = serializers.CharField(max_length=255, allow_blank=True, required=False)
-    criteria_url = serializers.CharField(allow_blank=True, required=False)
-    criteria_text = serializers.CharField(allow_blank=True, required=False)
+    criteria = serializers.CharField(allow_blank=True, required=False, write_only=True)
 
     def validate_image(self, image):
         # TODO: Make sure it's a PNG (square if possible), and remove any baked-in badge assertion that exists.
         return image
 
-    def validate_criteria_url(self, value):
-        if badgeanalysis.utils.test_probable_url(value):
-            return value
-        else:
-            raise serializers.ValidationError("Criteria URL " + value + " did not appear to be a valid URL.")
-
-    def validate_criteria_text(self, value):
-        if not isinstance(value, (str, unicode)):
-            raise serializers.ValidationError("Provided criteria text could not be properly processed")
-        else:
-            return value
-
     def validate(self, data):
-        # throw error for multiple competing criteria entries
-        if data.get('criteria_url', u'') != u'' and data.get('criteria_text', u'') != u'':
+
+        if badgeanalysis.utils.test_probable_url(data.get('criteria')):
+            data['criteria_url'] = data.pop('criteria')
+        elif not isinstance(data.get('criteria'), (str, unicode)):
             raise serializers.ValidationError(
-                "Both criteria_text and criteria_url were provided. Use one or the other."
+                "Provided criteria text could not be properly processed as URL or plain text."
             )
+        else:
+            data['criteria_text'] = data.pop('criteria')
+
         return data
 
     def create(self, validated_data, **kwargs):
-        import pdb; pdb.set_trace();
 
         # TODO: except KeyError on pops for invalid keys? or just ensure they're there with validate()
-        # "gets" data that must be in both model and model.badge_object, 
+        # "gets" data that must be in both model and model.badge_object,
         # "pops" data that shouldn't be sent to model init
         validated_data['badge_object'] = {
             '@context': utils.CURRENT_OBI_CONTEXT_IRI,
             '@type': 'BadgeClass',
             'name': validated_data.get('name'),
             'description': validated_data.pop('description'),
-            'criteria': validated_data.pop('criteria_url'),
             'issuer': validated_data.get('issuer').get_full_url()
         }
 
+        # If criteria_url, put it in the badge_object directly:
+        try:
+            validated_data['badge_object']['criteria'] = validated_data.pop('criteria_url')
+        except KeyError:
+            pass
+
         # remove criteria_text from data before model init
-        criteria_text = validated_data.pop('criteria_text')
+        try:
+            criteria_text = validated_data.pop('criteria_text')
+        except KeyError:
+            criteria_text = ''
 
         new_badgeclass = IssuerBadgeClass(**validated_data)
 
@@ -112,8 +110,7 @@ class IssuerBadgeClassSerializer(AbstractBadgeObjectSerializer):
         new_badgeclass.badge_object['@id'] = full_url
         new_badgeclass.badge_object['image'] = full_url + '/image'
 
-        current_criteria_url = new_badgeclass.badge_object.get('criteria')
-        if current_criteria_url is None or current_criteria_url == '':
+        if new_badgeclass.badge_object.get('criteria')is None or criteria_text == '':
             new_badgeclass.badge_object['criteria'] = full_url + '/criteria'
             new_badgeclass.criteria_text = criteria_text
 

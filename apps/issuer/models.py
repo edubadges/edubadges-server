@@ -37,7 +37,7 @@ class AbstractBadgeObject(cachemodel.CacheModel):
         return self.slug
 
     def get_full_url(self):
-        return str(getattr(settings, 'HTTP_ORIGIN')) +  self.get_absolute_url()
+        return str(getattr(settings, 'HTTP_ORIGIN')) + self.get_absolute_url()
 
     # Handle updating badge_object in case initial slug guess was modified on save because of a uniqueness constraint
     def process_real_full_url(self):
@@ -45,6 +45,8 @@ class AbstractBadgeObject(cachemodel.CacheModel):
 
     def save(self):
         super(AbstractBadgeObject, self).save()
+
+        # Make adjustments if the slug has changed due to uniqueness constraint
         object_id = self.badge_object.get('@id')
         if object_id != self.get_full_url():
             self.process_real_full_url()
@@ -114,7 +116,7 @@ class IssuerBadgeClass(AbstractBadgeObject):
 
     def process_real_full_url(self):
         self.badge_object['image'] = self.get_full_url() + '/image'
-        if self.criteria_url is None or self.criteria_url == '':
+        if self.badge_object.get('criteria') is None or self.badge_object.get('criteria') == '':
             self.badge_object['criteria'] = self.get_full_url() + '/criteria'
 
         super(IssuerBadgeClass, self).process_real_full_url()

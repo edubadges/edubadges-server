@@ -1,0 +1,32 @@
+[
+  {
+    "fields": {
+      "badge_object": "{\"description\":\"Issuer of Experimental Credentials\",\"url\":\"http://example.org\",\"type\":\"Issuer\",\"image\":\"http://localhost:8000/public/issuers/test-issuer/image\",\"@context\":\"https://w3id.org/openbadges/v1\",\"@id\":\"http://localhost:8000/public/issuers/test-issuer\",\"email\":\"exampleIssuer@example.org\",\"name\":\"Test Issuer\"}",
+      "created_at": "2015-03-30T23:06:23Z",
+      "editors": [],
+      "created_by": 1,
+      "image": "uploads/issuers/badge1_fSFqTVV.png",
+      "owner": 1,
+      "staff": [],
+      "slug": "test-issuer",
+      "name": "Test Issuer"
+    },
+    "model": "issuer.issuer",
+    "pk": 12
+  },
+  {
+    "fields": {
+      "criteria_url": null,
+      "name": "Badge of Testing",
+      "created_at": "2015-03-31T00:56:21Z",
+      "created_by": 1,
+      "image": "uploads/badges/badge1.png",
+      "criteria_text": "",
+      "issuer": 12,
+      "slug": "badge-of-testing",
+      "badge_object": "{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-awesome/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-awesome/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"@id\":\"http://localhost:8000/public/badges/badge-of-awesome\",\"@type\":\"BadgeClass\",\"name\":\"Badge of Awesome\"}"
+    },
+    "model": "issuer.issuerbadgeclass",
+    "pk": 10
+  }
+]
