@@ -106,7 +106,13 @@ class IssuerBadgeClass(AbstractBadgeObject):
 Open Badges Specification Assertion object
 """
 class IssuerAssertion(AbstractBadgeObject):
-    badgeclass = models.ForeignKey(IssuerBadgeClass, blank=False, null=False, on_delete=models.PROTECT, related_name='assertions')
+    badgeclass = models.ForeignKey(
+        IssuerBadgeClass,
+        blank=False,
+        null=False,
+        on_delete=models.PROTECT,
+        related_name='assertions'
+     )
 
     # in the future, obi_issuer might be different from badgeclass.obi_issuer sometimes
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
