@@ -57,8 +57,13 @@ class IssuerTests(TestCase):
         self.assertIsNotNone(badge_object.get('@id'))
         self.assertIsNotNone(badge_object.get('@context'))
 
+    def test_private_issuer_detail_get(self):
+        # GET on single badge should work if user has privileges
+        # Eventually, implement PUT for updates (if permitted)
+        pass
 
-class BadgeClasstests(APITestCase):
+
+class BadgeClassTests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
 
     def test_create_badgeclass_for_issuer_authenticated(self):
@@ -128,6 +133,27 @@ class BadgeClasstests(APITestCase):
         """
         response = self.client.get('/api/issuer/issuers/test-issuer/badges/')
         self.assertEqual(response.status_code, 403)
+
+
+class AssertionTests(APITestCase):
+    fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
+
+    # def test_authenticated_owner_issue_badge(self):
+    #     self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+    #     assertion = {
+    #         "email": "test@example.com"
+    #     }
+    #     response = self.client.post('/api/issuer/issuers/test-issuer/badges/', assertion)
+
+    #     self.assertEqual(response.status_code, 201)
+
+    # def test_authenticated_nonowner_user_cant_issue(self):
+    #     pass
+
+    # def test_unauthenticated_user_cant_issue(self):
+    #     assertion = {"email": "test@example.com"}
+    #     response = self.client.post('/api/issuer/issuers/test-issuer/badges/', assertion)
+    #     self.assertEqual(response.status_code, 403)
 
 
 class PublicAPITests(APITestCase):

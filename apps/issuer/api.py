@@ -126,6 +126,12 @@ class IssuerDetail(APIView):
     """
     model = Issuer
 
+    authentication_classes = (
+        # authentication.TokenAuthentication,
+        authentication.SessionAuthentication,
+        authentication.BasicAuthentication,
+    )
+
     def get(self, request, slug):
         try:
             current_issuer = Issuer.objects.get(slug=slug)
@@ -162,7 +168,7 @@ class BadgeClassList(APIView):
             Q(owner__id=request.user.id) |
             Q(editors__id=request.user.id) |
             Q(staff__id=request.user.id)
-        ).prefetch_related('badgeclasses')[0]
+        ).select_related('badgeclasses')[0]
 
         # Get the Issuers this user owns, edits, or staffs:
         issuer_badge_classes = current_issuer.badgeclasses.all()
@@ -204,8 +210,75 @@ class BadgeClassList(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-"""
+class BadgeClassDetail(APIView):
+    """
+    GET details on one issuer. PUT and DELETE should be highly restricted operations and are not implemented yet
+    """
+    model = IssuerBadgeClass
+
+    authentication_classes = (
+        # authentication.TokenAuthentication,
+        authentication.SessionAuthentication,
+        authentication.BasicAuthentication,
+    )
+
+    def get(self, request, issuerSlug, badgeSlug):
+        # TODO long term: allow GET if issuer has permission to issue even if not creator
+
+        try:
+            current_issuer = IssuerBadgeClass.objects.get(slug=badgeSlug, issuer__slug=issuerSlug)
+        except IssuerBadgeClass.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        else:
+            serializer = IssuerSerializer(current_issuer, context={'request': request})
+            return Response(serializer.data)
+
+
+class AssertionList(APIView):
+    """
+    /api/issuer/issuers/:issuerSlug/badges/:badgeSlug/assertions
+    GET a list of assertions per issuer & per badgeclass
+    POST to issue a new assertion
+    """
+    model = IssuerAssertion
+
+    authentication_classes = (
+        # authentication.TokenAuthentication,
+        authentication.SessionAuthentication,
+        authentication.BasicAuthentication,
+    )
+
+    def get(self, request, issuerSlug, badgeSlug):
+        if not isinstance(request.user, get_user_model()):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        # Ensure current user has permissions on current issuer
+        current_issuer = Issuer.objects.filter(
+            slug=issuerSlug
+        ).filter(
+            Q(owner__id=request.user.id) |
+            Q(editors__id=request.user.id) |
+            Q(staff__id=request.user.id)
+        ).select_related('badgeclasses').select_related('assertions')[0]
+
+        # Get the Issuers this user owns, edits, or staffs:
+        issuer_badge_classes = current_issuer.badgeclasses.all()
+
+        if not issuer_badge_classes.exists():
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        serializer = IssuerBadgeClassSerializer(issuer_badge_classes, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+
+
+
+
+""" <<<<<<<<<<<<<<<<<<<<<<< PUBLIC API >>>>>>>>>>>>>>>>>>>>>>>>>
 Public Open Badges Resources
+TODO: move this to its own file.
 """
 # Abstract badge object
 class JSONBadgeObjectView(APIView):

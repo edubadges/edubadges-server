@@ -80,9 +80,6 @@ class IssuerBadgeClass(AbstractBadgeObject):
     name = models.CharField(max_length=255)
     slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
     criteria_text = models.TextField(blank=True, null=True)  # TODO: refactor to be a rich text field via ckeditor
-
-    # TODO: migrate criteria_url into nothingness, replace with @property method -- duplicates data in badge_object
-    criteria_url = models.URLField(max_length=1024, blank=True, null=True)
     image = models.ImageField(upload_to='uploads/badges', blank=True)
 
     @property
@@ -90,26 +87,9 @@ class IssuerBadgeClass(AbstractBadgeObject):
         return self.obi_issuer.owner
 
     # TODO: Here's the replacement for criteria_url
-    # @property
-    # def criteria_url(self):
-    #     return self.badge_object.get('criteria')
-
-    # TODO: remove this approach. Replace with criteria_url property getter.
-    # criteria may either be locally hosted text or a remote UR
     @property
-    def criteria(self):
-        if self.criteria_url is not None:
-            return self.criteria_url
-        else:
-            return self.criteria_text
-    @criteria.setter
-    def criteria(self, value):
-        if test_probable_url(value):
-            self.criteria_url = value
-            self.criteria_text = None
-        else:
-            self.criteria_url = None
-            self.criteria_text = value
+    def criteria_url(self):
+        return self.badge_object.get('criteria')
 
     def get_absolute_url(self):
         return "/public/badges/%s" % self.get_slug()
@@ -126,7 +106,7 @@ class IssuerBadgeClass(AbstractBadgeObject):
 Open Badges Specification Assertion object
 """
 class IssuerAssertion(AbstractBadgeObject):
-    badgeclass = models.ForeignKey(IssuerBadgeClass, blank=False, null=False, on_delete=models.PROTECT)
+    badgeclass = models.ForeignKey(IssuerBadgeClass, blank=False, null=False, on_delete=models.PROTECT, related_name='assertions')
 
     # in the future, obi_issuer might be different from badgeclass.obi_issuer sometimes
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
