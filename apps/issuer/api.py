@@ -249,26 +249,48 @@ class AssertionList(APIView):
         authentication.BasicAuthentication,
     )
 
-    def get(self, request, issuerSlug, badgeSlug):
+    def post(self, request, issuerSlug, badgeSlug):
+        import pdb; pdb.set_trace();
         if not isinstance(request.user, get_user_model()):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        # Ensure current user has permissions on current issuer
-        current_issuer = Issuer.objects.filter(
-            slug=issuerSlug
+        # Ensure current user has permissions on current badgeclass
+        current_badgeclass = IssuerBadgeClass.objects.filter(
+            slug=badgeSlug
         ).filter(
-            Q(owner__id=request.user.id) |
-            Q(editors__id=request.user.id) |
-            Q(staff__id=request.user.id)
-        ).select_related('badgeclasses').select_related('assertions')[0]
+            Q(issuer__owner__id=request.user.id) |
+            Q(issuer__editors__id=request.user.id) |
+            Q(issuer__staff__id=request.user.id)
+        ).select_related('issuers')
+        if current_badgeclass.exists():
+            current_badgeclass = current_badgeclass[0]
+
+
+
+
+    def get(self, request, issuerSlug, badgeSlug):
+        import pdb; pdb.set_trace();
+        if not isinstance(request.user, get_user_model()):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        # Ensure current user has permissions on current badgeclass
+        current_badgeclass = IssuerBadgeClass.objects.filter(
+            slug=badgeSlug
+        ).filter(
+            Q(issuer__owner__id=request.user.id) |
+            Q(issuer__editors__id=request.user.id) |
+            Q(issuer__staff__id=request.user.id)
+        ).select_related('assertions')
+        if current_badgeclass.exists():
+            current_badgeclass = current_badgeclass[0]
 
         # Get the Issuers this user owns, edits, or staffs:
-        issuer_badge_classes = current_issuer.badgeclasses.all()
+        assertions = current_badgeclass.assertions.all()
 
-        if not issuer_badge_classes.exists():
+        if not assertions.exists():
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-        serializer = IssuerBadgeClassSerializer(issuer_badge_classes, many=True, context={'request': request})
+        serializer = IssuerAssertionSerializer(assertions, many=True, context={'request': request})
         return Response(serializer.data)
 
 

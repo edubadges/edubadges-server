@@ -138,14 +138,14 @@ class BadgeClassTests(APITestCase):
 class AssertionTests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
 
-    # def test_authenticated_owner_issue_badge(self):
-    #     self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
-    #     assertion = {
-    #         "email": "test@example.com"
-    #     }
-    #     response = self.client.post('/api/issuer/issuers/test-issuer/badges/', assertion)
+    def test_authenticated_owner_issue_badge(self):
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        assertion = {
+            "email": "test@example.com"
+        }
+        response = self.client.post('/api/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/', assertion)
 
-    #     self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 201)
 
     # def test_authenticated_nonowner_user_cant_issue(self):
     #     pass
@@ -155,6 +155,12 @@ class AssertionTests(APITestCase):
     #     response = self.client.post('/api/issuer/issuers/test-issuer/badges/', assertion)
     #     self.assertEqual(response.status_code, 403)
 
+    def test_authenticated_owner_list_assertions(self):
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        response = self.client.get('/api/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.body, [{}])  # TODO: Update
 
 class PublicAPITests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']

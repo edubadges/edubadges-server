@@ -124,6 +124,11 @@ class IssuerAssertionSerializer(AbstractBadgeObjectSerializer):
     badgeclass = serializers.HyperlinkedRelatedField(view_name='badgeclass_detail', read_only=True)
     slug = serializers.CharField(max_length=255, read_only=True)
     image = serializers.ImageField(use_url=True, read_only=True)
+    email = serializers.EmailField(write_only=True, max_length=255)
+
+    def create(self, validated_data, **kwargs):
+        # Assemble Badge Object
+        validated_data['badge_object']
 
 
 class EarnerNotificationSerializer(serializers.Serializer):

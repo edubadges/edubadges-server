@@ -84,7 +84,7 @@ class IssuerBadgeClass(AbstractBadgeObject):
 
     @property
     def owner(self):
-        return self.obi_issuer.owner
+        return self.issuer.owner
 
     # TODO: Here's the replacement for criteria_url
     @property
@@ -115,7 +115,7 @@ class IssuerAssertion(AbstractBadgeObject):
      )
 
     # in the future, obi_issuer might be different from badgeclass.obi_issuer sometimes
-    issuer = models.ForeignKey(Issuer, blank=False, null=False)
+    issuer = models.ForeignKey(Issuer, blank=False, null=False, related_name='assertions')
     slug = AutoSlugField(max_length=255, populate_from='get_new_slug', unique=True, blank=False, editable=False)
 
     @property
