@@ -41,13 +41,13 @@ class AbstractBadgeObject(cachemodel.CacheModel):
 
     # Handle updating badge_object in case initial slug guess was modified on save because of a uniqueness constraint
     def process_real_full_url(self):
-        self.badge_object['@id'] = self.get_full_url()
+        self.badge_object['id'] = self.get_full_url()
 
     def save(self):
         super(AbstractBadgeObject, self).save()
 
         # Make adjustments if the slug has changed due to uniqueness constraint
-        object_id = self.badge_object.get('@id')
+        object_id = self.badge_object.get('id')
         if object_id != self.get_full_url():
             self.process_real_full_url()
             super(AbstractBadgeObject, self).save()
@@ -112,8 +112,8 @@ class IssuerAssertion(AbstractBadgeObject):
         null=False,
         on_delete=models.PROTECT,
         related_name='assertions'
-     )
-
+    )
+    email = models.EmailField(max_length=255, blank=False, null=False)
     # in the future, obi_issuer might be different from badgeclass.obi_issuer sometimes
     issuer = models.ForeignKey(Issuer, blank=False, null=False, related_name='assertions')
     slug = AutoSlugField(max_length=255, populate_from='get_new_slug', unique=True, blank=False, editable=False)
