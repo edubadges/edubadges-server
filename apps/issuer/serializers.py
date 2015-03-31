@@ -42,8 +42,8 @@ class IssuerSerializer(AbstractBadgeObjectSerializer):
 
         new_issuer = Issuer(**validated_data)
 
-        # Add @id to new issuer, which is depenent on an instance being initiated
-        new_issuer.badge_object['@id'] = new_issuer.get_full_url()
+        # Add id to new issuer, which is depenent on an instance being initiated
+        new_issuer.badge_object['id'] = new_issuer.get_full_url()
 
         if validated_data.get('image') is not None:
             new_issuer.badge_object['image'] = new_issuer.get_full_url() + '/image'
@@ -85,7 +85,7 @@ class IssuerBadgeClassSerializer(AbstractBadgeObjectSerializer):
         # "pops" data that shouldn't be sent to model init
         validated_data['badge_object'] = {
             '@context': utils.CURRENT_OBI_CONTEXT_IRI,
-            '@type': 'BadgeClass',
+            'type': 'BadgeClass',
             'name': validated_data.get('name'),
             'description': validated_data.pop('description'),
             'issuer': validated_data.get('issuer').get_full_url()
@@ -106,8 +106,8 @@ class IssuerBadgeClassSerializer(AbstractBadgeObjectSerializer):
         new_badgeclass = IssuerBadgeClass(**validated_data)
 
         full_url = new_badgeclass.get_full_url()
-        # Augment with @id, image and criteria link
-        new_badgeclass.badge_object['@id'] = full_url
+        # Augment with id, image and criteria link
+        new_badgeclass.badge_object['id'] = full_url
         new_badgeclass.badge_object['image'] = full_url + '/image'
 
         if new_badgeclass.badge_object.get('criteria')is None or criteria_text == '':
@@ -120,16 +120,41 @@ class IssuerBadgeClassSerializer(AbstractBadgeObjectSerializer):
 
 class IssuerAssertionSerializer(AbstractBadgeObjectSerializer):
     badge_object = WritableJSONField(max_length=16384, read_only=True, required=False)
-    issuer = serializers.HyperlinkedRelatedField(view_name='issuer_detail', read_only=True)
-    badgeclass = serializers.HyperlinkedRelatedField(view_name='badgeclass_detail', read_only=True)
+    issuer = serializers.HyperlinkedRelatedField(view_name='issuer_detail', read_only=True,  lookup_field='slug')
+    badgeclass = serializers.HyperlinkedRelatedField(view_name='badgeclass_detail', read_only=True, lookup_field='slug')
     slug = serializers.CharField(max_length=255, read_only=True)
     image = serializers.ImageField(use_url=True, read_only=True)
     email = serializers.EmailField(write_only=True, max_length=255)
+    evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
 
     def create(self, validated_data, **kwargs):
+        import pdb; pdb.set_trace();
         # Assemble Badge Object
-        validated_data['badge_object']
+        validated_data['badge_object'] = {
+            '@context': utils.CURRENT_OBI_CONTEXT_IRI,
+            'type': 'Assertion',
+            'recipient': {
+                'identity'
+            },
+            'badge': validated_data.badgeclass.get_full_url(),
+            'verify': {
+                'type': 'hosted'
+            }
 
+        }
+
+        if validated_data.get('evidence') is not None or validated_data.get('evidence') != '':
+            validated_data['badge_object']['evidence'] = validated_data.pop('evidence')
+
+        new_assertion = IssuerAssertion(**validated_data)
+
+        # Augment badge_object with id
+        full_url = new_assertion.get_full_url()
+        new_assertion.badge_object['id'] = full_url
+        new_assertion.badge_object['verify']['url'] = full_url
+
+        new_assertion.save()
+        return new_assertion
 
 class EarnerNotificationSerializer(serializers.Serializer):
     url = serializers.CharField(max_length=2048)

@@ -54,7 +54,7 @@ class IssuerTests(TestCase):
         self.assertEqual(badge_object['name'], example_issuer_props['name'])
         self.assertEqual(badge_object['description'], example_issuer_props['description'])
         self.assertEqual(badge_object['email'], example_issuer_props['email'])
-        self.assertIsNotNone(badge_object.get('@id'))
+        self.assertIsNotNone(badge_object.get('id'))
         self.assertIsNotNone(badge_object.get('@context'))
 
     def test_private_issuer_detail_get(self):

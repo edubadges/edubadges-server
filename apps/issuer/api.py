@@ -265,8 +265,16 @@ class AssertionList(APIView):
         if current_badgeclass.exists():
             current_badgeclass = current_badgeclass[0]
 
+        serializer = IssuerAssertionSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
 
+        serializer.save(
+            issuer=current_badgeclass.issuer,
+            badgeclass=current_badgeclass,
+            created_by=request.user
+        )
 
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get(self, request, issuerSlug, badgeSlug):
         import pdb; pdb.set_trace();
