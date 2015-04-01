@@ -43,9 +43,17 @@ def verify_recipient(identifier, hash_string, salt):
     Check if a badge recipient is indeed the expected recipient (email address)
     """
     if hash_string.startswith('sha256$'):
-        return hash_string == 'sha256$' + hashlib.sha256(identifier+salt).hexdigest()
+        return hash_string == generate_sha256_hashstring(identifier, salt)
     elif hash_string.startswith('md5$'):
-        return hash_string == 'md5$' + hashlib.md5(identifier+salt).hexdigest()
+        return hash_string == generate_md5_hashstring(identifier, salt)
+
+
+def generate_sha256_hashstring(identifier, salt):
+    return 'sha256$' + hashlib.sha256(identifier+salt).hexdigest()
+
+
+def generate_md5_hashstring(identifier, salt):
+    return 'md5$' + hashlib.md5(identifier+salt).hexdigest()
 
 
 def is_json(string):

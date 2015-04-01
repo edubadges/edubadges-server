@@ -2,6 +2,9 @@ from django.db import models
 from django.conf import settings
 
 import uuid
+import datetime
+import json
+
 import basic_models
 import cachemodel
 from autoslug import AutoSlugField
@@ -11,14 +14,13 @@ from jsonfield import JSONField
 from mainsite.utils import slugify
 
 from badgeanalysis.models import OpenBadge
-from badgeanalysis.utils import test_probable_url
-from badgeanalysis.scheme_models import BadgeScheme
+from badgeanalysis.utils import generate_sha256_hashstring, bake
 
 
 """
 A base class for Issuer badge objects, those that are part of badges issue
 by users on this system.
-""" 
+"""
 class AbstractBadgeObject(cachemodel.CacheModel):
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(getattr(settings, 'AUTH_USER_MODEL'), blank=True, null=True)
@@ -117,6 +119,7 @@ class IssuerAssertion(AbstractBadgeObject):
     # in the future, obi_issuer might be different from badgeclass.obi_issuer sometimes
     issuer = models.ForeignKey(Issuer, blank=False, null=False, related_name='assertions')
     slug = AutoSlugField(max_length=255, populate_from='get_new_slug', unique=True, blank=False, editable=False)
+    image = models.ImageField(upload_to='issued/badges', blank=True)
 
     @property
     def owner(self):
@@ -132,6 +135,19 @@ class IssuerAssertion(AbstractBadgeObject):
         if self.slug is None or self.slug == '':
             self.slug = self.get_new_slug()
         return self.slug
+
+    def save(self, *args, **kwargs):
+        salt = self.get_new_slug()
+        self.badge_object['recipient']['salt'] = salt
+        self.badge_object['recipient']['identity'] = generate_sha256_hashstring(self.email, salt)
+
+        self.created_at = datetime.datetime.now()
+        self.badge_object['issuedOn'] = self.created_at.isoformat()
+
+        self.image = bake(self.badgeclass.image, json.dumps(self.badge_object, indent=2))
+        self.image.open()
+        # Don't need to worry about id uniqueness, so can skip immediate super's save method.
+        super(AbstractBadgeObject, self).save(*args, **kwargs)
 
 
 class EarnerNotification(basic_models.TimestampedModel):

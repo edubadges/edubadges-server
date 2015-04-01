@@ -54,7 +54,7 @@ class IssuerSerializer(AbstractBadgeObjectSerializer):
 
 
 class IssuerBadgeClassSerializer(AbstractBadgeObjectSerializer):
-    issuer = serializers.HyperlinkedRelatedField(view_name='issuer_detail', read_only=True, lookup_field='slug')
+    issuer = serializers.HyperlinkedRelatedField(view_name='issuer_badge_object', read_only=True, lookup_field='slug')
     badge_object = WritableJSONField(max_length=16384, read_only=True, required=False)
     name = serializers.CharField(max_length=255)
     image = serializers.ImageField(allow_empty_file=False, use_url=True)
@@ -120,38 +120,44 @@ class IssuerBadgeClassSerializer(AbstractBadgeObjectSerializer):
 
 class IssuerAssertionSerializer(AbstractBadgeObjectSerializer):
     badge_object = WritableJSONField(max_length=16384, read_only=True, required=False)
-    issuer = serializers.HyperlinkedRelatedField(view_name='issuer_detail', read_only=True,  lookup_field='slug')
-    badgeclass = serializers.HyperlinkedRelatedField(view_name='badgeclass_detail', read_only=True, lookup_field='slug')
+    issuer = serializers.HyperlinkedRelatedField(view_name='issuer_badge_object', read_only=True,  lookup_field='slug')
+    badgeclass = serializers.HyperlinkedRelatedField(view_name='badgeclass_badge_object', read_only=True, lookup_field='slug')
     slug = serializers.CharField(max_length=255, read_only=True)
-    image = serializers.ImageField(use_url=True, read_only=True)
-    email = serializers.EmailField(write_only=True, max_length=255)
+    image = serializers.ImageField(read_only=True)  # use_url=True, might be necessary
+    email = serializers.EmailField(max_length=255)
     evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
 
     def create(self, validated_data, **kwargs):
-        import pdb; pdb.set_trace();
         # Assemble Badge Object
         validated_data['badge_object'] = {
+            # 'id': TO BE ADDED IN SAVE
             '@context': utils.CURRENT_OBI_CONTEXT_IRI,
             'type': 'Assertion',
             'recipient': {
-                'identity'
+                'type': 'email',
+                'hashed': True
+                # 'email': TO BE ADDED IN SAVE
             },
-            'badge': validated_data.badgeclass.get_full_url(),
+            'badge': validated_data.get('badgeclass').get_full_url(),
             'verify': {
                 'type': 'hosted'
+                # 'url': TO BE ADDED IN SAVE
             }
 
         }
 
-        if validated_data.get('evidence') is not None or validated_data.get('evidence') != '':
-            validated_data['badge_object']['evidence'] = validated_data.pop('evidence')
+        evidence = validated_data.pop('evidence')
+        if evidence is not None and evidence != '':
+            validated_data['badge_object']['evidence'] = evidence
+
 
         new_assertion = IssuerAssertion(**validated_data)
 
         # Augment badge_object with id
-        full_url = new_assertion.get_full_url()
+        full_url = new_assertion.get_full_url()  # this sets the slug
         new_assertion.badge_object['id'] = full_url
         new_assertion.badge_object['verify']['url'] = full_url
+        new_assertion.badge_object['image'] = full_url + '/image'
 
         new_assertion.save()
         return new_assertion

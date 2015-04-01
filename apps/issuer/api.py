@@ -250,7 +250,6 @@ class AssertionList(APIView):
     )
 
     def post(self, request, issuerSlug, badgeSlug):
-        import pdb; pdb.set_trace();
         if not isinstance(request.user, get_user_model()):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
@@ -277,7 +276,6 @@ class AssertionList(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get(self, request, issuerSlug, badgeSlug):
-        import pdb; pdb.set_trace();
         if not isinstance(request.user, get_user_model()):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
