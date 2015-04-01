@@ -120,6 +120,8 @@ class IssuerAssertion(AbstractBadgeObject):
     issuer = models.ForeignKey(Issuer, blank=False, null=False, related_name='assertions')
     slug = AutoSlugField(max_length=255, populate_from='get_new_slug', unique=True, blank=False, editable=False)
     image = models.ImageField(upload_to='issued/badges', blank=True)
+    revoked = models.BooleanField(default=False)
+    revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
 
     @property
     def owner(self):
@@ -137,15 +139,19 @@ class IssuerAssertion(AbstractBadgeObject):
         return self.slug
 
     def save(self, *args, **kwargs):
-        salt = self.get_new_slug()
-        self.badge_object['recipient']['salt'] = salt
-        self.badge_object['recipient']['identity'] = generate_sha256_hashstring(self.email, salt)
+        if self.pk is None:
+            salt = self.get_new_slug()
+            self.badge_object['recipient']['salt'] = salt
+            self.badge_object['recipient']['identity'] = generate_sha256_hashstring(self.email, salt)
 
-        self.created_at = datetime.datetime.now()
-        self.badge_object['issuedOn'] = self.created_at.isoformat()
+            self.created_at = datetime.datetime.now()
+            self.badge_object['issuedOn'] = self.created_at.isoformat()
 
-        self.image = bake(self.badgeclass.image, json.dumps(self.badge_object, indent=2))
-        self.image.open()
+            self.image = bake(self.badgeclass.image, json.dumps(self.badge_object, indent=2))
+            self.image.open()
+
+        if self.revoked is False:
+            self.revocation_reason = None
         # Don't need to worry about id uniqueness, so can skip immediate super's save method.
         super(AbstractBadgeObject, self).save(*args, **kwargs)
 

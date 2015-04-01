@@ -14,7 +14,7 @@ from rest_framework.renderers import JSONRenderer
 from mainsite.renderers import JSONLDRenderer
 from models import EarnerNotification, Issuer, IssuerBadgeClass, IssuerAssertion
 from serializers import EarnerNotificationSerializer, IssuerSerializer, IssuerBadgeClassSerializer, IssuerAssertionSerializer
-
+import utils
 
 class EarnerNotificationList(APIView):
     """
@@ -300,6 +300,64 @@ class AssertionList(APIView):
         return Response(serializer.data)
 
 
+class AssertionDetail(APIView):
+    """
+    Endpoints for (GET)ting a single assertion (probably fairly rare)
+    or revoking a badge (DELETE)
+    """
+    model = IssuerAssertion
+
+    def get(self, request, assertionSlug):
+        if not isinstance(request.user, get_user_model()):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        current_assertion = IssuerAssertion.objects.filter(
+            slug=assertionSlug
+        ).filter(
+            Q(issuer__owner__id=request.user.id) |
+            Q(issuer__editors__id=request.user.id) |
+            Q(issuer__staff__id=request.user.id)
+        )
+        if current_assertion.exists():
+            current_assertion = current_assertion[0]
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = IssuerAssertionSerializer(current_assertion, context={'request': request})
+
+        return Response(serializer.data)
+
+    def delete(self, request, assertionSlug):
+        if not isinstance(request.user, get_user_model()):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        if request.data.get('revocation_reason') is None:
+            raise ValidationError("revocation_reason is required to revoke a badge assertion")
+
+        current_assertion = IssuerAssertion.objects.filter(
+            slug=assertionSlug
+        ).filter(
+            Q(issuer__owner__id=request.user.id) |
+            Q(issuer__editors__id=request.user.id) |
+            Q(issuer__staff__id=request.user.id)
+        )
+        if current_assertion.exists():
+            current_assertion = current_assertion[0]
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if current_assertion.revoked is True:
+            return Response("Assertion is already revoked.", status=status.HTTP_400_BAD_REQUEST)
+
+        current_assertion.revoked = True
+        current_assertion.revocation_reason = request.data.get('revocation_reason')
+        current_assertion.image.delete()
+        current_assertion.save()
+
+        return Response(
+            "Assertion {} has been revoked.".format(current_assertion.slug),
+            status=status.HTTP_200_OK
+        )
 
 
 
@@ -354,7 +412,7 @@ class IssuerBadgeClassCriteria(APIView):
     model = IssuerBadgeClass
 
     def get(self, request, slug):
-        # TODO: This view will display an HTML template if the badgeclass has criteria_text, 
+        # TODO: This view will display an HTML template if the badgeclass has criteria_text,
         # or will 301 redirect to criteria_url
         return NotImplementedError("Criteria view not implemented.")
 
@@ -362,9 +420,33 @@ class IssuerBadgeClassCriteria(APIView):
 class IssuerAssertionBadgeObject(JSONBadgeObjectView):
     model = IssuerAssertion
 
+    def get(self, request, slug):
+        try:
+            current_object = self.model.objects.get(slug=slug)
+        except self.model.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            if current_object.revoked is False:
+                return Response(current_object.badge_object)
+            else:
+                # TODO update terms based on final accepted terms in response to 
+                # https://github.com/openbadges/openbadges-specification/issues/33
+                revocation_info = {
+                    '@context': utils.CURRENT_OBI_CONTEXT_IRI,
+                    'id': current_object.get_full_url(),
+                    'revoked': True,
+                    'revocationReason': current_object.revocation_reason
+                }
+                return Response(revocation_info, status=status.HTTP_410_GONE)
+
 
 class IssuerAssertionImage(APIView):
     model = IssuerAssertion
 
     def get(self, request, slug):
-        return NotImplementedError("Baked badge image view not implemented.")
+        try:
+            current_assertion = IssuerAssertion.objects.get(slug=slug)
+        except self.model.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            return redirect(current_assertion.image.url)

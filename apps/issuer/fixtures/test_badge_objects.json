@@ -37,7 +37,9 @@
       "badgeclass": 10,
       "image": "issued/badges/ef2e975ad8274a6dd60eecac733769c4.png",
       "email": "test@example.com",
-      "issuer": 12
+      "issuer": 12,
+      "revoked": false,
+      "revocation_reason": ""
     },
     "model": "issuer.issuerassertion",
     "pk": 1

@@ -8,6 +8,6 @@ urlpatterns = patterns('issuer.api_views',
    url(r'^/issuers/(?P<slug>[\-0-9a-z]+)[/]?$', IssuerDetail.as_view(), name='issuer_detail'),
    url(r'^/issuers/(?P<issuerSlug>[-\d\w]+)/badges[/]?$', BadgeClassList.as_view(), name='badgeclass_list'),
    url(r'^/issuers/(?P<issuerSlug>[-\d\w]+)/badges/(?P<badgeSlug>[-\d\w]+)[/]?$', BadgeClassDetail.as_view(), name='badgeclass_detail'),
-   url(r'^/issuers/(?P<issuerSlug>[-\d\w]+)/badges/(?P<badgeSlug>[-\d\w]+)/assertions[/]?$', AssertionList.as_view(), name='assertion_list')
-
+   url(r'^/issuers/(?P<issuerSlug>[-\d\w]+)/badges/(?P<badgeSlug>[-\d\w]+)/assertions[/]?$', AssertionList.as_view(), name='assertion_list'),
+   url(r'^/issuers/[-\d\w]+/badges/[-\d\w]+/assertions/(?P<assertionSlug>[-\d\w]+)[/]?$', AssertionDetail.as_view(), name='assertion_detail'),
 )

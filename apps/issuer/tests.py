@@ -147,8 +147,14 @@ class AssertionTests(APITestCase):
 
         self.assertEqual(response.status_code, 201)
 
-    # def test_authenticated_nonowner_user_cant_issue(self):
-    #     pass
+    def test_authenticated_nonowner_user_cant_issue(self):
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=2))
+        assertion = {
+            "email": "test2@example.com"
+        }
+        response = self.client.post('/api/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/', assertion)
+
+        self.assertEqual(response.status_code, 403)
 
     def test_unauthenticated_user_cant_issue(self):
         assertion = {"email": "test@example.com"}
@@ -161,6 +167,26 @@ class AssertionTests(APITestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
+
+    def test_revoke_assertion(self):
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        response = self.client.delete(
+            '/api/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/9ecff8b2-a178-4d17-b382-9109065012d1',
+            {'revocation_reason': 'Earner kind of sucked, after all.'}
+        )
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get('/public/assertions/9ecff8b2-a178-4d17-b382-9109065012d1')
+        self.assertEqual(response.status_code, 410)
+
+    def test_revoke_assertion_missing_reason(self):
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        response = self.client.delete(
+            '/api/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/9ecff8b2-a178-4d17-b382-9109065012d1',
+            {}
+        )
+
+        self.assertEqual(response.status_code, 400)
 
 class PublicAPITests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
@@ -177,4 +203,8 @@ class PublicAPITests(APITestCase):
 
     def test_get_badgeclass_image_with_redirect(self):
         response = self.client.get('/public/badges/badge-of-testing/image')
+        self.assertEqual(response.status_code, 302)
+
+    def test_get_assertion_image_with_redirect(self):
+        response = self.client.get('/public/assertions/9ecff8b2-a178-4d17-b382-9109065012d1/image')
         self.assertEqual(response.status_code, 302)
