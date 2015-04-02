@@ -28,7 +28,7 @@ class IssuerTests(TestCase):
         view = IssuerList.as_view()
 
         request = factory.post(
-            '/api/issuer/issuers',
+            '/v1/issuer/issuers',
             json.dumps(example_issuer_props),
             content_type='application/json'
         )
@@ -40,7 +40,7 @@ class IssuerTests(TestCase):
         view = IssuerList.as_view()
 
         request = factory.post(
-            '/api/issuer/issuers',
+            '/v1/issuer/issuers',
             json.dumps(example_issuer_props),
             content_type='application/json'
         )
@@ -81,7 +81,7 @@ class BadgeClassTests(APITestCase):
 
             self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
             response = self.client.post(
-                '/api/issuer/issuers/test-issuer/badges/',
+                '/v1/issuer/issuers/test-issuer/badges/',
                 badgeclass_props
             )
             self.assertEqual(response.status_code, 201)
@@ -105,7 +105,7 @@ class BadgeClassTests(APITestCase):
 
             self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
             response = self.client.post(
-                '/api/issuer/issuers/test-issuer/badges/',
+                '/v1/issuer/issuers/test-issuer/badges/',
                 badgeclass_props
             )
             self.assertEqual(response.status_code, 201)
@@ -115,7 +115,7 @@ class BadgeClassTests(APITestCase):
             )
 
     def test_create_badgeclass_for_issuer_unauthenticated(self):
-        response = self.client.post('/api/issuer/issuers/test-issuer/badges/', {})
+        response = self.client.post('/v1/issuer/issuers/test-issuer/badges/', {})
         self.assertEqual(response.status_code, 403)
 
     def test_badgeclass_list_authenticated(self):
@@ -123,7 +123,7 @@ class BadgeClassTests(APITestCase):
         Ensure that a logged-in user can get a list of their BadgeClasses
         """
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
-        response = self.client.get('/api/issuer/issuers/test-issuer/badges/')
+        response = self.client.get('/v1/issuer/issuers/test-issuer/badges/')
 
         self.assertIsInstance(response.data, list)  # Ensure we receive a list of badgeclasses
         self.assertEqual(len(response.data), 1)  # Ensure that we receive the 1 badgeclass in fixture as expected
@@ -132,7 +132,7 @@ class BadgeClassTests(APITestCase):
         """
         Ensure that logged-out user can't GET the private API endpoint for badgeclass list
         """
-        response = self.client.get('/api/issuer/issuers/test-issuer/badges/')
+        response = self.client.get('/v1/issuer/issuers/test-issuer/badges/')
         self.assertEqual(response.status_code, 403)
 
 
@@ -144,7 +144,7 @@ class AssertionTests(APITestCase):
         assertion = {
             "email": "test@example.com"
         }
-        response = self.client.post('/api/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/', assertion)
+        response = self.client.post('/v1/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/', assertion)
 
         self.assertEqual(response.status_code, 201)
 
@@ -153,13 +153,13 @@ class AssertionTests(APITestCase):
         assertion = {
             "email": "test2@example.com"
         }
-        response = self.client.post('/api/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/', assertion)
+        response = self.client.post('/v1/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/', assertion)
 
         self.assertEqual(response.status_code, 403)
 
     def test_unauthenticated_user_cant_issue(self):
         assertion = {"email": "test@example.com"}
-        response = self.client.post('/api/issuer/issuers/test-issuer/badges/', assertion)
+        response = self.client.post('/v1/issuer/issuers/test-issuer/badges/', assertion)
         self.assertEqual(response.status_code, 403)
 
     def test_issue_assertion_with_notify(self):
@@ -168,14 +168,14 @@ class AssertionTests(APITestCase):
             "email": "ottonomy@gmail.com",
             'create_notification': True
         }
-        response = self.client.post('/api/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/', assertion)
+        response = self.client.post('/v1/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/', assertion)
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(len(mail.outbox), 1)
 
     def test_authenticated_owner_list_assertions(self):
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
-        response = self.client.get('/api/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/')
+        response = self.client.get('/v1/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/')
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
@@ -183,7 +183,7 @@ class AssertionTests(APITestCase):
     def test_revoke_assertion(self):
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.delete(
-            '/api/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/9ecff8b2-a178-4d17-b382-9109065012d1',
+            '/v1/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/9ecff8b2-a178-4d17-b382-9109065012d1',
             {'revocation_reason': 'Earner kind of sucked, after all.'}
         )
         self.assertEqual(response.status_code, 200)
@@ -194,7 +194,7 @@ class AssertionTests(APITestCase):
     def test_revoke_assertion_missing_reason(self):
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.delete(
-            '/api/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/9ecff8b2-a178-4d17-b382-9109065012d1',
+            '/v1/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/9ecff8b2-a178-4d17-b382-9109065012d1',
             {}
         )
 

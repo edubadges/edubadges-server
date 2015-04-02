@@ -77,7 +77,7 @@ var ActivePanel = React.createClass({
       return (
         <div className="active-panel earner-badge-form clearfix">
           <BadgeUploadForm
-            action='/api/earner/badges'
+            action='/v1/earner/badges'
             formId={this.props.type}
             recipientIds={this.props.recipientIds}
             pk={typeof this.props.badgeId !== 'undefined' ? this.props.badgeId : 0}
