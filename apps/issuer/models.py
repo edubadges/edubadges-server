@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from django.core.mail import send_mail
+import django.template.loader
 
 import uuid
 import datetime
@@ -7,14 +9,69 @@ import json
 
 import basic_models
 import cachemodel
-from autoslug import AutoSlugField
-import django.template.loader
 from jsonfield import JSONField
 
+from autoslug import AutoSlugField
 from mainsite.utils import slugify
-
 from badgeanalysis.models import OpenBadge
 from badgeanalysis.utils import generate_sha256_hashstring, bake
+
+
+"""
+EarnerNotification sends a template-based email informing the earner of any remotely hosted badge assertion.
+"""
+class EarnerNotification(basic_models.TimestampedModel):
+    url = models.URLField(verbose_name='Assertion URL', max_length=2048)
+    email = models.EmailField(max_length=254, blank=False)
+    badge = models.ForeignKey(OpenBadge, blank=True, null=True)
+
+    def get_form(self):
+        from issuer.forms import NotifyEarnerForm
+        return NotifyEarnerForm(instance=self)
+
+    @classmethod
+    def detect_existing(cls, url):
+        try:
+            cls.objects.get(url=url)
+        except EarnerNotification.DoesNotExist:
+            return False
+        except EarnerNotification.MultipleObjectsReturned:
+            return False
+        else:
+            return True
+
+    def send_email(self):
+        http_origin = getattr(settings, 'HTTP_ORIGIN', None)
+        ob = self.badge
+        email_context = {
+            'badge_name': ob.ldProp('bc', 'name'),
+            'badge_description': ob.ldProp('bc', 'description'),
+            'issuer_name': ob.ldProp('iss', 'name'),
+            'issuer_url': ob.ldProp('iss', 'url'),
+            'image_url': ob.get_baked_image_url(**{'origin': http_origin})
+        }
+        t = django.template.loader.get_template('issuer/notify_earner_email.txt')
+        ht = django.template.loader.get_template('issuer/notify_earner_email.html')
+        text_output_message = t.render(email_context)
+        html_output_message = ht.render(email_context)
+        mail_meta = {
+            'subject': 'Congratulations, you earned a badge!',
+            # 'from_address': email_context['issuer_name'] + ' Badges <noreply@oregonbadgealliance.org>',
+            'from_address': 'Oregon Badge Alliance' + ' Badges <noreply@oregonbadgealliance.org>',
+            'to_addresses': [self.email]
+        }
+
+        try:
+            send_mail(
+                mail_meta['subject'],
+                text_output_message,
+                mail_meta['from_address'],
+                mail_meta['to_addresses'],
+                fail_silently=False,
+                html_message=html_output_message
+            )
+        except Exception as e:
+            raise e
 
 
 """
@@ -53,6 +110,10 @@ class AbstractBadgeObject(cachemodel.CacheModel):
         if object_id != self.get_full_url():
             self.process_real_full_url()
             super(AbstractBadgeObject, self).save()
+
+    # Quick getter for values stored in the badge_object
+    def prop(self, property_name):
+        return self.badge_object.get(property_name)
 
 
 """
@@ -155,37 +216,28 @@ class IssuerAssertion(AbstractBadgeObject):
         # Don't need to worry about id uniqueness, so can skip immediate super's save method.
         super(AbstractBadgeObject, self).save(*args, **kwargs)
 
+    def notify_earner(self):
+        """
+        Sends an email notification to the badge earner.
+        This process involves creating a badgeanalysis.models.OpenBadge
+        returns the EarnerNotification instance.
 
-class EarnerNotification(basic_models.TimestampedModel):
-    url = models.URLField(verbose_name='Assertion URL', max_length=2048)
-    email = models.EmailField(max_length=254, blank=False)
-    badge = models.ForeignKey(OpenBadge, blank=True, null=True)
-
-    def get_form(self):
-        from issuer.forms import NotifyEarnerForm
-        return NotifyEarnerForm(instance=self)
-
-    @classmethod
-    def detect_existing(cls, url):
-        try:
-            cls.objects.get(url=url)
-        except EarnerNotification.DoesNotExist:
-            return False
-        except EarnerNotification.MultipleObjectsReturned:
-            return False
-        else:
-            return True
-
-    def send_email(self):
+        TODO: consider making this an option on initial save and having a foreign key to
+        the notification model instance (which would link through to the OpenBadge)
+        """
         http_origin = getattr(settings, 'HTTP_ORIGIN', None)
-        ob = self.badge
-        email_context = {
-            'badge_name': ob.ldProp('bc', 'name'),
-            'badge_description': ob.ldProp('bc', 'description'),
-            'issuer_name': ob.ldProp('iss', 'name'),
-            'issuer_url': ob.ldProp('iss', 'url'),
-            'image_url': ob.get_baked_image_url(**{'origin': http_origin})
-        }
+        try:
+            email_context = {
+                'badge_name': self.badgeclass.name,
+                'badge_description': self.badgeclass.prop('description'),
+                'issuer_name': self.issuer.name,
+                'issuer_url': self.issuer.prop('url'),
+                'image_url': self.get_full_url() + '/image'
+            }
+        except KeyError as e:
+            # for when a property isn't stored right in a badge_object
+            raise e
+
         t = django.template.loader.get_template('issuer/notify_earner_email.txt')
         ht = django.template.loader.get_template('issuer/notify_earner_email.html')
         text_output_message = t.render(email_context)
@@ -198,7 +250,6 @@ class EarnerNotification(basic_models.TimestampedModel):
         }
 
         try:
-            from django.core.mail import send_mail
             send_mail(
                 mail_meta['subject'],
                 text_output_message,

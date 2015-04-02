@@ -16,6 +16,7 @@ from models import EarnerNotification, Issuer, IssuerBadgeClass, IssuerAssertion
 from serializers import EarnerNotificationSerializer, IssuerSerializer, IssuerBadgeClassSerializer, IssuerAssertionSerializer
 import utils
 
+
 class EarnerNotificationList(APIView):
     """
     GET a list of notifications 
@@ -55,10 +56,7 @@ class EarnerNotificationDetail(APIView):
     model = EarnerNotification
 
     def get(self, request):
-        pass
-
-    def post(self, request):
-        pass
+        raise NotImplementedError("Earner notidication detail not implemented.")
 
 
 class IssuerList(APIView):
@@ -272,7 +270,6 @@ class AssertionList(APIView):
             badgeclass=current_badgeclass,
             created_by=request.user
         )
-
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get(self, request, issuerSlug, badgeSlug):

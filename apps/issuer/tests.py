@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.core import mail
 from django.test.utils import override_settings
 from rest_framework.test import APIRequestFactory, APIClient, APITestCase, force_authenticate
 from django.contrib.auth import get_user_model
@@ -161,6 +162,17 @@ class AssertionTests(APITestCase):
         response = self.client.post('/api/issuer/issuers/test-issuer/badges/', assertion)
         self.assertEqual(response.status_code, 403)
 
+    def test_issue_assertion_with_notify(self):
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        assertion = {
+            "email": "ottonomy@gmail.com",
+            'create_notification': True
+        }
+        response = self.client.post('/api/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/', assertion)
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(len(mail.outbox), 1)
+
     def test_authenticated_owner_list_assertions(self):
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.get('/api/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/')
@@ -187,6 +199,7 @@ class AssertionTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, 400)
+
 
 class PublicAPITests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
