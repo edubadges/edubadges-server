@@ -19,12 +19,14 @@ import utils
 
 class EarnerNotificationList(APIView):
     """
-    GET a list of notifications 
-    or POST assertion url/recipient email to create a new notification
+    Earner notifications allow a user to send email notifications about badges issued on other platforms.
     """
     model = EarnerNotification
 
     def get(self, request):
+        """
+        GET a list of all earner notifications in the system.
+        """
         try:
             notifications = EarnerNotification.objects.all()
         except EarnerNotification.DoesNotExist:
@@ -117,7 +119,7 @@ class IssuerDetail(APIView):
     GET details on one issuer. PUT and DELETE should be highly restricted operations and are not implemented yet
     """
     model = Issuer
-
+    serializer_class = IssuerSerializer
     authentication_classes = (
         # authentication.TokenAuthentication,
         authentication.SessionAuthentication,
@@ -125,6 +127,9 @@ class IssuerDetail(APIView):
     )
 
     def get(self, request, slug):
+        """
+        Detail view for one issuer owned, edited, or staffed by the authenticated user
+        """
         try:
             current_issuer = Issuer.objects.get(slug=slug)
         except Issuer.DoesNotExist:
