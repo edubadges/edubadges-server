@@ -109,6 +109,7 @@ JINGO_EXCLUDE_APPS = (
     'rest_framework',
     'allauth',
     'account',
+    'rest_framework_swagger'
 )
 
 

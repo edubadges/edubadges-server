@@ -61,10 +61,10 @@ class EarnerNotificationDetail(APIView):
 
 class IssuerList(APIView):
     """
-    GET a list of issuers the current user is owner, editor or staff open
-    or POST to create a new Issuer, which the requesting user will be owner of
+    Issuer List resource for the authenticated user
     """
     model = Issuer
+    serializer_class = IssuerSerializer
 
     authentication_classes = (
         # authentication.TokenAuthentication,
@@ -73,7 +73,9 @@ class IssuerList(APIView):
     )
 
     def get(self, request):
-
+        """
+        GET a list of issuers owned, edited or staffed by the logged in user
+        """
         if not isinstance(request.user, get_user_model()):
             # TODO consider changing this a public API of all issuers (that are public?)
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -92,15 +94,7 @@ class IssuerList(APIView):
 
     def post(self, request):
         """
-        Define a new issuer owned by the authenticated user
-        resuest.data = {
-            "image" (optional)
-            "description"
-            "name"
-            "slug" (optional)
-            "url": "http://string"  # Organization's homepage (if not included, use local detail view),
-            "email": "email@email.com"  # should be one of user's verified emails
-        }
+        Define a new issuer to be owned by the logged in user
         """
         if not isinstance(request.user, get_user_model()):
             return Response(status=status.HTTP_403_FORBIDDEN)
