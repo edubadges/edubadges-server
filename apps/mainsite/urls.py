@@ -55,6 +55,7 @@ urlpatterns = patterns('',
     url(r'^public', include('issuer.public_api_urls')),
     # url(r'^api/badges', include('badgeanalysis.api_urls')),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^docs/', include('rest_framework_swagger.urls')),
 
     # Local Apps
     url(r'^issue', include('issuer.urls')),
