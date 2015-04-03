@@ -7,6 +7,7 @@ from rest_framework import serializers
 from badgeuser.models import BadgeUser
 from earner.serializers import EarnerBadgeSerializer
 from consumer.serializers import ConsumerBadgeDetailSerializer
+from rest_framework.authtoken.models import Token
 
 
 class VerifiedEmailsField(serializers.Field):
@@ -48,3 +49,16 @@ class BadgeUserSerializer(serializers.ModelSerializer):
     userProfile = UserProfileField(source='*', read_only=True)
     earnerBadges = EarnerBadgeSerializer(many=True, read_only=True, source='earnerbadge_set')
     consumerBadges = ConsumerBadgeDetailSerializer(many=True, read_only=True, source='consumerbadge_set')
+
+
+class TokenSerializer(serializers.Serializer):
+    username = serializers.SlugRelatedField(slug_field='username', queryset=BadgeUser.objects.all())
+    replace = serializers.BooleanField(default=False, required=False, write_only=True)
+    token = serializers.CharField(max_length=40, read_only=True)
+
+    def create(self, validated_data, **kwargs):
+        if validated_data.get('replace') is True:
+            Token.objects.filter(user=validated_data.get('username')).delete()
+
+        token, created = Token.objects.get_or_create(user=validated_data.get('username'))
+        return token.key

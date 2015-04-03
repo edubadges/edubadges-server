@@ -48,7 +48,7 @@ urlpatterns = patterns('',
 
 
     # REST Framework
-    url(r'^v1/users', include('badgeuser.api_urls')),
+    url(r'^v1/user', include('badgeuser.api_urls')),
     url(r'^v1/issuer', include('issuer.api_urls')),
     url(r'^v1/earner', include('earner.api_urls')),
     url(r'^v1/consumer', include('consumer.api_urls')),
