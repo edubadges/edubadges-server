@@ -69,7 +69,7 @@ class IssuerList(APIView):
     serializer_class = IssuerSerializer
 
     authentication_classes = (
-        # authentication.TokenAuthentication,
+        authentication.TokenAuthentication,
         authentication.SessionAuthentication,
         authentication.BasicAuthentication,
     )
@@ -97,6 +97,32 @@ class IssuerList(APIView):
     def post(self, request):
         """
         Define a new issuer to be owned by the logged in user
+        ---
+        parameters:
+            - name: name
+              description: The name of the Issuer
+              required: true
+              type: string
+              paramType: form
+            - name: description
+              description: A short text description of the new Issuer
+              required: true
+              type: string
+              paramType: form
+            - name: url
+              description: A fully-qualified URL of the Issuer's website or homepage
+              required: true
+              type: string
+              paramType: form
+            - name: email
+              description: A contact email for the Issuer
+              required: true
+              type: string
+              paramType: form
+            - name: image
+              description: An image file that represents the Issuer, such as a logo
+              required: false
+              type: file
         """
         if not isinstance(request.user, get_user_model()):
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -121,7 +147,7 @@ class IssuerDetail(APIView):
     model = Issuer
     serializer_class = IssuerSerializer
     authentication_classes = (
-        # authentication.TokenAuthentication,
+        authentication.TokenAuthentication,
         authentication.SessionAuthentication,
         authentication.BasicAuthentication,
     )
@@ -148,7 +174,7 @@ class BadgeClassList(APIView):
     model = IssuerBadgeClass
 
     authentication_classes = (
-        # authentication.TokenAuthentication,
+        authentication.TokenAuthentication,
         authentication.SessionAuthentication,
         authentication.BasicAuthentication,
     )
@@ -214,7 +240,7 @@ class BadgeClassDetail(APIView):
     model = IssuerBadgeClass
 
     authentication_classes = (
-        # authentication.TokenAuthentication,
+        authentication.TokenAuthentication,
         authentication.SessionAuthentication,
         authentication.BasicAuthentication,
     )
@@ -234,14 +260,14 @@ class BadgeClassDetail(APIView):
 
 class AssertionList(APIView):
     """
-    /api/issuer/issuers/:issuerSlug/badges/:badgeSlug/assertions
+    /v1/issuer/issuers/:issuerSlug/badges/:badgeSlug/assertions
     GET a list of assertions per issuer & per badgeclass
     POST to issue a new assertion
     """
     model = IssuerAssertion
-
+    serializer_class = IssuerAssertionSerializer
     authentication_classes = (
-        # authentication.TokenAuthentication,
+        authentication.TokenAuthentication,
         authentication.SessionAuthentication,
         authentication.BasicAuthentication,
     )
