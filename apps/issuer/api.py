@@ -325,8 +325,7 @@ class AssertionList(APIView):
 
 class AssertionDetail(APIView):
     """
-    Endpoints for (GET)ting a single assertion (probably fairly rare)
-    or revoking a badge (DELETE)
+    Endpoints for (GET)ting a single assertion or revoking a badge (DELETE)
     """
     model = IssuerAssertion
 
@@ -336,20 +335,6 @@ class AssertionDetail(APIView):
         The assertionSlug URL prameter is the only one that varies the request,
         but the assertion must belong to an issuer owned, edited, or staffed by the
         authenticated user.
-        ---
-        parameters:
-            - name: assertionSlug
-              type: string
-              paramType: path
-              required: true
-            - name: badgeSlug
-              type: string
-              paramType: path
-              required: true
-            - name: issuerSlug
-              type: string
-              paramType: path
-              required: true
         """
         if not isinstance(request.user, get_user_model()):
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -371,6 +356,16 @@ class AssertionDetail(APIView):
         return Response(serializer.data)
 
     def delete(self, request, issuerSlug, badgeSlug, assertionSlug):
+        """
+        Revoke an issued badge assertion
+        ---
+        parameters:
+            - name: revocation_reason
+              description: A short description of why the badge is to be revoked
+              required: true
+              type: string
+              paramType: form
+        """
         if not isinstance(request.user, get_user_model()):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
