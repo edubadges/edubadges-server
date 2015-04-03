@@ -123,6 +123,7 @@ class IssuerList(APIView):
               description: An image file that represents the Issuer, such as a logo
               required: false
               type: file
+              paramType: form
         """
         if not isinstance(request.user, get_user_model()):
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -329,7 +330,27 @@ class AssertionDetail(APIView):
     """
     model = IssuerAssertion
 
-    def get(self, request, assertionSlug):
+    def get(self, request, issuerSlug, badgeSlug, assertionSlug):
+        """
+        GET a single assertion's details.
+        The assertionSlug URL prameter is the only one that varies the request,
+        but the assertion must belong to an issuer owned, edited, or staffed by the
+        authenticated user.
+        ---
+        parameters:
+            - name: assertionSlug
+              type: string
+              paramType: path
+              required: true
+            - name: badgeSlug
+              type: string
+              paramType: path
+              required: true
+            - name: issuerSlug
+              type: string
+              paramType: path
+              required: true
+        """
         if not isinstance(request.user, get_user_model()):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
@@ -349,7 +370,7 @@ class AssertionDetail(APIView):
 
         return Response(serializer.data)
 
-    def delete(self, request, assertionSlug):
+    def delete(self, request, issuerSlug, badgeSlug, assertionSlug):
         if not isinstance(request.user, get_user_model()):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
