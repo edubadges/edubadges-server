@@ -211,8 +211,11 @@ class IssuerAssertionSerializer(AbstractBadgeObjectSerializer):
         except KeyError:
             create_notification = False
 
-        evidence = validated_data.pop('evidence')
-        if evidence is not None and evidence != '':
+        try:
+            evidence = validated_data.pop('evidence')
+        except KeyError:
+            pass
+        else:
             validated_data['badge_object']['evidence'] = evidence
 
         new_assertion = IssuerAssertion(**validated_data)

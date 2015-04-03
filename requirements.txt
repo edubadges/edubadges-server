@@ -31,7 +31,7 @@ django-reversion==1.8.5
 # Memcached cache
 python-memcached==1.53
 # Django Rest Framework
-djangorestframework==3.0.2
+djangorestframework==3.1.1
 django-rest-swagger==0.2.9
 # Django Allauth
 django-allauth==0.19.1

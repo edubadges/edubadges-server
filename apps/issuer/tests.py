@@ -34,7 +34,7 @@ class IssuerTests(TestCase):
         )
 
         response = view(request)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 401)
 
     def test_create_issuer_authenticated(self):
         view = IssuerList.as_view()
@@ -116,7 +116,7 @@ class BadgeClassTests(APITestCase):
 
     def test_create_badgeclass_for_issuer_unauthenticated(self):
         response = self.client.post('/v1/issuer/issuers/test-issuer/badges/', {})
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 401)
 
     def test_badgeclass_list_authenticated(self):
         """
@@ -160,7 +160,7 @@ class AssertionTests(APITestCase):
     def test_unauthenticated_user_cant_issue(self):
         assertion = {"email": "test@example.com"}
         response = self.client.post('/v1/issuer/issuers/test-issuer/badges/', assertion)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 401)
 
     def test_issue_assertion_with_notify(self):
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
