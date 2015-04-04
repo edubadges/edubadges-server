@@ -250,13 +250,34 @@ class BadgeClassDetail(APIView):
         # TODO long term: allow GET if issuer has permission to issue even if not creator
 
         try:
-            current_issuer = IssuerBadgeClass.objects.get(slug=badgeSlug, issuer__slug=issuerSlug)
+            current_badgeclass = IssuerBadgeClass.objects.get(slug=badgeSlug, issuer__slug=issuerSlug)
         except IssuerBadgeClass.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         else:
-            serializer = IssuerSerializer(current_issuer, context={'request': request})
+            serializer = IssuerSerializer(current_badgeclass, context={'request': request})
             return Response(serializer.data)
+
+    def delete(self, request, issuerSlug, badgeSlug):
+        """
+        DELETE a badge class that has never been issued. This will fail if any assertions exist for the BadgeClass.
+        """
+
+        current_badgeclass = IssuerBadgeClass.objects.filter(
+            slug=badgeSlug,
+            issuer__slug=issuerSlug,
+            assertions=None
+        )
+
+        if current_badgeclass.exists():
+            current_badgeclass[0].delete()
+        else:
+            return Response(
+                "Badge Class either couldn't be deleted. It may have already been issued, or it may already not exist.",
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response("Badge " + badgeSlug + " has been deleted.", 200)
 
 
 class AssertionList(APIView):
