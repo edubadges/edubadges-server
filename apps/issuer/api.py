@@ -19,13 +19,13 @@ import utils
 
 class EarnerNotificationList(APIView):
     """
-    Earner notifications allow a user to send email notifications about badges issued on other platforms.
+    Deprecated: Earner notifications allow a user to send email notifications about badges issued on other platforms.
     """
     model = EarnerNotification
 
     def get(self, request):
         """
-        GET a list of all earner notifications in the system.
+        Depreated: GET a list of all earner notifications in the system.
         """
         try:
             notifications = EarnerNotification.objects.all()
@@ -38,8 +38,18 @@ class EarnerNotificationList(APIView):
 
     def post(self, request):
         """
-        Create a new EarnerNotification as long as you know the right email address for the badge
+        Deprecated: Create a new EarnerNotification as long as you know the right email address for the badge
         assertion, and the earner has not been previously notified.
+        ---
+        parameters:
+            - name: url
+              description: The URL of a hosted assertion you wish to notify an earner about.
+              type: string
+              paramType: form
+            - name: email
+              description: The email address of the badge recipient. Must match the assertion.
+              type: string
+              paramType: form
         """
         data = {'url': request.data.get('url'), 'email': request.data.get('email')}
         serializer = EarnerNotificationSerializer(data=data)
@@ -77,6 +87,8 @@ class IssuerList(APIView):
     def get(self, request):
         """
         GET a list of issuers owned, edited or staffed by the logged in user
+        ---
+        serializer: IssuerSerializer
         """
         if not isinstance(request.user, get_user_model()):
             # TODO consider changing this a public API of all issuers (that are public?)
@@ -156,6 +168,8 @@ class IssuerDetail(APIView):
     def get(self, request, slug):
         """
         Detail view for one issuer owned, edited, or staffed by the authenticated user
+        ---
+        serializer: IssuerSerializer
         """
         try:
             current_issuer = Issuer.objects.get(slug=slug)
@@ -181,6 +195,12 @@ class BadgeClassList(APIView):
     )
 
     def get(self, request, issuerSlug):
+        """
+        GET a list of badgeclasses within one Issuer context.
+        Authenticated user must have owner, editor, or staff status on Issuer
+        ---
+        serializer: IssuerBadgeClassSerializer
+        """
         if not isinstance(request.user, get_user_model()):
             # TODO consider changing this a public API of all issuers (that are public?)
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -204,6 +224,39 @@ class BadgeClassList(APIView):
         return Response(serializer.data)
 
     def post(self, request, issuerSlug):
+        """
+        Define a new BadgeClass to be owned by a particular Issuer.
+        Authenticated user must have owner or editor status on Issuer
+        ('staff' status is inadequate)
+        ---
+        serializer: IssuerBadgeClassSerializer
+        parameters:
+            - name: issuerSlug
+              required: true
+              type: string
+              paramType: path
+              description: slug of the Issuer to be owner of the new BadgeClass
+            - name: name
+              required: true
+              type: string
+              paramType: form
+              description: A short name for the new BadgeClass
+            - name: slug
+              required: false
+              type: string
+              paramType: form
+              description: Optionally customizable slug. Otherwise generated from name
+            - name: image
+              type: file
+              required: true
+              paramType: form
+              description: An image to represent the BadgeClass. Must be a square PNG with no existing OBI assertion data baked into it.
+            - name: criteria
+              type: string
+              required: true
+              paramType: form
+              description: Either a URL of a remotely hosted criteria page or a text string describing the criteria.
+        """
         if not isinstance(request.user, get_user_model()):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
@@ -212,8 +265,7 @@ class BadgeClassList(APIView):
             slug=issuerSlug
         ).filter(
             Q(owner__id=request.user.id) |
-            Q(editors__id=request.user.id) |
-            Q(staff__id=request.user.id)
+            Q(editors__id=request.user.id)
         )
 
         if not current_issuer.exists():
@@ -236,7 +288,7 @@ class BadgeClassList(APIView):
 
 class BadgeClassDetail(APIView):
     """
-    GET details on one issuer. PUT and DELETE should be highly restricted operations and are not implemented yet
+    GET details on one BadgeClass. PUT and DELETE should be restricted to BadgeClasses that haven't been issued yet.
     """
     model = IssuerBadgeClass
 
@@ -247,6 +299,11 @@ class BadgeClassDetail(APIView):
     )
 
     def get(self, request, issuerSlug, badgeSlug):
+        """
+        GET single BadgeClass representation
+        ---
+        serializer: IssuerBadgeClassSerializer
+        """
         # TODO long term: allow GET if issuer has permission to issue even if not creator
 
         try:
@@ -255,18 +312,28 @@ class BadgeClassDetail(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         else:
-            serializer = IssuerSerializer(current_badgeclass, context={'request': request})
+            serializer = IssuerBadgeClassSerializer(current_badgeclass, context={'request': request})
             return Response(serializer.data)
 
     def delete(self, request, issuerSlug, badgeSlug):
         """
         DELETE a badge class that has never been issued. This will fail if any assertions exist for the BadgeClass.
+        Restricted to owners or editors (not staff) of the corresponding Issuer.
+        ---
+        responseMessages:
+            - code: 400
+              message: Badge Class either couldn't be deleted. It may have already been issued, or it may already not exist.
+            - code: 200
+              message: Badge has been deleted.
         """
 
         current_badgeclass = IssuerBadgeClass.objects.filter(
             slug=badgeSlug,
             issuer__slug=issuerSlug,
             assertions=None
+        ). filter(
+            Q(issuer__owner__id=request.user.id) |
+            Q(issuer__editors__id=request.user.id)
         )
 
         if current_badgeclass.exists():
@@ -277,12 +344,11 @@ class BadgeClassDetail(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        return Response("Badge " + badgeSlug + " has been deleted.", 200)
+        return Response("Badge " + badgeSlug + " has been deleted.", status.HTTP_200_OK)
 
 
 class AssertionList(APIView):
     """
-    /v1/issuer/issuers/:issuerSlug/badges/:badgeSlug/assertions
     GET a list of assertions per issuer & per badgeclass
     POST to issue a new assertion
     """
@@ -295,6 +361,11 @@ class AssertionList(APIView):
     )
 
     def post(self, request, issuerSlug, badgeSlug):
+        """
+        Issue a badge to a single recipient.
+        ---
+        serializer: IssuerAssertionSerializer
+        """
         if not isinstance(request.user, get_user_model()):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
@@ -320,6 +391,11 @@ class AssertionList(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get(self, request, issuerSlug, badgeSlug):
+        """
+        Get a list of all issued assertions for a single BadgeClass.
+        ---
+        serializer: IssuerAssertionSerializer
+        """
         if not isinstance(request.user, get_user_model()):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
@@ -356,6 +432,8 @@ class AssertionDetail(APIView):
         The assertionSlug URL prameter is the only one that varies the request,
         but the assertion must belong to an issuer owned, edited, or staffed by the
         authenticated user.
+        ---
+        serializer: IssuerAssertionSerializer
         """
         if not isinstance(request.user, get_user_model()):
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -378,7 +456,8 @@ class AssertionDetail(APIView):
 
     def delete(self, request, issuerSlug, badgeSlug, assertionSlug):
         """
-        Revoke an issued badge assertion
+        Revoke an issued badge assertion.
+        Limited to Issuer owner and editors (not staff)
         ---
         parameters:
             - name: revocation_reason
@@ -386,6 +465,13 @@ class AssertionDetail(APIView):
               required: true
               type: string
               paramType: form
+        responseMessages:
+            - code: 200
+              message: Assertion has been revoked.
+            - code: 400
+              message: Assertion is already revoked
+            - code: 404
+              message: Assertion not found or user has inadequate permissions.
         """
         if not isinstance(request.user, get_user_model()):
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -397,8 +483,7 @@ class AssertionDetail(APIView):
             slug=assertionSlug
         ).filter(
             Q(issuer__owner__id=request.user.id) |
-            Q(issuer__editors__id=request.user.id) |
-            Q(issuer__staff__id=request.user.id)
+            Q(issuer__editors__id=request.user.id)
         )
         if current_assertion.exists():
             current_assertion = current_assertion[0]

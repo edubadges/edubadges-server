@@ -10,7 +10,7 @@ from serializers import TokenSerializer
 
 class BadgeUserList(APIView):
     """
-    GET: Viewing a list of a consumer' badges, or POST to upload a new one to analyze
+    GET a list of users on the system. Restricted to system administrators.
     """
     model = BadgeUser
 
