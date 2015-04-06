@@ -377,10 +377,15 @@ class OpenBadge(basic_models.DefaultModel):
     # TODO: remove this as soon as we're hosted.
     def obaImageUrl(self, **kwargs):
         oba = re.compile(r'^http://openbadges\.oregonbadgealliance\.org')
-        if oba.match(self.ldProp('bc', 'issuer')):
+        bh = re.compile(r'^http://badgehost\.io')
+        issuer_url = self.ldProp('bc', 'issuer')
+
+        if oba.match(issuer_url) or bh.match(issuer_url):
             return self.full_badge_object['assertion']['@id'] + '/image'
 
     def get_baked_image_url(self, **kwargs):
+        if self.obaImageUrl(**kwargs) is not None:
+            return self.obaImageUrl(**kwargs)
         # for saved objects that originated from a baked upload,
         # we have the baked image already, and can thus serve it.
         # kwargs['origin'] may contain 'http://server.domain:80' etc

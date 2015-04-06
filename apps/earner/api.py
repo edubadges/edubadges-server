@@ -20,7 +20,7 @@ class EarnerBadgesList(APIView):
     """
     model = EarnerBadge
 
-    # TODO: rich authentication possibilitiesfor remote API clients
+    # TODO: rich authentication possibilities for remote API clients
     authentication_classes = (
         # authentication.TokenAuthentication,
         authentication.SessionAuthentication,
@@ -33,7 +33,7 @@ class EarnerBadgesList(APIView):
         return a list of earned badges in the requesting user's account
         """
         if not isinstance(request.user, get_user_model()):
-            #TODO change this to 401 unauthenticated
+            # TODO change this to 401 unauthenticated
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         # TODO Use request.user

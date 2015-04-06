@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'sky_visitor',
 
     'rest_framework',
+    'rest_framework.authtoken',
+    'rest_framework_swagger',
 
     'mainsite',
     'homepage',
@@ -108,6 +110,7 @@ JINGO_EXCLUDE_APPS = (
     'rest_framework',
     'allauth',
     'account',
+    'rest_framework_swagger'
 )
 
 
@@ -139,6 +142,9 @@ LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = '/earn'
 
 AUTHENTICATION_BACKENDS = [
+    # Object permissions for issuing badges
+    'rules.permissions.ObjectPermissionBackend',
+
     # Needed to login by username in Django admin, regardless of `allauth`
     "django.contrib.auth.backends.ModelBackend",
 
@@ -277,7 +283,12 @@ REST_FRAMEWORK = {
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
+    ], 
+    'DEFAULT_RENDERER_CLASSES': (
+        'mainsite.renderers.JSONLDRenderer',
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    )
 }
 
 

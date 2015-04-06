@@ -100,7 +100,7 @@ APIStore.postEarnerBadgeForm = function(data){
   var context = {
     formId: "EarnerBadgeForm",
     apiCollectionKey: "earnerBadges",
-    actionUrl: "/api/earner/badges",
+    actionUrl: "/v1/earner/badges",
     successHttpStatus: [201],
     successMessage: "Successfully added badge to your collection."
   }
@@ -111,7 +111,7 @@ APIStore.postConsumerBadgeForm = function(data){
   var context = {
     formId: "ConsumerBadgeForm",
     apiCollectionKey: "consumerBadges",
-    actionUrl: "/api/consumer/badges",
+    actionUrl: "/v1/consumer/badges",
     successHttpStatus: [200, 201],
     successMessage: "Badge analysis successful"
   }
@@ -174,7 +174,7 @@ APIStore.postBadgeForm = function(data, context){
 APIStore.postIssuerNotificationForm = function(data){
   console.log("GOING TO POST THE ISSUER NOTIFICATION FORM WITH DATA:");
   console.log(data);
-  var req = request.post('/api/issuer/notifications')
+  var req = request.post('/v1/issuer/notifications')
     .set('X-CSRFToken', getCookie('csrftoken'))
     .accept('application/json')
     .field('url',data['url'])
