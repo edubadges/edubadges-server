@@ -46,8 +46,7 @@ urlpatterns = patterns('',
     # accounts:
     url(r'^accounts/', include('allauth.urls')),
 
-
-    # REST Framework
+    # REST Framework-based APIs
     url(r'^v1/user', include('badgeuser.api_urls')),
     url(r'^v1/issuer', include('issuer.api_urls')),
     url(r'^v1/earner', include('earner.api_urls')),
@@ -56,16 +55,19 @@ urlpatterns = patterns('',
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^docs/', include('rest_framework_swagger.urls')),
 
-    # Local Apps
+    # Service health endpoint
+    url(r'^health', include('health.urls')),
+
+    # Local Apps for browser front end
     url(r'^issue', include('issuer.urls')),
     url(r'^earn', include('earner.urls')),
     url(r'^understand', include('consumer.urls')),
+
 
     url(r'^contact', include('contact.urls')),
     url(r'^search', include('search.urls')),
     url(r'^badgeanalysis', include('badgeanalysis.urls')),
     url(r'^certificates', include('certificates.urls')),
-    # url(r'^', include('skycms.structure.urls')),
 )
 
 
