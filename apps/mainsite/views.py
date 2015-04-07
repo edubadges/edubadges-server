@@ -1,10 +1,20 @@
 from django import http
 from django import template
+from django.shortcuts import redirect
+
 from django.conf import settings
 # from django.core.urlresolvers import reverse
 from django.template.response import SimpleTemplateResponse
 from django.views.generic.base import TemplateView
 from django.contrib.auth import authenticate, login, logout
+
+
+# TODO: this is a temporary measure. Reconfigure urls.py to keep named "login" and "logout" views.
+def login_redirect(request):
+    return redirect('/accounts/login')
+
+def logout_redirect(request):
+    return redirect('/accounts/logout')
 
 
 class ActiveTabMixin(object):

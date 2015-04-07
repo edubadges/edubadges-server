@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.shortcuts import redirect
+from mainsite.views import login_redirect
 
 admin.autodiscover()
 #make sure that any view/model/form imports occur AFTER admin.autodiscover
@@ -32,6 +33,8 @@ urlpatterns = patterns('',
 
     # accounts:
     url(r'^accounts/', include('allauth.urls')),
+    url(r'^login', login_redirect, name='login'),
+    url(r'^logout', login_redirect, name='login'),
 
     # REST Framework-based APIs
     url(r'^v1/user', include('badgeuser.api_urls')),
