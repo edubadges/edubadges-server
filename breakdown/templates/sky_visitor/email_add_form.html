@@ -1,9 +1,0 @@
-{% extends "admin/auth/user/add_form.html" %}
-
-{% block form_top %}
-    {% if not is_popup %}
-        <p>{{ _("First, enter an e-mail address and password. Then, you'll be able to edit more user options.") }}</p>
-    {% else %}
-        <p>{{ _("Enter an e-mail address and password.") }}</p>
-    {% endif %}
-{% endblock %}

@@ -27,24 +27,21 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
 
-    'skycms.structure',
+    # 'skycms.structure',
     'reversion',
     'jingo',
-    'djangosphinx',
-    'sky_thumbnails',
-    'ckeditor',
-    'sky_redirects',
-    'emailtemplates',
-    'sky_visitor',
+    # 'djangosphinx',
+    # 'sky_thumbnails',
+    # 'ckeditor',
+    # 'sky_redirects',
+    # 'emailtemplates',
+    # 'sky_visitor',
 
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',
 
     'mainsite',
-    'homepage',
-    'search',
-    'contact',
     'certificates',
     'badgeanalysis',
     'issuer',
@@ -138,7 +135,7 @@ STATICFILES_DIRS = [
 ##
 
 AUTH_USER_MODEL = 'badgeuser.BadgeUser'
-LOGIN_URL = '/login'
+LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/earn'
 
 AUTHENTICATION_BACKENDS = [

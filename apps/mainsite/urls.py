@@ -9,15 +9,10 @@ admin.autodiscover()
 
 from django.views.generic.base import RedirectView
 from mainsite.views import Error404, Error500, SitemapView
-from homepage.sitemap import HomeSitemap
-from skycms.structure.sitemap import PageSitemap
-from sky_visitor.views import *
 
 TOKEN_REGEX = '(?P<uidb36>[0-9A-Za-z]{1,13})-(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})'
 
 sitemaps = {
-    'index': HomeSitemap,
-    'pages': PageSitemap,
 }
 
 urlpatterns = patterns('',
@@ -30,19 +25,11 @@ urlpatterns = patterns('',
     url(r'^sitemap$', SitemapView.as_view(), name='sitemap'),
     url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.sitemap', {'sitemaps': sitemaps}),
 
-    # Admin URLs
+    # Admin URLs from client_admin
     # https://github.com/concentricsky/django-client-admin
     url(r'^staff/', include('client_admin.urls')),
     url(r'^staff/', include(admin.site.urls)),
 
-    # Visitor account urls:
-    url(r'^register$', RegisterView.as_view(), name='register'),
-    url(r'^login$', LoginView.as_view(), name='login'),
-    url(r'^logout$', LogoutView.as_view(), name='logout'),
-    url(r'^forgot_password$', ForgotPasswordView.as_view(), name='forgot_password'),
-    url(r'^forgot_password/check_email$', ForgotPasswordCheckEmailView.as_view(), name='forgot_password_check_email'),
-    url(r'^reset_password/%s/$' % TOKEN_REGEX, ResetPasswordView.as_view(), name='reset_password'),
-    url(r'^change_password$', ChangePasswordView.as_view(), name='change_password'),
     # accounts:
     url(r'^accounts/', include('allauth.urls')),
 
@@ -51,7 +38,9 @@ urlpatterns = patterns('',
     url(r'^v1/issuer', include('issuer.api_urls')),
     url(r'^v1/earner', include('earner.api_urls')),
     url(r'^v1/consumer', include('consumer.api_urls')),
+
     url(r'^public', include('issuer.public_api_urls')),
+
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^docs/', include('rest_framework_swagger.urls')),
 
@@ -63,9 +52,6 @@ urlpatterns = patterns('',
     url(r'^earn', include('earner.urls')),
     url(r'^understand', include('consumer.urls')),
 
-
-    url(r'^contact', include('contact.urls')),
-    url(r'^search', include('search.urls')),
     url(r'^badgeanalysis', include('badgeanalysis.urls')),
     url(r'^certificates', include('certificates.urls')),
 )
