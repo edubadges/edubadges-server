@@ -1,11 +1,14 @@
 from django.test import TestCase
 from django.core import mail
+from django.conf import settings
 from django.test.utils import override_settings
 from rest_framework.test import APIRequestFactory, APIClient, APITestCase, force_authenticate
 from django.contrib.auth import get_user_model
 
 import json
 import os
+import os.path
+import shutil
 
 from api import *
 from serializers import *
@@ -219,7 +222,17 @@ class BadgeClassTests(APITestCase):
 class AssertionTests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
 
+    def ensure_image_exists(self, badge_object):
+        if not os.path.exists(badge_object.image.path):
+            shutil.copy2(
+                os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'),
+                badge_object.image.path
+            )
+
     def test_authenticated_owner_issue_badge(self):
+        # load test image into media files if it doesn't exist
+        self.ensure_image_exists(IssuerBadgeClass.objects.get(slug='badge-of-testing'))
+
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         assertion = {
             "email": "test@example.com"
@@ -229,6 +242,9 @@ class AssertionTests(APITestCase):
         self.assertEqual(response.status_code, 201)
 
     def test_authenticated_editor_can_issue_badge(self):
+        # load test image into media files if it doesn't exist
+        self.ensure_image_exists(IssuerBadgeClass.objects.get(slug='badge-of-testing'))
+
         # This issuer has user 2 among its editors.
         the_editor = get_user_model().objects.get(pk=2)
         self.client.force_authenticate(user=the_editor)
