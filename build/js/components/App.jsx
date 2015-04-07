@@ -63,8 +63,7 @@ var App = React.createClass({
   getInitialState: function() {
     return {
       earnerBadges: [],
-      activePanels: ActiveActionStore.getAllActiveActions(),
-      path: window.location.pathname
+      activePanels: ActiveActionStore.getAllActiveActions()
     };
   },
   componentWillMount: function() {
