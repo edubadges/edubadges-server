@@ -402,14 +402,18 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
         """
         # TODO long term: allow GET if issuer has permission to issue even if not creator
 
-        try:
-            current_badgeclass = IssuerBadgeClass.objects.get(slug=badgeSlug, issuer__slug=issuerSlug)
-        except IssuerBadgeClass.DoesNotExist:
+        current_badgeclass = IssuerBadgeClass.objects.filter(slug=badgeSlug, issuer__slug=issuerSlug).filter(
+            Q(owner__id=request.user.id) |
+            Q(editors__id=request.user.id) |
+            Q(staff__id=request.user.id)
+        )
+
+        if not current_badgeclass.exists():
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        else:
-            serializer = IssuerBadgeClassSerializer(current_badgeclass, context={'request': request})
-            return Response(serializer.data)
+        current_badgeclass = current_badgeclass[0]
+        serializer = IssuerBadgeClassSerializer(current_badgeclass, context={'request': request})
+        return Response(serializer.data)
 
     def delete(self, request, issuerSlug, badgeSlug):
         """
