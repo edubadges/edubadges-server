@@ -9,14 +9,12 @@ admin.autodiscover()
 
 from django.views.generic.base import RedirectView
 from mainsite.views import Error404, Error500, SitemapView
-from homepage.sitemap import HomeSitemap
 from skycms.structure.sitemap import PageSitemap
 from sky_visitor.views import *
 
 TOKEN_REGEX = '(?P<uidb36>[0-9A-Za-z]{1,13})-(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})'
 
 sitemaps = {
-    'index': HomeSitemap,
     'pages': PageSitemap,
 }
 

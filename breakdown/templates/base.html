@@ -44,16 +44,22 @@
     </head>
 
     <body class="{% block bodyclass %}{% endblock %}">
-        <div id="app">
-        <!-- React App renders here -->
-            <div class="container">
-                <div class="jumbotron loading-react">
-                    <h1>{{ self.title() }}</h1>
-                    <p>Loading...</p>
-                    <p class="loading-spinner"><img src="{{STATIC_URL}}images/ajax-loader.gif"></p>
+        {% block pre_content %}{% endblock %}
+
+        {% block react_app %}
+            {% if initial_data %}
+            <div id="app">
+            <!-- React App renders here -->
+                <div class="container">
+                    <div class="jumbotron loading-react">
+                        <h1>{{ self.title() }}</h1>
+                        <p>Loading...</p>
+                        <p class="loading-spinner"><img src="{{STATIC_URL}}images/ajax-loader.gif"></p>
+                    </div>
                 </div>
             </div>
-        </div>
+            {% endif %}
+        {% endblock %}
 
         {% block scripts %}
 
