@@ -42,9 +42,6 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
 
     'mainsite',
-    'homepage',
-    'search',
-    'contact',
     'certificates',
     'badgeanalysis',
     'issuer',
