@@ -1,5 +1,6 @@
 from django.conf.urls import patterns, url
 from issuer.api import *
+from issuer.public_api import *
 
 urlpatterns = patterns(
    'issuer.api_views',
