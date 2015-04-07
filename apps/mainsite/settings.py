@@ -135,7 +135,7 @@ STATICFILES_DIRS = [
 ##
 
 AUTH_USER_MODEL = 'badgeuser.BadgeUser'
-LOGIN_URL = '/login'
+LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/earn'
 
 AUTHENTICATION_BACKENDS = [
