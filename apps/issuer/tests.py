@@ -21,8 +21,8 @@ example_issuer_props = {
 }
 
 
-class IssuerTests(TestCase):
-    fixtures = ['0001_initial_superuser']
+class IssuerTests(APITestCase):
+    fixtures = ['0001_initial_superuser', 'test_badge_objects.json']
 
     def test_create_issuer_unauthenticated(self):
         view = IssuerList.as_view()
@@ -62,6 +62,68 @@ class IssuerTests(TestCase):
         # GET on single badge should work if user has privileges
         # Eventually, implement PUT for updates (if permitted)
         pass
+
+    def test_get_empty_issuer_editors_set(self):
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        response = self.client.get('/v1/issuer/issuers/test-issuer/editors')
+
+        self.assertEqual(response.data, [])
+        self.assertEqual(response.status_code, 200)
+
+    def test_add_user_to_issuer_editors_set(self):
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        post_response = self.client.post(
+            '/v1/issuer/issuers/test-issuer/editors',
+            {'action': 'add', 'username': 'user2'}
+        )
+
+        self.assertEqual(post_response.status_code, 200)
+        self.assertEqual(len(post_response.data), 1)  # Assert that there is now one editor
+
+    def test_bad_action_issuer_editors_set(self):
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        post_response = self.client.post(
+            '/v1/issuer/issuers/test-issuer/editors',
+            {'action': 'DO THE HOKEY POKEY', 'username': 'user2'}
+        )
+
+        self.assertEqual(post_response.status_code, 400)
+
+    def test_add_nonexistent_user_to_issuer_editors_set(self):
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        response = self.client.post(
+            '/v1/issuer/issuers/test-issuer/editors',
+            {'action': 'add', 'username': 'taylor_swift'}
+        )
+
+        self.assertContains(response, "User taylor_swift not found.", status_code=404)
+
+    def test_add_user_to_nonexistent_issuer_editors_set(self):
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        response = self.client.post(
+            '/v1/issuer/issuers/test-nonexistent-issuer/editors',
+            {'action': 'add', 'username': 'user2'}
+        )
+
+        self.assertContains(response, "Issuer test-nonexistent-issuer not found", status_code=404)
+
+    def test_add_remove_user_with_issuer_staff_set(self):
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        post_response = self.client.post(
+            '/v1/issuer/issuers/test-issuer/staff',
+            {'action': 'add', 'username': 'user2'}
+        )
+
+        self.assertEqual(post_response.status_code, 200)
+        self.assertEqual(len(post_response.data), 1)  # Assert that there is now one staff
+
+        second_response = self.client.post(
+            '/v1/issuer/issuers/test-issuer/staff',
+            {'action': 'remove', 'username': 'user2'}
+        )
+
+        self.assertEqual(second_response.status_code, 200)
+        self.assertEqual(len(second_response.data), 0) # Assert that there are no more staff now
 
 
 class BadgeClassTests(APITestCase):
@@ -126,14 +188,14 @@ class BadgeClassTests(APITestCase):
         response = self.client.get('/v1/issuer/issuers/test-issuer/badges')
 
         self.assertIsInstance(response.data, list)  # Ensure we receive a list of badgeclasses
-        self.assertEqual(len(response.data), 2)  # Ensure that we receive the 2 badgeclasses in fixture as expected
+        self.assertEqual(len(response.data), 2)  # Ensure that we receive the 3 badgeclasses in fixture as expected
 
     def test_unauthenticated_cant_get_badgeclass_list(self):
         """
         Ensure that logged-out user can't GET the private API endpoint for badgeclass list
         """
         response = self.client.get('/v1/issuer/issuers/test-issuer/badges')
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 401)
 
     def test_delete_unissued_badgeclass(self):
         self.assertTrue(IssuerBadgeClass.objects.filter(slug='badge-of-never-issued').exists())
@@ -166,6 +228,17 @@ class AssertionTests(APITestCase):
 
         self.assertEqual(response.status_code, 201)
 
+    def test_authenticated_editor_can_issue_badge(self):
+        # This issuer has user 2 among its editors.
+        the_editor = get_user_model().objects.get(pk=2)
+        self.client.force_authenticate(user=the_editor)
+        response = self.client.post(
+            '/v1/issuer/issuers/edited-test-issuer/badges/badge-of-edited-testing/assertions',
+            {"email": "test@example.com"}
+        )
+
+        self.assertEqual(response.status_code, 201)
+
     def test_authenticated_nonowner_user_cant_issue(self):
         self.client.force_authenticate(user=get_user_model().objects.get(pk=2))
         assertion = {
@@ -173,7 +246,7 @@ class AssertionTests(APITestCase):
         }
         response = self.client.post('/v1/issuer/issuers/test-issuer/badges/badge-of-testing/assertions', assertion)
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
 
     def test_unauthenticated_user_cant_issue(self):
         assertion = {"email": "test@example.com"}

@@ -49,6 +49,7 @@ class BadgeUserSerializer(serializers.ModelSerializer):
     userProfile = UserProfileField(source='*', read_only=True)
     earnerBadges = EarnerBadgeSerializer(many=True, read_only=True, source='earnerbadge_set')
     consumerBadges = ConsumerBadgeDetailSerializer(many=True, read_only=True, source='consumerbadge_set')
+    # issuerRoles
 
 
 class TokenSerializer(serializers.Serializer):
