@@ -14,7 +14,7 @@ from pyld import jsonld
 from jsonschema.exceptions import ValidationError  # , FormatError
 
 import basic_models
-from djangosphinx.models import SphinxSearch
+# from djangosphinx.models import SphinxSearch
 from jsonfield import JSONField
 
 import badgeanalysis.utils
@@ -58,7 +58,7 @@ class OpenBadge(basic_models.DefaultModel):
 
     scheme = models.ForeignKey(BadgeScheme, blank=True, null=True)
 
-    search = SphinxSearch()
+    # search = SphinxSearch()
 
     def __unicode__(self):
         if self.full_badge_object == u'':
