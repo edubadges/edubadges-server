@@ -32,7 +32,9 @@
     "vinyl-buffer": "~1.0.0",
     "gulp-size": "~1.1.0",
     "path-to-regexp": "~1.0.2",
-    "superagent": "~0.21.0"
+    "superagent": "~0.21.0",
+    "react-mini-router": "~1.1.1",
+    "react-dropzone": "~1.0.1"
   },
   "readmeFilename": "README"
 }
