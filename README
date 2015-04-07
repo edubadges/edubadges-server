@@ -1,14 +1,39 @@
-Run the following in a terminal:
+# Badge Trust
+*Digital badge management for issuers, earners, and consumers*
 
+## How to get started on your local development environment.
+This is a 
+Prerequisites:
+  * python 2.7.x
+  * virtualenv
+  * npm
+  * gulp
+
+### Create project directory and environment
 mkdir <PROJECT>
 cd <PROJECT>
 virtualenv env-<CURRENT DATE>
 ln -s env-<CURRENT DATE> env
 source env/bin/activate
-git clone git@github.com:concentricsky/csky-django-template.git code
-pip install -r code/requirements.txt
-cp code/apps/mainsite/settings_local.py.example code/apps/mainsite/settings_local.py
+git clone ssh://git@stash.concentricsky.com/~notto/csky-badges.git -b develop code
+cd code
 
-Edit the settings_local.py file and insert local credentials for DATABASES, then run the following:
+### Install requirements
+pip install -r requirements.txt
+npm install
 
-code/manage.py migrate
+### Customize local settings to your environment
+cp apps/mainsite/settings_local.py.example apps/mainsite/settings_local.py
+
+* Edit the settings_local.py file and insert local credentials for DATABASES, Email, then run the following from within the `code` directory:
+
+### Migrate databases and build front-end components
+./manage.py migrate
+gulp
+
+./manage py createsuperuser
+
+### Run a server
+./manage.py runserver
+Navigtate to http://localhost:8000/account/login
+
