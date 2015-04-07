@@ -13,8 +13,19 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.renderers import JSONRenderer
 from mainsite.renderers import JSONLDRenderer
 from models import EarnerNotification, Issuer, IssuerBadgeClass, IssuerAssertion
-from serializers import EarnerNotificationSerializer, IssuerSerializer, IssuerBadgeClassSerializer, IssuerAssertionSerializer
+from serializers import EarnerNotificationSerializer, IssuerSerializer, IssuerBadgeClassSerializer, IssuerAssertionSerializer, IssuerRoleActionSerializer
 import utils
+
+from badgeuser.serializers import UserProfileField
+
+
+class AbstractIssuerAPIEndpoint(APIView):
+    authentication_classes = (
+        authentication.TokenAuthentication,
+        authentication.SessionAuthentication,
+        authentication.BasicAuthentication,
+    )
+    permission_classes = (permissions.IsAuthenticated,)
 
 
 class EarnerNotificationList(APIView):
@@ -71,18 +82,12 @@ class EarnerNotificationDetail(APIView):
         raise NotImplementedError("Earner notidication detail not implemented.")
 
 
-class IssuerList(APIView):
+class IssuerList(AbstractIssuerAPIEndpoint):
     """
     Issuer List resource for the authenticated user
     """
     model = Issuer
     serializer_class = IssuerSerializer
-
-    authentication_classes = (
-        authentication.TokenAuthentication,
-        authentication.SessionAuthentication,
-        authentication.BasicAuthentication,
-    )
 
     def get(self, request):
         """
@@ -90,9 +95,6 @@ class IssuerList(APIView):
         ---
         serializer: IssuerSerializer
         """
-        if not isinstance(request.user, get_user_model()):
-            # TODO consider changing this a public API of all issuers (that are public?)
-            return Response(status=status.HTTP_403_FORBIDDEN)
 
         # Get the Issuers this user owns, edits, or staffs:
         user_issuers = Issuer.objects.filter(
@@ -137,8 +139,6 @@ class IssuerList(APIView):
               type: file
               paramType: form
         """
-        if not isinstance(request.user, get_user_model()):
-            return Response(status=status.HTTP_403_FORBIDDEN)
 
         serializer = IssuerSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
@@ -153,17 +153,12 @@ class IssuerList(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class IssuerDetail(APIView):
+class IssuerDetail(AbstractIssuerAPIEndpoint):
     """
     GET details on one issuer. PUT and DELETE should be highly restricted operations and are not implemented yet
     """
     model = Issuer
     serializer_class = IssuerSerializer
-    authentication_classes = (
-        authentication.TokenAuthentication,
-        authentication.SessionAuthentication,
-        authentication.BasicAuthentication,
-    )
 
     def get(self, request, slug):
         """
@@ -181,18 +176,130 @@ class IssuerDetail(APIView):
             return Response(serializer.data)
 
 
-class BadgeClassList(APIView):
+class IssuerRoleList(AbstractIssuerAPIEndpoint):
+    model = Issuer
+
+    def get(self, request, slug):
+        """
+        Get a list of users associated with a role on an Issuer
+        ---
+        type:
+          username:
+            type: string
+          earnerIds:
+            type: array
+            description: An array of the user's confirmed email addresses
+          id:
+            type: integer
+            description: The user id number
+          name:
+            type: string
+            description: The user's full name
+        """
+
+        current_issuer = Issuer.objects.filter(slug=slug).filter(
+            Q(owner__id=request.user.id) |
+            Q(editors__id=request.user.id) |
+            Q(staff__id=request.user.id)
+        ).prefetch_related(self.role)
+
+        if not current_issuer.exists():
+            return Response(
+                "Issuer %s not found. Authenticated user must have owner, editor or staff rights on the issuer." % slug,
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        else:
+            if getattr(current_issuer[0], self.role).exists():
+                serializer = UserProfileField(getattr(current_issuer[0], self.role).all(), many=True)
+                return Response(serializer.data)
+            else:
+                return Response([], status=status.HTTP_200_OK)
+
+    def post(self, request, slug):
+        """
+        Add or remove a user from a role on an issuer. Limited to Owner users only.
+        ---
+        parameters:
+            - name: slug
+              type: string
+              paramType: path
+              description: The slug of the issuer whose roles to modify.
+              required: true
+            - name: action
+              type: string
+              paramType: form
+              description: Must be one of `add` or `remove`
+              required: true
+            - name: username
+              type: string
+              paramType: form
+              description: The username of the user to add or remove from this role.
+              required: true
+        type:
+          username:
+            type: string
+          earnerIds:
+            type: array
+            description: An array of the user's confirmed email addresses
+          id:
+            type: integer
+            description: The user id number
+          name:
+            type: string
+            description: The user's full name
+        """
+
+        # validate POST data
+        serializer = IssuerRoleActionSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        current_issuer = Issuer.objects.filter(
+            slug=slug,
+            owner__id=request.user.id
+        ).prefetch_related(self.role)
+        user_to_modify = get_user_model().objects.filter(username=request.data.get('username'))
+
+        if not current_issuer.exists():
+            return Response(
+                "Issuer %s not found. Authenticated user must be Issuer's owner to modify user permissions." % slug,
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if not user_to_modify.exists():
+            return Response(
+                "User %s not found. Cannot modify Issuer permissions." % serializer.validated_data.get('username'),
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        action = request.data.get('action')
+
+        if action == 'add' or action == '':
+            getattr(current_issuer[0], self.role).add(user_to_modify[0])
+        elif action == 'remove':
+            getattr(current_issuer[0], self.role).remove(user_to_modify[0])
+
+        if getattr(current_issuer[0], self.role).exists():
+            return Response(UserProfileField(getattr(current_issuer[0], self.role).all(), many=True).data)
+        else:
+            return Response([], status=status.HTTP_200_OK)
+
+
+class IssuerEditorsList(IssuerRoleList):
+    role = 'editors'
+
+
+class IssuerStaffList(IssuerRoleList):
+    role = 'staff'
+
+
+class BadgeClassList(AbstractIssuerAPIEndpoint):
     """
     GET a list of badgeclasses within one issuer context or
     POST to create a new badgeclass within the issuer context
     """
     model = IssuerBadgeClass
-
-    authentication_classes = (
-        authentication.TokenAuthentication,
-        authentication.SessionAuthentication,
-        authentication.BasicAuthentication,
-    )
 
     def get(self, request, issuerSlug):
         """
@@ -201,9 +308,6 @@ class BadgeClassList(APIView):
         ---
         serializer: IssuerBadgeClassSerializer
         """
-        if not isinstance(request.user, get_user_model()):
-            # TODO consider changing this a public API of all issuers (that are public?)
-            return Response(status=status.HTTP_403_FORBIDDEN)
 
         # Ensure current user has permissions on current issuer
         current_issuer = Issuer.objects.filter(
@@ -257,8 +361,6 @@ class BadgeClassList(APIView):
               paramType: form
               description: Either a URL of a remotely hosted criteria page or a text string describing the criteria.
         """
-        if not isinstance(request.user, get_user_model()):
-            return Response(status=status.HTTP_403_FORBIDDEN)
 
         # Step 1: Locate the issuer
         current_issuer = current_issuer = Issuer.objects.filter(
@@ -286,17 +388,11 @@ class BadgeClassList(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class BadgeClassDetail(APIView):
+class BadgeClassDetail(AbstractIssuerAPIEndpoint):
     """
     GET details on one BadgeClass. PUT and DELETE should be restricted to BadgeClasses that haven't been issued yet.
     """
     model = IssuerBadgeClass
-
-    authentication_classes = (
-        authentication.TokenAuthentication,
-        authentication.SessionAuthentication,
-        authentication.BasicAuthentication,
-    )
 
     def get(self, request, issuerSlug, badgeSlug):
         """
@@ -306,14 +402,18 @@ class BadgeClassDetail(APIView):
         """
         # TODO long term: allow GET if issuer has permission to issue even if not creator
 
-        try:
-            current_badgeclass = IssuerBadgeClass.objects.get(slug=badgeSlug, issuer__slug=issuerSlug)
-        except IssuerBadgeClass.DoesNotExist:
+        current_badgeclass = IssuerBadgeClass.objects.filter(slug=badgeSlug, issuer__slug=issuerSlug).filter(
+            Q(owner__id=request.user.id) |
+            Q(editors__id=request.user.id) |
+            Q(staff__id=request.user.id)
+        )
+
+        if not current_badgeclass.exists():
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        else:
-            serializer = IssuerBadgeClassSerializer(current_badgeclass, context={'request': request})
-            return Response(serializer.data)
+        current_badgeclass = current_badgeclass[0]
+        serializer = IssuerBadgeClassSerializer(current_badgeclass, context={'request': request})
+        return Response(serializer.data)
 
     def delete(self, request, issuerSlug, badgeSlug):
         """
@@ -347,18 +447,13 @@ class BadgeClassDetail(APIView):
         return Response("Badge " + badgeSlug + " has been deleted.", status.HTTP_200_OK)
 
 
-class AssertionList(APIView):
+class AssertionList(AbstractIssuerAPIEndpoint):
     """
     GET a list of assertions per issuer & per badgeclass
     POST to issue a new assertion
     """
     model = IssuerAssertion
     serializer_class = IssuerAssertionSerializer
-    authentication_classes = (
-        authentication.TokenAuthentication,
-        authentication.SessionAuthentication,
-        authentication.BasicAuthentication,
-    )
 
     def post(self, request, issuerSlug, badgeSlug):
         """
@@ -366,8 +461,6 @@ class AssertionList(APIView):
         ---
         serializer: IssuerAssertionSerializer
         """
-        if not isinstance(request.user, get_user_model()):
-            return Response(status=status.HTTP_403_FORBIDDEN)
 
         # Ensure current user has permissions on current badgeclass
         current_badgeclass = IssuerBadgeClass.objects.filter(
@@ -379,6 +472,11 @@ class AssertionList(APIView):
         ).select_related('issuers')
         if current_badgeclass.exists():
             current_badgeclass = current_badgeclass[0]
+        else:
+            return Response(
+                "Issuer not found or current user lacks permission to issue badges.",
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         serializer = IssuerAssertionSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
@@ -396,8 +494,6 @@ class AssertionList(APIView):
         ---
         serializer: IssuerAssertionSerializer
         """
-        if not isinstance(request.user, get_user_model()):
-            return Response(status=status.HTTP_403_FORBIDDEN)
 
         # Ensure current user has permissions on current badgeclass
         current_badgeclass = IssuerBadgeClass.objects.filter(
@@ -420,7 +516,7 @@ class AssertionList(APIView):
         return Response(serializer.data)
 
 
-class AssertionDetail(APIView):
+class AssertionDetail(AbstractIssuerAPIEndpoint):
     """
     Endpoints for (GET)ting a single assertion or revoking a badge (DELETE)
     """
@@ -435,8 +531,6 @@ class AssertionDetail(APIView):
         ---
         serializer: IssuerAssertionSerializer
         """
-        if not isinstance(request.user, get_user_model()):
-            return Response(status=status.HTTP_403_FORBIDDEN)
 
         current_assertion = IssuerAssertion.objects.filter(
             slug=assertionSlug
@@ -473,8 +567,6 @@ class AssertionDetail(APIView):
             - code: 404
               message: Assertion not found or user has inadequate permissions.
         """
-        if not isinstance(request.user, get_user_model()):
-            return Response(status=status.HTTP_403_FORBIDDEN)
 
         if request.data.get('revocation_reason') is None:
             raise ValidationError("revocation_reason is required to revoke a badge assertion")
@@ -511,7 +603,8 @@ Public Open Badges Resources
 TODO: move this to its own file.
 """
 # Abstract badge object
-class JSONBadgeObjectView(APIView):
+class JSONBadgeObjectView(AbstractIssuerAPIEndpoint):
+    permission_classes = (permissions.AllowAny,)
     renderer_classes = (JSONRenderer, JSONLDRenderer)
 
     def get(self, request, slug):
@@ -542,6 +635,7 @@ class IssuerBadgeClassImage(APIView):
     GET the unbaked badge image from a pretty url instead of media path
     """
     model = IssuerBadgeClass
+    permission_classes = (permissions.AllowAny,)
 
     def get(self, request, slug):
         try:
@@ -552,7 +646,7 @@ class IssuerBadgeClassImage(APIView):
             return redirect(current_badgeclass.image.url)
 
 
-class IssuerBadgeClassCriteria(APIView):
+class IssuerBadgeClassCriteria(AbstractIssuerAPIEndpoint):
     model = IssuerBadgeClass
 
     def get(self, request, slug):
@@ -586,6 +680,7 @@ class IssuerAssertionBadgeObject(JSONBadgeObjectView):
 
 class IssuerAssertionImage(APIView):
     model = IssuerAssertion
+    permission_classes = (permissions.AllowAny,)
 
     def get(self, request, slug):
         try:

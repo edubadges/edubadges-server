@@ -108,6 +108,12 @@ class IssuerSerializer(AbstractBadgeObjectSerializer):
         return new_issuer
 
 
+class IssuerRoleActionSerializer(serializers.Serializer):
+    """ A serializer used for validating user role change POSTS """
+    action = serializers.ChoiceField(('add', 'remove',), allow_blank=True)
+    username = serializers.CharField(allow_blank=False)
+
+
 class IssuerBadgeClassSerializer(AbstractBadgeObjectSerializer):
     issuer = serializers.HyperlinkedRelatedField(view_name='issuer_badge_object', read_only=True, lookup_field='slug')
     badge_object = WritableJSONField(max_length=16384, read_only=True, required=False)
