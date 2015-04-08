@@ -11,6 +11,7 @@ from badgeuser.serializers import UserProfileField
 from .models import Issuer, BadgeClass, BadgeInstance
 from .serializers import (IssuerSerializer, BadgeClassSerializer,
                           BadgeInstanceSerializer, IssuerRoleActionSerializer)
+from .permissions import IsAuthorizedToIssue, IsAuthorizedToEdit
 
 
 class AbstractIssuerAPIEndpoint(APIView):
@@ -39,7 +40,6 @@ class IssuerList(AbstractIssuerAPIEndpoint):
         # Get the Issuers this user owns, edits, or staffs:
         user_issuers = Issuer.objects.filter(
             Q(owner__id=request.user.id) |
-            Q(editors__id=request.user.id) |
             Q(staff__id=request.user.id)
         )
         if not user_issuers.exists():
@@ -407,7 +407,6 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
             slug=badgeSlug
         ).filter(
             Q(issuer__owner__id=request.user.id) |
-            Q(issuer__editors__id=request.user.id) |
             Q(issuer__staff__id=request.user.id)
         ).select_related('issuers')
         if current_badgeclass.exists():
@@ -440,7 +439,6 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
             slug=badgeSlug
         ).filter(
             Q(issuer__owner__id=request.user.id) |
-            Q(issuer__editors__id=request.user.id) |
             Q(issuer__staff__id=request.user.id)
         ).select_related('assertions')
         if current_badgeclass.exists():
@@ -461,6 +459,16 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
     Endpoints for (GET)ting a single assertion or revoking a badge (DELETE)
     """
     model = BadgeInstance
+    permission_classes = (IsAuthorizedToEdit,)
+
+    def get_object(self, slug):
+        try:
+            obj = self.model.objects.get(slug=slug)
+        except self.model.DoesNotExist:
+            return None
+
+        if self.check_object_permissions(self.request, obj):
+            return obj
 
     def get(self, request, issuerSlug, badgeSlug, assertionSlug):
         """
@@ -471,17 +479,8 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
         ---
         serializer: BadgeInstanceSerializer
         """
-
-        current_assertion = BadgeInstance.objects.filter(
-            slug=assertionSlug
-        ).filter(
-            Q(issuer__owner__id=request.user.id) |
-            Q(issuer__editors__id=request.user.id) |
-            Q(issuer__staff__id=request.user.id)
-        )
-        if current_assertion.exists():
-            current_assertion = current_assertion[0]
-        else:
+        current_assertion = self.get_object(assertionSlug)
+        if current_assertion is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         serializer = BadgeInstanceSerializer(current_assertion, context={'request': request})
@@ -507,19 +506,11 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
             - code: 404
               message: Assertion not found or user has inadequate permissions.
         """
-
         if request.data.get('revocation_reason') is None:
             raise ValidationError("revocation_reason is required to revoke a badge assertion")
 
-        current_assertion = BadgeInstance.objects.filter(
-            slug=assertionSlug
-        ).filter(
-            Q(issuer__owner__id=request.user.id) |
-            Q(issuer__editors__id=request.user.id)
-        )
-        if current_assertion.exists():
-            current_assertion = current_assertion[0]
-        else:
+        current_assertion = self.get_object(assertionSlug)
+        if current_assertion is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         if current_assertion.revoked is True:

@@ -1,18 +1,16 @@
-from django.test import TestCase
-from django.core import mail
-from django.conf import settings
-from django.test.utils import override_settings
-from rest_framework.test import APIRequestFactory, APIClient, APITestCase, force_authenticate
-from django.contrib.auth import get_user_model
-
 import json
 import os
 import os.path
 import shutil
 
-from api import *
-from serializers import *
-from models import *
+from django.core import mail
+from django.contrib.auth import get_user_model
+
+from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
+
+from .api import *
+from .serializers import *
+from .models import *
 
 factory = APIRequestFactory()
 
@@ -126,7 +124,7 @@ class IssuerTests(APITestCase):
         )
 
         self.assertEqual(second_response.status_code, 200)
-        self.assertEqual(len(second_response.data), 0) # Assert that there are no more staff now
+        self.assertEqual(len(second_response.data), 0)  # Assert that there are no more staff now
 
 
 class BadgeClassTests(APITestCase):
@@ -201,12 +199,12 @@ class BadgeClassTests(APITestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_delete_unissued_badgeclass(self):
-        self.assertTrue(IssuerBadgeClass.objects.filter(slug='badge-of-never-issued').exists())
+        self.assertTrue(BadgeClass.objects.filter(slug='badge-of-never-issued').exists())
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.delete('/v1/issuer/issuers/test-issuer/badges/badge-of-never-issued')
         self.assertEqual(response.status_code, 200)
 
-        self.assertFalse(IssuerBadgeClass.objects.filter(slug='badge-of-never-issued').exists())
+        self.assertFalse(BadgeClass.objects.filter(slug='badge-of-never-issued').exists())
 
     def test_delete_already_issued_badgeclass(self):
         """
@@ -216,7 +214,7 @@ class BadgeClassTests(APITestCase):
         response = self.client.delete('/v1/issuer/issuers/test-issuer/badges/badge-of-testing')
         self.assertEqual(response.status_code, 400)
 
-        self.assertTrue(IssuerBadgeClass.objects.filter(slug='badge-of-testing').exists())
+        self.assertTrue(BadgeClass.objects.filter(slug='badge-of-testing').exists())
 
 
 class AssertionTests(APITestCase):
@@ -231,7 +229,7 @@ class AssertionTests(APITestCase):
 
     def test_authenticated_owner_issue_badge(self):
         # load test image into media files if it doesn't exist
-        self.ensure_image_exists(IssuerBadgeClass.objects.get(slug='badge-of-testing'))
+        self.ensure_image_exists(BadgeClass.objects.get(slug='badge-of-testing'))
 
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         assertion = {
@@ -243,7 +241,7 @@ class AssertionTests(APITestCase):
 
     def test_authenticated_editor_can_issue_badge(self):
         # load test image into media files if it doesn't exist
-        self.ensure_image_exists(IssuerBadgeClass.objects.get(slug='badge-of-testing'))
+        self.ensure_image_exists(BadgeClass.objects.get(slug='badge-of-testing'))
 
         # This issuer has user 2 among its editors.
         the_editor = get_user_model().objects.get(pk=2)
@@ -290,12 +288,12 @@ class AssertionTests(APITestCase):
     def test_revoke_assertion(self):
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.delete(
-            '/v1/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/9ecff8b2-a178-4d17-b382-9109065012d1',
+            '/v1/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa',
             {'revocation_reason': 'Earner kind of sucked, after all.'}
         )
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get('/public/assertions/9ecff8b2-a178-4d17-b382-9109065012d1')
+        response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa')
         self.assertEqual(response.status_code, 410)
 
     def test_revoke_assertion_missing_reason(self):

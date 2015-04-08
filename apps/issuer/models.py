@@ -76,6 +76,11 @@ class Issuer(Component):
     def get_absolute_url(self):
         return "/public/issuers/%s" % self.get_slug()
 
+    @property
+    def editors(self):
+        # TODO Test this:
+        return self.staff.filter(issuerstaff__editor=True)
+
 
 class IssuerStaff(models.Model):
     issuer = models.ForeignKey(Issuer)
