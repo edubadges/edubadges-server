@@ -2,10 +2,11 @@ from rest_framework import authentication, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
-from mainsite.permissions import IsOwner
-from models import BadgeUser
-from serializers import TokenSerializer
 
+from mainsite.permissions import IsOwner
+
+from .models import BadgeUser
+from .serializers import TokenSerializer
 
 
 class BadgeUserList(APIView):

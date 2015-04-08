@@ -6,6 +6,7 @@ import itertools
 import json
 import os
 import png
+import re
 
 from django.conf import settings
 from django.core.files import File
@@ -53,3 +54,11 @@ def baked_chunks(original_chunks, badge_chunk):
         itertools.islice(original_chunks, 1, None))
 
     return itertools.chain(first_slice, [badge_chunk], last_slice)
+
+
+def test_probable_url(string):
+    earl = re.compile(r'^(https?|ftp)://[^\s/$.?#].[^\s]*$')
+    if isinstance(string, (str, unicode)) and earl.match(string):
+        return True
+    else:
+        return False

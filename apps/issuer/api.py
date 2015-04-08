@@ -1,22 +1,16 @@
-# Views for Issuer API endpoints (incoming requests to this application)
 from django.contrib.auth import get_user_model
 from django.db.models import Q
-from django.db.models.query import EmptyQuerySet
-from django.utils.text import slugify
-from django.shortcuts import redirect
 
 from rest_framework import status, authentication, permissions
-from rest_framework.views import APIView
-from rest_framework.parsers import JSONParser
-from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
-from rest_framework.renderers import JSONRenderer
-from mainsite.renderers import JSONLDRenderer
-from models import EarnerNotification, Issuer, IssuerBadgeClass, IssuerAssertion
-from serializers import EarnerNotificationSerializer, IssuerSerializer, IssuerBadgeClassSerializer, IssuerAssertionSerializer, IssuerRoleActionSerializer
-import utils
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from badgeuser.serializers import UserProfileField
+
+from .models import Issuer, BadgeClass, BadgeInstance
+from .serializers import (IssuerSerializer, BadgeClassSerializer,
+                          BadgeInstanceSerializer, IssuerRoleActionSerializer)
 
 
 class AbstractIssuerAPIEndpoint(APIView):
@@ -90,7 +84,7 @@ class IssuerList(AbstractIssuerAPIEndpoint):
         serializer.is_valid(raise_exception=True)
 
         # Pass in user values where we have a real user object instead of a url
-        # and non-model-field data to go into badge_object
+        # and non-model-field data to go into json
         serializer.save(
             owner=request.user,
             created_by=request.user
@@ -245,14 +239,14 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
     GET a list of badgeclasses within one issuer context or
     POST to create a new badgeclass within the issuer context
     """
-    model = IssuerBadgeClass
+    model = BadgeClass
 
     def get(self, request, issuerSlug):
         """
         GET a list of badgeclasses within one Issuer context.
         Authenticated user must have owner, editor, or staff status on Issuer
         ---
-        serializer: IssuerBadgeClassSerializer
+        serializer: BadgeClassSerializer
         """
 
         # Ensure current user has permissions on current issuer
@@ -270,7 +264,7 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
         if not issuer_badge_classes.exists():
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-        serializer = IssuerBadgeClassSerializer(issuer_badge_classes, many=True, context={'request': request})
+        serializer = BadgeClassSerializer(issuer_badge_classes, many=True, context={'request': request})
         return Response(serializer.data)
 
     def post(self, request, issuerSlug):
@@ -279,7 +273,7 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
         Authenticated user must have owner or editor status on Issuer
         ('staff' status is inadequate)
         ---
-        serializer: IssuerBadgeClassSerializer
+        serializer: BadgeClassSerializer
         parameters:
             - name: issuerSlug
               required: true
@@ -322,7 +316,7 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
         current_issuer = current_issuer[0]
 
         # Step 2: validate, create new Badge Class
-        serializer = IssuerBadgeClassSerializer(data=request.data, context={'request': request})
+        serializer = BadgeClassSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
         serializer.save(
@@ -338,17 +332,17 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
     """
     GET details on one BadgeClass. PUT and DELETE should be restricted to BadgeClasses that haven't been issued yet.
     """
-    model = IssuerBadgeClass
+    model = BadgeClass
 
     def get(self, request, issuerSlug, badgeSlug):
         """
         GET single BadgeClass representation
         ---
-        serializer: IssuerBadgeClassSerializer
+        serializer: BadgeClassSerializer
         """
         # TODO long term: allow GET if issuer has permission to issue even if not creator
 
-        current_badgeclass = IssuerBadgeClass.objects.filter(slug=badgeSlug, issuer__slug=issuerSlug).filter(
+        current_badgeclass = BadgeClass.objects.filter(slug=badgeSlug, issuer__slug=issuerSlug).filter(
             Q(owner__id=request.user.id) |
             Q(editors__id=request.user.id) |
             Q(staff__id=request.user.id)
@@ -358,7 +352,7 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         current_badgeclass = current_badgeclass[0]
-        serializer = IssuerBadgeClassSerializer(current_badgeclass, context={'request': request})
+        serializer = BadgeClassSerializer(current_badgeclass, context={'request': request})
         return Response(serializer.data)
 
     def delete(self, request, issuerSlug, badgeSlug):
@@ -373,7 +367,7 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
               message: Badge has been deleted.
         """
 
-        current_badgeclass = IssuerBadgeClass.objects.filter(
+        current_badgeclass = BadgeClass.objects.filter(
             slug=badgeSlug,
             issuer__slug=issuerSlug,
             assertions=None
@@ -393,23 +387,23 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
         return Response("Badge " + badgeSlug + " has been deleted.", status.HTTP_200_OK)
 
 
-class AssertionList(AbstractIssuerAPIEndpoint):
+class BadgeInstanceList(AbstractIssuerAPIEndpoint):
     """
     GET a list of assertions per issuer & per badgeclass
     POST to issue a new assertion
     """
-    model = IssuerAssertion
-    serializer_class = IssuerAssertionSerializer
+    model = BadgeInstance
+    serializer_class = BadgeInstanceSerializer
 
     def post(self, request, issuerSlug, badgeSlug):
         """
         Issue a badge to a single recipient.
         ---
-        serializer: IssuerAssertionSerializer
+        serializer: BadgeInstanceSerializer
         """
 
         # Ensure current user has permissions on current badgeclass
-        current_badgeclass = IssuerBadgeClass.objects.filter(
+        current_badgeclass = BadgeClass.objects.filter(
             slug=badgeSlug
         ).filter(
             Q(issuer__owner__id=request.user.id) |
@@ -424,7 +418,7 @@ class AssertionList(AbstractIssuerAPIEndpoint):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        serializer = IssuerAssertionSerializer(data=request.data, context={'request': request})
+        serializer = BadgeInstanceSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
         serializer.save(
@@ -438,11 +432,11 @@ class AssertionList(AbstractIssuerAPIEndpoint):
         """
         Get a list of all issued assertions for a single BadgeClass.
         ---
-        serializer: IssuerAssertionSerializer
+        serializer: BadgeInstanceSerializer
         """
 
         # Ensure current user has permissions on current badgeclass
-        current_badgeclass = IssuerBadgeClass.objects.filter(
+        current_badgeclass = BadgeClass.objects.filter(
             slug=badgeSlug
         ).filter(
             Q(issuer__owner__id=request.user.id) |
@@ -458,15 +452,15 @@ class AssertionList(AbstractIssuerAPIEndpoint):
         if not assertions.exists():
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-        serializer = IssuerAssertionSerializer(assertions, many=True, context={'request': request})
+        serializer = BadgeInstanceSerializer(assertions, many=True, context={'request': request})
         return Response(serializer.data)
 
 
-class AssertionDetail(AbstractIssuerAPIEndpoint):
+class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
     """
     Endpoints for (GET)ting a single assertion or revoking a badge (DELETE)
     """
-    model = IssuerAssertion
+    model = BadgeInstance
 
     def get(self, request, issuerSlug, badgeSlug, assertionSlug):
         """
@@ -475,10 +469,10 @@ class AssertionDetail(AbstractIssuerAPIEndpoint):
         but the assertion must belong to an issuer owned, edited, or staffed by the
         authenticated user.
         ---
-        serializer: IssuerAssertionSerializer
+        serializer: BadgeInstanceSerializer
         """
 
-        current_assertion = IssuerAssertion.objects.filter(
+        current_assertion = BadgeInstance.objects.filter(
             slug=assertionSlug
         ).filter(
             Q(issuer__owner__id=request.user.id) |
@@ -490,7 +484,7 @@ class AssertionDetail(AbstractIssuerAPIEndpoint):
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        serializer = IssuerAssertionSerializer(current_assertion, context={'request': request})
+        serializer = BadgeInstanceSerializer(current_assertion, context={'request': request})
 
         return Response(serializer.data)
 
@@ -517,7 +511,7 @@ class AssertionDetail(AbstractIssuerAPIEndpoint):
         if request.data.get('revocation_reason') is None:
             raise ValidationError("revocation_reason is required to revoke a badge assertion")
 
-        current_assertion = IssuerAssertion.objects.filter(
+        current_assertion = BadgeInstance.objects.filter(
             slug=assertionSlug
         ).filter(
             Q(issuer__owner__id=request.user.id) |

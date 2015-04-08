@@ -1,25 +1,18 @@
-# Views for Issuer API endpoints (incoming requests to this application)
 from django.shortcuts import redirect
 
-from rest_framework import status, authentication, permissions
+from rest_framework import status, permissions
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from rest_framework.response import Response
-from rest_framework.renderers import JSONRenderer
-from mainsite.renderers import JSONLDRenderer
-from models import Issuer, IssuerBadgeClass, IssuerAssertion
+from .api import AbstractIssuerAPIEndpoint
+from .models import Issuer, BadgeClass, BadgeInstance
 import utils
-from api import AbstractIssuerAPIEndpoint
-
-"""
-Public Open Badges Resources
-"""
 
 
-"""
-Abstract Badge Object View Classes:
-"""
-class JSONBadgeObjectView(AbstractIssuerAPIEndpoint):
+class JSONComponentView(AbstractIssuerAPIEndpoint):
+    """
+    Abstract Component Class
+    """
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request, slug):
@@ -28,10 +21,13 @@ class JSONBadgeObjectView(AbstractIssuerAPIEndpoint):
         except self.model.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response(current_object.badge_object)
+            return Response(current_object.json)
 
 
-class BadgePropertyDetailView(APIView):
+class ComponentPropertyDetailView(APIView):
+    """
+    Abstract Component Class
+    """
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request, slug):
@@ -43,17 +39,14 @@ class BadgePropertyDetailView(APIView):
         return redirect(getattr(current_object, self.prop).url)
 
 
-"""
-Public views for Open Badges Issuer Objects and associated Resources
-"""
-class IssuerBadgeObject(JSONBadgeObjectView):
+class IssuerJson(JSONComponentView):
     """
     GET the actual OBI badge object for an issuer via the /public/issuers/ endpoint
     """
     model = Issuer
 
 
-class IssuerImage(BadgePropertyDetailView):
+class IssuerImage(ComponentPropertyDetailView):
     """
     GET an image that represents an Issuer
     """
@@ -62,27 +55,26 @@ class IssuerImage(BadgePropertyDetailView):
     Issuer.objects.exclude(image=None)
 
 
-#Badge Class views
-class IssuerBadgeClassObject(JSONBadgeObjectView):
+class BadgeClassJson(JSONComponentView):
     """
     GET the actual OBI badge object for a badgeclass via public/badges/:slug endpoint
     """
-    model = IssuerBadgeClass
+    model = BadgeClass
 
 
-class IssuerBadgeClassImage(BadgePropertyDetailView):
+class BadgeClassImage(ComponentPropertyDetailView):
     """
     GET the unbaked badge image from a pretty url instead of media path
     """
-    model = IssuerBadgeClass
+    model = BadgeClass
     prop = 'image'
-    queryset = IssuerBadgeClass.objects.exclude(image=None)
+    queryset = BadgeClass.objects.exclude(image=None)
 
 
-class IssuerBadgeClassCriteria(BadgePropertyDetailView):
-    model = IssuerBadgeClass
+class BadgeClassCriteria(ComponentPropertyDetailView):
+    model = BadgeClass
     prop = 'criteria'
-    queryset = IssuerBadgeClass.objects.all()
+    queryset = BadgeClass.objects.all()
 
     def get(self, request, slug):
         # TODO: Improve rendered HTML view template.
@@ -98,9 +90,8 @@ class IssuerBadgeClassCriteria(BadgePropertyDetailView):
         return Response(current_object.criteria_text)
 
 
-# Assertion views
-class IssuerAssertionBadgeObject(JSONBadgeObjectView):
-    model = IssuerAssertion
+class BadgeInstanceJson(JSONComponentView):
+    model = BadgeInstance
 
     def get(self, request, slug):
         try:
@@ -109,7 +100,7 @@ class IssuerAssertionBadgeObject(JSONBadgeObjectView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
             if current_object.revoked is False:
-                return Response(current_object.badge_object)
+                return Response(current_object.json)
             else:
                 # TODO update terms based on final accepted terms in response to
                 # https://github.com/openbadges/openbadges-specification/issues/33
@@ -122,7 +113,7 @@ class IssuerAssertionBadgeObject(JSONBadgeObjectView):
                 return Response(revocation_info, status=status.HTTP_410_GONE)
 
 
-class IssuerAssertionImage(BadgePropertyDetailView):
-    model = IssuerAssertion
+class BadgeInstanceImage(ComponentPropertyDetailView):
+    model = BadgeInstance
     prop = 'image'
-    queryset = IssuerAssertion.objects.filter(revoked=False)
+    queryset = BadgeInstance.objects.filter(revoked=False)

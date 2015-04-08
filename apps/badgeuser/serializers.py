@@ -1,13 +1,10 @@
 from rest_framework import serializers
-
-# from rest_framework.exceptions import ValidationError
-# from models import BadgeUser
-# from badgeanalysis.validation_messages import BadgeValidationError
-# from badgeanalysis.models import OpenBadge
-from badgeuser.models import BadgeUser
-from earner.serializers import EarnerBadgeSerializer
-from consumer.serializers import ConsumerBadgeDetailSerializer
 from rest_framework.authtoken.models import Token
+
+#from earner.serializers import EarnerBadgeSerializer
+#from consumer.serializers import ConsumerBadgeDetailSerializer
+
+from .models import BadgeUser
 
 
 class VerifiedEmailsField(serializers.Field):
@@ -47,8 +44,8 @@ class BadgeUserSerializer(serializers.ModelSerializer):
         fields = ('userProfile', 'earnerBadges', 'consumerBadges')
 
     userProfile = UserProfileField(source='*', read_only=True)
-    earnerBadges = EarnerBadgeSerializer(many=True, read_only=True, source='earnerbadge_set')
-    consumerBadges = ConsumerBadgeDetailSerializer(many=True, read_only=True, source='consumerbadge_set')
+    # earnerBadges = EarnerBadgeSerializer(many=True, read_only=True, source='earnerbadge_set')
+    # consumerBadges = ConsumerBadgeDetailSerializer(many=True, read_only=True, source='consumerbadge_set')
     # issuerRoles
 
 

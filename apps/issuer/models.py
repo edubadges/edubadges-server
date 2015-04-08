@@ -43,22 +43,22 @@ class Component(cachemodel.CacheModel):
     def get_full_url(self):
         return str(getattr(settings, 'HTTP_ORIGIN')) + self.get_absolute_url()
 
-    # Handle updating badge_object in case initial slug guess was modified on save because of a uniqueness constraint
+    # Handle updating json in case initial slug guess was modified on save because of a uniqueness constraint
     def process_real_full_url(self):
-        self.badge_object['id'] = self.get_full_url()
+        self.json['id'] = self.get_full_url()
 
     def save(self):
         super(Component, self).save()
 
         # Make adjustments if the slug has changed due to uniqueness constraint
-        object_id = self.badge_object.get('id')
+        object_id = self.json.get('id')
         if object_id != self.get_full_url():
             self.process_real_full_url()
             super(Component, self).save()
 
-    # Quick getter for values stored in the badge_object
+    # Quick getter for values stored in the json
     def prop(self, property_name):
-        return self.badge_object.get(property_name)
+        return self.json.get(property_name)
 
 
 class Issuer(Component):
@@ -100,15 +100,15 @@ class BadgeClass(Component):
     # TODO: Here's the replacement for criteria_url
     @property
     def criteria_url(self):
-        return self.badge_object.get('criteria')
+        return self.json.get('criteria')
 
     def get_absolute_url(self):
         return "/public/badges/%s" % self.get_slug()
 
     def process_real_full_url(self):
-        self.badge_object['image'] = self.get_full_url() + '/image'
-        if self.badge_object.get('criteria') is None or self.badge_object.get('criteria') == '':
-            self.badge_object['criteria'] = self.get_full_url() + '/criteria'
+        self.json['image'] = self.get_full_url() + '/image'
+        if self.json.get('criteria') is None or self.json.get('criteria') == '':
+            self.json['criteria'] = self.get_full_url() + '/criteria'
 
         super(BadgeClass, self).process_real_full_url()
 
@@ -149,13 +149,13 @@ class BadgeInstance(Component):
     def save(self, *args, **kwargs):
         if self.pk is None:
             salt = self.get_new_slug()
-            self.badge_object['recipient']['salt'] = salt
-            self.badge_object['recipient']['identity'] = generate_sha256_hashstring(self.email, salt)
+            self.json['recipient']['salt'] = salt
+            self.json['recipient']['identity'] = generate_sha256_hashstring(self.email, salt)
 
             self.created_at = datetime.datetime.now()
-            self.badge_object['issuedOn'] = self.created_at.isoformat()
+            self.json['issuedOn'] = self.created_at.isoformat()
 
-            self.image = bake(self.badgeclass.image, json.dumps(self.badge_object, indent=2))
+            self.image = bake(self.badgeclass.image, json.dumps(self.json, indent=2))
             self.image.open()
 
         if self.revoked is False:
@@ -181,7 +181,7 @@ class BadgeInstance(Component):
                 'image_url': self.get_full_url() + '/image'
             }
         except KeyError as e:
-            # for when a property isn't stored right in a badge_object
+            # for when a property isn't stored right in a json
             raise e
 
         t = django.template.loader.get_template('issuer/notify_earner_email.txt')

@@ -1,7 +1,7 @@
 [
   {
     "fields": {
-      "badge_object": "{\"description\":\"Issuer of Experimental Credentials\",\"url\":\"http://example.org\",\"type\":\"Issuer\",\"image\":\"http://localhost:8000/public/issuers/test-issuer/image\",\"@context\":\"https://w3id.org/openbadges/v1\",\"id\":\"http://localhost:8000/public/issuers/test-issuer\",\"email\":\"exampleIssuer@example.org\",\"name\":\"Test Issuer\"}",
+      "json": "{\"description\":\"Issuer of Experimental Credentials\",\"url\":\"http://example.org\",\"type\":\"Issuer\",\"image\":\"http://localhost:8000/public/issuers/test-issuer/image\",\"@context\":\"https://w3id.org/openbadges/v1\",\"id\":\"http://localhost:8000/public/issuers/test-issuer\",\"email\":\"exampleIssuer@example.org\",\"name\":\"Test Issuer\"}",
       "created_at": "2015-03-30T23:06:23Z",
       "editors": [],
       "created_by": 1,
@@ -16,7 +16,7 @@
   },
   {
     "fields": {
-      "badge_object": "{\"description\":\"Another Issuer of Experimental Credentials\",\"url\":\"http://example.org\",\"type\":\"Issuer\",\"image\":\"http://localhost:8000/public/issuers/test-issuer/image\",\"@context\":\"https://w3id.org/openbadges/v1\",\"id\":\"http://localhost:8000/public/issuers/test-issuer\",\"email\":\"exampleIssuer@example.org\",\"name\":\"Test Issuer\"}",
+      "json": "{\"description\":\"Another Issuer of Experimental Credentials\",\"url\":\"http://example.org\",\"type\":\"Issuer\",\"image\":\"http://localhost:8000/public/issuers/test-issuer/image\",\"@context\":\"https://w3id.org/openbadges/v1\",\"id\":\"http://localhost:8000/public/issuers/test-issuer\",\"email\":\"exampleIssuer@example.org\",\"name\":\"Test Issuer\"}",
       "created_at": "2015-03-30T23:06:23Z",
       "editors": [2],
       "created_by": 1,
@@ -38,7 +38,7 @@
       "criteria_text": "",
       "issuer": 12,
       "slug": "badge-of-testing",
-      "badge_object": "{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-awesome/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-awesome/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"id\":\"http://localhost:8000/public/badges/badge-of-awesome\",\"type\":\"BadgeClass\",\"name\":\"Badge of Awesome\"}"
+      "json": "{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-awesome/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-awesome/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"id\":\"http://localhost:8000/public/badges/badge-of-awesome\",\"type\":\"BadgeClass\",\"name\":\"Badge of Awesome\"}"
     },
     "model": "issuer.issuerbadgeclass",
     "pk": 10
@@ -52,7 +52,7 @@
       "criteria_text": "",
       "issuer": 12,
       "slug": "badge-of-never-issued",
-      "badge_object": "{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-awesome/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-awesome/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"id\":\"http://localhost:8000/public/badges/badge-of-awesome\",\"type\":\"BadgeClass\",\"name\":\"Badge of Awesome\"}"
+      "json": "{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-awesome/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-awesome/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"id\":\"http://localhost:8000/public/badges/badge-of-awesome\",\"type\":\"BadgeClass\",\"name\":\"Badge of Awesome\"}"
     },
     "model": "issuer.issuerbadgeclass",
     "pk": 11
@@ -66,14 +66,14 @@
       "criteria_text": "",
       "issuer": 13,
       "slug": "badge-of-edited-testing",
-      "badge_object": "{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-awesome/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-awesome/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"id\":\"http://localhost:8000/public/badges/badge-of-awesome\",\"type\":\"BadgeClass\",\"name\":\"Badge of Awesome\"}"
+      "json": "{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-awesome/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-awesome/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"id\":\"http://localhost:8000/public/badges/badge-of-awesome\",\"type\":\"BadgeClass\",\"name\":\"Badge of Awesome\"}"
     },
     "model": "issuer.issuerbadgeclass",
     "pk": 12
   },
   {
     "fields": {
-      "badge_object": "{\"issuedOn\":\"2015-03-31T18:14:04.857390\",\"verify\":{\"url\":\"http://localhost:8000/public/assertions/9ecff8b2-a178-4d17-b382-9109065012d1\",\"type\":\"hosted\"},\"image\":\"http://localhost:8000/public/assertions/9ecff8b2-a178-4d17-b382-9109065012d1/image\",\"recipient\":{\"type\":\"email\",\"salt\":\"686e1140-1127-4b79-a759-1e128bc52559\",\"hashed\":true,\"identity\":\"sha256$4e3dc77beef524c24b4788c55648f2b739212fbb65cfcff48b8a2df3c76431c2\"},\"type\":\"Assertion\",\"@context\":\"https://w3id.org/openbadges/v1\",\"badge\":\"http://localhost:8000/public/badges/badge-of-awesome\",\"id\":\"http://localhost:8000/public/assertions/9ecff8b2-a178-4d17-b382-9109065012d1\"}",
+      "json": "{\"issuedOn\":\"2015-03-31T18:14:04.857390\",\"verify\":{\"url\":\"http://localhost:8000/public/assertions/9ecff8b2-a178-4d17-b382-9109065012d1\",\"type\":\"hosted\"},\"image\":\"http://localhost:8000/public/assertions/9ecff8b2-a178-4d17-b382-9109065012d1/image\",\"recipient\":{\"type\":\"email\",\"salt\":\"686e1140-1127-4b79-a759-1e128bc52559\",\"hashed\":true,\"identity\":\"sha256$4e3dc77beef524c24b4788c55648f2b739212fbb65cfcff48b8a2df3c76431c2\"},\"type\":\"Assertion\",\"@context\":\"https://w3id.org/openbadges/v1\",\"badge\":\"http://localhost:8000/public/badges/badge-of-awesome\",\"id\":\"http://localhost:8000/public/assertions/9ecff8b2-a178-4d17-b382-9109065012d1\"}",
       "created_at": "2015-04-01T01:14:04Z",
       "created_by": 1,
       "slug": "9ecff8b2-a178-4d17-b382-9109065012d1",

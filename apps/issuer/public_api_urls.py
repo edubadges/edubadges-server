@@ -1,16 +1,19 @@
 from django.conf.urls import patterns, url
-from issuer.public_api import *
+
+from .public_api import (IssuerJson, IssuerImage, BadgeClassJson,
+                         BadgeClassImage, BadgeClassCriteria, BadgeInstanceJson,
+                         BadgeInstanceImage)
+
 
 urlpatterns = patterns(
-   'issuer.public_api_views',
-   url(r'^/issuers/(?P<slug>[\-0-9a-z]+)$', IssuerBadgeObject.as_view(), name='issuer_badge_object'),
-   url(r'^/issuers/(?P<slug>[\-0-9a-z]+)/image$', IssuerImage.as_view(), name='issuer_badge_object'),
+    'issuer.public_api_views',
+    url(r'^/issuers/(?P<slug>[\-0-9a-z]+)$', IssuerJson.as_view(), name='issuer_json'),
+    url(r'^/issuers/(?P<slug>[\-0-9a-z]+)/image$', IssuerImage.as_view(), name='issuer_image'),
 
-   url(r'^/badges/(?P<slug>[\-0-9a-z]+)$', IssuerBadgeClassObject.as_view(), name='badgeclass_badge_object'),
-   url(r'^/badges/(?P<slug>[\-0-9a-z]+)/image', IssuerBadgeClassImage.as_view(), name='badgeclass_image'),
-   url(r'^/badges/(?P<slug>[\-0-9a-z]+)/criteria', IssuerBadgeClassCriteria.as_view(), name='badgeclass_criteria'),
+    url(r'^/badges/(?P<slug>[\-0-9a-z]+)$', BadgeClassJson.as_view(), name='badgeclass_json'),
+    url(r'^/badges/(?P<slug>[\-0-9a-z]+)/image', BadgeClassImage.as_view(), name='badgeclass_image'),
+    url(r'^/badges/(?P<slug>[\-0-9a-z]+)/criteria', BadgeClassCriteria.as_view(), name='badgeclass_criteria'),
 
-   url(r'^/assertions/(?P<slug>[\-0-9a-z]+)$', IssuerAssertionBadgeObject.as_view(), name='assertion_badge_object'),
-   url(r'^/assertions/(?P<slug>[\-0-9a-z]+)/image', IssuerAssertionImage.as_view(), name='assertion_image'),
-
+    url(r'^/assertions/(?P<slug>[\-0-9a-z]+)$', BadgeInstanceJson.as_view(), name='assertion_json'),
+    url(r'^/assertions/(?P<slug>[\-0-9a-z]+)/image', BadgeInstanceImage.as_view(), name='assertion_image'),
 )
