@@ -36,5 +36,8 @@
     "react-mini-router": "~1.1.1",
     "react-dropzone": "~1.0.1"
   },
-  "readmeFilename": "README"
+  "readmeFilename": "README",
+  "scripts": {
+    "gulp-build": "gulp build"
+  }
 }
