@@ -1,4 +1,4 @@
-# Badge Trust
+# Badgr Platform
 *Digital badge management for issuers, earners, and consumers*
 
 ## How to get started on your local development environment.
@@ -7,15 +7,22 @@ Prerequisites:
   * python 2.7.x
   * virtualenv
   * npm
-  * gulp
+  - gulp (optional global install, or fallback with npm run-script )
 
 ### Create project directory and environment
 mkdir <PROJECT>
 cd <PROJECT>
+
+*It is sometimes useful to be able to easily switch between different version of the environment:*
 virtualenv env-<CURRENT DATE>
 ln -s env-<CURRENT DATE> env
+
+*Activate the environment (each time you start a session working with the code)*
 source env/bin/activate
-git clone ssh://git@stash.concentricsky.com/~notto/csky-badges.git -b develop code
+
+*Obtain source code*
+#### TODO: switch to master branch
+git clone ssh://git@stash.concentricsky.com/~notto/badgr-platform.git -b develop code
 cd code
 
 ### Install requirements
@@ -35,5 +42,6 @@ gulp
 
 ### Run a server
 ./manage.py runserver
-Navigtate to http://localhost:8000/account/login
+Navigate to http://localhost:8000/accounts/login
+login as superuser, verify an email address
 

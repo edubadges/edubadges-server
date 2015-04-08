@@ -1,90 +1,58 @@
 [
-  {
-    "fields": {
-      "json": "{\"description\":\"Issuer of Experimental Credentials\",\"url\":\"http://example.org\",\"type\":\"Issuer\",\"image\":\"http://localhost:8000/public/issuers/test-issuer/image\",\"@context\":\"https://w3id.org/openbadges/v1\",\"id\":\"http://localhost:8000/public/issuers/test-issuer\",\"email\":\"exampleIssuer@example.org\",\"name\":\"Test Issuer\"}",
-      "created_at": "2015-03-30T23:06:23Z",
-      "editors": [],
-      "created_by": 1,
-      "image": "uploads/issuers/badge1_fSFqTVV.png",
-      "owner": 1,
-      "staff": [],
-      "slug": "test-issuer",
-      "name": "Test Issuer"
+    {
+        "fields": {
+            "name": "Test Issuer",
+            "created_at": "2015-04-08T15:08:58Z",
+            "created_by": 1,
+            "json": "{\"description\":\"Issuer of Experimental Credentials\",\"url\":\"http://example.org\",\"image\":\"http://localhost:8000/public/issuers/test-issuer/image\",\"id\":\"http://localhost:8000/public/issuers/test-issuer\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"email\":\"exampleIssuer@example.org\",\"name\":\"Test Issuer\"}",
+            "image": "uploads/issuers/guinea_pig_testing_badge.png",
+            "owner": 1,
+            "slug": "test-issuer"
+        },
+        "model": "issuer.issuer",
+        "pk": 1
     },
-    "model": "issuer.issuer",
-    "pk": 12
-  },
-  {
-    "fields": {
-      "json": "{\"description\":\"Another Issuer of Experimental Credentials\",\"url\":\"http://example.org\",\"type\":\"Issuer\",\"image\":\"http://localhost:8000/public/issuers/test-issuer/image\",\"@context\":\"https://w3id.org/openbadges/v1\",\"id\":\"http://localhost:8000/public/issuers/test-issuer\",\"email\":\"exampleIssuer@example.org\",\"name\":\"Test Issuer\"}",
-      "created_at": "2015-03-30T23:06:23Z",
-      "editors": [2],
-      "created_by": 1,
-      "image": "uploads/issuers/badge1_fSFqTVV.png",
-      "owner": 1,
-      "staff": [],
-      "slug": "edited-test-issuer",
-      "name": "Edited Test Issuer"
+    {
+        "fields": {
+            "name": "Testing Badge",
+            "created_at": "2015-04-08T15:18:16Z",
+            "created_by": 1,
+            "json": "{\"description\":\"Issuer of Experimental Credentials\",\"url\":\"http://example.org\",\"image\":\"http://localhost:8000/public/issuers/test-issuer/image\",\"id\":\"http://localhost:8000/public/issuers/testing-badge\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"email\":\"exampleIssuer@example.org\",\"name\":\"Test Issuer\"}",
+            "image": "uploads/issuers/guinea_pig_testing_badge_dlQWRUl.png",
+            "owner": 1,
+            "slug": "testing-badge"
+        },
+        "model": "issuer.issuer",
+        "pk": 2
     },
-    "model": "issuer.issuer",
-    "pk": 13
-  },
-  {
-    "fields": {
-      "name": "Badge of Testing",
-      "created_at": "2015-03-31T00:56:21Z",
-      "created_by": 1,
-      "image": "uploads/badges/badge1.png",
-      "criteria_text": "",
-      "issuer": 12,
-      "slug": "badge-of-testing",
-      "json": "{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-awesome/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-awesome/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"id\":\"http://localhost:8000/public/badges/badge-of-awesome\",\"type\":\"BadgeClass\",\"name\":\"Badge of Awesome\"}"
+    {
+        "fields": {
+            "name": "Badge of Testing",
+            "created_at": "2015-04-08T15:20:25Z",
+            "created_by": 1,
+            "json": "{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-testing/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-awesome/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"type\":\"BadgeClass\",\"id\":\"http://localhost:8000/public/badges/badge-of-testing\",\"name\":\"Badge of Awesome\"}",
+            "image": "uploads/badges/guinea_pig_testing_badge.png",
+            "criteria_text": "Be cool, dawg.",
+            "slug": "badge-of-testing",
+            "issuer": 2
+        },
+        "model": "issuer.badgeclass",
+        "pk": 1
     },
-    "model": "issuer.issuerbadgeclass",
-    "pk": 10
-  },
-  {
-    "fields": {
-      "name": "Badge of Never Issued",
-      "created_at": "2015-03-31T00:56:21Z",
-      "created_by": 1,
-      "image": "uploads/badges/badge1.png",
-      "criteria_text": "",
-      "issuer": 12,
-      "slug": "badge-of-never-issued",
-      "json": "{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-awesome/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-awesome/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"id\":\"http://localhost:8000/public/badges/badge-of-awesome\",\"type\":\"BadgeClass\",\"name\":\"Badge of Awesome\"}"
-    },
-    "model": "issuer.issuerbadgeclass",
-    "pk": 11
-  },
-  {
-    "fields": {
-      "name": "Badge of Edited Issuer Testing",
-      "created_at": "2015-03-31T00:56:21Z",
-      "created_by": 1,
-      "image": "uploads/badges/badge1.png",
-      "criteria_text": "",
-      "issuer": 13,
-      "slug": "badge-of-edited-testing",
-      "json": "{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-awesome/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-awesome/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"id\":\"http://localhost:8000/public/badges/badge-of-awesome\",\"type\":\"BadgeClass\",\"name\":\"Badge of Awesome\"}"
-    },
-    "model": "issuer.issuerbadgeclass",
-    "pk": 12
-  },
-  {
-    "fields": {
-      "json": "{\"issuedOn\":\"2015-03-31T18:14:04.857390\",\"verify\":{\"url\":\"http://localhost:8000/public/assertions/9ecff8b2-a178-4d17-b382-9109065012d1\",\"type\":\"hosted\"},\"image\":\"http://localhost:8000/public/assertions/9ecff8b2-a178-4d17-b382-9109065012d1/image\",\"recipient\":{\"type\":\"email\",\"salt\":\"686e1140-1127-4b79-a759-1e128bc52559\",\"hashed\":true,\"identity\":\"sha256$4e3dc77beef524c24b4788c55648f2b739212fbb65cfcff48b8a2df3c76431c2\"},\"type\":\"Assertion\",\"@context\":\"https://w3id.org/openbadges/v1\",\"badge\":\"http://localhost:8000/public/badges/badge-of-awesome\",\"id\":\"http://localhost:8000/public/assertions/9ecff8b2-a178-4d17-b382-9109065012d1\"}",
-      "created_at": "2015-04-01T01:14:04Z",
-      "created_by": 1,
-      "slug": "9ecff8b2-a178-4d17-b382-9109065012d1",
-      "badgeclass": 10,
-      "image": "issued/badges/ef2e975ad8274a6dd60eecac733769c4.png",
-      "email": "test@example.com",
-      "issuer": 12,
-      "revoked": false,
-      "revocation_reason": ""
-    },
-    "model": "issuer.issuerassertion",
-    "pk": 1
-  }
+    {
+        "fields": {
+            "revocation_reason": null,
+            "revoked": false,
+            "created_at": "2015-04-08T15:59:03Z",
+            "created_by": null,
+            "slug": "92219015-18a6-4538-8b6d-2b228e47b8aa",
+            "json": "{\"issuedOn\":\"2015-04-08T08:59:03.679218\",\"verify\":{\"url\":\"http://localhost:8000/public/assertions/9ecff8b2-a178-4d17-b382-9109065012d1\",\"type\":\"hosted\"},\"image\":\"http://localhost:8000/public/assertions/9ecff8b2-a178-4d17-b382-9109065012d1/image\",\"recipient\":{\"type\":\"email\",\"salt\":\"9944f83b-c1df-420d-b2d9-5f2d8968ca1c\",\"hashed\":true,\"identity\":\"sha256$a44b0fc1b8fc717bd6a5222c0f5573163f8647a9cada578b821904012257ea2d\"},\"type\":\"Assertion\",\"@context\":\"https://w3id.org/openbadges/v1\",\"badge\":\"http://localhost:8000/public/badges/badge-of-awesome\",\"id\":\"http://localhost:8000/public/assertions/9ecff8b2-a178-4d17-b382-9109065012d1\"}",
+            "badgeclass": 1,
+            "image": "issued/badges/49213a69dc3213270e95c2ac3c1fbd01.png",
+            "email": "test@example.com",
+            "issuer": 2
+        },
+        "model": "issuer.badgeinstance",
+        "pk": 1
+    }
 ]
