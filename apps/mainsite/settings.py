@@ -42,11 +42,7 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
 
     'mainsite',
-    'certificates',
-    'badgeanalysis',
     'issuer',
-    'earner',
-    'consumer',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -280,7 +276,7 @@ REST_FRAMEWORK = {
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ], 
+    ],
     'DEFAULT_RENDERER_CLASSES': (
         'mainsite.renderers.JSONLDRenderer',
         'rest_framework.renderers.JSONRenderer',

@@ -28,60 +28,6 @@ class AbstractIssuerAPIEndpoint(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
 
-class EarnerNotificationList(APIView):
-    """
-    Deprecated: Earner notifications allow a user to send email notifications about badges issued on other platforms.
-    """
-    model = EarnerNotification
-
-    def get(self, request):
-        """
-        Depreated: GET a list of all earner notifications in the system.
-        """
-        try:
-            notifications = EarnerNotification.objects.all()
-        except EarnerNotification.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        serializer = EarnerNotificationSerializer(notifications, many=True)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def post(self, request):
-        """
-        Deprecated: Create a new EarnerNotification as long as you know the right email address for the badge
-        assertion, and the earner has not been previously notified.
-        ---
-        parameters:
-            - name: url
-              description: The URL of a hosted assertion you wish to notify an earner about.
-              type: string
-              paramType: form
-            - name: email
-              description: The email address of the badge recipient. Must match the assertion.
-              type: string
-              paramType: form
-        """
-        data = {'url': request.data.get('url'), 'email': request.data.get('email')}
-        serializer = EarnerNotificationSerializer(data=data)
-
-        if serializer.is_valid():
-            try:
-                serializer.create()
-            except Exception as e:
-                return Response(e.message, status=status.HTTP_400_BAD_REQUEST)
-
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class EarnerNotificationDetail(APIView):
-    model = EarnerNotification
-
-    def get(self, request):
-        raise NotImplementedError("Earner notidication detail not implemented.")
-
-
 class IssuerList(AbstractIssuerAPIEndpoint):
     """
     Issuer List resource for the authenticated user
