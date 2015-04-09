@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from mainsite.serializers import WritableJSONField
+from badgeuser.serializers import UserProfileField
 
 from .models import Issuer, BadgeClass, BadgeInstance
 import utils
@@ -55,8 +56,15 @@ class IssuerSerializer(AbstractComponentSerializer):
 
 class IssuerRoleActionSerializer(serializers.Serializer):
     """ A serializer used for validating user role change POSTS """
-    action = serializers.ChoiceField(('add', 'remove',), allow_blank=True)
+    action = serializers.ChoiceField(('add', 'modify', 'remove'), allow_blank=True)
     username = serializers.CharField(allow_blank=False)
+    editor = serializers.BooleanField(default=False)
+
+
+class IssuerStaffSerializer(serializers.Serializer):
+    """ A read_only serializer for staff roles """
+    user = UserProfileField()
+    editor = serializers.BooleanField()
 
 
 class BadgeClassSerializer(AbstractComponentSerializer):

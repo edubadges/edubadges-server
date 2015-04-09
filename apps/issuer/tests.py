@@ -66,27 +66,26 @@ class IssuerTests(APITestCase):
 
     def test_get_empty_issuer_editors_set(self):
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
-        response = self.client.get('/v1/issuer/issuers/test-issuer/editors')
+        response = self.client.get('/v1/issuer/issuers/test-issuer/staff')
 
-        self.assertEqual(response.data, [])
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
     def test_add_user_to_issuer_editors_set(self):
         """ Authenticated user (pk=1) owns test-issuer. Add user (username=test3) as an editor. """
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         post_response = self.client.post(
-            '/v1/issuer/issuers/test-issuer/editors',
-            {'action': 'add', 'username': 'test3'}
+            '/v1/issuer/issuers/test-issuer/staff',
+            {'action': 'add', 'username': 'test3', 'editor': True}
         )
 
         self.assertEqual(post_response.status_code, 200)
-        self.assertEqual(len(post_response.data), 1)  # Assert that there is now one editor
+        self.assertEqual(len(post_response.data), 2)  # Assert that there is now one editor
 
     def test_bad_action_issuer_editors_set(self):
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         post_response = self.client.post(
-            '/v1/issuer/issuers/test-issuer/editors',
-            {'action': 'DO THE HOKEY POKEY', 'username': 'user2'}
+            '/v1/issuer/issuers/test-issuer/staff',
+            {'action': 'DO THE HOKEY POKEY', 'username': 'test2', 'editor': True}
         )
 
         self.assertEqual(post_response.status_code, 400)
@@ -94,8 +93,8 @@ class IssuerTests(APITestCase):
     def test_add_nonexistent_user_to_issuer_editors_set(self):
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.post(
-            '/v1/issuer/issuers/test-issuer/editors',
-            {'action': 'add', 'username': 'taylor_swift'}
+            '/v1/issuer/issuers/test-issuer/staff',
+            {'action': 'add', 'username': 'taylor_swift', 'editor': True}
         )
 
         self.assertContains(response, "User taylor_swift not found.", status_code=404)
@@ -103,29 +102,32 @@ class IssuerTests(APITestCase):
     def test_add_user_to_nonexistent_issuer_editors_set(self):
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.post(
-            '/v1/issuer/issuers/test-nonexistent-issuer/editors',
-            {'action': 'add', 'username': 'user2'}
+            '/v1/issuer/issuers/test-nonexistent-issuer/staff',
+            {'action': 'add', 'username': 'test2', 'editor': True}
         )
 
         self.assertContains(response, "Issuer test-nonexistent-issuer not found", status_code=404)
 
     def test_add_remove_user_with_issuer_staff_set(self):
+        test_issuer = Issuer.objects.get(slug='test-issuer')
+        self.assertEqual(len(test_issuer.staff.all()), 0)
+
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         post_response = self.client.post(
             '/v1/issuer/issuers/test-issuer/staff',
-            {'action': 'add', 'username': 'user2'}
+            {'action': 'add', 'username': 'test2'}
         )
 
         self.assertEqual(post_response.status_code, 200)
-        self.assertEqual(len(post_response.data), 1)  # Assert that there is now one staff
+        self.assertEqual(len(test_issuer.staff.all()), 1)
 
         second_response = self.client.post(
             '/v1/issuer/issuers/test-issuer/staff',
-            {'action': 'remove', 'username': 'user2'}
+            {'action': 'remove', 'username': 'test2'}
         )
 
         self.assertEqual(second_response.status_code, 200)
-        self.assertEqual(len(second_response.data), 0)  # Assert that there are no more staff now
+        self.assertEqual(len(test_issuer.staff.all()), 0)
 
 
 class BadgeClassTests(APITestCase):
@@ -237,7 +239,7 @@ class AssertionTests(APITestCase):
         assertion = {
             "email": "test@example.com"
         }
-        response = self.client.post('/v1/issuer/issuers/test-issuer/badges/badge-of-testing/assertions', assertion)
+        response = self.client.post('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions', assertion)
 
         self.assertEqual(response.status_code, 201)
 
@@ -275,7 +277,7 @@ class AssertionTests(APITestCase):
             "email": "ottonomy@gmail.com",
             'create_notification': True
         }
-        response = self.client.post('/v1/issuer/issuers/test-issuer/badges/badge-of-testing/assertions', assertion)
+        response = self.client.post('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions', assertion)
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(len(mail.outbox), 1)
@@ -301,7 +303,7 @@ class AssertionTests(APITestCase):
     def test_revoke_assertion_missing_reason(self):
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.delete(
-            '/v1/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/9ecff8b2-a178-4d17-b382-9109065012d1',
+            '/v1/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa',
             {}
         )
 
@@ -326,5 +328,5 @@ class PublicAPITests(APITestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_get_assertion_image_with_redirect(self):
-        response = self.client.get('/public/assertions/9ecff8b2-a178-4d17-b382-9109065012d1/image')
+        response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa/image')
         self.assertEqual(response.status_code, 302)

@@ -33,7 +33,7 @@ def is_badgeclass_editor(user, badgeclass):
 
 @rules.predicate
 def is_badgeclass_staff(user, badgeclass):
-    return badgeclass.issuer.staff_set.filter(pk=user.pk).exists()
+    return badgeclass.issuer.staff.filter(pk=user.pk).exists()
 
 can_issue_badgeclass = is_owner | is_badgeclass_staff
 can_edit_badgeclass = is_owner | is_badgeclass_editor

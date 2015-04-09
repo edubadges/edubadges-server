@@ -6,11 +6,10 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from badgeuser.serializers import UserProfileField
-
 from .models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from .serializers import (IssuerSerializer, BadgeClassSerializer,
-                          BadgeInstanceSerializer, IssuerRoleActionSerializer)
+                          BadgeInstanceSerializer, IssuerRoleActionSerializer,
+                          IssuerStaffSerializer)
 from .permissions import (MayIssueBadgeClass, MayEditBadgeClass,
                           IsEditor, IsStaff, IsOwnerOrStaff)
 
@@ -25,6 +24,7 @@ class AbstractIssuerAPIEndpoint(APIView):
 
     def get_object(self, slug, queryset=None):
         """ Ensure user has permissions on Issuer """
+
         queryset = queryset if queryset is not None else self.queryset
         try:
             obj = queryset.get(slug=slug)
@@ -149,7 +149,9 @@ class IssuerDetail(AbstractIssuerAPIEndpoint):
             return Response(serializer.data)
 
 
-class IssuerRoleList(AbstractIssuerAPIEndpoint):
+class IssuerStaffList(AbstractIssuerAPIEndpoint):
+    """ View or modify an issuer's staff members and privileges """
+    role = 'staff'
     queryset = Issuer.objects.all()
     model = Issuer
     permission_classes = (IsOwnerOrStaff,)  # TODO: make sure editors/staff can GET
@@ -158,34 +160,29 @@ class IssuerRoleList(AbstractIssuerAPIEndpoint):
         """
         Get a list of users associated with a role on an Issuer
         ---
-        type:
-          username:
-            type: string
-          earnerIds:
-            type: array
-            description: An array of the user's confirmed email addresses
-          id:
-            type: integer
-            description: The user id number
-          name:
-            type: string
-            description: The user's full name
+        parameters:
+            - name: slug
+              type: string
+              paramType: path
+              description: The slug of the issuer whose roles to view.
+              required: true
         """
+        current_issuer = self.get_object(slug)
 
-        current_issuer = self.get_list(slug)
-
-        if not current_issuer.exists():
+        if current_issuer is None:
             return Response(
                 "Issuer %s not found. Authenticated user must have owner, editor or staff rights on the issuer." % slug,
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        else:
-            if getattr(current_issuer[0], self.role).exists():
-                serializer = UserProfileField(getattr(current_issuer[0], self.role).all(), many=True)
-                return Response(serializer.data)
-            else:
-                return Response([], status=status.HTTP_200_OK)
+        serializer = IssuerStaffSerializer(
+            IssuerStaff.objects.filter(issuer=current_issuer),
+            many=True
+        )
+
+        if len(serializer.data) == 0:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(serializer.data)
 
     def post(self, request, slug):
         """
@@ -200,27 +197,20 @@ class IssuerRoleList(AbstractIssuerAPIEndpoint):
             - name: action
               type: string
               paramType: form
-              description: Must be one of `add` or `remove`
+              description: The action to perform on the user: Must be one of: 'add', 'modify', or 'remove'
               required: true
             - name: username
               type: string
               paramType: form
               description: The username of the user to add or remove from this role.
               required: true
-        type:
-          username:
-            type: string
-          earnerIds:
-            type: array
-            description: An array of the user's confirmed email addresses
-          id:
-            type: integer
-            description: The user id number
-          name:
-            type: string
-            description: The user's full name
+            - name: editor
+              type: boolean
+              paramType: form
+              description: Should the user have editor privileges?
+              defaultValue: false
+              required: false
         """
-        import pdb; pdb.set_trace();
         # validate POST data
         serializer = IssuerRoleActionSerializer(data=request.data)
         if not serializer.is_valid():
@@ -234,18 +224,17 @@ class IssuerRoleList(AbstractIssuerAPIEndpoint):
             )
 
         try:
-            user_to_modify = get_user_model().objects.get(username=serializer.data.get('username'))
+            user_to_modify = get_user_model().objects.get(username=serializer.validated_data.get('username'))
         except get_user_model().DoesNotExist:
             return Response(
                 "User %s not found. Cannot modify Issuer permissions." % serializer.validated_data.get('username'),
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        action = serializer.data.get('action')
+        action = serializer.validated_data.get('action')
+        if action in ('add', 'modify'):
 
-        if action == 'add' or action == '':
-            editor_privilege = True if self.role == 'editors' else False
-
+            editor_privilege = serializer.validated_data.get('editor')
             staff_instance, created = IssuerStaff.objects.get_or_create(
                 user=user_to_modify,
                 issuer=current_issuer,
@@ -254,20 +243,15 @@ class IssuerRoleList(AbstractIssuerAPIEndpoint):
 
             if created is False and staff_instance.editor != editor_privilege:
                 staff_instance.editor = editor_privilege
-                staff_instance.save(update_fields=(editor,))
+                staff_instance.save(update_fields=('editor',))
 
         elif action == 'remove':
-            IssuerStaff.objects.delete(user=user_to_modify, issuer=current_issuer)
+            IssuerStaff.objects.filter(user=user_to_modify, issuer=current_issuer).delete()
+            return Response(
+                "User %s has been removed from %s staff." % (user_to_modify.username, current_issuer.name),
+                status=status.HTTP_200_OK)
 
-        return Response(UserProfileField(getattr(current_issuer, self.role).all(), many=True).data)
-
-
-class IssuerEditorsList(IssuerRoleList):
-    role = 'editors'
-
-
-class IssuerStaffList(IssuerRoleList):
-    role = 'staff'
+        return Response(IssuerStaffSerializer(staff_instance).data)
 
 
 class BadgeClassList(AbstractIssuerAPIEndpoint):
@@ -419,6 +403,7 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
     GET a list of assertions per issuer & per badgeclass
     POST to issue a new assertion
     """
+    queryset = BadgeClass.objects.all()
     model = BadgeClass
     serializer_class = BadgeInstanceSerializer
     permission_classes = (MayIssueBadgeClass,)
@@ -429,17 +414,10 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
         ---
         serializer: BadgeInstanceSerializer
         """
+        badgeclass_queryset = self.queryset.filter(issuer__slug=issuerSlug)
+        current_badgeclass = self.get_object(badgeSlug, queryset=badgeclass_queryset)
 
-        # Ensure current user has permissions on current badgeclass
-        current_badgeclass = BadgeClass.objects.filter(
-            slug=badgeSlug
-        ).filter(
-            Q(issuer__owner__id=request.user.id) |
-            Q(issuer__staff__id=request.user.id)
-        ).select_related('issuers')
-        if current_badgeclass.exists():
-            current_badgeclass = current_badgeclass[0]
-        else:
+        if current_badgeclass is None:
             return Response(
                 "Issuer not found or current user lacks permission to issue badges.",
                 status=status.HTTP_404_NOT_FOUND
