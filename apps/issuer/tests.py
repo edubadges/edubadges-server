@@ -186,8 +186,9 @@ class BadgeClassTests(APITestCase):
         Ensure that a logged-in user can get a list of their BadgeClasses
         """
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
-        response = self.client.get('/v1/issuer/issuers/test-issuer/badges')
+        response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges')
 
+        self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.data, list)  # Ensure we receive a list of badgeclasses
         self.assertEqual(len(response.data), 2)  # Ensure that we receive the 3 badgeclasses in fixture as expected
 
@@ -195,7 +196,7 @@ class BadgeClassTests(APITestCase):
         """
         Ensure that logged-out user can't GET the private API endpoint for badgeclass list
         """
-        response = self.client.get('/v1/issuer/issuers/test-issuer/badges')
+        response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges')
         self.assertEqual(response.status_code, 401)
 
     def test_delete_unissued_badgeclass(self):

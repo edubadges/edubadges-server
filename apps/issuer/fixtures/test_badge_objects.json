@@ -14,13 +14,13 @@
     },
     {
         "fields": {
-            "name": "Testing Badge",
+            "name": "Test Issuer 2",
             "created_at": "2015-04-08T15:18:16Z",
             "created_by": 1,
             "json": "{\"description\":\"Issuer of Experimental Credentials\",\"url\":\"http://example.org\",\"image\":\"http://localhost:8000/public/issuers/test-issuer/image\",\"id\":\"http://localhost:8000/public/issuers/testing-badge\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"email\":\"exampleIssuer@example.org\",\"name\":\"Test Issuer\"}",
             "image": "uploads/issuers/guinea_pig_testing_badge_dlQWRUl.png",
             "owner": 1,
-            "slug": "testing-badge"
+            "slug": "test-issuer-2"
         },
         "model": "issuer.issuer",
         "pk": 2
@@ -38,6 +38,20 @@
         },
         "model": "issuer.badgeclass",
         "pk": 1
+    },
+    {
+        "fields": {
+            "name": "Second Badge of Testing",
+            "created_at": "2015-04-08T15:20:25Z",
+            "created_by": 1,
+            "json": "{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-testing/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-awesome/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"type\":\"BadgeClass\",\"id\":\"http://localhost:8000/public/badges/badge-of-testing\",\"name\":\"Badge of Awesome\"}",
+            "image": "uploads/badges/guinea_pig_testing_badge.png",
+            "criteria_text": "Be cool, dawg.",
+            "slug": "second-badge-of-testing",
+            "issuer": 2
+        },
+        "model": "issuer.badgeclass",
+        "pk": 2
     },
     {
         "fields": {

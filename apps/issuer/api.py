@@ -2,16 +2,18 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 
 from rest_framework import status, authentication, permissions
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from badgeuser.serializers import UserProfileField
+from mainsite.permissions import IsOwner
 
 from .models import Issuer, BadgeClass, BadgeInstance
 from .serializers import (IssuerSerializer, BadgeClassSerializer,
                           BadgeInstanceSerializer, IssuerRoleActionSerializer)
-from .permissions import IsAuthorizedToIssue, IsAuthorizedToEdit
+from .permissions import (MayIssueBadgeClass, MayEditBadgeClass,
+                          IsEditor, IsStaff)
 
 
 class AbstractIssuerAPIEndpoint(APIView):
@@ -21,6 +23,29 @@ class AbstractIssuerAPIEndpoint(APIView):
         authentication.BasicAuthentication,
     )
     permission_classes = (permissions.IsAuthenticated,)
+
+    def get_object(self, slug):
+        """ Ensure user has permissions on Issuer """
+        try:
+            obj = self.model.objects.get(slug=slug)
+        except self.model.DoesNotExist:
+            return None
+
+        if self.check_object_permissions(self.request, obj):
+            return obj
+
+    def get_list(self, slug):
+        """ Ensure user has permissions on Issuer, and return badgeclass queryset if so. """
+        try:
+            obj = self.model.objects.filter(slug=slug).select_related('badgeclasses')
+        except self.model.DoesNotExist:
+            return self.model.objects.none()
+        try:
+            self.check_object_permissions(self.request, obj[0])
+        except PermissionDenied:
+            return self.model.objects.none()
+        else:
+            return obj
 
 
 class IssuerList(AbstractIssuerAPIEndpoint):
@@ -99,6 +124,7 @@ class IssuerDetail(AbstractIssuerAPIEndpoint):
     """
     model = Issuer
     serializer_class = IssuerSerializer
+    permission_classes = (IsStaff,)
 
     def get(self, request, slug):
         """
@@ -118,6 +144,7 @@ class IssuerDetail(AbstractIssuerAPIEndpoint):
 
 class IssuerRoleList(AbstractIssuerAPIEndpoint):
     model = Issuer
+    permission_classes = (IsOwner,)  # TODO: make sure editors/staff can GET
 
     def get(self, request, slug):
         """
@@ -239,7 +266,8 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
     GET a list of badgeclasses within one issuer context or
     POST to create a new badgeclass within the issuer context
     """
-    model = BadgeClass
+    model = Issuer
+    permission_classes = (IsEditor,)
 
     def get(self, request, issuerSlug):
         """
@@ -248,18 +276,17 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
         ---
         serializer: BadgeClassSerializer
         """
-
         # Ensure current user has permissions on current issuer
-        current_issuer = Issuer.objects.filter(
-            slug=issuerSlug
-        ).filter(
-            Q(owner__id=request.user.id) |
-            Q(editors__id=request.user.id) |
-            Q(staff__id=request.user.id)
-        ).select_related('badgeclasses')[0]
+        import pdb; pdb.set_trace();
+        current_issuer = self.get_list(issuerSlug)
 
-        # Get the Issuers this user owns, edits, or staffs:
-        issuer_badge_classes = current_issuer.badgeclasses.all()
+        if not current_issuer.exists():
+            return Response(
+                "Issuer %s not found or inadequate permissions." % issuerSlug,
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        issuer_badge_classes = current_issuer[0].badgeclasses.all()
 
         if not issuer_badge_classes.exists():
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -303,17 +330,13 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
         """
 
         # Step 1: Locate the issuer
-        current_issuer = current_issuer = Issuer.objects.filter(
-            slug=issuerSlug
-        ).filter(
-            Q(owner__id=request.user.id) |
-            Q(editors__id=request.user.id)
-        )
+        current_issuer = self.get_object(issuerSlug)
 
-        if not current_issuer.exists():
-            return Response('Issuer not found, or improper permissions on issuer', status=status.HTTP_404_NOT_FOUND)
-
-        current_issuer = current_issuer[0]
+        if current_issuer is None:
+            return Response(
+                "Issuer %s not found or inadequate permissions." % issuerSlug,
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         # Step 2: validate, create new Badge Class
         serializer = BadgeClassSerializer(data=request.data, context={'request': request})
@@ -333,6 +356,7 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
     GET details on one BadgeClass. PUT and DELETE should be restricted to BadgeClasses that haven't been issued yet.
     """
     model = BadgeClass
+    permission_classes = (MayEditBadgeClass,)
 
     def get(self, request, issuerSlug, badgeSlug):
         """
@@ -392,8 +416,9 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
     GET a list of assertions per issuer & per badgeclass
     POST to issue a new assertion
     """
-    model = BadgeInstance
+    model = BadgeClass
     serializer_class = BadgeInstanceSerializer
+    permission_classes = (MayIssueBadgeClass,)
 
     def post(self, request, issuerSlug, badgeSlug):
         """
@@ -459,16 +484,7 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
     Endpoints for (GET)ting a single assertion or revoking a badge (DELETE)
     """
     model = BadgeInstance
-    permission_classes = (IsAuthorizedToEdit,)
-
-    def get_object(self, slug):
-        try:
-            obj = self.model.objects.get(slug=slug)
-        except self.model.DoesNotExist:
-            return None
-
-        if self.check_object_permissions(self.request, obj):
-            return obj
+    permission_classes = (MayEditBadgeClass,)  # TODO: 
 
     def get(self, request, issuerSlug, badgeSlug, assertionSlug):
         """
