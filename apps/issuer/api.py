@@ -24,22 +24,28 @@ class AbstractIssuerAPIEndpoint(APIView):
     )
     permission_classes = (permissions.IsAuthenticated,)
 
-    def get_object(self, slug):
+    def get_object(self, slug, queryset=None):
         """ Ensure user has permissions on Issuer """
+        queryset = queryset if queryset is not None else self.queryset
         try:
-            obj = self.model.objects.get(slug=slug)
+            obj = queryset.get(slug=slug)
         except self.model.DoesNotExist:
             return None
 
-        if self.check_object_permissions(self.request, obj):
+        try:
+            self.check_object_permissions(self.request, obj)
+        except PermissionDenied:
+            return None
+        else:
             return obj
 
-    def get_list(self, slug):
+    def get_list(self, slug, queryset=None):
         """ Ensure user has permissions on Issuer, and return badgeclass queryset if so. """
-        try:
-            obj = self.model.objects.filter(slug=slug).select_related('badgeclasses')
-        except self.model.DoesNotExist:
+        queryset = queryset if queryset is not None else self.queryset
+        obj = queryset.filter(slug=slug).select_related('badgeclasses')
+        if not obj.exists():
             return self.model.objects.none()
+
         try:
             self.check_object_permissions(self.request, obj[0])
         except PermissionDenied:
@@ -52,6 +58,7 @@ class IssuerList(AbstractIssuerAPIEndpoint):
     """
     Issuer List resource for the authenticated user
     """
+    queryset = Issuer.objects.all()
     model = Issuer
     serializer_class = IssuerSerializer
 
@@ -122,6 +129,7 @@ class IssuerDetail(AbstractIssuerAPIEndpoint):
     """
     GET details on one issuer. PUT and DELETE should be highly restricted operations and are not implemented yet
     """
+    queryset = Issuer.objects.all()
     model = Issuer
     serializer_class = IssuerSerializer
     permission_classes = (IsStaff,)
@@ -143,6 +151,7 @@ class IssuerDetail(AbstractIssuerAPIEndpoint):
 
 
 class IssuerRoleList(AbstractIssuerAPIEndpoint):
+    queryset = Issuer.objects.all()
     model = Issuer
     permission_classes = (IsOwner,)  # TODO: make sure editors/staff can GET
 
@@ -266,6 +275,7 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
     GET a list of badgeclasses within one issuer context or
     POST to create a new badgeclass within the issuer context
     """
+    queryset = Issuer.objects.all()
     model = Issuer
     permission_classes = (IsEditor,)
 
@@ -277,7 +287,6 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
         serializer: BadgeClassSerializer
         """
         # Ensure current user has permissions on current issuer
-        import pdb; pdb.set_trace();
         current_issuer = self.get_list(issuerSlug)
 
         if not current_issuer.exists():
@@ -355,6 +364,7 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
     """
     GET details on one BadgeClass. PUT and DELETE should be restricted to BadgeClasses that haven't been issued yet.
     """
+    queryset = BadgeClass.objects.all()
     model = BadgeClass
     permission_classes = (MayEditBadgeClass,)
 
@@ -390,15 +400,8 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
             - code: 200
               message: Badge has been deleted.
         """
-
-        current_badgeclass = BadgeClass.objects.filter(
-            slug=badgeSlug,
-            issuer__slug=issuerSlug,
-            assertions=None
-        ). filter(
-            Q(issuer__owner__id=request.user.id) |
-            Q(issuer__editors__id=request.user.id)
-        )
+        unissued_badgeclasses = self.queryset.filter(assertions=None)
+        current_badgeclass = self.get_list(badgeSlug, queryset=unissued_badgeclasses)
 
         if current_badgeclass.exists():
             current_badgeclass[0].delete()
@@ -483,6 +486,7 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
     """
     Endpoints for (GET)ting a single assertion or revoking a badge (DELETE)
     """
+    queryset = BadgeInstance.objects.all()
     model = BadgeInstance
     permission_classes = (MayEditBadgeClass,)  # TODO: 
 
@@ -524,7 +528,6 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
         """
         if request.data.get('revocation_reason') is None:
             raise ValidationError("revocation_reason is required to revoke a badge assertion")
-
         current_assertion = self.get_object(assertionSlug)
         if current_assertion is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
