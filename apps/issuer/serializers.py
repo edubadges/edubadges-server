@@ -42,7 +42,7 @@ class IssuerSerializer(AbstractComponentSerializer):
 
         # Use AutoSlugField's pre_save to provide slug if empty, else auto-unique
         new_issuer.slug = \
-            Issuer._meta.get_field('slug').pre_save(new_issuer)
+            Issuer._meta.get_field('slug').pre_save(new_issuer, add=True)
 
         full_url = new_issuer.get_full_url()
         new_issuer.json['id'] = full_url
@@ -107,7 +107,7 @@ class BadgeClassSerializer(AbstractComponentSerializer):
 
         # Use AutoSlugField's pre_save to provide slug if empty, else auto-unique
         new_badgeclass.slug = \
-            BadgeClass._meta.get_field('slug').pre_save(new_badgeclass)
+            BadgeClass._meta.get_field('slug').pre_save(new_badgeclass, add=True)
 
         full_url = new_badgeclass.get_full_url()
         new_badgeclass.json['id'] = full_url
@@ -165,6 +165,7 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
             validated_data['json']['evidence'] = evidence
 
         new_assertion = BadgeInstance(**validated_data)
+        new_assertion.slug = new_assertion.get_new_slug()
 
         # Augment json with id
         full_url = new_assertion.get_full_url()  # this sets the slug
@@ -174,7 +175,7 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
 
         # Use AutoSlugField's pre_save to provide slug if empty, else auto-unique
         new_assertion.slug = \
-            BadgeInstance._meta.get_field('slug').pre_save(new_assertion)
+            BadgeInstance._meta.get_field('slug').pre_save(new_assertion, add=True)
 
         new_assertion.save()
 
