@@ -24,7 +24,7 @@ class BadgeUser(AbstractUser):
         return "/users/%s/" % urlquote(self.username)
 
     def get_full_name(self):
-        return self.name
+        return "%s %s", (self.first_name, self.last_name)
 
     def email_user(self, subject, message, from_email=None, **kwargs):
         """

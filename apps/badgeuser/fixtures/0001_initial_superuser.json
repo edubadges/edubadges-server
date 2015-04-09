@@ -34,5 +34,23 @@
         },
         "model": "badgeuser.badgeuser",
         "pk": 2
+    },
+    {
+        "fields": {
+            "username": "test3",
+            "first_name": "",
+            "last_name": "",
+            "is_active": true,
+            "is_superuser": false,
+            "is_staff": false,
+            "last_login": "2015-04-08T07:39:56Z",
+            "groups": [],
+            "user_permissions": [],
+            "password": "pbkdf2_sha256$12000$jsQRyPI88KXb$cymzbXd5z+IfpDLIh+NnKmZQAbeud/Vigp9UNkHBs64=",
+            "email": "test3@example.com",
+            "date_joined": "2015-04-08T07:39:18Z"
+        },
+        "model": "badgeuser.badgeuser",
+        "pk": 3
     }
 ]

@@ -27,7 +27,7 @@ class UserProfileField(serializers.Serializer):
 
         profile = {
             'id': obj.id,
-            'name': obj.name,
+            'name': obj.get_full_name(),
             'username': obj.username,
             'earnerIds': addresses
         }

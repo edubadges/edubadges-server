@@ -27,6 +27,19 @@
     },
     {
         "fields": {
+            "name": "Edited Test Issuer",
+            "created_at": "2015-04-08T15:18:16Z",
+            "created_by": 1,
+            "json": "{\"description\":\"Edited Test Issuer\",\"url\":\"http://example.org\",\"image\":\"http://localhost:8000/public/issuers/test-issuer/image\",\"id\":\"http://localhost:8000/public/issuers/testing-badge\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"email\":\"exampleIssuer@example.org\",\"name\":\"Test Issuer\"}",
+            "image": "uploads/issuers/guinea_pig_testing_badge_dlQWRUl.png",
+            "owner": 1,
+            "slug": "edited-test-issuer"
+        },
+        "model": "issuer.issuer",
+        "pk": 3
+    },
+    {
+        "fields": {
             "name": "Badge of Testing",
             "created_at": "2015-04-08T15:20:25Z",
             "created_by": 1,
@@ -52,6 +65,29 @@
         },
         "model": "issuer.badgeclass",
         "pk": 2
+    },
+    {
+        "fields": {
+            "name": "Badge of Edited Testing",
+            "created_at": "2015-04-08T15:20:25Z",
+            "created_by": 1,
+            "json": "{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-edited-testing/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-awesome/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"type\":\"BadgeClass\",\"id\":\"http://localhost:8000/public/badges/badge-of-testing\",\"name\":\"Badge of Awesome\"}",
+            "image": "uploads/badges/guinea_pig_testing_badge.png",
+            "criteria_text": "Be cool, dawg.",
+            "slug": "badge-of-edited-testing",
+            "issuer": 3
+        },
+        "model": "issuer.badgeclass",
+        "pk": 3
+    },
+    {
+        "fields": {
+            "user": 2,
+            "issuer": 3,
+            "editor": true
+        },
+        "model": "issuer.issuerstaff",
+        "pk": 1
     },
     {
         "fields": {

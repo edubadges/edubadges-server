@@ -51,7 +51,7 @@ class IssuerTests(APITestCase):
         self.assertEqual(response.status_code, 201)
 
         # assert that name, description, url, etc are set properly in response badge object
-        badge_object = response.data.get('badge_object')
+        badge_object = response.data.get('json')
         self.assertEqual(badge_object['url'], example_issuer_props['url'])
         self.assertEqual(badge_object['name'], example_issuer_props['name'])
         self.assertEqual(badge_object['description'], example_issuer_props['description'])
@@ -72,10 +72,11 @@ class IssuerTests(APITestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_add_user_to_issuer_editors_set(self):
+        """ Authenticated user (pk=1) owns test-issuer. Add user (username=test3) as an editor. """
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         post_response = self.client.post(
             '/v1/issuer/issuers/test-issuer/editors',
-            {'action': 'add', 'username': 'user2'}
+            {'action': 'add', 'username': 'test3'}
         )
 
         self.assertEqual(post_response.status_code, 200)
@@ -173,7 +174,7 @@ class BadgeClassTests(APITestCase):
             )
             self.assertEqual(response.status_code, 201)
             self.assertRegexpMatches(response.data.get(
-                'badge_object', {}).get('criteria'),
+                'json', {}).get('criteria'),
                 r'badge-of-awesome/criteria$'
             )
 

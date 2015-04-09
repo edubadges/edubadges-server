@@ -61,8 +61,11 @@ class Issuer(Component):
 
 class IssuerStaff(models.Model):
     issuer = models.ForeignKey(Issuer)
-    badgeuser = models.ForeignKey(AUTH_USER_MODEL)
+    user = models.ForeignKey(AUTH_USER_MODEL)
     editor = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('issuer', 'user')
 
 
 class BadgeClass(Component):

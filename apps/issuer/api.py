@@ -7,13 +7,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from badgeuser.serializers import UserProfileField
-from mainsite.permissions import IsOwner
 
-from .models import Issuer, BadgeClass, BadgeInstance
+from .models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from .serializers import (IssuerSerializer, BadgeClassSerializer,
                           BadgeInstanceSerializer, IssuerRoleActionSerializer)
 from .permissions import (MayIssueBadgeClass, MayEditBadgeClass,
-                          IsEditor, IsStaff)
+                          IsEditor, IsStaff, IsOwnerOrStaff)
 
 
 class AbstractIssuerAPIEndpoint(APIView):
@@ -153,7 +152,7 @@ class IssuerDetail(AbstractIssuerAPIEndpoint):
 class IssuerRoleList(AbstractIssuerAPIEndpoint):
     queryset = Issuer.objects.all()
     model = Issuer
-    permission_classes = (IsOwner,)  # TODO: make sure editors/staff can GET
+    permission_classes = (IsOwnerOrStaff,)  # TODO: make sure editors/staff can GET
 
     def get(self, request, slug):
         """
@@ -173,11 +172,7 @@ class IssuerRoleList(AbstractIssuerAPIEndpoint):
             description: The user's full name
         """
 
-        current_issuer = Issuer.objects.filter(slug=slug).filter(
-            Q(owner__id=request.user.id) |
-            Q(editors__id=request.user.id) |
-            Q(staff__id=request.user.id)
-        ).prefetch_related(self.role)
+        current_issuer = self.get_list(slug)
 
         if not current_issuer.exists():
             return Response(
@@ -225,41 +220,46 @@ class IssuerRoleList(AbstractIssuerAPIEndpoint):
             type: string
             description: The user's full name
         """
-
+        import pdb; pdb.set_trace();
         # validate POST data
         serializer = IssuerRoleActionSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        current_issuer = Issuer.objects.filter(
-            slug=slug,
-            owner__id=request.user.id
-        ).prefetch_related(self.role)
-        user_to_modify = get_user_model().objects.filter(username=request.data.get('username'))
-
-        if not current_issuer.exists():
+        current_issuer = self.get_object(slug)
+        if current_issuer is None:
             return Response(
                 "Issuer %s not found. Authenticated user must be Issuer's owner to modify user permissions." % slug,
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        if not user_to_modify.exists():
+        try:
+            user_to_modify = get_user_model().objects.get(username=serializer.data.get('username'))
+        except get_user_model().DoesNotExist:
             return Response(
                 "User %s not found. Cannot modify Issuer permissions." % serializer.validated_data.get('username'),
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        action = request.data.get('action')
+        action = serializer.data.get('action')
 
         if action == 'add' or action == '':
-            getattr(current_issuer[0], self.role).add(user_to_modify[0])
-        elif action == 'remove':
-            getattr(current_issuer[0], self.role).remove(user_to_modify[0])
+            editor_privilege = True if self.role == 'editors' else False
 
-        if getattr(current_issuer[0], self.role).exists():
-            return Response(UserProfileField(getattr(current_issuer[0], self.role).all(), many=True).data)
-        else:
-            return Response([], status=status.HTTP_200_OK)
+            staff_instance, created = IssuerStaff.objects.get_or_create(
+                user=user_to_modify,
+                issuer=current_issuer,
+                defaults={'editor': editor_privilege}
+            )
+
+            if created is False and staff_instance.editor != editor_privilege:
+                staff_instance.editor = editor_privilege
+                staff_instance.save(update_fields=(editor,))
+
+        elif action == 'remove':
+            IssuerStaff.objects.delete(user=user_to_modify, issuer=current_issuer)
+
+        return Response(UserProfileField(getattr(current_issuer, self.role).all(), many=True).data)
 
 
 class IssuerEditorsList(IssuerRoleList):
@@ -376,14 +376,14 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
         """
         # TODO long term: allow GET if issuer has permission to issue even if not creator
 
-        current_badgeclass = BadgeClass.objects.filter(slug=badgeSlug, issuer__slug=issuerSlug).filter(
-            Q(owner__id=request.user.id) |
-            Q(editors__id=request.user.id) |
-            Q(staff__id=request.user.id)
-        )
+        current_issuer_queryset = self.queryset.filter(issuer__slug=issuerSlug)
+        current_badgeclass = self.get_object(badgeSlug, queryset=current_issuer_queryset)
 
-        if not current_badgeclass.exists():
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        if current_badgeclass is None:
+            return Response(
+                "BadgeClass %s could not be found, or inadequate permissions." % badgeSlug,
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         current_badgeclass = current_badgeclass[0]
         serializer = BadgeClassSerializer(current_badgeclass, context={'request': request})

@@ -21,6 +21,7 @@ def is_staff(user, issuer):
 is_on_staff = is_owner | is_staff
 is_staff_editor = is_owner | is_editor
 
+rules.add_perm('issuer.is_owner', is_owner)
 rules.add_perm('issuer.is_editor', is_staff_editor)
 rules.add_perm('issuer.is_staff', is_on_staff)
 
@@ -63,10 +64,22 @@ class MayEditBadgeClass(permissions.BasePermission):
     """
 
     def has_object_permission(self, request, view, badgeclass):
-        if (request.method in SAFE_METHODS):
+        if request.method in SAFE_METHODS:
             return request.user.has_perm('issuer.can_issue_badge', badgeclass)
         else:
             return request.user.has_perm('issuer.can_edit_badgeclass', badgeclass)
+
+
+class IsOwnerOrStaff(permissions.BasePermission):
+    """
+    Ensures request user is owner for unsafe operations, or at least
+    staff for safe operations.
+    """
+    def has_object_permission(self, request, view, issuer):
+        if request.method in SAFE_METHODS:
+            return request.user.has_perm('issuer.is_staff', issuer)
+        else:
+            return request.user.has_perm('issuer.is_owner', issuer)
 
 
 class IsEditor(permissions.BasePermission):
@@ -78,7 +91,7 @@ class IsEditor(permissions.BasePermission):
     """
 
     def has_object_permission(self, request, view, issuer):
-        if (request.method in SAFE_METHODS):
+        if request.method in SAFE_METHODS:
             return request.user.has_perm('issuer.is_staff', issuer)
         else:
             return request.user.has_perm('issuer.is_editor', issuer)
