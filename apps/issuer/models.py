@@ -4,14 +4,13 @@ import uuid
 
 from django.conf import settings
 from django.core.mail import send_mail
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.loader import get_template
 
 from autoslug import AutoSlugField
 import cachemodel
 from jsonfield import JSONField
-
-from mainsite.utils import slugify
 
 from .utils import bake, generate_sha256_hashstring
 
@@ -32,29 +31,8 @@ class Component(cachemodel.CacheModel):
     class Meta:
         abstract = True
 
-    # Subclasses must implement 'slug' as a field
-    def get_slug(self):
-        if self.slug is None or self.slug == '':
-            # If there isn't a slug, object has been initialized but not saved,
-            # so this change will be saved later in present process; fine not to save now.
-            self.slug = slugify(self.name)
-        return self.slug
-
     def get_full_url(self):
-        return str(getattr(settings, 'HTTP_ORIGIN')) + self.get_absolute_url()
-
-    # Handle updating json in case initial slug guess was modified on save because of a uniqueness constraint
-    def process_real_full_url(self):
-        self.json['id'] = self.get_full_url()
-
-    def save(self):
-        super(Component, self).save()
-
-        # Make adjustments if the slug has changed due to uniqueness constraint
-        object_id = self.json.get('id')
-        if object_id != self.get_full_url():
-            self.process_real_full_url()
-            super(Component, self).save()
+        return settings.HTTP_ORIGIN + self.get_absolute_url()
 
     def prop(self, property_name):
         return self.json.get(property_name)
@@ -73,7 +51,7 @@ class Issuer(Component):
     image = models.ImageField(upload_to='uploads/issuers', blank=True)
 
     def get_absolute_url(self):
-        return "/public/issuers/%s" % self.get_slug()
+        return reverse('issuer_json', slug=self.slug)
 
     @property
     def editors(self):
@@ -106,14 +84,7 @@ class BadgeClass(Component):
         return self.json.get('criteria')
 
     def get_absolute_url(self):
-        return "/public/badges/%s" % self.get_slug()
-
-    def process_real_full_url(self):
-        self.json['image'] = self.get_full_url() + '/image'
-        if self.json.get('criteria') is None or self.json.get('criteria') == '':
-            self.json['criteria'] = self.get_full_url() + '/criteria'
-
-        super(BadgeClass, self).process_real_full_url()
+        return reverse('badgeclass_json', slug=self.slug)
 
 
 class BadgeInstance(Component):
@@ -139,15 +110,10 @@ class BadgeInstance(Component):
         return self.issuer.owner
 
     def get_absolute_url(self):
-        return "/public/assertions/%s" % self.get_slug()
+        return reverse('badgeinstance_json', slug=self.slug)
 
     def get_new_slug(self):
         return str(uuid.uuid4())
-
-    def get_slug(self):
-        if self.slug is None or self.slug == '':
-            self.slug = self.get_new_slug()
-        return self.slug
 
     def save(self, *args, **kwargs):
         if self.pk is None:

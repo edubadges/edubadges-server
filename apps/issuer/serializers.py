@@ -40,14 +40,16 @@ class IssuerSerializer(AbstractComponentSerializer):
 
         new_issuer = Issuer(**validated_data)
 
-        # Add id to new issuer, which is depenent on an instance being initiated
-        new_issuer.json['id'] = new_issuer.get_full_url()
+        # Use AutoSlugField's pre_save to provide slug if empty, else auto-unique
+        new_issuer.slug = \
+            Issuer._meta.get_field('slug').pre_save(new_issuer)
 
+        full_url = new_issuer.get_full_url()
+        new_issuer.json['id'] = full_url
         if validated_data.get('image') is not None:
-            new_issuer.json['image'] = new_issuer.get_full_url() + '/image'
+            new_issuer.json['image'] = "%s/image" % (full_url,)
 
         new_issuer.save()
-
         return new_issuer
 
 
@@ -95,28 +97,23 @@ class BadgeClassSerializer(AbstractComponentSerializer):
             'issuer': validated_data.get('issuer').get_full_url()
         }
 
-        # If criteria_url, put it in the json field directly:
         try:
-            validated_data['json']['criteria'] = validated_data.pop('criteria_url')
+            criteria_url = validated_data.pop('criteria_url')
+            validated_data['json']['criteria'] = criteria_url
         except KeyError:
             pass
 
-        # remove criteria_text from data before model init
-        try:
-            criteria_text = validated_data.pop('criteria_text')
-        except KeyError:
-            criteria_text = ''
-
         new_badgeclass = BadgeClass(**validated_data)
 
-        full_url = new_badgeclass.get_full_url()
-        # Augment with id, image and criteria link
-        new_badgeclass.json['id'] = full_url
-        new_badgeclass.json['image'] = full_url + '/image'
+        # Use AutoSlugField's pre_save to provide slug if empty, else auto-unique
+        new_badgeclass.slug = \
+            BadgeClass._meta.get_field('slug').pre_save(new_badgeclass)
 
-        if new_badgeclass.json.get('criteria')is None or criteria_text == '':
-            new_badgeclass.json['criteria'] = full_url + '/criteria'
-            new_badgeclass.criteria_text = criteria_text
+        full_url = new_badgeclass.get_full_url()
+        new_badgeclass.json['id'] = full_url
+        new_badgeclass.json['image'] = "%s/image" % (full_url,)
+        if new_badgeclass.criteria_text:
+            validated_data['json']['criteria'] = "%s/criteria" % (full_url,)
 
         new_badgeclass.save()
         return new_badgeclass
@@ -174,6 +171,10 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
         new_assertion.json['id'] = full_url
         new_assertion.json['verify']['url'] = full_url
         new_assertion.json['image'] = full_url + '/image'
+
+        # Use AutoSlugField's pre_save to provide slug if empty, else auto-unique
+        new_assertion.slug = \
+            BadgeInstance._meta.get_field('slug').pre_save(new_assertion)
 
         new_assertion.save()
 

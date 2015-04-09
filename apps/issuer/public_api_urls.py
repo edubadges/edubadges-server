@@ -14,6 +14,6 @@ urlpatterns = patterns(
     url(r'^/badges/(?P<slug>[\-0-9a-z]+)/image', BadgeClassImage.as_view(), name='badgeclass_image'),
     url(r'^/badges/(?P<slug>[\-0-9a-z]+)/criteria', BadgeClassCriteria.as_view(), name='badgeclass_criteria'),
 
-    url(r'^/assertions/(?P<slug>[\-0-9a-z]+)$', BadgeInstanceJson.as_view(), name='assertion_json'),
-    url(r'^/assertions/(?P<slug>[\-0-9a-z]+)/image', BadgeInstanceImage.as_view(), name='assertion_image'),
+    url(r'^/assertions/(?P<slug>[\-0-9a-z]+)$', BadgeInstanceJson.as_view(), name='badgeinstance_json'),
+    url(r'^/assertions/(?P<slug>[\-0-9a-z]+)/image', BadgeInstanceImage.as_view(), name='badgeinstance_image'),
 )
