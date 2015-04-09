@@ -71,7 +71,7 @@ class BadgeClassSerializer(AbstractComponentSerializer):
 
     def validate(self, data):
 
-        if utils.test_probable_url(data.get('criteria')):
+        if utils.is_probable_url(data.get('criteria')):
             data['criteria_url'] = data.pop('criteria')
         elif not isinstance(data.get('criteria'), (str, unicode)):
             raise serializers.ValidationError(

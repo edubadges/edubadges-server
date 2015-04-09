@@ -1,9 +1,5 @@
-"""
-Utility functions and constants focused on defining badge objects and issuing badges.
-"""
 import hashlib
 import itertools
-import json
 import os
 import png
 import re
@@ -25,9 +21,6 @@ def generate_md5_hashstring(identifier, salt):
 
 
 def bake(imageFile, assertion_json_string):
-    if isinstance(assertion_json_string, dict):
-        assertion_json_string = json.dumps(assertion_json_string)
-
     reader = png.Reader(file=imageFile)
     filepath = os.path.join(
         getattr(settings, 'MEDIA_ROOT', 'media'),
@@ -56,9 +49,6 @@ def baked_chunks(original_chunks, badge_chunk):
     return itertools.chain(first_slice, [badge_chunk], last_slice)
 
 
-def test_probable_url(string):
-    earl = re.compile(r'^(https?|ftp)://[^\s/$.?#].[^\s]*$')
-    if isinstance(string, (str, unicode)) and earl.match(string):
-        return True
-    else:
-        return False
+def is_probable_url(string):
+    earl = re.compile(r'^https?')
+    return earl.match(string)
