@@ -51,7 +51,7 @@ class Issuer(Component):
     image = models.ImageField(upload_to='uploads/issuers', blank=True)
 
     def get_absolute_url(self):
-        return reverse('issuer_json', slug=self.slug)
+        return reverse('issuer_json', kwargs={'slug': self.slug})
 
     @property
     def editors(self):
@@ -84,7 +84,7 @@ class BadgeClass(Component):
         return self.json.get('criteria')
 
     def get_absolute_url(self):
-        return reverse('badgeclass_json', slug=self.slug)
+        return reverse('badgeclass_json', kwargs={'slug': self.slug})
 
 
 class BadgeInstance(Component):
@@ -110,7 +110,7 @@ class BadgeInstance(Component):
         return self.issuer.owner
 
     def get_absolute_url(self):
-        return reverse('badgeinstance_json', slug=self.slug)
+        return reverse('badgeinstance_json', kwargs={'slug': self.slug})
 
     def get_new_slug(self):
         return str(uuid.uuid4())
