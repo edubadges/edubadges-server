@@ -9,14 +9,6 @@ from django.views.generic.base import TemplateView
 from django.contrib.auth import authenticate, login, logout
 
 
-# TODO: this is a temporary measure. Reconfigure urls.py to keep named "login" and "logout" views.
-def login_redirect(request):
-    return redirect('/accounts/login')
-
-def logout_redirect(request):
-    return redirect('/accounts/logout')
-
-
 class ActiveTabMixin(object):
     def get_context_data(self, **kwargs):
         context = super(ActiveTabMixin, self).get_context_data(**kwargs)

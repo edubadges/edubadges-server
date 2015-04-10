@@ -5,10 +5,9 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.shortcuts import redirect
 from django.views.generic.base import RedirectView
 
-from mainsite.views import login_redirect
 
 admin.autodiscover()
-#make sure that any view/model/form imports occur AFTER admin.autodiscover
+# make sure that any view/model/form imports occur AFTER admin.autodiscover
 
 from django.views.generic.base import RedirectView
 from mainsite.views import Error404, Error500, SitemapView
@@ -25,7 +24,7 @@ urlpatterns = patterns('',
     url(r'^robots\.txt$', RedirectView.as_view(url='%srobots.txt' % settings.STATIC_URL)),
 
     # Home
-    url(r'^$', RedirectView.as_view(url='/docs/', permanent=False), name='index'),
+    url(r'^$', RedirectView.as_view(url='/login', permanent=False), name='index'),
 
     # Sitemaps
     url(r'^sitemap$', SitemapView.as_view(), name='sitemap'),
@@ -38,8 +37,8 @@ urlpatterns = patterns('',
 
     # accounts:
     url(r'^accounts/', include('allauth.urls')),
-    url(r'^login', login_redirect, name='login'),
-    url(r'^logout', login_redirect, name='login'),
+    url(r'^login', RedirectView.as_view(url='/accounts/login', permanent=False), name='login'),
+    url(r'^logout', RedirectView.as_view(url='/accounts/logout', permanent=False), name='logout'),
 
     # REST Framework-based APIs
     url(r'^v1/$', RedirectView.as_view(url='/v1/issuer/issuers', permanent=False)),
