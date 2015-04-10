@@ -40,8 +40,10 @@ CACHES = {
 HTTP_ORIGIN = 'http://localhost:8000'
 
 
+# For the browsable API documentation at '/docs'
 # For local development environment: When you have a user you'd like to make API requests, 
 # as you can force the '/docs' endpoint to use particular credentials.
+# Get a token for your user at '/v1/user/auth-token'
 # SWAGGER_SETTINGS = {
 #     'api_key': ''
 # }
