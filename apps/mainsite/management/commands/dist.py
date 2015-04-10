@@ -1,5 +1,5 @@
-from django.core.management.base import BaseCommand, CommandError
-from subprocess import check_call
+from django.core.management.base import BaseCommand
+from subprocess import call
 
 
 class Command(BaseCommand):
@@ -7,10 +7,13 @@ class Command(BaseCommand):
     help = 'Runs build tasks to compile javascript and css'
 
     def handle(self, *args, **options):
+        """
+        Builds gulp resources. 
+        Gulp must be installed, and node_modules must be populated with `npm install`
+        """
+
         self.stdout.write('Task `dist`: compile front end resources with npm version...')
 
-        check_call(['npm','-v'])
-        check_call(['npm', 'install'])
-        check_call(['npm', 'run-script', 'gulp-build'])
+        call(['gulp', 'build'])
 
         self.stdout.write('SUCCESS: compiled front end resources')
