@@ -1,6 +1,10 @@
 # Badgr Home
 *Digital badge management for issuers, earners, and consumers*
 
+Badgr Home provides an API for issuing [Open Badges](http://openbadges.org). It will soon provide integrated badge management and sharing for badge earners and tools for inspection, exploration and discovery of Open Badges and a world of learning opportunities.
+
+*Project Status: in Development*
+
 ## How to get started on your local development environment.
 Prerequisites
   * python 2.7.x
@@ -41,4 +45,5 @@ Prerequisites
 * Navigate to http://localhost:8000/accounts/login
 * login, verify an email address
 
+A browseable API is available at `/v1` and documentation at `/docs`
 

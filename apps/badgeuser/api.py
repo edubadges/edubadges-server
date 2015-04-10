@@ -25,15 +25,14 @@ class BadgeUserList(APIView):
 
     def get(self, request):
         """
-        return a list of of badges that the consumer is currently analyzing.
-        TODO: make these badges expire after a few days
+        View a list of users viewable in current scope
         """
         raise ValidationError("viewing a user list not implemented")
 
 
 class BadgeUserDetail(APIView):
     """
-    View a single ConsumerBadge in detail (GET) or update a single ConsumerBadge with PUT
+    View a single user profile by username
     """
     model = BadgeUser
 

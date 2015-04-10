@@ -7,6 +7,7 @@ from .public_api import (IssuerJson, IssuerImage, BadgeClassJson,
 
 urlpatterns = patterns(
     'issuer.public_api_views',
+    # TODO: Handle url(r'^$),
     url(r'^/issuers/(?P<slug>[\-0-9a-z]+)$', IssuerJson.as_view(), name='issuer_json'),
     url(r'^/issuers/(?P<slug>[\-0-9a-z]+)/image$', IssuerImage.as_view(), name='issuer_image'),
 

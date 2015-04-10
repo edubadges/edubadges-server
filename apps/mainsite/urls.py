@@ -3,6 +3,8 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.shortcuts import redirect
+from django.views.generic.base import RedirectView
+
 from mainsite.views import login_redirect
 
 admin.autodiscover()
@@ -22,6 +24,9 @@ urlpatterns = patterns('',
     url(r'^favicon\.ico[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL)),
     url(r'^robots\.txt$', RedirectView.as_view(url='%srobots.txt' % settings.STATIC_URL)),
 
+    # Home
+    url(r'^$', RedirectView.as_view(url='/docs/', permanent=False), name='index'),
+
     # Sitemaps
     url(r'^sitemap$', SitemapView.as_view(), name='sitemap'),
     url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.sitemap', {'sitemaps': sitemaps}),
@@ -37,6 +42,7 @@ urlpatterns = patterns('',
     url(r'^logout', login_redirect, name='login'),
 
     # REST Framework-based APIs
+    url(r'^v1/$', RedirectView.as_view(url='/v1/issuer/issuers', permanent=False)),
     url(r'^v1/user', include('badgeuser.api_urls')),
     url(r'^v1/issuer', include('issuer.api_urls')),
     #url(r'^v1/earner', include('earner.api_urls')),
