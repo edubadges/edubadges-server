@@ -1,7 +1,7 @@
 # Badgr Server
 *Digital badge management for issuers, earners, and consumers*
 
-Badgr Home provides an API for issuing [Open Badges](http://openbadges.org). It will soon provide integrated badge management and sharing for badge earners and tools for inspection, exploration and discovery of Open Badges and a world of learning opportunities.
+Badgr Server provides an API for issuing [Open Badges](http://openbadges.org). It will soon provide integrated badge management and sharing for badge earners and tools for inspection, exploration and discovery of Open Badges and a world of learning opportunities.
 
 *Version: Developer Preview 0.1.1*
 
