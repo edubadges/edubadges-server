@@ -284,7 +284,7 @@ class AssertionTests(APITestCase):
 
     def test_authenticated_owner_list_assertions(self):
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
-        response = self.client.get('/v1/issuer/issuers/test-issuer/badges/badge-of-testing/assertions')
+        response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions')
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)

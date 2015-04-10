@@ -438,18 +438,15 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
         ---
         serializer: BadgeInstanceSerializer
         """
-
+        badgeclass_queryset = self.queryset.filter(issuer__slug=issuerSlug).select_related('assertions')
         # Ensure current user has permissions on current badgeclass
-        current_badgeclass = BadgeClass.objects.filter(
-            slug=badgeSlug
-        ).filter(
-            Q(issuer__owner__id=request.user.id) |
-            Q(issuer__staff__id=request.user.id)
-        ).select_related('assertions')
-        if current_badgeclass.exists():
-            current_badgeclass = current_badgeclass[0]
+        current_badgeclass = self.get_object(badgeSlug, queryset=badgeclass_queryset)
+        if current_badgeclass is None:
+            return Response(
+                "BadgeClass %s not found or inadequate permissions." % badgeSlug,
+                status=status.HTTP_404_NOT_FOUND
+            )
 
-        # Get the Issuers this user owns, edits, or staffs:
         assertions = current_badgeclass.assertions.all()
 
         if not assertions.exists():
