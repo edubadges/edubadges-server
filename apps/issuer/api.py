@@ -154,7 +154,7 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
     role = 'staff'
     queryset = Issuer.objects.all()
     model = Issuer
-    permission_classes = (IsOwnerOrStaff,)  # TODO: make sure editors/staff can GET
+    permission_classes = (IsOwnerOrStaff,)
 
     def get(self, request, slug):
         """
@@ -181,7 +181,7 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
         )
 
         if len(serializer.data) == 0:
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response([], status=status.HTTP_200_OK)
         return Response(serializer.data)
 
     def post(self, request, slug):
@@ -282,7 +282,7 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
         issuer_badge_classes = current_issuer[0].badgeclasses.all()
 
         if not issuer_badge_classes.exists():
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response([], status=status.HTTP_200_OK)
 
         serializer = BadgeClassSerializer(issuer_badge_classes, many=True, context={'request': request})
         return Response(serializer.data)
@@ -358,7 +358,6 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
         ---
         serializer: BadgeClassSerializer
         """
-        # TODO long term: allow GET if issuer has permission to issue even if not creator
 
         current_issuer_queryset = self.queryset.filter(issuer__slug=issuerSlug)
         current_badgeclass = self.get_object(badgeSlug, queryset=current_issuer_queryset)
@@ -454,7 +453,7 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
         assertions = current_badgeclass.assertions.all()
 
         if not assertions.exists():
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response([], status=status.HTTP_200_OK)
 
         serializer = BadgeInstanceSerializer(assertions, many=True, context={'request': request})
         return Response(serializer.data)
@@ -466,7 +465,7 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
     """
     queryset = BadgeInstance.objects.all()
     model = BadgeInstance
-    permission_classes = (MayEditBadgeClass,)  # TODO: 
+    permission_classes = (MayEditBadgeClass,)
 
     def get(self, request, issuerSlug, badgeSlug, assertionSlug):
         """

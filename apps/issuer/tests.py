@@ -68,7 +68,7 @@ class IssuerTests(APITestCase):
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.get('/v1/issuer/issuers/test-issuer/staff')
 
-        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.status_code, 200)
 
     def test_add_user_to_issuer_editors_set(self):
         """ Authenticated user (pk=1) owns test-issuer. Add user (username=test3) as an editor. """
