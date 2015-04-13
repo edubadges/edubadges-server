@@ -53,6 +53,12 @@ class IssuerSerializer(AbstractComponentSerializer):
         new_issuer.save()
         return new_issuer
 
+    def to_representation(self, obj):
+        representation = super(IssuerSerializer, self).to_representation(obj)
+        if self.context.get('embed_badgeclasses', False):
+            representation['badgeclasses'] = BadgeClassSerializer(obj.badgeclasses.all(), many=True, context=self.context).data
+
+        return representation
 
 class IssuerRoleActionSerializer(serializers.Serializer):
     """ A serializer used for validating user role change POSTS """
