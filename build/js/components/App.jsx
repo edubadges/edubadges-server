@@ -2,6 +2,7 @@ var React = require('react');
 var RouterMixin = require('react-mini-router').RouterMixin;
 var navigate = require('react-mini-router').navigate;
 var assign = require('object-assign');
+var urllite = require('urllite/lib/core');
 
 // Stores
 var RouteStore = require('../stores/RouteStore');
@@ -35,13 +36,9 @@ var App = React.createClass({
   // Route configuration: 
   routes: {
     '/': 'home',
-    '/earn': 'earnerMain',
-    // '/earn/badges': 'earnerBadgeForm',
-    // '/earn/badges/:id': 'earnerBadgeForm',
-    '/issue/badges': 'issuerMain',
-    '/issuer/certificates/new': 'issuerCertificateForm',
-    '/issuer/certificates/:id': 'issuerCertificateView', 
-    '/understand': 'consumerMain'
+    '/earner': 'earnerMain',
+    '/issuer': 'issuerMain',
+    '/explorer': 'consumerMain'
   },
 
   // Route handling:
@@ -53,6 +50,7 @@ var App = React.createClass({
 
   getDefaultProps: function() {
     return {
+      path: urllite(window.location.href).pathname + urllite(window.location.href).search,
       appTitle: 'Badge Trust',
       roleMenu: MenuStore.getAllItems('roleMenu'),
       actionMenu: MenuStore.getAllItems('topMenu'),
