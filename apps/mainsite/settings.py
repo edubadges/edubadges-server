@@ -45,11 +45,6 @@ INSTALLED_APPS = [
     'issuer',
 ]
 
-BADGR_INSTALLED_APPS = [
-    'badgeuser',
-    'issuer',
-]
-
 MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

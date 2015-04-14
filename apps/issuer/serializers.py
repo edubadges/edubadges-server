@@ -1,3 +1,5 @@
+from django.db.models import Q
+
 from rest_framework import serializers
 
 from mainsite.serializers import WritableJSONField
@@ -197,3 +199,31 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
             new_assertion.notify_earner()
 
         return new_assertion
+
+
+class IssuerPortalSerializer(serializers.Serializer):
+    """
+    A serializer used to pass initial data to a view template so that the React.js
+    front end can render.
+    It should detect which of the core Badgr applications are installed and return
+    appropriate contextual information.
+    """
+
+    def to_representation(self, user):
+        view_data = {}
+
+        user_issuers = Issuer.objects.filter(
+            Q(owner__id=user.id) |
+            Q(staff__id=user.id)
+        ).select_related('badgeclasses')
+
+        issuer_context = self.context.copy()
+        issuer_context['embed_badgeclasses'] = True
+        issuer_data = IssuerSerializer(
+            user_issuers,
+            many=True,
+            context=issuer_context
+        )
+        view_data['issuer'] = issuer_data.data
+
+        return view_data

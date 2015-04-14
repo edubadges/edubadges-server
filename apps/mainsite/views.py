@@ -1,35 +1,10 @@
-import json
-
 from django.conf import settings
-from django.core.urlresolvers import reverse
-from django.shortcuts import redirect
 from django.template.response import SimpleTemplateResponse
 from django.views.generic import TemplateView
-
-from .serializers import UserViewDataSerializer
 
 
 class SitemapView(TemplateView):
     template_name = 'sitemap.html'
-
-
-class ApplicationPortal(TemplateView):
-    template_name = 'base_interior.html'
-
-    def get(self, request):
-        if not request.user.is_authenticated():
-            return redirect(reverse('login'))
-
-        context = self.get_context_data(**{'request': request})
-        return self.render_to_response(context)
-
-    def get_context_data(self, **kwargs):
-        context_data = super(ApplicationPortal, self).get_context_data(**kwargs)
-        user_serializer = UserViewDataSerializer(kwargs['request'].user, context=kwargs)
-
-        context_data['initial_data'] = json.dumps(user_serializer.data)
-
-        return context_data
 
 
 ##
