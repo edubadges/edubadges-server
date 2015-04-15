@@ -1,3 +1,5 @@
+var _ = require('underscore')
+
 var Dispatcher = require('../dispatcher/appDispatcher');
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
@@ -7,67 +9,59 @@ var EarnerActions = require('../actions/earner');
 
 var FormStore = assign({}, EventEmitter.prototype);
 
-FormStore.data = {};
-FormStore.formIds = [
-  "EarnerBadgeForm",
-  "IssuerNotificationForm",
-  "ConsumerBadgeForm"
-];
 FormStore.requests = {};
 
+FormStore.data = {}
 
-FormStore.idValid = function(id){
-  return (typeof id == "string" && FormStore.formIds.indexOf(id) > -1);
-};
+FormStore.idValid = function(formId){
+  return (FormStore.data.hasOwnProperty(formId))
+}
 
-FormStore.getFormData = function(id){
-  if (!FormStore.idValid(id) || !FormStore.data.hasOwnProperty(id))
+FormStore.getFormData = function(formId){
+  if (!FormStore.idValid(formId))
     return {};
   else
-    return FormStore.data[id];
+    return FormStore.data[formId];
 };
-FormStore.defaultValues = {
-  EarnerBadgeForm: {
-    actionState: "ready"
-  },
-  ConsumerBadgeForm: {
-    actionState: "ready"
-  },
-  IssuerNotificationForm: {
-    email: "",
-    url: "", 
-    actionState: "ready"
-  }
-}
+FormStore.getFormState = function(formId){
+  if (!FormStore.idValid(formId))
+    return {};
+  else
+    return FormStore.data[formId].formState;
+};
+
 FormStore.getOrInitFormData = function(formId, initialData){
-  var formData = FormStore.getFormData(formId);
-  if (!formData)
-    return initialData;
-  if (Object.keys(formData).length === 0){
-    FormStore.setFormData(
-      formId, 
-      assign( FormStore.defaultValues[formId], initialData )
-    );
-    return FormStore.getFormData(formId);
-  }
-  return formData;
+  if (!FormStore.data.hasOwnProperty(formId))
+    FormStore.data[formId] = initialData
+
+  if (typeof FormStore.defaultValues === 'undefined')
+    initialState = {}
+
+  FormStore.data[formId].formState = _.clone(initialData.defaultValues);
+
+  return FormStore.getFormData(formId);
 }
 
-FormStore.setFormData = function(id, data){
-  if (FormStore.idValid(id) && data instanceof Object && !(data instanceof Array) )
-    FormStore.data[id] = data;
+FormStore.resetForm = function(formId){
+  if (FormStore.idValid(formId))
+    FormStore.data[formId].formState = _.clone(FormStore.data[formId].defaultValues);
 };
 
-FormStore.patchFormProperty = function(id, propName, value){
-  console.log("Patching form property: " + id + ", " + propName + ", " + value);
-  if (FormStore.idValid(id))
-    FormStore.data[id][propName] = value;
+FormStore.patchFormProperty = function(formId, propName, value){
+  if (FormStore.idValid(formId)) // for state not specified in fieldsMeta
+    FormStore.data[formId].formState[propName] = value;
+  else
+    console.log("Error: Could not patch form " + formId + " property " + propName);
 };
 FormStore.patchForm = function(id, data){
   for (key in data){
     FormStore.patchFormProperty(id, key, data[key]);
   }
 };
+FormStore.getFieldValue = function(formId, field){
+  if (FormStore.idValid(formId) && field in FormStore.data[formId].fieldsMeta)
+    return FormStore.data[formId][field];
+}
 
 
 // listener utils
@@ -99,7 +93,7 @@ FormStore.dispatchToken = Dispatcher.register(function(payload){
       break;
 
     case 'FORM_RESET':
-      FormStore.setFormData(action.formId, FormStore.defaultValues[action.formId]);
+      FormStore.resetForm(action.formId);
       FormStore.emit('FORM_DATA_UPDATED_' + action.formId);
       break;
 
@@ -129,8 +123,11 @@ module.exports = {
   removeListener: FormStore.removeListener,
   getCollection: FormStore.getCollection,
   getFormData: FormStore.getFormData,
+  getFormState: FormStore.getFormState,
+  resetFormData: FormStore.resetFormData,
   getOrInitFormData: FormStore.getOrInitFormData,
   patchFormData: FormStore.patchFormProperty,
+  getFieldValue: FormStore.getFieldValue,
   listeners: FormStore.listeners,
   dispatchToken: FormStore.dispatchToken
 }

@@ -8,12 +8,18 @@
   }
 }
 
-.earner-badge-form{
+.api-form{
   textarea { 
     max-width: 100%;
   }
-  .submit-button {
+  .form-controls {
     clear: both;
     padding: 1em;
+    padding-bottom: 0;
+    div {
+      float: right; 
+      padding: 0.25em;
+    }
   }
 }
+

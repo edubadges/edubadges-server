@@ -51,7 +51,7 @@ var App = React.createClass({
   getDefaultProps: function() {
     return {
       path: urllite(window.location.href).pathname + urllite(window.location.href).search,
-      appTitle: 'Badge Trust',
+      appTitle: 'Badgr Server',
       roleMenu: MenuStore.getAllItems('roleMenu'),
       actionMenu: MenuStore.getAllItems('topMenu'),
       actionBars: MenuStore.getAllItems('actionBars'),
@@ -227,9 +227,8 @@ var App = React.createClass({
 
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <SecondaryMenu viewId={viewId} items={this.props.secondaryMenus[viewId]} />
         <ActionBar
-          title="Issue Badges"
+          title="My Issuers"
           viewId={viewId}
           items={this.props.actionBars[viewId]}
           updateActivePanel={this.updateActivePanel}

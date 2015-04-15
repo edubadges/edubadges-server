@@ -110,7 +110,6 @@ class IssuerList(AbstractIssuerAPIEndpoint):
               type: file
               paramType: form
         """
-
         serializer = IssuerSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 

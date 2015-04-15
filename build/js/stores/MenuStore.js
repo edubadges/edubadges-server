@@ -49,17 +49,17 @@ MenuStore.defaultItems = {
       ],
       issuerMain: [
         {
-          title: "Define New Badge",
+          title: "New Issuer",
           buttonType: "primary",
           icon: "fa-pencil-square-o",
-          activePanelCommand: { type: "IssuerBadgeForm", content: {}}
-        },
-        {
-          title: "Notify Earners",
-          buttonType: "default",
-          icon: "fa-envelope",
-          activePanelCommand: { type: "IssuerNotificationForm", content: {}}
-        }
+          activePanelCommand: { type: "IssuerCreateUpdateForm", content: {}}
+        } // },
+        // {
+        //   title: "Notify Earners",
+        //   buttonType: "default",
+        //   icon: "fa-envelope",
+        //   activePanelCommand: { type: "IssuerNotificationForm", content: {}}
+        // }
       ],
       consumerMain: [
         { 

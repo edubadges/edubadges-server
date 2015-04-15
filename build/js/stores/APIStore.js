@@ -63,6 +63,8 @@ APIStore.getFirstItemByPropertyValue = function(collectionType, propName, value)
 }
 APIStore.addCollectionItem = function(collectionKey, item) {
   if (APIStore.collectionTypes.indexOf(collectionKey) > -1){
+    if (!APIStore.data.hasOwnProperty(collectionKey))
+      APIStore.data[collectionKey] = [];
     APIStore.data[collectionKey].push(item);
     return item;
   }
@@ -96,115 +98,73 @@ APIStore.storeInitialData = function() {
   }
 }
 
-APIStore.postEarnerBadgeForm = function(data){
-  var context = {
-    formId: "EarnerBadgeForm",
-    apiCollectionKey: "earnerBadges",
-    actionUrl: "/v1/earner/badges",
-    successHttpStatus: [201],
-    successMessage: "Successfully added badge to your collection."
-  }
-  return APIStore.postBadgeForm(data, context);
-};
 
-APIStore.postConsumerBadgeForm = function(data){
-  var context = {
-    formId: "ConsumerBadgeForm",
-    apiCollectionKey: "consumerBadges",
-    actionUrl: "/v1/consumer/badges",
-    successHttpStatus: [200, 201],
-    successMessage: "Badge analysis successful"
-  }
-  return APIStore.postBadgeForm(data, context);
-};
-
-/* postBadgeForm(): a common function to communicate with various API endpoints
- * to post badges in various contexts. 
+/* postForm(): a common function for POSTing forms and returning results
+ * to the FormStore.
  * Params:
- *   context is a dictionary providing the API endpoint
- *   data is the form data from the FormStore
+ *   context: a dictionary providing information about the API endpoint
+ *            and expected return results.
+ *   fields: the form data from the FormStore.
+ * This function will interrogate the data and attach appropriate fields
+ * to the post request.
 */
-APIStore.postBadgeForm = function(data, context){
+APIStore.postForm = function(fields, values, context){
+  
+  if (context.method == 'POST')
+    var req = request.post(context.actionUrl);
+  else if (context.method == 'DELETE')
+    var req = request.delete(context.actionUrl);
+  else if (context.method == 'PUT')
+    var req = request.put(context.actionUrl);
 
-  var req = request.post(context.actionUrl)
-    .set('X-CSRFToken', getCookie('csrftoken'))
-    .accept('application/json')
-    .field('recipient_input',data['recipient_input']);
+  req.set('X-CSRFToken', getCookie('csrftoken'))
+  .accept('application/json');
 
-    if ('earner_description' in data)
-      req.field('earner_description', data['earner_description']);
+  // Attach data fields to request
+  for (field in fields) {
+    if (["text", "textarea", "select"].indexOf(fields[field].inputType) > -1 && values[field])
+      req.field(field, values[field]);
+    else if (["image", "file"].indexOf(fields[field].inputType) > -1 && values[field])
+      req.attach(field, values[field], fields[field].filename);
+  }
 
-
-    req.attach('image', data['image'], 'earner_badge_upload.png');
-
-    req.end(function(error, response){
-      console.log(response);
-      if (error){
-        console.log("THERE WAS SOME KIND OF API REQUEST ERROR.");
-        console.log(error);
-        APIStore.emit('API_STORE_FAILURE');
-      }
-      else if (context.successHttpStatus.indexOf(response.status) == -1){
-        console.log("API REQUEST PROBLEM:");
-        console.log(response.text);
-        APIActions.APIFormResultFailure({
-          formId: context.formId,
-          message: {type: 'danger', content: "Error adding badge: " + response.text}
-        });
-      }
-      else{
-        var newBadge = APIStore.addCollectionItem(context.apiCollectionKey, JSON.parse(response.text))
-        if (newBadge){
-          APIStore.emit('DATA_UPDATED_' + context.apiCollectionKey);
-          APIActions.APIFormResultSuccess({
-            formId: context.formId, 
-            message: {type: 'success', content: context.successMessage}, 
-            result: newBadge 
-          });
-        }
-        else {
-          APIStore.emit('API_STORE_FAILURE');
-          console.log("Failed to add " + response.text + " to " + context.apiCollectionKey);
-        }
-      } 
-    });
-  return req;
-};
-
-APIStore.postIssuerNotificationForm = function(data){
-  console.log("GOING TO POST THE ISSUER NOTIFICATION FORM WITH DATA:");
-  console.log(data);
-  var req = request.post('/v1/issuer/notifications')
-    .set('X-CSRFToken', getCookie('csrftoken'))
-    .accept('application/json')
-    .field('url',data['url'])
-    .field('email', data['email'])
-    .end(function(error, response){
-      console.log(response);
-      if (error){
-        console.log("THERE WAS SOME KIND OF API REQUEST ERROR.");
-        console.log(error);
-        APIStore.emit('API_STORE_FAILURE');
-      }
-      else if (response.status != 201){
-        console.log("API REQUEST PROBLEM:");
-        console.log(response.text);
-        APIActions.APIFormResultFailure({
-          formId: 'IssuerNotificationForm',
-          message: {type: 'danger', content: "Error notifying earner: " + response.text}
-        });
-      }
-      else{
-        APIStore.emit('DATA_UPDATED_issuerNotification');
+  req.end(function(error, response){
+    console.log(response);
+    if (error){
+      console.log("THERE WAS SOME KIND OF API REQUEST ERROR.");
+      console.log(error);
+      APIStore.emit('API_STORE_FAILURE');
+    }
+    else if (context.successHttpStatus.indexOf(response.status) == -1){
+      console.log("API REQUEST PROBLEM:");
+      console.log(response.text);
+      APIActions.APIFormResultFailure({
+        formId: context.formId,
+        message: {type: 'danger', content: response.status + " Error submitting form: " + response.text}
+      });
+    }
+    else{
+      var newObject = APIStore.addCollectionItem(context.apiCollectionKey, JSON.parse(response.text))
+      if (newObject){
+        APIStore.emit('DATA_UPDATED_' + context.apiCollectionKey);
         APIActions.APIFormResultSuccess({
-          formId: 'IssuerNotificationForm', 
-          message: {type: 'success', content: "Successfully notified earner " + data['email'] + "." }, 
-          result: {}
+          formId: context.formId, 
+          message: {type: 'success', content: context.successMessage},
+          result: newObject
         });
-      } 
-    });
+      }
+      else {
+        APIStore.emit('API_STORE_FAILURE');
+        console.log("Failed to add " + response.text + " to " + context.apiCollectionKey);
+      }
+    } 
+  });
+
   return req;
-};
+}
+
+
+
 
 // Register with the dispatcher
 APIStore.dispatchToken = Dispatcher.register(function(payload){
@@ -227,6 +187,10 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
         APIStore.postConsumerBadgeForm(FormStore.getFormData(action.formId));
       else if (action.formId == "IssuerNotificationForm")
         APIStore.postIssuerNotificationForm(FormStore.getFormData(action.formId));
+      else if (action.formId == "IssuerCreateUpdateForm"){
+        formData = FormStore.getFormData(action.formId);
+        APIStore.postForm(formData.fieldsMeta, formData.formState, formData.apiContext);
+      }
       else
         console.log("Unidentified form type to submit: " + action.formId);
       break;

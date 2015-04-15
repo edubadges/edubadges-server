@@ -71,11 +71,15 @@
     max-width: 100%;
     height: auto; }
 
-.earner-badge-form textarea {
+.api-form textarea {
   max-width: 100%; }
-.earner-badge-form .submit-button {
+.api-form .form-controls {
   clear: both;
-  padding: 1em; }
+  padding: 1em;
+  padding-bottom: 0; }
+  .api-form .form-controls div {
+    float: right;
+    padding: 0.25em; }
 
 /*!
  * Start Bootstrap - SB Admin 2 Bootstrap Admin Theme (http://startbootstrap.com)
@@ -459,11 +463,15 @@ form.disabled, form.disabled textarea {
     max-width: 100%;
     height: auto; }
 
-.earner-badge-form textarea {
+.api-form textarea {
   max-width: 100%; }
-.earner-badge-form .submit-button {
+.api-form .form-controls {
   clear: both;
-  padding: 1em; }
+  padding: 1em;
+  padding-bottom: 0; }
+  .api-form .form-controls div {
+    float: right;
+    padding: 0.25em; }
 
 .navbar-brand img {
   max-width: 30px;

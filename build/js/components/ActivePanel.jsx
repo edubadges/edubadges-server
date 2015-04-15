@@ -1,6 +1,7 @@
 var React = require('react');
 var EarnerBadge = require('./BadgeDisplay.jsx').EarnerBadge;
 var BadgeUploadForm = require('./Form.jsx').BadgeUploadForm;
+var BasicAPIForm = require('./Form.jsx').BasicAPIForm;
 var FormStore = require('../stores/FormStore');
 
 var PanelActions = React.createClass({
@@ -103,6 +104,49 @@ var ActivePanel = React.createClass({
         <div className="active-panel earner-badge-form clearfix">
           <div className="container-fluid">
             <IssuerNotificationForm {...formProps} />
+          </div>
+        </div>
+      );
+    }
+
+    else if (this.props.type == "IssuerCreateUpdateForm"){
+      var formProps = {
+        formId: this.props.type,
+        fieldsMeta: {
+          name: {inputType: "text", label: "Issuer Name", required: true},
+          description: {inputType: "textarea", label: "Issuer Description", required: true},
+          url: {inputType: "text", label: "Website URL", required: true},
+          email: {inputType: "text", label: "Contact Email", required: true},
+          image: {inputType: "image", label: "Logo", required: false, filename: "issuer_logo.png"}
+        },
+        defaultValues: {
+          name: "",
+          description: "",
+          url: "",
+          email: "",
+          image: null,
+          imageData: null,
+          actionState: "ready"
+        },
+        columns: [
+          { fields: ['image'], className:'col-xs-5 col-sm-4 col-md-3' },
+          { fields: ['name', 'description', 'url', 'email'], className:'col-xs-7 col-sm-8 col-md-9' }
+        ],
+        apiContext: {
+          formId: this.props.type,
+          apiCollectionKey: "consumerBadges",
+          actionUrl: "/v1/issuer/issuers",
+          method: "POST",
+          successHttpStatus: [200, 201],
+          successMessage: "New issuer created"
+        }
+      };
+      FormStore.getOrInitFormData(this.props.type, formProps);
+
+      return (
+        <div className="active-panel api-form image-upload-form clearfix">
+          <div className="container-fluid">
+            <BasicAPIForm {...formProps} />
           </div>
         </div>
       );
