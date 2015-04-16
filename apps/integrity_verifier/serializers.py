@@ -42,7 +42,7 @@ class AlignmentObjectSerializer(BaseFieldSerializer):
     """
     name = serializers.CharField(required=True)
     url = serializers.URLField(required=True)
-    description = serializers.CharField()
+    description = serializers.CharField(required=False)
 
 
 class RecipientSerializer(BaseComponentSerializer):
@@ -73,8 +73,8 @@ class IssuerSerializerV0_5(BaseComponentSerializer):
     """
     origin = serializers.URLField(required=True)
     name = serializers.CharField(required=True)
-    org = serializers.CharField()
-    contact = serializers.EmailField()
+    org = serializers.CharField(required=False)
+    contact = serializers.EmailField(required=False)
 
 
 class BadgeClassSerializerV0_5(BaseComponentSerializer):
@@ -96,9 +96,9 @@ class BadgeInstanceSerializerV0_5Base(BaseComponentSerializer):
     specification for badge assertions.
     """
     badge = BadgeClassSerializerV0_5(required=True)
-    issued_on = serializers.DateTimeField()
-    expires = serializers.DateTimeField()
-    evidence = serializers.URLField()
+    issued_on = serializers.DateTimeField(required=False)
+    expires = serializers.DateTimeField(required=False)
+    evidence = serializers.URLField(required=False)
 
 
 class BadgeInstanceSerializerV0_5_1(BadgeInstanceSerializerV0_5Base):
@@ -107,7 +107,7 @@ class BadgeInstanceSerializerV0_5_1(BadgeInstanceSerializerV0_5Base):
     email addresses.
     """
     recipient = HashString(required=True)
-    salt = serializers.CharField()
+    salt = serializers.CharField(required=False)
 
 
 class BadgeInstanceSerializerV0_5_0(BadgeInstanceSerializerV0_5Base):
@@ -121,10 +121,10 @@ class BadgeInstanceSerializerV0_5_0(BadgeInstanceSerializerV0_5Base):
 class IssuerSerializerV1_0(BaseComponentSerializer):
     name = serializers.CharField(required=True)
     url = serializers.URLField(required=True)
-    description = serializers.CharField()
-    email = serializers.EmailField()
-    image = serializers.URLField()
-    revocationList = serializers.URLField()
+    description = serializers.CharField(required=False)
+    email = serializers.EmailField(required=False)
+    image = serializers.URLField(required=False)
+    revocationList = serializers.URLField(required=False)
 
 
 class BadgeClassSerializerV1_0(BaseComponentSerializer):
@@ -133,10 +133,8 @@ class BadgeClassSerializerV1_0(BaseComponentSerializer):
     image = serializers.URLField(required=True)
     criteria = serializers.URLField(required=True)
     issuer = serializers.URLField(required=True)
-    alignment = AlignmentObjectSerializer()
-    tags = serializers.ListField(
-        child=serializers.CharField()
-    )
+    alignment = AlignmentObjectSerializer(required=False)
+    tags = serializers.ListField(child=serializers.CharField(), required=False)
 
 
 class BadgeInstanceSerializerV1_0(BaseComponentSerializer):
@@ -145,6 +143,6 @@ class BadgeInstanceSerializerV1_0(BaseComponentSerializer):
     badge = serializers.URLField(required=True)
     issuedOn = serializers.DateTimeField(required=True)
     verify = VerificationObjectSerializer(required=True)
-    image = serializers.URLField()
-    expires = serializers.DateTimeField()
-    evidence = serializers.URLField()
+    image = serializers.URLField(required=False)
+    expires = serializers.DateTimeField(required=False)
+    evidence = serializers.URLField(required=False)
