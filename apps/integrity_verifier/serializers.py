@@ -17,7 +17,11 @@ class HashString(BaseFieldSerializer):
     algorithm and hashed value.
     """
     def to_internal_value(self, data):
-        data = data.lower()
+        try:
+            data = data.lower()
+        except AttributeError:
+            raise serializers.ValidationError("Invalid data. Expected a str.")
+
         patterns = (
             r'^sha1\$[a-f0-9]{40}$',
             r'^sha256\$[a-f0-9]{64}$',
@@ -25,7 +29,8 @@ class HashString(BaseFieldSerializer):
         )
 
         if not any(re.match(pattern, data) for pattern in patterns):
-            raise serializers.ValidationError
+            raise serializers.ValidationError(
+                "Invalid data. String is not recognizably formatted.");
 
         return data
 
@@ -57,7 +62,7 @@ class VerificationObjectSerializer(BaseComponentSerializer):
     verification resource, which is either a hosted copy of a badge instance
     or the issuer's public key.
     """
-    type = serializers.MultipleChoiceField(['hosted', 'signed'], required=True)
+    type = serializers.ChoiceField(['hosted', 'signed'], required=True)
     url = serializers.URLField(required=True)
 
 
@@ -129,7 +134,7 @@ class BadgeClassSerializerV1_0(BaseComponentSerializer):
     criteria = serializers.URLField(required=True)
     issuer = serializers.URLField(required=True)
     alignment = AlignmentObjectSerializer()
-    tags = serializers.listField(
+    tags = serializers.ListField(
         child=serializers.CharField()
     )
 
