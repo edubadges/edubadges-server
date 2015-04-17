@@ -277,3 +277,5 @@ var EarnerBadge = React.createClass({
 // Export the Menu class for rendering:
 module.exports.OpenBadge = OpenBadge;
 module.exports.EarnerBadge = EarnerBadge;
+module.exports.Property = Property;
+

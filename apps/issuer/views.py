@@ -24,7 +24,7 @@ class IssuerPortal(TemplateView):
         issuer_serializer = IssuerPortalSerializer(kwargs['request'].user, context=kwargs)
 
         context = {}
-        context['issuer'] = issuer_serializer.data
+        context['issuer'] = issuer_serializer.data['issuer']
         context['user'] = UserProfileField(kwargs['request'].user, context=kwargs).data
 
         context_data['initial_data'] = json.dumps(context)

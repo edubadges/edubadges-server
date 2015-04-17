@@ -61,6 +61,14 @@ MenuStore.defaultItems = {
         //   activePanelCommand: { type: "IssuerNotificationForm", content: {}}
         // }
       ],
+      issuerDetail: [
+        {
+          title: "New Badge",
+          buttonType: "primary",
+          icon: "fa-pencil-square-o",
+          activePanelCommand: { type: "BadgeClassCreateUpdateForm", content: {}}
+        }
+      ],
       consumerMain: [
         { 
           title: "Analyze Badge",

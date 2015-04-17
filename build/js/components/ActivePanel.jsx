@@ -134,12 +134,55 @@ var ActivePanel = React.createClass({
         ],
         apiContext: {
           formId: this.props.type,
-          apiCollectionKey: "consumerBadges",
+          apiCollectionKey: "issuers",
           actionUrl: "/v1/issuer/issuers",
           method: "POST",
           successHttpStatus: [200, 201],
           successMessage: "New issuer created"
-        }
+        },
+        handleCloseForm: this.clearActivePanel
+      };
+      FormStore.getOrInitFormData(this.props.type, formProps);
+
+      return (
+        <div className="active-panel api-form image-upload-form clearfix">
+          <div className="container-fluid">
+            <BasicAPIForm {...formProps} />
+          </div>
+        </div>
+      );
+    }
+
+    else if (this.props.type == "BadgeClassCreateUpdateForm"){
+      var formProps = {
+        formId: this.props.type,
+        fieldsMeta: {
+          name: {inputType: "text", label: "Badge Name", required: true},
+          description: {inputType: "textarea", label: "Badge Description", required: true},
+          criteria: {inputType: "textarea", label: "Criteria URL or text", required: true},
+          image: {inputType: "image", label: "Badge Image", required: false, filename: "issuer_logo.png"}
+        },
+        defaultValues: {
+          name: "",
+          description: "",
+          criteria: "",
+          image: null,
+          imageData: null,
+          actionState: "ready"
+        },
+        columns: [
+          { fields: ['image'], className:'col-xs-5 col-sm-4 col-md-3' },
+          { fields: ['name', 'description', 'criteria'], className:'col-xs-7 col-sm-8 col-md-9' }
+        ],
+        apiContext: {
+          formId: this.props.type,
+          apiCollectionKey: "issuerBadgeClasses",
+          actionUrl: "/v1/issuer/issuers/" + this.props.issuerSlug + "/badges",
+          method: "POST",
+          successHttpStatus: [200, 201],
+          successMessage: "New badge class created"
+        },
+        handleCloseForm: this.clearActivePanel
       };
       FormStore.getOrInitFormData(this.props.type, formProps);
 

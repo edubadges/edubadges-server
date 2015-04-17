@@ -124,10 +124,23 @@ var SubmitButton = React.createClass({
 var ResetButton = React.createClass({
   render: function() {
     return (
-      <div className="control-group">
+      <div className="control-group reset-button">
         <label className="control-label sr-only" htmlFor={this.props.name}>{ this.props.label || "Reset" }</label>
         <div className="controls">
           <button name={this.props.name} className="btn btn-danger" onClick={this.props.handleClick}>{this.props.label || "Reset" }</button>
+        </div>
+      </div>
+    );
+  }
+});
+
+var PlainButton = React.createClass({
+  render: function() {
+    return (
+      <div className="control-group button">
+        <label className="control-label sr-only" htmlFor={this.props.name}>{this.props.label}</label>
+        <div className="controls">
+          <button name={this.props.name} className="btn btn-default" onClick={this.props.handleClick}>{this.props.label}</button>
         </div>
       </div>
     );
@@ -601,6 +614,7 @@ BasicAPIForm = React.createClass({
 
       formControls = (
         <div className="row form-controls">
+          <PlainButton name="close" label="Close" handleClick={this.props.handleCloseForm} />
           <ResetButton name="reset" handleClick={this.handleReset} />
           <SubmitButton name="submit" handleClick={this.handleSubmit} />
           {loadingIcon}

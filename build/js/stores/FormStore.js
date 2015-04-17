@@ -13,6 +13,11 @@ FormStore.requests = {};
 
 FormStore.data = {}
 
+FormStore.genericFormTypes = [
+  'IssuerCreateUpdateForm',
+  'BadgeClassCreateUpdateForm'
+]
+
 FormStore.idValid = function(formId){
   return (FormStore.data.hasOwnProperty(formId))
 }
@@ -128,6 +133,7 @@ module.exports = {
   getOrInitFormData: FormStore.getOrInitFormData,
   patchFormData: FormStore.patchFormProperty,
   getFieldValue: FormStore.getFieldValue,
+  genericFormTypes: FormStore.genericFormTypes,
   listeners: FormStore.listeners,
   dispatchToken: FormStore.dispatchToken
 }

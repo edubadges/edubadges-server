@@ -17,11 +17,14 @@ var TopLinks = require('../components/TopLinks.jsx');
 var SideBarNav = require('../components/SideBarNav.jsx');
 var MainComponent = require ('../components/MainComponent.jsx');
 var SecondaryMenu = require('../components/SecondaryMenu.jsx');
+var BreadCrumbs = require('../components/BreadCrumbs.jsx');
 var ActionBar = require('../components/ActionBar.jsx');
 var ActivePanel = require('../components/ActivePanel.jsx');
 var OpenBadgeList = require('../components/OpenBadgeList.jsx');
 var EarnerBadgeForm = require('../components/Form.jsx').EarnerBadgeForm;
 var IssuerNotificationForm = require('../components/Form.jsx').IssuerNotificationForm
+var IssuerList = require('../components/IssuerDisplay.jsx').IssuerList;
+var IssuerDisplay = require('../components/IssuerDisplay.jsx').IssuerDisplay;
 var EarnerBadgeList = require('../components/EarnerBadgeList.jsx');
 var ConsumerBadgeList = require('../components/ConsumerBadgeList.jsx');
 
@@ -38,6 +41,8 @@ var App = React.createClass({
     '/': 'home',
     '/earner': 'earnerMain',
     '/issuer': 'issuerMain',
+    '/issuer/issuers': 'issuerMain',
+    '/issuer/issuers/:issuerSlug': 'issuerDetail',
     '/explorer': 'consumerMain'
   },
 
@@ -221,10 +226,8 @@ var App = React.createClass({
     return this.render_base(mainComponent);
   },
 
-  issuerMain: function(id) {
+  issuerMain: function() {
     var viewId = "issuerMain";
-  
-
     var mainComponent = (
       <MainComponent viewId={viewId}>
         <ActionBar
@@ -240,9 +243,44 @@ var App = React.createClass({
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
         />
-        
+        <IssuerList
+          viewId={viewId}
+          issuers={APIStore.getCollection('issuer')}
+        />
       </MainComponent>
     );
+    return this.render_base(mainComponent);
+  },
+
+  issuerDetail: function(issuerSlug){
+    var viewId = "issuerDetail-" + issuerSlug;
+    var issuer = APIStore.getFirstItemByPropertyValue('issuer', 'slug', issuerSlug);
+    var breadCrumbs = [
+      { name: "My Issuers", url: '/issuer'},
+      { name: issuer.name, url: '/issuer/issuers/' + issuerSlug }
+    ];
+    var mainComponent = (
+      <MainComponent viewId={viewId}>
+        <BreadCrumbs items={breadCrumbs} />
+        <ActionBar 
+          title={issuer.name}
+          viewId={viewId}
+          items={this.props.actionBars['issuerDetail']}
+          updateActivePanel={this.updateActivePanel}
+          clearActivePanel={this.clearActivePanel}
+        />
+        <ActivePanel
+          viewId={viewId}
+          {...this.state.activePanels[viewId]}
+          {...this.contextPropsForActivePanel(viewId)}
+          updateActivePanel={this.updateActivePanel}
+          clearActivePanel={this.clearActivePanel}
+          issuerSlug={issuerSlug}
+        />
+        <IssuerDisplay {...issuer} />
+      </MainComponent>
+    )
+
     return this.render_base(mainComponent);
   },
 

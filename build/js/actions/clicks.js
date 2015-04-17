@@ -26,6 +26,16 @@ var createLinkClickAction = function(target){
   return false;
 }
 
+var navigateLocalPath = function(path){
+  appDispatcher.dispatch({
+    action:{
+      type: 'ROUTE_CHANGED',
+      href: path
+    }
+  });
+}
+
 
 module.exports.createOffMenuClickAction = createOffMenuClickAction;
 module.exports.createLinkClickAction = createLinkClickAction;
+module.exports.navigateLocalPath = navigateLocalPath;

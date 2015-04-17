@@ -31,7 +31,8 @@ APIStore.collectionTypes = [
   "earnerNotifications",
   "issuerBadgeClasses",
   "issuerBadges",
-  "consumerBadges"
+  "consumerBadges",
+  'issuer'
 ]
 
 APIStore.getCollection = function(collectionType) {
@@ -187,7 +188,7 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
         APIStore.postConsumerBadgeForm(FormStore.getFormData(action.formId));
       else if (action.formId == "IssuerNotificationForm")
         APIStore.postIssuerNotificationForm(FormStore.getFormData(action.formId));
-      else if (action.formId == "IssuerCreateUpdateForm"){
+      else if (FormStore.genericFormTypes.indexOf(action.formId) > -1){
         formData = FormStore.getFormData(action.formId);
         APIStore.postForm(formData.fieldsMeta, formData.formState, formData.apiContext);
       }

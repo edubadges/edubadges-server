@@ -5,7 +5,7 @@ var assign = require('object-assign');
 
 /*
 The concept of an ActiveAction is a task-and-context-oriented way 
-to organize the application. Each view in known
+to organize the application. 
 
 */
 var ActiveActionStore = assign({}, EventEmitter.prototype);
@@ -23,18 +23,9 @@ Example action data instance:
 */
 ActiveActionStore.data = {};
 
-// Different views that have the concept of an ActiveAction
-ActiveActionStore.knownViews = [
-  'earnerHome',
-  'issuerMain',
-  'consumerMain'
-];
-
 ActiveActionStore.updateAction = function(viewId, update){
-  if (ActiveActionStore.knownViews.indexOf(viewId) > -1){
     ActiveActionStore.data[viewId] = update;
     ActiveActionStore.emit('ACTIVE_ACTION_UPDATED');
-  }
 };
 ActiveActionStore.clearAction = function(viewId){
   delete ActiveActionStore.data[viewId];
