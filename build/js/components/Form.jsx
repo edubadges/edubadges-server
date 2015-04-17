@@ -88,11 +88,12 @@ var ImageDropbox = React.createClass({
   },
   render: function() {
     var imageDisplay = this.props.imageData ? (<img src={this.props.imageData} />) : (<div className="dropzone-empty">Click to select file or drop image here</div>);
+    var dropzoneStyle = {};
     return (
       <div className="control-group form-group-dropzone">
         <label className="control-label" htmlFor={this.props.name}>{this.props.label}</label>
-        <div className="controls">
-          <Dropzone onDrop={this.fileHandler}>
+        <div className={ "controls"}>
+          <Dropzone onDrop={this.fileHandler} style={dropzoneStyle}>
             {imageDisplay}
           </Dropzone>
         </div>
@@ -158,333 +159,13 @@ var LoadingIcon = React.createClass({
 });
 
 
-/* BadgeUploadForm 
- * Can be used as EarnerBadgeForm or ConsumerBadgeForm: 
- * A form that allows the user to upload a new badge, indicate recipient email
- * address the badge belongs to, and then see the uploaded badge.
- */
-var BadgeUploadForm = React.createClass({
-  propTypes: {
-    action: ReactPropTypes.string,
-    formId: ReactPropTypes.string,
-    recipientIds: ReactPropTypes.arrayOf(ReactPropTypes.string),
-    pk: ReactPropTypes.number,
-    initialState: ReactPropTypes.object
-  },
-  getInitialState: function() {
-    return this.props.initialState;
-  },
-  updateFromFormData: function(){
-    formData = FormStore.getFormData(this.props.formId);
-    this.setState(formData);
-  },
-
-  // Mount/unmount the change handler based on this component's lifecycle, but use the fn passed 
-  // in as props to mutage state, because App.jsx is where state is managed.
-  componentDidMount: function() {
-    FormStore.addListener('FORM_DATA_UPDATED_' + this.props.formId, this.handlePatch);
-  },
-  componentWillUnmount: function() {
-    FormStore.removeListener('FORM_DATA_UPDATED_' + this.props.formId, this.handlePatch);
-  },
-  handleImageDrop: function(file){
-    // To make sure any changes within the focused element are recorded in the form state
-    document.activeElement.blur();
-
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      if (this.isMounted()){
-        FormActions.patchForm(this.props.formId, { image: file, imageData: reader.result });
-      }
-      else
-        console.log("TRIED TO SET FILE TO STATE, FAILED. WAS BUSY MOUNTING."); 
-    }.bind(this);
-    reader.readAsDataURL(file);
-
-  },
-  // handleChange fires on changes to the DOM value of form elements, updating state locally
-  handleChange: function(event){
-    //reject change unless form is ready
-    if (this.state.actionState != "ready"){
-      event.stopPropagation();
-      event.preventDefault();
-      return;
-    }
-
-    var field = event.target.name;
-
-    // if file case, shortcut to image handling
-    if (field == 'image'){
-      var value = event.target.files[0];
-      this.handleImageDrop(value);
-    }
-
-    // for other changes, manage locally
-    else{
-      var value = event.target.value;
-      var theChange = {};
-      theChange[field] = value;
-      if (this.isMounted())
-        this.setState(theChange);
-      else{
-        console.log("This probably should never fire: form value changed as it was unmounting..")
-        FormActions.patchForm(this.props.formId, theChange);
-      }
-    }
-    
-  },
-  // When an input field is blurred, a form patch is submitted if its value has changed.
-  // Does not apply to the image upload field
-  handleBlur: function(event){
-    var patch = {}
-    var field = event.target.name;
-    var currentData = FormStore.getFormData(this.props.formId);
-    if (currentData[field] !== event.target.value){
-      patch[field] = event.target.value;
-      FormActions.patchForm(this.props.formId, patch);
-    }
-  },
-  // This catches the result from form update and applies it to the formstate. 
-  // On submit, it is how the result gets displayed.
-  handlePatch: function(){
-    // 'this' is bound: EarnerBadgeForm
-    
-    if (this.isMounted()){
-      var newState = FormStore.getFormData(this.props.formId);
-      this.setState(newState);
-    }
-  },
-
-  handleSubmit: function(e){
-    e.preventDefault(); 
-    e.stopPropagation();
-
-    if (this.state.actionState != "waiting")
-      FormActions.submitForm(this.props.formId);
-    
-  },
-  handleReset: function(e){
-    e.preventDefault();
-    e.stopPropagation();
-
-    if(!this.props.pk){
-      FormActions.patchForm(this.props.formId, {
-        recipient_input: this.props.initialState.recipient_input,
-        earner_description: "",
-        image: undefined,
-        imageData: "",
-        actionState: "ready", 
-        result: undefined,
-        message: undefined
-      });
-    }
-    else {
-      // TODO: write case for resetting edited form to the original badge info.
-    }
-      
-  },
-
-  render: function(){
-    var messageAlert = (this.state.message) ? (<div className={"alert alert-" + this.state.message.type} >{this.state.message.content}</div>) : "";
-    var loadingIcon = this.state.actionState == "waiting" ? (<LoadingIcon />) : "";
-    var formResult = "";
-    if (this.state.result){
-      item = this.state.result;
-      formResult = (<OpenBadge 
-        pk={item.badge.pk}
-        display="detail"
-        image={ item.badge.image }
-        badge={ item.badge.full_badge_object }
-        earner={ item.badge.recipient_input }
-        setActiveBadgeId={ function(event){return;} }
-        handleCloseClick={this.handleReset}
-      />)
-    }
-    var activeInputs = "";
-    if (this.state.actionState == "ready" || this.state.actionState == "waiting"){
-      var recipientInput;
-      if (this.props.recipientIds){
-        recipientInput = (
-          <InputGroup name="recipient_input" 
-            inputType="select" selectOptions={this.props.recipientIds} 
-            value={this.state.recipient_input} 
-            defaultValue={this.props.recipientIds[0]} 
-            handleChange={this.handleChange}
-            handleBlur={this.handleBlur}
-          />
-        );
-      }
-      else {
-        recipientInput = (
-          <InputGroup name="recipient_input" 
-            inputType="text"
-            label="Recipient Email or Identifier"
-            value={this.state.recipient_input} 
-            handleChange={this.handleChange}
-            handleBlur={this.handleBlur}
-          />
-        );
-      }
-
-      var annotationInput = "";
-      if (this.props.formId == "EarnerBadgeForm"){
-        annotationInput = (
-          <InputGroup name="earner_description" inputType="textarea" 
-            label="Earner Annotation" value={this.state.earner_description} 
-            handleChange={this.handleChange} handleBlur={this.handleBlur}
-          />
-        );
-      } 
-      
-      activeInputs = (
-        <fieldset className="row">
-          <div className="col-xs-5 col-sm-4 col-md-3">
-            <ImageDropbox onDroppedImage={this.handleImageDrop} image={this.state.image} imageData={this.state.imageData} />
-
-            <InputGroup name="image" inputType="filebutton" 
-              label="Badge Image" handleChange={this.handleChange} 
-              handleBlur={this.handleBlur}
-            />
-          </div>
-          <div className="col-xs-7 col-sm-8 col-md-9">
-            {annotationInput}
-
-            {recipientInput}
-          </div>
-
-          <SubmitButton name="submit" handleClick={this.handleSubmit} />
-        </fieldset>
-      );
-    }
-
-    return (
-      <div className="form-container earner-badge-form-container">
-        <form action={this.props.action} method="POST" className={this.state.actionState == "waiting" ? "form-horizontal disabled" : "form-horizontal"}>
-            {messageAlert}
-            {formResult}
-            {activeInputs}
-            
-            <ResetButton name="reset" handleClick={this.handleReset} />
-            { loadingIcon }
-        </form>
-        
-      </div>
-    )
-  }
-});
 
 
-IssuerNotificationForm = React.createClass({
-  getInitialState: function() {
-    return this.props.initialState;
-  },  
-  // Mount/unmount the change handler based on this component's lifecycle, but use the fn passed 
-  // in as props to mutage state, because App.jsx is where state is managed.
-  componentDidMount: function() {
-    FormStore.addListener('FORM_DATA_UPDATED_IssuerNotificationForm', this.handlePatch);
-  },
-  componentWillUnmount: function() {
-    FormStore.removeListener('FORM_DATA_UPDATED_IssuerNotificationForm', this.handlePatch);
-  },
-  handleChange: function(event){
-    
-    //reject change unless form is ready
-    if (this.state.actionState != "ready"){
-      event.stopPropagation();
-      event.preventDefault();
-      return;
-    }
-    var field = event.target.name;
-    var value = event.target.value;
-
-    var theChange = {};
-    theChange[field] = value;
-    if (this.isMounted())
-      this.setState(theChange);
-    else{
-      console.log("This probably should never fire: form value changed as it was unmounting..")
-      FormActions.patchForm(this.props.formId, theChange);
-    }
-  },
-  // When an input field is blurred, a form patch is submitted if its value has changed.
-  // Does not apply to the image upload field
-  handleBlur: function(event){
-    var patch = {}
-    var field = event.target.name;
-    var currentData = FormStore.getFormData(this.props.formId);
-    if (currentData[field] !== event.target.value){
-      patch[field] = event.target.value;
-      FormActions.patchForm(this.props.formId, patch);
-    }
-  },
-  // This catches the result from form update and applies it to the formstate. 
-  // On submit, it is how the result gets displayed.
-  handlePatch: function(){
-    // 'this' is bound: EarnerBadgeForm
-    
-    if (this.isMounted()){
-      var newState = FormStore.getFormData(this.props.formId);
-      this.setState(newState);
-    }
-  },
-  handleSubmit: function(e){
-    e.preventDefault(); 
-    e.stopPropagation();
-    if (this.state.actionState != "waiting")
-      FormActions.submitForm(this.props.formId);
-  },
-  handleReset: function(e){
-    e.preventDefault();
-    e.stopPropagation();
-
-    FormActions.patchForm(this.props.formId, {
-      email: "",
-      url: "",
-      actionState: "ready", 
-      result: undefined,
-      message: undefined
-    });
-      
-  },
-  render: function() {
-    var messageAlert = (this.state.message) ? (<div className={"alert alert-" + this.state.message.type} >{this.state.message.content}</div>) : "";
-    var loadingIcon = this.state.actionState == "waiting" ? (<LoadingIcon />) : "";
-    var activeInputs = "";
-    if (this.state.actionState == "ready" || this.state.actionState == "waiting"){
-      activeInputs = (
-        <fieldset className="row">
-          <InputGroup name="url" inputType="text" value={this.state.url}
-            label="Assertion URL" handleChange={this.handleChange} 
-            handleBlur={this.handleBlur}
-          />
-
-          <InputGroup name="email" inputType="text" 
-            label="Earner Email Address" value={this.state.email} 
-            handleChange={this.handleChange} handleBlur={this.handleBlur}
-          />
-
-          <SubmitButton name="submit" handleClick={this.handleSubmit} />
-        </fieldset>
-      );
-    }
-    return (
-      <div className="form-container issuer-notification-form-container">
-        <form action={this.props.action} method="POST" className={this.state.actionState == "waiting" ? "form-horizontal disabled" : "form-horizontal"}>
-            {messageAlert}
-            {activeInputs}
-            
-            <ResetButton name="reset" handleClick={this.handleReset} />
-            { loadingIcon }
-        </form>
-      </div>
-    );
-  }
-});
 
 
 BasicAPIForm = React.createClass({
   getInitialState: function() {
-    return this.props.defaultValues;
+    return FormStore.getFormState(this.props.formId);
   },
   componentDidMount: function() {
     FormStore.addListener('FORM_DATA_UPDATED_' + this.props.formId, this.handlePatch);
@@ -629,20 +310,16 @@ BasicAPIForm = React.createClass({
       );
     }
 
-    
-
-
-
 
     return (
       <div className="form-container issuer-notification-form-container">
         {activeMessage}
-        <form action={this.props.apiContext.actionUrl} method={this.props.apiContext.method} className={this.state.actionState == "waiting" ? "form-horizontal disabled" : "form-horizontal"}>
+        <div className={this.state.actionState == "waiting" ? "form-horizontal disabled" : "form-horizontal"}>
           <fieldset className="row">
             {activeColumns}
           </fieldset>
           {formControls}
-        </form>
+        </div>
       </div>
     );
   }
@@ -650,6 +327,4 @@ BasicAPIForm = React.createClass({
 
 
 // Export the Menu class for rendering:
-module.exports.BadgeUploadForm = BadgeUploadForm;
 module.exports.BasicAPIForm = BasicAPIForm;
-module.exports.IssuerNotificationForm = IssuerNotificationForm;

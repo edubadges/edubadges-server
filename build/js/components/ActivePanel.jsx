@@ -1,6 +1,5 @@
 var React = require('react');
 var EarnerBadge = require('./BadgeDisplay.jsx').EarnerBadge;
-var BadgeUploadForm = require('./Form.jsx').BadgeUploadForm;
 var BasicAPIForm = require('./Form.jsx').BasicAPIForm;
 var FormStore = require('../stores/FormStore');
 
@@ -66,45 +65,6 @@ var ActivePanel = React.createClass({
           <PanelActions
             actions={panelActions}
           />
-        </div>
-      );
-    }
-
-    else if (this.props.type == "EarnerBadgeForm"){
-      defaultFormState = {
-        recipient_input: this.props.recipientIds[0], 
-        earner_description: '' 
-      }
-      return (
-        <div className="active-panel earner-badge-form clearfix">
-          <BadgeUploadForm
-            action='/v1/earner/badges'
-            formId={this.props.type}
-            recipientIds={this.props.recipientIds}
-            pk={typeof this.props.badgeId !== 'undefined' ? this.props.badgeId : 0}
-            initialState={FormStore.getOrInitFormData(this.props.type, defaultFormState)}
-          />
-          <PanelActions
-            actions={panelActions}
-          />
-        </div>
-      );
-    }
-
-    else if (this.props.type == "IssuerNotificationForm"){
-      var formProps = {
-        formId: this.props.type
-      }
-      formProps['pk'] = 0; //typeof this.props.content['id'] === 'object' ? 0: parseInt(id);
-      formProps['initialState'] = FormStore.getOrInitFormData(
-        formProps.formId,
-        { email: "", url: "", actionState: "ready" }
-      );
-      return (
-        <div className="active-panel earner-badge-form clearfix">
-          <div className="container-fluid">
-            <IssuerNotificationForm {...formProps} />
-          </div>
         </div>
       );
     }

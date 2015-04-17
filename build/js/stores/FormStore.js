@@ -39,10 +39,8 @@ FormStore.getOrInitFormData = function(formId, initialData){
   if (!FormStore.data.hasOwnProperty(formId))
     FormStore.data[formId] = initialData
 
-  if (typeof FormStore.defaultValues === 'undefined')
-    initialState = {}
-
-  FormStore.data[formId].formState = _.clone(initialData.defaultValues);
+  if (!FormStore.data[formId].formState)
+    FormStore.data[formId].formState = _.clone(initialData.defaultValues);
 
   return FormStore.getFormData(formId);
 }

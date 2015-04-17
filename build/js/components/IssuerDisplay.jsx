@@ -63,9 +63,6 @@ var IssuerDisplay = React.createClass({
           <Property name="URL" label={false} property={properties.url} />
           <Property name="Description" label={false} property={properties.description} />
         </div>
-        <div className='badgeclass-list col-xs-12'>
-          <BadgeClassList badgeClasses={this.props.badgeclasses} display="detail" />
-        </div>
       </div>
     );
   }

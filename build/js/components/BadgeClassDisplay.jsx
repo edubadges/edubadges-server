@@ -23,7 +23,7 @@ BadgeClassDetail = React.createClass({
     }
 
     return (
-      <div className="badgeclass-display badgeclass-display-detail col-xs-12">
+      <div className="badge-display badgeclass-display badgeclass-display-detail col-xs-12">
         <div className='property-group image col-xs-3'>
           <Property name="Badge Image" label={false} property={properties.image} />
         </div>
@@ -64,8 +64,10 @@ BadgeClassList = React.createClass({
       }
     }.bind(this));
     return (
-      <div className="badgeclass-list badgeclass-list-thumbnail row">
-        {badgeClasses}
+      <div className="container-fluid">
+        <div className="badgeclass-list badgeclass-list-thumbnail row">
+          {badgeClasses}
+        </div>
       </div>
     );
   }

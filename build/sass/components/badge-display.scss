@@ -30,6 +30,13 @@
   }
 }
 
+.issuer-display-short {
+  cursor: pointer;
+  &:hover {
+    background-color: #eee;
+  }
+}
+
 .badgeclass-display-thumbnail {
   margin-top: 0.5em;
   padding: 0.25em;

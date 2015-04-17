@@ -36,6 +36,11 @@
 .badge-display-active {
   background-color: #d1d1d1; }
 
+.issuer-display-short {
+  cursor: pointer; }
+  .issuer-display-short:hover {
+    background-color: #eee; }
+
 .badgeclass-display-thumbnail {
   margin-top: 0.5em;
   padding: 0.25em;
@@ -94,6 +99,18 @@
 
 .main-component {
   padding: 1em 0; }
+
+.breadcrumbs {
+  list-style: none;
+  padding-left: 0; }
+  .breadcrumbs .crumb {
+    float: left; }
+    .breadcrumbs .crumb a {
+      margin: 0 0.5em; }
+    .breadcrumbs .crumb:after {
+      content: ">"; }
+    .breadcrumbs .crumb:last-child:after {
+      content: ""; }
 
 /*!
  * Start Bootstrap - SB Admin 2 Bootstrap Admin Theme (http://startbootstrap.com)
@@ -467,6 +484,11 @@ form.disabled, form.disabled textarea {
 .badge-display-active {
   background-color: #d1d1d1; }
 
+.issuer-display-short {
+  cursor: pointer; }
+  .issuer-display-short:hover {
+    background-color: #eee; }
+
 .badgeclass-display-thumbnail {
   margin-top: 0.5em;
   padding: 0.25em;
@@ -497,6 +519,18 @@ form.disabled, form.disabled textarea {
   .api-form .form-controls div {
     float: right;
     padding: 0.25em; }
+
+.breadcrumbs {
+  list-style: none;
+  padding-left: 0; }
+  .breadcrumbs .crumb {
+    float: left; }
+    .breadcrumbs .crumb a {
+      margin: 0 0.5em; }
+    .breadcrumbs .crumb:after {
+      content: ">"; }
+    .breadcrumbs .crumb:last-child:after {
+      content: ""; }
 
 .navbar-brand img {
   max-width: 30px;
