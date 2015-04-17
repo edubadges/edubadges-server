@@ -94,7 +94,7 @@ var ActivePanel = React.createClass({
         ],
         apiContext: {
           formId: this.props.type,
-          apiCollectionKey: "issuers",
+          apiCollectionKey: "issuer_issuers",
           actionUrl: "/v1/issuer/issuers",
           method: "POST",
           successHttpStatus: [200, 201],
@@ -136,7 +136,7 @@ var ActivePanel = React.createClass({
         ],
         apiContext: {
           formId: this.props.type,
-          apiCollectionKey: "issuerBadgeClasses",
+          apiCollectionKey: "issuer_badgeclasses",
           actionUrl: "/v1/issuer/issuers/" + this.props.issuerSlug + "/badges",
           method: "POST",
           successHttpStatus: [200, 201],

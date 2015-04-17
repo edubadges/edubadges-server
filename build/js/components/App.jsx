@@ -248,17 +248,23 @@ var App = React.createClass({
         />
         <IssuerList
           viewId={viewId}
-          issuers={APIStore.getCollection('issuer')}
+          issuers={APIStore.getCollection('issuer_issuers')}
+          badgeclasses={APIStore.getCollection('issuer_badgeclasses')}
         />
       </MainComponent>
     );
     return this.render_base(mainComponent);
   },
 
-  issuerDetail: function(issuerSlug){
+  issuerDetail: function(issuerSlug, params){
+    if (!params['perPage'])
+      params['perPage'] = 10
+    if (!params['currentPage'])
+      params['currentPage'] = 1
+
     var viewId = "issuerDetail-" + issuerSlug;
-    var issuer = APIStore.getFirstItemByPropertyValue('issuer', 'slug', issuerSlug);
-    var badgeClasses = issuer.badgeclasses;
+    var issuer = APIStore.getFirstItemByPropertyValue('issuer_issuers', 'slug', issuerSlug);
+    var badgeClasses = APIStore.filter('issuer_badgeclasses', 'issuer', issuer.json.id);
     var breadCrumbs = [
       { name: "My Issuers", url: '/issuer'},
       { name: issuer.name, url: '/issuer/issuers/' + issuerSlug }
@@ -286,7 +292,12 @@ var App = React.createClass({
           clearActivePanel={this.clearActivePanel}
           issuerSlug={issuerSlug}
         />
-        <BadgeClassList badgeClasses={badgeClasses} display="detail" />
+        <BadgeClassList
+          badgeClasses={badgeClasses}
+          display="detail"
+          perPage={params.perPage}
+          currentPage={params.currentPage}
+        />
       </MainComponent>
     )
 

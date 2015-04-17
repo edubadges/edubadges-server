@@ -40,11 +40,16 @@ BadgeClassDetail = React.createClass({
 BadgeClassList = React.createClass({
   getDefaultProps: function() {
     return {
-      display: 'thumbnail'
+      display: 'thumbnail',
+      perPage: 4,
+      currentPage: 1
     };
   },
   render: function() {
-    var badgeClasses = this.props.badgeClasses.slice(0,4).map(function(bc, i){
+    var badgeClasses = this.props.badgeClasses.slice(
+      this.props.perPage * (this.props.currentPage-1),
+      this.props.perPage + this.props.perPage * (this.props.currentPage-1)
+    ).map(function(bc, i){
       var properties = {
         image: bc.image,
         name: bc.name,

@@ -305,6 +305,7 @@ BasicAPIForm = React.createClass({
     else {
       formControls = (
         <div className="row form-controls">
+          <PlainButton name="close" label="Close" handleClick={this.props.handleCloseForm} />
           <ResetButton name="reset" handleClick={this.handleReset} />
         </div>
       );

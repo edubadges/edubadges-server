@@ -82,6 +82,9 @@ var IssuerList = React.createClass({
     else {
       issuers = this.props.issuers.map(function(issuer, i){
         var issuerPath = "/issuer/issuers/" + issuer.slug;
+        var badgeClasses = this.props.badgeclasses.filter(
+          function(el,i,array){ return (el.issuer == issuer.json.id); }
+        );
         var handleClick = function(e){navigateLocalPath(issuerPath);};
         return (
           <IssuerDisplayShort
@@ -90,10 +93,10 @@ var IssuerList = React.createClass({
             url={issuer.json.url}
             key={"issuer-" + i}
             handleClick={handleClick}
-            badgeClasses={issuer.badgeclasses}
+            badgeClasses={badgeClasses}
           />
         );
-      });
+      }.bind(this));
     }
     return (
       <div className={listClass}>

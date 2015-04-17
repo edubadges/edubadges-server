@@ -1,3 +1,5 @@
+from itertools import chain
+
 from django.db.models import Q
 
 from rest_framework import serializers
@@ -216,14 +218,20 @@ class IssuerPortalSerializer(serializers.Serializer):
             Q(owner__id=user.id) |
             Q(staff__id=user.id)
         ).select_related('badgeclasses')
+        user_issuer_badgeclasses = chain.from_iterable(i.badgeclasses.all() for i in user_issuers)
 
-        issuer_context = self.context.copy()
-        issuer_context['embed_badgeclasses'] = True
         issuer_data = IssuerSerializer(
             user_issuers,
             many=True,
-            context=issuer_context
+            context=self.context
         )
-        view_data['issuer'] = issuer_data.data
+        badgeclass_data = BadgeClassSerializer(
+            user_issuer_badgeclasses,
+            many=True,
+            context=self.context
+        )
+
+        view_data['issuer_issuers'] = issuer_data.data
+        view_data['issuer_badgeclasses'] = badgeclass_data.data
 
         return view_data

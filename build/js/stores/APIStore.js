@@ -25,15 +25,6 @@ function getCookie(name) {
 var APIStore = assign({}, EventEmitter.prototype);
 
 APIStore.data = {}
-APIStore.collectionTypes = [
-  "earnerBadges",
-  "earnerBadgeCollections",
-  "earnerNotifications",
-  "issuerBadgeClasses",
-  "issuerBadges",
-  "consumerBadges",
-  'issuer'
-]
 
 APIStore.getCollection = function(collectionType) {
   if (collectionType.indexOf(collectionType) > -1)
@@ -53,7 +44,7 @@ APIStore.getCollectionLastItem = function(collectionType) {
 APIStore.getFirstItemByPropertyValue = function(collectionType, propName, value){
   // Will return the first item that matches -- don't use for queries where you want multiple results.
   var collection = APIStore.getCollection(collectionType);
-  if (collection.length > 0) {
+  if (!!collection && collection.length > 0) {
     for (var i=0; i<collection.length; i++){
       if (collection[i].hasOwnProperty(propName) && collection[i][propName] == value){
         return collection[i];
@@ -61,16 +52,23 @@ APIStore.getFirstItemByPropertyValue = function(collectionType, propName, value)
     }
   }
   return {};
-}
-APIStore.addCollectionItem = function(collectionKey, item) {
-  if (APIStore.collectionTypes.indexOf(collectionKey) > -1){
-    if (!APIStore.data.hasOwnProperty(collectionKey))
-      APIStore.data[collectionKey] = [];
-    APIStore.data[collectionKey].push(item);
-    return item;
+};
+APIStore.filter = function(collectionType, propName, value){
+  var collection = APIStore.getCollection(collectionType);
+  function match(el, index, collection){
+    return (el.hasOwnProperty(propName) && el[propName] == value);
   }
-  else
-    return false;
+
+  if (!!collection && collection.length > 0){
+    return collection.filter(match);
+  }
+};
+
+APIStore.addCollectionItem = function(collectionKey, item) {
+  if (!APIStore.data.hasOwnProperty(collectionKey))
+    APIStore.data[collectionKey] = [];
+  APIStore.data[collectionKey].push(item);
+  return item;
 }
 
 
@@ -92,9 +90,7 @@ APIStore.storeInitialData = function() {
     // TODO: Add validation of types?
     _initialData = initialData
     for (key in _initialData){
-      if (APIStore.collectionTypes.indexOf(key) > -1) {
-        APIStore.data[key] = _initialData[key]
-      }
+      APIStore.data[key] = _initialData[key]
     }
   }
 }
@@ -206,5 +202,6 @@ module.exports = {
   removeListener: APIStore.removeListener,
   getCollection: APIStore.getCollection,
   getCollectionLastItem: APIStore.getCollectionLastItem,
-  getFirstItemByPropertyValue: APIStore.getFirstItemByPropertyValue
+  getFirstItemByPropertyValue: APIStore.getFirstItemByPropertyValue,
+  filter: APIStore.filter
 }
