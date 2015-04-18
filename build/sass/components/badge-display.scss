@@ -30,7 +30,7 @@
   }
 }
 
-.issuer-display-short {
+.issuer-display-short, .badgeclass-list .badgeclass-display-detail {
   cursor: pointer;
   &:hover {
     background-color: #eee;

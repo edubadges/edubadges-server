@@ -36,9 +36,9 @@
 .badge-display-active {
   background-color: #d1d1d1; }
 
-.issuer-display-short {
+.issuer-display-short, .badgeclass-list .badgeclass-display-detail {
   cursor: pointer; }
-  .issuer-display-short:hover {
+  .issuer-display-short:hover, .badgeclass-list .badgeclass-display-detail:hover {
     background-color: #eee; }
 
 .badgeclass-display-thumbnail {
@@ -484,9 +484,9 @@ form.disabled, form.disabled textarea {
 .badge-display-active {
   background-color: #d1d1d1; }
 
-.issuer-display-short {
+.issuer-display-short, .badgeclass-list .badgeclass-display-detail {
   cursor: pointer; }
-  .issuer-display-short:hover {
+  .issuer-display-short:hover, .badgeclass-list .badgeclass-display-detail:hover {
     background-color: #eee; }
 
 .badgeclass-display-thumbnail {

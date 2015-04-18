@@ -155,6 +155,44 @@ var ActivePanel = React.createClass({
       );
     }
 
+    else if (this.props.type == "BadgeInstanceCreateUpdateForm"){
+      var formProps = {
+        formId: this.props.type,
+        fieldsMeta: {
+          email: {inputType: "text", label: "Recipient Email", required: true},
+          evidence: {inputType: "text", label: "Evidence URL", required: false},
+          create_notification: {inputType: "checkbox", label: "Notify earner by email", required: false}
+        },
+        defaultValues: {
+          email: "",
+          evidence: "",
+          create_notification: false,
+          actionState: "ready"
+        },
+        columns: [
+          { fields: ['email', 'evidence', 'create_notification'], className:'col-xs-12' }
+        ],
+        apiContext: {
+          formId: this.props.type,
+          apiCollectionKey: "issuer_badgeinstances",
+          actionUrl: "/v1/issuer/issuers/" + this.props.issuerSlug + "/badges/" + this.props.badgeClassSlug + '/assertions',
+          method: "POST",
+          successHttpStatus: [200, 201],
+          successMessage: "Badge successfully issued."
+        },
+        handleCloseForm: this.clearActivePanel
+      };
+      FormStore.getOrInitFormData(this.props.type, formProps);
+
+      return (
+        <div className="active-panel api-form image-upload-form clearfix">
+          <div className="container-fluid">
+            <BasicAPIForm {...formProps} />
+          </div>
+        </div>
+      );
+    }
+
     else if (this.props.type == "ConsumerBadgeForm"){
       defaultFormState = {
         recipient_input: ''

@@ -167,9 +167,7 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
                 'type': 'hosted'
                 # 'url': TO BE ADDED IN SAVE
             }
-
         }
-
         try:
             create_notification = validated_data.pop('create_notification')
         except KeyError:

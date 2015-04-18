@@ -69,6 +69,14 @@ MenuStore.defaultItems = {
           activePanelCommand: { type: "BadgeClassCreateUpdateForm", content: {}}
         }
       ],
+      badgeClassDetail: [
+        {
+          title: "Issue Badge",
+          buttonType: "primary",
+          icon: "fa-mail-forward",
+          activePanelCommand: { type: "BadgeInstanceCreateUpdateForm", content: {}}
+        }
+      ],
       consumerMain: [
         { 
           title: "Analyze Badge",

@@ -87,14 +87,14 @@ var IssuerList = React.createClass({
         );
         var handleClick = function(e){navigateLocalPath(issuerPath);};
         return (
-          <IssuerDisplayShort
-            name={issuer.name}
-            image={issuer.image}
-            url={issuer.json.url}
-            key={"issuer-" + i}
-            handleClick={handleClick}
-            badgeClasses={badgeClasses}
-          />
+            <IssuerDisplayShort
+              name={issuer.name}
+              image={issuer.image}
+              url={issuer.json.url}
+              key={"issuer-" + i}
+              handleClick={handleClick}
+              badgeClasses={badgeClasses}
+            />
         );
       }.bind(this));
     }

@@ -15,7 +15,8 @@ FormStore.data = {}
 
 FormStore.genericFormTypes = [
   'IssuerCreateUpdateForm',
-  'BadgeClassCreateUpdateForm'
+  'BadgeClassCreateUpdateForm',
+  'BadgeInstanceCreateUpdateForm'
 ]
 
 FormStore.idValid = function(formId){

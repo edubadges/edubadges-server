@@ -421,7 +421,15 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        serializer = BadgeInstanceSerializer(data=request.data, context={'request': request})
+        data = {}
+        if request.data.get('email') is not None:
+            data['email'] = request.data.get('email')
+        if request.data.get('evidence') is not None:
+            data['evidence'] = request.data.get('evidence')
+        if request.data.get('create_notification') is not None:
+            data['create_notification'] = True
+
+        serializer = BadgeInstanceSerializer(data=data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
         serializer.save(

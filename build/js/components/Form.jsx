@@ -10,6 +10,7 @@ var FormStore = require('../stores/FormStore');
 // Components
 var OpenBadge = require('../components/BadgeDisplay.jsx').OpenBadge;
 var Dropzone = require('react-dropzone');
+var LoadingIcon = require('../components/Widgets.jsx').LoadingIcon;
 
 // Actions
 var EarnerActions = require('../actions/earner');
@@ -24,7 +25,6 @@ var InputGroup = React.createClass({
     label: ReactPropTypes.string,
     inputType: ReactPropTypes.string,
     selectOptions: ReactPropTypes.arrayOf(ReactPropTypes.string),
-    value: React.PropTypes.string,
     handleChange: ReactPropTypes.func,
     placeholder: ReactPropTypes.string
   },
@@ -32,7 +32,8 @@ var InputGroup = React.createClass({
     var classes = {
       "filebutton": "input-file",
       "textarea": "input-textarea", //wrong. double-check. http://getbootstrap.com/components/#input-groups says you can't use textarea in .input-group
-      "select": "input-group-select"
+      "select": "input-group-select",
+      "checkbox": "input-checkbox"
     };
     return classes[this.props.inputType];
   },
@@ -45,7 +46,10 @@ var InputGroup = React.createClass({
       return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="text" onChange={this.props.handleChange} onBlur={this.props.handleBlur} /> );
     }
     else if (this.props.inputType == "textarea"){
-      return ( <textarea name={this.props.name} value={this.props.value} onChange={this.props.handleChange} onBlur={this.props.handleBlur} /> );
+      return ( <textarea name={this.props.name} value={this.props.value} onChange={this.props.handleChange} onClick={this.props.handleBlur} /> );
+    }
+    else if (this.props.inputType == "checkbox"){
+      return ( <input type="checkbox" name={this.props.name} checked={this.props.value} className={this.classNameForInput()} onChange={this.props.handleChange} /> );
     }
     else if (this.props.inputType == "select") {
       var selectOptions = this.props.selectOptions.map(function(option, index){
@@ -148,16 +152,6 @@ var PlainButton = React.createClass({
   }
 });
 
-var LoadingIcon = React.createClass({
-  render: function(){
-    return (
-      <div className="loading-icon" >
-        <span className='sr-only'>Loading...</span>
-      </div>
-    )
-  }
-});
-
 
 
 
@@ -180,14 +174,16 @@ BasicAPIForm = React.createClass({
       event.preventDefault();
       return;
     }
-    var field = event.target.name;
-    var value = event.target.value;
 
-    var change = {}
-    change[field] = value;
+    // Update Store immediately for checkbox fields
+    if (this.props.fieldsMeta[event.target.name].inputType == 'checkbox') {
+      this.handleBlur(event);
+      return;
+    }
 
+    var change = {};
+    change[event.target.name] = event.target.value;
     this.setState(change);
-    
   },
   // When an input field is blurred, a form patch is submitted if its value has changed.
   // Does not apply to the image upload field
@@ -267,6 +263,17 @@ BasicAPIForm = React.createClass({
                 inputType={inputType} selectOptions={this.state.fields[fieldKey].selectOptions} 
                 value={value} 
                 defaultValue={this.state.fields[fieldKey].defaultValue || this.state.fields[fieldKey].selectOptions[0]} 
+                handleChange={this.handleChange}
+                handleBlur={this.handleBlur}
+                label={label}
+              />
+            );
+          }
+          else if (inputType == 'checkbox'){
+            return (
+              <InputGroup name={fieldKey} key={this.props.formId + "-form-field-" + i + '-' + j}
+                inputType={inputType} 
+                value={value} 
                 handleChange={this.handleChange}
                 handleBlur={this.handleBlur}
                 label={label}

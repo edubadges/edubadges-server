@@ -24,15 +24,14 @@ function getCookie(name) {
 
 var APIStore = assign({}, EventEmitter.prototype);
 
-APIStore.data = {}
+APIStore.data = {};
+APIStore.getRequests = [];
 
 APIStore.getCollection = function(collectionType) {
-  if (collectionType.indexOf(collectionType) > -1)
+  if (APIStore.data.hasOwnProperty(collectionType))
     return APIStore.data[collectionType];
-  else {
-    throw new TypeError(collectionType + " not supported by APIStore");
-    return []
-  }
+  else
+    return [];
 };
 APIStore.getCollectionLastItem = function(collectionType) {
   var collection = APIStore.getCollection(collectionType);
@@ -54,6 +53,9 @@ APIStore.getFirstItemByPropertyValue = function(collectionType, propName, value)
   return {};
 };
 APIStore.filter = function(collectionType, propName, value){
+  if (!APIStore.data.hasOwnProperty(collectionType)){
+    APIStore.data[collectionType] = [];
+  }
   var collection = APIStore.getCollection(collectionType);
   function match(el, index, collection){
     return (el.hasOwnProperty(propName) && el[propName] == value);
@@ -62,6 +64,8 @@ APIStore.filter = function(collectionType, propName, value){
   if (!!collection && collection.length > 0){
     return collection.filter(match);
   }
+  else
+    return [];
 };
 
 APIStore.addCollectionItem = function(collectionKey, item) {
@@ -70,6 +74,10 @@ APIStore.addCollectionItem = function(collectionKey, item) {
   APIStore.data[collectionKey].push(item);
   return item;
 }
+
+APIStore.hasAlreadyRequested = function(path){
+  return (APIStore.getRequests.indexOf(path) > -1);
+};
 
 
 // listener utils
@@ -96,6 +104,53 @@ APIStore.storeInitialData = function() {
 }
 
 
+/* getData(): a common function for GETting needed data from the API so
+ * that views may be rendered.
+ * Params:
+ *   context: a dictionary providing information about the API endpoint,
+ *            expected return results and what to do with it.
+ *       - actionUrl: the path starting with / to request from
+ *       - successfulHttpStatus: [200] an array of success status codes
+ *       - apiCollectionKey: where to put the retrieved data
+*/
+APIStore.getData = function(context){
+  APIStore.getRequests.push(context.actionUrl);
+
+  var req = request.get(context.actionUrl)
+    .set('X-CSRFToken', getCookie('csrftoken'))
+    .accept('application/json');
+
+  req.end(function(error, response){
+    console.log(response);
+    if (error){
+      console.log("THERE WAS SOME KIND OF API REQUEST ERROR.");
+      console.log(error);
+      APIStore.emit('API_STORE_FAILURE');
+    }
+    else if (context.successfulHttpStatus.indexOf(response.status) == -1){
+      console.log("API REQUEST PROBLEM:");
+      console.log(response.text);
+      APIActions.APIGetResultFailure({
+        message: {type: 'danger', content: response.status + " Error getting data: " + response.text}
+      });
+    }
+    else {
+      if (Array.isArray(response.body)){
+        response.body.map(function(el, i, array){
+          APIStore.addCollectionItem(context.apiCollectionKey, el);
+        });
+      }
+      else {
+        APIStore.addCollectionItem(context.apiCollectionKey,response.body);
+      }
+      APIStore.emit('DATA_UPDATED');
+    }
+  });
+
+  return req;
+};
+
+
 /* postForm(): a common function for POSTing forms and returning results
  * to the FormStore.
  * Params:
@@ -106,7 +161,7 @@ APIStore.storeInitialData = function() {
  * to the post request.
 */
 APIStore.postForm = function(fields, values, context){
-  
+
   if (context.method == 'POST')
     var req = request.post(context.actionUrl);
   else if (context.method == 'DELETE')
@@ -119,9 +174,9 @@ APIStore.postForm = function(fields, values, context){
 
   // Attach data fields to request
   for (field in fields) {
-    if (["text", "textarea", "select"].indexOf(fields[field].inputType) > -1 && values[field])
+    if (["text", "textarea", "select", "checkbox"].indexOf(fields[field].inputType) > -1 && values[field])
       req.field(field, values[field]);
-    else if (["image", "file"].indexOf(fields[field].inputType) > -1 && values[field])
+    else if (["image", "file"].indexOf(fields[field].inputType) > -1 && typeof values[field])
       req.attach(field, values[field], fields[field].filename);
   }
 
@@ -178,18 +233,16 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
       // make sure form updates have occurred before processing submits
       Dispatcher.waitFor([FormStore.dispatchToken]);
 
-      if (action.formId == "EarnerBadgeForm")
-        APIStore.postEarnerBadgeForm(FormStore.getFormData(action.formId));
-      else if (action.formId == "ConsumerBadgeForm")
-        APIStore.postConsumerBadgeForm(FormStore.getFormData(action.formId));
-      else if (action.formId == "IssuerNotificationForm")
-        APIStore.postIssuerNotificationForm(FormStore.getFormData(action.formId));
-      else if (FormStore.genericFormTypes.indexOf(action.formId) > -1){
+      if (FormStore.genericFormTypes.indexOf(action.formId) > -1){
         formData = FormStore.getFormData(action.formId);
         APIStore.postForm(formData.fieldsMeta, formData.formState, formData.apiContext);
       }
       else
         console.log("Unidentified form type to submit: " + action.formId);
+      break;
+
+    case 'API_GET_DATA':
+      APIStore.getData(action.apiContext);
       break;
 
     default:
@@ -200,6 +253,7 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
 module.exports = {
   addListener: APIStore.addListener,
   removeListener: APIStore.removeListener,
+  hasAlreadyRequested: APIStore.hasAlreadyRequested,
   getCollection: APIStore.getCollection,
   getCollectionLastItem: APIStore.getCollectionLastItem,
   getFirstItemByPropertyValue: APIStore.getFirstItemByPropertyValue,

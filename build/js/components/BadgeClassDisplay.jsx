@@ -1,5 +1,8 @@
 var React = require('react');
 
+// Actions
+var navigateLocalPath = require('../actions/clicks').navigateLocalPath;
+
 // Components
 var Property = require('../components/BadgeDisplay.jsx').Property;
 
@@ -14,6 +17,11 @@ BadgeClassThumbnail = React.createClass({
 });
 
 BadgeClassDetail = React.createClass({
+  getDefaultProps: function() {
+    return {
+      handleClick: function(e){}
+    };
+  },
   render: function() {
     var properties = {
       image: {type: 'image', text: this.props.name + ' logo', href: this.props.image},
@@ -23,7 +31,10 @@ BadgeClassDetail = React.createClass({
     }
 
     return (
-      <div className="badge-display badgeclass-display badgeclass-display-detail col-xs-12">
+      <div 
+        className="badge-display badgeclass-display badgeclass-display-detail col-xs-12"
+        onClick={this.props.handleClick}
+      >
         <div className='property-group image col-xs-3'>
           <Property name="Badge Image" label={false} property={properties.image} />
         </div>
@@ -63,8 +74,10 @@ BadgeClassList = React.createClass({
         );
       }
       else {
+        var badgeclassPath = "/issuer/issuers/" + this.props.issuerSlug + "/badges/" + bc.slug;
+        var handleClick = function(e){navigateLocalPath(badgeclassPath);};
         return (
-          <BadgeClassDetail {...bc} key={'bc-' + i} />
+          <BadgeClassDetail {...bc} key={'bc-' + i} handleClick={handleClick} />
         );
       }
     }.bind(this));
@@ -81,5 +94,6 @@ BadgeClassList = React.createClass({
 
 
 module.exports = {
-  BadgeClassList: BadgeClassList
+  BadgeClassList: BadgeClassList,
+  BadgeClassDetail: BadgeClassDetail
 };

@@ -26,6 +26,8 @@ var EarnerBadgeForm = require('../components/Form.jsx').EarnerBadgeForm;
 var IssuerNotificationForm = require('../components/Form.jsx').IssuerNotificationForm
 var IssuerList = require('../components/IssuerDisplay.jsx').IssuerList;
 var IssuerDisplay = require('../components/IssuerDisplay.jsx').IssuerDisplay;
+var BadgeClassDetail = require('../components/BadgeClassDisplay.jsx').BadgeClassDetail;
+var BadgeInstanceList = require('../components/BadgeInstanceDisplay.jsx').BadgeInstanceList
 var EarnerBadgeList = require('../components/EarnerBadgeList.jsx');
 var ConsumerBadgeList = require('../components/ConsumerBadgeList.jsx');
 
@@ -33,6 +35,7 @@ var ConsumerBadgeList = require('../components/ConsumerBadgeList.jsx');
 var LifeCycleActions = require('../actions/lifecycle');
 var FormActions = require('../actions/forms');
 var ActiveActions = require('../actions/activeActions');
+var APIActions = require('../actions/api');
 
 var App = React.createClass({
   mixins: [RouterMixin],
@@ -44,6 +47,7 @@ var App = React.createClass({
     '/issuer': 'issuerMain',
     '/issuer/issuers': 'issuerMain',
     '/issuer/issuers/:issuerSlug': 'issuerDetail',
+    '/issuer/issuers/:issuerSlug/badges/:badgeClassSlug': 'badgeClassDetail',
     '/explorer': 'consumerMain'
   },
 
@@ -293,10 +297,72 @@ var App = React.createClass({
           issuerSlug={issuerSlug}
         />
         <BadgeClassList
+          issuerSlug={issuerSlug}
           badgeClasses={badgeClasses}
           display="detail"
           perPage={params.perPage}
           currentPage={params.currentPage}
+        />
+      </MainComponent>
+    )
+
+    return this.render_base(mainComponent);
+  },
+
+  badgeClassDetail: function(issuerSlug, badgeClassSlug){
+    var viewId = "badgeClassDetail-" + badgeClassSlug;
+    var issuer = APIStore.getFirstItemByPropertyValue('issuer_issuers', 'slug', issuerSlug);
+    var badgeClass = APIStore.getFirstItemByPropertyValue('issuer_badgeclasses', 'slug', badgeClassSlug);
+    var badgeInstances = APIStore.filter('issuer_badgeinstances', 'badgeclass', badgeClass.json.id);
+    var instanceRequestStatus = null;
+
+    var breadCrumbs = [
+      { name: "My Issuers", url: '/issuer'},
+      { name: issuer.name, url: '/issuer/issuers/' + issuerSlug},
+      { name: badgeClass.name, url: "/issuer/issuers/" + issuerSlug + "/badges/" + badgeClass.slug}
+    ];
+
+    // Trigger a get on instances if none are found and haven't been requested yet:
+    var instanceGetPath = '/v1' + breadCrumbs[2].url + '/assertions';
+    if (badgeInstances.length == 0 && !APIStore.hasAlreadyRequested(instanceGetPath)){
+      APIActions.APIGetData({
+        actionUrl: instanceGetPath,
+        apiCollectionKey: 'issuer_badgeinstances',
+        successfulHttpStatus: [200]
+      });
+      instanceRequestStatus = "waiting";
+    }
+
+    var mainComponent = (
+      <MainComponent viewId={viewId}>
+        <BreadCrumbs items={breadCrumbs} />
+        <HeadingBar 
+          title={issuer.name + ": " + badgeClass.name}
+        />
+        <IssuerDisplay {...issuer} />
+        <BadgeClassDetail {...badgeClass} />
+        <ActionBar
+          title={"Recipients (" + badgeInstances.length + ")"}
+          viewId={viewId}
+          items={this.props.actionBars['badgeClassDetail']}
+          updateActivePanel={this.updateActivePanel}
+          clearActivePanel={this.clearActivePanel}
+          activePanel={this.state.activePanels[viewId]}
+        />
+        <ActivePanel
+          viewId={viewId}
+          {...this.state.activePanels[viewId]}
+          {...this.contextPropsForActivePanel(viewId)}
+          updateActivePanel={this.updateActivePanel}
+          clearActivePanel={this.clearActivePanel}
+          issuerSlug={issuerSlug}
+          badgeClassSlug={badgeClassSlug}
+        />
+        <BadgeInstanceList
+          issuerSlug={issuerSlug}
+          badgeClass={badgeClass}
+          badgeInstances={badgeInstances}
+          dataRequestStatus={instanceRequestStatus}
         />
       </MainComponent>
     )
