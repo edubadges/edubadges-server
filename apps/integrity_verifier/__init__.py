@@ -1,6 +1,7 @@
 import inspect
 import re
 import sys
+from urlparse import urlparse
 from UserDict import UserDict
 
 import requests
@@ -34,14 +35,6 @@ class RemoteBadgeInstance(object):
         return str(self.badge_instance)
 
 
-#  from urlparse import urlparse
-#  same_domain = (urlparse(badge_instance.instance_url).netloc
-#                 == urlparse(badge_instance['badge']).netloc
-#                 == urlparse(badge_instance.badge['issuer']).netloc)
-#  if not same_domain:
-#      self.non_component_errors.append(
-#          ('domain', "Badge components don't share the same domain."))
-
 class AnnotatedDict(UserDict, object):
 
     def __init__(self, dictionary):
@@ -68,6 +61,9 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
             AnnotatedDict(badge_instance.badge_instance.copy())
         self.badge = AnnotatedDict(badge_instance.badge.copy())
         self.issuer = AnnotatedDict(badge_instance.issuer.copy())
+
+        self.non_component_errors = []
+        self.check_origin()
 
         self.version_signature = re.compile(r"[Vv][0-9](_[0-9])+$")
 
@@ -108,6 +104,14 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
                 .replace('_', '.').replace('V', 'v')
         except AttributeError:
             return None
+
+    def check_origin(self):
+        same_domain = (urlparse(self.instance_url).netloc
+                       == urlparse(self.badge_instance['badge']).netloc
+                       == urlparse(self.badge['issuer']['url']).netloc)
+        if not same_domain:
+            self.non_component_errors.append(
+                ('domain', "Badge components don't share the same domain."))
 
     def __getattr__(self, key):
         base_properties = ['instance_url', 'recipient_id',
