@@ -110,7 +110,9 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
             return None
 
     def __getattr__(self, key):
-        if key != 'badge' and key != 'issuer':
+        base_properties = ['instance_url', 'recipient_id',
+                           'badge', 'issuer', 'json']
+        if key not in base_properties:
             return getattr(self.badge_instance, key)
 
     def __getitem__(self, key):
