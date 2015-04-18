@@ -46,7 +46,7 @@ var InputGroup = React.createClass({
       return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="text" onChange={this.props.handleChange} onBlur={this.props.handleBlur} /> );
     }
     else if (this.props.inputType == "textarea"){
-      return ( <textarea name={this.props.name} value={this.props.value} onChange={this.props.handleChange} onClick={this.props.handleBlur} /> );
+      return ( <textarea name={this.props.name} value={this.props.value} onChange={this.props.handleChange} onBlur={this.props.handleBlur} /> );
     }
     else if (this.props.inputType == "checkbox"){
       return ( <input type="checkbox" name={this.props.name} checked={this.props.value} className={this.classNameForInput()} onChange={this.props.handleChange} /> );
