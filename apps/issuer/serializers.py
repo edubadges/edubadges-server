@@ -1,3 +1,7 @@
+from itertools import chain
+
+from django.db.models import Q
+
 from rest_framework import serializers
 
 from mainsite.serializers import WritableJSONField
@@ -53,6 +57,12 @@ class IssuerSerializer(AbstractComponentSerializer):
         new_issuer.save()
         return new_issuer
 
+    def to_representation(self, obj):
+        representation = super(IssuerSerializer, self).to_representation(obj)
+        if self.context.get('embed_badgeclasses', False):
+            representation['badgeclasses'] = BadgeClassSerializer(obj.badgeclasses.all(), many=True, context=self.context).data
+
+        return representation
 
 class IssuerRoleActionSerializer(serializers.Serializer):
     """ A serializer used for validating user role change POSTS """
@@ -157,9 +167,7 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
                 'type': 'hosted'
                 # 'url': TO BE ADDED IN SAVE
             }
-
         }
-
         try:
             create_notification = validated_data.pop('create_notification')
         except KeyError:
@@ -191,3 +199,37 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
             new_assertion.notify_earner()
 
         return new_assertion
+
+
+class IssuerPortalSerializer(serializers.Serializer):
+    """
+    A serializer used to pass initial data to a view template so that the React.js
+    front end can render.
+    It should detect which of the core Badgr applications are installed and return
+    appropriate contextual information.
+    """
+
+    def to_representation(self, user):
+        view_data = {}
+
+        user_issuers = Issuer.objects.filter(
+            Q(owner__id=user.id) |
+            Q(staff__id=user.id)
+        ).select_related('badgeclasses')
+        user_issuer_badgeclasses = chain.from_iterable(i.badgeclasses.all() for i in user_issuers)
+
+        issuer_data = IssuerSerializer(
+            user_issuers,
+            many=True,
+            context=self.context
+        )
+        badgeclass_data = BadgeClassSerializer(
+            user_issuer_badgeclasses,
+            many=True,
+            context=self.context
+        )
+
+        view_data['issuer_issuers'] = issuer_data.data
+        view_data['issuer_badgeclasses'] = badgeclass_data.data
+
+        return view_data

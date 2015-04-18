@@ -2,6 +2,7 @@ var React = require('react');
 var RouterMixin = require('react-mini-router').RouterMixin;
 var navigate = require('react-mini-router').navigate;
 var assign = require('object-assign');
+var urllite = require('urllite/lib/core');
 
 // Stores
 var RouteStore = require('../stores/RouteStore');
@@ -16,11 +17,17 @@ var TopLinks = require('../components/TopLinks.jsx');
 var SideBarNav = require('../components/SideBarNav.jsx');
 var MainComponent = require ('../components/MainComponent.jsx');
 var SecondaryMenu = require('../components/SecondaryMenu.jsx');
-var ActionBar = require('../components/ActionBar.jsx');
+var BreadCrumbs = require('../components/BreadCrumbs.jsx');
+var ActionBar = require('../components/ActionBar.jsx').ActionBar;
+var HeadingBar = require('../components/ActionBar.jsx').HeadingBar;
 var ActivePanel = require('../components/ActivePanel.jsx');
 var OpenBadgeList = require('../components/OpenBadgeList.jsx');
 var EarnerBadgeForm = require('../components/Form.jsx').EarnerBadgeForm;
 var IssuerNotificationForm = require('../components/Form.jsx').IssuerNotificationForm
+var IssuerList = require('../components/IssuerDisplay.jsx').IssuerList;
+var IssuerDisplay = require('../components/IssuerDisplay.jsx').IssuerDisplay;
+var BadgeClassDetail = require('../components/BadgeClassDisplay.jsx').BadgeClassDetail;
+var BadgeInstanceList = require('../components/BadgeInstanceDisplay.jsx').BadgeInstanceList
 var EarnerBadgeList = require('../components/EarnerBadgeList.jsx');
 var ConsumerBadgeList = require('../components/ConsumerBadgeList.jsx');
 
@@ -28,6 +35,7 @@ var ConsumerBadgeList = require('../components/ConsumerBadgeList.jsx');
 var LifeCycleActions = require('../actions/lifecycle');
 var FormActions = require('../actions/forms');
 var ActiveActions = require('../actions/activeActions');
+var APIActions = require('../actions/api');
 
 var App = React.createClass({
   mixins: [RouterMixin],
@@ -35,13 +43,12 @@ var App = React.createClass({
   // Route configuration: 
   routes: {
     '/': 'home',
-    '/earn': 'earnerMain',
-    // '/earn/badges': 'earnerBadgeForm',
-    // '/earn/badges/:id': 'earnerBadgeForm',
-    '/issue/badges': 'issuerMain',
-    '/issuer/certificates/new': 'issuerCertificateForm',
-    '/issuer/certificates/:id': 'issuerCertificateView', 
-    '/understand': 'consumerMain'
+    '/earner': 'earnerMain',
+    '/issuer': 'issuerMain',
+    '/issuer/issuers': 'issuerMain',
+    '/issuer/issuers/:issuerSlug': 'issuerDetail',
+    '/issuer/issuers/:issuerSlug/badges/:badgeClassSlug': 'badgeClassDetail',
+    '/explorer': 'consumerMain'
   },
 
   // Route handling:
@@ -53,7 +60,8 @@ var App = React.createClass({
 
   getDefaultProps: function() {
     return {
-      appTitle: 'Badge Trust',
+      path: urllite(window.location.href).pathname + urllite(window.location.href).search,
+      appTitle: 'Badgr Server',
       roleMenu: MenuStore.getAllItems('roleMenu'),
       actionMenu: MenuStore.getAllItems('topMenu'),
       actionBars: MenuStore.getAllItems('actionBars'),
@@ -76,9 +84,8 @@ var App = React.createClass({
 
     MenuStore.addListener('UNCAUGHT_DOCUMENT_CLICK', this._hideMenu);
     RouteStore.addListener('ROUTE_CHANGED', this.handleRouteChange);
-    APIStore.addListener('DATA_UPDATED_earnerBadges', function(){
-      // TODO: implement test: if (APIStore.routeUsesCollection(RouteStore.getCurrentRoute(), 'earnerBadges'))
-      this.setState( {earnerBadges: APIStore.getCollection('earnerBadges')} );
+    APIStore.addListener('DATA_UPDATED', function(){
+      this.setState({});
     }.bind(this));
     ActiveActionStore.addListener('ACTIVE_ACTION_UPDATED', this.handleActivePanelUpdate);
   },
@@ -202,6 +209,7 @@ var App = React.createClass({
           viewId={viewId}
           items={this.props.actionBars[viewId]}
           updateActivePanel={this.updateActivePanel}
+          activePanel={this.state.activePanels[viewId]}
         />
         <ActivePanel
           viewId={viewId}
@@ -223,18 +231,17 @@ var App = React.createClass({
     return this.render_base(mainComponent);
   },
 
-  issuerMain: function(id) {
+  issuerMain: function() {
     var viewId = "issuerMain";
-  
-
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <SecondaryMenu viewId={viewId} items={this.props.secondaryMenus[viewId]} />
         <ActionBar
-          title="Issue Badges"
+          title="My Issuers"
           viewId={viewId}
           items={this.props.actionBars[viewId]}
           updateActivePanel={this.updateActivePanel}
+          clearActivePanel={this.clearActivePanel}
+          activePanel={this.state.activePanels[viewId]}
         />
         <ActivePanel
           viewId={viewId}
@@ -243,9 +250,123 @@ var App = React.createClass({
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
         />
-        
+        <IssuerList
+          viewId={viewId}
+          issuers={APIStore.getCollection('issuer_issuers')}
+          badgeclasses={APIStore.getCollection('issuer_badgeclasses')}
+        />
       </MainComponent>
     );
+    return this.render_base(mainComponent);
+  },
+
+  issuerDetail: function(issuerSlug, params){
+    if (!params['perPage'])
+      params['perPage'] = 10
+    if (!params['currentPage'])
+      params['currentPage'] = 1
+
+    var viewId = "issuerDetail-" + issuerSlug;
+    var issuer = APIStore.getFirstItemByPropertyValue('issuer_issuers', 'slug', issuerSlug);
+    var badgeClasses = APIStore.filter('issuer_badgeclasses', 'issuer', issuer.json.id);
+    var breadCrumbs = [
+      { name: "My Issuers", url: '/issuer'},
+      { name: issuer.name, url: '/issuer/issuers/' + issuerSlug }
+    ];
+    var mainComponent = (
+      <MainComponent viewId={viewId}>
+        <BreadCrumbs items={breadCrumbs} />
+        <HeadingBar 
+          title={issuer.name}
+        />
+        <IssuerDisplay {...issuer} />
+        <ActionBar 
+          title="Active Badges"
+          viewId={viewId}
+          items={this.props.actionBars['issuerDetail']}
+          updateActivePanel={this.updateActivePanel}
+          clearActivePanel={this.clearActivePanel}
+          activePanel={this.state.activePanels[viewId]}
+        />
+        <ActivePanel
+          viewId={viewId}
+          {...this.state.activePanels[viewId]}
+          {...this.contextPropsForActivePanel(viewId)}
+          updateActivePanel={this.updateActivePanel}
+          clearActivePanel={this.clearActivePanel}
+          issuerSlug={issuerSlug}
+        />
+        <BadgeClassList
+          issuerSlug={issuerSlug}
+          badgeClasses={badgeClasses}
+          display="detail"
+          perPage={params.perPage}
+          currentPage={params.currentPage}
+        />
+      </MainComponent>
+    )
+
+    return this.render_base(mainComponent);
+  },
+
+  badgeClassDetail: function(issuerSlug, badgeClassSlug){
+    var viewId = "badgeClassDetail-" + badgeClassSlug;
+    var issuer = APIStore.getFirstItemByPropertyValue('issuer_issuers', 'slug', issuerSlug);
+    var badgeClass = APIStore.getFirstItemByPropertyValue('issuer_badgeclasses', 'slug', badgeClassSlug);
+    var badgeInstances = APIStore.filter('issuer_badgeinstances', 'badgeclass', badgeClass.json.id);
+    var instanceRequestStatus = null;
+
+    var breadCrumbs = [
+      { name: "My Issuers", url: '/issuer'},
+      { name: issuer.name, url: '/issuer/issuers/' + issuerSlug},
+      { name: badgeClass.name, url: "/issuer/issuers/" + issuerSlug + "/badges/" + badgeClass.slug}
+    ];
+
+    // Trigger a get on instances if none are found and haven't been requested yet:
+    var instanceGetPath = '/v1' + breadCrumbs[2].url + '/assertions';
+    if (badgeInstances.length == 0 && !APIStore.hasAlreadyRequested(instanceGetPath)){
+      APIActions.APIGetData({
+        actionUrl: instanceGetPath,
+        apiCollectionKey: 'issuer_badgeinstances',
+        successfulHttpStatus: [200]
+      });
+      instanceRequestStatus = "waiting";
+    }
+
+    var mainComponent = (
+      <MainComponent viewId={viewId}>
+        <BreadCrumbs items={breadCrumbs} />
+        <HeadingBar 
+          title={issuer.name + ": " + badgeClass.name}
+        />
+        <IssuerDisplay {...issuer} />
+        <BadgeClassDetail {...badgeClass} />
+        <ActionBar
+          title={"Recipients (" + badgeInstances.length + ")"}
+          viewId={viewId}
+          items={this.props.actionBars['badgeClassDetail']}
+          updateActivePanel={this.updateActivePanel}
+          clearActivePanel={this.clearActivePanel}
+          activePanel={this.state.activePanels[viewId]}
+        />
+        <ActivePanel
+          viewId={viewId}
+          {...this.state.activePanels[viewId]}
+          {...this.contextPropsForActivePanel(viewId)}
+          updateActivePanel={this.updateActivePanel}
+          clearActivePanel={this.clearActivePanel}
+          issuerSlug={issuerSlug}
+          badgeClassSlug={badgeClassSlug}
+        />
+        <BadgeInstanceList
+          issuerSlug={issuerSlug}
+          badgeClass={badgeClass}
+          badgeInstances={badgeInstances}
+          dataRequestStatus={instanceRequestStatus}
+        />
+      </MainComponent>
+    )
+
     return this.render_base(mainComponent);
   },
 
@@ -275,6 +396,7 @@ var App = React.createClass({
           viewId={viewId}
           items={this.props.actionBars[viewId]}
           updateActivePanel={this.updateActivePanel}
+          activePanel={this.state.activePanels[viewId]}
         />
         <ActivePanel
           viewId={viewId}

@@ -1,6 +1,6 @@
 var React = require('react');
 var EarnerBadge = require('./BadgeDisplay.jsx').EarnerBadge;
-var BadgeUploadForm = require('./Form.jsx').BadgeUploadForm;
+var BasicAPIForm = require('./Form.jsx').BasicAPIForm;
 var FormStore = require('../stores/FormStore');
 
 var PanelActions = React.createClass({
@@ -69,40 +69,125 @@ var ActivePanel = React.createClass({
       );
     }
 
-    else if (this.props.type == "EarnerBadgeForm"){
-      defaultFormState = {
-        recipient_input: this.props.recipientIds[0], 
-        earner_description: '' 
-      }
+    else if (this.props.type == "IssuerCreateUpdateForm"){
+      var formProps = {
+        formId: this.props.type,
+        fieldsMeta: {
+          name: {inputType: "text", label: "Issuer Name", required: true},
+          description: {inputType: "textarea", label: "Issuer Description", required: true},
+          url: {inputType: "text", label: "Website URL", required: true},
+          email: {inputType: "text", label: "Contact Email", required: true},
+          image: {inputType: "image", label: "Logo", required: false, filename: "issuer_logo.png"}
+        },
+        defaultValues: {
+          name: "",
+          description: "",
+          url: "",
+          email: "",
+          image: null,
+          imageData: null,
+          actionState: "ready"
+        },
+        columns: [
+          { fields: ['image'], className:'col-xs-5 col-sm-4 col-md-3' },
+          { fields: ['name', 'description', 'url', 'email'], className:'col-xs-7 col-sm-8 col-md-9' }
+        ],
+        apiContext: {
+          formId: this.props.type,
+          apiCollectionKey: "issuer_issuers",
+          actionUrl: "/v1/issuer/issuers",
+          method: "POST",
+          successHttpStatus: [200, 201],
+          successMessage: "New issuer created"
+        },
+        handleCloseForm: this.clearActivePanel
+      };
+      FormStore.getOrInitFormData(this.props.type, formProps);
+
       return (
-        <div className="active-panel earner-badge-form clearfix">
-          <BadgeUploadForm
-            action='/v1/earner/badges'
-            formId={this.props.type}
-            recipientIds={this.props.recipientIds}
-            pk={typeof this.props.badgeId !== 'undefined' ? this.props.badgeId : 0}
-            initialState={FormStore.getOrInitFormData(this.props.type, defaultFormState)}
-          />
-          <PanelActions
-            actions={panelActions}
-          />
+        <div className="active-panel api-form image-upload-form clearfix">
+          <div className="container-fluid">
+            <BasicAPIForm {...formProps} />
+          </div>
         </div>
       );
     }
 
-    else if (this.props.type == "IssuerNotificationForm"){
+    else if (this.props.type == "BadgeClassCreateUpdateForm"){
       var formProps = {
-        formId: this.props.type
-      }
-      formProps['pk'] = 0; //typeof this.props.content['id'] === 'object' ? 0: parseInt(id);
-      formProps['initialState'] = FormStore.getOrInitFormData(
-        formProps.formId,
-        { email: "", url: "", actionState: "ready" }
-      );
+        formId: this.props.type,
+        fieldsMeta: {
+          name: {inputType: "text", label: "Badge Name", required: true},
+          description: {inputType: "textarea", label: "Badge Description", required: true},
+          criteria: {inputType: "textarea", label: "Criteria URL or text", required: true},
+          image: {inputType: "image", label: "Badge Image", required: false, filename: "issuer_logo.png"}
+        },
+        defaultValues: {
+          name: "",
+          description: "",
+          criteria: "",
+          image: null,
+          imageData: null,
+          actionState: "ready"
+        },
+        columns: [
+          { fields: ['image'], className:'col-xs-5 col-sm-4 col-md-3' },
+          { fields: ['name', 'description', 'criteria'], className:'col-xs-7 col-sm-8 col-md-9' }
+        ],
+        apiContext: {
+          formId: this.props.type,
+          apiCollectionKey: "issuer_badgeclasses",
+          actionUrl: "/v1/issuer/issuers/" + this.props.issuerSlug + "/badges",
+          method: "POST",
+          successHttpStatus: [200, 201],
+          successMessage: "New badge class created"
+        },
+        handleCloseForm: this.clearActivePanel
+      };
+      FormStore.getOrInitFormData(this.props.type, formProps);
+
       return (
-        <div className="active-panel earner-badge-form clearfix">
+        <div className="active-panel api-form image-upload-form clearfix">
           <div className="container-fluid">
-            <IssuerNotificationForm {...formProps} />
+            <BasicAPIForm {...formProps} />
+          </div>
+        </div>
+      );
+    }
+
+    else if (this.props.type == "BadgeInstanceCreateUpdateForm"){
+      var formProps = {
+        formId: this.props.type,
+        fieldsMeta: {
+          email: {inputType: "text", label: "Recipient Email", required: true},
+          evidence: {inputType: "text", label: "Evidence URL", required: false},
+          create_notification: {inputType: "checkbox", label: "Notify earner by email", required: false}
+        },
+        defaultValues: {
+          email: "",
+          evidence: "",
+          create_notification: false,
+          actionState: "ready"
+        },
+        columns: [
+          { fields: ['email', 'evidence', 'create_notification'], className:'col-xs-12' }
+        ],
+        apiContext: {
+          formId: this.props.type,
+          apiCollectionKey: "issuer_badgeinstances",
+          actionUrl: "/v1/issuer/issuers/" + this.props.issuerSlug + "/badges/" + this.props.badgeClassSlug + '/assertions',
+          method: "POST",
+          successHttpStatus: [200, 201],
+          successMessage: "Badge successfully issued."
+        },
+        handleCloseForm: this.clearActivePanel
+      };
+      FormStore.getOrInitFormData(this.props.type, formProps);
+
+      return (
+        <div className="active-panel api-form image-upload-form clearfix">
+          <div className="container-fluid">
+            <BasicAPIForm {...formProps} />
           </div>
         </div>
       );

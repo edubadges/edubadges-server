@@ -1,10 +1,9 @@
+from django.apps import apps
 from django.conf.urls import patterns, include, url
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.shortcuts import redirect
 from django.views.generic.base import RedirectView
-
 
 admin.autodiscover()
 # make sure that any view/model/form imports occur AFTER admin.autodiscover
@@ -53,15 +52,20 @@ urlpatterns = patterns('',
     url(r'^docs/', include('rest_framework_swagger.urls')),
 
     # Service health endpoint
-    #url(r'^health', include('health.urls')),
+    url(r'^health', include('health.urls')),
 
     # Local Apps for browser front end
-    #url(r'^earn', include('earner.urls')),
-    #url(r'^understand', include('consumer.urls')),
+    #url(r'^my-badges', include('earner.urls')),
+    #url(r'^explore', include('consumer.urls')),
 
     #url(r'^badgeanalysis', include('badgeanalysis.urls')),
     #url(r'^certificates', include('certificates.urls')),
 )
+
+if apps.is_installed('issuer'):
+    urlpatterns += patterns('',
+        url(r'^issuer', include('issuer.urls')),
+    )
 
 
 # Test URLs to allow you to see these pages while DEBUG is True

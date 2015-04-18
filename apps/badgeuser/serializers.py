@@ -26,7 +26,6 @@ class UserProfileField(serializers.Serializer):
             addresses.append(emailaddress.email)
 
         profile = {
-            'id': obj.id,
             'name': obj.get_full_name(),
             'username': obj.username,
             'earnerIds': addresses
@@ -41,7 +40,7 @@ class BadgeUserSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = BadgeUser
-        fields = ('userProfile', 'earnerBadges', 'consumerBadges')
+        fields = ('userProfile',)
 
     userProfile = UserProfileField(source='*', read_only=True)
     # earnerBadges = EarnerBadgeSerializer(many=True, read_only=True, source='earnerbadge_set')

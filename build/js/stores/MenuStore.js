@@ -21,18 +21,7 @@ MenuStore.defaultItems = {
     ]
   },
   roleMenu: {
-    items: [
-      { title: "Earn", url: "/earn", icon: "fa-certificate", children: [
-        // { title: "View Badges", url: "/earn", icon: "fa-certificate", children: [] },
-        // { title: "Add Badge", url: "/earn/badges", icon: "fa-certificate", children: [] }
-      ] },
-      { title: "Issue", url: "/issue/badges", icon: "fa-mail-forward", children: [
-        // { title: "Award Badges", url: "/issue", icon: "fa-bookmark", children: [] },
-        // { title: "Notify Earners", url: "/issue/notifications", icon: "fa-envelope", children: [] },
-        // { title: "Print Certificates", url: "/certificates", icon: "fa-file", children: []}
-      ]},
-      { title: "Understand", url: "/understand", icon: "fa-info-circle", children: [] }
-    ]
+    items: []
   },
   secondaryMenus: {
       earnerHome: [
@@ -60,16 +49,32 @@ MenuStore.defaultItems = {
       ],
       issuerMain: [
         {
-          title: "Define New Badge",
+          title: "New Issuer",
           buttonType: "primary",
           icon: "fa-pencil-square-o",
-          activePanelCommand: { type: "IssuerBadgeForm", content: {}}
-        },
+          activePanelCommand: { type: "IssuerCreateUpdateForm", content: {}}
+        } // },
+        // {
+        //   title: "Notify Earners",
+        //   buttonType: "default",
+        //   icon: "fa-envelope",
+        //   activePanelCommand: { type: "IssuerNotificationForm", content: {}}
+        // }
+      ],
+      issuerDetail: [
         {
-          title: "Notify Earners",
-          buttonType: "default",
-          icon: "fa-envelope",
-          activePanelCommand: { type: "IssuerNotificationForm", content: {}}
+          title: "New Badge",
+          buttonType: "primary",
+          icon: "fa-pencil-square-o",
+          activePanelCommand: { type: "BadgeClassCreateUpdateForm", content: {}}
+        }
+      ],
+      badgeClassDetail: [
+        {
+          title: "Issue Badge",
+          buttonType: "primary",
+          icon: "fa-mail-forward",
+          activePanelCommand: { type: "BadgeInstanceCreateUpdateForm", content: {}}
         }
       ],
       consumerMain: [
@@ -83,10 +88,17 @@ MenuStore.defaultItems = {
   }
 };
 
+MenuStore.menus = {
+  topMenu: MenuStore.defaultItems.topMenu,
+  roleMenu: MenuStore.defaultItems.roleMenu,
+  secondaryMenus: MenuStore.defaultItems.secondaryMenus,
+  actionBars: MenuStore.defaultItems.actionBars
+}
+
 MenuStore.getAllItems = function(menu, viewName) {
   // if (typeof viewName === 'undefined')
 
-  return MenuStore.defaultItems[menu];
+  return MenuStore.menus[menu];
 };
 
 MenuStore.addListener = function(type, callback) {
@@ -97,11 +109,36 @@ MenuStore.addListener = function(type, callback) {
 //   MenuStore.removeListener(type, callback);
 // };
 
+MenuStore.storeInitialData = function() {
+  if (typeof initialData == 'undefined')
+    return;
+
+  // try to load the variable declared as initialData in the view template
+  if ('issuer' in initialData)
+    MenuStore.menus.roleMenu.items.push(
+      { title: "Issue", url: "/issuer", icon: "fa-mail-forward", children: []}
+    );
+
+  if ('earner' in initialData)
+    MenuStore.menus.roleMenu.items.push(
+      { title: "Earn", url: "/earn", icon: "fa-certificate", children: [] }
+    );
+  if ('consumer' in initialData)
+    MenuStore.menus.roleMenu.items.push(  
+      { title: "Understand", url: "/understand", icon: "fa-info-circle", children: [] }
+    );
+}
+
 // Register with the dispatcher
 MenuStore.dispatchToken = appDispatcher.register(function(payload){
   var action = payload.action;
 
   switch(action.type){
+    case 'APP_WILL_MOUNT':
+      MenuStore.storeInitialData()
+      MenuStore.emit('INITIAL_DATA_LOADED');
+      break;
+
     case 'CLICK_CLOSE_MENU':
       MenuStore.emit('UNCAUGHT_DOCUMENT_CLICK');
       break;

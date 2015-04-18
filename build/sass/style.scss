@@ -4,6 +4,8 @@
 @import "components/action-bar";
 @import "components/active-panel";
 @import "components/badge-form";
+@import "components/main-component";
+@import "components/breadcrumbs";
 
 // refactoring from this SB2 stylesheet as source, moving things into 
 // components as possible. Eventually this won't be needed:
@@ -22,7 +24,7 @@
   margin-bottom: 0;
 } 
 
-.badge-display {
+.badge-display, .issuer-display {
   margin-top: 0.5em;
   margin-bottom: 0.5em;
   padding: 0.25em;

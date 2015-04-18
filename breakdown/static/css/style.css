@@ -18,11 +18,15 @@
   margin-bottom: 0;
   font-weight: normal; }
 
-.badge-display .propertyName {
+.badge-display .propertyName, .issuer-display .propertyName {
   font-weight: bold;
   margin-right: 0.5em; }
-  .badge-display .propertyName:after {
+  .badge-display .propertyName:after, .issuer-display .propertyName:after {
     content: ":"; }
+.badge-display .propertyValue.URL:before, .issuer-display .propertyValue.URL:before {
+  content: "("; }
+.badge-display .propertyValue.URL:after, .issuer-display .propertyValue.URL:after {
+  content: ")"; }
 
 .property-group {
   margin-bottom: 1em; }
@@ -32,6 +36,18 @@
 .badge-display-active {
   background-color: #d1d1d1; }
 
+.issuer-display-short, .badgeclass-list .badgeclass-display-detail {
+  cursor: pointer; }
+  .issuer-display-short:hover, .badgeclass-list .badgeclass-display-detail:hover {
+    background-color: #eee; }
+
+.badgeclass-display-thumbnail {
+  margin-top: 0.5em;
+  padding: 0.25em;
+  float: left;
+  border: 1px solid #ccc;
+  border-radius: 4px; }
+
 .badgeProperty-type-link .propertyValue {
   display: inline-block;
   max-width: 100%; }
@@ -39,7 +55,7 @@
     text-overflow: hidden; }
 
 .action-bar {
-  margin-bottom: 1em; }
+  margin-bottom: 0.5em; }
   .action-bar h3 {
     margin: 0; }
   .action-bar ul {
@@ -71,11 +87,30 @@
     max-width: 100%;
     height: auto; }
 
-.earner-badge-form textarea {
+.api-form textarea {
   max-width: 100%; }
-.earner-badge-form .submit-button {
+.api-form .form-controls {
   clear: both;
-  padding: 1em; }
+  padding: 1em;
+  padding-bottom: 0; }
+  .api-form .form-controls div {
+    float: right;
+    padding: 0.25em; }
+
+.main-component {
+  padding: 1em 0; }
+
+.breadcrumbs {
+  list-style: none;
+  padding-left: 0; }
+  .breadcrumbs .crumb {
+    float: left; }
+    .breadcrumbs .crumb a {
+      margin: 0 0.5em; }
+    .breadcrumbs .crumb:after {
+      content: ">"; }
+    .breadcrumbs .crumb:last-child:after {
+      content: ""; }
 
 /*!
  * Start Bootstrap - SB Admin 2 Bootstrap Admin Theme (http://startbootstrap.com)
@@ -364,7 +399,7 @@ table.dataTable thead .sorting:after {
 .navbar-static-top {
   margin-bottom: 0; }
 
-.badge-display {
+.badge-display, .issuer-display {
   margin-top: 0.5em;
   margin-bottom: 0.5em;
   padding: 0.25em;
@@ -407,7 +442,7 @@ form.disabled, form.disabled textarea {
   border-bottom: 1px solid #e7e7e7; }
 
 .action-bar {
-  margin-bottom: 1em; }
+  margin-bottom: 0.5em; }
   .action-bar h3 {
     margin: 0; }
   .action-bar ul {
@@ -431,11 +466,15 @@ form.disabled, form.disabled textarea {
   box-shadow: 0 0 10px #9ecaed;
   border-radius: 4px; }
 
-.badge-display .propertyName {
+.badge-display .propertyName, .issuer-display .propertyName {
   font-weight: bold;
   margin-right: 0.5em; }
-  .badge-display .propertyName:after {
+  .badge-display .propertyName:after, .issuer-display .propertyName:after {
     content: ":"; }
+.badge-display .propertyValue.URL:before, .issuer-display .propertyValue.URL:before {
+  content: "("; }
+.badge-display .propertyValue.URL:after, .issuer-display .propertyValue.URL:after {
+  content: ")"; }
 
 .property-group {
   margin-bottom: 1em; }
@@ -444,6 +483,18 @@ form.disabled, form.disabled textarea {
 
 .badge-display-active {
   background-color: #d1d1d1; }
+
+.issuer-display-short, .badgeclass-list .badgeclass-display-detail {
+  cursor: pointer; }
+  .issuer-display-short:hover, .badgeclass-list .badgeclass-display-detail:hover {
+    background-color: #eee; }
+
+.badgeclass-display-thumbnail {
+  margin-top: 0.5em;
+  padding: 0.25em;
+  float: left;
+  border: 1px solid #ccc;
+  border-radius: 4px; }
 
 .badgeProperty-type-link .propertyValue {
   display: inline-block;
@@ -459,11 +510,27 @@ form.disabled, form.disabled textarea {
     max-width: 100%;
     height: auto; }
 
-.earner-badge-form textarea {
+.api-form textarea {
   max-width: 100%; }
-.earner-badge-form .submit-button {
+.api-form .form-controls {
   clear: both;
-  padding: 1em; }
+  padding: 1em;
+  padding-bottom: 0; }
+  .api-form .form-controls div {
+    float: right;
+    padding: 0.25em; }
+
+.breadcrumbs {
+  list-style: none;
+  padding-left: 0; }
+  .breadcrumbs .crumb {
+    float: left; }
+    .breadcrumbs .crumb a {
+      margin: 0 0.5em; }
+    .breadcrumbs .crumb:after {
+      content: ">"; }
+    .breadcrumbs .crumb:last-child:after {
+      content: ""; }
 
 .navbar-brand img {
   max-width: 30px;
@@ -484,6 +551,9 @@ form.disabled, form.disabled textarea {
   display: inline;
   margin-bottom: 0;
   font-weight: normal; }
+
+.main-component {
+  padding: 1em 0; }
 
 /*
  * metismenu - v1.0.3
