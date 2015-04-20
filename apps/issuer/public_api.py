@@ -52,7 +52,7 @@ class IssuerImage(ComponentPropertyDetailView):
     """
     model = Issuer
     prop = 'image'
-    Issuer.objects.exclude(image=None)
+    queryset = Issuer.objects.exclude(image=None)
 
 
 class BadgeClassJson(JSONComponentView):
