@@ -20,6 +20,7 @@
 
 .main-footer {
   border-top: 1px solid #e7e7e7;
+  margin-top: 2em;
   padding: 0.5em 15px; }
 
 .footer-links {
@@ -126,6 +127,47 @@
       content: ">"; }
     .breadcrumbs .crumb:last-child:after {
       content: ""; }
+
+body.accounts {
+  padding-top: 40px;
+  padding-bottom: 40px;
+  background-color: #eee; }
+
+.accounts-panel {
+  max-width: 530px;
+  padding: 15px;
+  margin: 0 auto; }
+
+.accounts-panel .accounts-panel-heading, .accounts-panel .checkbox {
+  margin-bottom: 10px; }
+
+.accounts-panel .checkbox {
+  font-weight: normal; }
+
+.accounts-panel .form-control {
+  position: relative;
+  height: auto;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 10px;
+  font-size: 16px; }
+
+.accounts-panel .form-control:focus {
+  z-index: 2; }
+
+.accounts-panel input[type="email"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0; }
+
+.accounts-panel input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0; }
+
+.accounts-panel .btn {
+  margin-top: 1em; }
 
 /*!
  * Start Bootstrap - SB Admin 2 Bootstrap Admin Theme (http://startbootstrap.com)
@@ -456,6 +498,47 @@ form.disabled, form.disabled textarea {
 .main-header {
   border-bottom: 1px solid #e7e7e7; }
 
+body.accounts {
+  padding-top: 40px;
+  padding-bottom: 40px;
+  background-color: #eee; }
+
+.accounts-panel {
+  max-width: 530px;
+  padding: 15px;
+  margin: 0 auto; }
+
+.accounts-panel .accounts-panel-heading, .accounts-panel .checkbox {
+  margin-bottom: 10px; }
+
+.accounts-panel .checkbox {
+  font-weight: normal; }
+
+.accounts-panel .form-control {
+  position: relative;
+  height: auto;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 10px;
+  font-size: 16px; }
+
+.accounts-panel .form-control:focus {
+  z-index: 2; }
+
+.accounts-panel input[type="email"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0; }
+
+.accounts-panel input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0; }
+
+.accounts-panel .btn {
+  margin-top: 1em; }
+
 .action-bar {
   margin-bottom: 0.5em; }
   .action-bar h3 {
@@ -549,6 +632,7 @@ form.disabled, form.disabled textarea {
 
 .main-footer {
   border-top: 1px solid #e7e7e7;
+  margin-top: 2em;
   padding: 0.5em 15px; }
 
 .footer-links {

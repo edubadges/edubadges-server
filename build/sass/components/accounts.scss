@@ -1,0 +1,17 @@
+body.accounts {
+  padding-top: 40px;
+  padding-bottom: 40px;
+  background-color: #eee;
+}
+
+.accounts-panel {
+  max-width: 530px;
+  padding: 15px;
+  margin: 0 auto;
+}
+.accounts-panel .accounts-panel-heading,
+.accounts-panel .checkbox {
+  margin-bottom: 10px;
+}
+
+.accounts-panel .btn { margin-top: 1em; }
