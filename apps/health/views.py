@@ -1,6 +1,7 @@
 """
-HTTP endpoint for verifying the health of the Badge Trust API, as hosted on one server
-Thanks to edx.org for endpoint design pattern.
+HTTP endpoint for verifying the health of the Badgr API, as hosted on one server
+Thanks to edx.org for endpoint design pattern. Licensed by edX under aGPL.
+https://github.com/edx/ecommerce/blob/master/LICENSE.txt
 """
 # import logger  # TODO integrate logging into results of health endpoint queries
 # import requests  # use for making requests to any dependency HTTP APIs.

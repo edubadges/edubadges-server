@@ -35,7 +35,14 @@ var navigateLocalPath = function(path){
   });
 }
 
+var navigateOut = function(path){
+  window.location.assign(path);
+}
 
-module.exports.createOffMenuClickAction = createOffMenuClickAction;
-module.exports.createLinkClickAction = createLinkClickAction;
-module.exports.navigateLocalPath = navigateLocalPath;
+
+module.exports = {
+  createOffMenuClickAction: createOffMenuClickAction,
+  createLinkClickAction: createLinkClickAction,
+  navigateLocalPath: navigateLocalPath,
+  navigateOut: navigateOut
+}

@@ -1,0 +1,15 @@
+.main-footer {
+  border-top: 1px solid #e7e7e7;
+  padding: 0.5em 15px;
+}
+
+.footer-links {
+  list-style: none;
+  text-align: right;
+  li {
+    display: inline-block;
+    padding-left: 1em;
+    &:first-child { padding-left: 0;}
+    a { text-decoration: none; }
+  }
+}

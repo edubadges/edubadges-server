@@ -18,6 +18,21 @@
   margin-bottom: 0;
   font-weight: normal; }
 
+.main-footer {
+  border-top: 1px solid #e7e7e7;
+  padding: 0.5em 15px; }
+
+.footer-links {
+  list-style: none;
+  text-align: right; }
+  .footer-links li {
+    display: inline-block;
+    padding-left: 1em; }
+    .footer-links li:first-child {
+      padding-left: 0; }
+    .footer-links li a {
+      text-decoration: none; }
+
 .badge-display .propertyName, .issuer-display .propertyName {
   font-weight: bold;
   margin-right: 0.5em; }
@@ -531,6 +546,21 @@ form.disabled, form.disabled textarea {
       content: ">"; }
     .breadcrumbs .crumb:last-child:after {
       content: ""; }
+
+.main-footer {
+  border-top: 1px solid #e7e7e7;
+  padding: 0.5em 15px; }
+
+.footer-links {
+  list-style: none;
+  text-align: right; }
+  .footer-links li {
+    display: inline-block;
+    padding-left: 1em; }
+    .footer-links li:first-child {
+      padding-left: 0; }
+    .footer-links li a {
+      text-decoration: none; }
 
 .navbar-brand img {
   max-width: 30px;

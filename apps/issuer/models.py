@@ -31,6 +31,9 @@ class Component(cachemodel.CacheModel):
     class Meta:
         abstract = True
 
+    def __unicode__(self):
+        return self.name
+
     def get_full_url(self):
         return settings.HTTP_ORIGIN + self.get_absolute_url()
 
@@ -78,6 +81,9 @@ class BadgeClass(Component):
     criteria_text = models.TextField(blank=True, null=True)  # TODO: CKEditor field
     image = models.ImageField(upload_to='uploads/badges', blank=True)
 
+    class Meta:
+        verbose_name_plural = "Badge classes"
+
     @property
     def owner(self):
         return self.issuer.owner
@@ -107,6 +113,9 @@ class BadgeInstance(Component):
     image = models.ImageField(upload_to='issued/badges', blank=True)
     revoked = models.BooleanField(default=False)
     revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
+
+    def __unicode__(self):
+        return "%s issued to %s" % (self.badgeclass.name, self.email,)
 
     @property
     def owner(self):

@@ -36,6 +36,7 @@ var LifeCycleActions = require('../actions/lifecycle');
 var FormActions = require('../actions/forms');
 var ActiveActions = require('../actions/activeActions');
 var APIActions = require('../actions/api');
+var ClickActions = require('../actions/clicks');
 
 var App = React.createClass({
   mixins: [RouterMixin],
@@ -418,8 +419,8 @@ var App = React.createClass({
   },
 
   notFound: function() {
-    var mainComponent = "NOT FOUND: " + this.state.path
-    return this.render_base(mainComponent);
+    ClickActions.navigateOut(window.location.href);
+    return this.render_base("Redirecting...");
   }
   
 });
