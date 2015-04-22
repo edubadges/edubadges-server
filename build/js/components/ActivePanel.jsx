@@ -86,7 +86,8 @@ var ActivePanel = React.createClass({
           email: "",
           image: null,
           imageData: null,
-          actionState: "ready"
+          actionState: "ready",
+          message: ""
         },
         columns: [
           { fields: ['image'], className:'col-xs-5 col-sm-4 col-md-3' },
@@ -128,7 +129,8 @@ var ActivePanel = React.createClass({
           criteria: "",
           image: null,
           imageData: null,
-          actionState: "ready"
+          actionState: "ready",
+          message: ""
         },
         columns: [
           { fields: ['image'], className:'col-xs-5 col-sm-4 col-md-3' },
@@ -167,7 +169,8 @@ var ActivePanel = React.createClass({
           email: "",
           evidence: "",
           create_notification: false,
-          actionState: "ready"
+          actionState: "ready",
+          message: ""
         },
         columns: [
           { fields: ['email', 'evidence', 'create_notification'], className:'col-xs-12' }

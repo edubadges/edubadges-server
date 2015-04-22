@@ -1,4 +1,5 @@
 var React = require('react');
+var moment = require('moment');
 
 // Actions
 var navigateLocalPath = require('../actions/clicks').navigateLocalPath;
@@ -9,10 +10,12 @@ var LoadingIcon = require('../components/Widgets.jsx').LoadingIcon;
 
 BadgeInstanceShort = React.createClass({
   render: function() {
+    var displayIssueDate = moment(this.props.issuedOn).format('MMMM Do YYYY, h:mm:ss a');
+
     return (
       <div className="badgeinstance-display badgeinstance-display-short row">
         <div className="email col-xs-6 col-sm-4">{this.props.email}</div>
-        <div className="issuedOn col-xs-6 col-sm-8">{this.props.issuedOn}</div>
+        <div className="issuedOn col-xs-6 col-sm-8">{displayIssueDate}</div>
       </div>
     );
   }

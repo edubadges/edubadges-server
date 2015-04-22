@@ -14,8 +14,8 @@ MenuStore.defaultItems = {
       // { title: "tasks", url: "#", icon: "fa-tasks", children: []},
       { title: "alerts", url: "#", icon: "fa-bell", children: [] },
       { title: "user", url: "#", icon: "fa-user", children: [
-        { title: "User Profile", url: "/#user", icon: "fa-user", children: [] },
-        { title: "Settings", url: "/#user/settings", icon: "fa-gear", children: [] },
+        { title: "User Profile", url: "/accounts/", icon: "fa-user", children: [] },
+        // { title: "Settings", url: "/#user/settings", icon: "fa-gear", children: [] },
         { title: "Log Out", url: "/logout", icon: "fa-sign-out", children: [] }
       ] }
     ]

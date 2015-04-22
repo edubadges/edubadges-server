@@ -35,14 +35,13 @@ urlpatterns = patterns('',
     url(r'^staff/', include(admin.site.urls)),
 
     # accounts:
+    url(r'^accounts[/]?$', RedirectView.as_view(url='/accounts/email/')),
     url(r'^accounts/', include('allauth.urls')),
     url(r'^login', RedirectView.as_view(url='/accounts/login', permanent=False), name='login'),
     url(r'^logout', RedirectView.as_view(url='/accounts/logout', permanent=False), name='logout'),
 
     # REST Framework-based APIs
-    url(r'^v1/$', RedirectView.as_view(url='/v1/issuer/issuers', permanent=False)),
     url(r'^v1/user', include('badgeuser.api_urls')),
-    url(r'^v1/issuer', include('issuer.api_urls')),
     #url(r'^v1/earner', include('earner.api_urls')),
     #url(r'^v1/consumer', include('consumer.api_urls')),
 
@@ -64,6 +63,8 @@ urlpatterns = patterns('',
 
 if apps.is_installed('issuer'):
     urlpatterns += patterns('',
+        url(r'^v1/$', RedirectView.as_view(url='/v1/issuer/issuers', permanent=False)),
+        url(r'^v1/issuer', include('issuer.api_urls')),
         url(r'^issuer', include('issuer.urls')),
     )
 

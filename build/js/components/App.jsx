@@ -165,7 +165,7 @@ var App = React.createClass({
             <nav className="navbar navbar-default navbar-static-top" role="navigation">
 
               <div className="navbar-header">
-                <a className="navbar-brand" href="/"><img src="/static/images/header-logo-120.png" className="brand-logo" />
+                <a className="navbar-brand" href="/issuer"><img src="/static/images/header-logo-120.png" className="brand-logo" />
                   <span>{ this.props.appTitle }</span>
                 </a>
                 <div className="navbar-right">
@@ -311,6 +311,7 @@ var App = React.createClass({
   },
 
   badgeClassDetail: function(issuerSlug, badgeClassSlug){
+    var loadingInstances = ""; var badgeInstanceDisplayLength;
     var viewId = "badgeClassDetail-" + badgeClassSlug;
     var issuer = APIStore.getFirstItemByPropertyValue('issuer_issuers', 'slug', issuerSlug);
     var badgeClass = APIStore.getFirstItemByPropertyValue('issuer_badgeclasses', 'slug', badgeClassSlug);
@@ -326,6 +327,7 @@ var App = React.createClass({
     // Trigger a get on instances if none are found and haven't been requested yet:
     var instanceGetPath = '/v1' + breadCrumbs[2].url + '/assertions';
     if (badgeInstances.length == 0 && !APIStore.hasAlreadyRequested(instanceGetPath)){
+      loadingInstances = "loading...";
       APIActions.APIGetData({
         actionUrl: instanceGetPath,
         apiCollectionKey: 'issuer_badgeinstances',
@@ -333,6 +335,7 @@ var App = React.createClass({
       });
       instanceRequestStatus = "waiting";
     }
+    badgeInstanceDisplayLength = loadingInstances != "" ? loadingInstances : badgeInstances.length
 
     var mainComponent = (
       <MainComponent viewId={viewId}>
@@ -343,7 +346,7 @@ var App = React.createClass({
         <IssuerDisplay {...issuer} />
         <BadgeClassDetail {...badgeClass} />
         <ActionBar
-          title={"Recipients (" + badgeInstances.length + ")"}
+          title={"Recipients (" + badgeInstanceDisplayLength + ")"}
           viewId={viewId}
           items={this.props.actionBars['badgeClassDetail']}
           updateActivePanel={this.updateActivePanel}

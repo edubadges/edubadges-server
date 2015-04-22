@@ -35,7 +35,8 @@
     "superagent": "~0.21.0",
     "react-mini-router": "~1.1.2",
     "react-dropzone": "~1.0.1",
-    "urllite": "^0.5.0"
+    "urllite": "^0.5.0",
+    "moment": "~2.10.2"
   },
   "readmeFilename": "README",
   "scripts": {

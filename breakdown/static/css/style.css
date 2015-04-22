@@ -70,6 +70,9 @@
   .badgeProperty-type-link .propertyValue a {
     text-overflow: hidden; }
 
+.badgeinstance-display-short:hover {
+  background-color: #eee; }
+
 .action-bar {
   margin-bottom: 0.5em; }
   .action-bar h3 {
@@ -96,15 +99,33 @@
   border-radius: 4px; }
 
 .dropzone {
-  width: 200px;
-  height: 200px;
-  max-width: 100%; }
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+  min-height: 150px;
+  text-align: center;
+  border: 2px dashed #ddd;
+  background-color: white;
+  padding: 0.5em;
+  cursor: pointer; }
   .dropzone img {
     max-width: 100%;
     height: auto; }
+  .dropzone:after {
+    content: "";
+    clear: both; }
 
-.api-form textarea {
-  max-width: 100%; }
+.dropzone-empty {
+  background-color: #e7e7e7;
+  padding: 0.5em;
+  text-align: center;
+  margin: 1em auto;
+  width: 80%; }
+
+.api-form input, .api-form textarea {
+  width: 480px;
+  max-width: 100%;
+  border: 1px solid #ddd; }
 .api-form .form-controls {
   clear: both;
   padding: 1em;
@@ -140,31 +161,6 @@ body.accounts {
 
 .accounts-panel .accounts-panel-heading, .accounts-panel .checkbox {
   margin-bottom: 10px; }
-
-.accounts-panel .checkbox {
-  font-weight: normal; }
-
-.accounts-panel .form-control {
-  position: relative;
-  height: auto;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-  padding: 10px;
-  font-size: 16px; }
-
-.accounts-panel .form-control:focus {
-  z-index: 2; }
-
-.accounts-panel input[type="email"] {
-  margin-bottom: -1px;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0; }
-
-.accounts-panel input[type="password"] {
-  margin-bottom: 10px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0; }
 
 .accounts-panel .btn {
   margin-top: 1em; }
@@ -450,6 +446,11 @@ table.dataTable thead .sorting:after {
 .active > a > .fa.plus-minus:before {
   content: "\f068"; }
 
+@media only screen and (max-width: 479px) {
+  .col-xs-1, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9, .col-xs-10, .col-xs-11, .col-xs-12 {
+    width: 100%; }
+ }
+
 .sidebar-nav li.expanded-false ul {
   display: none; }
 
@@ -510,31 +511,6 @@ body.accounts {
 
 .accounts-panel .accounts-panel-heading, .accounts-panel .checkbox {
   margin-bottom: 10px; }
-
-.accounts-panel .checkbox {
-  font-weight: normal; }
-
-.accounts-panel .form-control {
-  position: relative;
-  height: auto;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-  padding: 10px;
-  font-size: 16px; }
-
-.accounts-panel .form-control:focus {
-  z-index: 2; }
-
-.accounts-panel input[type="email"] {
-  margin-bottom: -1px;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0; }
-
-.accounts-panel input[type="password"] {
-  margin-bottom: 10px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0; }
 
 .accounts-panel .btn {
   margin-top: 1em; }
@@ -600,16 +576,37 @@ body.accounts {
   .badgeProperty-type-link .propertyValue a {
     text-overflow: hidden; }
 
+.badgeinstance-display-short:hover {
+  background-color: #eee; }
+
 .dropzone {
-  width: 200px;
-  height: 200px;
-  max-width: 100%; }
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+  min-height: 150px;
+  text-align: center;
+  border: 2px dashed #ddd;
+  background-color: white;
+  padding: 0.5em;
+  cursor: pointer; }
   .dropzone img {
     max-width: 100%;
     height: auto; }
+  .dropzone:after {
+    content: "";
+    clear: both; }
 
-.api-form textarea {
-  max-width: 100%; }
+.dropzone-empty {
+  background-color: #e7e7e7;
+  padding: 0.5em;
+  text-align: center;
+  margin: 1em auto;
+  width: 80%; }
+
+.api-form input, .api-form textarea {
+  width: 480px;
+  max-width: 100%;
+  border: 1px solid #ddd; }
 .api-form .form-controls {
   clear: both;
   padding: 1em;
