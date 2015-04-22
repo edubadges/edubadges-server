@@ -110,7 +110,7 @@ class BadgeInstance(Component):
     email = models.EmailField(max_length=255, blank=False, null=False)
     issuer = models.ForeignKey(Issuer, blank=False, null=False, related_name='assertions')
     slug = AutoSlugField(max_length=255, populate_from='get_new_slug', unique=True, blank=False, editable=False)
-    image = models.ImageField(upload_to='issued/badges', blank=True)
+    image = models.ImageField(upload_to='issued', blank=True)
     revoked = models.BooleanField(default=False)
     revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
 

@@ -6,6 +6,7 @@ import re
 
 from django.conf import settings
 from django.core.files import File
+from django.core.files.base import ContentFile
 
 
 CURRENT_OBI_VERSION = '1_1'
@@ -20,32 +21,16 @@ def generate_md5_hashstring(identifier, salt):
     return 'md5$' + hashlib.md5(identifier+salt).hexdigest()
 
 
-def ensure_image_directory_exists(f):
-    d = os.path.dirname(f)
-    if not os.path.exists(d):
-        try:
-            os.makedirs(d)
-        except OSError:
-            # directory was created
-            ensure_image_directory_exists(f)
-
-
 def bake(imageFile, assertion_json_string):
     reader = png.Reader(file=imageFile)
 
-    image_directory = os.path.join(
-        getattr(settings, 'MEDIA_ROOT', 'media'), 'uploads/badges/received'
-    )
-    ensure_image_directory_exists(image_directory)
+    filename = '%s.png' % hashlib.md5(str(assertion_json_string)).hexdigest()
 
-    filepath = os.path.join(image_directory, '%s.png' % (
-        hashlib.md5(str(assertion_json_string)).hexdigest())
-    )
-    with open(filepath, 'w') as f:
-        newfile = File(f)
-        chunkheader = 'openbadges\x00\x00\x00\x00\x00'
-        badge_chunk = ('iTXt', bytes(chunkheader + assertion_json_string))
-        png.write_chunks(newfile, baked_chunks(reader.chunks(), badge_chunk))
+    newfile = ContentFile("", name=filename)
+    newfile.open()
+    chunkheader = 'openbadges\x00\x00\x00\x00\x00'
+    badge_chunk = ('iTXt', bytes(chunkheader + assertion_json_string))
+    png.write_chunks(newfile, baked_chunks(reader.chunks(), badge_chunk))
     newfile.close()
     return newfile
 
