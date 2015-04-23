@@ -42,10 +42,13 @@ class PNGBakingTests(TestCase):
         with open(os.path.join(os.path.dirname(__file__),
                                'testfiles', 'public_domain_heart.png'
                                )) as image:
+
             return_file = png_bakery.bake(image, json.dumps(test_assertion))
             return_file.open('r')
             self.assertEqual(utils.check_image_type(return_file), 'PNG')
-            os.remove(return_file.name)
+            return_file.close()
+            return_file.open('r')
+            self.assertEqual(png_bakery.unbake(return_file), json.dumps(test_assertion))
 
     def test_unbake_png(self):
         with open(os.path.join(os.path.dirname(__file__),

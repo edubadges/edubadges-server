@@ -4,8 +4,7 @@ import os.path
 import png
 import re
 
-from django.conf import settings
-from django.core.files import File
+from django.core.files.base import ContentFile
 
 
 def unbake(imageFile):
@@ -30,15 +29,15 @@ def bake(imageFile, assertion_json_string):
     Embeds a serialized representation of a badge instance in a PNG image file.
     """
     reader = png.Reader(file=imageFile)
-    filepath = os.path.join(
-        getattr(settings, 'MEDIA_ROOT'),
-        'uploads/badges/received/' + hashlib.md5(assertion_json_string).hexdigest() + '.png'
-        )
-    with open(filepath, 'w') as f:
-        newfile = File(f)
-        chunkheader = 'openbadges\x00\x00\x00\x00\x00'
-        badge_chunk = ('iTXt', bytes(chunkheader + assertion_json_string))
-        png.write_chunks(newfile, baked_chunks(reader.chunks(), badge_chunk))
+
+    filename = '%s.png' % hashlib.md5(str(assertion_json_string)).hexdigest()
+
+    newfile = ContentFile("", name=filename)
+    newfile.open()
+    chunkheader = 'openbadges\x00\x00\x00\x00\x00'
+    badge_chunk = ('iTXt', bytes(chunkheader + assertion_json_string))
+    png.write_chunks(newfile, baked_chunks(reader.chunks(), badge_chunk))
+
     newfile.close()
     return newfile
 
