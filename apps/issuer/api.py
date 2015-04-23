@@ -462,6 +462,48 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
         return Response(serializer.data)
 
 
+class IssuerBadgeInstanceList(AbstractIssuerAPIEndpoint):
+    """
+    Retrieve assertions by a recipient identifier within one issuer
+    """
+    queryset = Issuer.objects.all().select_related('assertions')
+    model = Issuer
+    permission_classes = (IsStaff,)
+
+    def get(self, request, issuerSlug):
+        """
+        Get a list of assertions issued to one recpient by one issuer.
+        ---
+        serializer: BadgeInstanceSerializer
+        parameters:
+            - name: issuerSlug
+              required: true
+              type: string
+              paramType: path
+              description: slug of the Issuer to search for assertions under
+            - name: recipient
+              required: false
+              type: string
+              paramType: query
+              description: URL-encoded email address of earner to search by
+        """
+        current_issuer = self.get_object(issuerSlug)
+
+        if current_issuer is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if request.query_params.get('recipient') is not None:
+            instances = current_issuer.assertions.filter(email=request.query_params.get('recipient'), revoked=False)
+        else:
+            instances = current_issuer.assertions.filter(revoked=False)
+
+        serializer = BadgeInstanceSerializer(
+            instances, context={'request': request}, many=True
+        )
+
+        return Response(serializer.data)
+
+
 class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
     """
     Endpoints for (GET)ting a single assertion or revoking a badge (DELETE)
