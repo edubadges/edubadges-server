@@ -220,6 +220,34 @@ class BadgeClassTests(APITestCase):
 
         self.assertTrue(BadgeClass.objects.filter(slug='badge-of-testing').exists())
 
+    def test_create_badgeclass_with_underscore_slug(self):
+        """
+        Tests that a manually-defined slug that includes underscores does not
+        trigger an error when defining a new BadgeClass
+        """
+        with open(
+            os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
+        ) as badge_image:
+
+            badgeclass_props = {
+                'name': 'Badge of Slugs',
+                'slug': 'badge_of_slugs',
+                'description': "Recognizes slimy learners with a penchant for lettuce",
+                'image': badge_image,
+                'criteria': 'The earner of this badge must slither through a garden and return home before morning.',
+            }
+
+            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            response = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                badgeclass_props
+            )
+            self.assertEqual(response.status_code, 201)
+            self.assertRegexpMatches(response.data.get(
+                'json', {}).get('criteria'),
+                r'badge_of_slugs/criteria$'
+            )
+
 
 class AssertionTests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
