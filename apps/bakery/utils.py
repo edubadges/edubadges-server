@@ -21,6 +21,7 @@ def unbake(imageFile):
     Return the openbadges content contained in a baked image.
     """
     image_type = check_image_type(imageFile)
+    imageFile.seek(0)
     if image_type == 'PNG':
         return png_bakery.unbake(imageFile)
     elif image_type == 'SVG':
@@ -32,6 +33,7 @@ def bake(imageFile, assertion_json_string):
     Embeds a serialized representation of a badge instance in an image file.
     """
     image_type = check_image_type(imageFile)
+    imageFile.seek(0)  # reset pointer to the beginning of the file
     if image_type == 'PNG':
         return png_bakery.bake(imageFile, assertion_json_string)
     elif image_type == 'SVG':

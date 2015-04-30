@@ -12,7 +12,9 @@ from autoslug import AutoSlugField
 import cachemodel
 from jsonfield import JSONField
 
-from .utils import bake, generate_sha256_hashstring
+from bakery import bake
+
+from .utils import generate_sha256_hashstring
 
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
@@ -126,7 +128,9 @@ class BadgeInstance(Component):
             self.created_at = datetime.datetime.now()
             self.json['issuedOn'] = self.created_at.isoformat()
 
-            self.image = bake(self.badgeclass.image, json.dumps(self.json, indent=2))
+            with open(self.badgeclass.image.file.name) as imageFile:
+                self.image = bake(imageFile, json.dumps(self.json, indent=2))
+
             self.image.open()
 
         if self.revoked is False:

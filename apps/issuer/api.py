@@ -367,7 +367,6 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        current_badgeclass = current_badgeclass[0]
         serializer = BadgeClassSerializer(current_badgeclass, context={'request': request})
         return Response(serializer.data)
 

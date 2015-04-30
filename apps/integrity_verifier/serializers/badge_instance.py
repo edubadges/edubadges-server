@@ -34,6 +34,10 @@ class BadgeInstanceSerializerV0_5_0(V0_5Base):
 
 
 class BadgeInstanceSerializerV1_0(serializers.Serializer):
+    """
+    Serializer for 1.0 Open Badge assertions, which require a uid, have no
+    linked data context.
+    """
     uid = serializers.CharField(required=True)
     recipient = RecipientSerializer(required=True)
     badge = serializers.URLField(required=True)

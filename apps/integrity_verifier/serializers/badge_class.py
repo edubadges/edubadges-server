@@ -23,5 +23,5 @@ class BadgeClassSerializerV1_0(serializers.Serializer):
     image = serializers.URLField(required=True)
     criteria = serializers.URLField(required=True)
     issuer = serializers.URLField(required=True)
-    alignment = AlignmentObjectSerializer(required=False)
+    alignment = AlignmentObjectSerializer(required=False, many=True)
     tags = serializers.ListField(child=serializers.CharField(), required=False)

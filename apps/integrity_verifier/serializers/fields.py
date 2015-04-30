@@ -15,7 +15,7 @@ class BadgeDateTimeField(serializers.Field):
     }
 
     def to_internal_value(self, value):
-        if isinstance(value, str):
+        if isinstance(value, (str, unicode)):
             try:
                 return datetime.utcfromtimestamp(float(value))
             except ValueError:

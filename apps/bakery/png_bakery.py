@@ -30,9 +30,9 @@ def bake(imageFile, assertion_json_string):
     """
     reader = png.Reader(file=imageFile)
 
-    filename = '%s.png' % hashlib.md5(str(assertion_json_string)).hexdigest()
+    output_filename = '%s.png' % hashlib.md5(str(assertion_json_string)).hexdigest()
 
-    newfile = ContentFile("", name=filename)
+    newfile = ContentFile("", name=output_filename)
     newfile.open()
     chunkheader = 'openbadges\x00\x00\x00\x00\x00'
     badge_chunk = ('iTXt', bytes(chunkheader + assertion_json_string))

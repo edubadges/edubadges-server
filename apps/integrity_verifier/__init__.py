@@ -22,11 +22,13 @@ class RemoteBadgeInstance(object):
         self.badge_instance = requests.get(instance_url).json()
         self.json = self.badge_instance.copy()
 
-        self.badge = requests.get(self.badge_instance['badge']).json()
-        self.json['badge'] = self.badge
+        self.badge_url = self.badge_instance['badge']
+        self.badge = requests.get(self.badge_url).json()
+        self.json['badge'] = self.badge.copy()
 
-        self.issuer = requests.get(self.badge['issuer']).json()
-        self.json['badge']['issuer'] = self.issuer
+        self.issuer_url = self.badge['issuer']
+        self.issuer = requests.get(self.issuer_url).json()
+        self.json['badge']['issuer'] = self.issuer.copy()
 
     def __getitem__(self, key):
         return self.badge_instance[key]
@@ -52,6 +54,9 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
             raise TypeError('Expected RemoteBadgeInstance')
 
         self.instance_url = badge_instance.instance_url
+        self.badge_url = badge_instance.badge_url
+        self.issuer_url = badge_instance.issuer_url
+
         self.recipient_id = (recipient_id
                              or getattr(badge_instance, 'recipient_id', None))
         self.json = badge_instance.json.copy()
@@ -85,7 +90,6 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
             lambda class_: self.version_signature.search(class_), classes)
 
     def evaluate_version(self, component):
-
         component.version = None
         for version in component.versions:
             SerializerClass = getattr(serializers, version)
@@ -107,11 +111,22 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
 
     def check_origin(self):
         same_domain = (urlparse(self.instance_url).netloc
-                       == urlparse(self.badge_instance['badge']).netloc
-                       == urlparse(self.badge['issuer']['url']).netloc)
+                       == urlparse(self.badge_url).netloc
+                       == urlparse(self.issuer_url).netloc)
         if not same_domain:
             self.non_component_errors.append(
                 ('domain', "Badge components don't share the same domain."))
+
+        local_platform = (urlparse(self.issuer_url).netloc
+                          == urlparse(self.issuer.get('url')).netloc)
+        if not local_platform:
+            self.non_component_errors.append((
+                'platform',
+                "Badge was issued from a platform ("
+                + urlparse(self.issuer_url).netloc
+                + ") separate from the issuer's domain ("
+                + urlparse(self.issuer.get('url')).netloc + ")."
+            ))
 
     def __getattr__(self, key):
         base_properties = ['instance_url', 'recipient_id',
