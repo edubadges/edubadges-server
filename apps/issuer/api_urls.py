@@ -15,8 +15,8 @@ urlpatterns = patterns(
     url(r'^/issuers/(?P<issuerSlug>[-\w]+)/assertions$', IssuerBadgeInstanceList.as_view(), name='issuer_instance_list'),
 
     url(r'^/issuers/(?P<issuerSlug>[-\w]+)/badges$', BadgeClassList.as_view(), name='badgeclass_list'),
-    url(r'^/issuers/(?P<issuerSlug>[-\w]+)/badges/(?P<badgeSlug>[-\d\w]+)$', BadgeClassDetail.as_view(), name='badgeclass_detail'),
+    url(r'^/issuers/(?P<issuerSlug>[-\w]+)/badges/(?P<badgeSlug>[-\w]+)$', BadgeClassDetail.as_view(), name='badgeclass_detail'),
 
-    url(r'^/issuers/(?P<issuerSlug>[-\w]+)/badges/(?P<badgeSlug>[-\d\w]+)/assertions$', BadgeInstanceList.as_view(), name='badgeinstance_list'),
-    url(r'^/issuers/(?P<issuerSlug>[-\w]+)/badges/(?P<badgeSlug>[-\d\w]+)/assertions/(?P<assertionSlug>[-\d\w]+)$', BadgeInstanceDetail.as_view(), name='badgeinstance_detail'),
+    url(r'^/issuers/(?P<issuerSlug>[-\w]+)/badges/(?P<badgeSlug>[-\w]+)/assertions$', BadgeInstanceList.as_view(), name='badgeinstance_list'),
+    url(r'^/issuers/(?P<issuerSlug>[-\w]+)/badges/(?P<badgeSlug>[-\w]+)/assertions/(?P<assertionSlug>[-\w]+)$', BadgeInstanceDetail.as_view(), name='badgeinstance_detail'),
 )

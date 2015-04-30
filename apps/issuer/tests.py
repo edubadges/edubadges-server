@@ -231,7 +231,7 @@ class BadgeClassTests(APITestCase):
 
             badgeclass_props = {
                 'name': 'Badge of Slugs',
-                'slug': 'badge_of_slugs',
+                'slug': 'badge_of_slugs_99',
                 'description': "Recognizes slimy learners with a penchant for lettuce",
                 'image': badge_image,
                 'criteria': 'The earner of this badge must slither through a garden and return home before morning.',
@@ -245,7 +245,7 @@ class BadgeClassTests(APITestCase):
             self.assertEqual(response.status_code, 201)
             self.assertRegexpMatches(response.data.get(
                 'json', {}).get('criteria'),
-                r'badge_of_slugs/criteria$'
+                r'badge_of_slugs_99/criteria$'
             )
 
 
