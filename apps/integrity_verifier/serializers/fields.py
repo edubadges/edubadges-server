@@ -1,7 +1,7 @@
 from datetime import datetime
 import re
 
-from django.utils.dateparse import parse_datetime
+from django.utils.dateparse import parse_datetime, parse_date
 
 from rest_framework import serializers
 
@@ -21,10 +21,15 @@ class BadgeDateTimeField(serializers.Field):
             except ValueError:
                 pass
 
-            value = parse_datetime(value)
-            if not value:
-                self.fail('bad_str')
-            return value
+            result = parse_datetime(value)
+            if not result:
+                try:
+                    result = datetime.combine(
+                        parse_date(value), datetime.min.time()
+                    )
+                except TypeError:
+                    self.fail('bad_str')
+            return result
         elif isinstance(value, int) or isinstance(value, float):
             try:
                 return datetime.utcfromtimestamp(value)

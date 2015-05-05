@@ -1,3 +1,4 @@
+import hashlib
 import inspect
 import re
 import sys
@@ -69,6 +70,7 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
 
         self.non_component_errors = []
         self.check_origin()
+        self.check_recipient()
 
         self.version_signature = re.compile(r"[Vv][0-9](_[0-9])+$")
 
@@ -80,6 +82,14 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
         for module_name, component in components:
             self.add_versions(component, module_name)
             self.evaluate_version(component)
+
+        for module_name, component in components:
+            if component.version is None:
+                self.non_component_errors.append((
+                    'component_version',
+                    '%s version couldn\'t be determined' % module_name,
+                    component.version_errors
+                ))
 
     def add_versions(self, component, module_name):
         module = getattr(serializers, module_name)
@@ -126,6 +136,33 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
                 + urlparse(self.issuer_url).netloc
                 + ") separate from the issuer's domain ("
                 + urlparse(self.issuer.get('url')).netloc + ")."
+            ))
+
+    def check_recipient(self):
+        """
+        Check if a badge recipient is indeed the expected recipient (email address)
+        """
+        def verify_hash(identity_string, hash_string, salt=''):
+            if hash_string.startswith('sha256$'):
+                return hash_string == 'sha256$' + hashlib.sha256(self.recipient_id+salt).hexdigest()
+            elif hash_string.startswith('md5$'):
+                return hash_string == 'md5$' + hashlib.md5(identity_string+salt).hexdigest()
+            else:
+                return hash_string == identity_string
+
+        recipient_chunk = self.badge_instance.get('recipient', '')
+        if isinstance(recipient_chunk, dict):
+            hash_string = recipient_chunk.get('identity')
+            salt = recipient_chunk.get('salt', '')
+        else:
+            hash_string = recipient_chunk
+            salt = self.badge_instance.get('salt', '')
+
+        if verify_hash(self.recipient_id, hash_string, salt) is False:
+            self.non_component_errors.append((
+                'recipient',
+                'Recipient id "%s" did not match badge contents: "%s"'
+                % (self.recipient_id, hash_string)
             ))
 
     def __getattr__(self, key):
