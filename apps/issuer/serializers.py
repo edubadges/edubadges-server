@@ -64,6 +64,7 @@ class IssuerSerializer(AbstractComponentSerializer):
 
         return representation
 
+
 class IssuerRoleActionSerializer(serializers.Serializer):
     """ A serializer used for validating user role change POSTS """
     action = serializers.ChoiceField(('add', 'modify', 'remove'), allow_blank=True)
@@ -186,6 +187,7 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
         # Augment json with id
         full_url = new_assertion.get_full_url()  # this sets the slug
         new_assertion.json['id'] = full_url
+        new_assertion.json['uid'] = new_assertion.slug
         new_assertion.json['verify']['url'] = full_url
         new_assertion.json['image'] = full_url + '/image'
 
