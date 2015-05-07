@@ -1,3 +1,4 @@
+import hashlib
 import json
 import re
 
@@ -42,3 +43,12 @@ def get_instance_url_from_image(imageFile):
     image_contents = unbake(imageFile)
 
     return get_instance_url_from_unknown_string(image_contents)
+
+
+def verify_hash(identity_string, hash_string, salt=''):
+    if hash_string.startswith('sha256$'):
+        return hash_string == 'sha256$' + hashlib.sha256(identity_string+salt).hexdigest()
+    elif hash_string.startswith('md5$'):
+        return hash_string == 'md5$' + hashlib.md5(identity_string+salt).hexdigest()
+    else:
+        return hash_string == identity_string

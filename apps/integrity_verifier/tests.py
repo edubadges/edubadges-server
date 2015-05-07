@@ -46,6 +46,22 @@ def setup_bad_version():
     )
 
 
+def setup_0_5_0_ok():
+    responses.add(
+        responses.GET, 'http://oldstyle.com/instance3',
+        body=test_components['0_5_instance'],
+        status=200, content_type='application/json'
+    )
+
+
+def setup_0_5_1_ok():
+    responses.add(
+        responses.GET, 'http://oldstyle.com/instance4',
+        body=test_components['0_5_1_instance'],
+        status=200, content_type='application/json'
+    )
+
+
 class InstanceVerificationTests(TestCase):
 
     @responses.activate
@@ -65,7 +81,28 @@ class InstanceVerificationTests(TestCase):
         rbi = RemoteBadgeInstance('http://a.com/instance2')
         abi = AnalyzedBadgeInstance(rbi, recipient_id='recipient@example.com')
         self.assertIsNone(abi.version)
-        self.assertEqual(len(abi.non_component_errors), 1)
+        self.assertFalse(abi.is_valid())
+        self.assertEqual(len(abi.all_errors()), 1)
+
+    @responses.activate
+    def test_0_5_ok(self):
+        setup_0_5_0_ok()
+
+        rbi = RemoteBadgeInstance('http://oldstyle.com/instance3')
+        abi = AnalyzedBadgeInstance(rbi, recipient_id='recipient@example.com')
+
+        self.assertEqual(abi.version, 'v0.5.0')
+        self.assertEqual(len(abi.all_errors()), 0)
+
+    @responses.activate
+    def test_0_5_1_ok(self):
+        setup_0_5_1_ok()
+
+        rbi = RemoteBadgeInstance('http://oldstyle.com/instance4')
+        abi = AnalyzedBadgeInstance(rbi, recipient_id='recipient@example.com')
+
+        self.assertEqual(abi.version, 'v0.5.1')
+        self.assertEqual(len(abi.all_errors()), 0)
 
 
 class VerifierAPITests(APITestCase):
@@ -103,3 +140,16 @@ class VerifierAPITests(APITestCase):
             response.data.get('non_field_errors', [''])[0],
             r'Only one instance input field allowed'
         )
+
+    @responses.activate
+    def test_bad_version_via_api(self):
+        setup_bad_version()
+
+        post_data = {'recipient': 'recipient@example.com', 'url': 'http://a.com/instance2'}
+
+        response = self.client.post(
+            '/v1/verifier', json.dumps(post_data),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data.get('errors')), 1)

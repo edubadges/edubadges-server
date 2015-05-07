@@ -6,15 +6,6 @@ from . import RemoteBadgeInstance, AnalyzedBadgeInstance
 from .utils import get_instance_url_from_image, get_instance_url_from_assertion
 
 
-class InstanceErrorsSerializer(serializers.Serializer):
-    """ Provides a representation of errors from an AnalyzedBadgeInstance"""
-    def to_representation(self, obj):
-        if obj.version is not None:
-            return obj.non_component_errors
-        else:
-            return obj.non_component_errors  # append appropriate version errors
-
-
 class IntegritySerializer(serializers.Serializer):
     recipient = serializers.CharField(required=True, source='recipient_id')
 
@@ -24,7 +15,7 @@ class IntegritySerializer(serializers.Serializer):
 
     json = serializers.DictField(read_only=True)
     version = serializers.CharField(read_only=True)
-    errors = InstanceErrorsSerializer(read_only=True, source='*')
+    errors = serializers.ListField(read_only=True, source='all_errors')
     badge = serializers.DictField(read_only=True)
     badge_url = serializers.URLField(read_only=True)
     issuer = serializers.DictField(read_only=True)
@@ -57,7 +48,7 @@ class IntegritySerializer(serializers.Serializer):
 
         rbi = RemoteBadgeInstance(
             instance_url=url,
-            recipient_id=validated_data.get('recipient')
+            recipient_id=validated_data.get('recipient_id')
         )
 
         abi = AnalyzedBadgeInstance(rbi)
