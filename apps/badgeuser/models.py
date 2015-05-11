@@ -21,7 +21,7 @@ class BadgeUser(AbstractUser):
         return self.username
 
     def get_absolute_url(self):
-        return "/users/%s/" % urlquote(self.username)
+        return "/user/%s/" % urlquote(self.username)
 
     def get_full_name(self):
         return "%s %s" % (self.first_name, self.last_name)

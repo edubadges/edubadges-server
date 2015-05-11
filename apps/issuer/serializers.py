@@ -217,7 +217,7 @@ class IssuerPortalSerializer(serializers.Serializer):
         user_issuers = Issuer.objects.filter(
             Q(owner__id=user.id) |
             Q(staff__id=user.id)
-        ).select_related('badgeclasses')
+        ).distinct().select_related('badgeclasses')
         user_issuer_badgeclasses = chain.from_iterable(i.badgeclasses.all() for i in user_issuers)
 
         issuer_data = IssuerSerializer(

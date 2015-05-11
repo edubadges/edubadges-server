@@ -1,8 +1,7 @@
 from django.conf.urls import patterns, url
-from badgeuser.api import BadgeUserDetail, BadgeUserList, BadgeUserToken
+from badgeuser.api import BadgeUserDetail, BadgeUserToken
 
-urlpatterns = patterns('badgeuser.views',
-    url(r'^$', BadgeUserList.as_view(), name='user_list'),
-    url(r'^/users/(?P<username>[-\w]+)$', BadgeUserDetail.as_view(), name='user_detail'),
+urlpatterns = patterns('badgeuser.api_views',
     url(r'^/auth-token$', BadgeUserToken.as_view(), name='user_auth_token'),
+    url(r'^/(?P<username>[-\w]+)$', BadgeUserDetail.as_view(), name='api_user_detail')
 )

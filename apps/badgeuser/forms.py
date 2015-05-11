@@ -1,5 +1,9 @@
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from models import BadgeUser
+from django import forms
+
+# from allauth.account import forms as allauth_forms
+
+from .models import BadgeUser
 
 
 class BadgeUserCreationForm(UserCreationForm):
@@ -10,7 +14,10 @@ class BadgeUserCreationForm(UserCreationForm):
 
     class Meta:
         model = BadgeUser
-        fields = ("username","email",)
+        fields = ("username", "email", "first_name", "last_name")
+
+    def signup(self, request, user):
+        pass
 
 
 class BadgeUserChangeForm(UserChangeForm):

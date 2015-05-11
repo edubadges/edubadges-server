@@ -38,10 +38,16 @@ class AbstractIssuerAPIEndpoint(APIView):
         else:
             return obj
 
-    def get_list(self, slug, queryset=None):
+    def get_list(self, slug=None, queryset=None, related=None):
         """ Ensure user has permissions on Issuer, and return badgeclass queryset if so. """
         queryset = queryset if queryset is not None else self.queryset
-        obj = queryset.filter(slug=slug).select_related('badgeclasses')
+
+        obj = queryset
+        if slug is not None:
+            obj = queryset.filter(slug=slug)
+        if related is not None:
+            obj = queryset.select_related(related)
+
         if not obj.exists():
             return self.model.objects.none()
 
@@ -67,12 +73,8 @@ class IssuerList(AbstractIssuerAPIEndpoint):
         ---
         serializer: IssuerSerializer
         """
-
         # Get the Issuers this user owns, edits, or staffs:
-        user_issuers = Issuer.objects.filter(
-            Q(owner__id=request.user.id) |
-            Q(staff__id=request.user.id)
-        )
+        user_issuers = self.get_list()
         if not user_issuers.exists():
             return Response(status=status.HTTP_404_NOT_FOUND)
 

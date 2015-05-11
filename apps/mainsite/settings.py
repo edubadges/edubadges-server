@@ -146,6 +146,10 @@ AUTHENTICATION_BACKENDS = [
 ]
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_FORMS = {
+    'add_email': 'badgeuser.account_forms.AddEmailForm'
+}
+ACCOUNT_SIGNUP_FORM_CLASS = 'badgeuser.forms.BadgeUserCreationForm'
 
 ##
 #

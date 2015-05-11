@@ -1,40 +1,21 @@
-from rest_framework import authentication, permissions, status
+from rest_framework import authentication, permissions, status, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 
-from mainsite.permissions import IsOwner
+from mainsite.permissions import IsRequestUser
 
 from .models import BadgeUser
-from .serializers import TokenSerializer
+from .serializers import TokenSerializer, BadgeUserSerializer
 
 
-class BadgeUserList(APIView):
-    """
-    GET a list of users on the system. Restricted to system administrators.
-    """
-    model = BadgeUser
-
-    # TODO: rich authentication possibilitiesfor remote API clients
-    authentication_classes = (
-        # authentication.TokenAuthentication,
-        authentication.SessionAuthentication,
-        authentication.BasicAuthentication,
-    )
-    permission_classes = (IsOwner,)
-
-    def get(self, request):
-        """
-        View a list of users viewable in current scope
-        """
-        raise ValidationError("viewing a user list not implemented")
-
-
-class BadgeUserDetail(APIView):
+class BadgeUserDetail(generics.RetrieveUpdateAPIView):
     """
     View a single user profile by username
     """
-    model = BadgeUser
+    queryset = BadgeUser.objects.all()
+    serializer_class = BadgeUserSerializer
+    lookup_field = 'username'
 
     # TODO: rich authentication possibilitiesfor remote API clients
     authentication_classes = (
@@ -42,13 +23,18 @@ class BadgeUserDetail(APIView):
         authentication.SessionAuthentication,
         authentication.BasicAuthentication,
     )
-    permission_classes = (IsOwner,)
+    permission_classes = (IsRequestUser,)
 
     def get(self, request, username):
         """
         Return full details on a single badge the consumer is currently analyzing.
         """
-        raise ValidationError("viewing a single user not implemented")
+        import pdb; pdb.set_trace();
+        user = self.get_object()
+
+        serializer = BadgeUserSerializer(user)
+
+        return Response(serializer.data)
 
     def put(self, resuest, pk):
         raise ValidationError("updating a single user not implemented")

@@ -41,6 +41,7 @@ urlpatterns = patterns('',
     url(r'^logout', RedirectView.as_view(url='/accounts/logout', permanent=False), name='logout'),
 
     # REST Framework-based APIs
+    url(r'^user', include('badgeuser.urls')),
     url(r'^v1/user', include('badgeuser.api_urls')),
     #url(r'^v1/earner', include('earner.api_urls')),
     #url(r'^v1/consumer', include('consumer.api_urls')),
