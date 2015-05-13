@@ -43,8 +43,7 @@ urlpatterns = patterns('',
     # REST Framework-based APIs
     url(r'^user', include('badgeuser.urls')),
     url(r'^v1/user', include('badgeuser.api_urls')),
-    #url(r'^v1/earner', include('earner.api_urls')),
-    #url(r'^v1/consumer', include('consumer.api_urls')),
+    url(r'^v1/verifier', include('integrity_verifier.api_urls')),
 
     url(r'^public', include('issuer.public_api_urls')),
 
@@ -53,13 +52,6 @@ urlpatterns = patterns('',
 
     # Service health endpoint
     url(r'^health', include('health.urls')),
-
-    # Local Apps for browser front end
-    #url(r'^my-badges', include('earner.urls')),
-    #url(r'^explore', include('consumer.urls')),
-
-    #url(r'^badgeanalysis', include('badgeanalysis.urls')),
-    #url(r'^certificates', include('certificates.urls')),
 )
 
 if apps.is_installed('issuer'):
@@ -69,9 +61,9 @@ if apps.is_installed('issuer'):
         url(r'^issuer', include('issuer.urls')),
     )
 
-if apps.is_installed('integrity_verifier'):
+if apps.is_installed('earner'):
     urlpatterns += patterns('',
-        url(r'^v1/verifier', include('integrity_verifier.api_urls')),
+        url(r'^v1/earner', include('earner.api_urls')),
     )
 
 

@@ -6,6 +6,37 @@ from django.utils.dateparse import parse_datetime, parse_date
 from rest_framework import serializers
 
 
+class BadgeURLField(serializers.URLField):
+    def to_representation(self, value):
+        return {
+            'type': 'id',
+            'id': value
+        }
+
+
+class BadgeImageURLField(serializers.URLField):
+    def to_representation(self, value):
+        return {
+            'type': 'image',
+            'id': value
+        }
+
+
+class BadgeStringField(serializers.CharField):
+    def to_representation(self, value):
+        return {
+            'type': 'xsd:string',
+            '@value': value
+        }
+
+class BadgeEmailField(serializers.EmailField):
+    def to_representation(self, value):
+        return {
+            'type': 'email',
+            '@value': value
+        }
+
+
 class BadgeDateTimeField(serializers.Field):
 
     default_error_messages = {
@@ -30,13 +61,24 @@ class BadgeDateTimeField(serializers.Field):
                 except TypeError:
                     self.fail('bad_str')
             return result
-        elif isinstance(value, int) or isinstance(value, float):
+        elif isinstance(value, (int, float)):
             try:
                 return datetime.utcfromtimestamp(value)
             except ValueError:
                 self.fail('bad_int')
         else:
             self.fail('not_int_or_str')
+
+    def to_representation(self, string_value):
+        if isinstance(string_value, (str, unicode, int, float)):
+            value = self.to_internal_value(string_value)
+        else:
+            value = string_value
+
+        return {
+            'type': 'xsd:dateTime',
+            '@value': value.isoformat()
+        }
 
 
 class HashString(serializers.Field):
@@ -62,3 +104,44 @@ class HashString(serializers.Field):
                 "Invalid data. String is not recognizably formatted.")
 
         return data
+
+
+class AlignmentObjectSerializer(serializers.Serializer):
+    """
+    A small JSON object literal describing a BadgeClass's alignment to
+    a particular standard or competency map URL.
+    """
+    name = serializers.CharField(required=True)
+    url = serializers.URLField(required=True)
+    description = serializers.CharField(required=False)
+
+    def to_representation(self, value):
+        # Not implemented yet. This is going to be tricky.
+        return {}
+
+
+class RecipientSerializer(serializers.Serializer):
+    """
+    A representation of a 1.0 Open Badge recipient has either a hashed or
+    plaintext identifier (email address).
+    """
+    identity = serializers.CharField(required=True)  # TODO: email | HashString
+    type = serializers.CharField(required=True)
+    hashed = serializers.BooleanField(required=True)
+
+    def to_representation(self, value):
+        return {
+            'type': 'xsd:string',
+            '@value': self.context.get('recipient_id')
+        }
+
+
+class VerificationObjectSerializer(serializers.Serializer):
+    """
+    1.0 Open Badges use a VerificationObject to indicate what authentication
+    procedure a consumer should attempt and link to the relevant hosted
+    verification resource, which is either a hosted copy of a badge instance
+    or the issuer's public key.
+    """
+    type = serializers.ChoiceField(['hosted', 'signed'], required=True)
+    url = serializers.URLField(required=True)

@@ -4,6 +4,8 @@ import sys
 from urlparse import urlparse
 from UserDict import UserDict
 
+from django.core.exceptions import ValidationError
+
 import requests
 
 import serializers
@@ -101,6 +103,7 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
             self.check_origin_0_5()
 
         self.check_recipient()
+        self.check_version_continuity()
 
     def add_versions(self, component, module_name):
         module = getattr(serializers, module_name)
@@ -122,6 +125,7 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
                 component.version_errors[version] = serializer.errors
             else:
                 component.version = self.get_version(version)
+                component.serializer = SerializerClass
 
     def get_version(self, version):
         try:
@@ -182,6 +186,22 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
                 % (self.recipient_id, hash_string)
             ))
 
+    def check_version_continuity(self):
+        """
+        Check if all components of a badge are the same version
+        """
+        try:
+            if not (self.badge.version == self.issuer.version == self.version):
+                self.non_component_errors.append((
+                    'warning.version',
+                    "Components assembled with different specification versions."
+                    + " Assertion: " + self.version + ", BadgeClass: "
+                    + self.badge.version + ", Issuer: " + self.issuer.version
+                ))
+        except (TypeError, AttributeError):
+            pass
+
+
     def is_valid(self):
         """
         Check if all components of a badge have a version and that there are no
@@ -205,6 +225,15 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
                 )]
 
         return errors
+
+    @property
+    def data(self):
+        """
+        Return a canonical serialization
+        """
+        if self.is_valid():
+            serializer = self.serializer(self)
+            return serializer.data
 
     def __getattr__(self, key):
         base_properties = ['instance_url', 'recipient_id',

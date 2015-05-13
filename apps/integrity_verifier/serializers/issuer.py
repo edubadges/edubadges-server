@@ -1,5 +1,10 @@
+from collections import OrderedDict
+
 from rest_framework import serializers
 
+from .fields import (BadgeStringField, BadgeURLField, BadgeImageURLField,
+                     BadgeEmailField)
+from ..utils import ObjectView
 
 class IssuerSerializerV0_5(serializers.Serializer):
     """
@@ -13,9 +18,24 @@ class IssuerSerializerV0_5(serializers.Serializer):
 
 
 class IssuerSerializerV1_0(serializers.Serializer):
-    name = serializers.CharField(required=True)
-    url = serializers.URLField(required=True)
-    description = serializers.CharField(required=False)
-    email = serializers.EmailField(required=False)
-    image = serializers.URLField(required=False)
-    revocationList = serializers.URLField(required=False)
+    name = BadgeStringField(required=True)
+    url = BadgeURLField(required=True)
+    description = BadgeStringField(required=False)
+    email = BadgeEmailField(required=False)
+    image = BadgeImageURLField(required=False)
+    revocationList = BadgeURLField(required=False)
+
+    def to_representation(self, badge):
+        obj = ObjectView(dict(badge))
+        issuer_props = super(
+            IssuerSerializerV1_0, self).to_representation(obj)
+        
+        header = OrderedDict()
+        if not self.context.get('embedded', False):
+            header['@context'] = 'https://w3id.org/openbadges/v1'
+        header['type'] = 'Issuer'
+        header['id'] = self.context.get('instance').issuer_url
+
+        result = OrderedDict(header.items() + issuer_props.items())
+
+        return result
