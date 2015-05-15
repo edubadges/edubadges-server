@@ -52,5 +52,45 @@
         },
         "model": "badgeuser.badgeuser",
         "pk": 3
+    },
+    {
+        "fields": {
+            "verified": true,
+            "user": 1,
+            "primary": true,
+            "email": "test@example.com"
+        },
+        "model": "account.emailaddress",
+        "pk": 1
+    },
+    {
+        "fields": {
+            "verified": true,
+            "user": 1,
+            "primary": false,
+            "email": "test1again@example.com"
+        },
+        "model": "account.emailaddress",
+        "pk": 2
+    },
+    {
+        "fields": {
+            "verified": true,
+            "user": 2,
+            "primary": true,
+            "email": "test2@example.com"
+        },
+        "model": "account.emailaddress",
+        "pk": 3
+    },
+    {
+        "fields": {
+            "verified": true,
+            "user": 3,
+            "primary": true,
+            "email": "test3@example.com"
+        },
+        "model": "account.emailaddress",
+        "pk": 4
     }
 ]
