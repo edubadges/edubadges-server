@@ -69,6 +69,11 @@ if apps.is_installed('issuer'):
         url(r'^issuer', include('issuer.urls')),
     )
 
+if apps.is_installed('integrity_verifier'):
+    urlpatterns += patterns('',
+        url(r'^v1/verifier', include('integrity_verifier.api_urls')),
+    )
+
 
 # Test URLs to allow you to see these pages while DEBUG is True
 if getattr(settings, 'DEBUG_ERRORS', False):
