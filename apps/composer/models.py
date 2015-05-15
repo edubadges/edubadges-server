@@ -44,6 +44,9 @@ class StoredBadgeInstanceCollection(models.Model):
     collection = models.ForeignKey(Collection, null=False)
     description = models.TextField(blank=True)
 
+    class Meta:
+        unique_together = ('instance', 'collection')
+
 
 class CollectionPermission(models.Model):
     collection = models.ForeignKey(Collection, null=False)

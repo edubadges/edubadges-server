@@ -151,13 +151,14 @@ class EarnerCollectionBadgesList(APIView):
             collection__slug=slug, recipient_user=request.user
         )
 
-        serializer = EarnerBadgeSerializer(collection_badges, many=True)
+        serializer = EarnerBadgeReferenceSerializer(collection_badges, many=True)
         return Response(serializer.data)
 
     def post(self, request, slug):
         """
         POST new badge(s) to add them to a existing Collection
         """
+        import pdb; pdb.set_trace();
         try:
             collection = Collection.objects.get(
                 recipient=request.user, slug=slug
@@ -176,7 +177,14 @@ class EarnerCollectionBadgesList(APIView):
             )
             serializer.is_valid(raise_exception=True)
 
-        except serializers.ValidationError:
-            pass
+            ddd = [x.get('id') for x in request.data]
+            eee = self.queryset.filter(recipient_user=request.user, id__in=ddd)
+            fff =[StoredBadgeInstanceCollection(instance=y, collection=collection) for y in eee]
+            StoredBadgeInstanceCollection.objects.bulk_create(fff)
+
+            return self.get(request, slug)
+
+        except serializers.ValidationError as e:
+            raise e
         else:
-            return Response("Not implemented")
+            pass
