@@ -6,7 +6,8 @@ from rest_framework.views import APIView
 from mainsite.permissions import IsOwner
 from credential_store.models import StoredBadgeInstance
 
-from .serializers import (EarnerBadgeSerializer, 
+from .serializers import (EarnerBadgeSerializer,
+                          EarnerBadgeReferenceSerializer,
                           CollectionSerializer)
 from .models import Collection
 
@@ -83,6 +84,7 @@ class EarnerCollectionList(APIView):
         """
         GET a list of the logged-in user's Collections.
         ---
+        serializer: CollectionSerializer
         """
         user_collections = self.queryset.filter(recipient=request.user)
 
@@ -93,6 +95,11 @@ class EarnerCollectionList(APIView):
         return Response(serializer.data)
 
     def post(self, request):
+        """
+        POST a new collection to the logged-in user's account.
+        ---
+        serializer: CollectionSerializer
+        """
         serializer = CollectionSerializer(
             data=request.data, context={'request': request}
         )
@@ -130,7 +137,8 @@ class EarnerCollectionDetail(APIView):
 
 class EarnerCollectionBadgesList(APIView):
     """
-    POST to add badges to collection, PUT to update collection
+    POST to add badges to collection, PUT to update collection to a
+    new list of ids.
     """
     queryset = StoredBadgeInstance.objects.all()
     permission_classes = (permissions.IsAuthenticated, IsOwner,)
@@ -140,7 +148,7 @@ class EarnerCollectionBadgesList(APIView):
         GET the badges in a single Collection
         """
         collection_badges = self.queryset.filter(
-            collections__slug=slug, recipient=request.user
+            collection__slug=slug, recipient_user=request.user
         )
 
         serializer = EarnerBadgeSerializer(collection_badges, many=True)
@@ -161,13 +169,14 @@ class EarnerCollectionBadgesList(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+        add_many = isinstance(request.data, list)
         try:
-            serializer = EarnerBadgeSerializer(data=request.data)
+            serializer = EarnerBadgeReferenceSerializer(
+                data=request.data, many=add_many
+            )
             serializer.is_valid(raise_exception=True)
-
-            serializer.save()
 
         except serializers.ValidationError:
             pass
         else:
-            return Response("TODO!!!! api 171")
+            return Response("Not implemented")
