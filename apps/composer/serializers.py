@@ -8,7 +8,7 @@ from integrity_verifier import RemoteBadgeInstance, AnalyzedBadgeInstance
 from integrity_verifier.utils import get_instance_url_from_image, get_instance_url_from_assertion
 from credential_store.models import StoredBadgeInstance
 
-from .models import Collection
+from .models import Collection, StoredBadgeInstanceCollection
 
 RECIPIENT_ERROR = {
     'recipient':
@@ -79,8 +79,69 @@ class EarnerBadgeSerializer(serializers.Serializer):
             return new_instance
 
 
+class EarnerBadgeReferenceListSerializer(serializers.ListSerializer):
+
+    def create(self, validated_data):
+        collection = self.context.get('collection')
+        user = self.context.get('request').user
+
+        if not isinstance(validated_data, list):
+            validated_data = [validated_data]
+
+        id_set = [x.get('instance', {}).get('id') for x in validated_data]
+
+        badge_set = StoredBadgeInstance.objects.filter(
+            recipient_user=user, id__in=id_set
+        ).exclude(collection=collection)
+
+        new_records = []
+
+        for badge in badge_set:
+            description = [
+                item for item in validated_data if
+                item.get('instance', {}).get('id') == badge.id
+            ][0].get('description', '')
+
+            new_records.append(StoredBadgeInstanceCollection(
+                instance=badge,
+                collection=collection,
+                description=description
+            ))
+
+        if len(new_records) > 0:
+            return StoredBadgeInstanceCollection.objects.bulk_create(new_records)
+        else:
+            return new_records
+
+
 class EarnerBadgeReferenceSerializer(serializers.Serializer):
-    id = serializers.IntegerField(required=True)
+    id = serializers.IntegerField(required=True, source='instance.id')
+    description = serializers.CharField(required=False)
+
+    class Meta:
+        list_serializer_class = EarnerBadgeReferenceListSerializer
+
+    def create(self, validated_data):
+        collection = self.context.get('collection')
+        user = self.context.get('request').user
+
+        badge_query = StoredBadgeInstance.objects.filter(
+            recipient_user=user,
+            id=validated_data.get('instance',{}).get('id'),
+        ).exclude(collection=collection)
+
+        if not badge_query.exists():
+            return []
+
+        description = validated_data.get('description', '')
+
+        new_record = StoredBadgeInstanceCollection(
+            instance=badge_query[0], collection=collection,
+            description=description
+        )
+
+        new_record.save()
+        return new_record
 
 
 class CollectionSerializer(serializers.Serializer):
@@ -89,7 +150,7 @@ class CollectionSerializer(serializers.Serializer):
     description = serializers.CharField(required=False, max_length=255)
     badges = serializers.ListField(
         required=False, child=EarnerBadgeReferenceSerializer(),
-        source='instances.all'
+        source='storedbadgeinstancecollection_set.all'
     )
 
     def create(self, validated_data):

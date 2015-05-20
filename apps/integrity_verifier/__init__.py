@@ -140,7 +140,7 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
                        == urlparse(self.issuer_url).netloc)
         if not same_domain:
             self.non_component_errors.append(
-                ('warning.domain', "Badge components don't share the same domain."))
+                ['warning.domain', "Badge components don't share the same domain."])
 
         local_platform = (urlparse(self.issuer_url).netloc
                           == urlparse(self.issuer.get('url')).netloc)
@@ -159,13 +159,13 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
                           == urlparse(self.instance_url).netloc)
 
         if not local_platform:
-            self.non_component_errors.append((
+            self.non_component_errors.append([
                 'warning.platform',
                 "Badge was issued from a platform ("
                 + urlparse(self.issuer_origin).netloc
                 + ") separate from the issuer's domain ("
                 + urlparse(self.instance_url).netloc + ")."
-            ))
+            ])
 
     def check_recipient(self, recipient_ids):
         """
@@ -187,11 +187,11 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
                 self.recipient_id = identifier
                 break
         else:
-            self.non_component_errors.append((
+            self.non_component_errors.append([
                 'error.recipient',
                 'Recipient id "%s" did not match badge contents: "%s"'
                 % (str(recipient_ids), hash_string)
-            ))
+            ])
 
     def check_version_continuity(self):
         """
@@ -199,12 +199,12 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
         """
         try:
             if not (self.badge.version == self.issuer.version == self.version):
-                self.non_component_errors.append((
+                self.non_component_errors.append([
                     'warning.version',
                     "Components assembled with different specification versions."
                     + " Assertion: " + self.version + ", BadgeClass: "
                     + self.badge.version + ", Issuer: " + self.issuer.version
-                ))
+                ])
         except (TypeError, AttributeError):
             pass
 
@@ -228,12 +228,12 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
                 pass
             else:
                 if component is not None and component.version is None:
-                    errors += [(
+                    errors += [[
                         'error.version_detection',
                         'Could not determine Open Badges version of %s'
                         % component_type,
                         component.version_errors
-                    )]
+                    ]]
 
         return errors
 

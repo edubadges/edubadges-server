@@ -49,3 +49,7 @@ class TestSuccessfulBadgeUploads(APITestCase):
             'http://a.com/instance'
         )
         self.assertEqual(get_response.data[0].get('errors'), [])
+
+
+class TestCollectionOperations(APITestCase):
+    pass
