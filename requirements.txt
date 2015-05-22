@@ -11,7 +11,9 @@ git+https://github.com/concentricsky/jingo.git@v0.4
 MySQL-python==1.2.5
 # Email support
 boto==2.33.0
+django-boto==0.3.9
 django-ses==0.6.0
+django-storages==1.1.8
 # CSky models
 git+https://github.com/concentricsky/django-cachemodel.git@v2.0.0
 git+https://github.com/concentricsky/django-basic-models.git@v2.1.0

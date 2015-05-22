@@ -9,7 +9,7 @@ admin.autodiscover()
 # make sure that any view/model/form imports occur AFTER admin.autodiscover
 
 from django.views.generic.base import RedirectView
-from mainsite.views import Error404, Error500, SitemapView
+from mainsite.views import Error404, Error500, SitemapView, info_view
 
 TOKEN_REGEX = '(?P<uidb36>[0-9A-Za-z]{1,13})-(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})'
 
@@ -23,7 +23,7 @@ urlpatterns = patterns('',
     url(r'^robots\.txt$', RedirectView.as_view(url='%srobots.txt' % settings.STATIC_URL)),
 
     # Home
-    url(r'^$', RedirectView.as_view(url='/login', permanent=False), name='index'),
+    url(r'^$', info_view, name='index'),
 
     # Sitemaps
     url(r'^sitemap$', SitemapView.as_view(), name='sitemap'),

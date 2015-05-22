@@ -39,7 +39,11 @@ CACHES = {
 
 HTTP_ORIGIN = 'http://localhost:8000'
 
+# Optionally restrict issuer creation to accounts that have the 'issuer.add_issuer' permission
 BADGR_APPROVED_ISSUERS_ONLY = True
+
+# If you have an informational front page outside the Django site that can link back to '/login', specify it here 
+ROOT_INFO_REDIRECT = '/login'
 
 # For the browsable API documentation at '/docs'
 # For local development environment: When you have a user you'd like to make API requests, 
