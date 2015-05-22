@@ -1,9 +1,11 @@
 var Dispatcher = require('../dispatcher/appDispatcher');
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
+var APIStore = require('../stores/APIStore');
 
 var ActiveActions = require('../actions/activeActions');
 var MenuStore = assign({}, EventEmitter.prototype);
+
  
 
 // TODO Replace with data entered into the Dispatcher on page load
@@ -48,18 +50,6 @@ MenuStore.defaultItems = {
         }
       ],
       issuerMain: [
-        {
-          title: "New Issuer",
-          buttonType: "primary",
-          icon: "fa-pencil-square-o",
-          activePanelCommand: { type: "IssuerCreateUpdateForm", content: {}}
-        } // },
-        // {
-        //   title: "Notify Earners",
-        //   buttonType: "default",
-        //   icon: "fa-envelope",
-        //   activePanelCommand: { type: "IssuerNotificationForm", content: {}}
-        // }
       ],
       issuerDetail: [
         {
@@ -87,6 +77,18 @@ MenuStore.defaultItems = {
       ]
   }
 };
+
+user = APIStore.getCollection('user');
+if (user.approvedIssuer){
+  MenuStore.defaultItems.issuerMain = [
+    {
+      title: "New Issuer",
+      buttonType: "primary",
+      icon: "fa-pencil-square-o",
+      activePanelCommand: { type: "IssuerCreateUpdateForm", content: {}}
+    }
+  ];
+}
 
 MenuStore.menus = {
   topMenu: MenuStore.defaultItems.topMenu,

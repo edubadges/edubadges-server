@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 
@@ -112,6 +113,13 @@ class IssuerList(AbstractIssuerAPIEndpoint):
               type: file
               paramType: form
         """
+        if getattr(settings, 'BADGR_APPROVED_ISSUERS_ONLY', False) \
+                and not request.user.has_perm('issuer.add_issuer'):
+            return Response(
+                "User not in an approved issuers group",
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         serializer = IssuerSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 

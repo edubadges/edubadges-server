@@ -175,8 +175,7 @@ class BadgeInstance(Component):
         html_output_message = html_template.render(email_context)
         mail_meta = {
             'subject': 'Congratulations, you earned a badge!',
-            # 'from_address': email_context['issuer_name'] + ' Badges <noreply@oregonbadgealliance.org>',
-            'from_address': 'Oregon Badge Alliance' + ' Badges <noreply@oregonbadgealliance.org>',
+            'from_address': email_context['issuer_name'] + '<' + getattr(settings, 'DEFAULT_FROM_EMAIL') + '>',
             'to_addresses': [self.email]
         }
 
