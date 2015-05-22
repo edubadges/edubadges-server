@@ -44,6 +44,8 @@ INSTALLED_APPS = [
 
     'mainsite',
     'issuer',
+    'composer',
+    'credential_store'
 ]
 
 MIDDLEWARE_CLASSES = [

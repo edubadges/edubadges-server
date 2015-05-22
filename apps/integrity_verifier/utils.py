@@ -52,3 +52,11 @@ def verify_hash(identity_string, hash_string, salt=''):
         return hash_string == 'md5$' + hashlib.md5(identity_string+salt).hexdigest()
     else:
         return hash_string == identity_string
+
+
+class ObjectView(object):
+    def __init__(self, d):
+        self.__dict__ = d
+
+    def __unicode__(self):
+        return str(self.__dict__)

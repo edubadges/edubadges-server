@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
@@ -30,6 +32,12 @@ class UserProfileField(serializers.Serializer):
             'username': obj.username,
             'earnerIds': addresses
         }
+
+        if getattr(settings, 'BADGR_APPROVED_ISSUERS_ONLY', False):
+            profile['approvedIssuer'] = obj.has_perm('issuer.add_issuer')
+        else:
+            profile['approvedIssuer'] = True
+
         return profile
 
 
