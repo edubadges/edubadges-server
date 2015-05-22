@@ -4,40 +4,67 @@ import re
 from django.utils.dateparse import parse_datetime, parse_date
 
 from rest_framework import serializers
+from rest_framework.fields import SkipField
 
 
-class BadgeURLField(serializers.URLField):
+class BadgePotentiallyEmptyField(serializers.Field):
+    def get_attribute(self, instance):
+        value = serializers.Field.get_attribute(self, instance)
+
+        if value == '' or value is None or value == {}:
+            if not self.required or not self.allow_blank:
+                raise SkipField()
+        return value
+
+    def validate_empty_values(self, data):
+        """
+        If an empty value (empty string, null) exists in an optional
+        field, SkipField.
+        """
+        (is_empty_value, data) = serializers.Field.validate_empty_values(self, data)
+
+        if is_empty_value or data == '':
+            if self.required:
+                self.fail('required')
+            raise SkipField()
+
+        return (False, data)
+
+
+class BadgeCharField(object):
+    def run_validation(self, data):
+        # Reject empty strings only if field is required.
+        # Otherwise SkipField on encountering an empty string.
+        if data == '':
+            if not self.allow_blank and not self.required:
+                raise SkipField()
+            elif not self.allow_blank:
+                self.fail('blank')
+            return ''
+        return super(serializers.CharField, self).run_validation(data)
+
+
+class BadgeURLField(BadgePotentiallyEmptyField, BadgeCharField, serializers.URLField):
     def to_representation(self, value):
-        return {
-            'type': 'id',
-            'id': value
-        }
+        return value
 
 
-class BadgeImageURLField(serializers.URLField):
+class BadgeImageURLField(BadgePotentiallyEmptyField, BadgeCharField, serializers.URLField):
     def to_representation(self, value):
-        return {
-            'type': 'image',
-            'id': value
-        }
+        return value
 
 
-class BadgeStringField(serializers.CharField):
+class BadgeStringField(BadgePotentiallyEmptyField, BadgeCharField, serializers.CharField):
     def to_representation(self, value):
-        return {
-            'type': 'xsd:string',
-            '@value': value
-        }
+        return value
 
-class BadgeEmailField(serializers.EmailField):
+
+class BadgeEmailField(BadgePotentiallyEmptyField, BadgeCharField, serializers.EmailField):
     def to_representation(self, value):
-        return {
-            'type': 'email',
-            '@value': value
-        }
+        return value
 
 
-class BadgeDateTimeField(serializers.Field):
+class BadgeDateTimeField(BadgePotentiallyEmptyField, serializers.Field):
 
     default_error_messages = {
         'not_int_or_str': 'Invalid format. Expected an int or str.',
@@ -75,13 +102,10 @@ class BadgeDateTimeField(serializers.Field):
         else:
             value = string_value
 
-        return {
-            'type': 'xsd:dateTime',
-            '@value': value.isoformat()
-        }
+        return value.isoformat()
 
 
-class HashString(serializers.Field):
+class HashString(BadgePotentiallyEmptyField, serializers.Field):
     """
     A representation of a badge recipient identifier that indicates a hashing
     algorithm and hashed value.
@@ -106,7 +130,7 @@ class HashString(serializers.Field):
         return data
 
 
-class AlignmentObjectSerializer(serializers.Serializer):
+class AlignmentObjectSerializer(BadgePotentiallyEmptyField, serializers.Serializer):
     """
     A small JSON object literal describing a BadgeClass's alignment to
     a particular standard or competency map URL.
@@ -131,8 +155,8 @@ class RecipientSerializer(serializers.Serializer):
 
     def to_representation(self, value):
         return {
-            'type': 'xsd:string',
-            '@value': self.context.get('recipient_id')
+            'type': self.context.get('type', 'email'),
+            'recipient': self.context.get('recipient_id')
         }
 
 

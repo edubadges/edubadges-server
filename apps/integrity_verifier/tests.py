@@ -28,6 +28,15 @@ def setup_minimal():
     )
 
 
+def setup_1_0_extra_property():
+    setup_minimal()
+    responses.add(
+        responses.GET, 'http://a.com/instance3',
+        body=test_components['1_0_basic_instance_with_extra_properties'],
+        status=200, content_type='application/json'
+    )
+
+
 def setup_bad_version():
     responses.add(
         responses.GET, 'http://a.com/instance2',
@@ -97,11 +106,23 @@ class InstanceVerificationTests(TestCase):
     @responses.activate
     def test_0_5_1_ok(self):
         setup_0_5_1_ok()
-
         rbi = RemoteBadgeInstance('http://oldstyle.com/instance4')
         abi = AnalyzedBadgeInstance(rbi, recipient_id='test@example.com')
 
         self.assertEqual(abi.version, 'v0.5.1')
+        self.assertEqual(len(abi.all_errors()), 0)
+        self.assertEqual(
+            abi.data.get('badge').get('issuer').get('name'), 'Basic Issuer'
+        )
+
+    @responses.activate
+    def test_1_0_extra_properties(self):
+        setup_1_0_extra_property()
+
+        rbi = RemoteBadgeInstance('http://a.com/instance3')
+        abi = AnalyzedBadgeInstance(rbi, recipient_id='test@example.com')
+
+        self.assertEqual(abi.version, 'v1.0')
         self.assertEqual(len(abi.all_errors()), 0)
 
 

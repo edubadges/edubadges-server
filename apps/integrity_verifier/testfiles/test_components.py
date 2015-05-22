@@ -55,5 +55,13 @@ test_components = {
             "name": "Basic Issuer"
         }
     }
-    }"""
+    }""",
+'1_0_basic_instance_with_extra_properties': """{
+    "uid":"123abc",
+    "recipient": {"identity": "test@example.com","hashed": false, "type": "email"},
+    "badge": "http://a.com/badgeclass",
+    "issuedOn": "2015-04-30",
+    "verify": {"type": "hosted", "url": "http://a.com/instance3"},
+    "snood":"a very fun video game"
+    }""",
 }

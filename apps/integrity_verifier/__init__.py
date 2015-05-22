@@ -116,10 +116,12 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
     def evaluate_version(self, component):
         component.version = None
         for version in component.versions:
+
             SerializerClass = getattr(serializers, version)
             serializer = SerializerClass(
                 data=component.data,
-                context={'recipient_id': self.recipient_id})
+                context={'recipient_id': self.recipient_id}
+            )
 
             if not serializer.is_valid():
                 component.version_errors[version] = serializer.errors
@@ -145,13 +147,13 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
         local_platform = (urlparse(self.issuer_url).netloc
                           == urlparse(self.issuer.get('url')).netloc)
         if not local_platform:
-            self.non_component_errors.append((
+            self.non_component_errors.append([
                 'warning.platform',
                 "Badge was issued from a platform ("
                 + urlparse(self.issuer_url).netloc
                 + ") separate from the issuer's domain ("
                 + urlparse(self.issuer.get('url')).netloc + ")."
-            ))
+            ])
 
     def check_origin_0_5(self):
         issuer_origin = self.json.get('badge', {}).get('issuer', {}).get('origin', '')
@@ -207,7 +209,6 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
                 ])
         except (TypeError, AttributeError):
             pass
-
 
     def is_valid(self):
         """

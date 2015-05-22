@@ -7,6 +7,7 @@ from rest_framework import serializers
 from integrity_verifier import RemoteBadgeInstance, AnalyzedBadgeInstance
 from integrity_verifier.utils import get_instance_url_from_image, get_instance_url_from_assertion
 from credential_store.models import StoredBadgeInstance
+from credential_store.format import V1InstanceSerializer
 
 from .models import Collection, StoredBadgeInstanceCollection
 
@@ -24,7 +25,7 @@ class EarnerBadgeSerializer(serializers.Serializer):
     url = serializers.URLField(required=False, write_only=True)
     image = serializers.ImageField(required=False, write_only=True)
 
-    json = serializers.DictField(read_only=True)
+    json = V1InstanceSerializer(read_only=True)
     errors = serializers.ListField(read_only=True)
 
     def validate(self, data):
