@@ -28,6 +28,12 @@ class EarnerBadgeSerializer(serializers.Serializer):
     json = V1InstanceSerializer(read_only=True)
     errors = serializers.ListField(read_only=True)
 
+    def to_representation(self, obj):
+        import pdb; pdb.set_trace();
+        if self.context.get('format', 'v1') == 'plain':
+            self.fields.json = serializers.DictField(read_only=True)
+        return super(EarnerBadgeSerializer, self).to_representation(obj)
+
     def validate(self, data):
         # Remove empty DictField
         if data.get('assertion') == {}:
