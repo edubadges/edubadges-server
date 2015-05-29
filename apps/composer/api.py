@@ -26,7 +26,6 @@ class EarnerBadgeList(APIView):
         serializer: EarnerBadgeSerializer
         """
         user_badges = self.queryset.filter(recipient_user=request.user)
-        import pdb; pdb.set_trace();
         serializer = EarnerBadgeSerializer(
             user_badges, many=True, context={
                 'request': request,

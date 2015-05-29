@@ -29,7 +29,6 @@ class EarnerBadgeSerializer(serializers.Serializer):
     errors = serializers.ListField(read_only=True)
 
     def to_representation(self, obj):
-        import pdb; pdb.set_trace();
         if self.context.get('format', 'v1') == 'plain':
             self.fields.json = serializers.DictField(read_only=True)
         return super(EarnerBadgeSerializer, self).to_representation(obj)
