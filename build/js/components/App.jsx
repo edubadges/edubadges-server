@@ -273,8 +273,14 @@ var App = React.createClass({
     var viewId = "earnerBadges";
     dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
 
+    var breadCrumbs = [
+      { name: "Earner Home", url: '/earner'},
+      { name: "My Badges", url: '/earner/badges' }
+    ];
+
     var mainComponent = (
       <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet} >
+        <BreadCrumbs items={breadCrumbs} />
         <ActionBar 
           title="My Badges"
           titleLink="/earner/badges"
