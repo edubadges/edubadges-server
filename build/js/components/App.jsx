@@ -3,6 +3,7 @@ var RouterMixin = require('react-mini-router').RouterMixin;
 var navigate = require('react-mini-router').navigate;
 var assign = require('object-assign');
 var urllite = require('urllite/lib/core');
+var _ = require('underscore');
 
 // Stores
 var RouteStore = require('../stores/RouteStore');
@@ -29,6 +30,8 @@ var IssuerDisplay = require('../components/IssuerDisplay.jsx').IssuerDisplay;
 var BadgeClassDetail = require('../components/BadgeClassDisplay.jsx').BadgeClassDetail;
 var BadgeInstanceList = require('../components/BadgeInstanceDisplay.jsx').BadgeInstanceList
 var EarnerBadgeList = require('../components/EarnerBadgeList.jsx');
+var EarnerCollectionList = require('../components/EarnerBadgeCollection.jsx').EarnerCollectionList;
+var EarnerCollection = require('../components/EarnerBadgeCollection.jsx').EarnerCollection;
 var ConsumerBadgeList = require('../components/ConsumerBadgeList.jsx');
 
 // Actions
@@ -45,16 +48,28 @@ var App = React.createClass({
   routes: {
     '/': 'home',
     '/earner': 'earnerMain',
+    '/earner/badges': 'earnerBadges',
+    '/earner/badges/:badgeId': 'earnerBadgeDetail',
+    '/earner/collections': 'earnerCollections',
+    '/earner/collections/:collectionSlug': 'earnerCollectionDetail',
     '/issuer': 'issuerMain',
     '/issuer/issuers': 'issuerMain',
     '/issuer/issuers/:issuerSlug': 'issuerDetail',
     '/issuer/issuers/:issuerSlug/badges/:badgeClassSlug': 'badgeClassDetail',
     '/explorer': 'consumerMain'
   },
+  dependencies: {
+    'earnerMain': ['earner_badges', 'earner_collections'],
+    'issuerMain': ['issuer_issuers', 'issuer_badgeclasses']
+  },
 
   // Route handling:
   handleRouteChange: function() {
     newRoute = RouteStore.getCurrentRoute();
+    if (newRoute.startsWith('/earner'))
+      this.handleDependencies(this.dependencies['earnerMain']);
+    else if (newRoute.startsWith('/issuer'))
+      this.handleDependencies(this.dependencies['issuerMain']);
     navigate(newRoute);
   },
 
@@ -63,8 +78,6 @@ var App = React.createClass({
     return {
       path: urllite(window.location.href).pathname + urllite(window.location.href).search,
       appTitle: 'Badgr Server',
-      roleMenu: MenuStore.getAllItems('roleMenu'),
-      actionMenu: MenuStore.getAllItems('topMenu'),
       actionBars: MenuStore.getAllItems('actionBars'),
       secondaryMenus: MenuStore.getAllItems('secondaryMenus')
     };
@@ -72,17 +85,16 @@ var App = React.createClass({
   getInitialState: function() {
     return {
       earnerBadges: [],
-      activePanels: ActiveActionStore.getAllActiveActions()
+      requestedCollections: [],
+      activePanels: ActiveActionStore.getAllActiveActions(),
+      roleMenu: MenuStore.getAllItems('roleMenu')
     };
   },
   componentWillMount: function() {
     LifeCycleActions.appWillMount();
   },
   componentDidMount: function() {
-    this.setState(
-      { earnerBadges: APIStore.getCollection('earnerBadges') }
-    );
-
+    MenuStore.addListener('INITIAL_DATA_LOADED', function(){ this.updateMenu('roleMenu');});
     MenuStore.addListener('UNCAUGHT_DOCUMENT_CLICK', this._hideMenu);
     RouteStore.addListener('ROUTE_CHANGED', this.handleRouteChange);
     APIStore.addListener('DATA_UPDATED', function(){
@@ -100,6 +112,13 @@ var App = React.createClass({
   _hideMenu: function(){
     if (this.state.activeTopMenu != null)
       this.setState({activeTopMenu: null});
+  },
+  updateMenu: function(key){
+    if (this.isMounted()){
+      var newState = {}
+      newState[key] = MenuStore.getAllItems(key);
+      this.setState(newState);
+    }
   },
 
   updateActivePanel: function(viewId, update){
@@ -124,29 +143,28 @@ var App = React.createClass({
     if (!(viewId in this.state.activePanels))
       return {};
 
-    var context;
+    var context = {};
     var badgeCollectionFor = { 'earnerHome': 'earnerBadges', 'consumerMain': 'consumerBadges' };
     var panel = this.state.activePanels[viewId];
 
-    if (panel.type == "EarnerBadgeForm") {
+    if (panel.type == "EarnerBadgeImportForm") {
       context = {
         recipientIds: UserStore.getProperty('earnerIds'),
         badgeId: panel.content.badgeId
       };
     }
-    else if (panel.type == "OpenBadgeDisplay") {
-      context = {
-        badgeId: panel.content.badgeId,
-        detailLevel: panel.content.detailLevel,
-        badge: APIStore.getFirstItemByPropertyValue(badgeCollectionFor[viewId], 'id', panel.content.badgeId)
-      };
-    
-    }
-    else if (panel.type == "IssuerNotificationForm") {
-      context = {
-      }
-    }
     return context;
+  },
+
+  handleDependencies: function(collectionKeys){
+    var collectionKeys;
+    var dependenciesMet = APIStore.collectionsExist(collectionKeys);
+    if (!dependenciesMet && this.state.requestedCollections.length == 0){
+      this.setState({requestedCollections: collectionKeys}, function(){
+        APIActions.APIFetchCollections(collectionKeys);
+      });
+    }
+    return dependenciesMet;
   },
 
 
@@ -165,12 +183,12 @@ var App = React.createClass({
             <nav className="navbar navbar-default navbar-static-top" role="navigation">
 
               <div className="navbar-header">
-                <a className="navbar-brand" href="/issuer"><img src="/static/images/header-logo-120.png" className="brand-logo" />
+                <a className="navbar-brand" href="/issuer">
                   <span>{ this.props.appTitle }</span>
                 </a>
                 <div className="navbar-right">
-                  <TopLinks items={this.props.roleMenu.items} setActive={function(key){}} active={null} showLabels={true} />
-                  <TopLinks items={this.props.actionMenu.items} setActive={this.setActiveTopMenu} active={this.state.activeTopMenu} showLabels={false} />
+                  <TopLinks items={MenuStore.getAllItems('roleMenu').items} setActive={function(key){}} active={null} showLabels={true} />
+                  <TopLinks items={MenuStore.getAllItems('topMenu').items} setActive={this.setActiveTopMenu} active={this.state.activeTopMenu} showLabels={true} />
                 </div>
               </div>  
             </nav>
@@ -196,20 +214,18 @@ var App = React.createClass({
   },
 
   earnerMain: function() {
-    var activeBadgeId = null;
     var viewId = 'earnerHome';
-    if (this.state.activePanels && viewId in this.state.activePanels && 'content' in this.state.activePanels[viewId]){
-      activeBadgeId = this.state.activePanels[viewId].content.badgeId;
-    }
+    dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
 
     var mainComponent = (
-      <MainComponent viewId={viewId}>
-        <SecondaryMenu viewId={viewId} items={this.props.secondaryMenus[viewId]} />
+      <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet}>
         <ActionBar 
           title="My Badges"
+          titleLink="/earner/badges"
           viewId={viewId}
-          items={this.props.actionBars[viewId]}
+          items={this.props.actionBars['earnerBadges']}
           updateActivePanel={this.updateActivePanel}
+          clearActivePanel={this.clearActivePanel}
           activePanel={this.state.activePanels[viewId]}
         />
         <ActivePanel
@@ -221,9 +237,159 @@ var App = React.createClass({
         />
         <EarnerBadgeList
           viewId={viewId}
-          earnerBadges={this.state.earnerBadges}
+          badges={APIStore.getCollection('earner_badges')}
+          perPage={12}
+          moreLink="/earner/badges"
+        />
+
+        <ActionBar 
+          title="My Collections"
+          titleLink="/earner/badges"
+          viewId={'earnerMainCollections'}
+          items={this.props.actionBars['earnerCollections']}
           updateActivePanel={this.updateActivePanel}
-          activeBadgeId={activeBadgeId}
+          clearActivePanel={this.clearActivePanel}
+          activePanel={this.state.activePanels['earnerMainCollections']}
+        />
+        <ActivePanel
+          viewId={'earnerMainCollections'}
+          {...this.state.activePanels['earnerMainCollections']}
+          updateActivePanel={this.updateActivePanel}
+          clearActivePanel={this.clearActivePanel}
+        />
+        <EarnerCollectionList
+          collections={APIStore.getCollection('earner_collections')}
+          perPage={12}
+        />
+      </MainComponent>
+    );
+
+    // render the view
+    return this.render_base(mainComponent);
+  },
+
+  earnerBadges: function(){
+    return this.render_base("");
+  },
+
+  earnerBadgeDetail: function(badgeId) {
+    var viewId = 'earnerBadgeDetail';
+    var badge = APIStore.getFirstItemByPropertyValue(
+      'earner_badges', 'id', badgeId
+    );
+
+    if (!badge)
+      return this.render_base("Badge not found!");
+
+
+
+    var breadCrumbs = [
+      { name: "Earner Home", url: '/earner'},
+      { name: "My Badges", url: '/earner/badges' },
+      { name: badge.json.badge.name['@value'], url: '/earner/badges/' + badgeId }
+    ];
+    var mainComponent = (
+      <MainComponent viewId={viewId}>
+        <BreadCrumbs items={breadCrumbs} />
+        <ActionBar 
+          title={badge.json.badge.name['@value']}
+          viewId={viewId}
+          items={this.props.actionBars[viewId] || []}
+          updateActivePanel={this.updateActivePanel}
+          activePanel={this.state.activePanels[viewId]}
+        />
+        <ActivePanel
+          viewId={viewId}
+          {...this.state.activePanels[viewId]}
+          {...this.contextPropsForActivePanel(viewId)}
+          updateActivePanel={this.updateActivePanel}
+          clearActivePanel={this.clearActivePanel}
+        />
+      </MainComponent>
+    );
+
+    // render the view
+    return this.render_base(mainComponent);
+  },
+
+  earnerCollections: function() {
+    var viewId = 'earnerCollections';
+    var breadCrumbs = [
+      { name: "Earner Home", url: '/earner'},
+      { name: "My Collections", url: '/earner/collections' }
+    ];
+
+    var mainComponent = (
+      <MainComponent viewId={viewId}>
+        <BreadCrumbs items={breadCrumbs} />
+        <ActionBar 
+          title="My Collections"
+          viewId={viewId}
+          items={this.props.actionBars[viewId] || []}
+          updateActivePanel={this.updateActivePanel}
+          activePanel={this.state.activePanels[viewId]}
+        />
+        <ActivePanel
+          viewId={viewId}
+          {...this.state.activePanels[viewId]}
+          {...this.contextPropsForActivePanel(viewId)}
+          updateActivePanel={this.updateActivePanel}
+          clearActivePanel={this.clearActivePanel}
+        />
+        <EarnerCollectionList
+          collections={APIStore.getCollection('earner_collections')}
+          perPage={50}
+        />
+      </MainComponent>
+    );
+
+    // render the view
+    return this.render_base(mainComponent);
+  },
+
+  earnerCollectionDetail: function(collectionSlug) {
+    var viewId = 'earnerCollectionDetail';
+
+    var collection = APIStore.getFirstItemByPropertyValue(
+      'earner_collections', 'slug', collectionSlug
+    );
+    if (!collection)
+      return this.render_base("Collection not found.");
+    badgesIndexList = _.pluck(collection.badges, 'id');
+    badgesInCollection = APIStore.filter(
+      'earner_badges', 'id', badgesIndexList
+    ); 
+
+    var breadCrumbs = [
+      { name: "Earner Home", url: '/earner'},
+      { name: "My Collections", url: '/earner/collections' },
+      { name: collection.name, url: '/earner/collections/' + collectionSlug }
+    ];
+
+    var mainComponent = (
+      <MainComponent viewId={viewId}>
+        <BreadCrumbs items={breadCrumbs} />
+        <ActionBar 
+          title={"Badges in " + collection.name}
+          viewId={viewId}
+          items={this.props.actionBars[viewId] || []}
+          updateActivePanel={this.updateActivePanel}
+          activePanel={this.state.activePanels[viewId]}
+        />
+        <ActivePanel
+          viewId={viewId}
+          {...this.state.activePanels[viewId]}
+          {...this.contextPropsForActivePanel(viewId)}
+          updateActivePanel={this.updateActivePanel}
+          clearActivePanel={this.clearActivePanel}
+        />
+        <EarnerCollection
+          name={collection.name}
+          slug={collection.slug}
+          clickable={false}
+          description={collection.description}
+          badgeList={badgesInCollection}
+          display="thumbnail"
         />
       </MainComponent>
     );
@@ -234,8 +400,10 @@ var App = React.createClass({
 
   issuerMain: function() {
     var viewId = "issuerMain";
+    dependenciesMet = APIStore.collectionsExist(this.dependencies['issuerMain']);
+
     var mainComponent = (
-      <MainComponent viewId={viewId}>
+      <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet}>
         <ActionBar
           title="My Issuers"
           viewId={viewId}
@@ -277,9 +445,6 @@ var App = React.createClass({
     var mainComponent = (
       <MainComponent viewId={viewId}>
         <BreadCrumbs items={breadCrumbs} />
-        <HeadingBar 
-          title={issuer.name}
-        />
         <IssuerDisplay {...issuer} />
         <ActionBar 
           title="Active Badges"
@@ -343,7 +508,6 @@ var App = React.createClass({
         <HeadingBar 
           title={issuer.name + ": " + badgeClass.name}
         />
-        <IssuerDisplay {...issuer} />
         <BadgeClassDetail {...badgeClass} />
         <ActionBar
           title={"Recipients (" + badgeInstanceDisplayLength + ")"}

@@ -1,3 +1,5 @@
+// var _ = require("underscore");
+
 var Dispatcher = require('../dispatcher/appDispatcher');
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
@@ -26,7 +28,16 @@ var APIStore = assign({}, EventEmitter.prototype);
 
 APIStore.data = {};
 APIStore.getRequests = [];
+APIStore.activeGetRequests = {};
 
+
+APIStore.collectionsExist = function(collections){
+  for (var index in collections){
+    if (!APIStore.data.hasOwnProperty(collections[index]))
+      return false;
+  }
+  return true;
+};
 APIStore.getCollection = function(collectionType) {
   if (APIStore.data.hasOwnProperty(collectionType))
     return APIStore.data[collectionType];
@@ -58,7 +69,10 @@ APIStore.filter = function(collectionType, propName, value){
   }
   var collection = APIStore.getCollection(collectionType);
   function match(el, index, collection){
-    return (el.hasOwnProperty(propName) && el[propName] == value);
+    if (Array.isArray(value))
+      return (el.hasOwnProperty(propName) && value.indexOf(el[propName]) > -1);
+    else
+      return (el.hasOwnProperty(propName) && el[propName] == value);
   }
 
   if (!!collection && collection.length > 0){
@@ -79,6 +93,11 @@ APIStore.hasAlreadyRequested = function(path){
   return (APIStore.getRequests.indexOf(path) > -1);
 };
 
+APIStore.resolveActiveGet = function(collectionKey){
+  if (APIStore.activeGetRequests.hasOwnProperty(collectionKey))
+    delete APIStore.activeGetRequests[collectionKey];
+};
+
 
 // listener utils
 APIStore.addListener = function(type, callback) {
@@ -97,12 +116,48 @@ APIStore.storeInitialData = function() {
   if (initialData) {
     // TODO: Add validation of types?
     _initialData = initialData
-    for (key in _initialData){
+    for (var key in _initialData){
       APIStore.data[key] = _initialData[key]
     }
   }
-}
+};
 
+
+APIStore.fetchCollections = function(collectionKeys){
+  var actionUrl, key;
+  contexts = {
+    earner_badges: {
+      actionUrl: '/v1/earner/badges',
+      successfulHttpStatus: [200],
+      apiCollectionKey: 'earner_badges'
+    },
+    earner_collections: {
+      actionUrl: '/v1/earner/collections',
+      successfulHttpStatus: [200],
+      apiCollectionKey: 'earner_collections'
+    },
+    issuer_issuers: {
+      actionUrl: '/v1/issuer/issuers',
+      successfulHttpStatus: [200],
+      apiCollectionKey: 'issuer_issuers'
+    },
+    issuer_badgeclasses: {
+      actionUrl: '/v1/issuer/all-badges',
+      successfulHttpStatus: [200],
+      apiCollectionKey: 'issuer_badgeclasses'
+    },
+  };
+  for (var index in collectionKeys){
+    key = collectionKeys[index];
+    if (!contexts.hasOwnProperty(key))
+      continue;
+    actionUrl = contexts[key].actionUrl;
+    if (APIStore.activeGetRequests.hasOwnProperty(key))
+      continue;
+    APIStore.activeGetRequests[actionUrl] = true;
+    APIStore.getData(contexts[key]);
+  }
+};
 
 /* getData(): a common function for GETting needed data from the API so
  * that views may be rendered.
@@ -121,6 +176,7 @@ APIStore.getData = function(context){
     .accept('application/json');
 
   req.end(function(error, response){
+    APIStore.resolveActiveGet(context.apiCollectionKey);
     console.log(response);
     if (error){
       console.log("THERE WAS SOME KIND OF API REQUEST ERROR.");
@@ -173,7 +229,7 @@ APIStore.postForm = function(fields, values, context){
   .accept('application/json');
 
   // Attach data fields to request
-  for (field in fields) {
+  for (var field in fields) {
     if (["text", "textarea", "select", "checkbox"].indexOf(fields[field].inputType) > -1 && values[field])
       req.field(field, values[field]);
     else if (["image", "file"].indexOf(fields[field].inputType) > -1 && typeof values[field])
@@ -245,6 +301,10 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
       APIStore.getData(action.apiContext);
       break;
 
+    case 'API_FETCH_COLLECTIONS':
+      APIStore.fetchCollections(action.collectionIds);
+      break;
+
     default:
       // do naaathing.
   }
@@ -254,8 +314,10 @@ module.exports = {
   addListener: APIStore.addListener,
   removeListener: APIStore.removeListener,
   hasAlreadyRequested: APIStore.hasAlreadyRequested,
+  collectionsExist: APIStore.collectionsExist,
   getCollection: APIStore.getCollection,
   getCollectionLastItem: APIStore.getCollectionLastItem,
   getFirstItemByPropertyValue: APIStore.getFirstItemByPropertyValue,
-  filter: APIStore.filter
+  filter: APIStore.filter,
+  fetchCollection: APIStore.fetchCollection
 }

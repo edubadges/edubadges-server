@@ -31,10 +31,17 @@ var APIGetResultFailure = function(data) {
     }});
 }
 
+var APIFetchCollections = function(collectionKeys) {
+  appDispatcher.dispatch({ action: {
+    type: 'API_FETCH_COLLECTIONS',
+    collectionIds: collectionKeys
+  }}); 
+}
 
 module.exports = {
   APIFormResultSuccess: APIFormResultSuccess,
   APIFormResultFailure: APIFormResultFailure,
   APIGetResultFailure: APIGetResultFailure,
-  APIGetData: APIGetData
+  APIGetData: APIGetData,
+  APIFetchCollections: APIFetchCollections
 }

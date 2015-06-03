@@ -8,7 +8,7 @@ var assign = require('object-assign');
 var UserStore = assign({}, EventEmitter.prototype);
 
 UserStore.data = {}
-PROFILE_KEYWORD = 'userProfile';
+PROFILE_KEYWORD = 'user';
 
 UserStore.getProperty = function(profileKey) {
   if (profileKey in UserStore.data)

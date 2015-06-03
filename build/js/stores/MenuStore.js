@@ -14,9 +14,10 @@ MenuStore.defaultItems = {
     items: [
       // { title: "messages", url: "#", icon: "fa-envelope", children: [] },
       // { title: "tasks", url: "#", icon: "fa-tasks", children: []},
-      { title: "alerts", url: "#", icon: "fa-bell", children: [] },
+      // { title: "alerts", url: "#", icon: "fa-bell", children: [] },
       { title: "user", url: "#", icon: "fa-user", children: [
         { title: "User Profile", url: "/accounts/", icon: "fa-user", children: [] },
+
         // { title: "Settings", url: "/#user/settings", icon: "fa-gear", children: [] },
         { title: "Log Out", url: "/logout", icon: "fa-sign-out", children: [] }
       ] }
@@ -27,9 +28,8 @@ MenuStore.defaultItems = {
   },
   secondaryMenus: {
       earnerHome: [
-        { title: "My Badges", url: "/earn", icon: "fa-certificate", children: [] },
-        { title: "My Collections", url: "/earn/collections", icon: "fa-folder-open", children: [] },
-        { title: "Discover Badges", url: "/earn/discover", icon: "fa-globe", children: [] }
+        { title: "My Badges", url: "/earner/badges", icon: "fa-certificate", children: [] },
+        { title: "My Collections", url: "/earner/collections", icon: "fa-folder-open", children: [] }
       ],
       issuerMain: [
         { title: "Issue Badges", url: "/issue/badges", icon: "fa-mail-forward", children: [] },
@@ -41,19 +41,27 @@ MenuStore.defaultItems = {
       ]
   },
   actionBars: {
-      earnerHome: [
+      earnerBadges: [
         { 
-          title: "Add Badge",
+          title: "Import Badge",
           buttonType: "primary",
           icon: "fa-certificate", 
-          activePanelCommand: { type: "EarnerBadgeForm", content: { badgeId: null } } 
+          activePanelCommand: { type: "EarnerBadgeImportForm", content: { badgeId: null } } 
+        }
+      ],
+      earnerCollections: [
+        { 
+          title: "Add Collection",
+          buttonType: "primary",
+          icon: "fa-folder-open", 
+          activePanelCommand: { type: "EarnerCollectionCreateForm", content: {} } 
         }
       ],
       issuerMain: [
       ],
       issuerDetail: [
         {
-          title: "New Badge",
+          title: "Add Badge",
           buttonType: "primary",
           icon: "fa-pencil-square-o",
           activePanelCommand: { type: "BadgeClassCreateUpdateForm", content: {}}
@@ -77,18 +85,6 @@ MenuStore.defaultItems = {
       ]
   }
 };
-
-user = APIStore.getCollection('user');
-if (user.approvedIssuer){
-  MenuStore.defaultItems.issuerMain = [
-    {
-      title: "New Issuer",
-      buttonType: "primary",
-      icon: "fa-pencil-square-o",
-      activePanelCommand: { type: "IssuerCreateUpdateForm", content: {}}
-    }
-  ];
-}
 
 MenuStore.menus = {
   topMenu: MenuStore.defaultItems.topMenu,
@@ -116,20 +112,40 @@ MenuStore.storeInitialData = function() {
     return;
 
   // try to load the variable declared as initialData in the view template
-  if ('issuer' in initialData)
+  if (initialData.installed_apps.indexOf('issuer') > -1)
     MenuStore.menus.roleMenu.items.push(
       { title: "Issue", url: "/issuer", icon: "fa-mail-forward", children: []}
     );
-
-  if ('earner' in initialData)
+  if (initialData.installed_apps.indexOf('composer') > -1)
     MenuStore.menus.roleMenu.items.push(
-      { title: "Earn", url: "/earn", icon: "fa-certificate", children: [] }
+      { title: "Earn", url: "/earner", icon: "fa-certificate", children: [] }
     );
-  if ('consumer' in initialData)
+  if (initialData.installed_apps.indexOf('consumer') > -1)
     MenuStore.menus.roleMenu.items.push(  
       { title: "Understand", url: "/understand", icon: "fa-info-circle", children: [] }
     );
+  if ('user' in initialData){
+    for (index in MenuStore.menus.topMenu.items){
+      item = MenuStore.menus.topMenu.items[index];
+      if (item.title = 'user')
+        item['title'] = initialData.user.username
+      break;
+    }
+
+  }
+
+  if ('user' in initialData && initialData.user.approvedIssuer){
+    MenuStore.menus.actionBars.issuerMain = [
+      {
+        title: "Add Issuer",
+        buttonType: "primary",
+        icon: "fa-pencil-square-o",
+        activePanelCommand: { type: "IssuerCreateUpdateForm", content: {}}
+      }
+    ];
+  }
 }
+
 
 // Register with the dispatcher
 MenuStore.dispatchToken = appDispatcher.register(function(payload){

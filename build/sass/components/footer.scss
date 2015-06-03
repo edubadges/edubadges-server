@@ -1,7 +1,11 @@
+@import "../colors";
+
 .main-footer {
-  border-top: 1px solid #e7e7e7;
-  margin-top: 2em;
+  border-top: 1px solid $light;
+
   padding: 0.5em 15px;
+  color: $light;
+  a { color: $badgr-red; }
 }
 
 .footer-links {

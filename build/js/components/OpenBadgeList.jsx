@@ -5,36 +5,40 @@ var APIStore = require('../stores/APIStore');
 var OpenBadgeList = React.createClass({
   /*
   this.props.badgeList = [
-    { 
-      badge: {
-        full_badge_object: { assertion, badgeclass, issuerorg },
-        image, pk, recipient_input
-      }, 
-      earner: "username" 
-    }
+    {
+            "recipient_id": "nate@ottonomy.net",
+            "id": 8,
+            "json": {
+                "id": "https://app.achievery.com/badge-assertion/4613",
+                "type": "Assertion",
+                "uid": {
+                    "type": "xsd:string",
+                    "@value": "4613"
+                },
+                ...
+            },
+            "errors": []
+        }
+    ],
   ]
   */
   getDefaultProps: function() {
     return {
-      badgeList: [],
-      activeBadgeId: null
+      badges: []
     };
   },
   render: function(){  
-    var activeBadge = "";
 
-    var badgesInList = this.props.badgeList.map(function(item, i){
+    //var badgesInList = this.props.badgeList.map(function(item, i){
+    var badgesInList = this.props.badges.map(function(item, i){
       return (
         <OpenBadge 
-          key={"key-" + item.badge.pk}
-          id={item.id}
-          pk={item.badge.pk}
+          key={"key-" + item['id']}
+          id={item['id']}
           display="thumbnail"
-          image={ item.badge.image }
-          badge={ item.badge.full_badge_object }
-          earner={ item.badge.recipient_input }
-          setActiveBadgeId={ this.props.setActiveBadgeId }
-          isActive={ (this.props.activeBadgeId ==item.id) }
+          json={item['json']}
+          recipientId={item['recipient_id']}
+          errors={item['errors']}
         />
       );
     }.bind(this));

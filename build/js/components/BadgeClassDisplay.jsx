@@ -24,10 +24,10 @@ BadgeClassDetail = React.createClass({
   },
   render: function() {
     var properties = {
-      image: {type: 'image', text: this.props.name + ' logo', href: this.props.image},
-      name: {type: 'text', text: this.props.name},
-      criteria: {type: 'link', href: this.props.json.criteria},
-      description: {type: 'text', text: this.props.json.description}
+      image: {type: 'image', name: this.props.name + ' logo', id: this.props.image},
+      name: {type: 'xsd:string', '@value': this.props.name},
+      criteria: {type: 'id', id: this.props.json.criteria},
+      description: {type: 'xsd:string', '@value': this.props.json.description}
     }
 
     return (
@@ -40,8 +40,8 @@ BadgeClassDetail = React.createClass({
         </div>
         <div className='property-group details col-xs-9'>
           <Property name="Name" property={properties.name} />
-          <Property name="Criteria" label={false} property={properties.criteria} />
-          <Property name="Description" label={false} property={properties.description} />
+          <Property name="Criteria" label={true} property={properties.criteria} />
+          <Property name="Description" label={true} property={properties.description} />
         </div>
       </div>
     );

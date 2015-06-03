@@ -8,25 +8,25 @@ var OpenBadgeList = require('./OpenBadgeList.jsx');
   within an activePanel through a passed in setter.
 */
 var EarnerBadgeList = React.createClass({
-  setActiveBadgeId: function(id){
-    this.props.updateActivePanel(
-      this.props.viewId,
-      { type: "OpenBadgeDisplay", content: { badgeId: id, detailLevel: 'detail' }}
-    );
-  },
-  activateUploadForm: function(){
-    actionCreator.updateActiveAction(
-      this.props.viewId,
-      { type: "EarnerBadgeForm", content: { badgeId: null } }
-    );
-  },
-  clearActiveAction: function(){
-    actionCreator.clearActiveAction(this.props.viewId);
-  },
   render: function() {
+    var badges, moreLink;
+    if (this.props.perPage && this.props.badges.length > this.props.perPage){
+      badges = this.props.badges.slice(0, this.props.perPage);
+      moreLink = (<div className="more-link">
+        (<a href={this.props.moreLink}>
+          {this.props.badges.length - this.props.perPage} more...
+        </a>)
+      </div>);
+    }
+    else {
+      badges = this.props.badges;
+      moreLink = "";
+    }
+
     return (
       <div className="earner-badges-list">
-        <OpenBadgeList badgeList={this.props.earnerBadges} activeBadgeId={this.props.activeBadgeId} setActiveBadgeId={this.setActiveBadgeId} />
+        <OpenBadgeList badges={badges} />
+        {moreLink}
       </div>
     );
   }

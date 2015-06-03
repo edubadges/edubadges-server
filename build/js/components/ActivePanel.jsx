@@ -196,6 +196,84 @@ var ActivePanel = React.createClass({
       );
     }
 
+    else if (this.props.type == "EarnerBadgeImportForm"){
+      var formProps = {
+        formId: this.props.type,
+        fieldsMeta: {
+          image: {inputType: "image", label: "Badge Image", required: false},
+          url: {inputType: "text", label: "Assertion URL", required: false},
+          assertion: {inputType: "text", label: "Assertion URL", required: false}
+        },
+        defaultValues: {
+          image: null,
+          imageData: null,
+          url: "",
+          assertion: "",
+          actionState: "ready",
+          message: ""
+        },
+        columns: [
+          { fields: ['image'], className:'col-xs-5 col-sm-4 col-md-3' },
+          { fields: ['url', 'assertion'], className:'col-xs-7 col-sm-8 col-md-9' }
+        ],
+        apiContext: {
+          formId: this.props.type,
+          apiCollectionKey: "earner_badges",
+          actionUrl: "/v1/earner/badges",
+          method: "POST",
+          successHttpStatus: [200, 201],
+          successMessage: "Badge successfully imported."
+        },
+        handleCloseForm: this.clearActivePanel
+      };
+      FormStore.getOrInitFormData(this.props.type, formProps);
+
+      return (
+        <div className="active-panel api-form image-upload-form clearfix">
+          <div className="container-fluid">
+            <BasicAPIForm {...formProps} />
+          </div>
+        </div>
+      );
+    }
+
+    else if (this.props.type == "EarnerCollectionCreateForm"){
+      var formProps = {
+        formId: this.props.type,
+        fieldsMeta: {
+          name: {inputType: "text", label: "Name", required: true},
+          description: {inputType: "textarea", label: "Description", required: false}
+        },
+        defaultValues: {
+          name: "",
+          description: "",
+          actionState: "ready",
+          message: ""
+        },
+        columns: [
+          { fields: ['name', 'description'], className:'col-xs-12' },
+        ],
+        apiContext: {
+          formId: this.props.type,
+          apiCollectionKey: "earner_collections",
+          actionUrl: "/v1/earner/collections",
+          method: "POST",
+          successHttpStatus: [200, 201],
+          successMessage: "Collection successfully created."
+        },
+        handleCloseForm: this.clearActivePanel
+      };
+      FormStore.getOrInitFormData(this.props.type, formProps);
+
+      return (
+        <div className="active-panel api-form image-upload-form clearfix">
+          <div className="container-fluid">
+            <BasicAPIForm {...formProps} />
+          </div>
+        </div>
+      );
+    }
+
     else if (this.props.type == "ConsumerBadgeForm"){
       defaultFormState = {
         recipient_input: ''

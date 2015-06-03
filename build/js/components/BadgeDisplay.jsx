@@ -1,21 +1,22 @@
 var React = require('react');
 
-var Property = React.createClass({
-  /* props = {
-    name: "Text",
-    label: true,
-    property: {
-      type: "link",
-      text "alt-text or link text",
-      href: "image or link URL"
-      }
-    }
+// Actions
+var navigateLocalPath = require('../actions/clicks').navigateLocalPath;
+
+
+var wrap_text_property = function(value){
+  return {
+    'type': 'xsd:string',
+    '@value': value
   }
-  */
+}
+
+var Property = React.createClass({
   REQUIRED_VALUES_FOR_TYPE: {
-    "text": ["text"],
-    "link": ["href"],
-    "image": ["text", "href"]
+    "xsd:string": ["@value"],
+    "id": ["id"],
+    "image": ["id"],
+    "email": ["@value"]
   },
   getDefaultProps: function() {
     return {
@@ -30,15 +31,16 @@ var Property = React.createClass({
   },
   renderPropertyValue: function(property){
     var KNOWN_TYPES = {
-      "text": this.renderStringValue,
-      "link": this.renderLinkValue,
+      "xsd:string": this.renderStringValue,
+      "id": this.renderLinkValue,
       "image": this.renderImageValue,
+      "email": this.renderEmailValue
     };
     return KNOWN_TYPES[property.type](property);
   },
   renderStringValue: function(property){
     return (
-      <span className={"propertyValue " + this.props.name}>{property.text}</span>
+      <span className={"propertyValue " + this.props.name}>{property['@value']}</span>
     );
   },
   renderLinkValue: function(value){
@@ -47,13 +49,23 @@ var Property = React.createClass({
 
     return (
         <span className={"propertyValue " + this.props.name}>
-          <a href={value.href} >{value.text || value.href }</a>
+          <a href={value.id} >{value.name || value.id }</a>
+        </span>
+      );
+  },
+  renderEmailValue: function(value){
+    // TODO: preventDefault() on thumbnail view
+    //if (!this.props.linksClickable)
+
+    return (
+        <span className={"propertyValue " + this.props.name}>
+          <a href={"mailto:" + value['@value']} >{value['@value']}</a>
         </span>
       );
   },
   renderImageValue: function(value){
     return (
-      <img className="propertyImage" src={value.href} alt={value.text} />
+      <img className="propertyImage" src={value.id} alt={value.name || this.props.name} />
     );
   },
   hasRequiredValues: function(){
@@ -116,18 +128,24 @@ var Extension = React.createClass({
 
 
 var BadgeDisplayThumbnail = React.createClass({
+  getDefaultProps: function() {
+    return {
+      json: {badge: {issuer:{}}}
+    };
+  },
   handleClick: function(){
-    this.props.setActiveBadgeId(this.props.id);
+    if (this.props.clickable)
+      navigateLocalPath(
+        this.props.targetUrl || '/earner/badges/' + this.props.id
+      );
   },
   render: function() {
     var className = 'badge-display badge-display-thumbnail col-xs-3 col-md-2 col-lg-2';
-    if (this.props.isActive)
-      className += ' badge-display-active';
     return (
       <div className={className} onClick={this.handleClick} >
-        <Property name='Badge Image' label={false} property={this.props.image} />
-        <Property name='Name' label={false} property={this.props.badgeclass.name} />
-        <Property name='Issuer' label={false} property={this.props.issuerorg} linksClickable={false}/>
+        <Property name='Badge Image' label={false} property={this.props.json.image} />
+        <Property name='Name' property={this.props.json.badge.name} />
+        <Property name='Issuer' property={this.props.json.badge.issuer.name} />
       </div>
     );
   }
@@ -135,31 +153,38 @@ var BadgeDisplayThumbnail = React.createClass({
 
 
 var BadgeDisplayDetail = React.createClass({
+  handleClick: function(){
+    if (this.props.clickable)
+      navigateLocalPath(
+        this.props.targetUrl || '/earner/badges/' + this.props.id
+      );
+  },
   render: function() {
     return (
-      <div className='badge-display badge-display-detail col-xs-12'>
+      <div className='badge-display badge-display-detail col-xs-12' onClick={this.handleClick} >
         <div className='row'>
 
           <div className='property-group image col-xs-4'>
-            <Property name='Badge Image' label={false} property={this.props.image} />
+            <Property name='Badge Image' label={false} property={this.props.json.image} />
           </div>
 
           <div className='col-xs-8'>
             <div className='property-group badgeclass'>
-              <Property name='Name' property={this.props.badgeclass.name} />
-              <Property name='Description' property={this.props.badgeclass.description} />
-              <Property name='Criteria' property={this.props.badgeclass.criteria} />
+              <Property name='Name' property={this.props.json.badge.name} />
+              <Property name='Description' property={this.props.json.badge.description} />
+              <Property name='Criteria' property={this.props.json.badge.criteria} />
             </div>
 
             <div className='property-group issuer'>
-              <Property name='Issuer' property={this.props.issuerorg} />
+              <Property name='Issuer' property={this.props.json.badge.issuer.name} />
+              <Property name='Website' label={false} property={this.props.json.badge.issuer.url} />
             </div>
 
             <div className='property-group assertion'>
-              <Property name='Issue Date' property={this.props.assertion.issuedOn} />
-              <Property name='Expiration Date' property={this.props.assertion.expires} />
-              <Property name='Evidence Link' property={this.props.assertion.evidence} />
-              <Property name='Recipient' property={this.props.recipientId} />
+              <Property name='Issue Date' property={this.props.json.issuedOn} />
+              <Property name='Expiration Date' property={this.props.json.expires} />
+              <Property name='Evidence Link' property={this.props.json.evidence} />
+              <Property name='Recipient' property={wrap_text_property(this.props.recipientId)} />
             </div>
           </div>
 
@@ -171,8 +196,14 @@ var BadgeDisplayDetail = React.createClass({
 
 
 var BadgeDisplayFull = React.createClass({
+  handleClick: function(){
+    if (this.props.clickable)
+      navigateLocalPath(
+        this.props.targetUrl || '/earner/badges/' + this.props.id
+      );
+  },
   render: function() {
-    var validations = this.props.validations.map(function(validation, index){
+    var errors = this.props.errors.map(function(validation, index){
       return (
         <BadgeValidationResult
           key={"valresult-" + index}
@@ -185,26 +216,27 @@ var BadgeDisplayFull = React.createClass({
     });
 
     return (
-      <div className='badge-display badge-display-full'>
+      <div className='badge-display badge-display-full' onClick={this.handleClick}>
         <div className='property-group image col-xs-4'>
-          <Property name='Badge Image' label={false} property={this.props.image} />
+          <Property name='Badge Image' label={false} property={this.props.json.image} />
         </div>
 
         <div className='property-group badgeclass'>
-          <Property name='Name' property={this.props.badgeclass.name} />
-          <Property name='Description' property={this.props.badgeclass.description} />
-          <Property name='Criteria' property={this.props.badgeclass.criteria} />
+          <Property name='Name' property={this.props.json.badge.name} />
+          <Property name='Description' property={this.props.json.badge.description} />
+          <Property name='Criteria' property={this.props.json.badge.criteria} />
         </div>
 
         <div className='property-group issuer'>
-          <Property name='Issuer' property={this.props.issuerorg} />
+          <Property name='Issuer' property={this.props.json.badge.issuer.name} />
+          <Property name='Website' label={false} property={this.props.json.badge.issuer.url} />
         </div>
 
         <div className='property-group assertion'>
-          <Property name='Issue Date' property={this.props.assertion.issuedOn} />
-          <Property name='Expiration Date' property={this.props.assertion.expires} />
-          <Property name='Evidence Link' property={this.props.assertion.evidence} />
-          <Property name='Recipient' property={this.props.recipientId} />
+          <Property name='Issue Date' property={this.props.json.issuedOn} />
+          <Property name='Expiration Date' property={this.props.json.expires} />
+          <Property name='Evidence Link' property={this.props.json.evidence} />
+          <Property name='Recipient' property={wrap_text_property(this.props.recipientId)} />
         </div>
 
         <div className='property-group validations'>
@@ -217,65 +249,39 @@ var BadgeDisplayFull = React.createClass({
 
 
 var OpenBadge = React.createClass({
-  /* props = {
-    display: "thumbnail" / "detail" / "full",
-    badge = {}
-  }
-  */
+  proptypes: {
+    id: React.PropTypes.number.isRequired,
+    display: React.PropTypes.string,
+    json: React.PropTypes.object.isRequired,
+    errors: React.PropTypes.array,
+    recipientId: React.PropTypes.string,
+    clickable: React.PropTypes.bool,
+    targetUrl: React.PropTypes.string
+  },
   getDefaultProps: function() {
     return {
-      display: 'thumbnail'
+      display: 'thumbnail',
+      errors: [],
+      clickable: true
     };
-  },
-
-  innerRender: function(){
-    switch(this.props.display){
-      case 'detail':
-        return ( <BadgeDisplayDetail image={this.props.image} pk={this.props.pk} {...this.props.badge } recipientId={this.props.recipientId} /> );
-        break;
-      case 'thumbnail': 
-        return ( <BadgeDisplayThumbnail image={this.props.image} id={this.props.id} pk={this.props.pk} isActive={this.props.isActive} setActiveBadgeId={this.props.setActiveBadgeId} {...this.props.badge } /> );
-        break;
-      default:  // 'full'
-        return ( <BadgeDisplayFull image={this.props.image} pk={this.props.pk} {...this.props.badge } validations={this.props.validations} recipientId={this.props.recipientId} /> );
-    }
   },
 
   render: function(){
-    return this.innerRender();
+    switch(this.props.display){
+      case 'detail':
+        return ( <BadgeDisplayDetail {...this.props} /> );
+        break;
+      case 'thumbnail': 
+        return ( <BadgeDisplayThumbnail {...this.props} /> );
+        break;
+      default:  // 'full'
+        return ( <BadgeDisplayFull {...this.props} /> );
+    }
   }
 });
 
-var EarnerBadge = React.createClass({
-  render: function() {
-    var earnerProperty = {
-      type: "text",
-      text: this.props.earner
-    };
-
-    var validations = null;
-    if(typeof this.props.badge.errors !== 'undefined' && typeof this.props.badge.notes !== 'undefined')
-      validations = this.props.badge.notes.concat(this.props.badge.errors); 
-    
-    return (
-      <div className="earner-badge-display">
-        <OpenBadge
-          display={this.props.display}
-          id={this.props.id}
-          badge={this.props.badge.full_badge_object}
-          validations={validations}
-          image={this.props.badge.image}
-          isActive={this.props.isActive}
-          setActiveBadgeId={this.props.setActiveBadgeId}
-          recipientId={earnerProperty}
-        />
-      </div>
-    );
-  }
-});
 
 // Export the Menu class for rendering:
 module.exports.OpenBadge = OpenBadge;
-module.exports.EarnerBadge = EarnerBadge;
 module.exports.Property = Property;
 
