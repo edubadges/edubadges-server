@@ -14,6 +14,7 @@ var wrap_text_property = function(value){
 var Property = React.createClass({
   REQUIRED_VALUES_FOR_TYPE: {
     "xsd:string": ["@value"],
+    "@id": ["id"],
     "id": ["id"],
     "image": ["id"],
     "email": ["@value"]
@@ -33,6 +34,7 @@ var Property = React.createClass({
     var KNOWN_TYPES = {
       "xsd:string": this.renderStringValue,
       "id": this.renderLinkValue,
+      "@id": this.renderLinkValue,
       "image": this.renderImageValue,
       "email": this.renderEmailValue
     };
@@ -240,7 +242,7 @@ var BadgeDisplayFull = React.createClass({
         </div>
 
         <div className='property-group validations'>
-          {validations}
+          {errors}
         </div>
       </div>
     )

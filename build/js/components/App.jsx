@@ -23,6 +23,7 @@ var ActionBar = require('../components/ActionBar.jsx').ActionBar;
 var HeadingBar = require('../components/ActionBar.jsx').HeadingBar;
 var ActivePanel = require('../components/ActivePanel.jsx');
 var OpenBadgeList = require('../components/OpenBadgeList.jsx');
+var OpenBadge = require('../components/BadgeDisplay.jsx').OpenBadge;
 var EarnerBadgeForm = require('../components/Form.jsx').EarnerBadgeForm;
 var IssuerNotificationForm = require('../components/Form.jsx').IssuerNotificationForm
 var IssuerList = require('../components/IssuerDisplay.jsx').IssuerList;
@@ -215,7 +216,7 @@ var App = React.createClass({
 
   earnerMain: function() {
     var viewId = 'earnerHome';
-    dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
+    var dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
 
     var mainComponent = (
       <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet}>
@@ -269,7 +270,37 @@ var App = React.createClass({
   },
 
   earnerBadges: function(){
-    return this.render_base("");
+    var viewId = "earnerBadges";
+    dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
+
+    var mainComponent = (
+      <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet} >
+        <ActionBar 
+          title="My Badges"
+          titleLink="/earner/badges"
+          viewId={viewId}
+          items={this.props.actionBars['earnerBadges']}
+          updateActivePanel={this.updateActivePanel}
+          clearActivePanel={this.clearActivePanel}
+          activePanel={this.state.activePanels[viewId]}
+        />
+        <ActivePanel
+          viewId={viewId}
+          {...this.state.activePanels[viewId]}
+          {...this.contextPropsForActivePanel(viewId)}
+          updateActivePanel={this.updateActivePanel}
+          clearActivePanel={this.clearActivePanel}
+        />
+        <EarnerBadgeList
+          viewId={viewId}
+          badges={APIStore.getCollection('earner_badges')}
+          perPage={50}
+          moreLink="/earner/badges"
+        />
+      </MainComponent>
+    );
+
+    return this.render_base(mainComponent);
   },
 
   earnerBadgeDetail: function(badgeId) {
@@ -280,8 +311,6 @@ var App = React.createClass({
 
     if (!badge)
       return this.render_base("Badge not found!");
-
-
 
     var breadCrumbs = [
       { name: "Earner Home", url: '/earner'},
@@ -304,6 +333,13 @@ var App = React.createClass({
           {...this.contextPropsForActivePanel(viewId)}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
+        />
+        <OpenBadge
+          id={badge.id}
+          display="full"
+          json={badge.json}
+          recipientId={badge.recipient_id}
+          errors={badge.errors}
         />
       </MainComponent>
     );
