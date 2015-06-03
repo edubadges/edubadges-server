@@ -1,3 +1,5 @@
+from itertools import chain
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q
@@ -261,6 +263,38 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
                 status=status.HTTP_200_OK)
 
         return Response(IssuerStaffSerializer(staff_instance).data)
+
+
+class AllBadgeClassesList(AbstractIssuerAPIEndpoint):
+    """
+    GET a list of badgeclasses within one issuer context or
+    POST to create a new badgeclass within the issuer context
+    """
+    queryset = Issuer.objects.all()
+    model = Issuer
+    permission_classes = (IsEditor,)
+
+    def get(self, request):
+        """
+        GET a list of badgeclasses within one Issuer context.
+        Authenticated user must have owner, editor, or staff status on Issuer
+        ---
+        serializer: BadgeClassSerializer
+        """
+        # Ensure current user has permissions on current issuer
+        user_issuers = Issuer.objects.filter(
+            Q(owner__id=request.user.id) |
+            Q(staff__id=request.user.id)
+        ).distinct().select_related('badgeclasses')
+        issuer_badgeclasses = [
+            bc for bc in chain.from_iterable(i.badgeclasses.all() 
+                for i in user_issuers)
+        ]
+
+        serializer = BadgeClassSerializer(
+            issuer_badgeclasses, many=True, context={'request': request}
+        )
+        return Response(serializer.data)
 
 
 class BadgeClassList(AbstractIssuerAPIEndpoint):

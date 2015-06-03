@@ -5,6 +5,7 @@ from django.db.models import Q
 from rest_framework import serializers
 
 from mainsite.serializers import WritableJSONField
+from mainsite.utils import installed_apps_list
 from badgeuser.serializers import UserProfileField
 
 from .models import Issuer, BadgeClass, BadgeInstance
@@ -233,5 +234,6 @@ class IssuerPortalSerializer(serializers.Serializer):
 
         view_data['issuer_issuers'] = issuer_data.data
         view_data['issuer_badgeclasses'] = badgeclass_data.data
+        view_data['installed_apps'] = installed_apps_list()
 
         return view_data
