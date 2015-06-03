@@ -5,7 +5,8 @@ from django.core.exceptions import ValidationError
 import cachemodel
 from jsonfield import JSONField
 
-from .utils import find_recipient_user
+from .utils import find_recipient_user, baked_image_from_abi
+
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
@@ -116,6 +117,7 @@ class StoredBadgeInstance(AbstractStoredComponent):
     recipient_id = models.CharField(max_length=1024, blank=False)
     badgeclass = models.ForeignKey(StoredBadgeClass, null=True)
     issuer = models.ForeignKey(StoredIssuer, null=True)
+    image = models.ImageField(upload_to='uploads/badges', null=True)
 
     @classmethod
     def from_analyzed_instance(cls, abi, **kwargs):
@@ -147,13 +149,33 @@ class StoredBadgeInstance(AbstractStoredComponent):
         new_instance.badgeclass = StoredBadgeClass.from_analyzed_instance(
             abi, **kwargs
         )
+        if kwargs.get('image') is not None:
+            new_instance.image = kwargs.get('image')
+        else:
+            new_instance.image = baked_image_from_abi(abi)
+
+        new_instance.json['image'] = new_instance.image_url()
 
         # StoredBadgeClass is responsible for detecting issuer
         if new_instance.badgeclass is not None:
             new_instance.issuer = new_instance.badgeclass.issuer
 
         new_instance.save()
+        if getattr(settings, 'HTTP_ORIGIN') + new_instance.image_url() != \
+                new_instance.json['image']:
+            new_instance.json['image'] = getattr(settings, 'HTTP_ORIGIN') + \
+                new_instance.image_url()
+            new_instance.save(update_fields=['image'])
+
         return new_instance
+
+    def image_url(self):
+        if self.pk:
+            return self.image.url
+        else:
+            return getattr(settings, 'HTTP_ORIGIN') \
+                + getattr(settings, 'MEDIA_URL') \
+                + 'uploads/badges/' + self.image.name
 
     @property
     def owner(self):

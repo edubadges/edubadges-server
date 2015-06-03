@@ -1,3 +1,5 @@
+from django.core.exceptions import ValidationError as DjangoValidationError
+
 from rest_framework import authentication, permissions, status, serializers
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.response import Response
@@ -58,11 +60,6 @@ class EarnerBadgeList(APIView):
               required: false
               type: string
               paramType: form
-            - name: image
-              description: A baked badge image PNG
-              required: false
-              type: file
-              paramType: form
         """
         serializer = EarnerBadgeSerializer(data=request.data, context={'request': request})
 
@@ -101,7 +98,10 @@ class EarnerBadgeDetail(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         serializer = EarnerBadgeSerializer(
-            user_badge, context={'request': request}
+            user_badge, context={
+                'request': request,
+                'format': request.query_params.get('json_format', 'v1')
+            }
         )
 
         return Response(serializer.data)
