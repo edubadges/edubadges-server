@@ -1,3 +1,6 @@
+import os
+import uuid
+
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -154,6 +157,9 @@ class StoredBadgeInstance(AbstractStoredComponent):
         else:
             new_instance.image = baked_image_from_abi(abi)
 
+        img_name, img_ext = os.path.splitext(new_instance.image.name)
+
+        new_instance.image.name = 'earned_badge_' + str(uuid.uuid4()) + img_ext
         new_instance.json['image'] = new_instance.image_url()
 
         # StoredBadgeClass is responsible for detecting issuer
