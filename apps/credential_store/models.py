@@ -172,9 +172,7 @@ class StoredBadgeInstance(AbstractStoredComponent):
         return new_instance
 
     def image_url(self):
-        if self.pk:
-            return self.image.url
-        elif getattr(settings, 'MEDIA_URL').startswith('http'):
+        if getattr(settings, 'MEDIA_URL').startswith('http'):
             return getattr(settings, 'MEDIA_URL') \
                 + 'uploads/badges/' + self.image.name
         else:
