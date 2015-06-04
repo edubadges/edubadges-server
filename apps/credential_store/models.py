@@ -165,7 +165,7 @@ class StoredBadgeInstance(AbstractStoredComponent):
                 new_instance.json['image']:
             new_instance.json['image'] = getattr(settings, 'HTTP_ORIGIN') + \
                 new_instance.image_url()
-            new_instance.save(update_fields=['image'])
+            new_instance.save(update_fields=['json'])
 
         return new_instance
 

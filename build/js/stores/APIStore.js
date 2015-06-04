@@ -129,22 +129,26 @@ APIStore.fetchCollections = function(collectionKeys){
     earner_badges: {
       actionUrl: '/v1/earner/badges',
       successfulHttpStatus: [200],
-      apiCollectionKey: 'earner_badges'
+      apiCollectionKey: 'earner_badges',
+      replaceCollection: true
     },
     earner_collections: {
       actionUrl: '/v1/earner/collections',
       successfulHttpStatus: [200],
-      apiCollectionKey: 'earner_collections'
+      apiCollectionKey: 'earner_collections',
+      replaceCollection: true
     },
     issuer_issuers: {
       actionUrl: '/v1/issuer/issuers',
       successfulHttpStatus: [200],
-      apiCollectionKey: 'issuer_issuers'
+      apiCollectionKey: 'issuer_issuers',
+      replaceCollection: true
     },
     issuer_badgeclasses: {
       actionUrl: '/v1/issuer/all-badges',
       successfulHttpStatus: [200],
-      apiCollectionKey: 'issuer_badgeclasses'
+      apiCollectionKey: 'issuer_badgeclasses',
+      replaceCollection: true
     },
   };
   for (var index in collectionKeys){
@@ -191,6 +195,10 @@ APIStore.getData = function(context){
       });
     }
     else {
+      if (!APIStore.collectionsExist(context.apiCollectionKey) || context['replaceCollection']){
+        APIStore.data[context.apiCollectionKey] = [];
+      }
+
       if (Array.isArray(response.body)){
         response.body.map(function(el, i, array){
           APIStore.addCollectionItem(context.apiCollectionKey, el);

@@ -229,6 +229,29 @@ class EarnerCollectionDetail(APIView):
         serializer = CollectionSerializer(collection)
         return Response(serializer.data)
 
+    def delete(self, request, slug):
+        """
+        Delete a collection
+        ---
+        parameters:
+            - name: slug
+              description: "The collection's slug identifier"
+              type: string
+              paramType: path
+        """
+        try:
+            user_collection = self.queryset.get(
+                recipient=request.user,
+                slug=slug
+            )
+        except (Collection.MultipleObjectsReturned,
+                Collection.DoesNotExist):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        else:
+            user_collection.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class EarnerCollectionBadgesList(APIView):
     """

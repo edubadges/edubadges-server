@@ -121,7 +121,7 @@ var ActivePanel = React.createClass({
           name: {inputType: "text", label: "Badge Name", required: true},
           description: {inputType: "textarea", label: "Badge Description", required: true},
           criteria: {inputType: "textarea", label: "Criteria URL or text", required: true},
-          image: {inputType: "image", label: "Badge Image", required: false, filename: "issuer_logo.png"}
+          image: {inputType: "image", label: "Badge Image", required: false, filename: "badge_image.png"}
         },
         defaultValues: {
           name: "",
@@ -200,7 +200,7 @@ var ActivePanel = React.createClass({
       var formProps = {
         formId: this.props.type,
         fieldsMeta: {
-          image: {inputType: "image", label: "Badge Image", required: false},
+          image: {inputType: "image", label: "Badge Image", required: false, filename: "earned_badge.png"},
           url: {inputType: "text", label: "Assertion URL", required: false},
           assertion: {inputType: "text", label: "Assertion URL", required: false}
         },
