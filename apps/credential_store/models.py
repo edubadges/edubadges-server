@@ -161,12 +161,10 @@ class StoredBadgeInstance(AbstractStoredComponent):
             new_instance.issuer = new_instance.badgeclass.issuer
 
         new_instance.save()
-        if getattr(settings, 'MEDIA_URL').startswith('http'):
-            eurl = new_instance.image_url()
-        else:
-            eurl = getattr(settings, 'HTTP_ORIGIN') + new_instance.image_url()
+
+        eurl = new_instance.image_url()
         if eurl != new_instance.json['image']:
-            new_instance.json['image'] = new_instance.image_url()
+            new_instance.json['image'] = eurl
             new_instance.save(update_fields=['json'])
 
         return new_instance
@@ -174,11 +172,11 @@ class StoredBadgeInstance(AbstractStoredComponent):
     def image_url(self):
         if getattr(settings, 'MEDIA_URL').startswith('http'):
             return getattr(settings, 'MEDIA_URL') \
-                + 'uploads/badges/' + self.image.name
+                + self.image.name
         else:
             return getattr(settings, 'HTTP_ORIGIN') \
                 + getattr(settings, 'MEDIA_URL') \
-                + 'uploads/badges/' + self.image.name
+                + self.image.name
 
     @property
     def owner(self):
