@@ -161,10 +161,12 @@ class StoredBadgeInstance(AbstractStoredComponent):
             new_instance.issuer = new_instance.badgeclass.issuer
 
         new_instance.save()
-        if getattr(settings, 'HTTP_ORIGIN') + new_instance.image_url() != \
-                new_instance.json['image']:
-            new_instance.json['image'] = getattr(settings, 'HTTP_ORIGIN') + \
-                new_instance.image_url()
+        if getattr(settings, 'MEDIA_URL').startswith('http'):
+            eurl = new_instance.image_url()
+        else:
+            eurl = getattr(settings, 'HTTP_ORIGIN') + new_instance.image_url()
+        if eurl != new_instance.json['image']:
+            new_instance.json['image'] = new_instance.image_url()
             new_instance.save(update_fields=['json'])
 
         return new_instance
