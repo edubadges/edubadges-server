@@ -38,10 +38,6 @@ class StoredBadgeInstanceCollection(models.Model):
     class Meta:
         unique_together = ('instance', 'collection')
 
-    @property
-    def owner(self):
-        return self.collection.owner
-
 
 class CollectionPermission(models.Model):
     viewer = models.ForeignKey(AUTH_USER_MODEL, null=False)
