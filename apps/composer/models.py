@@ -21,8 +21,8 @@ class Collection(cachemodel.CacheModel):
     instances = models.ManyToManyField(
         StoredBadgeInstance, through='StoredBadgeInstanceCollection'
     )
-    viewers = models.ManyToManyField(
-        AUTH_USER_MODEL, through='CollectionPermission', related_name='sharee'
+    shared_with = models.ManyToManyField(
+        AUTH_USER_MODEL, through='CollectionPermission', related_name='shared_with_me'
     )
 
     class Meta:
@@ -40,10 +40,10 @@ class StoredBadgeInstanceCollection(models.Model):
 
 
 class CollectionPermission(models.Model):
-    viewer = models.ForeignKey(AUTH_USER_MODEL, null=False)
+    user = models.ForeignKey(AUTH_USER_MODEL, null=False)
     collection = models.ForeignKey(Collection, null=False)
 
-    writeable = models.BooleanField(default=False)
+    can_write = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ('viewer', 'collection')
+        unique_together = ('user', 'collection')
