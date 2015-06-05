@@ -9,24 +9,15 @@ from credential_store.models import StoredBadgeInstance
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
-class AbstractEarnerObject(cachemodel.CacheModel):
-    recipient = models.ForeignKey(settings.AUTH_USER_MODEL, null=False)
-
-    class Meta:
-        abstract = True
-
-    @property
-    def owner(self):
-        return self.recipient
-
-
-class Collection(AbstractEarnerObject):
+class Collection(cachemodel.CacheModel):
     name = models.CharField(max_length=128)
     slug = AutoSlugField(
         max_length=128, populate_from='name',
         blank=False, editable=True
     )
     description = models.CharField(max_length=255, blank=True)
+
+    recipient = models.ForeignKey(settings.AUTH_USER_MODEL, null=False)
 
     instances = models.ManyToManyField(
         StoredBadgeInstance, through='StoredBadgeInstanceCollection'
@@ -37,6 +28,10 @@ class Collection(AbstractEarnerObject):
 
     class Meta:
         unique_together = (("recipient", "slug"),)
+
+    @property
+    def owner(self):
+        return self.recipient
 
 
 class StoredBadgeInstanceCollection(models.Model):
