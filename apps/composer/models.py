@@ -16,8 +16,7 @@ class Collection(cachemodel.CacheModel):
         blank=False, editable=True
     )
     description = models.CharField(max_length=255, blank=True)
-
-    recipient = models.ForeignKey(settings.AUTH_USER_MODEL, null=False)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=False)
 
     instances = models.ManyToManyField(
         StoredBadgeInstance, through='StoredBadgeInstanceCollection'
@@ -27,16 +26,13 @@ class Collection(cachemodel.CacheModel):
     )
 
     class Meta:
-        unique_together = (("recipient", "slug"),)
-
-    @property
-    def owner(self):
-        return self.recipient
+        unique_together = (("owner", "slug"),)
 
 
 class StoredBadgeInstanceCollection(models.Model):
     instance = models.ForeignKey(StoredBadgeInstance, null=False)
     collection = models.ForeignKey(Collection, null=False)
+
     description = models.TextField(blank=True)
 
     class Meta:
@@ -44,13 +40,14 @@ class StoredBadgeInstanceCollection(models.Model):
 
     @property
     def owner(self):
-        return self.collection.recipient
+        return self.collection.owner
 
 
 class CollectionPermission(models.Model):
-    collection = models.ForeignKey(Collection, null=False)
     viewer = models.ForeignKey(AUTH_USER_MODEL, null=False)
+    collection = models.ForeignKey(Collection, null=False)
+
     writeable = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ('collection', 'viewer')
+        unique_together = ('viewer', 'collection')
