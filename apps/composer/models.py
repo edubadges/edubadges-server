@@ -26,7 +26,7 @@ class Collection(cachemodel.CacheModel):
     )
 
     class Meta:
-        unique_together = (("owner", "slug"),)
+        unique_together = ('owner', 'slug')
 
 
 class StoredBadgeInstanceCollection(models.Model):
