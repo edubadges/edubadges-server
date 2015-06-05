@@ -3,6 +3,7 @@ import json
 import uuid
 
 from django.conf import settings
+from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -136,9 +137,10 @@ class BadgeInstance(Component):
 
             self.created_at = datetime.datetime.now()
             self.json['issuedOn'] = self.created_at.isoformat()
+            import pdb; pdb.set_trace();
 
-            with open(self.badgeclass.image.file.name) as imageFile:
-                self.image = bake(imageFile, json.dumps(self.json, indent=2))
+            imageFile = default_storage.open(self.badgeclass.image.file.name)
+            self.image = bake(imageFile, json.dumps(self.json, indent=2))
 
             self.image.open()
 
