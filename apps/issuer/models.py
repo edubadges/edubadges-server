@@ -137,7 +137,6 @@ class BadgeInstance(Component):
 
             self.created_at = datetime.datetime.now()
             self.json['issuedOn'] = self.created_at.isoformat()
-            import pdb; pdb.set_trace();
 
             imageFile = default_storage.open(self.badgeclass.image.file.name)
             self.image = bake(imageFile, json.dumps(self.json, indent=2))
