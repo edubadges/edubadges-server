@@ -328,7 +328,7 @@ class EarnerCollectionBadgesList(APIView):
               required: true
               paramType: body
         """
-        badges = request.data.get('badges')
+        badges = request.data
 
         try:
             collection = Collection.objects.get(
