@@ -140,7 +140,7 @@ class EarnerCollectionList(APIView):
         ---
         serializer: CollectionSerializer
         """
-        user_collections = self.queryset.filter(recipient=request.user)
+        user_collections = self.queryset.filter(owner=request.user)
 
         serializer = CollectionSerializer(
             user_collections, many=True, context={'request': request}
@@ -177,7 +177,7 @@ class EarnerCollectionDetail(APIView):
         """
         try:
             user_collection = self.queryset.get(
-                recipient=request.user,
+                owner=request.user,
                 slug=slug
             )
         except (Collection.MultipleObjectsReturned,
@@ -215,7 +215,7 @@ class EarnerCollectionDetail(APIView):
 
         try:
             collection = self.queryset.get(
-                recipient=request.user,
+                owner=request.user,
                 slug=slug
             )
         except Collection.DoesNotExist:
@@ -241,7 +241,7 @@ class EarnerCollectionDetail(APIView):
         """
         try:
             user_collection = self.queryset.get(
-                recipient=request.user,
+                owner=request.user,
                 slug=slug
             )
         except (Collection.MultipleObjectsReturned,
@@ -281,7 +281,7 @@ class EarnerCollectionBadgesList(APIView):
         """
         try:
             collection = Collection.objects.get(
-                recipient=request.user, slug=slug
+                owner=request.user, slug=slug
             )
         except (Collection.MultipleObjectsReturned,
                 Collection.DoesNotExist):
@@ -317,7 +317,6 @@ class EarnerCollectionBadgesList(APIView):
         user's existing badges. Cannot be used to add new badges to the
         user's account at this time.
         ---
-        serializer: EarnerBadgeReferenceSerializer
         parameters:
             - name: slug
               description: The collection's slug identifier
@@ -326,14 +325,14 @@ class EarnerCollectionBadgesList(APIView):
               paramType: path
             - name: badges
               description: A JSON serialization of all the badges to be included in this collection, replacing the list that currently exists.
-              required: false
-              paramType: form
+              required: true
+              paramType: body
         """
         badges = request.data.get('badges')
 
         try:
             collection = Collection.objects.get(
-                recipient=request.user,
+                owner=request.user,
                 slug=slug
             )
         except Collection.DoesNotExist:

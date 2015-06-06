@@ -172,7 +172,7 @@ class CollectionSerializer(serializers.Serializer):
             name=validated_data.get('name'),
             slug=validated_data.get('slug', None),
             description=validated_data.get('description', ''),
-            recipient=user
+            owner=user
         )
 
         if validated_data.get('badges') is not None:
@@ -193,7 +193,7 @@ class EarnerPortalSerializer(serializers.Serializer):
     def to_representation(self, user):
         view_data = {}
 
-        earner_collections = Collection.objects.filter(recipient=user)
+        earner_collections = Collection.objects.filter(owner=user)
 
         earner_collections_serializer = CollectionSerializer(
             earner_collections,
