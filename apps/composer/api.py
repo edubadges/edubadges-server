@@ -1,3 +1,5 @@
+import os
+
 from django.core.exceptions import ValidationError as DjangoValidationError
 
 from rest_framework import authentication, permissions, status, serializers
@@ -451,5 +453,43 @@ class EarnerCollectionBadgeDetail(APIView):
             ).delete()
         except StoredBadgeInstanceCollection.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class EarnerCollectionGenerateShare(APIView):
+    """
+    Allows a Collection to be public by generation of a shareable hash.
+    """
+    queryset = Collection.objects.all()
+    permission_classes = (permissions.IsAuthenticated, IsOwner,)
+
+    def get(self, request, slug):
+        try:
+            collection = self.queryset.get(
+                owner=request.user,
+                slug=slug
+            )
+        except Collection.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if not collection.share_hash:
+            share_hash = os.urandom(16).encode('hex')
+            collection.share_hash
+            collection.save()
+
+        return Response(share_hash)
+
+    def delete(self, request, slug):
+        try:
+            collection = self.queryset.get(
+                owner=request.user,
+                slug=slug
+            )
+        except Collection.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        collection.share_hash = ''
+        collection.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)

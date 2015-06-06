@@ -10,5 +10,5 @@ urlpatterns = patterns(
     url(r'^/collections/(?P<slug>[-\w]+)$', EarnerCollectionDetail.as_view(), name='earner_collection_detail'),
     url(r'^/collections/(?P<slug>[-\w]+)/badges$', EarnerCollectionBadgesList.as_view(), name='earner_collection_badges'),
     url(r'^/collections/(?P<collection_slug>[-\w]+)/badges/(?P<badge_id>[\d]+)$', EarnerCollectionBadgeDetail.as_view(), name='earner_collection_badge_detail'),
-
+    url(r'^/collections/(?P<slug>[-\w]+)/share$', EarnerCollectionGenerateShare.as_view(), name='earner_collection_generate_share'),
 )

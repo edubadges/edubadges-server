@@ -17,6 +17,7 @@ class Collection(cachemodel.CacheModel):
     )
     description = models.CharField(max_length=255, blank=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=False)
+    share_hash = models.CharField(max_length=255, null=False, blank=True)
 
     instances = models.ManyToManyField(
         StoredBadgeInstance, through='StoredBadgeInstanceCollection'
