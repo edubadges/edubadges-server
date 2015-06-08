@@ -64,7 +64,7 @@ if apps.is_installed('issuer'):
 if apps.is_installed('composer'):
     urlpatterns += patterns('',
         url(r'^v1/earner', include('composer.api_urls')),
-        url(r'^earner', include('composer.urls')),
+        url(r'^public', include('composer.urls')),
     )
 
 

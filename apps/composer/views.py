@@ -1,11 +1,13 @@
 import json
 
 from django.core.urlresolvers import reverse
+from django.http import HttpResponse
 from django.shortcuts import redirect
-from django.views.generic import TemplateView
+from django.views.generic import DetailView, TemplateView
 
 from badgeuser.serializers import UserProfileField
 
+from .models import Collection
 from .serializers import EarnerPortalSerializer
 
 
@@ -31,3 +33,23 @@ class EarnerPortal(TemplateView):
 
         context_data['initial_data'] = json.dumps(context)
         return context_data
+
+
+class CollectionDetailView(DetailView):
+    model = Collection
+    context_object_name = 'collection'
+
+    def get(self, request, *args, **kwargs):
+        response = super(CollectionDetailView, self).get(request, *args, **kwargs)
+        print self.object.share_hash
+        print kwargs.get('share_hash')
+        if self.object.share_hash != kwargs.get('share_hash'):
+            return HttpResponse('Unauthorized', status=401)
+        return response
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(CollectionDetailView, self).get_context_data(*args, **kwargs)
+
+        context.update({
+        })
+        return context
