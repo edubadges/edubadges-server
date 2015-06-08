@@ -1,5 +1,6 @@
 var React = require('react');
 var OpenBadge = require('../components/BadgeDisplay.jsx').OpenBadge;
+var EmptyOpenBadge = require('../components/BadgeDisplay.jsx').EmptyOpenBadge;
 var APIStore = require('../stores/APIStore');
 
 var OpenBadgeList = React.createClass({
@@ -24,7 +25,8 @@ var OpenBadgeList = React.createClass({
   */
   getDefaultProps: function() {
     return {
-      badges: []
+      badges: [],
+      clickEmptyBadge: function(){}
     };
   },
   render: function(){  
@@ -42,6 +44,9 @@ var OpenBadgeList = React.createClass({
         />
       );
     }.bind(this));
+    if (this.props.badges.length == 0){
+      badgesInList = <EmptyOpenBadge clickEmptyBadge={this.props.clickEmptyBadge} />
+    }
     return (
       <div className="open-badge-list">
         { badgesInList }

@@ -234,7 +234,8 @@ BasicAPIForm = React.createClass({
   },
   render: function() {
     var activeColumns = "", 
-        activeMessage = (this.state.message) ? (<div className={"alert alert-" + this.state.message.type} >{this.state.message.content}</div>) : "";
+        activeMessage = (this.state.message) ? (<div className={"alert alert-" + this.state.message.type} >{this.state.message.content}</div>) : "",
+        activeHelpText = !this.state.message && this.props.helpText ? <div className="alert alert-info">{this.props.helpText}</div> : "",
         formControls = "",
         loadingIcon = this.state.actionState == "waiting" ? (<LoadingIcon />) : "";
     if (["ready", "waiting"].indexOf(this.state.actionState) > -1){
@@ -321,7 +322,7 @@ BasicAPIForm = React.createClass({
 
     return (
       <div className="form-container issuer-notification-form-container">
-        {activeMessage}
+        {activeMessage} {activeHelpText}
         <div className={this.state.actionState == "waiting" ? "form-horizontal disabled" : "form-horizontal"}>
           <fieldset className="row">
             {activeColumns}
