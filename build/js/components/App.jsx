@@ -217,7 +217,7 @@ var App = React.createClass({
   earnerMain: function() {
     var viewId = 'earnerHome';
     var dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
-
+    var clickeEmptyBadgeUpdate = {}
     var mainComponent = (
       <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet}>
         <ActionBar 
@@ -241,6 +241,7 @@ var App = React.createClass({
           badges={APIStore.getCollection('earner_badges')}
           perPage={12}
           moreLink="/earner/badges"
+          clickEmptyBadge={function(){this.updateActivePanel(viewId, clickeEmptyBadgeUpdate)}.bind(this)}
         />
 
         <ActionBar 

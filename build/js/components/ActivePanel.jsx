@@ -199,10 +199,11 @@ var ActivePanel = React.createClass({
     else if (this.props.type == "EarnerBadgeImportForm"){
       var formProps = {
         formId: this.props.type,
+        helpText: "Fill out one of the following fields to upload your badge. Usually, the baked badge image is available.",
         fieldsMeta: {
           image: {inputType: "image", label: "Badge Image", required: false, filename: "earned_badge.png"},
           url: {inputType: "text", label: "Assertion URL", required: false},
-          assertion: {inputType: "text", label: "Assertion URL", required: false}
+          assertion: {inputType: "textarea", label: "Assertion JSON", required: false}
         },
         defaultValues: {
           image: null,

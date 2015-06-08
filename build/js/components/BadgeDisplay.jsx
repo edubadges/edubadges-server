@@ -283,7 +283,48 @@ var OpenBadge = React.createClass({
 });
 
 
+var EmptyOpenBadge = React.createClass({
+  render: function() {
+    var fakeBadgeJSON = {
+                "id": ":_0",
+                "type": "Assertion",
+                "badge": {
+                    "id": ":_1",
+                    "type": "BadgeClass",
+                    "name": {
+                        "type": "xsd:string",
+                        "@value": "No badges yet"
+                    },
+                    "description": {
+                        "type": "xsd:string",
+                        "@value": "You have no badges uploaded yet. Click to add a new badge."
+                    },
+                    "issuer": {
+                      "name": ""
+                    }
+                },
+                "image": {
+                    "type": "image",
+                    "id": "https://placeholdit.imgix.net/~text?txtsize=19&txt=Upload%20your%20Badges&w=200&h=200"
+                }
+            };
+    return (
+      <div className="emptyBadge" onClick={this.props.clickEmptyBadge}>
+        <OpenBadge 
+          id={-1}
+          json={fakeBadgeJSON}
+          display={this.props.display || 'thumbnail'}
+          errors={[]}
+          clickable={false}
+        />
+      </div>
+    );
+  }
+});
+
+
 // Export the Menu class for rendering:
 module.exports.OpenBadge = OpenBadge;
+module.exports.EmptyOpenBadge = EmptyOpenBadge;
 module.exports.Property = Property;
 
