@@ -135,7 +135,7 @@ STATICFILES_DIRS = [
 
 AUTH_USER_MODEL = 'badgeuser.BadgeUser'
 LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/issuer'
+LOGIN_REDIRECT_URL = '/earner'
 
 AUTHENTICATION_BACKENDS = [
     # Object permissions for issuing badges
