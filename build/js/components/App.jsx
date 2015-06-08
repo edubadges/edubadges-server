@@ -242,6 +242,7 @@ var App = React.createClass({
           perPage={12}
           moreLink="/earner/badges"
           clickEmptyBadge={function(){this.updateActivePanel(viewId, clickeEmptyBadgeUpdate)}.bind(this)}
+          showEmptyBadge={true}
         />
 
         <ActionBar 
