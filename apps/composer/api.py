@@ -475,7 +475,7 @@ class EarnerCollectionGenerateShare(APIView):
 
         if not collection.share_hash:
             share_hash = os.urandom(16).encode('hex')
-            collection.share_hash
+            collection.share_hash = share_hash
             collection.save()
 
         return Response(share_hash)
