@@ -26,7 +26,8 @@ var OpenBadgeList = React.createClass({
   getDefaultProps: function() {
     return {
       badges: [],
-      clickEmptyBadge: function(){}
+      clickEmptyBadge: function(){},
+      showEmptyBadge: false
     };
   },
   render: function(){  
@@ -44,7 +45,7 @@ var OpenBadgeList = React.createClass({
         />
       );
     }.bind(this));
-    if (this.props.badges.length == 0){
+    if (this.props.badges.length == 0 && this.props.showEmptyBadge){
       badgesInList = <EmptyOpenBadge clickEmptyBadge={this.props.clickEmptyBadge} />
     }
     return (
