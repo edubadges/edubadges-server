@@ -1,0 +1,21 @@
+{# extends "base_interior.html" #}
+
+{% set page_title="Collection" %}
+
+{% block content %}		
+    <div class="content_area">	
+        <header>
+            <h1>{{collection.name}} (of {{collection.owner}})</h1>
+            <p>{{collection.description}}</p>
+        </header>
+        {% for instance in collection.instances.all() %}
+            {% set metadata = instance.storedbadgeinstancecollection_set.get(collection=collection) %}
+            <article>
+                <h1>{{instance}}</h1>
+                <img src="{{instance.image.url}}" />
+                <p>{{metadata.description}}</p>
+                <pre>{{instance.json}}</pre>
+            </article>
+        {% endfor %}
+    </div>
+{% endblock %}
