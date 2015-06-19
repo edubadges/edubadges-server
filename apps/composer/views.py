@@ -44,7 +44,10 @@ class CollectionDetailView(DetailView):
         print self.object.share_hash
         print kwargs.get('share_hash')
         if self.object.share_hash != kwargs.get('share_hash'):
-            return HttpResponse('Unauthorized', status=401)
+            return HttpResponse(
+                'Unauthorized: Invalid share URL for this collection',
+                status=401
+            )
         return response
 
     def get_context_data(self, *args, **kwargs):

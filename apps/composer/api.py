@@ -1,6 +1,7 @@
 import os
 
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.urlresolvers import reverse
 
 from rest_framework import authentication, permissions, status, serializers
 from rest_framework.exceptions import ValidationError, PermissionDenied
@@ -478,7 +479,12 @@ class EarnerCollectionGenerateShare(APIView):
             collection.share_hash = share_hash
             collection.save()
 
-        return Response(share_hash)
+        return Response(
+            reverse(
+                'shared_collection',
+                args=[collection.pk, collection.share_hash]
+            )
+        )
 
     def delete(self, request, slug):
         try:
