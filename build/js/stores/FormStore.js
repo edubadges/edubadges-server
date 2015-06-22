@@ -18,7 +18,8 @@ FormStore.genericFormTypes = [
   'BadgeClassCreateUpdateForm',
   'BadgeInstanceCreateUpdateForm',
   'EarnerBadgeImportForm',
-  'EarnerCollectionCreateForm'
+  'EarnerCollectionCreateForm',
+  'EarnerCollectionEditForm'
 ]
 
 FormStore.idValid = function(formId){

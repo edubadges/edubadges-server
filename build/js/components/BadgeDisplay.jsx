@@ -132,19 +132,25 @@ var Extension = React.createClass({
 var BadgeDisplayThumbnail = React.createClass({
   getDefaultProps: function() {
     return {
-      json: {badge: {issuer:{}}}
+      json: {badge: {issuer:{}}},
+      columnClass: 'col-xs-3 col-md-2',
+      selected: false
     };
   },
   handleClick: function(){
-    if (this.props.clickable)
+    if (this.props.clickable && !this.props.handleClick)
       navigateLocalPath(
         this.props.targetUrl || '/earner/badges/' + this.props.id
       );
+    else if (this.props.handleClick)
+      this.props.handleClick(this.props.id);
+  },
+  wrapperClass: function(){
+    return this.props.columnClass + ' badge-display badge-display-thumbnail selected-' + this.props.selected;
   },
   render: function() {
-    var className = 'badge-display badge-display-thumbnail col-xs-3 col-md-2 col-lg-2';
     return (
-      <div className={className} onClick={this.handleClick} >
+      <div className={this.wrapperClass()} onClick={this.handleClick} >
         <Property name='Badge Image' label={false} property={this.props.json.image} />
         <Property name='Name' property={this.props.json.badge.name} />
         <Property name='Issuer' property={this.props.json.badge.issuer.name} />
@@ -155,15 +161,26 @@ var BadgeDisplayThumbnail = React.createClass({
 
 
 var BadgeDisplayDetail = React.createClass({
+  getDefaultProps: function() {
+    return {
+      columnClass: 'col-xs-12', 
+      selected: false
+    };
+  },
   handleClick: function(){
-    if (this.props.clickable)
+    if (this.props.clickable && !this.props.handleClick)
       navigateLocalPath(
         this.props.targetUrl || '/earner/badges/' + this.props.id
       );
+    else if (this.props.handleClick)
+      this.props.handleClick(this.props.id);
+  },
+  wrapperClass: function(){
+    return this.props.columnClass + ' badge-display badge-display-detail selected-' + this.props.selected;
   },
   render: function() {
     return (
-      <div className='badge-display badge-display-detail col-xs-12' onClick={this.handleClick} >
+      <div className={this.wrapperClass()} onClick={this.handleClick} >
         <div className='row'>
 
           <div className='property-group image col-xs-4'>
@@ -199,10 +216,12 @@ var BadgeDisplayDetail = React.createClass({
 
 var BadgeDisplayFull = React.createClass({
   handleClick: function(){
-    if (this.props.clickable)
+    if (this.props.clickable && !this.props.handleClick)
       navigateLocalPath(
         this.props.targetUrl || '/earner/badges/' + this.props.id
       );
+    else if (this.props.handleClick)
+      this.props.handleClick(this.props.id);
   },
   render: function() {
     var errors = this.props.errors.map(function(validation, index){
@@ -250,6 +269,41 @@ var BadgeDisplayFull = React.createClass({
 });
 
 
+var BadgeDisplayImage = React.createClass({
+  getDefaultProps: function() {
+    return {
+      columnClass: "col-xs-3",
+      selected: false
+    };
+  },
+  handleClick: function(){
+    if (this.props.clickable && !this.props.handleClick)
+      navigateLocalPath(
+        this.props.targetUrl || '/earner/badges/' + this.props.id
+      );
+    else if (this.props.handleClick)
+      this.props.handleClick(this.props.id);
+  },
+  wrapperClass: function(){
+    return this.props.columnClass + ' more-link-fake-badge badge-display-image selected-' + this.props.selected;
+  },
+  render: function() {
+    if (this.props.type == 'more-link'){
+      return (
+        <div className={this.wrapperClass()} onClick={this.handleClick}>
+          <span className="more-link-text">{this.props.json.badge.name['@value']}</span>
+        </div>
+      );
+    }
+    return (
+      <div className={'badge-display-image ' + this.props.columnClass} onClick={this.handleClick}>
+        <Property name='Badge Image' label={false} property={this.props.json.image} />
+      </div>
+    )
+  }
+});
+
+
 var OpenBadge = React.createClass({
   proptypes: {
     id: React.PropTypes.number.isRequired,
@@ -258,6 +312,7 @@ var OpenBadge = React.createClass({
     errors: React.PropTypes.array,
     recipientId: React.PropTypes.string,
     clickable: React.PropTypes.bool,
+    handleClick: React.PropTypes.func,
     targetUrl: React.PropTypes.string
   },
   getDefaultProps: function() {
@@ -276,6 +331,9 @@ var OpenBadge = React.createClass({
       case 'thumbnail': 
         return ( <BadgeDisplayThumbnail {...this.props} /> );
         break;
+      case 'image only': 
+        return ( <BadgeDisplayImage {...this.props} /> );
+        break;
       default:  // 'full'
         return ( <BadgeDisplayFull {...this.props} /> );
     }
@@ -286,28 +344,29 @@ var OpenBadge = React.createClass({
 var EmptyOpenBadge = React.createClass({
   render: function() {
     var fakeBadgeJSON = {
-                "id": ":_0",
-                "type": "Assertion",
-                "badge": {
-                    "id": ":_1",
-                    "type": "BadgeClass",
-                    "name": {
-                        "type": "xsd:string",
-                        "@value": "No badges yet"
-                    },
-                    "description": {
-                        "type": "xsd:string",
-                        "@value": "You have no badges uploaded yet. Click to add a new badge."
-                    },
-                    "issuer": {
-                      "name": ""
-                    }
-                },
-                "image": {
-                    "type": "image",
-                    "id": "https://placeholdit.imgix.net/~text?txtsize=19&txt=Upload%20your%20Badges&w=200&h=200"
-                }
-            };
+      "id": ":_0",
+      "type": "Assertion",
+      "badge": {
+        "id": ":_1",
+        "type": "BadgeClass",
+        "name": {
+          "type": "xsd:string",
+          "@value": "No badges yet"
+        },
+        "description": {
+          "type": "xsd:string",
+          "@value": "You have no badges uploaded yet. Click to add a new badge."
+        },
+        "issuer": {
+          "name": ""
+        }
+      },
+      "image": {
+        "type": "image",
+        "id": "https://placeholdit.imgix.net/~text?txtsize=19&txt=Upload%20your%20Badges&w=200&h=200"
+      }
+    };
+
     return (
       <div className="emptyBadge" onClick={this.props.clickEmptyBadge}>
         <OpenBadge 

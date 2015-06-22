@@ -275,6 +275,43 @@ var ActivePanel = React.createClass({
       );
     }
 
+    else if (this.props.type == "EarnerCollectionEditForm"){
+      var formProps = {
+        formId: this.props.type,
+        fieldsMeta: {
+          name: {inputType: "text", label: "Name", required: true},
+          description: {inputType: "textarea", label: "Description", required: false}
+        },
+        defaultValues: {
+          name: this.props.collection.name,
+          description: this.props.collection.description,
+          actionState: "ready",
+          message: ""
+        },
+        columns: [
+          { fields: ['name', 'description'], className:'col-xs-12' },
+        ],
+        apiContext: {
+          formId: this.props.type,
+          apiCollectionKey: "earner_collections",
+          actionUrl: "/v1/earner/collections/" + this.props.collection.slug,
+          method: "PUT",
+          successHttpStatus: [200],
+          successMessage: "Collection successfully edited."
+        },
+        handleCloseForm: this.clearActivePanel
+      };
+      FormStore.getOrInitFormData(this.props.type, formProps);
+
+      return (
+        <div className="active-panel api-form image-upload-form clearfix">
+          <div className="container-fluid">
+            <BasicAPIForm {...formProps} />
+          </div>
+        </div>
+      );
+    }
+
     else if (this.props.type == "ConsumerBadgeForm"){
       defaultFormState = {
         recipient_input: ''

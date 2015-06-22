@@ -24,6 +24,14 @@ var APIGetData = function(apiContext) {
     }});
 }
 
+var APISubmitData = function(data, context){
+  appDispatcher.dispatch({ action: {
+    type: 'API_SUBMIT_DATA',
+    apiData: data,
+    apiContext: context
+  }});
+}
+
 var APIGetResultFailure = function(data) {
   appDispatcher.dispatch({ action: {
       type: 'API_GET_RESULT_FAILURE',
@@ -38,10 +46,12 @@ var APIFetchCollections = function(collectionKeys) {
   }}); 
 }
 
+
 module.exports = {
   APIFormResultSuccess: APIFormResultSuccess,
   APIFormResultFailure: APIFormResultFailure,
   APIGetResultFailure: APIGetResultFailure,
   APIGetData: APIGetData,
-  APIFetchCollections: APIFetchCollections
+  APIFetchCollections: APIFetchCollections,
+  APISubmitData: APISubmitData
 }

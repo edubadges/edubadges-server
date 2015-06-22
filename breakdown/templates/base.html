@@ -94,8 +94,10 @@
             <!-- Custom Theme JavaScript -->
             <script src="{{STATIC_URL}}js/libs/sb-admin-2.js"></script>
 
-            <script src="{{STATIC_URL}}js/script.js"></script>
-            
+            {% if initial_data %}
+                <script src="{{STATIC_URL}}js/script.js"></script>
+            {% endif %}
+
             <script type="text/javascript">
               /* var _gaq = _gaq || [];
               _gaq.push(['_setAccount', 'UA-#######-#']);

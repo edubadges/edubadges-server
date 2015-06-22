@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.urlresolvers import reverse
 
 from autoslug import AutoSlugField
 import cachemodel
@@ -28,6 +29,15 @@ class Collection(cachemodel.CacheModel):
 
     class Meta:
         unique_together = ('owner', 'slug')
+
+    @property
+    def share_url(self):
+        if self.share_hash != '':
+            return reverse(
+                'shared_collection',
+                args=[self.pk, self.share_hash]
+            )
+        return ''
 
 
 class StoredBadgeInstanceCollection(models.Model):

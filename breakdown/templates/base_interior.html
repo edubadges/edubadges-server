@@ -8,7 +8,9 @@
     
     {{super()}}
 
-    <h2>{% block content_title %}{{ title }}{% endblock %}</h2>
+    {% if content_title %}
+      <h2>{% block content_title %}{{ title }}{% endblock %}</h2>
+    {% endif %}
 
     {% block breadcrumbs %}{% endblock %}
 

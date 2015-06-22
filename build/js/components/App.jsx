@@ -32,7 +32,7 @@ var BadgeClassDetail = require('../components/BadgeClassDisplay.jsx').BadgeClass
 var BadgeInstanceList = require('../components/BadgeInstanceDisplay.jsx').BadgeInstanceList
 var EarnerBadgeList = require('../components/EarnerBadgeList.jsx');
 var EarnerCollectionList = require('../components/EarnerBadgeCollection.jsx').EarnerCollectionList;
-var EarnerCollection = require('../components/EarnerBadgeCollection.jsx').EarnerCollection;
+var EarnerCollectionDetail = require('../components/EarnerBadgeCollection.jsx').EarnerCollectionDetail;
 var ConsumerBadgeList = require('../components/ConsumerBadgeList.jsx');
 
 // Actions
@@ -145,7 +145,6 @@ var App = React.createClass({
       return {};
 
     var context = {};
-    var badgeCollectionFor = { 'earnerHome': 'earnerBadges', 'consumerMain': 'consumerBadges' };
     var panel = this.state.activePanels[viewId];
 
     if (panel.type == "EarnerBadgeImportForm") {
@@ -247,7 +246,7 @@ var App = React.createClass({
 
         <ActionBar 
           title="My Collections"
-          titleLink="/earner/badges"
+          titleLink="/earner/collections"
           viewId={'earnerMainCollections'}
           items={this.props.actionBars['earnerCollections']}
           updateActivePanel={this.updateActivePanel}
@@ -414,7 +413,7 @@ var App = React.createClass({
       <MainComponent viewId={viewId}>
         <BreadCrumbs items={breadCrumbs} />
         <ActionBar 
-          title={"Badges in " + collection.name}
+          title={collection.name}
           viewId={viewId}
           items={this.props.actionBars[viewId] || []}
           updateActivePanel={this.updateActivePanel}
@@ -424,10 +423,11 @@ var App = React.createClass({
           viewId={viewId}
           {...this.state.activePanels[viewId]}
           {...this.contextPropsForActivePanel(viewId)}
+          collection={collection}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
         />
-        <EarnerCollection
+        <EarnerCollectionDetail
           name={collection.name}
           slug={collection.slug}
           clickable={false}

@@ -27,7 +27,8 @@ var OpenBadgeList = React.createClass({
     return {
       badges: [],
       clickEmptyBadge: function(){},
-      showEmptyBadge: false
+      showEmptyBadge: false,
+      selectedBadgeIds: []
     };
   },
   render: function(){  
@@ -38,10 +39,14 @@ var OpenBadgeList = React.createClass({
         <OpenBadge 
           key={"key-" + item['id']}
           id={item['id']}
-          display="thumbnail"
+          display={this.props.display || "thumbnail"}
           json={item['json']}
           recipientId={item['recipient_id']}
           errors={item['errors']}
+          clickable={this.props.clickable}
+          handleClick={this.props.handleClick}
+          type={item.type || 'earned badge'}
+          selected={(this.props.selectedBadgeIds.indexOf(item.id) > -1)}
         />
       );
     }.bind(this));

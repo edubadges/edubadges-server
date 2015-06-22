@@ -1,0 +1,56 @@
+{% load url from future %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% block head %}
+  <title>{% block head_title %}Badgr{% endblock %}</title>
+  <link rel="shortcut icon" href="{{STATIC_URL}}favicon.png" />
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/bootstrap/css/bootstrap.css">
+
+  <!-- main stylesheet -->
+  <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/style.css">
+
+  {% block extrastyle %}{% endblock %}
+
+  {% block extrahead %}{% endblock %}
+
+  {% endblock %}
+</head>
+<body class="{% block bodyclass %}accounts{% endblock %}">
+  
+
+  {% block pre_content %}
+
+    {% if messages %}
+      <div class="accounts-panel messages">
+      {% for message in messages %}
+        <div class="alert alert-info" role="alert">
+          {{message}}
+        </div>
+      {% endfor %}
+      </div>
+    {% endif %}
+
+  {% endblock %}
+
+  <div class="accounts-panel container-fluid">
+  {% block content %}
+
+      <ul class="user-actions nav nav-pills">
+      {% if user.is_authenticated %}
+        <li><a href="{% url 'account_email' %}">Change email</a></li>
+        <li><a href="{% url 'account_logout' %}">Sign Out</a></li>
+      {% else %}
+        <li><a href="{% url 'account_login' %}">Sign In</a></li>
+        <li><a href="{% url 'account_signup' %}">Sign Up</a></li>
+      {% endif %}
+      </ul>
+
+  {% endblock %}
+  </div>
+
+</body>
+</html>
