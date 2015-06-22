@@ -38,10 +38,12 @@ var OpenBadgeList = React.createClass({
         <OpenBadge 
           key={"key-" + item['id']}
           id={item['id']}
-          display="thumbnail"
+          display={this.props.display || "thumbnail"}
           json={item['json']}
           recipientId={item['recipient_id']}
           errors={item['errors']}
+          clickable={this.props.clickable}
+          type={item.type || 'earned badge'}
         />
       );
     }.bind(this));

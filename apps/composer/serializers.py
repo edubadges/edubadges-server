@@ -161,6 +161,7 @@ class CollectionSerializer(serializers.Serializer):
     slug = serializers.CharField(required=False, max_length=128)
     description = serializers.CharField(required=False, max_length=255)
     share_hash = serializers.CharField(required=False, max_length=255)
+    share_url = serializers.CharField(read_only=True, max_length=1024)
     badges = serializers.ListField(
         required=False, child=EarnerBadgeReferenceSerializer(),
         source='storedbadgeinstancecollection_set.all'

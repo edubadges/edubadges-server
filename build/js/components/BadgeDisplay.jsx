@@ -250,6 +250,35 @@ var BadgeDisplayFull = React.createClass({
 });
 
 
+var BadgeDisplayImage = React.createClass({
+  getDefaultProps: function() {
+    return {
+      columnClass: "col-xs-3"
+    };
+  },
+  handleClick: function(){
+    if (this.props.clickable)
+      navigateLocalPath(
+        this.props.targetUrl || '/earner/badges/' + this.props.id
+      );
+  },
+  render: function() {
+    if (this.props.type == 'more-link'){
+      return (
+        <div className={'more-link-fake-badge badge-display-image ' + this.props.columnClass} onClick={this.handleClick}>
+          <span className="more-link-text">{this.props.json.badge.name['@value']}</span>
+        </div>
+      );
+    }
+    return (
+      <div className={'badge-display-image ' + this.props.columnClass} onClick={this.handleClick}>
+        <Property name='Badge Image' label={false} property={this.props.json.image} />
+      </div>
+    )
+  }
+});
+
+
 var OpenBadge = React.createClass({
   proptypes: {
     id: React.PropTypes.number.isRequired,
@@ -276,6 +305,9 @@ var OpenBadge = React.createClass({
       case 'thumbnail': 
         return ( <BadgeDisplayThumbnail {...this.props} /> );
         break;
+      case 'image only': 
+        return ( <BadgeDisplayImage {...this.props} /> );
+        break;
       default:  // 'full'
         return ( <BadgeDisplayFull {...this.props} /> );
     }
@@ -286,28 +318,29 @@ var OpenBadge = React.createClass({
 var EmptyOpenBadge = React.createClass({
   render: function() {
     var fakeBadgeJSON = {
-                "id": ":_0",
-                "type": "Assertion",
-                "badge": {
-                    "id": ":_1",
-                    "type": "BadgeClass",
-                    "name": {
-                        "type": "xsd:string",
-                        "@value": "No badges yet"
-                    },
-                    "description": {
-                        "type": "xsd:string",
-                        "@value": "You have no badges uploaded yet. Click to add a new badge."
-                    },
-                    "issuer": {
-                      "name": ""
-                    }
-                },
-                "image": {
-                    "type": "image",
-                    "id": "https://placeholdit.imgix.net/~text?txtsize=19&txt=Upload%20your%20Badges&w=200&h=200"
-                }
-            };
+      "id": ":_0",
+      "type": "Assertion",
+      "badge": {
+        "id": ":_1",
+        "type": "BadgeClass",
+        "name": {
+          "type": "xsd:string",
+          "@value": "No badges yet"
+        },
+        "description": {
+          "type": "xsd:string",
+          "@value": "You have no badges uploaded yet. Click to add a new badge."
+        },
+        "issuer": {
+          "name": ""
+        }
+      },
+      "image": {
+        "type": "image",
+        "id": "https://placeholdit.imgix.net/~text?txtsize=19&txt=Upload%20your%20Badges&w=200&h=200"
+      }
+    };
+
     return (
       <div className="emptyBadge" onClick={this.props.clickEmptyBadge}>
         <OpenBadge 

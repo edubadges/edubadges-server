@@ -43,7 +43,8 @@ class CollectionDetailView(DetailView):
         response = super(CollectionDetailView, self).get(request, *args, **kwargs)
         print self.object.share_hash
         print kwargs.get('share_hash')
-        if self.object.share_hash != kwargs.get('share_hash'):
+        if self.object.share_hash != '' or \
+                self.object.share_hash != kwargs.get('share_hash'):
             return HttpResponse(
                 'Unauthorized: Invalid share URL for this collection',
                 status=401

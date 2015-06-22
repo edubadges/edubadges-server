@@ -1,4 +1,4 @@
-// var _ = require("underscore");
+var _ = require("underscore");
 
 var Dispatcher = require('../dispatcher/appDispatcher');
 var EventEmitter = require('events').EventEmitter;
@@ -82,12 +82,33 @@ APIStore.filter = function(collectionType, propName, value){
     return [];
 };
 
-APIStore.addCollectionItem = function(collectionKey, item) {
+APIStore.addCollectionItem = function(collectionKey, item, isNew){
   if (!APIStore.data.hasOwnProperty(collectionKey))
     APIStore.data[collectionKey] = [];
-  APIStore.data[collectionKey].push(item);
+  if (!isNew)
+    APIStore.data[collectionKey].push(item);
+  else
+    return APIStore.replaceCollectionItem(collectionKey, item);
   return item;
 }
+
+APIStore.replaceCollectionItem = function(collectionKey, item){
+  debugger;
+  var key;
+  if (collectionKey == 'earner_collections'){
+    key = 'slug';
+  }
+  else {
+    key = 'id';
+  }
+
+  foundIndex = _.findIndex(APIStore.data[collectionKey], function(el){ return el[key] == item[key]; });
+  if (foundIndex != undefined)
+    APIStore.data[collectionKey][foundIndex] = item;
+  else
+    APIStore.data[collectionKey].push(item);
+  return item;
+};
 
 APIStore.hasAlreadyRequested = function(path){
   return (APIStore.getRequests.indexOf(path) > -1);
@@ -260,7 +281,7 @@ APIStore.postForm = function(fields, values, context){
       });
     }
     else{
-      var newObject = APIStore.addCollectionItem(context.apiCollectionKey, JSON.parse(response.text))
+      var newObject = APIStore.addCollectionItem(context.apiCollectionKey, JSON.parse(response.text), (context.method == 'PUT'));
       if (newObject){
         APIStore.emit('DATA_UPDATED');
         APIActions.APIFormResultSuccess({
