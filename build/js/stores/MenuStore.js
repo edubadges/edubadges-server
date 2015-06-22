@@ -59,7 +59,7 @@ MenuStore.defaultItems = {
       ],
       earnerCollectionDetail: [
         { 
-          title: "Edit",
+          title: "Edit Details",
           buttonType: "primary",
           icon: "fa-pencil-square-o", 
           activePanelCommand: { type: "EarnerCollectionEditForm", content: {} } 

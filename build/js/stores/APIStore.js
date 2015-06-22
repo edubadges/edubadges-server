@@ -93,7 +93,6 @@ APIStore.addCollectionItem = function(collectionKey, item, isNew){
 }
 
 APIStore.replaceCollectionItem = function(collectionKey, item){
-  debugger;
   var key;
   if (collectionKey == 'earner_collections'){
     key = 'slug';
@@ -108,6 +107,14 @@ APIStore.replaceCollectionItem = function(collectionKey, item){
   else
     APIStore.data[collectionKey].push(item);
   return item;
+};
+
+APIStore.partialUpdateCollectionItem = function(collectionKey, searchKey, searchValue, updateKey, updateValue){
+  var foundIndex = _.findIndex(APIStore.data[collectionKey], function(el){ return el[searchKey] == searchValue; });
+  if (foundIndex != undefined){
+    APIStore.data[collectionKey][foundIndex][updateKey] = updateValue;
+    return APIStore.data[collectionKey][foundIndex]
+  }
 };
 
 APIStore.hasAlreadyRequested = function(path){
@@ -301,6 +308,57 @@ APIStore.postForm = function(fields, values, context){
 }
 
 
+/* postForm(): a common function for POSTing forms and returning results
+ * to the FormStore.
+ * Params:
+ *   context: a dictionary providing information about the API endpoint
+ *            and expected return results.
+ *   fields: the form data from the FormStore.
+ * This function will interrogate the data and attach appropriate fields
+ * to the post request.
+*/
+APIStore.postData = function(data, context){
+  if (context.method == 'POST')
+    var req = request.post(context.actionUrl);
+  else if (context.method == 'DELETE')
+    var req = request.delete(context.actionUrl);
+  else if (context.method == 'PUT')
+    var req = request.put(context.actionUrl);
+
+  req.set('X-CSRFToken', getCookie('csrftoken'))
+  .accept('application/json')
+  .type('application/json');
+
+  req.send(data);
+
+  req.end(function(error, response){
+    console.log(response);
+    if (error){
+      console.log("THERE WAS SOME KIND OF API REQUEST ERROR.");
+      console.log(error);
+      APIStore.emit('API_STORE_FAILURE');
+    }
+    else if (context.successHttpStatus.indexOf(response.status) == -1){
+      console.log("API REQUEST PROBLEM:");
+      console.log(response.text);
+      APIStore.emit("API_RESULT")
+    }
+    else{
+      var newObject = APIStore.partialUpdateCollectionItem(context.apiCollectionKey, 'slug', context.apiItemKey, 'badges', JSON.parse(response.text));
+      if (newObject){
+        APIStore.emit('DATA_UPDATED');
+        APIStore.emit('DATA_UPDATED_' + context.formId);
+      }
+      else {
+        APIStore.emit('API_STORE_FAILURE');
+        console.log("Failed to add " + response.text + " to " + context.apiCollectionKey);
+      }
+    } 
+  });
+
+  return req;
+}
+
 
 
 // Register with the dispatcher
@@ -319,11 +377,15 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
       Dispatcher.waitFor([FormStore.dispatchToken]);
 
       if (FormStore.genericFormTypes.indexOf(action.formId) > -1){
-        formData = FormStore.getFormData(action.formId);
+        var formData = FormStore.getFormData(action.formId);
         APIStore.postForm(formData.fieldsMeta, formData.formState, formData.apiContext);
       }
       else
         console.log("Unidentified form type to submit: " + action.formId);
+      break;
+
+    case 'API_SUBMIT_DATA':
+      APIStore.postData(action.apiData, action.apiContext);
       break;
 
     case 'API_GET_DATA':

@@ -30,6 +30,8 @@ var EarnerBadgeList = React.createClass({
           badges={badges}
           showEmptyBadge={this.props.showEmptyBadge}
           clickEmptyBadge={this.props.clickEmptyBadge}
+          selectedBadgeIds={this.props.selectedBadgeIds}
+          handleClick={this.props.handleClick}
         />
         {moreLink}
       </div>

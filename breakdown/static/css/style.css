@@ -88,7 +88,7 @@
   .property-group.validations {
     clear: both; }
 
-.badge-display-active {
+.selected-true {
   background-color: #d1d1d1; }
 
 .issuer-display-short, .badgeclass-list .badgeclass-display-detail {
@@ -650,7 +650,7 @@ body.accounts {
   .property-group.validations {
     clear: both; }
 
-.badge-display-active {
+.selected-true {
   background-color: #d1d1d1; }
 
 .issuer-display-short, .badgeclass-list .badgeclass-display-detail {
