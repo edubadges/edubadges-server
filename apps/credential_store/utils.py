@@ -14,7 +14,7 @@ def find_recipient_user(recipient_id):
         confirmed_email = EmailAddress.objects.get(
             email=recipient_id, verified=True
         )
-    except EmailAddress.ObjectNotFound:
+    except EmailAddress.DoesNotExist:
         return None
     else:
         return confirmed_email.user
