@@ -10,7 +10,7 @@ from .serializers import IssuerPortalSerializer
 
 
 class IssuerPortal(TemplateView):
-    template_name = 'base_interior.html'
+    template_name = 'base.html'
 
     def get(self, request):
         if not request.user.is_authenticated():
@@ -27,6 +27,7 @@ class IssuerPortal(TemplateView):
         context['issuer_issuers'] = issuer_serializer.data['issuer_issuers']
         context['issuer_badgeclasses'] = issuer_serializer.data['issuer_badgeclasses']
         context['user'] = UserProfileField(kwargs['request'].user, context=kwargs).data
+        context['installed_apps'] = issuer_serializer.data['installed_apps']
 
         context_data['initial_data'] = json.dumps(context)
         return context_data

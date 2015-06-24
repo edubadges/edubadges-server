@@ -22,6 +22,7 @@ var ActivePanelUpdateButton = React.createClass({
 
 var ActionBar = React.createClass({
   render: function() {
+    var title;
     var items = this.props.items.map(function(item, index){
 
       return (
@@ -39,10 +40,16 @@ var ActionBar = React.createClass({
         </li>
       );
     }.bind(this));
+
+    if (this.props.titleLink)
+      title = (<h3><a href={this.props.titleLink}>{this.props.title}</a></h3>);
+    else
+      title = (<h3>{this.props.title}</h3>);
+
     return (
       <div className="action-bar clearfix">
         <div className="main-component-content-title col-xs-6">
-          <h3>{this.props.title}</h3>
+          {title}
         </div>
         <ul className="col-xs-6">
           {items}

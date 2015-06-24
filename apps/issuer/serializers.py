@@ -1,10 +1,13 @@
 from itertools import chain
+import os
+import uuid
 
 from django.db.models import Q
 
 from rest_framework import serializers
 
 from mainsite.serializers import WritableJSONField
+from mainsite.utils import installed_apps_list
 from badgeuser.serializers import UserProfileField
 
 from .models import Issuer, BadgeClass, BadgeInstance
@@ -32,6 +35,14 @@ class IssuerSerializer(AbstractComponentSerializer):
         # TODO: ensure email is a confirmed email in owner/creator's account
         # ^^^ that validation requires the request.user, which might be in self.context
         return data
+
+    def validate_image(self, image):
+        # TODO: Make sure it's a PNG (square if possible), and remove any baked-in badge assertion that exists.
+        # Doing: add a random string to filename
+        img_name, img_ext = os.path.splitext(image.name)
+
+        image.name = 'issuer_logo_' + str(uuid.uuid4()) + img_ext
+        return image
 
     def create(self, validated_data, **kwargs):
         validated_data['json'] = {
@@ -88,6 +99,10 @@ class BadgeClassSerializer(AbstractComponentSerializer):
 
     def validate_image(self, image):
         # TODO: Make sure it's a PNG (square if possible), and remove any baked-in badge assertion that exists.
+        # Doing: add a random string to filename
+        img_name, img_ext = os.path.splitext(image.name)
+
+        image.name = 'issuer_badgeclass_' + str(uuid.uuid4()) + img_ext
         return image
 
     def validate(self, data):
@@ -233,5 +248,6 @@ class IssuerPortalSerializer(serializers.Serializer):
 
         view_data['issuer_issuers'] = issuer_data.data
         view_data['issuer_badgeclasses'] = badgeclass_data.data
+        view_data['installed_apps'] = installed_apps_list()
 
         return view_data

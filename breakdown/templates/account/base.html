@@ -11,7 +11,10 @@
   <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/bootstrap/css/bootstrap.css">
 
   <!-- main stylesheet -->
-  <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/style.css">
+  <!-- <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/style.css"> -->
+
+  <!-- accounts stylesheet -->
+  <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/style-new.css">
 
   {% block extrastyle %}{% endblock %}
 
@@ -20,37 +23,78 @@
   {% endblock %}
 </head>
 <body class="{% block bodyclass %}accounts{% endblock %}">
-  
 
-  {% block pre_content %}
+  <div class="page-wrap">
+        <nav class="navbar navbar-inverse">
+            <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <!--<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>-->
+                    <!--<a class="navbar-brand" href="#">Badgr Server</a>-->
+                    <ul class="nav navbar-nav">
+                        <li><a href="/"><i class="fa fa-arrow-left"></i> Home</a></li>
+                    </ul>
+                </div>
+            </div><!-- /.container-fluid -->
+        </nav>
+        <div class="accounts-panel container">
+            <div class="col-sm-2">
+                <img class="col-logo hidden-xs" src="{{STATIC_URL}}images/logo_large.png" width="100%"/>
+            </div>
+            <div class="col-sm-10">
 
-    {% if messages %}
-      <div class="accounts-panel messages">
-      {% for message in messages %}
-        <div class="alert alert-info" role="alert">
-          {{message}}
+                {% block pre_content %}
+
+                  {% if messages %}
+                    <div class="accounts-panel messages">
+                    {% for message in messages %}
+                      <div class="alert alert-info" role="alert">
+                        {{message}}
+                      </div>
+                    {% endfor %}
+                    </div>
+                  {% endif %}
+
+                {% endblock %}
+
+                {% block content %}
+
+                  <ul class="user-actions nav nav-pills">
+                  {% if user.is_authenticated %}
+                    <li><a href="{% url 'account_email' %}">Change email</a></li>
+                    <li><a href="{% url 'account_logout' %}">Sign Out</a></li>
+                  {% else %}
+                    <li><a href="{% url 'account_login' %}">Sign In</a></li>
+                    <li><a href="{% url 'account_signup' %}">Sign Up</a></li>
+                  {% endif %}
+                    </ul>
+
+                {% endblock %}
+            </div>
         </div>
-      {% endfor %}
+    </div>
+
+    <footer class="footer">
+      <div class="row">
+        <div class="col col-xs-12 col-sm-5 col-sm-offset-2">
+          <p><img src="{{STATIC_URL}}images/concentricsky.png"/></p>
+          <p>Badgr is a product of <a href="http://www.concentricsky.com" target="_blank">Concentric Sky</a></p>
+        </div>
+        <div class="contact col-xs-12 col-sm-4 col-sm-offset-0">
+          <h4>Get in Touch</h4>
+          <ul>
+            <li>(541) 342-8456</li>
+            <li>Twitter. <a href="" target="_blank">@concentricsky</a></li>
+            <li>Email. <a href="mailto:hello@concentricsky.com">hello@concentricsky.com</a></li>
+          </ul>
+        </div>
       </div>
-    {% endif %}
-
-  {% endblock %}
-
-  <div class="accounts-panel container-fluid">
-  {% block content %}
-
-      <ul class="user-actions nav nav-pills">
-      {% if user.is_authenticated %}
-        <li><a href="{% url 'account_email' %}">Change email</a></li>
-        <li><a href="{% url 'account_logout' %}">Sign Out</a></li>
-      {% else %}
-        <li><a href="{% url 'account_login' %}">Sign In</a></li>
-        <li><a href="{% url 'account_signup' %}">Sign Up</a></li>
-      {% endif %}
-      </ul>
-
-  {% endblock %}
-  </div>
+    </footer>
 
 </body>
 </html>

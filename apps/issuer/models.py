@@ -3,6 +3,7 @@ import json
 import uuid
 
 from django.conf import settings
+from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -137,8 +138,8 @@ class BadgeInstance(Component):
             self.created_at = datetime.datetime.now()
             self.json['issuedOn'] = self.created_at.isoformat()
 
-            with open(self.badgeclass.image.file.name) as imageFile:
-                self.image = bake(imageFile, json.dumps(self.json, indent=2))
+            imageFile = default_storage.open(self.badgeclass.image.file.name)
+            self.image = bake(imageFile, json.dumps(self.json, indent=2))
 
             self.image.open()
 
@@ -175,8 +176,7 @@ class BadgeInstance(Component):
         html_output_message = html_template.render(email_context)
         mail_meta = {
             'subject': 'Congratulations, you earned a badge!',
-            # 'from_address': email_context['issuer_name'] + ' Badges <noreply@oregonbadgealliance.org>',
-            'from_address': 'Oregon Badge Alliance' + ' Badges <noreply@oregonbadgealliance.org>',
+            'from_address': email_context['issuer_name'] + '<' + getattr(settings, 'DEFAULT_FROM_EMAIL') + '>',
             'to_addresses': [self.email]
         }
 

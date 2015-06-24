@@ -9,7 +9,7 @@ admin.autodiscover()
 # make sure that any view/model/form imports occur AFTER admin.autodiscover
 
 from django.views.generic.base import RedirectView
-from mainsite.views import Error404, Error500, SitemapView
+from mainsite.views import Error404, Error500, SitemapView, info_view
 
 TOKEN_REGEX = '(?P<uidb36>[0-9A-Za-z]{1,13})-(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})'
 
@@ -23,7 +23,7 @@ urlpatterns = patterns('',
     url(r'^robots\.txt$', RedirectView.as_view(url='%srobots.txt' % settings.STATIC_URL)),
 
     # Home
-    url(r'^$', RedirectView.as_view(url='/login', permanent=False), name='index'),
+    url(r'^$', info_view, name='index'),
 
     # Sitemaps
     url(r'^sitemap$', SitemapView.as_view(), name='sitemap'),
@@ -43,8 +43,7 @@ urlpatterns = patterns('',
     # REST Framework-based APIs
     url(r'^user', include('badgeuser.urls')),
     url(r'^v1/user', include('badgeuser.api_urls')),
-    #url(r'^v1/earner', include('earner.api_urls')),
-    #url(r'^v1/consumer', include('consumer.api_urls')),
+    url(r'^v1/verifier', include('integrity_verifier.api_urls')),
 
     url(r'^public', include('issuer.public_api_urls')),
 
@@ -53,13 +52,6 @@ urlpatterns = patterns('',
 
     # Service health endpoint
     url(r'^health', include('health.urls')),
-
-    # Local Apps for browser front end
-    #url(r'^my-badges', include('earner.urls')),
-    #url(r'^explore', include('consumer.urls')),
-
-    #url(r'^badgeanalysis', include('badgeanalysis.urls')),
-    #url(r'^certificates', include('certificates.urls')),
 )
 
 if apps.is_installed('issuer'):
@@ -69,9 +61,10 @@ if apps.is_installed('issuer'):
         url(r'^issuer', include('issuer.urls')),
     )
 
-if apps.is_installed('integrity_verifier'):
+if apps.is_installed('composer'):
     urlpatterns += patterns('',
-        url(r'^v1/verifier', include('integrity_verifier.api_urls')),
+        url(r'^v1/earner', include('composer.api_urls')),
+        url(r'^earner', include('composer.urls')),
     )
 
 

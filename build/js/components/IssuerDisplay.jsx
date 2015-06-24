@@ -16,10 +16,9 @@ var IssuerDisplayShort = React.createClass({
     originUrl = this.props.url.split('/')[2];
   
     var properties = {
-      name: {type: 'text', text: this.props.name},
-      image: {type: 'image', text: this.props.name + ' logo', href: this.props.image},
-      name: {type: 'text', text: this.props.name},
-      url: {type: 'link', href: this.props.url, text: originUrl}
+      name: {type: 'xsd:string', '@value': this.props.name},
+      image: {type: 'image', name: this.props.name + ' logo', id: this.props.image},
+      url: {type: 'id', id: this.props.url, name: originUrl}
     }
 
     return (
@@ -48,10 +47,10 @@ var IssuerDisplay = React.createClass({
   render: function() {
     var originUrl = this.props.json.url.split('/')[2];
     var properties = {
-      image: {type: 'image', text: this.props.name + ' logo', href: this.props.image},
-      name: {type: 'text', text: this.props.name},
-      url: {type: 'link', href: this.props.json.url, text: originUrl},
-      description: {type: 'text', text: this.props.json.description}
+      image: {type: 'image', name: this.props.name + ' logo', id: this.props.image},
+      name: {type: 'xsd:string', '@value': this.props.name},
+      url: {type: 'id', id: this.props.json.url, name: originUrl},
+      description: {type: 'xsd:string', '@value': this.props.json.description}
     }
     return (
       <div className="issuer-display issuer-display-detail col-xs-12">

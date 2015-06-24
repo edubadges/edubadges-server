@@ -4,6 +4,8 @@ import sys
 from urlparse import urlparse
 from UserDict import UserDict
 
+from django.core.exceptions import ValidationError
+
 import requests
 
 import serializers
@@ -57,7 +59,7 @@ class AnnotatedDict(UserDict, object):
 
 class AnalyzedBadgeInstance(RemoteBadgeInstance):
 
-    def __init__(self, badge_instance, recipient_id=None):
+    def __init__(self, badge_instance, recipient_id=None, recipient_ids=None):
         if not isinstance(badge_instance, RemoteBadgeInstance):
             raise TypeError('Expected RemoteBadgeInstance')
 
@@ -84,9 +86,6 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
         except AttributeError:
             components = (('badge_instance', self.badge_instance),)
 
-        self.recipient_id = (recipient_id
-                             or getattr(badge_instance, 'recipient_id', None))
-
         self.version_signature = re.compile(r"[Vv][0-9](_[0-9])+$")
 
         for module_name, component in components:
@@ -100,7 +99,11 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
         elif self.version.startswith('v0'):
             self.check_origin_0_5()
 
-        self.check_recipient()
+        self.recipient_id = (recipient_id
+                             or getattr(badge_instance, 'recipient_id', None))
+        self.check_recipient(recipient_ids)
+
+        self.check_version_continuity()
 
     def add_versions(self, component, module_name):
         module = getattr(serializers, module_name)
@@ -113,15 +116,18 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
     def evaluate_version(self, component):
         component.version = None
         for version in component.versions:
+
             SerializerClass = getattr(serializers, version)
             serializer = SerializerClass(
                 data=component.data,
-                context={'recipient_id': self.recipient_id})
+                context={'recipient_id': self.recipient_id}
+            )
 
             if not serializer.is_valid():
                 component.version_errors[version] = serializer.errors
             else:
                 component.version = self.get_version(version)
+                component.serializer = SerializerClass
 
     def get_version(self, version):
         try:
@@ -136,18 +142,18 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
                        == urlparse(self.issuer_url).netloc)
         if not same_domain:
             self.non_component_errors.append(
-                ('warning.domain', "Badge components don't share the same domain."))
+                ['warning.domain', "Badge components don't share the same domain."])
 
         local_platform = (urlparse(self.issuer_url).netloc
                           == urlparse(self.issuer.get('url')).netloc)
         if not local_platform:
-            self.non_component_errors.append((
+            self.non_component_errors.append([
                 'warning.platform',
                 "Badge was issued from a platform ("
                 + urlparse(self.issuer_url).netloc
                 + ") separate from the issuer's domain ("
                 + urlparse(self.issuer.get('url')).netloc + ")."
-            ))
+            ])
 
     def check_origin_0_5(self):
         issuer_origin = self.json.get('badge', {}).get('issuer', {}).get('origin', '')
@@ -155,15 +161,15 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
                           == urlparse(self.instance_url).netloc)
 
         if not local_platform:
-            self.non_component_errors.append((
+            self.non_component_errors.append([
                 'warning.platform',
                 "Badge was issued from a platform ("
                 + urlparse(self.issuer_origin).netloc
                 + ") separate from the issuer's domain ("
                 + urlparse(self.instance_url).netloc + ")."
-            ))
+            ])
 
-    def check_recipient(self):
+    def check_recipient(self, recipient_ids):
         """
         Check if a badge recipient is indeed the expected recipient (email address)
         """
@@ -175,12 +181,34 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
             hash_string = recipient_chunk
             salt = self.badge_instance.get('salt', '')
 
-        if utils.verify_hash(self.recipient_id, hash_string, salt) is False:
-            self.non_component_errors.append((
+        if recipient_ids is None:
+            recipient_ids = [self.recipient_id]
+
+        for identifier in recipient_ids:
+            if utils.verify_hash(identifier, hash_string, salt) is True:
+                self.recipient_id = identifier
+                break
+        else:
+            self.non_component_errors.append([
                 'error.recipient',
                 'Recipient id "%s" did not match badge contents: "%s"'
-                % (self.recipient_id, hash_string)
-            ))
+                % (str(recipient_ids), hash_string)
+            ])
+
+    def check_version_continuity(self):
+        """
+        Check if all components of a badge are the same version
+        """
+        try:
+            if not (self.badge.version == self.issuer.version == self.version):
+                self.non_component_errors.append([
+                    'warning.version',
+                    "Components assembled with different specification versions."
+                    + " Assertion: " + self.version + ", BadgeClass: "
+                    + self.badge.version + ", Issuer: " + self.issuer.version
+                ])
+        except (TypeError, AttributeError):
+            pass
 
     def is_valid(self):
         """
@@ -195,16 +223,29 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
         errors = list(self.non_component_errors)
         for component_type in ('badge_instance', 'badge', 'issuer'):
 
-            component = getattr(self, component_type)
-            if component is not None and component.version is None:
-                errors += [(
-                    'error.version_detection',
-                    'Could not determine Open Badges version of %s'
-                    % component_type,
-                    component.version_errors
-                )]
+            try:
+                component = getattr(self, component_type)
+            except AttributeError:
+                pass
+            else:
+                if component is not None and component.version is None:
+                    errors += [[
+                        'error.version_detection',
+                        'Could not determine Open Badges version of %s'
+                        % component_type,
+                        component.version_errors
+                    ]]
 
         return errors
+
+    @property
+    def data(self):
+        """
+        Return a canonical serialization
+        """
+        if self.is_valid():
+            serializer = self.serializer(self)
+            return serializer.data
 
     def __getattr__(self, key):
         base_properties = ['instance_url', 'recipient_id',

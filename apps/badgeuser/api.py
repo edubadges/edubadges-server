@@ -29,7 +29,6 @@ class BadgeUserDetail(generics.RetrieveUpdateAPIView):
         """
         Return full details on a single badge the consumer is currently analyzing.
         """
-        import pdb; pdb.set_trace();
         user = self.get_object()
 
         serializer = BadgeUserSerializer(user)

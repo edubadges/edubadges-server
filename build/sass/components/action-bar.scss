@@ -1,8 +1,12 @@
 .action-bar {
+  clear: both;
   margin-bottom: 0.5em;
   
   h3 {
     margin: 0;
+    a {
+      color: inherit;
+    }
   }
   ul {
     margin: 0;

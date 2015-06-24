@@ -1,3 +1,6 @@
+from itertools import chain
+
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 
@@ -74,7 +77,10 @@ class IssuerList(AbstractIssuerAPIEndpoint):
         serializer: IssuerSerializer
         """
         # Get the Issuers this user owns, edits, or staffs:
-        user_issuers = self.get_list()
+        user_issuers = self.get_list(queryset=self.queryset.filter(
+            Q(owner__id=request.user.id) |
+            Q(staff__id=request.user.id))
+        )
         if not user_issuers.exists():
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -112,6 +118,13 @@ class IssuerList(AbstractIssuerAPIEndpoint):
               type: file
               paramType: form
         """
+        if getattr(settings, 'BADGR_APPROVED_ISSUERS_ONLY', False) \
+                and not request.user.has_perm('issuer.add_issuer'):
+            return Response(
+                "User not in an approved issuers group",
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         serializer = IssuerSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
@@ -253,6 +266,38 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
                 status=status.HTTP_200_OK)
 
         return Response(IssuerStaffSerializer(staff_instance).data)
+
+
+class AllBadgeClassesList(AbstractIssuerAPIEndpoint):
+    """
+    GET a list of badgeclasses within one issuer context or
+    POST to create a new badgeclass within the issuer context
+    """
+    queryset = Issuer.objects.all()
+    model = Issuer
+    permission_classes = (IsEditor,)
+
+    def get(self, request):
+        """
+        GET a list of badgeclasses within one Issuer context.
+        Authenticated user must have owner, editor, or staff status on Issuer
+        ---
+        serializer: BadgeClassSerializer
+        """
+        # Ensure current user has permissions on current issuer
+        user_issuers = Issuer.objects.filter(
+            Q(owner__id=request.user.id) |
+            Q(staff__id=request.user.id)
+        ).distinct().select_related('badgeclasses')
+        issuer_badgeclasses = [
+            bc for bc in chain.from_iterable(i.badgeclasses.all() 
+                for i in user_issuers)
+        ]
+
+        serializer = BadgeClassSerializer(
+            issuer_badgeclasses, many=True, context={'request': request}
+        )
+        return Response(serializer.data)
 
 
 class BadgeClassList(AbstractIssuerAPIEndpoint):

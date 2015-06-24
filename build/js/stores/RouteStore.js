@@ -32,7 +32,10 @@ RouteStore.dispatchToken = appDispatcher.register(function(payload){
     case 'ROUTE_CHANGED':
       _previous = _current + '';
       _current = action.href;
-      RouteStore.emit('ROUTE_CHANGED');
+      // This event will trigger another action, so we need to break out
+      // of the current dispatcher context w/setTimeout.
+      setTimeout(function(){ RouteStore.emit('ROUTE_CHANGED'); }, 0);
+      
       break;
 
     default:

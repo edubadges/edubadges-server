@@ -1,4 +1,6 @@
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
 from django.template.response import SimpleTemplateResponse
 from django.views.generic import TemplateView
 
@@ -39,3 +41,14 @@ class Error500(TemplateView):
             **response_kwargs
         )
 error500 = Error500.as_view()
+
+
+@login_required(
+    login_url=getattr(
+        settings, 'ROOT_INFO_REDIRECT',
+        getattr(settings, 'LOGIN_URL', '/login')
+    ),
+    redirect_field_name=None
+)
+def info_view(request):
+    return redirect(getattr(settings, 'LOGIN_REDIRECT_URL'))

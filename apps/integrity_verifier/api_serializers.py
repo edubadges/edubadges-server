@@ -4,6 +4,7 @@ from rest_framework import serializers
 
 from . import RemoteBadgeInstance, AnalyzedBadgeInstance
 from .utils import get_instance_url_from_image, get_instance_url_from_assertion
+# from .serializers import badge_class, badge_instance, issuer, fields
 
 
 class IntegritySerializer(serializers.Serializer):
@@ -13,15 +14,23 @@ class IntegritySerializer(serializers.Serializer):
     url = serializers.URLField(required=False, write_only=True)
     image = serializers.ImageField(required=False, write_only=True)
 
-    json = serializers.DictField(read_only=True)
+    is_valid = serializers.BooleanField(read_only=True)
     version = serializers.CharField(read_only=True)
     errors = serializers.ListField(read_only=True, source='all_errors')
+    json = serializers.DictField(read_only=True, source='data')
+
+    instance = serializers.DictField(read_only=True, source='badge_instance')
+    instance_url = serializers.URLField(read_only=True)
     badge = serializers.DictField(read_only=True)
     badge_url = serializers.URLField(read_only=True)
     issuer = serializers.DictField(read_only=True)
     issuer_url = serializers.URLField(read_only=True)
 
     def validate(self, data):
+        # Remove empty DictField
+        if data.get('assertion') == {}:
+            data.pop('assertion', None)
+
         instance_input_fields = set(('url', 'image', 'assertion'))
         valid_inputs = {key: data.get(key) for
                         key in instance_input_fields.intersection(data.keys())}

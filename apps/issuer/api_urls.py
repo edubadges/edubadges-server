@@ -3,12 +3,14 @@ from django.views.generic.base import RedirectView
 
 from .api import (IssuerList, IssuerDetail, IssuerStaffList,
                   BadgeClassList, BadgeClassDetail, BadgeInstanceList,
-                  BadgeInstanceDetail, IssuerBadgeInstanceList)
+                  BadgeInstanceDetail, IssuerBadgeInstanceList,
+                  AllBadgeClassesList)
 
 
 urlpatterns = patterns(
     'issuer.api_views',
     url(r'^$', RedirectView.as_view(url='/v1/issuer/issuers', permanent=False)),
+    url(r'^/all-badges$', AllBadgeClassesList.as_view(), name='issuer_all_badges_list'),
     url(r'^/issuers$', IssuerList.as_view(), name='issuer_list'),
     url(r'^/issuers/(?P<slug>[-\w]+)$', IssuerDetail.as_view(), name='issuer_detail'),
     url(r'^/issuers/(?P<slug>[-\w]+)/staff$', IssuerStaffList.as_view(), name='issuer_staff'),

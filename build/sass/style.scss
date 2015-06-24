@@ -2,18 +2,22 @@
 @import "components/header";
 @import "components/footer";
 @import "components/badge-display";
+@import "components/earner-badge-list";
 @import "components/action-bar";
 @import "components/active-panel";
 @import "components/badge-form";
 @import "components/main-component";
 @import "components/breadcrumbs";
 @import "components/accounts";
+@import "components/buttons";
+@import "components/card";
 
 // refactoring from this SB2 stylesheet as source, moving things into 
 // components as possible. Eventually this won't be needed:
 @import "components/sb2";
 @import "components/metismenu";
 
+@import "./colors";
 
 // Grid adjustments so that on the smallest screens, 
 // col-xs classes are 100% width
@@ -32,25 +36,17 @@
   li.expanded-false ul { display: none; }
 } 
 
-.navbar-static-top {
-  margin-bottom: 0;
-} 
-
-.badge-display, .issuer-display {
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
-  padding: 0.25em;
-  float: left;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+body.badgr {
+  background-color: $badgr-brown;
 }
-.badge-display-thumbnail {
-  overflow: hidden;
-  height: 310px;
+.main-app-container {
+  background-color: $white;
+  padding-bottom: 2em; 
+}
 
-  .badgeProperty {
-    span.propertyValue { font-weight: bold; }
-  }
+
+a {
+  color: $badgr-red;
 }
 
 img { 

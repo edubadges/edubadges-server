@@ -1,0 +1,17 @@
+@import "../colors";
+
+.btn-primary {
+  background-color: $badgr-red;
+  border-color: $badgr-darkred;
+  &:hover, &:active, &:focus {
+    background-color: $badgr-darkred;
+  }
+}
+
+.btn-danger {
+  background-color: $danger;
+  border-color: $danger-dark;
+  &:hover, &:active, &:focus {
+    background-color: $danger-dark;
+  }
+}

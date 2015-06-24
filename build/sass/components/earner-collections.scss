@@ -1,0 +1,29 @@
+@import "../colors";
+
+.earner-badges-list {
+  .more-link {
+    clear: both;
+    text-align: right;
+  }
+}
+
+.earner-collection-detail {
+  .text-label { font-weight: bold; }
+
+  .collection-share-info {
+    margin: 1em 2.5em;
+    padding: 1em 1em 1.25em 1em;
+    background-color: $light;
+
+    .sharing-input input { margin-right: 1em;}
+    .sharing-url-box input { width: 100%; }
+
+    .hint { color: $medium; font-size: 0.8em; }
+
+    &.sharing-disabled .sharing-url-box {
+      input { background-color: #f1f1f1; }
+    }
+  }
+
+
+}
