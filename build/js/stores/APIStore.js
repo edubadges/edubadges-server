@@ -308,26 +308,25 @@ APIStore.postForm = function(fields, values, context){
 }
 
 
-/* postForm(): a common function for POSTing forms and returning results
- * to the FormStore.
- * Params:
- *   context: a dictionary providing information about the API endpoint
- *            and expected return results.
- *   fields: the form data from the FormStore.
- * This function will interrogate the data and attach appropriate fields
- * to the post request.
+/* requestData: a method of making partial updates to collection records based on
+ * an API interaction.
 */
-APIStore.postData = function(data, context){
+APIStore.requestData = function(data, context){
+  var req;
   if (context.method == 'POST')
-    var req = request.post(context.actionUrl);
+    req = request.post(context.actionUrl);
   else if (context.method == 'DELETE')
-    var req = request.delete(context.actionUrl);
+    req = request.del(context.actionUrl);
   else if (context.method == 'PUT')
-    var req = request.put(context.actionUrl);
+    req = request.put(context.actionUrl);
+  else if (context.method == 'GET')
+    req = request.get(context.actionUrl);
 
   req.set('X-CSRFToken', getCookie('csrftoken'))
   .accept('application/json')
-  .type('application/json');
+
+  if (data)
+    req.type('application/json');
 
   req.send(data);
 
@@ -344,7 +343,8 @@ APIStore.postData = function(data, context){
       APIStore.emit("API_RESULT")
     }
     else{
-      var newObject = APIStore.partialUpdateCollectionItem(context.apiCollectionKey, 'slug', context.apiItemKey, 'badges', JSON.parse(response.text));
+      var newValue = typeof response.text == 'string' && response.text ? JSON.parse(response.text) : '';
+      var newObject = APIStore.partialUpdateCollectionItem(context.apiCollectionKey, context.apiSearchKey, context.apiSearchValue, context.apiUpdateKey, newValue);
       if (newObject){
         APIStore.emit('DATA_UPDATED');
         APIStore.emit('DATA_UPDATED_' + context.formId);
@@ -385,7 +385,7 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
       break;
 
     case 'API_SUBMIT_DATA':
-      APIStore.postData(action.apiData, action.apiContext);
+      APIStore.requestData(action.apiData, action.apiContext);
       break;
 
     case 'API_GET_DATA':

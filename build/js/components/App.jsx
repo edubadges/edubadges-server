@@ -432,6 +432,7 @@ var App = React.createClass({
           slug={collection.slug}
           clickable={false}
           description={collection.description}
+          share_url={collection.share_url}
           badgeList={badgesInCollection}
           display="thumbnail"
         />

@@ -1,5 +1,6 @@
 import os
 
+from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 
 from rest_framework import authentication, permissions, status, serializers

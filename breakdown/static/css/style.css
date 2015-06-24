@@ -771,6 +771,19 @@ body.accounts {
 
 .earner-collection-detail .text-label {
   font-weight: bold; }
+.earner-collection-detail .collection-share-info {
+  margin: 1em 2.5em;
+  padding: 1em 1em 1.25em 1em;
+  background-color: #e7e7e7; }
+  .earner-collection-detail .collection-share-info .sharing-input input {
+    margin-right: 1em; }
+  .earner-collection-detail .collection-share-info .sharing-url-box input {
+    width: 100%; }
+  .earner-collection-detail .collection-share-info .hint {
+    color: #777;
+    font-size: 0.8em; }
+  .earner-collection-detail .collection-share-info.sharing-disabled .sharing-url-box input {
+    background-color: #f1f1f1; }
 
 .main-footer {
   border-top: 1px solid #e7e7e7;

@@ -49,6 +49,37 @@ var moreLinkBadgeJSON = function(moreCount){
 };
 
 
+var CollectionShareInfo = React.createClass({
+  getDefaultProps: function() {
+    return {
+      share_url: ''
+    };
+  },
+  selectAllText: function(e){
+    e.target.setSelectionRange(0, this.props.share_url.length);
+  },
+  render: function() {
+    return (
+      <div className={this.props.share_url ? "collection-share-info sharing-enabled" : "collection-share-info sharing-disabled disabled"}>
+        <div className="sharing-input">
+          <input type="checkbox" name="sharecheck" checked={this.props.share_url ? true : false} className={"share-collection-checkbox"} onChange={this.props.handleChange} />
+          <label htmlFor="sharecheck">
+            Generate sharing link
+            {this.props.share_url ? (<span className="hint">(Unchecking this box will disable sharing)</span>) : ''}
+          </label>
+        </div>
+        <div className="sharing-url-box">
+          <label htmlFor="shareurl">Link:</label>
+          <input type="text" readOnly={true} name="shareurl" onClick={this.selectAllText} value={this.props.share_url} />
+        </div>
+        {this.props.share_url ? (<p className="hint">When enabled, anyone with the link will be able to view this collection.</p>) : ''}
+        {this.props.share_url ? (<p><a href={this.props.share_url}><button className='btn btn-primary'>View Share Page</button></a></p>) : ''}
+      </div>
+    );
+  }
+});
+
+
 var EarnerCollectionDetail = React.createClass({
   getInitialState: function() {
     return {
@@ -77,7 +108,9 @@ var EarnerCollectionDetail = React.createClass({
     var apiContext = {
       formId: "earnerCollection_" + this.props.slug,
       apiCollectionKey: "earner_collections",
-      apiItemKey: this.props.slug,
+      apiSearchKey: 'slug',
+      apiSearchValue: this.props.slug,
+      apiUpdateKey: 'badges',
       actionUrl: "/v1/earner/collections/" + this.props.slug + "/badges",
       method: "PUT",
       successHttpStatus: [200],
@@ -95,6 +128,39 @@ var EarnerCollectionDetail = React.createClass({
       this.setState({selectedBadgeIds: _.without(this.state.selectedBadgeIds, id)});
     else
       this.setState({selectedBadgeIds: this.state.selectedBadgeIds.concat([id])})
+  },
+  handleShareChange: function(e){
+    var apiContext;
+    if (!this.props.share_url) {
+      // Turn sharing on
+      apiContext = {
+        formId: "earnerCollection_" + this.props.slug,
+        apiCollectionKey: "earner_collections",
+        apiSearchKey: 'slug',
+        apiSearchValue: this.props.slug,
+        apiUpdateKey: 'share_url',
+        actionUrl: "/v1/earner/collections/" + this.props.slug + "/share",
+        method: "GET",
+        successHttpStatus: [200],
+        successMessage: "Collection updated"
+      };
+    }
+    else {
+      // Delete share hash
+      apiContext = {
+        formId: "earnerCollection_" + this.props.slug,
+        apiCollectionKey: "earner_collections",
+        apiSearchKey: 'slug',
+        apiSearchValue: this.props.slug,
+        apiUpdateKey: 'share_url',
+        actionUrl: "/v1/earner/collections/" + this.props.slug + "/share",
+        method: "DELETE",
+        successHttpStatus: [204],
+        successMessage: "Collection updated"
+      };
+    }
+
+    APISubmitData(null, apiContext);
   },
   handleUpdate: function(){
     if (this.isMounted()){
@@ -145,14 +211,20 @@ var EarnerCollectionDetail = React.createClass({
           <span className="text-label col-xs-12 col-sm-4">Description</span>
           <span className="text-content col-xs-12 col-sm-8">{this.props.description}</span>
         </p>
+
+        <CollectionShareInfo
+          share_url={this.props.share_url}
+          handleChange={this.handleShareChange}
+        />
+
+        {this.state.message ? (<div className={"alert alert-" + this.state.message.type}>{this.state.message.content}</div>) : ""}
+        {this.state.formState == "waiting" ? <LoadingComponent /> : ""}
         <ActionBar 
           title="Badges in collection"
           viewId={'earnerCollectionDetail' + this.props.slug}
           items={[editBadgeButtonConfig]}
           updateActivePanel={panelFunction}
         />
-        {this.state.formState == "waiting" ? <LoadingComponent /> : ""}
-        {this.state.message ? (<div className={"alert alert-" + this.state.message.type}>{this.state.message.content}</div>) : ""}
         <EarnerBadgeList
           display="thumbnail"
           badges={badges}
@@ -174,12 +246,15 @@ var EarnerCollectionCard = React.createClass({
       );
   },
   render: function() {
-    var cardActionItems = [{
-      actionUrl: this.props.share_url,
-      iconClass: 'fa-external-link',
-      actionClass: 'pull-right',
-      title: "Share"
-    }];
+    var cardActionItems = [];
+    if (this.props.share_url)
+      cardActionItems.push({
+        actionUrl: this.props.share_url,
+        iconClass: 'fa-external-link',
+        actionClass: 'pull-right',
+        title: "Share"
+      });
+
     var badges = APIStore.filter('earner_badges', 'id', _.pluck(this.props.badgeList, 'id').slice(0,7));
 
     if (this.props.badgeList.length > 7){
