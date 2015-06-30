@@ -37,7 +37,7 @@ urlpatterns = patterns('',
     # accounts:
     url(r'^accounts[/]?$', RedirectView.as_view(url='/accounts/email/')),
     url(r'^accounts/', include('allauth.urls')),
-    url(r'^login', RedirectView.as_view(url='/accounts/login', permanent=False), name='login'),
+    url(r'^login', RedirectView.as_view(url='/accounts/login', permanent=False, query_string=True), name='login'),
     url(r'^logout', RedirectView.as_view(url='/accounts/logout', permanent=False), name='logout'),
 
     # REST Framework-based APIs

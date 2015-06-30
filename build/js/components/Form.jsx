@@ -163,6 +163,8 @@ BasicAPIForm = React.createClass({
   },
   componentDidMount: function() {
     FormStore.addListener('FORM_DATA_UPDATED_' + this.props.formId, this.handlePatch);
+    if (this.props.submitImmediately)
+      this.handleSubmit();
   },
   componentWillUnmount: function() {
     FormStore.removeListener('FORM_DATA_UPDATED_' + this.props.formId, this.handlePatch);
@@ -206,8 +208,11 @@ BasicAPIForm = React.createClass({
     }
   },
   handleSubmit: function(e){
-    e.preventDefault(); 
-    e.stopPropagation();
+    if (typeof e !== 'undefined'){
+      e.preventDefault(); 
+      e.stopPropagation();
+    }
+    
     if (this.state.actionState != "waiting")
       FormActions.submitForm(this.props.formId);
   },
@@ -237,6 +242,7 @@ BasicAPIForm = React.createClass({
         activeMessage = (this.state.message) ? (<div className={"alert alert-" + this.state.message.type} >{this.state.message.content}</div>) : "",
         activeHelpText = !this.state.message && this.props.helpText ? <div className="alert alert-info">{this.props.helpText}</div> : "",
         formControls = "",
+        closeButton = this.props.handleCloseForm ? (<PlainButton name="close" label="Close" handleClick={this.props.handleCloseForm} />) : "",
         loadingIcon = this.state.actionState == "waiting" ? (<LoadingIcon />) : "";
     if (["ready", "waiting"].indexOf(this.state.actionState) > -1){
 
@@ -303,7 +309,7 @@ BasicAPIForm = React.createClass({
 
       formControls = (
         <div className="row form-controls">
-          <PlainButton name="close" label="Close" handleClick={this.props.handleCloseForm} />
+          {closeButton}
           <ResetButton name="reset" handleClick={this.handleReset} />
           <SubmitButton name="submit" handleClick={this.handleSubmit} />
           {loadingIcon}
@@ -313,7 +319,7 @@ BasicAPIForm = React.createClass({
     else {
       formControls = (
         <div className="row form-controls">
-          <PlainButton name="close" label="Close" handleClick={this.props.handleCloseForm} />
+          {closeButton}
           <ResetButton name="reset" handleClick={this.handleReset} />
         </div>
       );

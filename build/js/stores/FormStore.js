@@ -1,10 +1,14 @@
 var _ = require('underscore')
-
 var Dispatcher = require('../dispatcher/appDispatcher');
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
-var APIStore = require('../stores/APIStore');
+
+//actions
 var EarnerActions = require('../actions/earner');
+
+//stores
+var FormConfigStore = require('../stores/FormConfigStore');
+var APIStore = require('../stores/APIStore');
 
 
 var FormStore = assign({}, EventEmitter.prototype);
@@ -13,14 +17,7 @@ FormStore.requests = {};
 
 FormStore.data = {}
 
-FormStore.genericFormTypes = [
-  'IssuerCreateUpdateForm',
-  'BadgeClassCreateUpdateForm',
-  'BadgeInstanceCreateUpdateForm',
-  'EarnerBadgeImportForm',
-  'EarnerCollectionCreateForm',
-  'EarnerCollectionEditForm'
-]
+FormStore.genericFormTypes = FormConfigStore.genericFormTypes();
 
 FormStore.idValid = function(formId){
   return (FormStore.data.hasOwnProperty(formId))
