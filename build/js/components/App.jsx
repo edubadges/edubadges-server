@@ -10,6 +10,7 @@ var RouteStore = require('../stores/RouteStore');
 var MenuStore = require('../stores/MenuStore');
 var APIStore = require('../stores/APIStore');
 var FormStore = require('../stores/FormStore');
+var FormConfigStore = require('../stores/FormConfigStore');
 var UserStore = require('../stores/UserStore');
 var ActiveActionStore = require('../stores/ActiveActionStore');
 
@@ -50,6 +51,7 @@ var App = React.createClass({
     '/': 'home',
     '/earner': 'earnerMain',
     '/earner/badges': 'earnerBadges',
+    '/earner/badges/new': 'earnerImportBadge',
     '/earner/badges/:badgeId': 'earnerBadgeDetail',
     '/earner/collections': 'earnerCollections',
     '/earner/collections/:collectionSlug': 'earnerCollectionDetail',
@@ -307,6 +309,36 @@ var App = React.createClass({
       </MainComponent>
     );
 
+    return this.render_base(mainComponent);
+  },
+
+  earnerImportBadge: function(params){
+    var viewId = 'earnerImportBadge';
+    var dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
+    var breadCrumbs = [
+      { name: "Earner Home", url: '/earner'},
+      { name: "My Badges", url: '/earner/badges' },
+      { name: "Import New Badge", url: '/earner/badges/new' }
+    ];
+    var navigateToBadgeList = function(){
+      ClickActions.navigateLocalPath('/earner/badges');
+    };
+
+    var importUrl = params['url'];
+    debugger;
+    var mainComponent = (
+      <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet} >
+        <BreadCrumbs items={breadCrumbs} />
+        <ActivePanel 
+          viewId={viewId}
+          type="EarnerBadgeImportForm"
+          url={importUrl || ''}
+          submitImmediately={importUrl ? true : false}
+          clearActivePanel={navigateToBadgeList}
+        />
+
+      </MainComponent>
+    );
     return this.render_base(mainComponent);
   },
 

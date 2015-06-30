@@ -1,8 +1,10 @@
 import json
 
+from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect
+from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, TemplateView
 
 from badgeuser.serializers import UserProfileField
@@ -14,9 +16,11 @@ from .serializers import EarnerPortalSerializer
 class EarnerPortal(TemplateView):
     template_name = 'base.html'
 
+    @method_decorator(login_required)
     def get(self, request):
-        if not request.user.is_authenticated():
-            return redirect(reverse('login'))
+        # import pdb; pdb.set_trace();
+        # if not request.user.is_authenticated():
+        #     return redirect(reverse('login'))
 
         context = self.get_context_data(**{'request': request})
         return self.render_to_response(context)

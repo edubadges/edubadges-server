@@ -15,7 +15,7 @@ from jsonfield import JSONField
 
 from bakery import bake
 
-from .utils import generate_sha256_hashstring
+from .utils import generate_sha256_hashstring, badgr_import_url
 
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
@@ -164,7 +164,9 @@ class BadgeInstance(Component):
                 'badge_description': self.badgeclass.prop('description'),
                 'issuer_name': self.issuer.name,
                 'issuer_url': self.issuer.prop('url'),
-                'image_url': self.get_full_url() + '/image'
+                'issuer_image_url': self.issuer.get_full_url() + '/image',
+                'image_url': self.get_full_url() + '/image',
+                'badgr_import_url': badgr_import_url(self)
             }
         except KeyError as e:
             # A property isn't stored right in json
