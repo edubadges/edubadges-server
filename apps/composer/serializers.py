@@ -69,7 +69,7 @@ class EarnerBadgeSerializer(serializers.Serializer):
         try:
             rbi = RemoteBadgeInstance(url)
         except DjangoValidationError as e:
-            raise e
+            raise serializers.ValidationError(e.message)
 
         abi = AnalyzedBadgeInstance(rbi, recipient_ids=[id.email for id in user.emailaddress_set.all()])
         if len(

@@ -1,9 +1,7 @@
 import json
 
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
 from django.http import HttpResponse
-from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, TemplateView
 
