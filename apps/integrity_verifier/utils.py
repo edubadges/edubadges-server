@@ -2,6 +2,8 @@ import hashlib
 import json
 import re
 
+from django.core.exceptions import ValidationError
+
 from bakery import unbake
 
 
@@ -41,6 +43,9 @@ def get_instance_url_from_unknown_string(badge_input):
 def get_instance_url_from_image(imageFile):
     """ unbake an open file, and return the assertion URL contained within """
     image_contents = unbake(imageFile)
+
+    if image_contents is None:
+        raise ValidationError("No assertion found in image")
 
     return get_instance_url_from_unknown_string(image_contents)
 
