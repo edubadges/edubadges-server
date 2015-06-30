@@ -60,7 +60,6 @@ class EarnerBadgeSerializer(serializers.Serializer):
         elif validated_data.get('image') is not None:
             image = validated_data.get('image')
             image.open()
-            import pdb; pdb.set_trace();
             try:
                 url = get_instance_url_from_image(image)
             except Exception as e:

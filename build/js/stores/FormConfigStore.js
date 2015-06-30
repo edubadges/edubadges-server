@@ -35,7 +35,7 @@ FormConfigStore.getConfig = function(formId, overrides, context){
         description: {inputType: "textarea", label: "Issuer Description", required: true},
         url: {inputType: "text", label: "Website URL", required: true},
         email: {inputType: "text", label: "Contact Email", required: true},
-        image: {inputType: "image", label: "Logo", required: false, filename: "issuer_logo.png"}
+        image: {inputType: "image", label: "Logo (Square PNG)", required: false, filename: "issuer_logo.png"}
       },
       defaultValues: {
         name: "",
@@ -67,7 +67,7 @@ FormConfigStore.getConfig = function(formId, overrides, context){
         name: {inputType: "text", label: "Badge Name", required: true},
         description: {inputType: "textarea", label: "Badge Description", required: true},
         criteria: {inputType: "textarea", label: "Criteria URL or text", required: true},
-        image: {inputType: "image", label: "Badge Image", required: false, filename: "badge_image.png"}
+        image: {inputType: "image", label: "Badge Image (Square PNG)", required: false, filename: "badge_image.png"}
       },
       defaultValues: {
         name: "",
