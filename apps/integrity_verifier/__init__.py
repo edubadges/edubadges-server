@@ -7,6 +7,7 @@ from UserDict import UserDict
 from django.core.exceptions import ValidationError
 
 import requests
+from requests.exceptions import ConnectionError
 
 import serializers
 import utils
@@ -24,21 +25,24 @@ class RemoteBadgeInstance(object):
         self.instance_url = instance_url
         self.recipient_id = recipient_id
 
-        self.badge_instance = requests.get(
-            instance_url, headers=req_head).json()
-        self.json = self.badge_instance.copy()
+        try:
+            self.badge_instance = requests.get(
+                instance_url, headers=req_head).json()
+            self.json = self.badge_instance.copy()
 
-        # 0.x badges embedded badge and issuer information
-        if not isinstance(self.badge_instance['badge'], dict):
-            self.badge_url = self.badge_instance['badge']
-            self.badge = requests.get(
-                self.badge_url, headers=req_head).json()
-            self.json['badge'] = self.badge.copy()
+            # 0.x badges embedded badge and issuer information
+            if not isinstance(self.badge_instance['badge'], dict):
+                self.badge_url = self.badge_instance['badge']
+                self.badge = requests.get(
+                    self.badge_url, headers=req_head).json()
+                self.json['badge'] = self.badge.copy()
 
-            self.issuer_url = self.badge['issuer']
-            self.issuer = requests.get(
-                self.issuer_url, headers=req_head).json()
-            self.json['badge']['issuer'] = self.issuer.copy()
+                self.issuer_url = self.badge['issuer']
+                self.issuer = requests.get(
+                    self.issuer_url, headers=req_head).json()
+                self.json['badge']['issuer'] = self.issuer.copy()
+        except ConnectionError as e:
+            raise ValidationError(e.message)
 
     def __getitem__(self, key):
         return self.badge_instance[key]

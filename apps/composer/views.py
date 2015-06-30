@@ -18,9 +18,6 @@ class EarnerPortal(TemplateView):
 
     @method_decorator(login_required)
     def get(self, request):
-        # import pdb; pdb.set_trace();
-        # if not request.user.is_authenticated():
-        #     return redirect(reverse('login'))
 
         context = self.get_context_data(**{'request': request})
         return self.render_to_response(context)

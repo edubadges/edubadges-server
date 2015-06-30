@@ -79,7 +79,7 @@ class IssuerList(AbstractIssuerAPIEndpoint):
         # Get the Issuers this user owns, edits, or staffs:
         user_issuers = self.get_list(queryset=self.queryset.filter(
             Q(owner__id=request.user.id) |
-            Q(staff__id=request.user.id))
+            Q(staff__id=request.user.id)).distinct()
         )
         if not user_issuers.exists():
             return Response(status=status.HTTP_404_NOT_FOUND)
