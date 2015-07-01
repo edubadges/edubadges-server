@@ -3,6 +3,7 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import DetailView, TemplateView
 
 from badgeuser.serializers import UserProfileField
@@ -38,10 +39,10 @@ class CollectionDetailView(DetailView):
     model = Collection
     context_object_name = 'collection'
 
+    @method_decorator(xframe_options_exempt)
     def get(self, request, *args, **kwargs):
         response = super(CollectionDetailView, self).get(request, *args, **kwargs)
-        print self.object.share_hash
-        print kwargs.get('share_hash')
+
         if self.object.share_hash == '' or \
                 self.object.share_hash != kwargs.get('share_hash'):
             return HttpResponse(
@@ -56,3 +57,11 @@ class CollectionDetailView(DetailView):
         context.update({
         })
         return context
+
+
+class CollectionDetailEmbedView(CollectionDetailView):
+    template_name = 'composer/collection_detail_embed.html'
+
+    @method_decorator(xframe_options_exempt)
+    def get(self, request, *args, **kwargs):
+        return super(CollectionDetailEmbedView, self).get(request, *args, **kwargs)

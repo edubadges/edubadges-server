@@ -11,6 +11,7 @@
 @import "components/accounts";
 @import "components/buttons";
 @import "components/card";
+@import "components/iframe-embed-container";
 
 // refactoring from this SB2 stylesheet as source, moving things into 
 // components as possible. Eventually this won't be needed:
@@ -39,6 +40,10 @@
 body.badgr {
   background-color: $badgr-brown;
 }
+body.embedded-body {
+  background-color: transparent;
+}
+
 .main-app-container {
   background-color: $white;
   padding-bottom: 2em; 
@@ -47,6 +52,9 @@ body.badgr {
 
 a {
   color: $badgr-red;
+}
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+  color: $black;
 }
 
 img { 

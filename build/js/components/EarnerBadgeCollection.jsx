@@ -48,6 +48,21 @@ var moreLinkBadgeJSON = function(moreCount){
   };
 };
 
+var IFrameEmbedInfo = React.createClass({
+  generateEmbed: function(url){
+    return '<iframe height="500" width="300" frameborder="0" src="' + url + '/embed' + '"></iframe>';
+  },
+  selectAllText: function(e){
+    e.target.setSelectionRange(0, this.generateEmbed(this.props.share_url).length);
+  },
+  render: function() {
+    return (
+      <div className="collection-embed-info">
+        <textarea defaultValue={this.generateEmbed(this.props.share_url)} onClick={this.selectAllText} /> 
+      </div>
+    );
+  }
+});
 
 var CollectionShareInfo = React.createClass({
   getDefaultProps: function() {
@@ -59,6 +74,8 @@ var CollectionShareInfo = React.createClass({
     e.target.setSelectionRange(0, this.props.share_url.length);
   },
   render: function() {
+    var embedInfo = this.props.share_url ? (<IFrameEmbedInfo share_url={this.props.share_url} />) : '';
+
     return (
       <div className={this.props.share_url ? "collection-share-info sharing-enabled" : "collection-share-info sharing-disabled disabled"}>
         <div className="sharing-input">
@@ -71,6 +88,7 @@ var CollectionShareInfo = React.createClass({
         <div className="sharing-url-box">
           <label htmlFor="shareurl">Link:</label>
           <input type="text" readOnly={true} name="shareurl" onClick={this.selectAllText} value={this.props.share_url} />
+          {embedInfo}
         </div>
         {this.props.share_url ? (<p className="hint">When enabled, anyone with the link will be able to view this collection.</p>) : ''}
         {this.props.share_url ? (<p><a href={this.props.share_url}><button className='btn btn-primary'>View Share Page</button></a></p>) : ''}

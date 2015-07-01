@@ -16,12 +16,19 @@
     background-color: $light;
 
     .sharing-input input { margin-right: 1em;}
-    .sharing-url-box input { width: 100%; }
+    .sharing-url-box { 
+      input, textarea { width: 100%; }
+      textarea {
+        margin-top: 0.75em;
+        border-color: $light;
+        height: 4.8em;
+      }
+    }
 
     .hint { color: $medium; font-size: 0.8em; }
 
     &.sharing-disabled .sharing-url-box {
-      input { background-color: #f1f1f1; }
+      input, textarea { background-color: #f1f1f1; width: 100%; }
     }
   }
 

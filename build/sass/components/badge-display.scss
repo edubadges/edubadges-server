@@ -8,16 +8,17 @@
   border-radius: 4px;
 }
 .badge-display-thumbnail {
-  overflow: hidden;
+  overflow: hidden; 
   height: 310px;
 
   .badgeProperty {
     span.propertyValue { font-weight: bold; }
   }
-}
+} 
 
 
 .badge-display, .issuer-display {
+  a { word-wrap: break-word;}
   .propertyName {
     font-weight: bold;
     margin-right: 0.5em;
