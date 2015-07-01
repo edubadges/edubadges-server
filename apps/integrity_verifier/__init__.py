@@ -108,6 +108,7 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
         self.check_recipient(recipient_ids)
 
         self.check_version_continuity()
+        import pdb; pdb.set_trace();
 
     def add_versions(self, component, module_name):
         module = getattr(serializers, module_name)
@@ -168,7 +169,7 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
             self.non_component_errors.append([
                 'warning.platform',
                 "Badge was issued from a platform ("
-                + urlparse(self.issuer_origin).netloc
+                + urlparse(issuer_origin).netloc
                 + ") separate from the issuer's domain ("
                 + urlparse(self.instance_url).netloc + ")."
             ])
