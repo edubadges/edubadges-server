@@ -41,6 +41,9 @@ class RemoteBadgeInstance(object):
                 self.issuer = requests.get(
                     self.issuer_url, headers=req_head).json()
                 self.json['badge']['issuer'] = self.issuer.copy()
+            else:
+                self.badge = self.badge_instance['badge'].copy()
+                self.issuer = self.badge['issuer'].copy()
         except ConnectionError as e:
             raise ValidationError(e.message)
 
@@ -108,7 +111,6 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
         self.check_recipient(recipient_ids)
 
         self.check_version_continuity()
-        import pdb; pdb.set_trace();
 
     def add_versions(self, component, module_name):
         module = getattr(serializers, module_name)
@@ -169,9 +171,9 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
             self.non_component_errors.append([
                 'warning.platform',
                 "Badge was issued from a platform ("
-                + urlparse(issuer_origin).netloc
+                + urlparse(self.instance_url).netloc
                 + ") separate from the issuer's domain ("
-                + urlparse(self.instance_url).netloc + ")."
+                + urlparse(issuer_origin).netloc + ")."
             ])
 
     def check_recipient(self, recipient_ids):
@@ -220,9 +222,7 @@ class AnalyzedBadgeInstance(RemoteBadgeInstance):
         Check if all components of a badge have a version and that there are no
         non_component_errors.
         """
-        if all(e[0].startswith('warning') for e in self.all_errors()):
-            return True
-        return False
+        return all(e[0].startswith('warning') for e in self.all_errors())
 
     def all_errors(self):
         errors = list(self.non_component_errors)
