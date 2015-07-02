@@ -196,13 +196,6 @@ LOGGING = {
             'level': 'ERROR',
             'filters': [],
             'class': 'django.utils.log.AdminEmailHandler'
-        },
-        'local_file': {
-            'level': 'DEBUG',
-            'filters': ['badgr'],
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(LOGS_DIR, 'badgr.log'),
-            'formatter': 'default'
         }
     },
     'loggers': {
@@ -210,15 +203,6 @@ LOGGING = {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
-        },
-        'badgr': {
-            'handlers': ['local_file'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'root': {
-            'handlers': ['local_file'],
-            'level': 'INFO',
         }
     },
     'formatters': {
@@ -354,5 +338,3 @@ except ImportError as e:
     sys.stderr.write("no settings_local found, setting DEBUG=True...\n")
     DEBUG = True
     pass
-
-LOGGING['handlers']['local_file']['filename'] = os.path.join(LOGS_DIR, 'badgr.log')
