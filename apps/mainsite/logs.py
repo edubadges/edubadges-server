@@ -16,7 +16,7 @@ class SiteLogger(object):
         self.logger.setLevel(logging.DEBUG)
         self.logger.addHandler(
             logging.FileHandler(
-                path.join(settings.LOGS_DIR, log_file)
+                path.join(settings.LOGS_DIR, log_file), delay=True
             )
         )
         self.prefix = prefix
