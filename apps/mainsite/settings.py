@@ -185,7 +185,7 @@ FIXTURE_DIRS = [
 LOGS_DIR = os.path.join(TOP_DIR, 'logs')
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': True,
     'filters': {
         'badgr': {
             '()': 'mainsite.logs.BadgrFilter'
