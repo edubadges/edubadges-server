@@ -182,6 +182,7 @@ FIXTURE_DIRS = [
 #
 ##
 
+LOGS_DIR = os.path.join(TOP_DIR, 'logs')
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -200,7 +201,7 @@ LOGGING = {
             'level': 'DEBUG',
             'filters': ['badgr'],
             'class': 'logging.FileHandler',
-            'filename': os.path.join(TOP_DIR, 'logs', 'badgr.log'),
+            'filename': os.path.join(LOGS_DIR, 'badgr.log'),
             'formatter': 'default'
         }
     },
@@ -244,7 +245,7 @@ MAINTENANCE_URL = '/maintenance'
 #
 ##
 
-SPHINX_API_VERSION = 0x116 # Sphinx 0.9.9
+SPHINX_API_VERSION = 0x116  # Sphinx 0.9.9
 
 
 ##
@@ -278,8 +279,8 @@ CKEDITOR_CONFIGS = {
         'debug': True,
         'linkShowTargetTab': False,
         'linkShowAdvancedTab': False,
-    }
-    , 'basic': {
+    }, 
+    'basic': {
         'toolbar': [
             [      'Bold', 'Italic',
               '-', 'Link', 'Unlink',
@@ -350,7 +351,8 @@ USE_TZ = True
 try:
     from settings_local import *
 except ImportError as e:
-    import sys
     sys.stderr.write("no settings_local found, setting DEBUG=True...\n")
     DEBUG = True
     pass
+
+LOGGING['handlers']['local_file']['filename'] = os.path.join(LOGS_DIR, 'badgr.log')
