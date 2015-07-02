@@ -1,4 +1,5 @@
 import json
+import logging
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 
@@ -16,6 +17,7 @@ RECIPIENT_ERROR = {
     'recipient':
     "Badge recipient was not among any of user's confirmed identifiers"
 }
+logger = logging.getLogger('badgr')
 
 
 class EarnerBadgeSerializer(serializers.Serializer):
@@ -84,6 +86,10 @@ class EarnerBadgeSerializer(serializers.Serializer):
             raise serializers.ValidationError(RECIPIENT_ERROR)
 
         if not abi.is_valid():
+            logger.debug(
+                "Invalid earned badge uploaded by %s with instance_url %s and errors %s" %
+                (user.username, abi.instance_url, abi.all_errors())
+            )
             raise serializers.ValidationError(abi.all_errors())
         else:
             instance_kwargs = {'recipient_user': user}

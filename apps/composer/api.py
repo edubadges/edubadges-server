@@ -67,10 +67,8 @@ class EarnerBadgeList(APIView):
         serializer = EarnerBadgeSerializer(data=request.data, context={'request': request})
 
         serializer.is_valid(raise_exception=True)
-        serializer.save()
 
-        # if serializer.instance.version is None:
-        #     return Response()
+        serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

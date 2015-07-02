@@ -185,11 +185,23 @@ FIXTURE_DIRS = [
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'filters': {
+        'badgr': {
+            '()': 'mainsite.logs.BadgrFilter'
+        }
+    },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
             'filters': [],
             'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'local_file': {
+            'level': 'DEBUG',
+            'filters': ['badgr'],
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(TOP_DIR, 'logs', 'badgr.log'),
+            'formatter': 'default'
         }
     },
     'loggers': {
@@ -198,7 +210,21 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-    }
+        'badgr': {
+            'handlers': ['local_file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'root': {
+            'handlers': ['local_file'],
+            'level': 'INFO',
+        }
+    },
+    'formatters': {
+        'default': {
+            'format': '%(asctime)s %(levelname)s %(module)s %(message)s'
+        }
+    },
 }
 
 
