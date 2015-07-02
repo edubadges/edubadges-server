@@ -82,7 +82,7 @@ class IssuerList(AbstractIssuerAPIEndpoint):
             Q(staff__id=request.user.id)).distinct()
         )
         if not user_issuers.exists():
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response([])
 
         serializer = IssuerSerializer(user_issuers, many=True, context={'request': request})
         return Response(serializer.data)
