@@ -185,11 +185,11 @@ FIXTURE_DIRS = [
 LOGS_DIR = os.path.join(TOP_DIR, 'logs')
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': True,
+    'disable_existing_loggers': False,
     'filters': {
-        'badgr': {
-            '()': 'mainsite.logs.BadgrFilter'
-        }
+        # 'badgr': {
+        #     '()': 'mainsite.logs.BadgrFilter'
+        # }
     },
     'handlers': {
         'mail_admins': {
