@@ -1,15 +1,11 @@
 import os
 
-from django.conf import settings
-from django.core.exceptions import ValidationError as DjangoValidationError
-
-from rest_framework import authentication, permissions, status, serializers
-from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework import permissions, status, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from mainsite.permissions import IsOwner
-from credential_store.models import LocalBadgeInstance
+from local_components.models import BadgeInstance as LocalBadgeInstance
 
 from .serializers import (EarnerBadgeSerializer,
                           EarnerBadgeReferenceSerializer,
@@ -64,7 +60,8 @@ class EarnerBadgeList(APIView):
               type: string
               paramType: form
         """
-        serializer = EarnerBadgeSerializer(data=request.data, context={'request': request})
+        serializer = EarnerBadgeSerializer(data=request.data,
+                                           context={'request': request})
 
         serializer.is_valid(raise_exception=True)
         serializer.save()

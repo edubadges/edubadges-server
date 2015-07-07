@@ -9,7 +9,8 @@ from django.template.loader import get_template
 
 from bakery import bake
 
-from component_store.models import Issuer, BadgeClass, BadgeInstance
+from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
+                             AbstractBadgeInstance)
 
 from .utils import generate_sha256_hashstring
 
@@ -17,24 +18,9 @@ from .utils import generate_sha256_hashstring
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
-class Metadata(models.Model):
-    """
-    A base class for Issuer badge objects, those that are part of badges issue
-    by users on this system.
-    """
-    # errors = JSONField()
-    # url = models.URLField(max_length=1024, blank=True)
-
-    class Meta:
-        abstract = True
-
-
-class Issuer(Issuer):
-
-    @property
-    def editors(self):
-        # TODO Test this:
-        return self.staff.filter(issuerstaff__editor=True)
+class Issuer(AbstractIssuer):
+    owner = models.ForeignKey(AUTH_USER_MODEL, related_name='issuers',
+                              on_delete=models.PROTECT, null=False)
 
 
 class IssuerStaff(models.Model):
@@ -46,22 +32,21 @@ class IssuerStaff(models.Model):
         unique_together = ('issuer', 'user')
 
 
-class BadgeClass(BadgeClass, Metadata):
-    """
-    Open Badges Specification BadgeClass object
-    """
-    pass
+class BadgeClass(AbstractBadgeClass):
+    issuer = models.ForeignKey(Issuer, blank=False, null=False,
+                               on_delete=models.PROTECT,
+                               related_name="badgeclasses")
 
 
-class BadgeInstance(BadgeInstance, Metadata):
-    """
-    Open Badges Specification Assertion object
-    """
+class BadgeInstance(AbstractBadgeInstance):
+    badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False,
+                                   on_delete=models.PROTECT,
+                                   related_name='badgeinstances')
+    issuer = models.ForeignKey(Issuer, blank=False, null=False)
+
     revoked = models.BooleanField(default=False)
     revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
 
-    # def image_url(self):
-    #     pass
 
     def save(self, *args, **kwargs):
         if self.pk is None:

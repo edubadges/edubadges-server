@@ -43,10 +43,9 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
 
     'mainsite',
-    'component_store',
     'issuer',
+    'local_components',
     'composer',
-    'credential_store'
 ]
 
 MIDDLEWARE_CLASSES = [

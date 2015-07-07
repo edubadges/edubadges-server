@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from autoslug import AutoSlugField
 import cachemodel
 
-from credential_store.models import LocalBadgeInstance
+from local_components.models import BadgeInstance as LocalBadgeInstance
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
