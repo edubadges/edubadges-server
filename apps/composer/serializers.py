@@ -40,10 +40,6 @@ class EarnerBadgeSerializer(serializers.Serializer):
         return super(EarnerBadgeSerializer, self).to_representation(obj)
 
     def validate(self, data):
-        # Remove empty DictField
-        if data.get('assertion') == {}:
-            data.pop('assertion', None)
-
         valid_inputs = \
             dict(filter(lambda tuple: tuple[0] in ['url', 'image', 'assertion'],
                         data.items()))
@@ -60,9 +56,9 @@ class EarnerBadgeSerializer(serializers.Serializer):
         user = self.context.get('request').user
         image = None
 
-        if validated_data.get('url') is not None:
+        if validated_data.get('url'):
             url = validated_data.get('url')
-        elif validated_data.get('image') is not None:
+        elif validated_data.get('image'):
             image = validated_data.get('image')
             image.open()
             try:
@@ -72,10 +68,9 @@ class EarnerBadgeSerializer(serializers.Serializer):
                     "No Open Badges data could be extracted from image: "
                     + e.message
                 )
-        elif validated_data.get('assertion') is not None:
+        elif validated_data.get('assertion'):
             url = get_instance_url_from_assertion(
-                validated_data.get('assertion')
-            )
+                validated_data.get('assertion'))
 
         try:
             rbi = RemoteBadgeInstance(url)
