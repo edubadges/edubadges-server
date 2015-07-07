@@ -1,8 +1,8 @@
 from django.contrib import admin
 
-from .models import (StoredBadgeInstance, StoredBadgeClass, StoredIssuer)
+from .models import (LocalBadgeInstance, LocalBadgeClass, LocalIssuer)
 
 
-admin.site.register(StoredBadgeInstance, admin.ModelAdmin)
-admin.site.register(StoredBadgeClass, admin.ModelAdmin)
-admin.site.register(StoredIssuer, admin.ModelAdmin)
+admin.site.register(LocalBadgeInstance, admin.ModelAdmin)
+admin.site.register(LocalBadgeClass, admin.ModelAdmin)
+admin.site.register(LocalIssuer, admin.ModelAdmin)

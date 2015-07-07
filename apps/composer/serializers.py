@@ -4,13 +4,13 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 
 from rest_framework import serializers
 
+from credential_store.models import LocalBadgeInstance
+from credential_store.format import V1InstanceSerializer
 from integrity_verifier import RemoteBadgeInstance, AnalyzedBadgeInstance
 from integrity_verifier.utils import get_instance_url_from_image, get_instance_url_from_assertion
-from credential_store.models import StoredBadgeInstance
-from credential_store.format import V1InstanceSerializer
 from mainsite.utils import installed_apps_list
 
-from .models import Collection, StoredBadgeInstanceCollection
+from .models import Collection, LocalBadgeInstanceCollection
 
 RECIPIENT_ERROR = {
     'recipient':
@@ -84,7 +84,7 @@ class EarnerBadgeSerializer(serializers.Serializer):
             if image is not None:
                 instance_kwargs['image'] = image
 
-            new_instance = StoredBadgeInstance.from_analyzed_instance(
+            new_instance = LocalBadgeInstance.from_analyzed_instance(
                 abi, **instance_kwargs
             )
 
@@ -102,7 +102,7 @@ class EarnerBadgeReferenceListSerializer(serializers.ListSerializer):
 
         id_set = [x.get('instance', {}).get('id') for x in validated_data]
 
-        badge_set = StoredBadgeInstance.objects.filter(
+        badge_set = LocalBadgeInstance.objects.filter(
             recipient_user=user, id__in=id_set
         ).exclude(collection=collection)
 
@@ -114,14 +114,14 @@ class EarnerBadgeReferenceListSerializer(serializers.ListSerializer):
                 item.get('instance', {}).get('id') == badge.id
             ][0].get('description', '')
 
-            new_records.append(StoredBadgeInstanceCollection(
+            new_records.append(LocalBadgeInstanceCollection(
                 instance=badge,
                 collection=collection,
                 description=description
             ))
 
         if len(new_records) > 0:
-            return StoredBadgeInstanceCollection.objects.bulk_create(new_records)
+            return LocalBadgeInstanceCollection.objects.bulk_create(new_records)
         else:
             return new_records
 
@@ -137,7 +137,7 @@ class EarnerBadgeReferenceSerializer(serializers.Serializer):
         collection = self.context.get('collection')
         user = self.context.get('request').user
 
-        badge_query = StoredBadgeInstance.objects.filter(
+        badge_query = LocalBadgeInstance.objects.filter(
             recipient_user=user,
             id=validated_data.get('instance',{}).get('id'),
         ).exclude(collection=collection)
@@ -147,7 +147,7 @@ class EarnerBadgeReferenceSerializer(serializers.Serializer):
 
         description = validated_data.get('description', '')
 
-        new_record = StoredBadgeInstanceCollection(
+        new_record = LocalBadgeInstanceCollection(
             instance=badge_query[0], collection=collection,
             description=description
         )
@@ -203,7 +203,7 @@ class EarnerPortalSerializer(serializers.Serializer):
             context=self.context
         )
 
-        earner_badges = StoredBadgeInstance.objects.filter(
+        earner_badges = LocalBadgeInstance.objects.filter(
             recipient_user=user
         )
         earner_badges_serializer = EarnerBadgeSerializer(

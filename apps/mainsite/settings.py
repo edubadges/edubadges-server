@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
 
     'mainsite',
+    'component_store',
     'issuer',
     'composer',
     'credential_store'

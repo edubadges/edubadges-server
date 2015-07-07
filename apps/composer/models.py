@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from autoslug import AutoSlugField
 import cachemodel
 
-from credential_store.models import StoredBadgeInstance
+from credential_store.models import LocalBadgeInstance
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
@@ -21,7 +21,7 @@ class Collection(cachemodel.CacheModel):
     share_hash = models.CharField(max_length=255, null=False, blank=True)
 
     instances = models.ManyToManyField(
-        StoredBadgeInstance, through='StoredBadgeInstanceCollection'
+        LocalBadgeInstance, through='LocalBadgeInstanceCollection'
     )
     shared_with = models.ManyToManyField(
         AUTH_USER_MODEL, through='CollectionPermission', related_name='shared_with_me'
@@ -40,8 +40,8 @@ class Collection(cachemodel.CacheModel):
         return ''
 
 
-class StoredBadgeInstanceCollection(models.Model):
-    instance = models.ForeignKey(StoredBadgeInstance, null=False)
+class LocalBadgeInstanceCollection(models.Model):
+    instance = models.ForeignKey(LocalBadgeInstance, null=False)
     collection = models.ForeignKey(Collection, null=False)
 
     description = models.TextField(blank=True)

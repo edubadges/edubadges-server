@@ -9,19 +9,19 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from mainsite.permissions import IsOwner
-from credential_store.models import StoredBadgeInstance
+from credential_store.models import LocalBadgeInstance
 
 from .serializers import (EarnerBadgeSerializer,
                           EarnerBadgeReferenceSerializer,
                           CollectionSerializer)
-from .models import Collection, StoredBadgeInstanceCollection
+from .models import Collection, LocalBadgeInstanceCollection
 
 
 class EarnerBadgeList(APIView):
     """
     Retrieve a list of user's earned badges or post a new badge.
     """
-    queryset = StoredBadgeInstance.objects.all()
+    queryset = LocalBadgeInstance.objects.all()
     permission_classes = (permissions.IsAuthenticated, IsOwner,)
 
     def get(self, request):
@@ -76,7 +76,7 @@ class EarnerBadgeList(APIView):
 
 
 class EarnerBadgeDetail(APIView):
-    queryset = StoredBadgeInstance.objects.all()
+    queryset = LocalBadgeInstance.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
     """
     View or delete a stored badge earned by a recipient.
@@ -97,7 +97,7 @@ class EarnerBadgeDetail(APIView):
             user_badge = self.queryset.get(
                 recipient_user=request.user, id=badge_id
             )
-        except StoredBadgeInstance.DoesNotExist:
+        except LocalBadgeInstance.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         serializer = EarnerBadgeSerializer(
@@ -124,7 +124,7 @@ class EarnerBadgeDetail(APIView):
             self.queryset.get(
                 recipient_user=request.user, id=badge_id
             ).delete()
-        except StoredBadgeInstance.DoesNotExist:
+        except LocalBadgeInstance.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -261,7 +261,7 @@ class EarnerCollectionBadgesList(APIView):
     POST to add badges to collection, PUT to update collection to a
     new list of ids.
     """
-    queryset = StoredBadgeInstanceCollection.objects.all()
+    queryset = LocalBadgeInstanceCollection.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, slug):
@@ -353,7 +353,7 @@ class EarnerCollectionBadgesList(APIView):
                 item.get('id') for item in badges
             ]
 
-            StoredBadgeInstanceCollection.objects.filter(
+            LocalBadgeInstanceCollection.objects.filter(
                 collection=collection
             ).exclude(instance__id__in=badge_ids).delete()
 
@@ -368,7 +368,7 @@ class EarnerCollectionBadgeDetail(APIView):
     Update details on a single item in the collection or remove it from
     the collection
     """
-    queryset = StoredBadgeInstanceCollection.objects.all()
+    queryset = LocalBadgeInstanceCollection.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, collection_slug, badge_id):
@@ -378,7 +378,7 @@ class EarnerCollectionBadgeDetail(APIView):
                 collection__slug=collection_slug,
                 instance__id=int(badge_id)
             )
-        except StoredBadgeInstanceCollection.DoesNotExist:
+        except LocalBadgeInstanceCollection.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         serializer = EarnerBadgeReferenceSerializer(item)
@@ -420,7 +420,7 @@ class EarnerCollectionBadgeDetail(APIView):
                 collection__slug=collection_slug,
                 instance__id=int(badge_id)
             )
-        except StoredBadgeInstanceCollection.DoesNotExist:
+        except LocalBadgeInstanceCollection.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         item.description = description
@@ -452,7 +452,7 @@ class EarnerCollectionBadgeDetail(APIView):
                 collection__slug=collection_slug,
                 instance__id=int(badge_id)
             ).delete()
-        except StoredBadgeInstanceCollection.DoesNotExist:
+        except LocalBadgeInstanceCollection.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
