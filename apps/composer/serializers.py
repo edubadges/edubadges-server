@@ -44,9 +44,9 @@ class EarnerBadgeSerializer(serializers.Serializer):
         if data.get('assertion') == {}:
             data.pop('assertion', None)
 
-        instance_input_fields = set(('url', 'image', 'assertion'))
-        valid_inputs = {key: data.get(key) for
-                        key in instance_input_fields.intersection(data.keys())}
+        valid_inputs = \
+            dict(filter(lambda tuple: tuple[0] in ['url', 'image', 'assertion'],
+                        data.items()))
 
         if len(valid_inputs.keys()) != 1:
             raise serializers.ValidationError(
