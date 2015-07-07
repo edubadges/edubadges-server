@@ -30,6 +30,11 @@ class EarnerBadgeSerializer(serializers.Serializer):
     errors = serializers.ListField(read_only=True)
 
     def to_representation(self, obj):
+        """
+        If the APIView initialized the serializer with the extra context
+        variable 'format' from a query param in the GET request with the
+        value "plain", make the `json` field for this instance read_only.
+        """
         if self.context.get('format', 'v1') == 'plain':
             self.fields.json = serializers.DictField(read_only=True)
         return super(EarnerBadgeSerializer, self).to_representation(obj)
