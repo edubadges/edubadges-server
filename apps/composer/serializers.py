@@ -56,6 +56,7 @@ class EarnerBadgeSerializer(serializers.Serializer):
         user = self.context.get('request').user
         image = None
 
+        # Extract the URL from one of 3 sources
         if validated_data.get('url'):
             url = validated_data.get('url')
         elif validated_data.get('image'):
@@ -77,10 +78,11 @@ class EarnerBadgeSerializer(serializers.Serializer):
         except DjangoValidationError as e:
             raise serializers.ValidationError(e.message)
 
-        abi = AnalyzedBadgeInstance(rbi, recipient_ids=[id.email for id in user.emailaddress_set.all()])
-        if len(
-            [x for x in abi.non_component_errors if x[0] == 'error.recipient']
-        ) != 0:
+        abi = AnalyzedBadgeInstance(
+            rbi, recipient_ids=[id.email for id in user.emailaddress_set.all()])
+
+        if any([error_type == 'error.recipient' for error_type, error_message
+                in abi.non_component_errors]):
             raise serializers.ValidationError(RECIPIENT_ERROR)
 
         if not abi.is_valid():
