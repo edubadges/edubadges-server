@@ -54,6 +54,13 @@ ROOT_INFO_REDIRECT = '/login'
 # }
 
 
+#LTI_OAUTH_CREDENTIALS = {
+#    'test': 'secret',
+#    'test2': 'reallysecret'
+#}
+
+
+
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # EMAIL_BACKEND = 'django_ses.SESBackend'
 

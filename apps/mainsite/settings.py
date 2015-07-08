@@ -45,7 +45,9 @@ INSTALLED_APPS = [
     'mainsite',
     'issuer',
     'composer',
-    'credential_store'
+    'credential_store',
+
+    'badgrbook',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -53,6 +55,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django_auth_lti.middleware_patched.MultiLTILaunchAuthMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'mainsite.middleware.MaintenanceMiddleware',
@@ -146,6 +149,9 @@ AUTHENTICATION_BACKENDS = [
 
     # `allauth` specific authentication methods, such as login by e-mail
     "allauth.account.auth_backends.AuthenticationBackend",
+
+    # LTI authentication
+    'django_auth_lti.backends.LTIAuthBackend',
 ]
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
