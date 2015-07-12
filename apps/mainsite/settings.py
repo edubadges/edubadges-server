@@ -144,14 +144,15 @@ AUTHENTICATION_BACKENDS = [
     # Object permissions for issuing badges
     'rules.permissions.ObjectPermissionBackend',
 
+    # LTI authentication
+    'django_auth_lti.backends.LTIAuthBackend',
+
     # Needed to login by username in Django admin, regardless of `allauth`
     "django.contrib.auth.backends.ModelBackend",
 
     # `allauth` specific authentication methods, such as login by e-mail
     "allauth.account.auth_backends.AuthenticationBackend",
 
-    # LTI authentication
-    'django_auth_lti.backends.LTIAuthBackend',
 ]
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
