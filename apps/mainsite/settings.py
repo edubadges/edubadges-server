@@ -145,7 +145,7 @@ AUTHENTICATION_BACKENDS = [
     'rules.permissions.ObjectPermissionBackend',
 
     # LTI authentication
-    'django_auth_lti.backends.LTIAuthBackend',
+    'badgrbook.backends.CanvasLtiAuthBackend',
 
     # Needed to login by username in Django admin, regardless of `allauth`
     "django.contrib.auth.backends.ModelBackend",
