@@ -70,6 +70,7 @@ if apps.is_installed('composer'):
 
 if apps.is_installed('badgrbook'):
     urlpatterns += patterns('',
+        url(r'^accounts/lti$', 'badgrbook.views.lti_info'),
         url(r'^badgrbook/', include('badgrbook.urls')),
     )
 

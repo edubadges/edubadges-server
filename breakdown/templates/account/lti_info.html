@@ -1,0 +1,12 @@
+{% extends "account/base.html" %}
+
+
+{% block content %}
+
+<p><strong>Consumer Key:</strong> {{lti_credential.client_id}}</p>
+<p><strong>Shared Secret:</strong> {{lti_credential.client_secret}}</p>
+<p><strong>Config URL:</strong> {{cartridge_url}}</p>
+
+
+
+{% endblock %}
