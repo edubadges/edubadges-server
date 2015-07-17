@@ -46,7 +46,7 @@
     <body class="badgr {% block bodyclass %}{% endblock %}">
         {% block pre_content %}{% endblock %}
 
-        {% block content %}
+        {% block react %}
             {% if initial_data %}
             <div id="app" class="main-app-container">
             <!-- React App renders here -->
@@ -59,6 +59,9 @@
                 </div>
             </div>
             {% endif %}
+        {% endblock %}
+        {% block content %}
+
         {% endblock %}
 
         {% block footer %}
@@ -84,15 +87,6 @@
         {% block scripts %}
 
             <script src="{{STATIC_URL}}js/libs/jquery.min.js"></script>
-
-            <!-- Bootstrap Core JavaScript -->
-            <script src="{{STATIC_URL}}css/bootstrap/js/bootstrap.min.js"></script>
-
-            <!-- Metis Menu Plugin JavaScript -->
-            <script src="{{STATIC_URL}}js/libs/metisMenu.min.js"></script>
-
-            <!-- Custom Theme JavaScript -->
-            <script src="{{STATIC_URL}}js/libs/sb-admin-2.js"></script>
 
             {% if initial_data %}
                 <script src="{{STATIC_URL}}js/script.js"></script>

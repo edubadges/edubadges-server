@@ -59,7 +59,8 @@ var App = React.createClass({
     '/issuer/issuers': 'issuerMain',
     '/issuer/issuers/:issuerSlug': 'issuerDetail',
     '/issuer/issuers/:issuerSlug/badges/:badgeClassSlug': 'badgeClassDetail',
-    '/explorer': 'consumerMain'
+    '/explorer': 'consumerMain',
+    '/badgrbook': 'badgrBookMain'
   },
   dependencies: {
     'earnerMain': ['earner_badges', 'earner_collections'],
@@ -659,6 +660,16 @@ var App = React.createClass({
       </MainComponent>
     );
     
+    return this.render_base(mainComponent);
+  },
+
+  badgrBookMain: function() {
+    var mainComponent = (
+        <div className="badgr-book">
+          Hello BadgrBook
+        </div>
+    );
+
     return this.render_base(mainComponent);
   },
 
