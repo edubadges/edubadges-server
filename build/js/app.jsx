@@ -2,23 +2,27 @@ var React = require('react');
 var Dispatcher = require('./dispatcher/appDispatcher');
 var App = require('./components/App.jsx');
 var clickActions = require('./actions/clicks');
-
+require('./polyfills');
 
 React.render(
   <App history={true} />,
   document.getElementById('app')
 );
  
- 
-$('a').on('click', function(e){
-  if(clickActions.createLinkClickAction(e.currentTarget)){
+
+var clickHandler = function(e){
+  var target = e.target;
+  closestLink = target.closest('a');
+
+  // Handle clicking links to either navigate within the single page app or make a fresh request
+  if (closestLink) {
+    clickActions.createLinkClickAction(closestLink)
     e.preventDefault();
     e.stopPropagation();
   }
-});
 
-$(document).on('click', function(e){
-  target = $(e.target);
-  if (!target.closest("li.open").length)
+  // Close any open menus.
+  if (!target.closest('li.open'))
     clickActions.createOffMenuClickAction(target);
-}); 
+};
+document.onclick = clickHandler;

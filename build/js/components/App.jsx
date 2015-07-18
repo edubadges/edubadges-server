@@ -74,6 +74,10 @@ var App = React.createClass({
       this.handleDependencies(this.dependencies['earnerMain']);
     else if (newRoute.startsWith('/issuer'))
       this.handleDependencies(this.dependencies['issuerMain']);
+    else if (newRoute.startsWith('/explorer'))
+      this.handleDependencies([])
+    else if (newRoute.startsWith('/badgrbook'))
+      this.handleDependencies([])
     navigate(newRoute);
   },
 
@@ -102,7 +106,8 @@ var App = React.createClass({
     MenuStore.addListener('UNCAUGHT_DOCUMENT_CLICK', this._hideMenu);
     RouteStore.addListener('ROUTE_CHANGED', this.handleRouteChange);
     APIStore.addListener('DATA_UPDATED', function(){
-      this.setState({});
+      if (this.isMounted())
+        this.setState({});
     }.bind(this));
     ActiveActionStore.addListener('ACTIVE_ACTION_UPDATED', this.handleActivePanelUpdate);
   },
@@ -160,14 +165,19 @@ var App = React.createClass({
   },
 
   handleDependencies: function(collectionKeys){
-    var collectionKeys;
-    var dependenciesMet = APIStore.collectionsExist(collectionKeys);
-    if (!dependenciesMet && this.state.requestedCollections.length == 0){
-      this.setState({requestedCollections: collectionKeys}, function(){
-        APIActions.APIFetchCollections(collectionKeys);
+    toFetch = collectionKeys.filter(function(key, index){
+      if (!APIStore.collectionsExist([key]) && this.state.requestedCollections.indexOf(key) == -1)
+        return true;
+      return false;
+    }, this);
+
+    if (toFetch.length > 0){
+      this.setState({requestedCollections: this.state.requestedCollections.concat(toFetch)}, function(){
+        APIActions.APIFetchCollections(toFetch);
       });
+      return true;
     }
-    return dependenciesMet;
+    return false;
   },
 
 
@@ -326,7 +336,6 @@ var App = React.createClass({
     };
 
     var importUrl = params['url'];
-    debugger;
     var mainComponent = (
       <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet} >
         <BreadCrumbs items={breadCrumbs} />
