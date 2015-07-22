@@ -59,8 +59,7 @@ var App = React.createClass({
     '/issuer/issuers': 'issuerMain',
     '/issuer/issuers/:issuerSlug': 'issuerDetail',
     '/issuer/issuers/:issuerSlug/badges/:badgeClassSlug': 'badgeClassDetail',
-    '/explorer': 'consumerMain',
-    '/badgrbook': 'badgrBookMain'
+    '/explorer': 'consumerMain'
   },
   dependencies: {
     'earnerMain': ['earner_badges', 'earner_collections'],
@@ -76,8 +75,6 @@ var App = React.createClass({
       this.handleDependencies(this.dependencies['issuerMain']);
     else if (newRoute.startsWith('/explorer'))
       this.handleDependencies([])
-    else if (newRoute.startsWith('/badgrbook'))
-      this.handleDependencies([])
     navigate(newRoute);
   },
 
@@ -85,7 +82,7 @@ var App = React.createClass({
   getDefaultProps: function() {
     return {
       path: urllite(window.location.href).pathname + urllite(window.location.href).search,
-      appTitle: 'Badgr Server',
+      appTitle: 'Badgr',
       actionBars: MenuStore.getAllItems('actionBars'),
       secondaryMenus: MenuStore.getAllItems('secondaryMenus')
     };
@@ -669,16 +666,6 @@ var App = React.createClass({
       </MainComponent>
     );
     
-    return this.render_base(mainComponent);
-  },
-
-  badgrBookMain: function() {
-    var mainComponent = (
-        <div className="badgr-book">
-          Hello BadgrBook
-        </div>
-    );
-
     return this.render_base(mainComponent);
   },
 
