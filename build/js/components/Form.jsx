@@ -1,5 +1,6 @@
 var React = require('react');
 var ReactPropTypes = React.PropTypes;
+var _ = require('lodash');
 
 // Stores
 var APIStore = require('../stores/APIStore');
@@ -174,14 +175,16 @@ BasicAPIForm = React.createClass({
       event.preventDefault();
       return;
     }
+    var change = {};
 
     // Update Store immediately for checkbox fields
     if (this.props.fieldsMeta[event.target.name].inputType == 'checkbox') {
-      this.handleBlur(event);
+      change[event.target.name] = (!_.get(this.state, event.target.name)) ? "on": false;
+      FormActions.patchForm(this.props.formId, change);
+
       return;
     }
 
-    var change = {};
     change[event.target.name] = event.target.value;
     this.setState(change);
   },
