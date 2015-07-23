@@ -1,5 +1,3 @@
-var _ = require('underscore');
-
 var React = require('react');
 var ReactPropTypes = React.PropTypes;
 
@@ -214,7 +212,7 @@ BasicAPIForm = React.createClass({
     }
     
     if (this.state.actionState != "waiting")
-      FormActions.submitForm(this.props.formId);
+      FormActions.submitForm(this.props.formId, this.props.formType);
   },
   handleReset: function(e){
     e.preventDefault();

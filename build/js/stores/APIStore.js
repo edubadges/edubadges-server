@@ -376,7 +376,7 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
       // make sure form updates have occurred before processing submits
       Dispatcher.waitFor([FormStore.dispatchToken]);
 
-      if (FormStore.genericFormTypes.indexOf(action.formId) > -1){
+      if (FormStore.genericFormTypes.indexOf(action.formType) > -1){
         var formData = FormStore.getFormData(action.formId);
         APIStore.postForm(formData.fieldsMeta, formData.formState, formData.apiContext);
       }

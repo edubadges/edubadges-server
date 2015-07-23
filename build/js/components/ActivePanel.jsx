@@ -57,13 +57,16 @@ var ActivePanel = React.createClass({
       var formProps = FormConfigStore.getConfig(
         this.props.type,
         {
+          formId: this.props.type + this.props.formKey,
+          formType: this.props.type,
           handleCloseForm: this.props.clearActivePanel ? this.clearActivePanel : null,
           submitImmediately: this.props.submitImmediately
         },
         this.props
       );
 
-      FormStore.getOrInitFormData(this.props.type, formProps);
+
+      FormStore.getOrInitFormData(this.props.type + this.props.formKey, formProps);
       return (
         <div className="active-panel api-form image-upload-form clearfix">
           <div className="container-fluid">

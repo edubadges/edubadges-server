@@ -7,27 +7,15 @@ var reactify = require('reactify');
 var concat = require('gulp-concat');
 var sass = require('gulp-sass');
 var livereload = require('gulp-livereload');
-var es = require('event-stream');
-var rename = require('gulp-rename');
 
 var gutil = require('gulp-util')
 var clr = gutil.colors
 
-//var jshint = require('gulp-jshint');
 //var eslint = require('gulp-eslint');
 //var eslintJsx = require('eslint-plugin-react');
-//var stylish = require('gulp-jshint');
-
 var uglify = require('gulp-uglify');
 var size = require('gulp-size');
 //var dateformat = require('dateformat');
-// var rename = require('gulp-rename');
-// var notify = require('gulp-notify');
-
-// var yargs = require('yargs');
-// var IS_PRODUCTION = yargs.argv.env == 'production' ? true : false;
-
-
 
 
 
@@ -100,7 +88,6 @@ gulp.task('build', function(){
     return bundle(bundler, entry, {production: true, watching: false});
 
   });
-  //return es.merge.apply(null, jsbundles);
 });
 
 
@@ -130,7 +117,6 @@ gulp.task('watchScripts', function() {
 
 
   });
-  //return es.merge.apply(null, jsbundles);
 });
 
 // I added this so that you see how to run two watch tasks

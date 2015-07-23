@@ -1,4 +1,4 @@
-var _ = require('underscore')
+var _ = require('lodash')
 var Dispatcher = require('../dispatcher/appDispatcher');
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
@@ -37,8 +37,12 @@ FormStore.getFormState = function(formId){
 };
 
 FormStore.getOrInitFormData = function(formId, initialData){
-  if (!FormStore.data.hasOwnProperty(formId))
+  if (
+      !FormStore.data.hasOwnProperty(formId) ||
+      (FormStore.data.hasOwnProperty(formId) && _.get(FormStore.data[formId], "formState.actionState") == 'complete')
+  ) {
     FormStore.data[formId] = initialData
+  }
 
   if (!FormStore.data[formId].formState)
     FormStore.data[formId].formState = _.clone(initialData.defaultValues);

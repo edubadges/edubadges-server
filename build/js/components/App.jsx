@@ -3,7 +3,7 @@ var RouterMixin = require('react-mini-router').RouterMixin;
 var navigate = require('react-mini-router').navigate;
 var assign = require('object-assign');
 var urllite = require('urllite/lib/core');
-var _ = require('underscore');
+var _ = require('lodash');
 
 // Stores
 var RouteStore = require('../stores/RouteStore');
@@ -48,7 +48,7 @@ var App = React.createClass({
 
   // Route configuration: 
   routes: {
-    '/': 'home',
+    '/': 'earnerMain',
     '/earner': 'earnerMain',
     '/earner/badges': 'earnerBadges',
     '/earner/badges/new': 'earnerImportBadge',
@@ -218,11 +218,6 @@ var App = React.createClass({
   },
 
 
-  home: function() {
-    var mainComponent = "HOME"
-    return this.render_base(mainComponent);
-  },
-
   earnerMain: function() {
     var viewId = 'earnerHome';
     var dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
@@ -373,13 +368,6 @@ var App = React.createClass({
           updateActivePanel={this.updateActivePanel}
           activePanel={this.state.activePanels[viewId]}
         />
-        <ActivePanel
-          viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-        />
         <OpenBadge
           id={badge.id}
           display="full"
@@ -465,6 +453,7 @@ var App = React.createClass({
           collection={collection}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
+          formKey={collectionSlug}
         />
         <EarnerCollectionDetail
           name={collection.name}
@@ -545,6 +534,7 @@ var App = React.createClass({
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
           issuerSlug={issuerSlug}
+          formKey={issuerSlug}
         />
         <BadgeClassList
           issuerSlug={issuerSlug}
@@ -609,6 +599,7 @@ var App = React.createClass({
           clearActivePanel={this.clearActivePanel}
           issuerSlug={issuerSlug}
           badgeClassSlug={badgeClassSlug}
+          formKey={issuerSlug + '/' + badgeClassSlug}
         />
         <BadgeInstanceList
           issuerSlug={issuerSlug}

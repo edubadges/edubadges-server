@@ -1,5 +1,5 @@
 var React = require('react');
-var _ = require('underscore');
+var _ = require('lodash');
 
 // Actions
 var navigateLocalPath = require('../actions/clicks').navigateLocalPath;
