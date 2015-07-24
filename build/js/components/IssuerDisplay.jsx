@@ -85,6 +85,10 @@ var IssuerList = React.createClass({
           function(el,i,array){ return (el.issuer == issuer.json.id); }
         );
         var handleClick = function(e){navigateLocalPath(issuerPath);};
+        var providedHandler = this.props.handleClick
+        if (providedHandler) {
+          handleClick = function(e){ providedHandler(e, issuer); };
+        }
         return (
             <IssuerDisplayShort
               name={issuer.name}
