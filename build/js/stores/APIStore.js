@@ -280,7 +280,7 @@ APIStore.postForm = function(fields, values, context){
       APIStore.emit('API_STORE_FAILURE');
     }
     else if (context.successHttpStatus.indexOf(response.status) == -1){
-      console.log("API REQUEST PROBLEM:");
+      console.log("API Error: " + response.status);
       console.log(response.text);
       APIActions.APIFormResultFailure({
         formId: context.formId,

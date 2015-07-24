@@ -137,7 +137,9 @@ class StoredBadgeInstance(AbstractStoredComponent):
                 existing_instance.recipient_user = kwargs.get('recipient_user')
                 existing_instance.save()
 
-            return existing_instance
+                return existing_instance
+            elif existing_instance.recipient_user == kwargs.get('recipient_user'):
+                raise ValidationError("This badge is already associated with this user.")
 
         recipient_user = kwargs.get(
             'recipient_user', find_recipient_user(abi.recipient_id)
