@@ -3,7 +3,7 @@ Django==1.7.1
 # Timezone support
 pytz==2014.7
 # PIL support
-Pillow==2.6.1
+Pillow>=2.6.1,<3
 # jinja2 templates
 Jinja2==2.7.3
 git+https://github.com/concentricsky/jingo.git@v0.4
