@@ -25,7 +25,7 @@ Prerequisites:
 ### Install requirements
  *from within code directory* 
 
-* `pip install -r requirements.txt`
+* `pip install -r requirements-dev.txt`
 * `npm install`
 
 ### Customize local settings to your environment

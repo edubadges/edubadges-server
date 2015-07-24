@@ -1,4 +1,3 @@
-setuptools>=0.7
 # Django stuff
 Django==1.7.1
 # Timezone support
@@ -33,8 +32,6 @@ django-allauth==0.19.1
 oauthlib==0.7.2
 requests==2.5.1
 requests-oauthlib==0.4.2
-mock>=1.3.0
-responses>=0.3.0
 # Permissions framework
 rules==0.4
 
