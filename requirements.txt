@@ -1,3 +1,4 @@
+setuptools>=0.7
 # Django stuff
 Django==1.7.1
 # Timezone support
