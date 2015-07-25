@@ -19,6 +19,8 @@ def generate_md5_hashstring(identifier, salt):
 
 def is_probable_url(string):
     earl = re.compile(r'^https?')
+    if string is None:
+        return False
     return earl.match(string)
 
 
