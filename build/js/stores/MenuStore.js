@@ -27,6 +27,13 @@ MenuStore.defaultItems = {
   roleMenu: {
     items: []
   },
+  badgrbookMenu: {
+    items: [
+      { title: "Badges", url: "/badgrbook/badges", icon: "fa-cog", children: [] },
+      { title: "Objectives", url: "/badgrbook/objectives", icon: "fa-certificate", children: [] },
+      { title: "Progress", url: "/badgrbook/progress", icon: "fa-tasks", children: [] }
+    ]
+  },
   secondaryMenus: {
       earnerHome: [
         { title: "My Badges", url: "/earner/badges", icon: "fa-certificate", children: [] },
@@ -91,13 +98,16 @@ MenuStore.defaultItems = {
           icon: "fa-upload", 
           activePanelCommand: { type: "ConsumerBadgeForm", content: { badgeId: null } } 
         }
-      ]
+      ],
+      badgrbookObjectives: [
+      ],
   }
 };
 
 MenuStore.menus = {
   topMenu: MenuStore.defaultItems.topMenu,
   roleMenu: MenuStore.defaultItems.roleMenu,
+  badgrbookMenu: MenuStore.defaultItems.badgrbookMenu,
   secondaryMenus: MenuStore.defaultItems.secondaryMenus,
   actionBars: MenuStore.defaultItems.actionBars
 }
