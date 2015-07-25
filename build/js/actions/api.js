@@ -41,10 +41,11 @@ var APIGetResultFailure = function(data) {
     }});
 }
 
-var APIFetchCollections = function(collectionKeys) {
+var APIFetchCollections = function(collectionKeys, context) {
   appDispatcher.dispatch({ action: {
     type: 'API_FETCH_COLLECTIONS',
-    collectionIds: collectionKeys
+    collectionIds: collectionKeys,
+    context: context,
   }}); 
 }
 

@@ -151,7 +151,7 @@ APIStore.storeInitialData = function() {
 };
 
 
-APIStore.fetchCollections = function(collectionKeys){
+APIStore.fetchCollections = function(collectionKeys, requestContext){
   var actionUrl, key;
   contexts = {
     earner_badges: {
@@ -178,6 +178,18 @@ APIStore.fetchCollections = function(collectionKeys){
       apiCollectionKey: 'issuer_badgeclasses',
       replaceCollection: true
     },
+    badgrbook_courseobjectives: {
+      actionUrl: '/v1/badgrbook/courseobjectives/:tool_guid/:course_id',
+      successfulHttpStatus: [200],
+      apiCollectionKey: 'badgrbook_courseobjectives',
+      replaceCollection: true
+    },
+    badgrbook_badgeobjectives: {
+      actionUrl: '/v1/badgrbook/badgeobjectives/:tool_guid/:course_id',
+      successfulHttpStatus: [200],
+      apiCollectionKey: 'badgrbook_badgeobjectives',
+      replaceCollection: true
+    },
   };
   for (var index in collectionKeys){
     key = collectionKeys[index];
@@ -187,9 +199,15 @@ APIStore.fetchCollections = function(collectionKeys){
     if (APIStore.activeGetRequests.hasOwnProperty(key))
       continue;
     APIStore.activeGetRequests[actionUrl] = true;
-    APIStore.getData(contexts[key]);
+    APIStore.getData(contexts[key], requestContext);
   }
 };
+
+APIStore._buildUrlWithContext = function(url, context) {
+  return url.replace(/:(\w+)/g, function(replace) {
+    return context[replace.substring(1)];
+  });
+}
 
 /* getData(): a common function for GETting needed data from the API so
  * that views may be rendered.
@@ -199,11 +217,16 @@ APIStore.fetchCollections = function(collectionKeys){
  *       - actionUrl: the path starting with / to request from
  *       - successfulHttpStatus: [200] an array of success status codes
  *       - apiCollectionKey: where to put the retrieved data
+ *
+ *   requestContext: a dictionary providing context values for this particular request
 */
-APIStore.getData = function(context){
-  APIStore.getRequests.push(context.actionUrl);
+APIStore.getData = function(context, requestContext){
 
-  var req = request.get(context.actionUrl)
+  url = APIStore._buildUrlWithContext(context.actionUrl, requestContext)
+
+  APIStore.getRequests.push(url);
+
+  var req = request.get(url)
     .set('X-CSRFToken', getCookie('csrftoken'))
     .accept('application/json');
 
@@ -393,7 +416,7 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
       break;
 
     case 'API_FETCH_COLLECTIONS':
-      APIStore.fetchCollections(action.collectionIds);
+      APIStore.fetchCollections(action.collectionIds, action.context || {});
       break;
 
     default:
