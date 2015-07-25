@@ -76,6 +76,10 @@ BadgeClassList = React.createClass({
       else {
         var badgeclassPath = "/issuer/issuers/" + this.props.issuerSlug + "/badges/" + bc.slug;
         var handleClick = function(e){navigateLocalPath(badgeclassPath);};
+        var providedHandler = this.props.handleClick
+        if (providedHandler) {
+          handleClick = function(e) { providedHandler(e, bc); };
+        }
         return (
           <BadgeClassDetail {...bc} key={'bc-' + i} handleClick={handleClick} />
         );
