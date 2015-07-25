@@ -17,4 +17,4 @@ breakdown/static/js/app.js
 breakdown/static/js/lti-app.js
 breakdown/static/css/style.css
 .ropeproject
-.idea/
+.idea/*

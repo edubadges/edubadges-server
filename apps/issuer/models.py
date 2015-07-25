@@ -1,5 +1,6 @@
 import datetime
 import json
+import re
 import uuid
 
 from django.conf import settings
@@ -41,7 +42,10 @@ class Component(cachemodel.CacheModel):
         return settings.HTTP_ORIGIN + self.get_absolute_url()
 
     def prop(self, property_name):
-        return self.json.get(property_name)
+        try:
+            return self.json.get(property_name)
+        except Exception:
+            return None
 
 
 class Issuer(Component):
@@ -162,7 +166,7 @@ class BadgeInstance(Component):
             email_context = {
                 'badge_name': self.badgeclass.name,
                 'badge_description': self.badgeclass.prop('description'),
-                'issuer_name': self.issuer.name,
+                'issuer_name': re.sub(r'[^\w\s]+', '', self.issuer.name, 0, re.I),
                 'issuer_url': self.issuer.prop('url'),
                 'issuer_image_url': self.issuer.get_full_url() + '/image',
                 'image_url': self.get_full_url() + '/image',
@@ -178,7 +182,7 @@ class BadgeInstance(Component):
         html_output_message = html_template.render(email_context)
         mail_meta = {
             'subject': 'Congratulations, you earned a badge!',
-            'from_address': email_context['issuer_name'] + '<' + getattr(settings, 'DEFAULT_FROM_EMAIL') + '>',
+            'from_address': '"' + email_context['issuer_name'] + '" <' + getattr(settings, 'DEFAULT_FROM_EMAIL') + '>',
             'to_addresses': [self.email]
         }
 

@@ -211,7 +211,7 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
             - name: action
               type: string
               paramType: form
-              description: The action to perform on the user: Must be one of: 'add', 'modify', or 'remove'
+              description: The action to perform on the user. Must be one of 'add', 'modify', or 'remove'.
               required: true
             - name: username
               type: string
