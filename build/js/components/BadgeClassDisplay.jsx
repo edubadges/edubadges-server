@@ -7,9 +7,17 @@ var navigateLocalPath = require('../actions/clicks').navigateLocalPath;
 var Property = require('../components/BadgeDisplay.jsx').Property;
 
 BadgeClassThumbnail = React.createClass({
+  getDefaultProps: function() {
+    return {
+      handleClick: function(e){}
+    };
+  },
   render: function() {
     return (
-      <div className="badgeclass-display badgeclass-display-thumbnail col-xs-3">
+      <div
+        className="badgeclass-display badgeclass-display-thumbnail col-xs-3"
+        onClick={this.props.handleClick}
+      >
         <img src={this.props.image} alt={this.props.name} />
       </div>
     );
@@ -68,9 +76,15 @@ BadgeClassList = React.createClass({
         key: "bc-" + i
       }
 
+
       if (this.props.display == 'thumbnail'){
+        var handleClick = function(e){};
+        var providedHandler = this.props.handleClick
+        if (providedHandler) {
+          handleClick = function(e) { providedHandler(e, bc); };
+        }
         return (
-          <BadgeClassThumbnail {...properties} />
+          <BadgeClassThumbnail {...properties} handleClick={handleClick} />
         );
       }
       else {
