@@ -8,7 +8,6 @@
   "homepage": "http://concentricsky.com",
   "dependencies": {
     "react": "0.12.x",
-    "underscore": "1.8.x",
     "lodash": "~3.10.0"
   },
   "devDependencies": {
