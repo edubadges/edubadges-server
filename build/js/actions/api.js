@@ -19,18 +19,20 @@ var APIFormResultFailure = function(data) {
     }});
 }
 
-var APIGetData = function(apiContext) {
+var APIGetData = function(apiContext, requestContext) {
   appDispatcher.dispatch({ action: {
       type: 'API_GET_DATA',
-      apiContext: apiContext
+      apiContext: apiContext,
+      requestContext: requestContext
     }});
 }
 
-var APISubmitData = function(data, context){
+var APISubmitData = function(data, apiContext, requestContext){
   appDispatcher.dispatch({ action: {
     type: 'API_SUBMIT_DATA',
     apiData: data,
-    apiContext: context
+    apiContext: apiContext,
+    requestContext: requestContext
   }});
 }
 
@@ -41,11 +43,11 @@ var APIGetResultFailure = function(data) {
     }});
 }
 
-var APIFetchCollections = function(collectionKeys, context) {
+var APIFetchCollections = function(collectionKeys, requestContext) {
   appDispatcher.dispatch({ action: {
     type: 'API_FETCH_COLLECTIONS',
     collectionIds: collectionKeys,
-    context: context,
+    requestContext: requestContext
   }}); 
 }
 

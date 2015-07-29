@@ -195,7 +195,7 @@ APIStore.fetchCollections = function(collectionKeys, requestContext){
     key = collectionKeys[index];
     if (!contexts.hasOwnProperty(key))
       continue;
-    actionUrl = contexts[key].actionUrl;
+    actionUrl = APIStore._buildUrlWithContext(contexts[key].actionUrl, requestContext)
     if (APIStore.activeGetRequests.hasOwnProperty(key))
       continue;
     APIStore.activeGetRequests[actionUrl] = true;
@@ -275,14 +275,15 @@ APIStore.getData = function(context, requestContext){
  * This function will interrogate the data and attach appropriate fields
  * to the post request.
 */
-APIStore.postForm = function(fields, values, context){
+APIStore.postForm = function(fields, values, context, requestContext){
+  url = APIStore._buildUrlWithContext(context.actionUrl, requestContext)
 
   if (context.method == 'POST')
-    var req = request.post(context.actionUrl);
+    var req = request.post(url);
   else if (context.method == 'DELETE')
-    var req = request.delete(context.actionUrl);
+    var req = request.delete(url);
   else if (context.method == 'PUT')
-    var req = request.put(context.actionUrl);
+    var req = request.put(url);
 
   req.set('X-CSRFToken', getCookie('csrftoken'))
   .accept('application/json');
@@ -334,16 +335,18 @@ APIStore.postForm = function(fields, values, context){
 /* requestData: a method of making partial updates to collection records based on
  * an API interaction.
 */
-APIStore.requestData = function(data, context){
+APIStore.requestData = function(data, context, requestContext){
+  url = APIStore._buildUrlWithContext(context.actionUrl, requestContext)
+
   var req;
   if (context.method == 'POST')
-    req = request.post(context.actionUrl);
+    req = request.post(url);
   else if (context.method == 'DELETE')
-    req = request.del(context.actionUrl);
+    req = request.del(url);
   else if (context.method == 'PUT')
-    req = request.put(context.actionUrl);
+    req = request.put(url);
   else if (context.method == 'GET')
-    req = request.get(context.actionUrl);
+    req = request.get(url);
 
   req.set('X-CSRFToken', getCookie('csrftoken'))
   .accept('application/json')
@@ -391,7 +394,7 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
 
   switch(action.type){
     case 'APP_WILL_MOUNT':
-      APIStore.storeInitialData()
+      APIStore.storeInitialData();
       APIStore.emit('INITIAL_DATA_LOADED');
       break;
 
@@ -401,22 +404,22 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
 
       if (FormStore.genericFormTypes.indexOf(action.formType) > -1){
         var formData = FormStore.getFormData(action.formId);
-        APIStore.postForm(formData.fieldsMeta, formData.formState, formData.apiContext);
+        APIStore.postForm(formData.fieldsMeta, formData.formState, formData.apiContext, action.requestContext || {});
       }
       else
         console.log("Unidentified form type to submit: " + action.formId);
       break;
 
     case 'API_SUBMIT_DATA':
-      APIStore.requestData(action.apiData, action.apiContext);
+      APIStore.requestData(action.apiData, action.apiContext, action.requestContext || {});
       break;
 
     case 'API_GET_DATA':
-      APIStore.getData(action.apiContext);
+      APIStore.getData(action.apiContext, action.requestContext || {});
       break;
 
     case 'API_FETCH_COLLECTIONS':
-      APIStore.fetchCollections(action.collectionIds, action.context || {});
+      APIStore.fetchCollections(action.collectionIds, action.requestContext || {});
       break;
 
     default:
