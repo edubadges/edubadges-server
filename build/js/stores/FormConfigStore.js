@@ -11,7 +11,8 @@ FormConfigStore.genericFormTypes = function(){
     'BadgeInstanceCreateUpdateForm',
     'EarnerBadgeImportForm',
     'EarnerCollectionCreateForm',
-    'EarnerCollectionEditForm'
+    'EarnerCollectionEditForm',
+    'BadgrbookDefaultIssuerForm',
   ];
 }
 
@@ -193,7 +194,23 @@ FormConfigStore.getConfig = function(formType, overrides, context){
         successHttpStatus: [200],
         successMessage: "Collection successfully edited."
       }
-    }
+    },
+    BadgrbookDefaultIssuerForm: {
+      formId: overrides['formId'] || "BadgrbookDefaultIssuerForm",
+      fieldsMeta: {
+        default_issuer: {inputType: "text", label: "Default Issuer Slug", required: true},
+      },
+      defaultValues: {
+        default_issuer: "",
+      },
+      apiContext: {
+        formId: overrides['formId'] || "BadgrbookDefaultIssuerForm",
+        actionUrl: "/v1/badgrbook/defaultissuer/:tool_guid",
+        method: "PUT",
+        successHttpStatus: [200],
+        successMessage: "Default issuer saved."
+      }
+    },
   };
 
   var configData = configDefaults[formType] || {};
