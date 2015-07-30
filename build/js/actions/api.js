@@ -51,6 +51,16 @@ var APIFetchCollections = function(collectionKeys, requestContext) {
   }}); 
 }
 
+var APIPostForm = function(fields, values, apiContext, requestContext) {
+  appDispatcher.dispatch({ action: {
+    type: 'API_POST_FORM',
+    fields: fields,
+    values: values,
+    apiContext: apiContext,
+    requestContext: requestContext
+  }});
+}
+
 
 module.exports = {
   APIFormResultSuccess: APIFormResultSuccess,
@@ -58,5 +68,6 @@ module.exports = {
   APIGetResultFailure: APIGetResultFailure,
   APIGetData: APIGetData,
   APIFetchCollections: APIFetchCollections,
-  APISubmitData: APISubmitData
+  APISubmitData: APISubmitData,
+  APIPostForm: APIPostForm
 }

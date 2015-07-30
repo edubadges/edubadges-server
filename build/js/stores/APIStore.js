@@ -316,7 +316,7 @@ APIStore.postForm = function(fields, values, context, requestContext){
       if (newObject){
         APIStore.emit('DATA_UPDATED');
         APIActions.APIFormResultSuccess({
-          formId: context.formId, 
+          formId: context.formId,
           message: {type: 'success', content: context.successMessage},
           result: newObject
         });
@@ -408,6 +408,10 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
       }
       else
         console.log("Unidentified form type to submit: " + action.formId);
+      break;
+
+    case 'API_POST_FORM':
+      APIStore.postForm(action.fields, action.values, action.apiContext, action.requestContext || {});
       break;
 
     case 'API_SUBMIT_DATA':
