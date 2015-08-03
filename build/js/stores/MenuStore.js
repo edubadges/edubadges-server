@@ -151,6 +151,11 @@ MenuStore.storeInitialData = function() {
       break;
     }
 
+  if (initialData.lti_learner) {
+    MenuStore.menus.badgrbookMenu.items = [];
+  }
+
+
   }
 
   if ('user' in initialData && initialData.user.approvedIssuer){
