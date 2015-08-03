@@ -196,6 +196,12 @@ APIStore.fetchCollections = function(collectionKeys, requestContext){
       apiCollectionKey: 'badgrbook_courseprogress',
       replaceCollection: true
     },
+    badgrbook_badgeinstances: {
+      actionUrl: '/v1/badgrbook/studentbadges/',
+      successfulHttpStatus: [200],
+      apiCollectionKey: 'badgrbook_badgeinstances',
+      replaceCollection: true
+    },
   };
   for (var index in collectionKeys){
     key = collectionKeys[index];
