@@ -57,4 +57,4 @@ pypng==0.0.17
 jsonfield==1.0.0
 
 # LTI support
-git+https://github.com/Harvard-University-iCommons/django-auth-lti@v1.2.1
+git+https://github.com/concentricsky/django-auth-lti@v1.2.1-csky
