@@ -9,16 +9,22 @@ var Property = require('../components/BadgeDisplay.jsx').Property;
 BadgeClassThumbnail = React.createClass({
   getDefaultProps: function() {
     return {
-      handleClick: function(e){}
+      handleClick: function(e){},
+      showName: false
     };
   },
   render: function() {
+    var name = "";
+    if (this.props.showName) {
+      name = (<p>{this.props.name}</p>);
+    }
     return (
       <div
         className="badgeclass-display badgeclass-display-thumbnail col-xs-3"
         onClick={this.props.handleClick}
       >
         <img src={this.props.image} alt={this.props.name} />
+        {name}
       </div>
     );
   }
@@ -61,7 +67,8 @@ BadgeClassList = React.createClass({
     return {
       display: 'thumbnail',
       perPage: 4,
-      currentPage: 1
+      currentPage: 1,
+      showNameOnThumbnail: false
     };
   },
   render: function() {
@@ -73,7 +80,8 @@ BadgeClassList = React.createClass({
         image: bc.image,
         name: bc.name,
         slug: bc.slug,
-        key: "bc-" + i
+        key: "bc-" + i,
+        showName: this.props.showNameOnThumbnail
       }
 
 
