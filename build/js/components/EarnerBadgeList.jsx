@@ -10,17 +10,20 @@ var OpenBadgeList = require('./OpenBadgeList.jsx');
 var EarnerBadgeList = React.createClass({
   render: function() {
     var badges, moreLink = "";
-    if (this.props.perPage && this.props.badges.length > this.props.perPage){
-      badges = this.props.badges.slice(0, this.props.perPage);
+    if (this.props.perPage && this.props.badges.length > this.props.perPage * this.props.currentPage){
+      //badges = this.props.badges.slice(0, this.props.perPage);
+      badges = this.props.badges.slice(this.props.badges.length - this.props.perPage * this.props.currentPage);
+      badges.reverse();
 
       moreLink = (<div className="more-link">
         (<a href={this.props.moreLink}>
-          {this.props.badges.length - this.props.perPage} more...
+          Load more...
         </a>)
       </div>);
     }
     else {
-      badges = this.props.badges;
+      badges = this.props.badges.slice();
+      badges.reverse();
     }
 
     return (

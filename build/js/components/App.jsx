@@ -208,8 +208,10 @@ var App = React.createClass({
     return this.render_base("Loading My Badges...");
   },
 
-  earnerBadges: function(){
-    var viewId = "earnerBadges";
+  earnerBadges: function(params){
+    var viewId = "earnerBadges",
+        currentPage=parseInt(_.get(params, 'page')) || 1,
+        nextPage = currentPage + 1;
     dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
 
     var mainComponent = (
@@ -226,8 +228,9 @@ var App = React.createClass({
         <EarnerBadgeList
           viewId={viewId}
           badges={APIStore.getCollection('earner_badges')}
-          perPage={50}
-          moreLink="/earner/badges"
+          perPage={20}
+          currentPage={currentPage}
+          moreLink={"/earner/badges?page=" + nextPage}
         />
       </MainComponent>
     );

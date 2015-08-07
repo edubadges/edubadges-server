@@ -310,10 +310,9 @@ BasicAPIForm = React.createClass({
           </div>
         );
       }.bind(this));
-
       formControls = (
         <div className="row form-controls">
-          <SubmitButton name="submit" label="" handleClick={this.handleSubmit} />
+          <SubmitButton name="submit" label={_.get(this.props, 'formControls.submit.label')} handleClick={this.handleSubmit} />
           {closeButton}
           {loadingIcon}
         </div>
@@ -323,7 +322,6 @@ BasicAPIForm = React.createClass({
       formControls = (
         <div className="row form-controls">
           {closeButton}
-          <ResetButton name="reset" handleClick={this.handleReset} />
         </div>
       );
     }
