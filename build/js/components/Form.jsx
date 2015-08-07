@@ -221,7 +221,10 @@ BasicAPIForm = React.createClass({
     e.preventDefault();
     e.stopPropagation();
 
-    FormActions.resetForm(this.props.formId);   
+    FormActions.resetForm(this.props.formId);
+    if (this.props.handleCloseForm){
+      this.props.handleCloseForm();
+    }
   },
   handleImageDrop: function(file){
     // To make sure any changes within the focused element are recorded in the form state
@@ -243,7 +246,7 @@ BasicAPIForm = React.createClass({
         activeMessage = (this.state.message) ? (<div className={"alert alert-" + this.state.message.type} >{this.state.message.content}</div>) : "",
         activeHelpText = !this.state.message && this.props.helpText ? <div className="alert alert-info">{this.props.helpText}</div> : "",
         formControls = "",
-        closeButton = this.props.handleCloseForm ? (<PlainButton name="close" label="Close" handleClick={this.props.handleCloseForm} />) : "",
+        closeButton = this.props.handleCloseForm ? (<PlainButton name="close" label="Cancel" handleClick={this.handleReset} />) : "",
         loadingIcon = this.state.actionState == "waiting" ? (<LoadingIcon />) : "";
     if (["ready", "waiting"].indexOf(this.state.actionState) > -1){
 
@@ -310,9 +313,8 @@ BasicAPIForm = React.createClass({
 
       formControls = (
         <div className="row form-controls">
+          <SubmitButton name="submit" label="" handleClick={this.handleSubmit} />
           {closeButton}
-          <ResetButton name="reset" handleClick={this.handleReset} />
-          <SubmitButton name="submit" handleClick={this.handleSubmit} />
           {loadingIcon}
         </div>
       );
@@ -331,9 +333,11 @@ BasicAPIForm = React.createClass({
       <div className="form-container issuer-notification-form-container">
         {activeMessage} {activeHelpText}
         <div className={this.state.actionState == "waiting" ? "form-horizontal disabled" : "form-horizontal"}>
-          <fieldset className="row">
-            {activeColumns}
-          </fieldset>
+          <div className="container-fluid">
+            <fieldset className="row">
+              {activeColumns}
+            </fieldset>
+          </div>
           {formControls}
         </div>
       </div>

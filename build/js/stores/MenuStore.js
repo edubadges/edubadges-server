@@ -131,13 +131,14 @@ MenuStore.storeInitialData = function() {
     return;
 
   // try to load the variable declared as initialData in the view template
+  if (initialData.installed_apps.indexOf('composer') > -1)
+    MenuStore.menus.roleMenu.items.push(
+      { title: "My Badges", url: "/earner/badges", icon: "fa-certificate", children: [] },
+      { title: "My Collections", url: "/earner/collections", icon: "folder", children: [] }
+    );
   if (initialData.installed_apps.indexOf('issuer') > -1)
     MenuStore.menus.roleMenu.items.push(
       { title: "Issue", url: "/issuer", icon: "fa-mail-forward", children: []}
-    );
-  if (initialData.installed_apps.indexOf('composer') > -1)
-    MenuStore.menus.roleMenu.items.push(
-      { title: "Earn", url: "/earner", icon: "fa-certificate", children: [] }
     );
   if (initialData.installed_apps.indexOf('consumer') > -1)
     MenuStore.menus.roleMenu.items.push(  
