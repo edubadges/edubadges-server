@@ -21,6 +21,12 @@
 
 @import "./colors";
 
+.col-xs-1, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5,
+.col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9, .col-xs-10,
+.col-xs-11, .col-xs-12 {
+  padding:0;
+}
+
 // Grid adjustments so that on the smallest screens, 
 // col-xs classes are 100% width
 @media only screen and (max-width: 479px){
@@ -39,14 +45,14 @@
 } 
 
 body.badgr {
-  background-color: $badgr-brown;
+  background-color: $badgr-background;
+
 }
 body.embedded-body {
   background-color: transparent;
 }
 
 .main-app-container {
-  background-color: $white;
   padding-bottom: 2em; 
 }
 
@@ -56,6 +62,16 @@ a {
 }
 h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
   color: $black;
+}
+
+h2 {
+  a {
+    font-size: 34px;
+    font-weight: 400;
+    line-height: 40px;
+    margin-bottom: 30px;
+    color: #672f33;
+  }
 }
 
 img { 

@@ -47,8 +47,7 @@ var FirstLevelItem = React.createClass({
     }
     return (
       <li className={this.props.active ? 'nav-menu-item expanded-true active open' : 'nav-menu-item' }>
-        <a href={this.props.url} onClick={this.handleClick} alt={this.title}>  
-          <i className={'fa fa-fw ' + this.props.iconClass}></i> 
+        <a href={this.props.url} onClick={this.handleClick} alt={this.title}>
           <label>{this.props.label}</label>
           {downCaret}
         </a>

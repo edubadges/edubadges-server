@@ -1,11 +1,14 @@
 
 .badge-display, .issuer-display {
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
-  padding: 0.25em;
   float: left;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  margin: 0.5rem 0 1rem 0;
+  padding:0 7px 7px;
+  background-color: #fff;
+  transition: box-shadow .25s;
+  border-radius: 2px;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
 }
 .badge-display-thumbnail {
   overflow: hidden; 
@@ -13,6 +16,7 @@
 
   .badgeProperty {
     span.propertyValue { font-weight: bold; }
+    margin-top:7px;
   }
 } 
 
@@ -20,7 +24,6 @@
 .badge-display, .issuer-display {
   a { word-wrap: break-word;}
   .propertyName {
-    font-weight: bold;
     margin-right: 0.5em;
     &:after { content: ":"; }
 

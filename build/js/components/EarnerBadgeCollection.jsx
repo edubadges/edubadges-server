@@ -199,7 +199,7 @@ var EarnerCollectionDetail = React.createClass({
       editBadgeButtonConfig = { 
         title: "Select Badges",
         buttonType: "primary",
-        icon: "fa-certificate", 
+        icon: "fa-certificate",
         activePanelCommand: {} 
       };
       panelFunction = this.startEditing;

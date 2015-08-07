@@ -53,7 +53,7 @@ MenuStore.defaultItems = {
         { 
           title: "Import Badge",
           buttonType: "primary",
-          icon: "fa-certificate", 
+          icon: "fa-certificate",
           activePanelCommand: { type: "EarnerBadgeImportForm", content: { badgeId: null } } 
         }
       ],
@@ -61,7 +61,7 @@ MenuStore.defaultItems = {
         { 
           title: "Add Collection",
           buttonType: "primary",
-          icon: "fa-folder-open", 
+          icon: "fa-folder-open",
           activePanelCommand: { type: "EarnerCollectionCreateForm", content: {} } 
         }
       ],
