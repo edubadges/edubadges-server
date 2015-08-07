@@ -36,7 +36,11 @@ class ComponentPropertyDetailView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         current_object = current_query[0]
-        return redirect(getattr(current_object, self.prop).url)
+
+        p = getattr(current_object, self.prop)
+        if not bool(p):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return redirect(p.url)
 
 
 class IssuerJson(JSONComponentView):
