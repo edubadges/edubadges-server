@@ -145,21 +145,6 @@ var App = React.createClass({
       this.setState(update);
     }
   },
-  contextPropsForActivePanel: function(viewId){
-    if (!(viewId in this.state.activePanels))
-      return {};
-
-    var context = {};
-    var panel = this.state.activePanels[viewId];
-
-    if (panel.type == "EarnerBadgeImportForm") {
-      context = {
-        recipientIds: UserStore.getProperty('earnerIds'),
-        badgeId: panel.content.badgeId
-      };
-    }
-    return context;
-  },
 
   handleDependencies: function(collectionKeys){
     toFetch = collectionKeys.filter(function(key, index){
@@ -219,95 +204,33 @@ var App = React.createClass({
 
 
   earnerMain: function() {
-    var viewId = 'earnerHome';
-    var dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
-    var clickeEmptyBadgeUpdate = {}
-    var mainComponent = (
-      <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet}>
-        <ActionBar 
-          title="My Badges"
-          titleLink="/earner/badges"
-          viewId={viewId}
-          items={this.props.actionBars['earnerBadges']}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
-        <ActivePanel
-          viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-        />
-        <EarnerBadgeList
-          viewId={viewId}
-          badges={APIStore.getCollection('earner_badges')}
-          perPage={12}
-          moreLink="/earner/badges"
-          clickEmptyBadge={function(){this.updateActivePanel(viewId, clickeEmptyBadgeUpdate)}.bind(this)}
-          showEmptyBadge={true}
-        />
-
-        <ActionBar 
-          title="My Collections"
-          titleLink="/earner/collections"
-          viewId={'earnerMainCollections'}
-          items={this.props.actionBars['earnerCollections']}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          activePanel={this.state.activePanels['earnerMainCollections']}
-        />
-        <ActivePanel
-          viewId={'earnerMainCollections'}
-          {...this.state.activePanels['earnerMainCollections']}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-        />
-        <EarnerCollectionList
-          collections={APIStore.getCollection('earner_collections')}
-          perPage={12}
-        />
-      </MainComponent>
-    );
-
-    // render the view
-    return this.render_base(mainComponent);
+    ClickActions.navigateLocalPath('/earner/badges');
+    return this.render_base("Loading My Badges...");
   },
 
-  earnerBadges: function(){
-    var viewId = "earnerBadges";
+  earnerBadges: function(params){
+    var viewId = "earnerBadges",
+        currentPage=parseInt(_.get(params, 'page')) || 1,
+        nextPage = currentPage + 1;
     dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
-
-    var breadCrumbs = [
-      { name: "Earner Home", url: '/earner'},
-      { name: "My Badges", url: '/earner/badges' }
-    ];
 
     var mainComponent = (
       <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet} >
-        <BreadCrumbs items={breadCrumbs} />
-        <ActionBar 
+        <HeadingBar
           title="My Badges"
-          titleLink="/earner/badges"
-          viewId={viewId}
-          items={this.props.actionBars['earnerBadges']}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          activePanel={this.state.activePanels[viewId]}
         />
         <ActivePanel
           viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
+          {...{"type":"EarnerBadgeImportForm","content":{"badgeId":null}}}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
         />
         <EarnerBadgeList
           viewId={viewId}
           badges={APIStore.getCollection('earner_badges')}
-          perPage={50}
-          moreLink="/earner/badges"
+          perPage={20}
+          currentPage={currentPage}
+          moreLink={"/earner/badges?page=" + nextPage}
         />
       </MainComponent>
     );
@@ -402,7 +325,6 @@ var App = React.createClass({
         <ActivePanel
           viewId={viewId}
           {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
         />
@@ -449,7 +371,6 @@ var App = React.createClass({
         <ActivePanel
           viewId={viewId}
           {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
           collection={collection}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
@@ -488,7 +409,6 @@ var App = React.createClass({
         <ActivePanel
           viewId={viewId}
           {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
         />
@@ -530,7 +450,6 @@ var App = React.createClass({
         <ActivePanel
           viewId={viewId}
           {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
           issuerSlug={issuerSlug}
@@ -594,7 +513,6 @@ var App = React.createClass({
         <ActivePanel
           viewId={viewId}
           {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
           issuerSlug={issuerSlug}
@@ -644,7 +562,6 @@ var App = React.createClass({
         <ActivePanel
           viewId={viewId}
           {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
         />
