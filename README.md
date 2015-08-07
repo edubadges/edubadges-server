@@ -1,25 +1,33 @@
 # Badgr Server
 *Digital badge management for issuers, earners, and consumers*
 
-Badgr Server is a web application for issuing [Open Badges](http://openbadges.org). In addition to a powerful Issuer API and browser-based user interface for issuing, Badgr offers integrated badge management and sharing for badge earners. Free accounts are hosted by Concentric Sky at [Badgr.io](https://info.badgr.io), but for complete control over your own issuing environment, Badgr Server is available open source as a Python/Django application.
+Badgr Server is a web application for issuing [Open Badges](http://openbadges.org). In addition to a powerful Issuer API and browser-based user interface for issuing, Badgr offers integrated badge management and sharing for badge earners. Free accounts are hosted by Concentric Sky at [Badgr.io](http://info.badgr.io), but for complete control over your own issuing environment, Badgr Server is available open source as a Python/Django application.
 
-*Version: 1.1.0*
+*Version: 1.1.2*
 
 ## How to get started on your local development environment.
 Prerequisites:
 
-  * python 2.7.x
-  * virtualenv
-  * npm
-  * grunt
-  * mysql
+* python 2.7.x
+* virtualenv
+* npm
+* grunt
+* sass
+* mysql
+  
+Optional extras:
+
+* memcached
+* amqp broker (e.g. RabbitMQ)
 
 ### Create project directory and environment
+
 * `mkdir badgr`
 * `virtualenv env`
 * `source env/bin/activate` *Activate the environment (each time you start a session working with the code)*
 
 *Obtain source code and clone into code directory*
+
 * `git clone git@github.com:concentricsky/badgr-server.git code`
 * `cd code`
 
@@ -55,7 +63,7 @@ badgr
 * Navigate to http://localhost:8000/accounts/login
 * login, verify an email address
 
-A browseable API is available at `/v1` and API documentation at `/docs`
+A browseable API is available at `/v1` and additional API documentation at `/docs`
 
 ### Additional configuration options
 Set these values in your settings_local.py file to configure the application to your specific needs. Required options are listed in bold.
