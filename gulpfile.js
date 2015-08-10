@@ -126,8 +126,9 @@ gulp.task('css', function () {
     var result = gulp.src('./build/sass/**/*.scss')
     .pipe(sass())
     .pipe(concat('style.css'))
-    .pipe(gulp.dest('./breakdown/static/css/')).
-    pipe(livereload());
+    .pipe(gulp.dest('./breakdown/static/css/'))
+    .pipe(size({showFiles:true, gzip:true}))
+    .pipe(livereload());
     logUpdate('css', Date.now() - updateStart);
     return result;
   });
