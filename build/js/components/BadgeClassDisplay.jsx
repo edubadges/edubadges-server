@@ -68,7 +68,11 @@ BadgeClassList = React.createClass({
       display: 'thumbnail',
       perPage: 4,
       currentPage: 1,
-      showNameOnThumbnail: false
+      showNameOnThumbnail: false,
+      emptyMessage: "There are no badges defined yet.",
+      includeNullItem: false,
+      handleClick: function(e, badge_class) {},
+      handleNullClick: function(e) {},
     };
   },
   render: function() {
@@ -107,6 +111,17 @@ BadgeClassList = React.createClass({
         );
       }
     }.bind(this));
+    if (badgeClasses.length < 1) {
+      badgeClasses = this.props.emptyMessage;
+    } else if (this.props.includeNullItem) {
+      badgeClasses.push(<div key={"nullItem"}
+                          className="badgeclass-display badgeclass-display-none col-xs-3"
+                          onClick={this.props.handleNullClick}
+                          >
+                          <img src="/static/images/none.png" alt="No Badge" />
+                          <p>No Badge</p>
+                        </div>);
+    }
     return (
       <div className="container-fluid">
         <div className="badgeclass-list badgeclass-list-thumbnail row">
