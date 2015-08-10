@@ -208,7 +208,7 @@ FormConfigStore.getConfig = function(formType, overrides, context){
       },
       apiContext: {
         formId: overrides['formId'] || "BadgrbookDefaultIssuerForm",
-        actionUrl: "/v1/badgrbook/defaultissuer/:tool_guid",
+        actionUrl: "/v1/badgrbook/defaultissuer/:tool_guid/:course_id",
         method: "PUT",
         successHttpStatus: [200],
         successMessage: "Default issuer saved."
