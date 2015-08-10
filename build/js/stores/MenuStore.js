@@ -100,6 +100,12 @@ MenuStore.defaultItems = {
         }
       ],
       badgrbookObjectives: [
+        {
+          title: "Create New Badge",
+          buttonType: "primary",
+          icon: "fa-pencil-square-o",
+          activePanelCommand: { type: "BadgeClassCreateUpdateForm", content: {}}
+        }
       ],
   }
 };
