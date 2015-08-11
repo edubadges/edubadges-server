@@ -54,13 +54,17 @@
                 list-style: none;
                 padding:0;
                 margin:0;
+                position: absolute;
+                background: #fff;
+                border: 1px solid #ddd2d2;
+                max-width: 234px;
+                margin-top: 20px;
                 li {
-                  padding:10px;
                   border:1px solid #ddd2d2;
                   display:block;
                   cursor:pointer;
                   img {
-                    clear:both;
+
                   }
                 }
               }
