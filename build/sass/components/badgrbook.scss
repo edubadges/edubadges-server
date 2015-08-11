@@ -43,9 +43,27 @@
               width:250px;
               .badge-select {
                 text-align: left;
+                width:100%;
                 .fa {
                   float:right;
                   margin-top:3px;
+                }
+              }
+              .badge-class-chooser {
+                width:100%;
+                list-style: none;
+                padding:0;
+                margin:0;
+                li {
+                  padding:10px;
+                  border:1px solid #ddd2d2;
+                  img {
+                    max-width: 64px;
+                    float:left;
+                    margin-right:7px;
+                    border:1px solid #cbb9bb;
+                    border-radius:2px;
+                  }
                 }
               }
             }
