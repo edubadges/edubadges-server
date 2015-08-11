@@ -29,10 +29,10 @@ table {
     tbody {
       tr {
         &:nth-child(odd) {
-          background-color: #f0ede8;
+          background-color: blue;
         }
         td {
-          border-top: 1px solid #cbb9bb;
+          border-top: 1px solid red;
         }
       }
     }
