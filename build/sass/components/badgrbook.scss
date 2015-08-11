@@ -42,10 +42,16 @@
             &.badge-col {
               width:250px;
               .badge-select {
+                text-align: left;
                 .fa {
                   float:right;
                   margin-top:3px;
                 }
+              }
+            }
+            &.actions-col {
+              .btn {
+                margin-right:7px;
               }
             }
           }
