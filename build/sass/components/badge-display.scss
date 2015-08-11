@@ -60,18 +60,25 @@
   }
 }
 
-.badgeclass-display-thumbnail {
+.badgeclass-display-thumbnail, .badge-class-chosen, .badge-class-chooser {
   img {
     max-width: 64px;
-    float:left;
     margin-right:7px;
-    border:1px solid #cbb9bb;
     border-radius:2px;
+    float:left;
   }
   p {
     font-weight:600;
     font-size: .8em;
   }
+}
+
+.badge-class-chosen {
+  padding:3px;
+  border:1px solid #ddd2d2;
+  display:block;
+  background:#fff;
+  cursor:pointer;
 }
 
 // hide super long linkage
