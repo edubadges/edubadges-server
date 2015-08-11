@@ -29,7 +29,6 @@ MenuStore.defaultItems = {
   },
   badgrbookMenu: {
     items: [
-      { title: "Badges", url: "/badgrbook/badges", icon: "fa-cog", children: [] },
       { title: "Objectives", url: "/badgrbook/objectives", icon: "fa-certificate", children: [] },
       { title: "Progress", url: "/badgrbook/progress", icon: "fa-tasks", children: [] }
     ]
@@ -99,6 +98,7 @@ MenuStore.defaultItems = {
           activePanelCommand: { type: "ConsumerBadgeForm", content: { badgeId: null } } 
         }
       ],
+      badgrbookProgress: [],
       badgrbookObjectives: [
         {
           title: "Create New Badge",

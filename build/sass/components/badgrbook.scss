@@ -37,6 +37,24 @@
         td, th {
           border-top: 1px solid #ddd2d2;
           border-width: 1px 0 0 0;
+          &.col {
+            &.badge-col {
+              width:250px;
+              .badge-select {
+                border: 1px solid #ddd2d2;
+                padding: 10px;
+                font-weight: 600;
+                width: 250px;
+                border-radius: 2px;
+                font-size: 12px;
+                cursor: pointer;
+                background: #fff;
+                .fa.fa-caret-down {
+                  float:right;
+                }
+              }
+            }
+          }
         }
       }
     }
