@@ -10,12 +10,12 @@
   width: 64px;
 }
 
-table {
+.table {
   background-color: transparent;
   width: 100%;
   max-width: 100%;
   margin-bottom: 20px;
-  .table-striped {
+  .table-striped, .table-bordered {
     thead {
       tr {
         &:first-child {
