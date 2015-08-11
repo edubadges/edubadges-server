@@ -32,6 +32,7 @@ var InputGroup = React.createClass({
       "filebutton": "input-file",
       "textarea": "input-textarea", //wrong. double-check. http://getbootstrap.com/components/#input-groups says you can't use textarea in .input-group
       "select": "input-group-select",
+      "text": "form-control",
       "checkbox": "input-checkbox"
     };
     return classes[this.props.inputType];
@@ -311,7 +312,7 @@ BasicAPIForm = React.createClass({
         );
       }.bind(this));
       formControls = (
-        <div className="form-control">
+        <div className="row form-controls">
           <SubmitButton name="submit" label={_.get(this.props, 'formControls.submit.label')} handleClick={this.handleSubmit} />
           {closeButton}
           {loadingIcon}
@@ -320,7 +321,7 @@ BasicAPIForm = React.createClass({
     }
     else {
       formControls = (
-        <div className="form-control">
+        <div className="row form-controls">
           {closeButton}
         </div>
       );
