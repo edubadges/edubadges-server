@@ -14,7 +14,7 @@
   background-color: transparent;
   width: 100%;
   max-width: 100%;
-  border:0;
+  border: 3px solid #ddd2d2;
   margin-bottom: 20px;
   &.table-striped, &.table-bordered {
     thead {
@@ -37,20 +37,14 @@
         td, th {
           border-top: 1px solid #ddd2d2;
           border-width: 1px 0 0 0;
+          vertical-align: middle;
           &.col {
             &.badge-col {
               width:250px;
               .badge-select {
-                border: 1px solid #ddd2d2;
-                padding: 10px;
-                font-weight: 600;
-                width: 250px;
-                border-radius: 2px;
-                font-size: 12px;
-                cursor: pointer;
-                background: #fff;
                 .fa {
                   float:right;
+                  margin-top:3px;
                 }
               }
             }
