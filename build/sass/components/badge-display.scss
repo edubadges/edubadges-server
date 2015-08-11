@@ -64,7 +64,6 @@
   img {
     max-width: 64px;
     margin-right:7px;
-    border:1px solid #cbb9bb;
     border-radius:2px;
     float:left;
   }
@@ -72,6 +71,10 @@
     font-weight:600;
     font-size: .8em;
   }
+}
+
+.badge-class-chosen {
+  cursor:pointer;
 }
 
 // hide super long linkage
