@@ -14,13 +14,14 @@
   background-color: transparent;
   width: 100%;
   max-width: 100%;
+  border:0;
   margin-bottom: 20px;
   &.table-striped, &.table-bordered {
     thead {
       tr {
         &:first-child {
           th {
-            border-top: 0;
+            border: 0;
           }
         }
         th {
@@ -35,6 +36,7 @@
         }
         td {
           border-top: 1px solid #cbb9bb;
+          border-width: 1px 0 0 0;
         }
       }
     }
