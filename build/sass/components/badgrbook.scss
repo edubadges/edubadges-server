@@ -19,7 +19,9 @@
     thead {
       tr {
         &:first-child {
-          border-top: 0;
+          th {
+            border-top: 0;
+          }
         }
         th {
           border-bottom: 2px solid #cbb9bb;
