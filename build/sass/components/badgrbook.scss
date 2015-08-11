@@ -29,12 +29,10 @@
     tbody {
       tr {
         &:nth-child(odd) {
-          td {
-            background-color: blue;
-          }
+          background-color: #f0ede8;
         }
         td {
-          border-top: 1px solid red;
+          border-top: 1px solid #cbb9bb;
         }
       }
     }
