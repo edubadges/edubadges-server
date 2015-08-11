@@ -10,12 +10,31 @@
   width: 64px;
 }
 
-.badgeobjective-list {
-
-  .badgeobjective-display {
-    .row {
-
+table {
+  background-color: transparent;
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 20px;
+  .table-striped {
+    thead {
+      tr {
+        &:first-child {
+          border-top: 0;
+        }
+        th {
+          border-bottom: 2px solid #cbb9bb;
+        }
+      }
+    }
+    tbody {
+      tr {
+        &:nth-child(odd) {
+          background-color: #f0ede8;
+        }
+        td {
+          border-top: 1px solid #cbb9bb;
+        }
+      }
     }
   }
-
 }
