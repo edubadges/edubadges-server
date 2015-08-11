@@ -16,7 +16,7 @@ BadgeClassThumbnail = React.createClass({
   render: function() {
     var name = "";
     if (this.props.showName) {
-      name = (<label>{this.props.name}</label>);
+      name = (<p>{this.props.name}</p>);
     }
     return (
       <div
