@@ -1,11 +1,17 @@
 @import "../colors";
 
 .active-panel {
-  border: 1px solid #ccc;
   padding: 1em;
   .badge-display { border: 0; }
   &.empty {
     display: none;
+  }
+  &.non-modal {
+    border: 1px solid #ccc;
+  }
+  &.modal-dialog {
+    background-color: transparent;
+    //border: none;
   }
 
   .panel-actions {
@@ -13,7 +19,8 @@
   }
 }
 
-.active-panel, .badge-display-active {
+
+.active-panel.non-modal, .badge-display-active {
   border-color: $light;
   background:#fff;
   border-radius: 4px;

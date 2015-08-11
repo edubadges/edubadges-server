@@ -67,8 +67,25 @@ var ActivePanel = React.createClass({
 
 
       FormStore.getOrInitFormData(this.props.type + this.props.formKey, formProps);
+      var wrapperClass = "active-panel api-form image-upload-form clearfix";
+
+      if (this.props.modal){
+        return (
+          <div className="modal" style={{display: "block"}}>
+            <div className={wrapperClass + ' modal-dialog'}>
+              <div className="modal-content">
+                <div className="modal-body container-fluid">
+                  <BasicAPIForm {...formProps} />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+
       return (
-        <div className="active-panel api-form image-upload-form clearfix">
+        <div className={wrapperClass + ' non-modal'}>
           <div className="container-fluid">
             <BasicAPIForm {...formProps} />
           </div>
