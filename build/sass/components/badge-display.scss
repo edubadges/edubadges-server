@@ -77,9 +77,13 @@
 .badge-class-chosen {
   padding:3px;
   border:1px solid #ddd2d2;
+  border-radius: 4px;
   display:block;
   background:#fff;
   cursor:pointer;
+  &:hover {
+    border:1px solid #ccc2d2;
+  }
   .fa {
     float:right;
     margin-right: 10px;
