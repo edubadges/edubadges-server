@@ -30,7 +30,7 @@ var InputGroup = React.createClass({
   classNameForInput: function(){
     var classes = {
       "filebutton": "input-file",
-      "textarea": "input-textarea", //wrong. double-check. http://getbootstrap.com/components/#input-groups says you can't use textarea in .input-group
+      "textarea": "input-textarea form-control", //wrong. double-check. http://getbootstrap.com/components/#input-groups says you can't use textarea in .input-group
       "select": "input-group-select",
       "text": "form-control",
       "checkbox": "input-checkbox"
