@@ -41,9 +41,9 @@ var ActionBar = React.createClass({
     }.bind(this));
 
     if (this.props.titleLink)
-      title = (<h2><a href={this.props.titleLink}>{this.props.title}</a></h2>);
+      title = (<h3><a href={this.props.titleLink}>{this.props.title}</a></h3>);
     else
-      title = (<h2>{this.props.title}</h2>);
+      title = (<h3>{this.props.title}</h3>);
 
     return (
       <div className="action-bar clearfix">
