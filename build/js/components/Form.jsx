@@ -311,7 +311,7 @@ BasicAPIForm = React.createClass({
         );
       }.bind(this));
       formControls = (
-        <div className="row form-controls">
+        <div className="form-control">
           <SubmitButton name="submit" label={_.get(this.props, 'formControls.submit.label')} handleClick={this.handleSubmit} />
           {closeButton}
           {loadingIcon}
@@ -320,7 +320,7 @@ BasicAPIForm = React.createClass({
     }
     else {
       formControls = (
-        <div className="row form-controls">
+        <div className="form-control">
           {closeButton}
         </div>
       );
