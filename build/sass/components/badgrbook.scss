@@ -10,6 +10,17 @@
   width: 64px;
 }
 
+.badgeclass-display-thumbnail {
+  img {
+    max-width: 64px;
+    float:left;
+    margin-right:7px;
+  }
+  p {
+    
+  }
+}
+
 .table {
   background-color: transparent;
   width: 100%;

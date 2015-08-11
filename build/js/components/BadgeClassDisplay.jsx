@@ -20,7 +20,7 @@ BadgeClassThumbnail = React.createClass({
     }
     return (
       <div
-        className="badgeclass-display badgeclass-display-thumbnail col-xs-3"
+        className="badgeclass-display badgeclass-display-thumbnail"
         onClick={this.props.handleClick}
       >
         <img src={this.props.image} alt={this.props.name} />
