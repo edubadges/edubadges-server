@@ -207,6 +207,20 @@ APIStore.fetchCollections = function(collectionKeys, requestContext){
       apiCollectionKey: 'badgrbook_badgeinstances',
       replaceCollection: true
     },
+    badgrbook_checkcourseprogress: {
+        actionUrl: '/v1/badgrbook/checkprogress/:tool_guid/:course_id',
+        successfulHttpStatus: [200],
+        apiCollectionKey: 'badgrbook_checkcourseprogress',
+        replaceCollection: true,
+        formId: 'badgrbook_checkcourseprogress',
+    },
+    badgrbook_checkstudentprogress: {
+      actionUrl: '/v1/badgrbook/checkprogress/:tool_guid/:course_id/:student_id',
+      successfulHttpStatus: [200],
+      apiCollectionKey: 'badgrbook_checkstudentprogress',
+      replaceCollection: true,
+      formId: 'badgrbook_checkstudentprogress',
+    },
   };
   for (var index in collectionKeys){
     key = collectionKeys[index];
@@ -276,6 +290,9 @@ APIStore.getData = function(context, requestContext){
         APIStore.addCollectionItem(context.apiCollectionKey,response.body);
       }
       APIStore.emit('DATA_UPDATED');
+      if (context.hasOwnProperty('formId')) {
+        APIStore.emit('DATA_UPDATED_'+context.formId);
+      }
     }
   });
 
@@ -399,7 +416,7 @@ APIStore.requestData = function(data, context, requestContext){
       var newObject = APIStore.partialUpdateCollectionItem(context.apiCollectionKey, context.apiSearchKey, context.apiSearchValue, context.apiUpdateKey, newValue);
       if (newObject){
         APIStore.emit('DATA_UPDATED');
-        if (context.formId)
+        if (context.hasOwnProperty(formId))
           APIStore.emit('DATA_UPDATED_' + context.formId);
       }
       else {
@@ -447,6 +464,10 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
 
     case 'API_GET_DATA':
       APIStore.getData(action.apiContext, action.requestContext || {});
+      break;
+
+    case 'API_GET_RESULT_FAILURE':
+      APIStore.emit("API_GET_RESULT_FAILURE", action.message);
       break;
 
     case 'API_FETCH_COLLECTIONS':
