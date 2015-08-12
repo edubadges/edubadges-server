@@ -51,6 +51,9 @@ var destPaths = {
 var logUpdate = function(taskString, duration){
   gutil.log('Updated \'' + clr.cyan(taskString) + '\' after ' + clr.magenta( duration + 'ms'));
 }
+var logTheUgly = function(err){
+  gutil.log(err);
+}
 
 
 var bundle = function(bundler, fileOptions, config){
@@ -58,7 +61,7 @@ var bundle = function(bundler, fileOptions, config){
     .on('error', function(err){console.log(err);})
     .pipe(source(fileOptions.output))
     .pipe(buffer())
-    .pipe(config.production ? uglify() : gutil.noop())
+    //.pipe(config.production ? uglify().on('error', logTheUgly) : gutil.noop())
     .pipe(size({showFiles: true, gzip: true}))
     .pipe(gulp.dest(fileOptions.destination))
     .pipe(config.watching ? livereload() : gutil.noop());
