@@ -74,6 +74,13 @@ var App = React.createClass({
       this.handleDependencies(this.dependencies['issuerMain']);
     else if (newRoute.startsWith('/explorer'))
       this.handleDependencies([])
+
+
+    var currentItem = _.find(this.state.roleMenu.items, function(o) { return o.url == newRoute; }, this);
+    if (currentItem && currentItem.title != this.state.activeRoleMenu) {
+        this.setState({'activeRoleMenu': currentItem.title});
+    }
+
     navigate(newRoute);
   },
 
@@ -95,10 +102,10 @@ var App = React.createClass({
     };
   },
   componentWillMount: function() {
+    MenuStore.addListener('INITIAL_DATA_LOADED', function(){ this.updateMenu('roleMenu');}.bind(this));
     LifeCycleActions.appWillMount();
   },
   componentDidMount: function() {
-    MenuStore.addListener('INITIAL_DATA_LOADED', function(){ this.updateMenu('roleMenu');});
     MenuStore.addListener('UNCAUGHT_DOCUMENT_CLICK', this._hideMenu);
     RouteStore.addListener('ROUTE_CHANGED', this.handleRouteChange);
     APIStore.addListener('DATA_UPDATED', function(){
@@ -110,20 +117,32 @@ var App = React.createClass({
 
   // Menu visual display functions:
 
+  setActiveRoleMenu: function(key) {
+    if (this.isMounted())
+      this.setState({activeRoleMenu: key})
+  },
   setActiveTopMenu: function(key){
     if (this.isMounted())
-      this.setState({activeTopMenu: key});
+      this.setState({activeTopMenu: key, activeRoleMenu: null});
   },
   _hideMenu: function(){
     if (this.state.activeTopMenu != null)
       this.setState({activeTopMenu: null});
   },
   updateMenu: function(key){
-    if (this.isMounted()){
-      var newState = {}
-      newState[key] = MenuStore.getAllItems(key);
-      this.setState(newState);
-    }
+    //if (this.isMounted()) {
+
+        var newState = {}
+        newState[key] = MenuStore.getAllItems(key);
+
+        if (key == 'roleMenu') {
+          var currentItem = _.find(newState[key].items, function(o) { return o.url == this.props.path; }, this);
+          if (currentItem) {
+            newState.activeRoleMenu = currentItem.title;
+          }
+        }
+        this.setState(newState);
+    //}
   },
 
   updateActivePanel: function(viewId, update){
@@ -181,7 +200,7 @@ var App = React.createClass({
                   <span>{ this.props.appTitle }</span>
                 </a>
                 <div className="navbar-right">
-                  <TopLinks items={MenuStore.getAllItems('roleMenu').items} setActive={function(key){}} active={null} showLabels={true} />
+                  <TopLinks items={MenuStore.getAllItems('roleMenu').items} setActive={this.setActiveRoleMenu} active={this.state.activeRoleMenu} showLabels={true} />
                   <TopLinks items={MenuStore.getAllItems('topMenu').items} setActive={this.setActiveTopMenu} active={this.state.activeTopMenu} showLabels={true} />
                 </div>
               </div>  
