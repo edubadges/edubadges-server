@@ -71,7 +71,6 @@ BadgeClassList = React.createClass({
       showNameOnThumbnail: false,
       emptyMessage: "There are no badges defined yet.",
       includeNullItem: false,
-      handleClick: function(e, badge_class) {},
       handleNullClick: function(e) {},
     };
   },
@@ -102,7 +101,7 @@ BadgeClassList = React.createClass({
       else {
         var badgeclassPath = "/issuer/issuers/" + this.props.issuerSlug + "/badges/" + bc.slug;
         var handleClick = function(e){navigateLocalPath(badgeclassPath);};
-        var providedHandler = this.props.handleClick
+        var providedHandler = this.props.handleClick;
         if (providedHandler) {
           handleClick = function(e) { providedHandler(e, bc); };
         }

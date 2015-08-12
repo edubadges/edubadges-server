@@ -71,7 +71,7 @@ var ActivePanel = React.createClass({
 
       if (this.props.modal){
         return (
-          <div className="modal" style={{display: "block"}}>
+          <div className="modal closable" style={{display: "block"}}>
             <div className={wrapperClass + ' modal-dialog'}>
               <div className="modal-content">
                 <div className="modal-body container-fluid">

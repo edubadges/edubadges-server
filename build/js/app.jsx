@@ -22,7 +22,7 @@ var clickHandler = function(e){
   }
 
   // Close any open menus.
-  if (!target.closest('li.open'))
+  if (!target.closest('.closable'))
     clickActions.createOffMenuClickAction(target);
 };
 document.onclick = clickHandler;

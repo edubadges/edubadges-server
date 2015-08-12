@@ -16,7 +16,6 @@ var ActiveActionStore = require('../stores/ActiveActionStore');
 
 // Components
 var TopLinks = require('../components/TopLinks.jsx');
-var SideBarNav = require('../components/SideBarNav.jsx');
 var MainComponent = require ('../components/MainComponent.jsx');
 var SecondaryMenu = require('../components/SecondaryMenu.jsx');
 var BreadCrumbs = require('../components/BreadCrumbs.jsx');

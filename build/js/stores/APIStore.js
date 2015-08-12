@@ -1,4 +1,4 @@
-var _ = require("underscore");
+var _ = require("lodash");
 
 var Dispatcher = require('../dispatcher/appDispatcher');
 var EventEmitter = require('events').EventEmitter;
@@ -102,7 +102,7 @@ APIStore.replaceCollectionItem = function(collectionKey, item){
   }
 
   foundIndex = _.findIndex(APIStore.data[collectionKey], function(el){ return el[key] == item[key]; });
-  if (foundIndex != undefined)
+  if (foundIndex > -1)
     APIStore.data[collectionKey][foundIndex] = item;
   else
     APIStore.data[collectionKey].push(item);
@@ -111,8 +111,13 @@ APIStore.replaceCollectionItem = function(collectionKey, item){
 
 APIStore.partialUpdateCollectionItem = function(collectionKey, searchKey, searchValue, updateKey, updateValue){
   var foundIndex = _.findIndex(APIStore.data[collectionKey], function(el){ return el[searchKey] == searchValue; });
-  if (foundIndex != undefined){
-    APIStore.data[collectionKey][foundIndex][updateKey] = updateValue;
+  if (foundIndex > -1){
+    // Optional updateKey parameter lets you update a single property. Without it, replace the whole object.
+    if (updateKey)
+      APIStore.data[collectionKey][foundIndex][updateKey] = updateValue;
+    else
+      APIStore.data[collectionKey][foundIndex] = updateValue;
+
     return APIStore.data[collectionKey][foundIndex]
   }
 };
@@ -327,11 +332,13 @@ APIStore.postForm = function(fields, values, context, requestContext){
       var newObject = APIStore.addCollectionItem(context.apiCollectionKey, JSON.parse(response.text), (context.method == 'PUT'));
       if (newObject){
         APIStore.emit('DATA_UPDATED');
-        APIActions.APIFormResultSuccess({
-          formId: context.formId,
-          message: {type: 'success', content: context.successMessage},
-          result: newObject
-        });
+        if (context.formId){
+          APIActions.APIFormResultSuccess({
+            formId: context.formId,
+            message: {type: 'success', content: context.successMessage},
+            result: newObject
+          });
+        }
       }
       else {
         APIStore.emit('API_STORE_FAILURE');
@@ -380,12 +387,20 @@ APIStore.requestData = function(data, context, requestContext){
       console.log(response.text);
       APIStore.emit("API_RESULT")
     }
+    else if (context.method == 'DELETE'){
+      var foundIndex = _.findIndex(_.get(APIStore.data, context.apiCollectionKey), function(el){ return el[context.apiSearchKey] == context.apiSearchValue; });
+      if (foundIndex > -1) {
+        APIStore.data[context.apiCollectionKey].splice(foundIndex, 1);
+        APIStore.emit('DATA_UPDATED');
+      }
+    }
     else{
       var newValue = typeof response.text == 'string' && response.text ? JSON.parse(response.text) : '';
       var newObject = APIStore.partialUpdateCollectionItem(context.apiCollectionKey, context.apiSearchKey, context.apiSearchValue, context.apiUpdateKey, newValue);
       if (newObject){
         APIStore.emit('DATA_UPDATED');
-        APIStore.emit('DATA_UPDATED_' + context.formId);
+        if (context.formId)
+          APIStore.emit('DATA_UPDATED_' + context.formId);
       }
       else {
         APIStore.emit('API_STORE_FAILURE');

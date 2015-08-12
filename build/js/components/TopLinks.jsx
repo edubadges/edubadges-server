@@ -46,7 +46,7 @@ var FirstLevelItem = React.createClass({
       downCaret = (<i className='fa fa-fw fa-caret-down'></i>);
     }
     return (
-      <li className={this.props.active ? 'nav-menu-item expanded-true active open' : 'nav-menu-item' }>
+      <li className={this.props.active ? 'nav-menu-item expanded-true active open closable' : 'nav-menu-item' }>
         <a href={this.props.url} onClick={this.handleClick} alt={this.title}>
           <label>{this.props.label}</label>
           {downCaret}
