@@ -202,6 +202,13 @@ APIStore.fetchCollections = function(collectionKeys, requestContext){
       apiCollectionKey: 'badgrbook_badgeinstances',
       replaceCollection: true
     },
+    badgrbook_checkcourseprogress: {
+        actionUrl: '/v1/badgrbook/checkprogress/:tool_guid/:course_id',
+        successfulHttpStatus: [200],
+        apiCollectionKey: 'badgrbook_checkcourseprogress',
+        replaceCollection: true,
+        formId: 'badgrbook_checkcourseprogress',
+    },
   };
   for (var index in collectionKeys){
     key = collectionKeys[index];
@@ -271,6 +278,9 @@ APIStore.getData = function(context, requestContext){
         APIStore.addCollectionItem(context.apiCollectionKey,response.body);
       }
       APIStore.emit('DATA_UPDATED');
+      if (context.hasOwnProperty('formId')) {
+        APIStore.emit('DATA_UPDATED_'+context.formId);
+      }
     }
   });
 
@@ -432,6 +442,10 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
 
     case 'API_GET_DATA':
       APIStore.getData(action.apiContext, action.requestContext || {});
+      break;
+
+    case 'API_GET_RESULT_FAILURE':
+      APIStore.emit("API_GET_RESULT_FAILURE", action.message);
       break;
 
     case 'API_FETCH_COLLECTIONS':
