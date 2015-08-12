@@ -416,7 +416,7 @@ APIStore.requestData = function(data, context, requestContext){
       var newObject = APIStore.partialUpdateCollectionItem(context.apiCollectionKey, context.apiSearchKey, context.apiSearchValue, context.apiUpdateKey, newValue);
       if (newObject){
         APIStore.emit('DATA_UPDATED');
-        if (context.hasOwnProperty(formId))
+        if (context.hasOwnProperty('formId'))
           APIStore.emit('DATA_UPDATED_' + context.formId);
       }
       else {
