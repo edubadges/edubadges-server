@@ -209,6 +209,13 @@ APIStore.fetchCollections = function(collectionKeys, requestContext){
         replaceCollection: true,
         formId: 'badgrbook_checkcourseprogress',
     },
+    badgrbook_checkstudentprogress: {
+      actionUrl: '/v1/badgrbook/checkprogress/:tool_guid/:course_id/:student_id',
+      successfulHttpStatus: [200],
+      apiCollectionKey: 'badgrbook_checkstudentprogress',
+      replaceCollection: true,
+      formId: 'badgrbook_checkstudentprogress',
+    },
   };
   for (var index in collectionKeys){
     key = collectionKeys[index];
