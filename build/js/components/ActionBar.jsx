@@ -64,7 +64,7 @@ var HeadingBar = React.createClass({
     return (
       <div className="action-bar clearfix">
         <div className="main-component-content-title col-xs-12">
-          <h3>{this.props.title}</h3>
+          <h2>{this.props.title}</h2>
         </div>
       </div>
     );
