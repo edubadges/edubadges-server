@@ -72,16 +72,21 @@
               padding:0;
               margin:-3px 0 0 0;
               background: #fff;
-              border: 1px solid #ddd2d2;
+              min-width: 300px;
               li {
                 padding:7px;
                 border:1px solid #ddd2d2;
+                border-width:0 1px 1px 1px;
                 display:block;
                 cursor:pointer;
                 img {
 
                 }
               }
+            }
+            .badge-class-chosen {
+              width: 90%;
+              min-width:300px;
             }
             .badge-class-chosen, .badge-class-chooser-item {
               img {
