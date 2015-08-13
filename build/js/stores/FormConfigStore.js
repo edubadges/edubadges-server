@@ -49,7 +49,7 @@ FormConfigStore.getConfig = function(formType, overrides, context){
         message: ""
       },
       columns: [
-        { fields: ['image'], className:'test3' },
+        { fields: ['image'], className:'col-xs-5 col-sm-4 col-md-3' },
         { fields: ['name', 'description', 'url', 'email'], className:'col-xs-7 col-sm-8 col-md-9' }
       ],
       apiContext: {
@@ -80,7 +80,7 @@ FormConfigStore.getConfig = function(formType, overrides, context){
         message: ""
       },
       columns: [
-        { fields: ['image'], className:'test2' },
+        { fields: ['image'], className:'pull-left' },
         { fields: ['name', 'description', 'criteria'], className:'col-xs-7 col-sm-8 col-md-9' }
       ],
       apiContext: {
@@ -135,7 +135,7 @@ FormConfigStore.getConfig = function(formType, overrides, context){
         message: ""
       },
       columns: [
-        { fields: ['image'], className:'test1' },
+        { fields: ['image'], className:'col-xs-5 col-sm-4 col-md-3' },
         { fields: ['url', 'assertion'], className:'col-xs-7 col-sm-8 col-md-9' }
       ],
       formControls: {
