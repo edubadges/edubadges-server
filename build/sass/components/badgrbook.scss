@@ -70,7 +70,7 @@
               list-style: none;
               position:absolute;
               padding:0;
-              margin:-3px 0 0 0;
+              margin:0 0 0 4px;
               background: #fff;
               min-width: 300px;
               li {
@@ -79,6 +79,9 @@
                 border-width:0 1px 1px 1px;
                 display:block;
                 cursor:pointer;
+                &:hover {
+                  background: #f8f8f8;
+                }
                 img {
 
                 }
