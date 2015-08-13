@@ -42,8 +42,6 @@
               width:300px;
               .badge-select {
                 text-align: left;
-                float:left;
-                width:250px;
                 .fa {
                   float:right;
                   margin-top:3px;
@@ -74,6 +72,36 @@
 
                   }
                 }
+              }
+              .badge-class-chosen {
+                float:left;
+                width:240px;
+              }
+              .badge-class-chosen, .badge-class-chooser {
+                img {
+                  width: 50px;
+                  height:50px;
+                  margin-right:7px;
+                  border-radius:2px;
+                  float:left;
+                }
+                p {
+                  font-weight:600;
+                  font-size: .8em;
+                }
+              }
+
+              .badge-class-chosen {
+                padding:3px;
+                border:1px solid #ddd2d2;
+                border-radius: 4px;
+                display:block;
+                background:#fff;
+                cursor:pointer;
+                &:hover {
+                  border:1px solid #ccc2d2;
+                }
+
               }
             }
             &.actions-col {
