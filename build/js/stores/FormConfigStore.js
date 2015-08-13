@@ -80,8 +80,8 @@ FormConfigStore.getConfig = function(formType, overrides, context){
         message: ""
       },
       columns: [
-        { fields: ['image'], className:'pull-left' },
-        { fields: ['name', 'description', 'criteria'], className:'col-xs-7 col-sm-8 col-md-9' }
+        { fields: ['image'], className:'col-xs-4' },
+        { fields: ['name', 'description', 'criteria'], className:'col-xs-8' }
       ],
       apiContext: {
         formId: overrides['formId'] || "BadgeClassCreateUpdateForm",
