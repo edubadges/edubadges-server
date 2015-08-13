@@ -92,6 +92,12 @@ img {
   }
 }
 
+.btn {
+  .fa {
+    margin-right: 4px;
+  }
+}
+
 .loading-icon {
   height: 2em; width: 2em;
   background: transparent url('/static/images/ajax-loader.gif') no-repeat center center;

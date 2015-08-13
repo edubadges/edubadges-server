@@ -57,6 +57,9 @@
                 padding: 9px 7px;
                 margin: -6px -12px;
                 border-left: 1px solid #ddd2d2;
+                &:hover {
+                  background:#eee;
+                }
               }
             }
             .remove-badge {
@@ -123,6 +126,9 @@
                 padding: 33px 7px;
                 margin: -7px;
                 border-left: 1px solid #ddd2d2;
+                &:hover {
+                  background:#eee;
+                }
               }
             }
 
