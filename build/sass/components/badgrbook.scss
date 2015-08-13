@@ -82,22 +82,24 @@
               width:90%;
             }
             .badge-class-chosen, .badge-class-chooser {
+              .badge-class-details {
+                p {
+                  color:#555;
+                  font-weight:600;
+                  font-size: .9em;
+                  margin:0;
+                  padding:0;
+                }
+                .badge-class-description {
+                  color:#aaa;
+                }
+              }
               img {
                 width: 65px;
                 height:65px;
                 margin-right:7px;
                 border-radius:2px;
                 float:left;
-              }
-              p {
-                color:#555;
-                font-weight:600;
-                font-size: .9em;
-                margin:0;
-                padding:0;
-              }
-              .badge-class-description {
-                color:#aaa;
               }
               .fa {
                 float: right;
