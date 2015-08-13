@@ -75,7 +75,7 @@
               padding:0;
               margin:0 0 0 4px;
               background: #fff;
-              min-width: 300px;
+              width: 300px;
               li {
                 padding:7px;
                 border:1px solid #ddd2d2;
@@ -94,8 +94,7 @@
               }
             }
             .badge-class-chosen {
-              width: 90%;
-              min-width:300px;
+              width: 300px;
             }
             .badge-class-chosen, .badge-class-chooser-item {
               img {
