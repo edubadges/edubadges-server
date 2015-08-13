@@ -83,6 +83,7 @@
             }
             .badge-class-chosen, .badge-class-chooser {
               .badge-class-details {
+                float:left;
                 p {
                   color:#555;
                   font-weight:600;
@@ -107,7 +108,7 @@
                 border-radius: 0 4px 4px 0;
                 height: 79px;
                 padding: 33px 7px;
-                margin: -25px -7px;
+                margin: -7px;
                 border-left: 1px solid #ddd2d2;
               }
             }
