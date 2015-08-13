@@ -27,7 +27,7 @@
         border-bottom: 2px solid #ddd;
         color:#bbb;
         &.actions-col {
-          text-align:right;
+          text-align:center;
         }
       }
     }
@@ -41,6 +41,9 @@
           color:#666;
           padding: 14px 7px;
           vertical-align: middle;
+          &.name-col {
+            color:#444;
+          }
           &.badge-col {
             .badge-select {
               width:90%;
@@ -87,7 +90,7 @@
               float:left;
               width:90%;
             }
-            .badge-class-chosen, .badge-class-chooser {
+            .badge-class-chosen, .badge-class-chooser-item {
               .badge-class-details {
                 float:left;
                 h5 {
