@@ -133,7 +133,7 @@ var BadgeDisplayThumbnail = React.createClass({
   getDefaultProps: function() {
     return {
       json: {badge: {issuer:{}}},
-      columnClass: 'col-xs-3 col-md-2',
+      columnClass: 'col-xs-2',
       selected: false
     };
   },

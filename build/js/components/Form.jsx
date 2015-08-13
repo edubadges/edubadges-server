@@ -91,7 +91,7 @@ var ImageDropbox = React.createClass({
     }
   },
   render: function() {
-    var imageDisplay = this.props.imageData ? (<img src={this.props.imageData} />) : (<div className="dropzone-empty">Click to select file, or drop image here</div>);
+    var imageDisplay = this.props.imageData ? (<img src={this.props.imageData} />) : (<div className="dropzone-empty"><i className="fa fa-arrow-down"></i>Drop Image Here<br/><small>or Click to Select</small></div>);
     var dropzoneStyle = {};
     return (
       <div className="control-group form-group-dropzone">

@@ -1,25 +1,51 @@
 
 .badge-display, .issuer-display {
-  float: left;
   position: relative;
   overflow: hidden;
-  margin: 0.5rem 0 1rem 0;
-  padding:0 7px 7px;
-  background-color: #fff;
-  transition: box-shadow .25s;
+  margin: 0 14px 14px 0;
+  background-color: #fcfcfc;
+  transition:.5s;
   border-radius: 2px;
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+  border:1px solid #ddd;
+  cursor:pointer;
+  &:hover {
+    transition:.5s;
+    border:1px solid #666;
+  }
+  .badgeProperty {
+    padding: 14px 14px 0 14px;
+    &.badgeProperty-type-image {
+      padding:0;
+      .propertyImage {
+        width:100%;
+        border-bottom:1px solid #ddd;
+        background-color:#fff;
+      }
+    }
+    .propertyName {
+      display:block;
+      font-size:.8em;
+      color:#bbb;
+    }
+    &:last-child {
+      padding-bottom:14px;
+    }
+  }
 }
-.badge-display-thumbnail {
-  overflow: hidden; 
-  height: 310px;
 
+.open-badge-list {
+  display:flex;
+}
+
+/*.badge-display-thumbnail {
+  overflow: hidden;
+  height: 310px;
   .badgeProperty {
     span.propertyValue { font-weight: bold; }
     margin-top:7px;
   }
 }
-
 
 .badge-display, .issuer-display {
   a { word-wrap: break-word;}
@@ -35,7 +61,7 @@
   .propertyValue.URL:after {
     content: ")"
   }
-}
+}*/
 
 .property-group {
   margin-bottom: 1em;
@@ -60,7 +86,7 @@
   }
 }
 
-.badgeclass-display-thumbnail, .badge-class-chosen, .badge-class-chooser {
+.badge-class-chosen, .badge-class-chooser {
   img {
     width: 50px;
     height:50px;
@@ -84,11 +110,7 @@
   &:hover {
     border:1px solid #ccc2d2;
   }
-  .fa {
-    float:right;
-    margin-right: 10px;
-    color: #ddd;
-  }
+
 }
 
 // hide super long linkage
