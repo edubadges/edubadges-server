@@ -85,10 +85,18 @@ img {
 }
 
 .btn-info {
-  background-color: #0096db;
-  border-color: #0096db;
+  background-color: #672f33;
+  border-color: #672f33;
   &:hover {
-    background:#0087c2;
+    background:#56282b;
+  }
+}
+
+.btn-warning {
+  background-color: #f1971d;
+  border-color: #f1971d;
+  &:hover {
+    background:#c1510a;
   }
 }
 
