@@ -30,13 +30,12 @@
   }
   tbody {
     tr {
-      &:nth-child(odd) {
-        background-color: #f9f8f6;
-      }
       td, th {
         border-top: 1px solid #ddd2d2;
         border-width: 1px 0 0 0;
         &.col {
+          font-size:1.2em;
+          color:#333;
           &.badge-col {
             .badge-select {
               width:100%;
