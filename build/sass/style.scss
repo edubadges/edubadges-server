@@ -84,6 +84,14 @@ img {
   height: auto;
 }
 
+.btn-info {
+  background-color: #0096db;
+  border-color: #00648e;
+  &:hover {
+    background:#0087c2;
+  }
+}
+
 .loading-icon {
   height: 2em; width: 2em;
   background: transparent url('/static/images/ajax-loader.gif') no-repeat center center;
