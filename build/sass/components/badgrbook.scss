@@ -96,6 +96,7 @@
             .badge-class-chosen {
               width: 90%;
               min-width:300px;
+              height:85px;
             }
             .badge-class-chosen, .badge-class-chooser-item {
               img {
@@ -122,10 +123,11 @@
                 float: right;
                 background: #f8f8f8;
                 border-radius: 0 4px 4px 0;
-                height: 79px;
+                height: 83px;
                 padding: 33px 7px;
-                margin: -7px;
+                margin: -7px -7px -7px 0;
                 border-left: 1px solid #ddd2d2;
+                position: absolute;
                 &:hover {
                   background:#eee;
                 }
