@@ -27,7 +27,7 @@
         border-bottom: 2px solid #ddd;
         color:#bbb;
         &.actions-col {
-          text-align:center;
+//          text-align:center;
         }
       }
     }
@@ -81,9 +81,12 @@
                 cursor:pointer;
                 &:hover {
                   background: #f8f8f8;
+                  img {
+                    border:1px solid #eee;
+                  }
                 }
                 img {
-
+                  border:1px solid transparent;
                 }
               }
             }
@@ -137,7 +140,7 @@
           }
           &.actions-col {
             width:300px;
-            text-align:right;
+//            text-align:right;
             .btn {
               margin-right:7px;
             }
