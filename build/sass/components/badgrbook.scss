@@ -97,6 +97,7 @@
               width: 300px;
             }
             .badge-class-chosen, .badge-class-chooser-item {
+              height:81px;
               img {
                 width: 65px;
                 height:65px;
@@ -106,15 +107,18 @@
               }
               .badge-class-details {
                 float:left;
+                width: 185px;
                 h5 {
-                  margin-bottom:0;
+                  margin-bottom:5px;
                   padding-bottom:0;
+                  margin-top:7px;
                 }
                 p {
                   color:#777;
                   font-weight: normal;
                   margin:0;
                   padding:0;
+                  line-height:1em;
                 }
               }
               .fa {
