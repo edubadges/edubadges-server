@@ -86,11 +86,16 @@
                 }
               }
             }
-            .badge-class-chosen {
+            .badge-class-chosen, .badge-class-chooser-item {
               float:left;
               width:90%;
-            }
-            .badge-class-chosen, .badge-class-chooser-item {
+              img {
+                width: 65px;
+                height:65px;
+                margin-right:7px;
+                border-radius:2px;
+                float:left;
+              }
               .badge-class-details {
                 float:left;
                 h5 {
@@ -103,13 +108,6 @@
                   margin:0;
                   padding:0;
                 }
-              }
-              img {
-                width: 65px;
-                height:65px;
-                margin-right:7px;
-                border-radius:2px;
-                float:left;
               }
               .fa {
                 float: right;
