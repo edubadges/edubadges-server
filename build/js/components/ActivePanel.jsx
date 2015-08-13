@@ -75,6 +75,7 @@ var ActivePanel = React.createClass({
             <div className={wrapperClass + ' modal-dialog'}>
               <div className="modal-content">
                 <div className="modal-body container-fluid">
+                  {this.props.title ? (<h3>{this.props.title}</h3>) : null}
                   <BasicAPIForm {...formProps} />
                 </div>
               </div>
