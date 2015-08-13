@@ -25,7 +25,7 @@
       }
       th {
         border-bottom: 2px solid #ddd;
-        color:#bbb;
+        color:#999;
         &.actions-col {
 //          text-align:center;
         }
@@ -82,6 +82,9 @@
                 border-width:0 1px 1px 1px;
                 display:block;
                 cursor:pointer;
+                &:first-child {
+                  border-width:1px 1px 1px 1px;
+                }
                 &:hover {
                   background: #f8f8f8;
                   img {
