@@ -26,6 +26,9 @@
       th {
         border-bottom: 2px solid #ddd;
         color:#bbb;
+        &.actions-col {
+          text-align:right;
+        }
       }
     }
   }
