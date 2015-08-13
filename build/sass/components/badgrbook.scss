@@ -100,11 +100,13 @@
                 color:#aaa;
               }
               .fa {
-                float:left;
-                background:#ddd;
+                float: right;
+                background: #f8f8f8;
                 border-radius: 0 4px 4px 0;
-                height:70px;
-                padding:5px;
+                height: 79px;
+                padding: 33px 7px;
+                margin: -25px -7px;
+                border-left: 1px solid #ddd2d2;
               }
             }
 
