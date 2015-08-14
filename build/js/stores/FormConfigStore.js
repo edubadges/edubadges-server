@@ -49,9 +49,12 @@ FormConfigStore.getConfig = function(formType, overrides, context){
         message: ""
       },
       columns: [
-        { fields: ['image'], className:'col-xs-5 col-sm-4 col-md-3' },
-        { fields: ['name', 'description', 'url', 'email'], className:'col-xs-7 col-sm-8 col-md-9' }
+        { fields: ['image'], className:'' },
+        { fields: ['name', 'description', 'url', 'email'], className:'' }
       ],
+      formControls: {
+        "submit": {"label": "Add Issuer"}
+      },
       apiContext: {
         formId: overrides['formId'] || "IssuerCreateUpdateForm",
         apiCollectionKey: "issuer_issuers",
