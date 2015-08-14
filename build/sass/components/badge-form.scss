@@ -7,10 +7,11 @@
   min-height: 200px;
   max-width: 200px;
   text-align: center;
-  margin-right:21px;
+  margin:0 auto;
   padding: 40px 25px;
-  border: 2px dashed #ddd;
-  background-color: #fcfcfc;
+  border: 2px dashed #ccc;
+  border-radius:4px;
+  background-color: #fff;
   &:after { content: ""; clear: both; }
   cursor: pointer;
   img {
@@ -18,25 +19,33 @@
     height: auto;
   }
   &:hover {
-    border-color:#bbb;
+    border-color:#777;
+  }
+  .dropzone-empty {
+    text-align: center;
+    font-weight: bold;
+    color: #bbb;
+    .fa {
+      display:block;
+      font-size:5em;
+      color:#ddd;
+    }
   }
 }
-
-.dropzone-empty {
-  text-align: center;
-  font-weight: bold;
-  color: #bbb;
-  .fa {
-    display:block;
-    font-size:5em;
-    color:#ddd;
+.divider {
+  text-align:center;
+  border-top:1px solid #ddd;
+  margin:28px 0 0 0;
+  strong {
+    color:#333;
+    background: #fafafa;
+    position: relative;
+    top: -10px;
+    padding: 3px 7px;
   }
 }
-
 .api-form{
   input, textarea {
-    width: 480px;
-    max-width: 100%;
     border: 1px solid #ddd;
   }
   .form-controls {
@@ -61,4 +70,7 @@
 
 .modal {
   background: rgba(0,0,0,0.2);
+  .modal-body {
+    background: #fafafa;
+  }
 }

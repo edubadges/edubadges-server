@@ -27,7 +27,7 @@ var Property = React.createClass({
   },
   renderPropertyName: function(propName){
     return ( 
-      <span className={"propertyName " + propName}>{propName}</span>
+      <span className={"propertyName col-xs-2 " + propName}>{propName}</span>
     );
   },
   renderPropertyValue: function(property){
@@ -42,7 +42,7 @@ var Property = React.createClass({
   },
   renderStringValue: function(property){
     return (
-      <span className={"propertyValue " + this.props.name}>{property['@value']}</span>
+      <span className={"propertyValue col-xs-8 " + this.props.name}>{property['@value']}</span>
     );
   },
   renderLinkValue: function(value){
@@ -133,7 +133,7 @@ var BadgeDisplayThumbnail = React.createClass({
   getDefaultProps: function() {
     return {
       json: {badge: {issuer:{}}},
-      columnClass: 'col-xs-2',
+      columnClass: 'col-xs-3 col-sm-2',
       selected: false
     };
   },
@@ -183,11 +183,11 @@ var BadgeDisplayDetail = React.createClass({
       <div className={this.wrapperClass()} onClick={this.handleClick} >
         <div className='row'>
 
-          <div className='property-group image col-xs-4'>
+          <div className='property-group image'>
             <Property name='Badge Image' label={false} property={this.props.json.image} />
           </div>
 
-          <div className='col-xs-8'>
+          <div className=''>
             <div className='property-group badgeclass'>
               <Property name='Name' property={this.props.json.badge.name} />
               <Property name='Description' property={this.props.json.badge.description} />
@@ -237,8 +237,8 @@ var BadgeDisplayFull = React.createClass({
     });
 
     return (
-      <div className='badge-display badge-display-full' onClick={this.handleClick}>
-        <div className='property-group image col-xs-4'>
+      <div className='badge-display-full form-horizontal' onClick={this.handleClick}>
+        <div className='property-group image col-xs-2'>
           <Property name='Badge Image' label={false} property={this.props.json.image} />
         </div>
 
@@ -250,7 +250,7 @@ var BadgeDisplayFull = React.createClass({
 
         <div className='property-group issuer'>
           <Property name='Issuer' property={this.props.json.badge.issuer.name} />
-          <Property name='Website' label={false} property={this.props.json.badge.issuer.url} />
+          <Property name='Issuer Website' property={this.props.json.badge.issuer.url} />
         </div>
 
         <div className='property-group assertion'>

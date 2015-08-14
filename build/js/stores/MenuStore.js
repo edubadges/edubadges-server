@@ -52,7 +52,6 @@ MenuStore.defaultItems = {
         { 
           title: "Import Badge",
           buttonType: "primary",
-          icon: "fa-certificate",
           activePanelCommand: { type: "EarnerBadgeImportForm", content: { badgeId: null } } 
         }
       ],

@@ -234,12 +234,17 @@ var App = React.createClass({
 
     var mainComponent = (
       <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet} >
-        <HeadingBar
-          title="My Badges"
-        />
+          <ActionBar
+            title="My Badges"
+            viewId={viewId}
+            items={this.props.actionBars[viewId] || []}
+            updateActivePanel={this.updateActivePanel}
+            activePanel={this.state.activePanels[viewId]}
+          />
         <ActivePanel
+          modal={true}
           viewId={viewId}
-          {...{"type":"EarnerBadgeImportForm","content":{"badgeId":null}}}
+          {...this.state.activePanels[viewId]}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
         />
@@ -295,7 +300,6 @@ var App = React.createClass({
       return this.render_base("Badge not found!");
 
     var breadCrumbs = [
-      { name: "Earner Home", url: '/earner'},
       { name: "My Badges", url: '/earner/badges' },
       { name: badge.json.badge.name['@value'], url: '/earner/badges/' + badgeId }
     ];
@@ -333,7 +337,7 @@ var App = React.createClass({
     var mainComponent = (
       <MainComponent viewId={viewId}>
         <BreadCrumbs items={breadCrumbs} />
-        <ActionBar 
+        <ActionBar
           title="My Collections"
           viewId={viewId}
           items={this.props.actionBars[viewId] || []}
@@ -341,6 +345,7 @@ var App = React.createClass({
           activePanel={this.state.activePanels[viewId]}
         />
         <ActivePanel
+          modal={true}
           viewId={viewId}
           {...this.state.activePanels[viewId]}
           updateActivePanel={this.updateActivePanel}
@@ -425,6 +430,7 @@ var App = React.createClass({
           activePanel={this.state.activePanels[viewId]}
         />
         <ActivePanel
+          modal={true}
           viewId={viewId}
           {...this.state.activePanels[viewId]}
           updateActivePanel={this.updateActivePanel}

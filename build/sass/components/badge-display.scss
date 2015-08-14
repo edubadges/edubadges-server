@@ -3,33 +3,64 @@
   position: relative;
   overflow: hidden;
   margin: 0 14px 14px 0;
-  background-color: #fcfcfc;
+  background-color: #faf9f7;
   transition:.5s;
   border-radius: 2px;
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
   border:1px solid #ddd;
+  transform: scale(1);
   cursor:pointer;
-  &:hover {
-    transition:.5s;
-    border:1px solid #666;
-  }
   .badgeProperty {
     padding: 14px 14px 0 14px;
+    color:#555;
     &.badgeProperty-type-image {
-      padding:0;
+      background:#fff;
+      text-align:center;
+      border-bottom:4px solid #e2dbcf;
+      padding-bottom:14px;
       .propertyImage {
-        width:100%;
-        border-bottom:1px solid #ddd;
-        background-color:#fff;
+        width: 100%;
+        max-width: 150px;
       }
     }
     .propertyName {
       display:block;
       font-size:.8em;
-      color:#bbb;
+      color:#cdc1ae;
     }
     &:last-child {
       padding-bottom:14px;
+    }
+  }
+  &:hover {
+    transition:.5s;
+    transform: scale(1.05) !important;
+    .badgeProperty {
+      &.badgeProperty-type-image {
+
+      }
+    }
+  }
+}
+
+.badge-display-full {
+  .property-group {
+    margin-bottom:28px;
+  }
+  .badgeProperty {
+    .propertyName {
+      color: #333;
+      font-weight: 700;
+      text-align:right;
+      padding-right:21px;
+    }
+    .propertyValue {
+
+    }
+    &.badgeProperty-type-image {
+      img {
+        width:100%;
+      }
     }
   }
 }
@@ -37,31 +68,6 @@
 .open-badge-list {
   display:flex;
 }
-
-/*.badge-display-thumbnail {
-  overflow: hidden;
-  height: 310px;
-  .badgeProperty {
-    span.propertyValue { font-weight: bold; }
-    margin-top:7px;
-  }
-}
-
-.badge-display, .issuer-display {
-  a { word-wrap: break-word;}
-  .propertyName {
-    margin-right: 0.5em;
-    &:after { content: ":"; }
-
-  }
-  .propertyValue {}
-  .propertyValue.URL:before {
-    content: "(";
-  }
-  .propertyValue.URL:after {
-    content: ")"
-  }
-}*/
 
 .property-group {
   margin-bottom: 1em;
@@ -73,27 +79,11 @@
   background-color: #d1d1d1;
 }
 
-.badge-display-detail {
-  .badgeclass {
-
-  }
-}
-
 .issuer-display-short, .badgeclass-list .badgeclass-display-detail {
   cursor: pointer;
   &:hover {
     background-color: #eee;
   }
 }
-
-// hide super long linkage
-.badgeProperty-type-link .propertyValue {
-  display: inline-block;
-  max-width: 100%;
-  a { 
-    text-overflow: hidden;
-  }
-}
-
 
 .badgeinstance-display-short:hover { background-color: #eee; }

@@ -135,11 +135,11 @@ FormConfigStore.getConfig = function(formType, overrides, context){
         message: ""
       },
       columns: [
-        { fields: ['image'], className:'col-xs-5 col-sm-4 col-md-3' },
-        { fields: ['url', 'assertion'], className:'col-xs-7 col-sm-8 col-md-9' }
+        { fields: ['image'], className:'' },
+        { fields: ['url', 'assertion'], className:'' }
       ],
       formControls: {
-        "submit": {"label": "Import"}
+        "submit": {"label": "Import Badge"}
       },
       apiContext: {
         formId: overrides['formId'] || "EarnerBadgeImportForm",

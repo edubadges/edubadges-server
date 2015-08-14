@@ -22,9 +22,11 @@ BreadCrumbs = React.createClass({
       );
     });
     return (
-      <ul className="breadcrumbs clearfix">
-        {crumbs}
-      </ul>
+      <div className="breadcrumb-wrapper">
+        <ul className="breadcrumb">
+            {crumbs}
+        </ul>
+      </div>
     );
   }
 });
