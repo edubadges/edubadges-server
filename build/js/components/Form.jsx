@@ -91,7 +91,7 @@ var ImageDropbox = React.createClass({
     }
   },
   render: function() {
-    var imageDisplay = this.props.imageData ? (<img src={this.props.imageData} />) : (<div className="dropzone-empty"><i className="fa fa-arrow-down"></i>Drop Badge Here<br/><small>or Click to Select</small></div>);
+    var imageDisplay = this.props.imageData ? (<img src={this.props.imageData} />) : (<div className="dropzone-empty"><i className="fa fa-arrow-down"></i>Drop {this.props.imageDescription || "Badge"} Here<br/><small>or Click to Select</small></div>);
     var dropzoneStyle = {};
     return (
       <div className="control-group form-group-dropzone">
@@ -265,6 +265,7 @@ BasicAPIForm = React.createClass({
                   onDroppedImage={this.handleImageDrop}
                   image={this.state.image}
                   imageData={this.state.imageData}
+                  imageDescription={this.props.formType == "IssuerCreateUpdateForm" ? "Image": "Badge"}
                 />
                 <p className="divider"><strong>OR</strong></p>
               </div>
