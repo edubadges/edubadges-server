@@ -27,7 +27,7 @@ var Property = React.createClass({
   },
   renderPropertyName: function(propName){
     return ( 
-      <span className={"propertyName col-xs-2 " + propName}>{propName}</span>
+      <span className={"propertyName  " + propName}>{propName}</span>
     );
   },
   renderPropertyValue: function(property){
@@ -42,7 +42,7 @@ var Property = React.createClass({
   },
   renderStringValue: function(property){
     return (
-      <span className={"propertyValue col-xs-8 " + this.props.name}>{property['@value']}</span>
+      <span className={"propertyValue  " + this.props.name}>{property['@value']}</span>
     );
   },
   renderLinkValue: function(value){

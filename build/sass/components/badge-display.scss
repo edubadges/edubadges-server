@@ -53,9 +53,14 @@
       font-weight: 700;
       text-align:right;
       padding-right:21px;
+      width: 16.66666667%;
+      float: left;
+      position: relative;
+      min-height: 1px;
+      box-sizing: border-box;
     }
     .propertyValue {
-
+      width: 66.66666667%;
     }
     &.badgeProperty-type-image {
       img {
