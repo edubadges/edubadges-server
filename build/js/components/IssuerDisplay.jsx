@@ -22,16 +22,20 @@ var IssuerDisplayShort = React.createClass({
     }
 
     return (
-      <div className="issuer-display issuer-display-short col-xs-12" onClick={this.props.handleClick}>
-        <div className='row'>
-          <div className='property-group image col-xs-3'>
+      <div className="issuer-display issuer-display-short panel panel-default" onClick={this.props.handleClick}>
+        <div className='panel-heading'>
+          <div className='property-group image'>
             <Property name="Issuer Logo" label={false} property={properties.image} />
           </div>
-          <div className='property-group basic-data col-xs-9'>
+          <div className='property-group basic-data'>
             <Property name="Name" property={properties.name} />
             <Property name="URL" label={false} property={properties.url} />
-            <BadgeClassList display="thumbnail" max={4} badgeClasses={this.props.badgeClasses} />
           </div>
+        </div>
+        <div className="panel-body">
+            <div className="">
+                <BadgeClassList display="thumbnail" max={4} badgeClasses={this.props.badgeClasses} />
+            </div>
         </div>
       </div>
     );
