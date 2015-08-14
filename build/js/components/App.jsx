@@ -188,7 +188,7 @@ var App = React.createClass({
   },
 
   // Render the base structure for the app (top menu, sidebar, and main content area)
-  render_base: function(mainComponent) {
+  render_base: function(mainComponent, breadCrumbs) {
     return (
       <div id="wrapper" className="wrapper">
         <header className="main-header">
@@ -207,6 +207,8 @@ var App = React.createClass({
             </nav>
           </div>
         </header>
+
+        { breadCrumbs ? <BreadCrumbs items={breadCrumbs} /> : null }
 
         <section className="main-section content-container">
           <div className="wrap page-wrapper">
@@ -276,7 +278,6 @@ var App = React.createClass({
     var importUrl = params['url'];
     var mainComponent = (
       <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet} >
-        <BreadCrumbs items={breadCrumbs} />
         <ActivePanel 
           viewId={viewId}
           type="EarnerBadgeImportForm"
@@ -287,7 +288,7 @@ var App = React.createClass({
 
       </MainComponent>
     );
-    return this.render_base(mainComponent);
+    return this.render_base(mainComponent, breadCrumbs);
   },
 
   earnerBadgeDetail: function(badgeId) {
@@ -305,7 +306,6 @@ var App = React.createClass({
     ];
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <BreadCrumbs items={breadCrumbs} />
         <ActionBar 
           title={badge.json.badge.name['@value']}
           viewId={viewId}
@@ -324,7 +324,7 @@ var App = React.createClass({
     );
 
     // render the view
-    return this.render_base(mainComponent);
+    return this.render_base(mainComponent, breadCrumbs);
   },
 
   earnerCollections: function() {
@@ -336,7 +336,6 @@ var App = React.createClass({
 
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <BreadCrumbs items={breadCrumbs} />
         <ActionBar
           title="My Collections"
           viewId={viewId}
@@ -359,7 +358,7 @@ var App = React.createClass({
     );
 
     // render the view
-    return this.render_base(mainComponent);
+    return this.render_base(mainComponent, breadCrumbs);
   },
 
   earnerCollectionDetail: function(collectionSlug) {
@@ -383,7 +382,6 @@ var App = React.createClass({
 
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <BreadCrumbs items={breadCrumbs} />
         <ActionBar 
           title={collection.name}
           viewId={viewId}
@@ -412,7 +410,7 @@ var App = React.createClass({
     );
 
     // render the view
-    return this.render_base(mainComponent);
+    return this.render_base(mainComponent, breadCrumbs);
   },
 
   issuerMain: function() {
@@ -461,7 +459,6 @@ var App = React.createClass({
     ];
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <BreadCrumbs items={breadCrumbs} />
         <IssuerDisplay {...issuer} />
         <ActionBar 
           title="Active Badges"
@@ -489,7 +486,7 @@ var App = React.createClass({
       </MainComponent>
     )
 
-    return this.render_base(mainComponent);
+    return this.render_base(mainComponent, breadCrumbs);
   },
 
   badgeClassDetail: function(issuerSlug, badgeClassSlug){
@@ -521,7 +518,6 @@ var App = React.createClass({
 
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <BreadCrumbs items={breadCrumbs} />
         <HeadingBar 
           title={issuer.name + ": " + badgeClass.name}
         />
@@ -552,7 +548,7 @@ var App = React.createClass({
       </MainComponent>
     )
 
-    return this.render_base(mainComponent);
+    return this.render_base(mainComponent, breadCrumbs);
   },
 
   issuerCertificateForm: function() {
