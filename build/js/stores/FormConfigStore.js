@@ -126,6 +126,7 @@ FormConfigStore.getConfig = function(formType, overrides, context){
       helpText: "Fill out one of the following fields to upload your badge. Usually, the baked badge image is available.",
       fieldsMeta: {
         image: {inputType: "image", label: "Badge Image", required: false, filename: "earned_badge.png"},
+        divider: {inputType: "divider", label: "OR", required: false},
         url: {inputType: "text", label: "Assertion URL", required: false},
         assertion: {inputType: "textarea", label: "Assertion JSON", required: false}
       },
@@ -138,7 +139,7 @@ FormConfigStore.getConfig = function(formType, overrides, context){
         message: ""
       },
       columns: [
-        { fields: ['image'], className:'' },
+        { fields: ['image', 'divider'], className:'' },
         { fields: ['url', 'assertion'], className:'' }
       ],
       formControls: {

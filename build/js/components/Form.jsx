@@ -267,7 +267,6 @@ BasicAPIForm = React.createClass({
                   imageData={this.state.imageData}
                   imageDescription={this.props.formType == "IssuerCreateUpdateForm" ? "Image": "Badge"}
                 />
-                <p className="divider"><strong>OR</strong></p>
               </div>
             );
           }
@@ -305,6 +304,9 @@ BasicAPIForm = React.createClass({
                 handleBlur={this.handleBlur}
               />
             );
+          }
+          else if (inputType == 'divider'){
+            return (<p className="divider"><strong>{label}</strong></p>);
           }
         }.bind(this));
         return (
