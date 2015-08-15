@@ -63,8 +63,8 @@ var IssuerDisplay = React.createClass({
         </div>
         <div className='property-group image col-xs-9'>
           <Property name="Name" property={properties.name} />
-          <Property name="URL" label={false} property={properties.url} />
-          <Property name="Description" label={false} property={properties.description} />
+          <Property name="URL" label={true} property={properties.url} />
+          <Property name="Description" label={true} property={properties.description} />
         </div>
       </div>
     );

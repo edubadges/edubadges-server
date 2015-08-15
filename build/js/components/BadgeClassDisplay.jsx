@@ -46,13 +46,13 @@ BadgeClassDetail = React.createClass({
 
     return (
       <div 
-        className="badge-display badgeclass-display badgeclass-display-detail col-xs-12"
+        className="badge-display badgeclass-display badgeclass-display-detail col-xs-2"
         onClick={this.props.handleClick}
       >
-        <div className='property-group image col-xs-3'>
+        <div className='property-group image'>
           <Property name="Badge Image" label={false} property={properties.image} />
         </div>
-        <div className='property-group details col-xs-9'>
+        <div className='property-group details'>
           <Property name="Name" property={properties.name} />
           <Property name="Criteria" label={true} property={properties.criteria} />
           <Property name="Description" label={true} property={properties.description} />

@@ -43,6 +43,35 @@
   }
 }
 
+.badge-display-full {
+  .property-group {
+    margin-bottom:28px;
+  }
+  .badgeProperty {
+    margin-bottom:7px;
+    .propertyName {
+      color: #333;
+      font-weight: 700;
+      text-align:right;
+      padding-right:21px;
+      width: 16.66666667%;
+      float: left;
+      position: relative;
+      min-height: 1px;
+      box-sizing: border-box;
+    }
+    .propertyValue {
+      width: 66.66666667%;
+      display: inline-block;
+    }
+    &.badgeProperty-type-image {
+      img {
+        width:100%;
+      }
+    }
+  }
+}
+
 .issuer-display {
   .panel-heading {
     padding:14px 14px 7px 14px;
@@ -92,31 +121,38 @@
   }
 }
 
-.badge-display-full {
-  .property-group {
-    margin-bottom:28px;
+.badgeclass-list.badgeclass-list-thumbnail {
+  display:flex;
+}
+
+.issuer-display-detail {
+  margin-top:21px;
+  .propertyImage {
+    border-radius: 4px;
   }
-  .badgeProperty {
-    margin-bottom:7px;
-    .propertyName {
-      color: #333;
-      font-weight: 700;
-      text-align:right;
-      padding-right:21px;
-      width: 16.66666667%;
-      float: left;
-      position: relative;
-      min-height: 1px;
-      box-sizing: border-box;
-    }
-    .propertyValue {
-      width: 66.66666667%;
-      display: inline-block;
-    }
-    &.badgeProperty-type-image {
-      img {
-        width:100%;
+  .propertyName {
+    color: #333;
+    font-weight: 700;
+    text-align:right;
+    padding-right:21px;
+    width: 16.66666667%;
+    float: left;
+    position: relative;
+    min-height: 1px;
+    box-sizing: border-box;
+  }
+  .propertyValue {
+    width: 66.66666667%;
+    display: inline-block;
+    &.Criteria {
+      a {
+        word-wrap: break-word;
       }
+    }
+  }
+  &.badgeProperty-type-image {
+    img {
+      width:100%;
     }
   }
 }
