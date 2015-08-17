@@ -9,7 +9,6 @@ from integrity_verifier import RemoteBadgeInstance, AnalyzedBadgeInstance
 from integrity_verifier.utils import get_instance_url_from_image, get_instance_url_from_assertion
 from credential_store.models import StoredBadgeInstance
 from credential_store.format import V1InstanceSerializer
-from mainsite.utils import installed_apps_list
 
 from .models import Collection, StoredBadgeInstanceCollection
 
@@ -193,38 +192,3 @@ class CollectionSerializer(serializers.Serializer):
 
         new_collection.save()
         return new_collection
-
-
-class EarnerPortalSerializer(serializers.Serializer):
-    """
-    A serializer used to pass initial data to a view template so that the React.js
-    front end can render.
-    It should detect which of the core Badgr applications are installed and return
-    appropriate contextual information.
-    """
-
-    def to_representation(self, user):
-        view_data = {}
-
-        earner_collections = Collection.objects.filter(owner=user)
-
-        earner_collections_serializer = CollectionSerializer(
-            earner_collections,
-            many=True,
-            context=self.context
-        )
-
-        earner_badges = StoredBadgeInstance.objects.filter(
-            recipient_user=user
-        )
-        earner_badges_serializer = EarnerBadgeSerializer(
-            earner_badges,
-            many=True,
-            context=self.context
-        )
-
-        view_data['earner_collections'] = earner_collections_serializer.data
-        view_data['earner_badges'] = earner_badges_serializer.data
-        view_data['installed_apps'] = installed_apps_list()
-
-        return view_data
