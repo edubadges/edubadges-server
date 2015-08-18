@@ -52,26 +52,29 @@ class EarnerBadgeSerializer(serializers.Serializer):
 
         return data
 
-    def create(self, validated_data):
-        user = self.context.get('request').user
-        image = None
-
+    def _extract_url(self, validated_data):
         # Extract the URL from one of 3 sources
         if validated_data.get('url'):
-            url = validated_data.get('url')
+            return validated_data.get('url')
         elif validated_data.get('image'):
             image = validated_data.get('image')
             image.open()
             try:
-                url = get_instance_url_from_image(image)
+                return get_instance_url_from_image(image)
             except Exception as e:
                 raise serializers.ValidationError(
                     "No Open Badges data could be extracted from image: "
-                    + e.message
-                )
+                    + e.message)
         elif validated_data.get('assertion'):
-            url = get_instance_url_from_assertion(
+            return get_instance_url_from_assertion(
                 validated_data.get('assertion'))
+
+
+    def create(self, validated_data):
+        user = self.context.get('request').user
+        image = None
+
+        url = self._extract_url(validated_data)
 
         try:
             rbi = RemoteBadgeInstance(url)
