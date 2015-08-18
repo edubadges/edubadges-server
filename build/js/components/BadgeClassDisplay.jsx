@@ -55,7 +55,7 @@ BadgeClassDetail = React.createClass({
         <div className='property-group details'>
           <Property name="Name" property={properties.name} />
           <Property name="Criteria" label={true} property={properties.criteria} />
-          <Property name="Description" label={true} property={properties.description} /> 
+          <Property name="Description" label={true} property={properties.description} />
         </div>
       </div>
     );
