@@ -9,12 +9,15 @@
   a { color: $badgr-red; }
   li {
     padding:0 5px 0 0;
-    &.vendor-info {
-      &:after {
-        padding-left:14px;
-        color: #ccc;
-        content: "/\00a0";
-      }
+    &:after {
+      padding-left:14px;
+      color: #ccc;
+      content: "/\00a0";
+    }
+    &:last-child {
+      padding-left:0px;
+      color: #ccc;
+      content: "";
     }
   }
   .footer-info {
