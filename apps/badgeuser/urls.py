@@ -1,6 +1,10 @@
 from django.conf.urls import patterns, url
-from badgeuser.api import BadgeUserDetail, BadgeUserToken
+
+from .api import BadgeUserDetail
+from .views import UpdateBadgeUserIsActive
+
 
 urlpatterns = patterns('badgeuser.views',
-    url(r'^/(?P<username>[-.\w]+)$', BadgeUserDetail.as_view(), name='user_detail')
+    url(r'^/enabled$', UpdateBadgeUserIsActive.as_view(), name='account_enabled'),
+    url(r'^/(?P<username>[-.\w]+)$', BadgeUserDetail.as_view(), name='user_detail'),
 )

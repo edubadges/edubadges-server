@@ -60,6 +60,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'mainsite.middleware.MaintenanceMiddleware',
+    'badgeuser.middleware.InactiveUserMiddleware',
     # 'mainsite.middleware.TrailingSlashMiddleware',
 ]
 
@@ -273,7 +274,7 @@ CKEDITOR_CONFIGS = {
         'debug': True,
         'linkShowTargetTab': False,
         'linkShowAdvancedTab': False,
-    }, 
+    },
     'basic': {
         'toolbar': [
             [      'Bold', 'Italic',
