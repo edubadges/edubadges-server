@@ -176,8 +176,10 @@
     tr {
       th {
         text-align:center;
+        border-left:1px solid #ddd2d2;
         &:first-child {
           text-align:left;
+          border-left:none;
         }
       }
     }
@@ -185,6 +187,10 @@
 
   td {
     vertical-align: middle;
+    border-left:1px solid #ddd2d2;
+    &:first-child {
+      border-left:none;
+    }
     .award {
       text-align:center;
       img {
