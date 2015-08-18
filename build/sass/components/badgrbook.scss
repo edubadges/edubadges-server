@@ -79,12 +79,10 @@
               max-height: 260px;
               overflow-x: scroll;
               z-index: 10;
-              border: 1px solid #ddd2d2;
-              border-width: 0 0 0 1px;
               li {
                 padding:7px;
                 border:1px solid #ddd2d2;
-                border-width: 0 0 1px 0;
+                border-width:0 1px 1px 1px;
                 display:block;
                 cursor:pointer;
                 &:first-child {
