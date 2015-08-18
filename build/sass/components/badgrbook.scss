@@ -76,6 +76,8 @@
               margin:-2px 0 0 0;
               background: #fff;
               width: 300px;
+              max-height: 260px;
+              overflow-x: scroll;
               li {
                 padding:7px;
                 border:1px solid #ddd2d2;
@@ -98,6 +100,9 @@
             }
             .badge-class-chosen {
               width: 300px;
+              &.chooser-open {
+                border-radius:4px 4px 0 0;
+              }
             }
             .badge-class-chosen, .badge-class-chooser-item {
               height:81px;
