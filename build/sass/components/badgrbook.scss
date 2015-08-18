@@ -73,12 +73,14 @@
               list-style: none;
               position:absolute;
               padding:0;
-              margin:-1px 0 0 0;
+              margin:0 0 0 0;
               background: #fff;
               width: 300px;
               max-height: 260px;
               overflow-x: scroll;
               z-index: 10;
+              border: 1px solid #ddd2d2;
+              border-width: 0 0 0 1px;
               li {
                 padding:7px;
                 border:1px solid #ddd2d2;
