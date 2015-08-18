@@ -172,30 +172,32 @@
 }
 
 .badgrbook-course-progress-report {
-  thead {
-    tr {
-      th {
-        text-align:center;
-        border-left:1px solid #ddd2d2;
-        &:first-child {
-          text-align:left;
-          border-left:none;
+  .table {
+    thead {
+      tr {
+        th {
+          text-align: center;
+          border-left: 1px solid #ddd2d2;
+          &:first-child {
+            text-align: left;
+            border-left: none;
+          }
         }
       }
     }
-  }
 
-  td {
-    vertical-align: middle;
-    border-left:1px solid #ddd2d2;
-    &:first-child {
-      border-left:none;
-    }
-    .award {
-      text-align:center;
-      img {
-        height:65px;
-        width:65px;
+    td {
+      vertical-align: middle;
+      border-left: 1px solid #ddd2d2;
+      &:first-child {
+        border-left: none;
+      }
+      .award {
+        text-align: center;
+        img {
+          height: 65px;
+          width: 65px;
+        }
       }
     }
   }
