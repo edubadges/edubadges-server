@@ -435,3 +435,9 @@ section#resources h3 {
 .footer .contact {
   font-size: 1.1em;
 }
+
+.instructions-image {
+  max-width: 80%;
+  height: auto;
+  margin: 2em auto;
+}
