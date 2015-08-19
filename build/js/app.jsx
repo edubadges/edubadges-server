@@ -12,13 +12,15 @@ React.render(
 
 var clickHandler = function(e){
   var target = e.target;
-  closestLink = target.closest('a');
+  var closestLink = target.closest('a');
 
   // Handle clicking links to either navigate within the single page app or make a fresh request
   if (closestLink) {
-    clickActions.createLinkClickAction(closestLink)
-    e.preventDefault();
-    e.stopPropagation();
+    if (clickActions.createLinkClickAction(closestLink)){
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
   }
 
   // Close any open menus.
