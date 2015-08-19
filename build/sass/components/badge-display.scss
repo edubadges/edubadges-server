@@ -89,6 +89,11 @@
     transition: .5s;
     transform: scale(1.05);
   }
+  &.award {
+    &.unearned {
+      opacity: 0.2;
+    }
+  }
 }
 
 .badge-display-full {
