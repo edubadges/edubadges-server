@@ -40,6 +40,9 @@ class EarnerBadgeSerializer(serializers.Serializer):
         return super(EarnerBadgeSerializer, self).to_representation(obj)
 
     def validate(self, data):
+        if data.get('assertion') == {}:
+            data.pop('assertion')
+
         valid_inputs = \
             dict(filter(lambda tuple: tuple[0] in ['url', 'image', 'assertion'],
                         data.items()))
