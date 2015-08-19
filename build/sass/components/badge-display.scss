@@ -2,6 +2,11 @@
   display:flex;
   flex-wrap:wrap;
   text-align:center;
+  &.badgrbook-badgeawards {
+    .badge-display-thumbnail {
+
+    }
+  }
 }
 
 .badge-display-thumbnail {
