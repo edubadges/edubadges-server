@@ -19,10 +19,10 @@
   .badgeProperty-type-image {
     background:#fff;
     text-align:center;
-  }
-  .propertyImage {
-    width: 100%;
-    max-width: 150px;
+    .propertyImage {
+      width: 100%;
+      max-width: 150px;
+    }
   }
   .name-wrapper {
     padding:0 11px 7px 11px;
@@ -33,6 +33,7 @@
     }
     .propertyValue {
       &.Name {
+        text-align:center;
         font-weight:600;
         color:#333;
       }
