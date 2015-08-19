@@ -20,8 +20,8 @@
     background:#fff;
     text-align:center;
     .propertyImage {
-      width: 100%;
-      max-width: 150px;
+      width: 150px;
+      height: 150px;
     }
   }
   .name-wrapper {
@@ -33,6 +33,7 @@
     }
     .propertyValue {
       &.Name {
+        text-align:center;
         font-weight:600;
         color:#333;
       }
@@ -87,6 +88,11 @@
   &:hover {
     transition: .5s;
     transform: scale(1.05);
+  }
+  &.award {
+    &.unearned {
+      opacity: 0.2;
+    }
   }
 }
 
