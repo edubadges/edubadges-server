@@ -2,6 +2,9 @@
   display:flex;
   flex-wrap:wrap;
   text-align:center;
+  img {
+    padding:14px;
+  }
 }
 
 .badge-display-thumbnail {
@@ -18,6 +21,7 @@
   cursor:pointer;
   .badgeProperty-type-image {
     background:#fff;
+    padding: 14px;
     text-align:center;
     .propertyImage {
       width: 150px;
