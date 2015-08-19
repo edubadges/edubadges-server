@@ -34,7 +34,8 @@
     "react-mini-router": "~1.1.2",
     "react-dropzone": "~1.0.1",
     "urllite": "^0.5.0",
-    "moment": "~2.10.2"
+    "moment": "~2.10.2",
+    "react-social": "~0.1.5"
   },
   "readmeFilename": "README",
   "scripts": {

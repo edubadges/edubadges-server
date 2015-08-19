@@ -103,6 +103,7 @@ var ActivePanel = React.createClass({
                   {this.props.title ? (<h3>{this.props.title}</h3>) : null}
                   {this.props.content.children}
                   <button className="btn btn-default" onClick={this.clearActivePanel}>Close</button>
+                  {this.props.content.actions}
                 </div>
               </div>
             </div>

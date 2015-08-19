@@ -286,7 +286,7 @@ APIStore.getData = function(context, requestContext){
           APIStore.addCollectionItem(context.apiCollectionKey, el);
         });
       }
-      else {
+      else if (response.body !== null){
         APIStore.addCollectionItem(context.apiCollectionKey,response.body);
       }
       APIStore.emit('DATA_UPDATED');
