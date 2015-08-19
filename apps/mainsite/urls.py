@@ -43,7 +43,6 @@ urlpatterns = patterns('',
     # REST Framework-based APIs
     url(r'^user', include('badgeuser.urls')),
     url(r'^v1/user', include('badgeuser.api_urls')),
-    url(r'^v1/verifier', include('integrity_verifier.api_urls')),
 
     url(r'^public', include('issuer.public_api_urls')),
 

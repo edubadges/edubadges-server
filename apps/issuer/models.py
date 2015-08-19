@@ -14,7 +14,7 @@ from autoslug import AutoSlugField
 import cachemodel
 from jsonfield import JSONField
 
-from bakery import bake
+from openbadges_bakery import bake
 
 from .utils import generate_sha256_hashstring, badgr_import_url
 

@@ -23,7 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
 
     'badgeuser',
-    'integrity_verifier',
+    'badgecheck',
 
     'allauth',
     'allauth.account',
