@@ -20,7 +20,7 @@ BadgeClassThumbnail = React.createClass({
     }
     return (
       <div
-        className="badgeclass-display badgeclass-display-thumbnail"
+        className="badgeclass-display badge-display-thumbnail"
         onClick={this.props.handleClick}
       >
         <img src={this.props.image} alt={this.props.name} />
@@ -45,17 +45,20 @@ BadgeClassDetail = React.createClass({
     }
 
     return (
-      <div 
-        className="badge-display badgeclass-display badgeclass-display-detail col-xs-3"
-        onClick={this.props.handleClick}
-      >
-        <div className='property-group image'>
+      <div className="badge-display-full form-horizontal issuer-list xs-col-12" onClick={this.props.handleClick}>
+        <div className='property-group image col-xs-2'>
           <Property name="Badge Image" label={false} property={properties.image} />
         </div>
-        <div className='property-group details'>
-          <Property name="Name" property={properties.name} />
-          <Property name="Criteria" label={true} property={properties.criteria} />
-          <Property name="Description" label={true} property={properties.description} />
+        <div className="name-wrapper">
+            <Property name="Name" property={properties.name} />
+        </div>
+        <div className="detail-wrapper">
+            <div className="criteria-wrapper">
+                <Property name="Criteria" label={true} property={properties.criteria} />
+            </div>
+            <div className="description-wrapper">
+                <Property name="Description" label={true} property={properties.description} />
+            </div>
         </div>
       </div>
     );
@@ -123,7 +126,7 @@ BadgeClassList = React.createClass({
     }
     return (
       <div className="container-fluid">
-        <div className="badgeclass-list badgeclass-list-thumbnail row">
+        <div className="open-badge-list">
           {badgeClasses}
         </div>
       </div>

@@ -133,7 +133,7 @@ var BadgeDisplayThumbnail = React.createClass({
   getDefaultProps: function() {
     return {
       json: {badge: {issuer:{}}},
-      columnClass: 'col-xs-3 col-sm-2',
+      columnClass: 'col-xs-3',
       selected: false
     };
   },
@@ -152,8 +152,12 @@ var BadgeDisplayThumbnail = React.createClass({
     return (
       <div className={this.wrapperClass()} onClick={this.handleClick} >
         <Property name='Badge Image' label={false} property={this.props.json.image} />
-        <Property name='Name' property={this.props.json.badge.name} />
-        <Property name='Issuer' property={this.props.json.badge.issuer.name} />
+        <div className="name-wrapper">
+            <Property name='Name' property={this.props.json.badge.name} />
+        </div>
+        <div className="issuer-wrapper">
+            <Property name='Issuer' property={this.props.json.badge.issuer.name} />
+        </div>
       </div>
     );
   }
