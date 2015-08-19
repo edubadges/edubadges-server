@@ -5,8 +5,8 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 
 from rest_framework import serializers
 
-from integrity_verifier import RemoteBadgeInstance, AnalyzedBadgeInstance
-from integrity_verifier.utils import get_instance_url_from_image, get_instance_url_from_assertion
+from badgecheck import RemoteBadgeInstance, AnalyzedBadgeInstance
+from badgecheck.utils import get_instance_url_from_image, get_instance_url_from_assertion
 from credential_store.models import StoredBadgeInstance
 from credential_store.format import V1InstanceSerializer
 

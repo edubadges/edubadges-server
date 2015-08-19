@@ -23,7 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
 
     'badgeuser',
-    'integrity_verifier',
+    'badgecheck',
 
     'allauth',
     'allauth.account',
@@ -67,6 +67,7 @@ MIDDLEWARE_CLASSES = [
 ROOT_URLCONF = 'mainsite.urls'
 
 SECRET_KEY = '{{secret_key}}'
+UNSUBSCRIBE_SECRET_KEY = 'kAYWM0YWI2MDj/FODBZjE0ZDI4N'
 
 # Hosts/domain names that are valid for this site.
 # "*" matches anything, ".example.com" matches example.com and all subdomains
