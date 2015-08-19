@@ -94,6 +94,22 @@ var ActivePanel = React.createClass({
       );
     }
 
+    else if (this.props.type == "ChildComponent"){
+      return (
+          <div className="modal closable" style={{display: "block"}}>
+            <div className={wrapperClass + ' modal-dialog'}>
+              <div className="modal-content">
+                <div className="modal-body container-fluid">
+                  {this.props.title ? (<h3>{this.props.title}</h3>) : null}
+                  {this.props.content.children}
+                  <button className="btn btn-default" onClick={this.clearActivePanel}>Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+    }
+
 
     // Catch unknown view types
     return <div className="active-panel empty" />;

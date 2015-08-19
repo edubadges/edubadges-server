@@ -209,14 +209,14 @@ APIStore.fetchCollections = function(collectionKeys, requestContext){
     },
     badgrbook_checkcourseprogress: {
         actionUrl: '/v1/badgrbook/checkprogress/:tool_guid/:course_id',
-        successfulHttpStatus: [200],
+        successfulHttpStatus: [200, 204],
         apiCollectionKey: 'badgrbook_checkcourseprogress',
         replaceCollection: true,
         formId: 'badgrbook_checkcourseprogress',
     },
     badgrbook_checkstudentprogress: {
       actionUrl: '/v1/badgrbook/checkprogress/:tool_guid/:course_id/:student_id',
-      successfulHttpStatus: [200],
+      successfulHttpStatus: [200, 204],
       apiCollectionKey: 'badgrbook_checkstudentprogress',
       replaceCollection: true,
       formId: 'badgrbook_checkstudentprogress',

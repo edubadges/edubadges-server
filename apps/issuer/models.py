@@ -128,6 +128,14 @@ class BadgeInstance(Component):
     def owner(self):
         return self.issuer.owner
 
+    @property
+    def extended_json(self):
+        extended_json = self.json
+        extended_json['badge'] = self.badgeclass.json
+        extended_json['badge']['issuer'] = self.issuer.json
+
+        return extended_json
+
     def get_absolute_url(self):
         return reverse('badgeinstance_json', kwargs={'slug': self.slug})
 
