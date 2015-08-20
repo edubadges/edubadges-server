@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'credential_store',
 
     'badgrbook',
-    'canvaslms',
+    'badgrbook.canvaslms',
 ]
 
 MIDDLEWARE_CLASSES = [
