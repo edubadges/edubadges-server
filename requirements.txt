@@ -33,6 +33,7 @@ git+https://github.com/concentricsky/django-allauth.git@0.21.0-csky
 oauthlib==0.7.2
 requests==2.5.1
 requests-oauthlib==0.4.2
+responses==0.3.0
 # Permissions framework
 rules==0.4
 
