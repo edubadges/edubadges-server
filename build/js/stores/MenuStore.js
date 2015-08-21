@@ -183,12 +183,16 @@ MenuStore.dispatchToken = appDispatcher.register(function(payload){
 
   switch(action.type){
     case 'APP_WILL_MOUNT':
-      MenuStore.storeInitialData()
+      MenuStore.storeInitialData();
       MenuStore.emit('INITIAL_DATA_LOADED');
       break;
 
     case 'CLICK_CLOSE_MENU':
       MenuStore.emit('UNCAUGHT_DOCUMENT_CLICK');
+      break;
+
+    case 'CLOSE_MODAL':
+      MenuStore.emit('CLOSE_MODAL');
       break;
 
     default:
@@ -203,5 +207,6 @@ module.exports = {
   listeners: MenuStore.listeners,
   once: MenuStore.once,
   on: MenuStore.addListener,
-  dispatchToken: MenuStore.dispatchToken
-}
+  dispatchToken: MenuStore.dispatchToken,
+  emit: MenuStore.emit
+};

@@ -2,9 +2,13 @@ var React = require('react');
 var EarnerBadge = require('./BadgeDisplay.jsx').EarnerBadge;
 var BasicAPIForm = require('./Form.jsx').BasicAPIForm;
 
+var Dispatcher = require('../dispatcher/appDispatcher');
+var ClickActions = require('../actions/clicks');
+
 var FormStore = require('../stores/FormStore');
 var FormConfigStore = require('../stores/FormConfigStore');
 var MenuStore = require('../stores/MenuStore');
+
 
 var PanelActions = React.createClass({
   /* Define a click handler, a label, and a class for each action.
@@ -33,31 +37,43 @@ var PanelActions = React.createClass({
   }
 });
 
+
 var ActivePanel = React.createClass({
   getDefaultProps: function(){
     return {
       modal: false
-    }
+    };
   },
-  componentDidUpdate: function(prevProps){
-    if (this.props.modal && !!this.props.type && !prevProps.type) {
-      setTimeout(function () {
-        MenuStore.once("UNCAUGHT_DOCUMENT_CLICK", this.clearActivePanel);
-      }.bind(this), 50);
+  getInitialState: function(){
+    return {
+      open: (!this.props.modal)
+    };
+  },
+  componentDidMount: function(){
+    if (this.props.modal)
+      MenuStore.addListener('CLOSE_MODAL', this.clearActivePanel);
+  },
+  componentWillUnmount: function(){
+    MenuStore.removeListener('CLOSE_MODAL', this.clearActivePanel);
+  },
+  componentDidUpdate(prevProps, prevState){
+    if (!prevProps.type && this.props.type && this.isMounted()){
+      this.setState({open: true});
     }
   },
   updateActivePanel: function(update){
     this.props.updateActivePanel(this.props.viewId, update);
   },
   clearActivePanel: function(){
-    if (this.isMounted()) {
-      setTimeout(function () {
-        this.props.clearActivePanel(this.props.viewId);
-      }.bind(this), 0);
+    if (this.isMounted() && this.state.open) {
+      this.setState({open: false});
+      setTimeout(
+          function(){this.props.clearActivePanel(this.props.viewId);}.bind(this), 0
+      );
     }
   },
   render: function() {
-    if (!('type' in this.props))
+    if (!this.state.open)
       return <div className="active-panel empty" />;
 
     var formProps = {};

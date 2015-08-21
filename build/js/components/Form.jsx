@@ -306,7 +306,7 @@ BasicAPIForm = React.createClass({
             );
           }
           else if (inputType == 'divider'){
-            return (<p className="divider"><strong>{label}</strong></p>);
+            return (<p className="divider" key={"divider-" + i}><strong>{label}</strong></p>);
           }
         }.bind(this));
         return (

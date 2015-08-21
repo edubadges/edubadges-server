@@ -5,7 +5,14 @@ var createOffMenuClickAction = function(target) {
       type: 'CLICK_CLOSE_MENU',
       target: target
     }});
-}
+};
+
+var createCloseModalAction = function(target) {
+  appDispatcher.dispatch({ action: {
+      type: 'CLOSE_MODAL',
+      target: target
+    }});
+};
 
 var createLinkClickAction = function(target){
   function detect_local(href){
@@ -24,7 +31,7 @@ var createLinkClickAction = function(target){
     return true;
   }
   return false;
-}
+};
 
 var navigateLocalPath = function(path){
   appDispatcher.dispatch({
@@ -33,16 +40,17 @@ var navigateLocalPath = function(path){
       href: path
     }
   });
-}
+};
 
 var navigateOut = function(path){
   window.location.assign(path);
-}
+};
 
 
 module.exports = {
   createOffMenuClickAction: createOffMenuClickAction,
+  createCloseModalAction: createCloseModalAction,
   createLinkClickAction: createLinkClickAction,
   navigateLocalPath: navigateLocalPath,
   navigateOut: navigateOut
-}
+};

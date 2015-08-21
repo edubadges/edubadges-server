@@ -126,7 +126,7 @@ var App = React.createClass({
       this.setState({activeTopMenu: key, activeRoleMenu: null});
   },
   _hideMenu: function(){
-    if (this.state.activeTopMenu != null)
+    if (this.isMounted() && this.state.activeTopMenu != null)
       this.setState({activeTopMenu: null});
   },
   updateMenu: function(key){
@@ -141,7 +141,8 @@ var App = React.createClass({
             newState.activeRoleMenu = currentItem.title;
           }
         }
-        this.setState(newState);
+        if (this.isMounted())
+          this.setState(newState);
     //}
   },
 

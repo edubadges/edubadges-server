@@ -26,5 +26,8 @@ var clickHandler = function(e){
   // Close any open menus.
   if (!target.closest('.closable'))
     clickActions.createOffMenuClickAction(target);
+
+  if (!target.closest('.modal-content') && target.closest('.modal'))
+    clickActions.createCloseModalAction(target);
 };
 document.onclick = clickHandler;
