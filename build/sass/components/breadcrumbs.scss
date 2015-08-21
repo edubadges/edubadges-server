@@ -1,12 +1,12 @@
-.breadcrumbs {
-  list-style: none;
-  padding-left: 0;
-  .crumb {
-    float: left;
-    a { margin: 0 0.5em; }
-    &:after {
-      content: ">";
+.breadcrumb-wrapper {
+  background:#f5f5f5;
+  border-bottom: 1px solid #ccc;
+  .breadcrumb {
+    border-radius:0;
+    background:none;
+    margin-bottom:0;
+    .crumb {
+
     }
-    &:last-child:after { content: ""; }
   }
 }

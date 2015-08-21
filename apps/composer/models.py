@@ -34,9 +34,7 @@ class Collection(cachemodel.CacheModel):
     def share_url(self):
         if self.share_hash != '':
             return getattr(settings, 'HTTP_ORIGIN') + reverse(
-                'shared_collection',
-                args=[self.pk, self.share_hash]
-            )
+                'shared_collection', args=[self.pk, self.share_hash])
         return ''
 
 

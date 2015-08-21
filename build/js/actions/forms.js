@@ -8,10 +8,12 @@ var patchFormAction = function(formId, patch) {
     }});
 }
 
-var submitFormAction = function(formId) {
+var submitFormAction = function(formId, formType, requestContext) {
   appDispatcher.dispatch({ action: {
       type: 'FORM_SUBMIT',
-      formId: formId
+      formId: formId,
+      formType: formType,
+      requestContext: requestContext
     }});
 }
 

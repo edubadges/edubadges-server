@@ -11,6 +11,8 @@
 @import "components/accounts";
 @import "components/buttons";
 @import "components/card";
+@import "components/iframe-embed-container";
+@import "components/badgrbook";
 
 // refactoring from this SB2 stylesheet as source, moving things into 
 // components as possible. Eventually this won't be needed:
@@ -18,6 +20,19 @@
 @import "components/metismenu";
 
 @import "./colors";
+
+* {
+  margin: 0;
+}
+html, body {
+  height: 100%;
+}
+
+.col-xs-1, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5,
+.col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9, .col-xs-10,
+.col-xs-11, .col-xs-12 {
+  padding:0;
+}
 
 // Grid adjustments so that on the smallest screens, 
 // col-xs classes are 100% width
@@ -37,21 +52,79 @@
 } 
 
 body.badgr {
-  background-color: $badgr-brown;
+  background-color: $badgr-background;
+
 }
-.main-app-container {
-  background-color: $white;
-  padding-bottom: 2em; 
+body.embedded-body {
+  background-color: transparent;
 }
 
+.main-app-container {
+  padding-bottom: 2em;
+  min-height: 100%;
+  margin: 0 auto -100px;
+  padding-bottom:100px;
+}
 
 a {
   color: $badgr-red;
+}
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+  color: $black;
+}
+
+h2 {
+  font-size: 34px;
+  font-weight: 400;
+  line-height: 40px;
+  margin-bottom: 30px;
+  color: #672f33;
+}
+
+h3 {
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 40px;
+  margin-bottom: 30px;
+  color: #672f33;
 }
 
 img { 
   max-width: 100%;
   height: auto;
+}
+
+.btn.btn-info {
+  background-color: #672f33;
+  border-color: #672f33;
+  &:hover {
+    background:#56282b;
+    border-color: #56282b;
+  }
+}
+
+.btn.btn-primary {
+  background-color: #672f33;
+  border-color: #672f33;
+  &:hover {
+    background:#56282b;
+    border-color: #56282b;
+  }
+}
+
+.btn.btn-warning {
+  background-color: #f1971d;
+  border-color: #f1971d;
+  &:hover {
+    background:#cd8018;
+    border-color: #cd8018;
+  }
+}
+
+.btn {
+  .fa {
+    margin-right: 4px;
+  }
 }
 
 .loading-icon {

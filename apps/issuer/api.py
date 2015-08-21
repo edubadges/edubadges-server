@@ -79,10 +79,10 @@ class IssuerList(AbstractIssuerAPIEndpoint):
         # Get the Issuers this user owns, edits, or staffs:
         user_issuers = self.get_list(queryset=self.queryset.filter(
             Q(owner__id=request.user.id) |
-            Q(staff__id=request.user.id))
+            Q(staff__id=request.user.id)).distinct()
         )
         if not user_issuers.exists():
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response([])
 
         serializer = IssuerSerializer(user_issuers, many=True, context={'request': request})
         return Response(serializer.data)
@@ -211,7 +211,7 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
             - name: action
               type: string
               paramType: form
-              description: The action to perform on the user: Must be one of: 'add', 'modify', or 'remove'
+              description: The action to perform on the user. Must be one of 'add', 'modify', or 'remove'.
               required: true
             - name: username
               type: string
@@ -290,7 +290,7 @@ class AllBadgeClassesList(AbstractIssuerAPIEndpoint):
             Q(staff__id=request.user.id)
         ).distinct().select_related('badgeclasses')
         issuer_badgeclasses = [
-            bc for bc in chain.from_iterable(i.badgeclasses.all() 
+            bc for bc in chain.from_iterable(i.badgeclasses.all()
                 for i in user_issuers)
         ]
 
@@ -428,7 +428,7 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
             - code: 200
               message: Badge has been deleted.
         """
-        unissued_badgeclasses = self.queryset.filter(assertions=None)
+        unissued_badgeclasses = self.queryset.filter(badgeinstances=None)
         current_badgeclass = self.get_list(badgeSlug, queryset=unissued_badgeclasses)
 
         if current_badgeclass.exists():
@@ -491,21 +491,24 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
         ---
         serializer: BadgeInstanceSerializer
         """
-        badgeclass_queryset = self.queryset.filter(issuer__slug=issuerSlug).select_related('assertions')
+        badgeclass_queryset = self.queryset.filter(issuer__slug=issuerSlug) \
+            .select_related('badgeinstances')
         # Ensure current user has permissions on current badgeclass
-        current_badgeclass = self.get_object(badgeSlug, queryset=badgeclass_queryset)
+        current_badgeclass = self.get_object(badgeSlug,
+                                             queryset=badgeclass_queryset)
         if current_badgeclass is None:
             return Response(
                 "BadgeClass %s not found or inadequate permissions." % badgeSlug,
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        assertions = current_badgeclass.assertions.all()
+        badge_instances = current_badgeclass.badgeinstances.all()
 
-        if not assertions.exists():
+        if not badge_instances.exists():
             return Response([], status=status.HTTP_200_OK)
 
-        serializer = BadgeInstanceSerializer(assertions, many=True, context={'request': request})
+        serializer = BadgeInstanceSerializer(badge_instances, many=True,
+                                             context={'request': request})
         return Response(serializer.data)
 
 
@@ -513,7 +516,7 @@ class IssuerBadgeInstanceList(AbstractIssuerAPIEndpoint):
     """
     Retrieve assertions by a recipient identifier within one issuer
     """
-    queryset = Issuer.objects.all().select_related('assertions')
+    queryset = Issuer.objects.all().select_related('badgeinstances')
     model = Issuer
     permission_classes = (IsStaff,)
 
@@ -540,9 +543,9 @@ class IssuerBadgeInstanceList(AbstractIssuerAPIEndpoint):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         if request.query_params.get('recipient') is not None:
-            instances = current_issuer.assertions.filter(email=request.query_params.get('recipient'), revoked=False)
+            instances = current_issuer.badgeinstances.filter(email=request.query_params.get('recipient'), revoked=False)
         else:
-            instances = current_issuer.assertions.filter(revoked=False)
+            instances = current_issuer.badgeinstances.filter(revoked=False)
 
         serializer = BadgeInstanceSerializer(
             instances, context={'request': request}, many=True

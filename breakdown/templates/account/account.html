@@ -1,0 +1,25 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+{% load url from future %}
+
+{% block head_title %}{% trans "Account" %}{% endblock %}
+
+{% block content %}
+    <h2 class="accounts-panel-heading">{% trans "Account" %}</h2>
+
+    <!-- <h3>{% trans "Disable account" %}</h3> -->
+    <form class="signup" id="signup_form" method="post" action="{% url 'account_enabled' %}">
+        {% csrf_token %}
+        <div class="form-actions col-sm-12">
+        </div>
+        <div class="form-actions col-sm-3">
+            <label>{{ form.is_active }} {% if request.user.is_active %} Uncheck to deactivate. {% else %} Check to re-activate. {% endif %}</label>
+            <button class="btn btn-primary btn-block" type="submit">{% trans "Deactivate account" %}</button>
+        </div>
+    </form>
+{% endblock %}
+
+
+{% block extra_body %}
+{% endblock %}

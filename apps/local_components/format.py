@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from integrity_verifier.serializers.fields import BadgeDateTimeField as BDTF
+from badgecheck.serializers.fields import BadgeDateTimeField as BDTF
 
 
 class BadgeURLField(serializers.URLField):

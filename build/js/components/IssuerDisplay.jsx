@@ -22,16 +22,20 @@ var IssuerDisplayShort = React.createClass({
     }
 
     return (
-      <div className="issuer-display issuer-display-short col-xs-12" onClick={this.props.handleClick}>
-        <div className='row'>
-          <div className='property-group image col-xs-3'>
+      <div className="issuer-display issuer-display-short panel panel-default" onClick={this.props.handleClick}>
+        <div className='panel-heading'>
+          <div className='property-group image'>
             <Property name="Issuer Logo" label={false} property={properties.image} />
           </div>
-          <div className='property-group basic-data col-xs-9'>
+          <div className='property-group basic-data'>
             <Property name="Name" property={properties.name} />
             <Property name="URL" label={false} property={properties.url} />
-            <BadgeClassList display="thumbnail" max={4} badgeClasses={this.props.badgeClasses} />
           </div>
+        </div>
+        <div className="panel-body">
+            <div className="">
+                <BadgeClassList display="thumbnail" max={4} badgeClasses={this.props.badgeClasses} />
+            </div>
         </div>
       </div>
     );
@@ -59,8 +63,8 @@ var IssuerDisplay = React.createClass({
         </div>
         <div className='property-group image col-xs-9'>
           <Property name="Name" property={properties.name} />
-          <Property name="URL" label={false} property={properties.url} />
-          <Property name="Description" label={false} property={properties.description} />
+          <Property name="URL" label={true} property={properties.url} />
+          <Property name="Description" label={true} property={properties.description} />
         </div>
       </div>
     );
@@ -85,6 +89,10 @@ var IssuerList = React.createClass({
           function(el,i,array){ return (el.issuer == issuer.json.id); }
         );
         var handleClick = function(e){navigateLocalPath(issuerPath);};
+        var providedHandler = this.props.handleClick
+        if (providedHandler) {
+          handleClick = function(e){ providedHandler(e, issuer); };
+        }
         return (
             <IssuerDisplayShort
               name={issuer.name}

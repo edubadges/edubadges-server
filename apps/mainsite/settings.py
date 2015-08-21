@@ -23,7 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
 
     'badgeuser',
-    'integrity_verifier',
+    'badgecheck',
 
     'allauth',
     'allauth.account',
@@ -46,6 +46,9 @@ INSTALLED_APPS = [
     'issuer',
     'local_components',
     'composer',
+
+    'badgrbook',
+    'badgrbook.canvaslms',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -53,15 +56,18 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django_auth_lti.middleware_patched.MultiLTILaunchAuthMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'mainsite.middleware.MaintenanceMiddleware',
+    'badgeuser.middleware.InactiveUserMiddleware',
     # 'mainsite.middleware.TrailingSlashMiddleware',
 ]
 
 ROOT_URLCONF = 'mainsite.urls'
 
 SECRET_KEY = '{{secret_key}}'
+UNSUBSCRIBE_SECRET_KEY = 'kAYWM0YWI2MDj/FODBZjE0ZDI4N'
 
 # Hosts/domain names that are valid for this site.
 # "*" matches anything, ".example.com" matches example.com and all subdomains
@@ -95,6 +101,8 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     # allauth specific context processors
     "allauth.account.context_processors.account",
     "allauth.socialaccount.context_processors.socialaccount",
+
+    'mainsite.context_processors.help_email'
 ]
 
 JINGO_EXCLUDE_APPS = (
@@ -141,11 +149,15 @@ AUTHENTICATION_BACKENDS = [
     # Object permissions for issuing badges
     'rules.permissions.ObjectPermissionBackend',
 
+    # LTI authentication
+    'badgrbook.backends.CanvasLtiAuthBackend',
+
     # Needed to login by username in Django admin, regardless of `allauth`
     "django.contrib.auth.backends.ModelBackend",
 
     # `allauth` specific authentication methods, such as login by e-mail
     "allauth.account.auth_backends.AuthenticationBackend",
+
 ]
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
@@ -182,9 +194,15 @@ FIXTURE_DIRS = [
 #
 ##
 
+LOGS_DIR = os.path.join(TOP_DIR, 'logs')
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'filters': {
+        # 'badgr': {
+        #     '()': 'mainsite.logs.BadgrFilter'
+        # }
+    },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
@@ -197,8 +215,13 @@ LOGGING = {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
-        },
-    }
+        }
+    },
+    'formatters': {
+        'default': {
+            'format': '%(asctime)s %(levelname)s %(module)s %(message)s'
+        }
+    },
 }
 
 
@@ -218,8 +241,13 @@ MAINTENANCE_URL = '/maintenance'
 #
 ##
 
-SPHINX_API_VERSION = 0x116 # Sphinx 0.9.9
+SPHINX_API_VERSION = 0x116  # Sphinx 0.9.9
 
+##
+#
+# Testing
+##
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 ##
 #
@@ -252,8 +280,8 @@ CKEDITOR_CONFIGS = {
         'debug': True,
         'linkShowTargetTab': False,
         'linkShowAdvancedTab': False,
-    }
-    , 'basic': {
+    },
+    'basic': {
         'toolbar': [
             [      'Bold', 'Italic',
               '-', 'Link', 'Unlink',
@@ -324,7 +352,6 @@ USE_TZ = True
 try:
     from settings_local import *
 except ImportError as e:
-    import sys
     sys.stderr.write("no settings_local found, setting DEBUG=True...\n")
     DEBUG = True
     pass

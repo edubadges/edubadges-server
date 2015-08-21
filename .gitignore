@@ -13,5 +13,8 @@ node_modules/*
 bower_components/*
 npm-debug.log
 breakdown/static/js/script.js
+breakdown/static/js/app.js
+breakdown/static/js/lti-app.js
 breakdown/static/css/style.css
 .ropeproject
+.idea/*

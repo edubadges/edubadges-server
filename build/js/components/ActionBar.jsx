@@ -13,7 +13,6 @@ var ActivePanelUpdateButton = React.createClass({
 
     return (
       <button className={"btn btn-" + this.props.buttonType} onClick={this.handleClick}>
-        <i className={'fa fa-fw ' + icon}></i>
         {this.props.title}
       </button>
     );
@@ -42,9 +41,9 @@ var ActionBar = React.createClass({
     }.bind(this));
 
     if (this.props.titleLink)
-      title = (<h3><a href={this.props.titleLink}>{this.props.title}</a></h3>);
+      title = (<h2><a href={this.props.titleLink}>{this.props.title}</a></h2>);
     else
-      title = (<h3>{this.props.title}</h3>);
+      title = (<h2>{this.props.title}</h2>);
 
     return (
       <div className="action-bar clearfix">
@@ -65,7 +64,7 @@ var HeadingBar = React.createClass({
     return (
       <div className="action-bar clearfix">
         <div className="main-component-content-title col-xs-12">
-          <h3>{this.props.title}</h3>
+          <h2>{this.props.title}</h2>
         </div>
       </div>
     );

@@ -1,0 +1,27 @@
+{% extends "account/base.html" %}
+
+
+{% block content %}
+    <h3>Add Badges to a Canvas Course</h3>
+    <p class="instructions">
+        Badgr can connect with Canvas to automatically issue badges to students as they complete their work.
+        In Canvas, set up a course, with modules and completion requirements. Then go to Settings, select Apps,
+        and click the Add App button. Make sure your Badgr account has the <a href="/accounts/email">email address
+        confirmed</a> that you log in to Canvas with.
+    </p>
+    <img class="instructions-image" src="{{ STATIC_URL }}/images/canvas-settings.png" />
+    <p class="instructions">
+        Select the Add by URL method, and fill out the form with the information below, filling the Consumer Key,
+        Shared Secret, and Config URL fields.
+    </p>
+    <p><strong>Your Consumer Key:</strong> {{lti_credential.client_id}}</p>
+    <p><strong>Your Shared Secret:</strong> {{lti_credential.client_secret}}</p>
+    <p><strong>Config URL:</strong> {{cartridge_url}}</p>
+
+    <img class="instructions-image" src="{{ STATIC_URL }}/images/badgr-canvas-instructions.png" />
+
+
+
+
+
+{% endblock %}

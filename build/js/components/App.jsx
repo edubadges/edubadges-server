@@ -3,19 +3,19 @@ var RouterMixin = require('react-mini-router').RouterMixin;
 var navigate = require('react-mini-router').navigate;
 var assign = require('object-assign');
 var urllite = require('urllite/lib/core');
-var _ = require('underscore');
+var _ = require('lodash');
 
 // Stores
 var RouteStore = require('../stores/RouteStore');
 var MenuStore = require('../stores/MenuStore');
 var APIStore = require('../stores/APIStore');
 var FormStore = require('../stores/FormStore');
+var FormConfigStore = require('../stores/FormConfigStore');
 var UserStore = require('../stores/UserStore');
 var ActiveActionStore = require('../stores/ActiveActionStore');
 
 // Components
 var TopLinks = require('../components/TopLinks.jsx');
-var SideBarNav = require('../components/SideBarNav.jsx');
 var MainComponent = require ('../components/MainComponent.jsx');
 var SecondaryMenu = require('../components/SecondaryMenu.jsx');
 var BreadCrumbs = require('../components/BreadCrumbs.jsx');
@@ -47,9 +47,10 @@ var App = React.createClass({
 
   // Route configuration: 
   routes: {
-    '/': 'home',
+    '/': 'earnerMain',
     '/earner': 'earnerMain',
     '/earner/badges': 'earnerBadges',
+    '/earner/badges/new': 'earnerImportBadge',
     '/earner/badges/:badgeId': 'earnerBadgeDetail',
     '/earner/collections': 'earnerCollections',
     '/earner/collections/:collectionSlug': 'earnerCollectionDetail',
@@ -71,6 +72,15 @@ var App = React.createClass({
       this.handleDependencies(this.dependencies['earnerMain']);
     else if (newRoute.startsWith('/issuer'))
       this.handleDependencies(this.dependencies['issuerMain']);
+    else if (newRoute.startsWith('/explorer'))
+      this.handleDependencies([])
+
+
+    var currentItem = _.find(this.state.roleMenu.items, function(o) { return o.url == newRoute; }, this);
+    if (currentItem && currentItem.title != this.state.activeRoleMenu) {
+        this.setState({'activeRoleMenu': currentItem.title});
+    }
+
     navigate(newRoute);
   },
 
@@ -78,7 +88,7 @@ var App = React.createClass({
   getDefaultProps: function() {
     return {
       path: urllite(window.location.href).pathname + urllite(window.location.href).search,
-      appTitle: 'Badgr Server',
+      appTitle: 'Badgr',
       actionBars: MenuStore.getAllItems('actionBars'),
       secondaryMenus: MenuStore.getAllItems('secondaryMenus')
     };
@@ -92,34 +102,48 @@ var App = React.createClass({
     };
   },
   componentWillMount: function() {
+    MenuStore.addListener('INITIAL_DATA_LOADED', function(){ this.updateMenu('roleMenu');}.bind(this));
     LifeCycleActions.appWillMount();
   },
   componentDidMount: function() {
-    MenuStore.addListener('INITIAL_DATA_LOADED', function(){ this.updateMenu('roleMenu');});
     MenuStore.addListener('UNCAUGHT_DOCUMENT_CLICK', this._hideMenu);
     RouteStore.addListener('ROUTE_CHANGED', this.handleRouteChange);
     APIStore.addListener('DATA_UPDATED', function(){
-      this.setState({});
+      if (this.isMounted())
+        this.setState({});
     }.bind(this));
     ActiveActionStore.addListener('ACTIVE_ACTION_UPDATED', this.handleActivePanelUpdate);
   },
 
   // Menu visual display functions:
 
+  setActiveRoleMenu: function(key) {
+    if (this.isMounted())
+      this.setState({activeRoleMenu: key})
+  },
   setActiveTopMenu: function(key){
     if (this.isMounted())
-      this.setState({activeTopMenu: key});
+      this.setState({activeTopMenu: key, activeRoleMenu: null});
   },
   _hideMenu: function(){
-    if (this.state.activeTopMenu != null)
+    if (this.isMounted() && this.state.activeTopMenu != null)
       this.setState({activeTopMenu: null});
   },
   updateMenu: function(key){
-    if (this.isMounted()){
-      var newState = {}
-      newState[key] = MenuStore.getAllItems(key);
-      this.setState(newState);
-    }
+    //if (this.isMounted()) {
+
+        var newState = {}
+        newState[key] = MenuStore.getAllItems(key);
+
+        if (key == 'roleMenu') {
+          var currentItem = _.find(newState[key].items, function(o) { return o.url == this.props.path; }, this);
+          if (currentItem) {
+            newState.activeRoleMenu = currentItem.title;
+          }
+        }
+        if (this.isMounted())
+          this.setState(newState);
+    //}
   },
 
   updateActivePanel: function(viewId, update){
@@ -140,31 +164,21 @@ var App = React.createClass({
       this.setState(update);
     }
   },
-  contextPropsForActivePanel: function(viewId){
-    if (!(viewId in this.state.activePanels))
-      return {};
-
-    var context = {};
-    var panel = this.state.activePanels[viewId];
-
-    if (panel.type == "EarnerBadgeImportForm") {
-      context = {
-        recipientIds: UserStore.getProperty('earnerIds'),
-        badgeId: panel.content.badgeId
-      };
-    }
-    return context;
-  },
 
   handleDependencies: function(collectionKeys){
-    var collectionKeys;
-    var dependenciesMet = APIStore.collectionsExist(collectionKeys);
-    if (!dependenciesMet && this.state.requestedCollections.length == 0){
-      this.setState({requestedCollections: collectionKeys}, function(){
-        APIActions.APIFetchCollections(collectionKeys);
+    toFetch = collectionKeys.filter(function(key, index){
+      if (!APIStore.collectionsExist([key]) && this.state.requestedCollections.indexOf(key) == -1)
+        return true;
+      return false;
+    }, this);
+
+    if (toFetch.length > 0){
+      this.setState({requestedCollections: this.state.requestedCollections.concat(toFetch)}, function(){
+        APIActions.APIFetchCollections(toFetch);
       });
+      return true;
     }
-    return dependenciesMet;
+    return false;
   },
 
 
@@ -175,7 +189,7 @@ var App = React.createClass({
   },
 
   // Render the base structure for the app (top menu, sidebar, and main content area)
-  render_base: function(mainComponent) {
+  render_base: function(mainComponent, breadCrumbs) {
     return (
       <div id="wrapper" className="wrapper">
         <header className="main-header">
@@ -187,13 +201,15 @@ var App = React.createClass({
                   <span>{ this.props.appTitle }</span>
                 </a>
                 <div className="navbar-right">
-                  <TopLinks items={MenuStore.getAllItems('roleMenu').items} setActive={function(key){}} active={null} showLabels={true} />
+                  <TopLinks items={MenuStore.getAllItems('roleMenu').items} setActive={this.setActiveRoleMenu} active={this.state.activeRoleMenu} showLabels={true} />
                   <TopLinks items={MenuStore.getAllItems('topMenu').items} setActive={this.setActiveTopMenu} active={this.state.activeTopMenu} showLabels={true} />
                 </div>
               </div>  
             </nav>
           </div>
         </header>
+
+        { breadCrumbs ? <BreadCrumbs items={breadCrumbs} /> : null }
 
         <section className="main-section content-container">
           <div className="wrap page-wrapper">
@@ -208,106 +224,72 @@ var App = React.createClass({
   },
 
 
-  home: function() {
-    var mainComponent = "HOME"
-    return this.render_base(mainComponent);
-  },
-
   earnerMain: function() {
-    var viewId = 'earnerHome';
-    var dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
-    var clickeEmptyBadgeUpdate = {}
-    var mainComponent = (
-      <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet}>
-        <ActionBar 
-          title="My Badges"
-          titleLink="/earner/badges"
-          viewId={viewId}
-          items={this.props.actionBars['earnerBadges']}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
-        <ActivePanel
-          viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-        />
-        <EarnerBadgeList
-          viewId={viewId}
-          badges={APIStore.getCollection('earner_badges')}
-          perPage={12}
-          moreLink="/earner/badges"
-          clickEmptyBadge={function(){this.updateActivePanel(viewId, clickeEmptyBadgeUpdate)}.bind(this)}
-          showEmptyBadge={true}
-        />
-
-        <ActionBar 
-          title="My Collections"
-          titleLink="/earner/collections"
-          viewId={'earnerMainCollections'}
-          items={this.props.actionBars['earnerCollections']}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          activePanel={this.state.activePanels['earnerMainCollections']}
-        />
-        <ActivePanel
-          viewId={'earnerMainCollections'}
-          {...this.state.activePanels['earnerMainCollections']}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-        />
-        <EarnerCollectionList
-          collections={APIStore.getCollection('earner_collections')}
-          perPage={12}
-        />
-      </MainComponent>
-    );
-
-    // render the view
-    return this.render_base(mainComponent);
+    ClickActions.navigateLocalPath('/earner/badges');
+    return this.render_base("Loading My Badges...");
   },
 
-  earnerBadges: function(){
-    var viewId = "earnerBadges";
+  earnerBadges: function(params){
+    var viewId = "earnerBadges",
+        currentPage=parseInt(_.get(params, 'page')) || 1,
+        nextPage = currentPage + 1;
     dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
-
-    var breadCrumbs = [
-      { name: "Earner Home", url: '/earner'},
-      { name: "My Badges", url: '/earner/badges' }
-    ];
 
     var mainComponent = (
       <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet} >
-        <BreadCrumbs items={breadCrumbs} />
-        <ActionBar 
-          title="My Badges"
-          titleLink="/earner/badges"
-          viewId={viewId}
-          items={this.props.actionBars['earnerBadges']}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
+          <ActionBar
+            title="My Badges"
+            viewId={viewId}
+            items={this.props.actionBars[viewId] || []}
+            updateActivePanel={this.updateActivePanel}
+            activePanel={this.state.activePanels[viewId]}
+          />
         <ActivePanel
+          modal={true}
           viewId={viewId}
           {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
         />
         <EarnerBadgeList
           viewId={viewId}
           badges={APIStore.getCollection('earner_badges')}
-          perPage={50}
-          moreLink="/earner/badges"
+          perPage={20}
+          currentPage={currentPage}
+          moreLink={"/earner/badges?page=" + nextPage}
         />
       </MainComponent>
     );
 
     return this.render_base(mainComponent);
+  },
+
+  earnerImportBadge: function(params){
+    var viewId = 'earnerImportBadge';
+    var dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
+    var breadCrumbs = [
+      { name: "Earner Home", url: '/earner'},
+      { name: "My Badges", url: '/earner/badges' },
+      { name: "Import New Badge", url: '/earner/badges/new' }
+    ];
+    var navigateToBadgeList = function(){
+      ClickActions.navigateLocalPath('/earner/badges');
+    };
+
+    var importUrl = params['url'];
+    var mainComponent = (
+      <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet} >
+        <ActivePanel 
+          viewId={viewId}
+          type="EarnerBadgeImportForm"
+          url={importUrl || ''}
+          submitImmediately={importUrl ? true : false}
+          clearActivePanel={navigateToBadgeList}
+        />
+
+      </MainComponent>
+    );
+    return this.render_base(mainComponent, breadCrumbs);
   },
 
   earnerBadgeDetail: function(badgeId) {
@@ -320,26 +302,17 @@ var App = React.createClass({
       return this.render_base("Badge not found!");
 
     var breadCrumbs = [
-      { name: "Earner Home", url: '/earner'},
       { name: "My Badges", url: '/earner/badges' },
       { name: badge.json.badge.name['@value'], url: '/earner/badges/' + badgeId }
     ];
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <BreadCrumbs items={breadCrumbs} />
         <ActionBar 
           title={badge.json.badge.name['@value']}
           viewId={viewId}
           items={this.props.actionBars[viewId] || []}
           updateActivePanel={this.updateActivePanel}
           activePanel={this.state.activePanels[viewId]}
-        />
-        <ActivePanel
-          viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
         />
         <OpenBadge
           id={badge.id}
@@ -352,7 +325,7 @@ var App = React.createClass({
     );
 
     // render the view
-    return this.render_base(mainComponent);
+    return this.render_base(mainComponent, breadCrumbs);
   },
 
   earnerCollections: function() {
@@ -364,8 +337,7 @@ var App = React.createClass({
 
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <BreadCrumbs items={breadCrumbs} />
-        <ActionBar 
+        <ActionBar
           title="My Collections"
           viewId={viewId}
           items={this.props.actionBars[viewId] || []}
@@ -373,9 +345,9 @@ var App = React.createClass({
           activePanel={this.state.activePanels[viewId]}
         />
         <ActivePanel
+          modal={true}
           viewId={viewId}
           {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
         />
@@ -387,7 +359,7 @@ var App = React.createClass({
     );
 
     // render the view
-    return this.render_base(mainComponent);
+    return this.render_base(mainComponent, breadCrumbs);
   },
 
   earnerCollectionDetail: function(collectionSlug) {
@@ -411,7 +383,6 @@ var App = React.createClass({
 
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <BreadCrumbs items={breadCrumbs} />
         <ActionBar 
           title={collection.name}
           viewId={viewId}
@@ -422,10 +393,10 @@ var App = React.createClass({
         <ActivePanel
           viewId={viewId}
           {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
           collection={collection}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
+          formKey={collectionSlug}
         />
         <EarnerCollectionDetail
           name={collection.name}
@@ -440,7 +411,7 @@ var App = React.createClass({
     );
 
     // render the view
-    return this.render_base(mainComponent);
+    return this.render_base(mainComponent, breadCrumbs);
   },
 
   issuerMain: function() {
@@ -458,9 +429,9 @@ var App = React.createClass({
           activePanel={this.state.activePanels[viewId]}
         />
         <ActivePanel
+          modal={true}
           viewId={viewId}
           {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
         />
@@ -489,7 +460,6 @@ var App = React.createClass({
     ];
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <BreadCrumbs items={breadCrumbs} />
         <IssuerDisplay {...issuer} />
         <ActionBar 
           title="Active Badges"
@@ -501,11 +471,12 @@ var App = React.createClass({
         />
         <ActivePanel
           viewId={viewId}
+          modal={true}
           {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
           issuerSlug={issuerSlug}
+          formKey={issuerSlug}
         />
         <BadgeClassList
           issuerSlug={issuerSlug}
@@ -517,7 +488,7 @@ var App = React.createClass({
       </MainComponent>
     )
 
-    return this.render_base(mainComponent);
+    return this.render_base(mainComponent, breadCrumbs);
   },
 
   badgeClassDetail: function(issuerSlug, badgeClassSlug){
@@ -549,7 +520,6 @@ var App = React.createClass({
 
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <BreadCrumbs items={breadCrumbs} />
         <HeadingBar 
           title={issuer.name + ": " + badgeClass.name}
         />
@@ -565,11 +535,11 @@ var App = React.createClass({
         <ActivePanel
           viewId={viewId}
           {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
           issuerSlug={issuerSlug}
           badgeClassSlug={badgeClassSlug}
+          formKey={issuerSlug + '/' + badgeClassSlug}
         />
         <BadgeInstanceList
           issuerSlug={issuerSlug}
@@ -580,7 +550,7 @@ var App = React.createClass({
       </MainComponent>
     )
 
-    return this.render_base(mainComponent);
+    return this.render_base(mainComponent, breadCrumbs);
   },
 
   issuerCertificateForm: function() {
@@ -614,7 +584,6 @@ var App = React.createClass({
         <ActivePanel
           viewId={viewId}
           {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
         />

@@ -64,10 +64,11 @@ class EarnerBadgeList(APIView):
                                            context={'request': request})
 
         serializer.is_valid(raise_exception=True)
-        serializer.save()
 
-        # if serializer.instance.version is None:
-        #     return Response()
+        try:
+            serializer.save()
+        except DjangoValidationError as e:
+            raise ValidationError(e.message)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -355,7 +356,7 @@ class EarnerCollectionBadgesList(APIView):
             ).exclude(instance__id__in=badge_ids).delete()
 
         serializer = EarnerBadgeReferenceSerializer(
-            collection.storedbadgeinstancecollection_set.all(), many=True
+            collection.localbadgeinstancecollection_set.all(), many=True
         )
         return Response(serializer.data)
 

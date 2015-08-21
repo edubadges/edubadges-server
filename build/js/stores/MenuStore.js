@@ -17,6 +17,7 @@ MenuStore.defaultItems = {
       // { title: "alerts", url: "#", icon: "fa-bell", children: [] },
       { title: "user", url: "#", icon: "fa-user", children: [
         { title: "User Profile", url: "/accounts/", icon: "fa-user", children: [] },
+        { title: "LTI Info", url: "/accounts/lti", icon: "fa-gear", children: [] },
 
         // { title: "Settings", url: "/#user/settings", icon: "fa-gear", children: [] },
         { title: "Log Out", url: "/logout", icon: "fa-sign-out", children: [] }
@@ -25,6 +26,12 @@ MenuStore.defaultItems = {
   },
   roleMenu: {
     items: []
+  },
+  badgrbookMenu: {
+    items: [
+      { title: "Objectives", url: "/badgrbook/objectives", icon: "fa-certificate", children: [] },
+      { title: "Progress", url: "/badgrbook/progress", icon: "fa-tasks", children: [] }
+    ]
   },
   secondaryMenus: {
       earnerHome: [
@@ -45,7 +52,6 @@ MenuStore.defaultItems = {
         { 
           title: "Import Badge",
           buttonType: "primary",
-          icon: "fa-certificate", 
           activePanelCommand: { type: "EarnerBadgeImportForm", content: { badgeId: null } } 
         }
       ],
@@ -53,7 +59,7 @@ MenuStore.defaultItems = {
         { 
           title: "Add Collection",
           buttonType: "primary",
-          icon: "fa-folder-open", 
+          icon: "fa-folder-open",
           activePanelCommand: { type: "EarnerCollectionCreateForm", content: {} } 
         }
       ],
@@ -90,13 +96,23 @@ MenuStore.defaultItems = {
           icon: "fa-upload", 
           activePanelCommand: { type: "ConsumerBadgeForm", content: { badgeId: null } } 
         }
-      ]
+      ],
+      badgrbookProgress: [],
+      badgrbookObjectives: [
+        {
+          title: "Create New Badge",
+          buttonType: "primary",
+          icon: "fa-pencil-square-o",
+          activePanelCommand: { type: "BadgeClassCreateUpdateForm", content: {}}
+        }
+      ],
   }
 };
 
 MenuStore.menus = {
   topMenu: MenuStore.defaultItems.topMenu,
   roleMenu: MenuStore.defaultItems.roleMenu,
+  badgrbookMenu: MenuStore.defaultItems.badgrbookMenu,
   secondaryMenus: MenuStore.defaultItems.secondaryMenus,
   actionBars: MenuStore.defaultItems.actionBars
 }
@@ -120,13 +136,14 @@ MenuStore.storeInitialData = function() {
     return;
 
   // try to load the variable declared as initialData in the view template
+  if (initialData.installed_apps.indexOf('composer') > -1)
+    MenuStore.menus.roleMenu.items.push(
+      { title: "My Badges", url: "/earner/badges", icon: "fa-certificate", children: [] },
+      { title: "My Collections", url: "/earner/collections", icon: "folder", children: [] }
+    );
   if (initialData.installed_apps.indexOf('issuer') > -1)
     MenuStore.menus.roleMenu.items.push(
       { title: "Issue", url: "/issuer", icon: "fa-mail-forward", children: []}
-    );
-  if (initialData.installed_apps.indexOf('composer') > -1)
-    MenuStore.menus.roleMenu.items.push(
-      { title: "Earn", url: "/earner", icon: "fa-certificate", children: [] }
     );
   if (initialData.installed_apps.indexOf('consumer') > -1)
     MenuStore.menus.roleMenu.items.push(  
@@ -139,6 +156,11 @@ MenuStore.storeInitialData = function() {
         item['title'] = initialData.user.username
       break;
     }
+
+  if (initialData.lti_learner) {
+    MenuStore.menus.badgrbookMenu.items = [];
+  }
+
 
   }
 
@@ -161,12 +183,16 @@ MenuStore.dispatchToken = appDispatcher.register(function(payload){
 
   switch(action.type){
     case 'APP_WILL_MOUNT':
-      MenuStore.storeInitialData()
+      MenuStore.storeInitialData();
       MenuStore.emit('INITIAL_DATA_LOADED');
       break;
 
     case 'CLICK_CLOSE_MENU':
       MenuStore.emit('UNCAUGHT_DOCUMENT_CLICK');
+      break;
+
+    case 'CLOSE_MODAL':
+      MenuStore.emit('CLOSE_MODAL');
       break;
 
     default:
@@ -177,5 +203,10 @@ MenuStore.dispatchToken = appDispatcher.register(function(payload){
 module.exports = {
   getAllItems: MenuStore.getAllItems,
   addListener: MenuStore.addListener,
-  removeListener: MenuStore.removeListener
-}
+  removeListener: MenuStore.removeListener,
+  listeners: MenuStore.listeners,
+  once: MenuStore.once,
+  on: MenuStore.addListener,
+  dispatchToken: MenuStore.dispatchToken,
+  emit: MenuStore.emit
+};

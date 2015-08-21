@@ -11,23 +11,12 @@ var livereload = require('gulp-livereload');
 var gutil = require('gulp-util')
 var clr = gutil.colors
 
-var jshint = require('gulp-jshint');
-var stylish = require('gulp-jshint');
-
+//var eslint = require('gulp-eslint');
+//var eslintJsx = require('eslint-plugin-react');
 var uglify = require('gulp-uglify');
 var size = require('gulp-size');
 //var dateformat = require('dateformat');
-// var rename = require('gulp-rename');
-// var notify = require('gulp-notify');
 
-// var yargs = require('yargs');
-// var IS_PRODUCTION = yargs.argv.env == 'production' ? true : false;
-
-
-//utility functions:
-var logUpdate = function(taskString, duration){
-  gutil.log('Updated \'' + clr.cyan(taskString) + '\' after ' + clr.magenta( duration + 'ms'));
-}
 
 
 // Define some paths.
@@ -36,16 +25,47 @@ var sourceWatchPaths = {
   js: ['./build/js/**/*.jsx', './build/js/**/*.js']
 };
 
-var sourceBuildPaths = {
-  css: ['./build/sass/style.scss'],
-  js: ['./build/js/app.jsx']
-}
+var jsFiles = [
+  {
+    input      : ['./build/js/app.jsx'],
+    output     : 'app.js',
+    destination: './breakdown/static/js/'
+  },
+  {
+    input      : ['./build/js/lti-app.jsx'],
+    output     : 'lti-app.js',
+    destination: './breakdown/static/js/'
+  }
+];
 
 var destPaths = {
   css: './breakdown/static/css',
   js: './breakdown/static/js/'
+};
+
+
+/** HELPER FUNCTIONS
+ *
+ *  Reusable task component functions.
+ */
+var logUpdate = function(taskString, duration){
+  gutil.log('Updated \'' + clr.cyan(taskString) + '\' after ' + clr.magenta( duration + 'ms'));
+}
+var logTheUgly = function(err){
+  gutil.log(err);
 }
 
+
+var bundle = function(bundler, fileOptions, config){
+  return bundler.bundle()
+    .on('error', function(err){console.log(err);})
+    .pipe(source(fileOptions.output))
+    .pipe(buffer())
+    //.pipe(config.production ? uglify().on('error', logTheUgly) : gutil.noop())
+    .pipe(size({showFiles: true, gzip: true}))
+    .pipe(gulp.dest(fileOptions.destination))
+    .pipe(config.watching ? livereload() : gutil.noop());
+};
 
 
 /** PRODUCTION
@@ -54,25 +74,23 @@ var destPaths = {
  *
 **/
 gulp.task('build', function(){
-  var bundler = browserify({
-    entries: ['./build/js/app.jsx'], // Only need initial file, browserify finds the deps
-    transform: [reactify], // We want to convert JSX to normal javascript
-    debug: true, // Gives us sourcemapping
-    cache: {}, packageCache: {}, fullPaths: true // Requirement of watchify
-  });
-
-  var jsbundle = bundler.bundle()
-    .pipe(source('script.js'))
-    .pipe(buffer())
-    .pipe(uglify())
-    .pipe(size({showFiles:true, gzip:true}))
-    .pipe(gulp.dest('./breakdown/static/js/'));
-
   var cssbundle = gulp.src('./build/sass/**/*.scss')
     .pipe(sass())
     .pipe(concat('style.css'))
     .pipe(size({showFiles:true, gzip:true}))
-    .pipe(gulp.dest('./breakdown/static/css/'))
+    .pipe(gulp.dest('./breakdown/static/css/'));
+
+  var jsbundles = jsFiles.map(function(entry){
+    var bundler = browserify({
+      entries: [entry.input], // Only need initial file, browserify finds the deps
+      transform: [reactify], // We want to convert JSX to normal javascript
+      debug: true, // Gives us sourcemapping
+      cache: {}, packageCache: {}, fullPaths: true // Requirement of watchify
+    });
+
+    return bundle(bundler, entry, {production: true, watching: false});
+
+  });
 });
 
 
@@ -83,29 +101,25 @@ gulp.task('build', function(){
  *
 **/
 gulp.task('watchScripts', function() {
-  var bundler = browserify({
-    entries: ['./build/js/app.jsx'], // Only need initial file, browserify finds the deps
-    transform: [reactify], // We want to convert JSX to normal javascript
-    debug: true, // Gives us sourcemapping
-    cache: {}, packageCache: {}, fullPaths: true // Requirement of watchify
-  });
-  
-  var watcher  = watchify(bundler);
+  var jsbundles = jsFiles.map(function(entry){
+    var bundler = browserify({
+      entries: [entry.input], // Only need initial file, browserify finds the deps
+      transform: [reactify], // We want to convert JSX to normal javascript
+      debug: true, // Gives us sourcemapping
+      cache: {}, packageCache: {}, fullPaths: true // Requirement of watchify
+    });
 
-  return watcher
-  .on('update', function () { // When any files update
-    var updateStart = Date.now();
-    watcher.bundle() // Create new bundle that uses the cache for high performance
-    .pipe(source('script.js'))
-    .pipe(jshint())
-    .pipe(jshint.reporter(stylish))
-    .pipe(gulp.dest('./breakdown/static/js/'))
-    .pipe(livereload());
-    logUpdate('watchScripts', Date.now() - updateStart);
-  })
-  .bundle() // Create the initial bundle when starting the task
-  .pipe(source('script.js'))
-  .pipe(gulp.dest('./breakdown/static/js/'));
+    bundle(bundler, entry, {production: false, watching: true});
+
+    var watcher  = watchify(bundler);
+    return watcher.on('update', function(){
+      var updateStart = Date.now();
+      bundle(bundler, entry, {production: false, watching: true});
+      logUpdate('watchScripts', Date.now() - updateStart);
+    });
+
+
+  });
 });
 
 // I added this so that you see how to run two watch tasks
@@ -115,8 +129,9 @@ gulp.task('css', function () {
     var result = gulp.src('./build/sass/**/*.scss')
     .pipe(sass())
     .pipe(concat('style.css'))
-    .pipe(gulp.dest('./breakdown/static/css/')).
-    pipe(livereload());
+    .pipe(gulp.dest('./breakdown/static/css/'))
+    .pipe(size({showFiles:true, gzip:true}))
+    .pipe(livereload());
     logUpdate('css', Date.now() - updateStart);
     return result;
   });

@@ -9,6 +9,7 @@ from rest_framework import serializers
 from mainsite.serializers import WritableJSONField
 from mainsite.utils import installed_apps_list
 from badgeuser.serializers import UserProfileField
+from local_components.format import V1InstanceSerializer
 
 from .models import Issuer, BadgeClass, BadgeInstance
 import utils
@@ -166,6 +167,12 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
     revocation_reason = serializers.CharField(read_only=True)
 
     create_notification = serializers.BooleanField(write_only=True, required=False)
+
+    def to_representation(self, instance):
+        if self.context.get('extended_json'):
+            self.fields['json'] = V1InstanceSerializer(source='extended_json')
+
+        return super(BadgeInstanceSerializer, self).to_representation(instance)
 
     def create(self, validated_data, **kwargs):
         # Assemble Badge Object

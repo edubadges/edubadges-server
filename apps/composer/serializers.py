@@ -1,14 +1,14 @@
 import json
+from mainsite.logs import badgr_log
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 
 from rest_framework import serializers
 
-from local_components.models import BadgeInstance as LocalBadgeInstance
+from badgecheck import RemoteBadgeInstance, AnalyzedBadgeInstance
+from badgecheck.utils import get_instance_url_from_image, get_instance_url_from_assertion
+from local_components.models import BadgeInstance
 from local_components.format import V1InstanceSerializer
-from integrity_verifier import RemoteBadgeInstance, AnalyzedBadgeInstance
-from integrity_verifier.utils import get_instance_url_from_image, get_instance_url_from_assertion
-from mainsite.utils import installed_apps_list
 
 from .models import Collection, LocalBadgeInstanceCollection
 
@@ -40,6 +40,9 @@ class EarnerBadgeSerializer(serializers.Serializer):
         return super(EarnerBadgeSerializer, self).to_representation(obj)
 
     def validate(self, data):
+        if data.get('assertion') == {}:
+            data.pop('assertion')
+
         valid_inputs = \
             dict(filter(lambda tuple: tuple[0] in ['url', 'image', 'assertion'],
                         data.items()))
@@ -52,25 +55,34 @@ class EarnerBadgeSerializer(serializers.Serializer):
 
         return data
 
+    def _extract_url(self, validated_data):
+        # Extract the URL from one of 3 sources
+        if validated_data.get('url'):
+            return validated_data.get('url')
+        elif validated_data.get('image'):
+            image = validated_data.get('image')
+            image.open()
+            try:
+                return get_instance_url_from_image(image)
+            except Exception as e:
+                raise serializers.ValidationError(
+                    "No Open Badges data could be extracted from image: "
+                    + e.message)
+        elif validated_data.get('assertion'):
+            return get_instance_url_from_assertion(
+                validated_data.get('assertion'))
+
+
     def create(self, validated_data):
         user = self.context.get('request').user
         image = None
 
-        # Extract the URL from one of 3 sources
-        if validated_data.get('url'):
-            url = validated_data.get('url')
-        elif validated_data.get('image'):
-            image = validated_data.get('image')
-            image.open()
-            url = get_instance_url_from_image(image)
-        elif validated_data.get('assertion'):
-            url = get_instance_url_from_assertion(
-                validated_data.get('assertion'))
+        url = self._extract_url(validated_data)
 
         try:
             rbi = RemoteBadgeInstance(url)
         except DjangoValidationError as e:
-            raise e
+            raise serializers.ValidationError(e.message)
 
         abi = AnalyzedBadgeInstance(
             rbi, recipient_ids=[id.email for id in user.emailaddress_set.all()])
@@ -80,13 +92,17 @@ class EarnerBadgeSerializer(serializers.Serializer):
             raise serializers.ValidationError(RECIPIENT_ERROR)
 
         if not abi.is_valid():
+            badgr_log.debug(
+                "Invalid earned badge uploaded by %s with instance_url %s and errors %s" %
+                (user.username, abi.instance_url, abi.all_errors())
+            )
             raise serializers.ValidationError(abi.all_errors())
         else:
             instance_kwargs = {'recipient_user': user}
             if image is not None:
                 instance_kwargs['image'] = image
 
-            new_instance = LocalBadgeInstance.from_analyzed_instance(
+            new_instance = BadgeInstance.from_analyzed_instance(
                 abi, **instance_kwargs
             )
 
@@ -104,7 +120,7 @@ class EarnerBadgeReferenceListSerializer(serializers.ListSerializer):
 
         id_set = [x.get('instance', {}).get('id') for x in validated_data]
 
-        badge_set = LocalBadgeInstance.objects.filter(
+        badge_set = BadgeInstance.objects.filter(
             recipient_user=user, id__in=id_set
         ).exclude(collection=collection)
 
@@ -139,7 +155,7 @@ class EarnerBadgeReferenceSerializer(serializers.Serializer):
         collection = self.context.get('collection')
         user = self.context.get('request').user
 
-        badge_query = LocalBadgeInstance.objects.filter(
+        badge_query = BadgeInstance.objects.filter(
             recipient_user=user,
             id=validated_data.get('instance',{}).get('id'),
         ).exclude(collection=collection)
@@ -166,7 +182,7 @@ class CollectionSerializer(serializers.Serializer):
     share_url = serializers.CharField(read_only=True, max_length=1024)
     badges = serializers.ListField(
         required=False, child=EarnerBadgeReferenceSerializer(),
-        source='storedbadgeinstancecollection_set.all'
+        source='localbadgeinstancecollection_set.all'
     )
 
     def create(self, validated_data):
@@ -184,38 +200,3 @@ class CollectionSerializer(serializers.Serializer):
 
         new_collection.save()
         return new_collection
-
-
-class EarnerPortalSerializer(serializers.Serializer):
-    """
-    A serializer used to pass initial data to a view template so that the React.js
-    front end can render.
-    It should detect which of the core Badgr applications are installed and return
-    appropriate contextual information.
-    """
-
-    def to_representation(self, user):
-        view_data = {}
-
-        earner_collections = Collection.objects.filter(owner=user)
-
-        earner_collections_serializer = CollectionSerializer(
-            earner_collections,
-            many=True,
-            context=self.context
-        )
-
-        earner_badges = LocalBadgeInstance.objects.filter(
-            recipient_user=user
-        )
-        earner_badges_serializer = EarnerBadgeSerializer(
-            earner_badges,
-            many=True,
-            context=self.context
-        )
-
-        view_data['earner_collections'] = earner_collections_serializer.data
-        view_data['earner_badges'] = earner_badges_serializer.data
-        view_data['installed_apps'] = installed_apps_list()
-
-        return view_data

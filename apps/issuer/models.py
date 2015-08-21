@@ -1,18 +1,21 @@
 import datetime
 import json
+import re
+import uuid
 
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.mail import send_mail
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.loader import get_template
 
-from bakery import bake
+from openbadges_bakery import bake
 
 from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
                              AbstractBadgeInstance)
 
-from .utils import generate_sha256_hashstring
+from .utils import generate_sha256_hashstring, badgr_import_url
 
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
@@ -21,6 +24,7 @@ AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 class Issuer(AbstractIssuer):
     owner = models.ForeignKey(AUTH_USER_MODEL, related_name='issuers',
                               on_delete=models.PROTECT, null=False)
+    staff = models.ManyToManyField(AUTH_USER_MODEL, through='IssuerStaff')
 
 
 class IssuerStaff(models.Model):
@@ -47,6 +51,19 @@ class BadgeInstance(AbstractBadgeInstance):
     revoked = models.BooleanField(default=False)
     revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
 
+    @property
+    def extended_json(self):
+        extended_json = self.json
+        extended_json['badge'] = self.badgeclass.json
+        extended_json['badge']['issuer'] = self.issuer.json
+
+        return extended_json
+
+    def get_absolute_url(self):
+        return reverse('badgeinstance_json', kwargs={'slug': self.slug})
+
+    def get_new_slug(self):
+        return str(uuid.uuid4())
 
     def save(self, *args, **kwargs):
         if self.pk is None:
@@ -80,9 +97,11 @@ class BadgeInstance(AbstractBadgeInstance):
             email_context = {
                 'badge_name': self.badgeclass.name,
                 'badge_description': self.badgeclass.prop('description'),
-                'issuer_name': self.issuer.name,
+                'issuer_name': re.sub(r'[^\w\s]+', '', self.issuer.name, 0, re.I),
                 'issuer_url': self.issuer.prop('url'),
-                'image_url': self.get_full_url() + '/image'
+                'issuer_image_url': self.issuer.get_full_url() + '/image',
+                'image_url': self.get_full_url() + '/image',
+                'badgr_import_url': badgr_import_url(self)
             }
         except KeyError as e:
             # A property isn't stored right in json
@@ -94,7 +113,7 @@ class BadgeInstance(AbstractBadgeInstance):
         html_output_message = html_template.render(email_context)
         mail_meta = {
             'subject': 'Congratulations, you earned a badge!',
-            'from_address': email_context['issuer_name'] + '<' + getattr(settings, 'DEFAULT_FROM_EMAIL') + '>',
+            'from_address': '"' + email_context['issuer_name'] + '" <' + getattr(settings, 'DEFAULT_FROM_EMAIL') + '>',
             'to_addresses': [self.email]
         }
 

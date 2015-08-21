@@ -1,48 +1,56 @@
 import json
 
-from django.core.urlresolvers import reverse
 from django.http import HttpResponse
-from django.shortcuts import redirect
+from django.utils.decorators import method_decorator
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import DetailView, TemplateView
 
 from badgeuser.serializers import UserProfileField
+from local_components.models import BadgeInstance
+from mainsite.utils import installed_apps_list
 
 from .models import Collection
-from .serializers import EarnerPortalSerializer
+from .serializers import CollectionSerializer, EarnerBadgeSerializer
 
 
 class EarnerPortal(TemplateView):
     template_name = 'base.html'
 
-    def get(self, request):
-        if not request.user.is_authenticated():
-            return redirect(reverse('login'))
-
-        context = self.get_context_data(**{'request': request})
-        return self.render_to_response(context)
-
     def get_context_data(self, **kwargs):
-        context_data = super(EarnerPortal, self).get_context_data(**kwargs)
-        earner_serializer = EarnerPortalSerializer(kwargs['request'].user, context=kwargs)
+        """
+        Pass initial data to a view template so that the React.js front end can
+        render.
+        """
+        context = super(EarnerPortal, self).get_context_data(**kwargs)
 
-        context = {}
-        context['earner_collections'] = earner_serializer.data['earner_collections']
-        context['earner_badges'] = earner_serializer.data['earner_badges']
-        context['user'] = UserProfileField(kwargs['request'].user, context=kwargs).data
-        context['installed_apps'] = earner_serializer.data['installed_apps']
+        user_collections = CollectionSerializer(
+            Collection.objects.filter(owner=self.request.user),
+            many=True).data
 
-        context_data['initial_data'] = json.dumps(context)
-        return context_data
+        user_badges = EarnerBadgeSerializer(
+            BadgeInstance.objects.filter(recipient_user=self.request.user),
+            many=True).data
+
+        context.update({
+            'initial_data': json.dumps({
+                'earner_collections': user_collections,
+                'earner_badges': user_badges,
+                'installed_apps': installed_apps_list(),
+                'user': UserProfileField(self.request.user, context=kwargs).data,
+            }),
+        })
+
+        return context
 
 
 class CollectionDetailView(DetailView):
     model = Collection
     context_object_name = 'collection'
 
+    @method_decorator(xframe_options_exempt)
     def get(self, request, *args, **kwargs):
         response = super(CollectionDetailView, self).get(request, *args, **kwargs)
-        print self.object.share_hash
-        print kwargs.get('share_hash')
+
         if self.object.share_hash == '' or \
                 self.object.share_hash != kwargs.get('share_hash'):
             return HttpResponse(
@@ -57,3 +65,11 @@ class CollectionDetailView(DetailView):
         context.update({
         })
         return context
+
+
+class CollectionDetailEmbedView(CollectionDetailView):
+    template_name = 'composer/collection_detail_embed.html'
+
+    @method_decorator(xframe_options_exempt)
+    def get(self, request, *args, **kwargs):
+        return super(CollectionDetailEmbedView, self).get(request, *args, **kwargs)

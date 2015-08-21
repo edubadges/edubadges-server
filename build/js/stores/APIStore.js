@@ -1,4 +1,4 @@
-var _ = require("underscore");
+var _ = require("lodash");
 
 var Dispatcher = require('../dispatcher/appDispatcher');
 var EventEmitter = require('events').EventEmitter;
@@ -102,7 +102,7 @@ APIStore.replaceCollectionItem = function(collectionKey, item){
   }
 
   foundIndex = _.findIndex(APIStore.data[collectionKey], function(el){ return el[key] == item[key]; });
-  if (foundIndex != undefined)
+  if (foundIndex > -1)
     APIStore.data[collectionKey][foundIndex] = item;
   else
     APIStore.data[collectionKey].push(item);
@@ -111,8 +111,13 @@ APIStore.replaceCollectionItem = function(collectionKey, item){
 
 APIStore.partialUpdateCollectionItem = function(collectionKey, searchKey, searchValue, updateKey, updateValue){
   var foundIndex = _.findIndex(APIStore.data[collectionKey], function(el){ return el[searchKey] == searchValue; });
-  if (foundIndex != undefined){
-    APIStore.data[collectionKey][foundIndex][updateKey] = updateValue;
+  if (foundIndex > -1){
+    // Optional updateKey parameter lets you update a single property. Without it, replace the whole object.
+    if (updateKey)
+      APIStore.data[collectionKey][foundIndex][updateKey] = updateValue;
+    else
+      APIStore.data[collectionKey][foundIndex] = updateValue;
+
     return APIStore.data[collectionKey][foundIndex]
   }
 };
@@ -151,7 +156,7 @@ APIStore.storeInitialData = function() {
 };
 
 
-APIStore.fetchCollections = function(collectionKeys){
+APIStore.fetchCollections = function(collectionKeys, requestContext){
   var actionUrl, key;
   contexts = {
     earner_badges: {
@@ -178,18 +183,62 @@ APIStore.fetchCollections = function(collectionKeys){
       apiCollectionKey: 'issuer_badgeclasses',
       replaceCollection: true
     },
+    badgrbook_courseobjectives: {
+      actionUrl: '/v1/badgrbook/courseobjectives/:tool_guid/:course_id',
+      successfulHttpStatus: [200],
+      apiCollectionKey: 'badgrbook_courseobjectives',
+      replaceCollection: true
+    },
+    badgrbook_badgeobjectives: {
+      actionUrl: '/v1/badgrbook/badgeobjectives/:tool_guid/:course_id',
+      successfulHttpStatus: [200],
+      apiCollectionKey: 'badgrbook_badgeobjectives',
+      replaceCollection: true
+    },
+    badgrbook_courseprogress: {
+      actionUrl: '/v1/badgrbook/studentobjectives/:tool_guid/:course_id',
+      successfulHttpStatus: [200],
+      apiCollectionKey: 'badgrbook_courseprogress',
+      replaceCollection: true
+    },
+    badgrbook_badgeinstances: {
+      actionUrl: '/v1/badgrbook/studentbadges/',
+      successfulHttpStatus: [200],
+      apiCollectionKey: 'badgrbook_badgeinstances',
+      replaceCollection: true
+    },
+    badgrbook_checkcourseprogress: {
+        actionUrl: '/v1/badgrbook/checkprogress/:tool_guid/:course_id',
+        successfulHttpStatus: [200, 204],
+        apiCollectionKey: 'badgrbook_checkcourseprogress',
+        replaceCollection: true,
+        formId: 'badgrbook_checkcourseprogress',
+    },
+    badgrbook_checkstudentprogress: {
+      actionUrl: '/v1/badgrbook/checkprogress/:tool_guid/:course_id/:student_id',
+      successfulHttpStatus: [200, 204],
+      apiCollectionKey: 'badgrbook_checkstudentprogress',
+      replaceCollection: true,
+      formId: 'badgrbook_checkstudentprogress',
+    },
   };
   for (var index in collectionKeys){
     key = collectionKeys[index];
     if (!contexts.hasOwnProperty(key))
       continue;
-    actionUrl = contexts[key].actionUrl;
+    actionUrl = APIStore._buildUrlWithContext(contexts[key].actionUrl, requestContext)
     if (APIStore.activeGetRequests.hasOwnProperty(key))
       continue;
     APIStore.activeGetRequests[actionUrl] = true;
-    APIStore.getData(contexts[key]);
+    APIStore.getData(contexts[key], requestContext);
   }
 };
+
+APIStore._buildUrlWithContext = function(url, context) {
+  return url.replace(/:(\w+)/g, function(replace) {
+    return context[replace.substring(1)];
+  });
+}
 
 /* getData(): a common function for GETting needed data from the API so
  * that views may be rendered.
@@ -199,11 +248,16 @@ APIStore.fetchCollections = function(collectionKeys){
  *       - actionUrl: the path starting with / to request from
  *       - successfulHttpStatus: [200] an array of success status codes
  *       - apiCollectionKey: where to put the retrieved data
+ *
+ *   requestContext: a dictionary providing context values for this particular request
 */
-APIStore.getData = function(context){
-  APIStore.getRequests.push(context.actionUrl);
+APIStore.getData = function(context, requestContext){
 
-  var req = request.get(context.actionUrl)
+  url = APIStore._buildUrlWithContext(context.actionUrl, requestContext)
+
+  APIStore.getRequests.push(url);
+
+  var req = request.get(url)
     .set('X-CSRFToken', getCookie('csrftoken'))
     .accept('application/json');
 
@@ -232,10 +286,13 @@ APIStore.getData = function(context){
           APIStore.addCollectionItem(context.apiCollectionKey, el);
         });
       }
-      else {
+      else if (response.body !== null){
         APIStore.addCollectionItem(context.apiCollectionKey,response.body);
       }
       APIStore.emit('DATA_UPDATED');
+      if (context.hasOwnProperty('formId')) {
+        APIStore.emit('DATA_UPDATED_'+context.formId);
+      }
     }
   });
 
@@ -252,14 +309,15 @@ APIStore.getData = function(context){
  * This function will interrogate the data and attach appropriate fields
  * to the post request.
 */
-APIStore.postForm = function(fields, values, context){
+APIStore.postForm = function(fields, values, context, requestContext){
+  url = APIStore._buildUrlWithContext(context.actionUrl, requestContext)
 
   if (context.method == 'POST')
-    var req = request.post(context.actionUrl);
+    var req = request.post(url);
   else if (context.method == 'DELETE')
-    var req = request.delete(context.actionUrl);
+    var req = request.delete(url);
   else if (context.method == 'PUT')
-    var req = request.put(context.actionUrl);
+    var req = request.put(url);
 
   req.set('X-CSRFToken', getCookie('csrftoken'))
   .accept('application/json');
@@ -280,7 +338,7 @@ APIStore.postForm = function(fields, values, context){
       APIStore.emit('API_STORE_FAILURE');
     }
     else if (context.successHttpStatus.indexOf(response.status) == -1){
-      console.log("API REQUEST PROBLEM:");
+      console.log("API Error: " + response.status);
       console.log(response.text);
       APIActions.APIFormResultFailure({
         formId: context.formId,
@@ -291,11 +349,13 @@ APIStore.postForm = function(fields, values, context){
       var newObject = APIStore.addCollectionItem(context.apiCollectionKey, JSON.parse(response.text), (context.method == 'PUT'));
       if (newObject){
         APIStore.emit('DATA_UPDATED');
-        APIActions.APIFormResultSuccess({
-          formId: context.formId, 
-          message: {type: 'success', content: context.successMessage},
-          result: newObject
-        });
+        if (context.formId){
+          APIActions.APIFormResultSuccess({
+            formId: context.formId,
+            message: {type: 'success', content: context.successMessage},
+            result: newObject
+          });
+        }
       }
       else {
         APIStore.emit('API_STORE_FAILURE');
@@ -311,16 +371,18 @@ APIStore.postForm = function(fields, values, context){
 /* requestData: a method of making partial updates to collection records based on
  * an API interaction.
 */
-APIStore.requestData = function(data, context){
+APIStore.requestData = function(data, context, requestContext){
+  url = APIStore._buildUrlWithContext(context.actionUrl, requestContext)
+
   var req;
   if (context.method == 'POST')
-    req = request.post(context.actionUrl);
+    req = request.post(url);
   else if (context.method == 'DELETE')
-    req = request.del(context.actionUrl);
+    req = request.del(url);
   else if (context.method == 'PUT')
-    req = request.put(context.actionUrl);
+    req = request.put(url);
   else if (context.method == 'GET')
-    req = request.get(context.actionUrl);
+    req = request.get(url);
 
   req.set('X-CSRFToken', getCookie('csrftoken'))
   .accept('application/json')
@@ -342,12 +404,20 @@ APIStore.requestData = function(data, context){
       console.log(response.text);
       APIStore.emit("API_RESULT")
     }
+    else if (context.method == 'DELETE'){
+      var foundIndex = _.findIndex(_.get(APIStore.data, context.apiCollectionKey), function(el){ return el[context.apiSearchKey] == context.apiSearchValue; });
+      if (foundIndex > -1) {
+        APIStore.data[context.apiCollectionKey].splice(foundIndex, 1);
+        APIStore.emit('DATA_UPDATED');
+      }
+    }
     else{
       var newValue = typeof response.text == 'string' && response.text ? JSON.parse(response.text) : '';
       var newObject = APIStore.partialUpdateCollectionItem(context.apiCollectionKey, context.apiSearchKey, context.apiSearchValue, context.apiUpdateKey, newValue);
       if (newObject){
         APIStore.emit('DATA_UPDATED');
-        APIStore.emit('DATA_UPDATED_' + context.formId);
+        if (context.hasOwnProperty('formId'))
+          APIStore.emit('DATA_UPDATED_' + context.formId);
       }
       else {
         APIStore.emit('API_STORE_FAILURE');
@@ -368,7 +438,7 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
 
   switch(action.type){
     case 'APP_WILL_MOUNT':
-      APIStore.storeInitialData()
+      APIStore.storeInitialData();
       APIStore.emit('INITIAL_DATA_LOADED');
       break;
 
@@ -376,24 +446,32 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
       // make sure form updates have occurred before processing submits
       Dispatcher.waitFor([FormStore.dispatchToken]);
 
-      if (FormStore.genericFormTypes.indexOf(action.formId) > -1){
+      if (FormStore.genericFormTypes.indexOf(action.formType) > -1){
         var formData = FormStore.getFormData(action.formId);
-        APIStore.postForm(formData.fieldsMeta, formData.formState, formData.apiContext);
+        APIStore.postForm(formData.fieldsMeta, formData.formState, formData.apiContext, action.requestContext || {});
       }
       else
         console.log("Unidentified form type to submit: " + action.formId);
       break;
 
+    case 'API_POST_FORM':
+      APIStore.postForm(action.fields, action.values, action.apiContext, action.requestContext || {});
+      break;
+
     case 'API_SUBMIT_DATA':
-      APIStore.requestData(action.apiData, action.apiContext);
+      APIStore.requestData(action.apiData, action.apiContext, action.requestContext || {});
       break;
 
     case 'API_GET_DATA':
-      APIStore.getData(action.apiContext);
+      APIStore.getData(action.apiContext, action.requestContext || {});
+      break;
+
+    case 'API_GET_RESULT_FAILURE':
+      APIStore.emit("API_GET_RESULT_FAILURE", action.message);
       break;
 
     case 'API_FETCH_COLLECTIONS':
-      APIStore.fetchCollections(action.collectionIds);
+      APIStore.fetchCollections(action.collectionIds, action.requestContext || {});
       break;
 
     default:

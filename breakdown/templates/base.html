@@ -46,12 +46,12 @@
     <body class="badgr {% block bodyclass %}{% endblock %}">
         {% block pre_content %}{% endblock %}
 
-        {% block content %}
+        {% block react %}
             {% if initial_data %}
             <div id="app" class="main-app-container">
             <!-- React App renders here -->
                 <div class="container">
-                    <div class="jumbotron loading-react">
+                    <div class="loading-react">
                         <h1>{{ self.head_title() }}</h1>
                         <p>Loading...</p>
                         <p class="loading-spinner"><img src="{{STATIC_URL}}images/ajax-loader.gif"></p>
@@ -60,22 +60,19 @@
             </div>
             {% endif %}
         {% endblock %}
+        {% block content %}
+
+        {% endblock %}
 
         {% block footer %}
-            <footer class="main-footer clearfix wrap page-wrapper">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-xs-6 col-sm-4">
-                          <span class="vendor-info">
-                            Powered by <a href="https://github.com/concentricsky/badgr-server">Badgr</a>
-                          </span>
-                        </div>
-                        <div class="col-xs-6 col-sm-8">
-                            <ul class="footer-links">
-                                <!-- <li>About</li> -->
-                                <li><a href="/docs">API documentation</a></li>
-                            </ul>
-                        </div>
+            <footer class="main-footer clearfix page-wrapper">
+                <div class="wrap">
+                    <div class="footer-info">
+                      <ul class="list-inline">
+                          <li>Copyright &copy; 2015 <a href="http://www.concentricsky.com">Concentric Sky, Inc.</a></li> /
+                          <li class="vendor-info">Powered by <a href="https://github.com/concentricsky/badgr-server">Badgr</a><li> /
+                          <li><a href="/docs">API documentation</a></li>
+                      </ul>
                     </div>
                 </div>
             </footer>
@@ -83,19 +80,8 @@
 
         {% block scripts %}
 
-            <script src="{{STATIC_URL}}js/libs/jquery.min.js"></script>
-
-            <!-- Bootstrap Core JavaScript -->
-            <script src="{{STATIC_URL}}css/bootstrap/js/bootstrap.min.js"></script>
-
-            <!-- Metis Menu Plugin JavaScript -->
-            <script src="{{STATIC_URL}}js/libs/metisMenu.min.js"></script>
-
-            <!-- Custom Theme JavaScript -->
-            <script src="{{STATIC_URL}}js/libs/sb-admin-2.js"></script>
-
             {% if initial_data %}
-                <script src="{{STATIC_URL}}js/script.js"></script>
+                <script src="{{STATIC_URL}}js/app.js"></script>
             {% endif %}
 
             <script type="text/javascript">

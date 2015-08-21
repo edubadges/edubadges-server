@@ -6,7 +6,7 @@ from django.core.files.base import ContentFile
 from allauth.account.models import EmailAddress
 from rest_framework.exceptions import ValidationError
 
-from bakery import bake, unbake
+from openbadges_bakery import bake, unbake
 
 
 def find_recipient_user(recipient_id):

@@ -1,8 +1,8 @@
 @import "../colors";
 
 .main-header {
-  background-color: $badgr-red;
-  border-top: 5px solid $badgr-brown;
+  background-color: $badgr-black;
+//  border-top: 5px solid $badgr-red;
 }
 .navbar-static-top {
   margin-bottom: 0;
@@ -11,7 +11,7 @@
 } 
 
 .navbar-default a.navbar-brand {
-  background: transparent url('/static/images/header-logo-120.png') no-repeat 5px center;
+//  background: transparent url('/static/images/header-logo-120.png') no-repeat 5px center;
   background-size: auto 80%;
   img { 
     max-width: 30px;
@@ -19,7 +19,7 @@
     display: inline;
   }
   span {
-    padding-left: 40px;
+//    padding-left: 40px;
   }
   color: $white;
 }
@@ -33,7 +33,7 @@
   a { color: $white; }
 }
 .navbar-static-top li > a:hover, .nav > li > a:focus, .nav .open > a, .nav .open > a:hover, .nav .open > a:focus {
-  background-color: $badgr-darkred;
+  background-color: $badgr-nav-hover;
 }
 
 
