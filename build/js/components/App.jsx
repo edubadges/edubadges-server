@@ -470,6 +470,7 @@ var App = React.createClass({
         />
         <ActivePanel
           viewId={viewId}
+          modal={true}
           {...this.state.activePanels[viewId]}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}

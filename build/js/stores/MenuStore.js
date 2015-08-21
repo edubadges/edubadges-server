@@ -199,5 +199,9 @@ MenuStore.dispatchToken = appDispatcher.register(function(payload){
 module.exports = {
   getAllItems: MenuStore.getAllItems,
   addListener: MenuStore.addListener,
-  removeListener: MenuStore.removeListener
+  removeListener: MenuStore.removeListener,
+  listeners: MenuStore.listeners,
+  once: MenuStore.once,
+  on: MenuStore.addListener,
+  dispatchToken: MenuStore.dispatchToken
 }

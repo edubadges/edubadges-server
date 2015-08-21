@@ -4,6 +4,7 @@ var BasicAPIForm = require('./Form.jsx').BasicAPIForm;
 
 var FormStore = require('../stores/FormStore');
 var FormConfigStore = require('../stores/FormConfigStore');
+var MenuStore = require('../stores/MenuStore');
 
 var PanelActions = React.createClass({
   /* Define a click handler, a label, and a class for each action.
@@ -33,11 +34,27 @@ var PanelActions = React.createClass({
 });
 
 var ActivePanel = React.createClass({
+  getDefaultProps: function(){
+    return {
+      modal: false
+    }
+  },
+  componentDidUpdate: function(prevProps){
+    if (this.props.modal && !!this.props.type && !prevProps.type) {
+      setTimeout(function () {
+        MenuStore.once("UNCAUGHT_DOCUMENT_CLICK", this.clearActivePanel);
+      }.bind(this), 50);
+    }
+  },
   updateActivePanel: function(update){
     this.props.updateActivePanel(this.props.viewId, update);
   },
   clearActivePanel: function(){
-    this.props.clearActivePanel(this.props.viewId);
+    if (this.isMounted()) {
+      setTimeout(function () {
+        this.props.clearActivePanel(this.props.viewId);
+      }.bind(this), 0);
+    }
   },
   render: function() {
     if (!('type' in this.props))
@@ -71,9 +88,9 @@ var ActivePanel = React.createClass({
 
       if (this.props.modal){
         return (
-          <div className="modal closable" style={{display: "block"}}>
+          <div className="modal" style={{display: "block"}}>
             <div className={wrapperClass + ' modal-dialog'}>
-              <div className="modal-content">
+              <div className="modal-content closable">
                 <div className="modal-body container-fluid">
                   {this.props.title ? (<h3>{this.props.title}</h3>) : null}
                   <BasicAPIForm {...formProps} />
@@ -96,9 +113,9 @@ var ActivePanel = React.createClass({
 
     else if (this.props.type == "ChildComponent"){
       return (
-          <div className="modal closable" style={{display: "block"}}>
+          <div className="modal" style={{display: "block"}}>
             <div className={wrapperClass + ' modal-dialog'}>
-              <div className="modal-content">
+              <div className="modal-content closable">
                 <div className="modal-body container-fluid">
                   {this.props.title ? (<h3>{this.props.title}</h3>) : null}
                   {this.props.content.children}
