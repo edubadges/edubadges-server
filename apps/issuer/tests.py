@@ -8,9 +8,8 @@ from django.contrib.auth import get_user_model
 
 from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
 
-from .api import *
-from .serializers import *
-from .models import *
+from issuer.api import IssuerList
+from issuer.models import Issuer, BadgeClass
 
 factory = APIRequestFactory()
 

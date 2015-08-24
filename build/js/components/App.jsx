@@ -391,6 +391,7 @@ var App = React.createClass({
           activePanel={this.state.activePanels[viewId]}
         />
         <ActivePanel
+          modal={true}
           viewId={viewId}
           {...this.state.activePanels[viewId]}
           collection={collection}
@@ -534,6 +535,7 @@ var App = React.createClass({
         />
         <ActivePanel
           viewId={viewId}
+          modal={true}
           {...this.state.activePanels[viewId]}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
