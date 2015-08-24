@@ -25,3 +25,5 @@ class BadgeInstance(AbstractBadgeInstance):
                                    related_name='badgeinstances')
     # 0.5 BadgeInstances have no notion of a BadgeClass
     issuer = models.ForeignKey(Issuer, blank=False, null=True)
+
+    recipient_user = models.ForeignKey(AUTH_USER_MODEL, null=True)

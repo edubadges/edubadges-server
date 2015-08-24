@@ -48,9 +48,6 @@ class BadgeInstance(AbstractBadgeInstance):
                                    related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
 
-    revoked = models.BooleanField(default=False)
-    revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
-
     @property
     def extended_json(self):
         extended_json = self.json

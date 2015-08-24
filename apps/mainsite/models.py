@@ -100,10 +100,15 @@ class AbstractBadgeInstance(AbstractComponent):
     # # 0.5 BadgeInstances have no notion of a BadgeClass (null=True)
     # issuer = models.ForeignKey(Issuer, blank=False, null=False)
 
+    #  recipient_id = models.CharField(max_length=1024, blank=False)
     email = models.EmailField(max_length=255, blank=False, null=False)
     image = models.ImageField(upload_to='uploads/badges', blank=True)  # upload_to='issued' in cred_store
     slug = AutoSlugField(max_length=255, populate_from='populate_slug',
                          unique=True, blank=False, editable=False)
+
+    revoked = models.BooleanField(default=False)
+    revocation_reason = models.CharField(max_length=255, blank=True, null=True,  # TODO: blank=True, null=True?
+                                         default=None)
 
     class Meta:
         abstract = True

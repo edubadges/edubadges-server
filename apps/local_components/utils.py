@@ -10,6 +10,7 @@ from openbadges_bakery import bake, unbake
 
 
 def find_recipient_user(recipient_id):
+    # TODO: Call recipient_id email (as it is in the model)?
     try:
         confirmed_email = EmailAddress.objects.get(
             email=recipient_id, verified=True
