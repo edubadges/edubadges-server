@@ -277,6 +277,11 @@ APIStore.getData = function(context, requestContext){
       });
     }
     else {
+      if (response.header.link) {
+        console.log("PAGINATION", response.header.link);
+        APIStore.emit('DATA_HAS_PAGINATION_'+context.apiCollectionKey, response.header.link)
+      }
+
       if (!APIStore.collectionsExist(context.apiCollectionKey) || context['replaceCollection']){
         APIStore.data[context.apiCollectionKey] = [];
       }
