@@ -51,6 +51,15 @@ var APIFetchCollections = function(collectionKeys, requestContext) {
   }}); 
 }
 
+var APIFetchCollectionPage = function(collectionKey, url, requestContext) {
+  appDispatcher.dispatch({ action: {
+    type: 'API_FETCH_COLLECTION_PAGE',
+    collectionKey: collectionKey,
+    requestContext: requestContext,
+    paginationUrl: url
+  }});
+}
+
 var APIPostForm = function(fields, values, apiContext, requestContext) {
   appDispatcher.dispatch({ action: {
     type: 'API_POST_FORM',
@@ -68,6 +77,7 @@ module.exports = {
   APIGetResultFailure: APIGetResultFailure,
   APIGetData: APIGetData,
   APIFetchCollections: APIFetchCollections,
+  APIFetchCollectionPage: APIFetchCollectionPage,
   APISubmitData: APISubmitData,
   APIPostForm: APIPostForm
 }

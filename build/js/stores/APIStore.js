@@ -227,12 +227,20 @@ APIStore.fetchCollections = function(collectionKeys, requestContext){
     if (!contexts.hasOwnProperty(key))
       continue;
     actionUrl = APIStore._buildUrlWithContext(contexts[key].actionUrl, requestContext)
-    if (APIStore.activeGetRequests.hasOwnProperty(key))
+    if (APIStore.activeGetRequests.hasOwnProperty(actionUrl))
       continue;
     APIStore.activeGetRequests[actionUrl] = true;
     APIStore.getData(contexts[key], requestContext);
   }
 };
+
+APIStore.fetchCollectionPage = function(collectionKey, page_url, requestContext) {
+  if (APIStore.activeGetRequests.hasOwnProperty(page_url))
+    return;
+  APIStore.activeGetRequests[page_url] = true;
+  APIStore.getData(contexts[collectionKey], requestContext, page_url);
+
+}
 
 APIStore._buildUrlWithContext = function(url, context) {
   return url.replace(/:(\w+)/g, function(replace) {
@@ -251,9 +259,9 @@ APIStore._buildUrlWithContext = function(url, context) {
  *
  *   requestContext: a dictionary providing context values for this particular request
 */
-APIStore.getData = function(context, requestContext){
+APIStore.getData = function(context, requestContext, pagination_url) {
 
-  url = APIStore._buildUrlWithContext(context.actionUrl, requestContext)
+  var url = pagination_url || APIStore._buildUrlWithContext(context.actionUrl, requestContext)
 
   APIStore.getRequests.push(url);
 
@@ -278,22 +286,33 @@ APIStore.getData = function(context, requestContext){
     }
     else {
       if (response.header.link) {
-        console.log("PAGINATION", response.header.link);
-        APIStore.emit('DATA_HAS_PAGINATION_'+context.apiCollectionKey, response.header.link)
+        var links = {}
+        response.header.link.replace(/<([^>]+)>; rel="([^"]+)"/g, function(all, link, name) {
+          links[name] = link
+        });
+        APIStore.emit('DATA_PAGINATION_LINKS', context.apiCollectionKey+":"+url, links)
       }
 
-      if (!APIStore.collectionsExist(context.apiCollectionKey) || context['replaceCollection']){
-        APIStore.data[context.apiCollectionKey] = [];
+      var collectionKey = context.apiCollectionKey;
+      if (pagination_url) {
+        // this was a response to a next/prev page request
+        collectionKey = context.apiCollectionKey+":"+pagination_url;
+        //console.log("got next/prev page", collectionKey)
+      }
+
+      if (!APIStore.collectionsExist(collectionKey) || context['replaceCollection']){
+        APIStore.data[collectionKey] = [];
       }
 
       if (Array.isArray(response.body)){
         response.body.map(function(el, i, array){
-          APIStore.addCollectionItem(context.apiCollectionKey, el);
+          APIStore.addCollectionItem(collectionKey, el);
         });
       }
       else if (response.body !== null){
-        APIStore.addCollectionItem(context.apiCollectionKey,response.body);
+        APIStore.addCollectionItem(collectionKey, response.body);
       }
+
       APIStore.emit('DATA_UPDATED');
       if (context.hasOwnProperty('formId')) {
         APIStore.emit('DATA_UPDATED_'+context.formId);
@@ -478,6 +497,9 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
     case 'API_FETCH_COLLECTIONS':
       APIStore.fetchCollections(action.collectionIds, action.requestContext || {});
       break;
+
+    case 'API_FETCH_COLLECTION_PAGE':
+      APIStore.fetchCollectionPage(action.collectionKey, action.paginationUrl, action.requestContext || {});
 
     default:
       // do naaathing.
