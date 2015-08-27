@@ -1,4 +1,5 @@
 from itertools import chain
+import logging
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -8,6 +9,7 @@ from rest_framework import status, authentication, permissions
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
+import badgrlog
 
 from .models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from .serializers import (IssuerSerializer, BadgeClassSerializer,
@@ -15,6 +17,9 @@ from .serializers import (IssuerSerializer, BadgeClassSerializer,
                           IssuerStaffSerializer)
 from .permissions import (MayIssueBadgeClass, MayEditBadgeClass,
                           IsEditor, IsStaff, IsOwnerOrStaff)
+
+
+logger = badgrlog.BadgrLogger()
 
 
 class AbstractIssuerAPIEndpoint(APIView):
@@ -134,8 +139,10 @@ class IssuerList(AbstractIssuerAPIEndpoint):
             owner=request.user,
             created_by=request.user
         )
+        issuer = serializer.data
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        logger.info(badgrlog.IssuerCreatedEvent(issuer))
+        return Response(issuer, status=status.HTTP_201_CREATED)
 
 
 class IssuerDetail(AbstractIssuerAPIEndpoint):
