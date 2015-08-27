@@ -241,8 +241,8 @@ LOGGING = {
         },
         'json': {
             '()': 'mainsite.formatters.JsonFormatter',
-            'format': '%(asctime)s %(message)s',
-            # 'datefmt': '%Y-%m-%dT%H:%M:%S%z',
+            'format': '%(asctime)s',
+            'datefmt': '%Y-%m-%dT%H:%M:%S%z',
         }
     },
 }
