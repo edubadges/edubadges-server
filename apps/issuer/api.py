@@ -623,6 +623,7 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
         current_assertion.image.delete()
         current_assertion.save()
 
+        logger.event(badgrlog.BadgeAssertionRevokedEvent(current_assertion))
         return Response(
             "Assertion {} has been revoked.".format(current_assertion.slug),
             status=status.HTTP_200_OK

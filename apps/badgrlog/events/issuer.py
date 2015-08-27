@@ -59,3 +59,12 @@ class BadgeInstanceCreatedEvent(BaseBadgrEvent):
         }
 
 
+class BadgeAssertionRevokedEvent(BaseBadgrEvent):
+    def __init__(self, badge_instance):
+        self.badge_instance = badge_instance
+
+    def to_representation(self):
+        return {
+            'badge_instance': self.badge_instance.json
+        }
+
