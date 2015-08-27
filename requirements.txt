@@ -33,7 +33,6 @@ git+https://github.com/concentricsky/django-allauth.git@0.21.0-csky
 oauthlib==0.7.2
 requests==2.5.1
 requests-oauthlib==0.4.2
-responses==0.3.0
 # Permissions framework
 rules==0.4
 
@@ -63,5 +62,7 @@ git+https://github.com/concentricsky/django-auth-lti@v1.2.1-csky
 # Badgr related utilities
 openbadges-bakery==0.1.4
 git+ssh://git@stash.concentricsky.com/bp/badgecheck.git@v0.2.5
+
 celery==3.1.18
 django-celery==3.1.16
+python-json-logger==0.1.2
