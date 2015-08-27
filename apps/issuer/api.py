@@ -494,7 +494,10 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
             badgeclass=current_badgeclass,
             created_by=request.user
         )
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        badge_instance = serializer.data
+
+        logger.event(badgrlog.BadgeInstanceCreatedEvent(badge_instance, request.user))
+        return Response(badge_instance, status=status.HTTP_201_CREATED)
 
     def get(self, request, issuerSlug, badgeSlug):
         """

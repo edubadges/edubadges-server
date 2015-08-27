@@ -44,3 +44,18 @@ class BadgeClassDeletedEvent(BaseBadgrEvent):
         }
 
 
+class BadgeInstanceCreatedEvent(BaseBadgrEvent):
+    def __init__(self, serialized_badge_instance, user):
+        self.badge_instance = serialized_badge_instance
+        self.user = user
+
+    def to_representation(self):
+        return {
+            'creator': settings.HTTP_ORIGIN + self.user.get_absolute_url(),
+            'issuer': self.badge_instance.get('issuer'),
+            'email': self.badge_instance.get('email'),
+            'badge_class': self.badge_instance.get('badgeclass'),
+            'badge_instance': self.badge_instance.get('json'),
+        }
+
+
