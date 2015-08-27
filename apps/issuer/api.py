@@ -141,7 +141,7 @@ class IssuerList(AbstractIssuerAPIEndpoint):
         )
         issuer = serializer.data
 
-        logger.info(badgrlog.IssuerCreatedEvent(issuer))
+        logger.event(badgrlog.IssuerCreatedEvent(issuer))
         return Response(issuer, status=status.HTTP_201_CREATED)
 
 
@@ -393,8 +393,10 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
             created_by=request.user,
             description=request.data.get('description')
         )
+        badge_class = serializer.data
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        logger.event(badgrlog.BadgeClassCreatedEvent(badge_class, request.data.get('image')))
+        return Response(badge_class, status=status.HTTP_201_CREATED)
 
 
 class BadgeClassDetail(AbstractIssuerAPIEndpoint):
@@ -439,7 +441,9 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
         current_badgeclass = self.get_list(badgeSlug, queryset=unissued_badgeclasses)
 
         if current_badgeclass.exists():
+            old_badgeclass = current_badgeclass[0].json
             current_badgeclass[0].delete()
+            logger.event(badgrlog.BadgeClassDeletedEvent(old_badgeclass, request.user))
         else:
             return Response(
                 "Badge Class either couldn't be deleted. It may have already been issued, or it may already not exist.",

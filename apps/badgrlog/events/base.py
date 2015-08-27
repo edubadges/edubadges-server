@@ -2,8 +2,6 @@
 
 
 class BaseBadgrEvent(object):
-    def __init__(self):
-        pass
 
     def get_type(self):
         return self.__class__.__name__
