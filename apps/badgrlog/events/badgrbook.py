@@ -55,3 +55,19 @@ class BadgeObjectiveCreatedEvent(BaseBadgrLtiEvent):
 
 class BadgeObjectiveUpdatedEvent(BadgeObjectiveCreatedEvent):
     pass
+
+
+class BadgeObjectiveAwardedEvent(BaseBadgrEvent):
+    def __init__(self, badge_award, serialized_badge_instance):
+        self.badge_award = badge_award
+        self.badge_instance = serialized_badge_instance
+
+    def to_representation(self):
+        return {
+            'student_id': self.badge_award.student_id,
+            'badge_instance': self.badge_instance.get('badge_instance').get('id'),
+            'badge_class': self.badge_instance.get('badge_class'),
+            'objective_id': self.badge_award.badge_objective.objective_id,
+            'objective_type': self.badge_award.badge_objective.objective_type,
+
+        }
