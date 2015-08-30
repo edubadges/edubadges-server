@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import sys
 import os
 
@@ -11,3 +13,6 @@ if APPS_DIR not in sys.path:
 
 # Path to the whole project (one level up from apps)
 TOP_DIR = os.path.dirname(APPS_DIR)
+
+# import the celery app so INSTALLED_APPS gets autodiscovered
+from .celery import app as celery_app
