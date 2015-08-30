@@ -2,6 +2,7 @@ import sys
 import os
 
 from mainsite import TOP_DIR
+import logging
 
 
 ##
@@ -208,6 +209,14 @@ LOGGING = {
             'level': 'ERROR',
             'filters': [],
             'class': 'django.utils.log.AdminEmailHandler'
+        },
+
+        # badgr events log to disk by default
+        'badgr_events': {
+            'level': 'INFO',
+            'formatter': 'json',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOGS_DIR, 'badgr_events.log')
         }
     },
     'loggers': {
@@ -215,11 +224,25 @@ LOGGING = {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
+        },
+
+        # Badgr.Events emits all badge related activity
+        'Badgr.Events': {
+            'handlers': ['badgr_events'],
+            'level': 'INFO',
+            'propagate': False,
+
         }
+
     },
     'formatters': {
         'default': {
             'format': '%(asctime)s %(levelname)s %(module)s %(message)s'
+        },
+        'json': {
+            '()': 'mainsite.formatters.JsonFormatter',
+            'format': '%(asctime)s',
+            'datefmt': '%Y-%m-%dT%H:%M:%S%z',
         }
     },
 }

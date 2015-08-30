@@ -1,4 +1,5 @@
 from itertools import chain
+import logging
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -8,6 +9,7 @@ from rest_framework import status, authentication, permissions
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
+import badgrlog
 
 from .models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from .serializers import (IssuerSerializer, BadgeClassSerializer,
@@ -15,6 +17,9 @@ from .serializers import (IssuerSerializer, BadgeClassSerializer,
                           IssuerStaffSerializer)
 from .permissions import (MayIssueBadgeClass, MayEditBadgeClass,
                           IsEditor, IsStaff, IsOwnerOrStaff)
+
+
+logger = badgrlog.BadgrLogger()
 
 
 class AbstractIssuerAPIEndpoint(APIView):
@@ -134,8 +139,10 @@ class IssuerList(AbstractIssuerAPIEndpoint):
             owner=request.user,
             created_by=request.user
         )
+        issuer = serializer.data
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        logger.event(badgrlog.IssuerCreatedEvent(issuer))
+        return Response(issuer, status=status.HTTP_201_CREATED)
 
 
 class IssuerDetail(AbstractIssuerAPIEndpoint):
@@ -386,8 +393,10 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
             created_by=request.user,
             description=request.data.get('description')
         )
+        badge_class = serializer.data
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        logger.event(badgrlog.BadgeClassCreatedEvent(badge_class, request.data.get('image')))
+        return Response(badge_class, status=status.HTTP_201_CREATED)
 
 
 class BadgeClassDetail(AbstractIssuerAPIEndpoint):
@@ -432,7 +441,9 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
         current_badgeclass = self.get_list(badgeSlug, queryset=unissued_badgeclasses)
 
         if current_badgeclass.exists():
+            old_badgeclass = current_badgeclass[0].json
             current_badgeclass[0].delete()
+            logger.event(badgrlog.BadgeClassDeletedEvent(old_badgeclass, request.user))
         else:
             return Response(
                 "Badge Class either couldn't be deleted. It may have already been issued, or it may already not exist.",
@@ -483,7 +494,10 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
             badgeclass=current_badgeclass,
             created_by=request.user
         )
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        badge_instance = serializer.data
+
+        logger.event(badgrlog.BadgeInstanceCreatedEvent(badge_instance, request.user))
+        return Response(badge_instance, status=status.HTTP_201_CREATED)
 
     def get(self, request, issuerSlug, badgeSlug):
         """
@@ -612,6 +626,7 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
         current_assertion.image.delete()
         current_assertion.save()
 
+        logger.event(badgrlog.BadgeAssertionRevokedEvent(current_assertion))
         return Response(
             "Assertion {} has been revoked.".format(current_assertion.slug),
             status=status.HTTP_200_OK
