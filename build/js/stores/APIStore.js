@@ -208,7 +208,7 @@ APIStore.fetchCollections = function(collectionKeys, requestContext){
       replaceCollection: true
     },
     badgrbook_checkcourseprogress: {
-        actionUrl: '/v1/badgrbook/checkprogress/:tool_guid/:course_id',
+        actionUrl: '/v1/badgrbook/checkprogress/:tool_guid/:course_id?page=:page',
         successfulHttpStatus: [200, 204],
         apiCollectionKey: 'badgrbook_checkcourseprogress',
         replaceCollection: true,
@@ -226,7 +226,7 @@ APIStore.fetchCollections = function(collectionKeys, requestContext){
     key = collectionKeys[index];
     if (!contexts.hasOwnProperty(key))
       continue;
-    actionUrl = APIStore._buildUrlWithContext(contexts[key].actionUrl, requestContext)
+    actionUrl = APIStore.buildUrlWithContext(contexts[key].actionUrl, requestContext)
     if (APIStore.activeGetRequests.hasOwnProperty(actionUrl))
       continue;
     APIStore.activeGetRequests[actionUrl] = true;
@@ -242,7 +242,7 @@ APIStore.fetchCollectionPage = function(collectionKey, page_url, requestContext)
 
 }
 
-APIStore._buildUrlWithContext = function(url, context) {
+APIStore.buildUrlWithContext = function(url, context) {
   return url.replace(/:(\w+)/g, function(replace) {
     return context[replace.substring(1)];
   });
@@ -261,7 +261,7 @@ APIStore._buildUrlWithContext = function(url, context) {
 */
 APIStore.getData = function(context, requestContext, pagination_url) {
 
-  var url = pagination_url || APIStore._buildUrlWithContext(context.actionUrl, requestContext)
+  var url = pagination_url || APIStore.buildUrlWithContext(context.actionUrl, requestContext)
 
   APIStore.getRequests.push(url);
 
@@ -334,7 +334,7 @@ APIStore.getData = function(context, requestContext, pagination_url) {
  * to the post request.
 */
 APIStore.postForm = function(fields, values, context, requestContext){
-  url = APIStore._buildUrlWithContext(context.actionUrl, requestContext)
+  url = APIStore.buildUrlWithContext(context.actionUrl, requestContext)
 
   if (context.method == 'POST')
     var req = request.post(url);
@@ -396,7 +396,7 @@ APIStore.postForm = function(fields, values, context, requestContext){
  * an API interaction.
 */
 APIStore.requestData = function(data, context, requestContext){
-  url = APIStore._buildUrlWithContext(context.actionUrl, requestContext)
+  url = APIStore.buildUrlWithContext(context.actionUrl, requestContext)
 
   var req;
   if (context.method == 'POST')
@@ -515,5 +515,6 @@ module.exports = {
   getCollectionLastItem: APIStore.getCollectionLastItem,
   getFirstItemByPropertyValue: APIStore.getFirstItemByPropertyValue,
   filter: APIStore.filter,
-  fetchCollection: APIStore.fetchCollection
+  fetchCollection: APIStore.fetchCollection,
+  buildUrlWithContext: APIStore.buildUrlWithContext
 }
