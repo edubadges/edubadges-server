@@ -51,6 +51,14 @@ var APIFetchCollections = function(collectionKeys, requestContext) {
   }}); 
 }
 
+var APIReloadCollections = function(collectionKeys, requestContext) {
+    appDispatcher.dispatch({ action: {
+        type: 'API_RELOAD_COLLECTIONS',
+        collectionIds: collectionKeys,
+        requestContext: requestContext
+    }});
+}
+
 var APIFetchCollectionPage = function(collectionKey, url, requestContext) {
   appDispatcher.dispatch({ action: {
     type: 'API_FETCH_COLLECTION_PAGE',
@@ -78,6 +86,7 @@ module.exports = {
   APIGetData: APIGetData,
   APIFetchCollections: APIFetchCollections,
   APIFetchCollectionPage: APIFetchCollectionPage,
+  APIReloadCollections: APIReloadCollections,
   APISubmitData: APISubmitData,
-  APIPostForm: APIPostForm
+  APIPostForm: APIPostForm,
 }
