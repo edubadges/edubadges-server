@@ -64,7 +64,7 @@ if apps.is_installed('issuer'):
 if apps.is_installed('composition'):
     urlpatterns += patterns('',
         url(r'^v1/earner', include('composition.api_urls')),
-        url(r'^earner', include('composer.urls')),
+        url(r'^earner', include('composition.urls')),
     )
 
 if apps.is_installed('badgrbook'):

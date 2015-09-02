@@ -31,6 +31,12 @@ class LocalBadgeInstance(AbstractBadgeInstance):
 
     recipient_user = models.ForeignKey(AUTH_USER_MODEL)
 
+    def image_url(self):
+        if getattr(settings, 'MEDIA_ROOT').startswith('http'):
+            return self.image.url
+        else:
+            return getattr(settings, 'HTTP_ORIGIN') + self.image.url
+
 
 class Collection(cachemodel.CacheModel):
     name = models.CharField(max_length=128)

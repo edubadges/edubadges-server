@@ -62,13 +62,8 @@ class EarnerBadgeList(APIView):
         """
         serializer = EarnerBadgeSerializer(data=request.data,
                                            context={'request': request})
-
         serializer.is_valid(raise_exception=True)
-
-        try:
-            serializer.save()
-        except DjangoValidationError as e:
-            raise ValidationError(e.message)
+        serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

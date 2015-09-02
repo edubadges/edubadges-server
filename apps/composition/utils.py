@@ -44,7 +44,10 @@ def badge_email_matches_emails(badge_instance, verified_addresses):
     email_type, badge_email, salt = _get_email_type(badge_instance)
 
     if email_type == "email":
-        return badge_email in verified_addresses
+        if badge_email in [e.email for e in verified_addresses]:
+            return badge_email
+        else:
+            return False
 
     if email_type == "hash":
         try:
