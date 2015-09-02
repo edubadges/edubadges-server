@@ -137,8 +137,10 @@ APIStore.addListener = function(type, callback) {
   APIStore.on(type, callback);
 };
 
-// Part of eventemitter
-// APIStore.removeListener = function(type, callback)
+// wrap eventemitter so it gets the same object as when addListener was called
+APIStore.removeApiListener = function(type, callback) {
+  APIStore.removeListener(type, callback)
+}
 
 
 // on startup
@@ -534,7 +536,7 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
 
 module.exports = {
   addListener: APIStore.addListener,
-  removeListener: APIStore.removeListener,
+  removeListener: APIStore.removeApiListener,
   hasAlreadyRequested: APIStore.hasAlreadyRequested,
   collectionsExist: APIStore.collectionsExist,
   getCollection: APIStore.getCollection,
