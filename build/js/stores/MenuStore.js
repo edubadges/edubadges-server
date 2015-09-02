@@ -27,10 +27,10 @@ MenuStore.defaultItems = {
   roleMenu: {
     items: []
   },
-  badgrbookMenu: {
+  badgebookMenu: {
     items: [
-      { title: "Objectives", url: "/badgrbook/objectives", icon: "fa-certificate", children: [] },
-      { title: "Progress", url: "/badgrbook/progress", icon: "fa-tasks", children: [] }
+      { title: "Objectives", url: "/badgebook/objectives", icon: "fa-certificate", children: [] },
+      { title: "Progress", url: "/badgebook/progress", icon: "fa-tasks", children: [] }
     ]
   },
   secondaryMenus: {
@@ -97,8 +97,8 @@ MenuStore.defaultItems = {
           activePanelCommand: { type: "ConsumerBadgeForm", content: { badgeId: null } } 
         }
       ],
-      badgrbookProgress: [],
-      badgrbookObjectives: [
+      badgebookProgress: [],
+      badgebookObjectives: [
         {
           title: "Create New Badge",
           buttonType: "primary",
@@ -112,7 +112,7 @@ MenuStore.defaultItems = {
 MenuStore.menus = {
   topMenu: MenuStore.defaultItems.topMenu,
   roleMenu: MenuStore.defaultItems.roleMenu,
-  badgrbookMenu: MenuStore.defaultItems.badgrbookMenu,
+  badgebookMenu: MenuStore.defaultItems.badgebookMenu,
   secondaryMenus: MenuStore.defaultItems.secondaryMenus,
   actionBars: MenuStore.defaultItems.actionBars
 }
@@ -158,7 +158,7 @@ MenuStore.storeInitialData = function() {
     }
 
   if (initialData.lti_learner) {
-    MenuStore.menus.badgrbookMenu.items = [];
+    MenuStore.menus.badgebookMenu.items = [];
   }
 
 

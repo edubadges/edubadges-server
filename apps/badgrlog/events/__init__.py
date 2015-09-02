@@ -2,4 +2,4 @@
 
 from .issuer import *
 from .public import *
-from .badgrbook import *
+from .badgebook import *

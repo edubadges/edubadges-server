@@ -182,43 +182,43 @@ APIStore.defaultContexts = {
       apiCollectionKey: 'issuer_badgeclasses',
       replaceCollection: true
     },
-    badgrbook_courseobjectives: {
-      actionUrl: '/v1/badgrbook/courseobjectives/:tool_guid/:course_id',
+    badgebook_courseobjectives: {
+      actionUrl: '/v1/badgebook/courseobjectives/:tool_guid/:course_id',
       successfulHttpStatus: [200],
-      apiCollectionKey: 'badgrbook_courseobjectives',
+      apiCollectionKey: 'badgebook_courseobjectives',
       replaceCollection: true
     },
-    badgrbook_badgeobjectives: {
-      actionUrl: '/v1/badgrbook/badgeobjectives/:tool_guid/:course_id',
+    badgebook_badgeobjectives: {
+      actionUrl: '/v1/badgebook/badgeobjectives/:tool_guid/:course_id',
       successfulHttpStatus: [200],
-      apiCollectionKey: 'badgrbook_badgeobjectives',
+      apiCollectionKey: 'badgebook_badgeobjectives',
       replaceCollection: true
     },
-    badgrbook_courseprogress: {
-      actionUrl: '/v1/badgrbook/studentobjectives/:tool_guid/:course_id',
+    badgebook_courseprogress: {
+      actionUrl: '/v1/badgebook/studentobjectives/:tool_guid/:course_id',
       successfulHttpStatus: [200],
-      apiCollectionKey: 'badgrbook_courseprogress',
+      apiCollectionKey: 'badgebook_courseprogress',
       replaceCollection: true
     },
-    badgrbook_badgeinstances: {
-      actionUrl: '/v1/badgrbook/studentbadges/',
+    badgebook_badgeinstances: {
+      actionUrl: '/v1/badgebook/studentbadges/',
       successfulHttpStatus: [200],
-      apiCollectionKey: 'badgrbook_badgeinstances',
+      apiCollectionKey: 'badgebook_badgeinstances',
       replaceCollection: true
     },
-    badgrbook_checkcourseprogress: {
-        actionUrl: '/v1/badgrbook/checkprogress/:tool_guid/:course_id?page=:page',
+    badgebook_checkcourseprogress: {
+        actionUrl: '/v1/badgebook/checkprogress/:tool_guid/:course_id?page=:page',
         successfulHttpStatus: [200, 204],
-        apiCollectionKey: 'badgrbook_checkcourseprogress',
+        apiCollectionKey: 'badgebook_checkcourseprogress',
         replaceCollection: true,
-        formId: 'badgrbook_checkcourseprogress',
+        formId: 'badgebook_checkcourseprogress',
     },
-    badgrbook_checkstudentprogress: {
-      actionUrl: '/v1/badgrbook/checkprogress/:tool_guid/:course_id/:student_id',
+    badgebook_checkstudentprogress: {
+      actionUrl: '/v1/badgebook/checkprogress/:tool_guid/:course_id/:student_id',
       successfulHttpStatus: [200, 204],
-      apiCollectionKey: 'badgrbook_checkstudentprogress',
+      apiCollectionKey: 'badgebook_checkstudentprogress',
       replaceCollection: true,
-      formId: 'badgrbook_checkstudentprogress',
+      formId: 'badgebook_checkstudentprogress',
     },
 };
 

@@ -48,8 +48,8 @@ INSTALLED_APPS = [
     'local_components',
     'composer',
 
-    'badgrbook',
-    'badgrbook.canvaslms',
+    'badgebook',
+    'badgebook.canvaslms',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -151,7 +151,7 @@ AUTHENTICATION_BACKENDS = [
     'rules.permissions.ObjectPermissionBackend',
 
     # LTI authentication
-    'badgrbook.backends.CanvasLtiAuthBackend',
+    'badgebook.backends.CanvasLtiAuthBackend',
 
     # Needed to login by username in Django admin, regardless of `allauth`
     "django.contrib.auth.backends.ModelBackend",

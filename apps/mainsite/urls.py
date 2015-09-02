@@ -67,11 +67,11 @@ if apps.is_installed('composer'):
         url(r'^earner', include('composer.urls')),
     )
 
-if apps.is_installed('badgrbook'):
+if apps.is_installed('badgebook'):
     urlpatterns += patterns('',
-        url(r'^accounts/lti$', 'badgrbook.views.lti_info', name='badgrbook_lti_info'),
-        url(r'^v1/badgrbook', include('badgrbook.api_urls')),
-        url(r'^badgrbook', include('badgrbook.urls')),
+        url(r'^accounts/lti$', 'badgebook.views.lti_info', name='badgebook_lti_info'),
+        url(r'^v1/badgebook', include('badgebook.api_urls')),
+        url(r'^badgebook', include('badgebook.urls')),
     )
 
 

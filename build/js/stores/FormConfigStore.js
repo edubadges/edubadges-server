@@ -12,7 +12,7 @@ FormConfigStore.genericFormTypes = function(){
     'EarnerBadgeImportForm',
     'EarnerCollectionCreateForm',
     'EarnerCollectionEditForm',
-    'BadgrbookDefaultIssuerForm',
+    'BadgebookDefaultIssuerForm',
   ];
 }
 
@@ -202,8 +202,8 @@ FormConfigStore.getConfig = function(formType, overrides, context){
         successMessage: "Collection successfully edited."
       }
     },
-    BadgrbookDefaultIssuerForm: {
-      formId: overrides['formId'] || "BadgrbookDefaultIssuerForm",
+    BadgebookDefaultIssuerForm: {
+      formId: overrides['formId'] || "BadgebookDefaultIssuerForm",
       fieldsMeta: {
         default_issuer: {inputType: "text", label: "Default Issuer Slug", required: true},
       },
@@ -211,8 +211,8 @@ FormConfigStore.getConfig = function(formType, overrides, context){
         default_issuer: "",
       },
       apiContext: {
-        formId: overrides['formId'] || "BadgrbookDefaultIssuerForm",
-        actionUrl: "/v1/badgrbook/defaultissuer/:tool_guid/:course_id",
+        formId: overrides['formId'] || "BadgebookDefaultIssuerForm",
+        actionUrl: "/v1/badgebook/defaultissuer/:tool_guid/:course_id",
         method: "PUT",
         successHttpStatus: [200],
         successMessage: "Default issuer saved."
