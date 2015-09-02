@@ -58,7 +58,7 @@ class IssuerTests(APITestCase):
         self.assertIsNotNone(badge_object.get('id'))
         self.assertIsNotNone(badge_object.get('@context'))
 
-        # assert that the record was published to cache
+        # assert that the issuer was published to and fetched from the cache
         with self.assertNumQueries(0):
             slug = response.data.get('slug')
             response = self.client.get('/v1/issuer/issuers/{}'.format(slug))
@@ -157,7 +157,7 @@ class BadgeClassTests(APITestCase):
             )
             self.assertEqual(response.status_code, 201)
 
-            # assert that the record was published to and fetched from cache
+            # assert that the BadgeClass was published to and fetched from the cache
             with self.assertNumQueries(0):
                 slug = response.data.get('slug')
                 response = self.client.get('/v1/issuer/issuers/test-issuer/badges/{}'.format(slug))
@@ -282,7 +282,7 @@ class AssertionTests(APITestCase):
 
         self.assertEqual(response.status_code, 201)
 
-        # assert that the record was published to cache
+        # assert that the BadgeInstance was published to and fetched from cache
         with self.assertNumQueries(0):
             slug = response.data.get('slug')
             response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions/{}'.format(slug))
