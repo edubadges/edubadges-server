@@ -61,8 +61,8 @@ class IssuerTests(APITestCase):
         # assert that the record was published to cache
         with self.assertNumQueries(0):
             slug = response.data.get('slug')
-            issuer = Issuer.cached.get(slug=slug)
-            self.assertIsNotNone(issuer)
+            response = self.client.get('/v1/issuer/issuers/{}'.format(slug))
+            self.assertEqual(response.status_code, 200)
 
     def test_private_issuer_detail_get(self):
         # GET on single badge should work if user has privileges
@@ -157,11 +157,11 @@ class BadgeClassTests(APITestCase):
             )
             self.assertEqual(response.status_code, 201)
 
-            # assert that the record was published to cache
+            # assert that the record was published to and fetched from cache
             with self.assertNumQueries(0):
                 slug = response.data.get('slug')
-                obj = BadgeClass.cached.get(slug=slug)
-                self.assertIsNotNone(obj)
+                response = self.client.get('/v1/issuer/issuers/test-issuer/badges/{}'.format(slug))
+                self.assertEqual(response.status_code, 200)
 
     def test_create_criteriatext_badgeclass_for_issuer_authenticated(self):
         """
@@ -285,8 +285,8 @@ class AssertionTests(APITestCase):
         # assert that the record was published to cache
         with self.assertNumQueries(0):
             slug = response.data.get('slug')
-            obj = BadgeInstance.cached.get(slug=slug)
-            self.assertIsNotNone(obj)
+            response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions/{}'.format(slug))
+            self.assertEqual(response.status_code, 200)
 
     def test_authenticated_editor_can_issue_badge(self):
         # load test image into media files if it doesn't exist
