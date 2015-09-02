@@ -137,8 +137,10 @@ APIStore.addListener = function(type, callback) {
   APIStore.on(type, callback);
 };
 
-// Part of eventemitter
-// APIStore.removeListener = function(type, callback)
+// wrap eventemitter so it gets the same object as when addListener was called
+APIStore.removeApiListener = function(type, callback) {
+  APIStore.removeListener(type, callback)
+}
 
 
 // on startup
@@ -155,10 +157,7 @@ APIStore.storeInitialData = function() {
   }
 };
 
-
-APIStore.fetchCollections = function(collectionKeys, requestContext){
-  var actionUrl, key;
-  contexts = {
+APIStore.defaultContexts = {
     earner_badges: {
       actionUrl: '/v1/earner/badges',
       successfulHttpStatus: [200],
@@ -208,7 +207,7 @@ APIStore.fetchCollections = function(collectionKeys, requestContext){
       replaceCollection: true
     },
     badgrbook_checkcourseprogress: {
-        actionUrl: '/v1/badgrbook/checkprogress/:tool_guid/:course_id',
+        actionUrl: '/v1/badgrbook/checkprogress/:tool_guid/:course_id?page=:page',
         successfulHttpStatus: [200, 204],
         apiCollectionKey: 'badgrbook_checkcourseprogress',
         replaceCollection: true,
@@ -221,16 +220,19 @@ APIStore.fetchCollections = function(collectionKeys, requestContext){
       replaceCollection: true,
       formId: 'badgrbook_checkstudentprogress',
     },
-  };
+};
+
+APIStore.fetchCollections = function(collectionKeys, requestContext){
+  var actionUrl, key;
   for (var index in collectionKeys){
     key = collectionKeys[index];
-    if (!contexts.hasOwnProperty(key))
+    if (!APIStore.defaultContexts.hasOwnProperty(key))
       continue;
-    actionUrl = APIStore._buildUrlWithContext(contexts[key].actionUrl, requestContext)
+    actionUrl = APIStore.buildUrlWithContext(APIStore.defaultContexts[key].actionUrl, requestContext)
     if (APIStore.activeGetRequests.hasOwnProperty(actionUrl))
       continue;
     APIStore.activeGetRequests[actionUrl] = true;
-    APIStore.getData(contexts[key], requestContext);
+    APIStore.getData(APIStore.defaultContexts[key], requestContext);
   }
 };
 
@@ -238,11 +240,32 @@ APIStore.fetchCollectionPage = function(collectionKey, page_url, requestContext)
   if (APIStore.activeGetRequests.hasOwnProperty(page_url))
     return;
   APIStore.activeGetRequests[page_url] = true;
-  APIStore.getData(contexts[collectionKey], requestContext, page_url);
+  APIStore.getData(APIStore.defaultContexts[collectionKey], requestContext, page_url);
 
 }
 
-APIStore._buildUrlWithContext = function(url, context) {
+APIStore.reloadCollections = function(collectionKeys, requestContext) {
+  console.log("reloadCollections", collectionKeys)
+  for (var index in collectionKeys) {
+    var pagination_url = undefined;
+    var key = collectionKeys[index];
+    var idx = key.indexOf(':');
+    if (idx != -1) {
+      pagination_url = key.substring(idx+1)
+      key = key.substring(0, idx)
+    }
+    if (APIStore.defaultContexts.hasOwnProperty(key)) {
+      var apiContext = APIStore.defaultContexts[key];
+      var actionUrl = APIStore.buildUrlWithContext(apiContext.actionUrl, requestContext)
+      APIStore.activeGetRequests[actionUrl] = true;
+      APIStore.getData(apiContext, requestContext, pagination_url);
+    }
+  }
+
+  return;
+}
+
+APIStore.buildUrlWithContext = function(url, context) {
   return url.replace(/:(\w+)/g, function(replace) {
     return context[replace.substring(1)];
   });
@@ -261,7 +284,7 @@ APIStore._buildUrlWithContext = function(url, context) {
 */
 APIStore.getData = function(context, requestContext, pagination_url) {
 
-  var url = pagination_url || APIStore._buildUrlWithContext(context.actionUrl, requestContext)
+  var url = pagination_url || APIStore.buildUrlWithContext(context.actionUrl, requestContext)
 
   APIStore.getRequests.push(url);
 
@@ -334,7 +357,7 @@ APIStore.getData = function(context, requestContext, pagination_url) {
  * to the post request.
 */
 APIStore.postForm = function(fields, values, context, requestContext){
-  url = APIStore._buildUrlWithContext(context.actionUrl, requestContext)
+  url = APIStore.buildUrlWithContext(context.actionUrl, requestContext)
 
   if (context.method == 'POST')
     var req = request.post(url);
@@ -396,7 +419,7 @@ APIStore.postForm = function(fields, values, context, requestContext){
  * an API interaction.
 */
 APIStore.requestData = function(data, context, requestContext){
-  url = APIStore._buildUrlWithContext(context.actionUrl, requestContext)
+  url = APIStore.buildUrlWithContext(context.actionUrl, requestContext)
 
   var req;
   if (context.method == 'POST')
@@ -500,6 +523,11 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
 
     case 'API_FETCH_COLLECTION_PAGE':
       APIStore.fetchCollectionPage(action.collectionKey, action.paginationUrl, action.requestContext || {});
+      break;
+
+    case 'API_RELOAD_COLLECTIONS':
+      APIStore.reloadCollections(action.collectionIds, action.requestContext || {});
+      break;
 
     default:
       // do naaathing.
@@ -508,12 +536,13 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
 
 module.exports = {
   addListener: APIStore.addListener,
-  removeListener: APIStore.removeListener,
+  removeListener: APIStore.removeApiListener,
   hasAlreadyRequested: APIStore.hasAlreadyRequested,
   collectionsExist: APIStore.collectionsExist,
   getCollection: APIStore.getCollection,
   getCollectionLastItem: APIStore.getCollectionLastItem,
   getFirstItemByPropertyValue: APIStore.getFirstItemByPropertyValue,
   filter: APIStore.filter,
-  fetchCollection: APIStore.fetchCollection
+  fetchCollection: APIStore.fetchCollection,
+  buildUrlWithContext: APIStore.buildUrlWithContext,
 }
