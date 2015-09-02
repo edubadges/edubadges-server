@@ -1,4 +1,5 @@
 import os
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 from rest_framework import permissions, status, serializers
 from rest_framework.response import Response
@@ -68,7 +69,7 @@ class EarnerBadgeList(APIView):
         try:
             serializer.save()
         except DjangoValidationError as e:
-            raise ValidationError(e.message)
+            raise serializer.ValidationError(e.message)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
