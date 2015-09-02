@@ -4,6 +4,7 @@ from rest_framework import serializers
 
 from .fields import (BadgeStringField, BadgeURLField, BadgeImageURLField,
                      BadgeEmailField)
+from .utils import ObjectView
 
 
 class IssuerSerializerV0_5(serializers.Serializer):
@@ -53,7 +54,7 @@ class IssuerSerializerV1_0(serializers.Serializer):
         if not self.context.get('embedded', False):
             header['@context'] = 'https://w3id.org/openbadges/v1'
         header['type'] = 'Issuer'
-        header['id'] = self.context.get('instance').issuer_url
+        header['id'] = self.context.get('instance').badge['issuer']
 
         result = OrderedDict(header.items() + issuer_props.items())
 

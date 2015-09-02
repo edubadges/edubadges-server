@@ -44,8 +44,8 @@ INSTALLED_APPS = [
 
     'mainsite',
     'issuer',
-    'local_components',
-    'composer',
+    'composition',
+    'verifier',
 
     'badgrbook',
     'badgrbook.canvaslms',

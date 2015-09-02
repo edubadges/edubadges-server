@@ -29,6 +29,10 @@ class ComponentsSerializer(object):
         self.badge = AnnotatedDict(badge_class.copy())
         self.issuer = AnnotatedDict(issuer.copy())
 
+        self.json = badge_instance.copy()
+        self.json['badge'] = badge_class.copy()
+        self.json['badge']['issuer'] = issuer.copy()
+
         self.components = (
             ('issuer', self.issuer),
             ('badge_class', self.badge),
@@ -90,7 +94,6 @@ class ComponentsSerializer(object):
         if self.badge_instance.version.startswith('v1'):
             resources = filter(None, [self.badge_instance['verify']['url'],
                                       self.badge_instance['badge'],
-                                      self.issuer['url'],
                                       self.badge_instance.get('url'),
                                       self.badge_instance.get('id')])
             same_domains = len(set([domain(resource)

@@ -2,6 +2,10 @@ import hashlib
 import re
 import json
 
+from django.core.files.base import ContentFile
+
+from openbadges_bakery import bake, unbake
+import requests
 from rest_framework.serializers import ValidationError
 
 from verifier.utils import (get_badge_instance_from_baked_image,
@@ -21,22 +25,6 @@ def get_verified_badge_instance_from_form(validated_data):
 
     raise ValidationError(
         "No badge instance found from the given form input.")
-
-
-def _get_reference_type(component_reference):
-    try:
-        component_reference = json.loads(component_reference)
-    except Exception:
-        pass
-
-    if isinstance(component_reference, dict):
-        return ("json", component_reference)
-
-    if re.match(r"^http", component_reference):
-        return ("url", component_reference)
-
-    if component_reference.count('.') == 2:
-        return ("jws", component_reference)
 
 
 def _get_email_type(badge_instance):
@@ -68,9 +56,31 @@ def badge_email_matches_emails(badge_instance, verified_addresses):
 
         for email in verified_addresses:
             algorithm_func = hashlib.new(hash_algorithm)
-            algorithm_func.update(salt)
             algorithm_func.update(email.email)
+            algorithm_func.update(salt)
             if (hash_string == algorithm_func.hexdigest()):
-                return True
+                return email.email
 
     return False
+
+
+def verify_baked_image(uploaded_image):
+    try:
+        unbake(uploaded_image)
+    except Exception:
+        return False
+
+    return True
+
+
+def bake_badge_instance(badge_instance, badge_class_image_url):
+    try:
+        unbaked_image = ContentFile(
+            requests.get(badge_class_image_url)._content, "unbaked_image.png")
+        unbaked_image.open()
+        baked_image = bake(unbaked_image, json.dumps(badge_instance, indent=2))
+    except requests.exceptions.SSLError:
+        raise ValidationError(
+            "SSL failure retrieving image " + badge_class_image_url)
+
+    return baked_image

@@ -9,7 +9,7 @@ from rest_framework import serializers
 from mainsite.serializers import WritableJSONField
 from mainsite.utils import installed_apps_list
 from badgeuser.serializers import UserProfileField
-from local_components.format import V1InstanceSerializer
+from composition.format import V1InstanceSerializer
 
 from .models import Issuer, BadgeClass, BadgeInstance
 import utils

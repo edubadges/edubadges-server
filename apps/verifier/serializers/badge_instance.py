@@ -6,6 +6,7 @@ import badge_class
 from .fields import (BadgeDateTimeField, HashString,
                      RecipientSerializer, VerificationObjectSerializer,
                      BadgeURLField, BadgeImageURLField, BadgeStringField)
+from .utils import ObjectView
 
 
 class V0_5Base(serializers.Serializer):
@@ -37,7 +38,7 @@ class V0_5Base(serializers.Serializer):
         if not self.context.get('embedded', False):
             header['@context'] = 'https://w3id.org/openbadges/v1'
         header['type'] = 'Assertion'
-        header['id'] = instance.instance_url
+        header['id'] = instance.badge_instance_url
 
         result = OrderedDict(header.items() + props.items())
 
@@ -93,7 +94,7 @@ class BadgeInstanceSerializerV1_0(serializers.Serializer):
         if not self.context.get('embedded', False):
             header['@context'] = 'https://w3id.org/openbadges/v1'
         header['type'] = 'Assertion'
-        header['id'] = instance.instance_url
+        header['id'] = instance.badge_instance_url  # TODO: JWT has no hosted??
 
         result = OrderedDict(header.items() + instance_props.items())
 
