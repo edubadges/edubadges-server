@@ -360,6 +360,13 @@ class PublicAPITests(APITestCase):
     """
     Tests the ability of an anonymous user to GET one public badge object
     """
+    def setUp(self):
+        # ensure records are published to cache
+        Issuer.cached.get(slug='test-issuer')
+        BadgeClass.cached.get(slug='badge-of-testing')
+        BadgeInstance.cached.get(slug='92219015-18a6-4538-8b6d-2b228e47b8aa', revoked=False)
+        pass
+
     def test_get_issuer_object(self):
         with self.assertNumQueries(0):
             response = self.client.get('/public/issuers/test-issuer')
