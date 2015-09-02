@@ -8,8 +8,8 @@ var concat = require('gulp-concat');
 var sass = require('gulp-sass');
 var livereload = require('gulp-livereload');
 
-var gutil = require('gulp-util')
-var clr = gutil.colors
+var gutil = require('gulp-util');
+var clr = gutil.colors;
 
 //var eslint = require('gulp-eslint');
 //var eslintJsx = require('eslint-plugin-react');
@@ -21,7 +21,7 @@ var size = require('gulp-size');
 
 // Define some paths.
 var sourceWatchPaths = {
-  css: ['./build/sass/**/*.scss'],
+  css: ['./build/scss/**/*.scss'],
   js: ['./build/js/**/*.jsx', './build/js/**/*.js']
 };
 
@@ -74,7 +74,7 @@ var bundle = function(bundler, fileOptions, config){
  *
 **/
 gulp.task('build', function(){
-  var cssbundle = gulp.src('./build/sass/**/*.scss')
+  var cssbundle = gulp.src('./build/scss/**/*.scss')
     .pipe(sass())
     .pipe(concat('screen.css'))
     .pipe(size({showFiles:true, gzip:true}))
@@ -124,9 +124,9 @@ gulp.task('watchScripts', function() {
 
 // I added this so that you see how to run two watch tasks
 gulp.task('css', function () {
-  gulp.watch('./build/sass/**/*.scss', function () {
+  gulp.watch('./build/scss/**/*.scss', function () {
     var updateStart = Date.now();
-    var result = gulp.src('./build/sass/**/*.scss')
+    var result = gulp.src('./build/scss/**/*.scss')
     .pipe(sass())
     .pipe(concat('screen.css'))
     .pipe(gulp.dest('./breakdown/static/css/'))
@@ -142,7 +142,7 @@ gulp.task('css', function () {
 // Rerun tasks whenever a file changes.
 gulp.task('watch', ['css', 'watchScripts'], function() {
   livereload.listen();
-  gulp.watch(sourceWatchPaths.sass, ['css']);
+  gulp.watch(sourceWatchPaths.css, ['css']);
 });
  
 // The default task (called when we run `gulp` from cli)
