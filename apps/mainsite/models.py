@@ -142,6 +142,7 @@ class AbstractBadgeInstance(AbstractComponent):
     def publish(self):
         super(AbstractBadgeInstance, self).publish()
         self.publish_by('slug')
+        self.publish_by('slug', 'revoked')
 
 
 class EmailBlacklist(models.Model):

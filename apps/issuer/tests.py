@@ -361,17 +361,21 @@ class PublicAPITests(APITestCase):
     Tests the ability of an anonymous user to GET one public badge object
     """
     def test_get_issuer_object(self):
-        response = self.client.get('/public/issuers/test-issuer')
-        self.assertEqual(response.status_code, 200)
+        with self.assertNumQueries(0):
+            response = self.client.get('/public/issuers/test-issuer')
+            self.assertEqual(response.status_code, 200)
 
     def test_get_issuer_object_that_doesnt_exist(self):
-        response = self.client.get('/public/issuers/imaginary-issuer')
-        self.assertEqual(response.status_code, 404)
+        with self.assertNumQueries(1):
+            response = self.client.get('/public/issuers/imaginary-issuer')
+            self.assertEqual(response.status_code, 404)
 
     def test_get_badgeclass_image_with_redirect(self):
-        response = self.client.get('/public/badges/badge-of-testing/image')
-        self.assertEqual(response.status_code, 302)
+        with self.assertNumQueries(0):
+            response = self.client.get('/public/badges/badge-of-testing/image')
+            self.assertEqual(response.status_code, 302)
 
     def test_get_assertion_image_with_redirect(self):
-        response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa/image')
-        self.assertEqual(response.status_code, 302)
+        with self.assertNumQueries(0):
+            response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa/image')
+            self.assertEqual(response.status_code, 302)
