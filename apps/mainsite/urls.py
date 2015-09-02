@@ -2,7 +2,7 @@ from django.apps import apps
 from django.conf.urls import patterns, include, url
 from django.conf import settings
 from django.contrib import admin
-from django.views.generic.base import RedirectView
+from django.views.generic.base import RedirectView, TemplateView
 
 from .views import SitemapView, info_view, email_unsubscribe
 
@@ -20,6 +20,9 @@ urlpatterns = patterns('',
     url(r'^favicon\.png[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL)),
     url(r'^favicon\.ico[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL)),
     url(r'^robots\.txt$', RedirectView.as_view(url='%srobots.txt' % settings.STATIC_URL)),
+
+    # Pattern library
+    url(r'^pattern-library$', TemplateView.as_view(template_name='pattern-library.html'), name='pattern-library'),
 
     # Home
     url(r'^$', info_view, name='index'),

@@ -76,7 +76,7 @@ var bundle = function(bundler, fileOptions, config){
 gulp.task('build', function(){
   var cssbundle = gulp.src('./build/sass/**/*.scss')
     .pipe(sass())
-    .pipe(concat('style.css'))
+    .pipe(concat('screen.css'))
     .pipe(size({showFiles:true, gzip:true}))
     .pipe(gulp.dest('./breakdown/static/css/'));
 
@@ -128,7 +128,7 @@ gulp.task('css', function () {
     var updateStart = Date.now();
     var result = gulp.src('./build/sass/**/*.scss')
     .pipe(sass())
-    .pipe(concat('style.css'))
+    .pipe(concat('screen.css'))
     .pipe(gulp.dest('./breakdown/static/css/'))
     .pipe(size({showFiles:true, gzip:true}))
     .pipe(livereload());
