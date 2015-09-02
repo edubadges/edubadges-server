@@ -34,7 +34,13 @@
     "react-dropzone": "~1.0.1",
     "urllite": "^0.5.0",
     "moment": "~2.10.2",
-    "react-social": "~0.1.5"
+    "react-social": "~0.1.5",
+    "browser-sync": "latest",
+    "grunt-contrib-requirejs": "latest",
+    "grunt-autoprefixer": "latest",
+    "grunt-contrib-sass": "latest",
+    "grunt-contrib-watch": "latest",
+    "grunt-shell-spawn": "latest"
   },
   "readmeFilename": "README",
   "scripts": {
