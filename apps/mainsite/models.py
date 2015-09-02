@@ -62,6 +62,10 @@ class AbstractIssuer(AbstractComponent):
     class Meta:
         abstract = True
 
+    def publish(self):
+        super(AbstractIssuer, self).publish()
+        self.publish_by('slug')
+
 
 class AbstractBadgeClass(AbstractComponent):
     """
@@ -87,6 +91,10 @@ class AbstractBadgeClass(AbstractComponent):
     @property
     def owner(self):
         return self.issuer.owner
+
+    def publish(self):
+        super(AbstractBadgeClass, self).publish()
+        self.publish_by('slug')
 
 
 class AbstractBadgeInstance(AbstractComponent):
@@ -130,6 +138,10 @@ class AbstractBadgeInstance(AbstractComponent):
     #          return getattr(settings, 'HTTP_ORIGIN') \
     #              + getattr(settings, 'MEDIA_URL') \
     #              + self.image.name
+
+    def publish(self):
+        super(AbstractBadgeInstance, self).publish()
+        self.publish_by('slug')
 
 
 class EmailBlacklist(models.Model):

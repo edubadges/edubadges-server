@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
 
 from issuer.api import IssuerList
-from issuer.models import Issuer, BadgeClass
+from issuer.models import Issuer, BadgeClass, BadgeInstance
 
 factory = APIRequestFactory()
 
@@ -57,6 +57,12 @@ class IssuerTests(APITestCase):
         self.assertEqual(badge_object['email'], example_issuer_props['email'])
         self.assertIsNotNone(badge_object.get('id'))
         self.assertIsNotNone(badge_object.get('@context'))
+
+        # assert that the record was published to cache
+        with self.assertNumQueries(0):
+            slug = response.data.get('slug')
+            issuer = Issuer.cached.get(slug=slug)
+            self.assertIsNotNone(issuer)
 
     def test_private_issuer_detail_get(self):
         # GET on single badge should work if user has privileges
@@ -150,6 +156,12 @@ class BadgeClassTests(APITestCase):
                 example_badgeclass_props
             )
             self.assertEqual(response.status_code, 201)
+
+            # assert that the record was published to cache
+            with self.assertNumQueries(0):
+                slug = response.data.get('slug')
+                obj = BadgeClass.cached.get(slug=slug)
+                self.assertIsNotNone(obj)
 
     def test_create_criteriatext_badgeclass_for_issuer_authenticated(self):
         """
@@ -269,6 +281,12 @@ class AssertionTests(APITestCase):
         response = self.client.post('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions', assertion)
 
         self.assertEqual(response.status_code, 201)
+
+        # assert that the record was published to cache
+        with self.assertNumQueries(0):
+            slug = response.data.get('slug')
+            obj = BadgeInstance.cached.get(slug=slug)
+            self.assertIsNotNone(obj)
 
     def test_authenticated_editor_can_issue_badge(self):
         # load test image into media files if it doesn't exist
