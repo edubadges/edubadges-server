@@ -1,11 +1,13 @@
 from itertools import chain
 import os
 import uuid
+from django.conf import settings
 from django.core.urlresolvers import reverse
 
 from django.db.models import Q
 
 from rest_framework import serializers
+from badgeuser.models import BadgeUser
 
 from mainsite.serializers import WritableJSONField
 from mainsite.utils import installed_apps_list
@@ -18,7 +20,12 @@ import utils
 
 class AbstractComponentSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
-    created_by = serializers.HyperlinkedRelatedField(view_name='user_detail', lookup_field='username', read_only=True)
+    # created_by = serializers.HyperlinkedRelatedField(view_name='user_detail', lookup_field='username', read_only=True)
+
+    def to_representation(self, instance):
+        representation = super(AbstractComponentSerializer, self).to_representation(instance)
+        representation['created_by'] = (settings.HTTP_ORIGIN+reverse('user_detail', kwargs={'username': BadgeUser.cached.get(pk=instance.created_by_id)})) if instance.created_by_id is not None else None
+        return representation
 
 
 class IssuerSerializer(AbstractComponentSerializer):
@@ -29,8 +36,8 @@ class IssuerSerializer(AbstractComponentSerializer):
     email = serializers.EmailField(max_length=255, required=True, write_only=True)
     description = serializers.CharField(max_length=1024, required=True, write_only=True)
     url = serializers.URLField(max_length=1024, required=True, write_only=True)
-    owner = serializers.HyperlinkedRelatedField(view_name='user_detail', lookup_field='username', read_only=True)
-    # HyperlinkedRelatedField(many=True) refuses to not hit the database, so this is done manually in to_representation
+    # HyperlinkedRelatedField refuses to not hit the database, so this is done manually in to_representation
+    # owner = serializers.HyperlinkedRelatedField(view_name='user_detail', lookup_field='username', read_only=True)
     # editors = serializers.HyperlinkedRelatedField(many=True, view_name='user_detail', lookup_field='username', read_only=True, source='cached_editors')
     # staff = serializers.HyperlinkedRelatedField(many=True, view_name='user_detail', lookup_field='username', read_only=True, source='cached_staff')
 
@@ -73,8 +80,9 @@ class IssuerSerializer(AbstractComponentSerializer):
 
     def to_representation(self, obj):
         representation = super(IssuerSerializer, self).to_representation(obj)
-        representation['editors'] = [reverse('user_detail', kwargs={'username': u.username}) for u in obj.cached_editors()]
-        representation['staff'] = [reverse('user_detail', kwargs={'username': u.username}) for u in obj.cached_staff()]
+        representation['owner'] = (settings.HTTP_ORIGIN+reverse('user_detail', kwargs={'username': BadgeUser.cached.get(pk=obj.created_by_id).username})) if obj.created_by_id is not None else None
+        representation['editors'] = [settings.HTTP_ORIGIN+reverse('user_detail', kwargs={'username': u.username}) for u in obj.cached_editors()]
+        representation['staff'] = [settings.HTTP_ORIGIN+reverse('user_detail', kwargs={'username': u.username}) for u in obj.cached_staff()]
         if self.context.get('embed_badgeclasses', False):
             representation['badgeclasses'] = BadgeClassSerializer(obj.badgeclasses.all(), many=True, context=self.context).data
 

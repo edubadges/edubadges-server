@@ -1,10 +1,11 @@
+import cachemodel
 from django.utils.http import urlquote
 from django.utils.translation import ugettext_lazy as _
 from django.core.mail import send_mail
 from django.contrib.auth.models import AbstractUser
 
 
-class BadgeUser(AbstractUser):
+class BadgeUser(AbstractUser, cachemodel.CacheModel):
     """
     A full-featured user model that can be an Earner, Issuer, or Consumer of Open Badges
     """
@@ -31,3 +32,7 @@ class BadgeUser(AbstractUser):
         Sends an email to this User.
         """
         send_mail(subject, message, from_email, [self.email], **kwargs)
+
+    def publish(self):
+        super(BadgeUser, self).publish()
+        self.publish_by('username')
