@@ -9,7 +9,7 @@ from rest_framework.test import APITestCase
 dir = os.path.dirname(__file__)
 
 
-def setup_basic_1_0():
+def setup_basic_1_0(**kwargs):
     responses.add(
         responses.GET, 'http://a.com/instance',
         body=open(os.path.join(dir, 'testfiles/1_0_basic_instance.json')).read(),
@@ -25,11 +25,12 @@ def setup_basic_1_0():
         body=open(os.path.join(dir, 'testfiles/1_0_basic_issuer.json')).read(),
         status=200, content_type='application/json'
     )
-    responses.add(
-        responses.GET, 'http://a.com/badgeclass_image',
-        body=open(os.path.join(dir, 'testfiles/unbaked_image.png')).read(),
-        status=200, content_type='image/png'
-    )
+    if not kwargs or not 'http://a.com/badgeclass_image' in kwargs.get('exclude'):
+        responses.add(
+            responses.GET, 'http://a.com/badgeclass_image',
+            body=open(os.path.join(dir, 'testfiles/unbaked_image.png')).read(),
+            status=200, content_type='image/png'
+        )
 
 
 class TestSuccessfulBadgeUploads(APITestCase):
@@ -38,8 +39,6 @@ class TestSuccessfulBadgeUploads(APITestCase):
     @responses.activate
     def test_basic_1_0_badge(self):
         setup_basic_1_0()
-
-        # import pdb; pdb.set_trace()
 
         post_input = {
             'recipient': 'test@example.com', 'url': 'http://a.com/instance'
@@ -55,6 +54,20 @@ class TestSuccessfulBadgeUploads(APITestCase):
             get_response.data[0].get('json', {}).get('id'),
             'http://a.com/instance'
         )
+
+    @responses.activate
+    def test_basic_1_0_badge_with_inaccessible_badge_image(self):
+        setup_basic_1_0(**{'exclude': 'http://a.com/badgeclass_image'})
+
+        post_input = {
+            'recipient': 'test@example.com', 'url': 'http://a.com/instance'
+        }
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        response = self.client.post(
+            '/v1/earner/badges', post_input
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertTrue(response.data[0].startswith('Error retrieving image'))
 
 
 class TestCollectionOperations(APITestCase):

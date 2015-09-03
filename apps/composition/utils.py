@@ -82,8 +82,8 @@ def bake_badge_instance(badge_instance, badge_class_image_url):
             requests.get(badge_class_image_url)._content, "unbaked_image.png")
         unbaked_image.open()
         baked_image = bake(unbaked_image, json.dumps(badge_instance, indent=2))
-    except requests.exceptions.SSLError:
+    except requests.exceptions.RequestException as e:
         raise ValidationError(
-            "SSL failure retrieving image " + badge_class_image_url)
-
+            "Error retrieving image {}: {}".format(badge_class_image_url, e.message)
+        )
     return baked_image
