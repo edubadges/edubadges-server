@@ -75,6 +75,14 @@ class BadgeInstance(AbstractBadgeInstance):
 
         return extended_json
 
+    @property
+    def cached_issuer(self):
+        return Issuer.cached.get(pk=self.issuer_id)
+
+    @property
+    def cached_badgeclass(self):
+        return BadgeClass.cached.get(pk=self.badgeclass_id)
+
     def get_absolute_url(self):
         return reverse('badgeinstance_json', kwargs={'slug': self.slug})
 
