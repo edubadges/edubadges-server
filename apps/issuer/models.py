@@ -2,8 +2,10 @@ import datetime
 import json
 import re
 import uuid
+import cachemodel
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
@@ -25,6 +27,15 @@ class Issuer(AbstractIssuer):
     owner = models.ForeignKey(AUTH_USER_MODEL, related_name='issuers',
                               on_delete=models.PROTECT, null=False)
     staff = models.ManyToManyField(AUTH_USER_MODEL, through='IssuerStaff')
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_staff(self):
+        return self.staff.all()
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_editors(self):
+        UserModel = get_user_model()
+        return UserModel.objects.filter(issuerstaff__issuer=self, issuerstaff__editor=True)
 
 
 class IssuerStaff(models.Model):

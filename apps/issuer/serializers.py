@@ -1,6 +1,7 @@
 from itertools import chain
 import os
 import uuid
+from django.core.urlresolvers import reverse
 
 from django.db.models import Q
 
@@ -29,8 +30,9 @@ class IssuerSerializer(AbstractComponentSerializer):
     description = serializers.CharField(max_length=1024, required=True, write_only=True)
     url = serializers.URLField(max_length=1024, required=True, write_only=True)
     owner = serializers.HyperlinkedRelatedField(view_name='user_detail', lookup_field='username', read_only=True)
-    editors = serializers.HyperlinkedRelatedField(many=True, view_name='user_detail', lookup_field='username', read_only=True)
-    staff = serializers.HyperlinkedRelatedField(many=True, view_name='user_detail', lookup_field='username', read_only=True)
+    # HyperlinkedRelatedField(many=True) refuses to not hit the database, so this is done manually in to_representation
+    # editors = serializers.HyperlinkedRelatedField(many=True, view_name='user_detail', lookup_field='username', read_only=True, source='cached_editors')
+    # staff = serializers.HyperlinkedRelatedField(many=True, view_name='user_detail', lookup_field='username', read_only=True, source='cached_staff')
 
     def validate(self, data):
         # TODO: ensure email is a confirmed email in owner/creator's account
@@ -71,6 +73,8 @@ class IssuerSerializer(AbstractComponentSerializer):
 
     def to_representation(self, obj):
         representation = super(IssuerSerializer, self).to_representation(obj)
+        representation['editors'] = [reverse('user_detail', kwargs={'username': u.username}) for u in obj.cached_editors()]
+        representation['staff'] = [reverse('user_detail', kwargs={'username': u.username}) for u in obj.cached_staff()]
         if self.context.get('embed_badgeclasses', False):
             representation['badgeclasses'] = BadgeClassSerializer(obj.badgeclasses.all(), many=True, context=self.context).data
 
