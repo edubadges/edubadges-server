@@ -1,8 +1,18 @@
+from allauth.account.models import EmailAddress
 import cachemodel
 from django.utils.http import urlquote
 from django.utils.translation import ugettext_lazy as _
 from django.core.mail import send_mail
 from django.contrib.auth.models import AbstractUser
+
+
+class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
+    class Meta:
+        proxy = True
+
+    def publish(self):
+        super(CachedEmailAddress, self).publish()
+        self.user.publish()
 
 
 class BadgeUser(AbstractUser, cachemodel.CacheModel):
@@ -36,3 +46,7 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
     def publish(self):
         super(BadgeUser, self).publish()
         self.publish_by('username')
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_emails(self):
+        return EmailAddress.objects.filter(user=self)

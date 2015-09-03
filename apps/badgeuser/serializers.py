@@ -24,7 +24,7 @@ class UserProfileField(serializers.Serializer):
     """
     def to_representation(self, obj):
         addresses = []
-        for emailaddress in obj.emailaddress_set.all():
+        for emailaddress in obj.cached_emails():
             addresses.append(emailaddress.email)
 
         profile = {
