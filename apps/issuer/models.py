@@ -37,6 +37,10 @@ class Issuer(AbstractIssuer):
         UserModel = get_user_model()
         return UserModel.objects.filter(issuerstaff__issuer=self, issuerstaff__editor=True)
 
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_badgeclasses(self):
+        return self.badgeclasses.all()
+
 
 class IssuerStaff(models.Model):
     issuer = models.ForeignKey(Issuer)
@@ -51,6 +55,10 @@ class BadgeClass(AbstractBadgeClass):
     issuer = models.ForeignKey(Issuer, blank=False, null=False,
                                on_delete=models.PROTECT,
                                related_name="badgeclasses")
+
+    def publish(self):
+        super(BadgeClass, self).publish()
+        self.issuer.publish()
 
 
 class BadgeInstance(AbstractBadgeInstance):

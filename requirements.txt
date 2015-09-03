@@ -15,7 +15,7 @@ django-boto==0.3.9
 django-ses==0.6.0
 django-storages==1.1.8
 # CSky models
-git+https://github.com/concentricsky/django-cachemodel.git@v2.0.0
+git+https://github.com/concentricsky/django-cachemodel.git@release/v2.1.x
 git+https://github.com/concentricsky/django-basic-models.git@v2.1.0
 # CSky Client Admin
 git+https://github.com/concentricsky/django-sky-ckeditor.git@v0.9.8
