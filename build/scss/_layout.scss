@@ -1,0 +1,32 @@
+#header {
+  background-color: $header;
+  border-bottom: 1px solid $header-border;
+
+  > .header-x-wrap {
+    @include wrap;
+  }
+}
+
+#footer {
+  background: $footer;
+  border-top: 1px solid $footer-border;
+  height: 100px;
+  padding: 21px 15px;
+
+  > .footer-x-wrap {
+    @include wrap;
+  }
+}
+
+
+.l-horizontal-list {
+  > li {
+    display: inline-block;
+    list-style: none;
+  }
+}
+
+.l-space-between {
+  display: flex;
+  justify-content: space-between;
+}

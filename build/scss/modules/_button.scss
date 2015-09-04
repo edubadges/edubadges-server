@@ -1,0 +1,21 @@
+.button {
+  background-color: $button-primary;
+  border: 1px solid $button-primary-border;
+  border-radius: 4px;
+  color: $button-primary-text;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 1.42857143;
+  margin-bottom: 0;
+  padding: 6px 12px;
+  text-align: center;
+  user-select: none;
+}
+
+.button-secondary {
+  background-color: $button-secondary;
+  border-color: 1px solid $button-secondary-border;
+  color: $button-secondary-text;
+}

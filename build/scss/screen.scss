@@ -1,9 +1,10 @@
 @import 'base';
 @import 'layout';
 
-//@import
-//'modules/auth',
-//'modules/blank',
+@import
+'modules/button',
+'modules/heading',
+'modules/masthead';
 
 //Legacy single-sheet styling to be modularized
 @import 'legacy/style';
