@@ -1,0 +1,19 @@
+.addbadge {
+  border: 2px dashed #ccc;
+  color: #ccc;
+  cursor: pointer;
+  padding: 35px 32px;
+  text-align: center;
+  width: 250px;
+
+  > img {
+    margin-bottom: 10px;
+  }
+  > h1 {
+    font-size: 20px;
+    margin-bottom: 30px;
+  }
+  > p {
+    font-size: 14px;
+  }
+}
