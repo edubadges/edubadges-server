@@ -3,9 +3,11 @@
 $brand-color: #672f33;
 $light-border: #ccc;
 $light-font: #fff;
+$medium-font: #333;
 
 $font-size-large: 34px;
 $font-size-medium: 24px;
+$font-size-small: 16px;
 
 @mixin wrap {
   margin: 0 auto;
@@ -25,14 +27,12 @@ $footer-border: $light-border;
 
 $heading-color: $brand-color;
 
-$button-primary: $brand-color;
-$button-primary-border: $brand-color;
-$button-primary-text: $light-font;
-
-$button-secondary: $light-font;
-$button-secondary-border: #ccc;
-$button-secondary-text: #333;
-
 p, h1, h2, h3, h4, h5, h6 {
   margin: 0;
+}
+label {
+  color: $medium-font;
+  font-size: $font-size-small;
+  font-weight: 500;
+  margin-top: 23px;
 }
