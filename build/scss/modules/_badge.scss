@@ -1,0 +1,42 @@
+.badge_ {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, .16), 0 2px 10px 0 rgba(0, 0, 0, .12);
+  cursor: pointer;
+  transform: scale(1);
+  transition: .5s;
+  width: 250px;
+
+  > header {
+    align-items: center;
+    border-bottom: 1px solid $light-border;
+    display: flex;
+    height: 190px;
+    justify-content: center;
+
+    img {
+      height: 125px;
+      width: 125px;
+    }
+  }
+
+  > .badge-main {
+    align-items: center;
+    display: flex;
+
+    > .badge-info {
+      flex: 0 0 205px;
+      padding: 14px 20px;
+      width: 205px;
+
+      > .badge-classname {
+        font-size: 18px;
+      }
+      > .badge-issuer {
+        font-size: 13px;
+        color: #ccc;
+      }
+    }
+  }
+}
