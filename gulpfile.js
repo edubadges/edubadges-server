@@ -21,7 +21,7 @@ var size = require('gulp-size');
 
 // Define some paths.
 var sourceWatchPaths = {
-  css: ['./build/scss/**/*.scss'],
+  css: ['./build/scss/legacy/*.scss'],
   js: ['./build/js/**/*.jsx', './build/js/**/*.js']
 };
 
@@ -74,9 +74,9 @@ var bundle = function(bundler, fileOptions, config){
  *
 **/
 gulp.task('build', function(){
-  var cssbundle = gulp.src('./build/scss/**/*.scss')
+  var cssbundle = gulp.src('./build/scss/legacy/*.scss')
     .pipe(sass())
-    .pipe(concat('screen.css'))
+    .pipe(concat('style.css'))
     .pipe(size({showFiles:true, gzip:true}))
     .pipe(gulp.dest('./breakdown/static/css/'));
 
@@ -124,11 +124,11 @@ gulp.task('watchScripts', function() {
 
 // I added this so that you see how to run two watch tasks
 gulp.task('css', function () {
-  gulp.watch('./build/scss/**/*.scss', function () {
+  gulp.watch('./build/scss/legacy/*.scss', function () {
     var updateStart = Date.now();
-    var result = gulp.src('./build/scss/**/*.scss')
+    var result = gulp.src('./build/scss/legacy/*.scss')
     .pipe(sass())
-    .pipe(concat('screen.css'))
+    .pipe(concat('style.css'))
     .pipe(gulp.dest('./breakdown/static/css/'))
     .pipe(size({showFiles:true, gzip:true}))
     .pipe(livereload());

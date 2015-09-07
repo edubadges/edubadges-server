@@ -1,4 +1,11 @@
 @import 'base';
+
+label {
+  color: $medium-font;
+  font-size: $font-size-small;
+  font-weight: 500;
+}
+
 @import 'layout';
 
 @import
@@ -9,6 +16,3 @@
 'modules/form',
 'modules/heading',
 'modules/masthead';
-
-//Legacy styling to be modularized
-@import 'legacy/style';
