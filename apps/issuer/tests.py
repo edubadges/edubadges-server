@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
 
 from issuer.api import IssuerList
-from issuer.models import Issuer, BadgeClass
+from issuer.models import Issuer, BadgeClass, BadgeInstance
 
 factory = APIRequestFactory()
 
@@ -57,6 +57,12 @@ class IssuerTests(APITestCase):
         self.assertEqual(badge_object['email'], example_issuer_props['email'])
         self.assertIsNotNone(badge_object.get('id'))
         self.assertIsNotNone(badge_object.get('@context'))
+
+        # assert that the issuer was published to and fetched from the cache
+        with self.assertNumQueries(0):
+            slug = response.data.get('slug')
+            response = self.client.get('/v1/issuer/issuers/{}'.format(slug))
+            self.assertEqual(response.status_code, 200)
 
     def test_private_issuer_detail_get(self):
         # GET on single badge should work if user has privileges
@@ -150,6 +156,12 @@ class BadgeClassTests(APITestCase):
                 example_badgeclass_props
             )
             self.assertEqual(response.status_code, 201)
+
+            # assert that the BadgeClass was published to and fetched from the cache
+            with self.assertNumQueries(0):
+                slug = response.data.get('slug')
+                response = self.client.get('/v1/issuer/issuers/test-issuer/badges/{}'.format(slug))
+                self.assertEqual(response.status_code, 200)
 
     def test_create_criteriatext_badgeclass_for_issuer_authenticated(self):
         """
@@ -270,6 +282,12 @@ class AssertionTests(APITestCase):
 
         self.assertEqual(response.status_code, 201)
 
+        # assert that the BadgeInstance was published to and fetched from cache
+        with self.assertNumQueries(0):
+            slug = response.data.get('slug')
+            response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions/{}'.format(slug))
+            self.assertEqual(response.status_code, 200)
+
     def test_authenticated_editor_can_issue_badge(self):
         # load test image into media files if it doesn't exist
         self.ensure_image_exists(BadgeClass.objects.get(slug='badge-of-testing'))
@@ -342,18 +360,29 @@ class PublicAPITests(APITestCase):
     """
     Tests the ability of an anonymous user to GET one public badge object
     """
+    def setUp(self):
+        # ensure records are published to cache
+        Issuer.cached.get(slug='test-issuer')
+        BadgeClass.cached.get(slug='badge-of-testing')
+        BadgeInstance.cached.get(slug='92219015-18a6-4538-8b6d-2b228e47b8aa', revoked=False)
+        pass
+
     def test_get_issuer_object(self):
-        response = self.client.get('/public/issuers/test-issuer')
-        self.assertEqual(response.status_code, 200)
+        with self.assertNumQueries(0):
+            response = self.client.get('/public/issuers/test-issuer')
+            self.assertEqual(response.status_code, 200)
 
     def test_get_issuer_object_that_doesnt_exist(self):
-        response = self.client.get('/public/issuers/imaginary-issuer')
-        self.assertEqual(response.status_code, 404)
+        with self.assertNumQueries(1):
+            response = self.client.get('/public/issuers/imaginary-issuer')
+            self.assertEqual(response.status_code, 404)
 
     def test_get_badgeclass_image_with_redirect(self):
-        response = self.client.get('/public/badges/badge-of-testing/image')
-        self.assertEqual(response.status_code, 302)
+        with self.assertNumQueries(0):
+            response = self.client.get('/public/badges/badge-of-testing/image')
+            self.assertEqual(response.status_code, 302)
 
     def test_get_assertion_image_with_redirect(self):
-        response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa/image')
-        self.assertEqual(response.status_code, 302)
+        with self.assertNumQueries(0):
+            response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa/image')
+            self.assertEqual(response.status_code, 302)

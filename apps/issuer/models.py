@@ -2,8 +2,10 @@ import datetime
 import json
 import re
 import uuid
+import cachemodel
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
@@ -26,6 +28,19 @@ class Issuer(AbstractIssuer):
                               on_delete=models.PROTECT, null=False)
     staff = models.ManyToManyField(AUTH_USER_MODEL, through='IssuerStaff')
 
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_staff(self):
+        return self.staff.all()
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_editors(self):
+        UserModel = get_user_model()
+        return UserModel.objects.filter(issuerstaff__issuer=self, issuerstaff__editor=True)
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_badgeclasses(self):
+        return self.badgeclasses.all()
+
 
 class IssuerStaff(models.Model):
     issuer = models.ForeignKey(Issuer)
@@ -41,6 +56,10 @@ class BadgeClass(AbstractBadgeClass):
                                on_delete=models.PROTECT,
                                related_name="badgeclasses")
 
+    def publish(self):
+        super(BadgeClass, self).publish()
+        self.issuer.publish()
+
 
 class BadgeInstance(AbstractBadgeInstance):
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False,
@@ -55,6 +74,14 @@ class BadgeInstance(AbstractBadgeInstance):
         extended_json['badge']['issuer'] = self.issuer.json
 
         return extended_json
+
+    @property
+    def cached_issuer(self):
+        return Issuer.cached.get(pk=self.issuer_id)
+
+    @property
+    def cached_badgeclass(self):
+        return BadgeClass.cached.get(pk=self.badgeclass_id)
 
     def get_absolute_url(self):
         return reverse('badgeinstance_json', kwargs={'slug': self.slug})

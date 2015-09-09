@@ -161,7 +161,7 @@ class IssuerDetail(AbstractIssuerAPIEndpoint):
         serializer: IssuerSerializer
         """
         try:
-            current_issuer = Issuer.objects.get(slug=slug)
+            current_issuer = Issuer.cached.get(slug=slug)
         except Issuer.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -414,17 +414,17 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
         serializer: BadgeClassSerializer
         """
 
-        current_issuer_queryset = self.queryset.filter(issuer__slug=issuerSlug)
-        current_badgeclass = self.get_object(badgeSlug, queryset=current_issuer_queryset)
-
-        if current_badgeclass is None:
+        try:
+            current_badgeclass = BadgeClass.cached.get(slug=badgeSlug)
+            self.check_object_permissions(self.request, current_badgeclass)
+        except (BadgeClass.DoesNotExist, PermissionDenied):
             return Response(
                 "BadgeClass %s could not be found, or inadequate permissions." % badgeSlug,
                 status=status.HTTP_404_NOT_FOUND
             )
-
-        serializer = BadgeClassSerializer(current_badgeclass, context={'request': request})
-        return Response(serializer.data)
+        else:
+            serializer = BadgeClassSerializer(current_badgeclass, context={'request': request})
+            return Response(serializer.data)
 
     def delete(self, request, issuerSlug, badgeSlug):
         """
@@ -585,13 +585,13 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
         ---
         serializer: BadgeInstanceSerializer
         """
-        current_assertion = self.get_object(assertionSlug)
-        if current_assertion is None:
+        try:
+            current_assertion = BadgeInstance.cached.get(slug=assertionSlug)
+        except (BadgeInstance.DoesNotExist, PermissionDenied):
             return Response(status=status.HTTP_404_NOT_FOUND)
-
-        serializer = BadgeInstanceSerializer(current_assertion, context={'request': request})
-
-        return Response(serializer.data)
+        else:
+            serializer = BadgeInstanceSerializer(current_assertion, context={'request': request})
+            return Response(serializer.data)
 
     def delete(self, request, issuerSlug, badgeSlug, assertionSlug):
         """

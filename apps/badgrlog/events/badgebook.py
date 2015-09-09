@@ -45,7 +45,7 @@ class BadgeObjectiveCreatedEvent(BaseBadgrLtiEvent):
     def to_representation(self):
         data = super(BadgeObjectiveCreatedEvent, self).to_representation()
         data.update({
-            'badge_class': self.badge_objective.get('badge_class').get('json').get('id'),
+            'badge_class': self.badge_objective.get('badge_class', None),
             'objective_id': self.badge_objective.get('objective_id', None),
             'objective_type': self.badge_objective.get('objective_type', None),
             'objective_name': self.badge_objective.get('objective_name', None),

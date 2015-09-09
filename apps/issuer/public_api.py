@@ -23,7 +23,7 @@ class JSONComponentView(AbstractIssuerAPIEndpoint):
 
     def get(self, request, slug):
         try:
-            current_object = self.model.objects.get(slug=slug)
+            current_object = self.model.cached.get(slug=slug)
         except self.model.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
@@ -41,13 +41,13 @@ class ComponentPropertyDetailView(APIView):
         pass
 
     def get(self, request, slug):
-        current_query = self.queryset.filter(slug=slug)
-        if not current_query.exists():
+        try:
+            current_object = self.model.cached.get(slug=slug)
+        except self.model.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-
-        current_object = current_query[0]
-        self.log(current_object)
-        return redirect(getattr(current_object, self.prop).url)
+        else:
+            self.log(current_object)
+            return redirect(getattr(current_object, self.prop).url)
 
 
 class IssuerJson(JSONComponentView):
@@ -66,7 +66,6 @@ class IssuerImage(ComponentPropertyDetailView):
     """
     model = Issuer
     prop = 'image'
-    queryset = Issuer.objects.exclude(image=None)
 
     def log(self, obj):
         logger.event(badgrlog.IssuerImageRetrievedEvent(obj, self.request))
@@ -88,7 +87,6 @@ class BadgeClassImage(ComponentPropertyDetailView):
     """
     model = BadgeClass
     prop = 'image'
-    queryset = BadgeClass.objects.exclude(image=None)
 
     def log(self, obj):
         logger.event(badgrlog.BadgeClassImageRetrievedEvent(obj, self.request))
@@ -121,7 +119,7 @@ class BadgeInstanceJson(JSONComponentView):
 
     def get(self, request, slug):
         try:
-            current_object = self.model.objects.get(slug=slug)
+            current_object = self.model.cached.get(slug=slug)
         except self.model.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
@@ -146,8 +144,16 @@ class BadgeInstanceJson(JSONComponentView):
 class BadgeInstanceImage(ComponentPropertyDetailView):
     model = BadgeInstance
     prop = 'image'
-    queryset = BadgeInstance.objects.filter(revoked=False)
 
     def log(self, badge_instance):
         logger.event(badgrlog.BadgeInstanceDownloadedEvent(badge_instance, self.request))
+
+    def get(self, request, slug):
+        try:
+            current_object = self.model.cached.get(slug=slug, revoked=False)
+        except self.model.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            self.log(current_object)
+            return redirect(getattr(current_object, self.prop).url)
 
