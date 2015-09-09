@@ -377,4 +377,6 @@ try:
 except ImportError as e:
     sys.stderr.write("no settings_local found, setting DEBUG=True...\n")
     DEBUG = True
-    pass
+finally:
+    if not os.path.exists(LOGS_DIR):
+        os.makedirs(LOGS_DIR)
