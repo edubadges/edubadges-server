@@ -136,7 +136,7 @@ MenuStore.storeInitialData = function() {
     return;
 
   // try to load the variable declared as initialData in the view template
-  if (initialData.installed_apps.indexOf('composer') > -1)
+  if (initialData.installed_apps.indexOf('composition') > -1)
     MenuStore.menus.roleMenu.items.push(
       { title: "My Badges", url: "/earner/badges", icon: "fa-certificate", children: [] },
       { title: "My Collections", url: "/earner/collections", icon: "folder", children: [] }
