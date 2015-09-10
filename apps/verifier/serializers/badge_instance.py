@@ -6,7 +6,6 @@ import badge_class
 from .fields import (BadgeDateTimeField, HashString,
                      RecipientSerializer, VerificationObjectSerializer,
                      BadgeURLField, BadgeImageURLField, BadgeStringField)
-from .utils import ObjectView
 
 
 class V0_5Base(serializers.Serializer):
@@ -20,15 +19,12 @@ class V0_5Base(serializers.Serializer):
     evidence = BadgeURLField(required=False)
 
     def to_representation(self, instance):
-        obj = ObjectView(instance.json)
-        self.context['recipient_id'] = instance.recipient_id
-
-        props = super(V0_5Base, self).to_representation(obj)
+        props = super(V0_5Base, self).to_representation(instance)
         props['recipient'] = RecipientSerializer({
-            'recipient': instance.recipient_id,
+            'recipient': self.context.get('recipient_id'),
             'hashed': False,
             'type': 'email'
-        }, context={'recipient_id': instance.recipient_id}).data
+        }, context={'recipient_id': self.context.get('recipient_id')}).data
 
         for prop in (('issued_on', 'issuedOn'),):
             if props.get(prop[0]) is not None:
@@ -38,13 +34,13 @@ class V0_5Base(serializers.Serializer):
         if not self.context.get('embedded', False):
             header['@context'] = 'https://w3id.org/openbadges/v1'
         header['type'] = 'Assertion'
-        header['id'] = instance.badge_instance_url
+        header['id'] = self.context['instance_url']
 
         result = OrderedDict(header.items() + props.items())
 
         badge_class_serializer = badge_class.BadgeClassSerializerV0_5(
-            instance.json.get('badge'), context={'instance': instance, 'embedded': True}
-        )
+            self.context['badge_class'],
+            context={'embedded': True})
         result['badge'] = badge_class_serializer.data
 
         return result
@@ -59,7 +55,7 @@ class BadgeInstanceSerializerV0_5_1(V0_5Base):
     salt = BadgeStringField(write_only=True, required=False)
 
 
-class BadgeInstanceSerializerV0_5_0(V0_5Base):
+class BadgeInstanceSerializerV0_5(V0_5Base):
     """
     Serializer for the 0.5.0 specification version before the possibility of
     hashing a recipient identifier was introduced.
@@ -84,23 +80,35 @@ class BadgeInstanceSerializerV1_0(serializers.Serializer):
     def to_representation(self, instance):
         """
         Converts a 1.0 Badge Instance to serialized verbose v1.1 style output
-        """
-        obj = ObjectView(instance.json)
-        self.context['recipient_id'] = instance.recipient_id
 
+        Requred context:
+            * instance_id: Populates the `id` field.
+            * badge_class: Object to serialize for .data within the `badge`
+            field.
+            * issuer: Object required as context for a BadgeClassSerializerV1_0.
+        """
         instance_props = super(
-            BadgeInstanceSerializerV1_0, self).to_representation(obj)
+            BadgeInstanceSerializerV1_0, self).to_representation(instance)
         header = OrderedDict()
         if not self.context.get('embedded', False):
             header['@context'] = 'https://w3id.org/openbadges/v1'
         header['type'] = 'Assertion'
-        header['id'] = instance.badge_instance_url  # TODO: JWT has no hosted??
+        if instance['verify']['type'] == 'hosted':
+            if self.context.get('instance_id'):
+                # We ignore the instance[verify][url] in favor of being passed
+                # through the context the place with which we actually retreived
+                # the raw assertion/badge instance from prior to serialization.
+                header['id'] = self.context['instance_id']
+            else:
+                header['id'] = instance['verify']['url']
 
         result = OrderedDict(header.items() + instance_props.items())
 
         badge_class_serializer = badge_class.BadgeClassSerializerV1_0(
-            instance.badge, context={'instance': instance, 'embedded': True}
-        )
+            self.context['badge_class'],
+            context={'badge_class_id': instance['badge'],  # A URL in v1 badges
+                     'issuer': self.context['issuer'],
+                     'embedded': True})
         result['badge'] = badge_class_serializer.data
 
         return result

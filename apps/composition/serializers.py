@@ -104,21 +104,27 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
         # TODO: Pass this in context not via a ComponentsSerializer attribute
         components.recipient_id = matched_email
 
-        badge_instance_json = components.badge_instance.serializer(
-            components, context={'instance': components, 'embedded': True}).data
-        badge_class_json = badge_instance_json['badge'].copy()
-        badge_class_json['@context'] = 'https://w3id.org/openbadges/v1'
-        issuer_json = badge_class_json['issuer'].copy()
-        issuer_json['@context'] = 'https://w3id.org/openbadges/v1'
 
+        # Create local component instance `json` fields
+        badge_instance_json = \
+            components.badge_instance.serializer(badge_instance, context={
+                'instance_url': badge_instance_url,  # To populate BI id
+                'recipient_id': badge_check.matched_email,  # For 0.5 badges
+                # A BadgeInstanceSerializer will recursively instantiate
+                # serializers of the other components to nest a representation
+                # of their .data for BI['badge'] and BI['badge']['issuer']
+                'badge_class': badge_class,  # To instantiate the BC Serializer
+                'issuer': issuer}).data  # To instantiate the Issuer Serializer
+
+        # Create local component instances
         new_issuer = LocalIssuer.objects.create(**{
             'name': issuer['name'],
-            'json': issuer_json,
+            'json': badge_instance_json['badge']['issuer'],
         })
 
         new_badge_class = LocalBadgeClass.objects.create(**{
             'name': badge_class['name'],
-            'json': badge_class_json,
+            'json': badge_instance_json['badge'],
             'issuer': new_issuer,
         })
 

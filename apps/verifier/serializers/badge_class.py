@@ -5,7 +5,6 @@ from rest_framework import serializers
 import issuer
 from .fields import (AlignmentObjectSerializer, BadgeStringField,
                      BadgeURLField, BadgeImageURLField)
-from .utils import ObjectView
 
 
 class BadgeClassSerializerV0_5(serializers.Serializer):
@@ -21,9 +20,8 @@ class BadgeClassSerializerV0_5(serializers.Serializer):
     issuer = issuer.IssuerSerializerV0_5(write_only=True, required=True)
 
     def to_representation(self, badge):
-        obj = ObjectView(dict(badge))
         badge_props = super(
-            BadgeClassSerializerV0_5, self).to_representation(obj)
+            BadgeClassSerializerV0_5, self).to_representation(badge)
 
         header = OrderedDict()
         if not self.context.get('embedded', False):
@@ -32,9 +30,8 @@ class BadgeClassSerializerV0_5(serializers.Serializer):
 
         result = OrderedDict(header.items() + badge_props.items())
         issuer_serializer = issuer.IssuerSerializerV0_5(
-            badge.get('issuer'),
-            context=self.context
-        )
+            badge['issuer'],
+            context=self.context)
         result['issuer'] = issuer_serializer.data
 
         return result
@@ -53,20 +50,24 @@ class BadgeClassSerializerV1_0(serializers.Serializer):
     tags = serializers.ListField(child=BadgeStringField(), required=False)
 
     def to_representation(self, badge):
-        obj = ObjectView(dict(badge))
+        """
+        Required context:
+            * badge_class_id: Populates the `id` field.
+            * issuer: Object to serialize for .data within the `issuer` field.
+        """
         badge_props = super(
-            BadgeClassSerializerV1_0, self).to_representation(obj)
+            BadgeClassSerializerV1_0, self).to_representation(badge)
 
         header = OrderedDict()
         if not self.context.get('embedded', False):
             header['@context'] = 'https://w3id.org/openbadges/v1'
         header['type'] = 'BadgeClass'
-        header['id'] = self.context.get('instance').badge_instance['badge']
+        header['id'] = self.context['badge_class_id']
 
         result = OrderedDict(header.items() + badge_props.items())
 
         issuer_serializer = issuer.IssuerSerializerV1_0(
-            self.context.get('instance').issuer, context=self.context
+            self.context['issuer'], context=self.context
         )
         result['issuer'] = issuer_serializer.data
 
