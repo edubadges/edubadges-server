@@ -20,7 +20,7 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     image = serializers.ImageField(required=False, write_only=True)
     url = serializers.URLField(required=False, write_only=True)
-    assertion = serializers.DictField(required=False, write_only=True)
+    assertion = serializers.CharField(required=False, write_only=True)
 
     # Populated by to_representation
     json = V1InstanceSerializer(read_only=True)
