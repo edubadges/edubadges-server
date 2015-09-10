@@ -1,7 +1,7 @@
 {
-  "name": "BadgeTrust",
-  "description": "BadgeTrust is a 3-facet application to enable rich badge ecosystem participation by issuers, earners, and consumers.",
-  "version": "0.0.2",
+  "name": "badgr-server",
+  "description": "Badgr Server is an issuing and earner badge management platform that uses the Open Badges Specification.",
+  "version": "0.2.20",
   "keywords": [
     "open badges"
   ],
@@ -23,15 +23,6 @@
     "grunt-contrib-watch": "latest",
     "grunt-env": "^0.4.4",
     "grunt-shell-spawn": "latest",
-    "gulp": "~3.8.10",
-    "gulp-browserify": "~0.5.0",
-    "gulp-concat": "~2.4.2",
-    "gulp-livereload": "~3.0.2",
-    "gulp-sass": "~2.0.1",
-    "gulp-size": "~1.1.0",
-    "gulp-uglify": "~1.0.2",
-    "gulp-util": "~3.0.1",
-    "jshint-stylish": "~1.0.0",
     "moment": "~2.10.2",
     "object-assign": "~2.0.0",
     "path-to-regexp": "~1.0.2",
@@ -41,12 +32,6 @@
     "reactify": "~0.17.1",
     "superagent": "~0.21.0",
     "urllite": "^0.5.0",
-    "vinyl-buffer": "~1.0.0",
-    "vinyl-source-stream": "~1.0.0",
     "watchify": "~2.2.1"
-  },
-  "readmeFilename": "README",
-  "scripts": {
-    "gulp-build": "gulp build"
   }
 }
