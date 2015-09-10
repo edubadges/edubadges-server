@@ -23,12 +23,6 @@ urlpatterns = patterns('',
 
     # Pattern library
     url(r'^pattern-library$', TemplateView.as_view(template_name='pattern-library.html'), name='pattern-library'),
-    # Static templates
-    url(r'^pattern-work/my-badges$', TemplateView.as_view(template_name='pattern-work/my-badges.html'), name='static-my-badges'),
-    url(r'^pattern-work/my-issuers$', TemplateView.as_view(template_name='pattern-work/my-issuers.html'), name='static-my-issuers'),
-    url(r'^pattern-work/active-badges$', TemplateView.as_view(template_name='pattern-work/active-badges.html'), name='static-active-badges'),
-    url(r'^pattern-work/add-collection-modal$', TemplateView.as_view(template_name='pattern-work/add-collection-modal.html'), name='static-add-collection-modal'),
-    url(r'^pattern-work/add-issuers-modal$', TemplateView.as_view(template_name='pattern-work/add-issuers-modal.html'), name='static-add-issuers-modal'),
 
     # Home
     url(r'^$', info_view, name='index'),
