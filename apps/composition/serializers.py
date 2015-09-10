@@ -13,8 +13,7 @@ from .models import (LocalBadgeInstance, LocalBadgeClass, LocalIssuer,
                      Collection, LocalBadgeInstanceCollection)
 from .utils import (get_verified_badge_instance_from_form,
                     badge_email_matches_emails,
-                    verify_baked_image, bake_badge_instance)
-
+                    use_or_bake_badge_instance_image)
 
 class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
     # Form submission fields as populated by request.data in the API
@@ -105,19 +104,6 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
         # TODO: Pass this in context not via a ComponentsSerializer attribute
         components.recipient_id = matched_email
 
-        # Create a baked badge instance, or use a provided baked badge instance
-        # from the form, and assign it to our badge instance in the database.
-        uploaded_image = validated_data.get('image')
-        if uploaded_image and verify_baked_image(uploaded_image):
-            baked_badge_instance = uploaded_image  # InMemoryUploadedFile
-        else:
-            baked_badge_instance = bake_badge_instance(
-                badge_instance, badge_class['image'])  # ContentFile
-        # Normalize filename
-        _, image_extension = os.path.splitext(baked_badge_instance.name)
-        baked_badge_instance.name = \
-            'local_badgeinstance_' + str(uuid.uuid4()) + image_extension
-
         badge_instance_json = components.badge_instance.serializer(
             components, context={'instance': components, 'embedded': True}).data
         badge_class_json = badge_instance_json['badge'].copy()
@@ -142,7 +128,8 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
             'badgeclass': new_badge_class,
             'issuer': new_issuer,
             'email': matched_email,
-            'image': baked_badge_instance,
+            'image': use_or_bake_badge_instance_image(
+                validated_data.get('image'), badge_instance, badge_class)
         })
         new_instance.json['image'] = new_instance.image_url()
         new_instance.save()
