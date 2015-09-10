@@ -37,6 +37,8 @@ CACHES = {
     }
 }
 
+
+
 # celery
 BROKER_URL = 'amqp://localhost:5672/'
 CELERY_RESULT_BACKEND = 'djcelery.backends.cache:CacheBackend'
@@ -92,3 +94,56 @@ DEFAULT_FROM_EMAIL = ''
 #    '127.0.0.1',
 #)
 #DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECTS': False}
+
+
+
+
+LOGS_DIR = os.path.join(TOP_DIR, 'logs')
+if not os.path.exists(LOGS_DIR):
+    os.makedirs(LOGS_DIR)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': [],
+            'class': 'django.utils.log.AdminEmailHandler'
+        },
+
+        # badgr events log to disk by default
+        'badgr_events': {
+            'level': 'INFO',
+            'formatter': 'json',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOGS_DIR, 'badgr_events.log')
+        }
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+
+        # Badgr.Events emits all badge related activity
+        'Badgr.Events': {
+            'handlers': ['badgr_events'],
+            'level': 'INFO',
+            'propagate': False,
+
+        }
+
+    },
+    'formatters': {
+        'default': {
+            'format': '%(asctime)s %(levelname)s %(module)s %(message)s'
+        },
+        'json': {
+            '()': 'mainsite.formatters.JsonFormatter',
+            'format': '%(asctime)s',
+            'datefmt': '%Y-%m-%dT%H:%M:%S%z',
+        }
+    },
+}
+

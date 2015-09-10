@@ -195,15 +195,9 @@ FIXTURE_DIRS = [
 #
 ##
 
-LOGS_DIR = os.path.join(TOP_DIR, 'logs')
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'filters': {
-        # 'badgr': {
-        #     '()': 'mainsite.logs.BadgrFilter'
-        # }
-    },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
@@ -211,13 +205,12 @@ LOGGING = {
             'class': 'django.utils.log.AdminEmailHandler'
         },
 
-        # badgr events log to disk by default
-        'badgr_events': {
-            'level': 'INFO',
-            'formatter': 'json',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(LOGS_DIR, 'badgr_events.log')
-        }
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+
+        },
     },
     'loggers': {
         'django.request': {
@@ -228,10 +221,9 @@ LOGGING = {
 
         # Badgr.Events emits all badge related activity
         'Badgr.Events': {
-            'handlers': ['badgr_events'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
-
         }
 
     },
@@ -377,6 +369,4 @@ try:
 except ImportError as e:
     sys.stderr.write("no settings_local found, setting DEBUG=True...\n")
     DEBUG = True
-finally:
-    if not os.path.exists(LOGS_DIR):
-        os.makedirs(LOGS_DIR)
+
