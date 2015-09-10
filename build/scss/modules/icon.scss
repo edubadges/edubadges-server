@@ -1,0 +1,71 @@
+.icon_ {
+  display: inline-block;
+  padding-left: $layout-spacing*4;
+  position: relative;
+
+  &::after {
+    background-position: left center;
+    background-repeat: no-repeat;
+    content: '';
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: $layout-spacing*4;
+  }
+
+}
+
+.icon_-small {
+  padding-left: $layout-spacing*2;
+
+  &::after {
+    width: $layout-spacing*2;
+  }
+
+}
+
+.icon_-right {
+  padding-left: 0;
+  padding-right: $layout-spacing*4;
+
+  &::after {
+    background-position: right center;
+    left: auto;
+    right: 0;
+  }
+
+}
+
+.icon_-right.icon_-small {
+  padding-left: 0;
+  padding-right: $layout-spacing*2;
+}
+
+// Large Icons
+
+.icon_-add {
+
+  &::after {
+    background-image: url('images/icon-add.svg');
+  }
+  
+}
+
+// Small Icons
+
+.icon_-dropdown {
+
+  &::after {
+    background-image: url('images/icon-dropdown.svg');
+  }
+
+}
+
+.icon_-dropdownlight {
+
+  &::after {
+    background-image: url('images/icon-dropdownlight.svg');
+  }
+  
+}
