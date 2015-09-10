@@ -86,7 +86,7 @@ class BadgeDateTimeField(BadgePotentiallyEmptyField, serializers.Field):
                     result = datetime.combine(
                         parse_date(value), datetime.min.time()
                     )
-                except TypeError:
+                except (TypeError, ValueError):
                     self.fail('bad_str')
             return result
         elif isinstance(value, (int, float)):
