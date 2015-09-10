@@ -3,3 +3,4 @@
 from .issuer import *
 from .public import *
 from .badgebook import *
+from .composer import *
