@@ -18,7 +18,7 @@ module.exports = function(grunt) {
                 tasks: ['sass', 'autoprefixer', 'bs-inject']
             },
             staticFiles: {
-                files: ['**/*.html','**/*.php', '**/*.js'],
+                files: ['**/*.html','**/*.php'],
                 tasks: ['bs-inject']
             }
         },
