@@ -12,5 +12,5 @@ class Command(BaseCommand):
         Builds gulp resources.
         Gulp must be installed, and node_modules must be populated with `npm install`
         """
-        call(['gulp', 'build'])
+        call(['grunt', 'dist'])
         #management.call_command('test', verbosity=1)
