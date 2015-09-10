@@ -1,6 +1,8 @@
 import hashlib
-import re
 import json
+import os
+import re
+import uuid
 
 from django.core.files.base import ContentFile
 
@@ -67,6 +69,22 @@ def badge_email_matches_emails(badge_instance, verified_addresses):
     return False
 
 
+def use_or_bake_badge_instance_image(uploaded_image, badge_instance,
+                                     badge_class):
+    # Create a baked badge instance, or use a provided baked badge instance
+    # from the form, and assign it to our badge instance in the database.
+    if uploaded_image and verify_baked_image(uploaded_image):
+        baked_badge_instance = uploaded_image  # InMemoryUploadedFile
+    else:
+        baked_badge_instance = bake_badge_instance(
+            badge_instance, badge_class['image'])  # ContentFile
+    # Normalize filename
+    _, image_extension = os.path.splitext(baked_badge_instance.name)
+    baked_badge_instance.name = \
+        'local_badgeinstance_' + str(uuid.uuid4()) + image_extension
+    return baked_badge_instance
+
+
 def verify_baked_image(uploaded_image):
     try:
         unbake(uploaded_image)
@@ -84,6 +102,6 @@ def bake_badge_instance(badge_instance, badge_class_image_url):
         baked_image = bake(unbaked_image, json.dumps(badge_instance, indent=2))
     except requests.exceptions.RequestException as e:
         raise ValidationError(
-            "Error retrieving image {}: {}".format(badge_class_image_url, e.message)
-        )
+            "Error retrieving image {}: {}".format(
+                badge_class_image_url, e.message))
     return baked_image
