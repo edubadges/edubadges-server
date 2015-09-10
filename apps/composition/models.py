@@ -71,6 +71,15 @@ class LocalBadgeInstanceCollection(models.Model):
 
     class Meta:
         unique_together = ('instance', 'collection')
+        verbose_name = "BadgeInstance in a Collection"
+        verbose_name_plural = "BadgeInstances in Collections"
+
+    def __unicode__(self):
+        return u'{} in {}\'s {}'.format(
+            self.instance.badgeclass.name,
+            self.instance.recipient_user.username,
+            self.collection.name
+        )
 
 
 class CollectionPermission(models.Model):
