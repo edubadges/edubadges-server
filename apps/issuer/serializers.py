@@ -168,8 +168,9 @@ class BadgeClassSerializer(AbstractComponentSerializer):
 
 class BadgeInstanceSerializer(AbstractComponentSerializer):
     json = WritableJSONField(max_length=16384, read_only=True, required=False)
-    issuer = serializers.HyperlinkedRelatedField(view_name='issuer_json', read_only=True,  lookup_field='slug')
-    badgeclass = serializers.HyperlinkedRelatedField(view_name='badgeclass_json', read_only=True, lookup_field='slug')
+    # HyperlinkedRelatedField refuses to not hit the database, so this is done manually in to_representation
+    #issuer = serializers.HyperlinkedRelatedField(view_name='issuer_json', read_only=True,  lookup_field='slug')
+    #badgeclass = serializers.HyperlinkedRelatedField(view_name='badgeclass_json', read_only=True, lookup_field='slug')
     slug = serializers.CharField(max_length=255, read_only=True)
     image = serializers.ImageField(read_only=True)  # use_url=True, might be necessary
     email = serializers.EmailField(max_length=255)
@@ -184,7 +185,10 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
         if self.context.get('extended_json'):
             self.fields['json'] = V1InstanceSerializer(source='extended_json')
 
-        return super(BadgeInstanceSerializer, self).to_representation(instance)
+        representation = super(BadgeInstanceSerializer, self).to_representation(instance)
+        representation['issuer'] = settings.HTTP_ORIGIN+reverse('issuer_json', kwargs={'slug': instance.cached_issuer.slug})
+        representation['badge_class'] = settings.HTTP_ORIGIN+reverse('badgeclass_json', kwargs={'slug': instance.cached_badgeclass.slug})
+        return representation
 
     def create(self, validated_data, **kwargs):
         # Assemble Badge Object
