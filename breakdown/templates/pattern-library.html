@@ -250,24 +250,79 @@
 
 			<section data-pattern="patterns">
 
-				<article data-pattern="pattern" id="badge-logo"> 
-					<code data-pattern="code">
-                        <a class="navbar-brand" href="/issuer"><span>Badgr</span></a>
-					</code>
-				</article>
-
-				<article data-pattern="pattern" id="example-pattern-2"> 
-					<div data-pattern="pattern-secondary" id="button">
-						<code data-pattern="code" data-pattern-helper="spacer">
-							<button data-pattern-helper="example">Example 2 Secondary 1 (With Spacer Helper)</button>
-						</code>
-					</div>
-
+				<article data-pattern="pattern" id="buttons"> 
 					<div data-pattern="pattern-secondary" id="button">
 						<code data-pattern="code">
-							<button data-pattern-helper="example">Example 2 Secondary 2</button>
+                            <button name="submit" class="button">Import Badge</button>
 						</code>
 					</div>
+
+					<div data-pattern="pattern-secondary" id="button-uppercase">
+						<code data-pattern="code">
+                            <button name="submit" class="button button-uppercase">Submit</button>
+						</code>
+					</div>
+
+					<div data-pattern="pattern-secondary" id="button-secondary">
+						<code data-pattern="code">
+                            <button name="close" class="button button-secondary">Cancel</button>
+						</code>
+					</div>
+				</article>
+
+				<article data-pattern="pattern" id="headings"> 
+					<div data-pattern="pattern-secondary" id="heading">
+						<code data-pattern="code">
+                            <h1 class="heading">My Badges</h1>
+						</code>
+					</div>
+
+					<div data-pattern="pattern-secondary" id="heading-medium">
+						<code data-pattern="code">
+                            <h1 class="heading heading-medium">My Badges</h1>
+						</code>
+					</div>
+				</article>
+
+                <article data-pattern="pattern" id="dropzone_"> 
+                    <code data-pattern="code">
+                        <code data-pattern="code">
+                            <article class="dropzone_">
+                                <img src="/static/images/add-badge.png" alt="Upload Badge">
+                                <h1>Upload Badge</h1>
+                                <p>Drag a bage here, or tap for advanced options.</p>
+                            </article>
+                        </code>
+                    </code>
+                </article>
+
+                <article data-pattern="pattern" id="badge_"> 
+                    <code data-pattern="code">
+                        <article class="badge_">
+                            <header class="badge-image">
+                                <img src="http://localhost:8018/media/uploads/badges/earned_badge_58369dde-75e1-4c8c-9d76-7df96fe939e6.png" alt="Badge Image">
+                            </header>
+                            <div class="badge-main">
+                                <div class="badge-info">
+                                    <h1 class="badge-classname">Badgr Tester 2015</h1>
+                                    <p class="badge-issuer">Oregon Badge Alliance</p>
+                                </div>
+                                <footer class="badge-links">
+                                </footer>
+                            </div>
+                        </article>
+                    </code>
+                </article>
+
+				<article data-pattern="pattern" id="form_-controls"> 
+					<code data-pattern="code">
+                        <div class="form_">
+                            <div class="form_-controls">
+                                <button name="close" class="button button-secondary button-uppercase">Cancel</button>
+                                <button name="submit" class="button button-uppercase">Submit</button>
+                            </div>
+                        </div>
+					</code>
 				</article>
 
 			</section>
