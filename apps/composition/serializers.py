@@ -53,15 +53,16 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
     def create(self, validated_data):
         request_user = self.context.get('request').user
 
-        badge_instance = get_verified_badge_instance_from_form(validated_data)
+        # Fetch payload and instance id (url) from one of many types of input
+        badge_instance_url, badge_instance = \
+            get_verified_badge_instance_from_form(validated_data)
         try:
-            badge_class = find_and_get_badge_class(badge_instance['badge'])
-            issuer = find_and_get_issuer(badge_class['issuer'])
+            _, badge_class = find_and_get_badge_class(badge_instance['badge'])
+            _, issuer = find_and_get_issuer(badge_class['issuer'])
         except KeyError as e:
             raise serializers.ValidationError(
                 "Badge components not well formed. Missing structure: {}"
-                .format(e.message)
-            )
+                .format(e.message))
 
         components = ComponentsSerializer(badge_instance, badge_class, issuer)
 

@@ -8,8 +8,6 @@ from openbadges_bakery import unbake
 from rest_framework.serializers import ValidationError
 import requests
 
-import serializers
-
 
 def domain(url):
     return urlparse(url).netloc
@@ -34,24 +32,35 @@ def find_and_get_badge_class(badge_reference):
     badge_class_type = _get_reference_type(badge_reference)
 
     if badge_class_type == "dict":
-        return json.loads(badge_reference)
+        return (None, badge_reference)
 
     if badge_class_type == "url":
-        return get_badge_component_from_url(badge_reference)
+        try:
+            return get_badge_component_from_url(badge_reference)
+        except ValidationError as e:
+            raise ValidationError("Error attempting to retrieve the hosted \
+                                  BadgeClass file: {}".format(e.message))
 
 
 def find_and_get_issuer(issuer_reference):
     issuer_type = _get_reference_type(issuer_reference)
 
     if issuer_type == "dict":
-        return json.loads(issuer_reference)
+        return (None, issuer_reference)
 
     if issuer_type == "url":
-        return get_badge_component_from_url(issuer_reference)
+        try:
+            return get_badge_component_from_url(issuer_reference)
+        except ValidationError as e:
+            raise ValidationError("Error attempting to retrieve the hosted \
+                                  Issuer file: {}".format(e.message))
 
 
 def get_badge_instance_from_json(json_data):
     json_data = json.loads(json_data)
+
+    if not json_data.get('verify'):
+        return (None, json_data)  # v0.5 badges have no reference to fetch.
 
     if json_data['verify']['type'] == 'signed':
         raise ValidationError(
@@ -61,9 +70,13 @@ def get_badge_instance_from_json(json_data):
     return get_badge_component_from_url(url)
 
 
-def get_badge_component_from_url(url):
-    badge_component = _fetch(url)
-    return badge_component
+def get_badge_component_from_url(url, return_instance_url=True):
+    try:
+        badge_component = _fetch(url)
+    except requests.exceptions.RequestException as e:
+        raise ValidationError("Unable to fetch a badge component: \
+                              {}".format(e.message))
+    return (url, badge_component)
 
 
 def get_badge_instance_from_jwt(jwt_string):
@@ -87,7 +100,7 @@ def get_badge_instance_from_jwt(jwt_string):
             key.")
 
     badge_instance = badge_instance
-    return badge_instance
+    return (None, badge_instance)
 
 
 def _fetch(url):
@@ -97,11 +110,12 @@ def _fetch(url):
 def _get_reference_type(component_reference):
     try:
         component_reference = json.loads(component_reference)
+        return "json"
     except Exception:
         pass
 
     if isinstance(component_reference, dict):
-        return "json"
+        return "dict"
 
     if re.match(r"^http", component_reference):
         return "url"
