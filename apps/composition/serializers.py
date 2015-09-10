@@ -17,12 +17,13 @@ from .utils import (get_verified_badge_instance_from_form,
 
 
 class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
-    id = serializers.IntegerField(read_only=True)
+    # Form submission fields as populated by request.data in the API
     image = serializers.ImageField(required=False, write_only=True)
     url = serializers.URLField(required=False, write_only=True)
     assertion = serializers.CharField(required=False, write_only=True)
 
-    # Populated by to_representation
+    # Reinstantiation using fields from badge instance when returned by .create
+    id = serializers.IntegerField(read_only=True)
     json = V1InstanceSerializer(read_only=True)
 
     def to_representation(self, obj):
