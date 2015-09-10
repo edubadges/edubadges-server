@@ -24,8 +24,11 @@ class UserProfileField(serializers.Serializer):
     """
     def to_representation(self, obj):
         addresses = []
-        for emailaddress in obj.cached_emails():
-            addresses.append(emailaddress.email)
+        if hasattr(obj, 'cached_email'):
+            for emailaddress in obj.cached_emails():
+                addresses.append(emailaddress.email)
+        else:
+            addresses = [obj.email]
 
         profile = {
             'name': obj.get_full_name(),
