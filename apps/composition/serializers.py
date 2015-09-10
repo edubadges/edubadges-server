@@ -1,18 +1,14 @@
-import os
-import uuid
-
 from rest_framework import serializers
 
 from mainsite.logs import badgr_log
 from verifier import ComponentsSerializer
-from verifier.utils import (domain, find_and_get_badge_class,
-                            find_and_get_issuer)
+from verifier.badge_check import BadgeCheck
+from verifier.utils import find_and_get_badge_class, find_and_get_issuer
 
 from .format import V1InstanceSerializer
 from .models import (LocalBadgeInstance, LocalBadgeClass, LocalIssuer,
                      Collection, LocalBadgeInstanceCollection)
 from .utils import (get_verified_badge_instance_from_form,
-                    badge_email_matches_emails,
                     use_or_bake_badge_instance_image)
 
 class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
@@ -63,47 +59,33 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
                 "Badge components not well formed. Missing structure: {}"
                 .format(e.message))
 
+        # Find and assign a Serialier to each badge Component
         components = ComponentsSerializer(badge_instance, badge_class, issuer)
-
         if not components.is_valid():
             raise serializers.ValidationError(
-                "The uploaded badge did not validate.")
+                {'message': "The uploaded badge did not validate.",
+                 'details': {
+                     'instance': components.badge_instance.version_errors,
+                     'badge_class': components.badge_class.version_errors,
+                     'issuer': components.issuer.version_errors
+                 }})
 
-        # Non form-specific validation (Validation between components)
-        components.validate(raise_exception=True)
+        # Check non-structural business logic checks and constraints
+        badge_check = BadgeCheck(
+            components.badge_instance, components.badge_class,
+            components.issuer, request_user.emailaddress_set.all(),
+            badge_instance_url)
+        badge_check.validate()
 
-        # Form-specific badge instance validation (reliance on URL input)
-        if components.badge_instance.version.startswith('v0.5'):
-            if not validated_data.get('url'):
-                raise serializers.ValidationError(
-                    "We cannot verify a v0.5 badge without its hosted URL.")
-
-        # Form-specific context information passed to Serializer (URL input)
-        # TODO: Pass this in context not via a ComponentsSerializer attribute
-        if components.issuer.version.startswith('v0.5'):
-            components.badge_instance_url = validated_data['url']
-        if components.issuer.version.startswith('v1'):
-            if badge_instance['verify']['type'] == 'hosted':
-                components.badge_instance_url = badge_instance['verify']['url']
-
-        # Form-specific badge instance validation (reliance on form data)
-        if components.issuer.version.startswith('v0.5'):
-            if not (domain(components.issuer['origin']) ==
-                    domain(validated_data['url'])):
-                raise serializers.ValidationError(
-                    "We cannot verify a v0.5 badge without its hosted URL.")
-
-        # Request.user specific validation
-        verified_emails = request_user.emailaddress_set.all()
-        matched_email = badge_email_matches_emails(badge_instance,
-                                                   verified_emails)
-        if not matched_email:
+        if not badge_check.is_valid():
             raise serializers.ValidationError(
-                "The badge you are trying to import does not belong to one of \
-                your verified e-mail addresses.")
-        # TODO: Pass this in context not via a ComponentsSerializer attribute
-        components.recipient_id = matched_email
+                "The uploaded badge did not pass verification constraints.")
 
+        # Don't support v0.5 badges until solution reached on nested components
+        if components.badge_instance.version.startswith('v0'):
+            raise serializers.ValidationError(
+                "Sorry, v0.5 badges are not supported at this time. This \
+                badge was valid, but cannot be saved.")
 
         # Create local component instance `json` fields
         badge_instance_json = \
@@ -133,7 +115,7 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
             'json': badge_instance_json,
             'badgeclass': new_badge_class,
             'issuer': new_issuer,
-            'email': matched_email,
+            'email': badge_check.matched_email,
             'image': use_or_bake_badge_instance_image(
                 validated_data.get('image'), badge_instance, badge_class)
         })
