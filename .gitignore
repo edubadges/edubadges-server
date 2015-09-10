@@ -16,5 +16,7 @@ breakdown/static/js/script.js
 breakdown/static/js/app.js
 breakdown/static/js/lti-app.js
 breakdown/static/css/style.css
+breakdown/static/css/screen.css
+breakdown/static/css/screen.css.map
 .ropeproject
 .idea/*
