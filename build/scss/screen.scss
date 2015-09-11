@@ -1,5 +1,11 @@
 @import 'base';
 
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-size: $font-size;
+  -webkit-font-smoothing: antialiased;
+}
+
 label {
   color: $medium-font;
   font-size: $font-size-small;
@@ -15,4 +21,6 @@ label {
 'modules/dropzone',
 'modules/form',
 'modules/heading',
-'modules/masthead';
+'modules/header',
+'modules/icon';
+

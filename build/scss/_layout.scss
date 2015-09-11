@@ -30,3 +30,8 @@
   display: flex;
   justify-content: space-between;
 }
+
+.l-wrapper {
+  padding-left: calc(50% - 680px);
+  padding-right: calc(50% - 680px);
+}
