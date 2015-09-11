@@ -42,7 +42,9 @@
     "urllite": "^0.5.0",
     "vinyl-buffer": "~1.0.0",
     "vinyl-source-stream": "~1.0.0",
-    "watchify": "~2.2.1"
+    "watchify": "~2.2.1",
+    "grunt-browserify": "~4.0.1",
+    "grunt-env": "~0.4.4"
   },
   "readmeFilename": "README",
   "scripts": {
