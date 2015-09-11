@@ -67,7 +67,7 @@ class CollectionDetailView(DetailView):
 
 
 class CollectionDetailEmbedView(CollectionDetailView):
-    template_name = 'composer/collection_detail_embed.html'
+    template_name = 'composition/collection_detail_embed.html'
 
     @method_decorator(xframe_options_exempt)
     def get(self, request, *args, **kwargs):
