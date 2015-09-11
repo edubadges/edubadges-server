@@ -30,13 +30,27 @@ module.exports = function(grunt) {
             },
             browserify: {
                 files: [
-                    '<%= srcPath %>/js/*.jsx',
-                    '<%= srcPath %>/js/**/*.jsx',
-                    '<%= srcPath %>/*.js',
-                    '<%= srcPath %>/js/**/*.jsx'
+                    '<%= srcPath %>js/*.jsx',
+                    '<%= srcPath %>*.js',
+                    '<%= srcPath %>js/stores/*.jsx',
+                    '<%= srcPath %>js/actions/*.js',
+                    '<%= srcPath %>js/components/*.jsx',
                 ],
-                tasks: ['browserify:dev']
+                tasks: ['browserify:dev', 'bs-inject']
+            },
+            patterns: {
+                files: [
+                    '<%= srcPath %>js/pattern-library.html',
+                    '<%= srcPath %>js/patterns/*.jsx',
+                ],
+                tasks: ['browserify:patterns', 'inline:dist', 'bs-inject']
+            }
+        },
 
+        inline: {
+            dist: {
+                src: '<%= srcPath %>js/pattern-library.html',
+                dest: 'breakdown/templates/pattern-library.html'
             }
         },
 
@@ -48,8 +62,7 @@ module.exports = function(grunt) {
                 },
                 files: {
                     'breakdown/static/js/app.js': 'build/js/app.jsx',
-                    'breakdown/static/js/lti-app.js': 'build/js/lti-app.jsx',
-                    'breakdown/static/js/pattern-library-react.js': 'build/js/pattern-library.jsx',
+                    'breakdown/static/js/lti-app.js': 'build/js/lti-app.jsx'
                 }
             },
             dist: {
@@ -61,6 +74,20 @@ module.exports = function(grunt) {
                     'breakdown/static/js/app.js': 'build/js/app.jsx',
                     'breakdown/static/js/lti-app.js': 'build/js/lti-app.jsx'
                 }
+            },
+            patterns: {
+                options: {
+                    debug: true,
+                    transform: ['reactify']
+                },
+                files: [{
+                    expand: true,
+                    cwd: '<%= srcPath %>js/patterns',
+                    src: ['*.pattern.jsx'],
+                    dest: '<%= srcPath %>js/temp',
+                    ext: '.pattern.js',
+                    extDot: 'first'
+                }]
             }
         },
 
@@ -116,7 +143,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-env');
     grunt.loadNpmTasks('grunt-shell-spawn');
+    grunt.loadNpmTasks('grunt-inline');
+
     grunt.registerTask('default',['bs-init', 'watch']);
     grunt.registerTask('dist', ['env:dist', 'sass', 'autoprefixer', 'browserify:dist']);
-
 }

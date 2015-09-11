@@ -1,11 +1,7 @@
-var React = require('react');
 var FixedDataTable = require('fixed-data-table');
 var Table = FixedDataTable.Table;
 var Column = FixedDataTable.Column;
-require('./polyfills');
 
-
-/* MODULE fixeddatatable */
 var dataRows = [
     ['Sally Student', 'Sally1', 'Sally2', 'Sally3'],
     ['Bill Student', 'Bill1', 'Bill2', 'Bill3'],
@@ -24,7 +20,7 @@ function rowGetter(rowIndex){
     return dataRows[rowIndex];
 }
 function cellRenderer(cellData, cellDataKey, rowData, rowIndex, columnData, width){
-    return (<span className="fixeddatatable-x-cell">{cellData}</span>);
+    return (React.createElement("span", {className: "fixeddatatable-x-cell"}, cellData));
 }
 
 React.render(
@@ -37,9 +33,9 @@ React.render(
         headerHeight={100}
     >
         <Column label="Student" width={300} dataKey={0} fixed={true} cellRenderer={cellRenderer} />
-        <Column label="Module 1" width={400} dataKey={1} cellRenderer={cellRenderer} />
-        <Column label="Module 2" width={400} dataKey={2} cellRenderer={cellRenderer} />
-        <Column label="Module 3" width={400} dataKey={3} cellRenderer={cellRenderer} />
+        <Column label="Module 1" width={400} dataKey={1} fixed={false} cellRenderer={cellRenderer} />
+        <Column label="Module 2" width={400} dataKey={2} fixed={false} cellRenderer={cellRenderer} />
+        <Column label="Module 3" width={400} dataKey={3} fixed={false} cellRenderer={cellRenderer} />
     </Table>),
     document.getElementById('REACT-fixeddatatable')
 );

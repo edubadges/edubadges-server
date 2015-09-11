@@ -230,6 +230,8 @@
         <link href="{{ STATIC_URL }}css/fixed-data-table.css" media="screen" rel="stylesheet" type="text/css" >
 
 		<!-- Place your CSS and JS Dependencies here -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/JSXTransformer.js" type="text/javascript"></script>
 
 	</head>
 
@@ -332,6 +334,9 @@
                         <div id="REACT-fixeddatatable">
                             <!-- This div replaced by A FixedDataTable React Component. Markup in js/pattern-library-react.js -->
                         </div>
+                        {% raw %}
+                        <script src="temp/fixeddatatable.pattern.js?__inline=true"></script>
+                        {% endraw %}
 					</code>
                 </article>
 
@@ -594,8 +599,6 @@
 
 
 		</script>
-
-        <script src="{{ STATIC_URL }}js/pattern-library-react.js"></script>
 
 	</body>
 
