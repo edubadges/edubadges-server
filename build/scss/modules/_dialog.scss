@@ -1,0 +1,30 @@
+.dialog_ {
+  background: map-get($colors, solid);
+  border: 0;
+  border-radius: $border-radius;
+  /* modalWindow Copy: */
+  box-shadow: $layout-spacing/2 $layout-spacing $layout-spacing*2.5 $layout-spacing rgba(map-get($colors, solid-dark), .30);
+  max-width: 865px;
+  position: fixed;
+  top: $layout-spacing*12.5;
+  width: 60%;
+  
+  + .backdrop,
+  &::backdrop {
+    background: rgba(map-get($colors, solid-dark), .5);
+  } 
+
+  .dialog_-x-close {
+    background: none;
+    border: 0;
+    cursor: pointer;
+    display: block;
+    height: 15px;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    right: $layout-spacing*1;
+    top: $layout-spacing*3;
+  }
+
+}

@@ -225,6 +225,7 @@
 		</style>
 
 		<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,400italic,700,700italic,300,300italic' rel='stylesheet' type='text/css'>
+		<link href="{{ STATIC_URL }}css/dialog-polyfill.css" media="screen" rel="stylesheet" type="text/css" >
 		<link href="{{ STATIC_URL }}css/reset.css" media="screen" rel="stylesheet" type="text/css" >
 		<link href="{{ STATIC_URL }}css/screen.css" media="screen" rel="stylesheet" type="text/css" >
 
@@ -285,44 +286,79 @@
 					</div>
 				</article>
 
-                <article data-pattern="pattern" id="dropzone_"> 
-                    <code data-pattern="code">
-                        <code data-pattern="code">
-                            <article class="dropzone_">
-                                <img src="/static/images/add-badge.png" alt="Upload Badge">
-                                <h1>Upload Badge</h1>
-                                <p>Drag a bage here, or tap for advanced options.</p>
-                            </article>
-                        </code>
-                    </code>
-                </article>
+				<article data-pattern="pattern" id="dialog_">
+					
+					<code data-pattern="code" data-pattern-helper="spacer">
 
-                <article data-pattern="pattern" id="badge_"> 
-                    <code data-pattern="code">
-                        <article class="badge_">
-                            <header class="badge-image">
-                                <img src="http://localhost:8018/media/uploads/badges/earned_badge_58369dde-75e1-4c8c-9d76-7df96fe939e6.png" alt="Badge Image">
-                            </header>
-                            <div class="badge-main">
-                                <div class="badge-info">
-                                    <h1 class="badge-classname">Badgr Tester 2015</h1>
-                                    <p class="badge-issuer">Oregon Badge Alliance</p>
-                                </div>
-                                <footer class="badge-links">
-                                </footer>
-                            </div>
-                        </article>
-                    </code>
+						<!-- Requires dialog-polyfill.js above screen.css, dialog elements themselves need to be a child of body -->
+
+						<button class="button" id="dialogOpen">Open Dialog</button>
+
+						<script src="{{STATIC_URL}}/js/dialog-polyfill.js" type="text/javascript"></script>
+
+						<script type="text/javascript">
+						  document.addEventListener('DOMContentLoaded', function() {
+
+						    var dialogOpen = document.getElementById('dialogOpen');
+						    var dialogClose = document.getElementById('dialogClose');
+						    var dialog = document.getElementById('dialogID');
+						    dialogPolyfill.registerDialog(dialog);
+
+						    // Update button opens a modal dialog
+						    dialogOpen.addEventListener('click', function() {
+						      dialog.showModal();
+						    });
+
+						    // Form cancel button closes the dialog box
+						    dialogClose.addEventListener('click', function() {
+						      dialog.close();
+						    });
+
+						  });
+						</script>
+
+					</code>
+
+				</article>
+
+        <article data-pattern="pattern" id="dropzone_"> 
+            <code data-pattern="code">
+                <code data-pattern="code">
+                    <article class="dropzone_">
+                        <img src="/static/images/add-badge.png" alt="Upload Badge">
+                        <h1>Upload Badge</h1>
+                        <p>Drag a bage here, or tap for advanced options.</p>
+                    </article>
+                </code>
+            </code>
+        </article>
+
+        <article data-pattern="pattern" id="badge_"> 
+            <code data-pattern="code">
+                <article class="badge_">
+                    <header class="badge-image">
+                        <img src="http://localhost:8018/media/uploads/badges/earned_badge_58369dde-75e1-4c8c-9d76-7df96fe939e6.png" alt="Badge Image">
+                    </header>
+                    <div class="badge-main">
+                        <div class="badge-info">
+                            <h1 class="badge-classname">Badgr Tester 2015</h1>
+                            <p class="badge-issuer">Oregon Badge Alliance</p>
+                        </div>
+                        <footer class="badge-links">
+                        </footer>
+                    </div>
                 </article>
+            </code>
+        </article>
 
 				<article data-pattern="pattern" id="form_-controls"> 
 					<code data-pattern="code">
-                        <div class="form_">
-                            <div class="form_-controls">
-                                <button name="close" class="button button-secondary button-uppercase">Cancel</button>
-                                <button name="submit" class="button button-uppercase">Submit</button>
-                            </div>
-                        </div>
+	          <div class="form_">
+	              <div class="form_-controls">
+	                  <button name="close" class="button button-secondary button-uppercase">Cancel</button>
+	                  <button name="submit" class="button button-uppercase">Submit</button>
+	              </div>
+	          </div>
 					</code>
 				</article>
 
@@ -427,6 +463,12 @@
 			</section>
 
 		</div>
+
+		<dialog class="dialog_" id="dialogID">
+
+			<button class="dialog_-x-close" id="dialogClose"><span class="icon_ icon_-close"><span class="hidden">Close</span></span></button>
+		  
+		</dialog>
 
 		<script type="text/javascript">
 
