@@ -52,6 +52,14 @@
   
 }
 
+.icon_-close {
+
+  &::after {
+    background-image: url('images/icon-close.svg');
+  }
+
+}
+
 // Small Icons
 
 .icon_-dropdown {

@@ -14,13 +14,17 @@ label {
 
 @import 'layout';
 
+// Modules
+
 @import
 'modules/badge',
 'modules/button',
+'modules/dialog',
 'modules/dropdown',
 'modules/dropzone',
 'modules/form',
 'modules/heading',
 'modules/header',
+'modules/hidden',
 'modules/icon';
 
