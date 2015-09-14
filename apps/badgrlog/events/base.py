@@ -7,7 +7,7 @@ class BaseBadgrEvent(object):
         return self.__class__.__name__
 
     def get_context(self):
-        return "http://badgr.io/json-ld/"
+        return "https://badgr.io/json-ld/v1"
 
     def to_representation(self):
         raise NotImplementedError("subclasses must provide a to_representation method")
@@ -16,6 +16,6 @@ class BaseBadgrEvent(object):
         data = self.to_representation()
         data.update({
             '@context': self.get_context(),
-            '@type': self.get_type(),
+            'type': self.get_type(),
         })
         return data
