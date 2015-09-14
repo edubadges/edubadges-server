@@ -70,12 +70,17 @@ def get_badge_instance_from_json(json_data):
     return get_badge_component_from_url(url)
 
 
-def get_badge_component_from_url(url, return_instance_url=True):
-    try:
-        badge_component = _fetch(url)
-    except requests.exceptions.RequestException as e:
-        raise ValidationError("Unable to fetch a badge component: \
-                              {}".format(e.message))
+def get_badge_component_from_url(url, **kwargs):
+    if 'preloaded_response' in kwargs:
+        badge_component = kwargs.get('preloaded_response').json()
+    else:
+        try:
+            badge_component = _fetch(url)
+        except requests.exceptions.RequestException as e:
+            raise ValidationError(
+                "Unable to fetch a badge component: \
+                {}".format(e.message)
+            )
     return (url, badge_component)
 
 

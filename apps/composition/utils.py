@@ -2,6 +2,7 @@ import hashlib
 import json
 import os
 import re
+import simplejson
 import uuid
 
 from django.core.files.base import ContentFile
@@ -23,7 +24,21 @@ def get_verified_badge_instance_from_form(validated_data):
         return get_badge_instance_from_json(validated_data['assertion'])
 
     if 'url' in validated_data:
-        return get_badge_component_from_url(validated_data['url'])
+        try:
+            url_response = requests.get(
+                validated_data['url'],
+                headers={
+                    'Accept': 'application/ld+json, application/json, image/png, image/svg'
+                }
+            )
+            return get_badge_component_from_url(
+                validated_data['url'],
+                **{'preloaded_response': url_response}
+            )
+        except simplejson.JSONDecodeError:
+            return get_badge_instance_from_baked_image(
+                ContentFile(url_response.content, 'baked_image.png')
+            )
 
     raise ValidationError(
         "No badge instance found from the given form input.")
