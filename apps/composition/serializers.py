@@ -106,14 +106,21 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
 
         # Create local component instances
         if issuer_url and badge_class_url:
+            non_embedded_issuer_json = components.issuer.serializer(
+                issuer, context={'issuer_id': issuer_url}).data
             new_issuer, _ = LocalIssuer.objects.get_or_create({
                 'name': issuer['name'],
-                'json': badge_instance_json['badge']['issuer'],
+                'json': non_embedded_issuer_json
             }, identifier=issuer_url)
 
+            non_embedded_badge_class_json = \
+                components.badge_class.serializer(
+                    badge_class, context={'badge_class_id': badge_class_url,
+                                          'issuer': issuer,
+                                          'issuer_id': issuer_url}).data
             new_badge_class, _ = LocalBadgeClass.objects.get_or_create({
                 'name': badge_class['name'],
-                'json': badge_instance_json['badge'],
+                'json': non_embedded_badge_class_json,
                 'issuer': new_issuer,
             }, identifier=badge_class_url)
         else:  # 0.5 badges
