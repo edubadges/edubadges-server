@@ -46,7 +46,7 @@ def badge_email_matches_emails(badge_instance, verified_addresses):
     email_type, badge_email, salt = _get_email_type(badge_instance)
 
     if email_type == "email":
-        if badge_email in [e.email for e in verified_addresses]:
+        if badge_email in verified_addresses:
             return badge_email
         else:
             return False
@@ -61,10 +61,10 @@ def badge_email_matches_emails(badge_instance, verified_addresses):
 
         for email in verified_addresses:
             algorithm_func = hashlib.new(hash_algorithm)
-            algorithm_func.update(email.email)
+            algorithm_func.update(email)
             algorithm_func.update(salt)
             if (hash_string == algorithm_func.hexdigest()):
-                return email.email
+                return email
 
     return False
 
