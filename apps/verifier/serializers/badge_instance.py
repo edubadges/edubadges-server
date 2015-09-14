@@ -108,6 +108,7 @@ class BadgeInstanceSerializerV1_0(serializers.Serializer):
             self.context['badge_class'],
             context={'badge_class_id': instance['badge'],  # A URL in v1 badges
                      'issuer': self.context['issuer'],
+                     'issuer_id': self.context['badge_class']['issuer'],
                      'embedded': True})
         result['badge'] = badge_class_serializer.data
 

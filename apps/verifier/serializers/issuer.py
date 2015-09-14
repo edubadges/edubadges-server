@@ -51,7 +51,7 @@ class IssuerSerializerV1_0(serializers.Serializer):
         if not self.context.get('embedded', False):
             header['@context'] = 'https://w3id.org/openbadges/v1'
         header['type'] = 'Issuer'
-        header['id'] = issuer['url']
+        header['id'] = self.context['issuer_id']
 
         result = OrderedDict(header.items() + issuer_props.items())
 
