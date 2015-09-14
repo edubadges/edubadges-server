@@ -65,7 +65,7 @@ class BadgeClassSerializerV1_0(serializers.Serializer):
         header['id'] = self.context['badge_class_id']
 
         result = OrderedDict(header.items() + badge_props.items())
-
+        self.context.update({'embdedded': True})  # We'll be embedded in the BC
         issuer_serializer = issuer.IssuerSerializerV1_0(
             self.context['issuer'], context=self.context
         )
