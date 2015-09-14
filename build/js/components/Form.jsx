@@ -243,8 +243,20 @@ BasicAPIForm = React.createClass({
 
   },
   render: function() {
-    var activeColumns = "", 
-        activeMessage = (this.state.message) ? (<div className={"alert alert-" + this.state.message.type} >{this.state.message.content}</div>) : "",
+    var messageText = _.get(this.state, 'message.content'),
+        messageDescription = (_.get(this.state.message, 'detail.detail')) ? (<p>{_.get(this.state.message, 'detail.detail')}</p>) : null;
+        // TODO: Create pattern library modules for the different types of content that could be in this.state.message.detail
+        messageDetail = (this.state.message && this.state.message.detail) ? (
+            <div className='message-x-detail'>
+              <h4>{_.get(this.state.message, 'detail.message', JSON.stringify(this.state.message.detail))}</h4>
+              {messageDescription}
+            </div>
+        ) : null;
+    var activeColumns = "",
+        activeMessage = (this.state.message) ? (<div className={"alert alert-" + this.state.message.type}>
+          {messageText}
+          {messageDetail}
+        </div>) : "",
         activeHelpText = !this.state.message && this.props.helpText ? <div className="form-help-text">{this.props.helpText}</div> : "",
         formControls = "",
         closeButton = this.props.handleCloseForm ? (<PlainButton name="close" label="Cancel" handleClick={this.handleReset} />) : "",
