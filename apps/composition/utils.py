@@ -55,7 +55,8 @@ def badge_email_matches_emails(badge_instance, verified_addresses):
         try:
             hash_algorithm, hash_string = badge_email.split('$')
         except ValueError:
-            return False  # No algoirthm, no matching hash.
+            raise ValidationError("Recipient hash string {} is poorly formed." \
+                                  .format(badge_email))
 
         # TODO: Ensure hash is one of two possibilities or return False
 
