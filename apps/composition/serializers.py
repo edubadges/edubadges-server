@@ -79,8 +79,12 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
         badge_check.validate()
 
         if not badge_check.is_valid():
-            raise serializers.ValidationError(
-                "The uploaded badge did not pass verification constraints.")
+            raise serializers.ValidationError({
+                'message':
+                "The uploaded badge did not pass verification constraints.",
+                'detail':
+                [error['message'] for error in badge_check.results
+                 if error['type'] is 'error' and not error['success']]})
 
         # Don't support v0.5 badges until solution reached on nested components
         if components.badge_instance.version.startswith('v0'):

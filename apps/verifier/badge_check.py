@@ -37,10 +37,14 @@ class BadgeCheckBase(object):
         for check_name, check_method in checks:
             check_type = check_name in self.warnings and 'warning' or 'error'
             try:
-                getattr(self, check_name)()
-                self.results.append((check_name, True, check_type, ''))
+                success_message = getattr(self, check_name)()
+                self.results.append({
+                    "name": check_name, "success": True,
+                    "type": check_type, "message": success_message})
             except ValidationError as e:
-                self.results.append((check_name, False, check_type, e.detail))
+                self.results.append({
+                    "name": check_name, "success": False,
+                    "type": check_type, "message": e.detail})
 
         return self.is_valid()
 
@@ -48,8 +52,8 @@ class BadgeCheckBase(object):
         if not self.results:
             self.validate()
 
-        for check_name, passed, check_type, message in self.results:
-            if check_type == 'error' and not passed:
+        for result in self.results:
+            if result['type'] == 'error' and not result['success']:
                 return False
 
         return True
@@ -74,6 +78,10 @@ class BadgeCheck(BadgeCheckBase):
             raise ValidationError(
                 "Components assembled with different specification versions.")
 
+        return "All components of the Open Badge were properly structured, and \
+            their versions are compatible: '{}'".format(
+                self.badge_instance.version)
+
     def check_badge_belongs_to_recipient(self):
         # Request.user specific validation
         matched_email = badge_email_matches_emails(self.badge_instance,
@@ -82,8 +90,10 @@ class BadgeCheck(BadgeCheckBase):
             raise ValidationError(
                 "The badge you are trying to import does not belong to one of \
                 your verified e-mail addresses.")
-        # TODO: Pass this in context not via a ComponentsSerializer attribute
+
         self.matched_email = matched_email
+
+        return "The badge was issued to '{}' as expected".format(matched_email);
 
 
 class BadgeCheckTests_V0_5(BadgeCheck):
@@ -100,13 +110,16 @@ class BadgeCheckTests_V0_5(BadgeCheck):
 
         super(BadgeCheckTests_V0_5, self).validate()
 
-    def check_issuer_and_assertion_domains_differ(self):
+    def check_issuing_platform_domain_against_assertion_host(self):
         # Form-specific badge instance validation (reliance on form data)
         if not (domain(self.issuer['origin']) ==
                 domain(self.instance_url)):  # TODO: Can come from baked image
             raise ValidationError(
                 "The URL of the institution does not match the verifiable \
-                host of the assertion.")
+                host of the assertion, and authorized use of a remote platform \
+                could not be verified.")
+
+        return "This badge was issued from a platform on the issuer's domain."
 
 
 class BadgeCheckTests_V1_0(BadgeCheck):
@@ -120,5 +133,18 @@ class BadgeCheckTests_V1_0(BadgeCheck):
                                 for resource in resources])) == 1
         if not same_domains:
             raise ValidationError(
-                "Component resource references don't share the same \
-                domain.")
+                "Badge components are not all hosted on the same domain, \
+                which indicates a counterfeit badge.")
+
+        return "Badge components are properly hosted on the same domain."
+
+    def check_issuing_platform_domain_against_assertion_host(self):
+        # Form-specific badge instance validation (reliance on form data)
+        if not (domain(self.issuer['url']) ==
+                domain(self.instance_url)):  # TODO: Can come from baked image
+            raise ValidationError(
+                "The URL of the institution does not match the verifiable \
+                host of the assertion, and authorized use of a remote platform \
+                could not be verified.")
+
+        return "This badge was issued from a platform on the issuer's domain."
