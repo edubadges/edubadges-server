@@ -1,4 +1,6 @@
 .icon_ {
+  background: none;
+  border: 0;
   display: inline-block;
   padding-left: $layout-spacing*4;
   position: relative;
@@ -76,4 +78,8 @@
     background-image: url('images/icon-dropdownlight.svg');
   }
   
+}
+
+.icon_-notext {
+  text-indent: -9999em;
 }

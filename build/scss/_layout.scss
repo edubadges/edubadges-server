@@ -35,3 +35,32 @@
   padding-left: calc(50% - 680px);
   padding-right: calc(50% - 680px);
 }
+
+.l-horizontal {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+
+  > * {
+    align-items: center;
+    display: flex;
+
+    &:first-child {
+
+      > * {
+        margin-right: $layout-spacing;
+      }
+
+    }
+
+    &:last-child {
+
+      > * {
+        margin-left: $layout-spacing;
+      }
+
+    }
+
+  }
+
+}
