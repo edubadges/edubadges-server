@@ -17,9 +17,11 @@
     "fixed-data-table": "^0.4.6",
     "flux": "~2.0.1",
     "grunt-autoprefixer": "latest",
+    "grunt-browserify": "~4.0.1",
     "grunt-contrib-requirejs": "latest",
     "grunt-contrib-sass": "latest",
     "grunt-contrib-watch": "latest",
+    "grunt-env": "~0.4.4",
     "grunt-inline": "^0.3.6",
     "grunt-shell-spawn": "latest",
     "gulp": "~3.8.10",
@@ -37,14 +39,13 @@
     "react-dropzone": "~1.0.1",
     "react-mini-router": "~1.1.2",
     "react-social": "~0.1.5",
+    "react-style-guide": "^1.1.6",
     "reactify": "~0.17.1",
     "superagent": "~0.21.0",
     "urllite": "^0.5.0",
     "vinyl-buffer": "~1.0.0",
     "vinyl-source-stream": "~1.0.0",
-    "watchify": "~2.2.1",
-    "grunt-browserify": "~4.0.1",
-    "grunt-env": "~0.4.4"
+    "watchify": "~2.2.1"
   },
   "readmeFilename": "README",
   "scripts": {

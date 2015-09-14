@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+
+		<title>Pattern Library</title>
+
+		<meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1">
+
+        <link href="pattern-library.css?__inline=true" rel="stylesheet" type="text/css">
+		<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,400italic,700,700italic,300,300italic' rel='stylesheet' type='text/css'>
+		<link href="{{ STATIC_URL }}css/dialog-polyfill.css" media="screen" rel="stylesheet" type="text/css" >
+		<link href="{{ STATIC_URL }}css/reset.css" media="screen" rel="stylesheet" type="text/css" >
+		<link href="{{ STATIC_URL }}css/screen.css" media="screen" rel="stylesheet" type="text/css" >
+
+        <!-- required for Fixed Data Table react component -->
+        <link href="{{ STATIC_URL }}css/fixed-data-table.css" media="screen" rel="stylesheet" type="text/css" >
+
+	</head>
+
+	<body>
+
+		<div data-pattern="container">
+
+			<button data-pattern="nav-toggle">Toggle Navigation</button>
+
+			<nav data-pattern="nav">
+
+				<!-- The navigation will be auto-generated here based on pattern IDs -->
+				
+				<ul data-pattern="nav-menu">
+				</ul>
+
+			</nav>
+
+			<!-- Place your patterns here (see example.) If you have a wrapper class for your layout, apply to to data-pattern="patterns" -->
+
+			<section data-pattern="patterns">
+
+				<article data-pattern="pattern" id="buttons"> 
+					<div data-pattern="pattern-secondary" id="button">
+						<code data-pattern="code">
+                            <button name="submit" class="button">Import Badge</button>
+						</code>
+					</div>
+
+					<div data-pattern="pattern-secondary" id="button-uppercase">
+						<code data-pattern="code">
+                            <button name="submit" class="button button-uppercase">Submit</button>
+						</code>
+					</div>
+
+					<div data-pattern="pattern-secondary" id="button-secondary">
+						<code data-pattern="code">
+                            <button name="close" class="button button-secondary">Cancel</button>
+						</code>
+					</div>
+				</article>
+
+				<article data-pattern="pattern" id="headings"> 
+					<div data-pattern="pattern-secondary" id="heading">
+						<code data-pattern="code">
+                            <h1 class="heading">My Badges</h1>
+						</code>
+					</div>
+
+					<div data-pattern="pattern-secondary" id="heading-medium">
+						<code data-pattern="code">
+                            <h1 class="heading heading-medium">My Badges</h1>
+						</code>
+					</div>
+				</article>
+
+				<article data-pattern="pattern" id="dialog_">
+					
+					<code data-pattern="code" data-pattern-helper="spacer">
+
+						<!-- Requires dialog-polyfill.js above screen.css, dialog elements themselves need to be a child of body -->
+
+						<button class="button" id="dialogOpen">Open Dialog</button>
+
+						<script src="{{STATIC_URL}}/js/dialog-polyfill.js" type="text/javascript"></script>
+
+						<script type="text/javascript">
+						  document.addEventListener('DOMContentLoaded', function() {
+
+						    var dialogOpen = document.getElementById('dialogOpen');
+						    var dialogClose = document.getElementById('dialogClose');
+						    var dialog = document.getElementById('dialogID');
+						    dialogPolyfill.registerDialog(dialog);
+
+						    // Update button opens a modal dialog
+						    dialogOpen.addEventListener('click', function() {
+						      dialog.showModal();
+						    });
+
+						    // Form cancel button closes the dialog box
+						    dialogClose.addEventListener('click', function() {
+						      dialog.close();
+						    });
+
+						  });
+						</script>
+
+					</code>
+
+				</article>
+
+                <article data-pattern="pattern" id="dropzone_">
+                    <code data-pattern="code">
+                        <code data-pattern="code">
+                            <article class="dropzone_">
+                                <img src="/static/images/add-badge.png" alt="Upload Badge">
+                                <h1>Upload Badge</h1>
+                                <p>Drag a bage here, or tap for advanced options.</p>
+                            </article>
+                        </code>
+                    </code>
+                </article>
+
+                <article data-pattern="pattern" id="badge_">
+                    <code data-pattern="code">
+                        <article class="badge_">
+                            <header class="badge-image">
+                                <img src="http://localhost:8018/media/uploads/badges/earned_badge_58369dde-75e1-4c8c-9d76-7df96fe939e6.png" alt="Badge Image">
+                            </header>
+                            <div class="badge-main">
+                                <div class="badge-info">
+                                    <h1 class="badge-classname">Badgr Tester 2015</h1>
+                                    <p class="badge-issuer">Oregon Badge Alliance</p>
+                                </div>
+                                <footer class="badge-links">
+                                </footer>
+                            </div>
+                        </article>
+                    </code>
+                </article>
+
+                <article data-pattern="pattern" id="form_-controls">
+                    <code data-pattern="code">
+                        <div class="form_">
+                            <div class="form_-controls">
+                                <button name="close" class="button button-secondary button-uppercase">Cancel</button>
+                                <button name="submit" class="button button-uppercase">Submit</button>
+                            </div>
+                        </div>
+                    </code>
+                </article>
+
+                <article data-pattern="pattern" id="headers">
+
+                    <div data-pattern="pattern-secondary" id="header_">
+
+                        <code data-pattern="code">
+
+                            <header class="header_ l-wrapper">
+
+                                <a class="header_-x-logo" href=""><img src="{{STATIC_URL}}/images/header-logo.svg" width="193" height="89"></a>
+
+                                <nav>
+
+                                    <ul>
+                                        <li><a class="is-active" href="">My Badges</a></li>
+                                        <li><a href="">My Collections</a></li>
+                                        <li><a href="">Issue Badges</a></li>
+                                        <li><a href=""><span class="icon_ icon_-small icon_-right icon_-dropdownlight">username</span></a></li>
+                                    </ul>
+
+                                </nav>
+
+                            </header>
+
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="header_-small">
+
+                        <code data-pattern="code">
+
+                            <header class="header_ header_-small l-wrapper">
+
+                                <a class="header_-x-logo" href=""><img src="{{STATIC_URL}}/images/header-logo-small.svg" width="153" height="65"></a>
+
+                                <nav>
+
+                                    <ul>
+                                        <li><a class="is-active" href="">My Badges</a></li>
+                                        <li><a href="">My Collections</a></li>
+                                        <li><a href="">Issue Badges</a></li>
+                                        <li><a href="">username</a></li>
+                                    </ul>
+
+                                </nav>
+
+                            </header>
+
+                        </code>
+
+                    </div>
+
+                </article>
+
+                <article data-pattern="pattern" id="icons">
+
+                    <div data-pattern="pattern-secondary" id="icon_">
+
+                        <code data-pattern="code" data-pattern-helper="spacer">
+
+                            <span class="icon_ icon_-add">icon</span>
+
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="icon_-right">
+
+                        <code data-pattern="code" data-pattern-helper="spacer">
+
+                            <span class="icon_ icon_-right icon_-add">icon</span>
+
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="icon_-small">
+
+                        <code data-pattern="code" data-pattern-helper="spacer">
+
+                            <span class="icon_ icon_-small icon_-dropdown">icon</span>
+
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="icon_-small+icon_-right">
+
+                        <code data-pattern="code" data-pattern-helper="spacer">
+
+                            <span class="icon_ icon_-small icon_-right icon_-dropdown">icon</span>
+
+                        </code>
+
+                    </div>
+
+                </article>
+
+            </section>
+
+            <section>
+                <div id="ReactPatterns">
+                    <!-- React component patterns in pattern-library.jsx will be inserted here -->
+                    <div>
+                        If you can read this message, your React elements aren't properly loaded.
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+		<dialog class="dialog_" id="dialogID">
+
+			<button class="dialog_-x-close" id="dialogClose"><span class="icon_ icon_-close"><span class="hidden">Close</span></span></button>
+		  
+		</dialog>
+
+        <script type="text/javascript" src="{{ STATIC_URL }}js/pattern-library.js"></script>
+
+	</body>
+
+</html>
