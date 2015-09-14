@@ -25,7 +25,8 @@ class AbstractComponent(cachemodel.CacheModel):
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True,
                                    related_name="+")
-
+    identifier = models.CharField(max_length=1024, null=False,
+                                  default='get_full_url')
     json = JSONField()
 
     class Meta:
@@ -35,7 +36,13 @@ class AbstractComponent(cachemodel.CacheModel):
         return self.name
 
     def get_full_url(self):
-        return settings.HTTP_ORIGIN + self.get_absolute_url()
+        try:
+            return self.json['id']
+        except KeyError:
+            if self.get_absolute_url().startswith('/'):
+                return settings.HTTP_ORIGIN + self.get_absolute_url()
+            else:
+                return '_:null'
 
     def prop(self, property_name):
         return self.json.get(property_name)

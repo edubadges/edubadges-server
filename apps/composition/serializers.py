@@ -52,8 +52,9 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
         badge_instance_url, badge_instance = \
             get_verified_badge_instance_from_form(validated_data)
         try:
-            _, badge_class = find_and_get_badge_class(badge_instance['badge'])
-            _, issuer = find_and_get_issuer(badge_class['issuer'])
+            badge_class_url, badge_class = \
+                find_and_get_badge_class(badge_instance['badge'])
+            issuer_url, issuer = find_and_get_issuer(badge_class['issuer'])
         except KeyError as e:
             raise serializers.ValidationError(
                 "Badge components not well formed. Missing structure: {}"
@@ -104,18 +105,21 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
                 'issuer': issuer}).data  # To instantiate the Issuer Serializer
 
         # Create local component instances
-        new_issuer = LocalIssuer.objects.create(**{
-            'name': issuer['name'],
-            'json': badge_instance_json['badge']['issuer'],
-        })
+        if issuer_url and badge_class_url:
+            new_issuer, _ = LocalIssuer.objects.get_or_create({
+                'name': issuer['name'],
+                'json': badge_instance_json['badge']['issuer'],
+            }, identifier=issuer_url)
 
-        new_badge_class = LocalBadgeClass.objects.create(**{
-            'name': badge_class['name'],
-            'json': badge_instance_json['badge'],
-            'issuer': new_issuer,
-        })
+            new_badge_class, _ = LocalBadgeClass.objects.get_or_create({
+                'name': badge_class['name'],
+                'json': badge_instance_json['badge'],
+                'issuer': new_issuer,
+            }, identifier=badge_class_url)
+        else:  # 0.5 badges
+            new_issuer, new_badge_class = None, None
 
-        new_instance = LocalBadgeInstance.objects.create(**{
+        new_instance, _ = LocalBadgeInstance.objects.get_or_create({
             'recipient_user': request_user,
             'json': badge_instance_json,
             'badgeclass': new_badge_class,
@@ -123,7 +127,8 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
             'email': badge_check.matched_email,
             'image': use_or_bake_badge_instance_image(
                 validated_data.get('image'), badge_instance, badge_class)
-        })
+        }, identifier=badge_instance_url, recipient_user=request_user)
+        # TODO: Prevent saving twice
         new_instance.json['image'] = new_instance.image_url()
         new_instance.save()
 
