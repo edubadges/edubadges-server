@@ -65,7 +65,8 @@ class BadgeInstance(AbstractBadgeInstance):
     def save(self, *args, **kwargs):
         if self.pk is None:
             self.json['recipient']['salt'] = salt = self.get_new_slug()
-            self.json['recipient']['identity'] = generate_sha256_hashstring(self.email, salt)
+            self.json['recipient']['identity'] = \
+                generate_sha256_hashstring(self.recipient_identifier, salt)
 
             self.created_at = datetime.datetime.now()
             self.json['issuedOn'] = self.created_at.isoformat()
@@ -111,7 +112,7 @@ class BadgeInstance(AbstractBadgeInstance):
         mail_meta = {
             'subject': 'Congratulations, you earned a badge!',
             'from_address': '"' + email_context['issuer_name'] + '" <' + getattr(settings, 'DEFAULT_FROM_EMAIL') + '>',
-            'to_addresses': [self.email]
+            'to_addresses': [self.recipient_identifier]
         }
 
         try:

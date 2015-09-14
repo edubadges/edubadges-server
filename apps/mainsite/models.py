@@ -107,8 +107,8 @@ class AbstractBadgeInstance(AbstractComponent):
     # # 0.5 BadgeInstances have no notion of a BadgeClass (null=True)
     # issuer = models.ForeignKey(Issuer, blank=False, null=False)
 
-    #  recipient_id = models.CharField(max_length=1024, blank=False)
-    email = models.EmailField(max_length=255, blank=False, null=False)
+    recipient_identifier = models.EmailField(max_length=1024, blank=False,
+                                             null=False)
     image = models.ImageField(upload_to='uploads/badges', blank=True)  # upload_to='issued' in cred_store
     slug = AutoSlugField(max_length=255, populate_from='populate_slug',
                          unique=True, blank=False, editable=False)
@@ -121,7 +121,8 @@ class AbstractBadgeInstance(AbstractComponent):
         abstract = True
 
     def __unicode__(self):
-        return "%s issued to %s" % (self.badgeclass.name, self.email,)
+        return "%s issued to %s" % (self.badgeclass.name,
+                                    self.recipient_identifier,)
 
     def get_absolute_url(self):
         return reverse('badgeinstance_json', kwargs={'slug': self.slug})

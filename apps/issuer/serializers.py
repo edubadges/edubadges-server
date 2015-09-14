@@ -160,7 +160,7 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
     badgeclass = serializers.HyperlinkedRelatedField(view_name='badgeclass_json', read_only=True, lookup_field='slug')
     slug = serializers.CharField(max_length=255, read_only=True)
     image = serializers.ImageField(read_only=True)  # use_url=True, might be necessary
-    email = serializers.EmailField(max_length=255)
+    recipient_identifier = serializers.EmailField(max_length=1024)
     evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
 
     revoked = serializers.BooleanField(read_only=True)

@@ -124,7 +124,7 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
             'json': badge_instance_json,
             'badgeclass': new_badge_class,
             'issuer': new_issuer,
-            'email': badge_check.matched_email,
+            'recipient_identifier': badge_check.matched_email,
             'image': use_or_bake_badge_instance_image(
                 validated_data.get('image'), badge_instance, badge_class)
         }, identifier=badge_instance_url, recipient_user=request_user)
