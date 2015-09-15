@@ -64,3 +64,18 @@
   }
 
 }
+
+.l-grid {
+  display: flex;
+  flex-wrap: wrap;
+  padding: $layout-spacing*2 $layout-spacing;
+  width: 100%;
+
+  > * {
+    box-sizing: border-box;
+    display: flex;
+    flex: 0 0 20%;
+    padding: 0 $layout-spacing $layout-spacing*2;
+  }
+
+}
