@@ -12,10 +12,7 @@ var MenuStore = assign({}, EventEmitter.prototype);
 MenuStore.defaultItems = {
   topMenu: {
     items: [
-      // { title: "messages", url: "#", icon: "fa-envelope", children: [] },
-      // { title: "tasks", url: "#", icon: "fa-tasks", children: []},
-      // { title: "alerts", url: "#", icon: "fa-bell", children: [] },
-      { title: "user", url: "#", icon: "fa-user", children: [
+      { title: "user", url: "#", icon: "icon_ icon_-small icon_-right icon_-dropdownlight", children: [
         { title: "User Profile", url: "/accounts/", icon: "fa-user", children: [] },
         { title: "LTI Info", url: "/accounts/lti", icon: "fa-gear", children: [] },
 
@@ -23,9 +20,6 @@ MenuStore.defaultItems = {
         { title: "Log Out", url: "/logout", icon: "fa-sign-out", children: [] }
       ] }
     ]
-  },
-  roleMenu: {
-    items: []
   },
   badgebookMenu: {
     items: [
@@ -111,7 +105,6 @@ MenuStore.defaultItems = {
 
 MenuStore.menus = {
   topMenu: MenuStore.defaultItems.topMenu,
-  roleMenu: MenuStore.defaultItems.roleMenu,
   badgebookMenu: MenuStore.defaultItems.badgebookMenu,
   secondaryMenus: MenuStore.defaultItems.secondaryMenus,
   actionBars: MenuStore.defaultItems.actionBars
@@ -135,33 +128,35 @@ MenuStore.storeInitialData = function() {
   if (typeof initialData == 'undefined')
     return;
 
+  var newItems = [], item;
   // try to load the variable declared as initialData in the view template
   if (initialData.installed_apps.indexOf('composer') > -1)
-    MenuStore.menus.roleMenu.items.push(
-      { title: "My Badges", url: "/earner/badges", icon: "fa-certificate", children: [] },
-      { title: "My Collections", url: "/earner/collections", icon: "folder", children: [] }
+    newItems.push(
+      { title: "My Badges", url: "/earner/badges", icon: "", children: [] },
+      { title: "My Collections", url: "/earner/collections", icon: "", children: [] }
     );
   if (initialData.installed_apps.indexOf('issuer') > -1)
-    MenuStore.menus.roleMenu.items.push(
-      { title: "Issue", url: "/issuer", icon: "fa-mail-forward", children: []}
+    newItems.push(
+      { title: "Issue", url: "/issuer", icon: "", children: []}
     );
   if (initialData.installed_apps.indexOf('consumer') > -1)
-    MenuStore.menus.roleMenu.items.push(  
-      { title: "Understand", url: "/understand", icon: "fa-info-circle", children: [] }
+    newItems.push(
+      { title: "Understand", url: "/understand", icon: "", children: [] }
     );
-  if ('user' in initialData){
-    for (index in MenuStore.menus.topMenu.items){
+  if ('user' in initialData) {
+    for (index in MenuStore.menus.topMenu.items) {
       item = MenuStore.menus.topMenu.items[index];
-      if (item.title = 'user')
-        item['title'] = initialData.user.username
-      break;
+      if (item.title = 'user') {
+        item['title'] = initialData.user.username;
+        newItems.push(item);
+        break;
+      }
     }
+  }
+  MenuStore.menus.topMenu.items = newItems;
 
   if (initialData.lti_learner) {
     MenuStore.menus.badgebookMenu.items = [];
-  }
-
-
   }
 
   if ('user' in initialData && initialData.user.approvedIssuer){

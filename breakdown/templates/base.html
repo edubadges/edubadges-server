@@ -19,8 +19,12 @@
             <!-- Custom Fonts -->
             <link href="{{STATIC_URL}}css/plugins/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
-            <!-- main stylesheet -->
+            <!-- main (legacy) stylesheet -->
             <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/style.css">
+
+            <!-- main (incoming and future ruler of the realm) stylesheet -->
+            <link href="{{ STATIC_URL }}css/reset.css" media="screen" rel="stylesheet" type="text/css" >
+            <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/screen.css">
 
             <!-- TODO: create print stylesheet
             <link rel="stylesheet" media="print" type="text/css" href="{{STATIC_URL}}css/print.css">
