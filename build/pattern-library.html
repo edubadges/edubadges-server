@@ -131,11 +131,13 @@
 						    // Update button opens a modal dialog
 						    dialogOpen.addEventListener('click', function() {
 						      dialog.showModal();
+                              dialog.classList.add('is-visible');
 						    });
 
 						    // Form cancel button closes the dialog box
 						    dialogClose.addEventListener('click', function() {
 						      dialog.close();
+                              dialog.classList.remove('is-visible');
 						    });
 
 						  });
@@ -631,7 +633,12 @@
 
 		<dialog class="dialog_" id="dialogID">
 
-			<button class="dialog_-x-close" id="dialogClose"><span class="icon_ icon_-close"><span class="hidden">Close</span></span></button>
+			<button class="dialog_-x-close" id="dialogClose"><span class="icon_ icon_-notext icon_-close">Close</span></button>
+
+            <header class="dialog_-x-section heading_ heading_-small">
+                <h1>Dialog Header</h1>
+                <p>Dialog header text.</p>
+            </header>
 		  
 		</dialog>
 
