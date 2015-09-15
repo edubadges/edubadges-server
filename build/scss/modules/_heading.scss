@@ -1,12 +1,50 @@
-.heading {
-  color: $heading-color;
-  font-size: $font-size-large-2x;
-  font-weight: 400;
-  line-height: 40px;
-  margin-bottom: 30px;
-  margin-top: 20px;
+.heading_ {
+  box-sizing: border-box;
+  padding-right: 40%;
+
+  h1,
+  p {
+    margin-bottom: $layout-spacing*2;
+  }
+  
+  h1 {
+    color: map-get($colors, heading);
+    font-size: $font-size-large-5x;
+    font-weight: 300;
+  }
+
+  p {
+    line-height: 1.5;
+  }
+
 }
 
-.heading-medium {
-  font-size: $font-size-large;
+.heading_-medium {
+
+  h1 {
+    font-size: $font-size-large-3x;
+  }
+
+  p {
+    font-size: $font-size-small;
+  }
+
+}
+
+.heading_-small {
+
+  h1,
+  p {
+    margin-bottom: $layout-spacing;
+  }
+
+  h1 {
+    font-size: $font-size-large-2x;
+    font-weight: normal;
+  }
+
+  p {
+    font-size: $font-size-small;
+  }
+
 }

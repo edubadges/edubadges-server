@@ -13,6 +13,7 @@ button {
   cursor: pointer;
   font-family: $font-family;
   font-size: $font-size;
+  line-height: 1;
   margin: 0;
   outline: none;
   padding: 0;
@@ -21,6 +22,10 @@ button {
 label {
   color: $medium-font;
   font-size: $font-size-small-2x;
+  font-weight: 600;
+}
+
+strong {
   font-weight: 600;
 }
 
