@@ -1,0 +1,42 @@
+// The consists entirely of overrides
+
+.fixedDataTableLayout_main {
+  border: 0 !important;
+  font-size: $font-size-small-2x;
+
+  .public_fixedDataTable_header,
+  .public_fixedDataTable_header .public_fixedDataTableCell_main {
+    background: map-get($colors, solid-light);
+    padding-top: $layout-spacing*2;
+  }
+
+  .public_fixedDataTableCell_cellContent {
+    padding: 0 $layout-spacing*2;
+  }
+
+  .public_fixedDataTableRow_highlighted,
+  .public_fixedDataTableRow_highlighted .public_fixedDataTableCell_main {
+    background-color: map-get($colors, solid-light);
+  }
+
+  .fixedDataTableCellLayout_main {
+    border-right: 1px solid rgba(map-get($colors, border), .5);
+    border-bottom: 1px solid rgba(map-get($colors, border), .5);
+
+    &:last-child:not(:only-child) {
+      border-right: 0;
+    }
+
+  }
+
+  .fixedDataTableRowLayout_rowWrapper:last-child {
+    .fixedDataTableCellLayout_main {
+      border-bottom: 0 !important;
+    }
+  }
+
+  .fixedDataTableRowLayout_fixedColumnsDivider {
+    border-left: 0;
+  }
+
+}
