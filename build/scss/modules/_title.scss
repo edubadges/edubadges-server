@@ -1,5 +1,6 @@
 .title_ {
   align-items: center;
+  border-top: 1px solid rgba(map-get($colors, border), .5);
   display: flex;
   font-size: $font-size-small;
   justify-content: space-between;
