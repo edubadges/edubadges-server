@@ -300,6 +300,16 @@ APIStore.getData = function(context, requestContext, pagination_url) {
       console.log(error);
       APIStore.emit('API_STORE_FAILURE');
     }
+    else if (response.status == 202 && response.body.resume) {
+      var resume = response.body.resume;
+      var wait = response.body.wait || 8;
+      if (url.indexOf('resume=') == -1) {
+        url += (url.indexOf('?') == -1 ? '?' : '&')+"resume="+resume;
+      }
+      setTimeout(function() {
+        APIStore.getData(context, requestContext, url)
+      }.bind(this), wait*1000);
+    }
     else if (context.successfulHttpStatus.indexOf(response.status) == -1){
       console.log("API REQUEST PROBLEM:");
       console.log(response.text);
