@@ -1,0 +1,34 @@
+.step_ {
+  @include buttonoverride;
+  align-items: center;
+  display: flex;
+  font-size: $font-size-small;
+  font-weight: 600;
+  padding: $layout-spacing*2;
+
+  &::before {
+    @include pseudobase;
+    background: url('images/step-unearned.svg') center center no-repeat;
+    background-size: contain;
+    height: 32px;
+    margin-right: $layout-spacing*2;
+    width: 32px;
+  }
+
+}
+
+.step_-earned {
+
+  &::before {
+    background-image: url('images/step-earned.svg');
+  }
+
+  &:hover {
+
+    &::before {
+      background-image: url('images/step-earned-hover.svg');
+    }
+
+  }
+
+}

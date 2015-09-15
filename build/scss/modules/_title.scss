@@ -2,18 +2,17 @@
   align-items: center;
   border-top: 1px solid rgba(map-get($colors, border), .5);
   display: flex;
-  font-size: $font-size-small;
   justify-content: space-between;
   padding: $layout-spacing*2 0;
 
   .title_-x-primary {
-    font-size: $font-size;
+    font-size: $font-size-large;
     font-weight: 600;
   }
 
   .title_-x-secondary {
     color: map-get($colors, bodycopy-faint);
-    font-size: $font-size-small2;
+    font-size: $font-size-small-2x;
     margin-top: $layout-spacing/2;
   }
 

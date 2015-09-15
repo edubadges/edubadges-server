@@ -1,18 +1,26 @@
 @import 'base';
 
 body {
-  font-family: 'Open Sans', sans-serif;
+  font-family: $font-family;
   font-size: $font-size;
   -webkit-font-smoothing: antialiased;
 }
 
 button {
+  -webkit-apperance: none;
+  background: none;
+  border: 0;
   cursor: pointer;
+  font-family: $font-family;
+  font-size: $font-size;
+  margin: 0;
+  outline: none;
+  padding: 0;
 }
 
 label {
   color: $medium-font;
-  font-size: $font-size-small2;
+  font-size: $font-size-small-2x;
   font-weight: 600;
 }
 
@@ -32,5 +40,5 @@ label {
 'modules/header',
 'modules/hidden',
 'modules/icon',
+'modules/step',
 'modules/title';
-
