@@ -2,6 +2,7 @@ $colors: (
   bodybackground: #fafafa,
   bodycopy: #31383e,
   bodycopy-light: #5b6c79,
+  bodycopy-faint: #9B9B9B,
   border: #bbb,
   solid: #fff,
   solid-dark: #000
@@ -14,10 +15,12 @@ $light-border: #ccc;
 $light-font: #fff;
 $medium-font: #333;
 
+$font-size-small2: 12px;
+$font-size-small: 14px;
 $font-size: 16px;
-$font-size-large: 34px;
-$font-size-medium: 24px;
-$font-size-small: 16px;
+$font-size-large: 24px;
+$font-size-large2: 34px;
+
 
 $layout-spacing: $font-size / 2;
 

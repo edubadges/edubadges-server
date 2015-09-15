@@ -56,7 +56,7 @@
     &:last-child {
 
       > * {
-        margin-left: $layout-spacing;
+        margin-left: $layout-spacing*3;
       }
 
     }

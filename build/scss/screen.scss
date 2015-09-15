@@ -12,8 +12,8 @@ button {
 
 label {
   color: $medium-font;
-  font-size: $font-size-small;
-  font-weight: 500;
+  font-size: $font-size-small2;
+  font-weight: 600;
 }
 
 @import 'layout';
@@ -31,5 +31,6 @@ label {
 'modules/heading',
 'modules/header',
 'modules/hidden',
-'modules/icon';
+'modules/icon',
+'modules/title';
 

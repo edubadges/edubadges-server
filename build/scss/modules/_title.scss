@@ -1,0 +1,41 @@
+.title_ {
+  align-items: center;
+  display: flex;
+  font-size: $font-size-small;
+  justify-content: space-between;
+  padding: $layout-spacing*2 0;
+
+  .title_-x-primary {
+    font-size: $font-size;
+    font-weight: 600;
+  }
+
+  .title_-x-secondary {
+    color: map-get($colors, bodycopy-faint);
+    font-size: $font-size-small2;
+    margin-top: $layout-spacing/2;
+  }
+
+  .title_-x-centered {
+    text-align: center;
+  }
+
+  .title_-x-primary,
+  .title_-x-secondary {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+  }
+
+  > :first-child {
+    flex: 1 1 0;
+    padding: 0 $layout-spacing*2;
+  }
+
+  > :last-child {
+    padding-right: $layout-spacing*2;
+  }
+
+
+}
