@@ -22,12 +22,10 @@ BreadCrumbs = React.createClass({
       );
     });
     return (
-      <div className="breadcrumb-wrapper">
-        <div className="wrap">
-            <ul className="breadcrumb">
-                {crumbs}
-            </ul>
-        </div>
+      <div className="breadcrumb-wrapper l-wrapper">
+        <ul className={"breadcrumb breadcrumb-" + this.props.submodule}>
+          {crumbs}
+        </ul>
       </div>
     );
   }

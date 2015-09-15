@@ -1,0 +1,31 @@
+.dropdown_ {
+  display: none;
+  position: absolute;
+  z-index: 500;
+  min-width: 160px;
+  padding: 8px 0;
+  margin: 4px 0 0;
+  border: 1px solid $header-border;
+  background: map-get($colors, solid);
+
+  li.dropdown_-x-item {
+    display: block;
+    background: transparent;
+
+    a {
+      color: map-get($colors, bodycopy);
+
+      &:hover {
+        background-color: map-get($colors, bodybackground);
+      }
+    }
+  }
+}
+
+.dropdown_-toplinks {
+  right: 0;
+}
+
+.is-open .dropdown_ {
+  display: block;
+}
