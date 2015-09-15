@@ -1,4 +1,4 @@
-.button {
+.button_ {
   background-color: $brand-color;
   border: 1px solid $brand-color;
   border-radius: 4px;
@@ -14,12 +14,18 @@
   user-select: none;
 }
 
-.button-secondary {
+.button_-secondary {
   background-color: #fff;
   border: 1px solid $brand-color;
   color: $brand-color;
 }
 
-.button-uppercase {
+.button_-solid {
+  background: none;
+  border-color: map-get($colors, solid);
+  color: map-get($colors, solid);
+}
+
+.button_-uppercase {
   text-transform: uppercase;
 }
