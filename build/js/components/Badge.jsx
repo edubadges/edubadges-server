@@ -22,10 +22,10 @@ var Badge = React.createClass({
 
     render: function() {
         return (
-            <div className="badge_">
+            <div className="badge_" onClick={this.props.handleClick}>
                 <img src={this.props.image} width={this.props.width} height={this.props.height} alt={this.props.description}/>
                 <div className="badge_-x-action">
-                    <button className="button_ button_-solid button_-uppercase" onClick={this.props.handleClick}>{this.props.label}</button>
+                    <button className="button_ button_-solid button_-uppercase">{this.props.label}</button>
                 </div>
             </div>);
     }

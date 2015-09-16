@@ -60,6 +60,10 @@ class BadgeClass(AbstractBadgeClass):
         super(BadgeClass, self).publish()
         self.issuer.publish()
 
+    @property
+    def cached_issuer(self):
+        return Issuer.cached.get(pk=self.issuer_id)
+
 
 class BadgeInstance(AbstractBadgeInstance):
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False,
