@@ -8,6 +8,19 @@
   padding: $layout-spacing $layout-spacing*2;
   text-align: center;
   user-select: none;
+
+  &:hover {
+    background-color: map-get($colors, button-hover);
+    border-color: map-get($colors, button-hover);
+    color: map-get($colors, solid);
+  }
+
+  &:active {
+    background-color: map-get($colors, button-active);
+    border-color: map-get($colors, button-active);
+    color: map-get($colors, solid);
+  }
+  
 }
 
 .button_-secondary {
@@ -20,6 +33,33 @@
   background: none;
   border-color: map-get($colors, solid);
   color: map-get($colors, solid);
+
+  &:active,
+  &:hover {
+    background: none;
+    border-color: map-get($colors, solid);
+    color: map-get($colors, solid);
+  }
+
+}
+
+.button_-tertiary {
+  background: none;
+  border-color: map-get($colors, link);
+  color: map-get($colors, link);
+  padding-left: $layout-spacing;
+  padding-right: $layout-spacing;
+
+  &:hover {
+    background-color: map-get($colors, link-hover);
+    border-color: map-get($colors, link-hover);
+  }
+
+  &:active {
+    background-color: map-get($colors, link-active);
+    border-color: map-get($colors, link-active);
+  }
+
 }
 
 .button_-uppercase {
