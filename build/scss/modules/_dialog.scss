@@ -35,16 +35,11 @@
     top: $layout-spacing*3;
   }
 
-  .dialog_-x-section {
-    padding-left: $layout-spacing*3;
-    padding-right: $layout-spacing*3;
+  .dialog_-x-content {
+    padding: $layout-spacing*3 $layout-spacing*3 0;
 
-    &:first-of-type {
-      padding-top: $layout-spacing*3;
-    }
-
-    &:last-of-type {
-      padding-bottom: $layout-spacing*2;
+    > * {
+      margin-bottom: $layout-spacing*2;
     }
 
   }
