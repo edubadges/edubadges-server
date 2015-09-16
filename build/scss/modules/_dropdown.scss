@@ -1,31 +1,18 @@
 .dropdown_ {
+  background: map-get($colors, solid-light);
+  border-radius: $border-radius;
+  box-shadow: 0 1px $layout-spacing/2 0 rgba(map-get($colors, solid-dark), .3);
   display: none;
-  position: absolute;
-  z-index: 500;
-  min-width: 160px;
-  padding: 8px 0;
-  margin: 4px 0 0;
-  border: 1px solid map-get($colors, border-light);
-  background: map-get($colors, solid);
+  max-width: 286px;
+  opacity: 0;
+  transition: opacity $transition-duration $transition-easing;
 
-  li.dropdown_-x-item {
+  &.is-active {
     display: block;
-    background: transparent;
-
-    a {
-      color: map-get($colors, bodycopy);
-
-      &:hover {
-        background-color: map-get($colors, bodybackground);
-      }
-    }
   }
-}
 
-.dropdown_-toplinks {
-  right: 0;
-}
+  &.is-visible {
+    opacity: 1;
+  }
 
-.is-open .dropdown_ {
-  display: block;
 }
