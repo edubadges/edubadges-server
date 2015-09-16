@@ -48,8 +48,6 @@ class BadgeInstance(AbstractBadgeInstance):
                                    related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
 
-    email = models.EmailField(max_length=255, blank=False, null=False)
-
     @property
     def extended_json(self):
         extended_json = self.json
