@@ -127,6 +127,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-shell-spawn');
     grunt.loadNpmTasks('grunt-inline');
 
-    grunt.registerTask('default',['bs-init', 'watch']);
+    grunt.registerTask('default',['bs-init', 'sass', 'autoprefixer', 'browserify:dev', 'inline:dist', 'watch']);
     grunt.registerTask('dist', ['env:dist', 'sass', 'autoprefixer', 'browserify:dist']);
 }
