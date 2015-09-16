@@ -12,7 +12,7 @@ var Heading = React.createClass({
 
     render: function() {
         var subtitle = this.props.subtitle ? (<p>this.props.subtitle</p>) : "";
-        var size = this.props.size.toLowerCase();
+        var size = this.props.size ? this.props.size.toLowerCase() : "";
 
         if (size && (size in ["medium", "small"])) {
             size = "heading_-"+size;
@@ -28,4 +28,8 @@ var Heading = React.createClass({
     }
 });
 
-module.exports = Heading;
+module.exports = {
+    Heading: Heading,
+};
+
+
