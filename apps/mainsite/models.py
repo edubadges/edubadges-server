@@ -52,7 +52,8 @@ class AbstractIssuer(AbstractComponent):
     """
     Open Badges Specification IssuerOrg object
     """
-    image = models.ImageField(upload_to='uploads/issuers', blank=True)
+    image = models.ImageField(upload_to='uploads/issuers', blank=True,
+                              null=True)
     name = models.CharField(max_length=1024)
     slug = AutoSlugField(max_length=255, populate_from='name', unique=True,
                          blank=False, editable=True)
