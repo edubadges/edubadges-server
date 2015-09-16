@@ -23,7 +23,7 @@ def copy_collection_to_composition(apps, schema_editor):
 
             # WARNING: Null-able -> NOT NULL
             'owner': composer_collection.owner,  # Auth user
-        }, name=composer_collection.name, slug=composer_collection.slug)
+        }, slug=composer_collection.slug, owner=composer_collection.owner)
 
 
 def copy_collectionpermission_to_composition(apps, schema_editor):
