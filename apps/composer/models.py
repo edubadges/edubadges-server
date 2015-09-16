@@ -17,14 +17,14 @@ class Collection(cachemodel.CacheModel):
         blank=False, editable=True
     )
     description = models.CharField(max_length=255, blank=True)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=False)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=False, related_name="composer_collection_set")
     share_hash = models.CharField(max_length=255, null=False, blank=True)
 
     instances = models.ManyToManyField(
         StoredBadgeInstance, through='StoredBadgeInstanceCollection'
     )
     shared_with = models.ManyToManyField(
-        AUTH_USER_MODEL, through='CollectionPermission', related_name='shared_with_me'
+        AUTH_USER_MODEL, through='CollectionPermission', related_name='composer_shared_with_me'
     )
 
     class Meta:
@@ -51,7 +51,7 @@ class StoredBadgeInstanceCollection(models.Model):
 
 
 class CollectionPermission(models.Model):
-    user = models.ForeignKey(AUTH_USER_MODEL, null=False)
+    user = models.ForeignKey(AUTH_USER_MODEL, null=False, related_name="composer_collectionpermission_set")
     collection = models.ForeignKey(Collection, null=False)
 
     can_write = models.BooleanField(default=False)
