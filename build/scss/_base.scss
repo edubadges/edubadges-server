@@ -4,18 +4,19 @@ $colors: (
   bodycopy-light: #5b6c79,
   bodycopy-faint: #9B9B9B,
   border: #bbb,
+  border-light: #ccc,
+  button: #672F33,
+  button-hover: #AB2430,
+  button-active: #9D1F2A,
   heading: #3D1719,
+  link: #4A90E2,
+  link-hover: #6BADF9,
+  link-active: #4286D7,
+  loading: #93AB23,
   solid: #fff,
-  solid-light: #FDFDFD,
+  solid-light: #F9F9F9,
   solid-dark: #000
 );
-
-// Base colors
-
-$brand-color: #672f33;
-$light-border: #ccc;
-$light-font: #fff;
-$medium-font: #333;
 
 $font-size-small-2x: 12px;
 $font-size-small: 14px;
@@ -26,10 +27,14 @@ $font-size-large-3x: 28px;
 $font-size-large-4x: 34px;
 $font-size-large-5x: 40px;
 
-
 $layout-spacing: $font-size / 2;
 
 $border-radius: 2px;
+
+$font-family: 'Open Sans', sans-serif;
+
+$transition-duration: .25s;
+$transition-easing: ease-out;
 
 @mixin wrap {
   margin: 0 auto;
@@ -42,19 +47,14 @@ $border-radius: 2px;
   display: block;
 }
 
-// Layout colors
+@keyframes rotate {
 
-$header: #31383e;
-$header-border: #e7e7e7;
+  0% {
+    transform: rotate3d(0, 0, 1, 0);
+  }
 
-$footer: #f5f5f5;
-$footer-border: $light-border;
+  100% {
+    transform: rotate3d(0, 0, 1, 360deg);
+  }
 
-$font-family: 'Open Sans', sans-serif;
-
-// Module colors
-
-$heading-color: $brand-color;
-
-$transition-duration: .25s;
-$transition-easing: ease-out;
+}

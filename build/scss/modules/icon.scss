@@ -16,6 +16,15 @@
     width: $layout-spacing*4;
   }
 
+  &[disabled] {
+
+    &::after {
+      cursor: default;
+      opacity: .25;
+    }
+
+  }
+
 }
 
 .icon_-small {
@@ -88,6 +97,38 @@
 
   &::after {
     background-image: url('images/icon-more.svg');
+  }
+
+}
+
+.icon_-next {
+
+  &::after {
+    background-image: url('images/icon-next.svg');
+  }
+
+}
+
+.icon_-last {
+
+  &::after {
+    background-image: url('images/icon-last.svg');
+  }
+
+}
+
+.icon_-previous {
+
+  &::after {
+    background-image: url('images/icon-previous.svg');
+  }
+
+}
+
+.icon_-first {
+
+  &::after {
+    background-image: url('images/icon-first.svg');
   }
 
 }

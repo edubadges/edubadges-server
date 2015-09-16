@@ -20,9 +20,8 @@ button {
 }
 
 label {
-  color: $medium-font;
-  font-size: $font-size-small-2x;
-  font-weight: 600;
+  font-family: $font-family;
+  font-size: $font-size;
 }
 
 strong {
@@ -46,5 +45,6 @@ strong {
 'modules/header',
 'modules/hidden',
 'modules/icon',
+'modules/pagination',
 'modules/step',
 'modules/title';

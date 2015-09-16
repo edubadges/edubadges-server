@@ -1,6 +1,6 @@
 .button_ {
-  background-color: $brand-color;
-  border: 1px solid $brand-color;
+  background-color: map-get($colors, button);
+  border: 1px solid map-get($colors, button);
   border-radius: $border-radius;
   color: map-get($colors, solid);
   display: inline-block;
@@ -12,8 +12,8 @@
 
 .button_-secondary {
   background-color: #fff;
-  border: 1px solid $brand-color;
-  color: $brand-color;
+  border: 1px solid map-get($colors, button);
+  color: map-get($colors, button);
 }
 
 .button_-solid {
