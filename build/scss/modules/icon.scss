@@ -94,7 +94,7 @@
 
 // Small Icons
 
-.icon_-dropdown {
+.icon_-small.icon_-dropdown {
 
   &::after {
     background-image: url('images/icon-dropdown.svg');
@@ -102,7 +102,7 @@
 
 }
 
-.icon_-dropdownlight {
+.icon_-small.icon_-dropdownlight {
 
   &::after {
     background-image: url('images/icon-dropdownlight.svg');

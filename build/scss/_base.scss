@@ -4,7 +4,9 @@ $colors: (
   bodycopy-light: #5b6c79,
   bodycopy-faint: #9B9B9B,
   border: #bbb,
+  heading: #3D1719,
   solid: #fff,
+  solid-light: #FDFDFD,
   solid-dark: #000
 );
 
@@ -20,7 +22,9 @@ $font-size-small: 14px;
 $font-size: 16px;
 $font-size-large: 16px;
 $font-size-large-2x: 24px;
-$font-size-large-3x: 34px;
+$font-size-large-3x: 28px;
+$font-size-large-4x: 34px;
+$font-size-large-5x: 40px;
 
 
 $layout-spacing: $font-size / 2;
@@ -51,3 +55,6 @@ $font-family: 'Open Sans', sans-serif;
 // Module colors
 
 $heading-color: $brand-color;
+
+$transition-duration: .25s;
+$transition-easing: ease-out;

@@ -1,25 +1,27 @@
-.button {
+.button_ {
   background-color: $brand-color;
   border: 1px solid $brand-color;
-  border-radius: 4px;
-  color: $light-font;
-  cursor: pointer;
+  border-radius: $border-radius;
+  color: map-get($colors, solid);
   display: inline-block;
-  font-size: 14px;
-  font-weight: normal;
-  line-height: 1.42857143;
-  margin-bottom: 0;
-  padding: 6px 12px;
+  font-size: $font-size-small;
+  padding: $layout-spacing $layout-spacing*2;
   text-align: center;
   user-select: none;
 }
 
-.button-secondary {
+.button_-secondary {
   background-color: #fff;
   border: 1px solid $brand-color;
   color: $brand-color;
 }
 
-.button-uppercase {
+.button_-solid {
+  background: none;
+  border-color: map-get($colors, solid);
+  color: map-get($colors, solid);
+}
+
+.button_-uppercase {
   text-transform: uppercase;
 }
