@@ -23,8 +23,8 @@ MenuStore.defaultItems = {
   },
   badgebookMenu: {
     items: [
-      { title: "Objectives", url: "/badgebook/objectives", icon: "fa-certificate", children: [] },
-      { title: "Progress", url: "/badgebook/progress", icon: "fa-tasks", children: [] }
+      { title: "Objectives", url: "/badgebook/objectives", icon: "", children: [] },
+      { title: "Progress", url: "/badgebook/progress", icon: "", children: [] }
     ]
   },
   secondaryMenus: {
