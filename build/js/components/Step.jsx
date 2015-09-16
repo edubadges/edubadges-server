@@ -13,7 +13,7 @@ var Step = React.createClass({
     },
 
     render: function() {
-        return (<button className="step_ {this.props.earned ? 'step_-earned' : ''}">{this.props.title}</button>);
+        return (<button className={"step_ "+(this.props.earned ? 'step_-earned' : '')}>{this.props.title}</button>);
     }
 });
 
