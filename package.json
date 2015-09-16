@@ -8,7 +8,10 @@
   "homepage": "http://concentricsky.com",
   "dependencies": {
     "react": "0.13.x",
-    "lodash": "~3.10.0"
+    "lodash": "~3.10.0",
+
+    "babel-jest": "*",
+    "jest-cli": "*"
   },
   "devDependencies": {
     "browser-sync": "latest",
@@ -32,6 +35,7 @@
     "gulp-size": "~1.1.0",
     "gulp-uglify": "~1.0.2",
     "gulp-util": "~3.0.1",
+    "jest-cli": "^0.5.5",
     "jshint-stylish": "~1.0.0",
     "moment": "~2.10.2",
     "object-assign": "~2.0.0",
@@ -49,6 +53,12 @@
   },
   "readmeFilename": "README",
   "scripts": {
-    "gulp-build": "gulp build"
+    "gulp-build": "gulp build",
+    "test": "jest --config=jest-config.js"
+  },
+  "jest": {
+    "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
+    "unmockedModulePathPatterns": ["<rootDir>/node_modules/react"]
   }
+
 }

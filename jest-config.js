@@ -1,0 +1,3 @@
+{
+	"testPathDirs": ["build/js"]
+}
