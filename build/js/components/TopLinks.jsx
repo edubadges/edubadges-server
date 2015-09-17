@@ -1,5 +1,6 @@
 var React = require('react');
 var ItemsStore = require('../stores/MenuStore.js');
+var Icon = require('../components/Icon.jsx').Icon;
 
 var DropMenuItem = React.createClass({
   handleClick: function(event){
@@ -47,7 +48,7 @@ var FirstLevelItem = React.createClass({
       anyChildren = (<MenuList items={this.props.children} title={this.props.title} clName="nav nav-second-level" key='nested-menu' />);
       liClassName = this.props.open ? 'is-open is-closable open closable' : 'closable is-closable';
     }
-    var label = this.props.iconClass ? (<span className={this.props.iconClass}>{this.props.label}</span>) : this.props.label;
+    var label = this.props.iconClass ? (<Icon iconName={this.props.iconClass} position="right" size="small">{this.props.label}</Icon>) : this.props.label;
 
     return (
       <li className={liClassName}>

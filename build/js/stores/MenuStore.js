@@ -12,7 +12,7 @@ var MenuStore = assign({}, EventEmitter.prototype);
 MenuStore.defaultItems = {
   topMenu: {
     items: [
-      { title: "user", url: "#", icon: "icon_ icon_-small icon_-right icon_-dropdownlight", children: [
+      { title: "user", url: "#", icon: "icon_-dropdownlight", children: [
         { title: "User Profile", url: "/accounts/", icon: "fa-user", children: [] },
         { title: "LTI Info", url: "/accounts/lti", icon: "fa-gear", children: [] },
 
