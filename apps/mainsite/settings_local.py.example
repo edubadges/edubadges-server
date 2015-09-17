@@ -68,6 +68,11 @@ ROOT_INFO_REDIRECT = '/login'
 #    'test2': 'reallysecret'
 #}
 
+LOGS_DIR = TOP_DIR + '/logs'
+
+
+# Run celery tasks in same thread as webserver
+CELERY_ALWAYS_EAGER = True
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
