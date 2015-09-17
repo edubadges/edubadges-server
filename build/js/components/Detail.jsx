@@ -2,6 +2,7 @@
 var React = require('react');
 var FacebookButton = require("react-social").FacebookButton;
 var Heading = require('../components/Heading.jsx').Heading;
+var _ = require('lodash');
 
 var Detail = React.createClass({
     proptypes: {
