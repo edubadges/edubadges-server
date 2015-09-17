@@ -77,7 +77,7 @@ var InputGroup = React.createClass({
 /* A droppable zone for image files. Must send in handler(file) for when images are dropped and set image prop with that file from above. */
 var ImageDropbox = React.createClass({
   validateFileType: function(file){
-    if (file instanceof File && (file.type && (file.type == 'image/png' || file.type == 'image/svg')))
+    if (file instanceof File && (file.type && (file.type == 'image/png' || file.type == 'image/svg+xml')))
       return true;
     else
       console.log("FILE DID NOT SEEM TO VALIDATE.")
