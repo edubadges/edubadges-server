@@ -479,8 +479,13 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
             )
 
         data = {}
-        if request.data.get('email') is not None:
-            data['email'] = request.data.get('email')
+        if request.data.get('recipient_identifier') is not None:
+            data['recipient_identifier'] = \
+                request.data.get('recipient_identifier')
+        elif request.data.get('recipient_id') is not None:
+            data['recipient_identifier'] = request.data.get('recipient_id')
+        elif request.data.get('email') is not None:
+            data['recipient_identifier'] = request.data.get('email')
         if request.data.get('evidence') is not None:
             data['evidence'] = request.data.get('evidence')
         if request.data.get('create_notification') is not None:
@@ -557,7 +562,9 @@ class IssuerBadgeInstanceList(AbstractIssuerAPIEndpoint):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         if request.query_params.get('recipient') is not None:
-            instances = current_issuer.badgeinstances.filter(email=request.query_params.get('recipient'), revoked=False)
+            instances = current_issuer.badgeinstances.filter(
+                recipient_identifier=request.query_params.get('recipient'),
+                revoked=False)
         else:
             instances = current_issuer.badgeinstances.filter(revoked=False)
 

@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from autoslug import AutoSlugField
 import cachemodel
 
-from local_components.models import BadgeInstance as LocalBadgeInstance
+from credential_store.models import StoredBadgeInstance
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
@@ -17,14 +17,14 @@ class Collection(cachemodel.CacheModel):
         blank=False, editable=True
     )
     description = models.CharField(max_length=255, blank=True)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=False)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=False, related_name="composer_collection_set")
     share_hash = models.CharField(max_length=255, null=False, blank=True)
 
     instances = models.ManyToManyField(
-        LocalBadgeInstance, through='LocalBadgeInstanceCollection'
+        StoredBadgeInstance, through='StoredBadgeInstanceCollection'
     )
     shared_with = models.ManyToManyField(
-        AUTH_USER_MODEL, through='CollectionPermission', related_name='shared_with_me'
+        AUTH_USER_MODEL, through='CollectionPermission', related_name='composer_shared_with_me'
     )
 
     class Meta:
@@ -34,12 +34,14 @@ class Collection(cachemodel.CacheModel):
     def share_url(self):
         if self.share_hash != '':
             return getattr(settings, 'HTTP_ORIGIN') + reverse(
-                'shared_collection', args=[self.pk, self.share_hash])
+                'shared_collection',
+                args=[self.pk, self.share_hash]
+            )
         return ''
 
 
-class LocalBadgeInstanceCollection(models.Model):
-    instance = models.ForeignKey(LocalBadgeInstance, null=False)
+class StoredBadgeInstanceCollection(models.Model):
+    instance = models.ForeignKey(StoredBadgeInstance, null=False)
     collection = models.ForeignKey(Collection, null=False)
 
     description = models.TextField(blank=True)
@@ -49,7 +51,7 @@ class LocalBadgeInstanceCollection(models.Model):
 
 
 class CollectionPermission(models.Model):
-    user = models.ForeignKey(AUTH_USER_MODEL, null=False)
+    user = models.ForeignKey(AUTH_USER_MODEL, null=False, related_name="composer_collectionpermission_set")
     collection = models.ForeignKey(Collection, null=False)
 
     can_write = models.BooleanField(default=False)

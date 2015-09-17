@@ -1,46 +1,38 @@
 import json
 
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import DetailView, TemplateView
 
 from badgeuser.serializers import UserProfileField
-from local_components.models import BadgeInstance
-from mainsite.utils import installed_apps_list
 
 from .models import Collection
-from .serializers import CollectionSerializer, EarnerBadgeSerializer
+from .serializers import EarnerPortalSerializer
 
 
 class EarnerPortal(TemplateView):
     template_name = 'base.html'
 
+    @method_decorator(login_required)
+    def get(self, request):
+
+        context = self.get_context_data(**{'request': request})
+        return self.render_to_response(context)
+
     def get_context_data(self, **kwargs):
-        """
-        Pass initial data to a view template so that the React.js front end can
-        render.
-        """
-        context = super(EarnerPortal, self).get_context_data(**kwargs)
+        context_data = super(EarnerPortal, self).get_context_data(**kwargs)
+        earner_serializer = EarnerPortalSerializer(kwargs['request'].user, context=kwargs)
 
-        user_collections = CollectionSerializer(
-            Collection.objects.filter(owner=self.request.user),
-            many=True).data
+        context = {}
+        context['earner_collections'] = earner_serializer.data['earner_collections']
+        context['earner_badges'] = earner_serializer.data['earner_badges']
+        context['user'] = UserProfileField(kwargs['request'].user, context=kwargs).data
+        context['installed_apps'] = earner_serializer.data['installed_apps']
 
-        user_badges = EarnerBadgeSerializer(
-            BadgeInstance.objects.filter(recipient_user=self.request.user),
-            many=True).data
-
-        context.update({
-            'initial_data': json.dumps({
-                'earner_collections': user_collections,
-                'earner_badges': user_badges,
-                'installed_apps': installed_apps_list(),
-                'user': UserProfileField(self.request.user, context=kwargs).data,
-            }),
-        })
-
-        return context
+        context_data['initial_data'] = json.dumps(context)
+        return context_data
 
 
 class CollectionDetailView(DetailView):

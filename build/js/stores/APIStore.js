@@ -397,9 +397,14 @@ APIStore.postForm = function(fields, values, context, requestContext){
     else if (context.successHttpStatus.indexOf(response.status) == -1){
       console.log("API Error: " + response.status);
       console.log(response.text);
+
       APIActions.APIFormResultFailure({
         formId: context.formId,
-        message: {type: 'danger', content: response.status + " Error submitting form: " + response.text}
+        message: {
+          type: 'danger',
+          content: "Error submitting form: (" + response.status + ').',
+          detail: JSON.parse(response.text)
+        }
       });
     }
     else{

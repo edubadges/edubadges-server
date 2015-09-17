@@ -1,14 +1,12 @@
 import os
 import uuid
 
+from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db import models
 
+import cachemodel
 from jsonfield import JSONField
-
-from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
-                             AbstractBadgeInstance)
 
 from .utils import find_recipient_user, baked_image_from_abi
 
@@ -16,16 +14,25 @@ from .utils import find_recipient_user, baked_image_from_abi
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
-class AbstractLocalComponent(models.Model):
+class AbstractStoredComponent(cachemodel.CacheModel):
+    json = JSONField()
     errors = JSONField()
     url = models.URLField(max_length=1024, blank=True)
 
     class Meta:
         abstract = True
 
+    def save(self, *args, **kwargs):
+        if not self.pk and not self.url:
+            self.url = self.get_url()
 
-class Issuer(AbstractLocalComponent, AbstractIssuer):
+        super(AbstractStoredComponent, self).save(*args, **kwargs)
 
+    def get_url(self):
+        return self.json.get('id')
+
+
+class StoredIssuer(AbstractStoredComponent):
     @classmethod
     def from_analyzed_instance(cls, abi, **kwargs):
         if not abi.is_valid():
@@ -65,10 +72,8 @@ class Issuer(AbstractLocalComponent, AbstractIssuer):
         return new_issuer
 
 
-class BadgeClass(AbstractLocalComponent, AbstractBadgeClass):
-    issuer = models.ForeignKey(Issuer, blank=False, null=False,
-                               on_delete=models.PROTECT,
-                               related_name="badgeclasses")
+class StoredBadgeClass(AbstractStoredComponent):
+    issuer = models.ForeignKey(StoredIssuer, null=False)
 
     @classmethod
     def from_analyzed_instance(cls, abi, **kwargs):
@@ -104,22 +109,18 @@ class BadgeClass(AbstractLocalComponent, AbstractBadgeClass):
             errors=badgeclass_errors,
             url=abi.badge_url
         )
-        new_badgeclass.issuer = Issuer.from_analyzed_instance(abi, **kwargs)
+        new_badgeclass.issuer = StoredIssuer.from_analyzed_instance(abi, **kwargs)
         new_badgeclass.save()
 
         return new_badgeclass
 
 
-class BadgeInstance(AbstractLocalComponent, AbstractBadgeInstance):
-    # 0.5 BadgeInstances have no notion of a BadgeClass
-    badgeclass = models.ForeignKey(BadgeClass, blank=False, null=True,
-                                   on_delete=models.PROTECT,
-                                   related_name='badgeinstances')
-    # 0.5 BadgeInstances have no notion of a BadgeClass
-    issuer = models.ForeignKey(Issuer, blank=False, null=True)
-
-    recipient_id = models.CharField(max_length=1024, blank=False)  # Email
+class StoredBadgeInstance(AbstractStoredComponent):
     recipient_user = models.ForeignKey(AUTH_USER_MODEL, null=True)
+    recipient_id = models.CharField(max_length=1024, blank=False)
+    badgeclass = models.ForeignKey(StoredBadgeClass, null=True)
+    issuer = models.ForeignKey(StoredIssuer, null=True)
+    image = models.ImageField(upload_to='uploads/badges', null=True)
 
     @classmethod
     def from_analyzed_instance(cls, abi, **kwargs):
@@ -148,7 +149,7 @@ class BadgeInstance(AbstractLocalComponent, AbstractBadgeInstance):
             json=abi.data,
             errors=abi.all_errors()
         )
-        new_instance.badgeclass = BadgeClass.from_analyzed_instance(
+        new_instance.badgeclass = StoredBadgeClass.from_analyzed_instance(
             abi, **kwargs
         )
         if kwargs.get('image') is not None:
@@ -161,7 +162,7 @@ class BadgeInstance(AbstractLocalComponent, AbstractBadgeInstance):
         new_instance.image.name = 'earned_badge_' + str(uuid.uuid4()) + img_ext
         new_instance.json['image'] = new_instance.image_url()
 
-        # BadgeClass is responsible for detecting issuer
+        # StoredBadgeClass is responsible for detecting issuer
         if new_instance.badgeclass is not None:
             new_instance.issuer = new_instance.badgeclass.issuer
 
@@ -182,3 +183,11 @@ class BadgeInstance(AbstractLocalComponent, AbstractBadgeInstance):
             return getattr(settings, 'HTTP_ORIGIN') \
                 + getattr(settings, 'MEDIA_URL') \
                 + self.image.name
+
+    @property
+    def owner(self):
+        return self.recipient_user
+
+# class StoredEndorsement(AbstractStoredComponent):
+#     recipient_id = models.CharField(max_length=1024, blank=False)
+#     # TODO: needs generic foreign key to one of (SBI, SBC, SI)

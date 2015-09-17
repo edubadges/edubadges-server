@@ -45,11 +45,14 @@ INSTALLED_APPS = [
 
     'mainsite',
     'issuer',
-    'local_components',
-    'composer',
+    'composition',
+    'verifier',
 
     'badgebook',
     'badgebook.canvaslms',
+
+    'composer',
+    'credential_store',
 ]
 
 MIDDLEWARE_CLASSES = [

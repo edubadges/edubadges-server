@@ -1,0 +1,6 @@
+{
+  "uid":"123abc",
+  "recipient": {"identity": "test@example.com","hashed": false, "type": "email"},
+  "issuedOn": "2015-04-30",
+  "verify": {"type": "hosted", "url": "http://a.com/instance"}
+}

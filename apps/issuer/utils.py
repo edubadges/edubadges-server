@@ -25,6 +25,6 @@ def is_probable_url(string):
 
 
 def badgr_import_url(instance):
-    if apps.is_installed('composer'):
+    if apps.is_installed('composition'):
         return getattr(settings, 'HTTP_ORIGIN') \
             + '/earner/badges/new?url=' + instance.get_full_url()

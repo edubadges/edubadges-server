@@ -66,7 +66,7 @@ class BadgeDateTimeField(BDTF):
 
 
 class V1IssuerSerializer(serializers.Serializer):
-    id = serializers.URLField()
+    id = serializers.URLField(required=False)  # v0.5 Badge Classes have none
     type = serializers.CharField()
     name = BadgeStringField()
     url = BadgeURLField()
@@ -76,7 +76,7 @@ class V1IssuerSerializer(serializers.Serializer):
 
 
 class V1BadgeClassSerializer(serializers.Serializer):
-    id = serializers.URLField()
+    id = serializers.URLField(required=False)  # v0.5 Badge Classes have none
     type = serializers.CharField()
     name = BadgeStringField()
     description = BadgeStringField()
@@ -88,12 +88,12 @@ class V1BadgeClassSerializer(serializers.Serializer):
 
 
 class V1InstanceSerializer(serializers.Serializer):
-    id = serializers.URLField()
+    id = serializers.URLField(required=False)
     type = serializers.CharField()
     uid = BadgeStringField(required=False)
     recipient = BadgeEmailField()  # TODO: improve for richer types
     badge = V1BadgeClassSerializer()
-    issuedOn = BadgeDateTimeField()
+    issuedOn = BadgeDateTimeField(required=False) # missing in some translated v0.5.0
     expires = BadgeDateTimeField(required=False)
     image = BadgeImageURLField(required=False)
     evidence = BadgeURLField(required=False)
