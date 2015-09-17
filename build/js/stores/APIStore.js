@@ -384,7 +384,7 @@ APIStore.postForm = function(fields, values, context, requestContext){
     if (["text", "textarea", "select", "checkbox"].indexOf(fields[field].inputType) > -1 && values[field])
       req.field(field, values[field]);
     else if (["image", "file"].indexOf(fields[field].inputType) > -1 && values[field] != null)
-      req.attach(field, values[field], fields[field].filename);
+      req.attach(field, values[field], _.get(values[field], 'name', fields[field].filename));
   }
 
   req.end(function(error, response){
