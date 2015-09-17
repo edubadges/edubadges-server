@@ -5,6 +5,10 @@ main {
   padding-top: $layout-spacing*7;
 }
 
+.l-mainoverride {
+  padding-top: 0;
+}
+
 .l-grid {
   display: flex;
   flex-wrap: wrap;

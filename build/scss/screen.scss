@@ -60,3 +60,14 @@ strong {
 'modules/step',
 'modules/title',
 'modules/wrap';
+
+// Overrides
+
+.o-canvas {
+  background-color: map-get($colors, bodybackground-light);
+  
+  main {
+    padding-top: $layout-spacing*4;
+  }
+
+}
