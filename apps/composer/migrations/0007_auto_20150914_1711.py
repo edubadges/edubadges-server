@@ -37,6 +37,7 @@ def copy_collectionpermission_to_composition(apps, schema_editor):
             ComposerCollectionPermission.objects.all():
         # Foreign keys
         referenced_collection = Collection.objects.get(
+            owner=composer_collectionpermission.collection.owner,
             slug=composer_collectionpermission.collection.slug)
 
         # Create composition CollectionPermission from composer's
@@ -68,6 +69,7 @@ def copy_storedbadgeinstancecollection_to_composition(apps, schema_editor):
             ComposerStoredBadgeInstanceCollection.objects.all():
         # Foreign keys
         referenced_collection = Collection.objects.get(
+            owner=storedbadgeinstancecollection.collection.owner,
             slug=storedbadgeinstancecollection.collection.slug)
 
         storedbadgeinstance = storedbadgeinstancecollection.instance
