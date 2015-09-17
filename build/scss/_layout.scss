@@ -1,15 +1,23 @@
+main {
+  display: block; // IE
+  min-height: 456px;
+  padding-bottom: $layout-spacing*2;
+  padding-top: $layout-spacing*7;
+}
+
 .l-grid {
-  box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
-  padding: $layout-spacing*2 $layout-spacing;
-  width: 100%;
+  margin-left: -$layout-spacing*2;
+  padding: $layout-spacing*2 $layout-spacing 0;
+  width: calc(100% + #{$layout-spacing*2});
 
   > * {
     box-sizing: border-box;
     display: flex;
     flex: 0 0 20%;
     padding: 0 $layout-spacing $layout-spacing*2;
+    max-width: 20%;
   }
 
 }
@@ -41,4 +49,20 @@
 
   }
 
+}
+
+.l-wrapper {
+  padding-left: calc(50% - 680px);
+  padding-right: calc(50% - 680px);
+}
+
+.l-wrapper-inset {
+  padding-left: $layout-spacing*3;
+  padding-right: $layout-spacing*3;
+
+  @media (min-width: 1184px + $layout-spacing*6) {
+    padding-left: calc(50% - 592px);
+    padding-right: calc(50% - 592px);
+  }
+  
 }

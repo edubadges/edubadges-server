@@ -1,0 +1,7 @@
+.rule_ {
+  background: map-get($colors, border-light);
+  border: 0;
+  height: 1px;
+  margin: $layout-spacing 0;
+  width: 100%;
+}

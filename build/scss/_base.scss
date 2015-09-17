@@ -1,5 +1,6 @@
 $colors: (
-  bodybackground: #fafafa,
+  bodybackground: #F5F5F5,
+  bodybackground-light: #FDFDFD,
   bodycopy: #31383e,
   bodycopy-light: #5b6c79,
   bodycopy-faint: #9B9B9B,
@@ -35,6 +36,10 @@ $font-family: 'Open Sans', sans-serif;
 
 $transition-duration: .25s;
 $transition-easing: ease-out;
+
+$z-index-low: 1;
+$z-index-med: 2;
+$z-index-high: 3;
 
 @mixin wrap {
   margin: 0 auto;
