@@ -245,7 +245,6 @@ APIStore.fetchCollectionPage = function(collectionKey, page_url, requestContext)
 }
 
 APIStore.reloadCollections = function(collectionKeys, requestContext) {
-  console.log("reloadCollections", collectionKeys)
   for (var index in collectionKeys) {
     var pagination_url = undefined;
     var key = collectionKeys[index];
@@ -294,10 +293,7 @@ APIStore.getData = function(context, requestContext, pagination_url) {
 
   req.end(function(error, response){
     APIStore.resolveActiveGet(context.apiCollectionKey);
-    console.log(response);
     if (error){
-      console.log("THERE WAS SOME KIND OF API REQUEST ERROR.");
-      console.log(error);
       APIStore.emit('API_STORE_FAILURE');
     }
     else if (response.status == 202 && response.body.resume) {
@@ -311,8 +307,6 @@ APIStore.getData = function(context, requestContext, pagination_url) {
       }.bind(this), wait*1000);
     }
     else if (context.successfulHttpStatus.indexOf(response.status) == -1){
-      console.log("API REQUEST PROBLEM:");
-      console.log(response.text);
       APIActions.APIGetResultFailure({
         message: {type: 'danger', content: response.status + " Error getting data: " + response.text}
       });
@@ -330,7 +324,6 @@ APIStore.getData = function(context, requestContext, pagination_url) {
       if (pagination_url) {
         // this was a response to a next/prev page request
         collectionKey = context.apiCollectionKey+":"+pagination_url;
-        //console.log("got next/prev page", collectionKey)
       }
 
       if (!APIStore.collectionsExist(collectionKey) || context['replaceCollection']){
@@ -388,16 +381,10 @@ APIStore.postForm = function(fields, values, context, requestContext){
   }
 
   req.end(function(error, response){
-    console.log(response);
     if (error){
-      console.log("THERE WAS SOME KIND OF API REQUEST ERROR.");
-      console.log(error);
       APIStore.emit('API_STORE_FAILURE');
     }
     else if (context.successHttpStatus.indexOf(response.status) == -1){
-      console.log("API Error: " + response.status);
-      console.log(response.text);
-
       APIActions.APIFormResultFailure({
         formId: context.formId,
         message: {
@@ -421,7 +408,6 @@ APIStore.postForm = function(fields, values, context, requestContext){
       }
       else {
         APIStore.emit('API_STORE_FAILURE');
-        console.log("Failed to add " + response.text + " to " + context.apiCollectionKey);
       }
     } 
   });
@@ -455,15 +441,10 @@ APIStore.requestData = function(data, context, requestContext){
   req.send(data);
 
   req.end(function(error, response){
-    console.log(response);
     if (error){
-      console.log("THERE WAS SOME KIND OF API REQUEST ERROR.");
-      console.log(error);
       APIStore.emit('API_STORE_FAILURE');
     }
     else if (context.successHttpStatus.indexOf(response.status) == -1){
-      console.log("API REQUEST PROBLEM:");
-      console.log(response.text);
       APIStore.emit("API_RESULT")
     }
     else if (context.method == 'DELETE'){
@@ -483,7 +464,6 @@ APIStore.requestData = function(data, context, requestContext){
       }
       else {
         APIStore.emit('API_STORE_FAILURE');
-        console.log("Failed to add " + response.text + " to " + context.apiCollectionKey);
       }
     } 
   });
@@ -512,8 +492,6 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
         var formData = FormStore.getFormData(action.formId);
         APIStore.postForm(formData.fieldsMeta, formData.formState, formData.apiContext, action.requestContext || {});
       }
-      else
-        console.log("Unidentified form type to submit: " + action.formId);
       break;
 
     case 'API_POST_FORM':

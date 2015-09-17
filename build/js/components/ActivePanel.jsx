@@ -21,7 +21,6 @@ var PanelActions = React.createClass({
   render: function() {
     if (!this.props.actions)
       return null;
-    console.log(this.props.actions);
     var actions = this.props.actions.map(function(item, i){
       return (
         <button className={'btn ' + item.buttonClass} onClick={item.onClick} key={"panel-action-" + i}>

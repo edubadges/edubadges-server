@@ -79,13 +79,9 @@ var ImageDropbox = React.createClass({
   validateFileType: function(file){
     if (file instanceof File && (file.type && (file.type == 'image/png' || file.type == 'image/svg+xml')))
       return true;
-    else
-      console.log("FILE DID NOT SEEM TO VALIDATE.")
   },
   fileHandler: function(files){
     file = files[0];
-    console.log("A file has been dropped on the Dropzone!");
-    console.log(file);
     if (this.validateFileType(file)){
       this.props.onDroppedImage(file);
     }
@@ -236,8 +232,6 @@ BasicAPIForm = React.createClass({
       if (this.isMounted()){
         FormActions.patchForm(this.props.formId, { image: file, imageData: reader.result });
       }
-      else
-        console.log("TRIED TO SET FILE TO STATE, FAILED. WAS BUSY MOUNTING."); 
     }.bind(this);
     reader.readAsDataURL(file);
 

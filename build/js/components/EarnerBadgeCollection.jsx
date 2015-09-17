@@ -120,7 +120,6 @@ var EarnerCollectionDetail = React.createClass({
     });
   },
   save: function(){
-    console.log("SAVING....");
     this.setState({formState: "waiting"});
 
     var apiContext = {
@@ -137,7 +136,6 @@ var EarnerCollectionDetail = React.createClass({
     var data = this.state.selectedBadgeIds.map(function(el, index){
       return {"id": el};
     }.bind(this));
-    console.log(data);
     APISubmitData(data, apiContext);
 
   },
