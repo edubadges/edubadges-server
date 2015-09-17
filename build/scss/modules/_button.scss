@@ -8,6 +8,7 @@
   font-size: $font-size-small;
   padding: $layout-spacing $layout-spacing*2;
   text-align: center;
+  transition: all $transition-duration $transition-easing;
   user-select: none;
 
   &:hover {
