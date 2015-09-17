@@ -133,9 +133,15 @@ var ActivePanel = React.createClass({
             <div className={wrapperClass + ' modal-dialog'}>
               <div className="modal-content closable">
                 <div className="modal-body container-fluid">
+                  <button className="dialog_-x-close" onClick={this.clearActivePanel}>
+                    <span className="icon_ icon_-notext icon_-close">Close</span>
+                  </button>
+
                   {this.props.title ? (<h3>{this.props.title}</h3>) : null}
                   {this.props.content.children}
-                  <button className="btn btn-default" onClick={this.clearActivePanel}>Close</button>
+                  <div className="control_">
+                    <button className="button_ button_-secondary" onClick={this.clearActivePanel}>Close</button>
+                  </div>
                   {this.props.content.actions}
                 </div>
               </div>
