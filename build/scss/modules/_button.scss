@@ -2,6 +2,7 @@
   background-color: map-get($colors, button);
   border: 1px solid map-get($colors, button);
   border-radius: $border-radius;
+  box-sizing: border-box;
   color: map-get($colors, solid);
   display: inline-block;
   font-size: $font-size-small;
