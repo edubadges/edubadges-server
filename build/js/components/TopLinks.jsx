@@ -31,13 +31,13 @@ var MenuList = React.createClass({
 
 var FirstLevelItem = React.createClass({
   handleClick: function(event) {
-    if ( this.props.active ){
-      this.props.setOpen(null); // setOpen is a method passed in from App as a property
-    }
-    else {
-
-
-      this.props.setOpen(this.props.title);
+    if (this.props.setOpen) {
+        if ( this.props.active ){
+          this.props.setOpen(null); // setOpen is a method passed in from App as a property
+        }
+        else {
+          this.props.setOpen(this.props.title);
+        }
     }
     event.stopPropagation();
   }, 
