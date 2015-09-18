@@ -38,7 +38,7 @@ class AbstractComponent(cachemodel.CacheModel):
     def get_full_url(self):
         try:
             return self.json['id']
-        except KeyError:
+        except (KeyError, TypeError):
             if self.get_absolute_url().startswith('/'):
                 return settings.HTTP_ORIGIN + self.get_absolute_url()
             else:
