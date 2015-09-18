@@ -11,8 +11,8 @@ class BadgeUploaded(BaseBadgrEvent):
 
     def to_representation(self):
         return {
-            'user': self.user.username,
-            'instance': self.instance_json,
+            'username': self.user.username,
+            'badgeInstance': self.instance_json,
             'results': self.badge_check.results
         }
 
@@ -26,8 +26,8 @@ class InvalidBadgeUploaded(BaseBadgrEvent):
 
     def to_representation(self):
         return {
-            'user': self.user.username,
-            'instance': self.components.badge_instance,
+            'username': self.user.username,
+            'badgeInstance': self.components.badge_instance,
             'badge': self.components.badge_class,
             'issuer': self.components.issuer,
             'error': self.error

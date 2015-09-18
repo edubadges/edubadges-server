@@ -1,5 +1,5 @@
 # Created by wiggins@concentricsky.com on 8/27/15.
-
+import datetime
 
 class BaseBadgrEvent(object):
 
@@ -16,6 +16,8 @@ class BaseBadgrEvent(object):
         data = self.to_representation()
         data.update({
             '@context': self.get_context(),
-            'type': self.get_type(),
+            'type': 'Action',
+            'actionType': self.get_type(),
+            'timestamp': datetime.datetime.now().isoformat()
         })
         return data
