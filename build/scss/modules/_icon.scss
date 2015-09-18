@@ -57,6 +57,7 @@
   text-indent: -9999em;
   padding-left: $layout-spacing;
   padding-right: $layout-spacing;
+  max-width: 0;
 
   &::after {
     background-position: center center;
@@ -129,6 +130,30 @@
 
   &::after {
     background-image: url('images/icon-first.svg');
+  }
+
+}
+
+.icon_-link {
+
+  &::after {
+    background-image: url('images/icon-link.svg');
+  }
+
+}
+
+.icon_-expand {
+
+  &::after {
+    background-image: url('images/icon-expand.svg');
+  }
+
+}
+
+.icon_-collapse {
+
+  &::after {
+    background-image: url('images/icon-collapse.svg');
   }
 
 }
