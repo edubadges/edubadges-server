@@ -8,6 +8,7 @@ var ClickActions = require('../actions/clicks');
 var FormStore = require('../stores/FormStore');
 var FormConfigStore = require('../stores/FormConfigStore');
 var MenuStore = require('../stores/MenuStore');
+var Heading = require('../components/Heading.jsx').Heading;
 
 
 var PanelActions = React.createClass({
@@ -107,7 +108,7 @@ var ActivePanel = React.createClass({
             <div className={wrapperClass + ' modal-dialog'}>
               <div className="modal-content closable">
                 <div className="modal-body container-fluid">
-                  {this.props.title ? (<h3>{this.props.title}</h3>) : null}
+                  {this.props.title ? (<Heading size="small" title={this.props.title}/>) : null}
                   <BasicAPIForm {...formProps} />
                 </div>
               </div>
@@ -132,9 +133,15 @@ var ActivePanel = React.createClass({
             <div className={wrapperClass + ' modal-dialog'}>
               <div className="modal-content closable">
                 <div className="modal-body container-fluid">
+                  <button className="dialog_-x-close" onClick={this.clearActivePanel}>
+                    <span className="icon_ icon_-notext icon_-close">Close</span>
+                  </button>
+
                   {this.props.title ? (<h3>{this.props.title}</h3>) : null}
                   {this.props.content.children}
-                  <button className="btn btn-default" onClick={this.clearActivePanel}>Close</button>
+                  <div className="control_">
+                    <button className="button_ button_-secondary" onClick={this.clearActivePanel}>Close</button>
+                  </div>
                   {this.props.content.actions}
                 </div>
               </div>

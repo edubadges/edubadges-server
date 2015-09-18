@@ -11,6 +11,8 @@ var OpenBadge = require('../components/BadgeDisplay.jsx').OpenBadge;
 var Dropzone = require('react-dropzone');
 var LoadingIcon = require('../components/Widgets.jsx').LoadingIcon;
 
+var Button = require('../components/Button.jsx').Button;
+
 // Actions
 var EarnerActions = require('../actions/earner');
 var FormActions = require('../actions/forms');
@@ -64,13 +66,10 @@ var InputGroup = React.createClass({
   },
   render: function(){
     return (
-      <div className={"control-group form-group-" + this.props.name}>
-        <label className="control-label" htmlFor={this.props.name}>{this.props.label}</label>
-        <div className="controls">
-          { this.theInput() }
-        </div>
-      </div>
-    )
+        <div className="form_-x-field">
+          <label htmlFor={this.props.name}>{this.props.label}</label>
+          {this.theInput()}
+        </div>);
   }
 });
 
@@ -101,56 +100,6 @@ var ImageDropbox = React.createClass({
     );
   }
 });
-
-
-var SubmitButton = React.createClass({
-  handleClick: function(e){
-    if (!this.props.isDisabled)
-      this.props.handleClick(e);
-    e.preventDefault();
-    e.stopPropagation();
-  },
-  render: function() {
-    return (
-      <div className="control-group submit-button">
-        <label className="control-label sr-only" htmlFor={this.props.name}>{ this.props.label || "Submit" }</label>
-        <div className="controls">
-          <button name={this.props.name} className="btn btn-primary" onClick={this.handleClick}>{this.props.label || "Submit" }</button>
-        </div>
-      </div>
-    );
-  }
-});
-
-var ResetButton = React.createClass({
-  render: function() {
-    return (
-      <div className="control-group reset-button">
-        <label className="control-label sr-only" htmlFor={this.props.name}>{ this.props.label || "Reset" }</label>
-        <div className="controls">
-          <button name={this.props.name} className="btn btn-danger" onClick={this.props.handleClick}>{this.props.label || "Reset" }</button>
-        </div>
-      </div>
-    );
-  }
-});
-
-var PlainButton = React.createClass({
-  render: function() {
-    return (
-      <div className="control-group button">
-        <label className="control-label sr-only" htmlFor={this.props.name}>{this.props.label}</label>
-        <div className="controls">
-          <button name={this.props.name} className="btn btn-default" onClick={this.props.handleClick}>{this.props.label}</button>
-        </div>
-      </div>
-    );
-  }
-});
-
-
-
-
 
 
 BasicAPIForm = React.createClass({
@@ -253,7 +202,7 @@ BasicAPIForm = React.createClass({
         </div>) : "",
         activeHelpText = !this.state.message && this.props.helpText ? <div className="form-help-text">{this.props.helpText}</div> : "",
         formControls = "",
-        closeButton = this.props.handleCloseForm ? (<PlainButton name="close" label="Cancel" handleClick={this.handleReset} />) : "",
+        closeButton = this.props.handleCloseForm ? (<Button name="close" label="Cancel" style="secondary" handleClick={this.handleReset} />) : "",
         loadingIcon = this.state.actionState == "waiting" ? (<LoadingIcon />) : "";
     if (["ready", "waiting"].indexOf(this.state.actionState) > -1){
 
@@ -266,7 +215,7 @@ BasicAPIForm = React.createClass({
           
           if (inputType == 'image'){
             return (
-              <div className="image-input" key={this.props.formId + "-form-field-" + i + '-' + j}>
+              <div className="form_-x-field" key={this.props.formId + "-form-field-" + i + '-' + j}>
                 <ImageDropbox
                   onDroppedImage={this.handleImageDrop}
                   image={this.state.image}
@@ -316,41 +265,37 @@ BasicAPIForm = React.createClass({
           }
         }.bind(this));
         return (
-          <div className={item.className} key={this.props.formId + "-form-column-" + i}>
+          <fieldset className={item.className} key={this.props.formId + "-form-column-" + i}>
             {thisColumnItems}
-          </div>
+          </fieldset>
         );
       }.bind(this));
       formControls = (
-        <div className="row form-controls">
-          <SubmitButton name="submit" label={_.get(this.props, 'formControls.submit.label')} handleClick={this.handleSubmit} />
+        <div className="control_">
           {closeButton}
+          <Button type="submit" name="submit" label={_.get(this.props, 'formControls.submit.label', 'Submit')} handleClick={this.handleSubmit} />
           {loadingIcon}
         </div>
       );
     }
     else {
       formControls = (
-        <div className="row form-controls">
+        <div className="control_">
           {closeButton}
         </div>
       );
     }
 
-
     return (
       <div className="form-container issuer-notification-form-container">
         {activeMessage} {activeHelpText}
-        <div className={this.state.actionState == "waiting" ? "form-horizontal disabled" : "form-horizontal"}>
-          <div className="container-fluid">
-            <fieldset className="row">
-              {activeColumns}
-            </fieldset>
+        <form action="" className="form_" onSubmit={this.handleSubmit}>
+          <div className="form_-x-imageupload">
+            {activeColumns}
           </div>
           {formControls}
-        </div>
-      </div>
-    );
+        </form>
+      </div>);
   }
 });
 
