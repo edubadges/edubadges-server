@@ -175,3 +175,11 @@
   }
   
 }
+
+.icon_-small.icon_-clear {
+
+  &::after {
+    background-image: url('images/icon-clear.svg');
+  }
+
+}
