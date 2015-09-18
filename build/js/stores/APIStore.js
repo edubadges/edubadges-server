@@ -110,6 +110,9 @@ APIStore.replaceCollectionItem = function(collectionKey, item){
 };
 
 APIStore.partialUpdateCollectionItem = function(collectionKey, searchKey, searchValue, updateKey, updateValue){
+  if (!APIStore.data.hasOwnProperty(collectionKey)) {
+    return APIStore.addCollectionItem(collectionKey, updateValue);
+  }
   var foundIndex = _.findIndex(APIStore.data[collectionKey], function(el){ return el[searchKey] == searchValue; });
   if (foundIndex > -1){
     // Optional updateKey parameter lets you update a single property. Without it, replace the whole object.

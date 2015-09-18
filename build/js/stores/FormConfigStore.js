@@ -11,8 +11,7 @@ FormConfigStore.genericFormTypes = function(){
     'BadgeInstanceCreateUpdateForm',
     'EarnerBadgeImportForm',
     'EarnerCollectionCreateForm',
-    'EarnerCollectionEditForm',
-    'BadgebookDefaultIssuerForm',
+    'EarnerCollectionEditForm'
   ];
 }
 
@@ -200,22 +199,6 @@ FormConfigStore.getConfig = function(formType, overrides, context){
         method: "PUT",
         successHttpStatus: [200],
         successMessage: "Collection successfully edited."
-      }
-    },
-    BadgebookDefaultIssuerForm: {
-      formId: overrides['formId'] || "BadgebookDefaultIssuerForm",
-      fieldsMeta: {
-        default_issuer: {inputType: "text", label: "Default Issuer Slug", required: true},
-      },
-      defaultValues: {
-        default_issuer: "",
-      },
-      apiContext: {
-        formId: overrides['formId'] || "BadgebookDefaultIssuerForm",
-        actionUrl: "/v1/badgebook/defaultissuer/:tool_guid/:course_id",
-        method: "PUT",
-        successHttpStatus: [200],
-        successMessage: "Default issuer saved."
       }
     },
   };
