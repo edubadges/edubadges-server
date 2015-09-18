@@ -1,0 +1,38 @@
+.step_ {
+  align-items: center;
+  display: flex;
+  font-size: $font-size-small;
+  font-weight: 600;
+  padding: ($layout-spacing*2) ($layout-spacing*2) ($layout-spacing*2) ($layout-spacing*4 + 32px);
+  position: relative;
+  text-align: left;
+
+  &::before {
+    @include pseudobase;
+    background: url('images/step-unearned.svg') center center no-repeat;
+    background-size: contain;
+    height: 32px;
+    left: $layout-spacing*2;
+    margin-right: $layout-spacing*2;
+    position: absolute;
+    top: calc(50% - 16px);
+    width: 32px;
+  }
+
+}
+
+.step_-earned {
+
+  &::before {
+    background-image: url('images/step-earned.svg');
+  }
+
+  &:hover {
+
+    &::before {
+      background-image: url('images/step-earned-hover.svg');
+    }
+
+  }
+
+}

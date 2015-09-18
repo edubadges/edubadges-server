@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <!-- Generator: Sketch 3.3.3 (12072) - http://www.bohemiancoding.com/sketch -->
+    <title>iconSearch</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Components" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="Canvas---Select-Badge" sketch:type="MSArtboardGroup" transform="translate(-828.000000, -228.000000)" fill="#5B6C79">
+            <g id="selectBadgeDropdown" sketch:type="MSLayerGroup" transform="translate(803.000000, 212.000000)">
+                <g id="filter" transform="translate(0.000000, 14.000000)" sketch:type="MSShapeGroup">
+                    <path d="M36.1111111,11.7777778 L35.4,11.7777778 L35.1333333,11.5111111 C36.0222222,10.5333333 36.5555556,9.2 36.5555556,7.77777778 C36.5555556,4.57777778 33.9777778,2 30.7777778,2 C27.5777778,2 25,4.57777778 25,7.77777778 C25,10.9777778 27.5777778,13.5555556 30.7777778,13.5555556 C32.2,13.5555556 33.5333333,13.0222222 34.5111111,12.1333333 L34.7777778,12.4 L34.7777778,13.1111111 L39.2222222,17.5555556 L40.5555556,16.2222222 L36.1111111,11.7777778 L36.1111111,11.7777778 Z M30.7777778,11.7777778 C28.5555556,11.7777778 26.7777778,10 26.7777778,7.77777778 C26.7777778,5.55555556 28.5555556,3.77777778 30.7777778,3.77777778 C33,3.77777778 34.7777778,5.55555556 34.7777778,7.77777778 C34.7777778,10 33,11.7777778 30.7777778,11.7777778 L30.7777778,11.7777778 Z" id="iconSearch"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

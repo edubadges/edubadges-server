@@ -1,0 +1,7 @@
+{
+    "uid":"123abd",
+    "recipient": {"identity": "test@example.com","hashed": false, "type": "email"},
+    "badge": "http://a.com/badgeclass",
+    "issuedOn": "2015-04-31",
+    "verify": {"type": "hosted", "url": "http://a.com/instancebaddate"}
+}

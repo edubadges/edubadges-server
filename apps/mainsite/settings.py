@@ -45,11 +45,14 @@ INSTALLED_APPS = [
 
     'mainsite',
     'issuer',
-    'local_components',
-    'composer',
+    'composition',
+    'verifier',
 
     'badgebook',
     'badgebook.canvaslms',
+
+    'composer',
+    'credential_store',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -57,7 +60,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django_auth_lti.middleware_patched.MultiLTILaunchAuthMiddleware',
+    'django_auth_lti.middleware.LTIAuthMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'mainsite.middleware.MaintenanceMiddleware',
@@ -367,6 +370,8 @@ USE_TZ = True
 try:
     from settings_local import *
 except ImportError as e:
+    import traceback
+    traceback.print_exc()
     sys.stderr.write("no settings_local found, setting DEBUG=True...\n")
     DEBUG = True
 

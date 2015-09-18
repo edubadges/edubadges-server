@@ -21,15 +21,14 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('json', jsonfield.fields.JSONField()),
-                ('criteria_text', models.TextField(null=True, blank=True)),
-                ('image', models.ImageField(upload_to=b'uploads/badges', blank=True)),
                 ('name', models.CharField(max_length=255)),
                 ('slug', autoslug.fields.AutoSlugField(unique=True, max_length=255)),
+                ('criteria_text', models.TextField(null=True, blank=True)),
+                ('image', models.ImageField(upload_to=b'uploads/badges', blank=True)),
                 ('created_by', models.ForeignKey(related_name='+', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
                 'abstract': False,
-                'verbose_name_plural': 'Badge classes',
             },
             bases=(models.Model,),
         ),
@@ -40,11 +39,11 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('json', jsonfield.fields.JSONField()),
                 ('email', models.EmailField(max_length=255)),
-                ('image', models.ImageField(upload_to=b'uploads/badges', blank=True)),
                 ('slug', autoslug.fields.AutoSlugField(unique=True, max_length=255, editable=False)),
+                ('image', models.ImageField(upload_to=b'issued/badges', blank=True)),
                 ('revoked', models.BooleanField(default=False)),
                 ('revocation_reason', models.CharField(default=None, max_length=255, null=True, blank=True)),
-                ('badgeclass', models.ForeignKey(related_name='badgeinstances', on_delete=django.db.models.deletion.PROTECT, to='issuer.BadgeClass')),
+                ('badgeclass', models.ForeignKey(related_name='assertions', on_delete=django.db.models.deletion.PROTECT, to='issuer.BadgeClass')),
                 ('created_by', models.ForeignKey(related_name='+', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
@@ -58,11 +57,11 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('json', jsonfield.fields.JSONField()),
-                ('image', models.ImageField(upload_to=b'uploads/issuers', blank=True)),
                 ('name', models.CharField(max_length=1024)),
                 ('slug', autoslug.fields.AutoSlugField(unique=True, max_length=255)),
+                ('image', models.ImageField(upload_to=b'uploads/issuers', blank=True)),
                 ('created_by', models.ForeignKey(related_name='+', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('owner', models.ForeignKey(related_name='issuers', on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
+                ('owner', models.ForeignKey(related_name='owner', on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'abstract': False,
@@ -74,16 +73,12 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('editor', models.BooleanField(default=False)),
+                ('badgeuser', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
                 ('issuer', models.ForeignKey(to='issuer.Issuer')),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
             options={
             },
             bases=(models.Model,),
-        ),
-        migrations.AlterUniqueTogether(
-            name='issuerstaff',
-            unique_together=set([('issuer', 'user')]),
         ),
         migrations.AddField(
             model_name='issuer',
@@ -94,7 +89,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='badgeinstance',
             name='issuer',
-            field=models.ForeignKey(to='issuer.Issuer'),
+            field=models.ForeignKey(related_name='assertions', to='issuer.Issuer'),
             preserve_default=True,
         ),
         migrations.AddField(

@@ -1,26 +1,45 @@
 $colors: (
-  bodybackground: #fafafa,
+  bodybackground: #F5F5F5,
+  bodybackground-light: #FDFDFD,
   bodycopy: #31383e,
   bodycopy-light: #5b6c79,
+  bodycopy-faint: #9B9B9B,
+  border: #bbb,
+  border-light: #ccc,
+  button: #672F33,
+  button-hover: #AB2430,
+  button-active: #9D1F2A,
+  heading: #3D1719,
+  link: #4A90E2,
+  link-hover: #6BADF9,
+  link-active: #4286D7,
+  loading: #93AB23,
   solid: #fff,
+  solid-light: #F9F9F9,
   solid-dark: #000
 );
 
-// Base colors
-
-$brand-color: #672f33;
-$light-border: #ccc;
-$light-font: #fff;
-$medium-font: #333;
-
+$font-size-small-2x: 12px;
+$font-size-small: 14px;
 $font-size: 16px;
-$font-size-large: 34px;
-$font-size-medium: 24px;
-$font-size-small: 16px;
+$font-size-large: 16px;
+$font-size-large-2x: 24px;
+$font-size-large-3x: 28px;
+$font-size-large-4x: 34px;
+$font-size-large-5x: 40px;
 
 $layout-spacing: $font-size / 2;
 
 $border-radius: 2px;
+
+$font-family: 'Open Sans', sans-serif;
+
+$transition-duration: .25s;
+$transition-easing: ease-out;
+
+$z-index-low: 1;
+$z-index-med: 2;
+$z-index-high: 3;
 
 @mixin wrap {
   margin: 0 auto;
@@ -28,14 +47,19 @@ $border-radius: 2px;
   padding: 0 20px;
 }
 
-// Layout colors
+@mixin pseudobase {
+  content: '';
+  display: block;
+}
 
-$header: #31383e;
-$header-border: #e7e7e7;
+@keyframes rotate {
 
-$footer: #f5f5f5;
-$footer-border: $light-border;
+  0% {
+    transform: rotate3d(0, 0, 1, 0);
+  }
 
-// Module colors
+  100% {
+    transform: rotate3d(0, 0, 1, 360deg);
+  }
 
-$heading-color: $brand-color;
+}

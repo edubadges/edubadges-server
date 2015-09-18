@@ -1,0 +1,18 @@
+.dropdown_ {
+  background: map-get($colors, solid-light);
+  border-radius: $border-radius;
+  box-shadow: 0 1px $layout-spacing/2 0 rgba(map-get($colors, solid-dark), .3);
+  display: none;
+  max-width: 286px;
+  opacity: 0;
+  transition: opacity $transition-duration $transition-easing;
+
+  &.is-active {
+    display: block;
+  }
+
+  &.is-visible {
+    opacity: 1;
+  }
+
+}

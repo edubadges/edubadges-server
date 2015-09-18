@@ -16,7 +16,7 @@ django-ses==0.6.0
 django-storages==1.1.8
 # CSky models
 git+https://github.com/concentricsky/django-cachemodel.git@release/v2.1.x
-git+https://github.com/concentricsky/django-basic-models.git@v2.1.0
+git+https://github.com/concentricsky/django-basic-models.git@v2.1.2
 # CSky Client Admin
 git+https://github.com/concentricsky/django-sky-ckeditor.git@v0.9.8
 git+https://github.com/concentricsky/django-client-admin.git@v1.1.1
@@ -55,6 +55,7 @@ PyLD==0.6.3
 rfc3987==1.3.4
 pypng==0.0.17
 jsonfield==1.0.0
+PyJWT==1.4.0
 
 # LTI support
 git+https://github.com/concentricsky/django-auth-lti@v1.2.1-csky

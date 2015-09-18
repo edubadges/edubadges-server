@@ -14,9 +14,9 @@
         Select the Add by URL method, and fill out the form with the information below, filling the Consumer Key,
         Shared Secret, and Config URL fields.
     </p>
-    <p><strong>Your Consumer Key:</strong> {{lti_credential.client_id}}</p>
-    <p><strong>Your Shared Secret:</strong> {{lti_credential.client_secret}}</p>
-    <p><strong>Config URL:</strong> {{cartridge_url}}</p>
+    <p><strong>Your Consumer Key:</strong> <span class="lti_credential_client_id">{{lti_credential.client_id}}</span></p>
+    <p><strong>Your Shared Secret:</strong> <span class="lti_credential_client_secret">{{lti_credential.client_secret}}</span></p>
+    <p><strong>Config URL:</strong> <span class="lti_credential_url">{{cartridge_url}}</span></p>
 
     <img class="instructions-image" src="{{ STATIC_URL }}/images/badgr-canvas-instructions.png" />
 

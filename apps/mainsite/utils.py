@@ -13,7 +13,7 @@ slugify = get_callable(slugify_function_path)
 
 def installed_apps_list():
     installed_apps = []
-    for app in ('issuer', 'composer'):
+    for app in ('issuer', 'composition'):
         if apps.is_installed(app):
             installed_apps.append(app)
     return installed_apps

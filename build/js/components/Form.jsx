@@ -77,15 +77,11 @@ var InputGroup = React.createClass({
 /* A droppable zone for image files. Must send in handler(file) for when images are dropped and set image prop with that file from above. */
 var ImageDropbox = React.createClass({
   validateFileType: function(file){
-    if (file instanceof File && (file.type && (file.type == 'image/png' || file.type == 'image/svg')))
+    if (file instanceof File && (file.type && (file.type == 'image/png' || file.type == 'image/svg+xml')))
       return true;
-    else
-      console.log("FILE DID NOT SEEM TO VALIDATE.")
   },
   fileHandler: function(files){
     file = files[0];
-    console.log("A file has been dropped on the Dropzone!");
-    console.log(file);
     if (this.validateFileType(file)){
       this.props.onDroppedImage(file);
     }
@@ -236,15 +232,25 @@ BasicAPIForm = React.createClass({
       if (this.isMounted()){
         FormActions.patchForm(this.props.formId, { image: file, imageData: reader.result });
       }
-      else
-        console.log("TRIED TO SET FILE TO STATE, FAILED. WAS BUSY MOUNTING."); 
     }.bind(this);
     reader.readAsDataURL(file);
 
   },
   render: function() {
-    var activeColumns = "", 
-        activeMessage = (this.state.message) ? (<div className={"alert alert-" + this.state.message.type} >{this.state.message.content}</div>) : "",
+    var messageText = _.get(this.state, 'message.content'),
+        messageDescription = (_.get(this.state.message, 'detail.detail')) ? (<p>{_.get(this.state.message, 'detail.detail')}</p>) : null;
+        // TODO: Create pattern library modules for the different types of content that could be in this.state.message.detail
+        messageDetail = (this.state.message && this.state.message.detail) ? (
+            <div className='message-x-detail'>
+              <h4>{_.get(this.state.message, 'detail.message', JSON.stringify(this.state.message.detail))}</h4>
+              {messageDescription}
+            </div>
+        ) : null;
+    var activeColumns = "",
+        activeMessage = (this.state.message) ? (<div className={"alert alert-" + this.state.message.type}>
+          {messageText}
+          {messageDetail}
+        </div>) : "",
         activeHelpText = !this.state.message && this.props.helpText ? <div className="form-help-text">{this.props.helpText}</div> : "",
         formControls = "",
         closeButton = this.props.handleCloseForm ? (<PlainButton name="close" label="Cancel" handleClick={this.handleReset} />) : "",

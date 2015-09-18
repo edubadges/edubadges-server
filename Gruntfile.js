@@ -9,17 +9,67 @@ module.exports = function(grunt) {
         
         pkg: grunt.file.readJSON('package.json'),
 
+        env: {
+            dist: {
+                NODE_ENV: 'production'
+            }
+        },
+
         watch: {
             options: {
-                spawn: false
+                spawn: false,
+                livereload: true
             },
             scss: {
                 files: '<%= srcPath %>**/*.scss',
                 tasks: ['sass', 'autoprefixer', 'bs-inject']
             },
             staticFiles: {
-                files: ['**/*.html','**/*.php'],
+                files: ['**/*.html'],
                 tasks: ['bs-inject']
+            },
+            browserify: {
+                files: [
+                    '<%= srcPath %>js/*.jsx',
+                    '<%= srcPath %>*.js',
+                    '<%= srcPath %>*.html',
+                    '<%= srcPath %>js/**/*.jsx',
+                    '<%= srcPath %>js/**/*.js',
+                    '<%= srcPath %>pattern-library.html',
+                    '<%= srcPath %>js/pattern-library.jsx',
+                ],
+                tasks: ['browserify:dev', 'inline:dist', 'bs-inject']
+            }
+        },
+
+        inline: {
+            dist: {
+                src: '<%= srcPath %>pattern-library.html',
+                dest: 'breakdown/templates/pattern-library.html'
+            }
+        },
+
+        browserify: {
+            dev: {
+                options: {
+                    debug: true,
+                    transform: ['reactify']
+                },
+                files: {
+                    'breakdown/static/js/app.js': 'build/js/app.jsx',
+                    'breakdown/static/js/lti-app.js': 'build/js/lti-app.jsx',
+                    'breakdown/static/js/pattern-library.js': 'build/js/pattern-library.jsx',
+                }
+            },
+            dist: {
+                options: {
+                    debug: false,
+                    transform: ['reactify']
+                },
+                files: {
+                    'breakdown/static/js/app.js': 'build/js/app.jsx',
+                    'breakdown/static/js/lti-app.js': 'build/js/lti-app.jsx'
+                }
             }
         },
 
@@ -31,6 +81,13 @@ module.exports = function(grunt) {
                 files: [{
                     expand: true,
                     cwd: '<%= srcPath %>scss',
+                    src: ['*.scss', '!_*.scss'],
+                    dest: '<%= destPath %>css',
+                    ext: '.css'
+                },
+                {
+                    expand: true,
+                    cwd: '<%= srcPath %>scss/legacy',
                     src: ['*.scss', '!_*.scss'],
                     dest: '<%= destPath %>css',
                     ext: '.css'
@@ -59,13 +116,17 @@ module.exports = function(grunt) {
     });
 
     grunt.registerTask("bs-inject", function () {
-        browserSync.reload(['**/*.html','**/*.php','**/*.css']);
+        browserSync.reload(['**/*.html','**/*.css']);
     });
 
     grunt.loadNpmTasks('grunt-autoprefixer');
     grunt.loadNpmTasks('grunt-contrib-sass');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-browserify');
+    grunt.loadNpmTasks('grunt-env');
     grunt.loadNpmTasks('grunt-shell-spawn');
-    grunt.registerTask('default',['bs-init', 'watch']);
+    grunt.loadNpmTasks('grunt-inline');
 
+    grunt.registerTask('default',['bs-init', 'sass', 'autoprefixer', 'browserify:dev', 'inline:dist', 'watch']);
+    grunt.registerTask('dist', ['env:dist', 'sass', 'autoprefixer', 'browserify:dist']);
 }

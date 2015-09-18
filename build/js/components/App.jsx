@@ -75,10 +75,9 @@ var App = React.createClass({
     else if (newRoute.startsWith('/explorer'))
       this.handleDependencies([])
 
-
-    var currentItem = _.find(this.state.roleMenu.items, function(o) { return o.url == newRoute; }, this);
-    if (currentItem && currentItem.title != this.state.activeRoleMenu) {
-        this.setState({'activeRoleMenu': currentItem.title});
+    var currentItem = _.find(this.state.topMenu.items, function(o) { return o.url == newRoute; }, this);
+    if (this.isMounted() && currentItem && currentItem.title != this.state.activeTopMenu) {
+        this.setState({'activeTopMenu': currentItem.title});
     }
 
     navigate(newRoute);
@@ -98,15 +97,17 @@ var App = React.createClass({
       earnerBadges: [],
       requestedCollections: [],
       activePanels: ActiveActionStore.getAllActiveActions(),
-      roleMenu: MenuStore.getAllItems('roleMenu')
+      topMenu: MenuStore.getAllItems('topMenu'),
+      activeTopMenu: null,
+      openTopMenu: null
     };
   },
   componentWillMount: function() {
-    MenuStore.addListener('INITIAL_DATA_LOADED', function(){ this.updateMenu('roleMenu');}.bind(this));
+    MenuStore.addListener('INITIAL_DATA_LOADED', function(){ this.updateMenu('topMenu');}.bind(this));
     LifeCycleActions.appWillMount();
   },
   componentDidMount: function() {
-    MenuStore.addListener('UNCAUGHT_DOCUMENT_CLICK', this._hideMenu);
+    MenuStore.addListener('UNCAUGHT_DOCUMENT_CLICK', this.hideOpenTopMenu);
     RouteStore.addListener('ROUTE_CHANGED', this.handleRouteChange);
     APIStore.addListener('DATA_UPDATED', function(){
       if (this.isMounted())
@@ -116,39 +117,36 @@ var App = React.createClass({
   },
 
   // Menu visual display functions:
-
-  setActiveRoleMenu: function(key) {
-    if (this.isMounted())
-      this.setState({activeRoleMenu: key})
+  setOpenTopMenu: function(key){
+    if (this.state.openTopMenu != key)
+      this.setState({openTopMenu: key});
+    else
+      this.setState({openTopMenu: null});
   },
-  setActiveTopMenu: function(key){
-    if (this.isMounted())
-      this.setState({activeTopMenu: key, activeRoleMenu: null});
-  },
-  _hideMenu: function(){
-    if (this.isMounted() && this.state.activeTopMenu != null)
-      this.setState({activeTopMenu: null});
+  hideOpenTopMenu: function(){
+    /* Handler called to close open sub-menus:
+    It runs whenever a click is made outside a '.closable' element.
+    */
+    if (this.isMounted() && this.state.openTopMenu != null)
+      this.setState({openTopMenu: null});
   },
   updateMenu: function(key){
-    //if (this.isMounted()) {
+    if (this.isMounted()) {
 
         var newState = {}
         newState[key] = MenuStore.getAllItems(key);
 
-        if (key == 'roleMenu') {
+        if (key == 'topMenu') {
           var currentItem = _.find(newState[key].items, function(o) { return o.url == this.props.path; }, this);
           if (currentItem) {
-            newState.activeRoleMenu = currentItem.title;
+            newState.activeTopMenu = currentItem.title;
           }
         }
-        if (this.isMounted())
-          this.setState(newState);
-    //}
+      this.setState(newState);
+    }
   },
 
   updateActivePanel: function(viewId, update){
-    console.log("Updating active panel " + viewId);
-    console.log(update);
     ActiveActions.updateActiveAction(
       viewId,
       //updates vary by type; example: { type: "OpenBadgeDisplay", content: { badgeId: id, detailLevel: 'detail' }}
@@ -192,24 +190,21 @@ var App = React.createClass({
   render_base: function(mainComponent, breadCrumbs) {
     return (
       <div id="wrapper" className="wrapper">
-        <header className="main-header">
-          <div className="wrap">
-            <nav className="navbar navbar-default navbar-static-top" role="navigation">
-
-              <div className="navbar-header">
-                <a className="navbar-brand" href="/issuer">
-                  <span>{ this.props.appTitle }</span>
-                </a>
-                <div className="navbar-right">
-                  <TopLinks items={MenuStore.getAllItems('roleMenu').items} setActive={this.setActiveRoleMenu} active={this.state.activeRoleMenu} showLabels={true} />
-                  <TopLinks items={MenuStore.getAllItems('topMenu').items} setActive={this.setActiveTopMenu} active={this.state.activeTopMenu} showLabels={true} />
-                </div>
-              </div>  
-            </nav>
-          </div>
+        <header className="header_ l-wrapper">
+          <a className="header_-x-logo" href="/">
+            <img src="/static/images/header-logo.svg" width="193" height="89" />
+          </a>
+          <nav>
+            <TopLinks
+                items={MenuStore.getAllItems('topMenu').items}
+                setOpen={this.setOpenTopMenu}
+                active={this.state.activeTopMenu}
+                open={this.state.openTopMenu}
+                showLabels={true} />
+          </nav>
         </header>
 
-        { breadCrumbs ? <BreadCrumbs items={breadCrumbs} /> : null }
+        { breadCrumbs ? <BreadCrumbs items={breadCrumbs} submodule="header" /> : null }
 
         <section className="main-section content-container">
           <div className="wrap page-wrapper">

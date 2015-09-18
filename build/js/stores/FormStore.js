@@ -58,8 +58,6 @@ FormStore.resetForm = function(formId){
 FormStore.patchFormProperty = function(formId, propName, value){
   if (FormStore.idValid(formId)) // for state not specified in fieldsMeta
     FormStore.data[formId].formState[propName] = value;
-  else
-    console.log("Error: Could not patch form " + formId + " property " + propName);
 };
 FormStore.patchForm = function(id, data){
   for (key in data){

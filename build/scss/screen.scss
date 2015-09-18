@@ -1,15 +1,37 @@
 @import 'base';
 
 body {
-  font-family: 'Open Sans', sans-serif;
+  background: map-get($colors, bodybackground);
+  color: map-get($colors, bodycopy);
+  font-family: $font-family;
   font-size: $font-size;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
-label {
-  color: $medium-font;
-  font-size: $font-size-small;
-  font-weight: 500;
+button {
+  -webkit-apperance: none;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: $font-family;
+  font-size: $font-size;
+  line-height: 1;
+  margin: 0;
+  outline: none;
+  padding: 0;
+}
+
+input,
+label,
+textarea {
+  color: map-get($colors, bodycopy);
+  font-family: $font-family;
+  font-size: $font-size;
+}
+
+strong {
+  font-weight: 600;
 }
 
 @import 'layout';
@@ -19,12 +41,33 @@ label {
 @import
 'modules/badge',
 'modules/button',
+'modules/card',
+'modules/control',
+'modules/datatable',
+'modules/detail',
 'modules/dialog',
 'modules/dropdown',
 'modules/dropzone',
+'modules/filter',
+'modules/footer',
 'modules/form',
 'modules/heading',
 'modules/header',
 'modules/hidden',
-'modules/icon';
+'modules/icon',
+'modules/pagination',
+'modules/rule',
+'modules/step',
+'modules/title',
+'modules/wrap';
 
+// Overrides
+
+.o-canvas {
+  background-color: map-get($colors, bodybackground-light);
+  
+  main {
+    padding-top: $layout-spacing*4;
+  }
+
+}

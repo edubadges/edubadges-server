@@ -1,0 +1,66 @@
+.pagination_ {
+  align-items: center;
+  background: map-get($colors, solid-light);
+  border-top: 1px solid map-get($colors, border-light);
+  display: flex;
+  font-size: $font-size-small-2x;
+  justify-content: space-between;
+  line-height: $font-size-large-2x;
+  padding: $layout-spacing $layout-spacing*2 $layout-spacing 0;
+
+  nav {
+    display: flex;
+
+    > * {
+      margin-left: $layout-spacing*2;
+    }
+
+  }
+
+  > :first-child {
+    align-items: center;
+    display: flex;
+  }
+
+  form {
+    align-items: center;
+    display: flex;
+
+    input {
+      border: 1px solid map-get($colors, border);
+      border-radius: $border-radius;
+      box-shadow: inset 0 1px $layout-spacing/2 0 rgba(map-get($colors, solid-dark) , .2);
+      display: block;
+      margin-left: $layout-spacing;
+      padding: $layout-spacing/2;
+    }
+
+    p:last-child {
+      margin-left: $layout-spacing/2;
+    }
+
+  }
+
+  .pagination_-x-status {
+    color: map-get($colors, bodycopy-light);
+    margin-left: $layout-spacing*8;
+    padding-left: 14px + $layout-spacing;
+    position: relative;
+
+    &::after {
+      @include pseudobase;
+      animation: rotate .75s ease-in-out infinite forwards;
+      border: 2px solid map-get($colors, loading);
+      border-radius: 50%;
+      border-right-color: transparent;
+      box-sizing: border-box;
+      height: 16px;
+      left: 0;
+      position: absolute;
+      top: calc(50% - 8px);
+      width: 16px;
+    }
+
+  }
+
+}

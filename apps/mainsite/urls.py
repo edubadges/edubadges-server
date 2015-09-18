@@ -20,8 +20,10 @@ urlpatterns = patterns('',
     url(r'^favicon\.ico[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL)),
     url(r'^robots\.txt$', RedirectView.as_view(url='%srobots.txt' % settings.STATIC_URL)),
 
-    # Pattern library
+    # Pattern library & Temp Views
     url(r'^pattern-library$', TemplateView.as_view(template_name='pattern-library.html'), name='pattern-library'),
+    url(r'^temp/app$', TemplateView.as_view(template_name='temp-app.html'), name='temp-app'),
+    url(r'^temp/canvas$', TemplateView.as_view(template_name='temp-canvas.html'), name='temp-canvas'),
 
     # Home
     url(r'^$', info_view, name='index'),
@@ -66,10 +68,10 @@ if apps.is_installed('issuer'):
         url(r'^issuer', include('issuer.urls')),
     )
 
-if apps.is_installed('composer'):
+if apps.is_installed('composition'):
     urlpatterns += patterns('',
-        url(r'^v1/earner', include('composer.api_urls')),
-        url(r'^earner', include('composer.urls')),
+        url(r'^v1/earner', include('composition.api_urls')),
+        url(r'^earner', include('composition.urls')),
     )
 
 if apps.is_installed('badgebook'):

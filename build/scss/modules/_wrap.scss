@@ -1,0 +1,4 @@
+.wrap_ {
+  background-color: map-get($colors, bodybackground-light);
+  z-index: $z-index-low;
+}

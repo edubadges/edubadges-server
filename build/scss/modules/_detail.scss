@@ -1,0 +1,31 @@
+.detail_ {
+  display: flex;
+
+  > * {
+    margin-right: $layout-spacing*2;
+  }
+
+  li {
+    margin-bottom: $layout-spacing*3;
+  }
+
+  a {
+    color: map-get($colors, link);
+
+    &:hover {
+      color: map-get($colors, link-hover);
+    }
+
+    &:active {
+      color: map-get($colors, link-active);
+    }
+
+  }
+
+  .detail_-x-meta {
+    color: map-get($colors, bodycopy-faint);
+    font-size: $font-size-small;
+    margin-bottom: $layout-spacing/2;
+  }
+
+}

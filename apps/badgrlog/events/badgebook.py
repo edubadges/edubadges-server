@@ -1,4 +1,5 @@
 # Created by wiggins@concentricsky.com on 8/27/15.
+from django.conf import settings
 from .base import BaseBadgrEvent
 
 
@@ -69,5 +70,17 @@ class BadgeObjectiveAwardedEvent(BaseBadgrEvent):
             'badge_class': self.badge_instance.get('badge_class'),
             'objective_id': self.badge_award.badge_objective.objective_id,
             'objective_type': self.badge_award.badge_objective.objective_type,
-
         }
+
+
+class InstructorAccountCreatedEvent(BaseBadgrLtiEvent):
+    def __init__(self, request, user):
+        super(InstructorAccountCreatedEvent, self).__init__(request)
+        self.user = user
+
+    def to_representation(self):
+        data = super(InstructorAccountCreatedEvent, self).to_representation()
+        data.update({
+            'user': settings.HTTP_ORIGIN + self.user.get_absolute_url(),
+        })
+        return data
