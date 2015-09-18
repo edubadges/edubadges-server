@@ -4,12 +4,15 @@ from rest_framework import permissions, status, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+import badgrlog
 from mainsite.permissions import IsOwner
 
 from .serializers import (LocalBadgeInstanceUploadSerializer,
                           CollectionSerializer,
                           CollectionLocalBadgeInstanceSerializer)
 from .models import LocalBadgeInstance, Collection, LocalBadgeInstanceCollection
+
+logger = badgrlog.BadgrLogger()
 
 
 class LocalBadgeInstanceList(APIView):
@@ -63,6 +66,7 @@ class LocalBadgeInstanceList(APIView):
             data=request.data, context={'request': request})
 
         serializer.is_valid(raise_exception=True)
+
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)

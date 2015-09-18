@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+import badgrlog
 from verifier import ComponentsSerializer
 from verifier.badge_check import BadgeCheck
 from verifier.utils import find_and_get_badge_class, find_and_get_issuer
@@ -9,6 +10,9 @@ from .models import (LocalBadgeInstance, LocalBadgeClass, LocalIssuer,
                      Collection, LocalBadgeInstanceCollection)
 from .utils import (get_verified_badge_instance_from_form,
                     use_or_bake_badge_instance_image)
+
+logger = badgrlog.BadgrLogger()
+
 
 class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
     # Form submission fields as populated by request.data in the API
@@ -62,13 +66,16 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
         # Find and assign a Serialier to each badge Component
         components = ComponentsSerializer(badge_instance, badge_class, issuer)
         if not components.is_valid():
-            raise serializers.ValidationError(
-                {'message': "The uploaded badge did not validate.",
+            error = {
+                'message': "The uploaded badge did not validate.",
                  'details': {
                      'instance': components.badge_instance.version_errors,
                      'badge_class': components.badge_class.version_errors,
                      'issuer': components.issuer.version_errors
-                 }})
+                 }
+            }
+            logger.event(badgrlog.InvalidBadgeUploaded(components, error, request_user))
+            raise serializers.ValidationError(error)
 
         # Check non-structural business logic checks and constraints
         verified_emails = request_user.emailaddress_set.filter(verified=True) \
@@ -79,24 +86,28 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
         badge_check.validate()
 
         if not badge_check.is_valid():
-            raise serializers.ValidationError({
+            error = {
                 'message':
                 "The uploaded badge did not pass verification constraints.",
                 'detail':
                 [error['message'] for error in badge_check.results
-                 if error['type'] is 'error' and not error['success']]})
+                 if error['type'] is 'error' and not error['success']]
+            }
+            logger.event(badgrlog.InvalidBadgeUploaded(components, error, request_user))
+            raise serializers.ValidationError(error)
 
         # Don't support v0.5 badges until solution reached on nested components
         if components.badge_instance.version.startswith('v0'):
-            raise serializers.ValidationError(
-                "Sorry, v0.5 badges are not supported at this time. This \
-                badge was valid, but cannot be saved.")
+            error = "Sorry, v0.5 badges are not supported at this time. This \
+badge was valid, but cannot be saved."
+            logger.event(badgrlog.InvalidBadgeUploaded(components, error, request_user))
+            raise serializers.ValidationError(error)
 
         # Create local component instance `json` fields
         badge_instance_json = \
             components.badge_instance.serializer(badge_instance, context={
                 'instance_url': badge_instance_url,  # To populate BI id
-                'recipient_id': badge_check.matched_email,  # For 0.5 badges
+                'recipient_id': badge_check.recipient_id,  # For 0.5 badges
                 # A BadgeInstanceSerializer will recursively instantiate
                 # serializers of the other components to nest a representation
                 # of their .data for BI['badge'] and BI['badge']['issuer']
@@ -130,13 +141,15 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
             'json': badge_instance_json,
             'badgeclass': new_badge_class,
             'issuer': new_issuer,
-            'recipient_identifier': badge_check.matched_email,
+            'recipient_identifier': badge_check.recipient_id,
             'image': use_or_bake_badge_instance_image(
                 validated_data.get('image'), badge_instance, badge_class)
         }, identifier=badge_instance_url, recipient_user=request_user)
         # TODO: Prevent saving twice
         new_instance.json['image'] = new_instance.image_url()
         new_instance.save()
+
+        logger.event(badgrlog.BadgeUploaded(badge_instance_json, badge_check, request_user))
 
         return new_instance
 
