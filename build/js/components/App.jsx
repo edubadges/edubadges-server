@@ -147,8 +147,6 @@ var App = React.createClass({
   },
 
   updateActivePanel: function(viewId, update){
-    console.log("Updating active panel " + viewId);
-    console.log(update);
     ActiveActions.updateActiveAction(
       viewId,
       //updates vary by type; example: { type: "OpenBadgeDisplay", content: { badgeId: id, detailLevel: 'detail' }}

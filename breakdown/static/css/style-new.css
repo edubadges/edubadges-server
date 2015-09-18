@@ -1,0 +1,442 @@
+* {
+  margin: 0;
+}
+html,
+body {
+  height: 100%;
+}
+body {
+  font-family: proxima-nova, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #555;
+  background-color: #fbf9f5;
+}
+.row {
+  padding: 0;
+  margin: 0;
+}
+hr {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #cfc7c7;
+  border-width: 1px 0 0 0;
+}
+a {
+  color: #bd2233;
+  text-decoration: none;
+}
+h1 {
+  font-size: 50px;
+  letter-spacing: -1px;
+  margin-bottom: 22px;
+  color: #672f33;
+}
+h2 {
+  font-size: 40px;
+  font-weight: 300;
+  letter-spacing: -1px;
+  margin-bottom: 22px;
+  color: #672f33;
+}
+h2.text-centered {
+  text-align: center;
+}
+h3 {
+  font-size: 24px;
+  margin-bottom: 16.06px;
+  font-weight: 300;
+}
+h4 {
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.26;
+  color: #333;
+}
+h4.text-bring-up {
+  margin-bottom: 4px;
+}
+h5 {
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.26;
+  color: #333;
+}
+h5.text-move-up {
+  margin-top: -4px;
+}
+p {
+  margin: 0 0 22px;
+  font-size: 1.1em;
+}
+/* Buttons */
+.btn-primary {
+  color: #fff;
+  background-color: #ba2436;
+  border-color: #ba2436;
+}
+.btn-primary:hover {
+  background-color: #9b1d2a;
+  border-color: #9b1d2a;
+}
+a.btn-primary-banner {
+  color: #fff;
+  background: #BE1E2D;
+  font-size: 1em;
+  font-weight: 500;
+  padding: 11px 14px 6px 11px;
+  border: 1px solid #BE1E2D;
+  text-transform: uppercase;
+  margin-bottom: 7px;
+}
+a.btn-primary-banner:active,
+a.btn-primary-banner:focus,
+a.btn-primary-banner:hover {
+  background: #BE1E2D;
+  border: 1px solid #BE1E2D;
+  color: #fff;
+}
+a.btn-primary-banner img {
+  height: 30px;
+  width: auto;
+  float: left;
+  margin-right: 7px;
+  margin-top: -5px;
+}
+a.btn-default-banner {
+  color: #501114;
+  text-transform: uppercase;
+  background: #fff;
+  font-size: 1em;
+  font-weight: 500;
+  padding: 10px 14px 10px 11px;
+  margin-bottom: 7px;
+  border: 1px solid #501114;
+}
+a.btn-default-banner:active,
+a.btn-default-banner:focus,
+a.btn-default-banner:hover {
+  background: #fff;
+  border: 1px solid #501114;
+  color: #501114;
+}
+a.btn-default-banner img {
+  height: 24px;
+  width: auto;
+  margin-right: 7px;
+  margin-top: -5px;
+}
+.navbar {
+  background-color: transparent;
+  font-weight: 400;
+  border: none;
+  border-radius: 0;
+  z-index: 100;
+}
+.navbar.navbar-inverse {
+  background: #2D2D2D;
+  border-top: 5px solid #bd2233;
+}
+.navbar.navbar-inverse .navbar-brand {
+  color: #fff;
+}
+.navbar.navbar-inverse .navbar-brand:hover {
+  color: #fff;
+}
+.navbar.navbar-inverse .navbar-nav li a {
+  color: #fff;
+}
+.navbar.navbar-inverse .navbar-nav li a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+.navbar .row {
+  padding-top: 35px;
+}
+.navbar .navbar-brand {
+  color: #501114;
+}
+.navbar .navbar-brand:focus,
+.navbar .navbar-brand:hover {
+  color: #501114;
+  background-color: transparent;
+}
+.navbar .login img {
+  width: 21px;
+  margin-top: -2px;
+}
+.navbar .nav li a {
+  color: #501114;
+  font-size: 1.1em;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+.navbar .nav li a:hover,
+.navbar .nav li a:focus {
+  color: #501114;
+  background: transparent;
+}
+@media (max-width: 768px) {
+  .navbar .row {
+    padding-top: 7px;
+  }
+  .navbar .row .login img {
+    margin-left: 16px;
+  }
+}
+section {
+  clear: left;
+  padding-top: 60px;
+  padding-bottom: 120px;
+  position: relative;
+  margin-top: -1px;
+}
+section h2 {
+  margin-bottom: 49px;
+}
+section h3 {
+  color: #BE1E2D;
+  line-height: 1.3em;
+  font-size: 1.7em;
+}
+section ul {
+  padding-left: 28px;
+}
+section ul li {
+  font-size: 1.1em;
+  margin-bottom: 7px;
+  padding-left: 7px;
+}
+section#overview .row.section img {
+  width: 100%;
+  height: auto;
+}
+section#divide {
+  background: #2D2D2D;
+  padding: 60px 0 60px;
+  text-align: center;
+}
+section#divide h2 {
+  color: #fff;
+  margin: 0 0 14px;
+  padding: 0;
+}
+section#api-information {
+  background: #fff;
+}
+section#api-information h3 {
+  padding-bottom: 11px;
+  border-bottom: 1px solid #BE1E2D;
+}
+section#api-information h3 img {
+  height: 30px;
+  width: auto;
+  margin-right: 7px;
+}
+section#api-information .col {
+  padding: 0 21px;
+}
+section#mobile {
+  background: #222222 url(../images/mobile-img.jpg) center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  padding: 120px 0;
+}
+section#mobile p {
+  color: #fff;
+}
+section#mobile h2 {
+  color: #fff;
+  margin-bottom: 21px;
+}
+section#mobile img {
+  height: 47px;
+  width: auto;
+}
+section#resources h3 {
+  padding-bottom: 11px;
+  border-bottom: 1px solid #BE1E2D;
+}
+@media (max-width: 768px) {
+  section#resources .badge-info-graph {
+    width: 100%;
+    margin: 0 auto;
+    display: block;
+    float: none;
+    margin-bottom: 21px;
+  }
+  section#resources .badge-info-graph small {
+    display: block;
+    text-align: center;
+  }
+  section#resources .badge-info-graph img {
+    width: 100%;
+    height: auto;
+  }
+  section#mobile {
+    text-align: center;
+  }
+  section#mobile .col {
+    position: relative;
+    z-index: 15;
+  }
+  section#mobile:after {
+    content: " ";
+    z-index: 10;
+    display: block;
+    position: absolute;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.5);
+  }
+}
+@media (min-width: 768px) {
+  section#resources .badge-info-graph {
+    width: 300px;
+    margin: 0 11px 11px -65px;
+    display: auto;
+    float: left;
+  }
+  section#resources .badge-info-graph small {
+    display: block;
+    text-align: center;
+  }
+  section#resources .badge-info-graph img {
+    width: 100%;
+    height: auto;
+  }
+}
+@media (min-width: 991px) {
+  section#resources .badge-info-graph {
+    width: 300px;
+    margin: 0 11px 11px -95px;
+    display: auto;
+    float: left;
+  }
+}
+.header {
+  background: #3e060a url(../images/header-img.jpg);
+  background-size: cover;
+  overflow-x: hidden;
+  border-bottom: 4px solid #501114;
+}
+.header .jumbotron {
+  margin-top: -100px;
+  margin-bottom: 0;
+  padding: 21px;
+  text-align: center;
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.8);
+  position: relative;
+  height: 80%;
+  min-height: 665px;
+}
+.header .jumbotron p {
+  margin: 0px auto 49px;
+  display: block;
+  font-size: 1.5em;
+  color: #501114;
+  line-height: 1.3em;
+  max-width: 400px;
+}
+.header .jumbotron p small {
+  color: #2D2D2D;
+  font-size: .65em;
+  margin: 0px 14px 14px 14px;
+  display: block;
+  line-height: 1.3em;
+}
+@media (max-width: 991px) {
+  .header .jumbotron {
+    background-color: rgba(255, 255, 255, 0.9);
+  }
+}
+.accounts .form-actions {
+  margin-bottom: 14px;
+  padding: 7px;
+}
+.accounts .forgot-password a {
+  display: block;
+  margin: 21px 14px 0 0;
+  font-size: .8em;
+}
+.accounts .signin-action {
+  padding: 0;
+}
+.accounts .col-logo {
+  margin-top: 21px;
+}
+.accounts .page-wrap {
+  min-height: 100%;
+  /* equal to footer height */
+  margin-bottom: -270px;
+}
+.accounts .page-wrap:after {
+  content: "";
+  display: block;
+}
+.accounts .footer,
+.accounts .page-wrap:after {
+  height: 270px;
+}
+.accounts .table-striped > tbody > tr:nth-child(odd) {
+  background-color: #f0ede8;
+}
+.accounts .table > thead > tr > th,
+.accounts .table > tbody > tr > th,
+.accounts .table > tfoot > tr > th,
+.accounts .table > thead > tr > td,
+.accounts .table > tbody > tr > td,
+.accounts .table > tfoot > tr > td {
+  border-top: 1px solid #cbb9bb;
+}
+.accounts .table > thead > tr > th {
+  border-bottom: 2px solid #cbb9bb;
+}
+.accounts .panel-default {
+  border-color: #cbb9bb;
+}
+.accounts .panel-default > .panel-heading {
+  background-color: #f0ede8;
+  border-color: #cbb9bb;
+}
+.footer {
+  background: #2D2D2D;
+  padding: 60px 0;
+  color: #9E9E9E;
+}
+.footer a {
+  color: #fff;
+}
+.footer a:hover {
+  color: #fff;
+}
+.footer .col {
+  text-align: center;
+}
+.footer .col p img {
+  width: 100%;
+  max-width: 370px;
+}
+.footer ul {
+  list-style: none;
+  padding: 0;
+}
+.footer ul li {
+  margin-bottom: 2px;
+}
+.footer h4 {
+  color: #fff;
+  font-size: 1.5em;
+  margin-top: 20px;
+}
+.footer .contact {
+  font-size: 1.1em;
+}
+
+.instructions-image {
+  max-width: 100%;
+  height: auto;
+}

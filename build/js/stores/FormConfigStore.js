@@ -49,8 +49,8 @@ FormConfigStore.getConfig = function(formType, overrides, context){
         message: ""
       },
       columns: [
+        { fields: ['name', 'description', 'url', 'email'], className:'' },
         { fields: ['image'], className:'' },
-        { fields: ['name', 'description', 'url', 'email'], className:'' }
       ],
       formControls: {
         "submit": {"label": "Add Issuer"}
@@ -83,8 +83,8 @@ FormConfigStore.getConfig = function(formType, overrides, context){
         message: ""
       },
       columns: [
+        { fields: ['name', 'description', 'criteria'], className:'' },
         { fields: ['image'], className:'' },
-        { fields: ['name', 'description', 'criteria'], className:'' }
       ],
       apiContext: {
         formId: overrides['formId'] || "BadgeClassCreateUpdateForm",
@@ -139,8 +139,8 @@ FormConfigStore.getConfig = function(formType, overrides, context){
         message: ""
       },
       columns: [
+        { fields: ['url', 'assertion'], className:'' },
         { fields: ['image', 'divider'], className:'' },
-        { fields: ['url', 'assertion'], className:'' }
       ],
       formControls: {
         "submit": {"label": "Import Badge"}

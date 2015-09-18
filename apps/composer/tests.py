@@ -6,7 +6,7 @@ import responses
 from rest_framework.test import APITestCase
 
 
-from badgecheck.testfiles.test_components import test_components
+from integrity_verifier.testfiles.test_components import test_components
 
 
 def setup_basic_1_0():

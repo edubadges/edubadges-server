@@ -25,7 +25,8 @@ class AbstractComponent(cachemodel.CacheModel):
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True,
                                    related_name="+")
-
+    identifier = models.CharField(max_length=1024, null=False,
+                                  default='get_full_url')
     json = JSONField()
 
     class Meta:
@@ -35,7 +36,13 @@ class AbstractComponent(cachemodel.CacheModel):
         return self.name
 
     def get_full_url(self):
-        return settings.HTTP_ORIGIN + self.get_absolute_url()
+        try:
+            return self.json['id']
+        except (KeyError, TypeError):
+            if self.get_absolute_url().startswith('/'):
+                return settings.HTTP_ORIGIN + self.get_absolute_url()
+            else:
+                return '_:null'
 
     def prop(self, property_name):
         return self.json.get(property_name)
@@ -45,7 +52,8 @@ class AbstractIssuer(AbstractComponent):
     """
     Open Badges Specification IssuerOrg object
     """
-    image = models.ImageField(upload_to='uploads/issuers', blank=True)
+    image = models.ImageField(upload_to='uploads/issuers', blank=True,
+                              null=True)
     name = models.CharField(max_length=1024)
     slug = AutoSlugField(max_length=255, populate_from='name', unique=True,
                          blank=False, editable=True)
@@ -108,8 +116,8 @@ class AbstractBadgeInstance(AbstractComponent):
     # # 0.5 BadgeInstances have no notion of a BadgeClass (null=True)
     # issuer = models.ForeignKey(Issuer, blank=False, null=False)
 
-    #  recipient_id = models.CharField(max_length=1024, blank=False)
-    email = models.EmailField(max_length=255, blank=False, null=False)
+    recipient_identifier = models.EmailField(max_length=1024, blank=False,
+                                             null=False)
     image = models.ImageField(upload_to='uploads/badges', blank=True)  # upload_to='issued' in cred_store
     slug = AutoSlugField(max_length=255, populate_from='populate_slug',
                          unique=True, blank=False, editable=False)
@@ -122,7 +130,8 @@ class AbstractBadgeInstance(AbstractComponent):
         abstract = True
 
     def __unicode__(self):
-        return "%s issued to %s" % (self.badgeclass.name, self.email,)
+        return "%s issued to %s" % (self.badgeclass.name,
+                                    self.recipient_identifier,)
 
     def get_absolute_url(self):
         return reverse('badgeinstance_json', kwargs={'slug': self.slug})

@@ -29,7 +29,7 @@
 
                     <div class="collection-badges-list container-fluid">
                     {% for instance in collection.instances.all() %}
-                        {% set metadata = instance.storedbadgeinstancecollection_set.get(collection=collection) %}
+                        {% set metadata = instance.localbadgeinstancecollection_set.get(collection=collection) %}
                         <div class="row badge-display badge-display-full col-xs-12">
                             <div class="row col-xs-12">
                                 <h1>{{instance.json.get('badge').get('name')}}</h1>

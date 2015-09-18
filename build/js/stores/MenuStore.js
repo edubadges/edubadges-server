@@ -130,7 +130,7 @@ MenuStore.storeInitialData = function() {
 
   var newItems = [], item;
   // try to load the variable declared as initialData in the view template
-  if (initialData.installed_apps.indexOf('composer') > -1)
+  if (initialData.installed_apps.indexOf('composition') > -1)
     newItems.push(
       { title: "My Badges", url: "/earner/badges", icon: "", children: [] },
       { title: "My Collections", url: "/earner/collections", icon: "", children: [] }

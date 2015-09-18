@@ -1,24 +1,27 @@
 import os
+
+from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 
-from rest_framework import permissions, status, serializers
+from rest_framework import authentication, permissions, status, serializers
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from mainsite.permissions import IsOwner
-from local_components.models import BadgeInstance as LocalBadgeInstance
+from credential_store.models import StoredBadgeInstance
 
 from .serializers import (EarnerBadgeSerializer,
                           EarnerBadgeReferenceSerializer,
                           CollectionSerializer)
-from .models import Collection, LocalBadgeInstanceCollection
+from .models import Collection, StoredBadgeInstanceCollection
 
 
 class EarnerBadgeList(APIView):
     """
     Retrieve a list of user's earned badges or post a new badge.
     """
-    queryset = LocalBadgeInstance.objects.all()
+    queryset = StoredBadgeInstance.objects.all()
     permission_classes = (permissions.IsAuthenticated, IsOwner,)
 
     def get(self, request):
@@ -61,21 +64,17 @@ class EarnerBadgeList(APIView):
               type: string
               paramType: form
         """
-        serializer = EarnerBadgeSerializer(data=request.data,
-                                           context={'request': request})
+        serializer = EarnerBadgeSerializer(data=request.data, context={'request': request})
 
         serializer.is_valid(raise_exception=True)
 
-        try:
-            serializer.save()
-        except DjangoValidationError as e:
-            raise serializer.ValidationError(e.message)
+        serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class EarnerBadgeDetail(APIView):
-    queryset = LocalBadgeInstance.objects.all()
+    queryset = StoredBadgeInstance.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
     """
     View or delete a stored badge earned by a recipient.
@@ -96,7 +95,7 @@ class EarnerBadgeDetail(APIView):
             user_badge = self.queryset.get(
                 recipient_user=request.user, id=badge_id
             )
-        except LocalBadgeInstance.DoesNotExist:
+        except StoredBadgeInstance.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         serializer = EarnerBadgeSerializer(
@@ -123,7 +122,7 @@ class EarnerBadgeDetail(APIView):
             self.queryset.get(
                 recipient_user=request.user, id=badge_id
             ).delete()
-        except LocalBadgeInstance.DoesNotExist:
+        except StoredBadgeInstance.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -260,7 +259,7 @@ class EarnerCollectionBadgesList(APIView):
     POST to add badges to collection, PUT to update collection to a
     new list of ids.
     """
-    queryset = LocalBadgeInstanceCollection.objects.all()
+    queryset = StoredBadgeInstanceCollection.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, slug):
@@ -352,12 +351,12 @@ class EarnerCollectionBadgesList(APIView):
                 item.get('id') for item in badges
             ]
 
-            LocalBadgeInstanceCollection.objects.filter(
+            StoredBadgeInstanceCollection.objects.filter(
                 collection=collection
             ).exclude(instance__id__in=badge_ids).delete()
 
         serializer = EarnerBadgeReferenceSerializer(
-            collection.localbadgeinstancecollection_set.all(), many=True
+            collection.storedbadgeinstancecollection_set.all(), many=True
         )
         return Response(serializer.data)
 
@@ -367,7 +366,7 @@ class EarnerCollectionBadgeDetail(APIView):
     Update details on a single item in the collection or remove it from
     the collection
     """
-    queryset = LocalBadgeInstanceCollection.objects.all()
+    queryset = StoredBadgeInstanceCollection.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, collection_slug, badge_id):
@@ -377,7 +376,7 @@ class EarnerCollectionBadgeDetail(APIView):
                 collection__slug=collection_slug,
                 instance__id=int(badge_id)
             )
-        except LocalBadgeInstanceCollection.DoesNotExist:
+        except StoredBadgeInstanceCollection.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         serializer = EarnerBadgeReferenceSerializer(item)
@@ -419,7 +418,7 @@ class EarnerCollectionBadgeDetail(APIView):
                 collection__slug=collection_slug,
                 instance__id=int(badge_id)
             )
-        except LocalBadgeInstanceCollection.DoesNotExist:
+        except StoredBadgeInstanceCollection.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         item.description = description
@@ -451,7 +450,7 @@ class EarnerCollectionBadgeDetail(APIView):
                 collection__slug=collection_slug,
                 instance__id=int(badge_id)
             ).delete()
-        except LocalBadgeInstanceCollection.DoesNotExist:
+        except StoredBadgeInstanceCollection.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
