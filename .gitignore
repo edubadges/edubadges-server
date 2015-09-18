@@ -21,3 +21,5 @@ breakdown/static/css/screen.css
 breakdown/static/css/*.map
 .ropeproject
 .idea/*
+
+test.cache/
