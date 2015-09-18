@@ -1,6 +1,5 @@
 from rest_framework import serializers
 
-from mainsite.logs import badgr_log
 from verifier import ComponentsSerializer
 from verifier.badge_check import BadgeCheck
 from verifier.utils import find_and_get_badge_class, find_and_get_issuer
