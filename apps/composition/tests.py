@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 import responses
 from rest_framework.test import APITestCase
 
-from .models import LocalBadgeClass, LocalIssuer
+from composition.models import LocalBadgeClass, LocalIssuer
 
 dir = os.path.dirname(__file__)
 

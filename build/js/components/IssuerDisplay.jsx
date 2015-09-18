@@ -9,6 +9,7 @@ var APIStore = require('../stores/APIStore');
 // Components
 var Property = require('../components/BadgeDisplay.jsx').Property;
 var BadgeClassList = require('./BadgeClassDisplay.jsx').BadgeClassList;
+var Issuer = require('../components/Issuer.jsx').Issuer;
 
 
 var IssuerDisplayShort = React.createClass({
@@ -89,20 +90,28 @@ var IssuerList = React.createClass({
           function(el,i,array){ return (el.issuer == issuer.json.id); }
         );
         var handleClick = function(e){navigateLocalPath(issuerPath);};
-        var providedHandler = this.props.handleClick
+        var providedHandler = this.props.handleClick;
         if (providedHandler) {
           handleClick = function(e){ providedHandler(e, issuer); };
         }
         return (
-            <IssuerDisplayShort
-              name={issuer.name}
-              image={issuer.image}
-              url={issuer.json.url}
-              key={"issuer-" + i}
-              handleClick={handleClick}
-              badgeClasses={badgeClasses}
-            />
-        );
+            <Issuer key={"issuer-"+i}
+                    name={issuer.name}
+                    image={issuer.image}
+                    description={issuer.description}
+                    badgeClasses={badgeClasses}
+                    handleClick={handleClick}/>);
+
+        //return (
+        //    <IssuerDisplayShort
+        //      name={issuer.name}
+        //      image={issuer.image}
+        //      url={issuer.json.url}
+        //      key={"issuer-" + i}
+        //      handleClick={handleClick}
+        //      badgeClasses={badgeClasses}
+        //    />
+        //);
       }.bind(this));
     }
     return (
