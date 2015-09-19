@@ -4,4 +4,4 @@ from .issuer import *
 from .public import *
 from .badgebook import *
 from .badgeuser import *
-from .composer import *
+from .composition import *
