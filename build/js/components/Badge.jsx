@@ -7,6 +7,7 @@ var Badge = React.createClass({
         label: React.PropTypes.string,
         width: React.PropTypes.number,
         height: React.PropTypes.number,
+        noAction: React.PropTypes.bool,
     },
 
     getDefaultProps: function() {
@@ -15,18 +16,26 @@ var Badge = React.createClass({
             description: undefined,
             width: 128,
             height: 128,
+            noAction: false,
             label: "View Details",
             handleClick: function() {},
         };
     },
 
     render: function() {
+
+        var badgeAction;
+        if ( ! this.props.noAction) {
+            badgeAction = (
+                <div className="badge_-x-action">
+                    <button className="button_ button_-solid button_-uppercase">{this.props.label}</button>
+                </div>);
+        }
+
         return (
             <div className="badge_" onClick={this.props.handleClick}>
                 <img src={this.props.image} width={this.props.width} height={this.props.height} alt={this.props.description}/>
-                <div className="badge_-x-action">
-                    <button className="button_ button_-solid button_-uppercase">{this.props.label}</button>
-                </div>
+                {badgeAction}
             </div>);
     }
 
