@@ -19,7 +19,7 @@ var LinkedInButton = React.createClass({
 
     click: function (e) {
         this.props.onClick(e);
-        window.open(this.constructUrl(), "_blank", "width=550,height=450");
+        window.open(this.constructUrl(), "_blank", "width=550,height=448");
     },
 
     render: function () {
@@ -39,6 +39,36 @@ var LinkedInButton = React.createClass({
 });
 
 
+var FacebookButton = React.createClass({
+    propTypes: {
+        url: React.PropTypes.string.isRequired,
+        element: React.PropTypes.string,
+        onClick: React.PropTypes.func
+    },
+
+    getDefaultProps: function () {
+        return {
+            element: "button",
+            onClick: function() {}
+        };
+    },
+
+    click: function (e) {
+        this.props.onClick(e);
+        window.open(this.constructUrl(), "_blank", "width=550,height=274");
+    },
+
+    render: function () {
+        return React.createElement(this.props.element, { 'onClick': this.click, 'className': this.props.className }, this.props.children);
+    },
+
+    constructUrl: function () {
+        return "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(this.props.url);
+    }
+});
+
+
 module.exports = {
-    "LinkedInButton": LinkedInButton
+    "LinkedInButton": LinkedInButton,
+    "FacebookButton": FacebookButton
 };

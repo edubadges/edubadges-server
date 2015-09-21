@@ -1,7 +1,7 @@
 
 var React = require('react');
-var FacebookButton = require("react-social").FacebookButton;
-var LinkedInButton = require("../components/LinkedInButton.jsx").LinkedInButton;
+var FacebookButton = require("../components/ShareButtons.jsx").FacebookButton;
+var LinkedInButton = require("../components/ShareButtons.jsx").LinkedInButton;
 var Heading = require('../components/Heading.jsx').Heading;
 var _ = require('lodash');
 
@@ -66,7 +66,7 @@ var Detail = React.createClass({
                         <LinkedInButton url={_.get(this.props.badge_instance, 'json.id')} title="I earned a badge!" message={this.props.badge_class.name} className='button_ button_-tertiary'>
                             Share on LinkedIn
                         </LinkedInButton>
-                        <FacebookButton url={_.get(this.props.badge_instance, 'json.id')} message="I earned a badge!" className='button_ button_-tertiary'>
+                        <FacebookButton url={_.get(this.props.badge_instance, 'json.id')} className='button_ button_-tertiary'>
                             Share on Facebook
                         </FacebookButton>
                     </li>
