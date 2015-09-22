@@ -20,14 +20,6 @@
     text-align: center;
   }
 
-  .title_-x-primary,
-  .title_-x-secondary {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    width: 100%;
-  }
-
   > :first-child {
     flex: 1 1 0;
     padding: 0 $layout-spacing*2;
