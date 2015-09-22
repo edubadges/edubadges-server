@@ -42,24 +42,7 @@
   }
 
   .pagination_-x-status {
-    color: map-get($colors, bodycopy-light);
     margin-left: $layout-spacing*8;
-    padding-left: 14px + $layout-spacing;
-    position: relative;
-
-    &::after {
-      @include pseudobase;
-      animation: rotate .75s ease-in-out infinite forwards;
-      border: 2px solid map-get($colors, loading);
-      border-radius: 50%;
-      border-right-color: transparent;
-      box-sizing: border-box;
-      height: 16px;
-      left: 0;
-      position: absolute;
-      top: calc(50% - 8px);
-      width: 16px;
-    }
 
   }
 
