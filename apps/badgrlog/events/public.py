@@ -10,8 +10,8 @@ class BaseBadgeAssertionEvent(BaseBadgrEvent):
 
     def to_representation(self):
         return {
-            'referer': client_ip_from_request(self.request),
-            'badge_instance': self.badge_instance.json,
+            'ipAddress': client_ip_from_request(self.request),
+            'badgeInstance': self.badge_instance.json,
         }
 
 

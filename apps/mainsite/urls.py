@@ -6,7 +6,6 @@ from django.views.generic.base import RedirectView, TemplateView
 
 from .views import SitemapView, info_view, email_unsubscribe
 
-
 admin.autodiscover()
 # make sure that any view/model/form imports occur AFTER admin.autodiscover
 
@@ -56,6 +55,9 @@ urlpatterns = patterns('',
 
     # Service health endpoint
     url(r'^health', include('health.urls')),
+
+    # JSON-LD Context
+    url(r'^json-ld/', include('badgrlog.urls')),
 
 )
 

@@ -30,7 +30,7 @@ var Issuer = React.createClass({
             handleClick: function() {},
             handleLinkClick: undefined,
             handleAddClick: undefined
-        }
+        };
     },
     getInitialState: function() {
         return {
@@ -60,7 +60,8 @@ var Issuer = React.createClass({
                     <div key={"issuer-badge-"+badgeclass.slug} onClick={this.handleBadgeClick}>
                         <div className="card_">
                             <Badge image={badgeclass.image}
-                                   description={badgeclass.description}/>
+                                   description={badgeclass.description}
+                                   noAction={true} />
                             <Title title={badgeclass.name} centered={true}/>
                         </div>
                     </div>);

@@ -62,11 +62,11 @@ class BadgeCheckBase(object):
 class BadgeCheck(BadgeCheckBase):
 
     def __init__(self, *args, **kwargs):
-        self.matched_email = None
+        self.recipient_id = None
         super(BadgeCheck, self).__init__(*args, **kwargs)
 
     def validate(self):
-        self.matched_email = None
+        self.recipient_id = None
         super(BadgeCheck, self).validate()
 
     def check_components_have_same_version(self):
@@ -84,16 +84,16 @@ class BadgeCheck(BadgeCheckBase):
 
     def check_badge_belongs_to_recipient(self):
         # Request.user specific validation
-        matched_email = badge_email_matches_emails(self.badge_instance,
+        recipient_id = badge_email_matches_emails(self.badge_instance,
                                                    self.verified_emails)
-        if not matched_email:
+        if not recipient_id:
             raise ValidationError(
                 "The badge you are trying to import does not belong to one of \
                 your verified e-mail addresses.")
 
-        self.matched_email = matched_email
+        self.recipient_id = recipient_id
 
-        return "The badge was issued to '{}' as expected".format(matched_email);
+        return "The badge was issued to '{}' as expected".format(recipient_id);
 
 
 class BadgeCheckTests_V0_5(BadgeCheck):

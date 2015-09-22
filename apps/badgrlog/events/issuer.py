@@ -22,12 +22,14 @@ class BadgeClassCreatedEvent(BaseBadgrEvent):
         self.image = image
 
     def to_representation(self):
+
         return {
             'creator': self.badge_class.get('created_by'),
-            'badge_class': self.badge_class.get('json'),
+            'badgeClass': self.badge_class.get('json'),
             'image': {
+                'id': self.badge_class.get('json', {}).get('image'),
                 'size': self.image.size,
-                'type': self.image.content_type,
+                'fileType': self.image.content_type,
             }
         }
 
@@ -39,8 +41,8 @@ class BadgeClassDeletedEvent(BaseBadgrEvent):
 
     def to_representation(self):
         return {
-            'deleter': settings.HTTP_ORIGIN + self.user.get_absolute_url(),
-            'badge_class': self.badge_class_json
+            'user': settings.HTTP_ORIGIN + self.user.get_absolute_url(),
+            'badgeClass': self.badge_class_json
         }
 
 
@@ -53,18 +55,20 @@ class BadgeInstanceCreatedEvent(BaseBadgrEvent):
         return {
             'creator': settings.HTTP_ORIGIN + self.user.get_absolute_url(),
             'issuer': self.badge_instance.get('issuer'),
-            'email': self.badge_instance.get('email'),
-            'badge_class': self.badge_instance.get('badgeclass'),
-            'badge_instance': self.badge_instance.get('json'),
+            'recipient': self.badge_instance.get('recipient_identifier'),
+            'badgeClass': self.badge_instance.get('badgeclass'),
+            'badgeInstance': self.badge_instance.get('json'),
         }
 
 
 class BadgeAssertionRevokedEvent(BaseBadgrEvent):
-    def __init__(self, badge_instance):
+    def __init__(self, badge_instance, user):
         self.badge_instance = badge_instance
+        self.user = user
 
     def to_representation(self):
         return {
-            'badge_instance': self.badge_instance.json
+            'user': settings.HTTP_ORIGIN + self.user.get_absolute_url(),
+            'badgeInstance': self.badge_instance.json
         }
 
