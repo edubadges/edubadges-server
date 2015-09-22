@@ -39,30 +39,38 @@
 
 .heading_-medium {
 
-  h1 {
-    font-size: $font-size-large-3x;
-  }
+  .heading_-x-text {
 
-  p {
-    font-size: $font-size-small;
+    h1 {
+      font-size: $font-size-large-3x;
+    }
+
+    p {
+      font-size: $font-size-small;
+    }
+
   }
 
 }
 
 .heading_-small {
 
-  h1,
-  p {
-    margin-bottom: $layout-spacing;
-  }
+  .heading_-x-text {
 
-  h1 {
-    font-size: $font-size-large-2x;
-    font-weight: normal;
-  }
+    h1,
+    p {
+      margin-bottom: $layout-spacing;
+    }
 
-  p {
-    font-size: $font-size-small;
+    h1 {
+      font-size: $font-size-large-2x;
+      font-weight: normal;
+    }
+
+    p {
+      font-size: $font-size-small;
+    } 
+
   }
 
 }
