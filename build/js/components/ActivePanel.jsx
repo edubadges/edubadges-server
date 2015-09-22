@@ -56,7 +56,7 @@ var ActivePanel = React.createClass({
   componentWillUnmount: function(){
     MenuStore.removeListener('CLOSE_MODAL', this.clearActivePanel);
   },
-  componentDidUpdate(prevProps, prevState){
+  componentDidUpdate: function(prevProps, prevState){
     if (!prevProps.type && this.props.type && this.isMounted()){
       this.setState({open: true});
     }
