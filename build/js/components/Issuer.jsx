@@ -61,7 +61,7 @@ var Issuer = React.createClass({
                         <div className="card_">
                             <Badge image={badgeclass.image}
                                    description={badgeclass.description}/>
-                            <Title title={badgeclass.name}/>
+                            <Title title={badgeclass.name} centered={true}/>
                         </div>
                     </div>);
 
