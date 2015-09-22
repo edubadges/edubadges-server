@@ -3,6 +3,8 @@
   display: flex;
   font-size: $font-size-small;
   font-weight: 600;
+  height: 75px;
+  line-height: 1.5;
   padding: ($layout-spacing*2) ($layout-spacing*2) ($layout-spacing*2) ($layout-spacing*4 + 32px);
   position: relative;
   text-align: left;

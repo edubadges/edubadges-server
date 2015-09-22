@@ -7,6 +7,15 @@ body {
   font-size: $font-size;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+
+  // Preload hover-state images
+  // http://stackoverflow.com/questions/1373142/preloading-css-images
+
+  &::after {
+    content: url('images/step-earned-hover.svg') url('images/icon-collapse.svg');
+    display: none;
+  }
+
 }
 
 button {
