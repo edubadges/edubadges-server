@@ -1,15 +1,23 @@
 .filter_ {
   width: 286px;
 
+  > *:not(:first-child) {
+    border-top: 1px solid map-get($colors, border-light);
+  }
+
   input {
     background: url('images/filter-search.svg') $layout-spacing*3.5 center no-repeat;
     border: 0;
-    border-bottom: 1px solid map-get($colors, border-light);
     box-sizing: border-box;
     display: block;
     font-size: $font-size-small;
     padding: $layout-spacing*1.75 $layout-spacing*1.75 $layout-spacing*1.75 ($layout-spacing*3.5 + 40px);
     width: 100%;
+  }
+
+  > p {
+    line-height: 1.2;
+    padding: $layout-spacing*2;
   }
 
   ul {
@@ -40,13 +48,14 @@
   }
 
   .filter_-x-action {
-    border-top: 1px solid map-get($colors, border-light);
     box-sizing: border-box;
     color: map-get($colors, button);
-    font-size: $font-size-small;
-    padding: $layout-spacing*1.75;
-    text-transform: uppercase;
-    width: 100%;
+    padding: $layout-spacing;
+
+    button {
+      width: 100%;
+    }
+
   }
 
 }
