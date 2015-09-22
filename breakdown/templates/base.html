@@ -4,73 +4,56 @@
         {% block head %}
             <meta charset="utf-8">
             <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    
             <title>{% block head_title %}Badgr{% endblock %}</title>
             <link rel="shortcut icon" href="{{STATIC_URL}}images/favicon.ico" />
-        
+            <meta name="description" content="">
             <meta name="viewport" content="width=device-width,initial-scale=1">
-
+            <!-- <link rel="apple-touch-icon" href="apple-touch-icon.png"> -->
+        
             <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/bootstrap/css/bootstrap.css">
-            <!-- TODO: replace with min later: 
-            <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/bootstrap/bootstrap.min.css">
-            -->
 
             <!-- dialog polyfill needs to be above screen.css -->
             <script src="{{STATIC_URL}}js/dialog-polyfill.js"></script>
 
-            <!-- Custom Fonts -->
-            <link href="{{STATIC_URL}}css/plugins/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-
             <!-- main (legacy) stylesheet -->
             <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/style.css">
-
             <!-- main (incoming and future ruler of the realm) stylesheet -->
             <link href="{{ STATIC_URL }}css/reset.css" media="screen" rel="stylesheet" type="text/css" >
             <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/screen.css">
 
-            <!-- TODO: create print stylesheet
-            <link rel="stylesheet" media="print" type="text/css" href="{{STATIC_URL}}css/print.css">
-            -->
-
-            <!-- for fixed data tables -->
             <link href="{{ STATIC_URL }}css/fixed-data-table.css" media="screen" rel="stylesheet" type="text/css" >
+            <link href="{{STATIC_URL}}css/plugins/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
         
             {% block extrastyle %}{% endblock %}
 
             <script src="{{STATIC_URL}}js/libs/modernizr-2.5.3.min.js"></script>
-
         {% endblock %}
 
         {% block extrahead %}{% endblock %}
 
-        {% block initial_data %}
-            {% if initial_data %}
-                <script type="text/javascript">
-                    var initialData = {{ initial_data | safe }};
-                </script>
-            {% endif %}
-        {% endblock %}
+        {% if initial_data %}
+            <script type="text/javascript">
+                var initialData = {{ initial_data | safe }};
+            </script>
+        {% endif %}
     </head>
 
-    <body class="badgr {% block bodyclass %}{% endblock %}">
+    <body class="{% block bodyclass %}{% endblock %}">
         {% block pre_content %}{% endblock %}
 
-        {% block react %}
+        {% block content %}
             {% if initial_data %}
-            <div id="app" class="main-app-container">
-            <!-- React App renders here -->
-                <div class="container">
+                <div id="app" class="x-owner">
+                    <!-- React App renders within #app -->
                     <div class="loading-react">
                         <h1>{{ self.head_title() }}</h1>
                         <p>Loading...</p>
                         <p class="loading-spinner"><img src="{{STATIC_URL}}images/ajax-loader.gif"></p>
                     </div>
                 </div>
-            </div>
+            {% else %}
+                <!-- No react content to render -->
             {% endif %}
-        {% endblock %}
-        {% block content %}
-
         {% endblock %}
 
         {% block footer %}
@@ -80,23 +63,19 @@
         {% endblock %}
 
         {% block scripts %}
-
             {% if initial_data %}
                 <script src="{{STATIC_URL}}js/app.js"></script>
             {% endif %}
-
             <script type="text/javascript">
-              /* var _gaq = _gaq || [];
-              _gaq.push(['_setAccount', 'UA-#######-#']);
-              _gaq.push(['_trackPageview']);
-              (function() {
-                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-              })(); */
+                /* var _gaq = _gaq || [];
+                _gaq.push(['_setAccount', 'UA-#######-#']);
+                _gaq.push(['_trackPageview']);
+                (function() {
+                    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+                })(); */
             </script>
         {% endblock %}
     </body>
 </html>
-
-
