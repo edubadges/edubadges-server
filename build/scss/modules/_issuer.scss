@@ -17,14 +17,14 @@
 
   .issuer_-x-title {
     flex: 1 1 0;
-
-    h1 {
-      font-weight: 600;
-      margin-bottom: $layout-spacing/4;
-    }
+    font-weight: 600;
+    text-align: left;
     
-    p {
+    span {
+      display: block;
       font-size: $font-size-small-2x;
+      font-weight: normal;
+      margin-top: $layout-spacing/4;
     }
 
   }
