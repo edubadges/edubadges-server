@@ -41,6 +41,10 @@ main {
         margin-right: $layout-spacing;
       }
 
+      button {
+        text-align: left;
+      }
+
     }
 
     &:first-child:not(:only-child) {
