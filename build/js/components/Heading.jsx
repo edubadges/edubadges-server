@@ -20,10 +20,22 @@ var Heading = React.createClass({
             size = "";
         }
 
+        var actions;
+        if (React.Children.count(this.props.children) > 0) {
+            actions = (
+                <div className="heading_-x-actions">
+                    {this.props.children}
+                </div>
+            )
+        }
+
         return (
-            <header className="heading_ {size}">
-                <h1>{this.props.title}</h1>
-                {subtitle}
+            <header className={"heading_ "+size}>
+                <div className="heading_-x-text">
+                    <h1>{this.props.title}</h1>
+                    {subtitle}
+                </div>
+                {actions}
             </header>);
     }
 });
