@@ -189,32 +189,29 @@ var App = React.createClass({
   // Render the base structure for the app (top menu, sidebar, and main content area)
   render_base: function(mainComponent, breadCrumbs) {
     return (
-      <div id="wrapper" className="wrapper">
-        <header className="header_ l-wrapper">
-          <a className="header_-x-logo" href="/">
-            <img src="/static/images/header-logo.svg" width="193" height="89" />
-          </a>
-          <nav>
-            <TopLinks
-                items={MenuStore.getAllItems('topMenu').items}
-                setOpen={this.setOpenTopMenu}
-                active={this.state.activeTopMenu}
-                open={this.state.openTopMenu}
-                showLabels={true} />
-          </nav>
-        </header>
+        <div className="x-owner">
+            <header className="header_ l-wrapper">
+            <a className="header_-x-logo" href="/">
+                <img src="/static/images/header-logo.svg" width="193" height="89" />
+            </a>
+            <nav>
+                <TopLinks
+                    items={MenuStore.getAllItems('topMenu').items}
+                    setOpen={this.setOpenTopMenu}
+                    active={this.state.activeTopMenu}
+                    open={this.state.openTopMenu}
+                    showLabels={true} />
+            </nav>
+            </header>
 
-        { breadCrumbs ? <BreadCrumbs items={breadCrumbs} submodule="header" /> : null }
+            { breadCrumbs ? <BreadCrumbs items={breadCrumbs} submodule="header" /> : null }
 
-        <section className="main-section content-container">
-          <div className="wrap page-wrapper">
-            <div className="container-fluid">
-                { mainComponent }
-            </div>
-          </div>
-        </section>
-
-      </div>
+            <main className="wrap_ ">
+                <div className="l-wrapper l-wrapper-inset">
+                    { mainComponent }
+                </div>
+            </main>
+        </div>
     );
   },
 

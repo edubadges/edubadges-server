@@ -1,17 +1,7 @@
 {% extends "base.html" %}
 
-
-{% block body_class %}interior{% endblock %}
-
-
-{% block pre_content %}
-    
-    {{super()}}
-
-    {% if content_title %}
-      <h2>{% block content_title %}{{ title }}{% endblock %}</h2>
-    {% endif %}
-
-    {% block breadcrumbs %}{% endblock %}
-
+{% block footer %}
+    <footer class="footer_ l-wrapper l-wrapper-inset">
+        <p>Copyright &copy; 2015 <a href="http://concentricsky.com" target="_blank">Concentric Sky, Inc.</a>  /  Powered by <a href="" target="_blank">Badgr</a>  /  <a href="" target="_blank">API documentation</a></p>
+    </footer>
 {% endblock %}
