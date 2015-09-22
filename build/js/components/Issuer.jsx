@@ -90,7 +90,13 @@ var Issuer = React.createClass({
                         handleClick={this.props.handleLinkClick}>Link Somewhere</button>);
         }
 
-        var image = this.props.image ? (<img src={this.props.image} width="48" height="48" alt={this.props.description}/>) : "";
+        var image = this.props.image ?
+                        (<img src={this.props.image}
+                              width="48" height="48"
+                              alt={this.props.description}/>) :
+                        (<img src={initialData.STATIC_URL+"/images/issuer-placeholder.png"}
+                              width="48" height="48"
+                              alt={this.props.description}/>);
 
         return (
             <div className={"issuer_ "+(this.state.badgesExpanded ? 'is-expanded' : '')}>
@@ -98,11 +104,11 @@ var Issuer = React.createClass({
                     <div className="issuer_-x-image" onClick={this.props.handleClick}>
                         {image}
                     </div>
-                    <div className="issuer_-x-title" onClick={this.props.handleClick}>
+                    <button className="issuer_-x-title" onClick={this.props.handleClick}>
                         <h1>{this.props.name}</h1>
 
                         <p>{this.props.description}</p>
-                    </div>
+                    </button>
                     <div className="issuer_-x-controls">
                         {badgelink}
                         {linklink}

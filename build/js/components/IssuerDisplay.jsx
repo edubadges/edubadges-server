@@ -95,12 +95,13 @@ var IssuerList = React.createClass({
           handleClick = function(e){ providedHandler(e, issuer); };
         }
         return (
-            <Issuer key={"issuer-"+i}
-                    name={issuer.name}
-                    image={issuer.image}
-                    description={issuer.description}
-                    badgeClasses={badgeClasses}
-                    handleClick={handleClick}/>);
+            <div key={"issuer-"+i}>
+                <Issuer name={issuer.name}
+                        image={issuer.image}
+                        description={issuer.description}
+                        badgeClasses={badgeClasses}
+                        handleClick={handleClick}/>
+            </div>);
 
         //return (
         //    <IssuerDisplayShort
@@ -115,7 +116,7 @@ var IssuerList = React.createClass({
       }.bind(this));
     }
     return (
-      <div className={listClass}>
+      <div className="l-vertical l-wrapper l-wrapper-inset">
         {issuers}
       </div>
     );
