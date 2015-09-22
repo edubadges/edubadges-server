@@ -1,0 +1,13 @@
+.action_ {
+  color: map-get($colors, button);
+  font-size: $font-size-small;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.action_-secondary {
+  color: map-get($colors, bodycopy);
+  font-size: $font-size;
+  font-weight: normal;
+  text-transform: none;
+}

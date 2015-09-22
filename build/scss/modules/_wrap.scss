@@ -2,3 +2,7 @@
   background-color: map-get($colors, bodybackground-light);
   z-index: $z-index-low;
 }
+
+.wrap-solid {
+  background-color: map-get($colors, solid);
+}

@@ -55,6 +55,22 @@ main {
 
 }
 
+.l-vertical {
+
+  > * {
+    margin-bottom: $layout-spacing*2;
+  }
+
+}
+
+.l-vertical-small {
+
+  > * {
+    margin-bottom: $layout-spacing;
+  }
+
+}
+
 .l-wrapper {
   padding-left: calc(50% - 680px);
   padding-right: calc(50% - 680px);
