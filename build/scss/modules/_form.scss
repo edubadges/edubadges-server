@@ -46,15 +46,28 @@
   }
 
   .form_-x-imagefield {
-    background: url('images/form-image.svg') center $layout-spacing*3 map-get($colors, solid-light) no-repeat;
+    background-color: map-get($colors, solid-light);
     border: 2px dashed map-get($colors, border-light);
     box-sizing: border-box;
     color: map-get($colors, bodycopy-faint);
     cursor: pointer;
-    font-size: $font-size-small;
-    padding: $layout-spacing*9.5 $layout-spacing*3 $layout-spacing*3;
-    text-align: center;
     width: 100%;
+
+    .dropzone {
+      background-image: url('images/form-image.svg');
+      background-position: center $layout-spacing*3;
+      background-repeat: no-repeat;
+      font-size: $font-size-small;
+      padding: $layout-spacing*9.5 $layout-spacing*3 $layout-spacing*3;
+      text-align: center;
+    }
+
+    img {
+      display: block;
+      height: auto;
+      width: 100%;
+    }
+
   }
 
   .form_-x-imageupload {
