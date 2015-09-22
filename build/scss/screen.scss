@@ -22,6 +22,7 @@ button {
   -webkit-apperance: none;
   background: none;
   border: 0;
+  color: map-get($colors, bodycopy);
   cursor: pointer;
   font-family: $font-family;
   font-size: $font-size;
