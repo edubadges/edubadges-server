@@ -55,12 +55,12 @@ $z-index-high: 3;
 
 @keyframes rotate {
 
-  0% {
-    transform: rotate3d(0, 0, 1, 0);
+  from {
+    transform: rotate(0);
   }
 
-  100% {
-    transform: rotate3d(0, 0, 1, 360deg);
+  to {
+    transform: rotate(360deg);
   }
 
 }

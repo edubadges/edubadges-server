@@ -60,15 +60,19 @@ var Detail = React.createClass({
                 );
                 properties.push(
                     <li key="actions">
-                        <button className="button_ button_-tertiary" href={"/earner/badges/new?url=" + _.get(this.props.badge_instance, 'json.id')} target="_blank">
-                            Add to Badgr
-                        </button>
-                        <LinkedInButton url={_.get(this.props.badge_instance, 'json.id')} title="I earned a badge!" message={this.props.badge_class.name} className='button_ button_-tertiary'>
-                            Share on LinkedIn
-                        </LinkedInButton>
-                        <FacebookButton url={_.get(this.props.badge_instance, 'json.id')} className='button_ button_-tertiary'>
-                            Share on Facebook
-                        </FacebookButton>
+                        <div className="l-horizontal">
+                            <div>
+                                <button className="button_ button_-tertiary" href={"/earner/badges/new?url=" + _.get(this.props.badge_instance, 'json.id')} target="_blank">
+                                    Add to Badgr
+                                </button>
+                                <LinkedInButton url={_.get(this.props.badge_instance, 'json.id')} title="I earned a badge!" message={this.props.badge_class.name} className='button_ button_-tertiary'>
+                                    Share on LinkedIn
+                                </LinkedInButton>
+                                <FacebookButton url={_.get(this.props.badge_instance, 'json.id')} className='button_ button_-tertiary'>
+                                    Share on Facebook
+                                </FacebookButton>
+                            </div>
+                        </div>
                     </li>
                 );
             }
