@@ -11,3 +11,9 @@
   font-weight: normal;
   text-transform: none;
 }
+
+.action_-faint {
+  color: map-get($colors, bodycopy-faint);
+  font-weight: normal;
+  text-transform: none;
+}

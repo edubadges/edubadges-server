@@ -62,7 +62,7 @@ var Issuer = React.createClass({
                             <Badge image={badgeclass.image}
                                    description={badgeclass.description}
                                    noAction={true} />
-                            <Title title={badgeclass.name}/>
+                            <Title title={badgeclass.name} centered={true}/>
                         </div>
                     </div>);
 

@@ -30,6 +30,7 @@ main {
   align-items: center;
   display: flex;
   justify-content: space-between;
+  white-space: nowrap;
 
   > * {
     align-items: center;
@@ -46,7 +47,7 @@ main {
     &:last-child {
 
       > * {
-        margin-left: $layout-spacing*3;
+        margin: 0 $layout-spacing*1.5;
       }
 
     }
