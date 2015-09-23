@@ -67,8 +67,8 @@ module.exports = function(grunt) {
                     transform: ['reactify']
                 },
                 files: {
-                    'breakdown/static/js/app.js': 'build/js/app.jsx',
-                    'breakdown/static/js/lti-app.js': 'build/js/lti-app.jsx'
+                    'build/js/temp/app.js': 'build/js/app.jsx',
+                    'build/js/temp/lti-app.js': 'build/js/lti-app.jsx'
                 }
             }
         },
@@ -145,5 +145,5 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-inline');
 
     grunt.registerTask('default',['bs-init', 'sass', 'autoprefixer', 'browserify:dev', 'inline:dist', 'watch']);
-    grunt.registerTask('dist', ['env:dist', 'sass', 'autoprefixer', 'browserify:dist']);
+    grunt.registerTask('dist', ['env:dist', 'sass', 'autoprefixer', 'browserify:dist', 'uglify']);
 }
