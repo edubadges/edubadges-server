@@ -7,8 +7,8 @@ var DropMenuItem = React.createClass({
   },
   render: function() {
     return (
-        <li className="dropdown_-x-item">
-          <a href={this.props.url} onClick={this.handleClick}><i className={'fa fa-fw ' + this.props.iconClass}></i> {this.props.title}</a>
+        <li>
+          <a className="menu_-x-dropdownitem" href={this.props.url} onClick={this.handleClick}>{this.props.title}</a>
         </li>
       ); 
   }
@@ -21,9 +21,11 @@ var MenuList = React.createClass({
       return(<DropMenuItem url={item.url} title={item.title} iconClass={item.icon} key={item.title + '-item-' + i} />)
     }.bind(this));
     return (
-      <ul className={'dropdown_ dropdown_-toplinks dropdown_-' + this.props.title}>
-        {secondLevelItems}
-      </ul>
+      <div className={'menu_-x-dropdown menu_-x-dropdown-' + this.props.title}>
+        <ul>
+          {secondLevelItems}
+        </ul>
+      </div>
     );
   }
 });
@@ -43,18 +45,26 @@ var FirstLevelItem = React.createClass({
   }, 
 
   render: function(){
-    var anyChildren = null, liClassName = '';
+    var anyChildren = null, liClassName = '', labelElement;
+    var label = this.props.iconClass ? (<Icon iconName={this.props.iconClass} position="right" size="small">{this.props.label}</Icon>) : this.props.label;
     if (this.props.children.length > 0) {
       anyChildren = (<MenuList items={this.props.children} title={this.props.title} clName="nav nav-second-level" key='nested-menu' />);
       liClassName = this.props.open ? 'is-open is-closable open closable' : 'closable is-closable';
+      labelElement = (<span
+          className={this.props.active ? 'menu_-x-item is-active' : 'menu_-x-item'}
+          onClick={this.handleClick} alt={this.title}>
+        {label}
+      </span>);
     }
-    var label = this.props.iconClass ? (<Icon iconName={this.props.iconClass} position="right" size="small">{this.props.label}</Icon>) : this.props.label;
+    else {
+      labelElement = (<a href={this.props.url} className={this.props.active ? 'menu_-x-item is-active' : 'menu_-x-item'} onClick={this.handleClick} alt={this.title}>
+        {label}
+      </a>);
+    }
 
     return (
       <li className={liClassName}>
-        <a href={this.props.url} className={this.props.active ? 'is-active' : ''} onClick={this.handleClick} alt={this.title}>
-          {label}
-        </a>
+        {labelElement}
         {anyChildren}
       </li>
     );
@@ -81,7 +91,7 @@ var TopLinks = React.createClass({
         );
     }.bind(this));
     return (
-      <ul>
+      <ul className={ this.props.headerSize == "small" ? "menu_ menu_-small": "menu_"}>
         {firstLevelItems}
       </ul>
       );
