@@ -1,5 +1,20 @@
 {% extends "base.html" %}
 
 {% block content %}
-<p class="error500">We're sorry, an error has occurred.</p>
+    <div class="x-owner">
+        <header class="header_ header_-small l-wrapper">
+            <a class="header_-x-logo" href="#">
+                <img src="{{ STATIC_URL }}images/header-logo-small.svg"} width="153" height="65" />
+            </a>
+        </header>
+
+        <main class="wrap_ ">
+            <div class="l-wrapper l-wrapper-inset">
+                <div class="message_">
+                    <img srcset="{{ STATIC_URL }}images/500-badgr-2x.png 2x, {{ STATIC_URL }}images/500-badgr.png" src="{{ STATIC_URL }}images/500-badgr.png" alt="Badgr is sorry :(" width="312" height="317">
+                    <p>We're sorry, an error has occurred.<p>
+                </div>
+            </div>
+        </main>
+    </div>
 {% endblock %}
