@@ -289,7 +289,6 @@ BasicAPIForm = React.createClass({
           <div className="form_-x-imageupload">
             {activeColumns}
           </div>
-          {formControls}
         </form>
       </div>);
   }
