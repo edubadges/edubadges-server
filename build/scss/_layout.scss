@@ -65,8 +65,9 @@ main {
 }
 
 .l-vertical {
+  max-width: 100%;
 
-  > * {
+  > *:not(:last-child) {
     margin-bottom: $layout-spacing*2;
   }
 
@@ -74,7 +75,7 @@ main {
 
 .l-vertical-small {
 
-  > * {
+  > *:not(:last-child) {
     margin-bottom: $layout-spacing;
   }
 
