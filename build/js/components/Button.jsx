@@ -9,16 +9,20 @@ var Button = React.createClass({
     getDefaultProps: function() {
         return {
             handleClick: function(e) { },
-            isDisabled: false
+            isDisabled: false,
+            propagateClick: false,
         };
     },
 
     handleClick: function(e) {
+
         if (!this.props.isDisabled) {
             this.props.handleClick(e);
         }
-        e.preventDefault();
-        e.stopPropagation();
+        if (!this.props.propagateClick) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
     },
 
     render: function() {
