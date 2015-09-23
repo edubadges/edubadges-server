@@ -24,6 +24,10 @@
     text-decoration: none;
     transition: background-color $transition-duration $transition-easing;
 
+    &:hover {
+      cursor: pointer;
+    }
+
     &[href]:hover {
       background-color: map-get($colors, bodycopy-light);
     }
