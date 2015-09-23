@@ -251,7 +251,7 @@ APIStore.reloadCollections = function(collectionKeys, requestContext) {
   for (var index in collectionKeys) {
     var pagination_url = undefined;
     var key = collectionKeys[index];
-    var idx = key.indexOf(':');
+    var idx = key ? key.indexOf(':') : -1;
     if (idx != -1) {
       pagination_url = key.substring(idx+1)
       key = key.substring(0, idx)
@@ -259,8 +259,10 @@ APIStore.reloadCollections = function(collectionKeys, requestContext) {
     if (APIStore.defaultContexts.hasOwnProperty(key)) {
       var apiContext = APIStore.defaultContexts[key];
       var actionUrl = APIStore.buildUrlWithContext(apiContext.actionUrl, requestContext)
-      APIStore.activeGetRequests[actionUrl] = true;
-      APIStore.getData(apiContext, requestContext, pagination_url);
+      if (!APIStore.activeGetRequests.hasOwnProperty(actionUrl)) {
+        APIStore.activeGetRequests[actionUrl] = true;
+        APIStore.getData(apiContext, requestContext, pagination_url);
+      }
     }
   }
 
