@@ -14,7 +14,7 @@ var Heading = React.createClass({
         var subtitle = this.props.subtitle ? (<p>{this.props.subtitle}</p>) : "";
         var size = this.props.size ? this.props.size.toLowerCase() : "";
 
-        if (size && (size in ["medium", "small"])) {
+        if (size && ["medium", "small"].indexOf(size) != -1) {
             size = "heading_-"+size;
         } else {
             size = "";
