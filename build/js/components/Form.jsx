@@ -86,15 +86,12 @@ var ImageDropbox = React.createClass({
     }
   },
   render: function() {
-    var image = this.props.imageData ? (<img src={this.props.imageData} />) : "Tap here to upload image";
     var dropzoneStyle = {};
     return (
         <div className="form_-x-field">
-            <div className="form_-x-imagefield">
-                <Dropzone onDrop={this.fileHandler} style={dropzoneStyle}>
-                  {image}
-                </Dropzone>
-            </div>
+            <Dropzone onDrop={this.fileHandler} style={dropzoneStyle} activeClassName='is-active' className={'form_-x-imagefield dropzone'+ (this.props.imageData ? ' is-uploaded' : '')}>
+                {this.props.imageData ? <img src={this.props.imageData} /> : <p>Tap here to upload image</p>}
+            </Dropzone>
         </div>
     );
   }
