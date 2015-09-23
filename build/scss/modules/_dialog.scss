@@ -5,14 +5,15 @@
   box-shadow: $layout-spacing/2 $layout-spacing $layout-spacing*2.5 $layout-spacing rgba(map-get($colors, solid-dark), .30);
   margin-left: auto; // Remove when legacy css is deprcated
   margin-right: auto; // Remove when legacy css is deprcated
-  max-height: calc(100vh - #{($layout-spacing*12.5) + $layout-spacing*8});
-  max-width: 865px;
+  max-height: calc(100vh - #{$layout-spacing*6});
+  max-width: 75%;
   min-height: $layout-spacing*4;
+  min-width: 75%;
   opacity: 0;
   overflow-y: auto;
   padding: 0;
   position: fixed;
-  top: $layout-spacing*12.5;
+  top: $layout-spacing*3;
   transform: translate3d(0, -100%, 0);
   transition: all $transition-duration $transition-easing;
   width: 60%;
