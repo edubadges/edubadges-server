@@ -5,26 +5,6 @@
   display: flex;
   justify-content: space-between;
 
-  ul:not(.dropdown_) {
-    display: flex;
-  }
-
-  a:not(.header_-x-logo) {
-    color: map-get($colors, bodybackground);
-    display: block;
-    height: $layout-spacing*8;
-    line-height: $layout-spacing*8;
-    padding: 0 $layout-spacing*2;
-    text-decoration: none;
-    transition: background-color $transition-duration $transition-easing;
-
-    &:hover,
-    &.is-active {
-      background-color: map-get($colors, bodycopy-light);
-    }
-
-  }
-
   .header_-x-logo {
     display: block;
     padding: 0 $layout-spacing*2;
@@ -34,11 +14,4 @@
 
 .header_-small {
   height: $layout-spacing*6;
-
-  a:not(.header_-x-logo) {
-    height: $layout-spacing*6;
-    line-height: $layout-spacing*6;
-    padding: 0 $layout-spacing*3;
-  }
-
 }

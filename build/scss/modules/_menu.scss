@@ -1,0 +1,71 @@
+.menu_ {
+  display: flex;
+
+  li {
+    position: relative;
+
+    &.is-open,
+    &:hover {
+      
+      .menu_-x-dropdown {
+        display: block;
+      }
+
+    }
+
+  }
+
+  .menu_-x-item {
+    color: map-get($colors, bodybackground);
+    display: block;
+    height: $layout-spacing*8;
+    line-height: $layout-spacing*8;
+    padding: 0 $layout-spacing*2;
+    text-decoration: none;
+    transition: background-color $transition-duration $transition-easing;
+
+    &[href]:hover {
+      background-color: map-get($colors, bodycopy-light);
+    }
+
+    &.is-active {
+      background-color: map-get($colors, bodycopy-light);
+    }
+
+  }
+
+  .menu_-x-dropdown {
+    @include dropdown;
+    background-color: map-get($colors, solid);
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    z-index: $z-index-high;
+  }
+
+  .menu_-x-dropdownitem {
+    color: map-get($colors, bodycopy);
+    display: block;
+    font-size: $font-size-small;
+    padding: $layout-spacing*2;
+    text-decoration: none;
+    white-space: nowrap;
+
+    &:hover {
+      background-color: darken(map-get($colors, solid-light), 8%);
+    }
+
+  }
+
+}
+
+.menu_-small {
+
+  .menu_-x-item {
+    height: $layout-spacing*6;
+    line-height: $layout-spacing*6;
+    padding: 0 $layout-spacing*3;
+  }
+
+}
