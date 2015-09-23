@@ -34,7 +34,7 @@ TetheredElement.prototype.update = function () {
     React.render(
         this.reactComponent,
         this.domNode,
-        function(){ return this.tether.position()}
+        function(){ return this.tether.position()}.bind(this)
     );
 };
 TetheredElement.prototype.destroy = function () {
