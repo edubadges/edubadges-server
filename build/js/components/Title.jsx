@@ -7,17 +7,22 @@ var Title = React.createClass({
             subtitle: undefined,
             options: undefined,
             centered: false,
-        }
+            truncate: false,
+        };
     },
 
     render: function() {
+        var headerClassList = [];
+        if (this.props.centered) headerClassList.push('title_-x-centered');
+        if (this.props.truncate) headerClassList.push('truncate_');
+
         var title = this.props.subtitle ?
             (<div>
                 <h1 className="title_-x-primary">{this.props.title}</h1>
                 <p className="title_-x-secondary">{this.props.subtitle}</p>
              </div>) :
             (<div>
-                <h1 className={this.props.centered ? 'title_-x-centered' : ''}>{this.props.title}</h1>
+                <h1 className={headerClassList.join(' ')}>{this.props.title}</h1>
              </div>);
         var options = this.props.options ? (
             <div>
