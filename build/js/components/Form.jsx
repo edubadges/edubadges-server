@@ -282,6 +282,10 @@ BasicAPIForm = React.createClass({
       );
     }
 
+    if (this.props.hideFormControls) {
+      formControls = "";
+    }
+
     return (
       <div className="form-container issuer-notification-form-container">
         {activeMessage} {activeHelpText}
@@ -289,6 +293,7 @@ BasicAPIForm = React.createClass({
           <div className="form_-x-imageupload">
             {activeColumns}
           </div>
+          {formControls}
         </form>
       </div>);
   }
