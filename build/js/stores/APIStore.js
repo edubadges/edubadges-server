@@ -258,7 +258,7 @@ APIStore.reloadCollections = function(collectionKeys, requestContext) {
     }
     if (APIStore.defaultContexts.hasOwnProperty(key)) {
       var apiContext = APIStore.defaultContexts[key];
-      var actionUrl = APIStore.buildUrlWithContext(apiContext.actionUrl, requestContext)
+      var actionUrl = APIStore.buildUrlWithContext(apiContext.actionUrl, requestContext);
       if (!APIStore.activeGetRequests.hasOwnProperty(actionUrl)) {
         APIStore.activeGetRequests[actionUrl] = true;
         APIStore.getData(apiContext, requestContext, pagination_url);
@@ -298,6 +298,7 @@ APIStore.getData = function(context, requestContext, pagination_url) {
 
   req.end(function(error, response){
     APIStore.resolveActiveGet(context.apiCollectionKey);
+    APIStore.resolveActiveGet(url);
     if (error){
       APIStore.emit('API_STORE_FAILURE');
     }
