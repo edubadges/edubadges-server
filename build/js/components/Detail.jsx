@@ -14,14 +14,14 @@ var Detail = React.createClass({
     getDefaultProps: function() {
         return {
             badge_instance: undefined
-        }
+        };
     },
 
     render: function() {
         var properties = [
             (<li key="criteria">
                     <h2 className="detail_-x-meta">Criteria</h2>
-                    <p><a href={this.props.badge_class.criteria} target="_blank" title="Criteria to earn this badge">{this.props.badge_class.criteria}</a></p>
+                    <p><a href={this.props.badge_class.json.criteria} target="_blank" title="Criteria to earn this badge">{this.props.badge_class.json.criteria}</a></p>
              </li>),
 
             (<li key="issuer">
@@ -45,10 +45,7 @@ var Detail = React.createClass({
                     </li>);
             }
 
-            var addToBadgr = (<button className="button_ button_-tertiary" href={"/earner/badges/new?url=" + _.get(this.props.badge_instance, 'json.id')} target="_blank">
-                                   Add to Badgr
-                               </button>);
-
+            var addToBadgr;
             if (this.props.badge_instance) {
                 properties.unshift(
                     <li key="recipient">
@@ -62,6 +59,9 @@ var Detail = React.createClass({
                         <p>{this.props.badge_instance.json.issuedOn}</p>
                     </li>
                 );
+                addToBadgr = (<button className="button_ button_-tertiary" href={"/earner/badges/new?url=" + _.get(this.props.badge_instance, 'json.id')} target="_blank">
+                                Add to Badgr
+                              </button>);
                 properties.push(
                     <li key="actions">
                         <div className="l-horizontal">
