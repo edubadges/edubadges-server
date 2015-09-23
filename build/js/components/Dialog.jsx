@@ -43,9 +43,7 @@ function DialogElement(reactComponent, dialogId) {
     dialogPolyfill.registerDialog(this.domNode);
 }
 DialogElement.prototype.update = function() {
-    React.render(this.reactComponent, this.domNode, () => {
-
-    });
+    React.render(this.reactComponent, this.domNode, function() {});
 };
 DialogElement.prototype.destroy = function() {
     React.unmountComponentAtNode(this.domNode);
