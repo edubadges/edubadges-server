@@ -3,6 +3,8 @@
   border: 0;
   border-radius: $border-radius;
   box-shadow: $layout-spacing/2 $layout-spacing $layout-spacing*2.5 $layout-spacing rgba(map-get($colors, solid-dark), .30);
+  margin-left: auto;
+  margin-right: auto;
   max-height: calc(100vh - #{($layout-spacing*12.5) + $layout-spacing*8});
   max-width: 865px;
   min-height: $layout-spacing*4;
