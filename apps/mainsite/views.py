@@ -5,8 +5,9 @@ from django.db import IntegrityError
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render_to_response
 from django.template.response import SimpleTemplateResponse
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import TemplateView
 
 from .models import EmailBlacklist
@@ -21,33 +22,18 @@ class SitemapView(TemplateView):
 #  Error Handler Views
 #
 ##
-class Error404(TemplateView):
-    template_name = '404.html'
-
-    def render_to_response(self, context, **response_kwargs):
-        response_kwargs.update({'status': 404})
-        return super(Error404, self).render_to_response(context, **response_kwargs)
-error404 = Error404.as_view()
+@xframe_options_exempt
+def error404(request):
+    return render_to_response('404.html', {
+        'STATIC_URL': getattr(settings, 'STATIC_URL', '/static/'),
+    })
 
 
-class Error500(TemplateView):
-    template_name = '500.html'
-    response_class = SimpleTemplateResponse  # Doesn't call context_processors (possible 500 error source)
-
-    def get_context_data(self, **kwargs):
-        # We must add STATIC_URL manually because context_processors aren't being called
-        return {
-            'STATIC_URL': getattr(settings, 'STATIC_URL', '/static/'),
-        }
-
-    def render_to_response(self, context, **response_kwargs):
-        response_kwargs.update({'status': 500})
-        return self.response_class(
-            template=self.get_template_names(),
-            context=context,
-            **response_kwargs
-        )
-error500 = Error500.as_view()
+@xframe_options_exempt
+def error500(request):
+    return render_to_response('500.html', {
+        'STATIC_URL': getattr(settings, 'STATIC_URL', '/static/'),
+    })
 
 
 @login_required(

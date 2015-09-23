@@ -82,6 +82,8 @@ if apps.is_installed('badgebook'):
     )
 
 
+handler404 = 'mainsite.views.error404'
+handler500 = 'mainsite.views.error500'
 # Test URLs to allow you to see these pages while DEBUG is True
 if getattr(settings, 'DEBUG_ERRORS', False):
     urlpatterns = patterns('mainsite.views',

@@ -3,6 +3,10 @@
   z-index: $z-index-low;
 }
 
-.wrap-solid {
+.wrap_-solid {
   background-color: map-get($colors, solid);
+}
+
+.wrap_-body {
+  background-color: map-get($colors, bodycopy);
 }

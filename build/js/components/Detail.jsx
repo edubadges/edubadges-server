@@ -45,6 +45,10 @@ var Detail = React.createClass({
                     </li>);
             }
 
+            var addToBadgr = (<button className="button_ button_-tertiary" href={"/earner/badges/new?url=" + _.get(this.props.badge_instance, 'json.id')} target="_blank">
+                                   Add to Badgr
+                               </button>);
+
             if (this.props.badge_instance) {
                 properties.unshift(
                     <li key="recipient">
@@ -62,9 +66,6 @@ var Detail = React.createClass({
                     <li key="actions">
                         <div className="l-horizontal">
                             <div>
-                                <button className="button_ button_-tertiary" href={"/earner/badges/new?url=" + _.get(this.props.badge_instance, 'json.id')} target="_blank">
-                                    Add to Badgr
-                                </button>
                                 <LinkedInButton url={_.get(this.props.badge_instance, 'json.id')} title="I earned a badge!" message={this.props.badge_class.name} className='button_ button_-tertiary'>
                                     Share on LinkedIn
                                 </LinkedInButton>

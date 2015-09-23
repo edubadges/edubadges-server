@@ -53,6 +53,12 @@ $z-index-high: 3;
   display: block;
 }
 
+@mixin dropdown {
+  background: map-get($colors, solid-light);
+  border-radius: $border-radius;
+  box-shadow: 0 1px $layout-spacing/2 0 rgba(map-get($colors, solid-dark), .3);
+}
+
 @keyframes rotate {
 
   from {
