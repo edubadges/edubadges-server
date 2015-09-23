@@ -91,7 +91,7 @@ var TopLinks = React.createClass({
         );
     }.bind(this));
     return (
-      <ul className="menu_">
+      <ul className={ this.props.headerSize == "small" ? "menu_ menu_-small": "menu_"}>
         {firstLevelItems}
       </ul>
       );
