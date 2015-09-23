@@ -123,6 +123,7 @@ var Dialog = React.createClass({
                 </div>
                 <div className="control_">
                     <button className="button_ button_-secondary" onClick={this.closeDialog}>Close</button>
+                    {this.props.actions}
                 </div>
             </div>);
     }

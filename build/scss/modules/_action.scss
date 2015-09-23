@@ -17,3 +17,9 @@
   font-weight: normal;
   text-transform: none;
 }
+
+.action_-tertiary {
+  color: map-get($colors, link);
+  font-weight: normal;
+  text-transform: none;
+}
