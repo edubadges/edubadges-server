@@ -4,8 +4,9 @@ import time
 from django.db import IntegrityError
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseServerError, HttpResponseNotFound
 from django.shortcuts import redirect, render_to_response
+from django.template import loader, TemplateDoesNotExist, Context
 from django.template.response import SimpleTemplateResponse
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import TemplateView
@@ -24,16 +25,24 @@ class SitemapView(TemplateView):
 ##
 @xframe_options_exempt
 def error404(request):
-    return render_to_response('404.html', {
+    try:
+        template = loader.get_template('404.html')
+    except TemplateDoesNotExist:
+        return HttpResponseServerError('<h1>Page not found (404)</h1>', content_type='text/html')
+    return HttpResponseNotFound(template.render(Context({
         'STATIC_URL': getattr(settings, 'STATIC_URL', '/static/'),
-    })
+    })))
 
 
 @xframe_options_exempt
 def error500(request):
-    return render_to_response('500.html', {
+    try:
+        template = loader.get_template('500.html')
+    except TemplateDoesNotExist:
+        return HttpResponseServerError('<h1>Server Error (500)</h1>', content_type='text/html')
+    return HttpResponseServerError(template.render(Context({
         'STATIC_URL': getattr(settings, 'STATIC_URL', '/static/'),
-    })
+    })))
 
 
 @login_required(
