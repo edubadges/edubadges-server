@@ -14,6 +14,7 @@ var Pagination = React.createClass({
             totalPages: undefined,
             totalCount: undefined,
             checkingProgress: true,
+            verboseName: undefined,
         };
     },
 
@@ -63,7 +64,7 @@ var Pagination = React.createClass({
                     </nav>
                     {progress}
                 </div>
-                <p>Displaying {idxFirst}-{idxLast} {totalCount}</p>
+                <p>Displaying {idxFirst}-{idxLast} {this.props.verboseName} {totalCount}</p>
             </div>);
     }
 });
