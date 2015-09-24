@@ -72,6 +72,7 @@ var DialogOpener = React.createClass({
     },
     componentDidMount: function() {
         this.dialog = new DialogElement(this.props.dialog, this.props.dialogId)
+        this.dialog.update();
     },
     componentWillUnmount: function() {
         this.dialog.destroy();
@@ -113,8 +114,9 @@ var Dialog = React.createClass({
     },
 
     render: function() {
+        var divProps = _.omit(this.props, ['dialogId', 'actions'])
         return (
-            <div>
+            <div {...divProps}>
                 <button className="dialog_-x-close" onClick={this.closeDialog}>
                     <span className="icon_ icon_-notext icon_-close">Close</span>
                 </button>
