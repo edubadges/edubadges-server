@@ -22,8 +22,11 @@ var Detail = React.createClass({
         var properties = [
             (<li key="criteria">
                     <h2 className="detail_-x-meta">Criteria</h2>
-                    <p><a href={_.get(this.props, 'badge_class.json.criteria')} target="_blank" title="Criteria to earn this badge">
-                        {_.get(this.props, 'badge_class.json.criteria')}
+                    <p>
+                        <a href={_.get(this.props, 'badge_class.json.criteria', _.get(this.props, 'badge_class.criteria'))}
+                          target="_blank" title="Criteria to earn this badge"
+                        >
+                        {_.get(this.props, 'badge_class.json.criteria', _.get(this.props, 'badge_class.criteria'))}
                     </a></p>
              </li>),
 
@@ -57,7 +60,7 @@ var Detail = React.createClass({
                 properties.unshift(
                     <li key="recipient">
                         <h2 className="detail_-x-meta">Recipient</h2>
-                        <p>{_.get(this.props, 'badge_instance.email')}</p>
+                        <p>{_.get(this.props, 'badge_instance.recipient_identifier')}</p>
                     </li>
                 );
                 properties.unshift(
