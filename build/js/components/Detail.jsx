@@ -60,7 +60,7 @@ var Detail = React.createClass({
                 properties.unshift(
                     <li key="recipient">
                         <h2 className="detail_-x-meta">Recipient</h2>
-                        <p>{_.get(this.props, 'badge_instance.recipient_identifier')}</p>
+                        <p>{_.get(this.props, 'badge_instance.recipient_identifier', _.get(this.props, 'badge_instance.email'))}</p>
                     </li>
                 );
                 properties.unshift(
