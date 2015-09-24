@@ -85,11 +85,17 @@ var DialogOpener = React.createClass({
         this.dialog.showDialog();
     },
 
+    handleClick: function(e) {
+        this.openDialog();
+        if (this.props.handleClick) {
+            this.props.handleClick(e)
+        }
+    },
 
     render: function() {
         var divProps = _.omit(this.props, 'dialog', 'dialogId');
         return (
-            <div onClick={this.openDialog} {...divProps}>
+            <div onClick={this.handleClick} {...divProps}>
                 {this.props.children}
             </div>);
 
