@@ -100,7 +100,8 @@ class BadgeCheckTests_V0_5(BadgeCheck):
 
     def __init__(self, *args, **kwargs):
         super(BadgeCheckTests_V0_5, self).__init__(*args, **kwargs)
-        self.warnings.extend(['check_issuer_and_assertion_domains_differ'])
+        self.warnings.extend(
+            ['check_issuing_platform_domain_against_assertion_host'])
 
     def validate(self):
         # Form-specific badge instance validation (reliance on URL input)
@@ -123,6 +124,11 @@ class BadgeCheckTests_V0_5(BadgeCheck):
 
 
 class BadgeCheckTests_V1_0(BadgeCheck):
+
+    def __init__(self, *args, **kwargs):
+        super(BadgeCheckTests_V1_0, self).__init__(*args, **kwargs)
+        self.warnings.extend(
+            ['check_issuing_platform_domain_against_assertion_host'])
 
     def check_components_have_same_domain(self):
         resources = filter(None, [self.badge_instance['verify']['url'],
