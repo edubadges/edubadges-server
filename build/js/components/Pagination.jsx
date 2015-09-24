@@ -47,7 +47,7 @@ var Pagination = React.createClass({
         var totalCount = this.props.totalCount ? "of "+this.props.totalCount : "";
         var totalPages = this.props.totalPages ? (<p>of {this.props.totalPages}</p>) : "";
 
-        var progress = this.props.checkingProgress ? (<p className="pagination_-x-status">Checking for new badges …</p>) : "";
+        var progress = this.props.checkingProgress ? (<p className="pagination_-x-status status_">Checking for new badges …</p>) : "";
 
         return (
             <div className="pagination_">
