@@ -55,6 +55,7 @@ var Detail = React.createClass({
                     </li>);
             }
 
+            var badgeName = _.get(this.props, 'badge_class.name', "Unknown");
             var addToBadgr;
             if (this.props.badge_instance) {
                 properties.unshift(
@@ -75,7 +76,7 @@ var Detail = React.createClass({
                               </button>);
 
                 var actions = this.props.actions ? this.props.actions : [
-                    (<LinkedInButton key="linkedin" url={_.get(this.props.badge_instance, 'json.id')} title="I earned a badge!" message={this.props.badge_class.name} className='button_ button_-tertiary'>
+                    (<LinkedInButton key="linkedin" url={_.get(this.props.badge_instance, 'json.id')} title="I earned a badge!" message={badgeName} className='button_ button_-tertiary'>
                         Share on LinkedIn
                     </LinkedInButton>),
                     (<FacebookButton key="facebook" url={_.get(this.props.badge_instance, 'json.id')} className='button_ button_-tertiary'>
@@ -95,10 +96,10 @@ var Detail = React.createClass({
 
             return (
                 <div className="dialog_-x_content">
-                    <Heading size="small" title={this.props.badge_class.name} subtitle={_.get(this.props, 'badge_class.json.description')}/>
+                    <Heading size="small" title={badgeName} subtitle={_.get(this.props, 'badge_class.json.description')}/>
                     <div className="detail_">
                         <div>
-                            <img src={_.get(this.props, 'badge_class.image')} width="224" height="224" alt={this.props.badge_class.name}/>
+                            <img src={_.get(this.props, 'badge_class.image')} width="224" height="224" alt={badgeName}/>
                         </div>
                         <ul>{properties}</ul>
                     </div>
