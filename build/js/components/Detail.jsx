@@ -21,7 +21,9 @@ var Detail = React.createClass({
         var properties = [
             (<li key="criteria">
                     <h2 className="detail_-x-meta">Criteria</h2>
-                    <p><a href={this.props.badge_class.json.criteria} target="_blank" title="Criteria to earn this badge">{this.props.badge_class.json.criteria}</a></p>
+                    <p><a href={_.get(this.props, 'badge_class.json.criteria')} target="_blank" title="Criteria to earn this badge">
+                        {_.get(this.props, 'badge_class.json.criteria')}
+                    </a></p>
              </li>),
 
             (<li key="issuer">
@@ -29,19 +31,23 @@ var Detail = React.createClass({
                     <p>{this.props.issuer.name}</p>
              </li>)];
 
-            if (this.props.issuer.url) {
+            if (_.get(this.props, 'issuer.json.url')) {
                 properties.push(
                     <li key="website">
                         <h2 className="detail_-x-meta">Issuer Website</h2>
-                        <p><a href={this.props.issuer.url} target="_blank" title="Website of badge issuer">{this.props.issuer.url}</a></p>
+                        <p><a href={_.get(this.props, 'issuer.json.url')} target="_blank" title="Website of badge issuer">
+                            {_.get(this.props, 'issuer.json.url')}
+                        </a></p>
                     </li>);
             }
 
-            if (this.props.issuer.email) {
+            if (_.get(this.props, 'issuer.json.email')) {
                 properties.push(
                     <li key="contact">
                         <h2 className="detail_-x-meta">Issuer Contact</h2>
-                        <p><a href={"mailto:"+this.props.issuer.email} target="_blank" title="Contact email for issuer">{this.props.issuer.email}</a></p>
+                        <p><a href={"mailto:"+_.get(this.props, 'issuer.json.email')} target="_blank" title="Contact email for issuer">
+                            {_.get(this.props, 'issuer.json.email')}
+                        </a></p>
                     </li>);
             }
 
@@ -50,7 +56,7 @@ var Detail = React.createClass({
                 properties.unshift(
                     <li key="recipient">
                         <h2 className="detail_-x-meta">Recipient</h2>
-                        <p>{this.props.badge_instance.email}</p>
+                        <p>{_.get(this.props, 'badge_instance.email')}</p>
                     </li>
                 );
                 properties.unshift(
@@ -80,10 +86,10 @@ var Detail = React.createClass({
 
             return (
                 <div className="dialog_-x_content">
-                    <Heading size="small" title={this.props.badge_class.name} subtitle={this.props.badge_class.description}/>
+                    <Heading size="small" title={this.props.badge_class.name} subtitle={_.get(this.props, 'badge_class.json.description')}/>
                     <div className="detail_">
                         <div>
-                            <img src={this.props.badge_class.image} width="224" height="224" alt={this.props.badge_class.name}/>
+                            <img src={_.get(this.props, 'badge_class.image')} width="224" height="224" alt={this.props.badge_class.name}/>
                         </div>
                         <ul>{properties}</ul>
                     </div>
