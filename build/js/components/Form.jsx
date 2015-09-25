@@ -27,7 +27,14 @@ var InputGroup = React.createClass({
     inputType: ReactPropTypes.string,
     selectOptions: ReactPropTypes.arrayOf(ReactPropTypes.string),
     handleChange: ReactPropTypes.func,
-    placeholder: ReactPropTypes.string
+    placeholder: ReactPropTypes.string,
+    hint: ReactPropTypes.string,
+    required: ReactPropTypes.bool,
+  },
+  getDefaultProps: function() {
+    return {
+      required: false,
+    }
   },
   classNameForInput: function(){
     var classes = {
@@ -64,10 +71,12 @@ var InputGroup = React.createClass({
       );
     }
   },
+
   render: function(){
+    var hint = this.props.hint ? (<span className="hint">{this.props.hint}</span>) : "";
     return (
         <div className="form_-x-field">
-          <label htmlFor={this.props.name}>{this.props.label}</label>
+          <label htmlFor={this.props.name}>{this.props.label} {hint}</label>
           {this.theInput()}
         </div>);
   }
@@ -75,6 +84,11 @@ var InputGroup = React.createClass({
 
 /* A droppable zone for image files. Must send in handler(file) for when images are dropped and set image prop with that file from above. */
 var ImageDropbox = React.createClass({
+  getDefaultProps: function() {
+    return {
+      'hint': "Tap here to upload image",
+    }
+  },
   validateFileType: function(file){
     if (file instanceof File && (file.type && (file.type == 'image/png' || file.type == 'image/svg+xml')))
       return true;
@@ -90,7 +104,7 @@ var ImageDropbox = React.createClass({
     return (
         <div className="form_-x-field">
             <Dropzone onDrop={this.fileHandler} style={dropzoneStyle} activeClassName='is-active' className={'form_-x-imagefield dropzone'+ (this.props.imageData ? ' is-uploaded' : '')}>
-                {this.props.imageData ? <img src={this.props.imageData} /> : <p>Tap here to upload image</p>}
+                {this.props.imageData ? <img src={this.props.imageData} /> : (<p>{this.props.hint}</p>)}
             </Dropzone>
         </div>
     );
@@ -208,7 +222,8 @@ BasicAPIForm = React.createClass({
           var value = this.state[fieldKey];
           var label = this.props.fieldsMeta[fieldKey].label;
           var required = this.props.fieldsMeta[fieldKey].required;
-          
+          var hint = this.props.fieldsMeta[fieldKey].hint;
+
           if (inputType == 'image'){
             return (
               <div className="form_-x-field" key={this.props.formId + "-form-field-" + i + '-' + j}>
@@ -217,6 +232,7 @@ BasicAPIForm = React.createClass({
                   image={this.state.image}
                   imageData={this.state.imageData}
                   imageDescription={this.props.formType == "IssuerCreateUpdateForm" ? "Image": "Badge"}
+                  hint={hint}
                 />
               </div>
             );
@@ -230,6 +246,7 @@ BasicAPIForm = React.createClass({
                 handleChange={this.handleChange}
                 handleBlur={this.handleBlur}
                 label={label}
+                hint={hint}
               />
             );
           }
@@ -241,6 +258,7 @@ BasicAPIForm = React.createClass({
                 handleChange={this.handleChange}
                 handleBlur={this.handleBlur}
                 label={label}
+                hint={hint}
               />
             );
           }
@@ -253,6 +271,7 @@ BasicAPIForm = React.createClass({
                 value={value} label={label} 
                 handleChange={this.handleChange} 
                 handleBlur={this.handleBlur}
+                hint={hint}
               />
             );
           }
