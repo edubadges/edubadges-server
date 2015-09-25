@@ -122,7 +122,7 @@ FormConfigStore.getConfig = function(formType, overrides, context){
     },
     EarnerBadgeImportForm: {
       formId: "EarnerBadgeImportForm",
-      helpText: "Fill out one of the following fields to upload your badge. Usually, the baked badge image is available.",
+      helpText: "Verify an Open Badge and add it to your library by uploading a badge image or entering its URL.",
       fieldsMeta: {
         image: {inputType: "image", label: "Badge Image", required: false, filename: "earned_badge.png"},
         divider: {inputType: "divider", label: "OR", required: false},
