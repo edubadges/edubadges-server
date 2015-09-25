@@ -6,7 +6,7 @@
     font-size: $font-size-small;
     margin-bottom: $layout-spacing;
 
-    span {
+    .hint {
       color: map-get($colors, bodycopy-faint);
     }
 
