@@ -130,7 +130,12 @@ class AbstractBadgeInstance(AbstractComponent):
         abstract = True
 
     def __unicode__(self):
-        return "%s issued to %s" % (self.badgeclass.name,
+        if self.badgeclass:
+            badge_class_name = self.badgeclass.name
+        else:
+            badge_class_name = self.json['badge']['name']
+
+        return "%s issued to %s" % (badge_class_name,
                                     self.recipient_identifier,)
 
     def get_absolute_url(self):
