@@ -11,10 +11,12 @@ var Detail = React.createClass({
         issuer: React.PropTypes.object.isRequired,
         badge_class: React.PropTypes.object.isRequired,
         badge_instance: React.PropTypes.object,
+        recipient: React.PropTypes.string,
     },
     getDefaultProps: function() {
         return {
-            badge_instance: undefined
+            badge_instance: undefined,
+            recipient: undefined
         };
     },
 
@@ -61,7 +63,7 @@ var Detail = React.createClass({
                 properties.unshift(
                     <li key="recipient">
                         <h2 className="detail_-x-meta">Recipient</h2>
-                        <p>{_.get(this.props, 'badge_instance.recipient_identifier', _.get(this.props, 'badge_instance.email'))}</p>
+                        <p>{this.props.recipient ? this.props.recipient : _.get(this.props, 'badge_instance.recipient_identifier', _.get(this.props, 'badge_instance.email'))}</p>
                     </li>
                 );
                 properties.unshift(
