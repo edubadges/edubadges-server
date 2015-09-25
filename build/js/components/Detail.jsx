@@ -21,6 +21,13 @@ var Detail = React.createClass({
     },
 
     render: function() {
+        var issuerName = (_.get(this.props, 'issuer.json.url')) ?
+            (<a href={_.get(this.props, 'issuer.json.url')} target="_blank" title="Website of badge issuer">
+                {_.get(this.props, 'issuer.name')}
+            </a>) : this.props.issuer.name;
+        var issuerEmail = (_.get(this.props, 'issuer.json.email'))  ?
+            "("+_.get(this.props, 'issuer.json.email')+")" : "";
+
         var properties = [
             (<li key="criteria">
                     <h2 className="detail_-x-meta">Criteria</h2>
@@ -34,28 +41,8 @@ var Detail = React.createClass({
 
             (<li key="issuer">
                     <h2 className="detail_-x-meta">Issuer</h2>
-                    <p>{this.props.issuer.name}</p>
+                    <p>{issuerName} {issuerEmail}</p>
              </li>)];
-
-            if (_.get(this.props, 'issuer.json.url')) {
-                properties.push(
-                    <li key="website">
-                        <h2 className="detail_-x-meta">Issuer Website</h2>
-                        <p><a href={_.get(this.props, 'issuer.json.url')} target="_blank" title="Website of badge issuer">
-                            {_.get(this.props, 'issuer.json.url')}
-                        </a></p>
-                    </li>);
-            }
-
-            if (_.get(this.props, 'issuer.json.email')) {
-                properties.push(
-                    <li key="contact">
-                        <h2 className="detail_-x-meta">Issuer Contact</h2>
-                        <p><a href={"mailto:"+_.get(this.props, 'issuer.json.email')} target="_blank" title="Contact email for issuer">
-                            {_.get(this.props, 'issuer.json.email')}
-                        </a></p>
-                    </li>);
-            }
 
             var badgeName = _.get(this.props, 'badge_class.name', "Unknown");
             var addToBadgr;
