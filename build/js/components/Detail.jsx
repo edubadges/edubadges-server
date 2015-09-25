@@ -24,7 +24,7 @@ var Detail = React.createClass({
         var issuerName = (_.get(this.props, 'issuer.json.url')) ?
             (<a href={_.get(this.props, 'issuer.json.url')} target="_blank" title="Website of badge issuer">
                 {_.get(this.props, 'issuer.name')}
-            </a>) : this.props.issuer.name;
+            </a>) : _.get(this.props, 'issuer.name', "Unknown");
         var issuerEmail = (_.get(this.props, 'issuer.json.email'))  ?
             "("+_.get(this.props, 'issuer.json.email')+")" : "";
 
