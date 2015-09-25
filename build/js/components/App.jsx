@@ -20,16 +20,20 @@ var MainComponent = require ('../components/MainComponent.jsx');
 var SecondaryMenu = require('../components/SecondaryMenu.jsx');
 var BreadCrumbs = require('../components/BreadCrumbs.jsx');
 var ActionBar = require('../components/ActionBar.jsx').ActionBar;
+var Heading = require('../components/Heading.jsx').Heading;
+var Dialog = require('../components/Dialog.jsx').Dialog;
+var DialogOpener = require('../components/Dialog.jsx').DialogOpener;
+var Button = require('../components/Button.jsx').Button;
 var HeadingBar = require('../components/ActionBar.jsx').HeadingBar;
 var ActivePanel = require('../components/ActivePanel.jsx');
 var OpenBadgeList = require('../components/OpenBadgeList.jsx');
 var OpenBadge = require('../components/BadgeDisplay.jsx').OpenBadge;
 var EarnerBadgeForm = require('../components/Form.jsx').EarnerBadgeForm;
-var IssuerNotificationForm = require('../components/Form.jsx').IssuerNotificationForm
+var IssuerNotificationForm = require('../components/Form.jsx').IssuerNotificationForm;
 var IssuerList = require('../components/IssuerDisplay.jsx').IssuerList;
 var IssuerDisplay = require('../components/IssuerDisplay.jsx').IssuerDisplay;
 var BadgeClassDetail = require('../components/BadgeClassDisplay.jsx').BadgeClassDetail;
-var BadgeInstanceList = require('../components/BadgeInstanceDisplay.jsx').BadgeInstanceList
+var BadgeInstanceList = require('../components/BadgeInstanceDisplay.jsx').BadgeInstanceList;
 var EarnerBadgeList = require('../components/EarnerBadgeList.jsx');
 var EarnerCollectionList = require('../components/EarnerBadgeCollection.jsx').EarnerCollectionList;
 var EarnerCollectionDetail = require('../components/EarnerBadgeCollection.jsx').EarnerCollectionDetail;
@@ -222,20 +226,44 @@ var App = React.createClass({
   },
 
   earnerBadges: function(params){
+    function handleFormSubmit(formId, formType) {
+        var formData = FormStore.getFormData(formId);
+        if (formData.formState.actionState !== "waiting") {
+            FormActions.submitForm(formId, formType);
+        }
+    }
+
     var viewId = "earnerBadges",
         currentPage=parseInt(_.get(params, 'page')) || 1,
         nextPage = currentPage + 1;
     dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
 
+    var formProps = FormConfigStore.getConfig("EarnerBadgeImportForm");
+    FormStore.getOrInitFormData("EarnerBadgeImportForm", formProps);
+
+    var actions=[
+        (<button type="submit" key="submit" className="button_ button_-primary" onClick={function() { handleFormSubmit("EarnerBadgeImportForm", "EarnerBadgeImportForm"); }}>Import Badge</button>)
+    ];
+    var dialog = (
+        <Dialog dialogId="import-badge" actions={actions} className="closable">
+            <Heading size="small"
+                        title="Create New Badge"
+                        subtitle="Verify an Open Badge and add it to your library by uploading a badge image or entering its URL."/>
+
+            <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
+        </Dialog>);
+
     var mainComponent = (
       <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet} >
-          <ActionBar
+          <Heading
+            size="large"
             title="My Badges"
-            viewId={viewId}
-            items={this.props.actionBars[viewId] || []}
-            updateActivePanel={this.updateActivePanel}
-            activePanel={this.state.activePanels[viewId]}
-          />
+            subtitle="Import your Open Badges with Badgr! Upload images to verify your badges, and then add them to collections to share with your friends and colleagues."
+            rule={true}>
+                <DialogOpener dialog={dialog} dialogId="import-badge">
+                    <Button label="Import Badge" propagateClick={true}/>
+                </DialogOpener>
+          </Heading>
         <ActivePanel
           modal={true}
           viewId={viewId}

@@ -122,10 +122,9 @@ FormConfigStore.getConfig = function(formType, overrides, context){
     },
     EarnerBadgeImportForm: {
       formId: "EarnerBadgeImportForm",
-      helpText: "Verify an Open Badge and add it to your library by uploading a badge image or entering its URL.",
+      //helpText: "Verify an Open Badge and add it to your library by uploading a badge image or entering its URL.",
       fieldsMeta: {
         image: {inputType: "image", label: "Badge Image", required: false, filename: "earned_badge.png"},
-        divider: {inputType: "divider", label: "OR", required: false},
         url: {inputType: "text", label: "Assertion URL", required: false},
         assertion: {inputType: "textarea", label: "Assertion JSON", required: false}
       },
@@ -139,7 +138,7 @@ FormConfigStore.getConfig = function(formType, overrides, context){
       },
       columns: [
         { fields: ['url', 'assertion'], className:'' },
-        { fields: ['image', 'divider'], className:'' },
+        { fields: ['image'], className:'' },
       ],
       formControls: {
         "submit": {"label": "Import Badge"}
