@@ -55,10 +55,14 @@ BadgeInstanceList = React.createClass({
       this.props.perPage + this.props.perPage * (this.props.currentPage-1)
     ).map(function(instance, i){
       var properties = {
-        email: instance.email,
+        email: instance.recipient_identifier,
         slug: instance.slug,
         issuedOn: instance.json.issuedOn,
         key: "instance-" + i
+      };
+
+      if (instance.award) {
+        properties.email = "Student email not shown";
       }
 
       if (this.props.display == 'list'){

@@ -188,6 +188,17 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
         representation = super(BadgeInstanceSerializer, self).to_representation(instance)
         representation['issuer'] = settings.HTTP_ORIGIN+reverse('issuer_json', kwargs={'slug': instance.cached_issuer.slug})
         representation['badge_class'] = settings.HTTP_ORIGIN+reverse('badgeclass_json', kwargs={'slug': instance.cached_badgeclass.slug})
+
+        # TODO: only bother doing this if badgebook is in INSTALLED_APPS
+        from badgebook.models import BadgeObjectiveAward
+        from badgebook.serializers import BadgeObjectiveAwardSerializer
+        try:
+            award = BadgeObjectiveAward.cached.get(badge_instance_id=instance.id)
+        except BadgeObjectiveAward.DoesNotExist:
+            representation['award'] = None
+        else:
+            representation['award'] = BadgeObjectiveAwardSerializer(award).data
+
         return representation
 
     def create(self, validated_data, **kwargs):

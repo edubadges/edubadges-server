@@ -489,7 +489,7 @@ var App = React.createClass({
     var viewId = "badgeClassDetail-" + badgeClassSlug;
     var issuer = APIStore.getFirstItemByPropertyValue('issuer_issuers', 'slug', issuerSlug);
     var badgeClass = APIStore.getFirstItemByPropertyValue('issuer_badgeclasses', 'slug', badgeClassSlug);
-    var badgeInstances = APIStore.filter('issuer_badgeinstances', 'badgeclass', badgeClass.json.id);
+    var badgeInstances = APIStore.filter('issuer_badgeinstances', 'badge_class', badgeClass.json.id);
     var instanceRequestStatus = null;
 
     var breadCrumbs = [

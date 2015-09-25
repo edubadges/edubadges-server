@@ -1,4 +1,5 @@
 import json
+from django.conf import settings
 
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
@@ -36,6 +37,7 @@ class EarnerPortal(TemplateView):
                 'earner_badges': user_badges,
                 'installed_apps': installed_apps_list(),
                 'user': UserProfileField(self.request.user, context=kwargs).data,
+                'STATIC_URL': settings.STATIC_URL
             }),
         })
 
