@@ -70,7 +70,7 @@ FormConfigStore.getConfig = function(formType, overrides, context){
         name: {inputType: "text", label: "Badge Name", required: true},
         description: {inputType: "textarea", label: "Badge Description", required: true},
         criteria: {inputType: "textarea", label: "Criteria URL or text", required: true},
-        image: {inputType: "image", label: "Badge Image (Square PNG)", required: false, filename: "badge_image.png"}
+        image: {inputType: "image", label: "Badge Image (Square PNG)", required: true, filename: "badge_image.png"}
       },
       defaultValues: {
         name: "",
