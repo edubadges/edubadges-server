@@ -49,16 +49,16 @@ var InputGroup = React.createClass({
   theInput: function(){
     if (this.props.inputType == "filebutton"){
       // TODO: Add accept='image/*' ??
-      return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="file" onChange={this.props.handleChange} /> );
+      return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="file" onChange={this.props.handleChange} required={this.props.required} /> );
     }
     else if (this.props.inputType == "text"){
-      return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="text" onChange={this.props.handleChange} onBlur={this.props.handleBlur} /> );
+      return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="text" onChange={this.props.handleChange} onBlur={this.props.handleBlur} required={this.props.required} /> );
     }
     else if (this.props.inputType == "textarea"){
-      return ( <textarea name={this.props.name} value={this.props.value} className={this.classNameForInput()} onChange={this.props.handleChange} onBlur={this.props.handleBlur} /> );
+      return ( <textarea name={this.props.name} value={this.props.value} className={this.classNameForInput()} onChange={this.props.handleChange} onBlur={this.props.handleBlur} required={this.props.required} /> );
     }
     else if (this.props.inputType == "checkbox"){
-      return ( <input type="checkbox" name={this.props.name} checked={this.props.value} className={this.classNameForInput()} onChange={this.props.handleChange} /> );
+      return ( <input type="checkbox" name={this.props.name} checked={this.props.value} className={this.classNameForInput()} onChange={this.props.handleChange} required={this.props.required} /> );
     }
     else if (this.props.inputType == "select") {
       var selectOptions = this.props.selectOptions.map(function(option, index){
@@ -103,7 +103,7 @@ var ImageDropbox = React.createClass({
     var dropzoneStyle = {};
     return (
         <div className="form_-x-field">
-            <Dropzone onDrop={this.fileHandler} style={dropzoneStyle} activeClassName='is-active' className={'form_-x-imagefield dropzone'+ (this.props.imageData ? ' is-uploaded' : '')}>
+            <Dropzone onDrop={this.fileHandler} style={dropzoneStyle} activeClassName='is-active' className={'form_-x-imagefield dropzone'+ (this.props.imageData ? ' is-uploaded' : '')} required={this.props.required}>
                 {this.props.imageData ? <img src={this.props.imageData} /> : (<p>{this.props.hint}</p>)}
             </Dropzone>
         </div>
@@ -233,6 +233,7 @@ BasicAPIForm = React.createClass({
                   imageData={this.state.imageData}
                   imageDescription={this.props.formType == "IssuerCreateUpdateForm" ? "Image": "Badge"}
                   hint={hint}
+                  required={required}
                 />
               </div>
             );
@@ -247,6 +248,7 @@ BasicAPIForm = React.createClass({
                 handleBlur={this.handleBlur}
                 label={label}
                 hint={hint}
+                required={required}
               />
             );
           }
@@ -259,6 +261,7 @@ BasicAPIForm = React.createClass({
                 handleBlur={this.handleBlur}
                 label={label}
                 hint={hint}
+                required={required}
               />
             );
           }
@@ -272,6 +275,7 @@ BasicAPIForm = React.createClass({
                 handleChange={this.handleChange} 
                 handleBlur={this.handleBlur}
                 hint={hint}
+                required={required}
               />
             );
           }
