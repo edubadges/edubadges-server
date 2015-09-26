@@ -105,7 +105,14 @@ var DialogOpener = React.createClass({
 
 var Dialog = React.createClass({
     propTypes: {
-        dialogId: React.PropTypes.string.isRequired
+        dialogId: React.PropTypes.string.isRequired,
+        hideControls: React.PropTypes.bool
+    },
+    getDefaultProps: function() {
+        return {
+            hideControls: false,
+        }
+
     },
 
     closeDialog: function() {
@@ -121,6 +128,11 @@ var Dialog = React.createClass({
 
     render: function() {
         var divProps = _.omit(this.props, ['dialogId', 'actions'])
+        var controls = this.props.hideControls ? "" : (
+            <div className="control_">
+                <button className="button_ button_-secondary" onClick={this.closeDialog}>Close</button>
+            {this.props.actions}
+            </div>);
         return (
             <div {...divProps}>
                 <button className="dialog_-x-close" onClick={this.closeDialog}>
@@ -129,10 +141,7 @@ var Dialog = React.createClass({
                 <div className="dialog_-x-content">
                     {this.props.children}
                 </div>
-                <div className="control_">
-                    <button className="button_ button_-secondary" onClick={this.closeDialog}>Close</button>
-                    {this.props.actions}
-                </div>
+                {controls}
             </div>);
     }
 

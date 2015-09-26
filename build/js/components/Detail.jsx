@@ -5,6 +5,7 @@ var _ = require('lodash');
 var FacebookButton = require("../components/ShareButtons.jsx").FacebookButton;
 var LinkedInButton = require("../components/ShareButtons.jsx").LinkedInButton;
 var Heading = require('../components/Heading.jsx').Heading;
+var Step = require('../components/Step.jsx').Step;
 
 var Detail = React.createClass({
     proptypes: {
@@ -12,11 +13,13 @@ var Detail = React.createClass({
         badge_class: React.PropTypes.object.isRequired,
         badge_instance: React.PropTypes.object,
         recipient: React.PropTypes.string,
+        showUnearnedStep: React.PropTypes.bool,
     },
     getDefaultProps: function() {
         return {
             badge_instance: undefined,
-            recipient: undefined
+            recipient: undefined,
+            showUnearnedStep: false,
         };
     },
 
@@ -44,7 +47,8 @@ var Detail = React.createClass({
                     <p>{issuerName} {issuerEmail}</p>
              </li>)];
 
-            var badgeName = _.get(this.props, 'badge_class.name', "Unknown");
+            var badgeName = _.get(this.props, 'badge_class.name', "Unknown Badge");
+            var stepName = this.props.objectiveName || badgeName;
             var addToBadgr;
             if (this.props.badge_instance) {
                 properties.unshift(
@@ -53,11 +57,11 @@ var Detail = React.createClass({
                         <p>{this.props.recipient ? this.props.recipient : _.get(this.props, 'badge_instance.recipient_identifier', _.get(this.props, 'badge_instance.email'))}</p>
                     </li>
                 );
+
+                var dateString = moment(this.props.badge_instance.json.issuedOn).format('MMMM D, YYYY');
                 properties.unshift(
                     <li key="issued">
-                        <h2 className="detail_-x-meta">Issue Date</h2>
- 
-                        <p>{moment(this.props.badge_instance.json.issuedOn).format('MMMM Do YYYY, h:mm a')}</p>
+                        <Step title={stepName} subtitle={"Earned "+dateString} earned={true}/>
                     </li>
                 );
                 addToBadgr = (<button className="button_ button_-tertiary" href={"/earner/badges/new?url=" + _.get(this.props.badge_instance, 'json.id')} target="_blank">
@@ -79,6 +83,13 @@ var Detail = React.createClass({
                                 {actions}
                             </div>
                         </div>
+                    </li>
+                );
+            }
+            else if (this.props.showUnearnedStep) {
+                properties.unshift(
+                    <li key="unissued">
+                        <Step title={stepName} subtitle="Not earned" earned={false}/>
                     </li>
                 );
             }
