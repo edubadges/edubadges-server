@@ -20,9 +20,9 @@ RouteStore.addListener = function(type, callback) {
   RouteStore.on(type, callback);
 };
 
-// FormStore.removeListener = function(type, callback) {
-//   FormStore.removeListener(type, callback);
-// };
+FormStore.removeStoreListener = function(type, callback) {
+   FormStore.removeListener(type, callback);
+ };
 
 // Register with the dispatcher
 RouteStore.dispatchToken = appDispatcher.register(function(payload){
@@ -47,5 +47,5 @@ RouteStore.dispatchToken = appDispatcher.register(function(payload){
 module.exports = {
   getCurrentRoute: RouteStore.getCurrentRoute,
   addListener: RouteStore.addListener,
-  removeListener: RouteStore.removeListener
+  removeListener: RouteStore.removeStoreListener
 }

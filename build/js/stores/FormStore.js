@@ -75,9 +75,9 @@ FormStore.addListener = function(type, callback) {
   FormStore.on(type, callback);
 };
 
-// FormStore.removeListener = function(type, callback) {
-//   FormStore.removeListener(type, callback);
-// };
+ FormStore.removeStoreListener = function(type, callback) {
+   FormStore.removeListener(type, callback);
+ };
 
 
 
@@ -126,7 +126,7 @@ FormStore.dispatchToken = Dispatcher.register(function(payload){
 
 module.exports = {
   addListener: FormStore.addListener,
-  removeListener: FormStore.removeListener,
+  removeListener: FormStore.removeStoreListener,
   getCollection: FormStore.getCollection,
   getFormData: FormStore.getFormData,
   getFormState: FormStore.getFormState,
