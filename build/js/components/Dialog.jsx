@@ -40,7 +40,11 @@ function DialogElement(reactComponent, dialogId) {
     this.domNode.id = dialogId;
     document.body.appendChild(this.domNode);
 
-    dialogPolyfill.registerDialog(this.domNode);
+    if (!this.domNode.showModal)
+        dialogPolyfill.registerDialog(this.domNode);
+}
+DialogElement.prototype.attach = function() {
+
 }
 DialogElement.prototype.update = function() {
     React.render(this.reactComponent, this.domNode, function() {});
@@ -111,7 +115,8 @@ var Dialog = React.createClass({
     closeDialog: function() {
         var dialog = document.getElementById(this.props.dialogId)
         if (dialog) {
-            dialogPolyfill.registerDialog(dialog);
+            if (!dialog.showModal)
+                dialogPolyfill.registerDialog(dialog);
             dialog.close();
             dialog.classList.remove('is-visible');
         } else {

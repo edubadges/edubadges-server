@@ -10,7 +10,7 @@ var APIActions = require('../actions/api');
 
 function getCookie(name) {
     var cookieValue = null;
-    if (document.cookie && document.cookie != '') {
+    if (document.cookie) {
         var cookies = document.cookie.split(';');
         for (var i = 0; i < cookies.length; i++) {
             var cookie = cookies[i].trim();
@@ -401,6 +401,17 @@ APIStore.postForm = function(fields, values, context, requestContext){
       });
     }
     else{
+      if (!!context.updateFunction){
+        newObject = context.updateFunction(response, APIStore);
+        APIStore.emit('DATA_UPDATED');
+        if (context.formId){
+          APIActions.APIFormResultSuccess({
+            formId: context.formId,
+            message: {type: 'success', content: context.successMessage},
+            result: newObject
+          })
+        }
+      }
       var newObject = APIStore.addCollectionItem(context.apiCollectionKey, JSON.parse(response.text), (context.method == 'PUT'));
       if (newObject){
         APIStore.emit('DATA_UPDATED');
@@ -543,5 +554,5 @@ module.exports = {
   getFirstItemByPropertyValue: APIStore.getFirstItemByPropertyValue,
   filter: APIStore.filter,
   fetchCollection: APIStore.fetchCollection,
-  buildUrlWithContext: APIStore.buildUrlWithContext,
-}
+  buildUrlWithContext: APIStore.buildUrlWithContext
+};
