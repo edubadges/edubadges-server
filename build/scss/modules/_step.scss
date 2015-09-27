@@ -1,6 +1,5 @@
 .step_ {
   align-items: center;
-  display: flex;
   font-size: $font-size-small;
   font-weight: 600;
   height: 75px;
@@ -19,6 +18,12 @@
     position: absolute;
     top: calc(50% - 16px);
     width: 32px;
+  }
+
+  p {
+    color: map-get($colors, bodycopy-faint);
+    font-size: $font-size-small-2x;
+    font-weight: normal;
   }
 
 }
