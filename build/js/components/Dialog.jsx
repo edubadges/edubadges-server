@@ -75,24 +75,21 @@ var DialogOpener = React.createClass({
         dialogId: React.PropTypes.string.isRequired
     },
     componentDidMount: function() {
-        this.dialog = new DialogElement(this.props.dialog, this.props.dialogId)
+        this.dialog = new DialogElement(this.props.dialog, this.props.dialogId);
         this.dialog.update();
     },
     componentWillUnmount: function() {
         this.dialog.destroy();
     },
-    componentDidUpdate: function() {
+    componentDidUpdate: function(prevProps, prevState) {
         this.dialog.update();
     },
 
-    openDialog: function() {
-        this.dialog.showDialog();
-    },
-
     handleClick: function(e) {
-        this.openDialog();
+        this.dialog.showDialog();
+
         if (this.props.handleClick) {
-            this.props.handleClick(e)
+            this.props.handleClick(e);
         }
     },
 
