@@ -16,6 +16,7 @@ var Detail = React.createClass({
         badge_instance: React.PropTypes.object,
         recipient: React.PropTypes.string,
         updateOn: React.PropTypes.string,
+        updateStore: React.PropTypes.object,
         actionGenerator: React.PropTypes.func,
         showUnearnedStep: React.PropTypes.bool
     },
@@ -28,11 +29,12 @@ var Detail = React.createClass({
         };
     },
     componentDidMount: function(){
-        if (this.props.updateOn)
-            FormStore.addListener(this.props.updateOn, this.handleUpdate);
+        if (this.props.updateOn && this.props.updateStore && this.props.updateStore.addListener)
+            this.props.updateStore.addListener(this.props.updateOn, this.handleUpdate);
     },
     componentWillUnmount: function(){
-        FormStore.removeListener(this.props.updateOn, this.handleUpdate);
+        if (this.props.updateOn && this.props.updateStore && this.props.updateStore.removeListener)
+            this.props.updateStore.removeListener(this.props.updateOn, this.handleUpdate);
     },
     handleUpdate: function(){
         this.forceUpdate();
