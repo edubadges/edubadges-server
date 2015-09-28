@@ -1,11 +1,15 @@
 {
-  "name": "BadgeTrust",
-  "description": "BadgeTrust is a 3-facet application to enable rich badge ecosystem participation by issuers, earners, and consumers.",
-  "version": "0.0.2",
+  "name": "Badgr",
+  "description": "Badgr provides an API for issuing Open Badges (http://openbadges.org). Providing integrated badge management and sharing for badge earners and tools for inspection, exploration and discovery of Open Badges and a world of learning opportunities."
+  "version": "1.0.0-rc1",
   "keywords": [
-    "open badges"
+    "badges",
+    "openbadges",
+    "open badges",
+    "lti",
+    "canvas"
   ],
-  "homepage": "http://concentricsky.com",
+  "homepage": "https://badgr.io",
   "dependencies": {
     "react": "0.13.x",
     "lodash": "~3.10.0"
