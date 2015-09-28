@@ -10,7 +10,7 @@ var APIActions = require('../actions/api');
 
 function getCookie(name) {
     var cookieValue = null;
-    if (document.cookie && document.cookie != '') {
+    if (document.cookie) {
         var cookies = document.cookie.split(';');
         for (var i = 0; i < cookies.length; i++) {
             var cookie = cookies[i].trim();
@@ -141,7 +141,7 @@ APIStore.addListener = function(type, callback) {
 };
 
 // wrap eventemitter so it gets the same object as when addListener was called
-APIStore.removeApiListener = function(type, callback) {
+APIStore.removeStoreListener = function(type, callback) {
   APIStore.removeListener(type, callback)
 }
 
@@ -402,6 +402,17 @@ APIStore.postForm = function(fields, values, context, requestContext){
       });
     }
     else{
+      if (!!context.updateFunction){
+        newObject = context.updateFunction(response, APIStore);
+        APIStore.emit('DATA_UPDATED');
+        if (context.formId){
+          APIActions.APIFormResultSuccess({
+            formId: context.formId,
+            message: {type: 'success', content: context.successMessage},
+            result: newObject
+          })
+        }
+      }
       var newObject = APIStore.addCollectionItem(context.apiCollectionKey, JSON.parse(response.text), (context.method == 'PUT'));
       if (newObject){
         APIStore.emit('DATA_UPDATED');
@@ -536,7 +547,7 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
 
 module.exports = {
   addListener: APIStore.addListener,
-  removeListener: APIStore.removeApiListener,
+  removeListener: APIStore.removeStoreListener,
   hasAlreadyRequested: APIStore.hasAlreadyRequested,
   collectionsExist: APIStore.collectionsExist,
   getCollection: APIStore.getCollection,
@@ -544,5 +555,5 @@ module.exports = {
   getFirstItemByPropertyValue: APIStore.getFirstItemByPropertyValue,
   filter: APIStore.filter,
   fetchCollection: APIStore.fetchCollection,
-  buildUrlWithContext: APIStore.buildUrlWithContext,
-}
+  buildUrlWithContext: APIStore.buildUrlWithContext
+};

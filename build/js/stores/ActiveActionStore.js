@@ -47,9 +47,9 @@ ActiveActionStore.getAllActiveActions = function() {
 ActiveActionStore.addListener = function(type, callback) {
   ActiveActionStore.on(type, callback);
 };
-// ActiveActionStore.removeListener = function(type, callback) {
-//   ActiveActionStore.removeListener(type, callback);
-// };
+ ActiveActionStore.removeStoreListener = function(type, callback) {
+   ActiveActionStore.removeListener(type, callback);
+ };
 
 
 // Register with the dispatcher
@@ -73,7 +73,7 @@ ActiveActionStore.dispatchToken = appDispatcher.register(function(payload){
 
 module.exports = {
   addListener: ActiveActionStore.addListener,
-  removeListener: ActiveActionStore.removeListener,
+  removeListener: ActiveActionStore.removeStoreListener,
   getActiveAction: ActiveActionStore.getActiveAction,
   getAllActiveActions: ActiveActionStore.getAllActiveActions
 };

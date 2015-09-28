@@ -2,6 +2,8 @@ var React = require('react');
 var moment = require('moment');
 var _ = require('lodash');
 
+var FormStore = require('../stores/FormStore');
+
 var FacebookButton = require("../components/ShareButtons.jsx").FacebookButton;
 var LinkedInButton = require("../components/ShareButtons.jsx").LinkedInButton;
 var Heading = require('../components/Heading.jsx').Heading;
@@ -13,14 +15,27 @@ var Detail = React.createClass({
         badge_class: React.PropTypes.object.isRequired,
         badge_instance: React.PropTypes.object,
         recipient: React.PropTypes.string,
-        showUnearnedStep: React.PropTypes.bool,
+        updateOn: React.PropTypes.string,
+        actionGenerator: React.PropTypes.func,
+        showUnearnedStep: React.PropTypes.bool
     },
     getDefaultProps: function() {
         return {
             badge_instance: undefined,
             recipient: undefined,
-            showUnearnedStep: false,
+            actionGenerator: function(){},
+            showUnearnedStep: false
         };
+    },
+    componentDidMount: function(){
+        if (this.props.updateOn)
+            FormStore.addListener(this.props.updateOn, this.handleUpdate);
+    },
+    componentWillUnmount: function(){
+        FormStore.removeListener(this.props.updateOn, this.handleUpdate);
+    },
+    handleUpdate: function(){
+        this.forceUpdate();
     },
 
     render: function() {
@@ -68,7 +83,7 @@ var Detail = React.createClass({
                                 Add to Badgr
                               </button>);
 
-                var actions = this.props.actions ? this.props.actions : [
+                var actions = this.props.actions || this.props.actionGenerator() || [
                     (<LinkedInButton key="linkedin" url={_.get(this.props.badge_instance, 'json.id')} title="I earned a badge!" message={badgeName} className='button_ button_-tertiary'>
                         Share on LinkedIn
                     </LinkedInButton>),

@@ -120,9 +120,9 @@ MenuStore.addListener = function(type, callback) {
   MenuStore.on(type, callback);
 };
 
-// MenuStore.removeListener = function(type, callback) {
-//   MenuStore.removeListener(type, callback);
-// };
+MenuStore.removeStoreListener = function(type, callback) {
+   MenuStore.removeListener(type, callback);
+ };
 
 MenuStore.storeInitialData = function() {
   if (typeof initialData == 'undefined')
@@ -198,7 +198,7 @@ MenuStore.dispatchToken = appDispatcher.register(function(payload){
 module.exports = {
   getAllItems: MenuStore.getAllItems,
   addListener: MenuStore.addListener,
-  removeListener: MenuStore.removeListener,
+  removeListener: MenuStore.removeStoreListener,
   listeners: MenuStore.listeners,
   once: MenuStore.once,
   on: MenuStore.addListener,
