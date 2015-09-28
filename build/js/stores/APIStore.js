@@ -204,10 +204,11 @@ APIStore.defaultContexts = {
       replaceCollection: true
     },
     badgebook_badgeinstances: {
-      actionUrl: '/v1/badgebook/studentbadges/',
+      actionUrl: '/v1/badgebook/badgeinstances/:tool_guid/:course_id/:student_id',
       successfulHttpStatus: [200],
       apiCollectionKey: 'badgebook_badgeinstances',
-      replaceCollection: true
+      replaceCollection: true,
+      formId: 'badgebook_badgeinstances',
     },
     badgebook_checkcourseprogress: {
         actionUrl: '/v1/badgebook/checkprogress/:tool_guid/:course_id?page=:page',
