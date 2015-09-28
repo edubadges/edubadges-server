@@ -41,7 +41,7 @@ var Detail = React.createClass({
 
                 updater.store.addListener(
                     updater.listenFor,
-                    updateFunction.bind(this)
+                    updateFunction
                 );
             }, this);
         }
