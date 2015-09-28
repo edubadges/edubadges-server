@@ -226,17 +226,17 @@ var App = React.createClass({
   },
 
   earnerBadges: function(params){
+    var viewId = "earnerBadges",
+        currentPage=parseInt(_.get(params, 'page')) || 1,
+        nextPage = currentPage + 1;
+    dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
+
     function handleFormSubmit(formId, formType) {
         var formData = FormStore.getFormData(formId);
         if (formData.formState.actionState !== "waiting") {
             FormActions.submitForm(formId, formType);
         }
     }
-
-    var viewId = "earnerBadges",
-        currentPage=parseInt(_.get(params, 'page')) || 1,
-        nextPage = currentPage + 1;
-    dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
 
     var formProps = FormConfigStore.getConfig("EarnerBadgeImportForm");
     FormStore.getOrInitFormData("EarnerBadgeImportForm", formProps);
@@ -264,13 +264,6 @@ var App = React.createClass({
                     <Button label="Import Badge" propagateClick={true}/>
                 </DialogOpener>
           </Heading>
-        <ActivePanel
-          modal={true}
-          viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-        />
         <EarnerBadgeList
           viewId={viewId}
           badges={APIStore.getCollection('earner_badges')}
@@ -355,24 +348,39 @@ var App = React.createClass({
       { name: "My Collections", url: '/earner/collections' }
     ];
 
+    function handleFormSubmit(formId, formType) {
+        var formData = FormStore.getFormData(formId);
+        if (formData.formState.actionState !== "waiting") {
+            FormActions.submitForm(formId, formType);
+        }
+    }
+
+    var formProps = FormConfigStore.getConfig("EarnerCollectionCreateForm");
+    FormStore.getOrInitFormData("EarnerCollectionCreateForm", formProps);
+
+    var actions=[
+        (<button type="submit" key="submit" className="button_ button_-primary" onClick={function() { handleFormSubmit("EarnerCollectionCreateForm", "EarnerCollectionCreateForm"); }}>Add Collection</button>)
+    ];
+    var dialog = (
+        <Dialog dialogId="add-collection" actions={actions} className="closable">
+            <Heading size="small"
+                        title="Add to Collection"
+                        subtitle=""/>
+
+            <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
+        </Dialog>);
+
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <Heading
-          size="large"
-          title="My Collections"
+          <Heading
+            size="large"
+            title="My Collections"
           subtitle="Define collections to organize your badges, then display your collections to friends, employers, or other collaborators."
-          rule={true}>
-            <Button label="Add Collection" propagateClick={true}
-              handleClick={function(e){this.updateActivePanel(viewId,{'type': 'EarnerCollectionCreateForm'});}.bind(this)}
-            />
-        </Heading>
-        <ActivePanel
-          modal={true}
-          viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-        />
+            rule={true}>
+                <DialogOpener dialog={dialog} dialogId="add-collection">
+                    <Button label="Add Collection" propagateClick={true}/>
+                </DialogOpener>
+          </Heading>
         <EarnerCollectionList
           collections={APIStore.getCollection('earner_collections')}
           perPage={50}
@@ -403,24 +411,40 @@ var App = React.createClass({
       { name: collection.name, url: '/earner/collections/' + collectionSlug }
     ];
 
+    function handleFormSubmit(formId, formType) {
+        var formData = FormStore.getFormData(formId);
+        if (formData.formState.actionState !== "waiting") {
+            FormActions.submitForm(formId, formType);
+        }
+    }
+
+    var formProps = FormConfigStore.getConfig("EarnerCollectionEditForm");
+    FormStore.getOrInitFormData("EarnerCollectionEditForm", formProps);
+
+    var actions=[
+        (<button type="submit" key="submit" className="button_ button_-primary" onClick={function() { handleFormSubmit("EarnerCollectionEditForm", "EarnerCollectionEditForm"); }}>Add Collection</button>)
+    ];
+    var dialog = (
+        <Dialog dialogId="edit-collection" actions={actions} className="closable">
+            <Heading size="small"
+                        title="Edit Collection"
+                        subtitle=""/>
+
+            <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
+        </Dialog>);
+
+
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <ActionBar 
-          title={collection.name}
-          viewId={viewId}
-          items={this.props.actionBars[viewId] || []}
-          updateActivePanel={this.updateActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
-        <ActivePanel
-          modal={true}
-          viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          collection={collection}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          formKey={collectionSlug}
-        />
+          <Heading
+            size="large"
+            title={collection.name}
+            subtitle={collection.description}
+            rule={true}>
+                <DialogOpener dialog={dialog} dialogId="edit-collection">
+                    <Button label="Edit Details" propagateClick={true}/>
+                </DialogOpener>
+          </Heading>
         <EarnerCollectionDetail
           name={collection.name}
           slug={collection.slug}
@@ -441,23 +465,40 @@ var App = React.createClass({
     var viewId = "issuerMain";
     dependenciesMet = APIStore.collectionsExist(this.dependencies['issuerMain']);
 
+    function handleFormSubmit(formId, formType) {
+        var formData = FormStore.getFormData(formId);
+        if (formData.formState.actionState !== "waiting") {
+            FormActions.submitForm(formId, formType);
+        }
+    }
+
+    var formProps = FormConfigStore.getConfig("IssuerCreateUpdateForm");
+    FormStore.getOrInitFormData("IssuerCreateUpdateForm", formProps);
+
+    var actions=[
+        (<button type="submit" key="submit" className="button_ button_-primary" onClick={function() { handleFormSubmit("IssuerCreateUpdateForm", "IssuerCreateUpdateForm"); }}>Add Issuer</button>)
+    ];
+    var dialog = (
+        <Dialog dialogId="add-issuer" actions={actions} className="closable">
+            <Heading size="small"
+                        title="New Issuer"
+                        subtitle=""/>
+
+            <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
+        </Dialog>);
+
+
     var mainComponent = (
       <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet}>
-        <ActionBar
-          title="My Issuers"
-          viewId={viewId}
-          items={this.props.actionBars[viewId]}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
-        <ActivePanel
-          modal={true}
-          viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-        />
+          <Heading
+            size="large"
+            title="My Issuers"
+            subtitle=""
+            rule={true}>
+                <DialogOpener dialog={dialog} dialogId="add-issuer">
+                    <Button label="Add Issuer" propagateClick={true}/>
+                </DialogOpener>
+          </Heading>
         <IssuerList
           viewId={viewId}
           issuers={APIStore.getCollection('issuer_issuers')}
@@ -481,26 +522,38 @@ var App = React.createClass({
       { name: "My Issuers", url: '/issuer'},
       { name: issuer.name, url: '/issuer/issuers/' + issuerSlug }
     ];
+
+    function handleFormSubmit(formId, formType) {
+        var formData = FormStore.getFormData(formId);
+        if (formData.formState.actionState !== "waiting") {
+            FormActions.submitForm(formId, formType);
+        }
+    }
+
+    var formProps = FormConfigStore.getConfig("BadgeClassCreateUpdateForm");
+    FormStore.getOrInitFormData("BadgeClassCreateUpdateForm", formProps);
+
+    var actions=[
+        (<button type="submit" key="submit" className="button_ button_-primary" onClick={function() { handleFormSubmit("BadgeClassCreateUpdateForm", "BadgeClassCreateUpdateForm"); }}>Add Collection</button>)
+    ];
+    var dialog = (
+        <Dialog dialogId="issuer-add-badge" actions={actions} className="closable">
+            <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
+        </Dialog>);
+
+
     var mainComponent = (
       <MainComponent viewId={viewId}>
         <IssuerDisplay {...issuer} />
-        <ActionBar 
-          title="Active Badges"
-          viewId={viewId}
-          items={this.props.actionBars['issuerDetail']}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
-        <ActivePanel
-          viewId={viewId}
-          modal={true}
-          {...this.state.activePanels[viewId]}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          issuerSlug={issuerSlug}
-          formKey={issuerSlug}
-        />
+          <Heading
+            size="small"
+            title="Active Badges"
+            subtitle=""
+            rule={true}>
+                <DialogOpener dialog={dialog} dialogId="issuer-add-badge">
+                    <Button label="Add Badge" propagateClick={true}/>
+                </DialogOpener>
+          </Heading>
         <BadgeClassList
           issuerSlug={issuerSlug}
           badgeClasses={badgeClasses}
