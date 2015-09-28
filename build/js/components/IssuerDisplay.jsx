@@ -58,15 +58,24 @@ var IssuerDisplay = React.createClass({
       description: {type: 'xsd:string', '@value': this.props.json.description}
     }
     return (
-      <div className="issuer-display issuer-display-detail col-xs-12">
-        <div className='property-group image col-xs-3'>
-          <Property name="Issuer Logo" label={false} property={properties.image} />
+      <div className="detail_">
+        <div>
+          <img src={properties.image.id} width="112" height="112" />
         </div>
-        <div className='property-group image col-xs-9'>
-          <Property name="Name" property={properties.name} />
-          <Property name="URL" label={true} property={properties.url} />
-          <Property name="Description" label={true} property={properties.description} />
-        </div>
+        <ul>
+          <li>
+            <h2 className="detail_-x-meta">Name</h2>
+            <p>{properties.name['@value']}</p>
+          </li>
+          <li>
+            <h2 className="detail_-x-meta">URL</h2>
+            <p><a href="{properties.url.id}">{properties.url.name || properties.url.id}</a></p>
+          </li>
+          <li>
+            <h2 className="detail_-x-meta">Description</h2>
+            <p>{properties.description['@value']}</p>
+          </li>
+        </ul>
       </div>
     );
   }
