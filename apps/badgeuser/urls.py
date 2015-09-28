@@ -6,5 +6,5 @@ from .views import UpdateBadgeUserIsActive
 
 urlpatterns = patterns('badgeuser.views',
     url(r'^/enabled$', UpdateBadgeUserIsActive.as_view(), name='account_enabled'),
-    url(r'^/(?P<username>[-.\w]+)$', BadgeUserDetail.as_view(), name='user_detail'),
+    url(r'^/(?P<username>[\w.@+-]+)$', BadgeUserDetail.as_view(), name='user_detail'),
 )
