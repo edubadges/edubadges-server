@@ -1,11 +1,14 @@
 from django.shortcuts import redirect
 
 from rest_framework import status, permissions
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .api import AbstractIssuerAPIEndpoint
 from .models import Issuer, BadgeClass, BadgeInstance
+from .renderers import BadgeInstanceHTMLRenderer
+
 import utils
 import badgrlog
 
@@ -116,10 +119,21 @@ class BadgeClassCriteria(ComponentPropertyDetailView):
 
 class BadgeInstanceJson(JSONComponentView):
     model = BadgeInstance
+    renderer_classes = (BadgeInstanceHTMLRenderer, JSONRenderer,)
+
+    def get_renderer_context(self, **kwargs):
+        context = super(BadgeInstanceJson, self).get_renderer_context()
+
+        context['badge_instance'] = self.current_object
+        context['badge_class'] = self.current_object.badgeclass
+        context['issuer'] = self.current_object.issuer
+
+        return context
 
     def get(self, request, slug):
         try:
             current_object = self.model.cached.get(slug=slug)
+            self.current_object = current_object
         except self.model.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
