@@ -2,7 +2,6 @@ var React = require('react');
 var moment = require('moment');
 var _ = require('lodash');
 
-var FormStore = require('../stores/FormStore');
 
 var FacebookButton = require("../components/ShareButtons.jsx").FacebookButton;
 var LinkedInButton = require("../components/ShareButtons.jsx").LinkedInButton;
@@ -15,7 +14,7 @@ var Detail = React.createClass({
         badge_class: React.PropTypes.object.isRequired,
         badge_instance: React.PropTypes.object,
         recipient: React.PropTypes.string,
-        updateOn: React.PropTypes.string,
+        selfUpdaters: React.PropTypes.arrayOf(React.PropTypes.object),
         actionGenerator: React.PropTypes.func,
         showUnearnedStep: React.PropTypes.bool
     },
@@ -27,12 +26,42 @@ var Detail = React.createClass({
             showUnearnedStep: false
         };
     },
+    getInitialState: function(){
+        return {};
+    },
     componentDidMount: function(){
-        if (this.props.updateOn)
-            FormStore.addListener(this.props.updateOn, this.handleUpdate);
+        var updateFunction;
+
+        if (this.props.selfUpdaters){
+            _.forEach(this.props.selfUpdaters, function(updater){
+                if (updater.handler)
+                    updateFunction = updater.handler.bind(this);
+                else
+                    updateFunction = this.handleUpdate;
+
+                updater.store.addListener(
+                    updater.listenFor,
+                    updateFunction.bind(this)
+                );
+            }, this);
+        }
     },
     componentWillUnmount: function(){
-        FormStore.removeListener(this.props.updateOn, this.handleUpdate);
+        var updateFunction;
+
+        if (this.props.selfUpdaters){
+            _.forEach(this.props.selfUpdaters, function(updater){
+                if (updater.handler)
+                    updateFunction = updater.handler.bind(this);
+                else
+                    updateFunction = this.handleUpdate;
+                
+                updater.store.removeListener(
+                    updater.listenFor,
+                    updateFunction
+                );
+            }, this);
+        }
     },
     handleUpdate: function(){
         this.forceUpdate();
@@ -65,29 +94,32 @@ var Detail = React.createClass({
             var badgeName = _.get(this.props, 'badge_class.name', "Unknown Badge");
             var stepName = this.props.objectiveName || badgeName;
             var addToBadgr;
-            if (this.props.badge_instance) {
+            var badge_instance = _.find([this.props.badge_instance, this.state.badge_instance], function(bi){
+                return (!!_.get(bi, 'json.issuedOn'));
+            });
+
+            if (badge_instance) {
                 properties.unshift(
                     <li key="recipient">
                         <h2 className="detail_-x-meta">Recipient</h2>
-                        <p>{this.props.recipient ? this.props.recipient : _.get(this.props, 'badge_instance.recipient_identifier', _.get(this.props, 'badge_instance.email'))}</p>
+                        <p>{this.props.recipient ? this.props.recipient : badge_instance.recipient_identifier || badge_instance.email}</p>
                     </li>
                 );
-
-                var dateString = moment(this.props.badge_instance.json.issuedOn).format('MMMM D, YYYY');
+                var dateString = moment(badge_instance.json.issuedOn).format('MMMM D, YYYY');
                 properties.unshift(
                     <li key="issued">
                         <Step title={stepName} subtitle={"Earned "+dateString} earned={true}/>
                     </li>
                 );
-                addToBadgr = (<button className="button_ button_-tertiary" href={"/earner/badges/new?url=" + _.get(this.props.badge_instance, 'json.id')} target="_blank">
+                addToBadgr = (<button className="button_ button_-tertiary" href={"/earner/badges/new?url=" + _.get(badge_instance, 'json.id')} target="_blank">
                                 Add to Badgr
                               </button>);
 
                 var actions = this.props.actions || this.props.actionGenerator() || [
-                    (<LinkedInButton key="linkedin" url={_.get(this.props.badge_instance, 'json.id')} title="I earned a badge!" message={badgeName} className='button_ button_-tertiary'>
+                    (<LinkedInButton key="linkedin" url={_.get(badge_instance, 'json.id')} title="I earned a badge!" message={badgeName} className='button_ button_-tertiary'>
                         Share on LinkedIn
                     </LinkedInButton>),
-                    (<FacebookButton key="facebook" url={_.get(this.props.badge_instance, 'json.id')} className='button_ button_-tertiary'>
+                    (<FacebookButton key="facebook" url={_.get(badge_instance, 'json.id')} className='button_ button_-tertiary'>
                         Share on Facebook
                     </FacebookButton>),
                 ];
