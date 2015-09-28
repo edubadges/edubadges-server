@@ -25,62 +25,71 @@
         <main class="wrap_ {% block main_override %}{% endblock %}">
 
             {% block content %}
-            <div class="detail_ l-wrapper">
+            <div class=" l-wrapper">
+                <div class="card_" style="padding: 1em;">
 
-                <div>
+                    <header class="heading_ heading_-medium">
+                        <div class="heading_-x-text">
+                            <h1>Badge Instance Detail</h1>
+                            <p>The baked image and record of a badge issued to a single recipient</p>
+                        </div>
+                    </header>
 
-                    <img src="{{ badge_instance.json['image'] }}" width="224" height="224" alt="baked badge image">
+                    <div class="detail_">
+                        <div>
+                            <img src="{{ badge_instance.json['image'] }}" width="224" height="224" alt="baked badge image">
+                        </div>
 
-                </div>
-
-                <ul>
-                    <li>
-                        <h2 class="detail_-x-meta">Criteria</h2>
-                        <p>
-                            {% if badge_class.criteria_text %}
-                                {{ badge_class.criteria_text }}
-                                <a href="{{ badge_class.json['criteria'] }}" target="_blank" title="Criteria to earn this badge">(link)</a>
-                            {% else %}
-                                <a href="{{ badge_class.json['criteria'] }}" target="_blank" title="Criteria to earn this badge">
-                                    {{ badge_class.json['criteria'] }}
-                                </a>
+                        <ul>
+                            <li>
+                                <h2 class="detail_-x-meta">Criteria</h2>
+                                <p>
+                                    {% if badge_class.criteria_text %}
+                                        {{ badge_class.criteria_text }}
+                                        <a href="{{ badge_class.json['criteria'] }}" target="_blank" title="Criteria to earn this badge">(link)</a>
+                                    {% else %}
+                                        <a href="{{ badge_class.json['criteria'] }}" target="_blank" title="Criteria to earn this badge">
+                                            {{ badge_class.json['criteria'] }}
+                                        </a>
+                                    {% endif %}
+                                </p>
+                            </li>
+                            <li>
+                                <h2 class="detail_-x-meta">Issue Date</h2>
+                                <p>{{ badge_instance.json['issuedOn'] }}</p>
+                            </li>
+                            <li>
+                                <h2 class="detail_-x-meta">Issuer</h2>
+                                <p>{{ issuer.json['name'] }}</p>
+                            </li>
+                            <li>
+                                <h2 class="detail_-x-meta">Issuer Website</h2>
+                                <p><a href="{{ issuer.json['url'] }}" target="_blank" title="Website of badge issuer">{{ issuer.json['url'] }}</a></p>
+                            </li>
+                            {% if badge_instance.json['evidence'] %}
+                            <li>
+                                <h2 class="detail_-x-meta">Evidence</h2>
+                                <p><a href="{{ badge_instance.json['evidence'] }}" target="_blank" title="Badge evidence">{{ badge_instance.json['evidence'] }}</a></p>
+                            </li>
                             {% endif %}
-                        </p>
-                    </li>
-                    <li>
-                        <h2 class="detail_-x-meta">Issue Date</h2>
-                        <p>{{ badge_instance.json['issuedOn'] }}</p>
-                    </li>
-                    <li>
-                        <h2 class="detail_-x-meta">Issuer</h2>
-                        <p>{{ issuer.json['name'] }}</p>
-                    </li>
-                    <li>
-                        <h2 class="detail_-x-meta">Issuer Website</h2>
-                        <p><a href="{{ issuer.json['url'] }}" target="_blank" title="Website of badge issuer">{{ issuer.json['url'] }}</a></p>
-                    </li>
-                    {% if badge_instance.json['evidence'] %}
-                    <li>
-                        <h2 class="detail_-x-meta">Evidence</h2>
-                        <p><a href="{{ badge_instance.json['evidence'] }}" target="_blank" title="Badge evidence">{{ badge_instance.json['evidence'] }}</a></p>
-                    </li>
-                    {% endif %}
-                    <li>
-                        <h2 class="detail_-x-meta">Recipient</h2>
-                        <p>
-                            {{ obscured_recipient }}
+                            <li>
+                                <h2 class="detail_-x-meta">Recipient</h2>
+                                <p>
+                                    {{ obscured_recipient }}
 
-                            <button class="button_" href="https://badgecheck.io/?url={{ badge_instance.json['id'] }}">
-                                Verify Badge Recipient
-                            </button>
-                        </p>
-                    </li>
-                </ul>
+                                    <button class="button_" href="https://badgecheck.io/?url={{ badge_instance.json['id'] }}">
+                                        Verify Badge Recipient
+                                    </button>
+                                </p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
 
             </div>
 
             <div class="l-wrapper">
-                <pre style="background-color: #eee; padding: 0.5em;">{{ content }}</pre>
+                <pre style="background-color: #eee; padding: 1em;">{{ content }}</pre>
                 {% endblock %}
             </div>
             
