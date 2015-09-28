@@ -357,13 +357,15 @@ var App = React.createClass({
 
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <ActionBar
+        <Heading
+          size="large"
           title="My Collections"
-          viewId={viewId}
-          items={this.props.actionBars[viewId] || []}
-          updateActivePanel={this.updateActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
+          subtitle="Define collections to organize your badges, then display your collections to friends, employers, or other collaborators."
+          rule={true}>
+            <Button label="Add Collection" propagateClick={true}
+              handleClick={function(e){this.updateActivePanel(viewId,{'type': 'EarnerCollectionCreateForm'});}.bind(this)}
+            />
+        </Heading>
         <ActivePanel
           modal={true}
           viewId={viewId}
