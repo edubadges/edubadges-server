@@ -418,8 +418,14 @@ var App = React.createClass({
         }
     }
 
-    var formProps = FormConfigStore.getConfig("EarnerCollectionEditForm");
-    FormStore.getOrInitFormData("EarnerCollectionEditForm", formProps);
+    var formProps = FormConfigStore.getConfig("EarnerCollectionEditForm", undefined, 
+            {
+                "collection": {
+                    "name": collection.name,
+                    "description": collection.description,
+                }
+            });
+    FormStore.getOrInitFormData("EarnerCollectionEditForm", formProps)
 
     var actions=[
         (<button type="submit" key="submit" className="button_ button_-primary" onClick={function() { handleFormSubmit("EarnerCollectionEditForm", "EarnerCollectionEditForm"); }}>Add Collection</button>)
