@@ -9,6 +9,7 @@ from rest_framework import status, authentication, permissions
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from badgebook.models import BadgeObjectiveAward
 import badgrlog
 
 from .models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
@@ -632,6 +633,13 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
         current_assertion.revocation_reason = request.data.get('revocation_reason')
         current_assertion.image.delete()
         current_assertion.save()
+
+        try:
+            award = BadgeObjectiveAward.cached.get(badge_instance_id=current_assertion.id)
+        except BadgeObjectiveAward.DoesNotExist:
+            pass
+        else:
+            award.delete()
 
         logger.event(badgrlog.BadgeAssertionRevokedEvent(current_assertion, request.user))
         return Response(

@@ -372,7 +372,7 @@ APIStore.postForm = function(fields, values, context, requestContext){
   if (context.method == 'POST')
     var req = request.post(url);
   else if (context.method == 'DELETE')
-    var req = request.delete(url);
+    var req = request.del(url);
   else if (context.method == 'PUT')
     var req = request.put(url);
 
