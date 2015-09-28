@@ -108,10 +108,10 @@ var ActivePanel = React.createClass({
             <div className={wrapperClass + ' modal-dialog'}>
               <div className="modal-content closable">
                 <div className="modal-body container-fluid">
-                  <button className="dialog_-x-close" onClick={this.clearActivePanel}>
+                  <button className="dialog_-x-close" onClick={this.clearActivePanel} style={{float:'right'}}>
                     <span className="icon_ icon_-notext icon_-close">Close</span>
                   </button>
-                  {this.props.title ? (<Heading size="small" title={this.props.title}/>) : null}
+                  {this.props.title ? (<Heading size="small" title={this.props.title} style={{clear:'both'}}/>) : <div style={{clear:'both'}} />}
                   <BasicAPIForm {...formProps} />
                 </div>
               </div>
