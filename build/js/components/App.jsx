@@ -470,7 +470,7 @@ var App = React.createClass({
 
   issuerDetail: function(issuerSlug, params){
     if (!params['perPage'])
-      params['perPage'] = 10
+      params['perPage'] = -1
     if (!params['currentPage'])
       params['currentPage'] = 1
 

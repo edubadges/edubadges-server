@@ -1,3 +1,5 @@
+var _ = require('lodash');
+
 var React = require('react');
 
 // Actions
@@ -78,9 +80,11 @@ BadgeClassList = React.createClass({
     };
   },
   render: function() {
+    var perPage = this.props.perPage == -1 ? _.get(this.props, 'badgeClasses.length') : this.props.perPage;
+
     var badgeClasses = this.props.badgeClasses.slice(
-      this.props.perPage * (this.props.currentPage-1),
-      this.props.perPage + this.props.perPage * (this.props.currentPage-1)
+      perPage * (this.props.currentPage-1),
+      perPage + perPage * (this.props.currentPage-1)
     ).map(function(bc, i){
       var properties = {
         image: bc.image,
