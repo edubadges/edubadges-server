@@ -2,9 +2,11 @@ main {
   display: block; // IE
   padding-bottom: $layout-spacing*2;
   padding-top: $layout-spacing*7;
+  z-index: $z-index-low;
 }
 
 .l-mainoverride {
+  padding-bottom: 0;
   padding-top: 0;
 }
 
