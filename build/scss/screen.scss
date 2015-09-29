@@ -89,6 +89,13 @@ strong {
     &.l-mainoverride {
       padding-bottom: 0;
       padding-top: 0;
+
+      // Temporary legacy override for LTI views
+
+      .main-component {
+        padding: 0 !important;
+      }
+
     }
 
   }
