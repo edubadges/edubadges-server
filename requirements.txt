@@ -67,3 +67,13 @@ git+ssh://git@stash.concentricsky.com/bp/badgecheck.git@v0.2.5
 celery==3.1.18
 django-celery==3.1.16
 python-json-logger==0.1.2
+
+# SSL Support
+cffi==1.2.1
+cryptography==1.0.2
+enum34==1.0.4
+idna==2.0
+ipaddress==1.0.14
+pyasn1==0.1.9
+pycparser==2.14
+six==1.9.0
