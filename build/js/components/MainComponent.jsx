@@ -11,7 +11,7 @@ var MainComponent = React.createClass({
   render: function() {
     var spinner = <LoadingComponent/>
     return (
-      <div className="main-component clearfix">
+      <div>
         {this.props.dependenciesLoaded ? this.props.children : spinner}
       </div>
     );
