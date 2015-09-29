@@ -4,6 +4,8 @@
   height: $layout-spacing*8;
   display: flex;
   justify-content: space-between;
+  position: relative;
+  z-index: $z-index-high;
 
   .header_-x-logo {
     display: block;
