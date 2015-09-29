@@ -9,7 +9,8 @@ var MainComponent = React.createClass({
     };
   },
   render: function() {
-    var spinner = <LoadingComponent/>
+    var spinner = (<div className="message_" style={{marginTop: '50px'}}>
+        <LoadingComponent/></div>);
     return (
       <div>
         {this.props.dependenciesLoaded ? this.props.children : spinner}
