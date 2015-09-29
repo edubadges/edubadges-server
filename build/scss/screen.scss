@@ -85,6 +85,11 @@ strong {
   
   main {
     padding-top: $layout-spacing*4;
+
+    &.l-mainoverride {
+      padding-top: 0;
+    }
+
   }
 
 }
