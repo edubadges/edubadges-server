@@ -82,8 +82,12 @@ main {
 }
 
 .l-wrapper {
-  padding-left: calc(50% - 680px);
-  padding-right: calc(50% - 680px);
+
+  @media (min-width: 1184px + $layout-spacing*6) {
+    padding-left: calc(50% - 680px);
+    padding-right: calc(50% - 680px);
+  }
+
 }
 
 .l-wrapper-inset {
