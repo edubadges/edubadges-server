@@ -10,10 +10,12 @@ var APIStore = require('../stores/APIStore');
 
 // Components
 var ActionBar = require('../components/ActionBar.jsx').ActionBar;
+var Button = require('../components/Button.jsx').Button;
 var Card = require('../components/Card.jsx');
 var Property = require('../components/BadgeDisplay.jsx').Property;
 var EarnerBadgeList = require('../components/EarnerBadgeList.jsx');
 var LoadingComponent = require('../components/LoadingComponent.jsx');
+var Heading = require('../components/Heading.jsx').Heading;
 
 var moreLinkBadgeJSON = function(moreCount){
   return {
@@ -77,7 +79,7 @@ var CollectionShareInfo = React.createClass({
     var embedInfo = this.props.share_url ? (<IFrameEmbedInfo share_url={this.props.share_url} />) : '';
 
     return (
-      <div className={this.props.share_url ? "collection-share-info sharing-enabled" : "collection-share-info sharing-disabled disabled"}>
+      <div className={this.props.share_url ? "card_ collection-share-info sharing-enabled" : "card_ collection-share-info sharing-disabled disabled"} style={{padding: '1em'}}>
         <div className="sharing-input">
           <input type="checkbox" name="sharecheck" checked={this.props.share_url ? true : false} className={"share-collection-checkbox"} onChange={this.props.handleChange} />
           <label htmlFor="sharecheck">
@@ -222,12 +224,7 @@ var EarnerCollectionDetail = React.createClass({
 
 
     return (
-      <div className="earner-collection-detail">
-        <p className="earner-collection-description row">
-          <span className="text-label col-xs-12 col-sm-4">Description</span>
-          <span className="text-content col-xs-12 col-sm-8">{this.props.description}</span>
-        </p>
-
+      <div>
         <CollectionShareInfo
           share_url={this.props.share_url}
           handleChange={this.handleShareChange}
@@ -235,12 +232,16 @@ var EarnerCollectionDetail = React.createClass({
 
         {this.state.message ? (<div className={"alert alert-" + this.state.message.type}>{this.state.message.content}</div>) : ""}
         {this.state.formState == "waiting" ? <LoadingComponent /> : ""}
-        <ActionBar 
-          title="Badges in collection"
-          viewId={'earnerCollectionDetail' + this.props.slug}
-          items={[editBadgeButtonConfig]}
-          updateActivePanel={panelFunction}
-        />
+
+        <Heading
+          size="medium"
+          title={"Badges in Collection"}
+          subtitle={this.state.formState == 'editing' ? "Manage and save which badges appear in this collection." : "Badges with a gray highlighed background will remain in the collection when you click save."}
+          rule={false}>
+            <Button label={this.state.formState == 'editing' ? "Save": "Select Badges"} propagateClick={true}
+              handleClick={panelFunction}
+            />
+        </Heading>
         <EarnerBadgeList
           display="thumbnail"
           badges={badges}

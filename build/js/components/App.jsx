@@ -405,13 +405,15 @@ var App = React.createClass({
 
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <ActionBar 
+        <Heading
+          size="large"
           title={collection.name}
-          viewId={viewId}
-          items={this.props.actionBars[viewId] || []}
-          updateActivePanel={this.updateActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
+          subtitle={collection.description}
+          rule={false}>
+            <Button label="Edit Collection" propagateClick={true}
+              handleClick={function(e){this.updateActivePanel(viewId,{'type': 'EarnerCollectionEditForm'});}.bind(this)}
+            />
+        </Heading>
         <ActivePanel
           modal={true}
           viewId={viewId}
@@ -423,7 +425,7 @@ var App = React.createClass({
         />
         <EarnerCollectionDetail
           name={collection.name}
-          slug={collection.slug}
+          slug={collectionSlug}
           clickable={false}
           description={collection.description}
           share_url={collection.share_url}
