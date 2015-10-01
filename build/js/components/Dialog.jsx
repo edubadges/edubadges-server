@@ -1,6 +1,8 @@
-
-var _ = require('lodash');
 var React = require('react');
+var _ = require('lodash');
+
+// Stores
+var FormStore = require('../stores/FormStore');
 
 
 /**
@@ -99,21 +101,39 @@ var DialogOpener = React.createClass({
             <div onClick={this.handleClick} {...divProps}>
                 {this.props.children}
             </div>);
-
     }
-
 });
 
 var Dialog = React.createClass({
     propTypes: {
         dialogId: React.PropTypes.string.isRequired,
-        hideControls: React.PropTypes.bool
+        hideControls: React.PropTypes.bool,
+        formId: React.PropTypes.string,
     },
-    getDefaultProps: function() {
+
+    getInitialState: function() {
         return {
             hideControls: false,
         }
+    },
 
+    handleFormDataUpdated: function() {
+        var formData = FormStore.getFormData(this.props.formId);
+        if (formData.formState.actionState === "complete") {
+            this.setState({'hideControls': true});
+        }
+    },
+
+    componentDidMount: function() {
+        if (this.props.formId) {
+            FormStore.addListener('FORM_DATA_UPDATED_'+ this.props.formId, this.handleFormDataUpdated);
+        }
+    },
+
+    componentWillUnmount: function() {
+        if (this.props.formId) {
+            FormStore.removeListener('FORM_DATA_UPDATED_'+ this.props.formId, this.handleFormDataUpdated);
+        }
     },
 
     closeDialog: function() {
@@ -130,10 +150,10 @@ var Dialog = React.createClass({
 
     render: function() {
         var divProps = _.omit(this.props, ['dialogId', 'actions'])
-        var controls = this.props.hideControls ? "" : (
+        var controls = (this.props.hideControls || this.state.hideControls) ? "" : (
             <div className="control_">
                 <button className="button_ button_-secondary" onClick={this.closeDialog}>Close</button>
-            {this.props.actions}
+                {this.props.actions}
             </div>);
         return (
             <div {...divProps}>

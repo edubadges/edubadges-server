@@ -24,6 +24,7 @@ var Heading = require('../components/Heading.jsx').Heading;
 var Dialog = require('../components/Dialog.jsx').Dialog;
 var DialogOpener = require('../components/Dialog.jsx').DialogOpener;
 var Button = require('../components/Button.jsx').Button;
+var SubmitButton = require('../components/Button.jsx').SubmitButton;
 var HeadingBar = require('../components/ActionBar.jsx').HeadingBar;
 var ActivePanel = require('../components/ActivePanel.jsx');
 var OpenBadgeList = require('../components/OpenBadgeList.jsx');
@@ -238,14 +239,15 @@ var App = React.createClass({
         }
     }
 
-    var formProps = FormConfigStore.getConfig("EarnerBadgeImportForm");
-    FormStore.getOrInitFormData("EarnerBadgeImportForm", formProps);
+    var dialogFormId = "EarnerBadgeImportForm"
+    var formProps = FormConfigStore.getConfig(dialogFormId);
+    FormStore.getOrInitFormData(dialogFormId, formProps);
 
     var actions=[
-        (<button type="submit" key="submit" className="button_ button_-primary" onClick={function() { handleFormSubmit("EarnerBadgeImportForm", "EarnerBadgeImportForm"); }}>Import Badge</button>)
+        <SubmitButton formId={dialogFormId} label="Import Badge" />
     ];
     var dialog = (
-        <Dialog dialogId="import-badge" actions={actions} className="closable">
+        <Dialog formId={dialogFormId} dialogId="import-badge" actions={actions} className="closable">
             <Heading size="small"
                         title="Create New Badge"
                         subtitle="Verify an Open Badge and add it to your library by uploading a badge image or entering its URL."/>
@@ -348,21 +350,15 @@ var App = React.createClass({
       { name: "My Collections", url: '/earner/collections' }
     ];
 
-    function handleFormSubmit(formId, formType) {
-        var formData = FormStore.getFormData(formId);
-        if (formData.formState.actionState !== "waiting") {
-            FormActions.submitForm(formId, formType);
-        }
-    }
-
-    var formProps = FormConfigStore.getConfig("EarnerCollectionCreateForm");
-    FormStore.getOrInitFormData("EarnerCollectionCreateForm", formProps);
+    var dialogFormId = "EarnerCollectionCreateForm";
+    var formProps = FormConfigStore.getConfig(dialogFormId);
+    FormStore.getOrInitFormData(dialogFormId, formProps);
 
     var actions=[
-        (<button type="submit" key="submit" className="button_ button_-primary" onClick={function() { handleFormSubmit("EarnerCollectionCreateForm", "EarnerCollectionCreateForm"); }}>Add Collection</button>)
+        <SubmitButton formId={dialogFormId} label="Add Collection" />
     ];
     var dialog = (
-        <Dialog dialogId="add-collection" actions={actions} className="closable">
+        <Dialog formId={dialogFormId} dialogId="add-collection" actions={actions} className="closable">
             <Heading size="small"
                         title="Add to Collection"
                         subtitle=""/>
@@ -411,27 +407,21 @@ var App = React.createClass({
       { name: collection.name, url: '/earner/collections/' + collectionSlug }
     ];
 
-    function handleFormSubmit(formId, formType) {
-        var formData = FormStore.getFormData(formId);
-        if (formData.formState.actionState !== "waiting") {
-            FormActions.submitForm(formId, formType);
-        }
-    }
-
-    var formProps = FormConfigStore.getConfig("EarnerCollectionEditForm", undefined, 
+    var dialogFormId = "EarnerCollectionEditForm";
+    var formProps = FormConfigStore.getConfig(dialogFormId, undefined, 
             {
                 "collection": {
                     "name": collection.name,
                     "description": collection.description,
                 }
             });
-    FormStore.getOrInitFormData("EarnerCollectionEditForm", formProps)
+    FormStore.getOrInitFormData(dialogFormId, formProps)
 
     var actions=[
-        (<button type="submit" key="submit" className="button_ button_-primary" onClick={function() { handleFormSubmit("EarnerCollectionEditForm", "EarnerCollectionEditForm"); }}>Add Collection</button>)
+        <SubmitButton formId={dialogFormId} label="Edit Collection" />
     ];
     var dialog = (
-        <Dialog dialogId="edit-collection" actions={actions} className="closable">
+        <Dialog formId={dialogFormId} dialogId="edit-collection" actions={actions} className="closable">
             <Heading size="small"
                         title="Edit Collection"
                         subtitle=""/>
@@ -471,21 +461,15 @@ var App = React.createClass({
     var viewId = "issuerMain";
     dependenciesMet = APIStore.collectionsExist(this.dependencies['issuerMain']);
 
-    function handleFormSubmit(formId, formType) {
-        var formData = FormStore.getFormData(formId);
-        if (formData.formState.actionState !== "waiting") {
-            FormActions.submitForm(formId, formType);
-        }
-    }
-
-    var formProps = FormConfigStore.getConfig("IssuerCreateUpdateForm");
-    FormStore.getOrInitFormData("IssuerCreateUpdateForm", formProps);
+    var dialogFormId = "IssuerCreateUpdateForm"
+    var formProps = FormConfigStore.getConfig(dialogFormId);
+    FormStore.getOrInitFormData(dialogFormId, formProps);
 
     var actions=[
-        (<button type="submit" key="submit" className="button_ button_-primary" onClick={function() { handleFormSubmit("IssuerCreateUpdateForm", "IssuerCreateUpdateForm"); }}>Add Issuer</button>)
+        <SubmitButton formId={dialogFormId} label="Add Issuer" />
     ];
     var dialog = (
-        <Dialog dialogId="add-issuer" actions={actions} className="closable">
+        <Dialog formId={dialogFormId} dialogId="add-issuer" actions={actions} className="closable">
             <Heading size="small"
                         title="New Issuer"
                         subtitle=""/>
@@ -529,21 +513,15 @@ var App = React.createClass({
       { name: issuer.name, url: '/issuer/issuers/' + issuerSlug }
     ];
 
-    function handleFormSubmit(formId, formType) {
-        var formData = FormStore.getFormData(formId);
-        if (formData.formState.actionState !== "waiting") {
-            FormActions.submitForm(formId, formType);
-        }
-    }
-
-    var formProps = FormConfigStore.getConfig("BadgeClassCreateUpdateForm");
-    FormStore.getOrInitFormData("BadgeClassCreateUpdateForm", formProps);
+    var dialogFormId = "BadgeClassCreateUpdateForm"
+    var formProps = FormConfigStore.getConfig(dialogFormId);
+    FormStore.getOrInitFormData(dialogFormId, formProps);
 
     var actions=[
-        (<button type="submit" key="submit" className="button_ button_-primary" onClick={function() { handleFormSubmit("BadgeClassCreateUpdateForm", "BadgeClassCreateUpdateForm"); }}>Add Collection</button>)
+        <SubmitButton formId={dialogFormId} label="Add Collection" />
     ];
     var dialog = (
-        <Dialog dialogId="issuer-add-badge" actions={actions} className="closable">
+        <Dialog formId={dialogFormId} dialogId="issuer-add-badge" actions={actions} className="closable">
             <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
         </Dialog>);
 
