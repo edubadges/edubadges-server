@@ -147,7 +147,10 @@ MenuStore.storeInitialData = function() {
     for (index in MenuStore.menus.topMenu.items) {
       item = MenuStore.menus.topMenu.items[index];
       if (item.title = 'user') {
-        item['title'] = initialData.user.username;
+        var name = (initialData.user.earnerIds && initialData.user.earnerIds.length > 0) ?
+                    initialData.user.earnerIds[0] :
+                    initialData.user.username;
+        item['title'] = name;
         newItems.push(item);
         break;
       }
