@@ -287,7 +287,7 @@ APIStore.buildUrlWithContext = function(url, context) {
  *
  *   requestContext: a dictionary providing context values for this particular request
 */
-APIStore.getData = function(context, requestContext, pagination_url) {
+APIStore.getData = function(context, requestContext, pagination_url, retriedAttempt) {
 
   var url = pagination_url || APIStore.buildUrlWithContext(context.actionUrl, requestContext)
 
@@ -310,7 +310,7 @@ APIStore.getData = function(context, requestContext, pagination_url) {
         url += (url.indexOf('?') == -1 ? '?' : '&')+"resume="+resume;
       }
       setTimeout(function() {
-        APIStore.getData(context, requestContext, url)
+        APIStore.getData(context, requestContext, url, pagination_url ? false : true)
       }.bind(this), wait*1000);
     }
     else if (context.successfulHttpStatus.indexOf(response.status) == -1){
@@ -328,7 +328,10 @@ APIStore.getData = function(context, requestContext, pagination_url) {
       }
 
       var collectionKey = context.apiCollectionKey;
-      if (pagination_url) {
+      if (pagination_url && !retriedAttempt) {
+        // strip any resume argument from pagination_url
+        pagination_url = pagination_url.replace(/[&?]resume=[0-9a-f-]+/i, '');
+
         // this was a response to a next/prev page request
         collectionKey = context.apiCollectionKey+":"+pagination_url;
       }
