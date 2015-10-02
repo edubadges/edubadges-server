@@ -1,7 +1,7 @@
-
 var _ = require('lodash');
 var React = require('react');
 
+var ClickActions = require('../actions/clicks');
 
 /**
  * Usage:
@@ -111,6 +111,7 @@ var Dialog = React.createClass({
     propTypes: {
         dialogId: React.PropTypes.string.isRequired,
         hideControls: React.PropTypes.bool,
+        showCloseAction: React.PropTypes.bool,
         actionGenerator: React.PropTypes.func
     },
     getDefaultProps: function() {
@@ -158,15 +159,7 @@ var Dialog = React.createClass({
         }
     },
     closeDialog: function() {
-        var dialog = document.getElementById(this.props.dialogId);
-        if (dialog) {
-            if (!dialog.showModal)
-                dialogPolyfill.registerDialog(dialog);
-            dialog.close();
-            dialog.classList.remove('is-visible');
-        } else {
-            console.log("Unable to find dialog with dialogId="+this.props.dialogId)
-        }
+        ClickActions.closeDialog(this.props.dialogId);
     },
 
     render: function() {

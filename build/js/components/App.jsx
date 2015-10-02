@@ -228,29 +228,42 @@ var App = React.createClass({
 
   earnerBadges: function(params){
     var viewId = "earnerBadges",
+        formId = "EarnerBadgeImportForm",
         currentPage=parseInt(_.get(params, 'page')) || 1,
         nextPage = currentPage + 1,
         dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
 
-    var formProps = FormConfigStore.getConfig("EarnerBadgeImportForm");
-    FormStore.getOrInitFormData("EarnerBadgeImportForm", formProps);
+    var formProps = FormConfigStore.getConfig(formId);
+    FormStore.getOrInitFormData(formId, formProps);
 
     var actionGenerator = function() {
-      var formState = _.get(FormStore.getFormData('EarnerBadgeImportForm'), 'formState.actionState');
+      var actions = [
+        (<Button
+          label="Close"
+          key="dialog-import-badge-close"
+          className="button_ button_-secondary"
+          handleClick={function() {
+            if (_.get(FormStore.getFormData(formId), 'formState.actionState') == 'waiting')
+              FormActions.resetForm(formId, formId);
+            ClickActions.closeDialog('import-badge');
+          }}
+
+        />)
+      ],
+          formState = _.get(FormStore.getFormData(formId), 'formState.actionState');
       if (formState == 'ready')
-        return (
-          <button
+        actions.push(
+          <Button
+            label="Import Badge"
             type="submit"
             key="import-badge-submit"
             className="button_ button_-primary"
-            onClick={function() { FormActions.submitForm("EarnerBadgeImportForm", "EarnerBadgeImportForm"); }}
-          >
-            Import Badge
-          </button>
+            handleClick={function() { FormActions.submitForm(formId, formId); }}
+          />
         );
       else if (formState == 'waiting')
-        return (<LoadingComponent label="" />);
-        return null;
+        actions.push(<LoadingComponent key="import-badge-spinner" label="" />);
+      return actions;
     };
     var resetFormOnNewOpen = function(){
       var formState = _.get(FormStore.getFormData('EarnerBadgeImportForm'), 'formState.actionState');
@@ -263,6 +276,7 @@ var App = React.createClass({
                 dialogId="import-badge"
                 actionGenerator={actionGenerator}
                 className="closable"
+                showCloseAction={false}
                 selfUpdaters={[{store: FormStore, listenFor: 'FORM_DATA_UPDATED_EarnerBadgeImportForm' }]}
             >
             <Heading size="small"

@@ -46,11 +46,23 @@ var navigateOut = function(path){
   window.location.assign(path);
 };
 
+closeDialog = function(dialogId){
+  var dialog = document.getElementById(dialogId);
+  if (dialog) {
+      if (!dialog.showModal)
+          dialogPolyfill.registerDialog(dialog);
+      dialog.close();
+      dialog.classList.remove('is-visible');
+  } else {
+      console.log("Unable to find dialog with dialogId="+dialogId)
+  }
+};
 
 module.exports = {
   createOffMenuClickAction: createOffMenuClickAction,
   createCloseModalAction: createCloseModalAction,
   createLinkClickAction: createLinkClickAction,
   navigateLocalPath: navigateLocalPath,
-  navigateOut: navigateOut
+  navigateOut: navigateOut,
+  closeDialog: closeDialog
 };
