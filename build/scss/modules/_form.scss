@@ -17,7 +17,7 @@
     text-transform: uppercase;
   }
 
-  :focus {
+  :focus:not([readonly]) {
     box-shadow: rgba(map-get($colors, link), .5) 0 0 $layout-spacing/2 $layout-spacing/4;
   }
 
