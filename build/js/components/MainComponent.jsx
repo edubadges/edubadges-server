@@ -9,9 +9,10 @@ var MainComponent = React.createClass({
     };
   },
   render: function() {
-    var spinner = <LoadingComponent/>
+    var spinner = (<div className="message_" style={{marginTop: '50px'}}>
+        <LoadingComponent/></div>);
     return (
-      <div className="main-component clearfix">
+      <div className="clearfix">
         {this.props.dependenciesLoaded ? this.props.children : spinner}
       </div>
     );
