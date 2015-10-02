@@ -267,7 +267,10 @@ var App = React.createClass({
     };
     var resetFormOnNewOpen = function(){
       var formState = _.get(FormStore.getFormData('EarnerBadgeImportForm'), 'formState.actionState');
-      if (formState == 'complete')
+      if (
+        formState == 'complete' ||
+        _.get(FormStore.getFormData('EarnerBadgeImportForm'), 'formState.message.type') == 'danger'
+      )
         FormActions.resetForm('EarnerBadgeImportForm');
     };
 
