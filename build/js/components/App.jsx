@@ -262,7 +262,7 @@ var App = React.createClass({
             title="My Badges"
             subtitle="Import your Open Badges with Badgr! Upload images to verify your badges, and then add them to collections to share with your friends and colleagues."
             rule={true}>
-                <DialogOpener key="import-badge" dialog={dialog} dialogId="import-badge">
+                <DialogOpener dialog={dialog} dialogId="import-badge" key="import-badge">
                     <Button label="Import Badge" propagateClick={true}/>
                 </DialogOpener>
           </Heading>
@@ -373,7 +373,7 @@ var App = React.createClass({
             title="My Collections"
           subtitle="Define collections to organize your badges, then display your collections to friends, employers, or other collaborators."
             rule={true}>
-                <DialogOpener key="add-collection" dialog={dialog} dialogId="add-collection">
+                <DialogOpener dialog={dialog} dialogId="add-collection" key="add-collection">
                     <Button label="Add Collection" propagateClick={true}/>
                 </DialogOpener>
           </Heading>
@@ -437,7 +437,7 @@ var App = React.createClass({
             title={collection.name}
             subtitle={collection.description}
             rule={true}>
-                <DialogOpener key="edit-collection" dialog={dialog} dialogId="edit-collection">
+                <DialogOpener dialog={dialog} dialogId="edit-collection" key="edit-collection">
                     <Button label="Edit Details" propagateClick={true}/>
                 </DialogOpener>
           </Heading>
@@ -485,7 +485,7 @@ var App = React.createClass({
             title="My Issuers"
             subtitle=""
             rule={true}>
-                <DialogOpener key="add-issuer" dialog={dialog} dialogId="add-issuer">
+                <DialogOpener dialog={dialog} dialogId="add-issuer" key="add-issuer">
                     <Button label="Add Issuer" propagateClick={true}/>
                 </DialogOpener>
           </Heading>
@@ -534,7 +534,7 @@ var App = React.createClass({
             title="Active Badges"
             subtitle=""
             rule={true}>
-                <DialogOpener key="issuer-add-badge" dialog={dialog} dialogId="issuer-add-badge">
+                <DialogOpener dialog={dialog} dialogId="issuer-add-badge" key="issuer-add-badge">
                     <Button label="Add Badge" propagateClick={true}/>
                 </DialogOpener>
           </Heading>
