@@ -1,6 +1,5 @@
 .form_ {
 
-
   label {
     display: block;
     font-size: $font-size-small;
@@ -18,6 +17,10 @@
     text-transform: uppercase;
   }
 
+  :focus {
+    box-shadow: rgba(map-get($colors, link), .5) 0 0 $layout-spacing/2 $layout-spacing/4;
+  }
+
   input,
   textarea {
     background: map-get($colors, solid);
@@ -26,15 +29,9 @@
     box-shadow: inset 0 1px $layout-spacing/2 0 rgba(map-get($colors, solid-dark), .2);
     box-sizing: border-box;
     display: block;
-    outline-color: map-get($colors, link-hover);
+    outline: none;
     padding: $layout-spacing;
     width: 100%;
-
-    &[disabled] {
-      background: map-get($colors, solid-light);
-      opacity: .25;
-    }
-
   }
 
   textarea {
@@ -43,6 +40,28 @@
 
   .form_-x-field {
     margin-bottom: $layout-spacing*2;
+  }
+
+  .form_-x-action {
+    align-items: stretch;
+    display: flex;
+
+    input {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    button {
+      background-color: map-get($colors, solid);
+      border: 1px solid map-get($colors, border-light);
+      border-bottom-right-radius: $border-radius;
+      border-left: 0;
+      border-top-right-radius: $border-radius;
+      line-height: 40px;
+      padding: 0 $layout-spacing*2;
+      white-space: nowrap;
+    }
+
   }
 
   .form_-x-imagefield {
@@ -73,9 +92,11 @@
       border: 0;
     }
 
-    &:hover, 
+    &:hover,
+    &:focus, 
     &.is-active {
       border-color: map-get($colors, loading);
+      box-shadow: none;
     }
 
   }

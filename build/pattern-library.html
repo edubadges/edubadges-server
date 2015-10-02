@@ -519,17 +519,29 @@
                                     
                                     <div class="form_-x-field">
                                         <label for="name">Name <span class="hint">(with a note)</span></label>
-                                        <input type="text" id="name" name="name" required>
+                                        <input type="text" id="name" name="name" tabindex="1" required>
+                                    </div>
+
+                                    <div class="form_-x-field">
+                                        <label for="action">Action <span class="hint">(with a note)</span></label>
+                                        <div class="form_-x-action">
+                                            <input type="text" id="action" name="action" readonly value="Here's some text to copy">
+                                            <button type="button" tabindex="2"><span class="icon_ icon_-copy">Copy</span></button>
+                                        </div>
+                                    </div>
+
+                                    <div class="form_-x-field">
+                                        <label for="file">Action <span class="hint">(with a note)</span></label>
+                                        <input type="file" id="file" name="file" class="hidden">
+                                        <div class="form_-x-action">
+                                            <input type="text" id="fakefile" name="fakefile" readonly>
+                                            <button type="button" tabindex="3">Browse</button>
+                                        </div>
                                     </div>
 
                                     <div class="form_-x-field">
                                         <label for="description">Description</label>
-                                        <textarea name="description" id="description"></textarea>
-                                    </div>
-
-                                    <div class="form_-x-field">
-                                        <label for="criteria">Criteria or URL Text</label>
-                                        <input type="text" id="criteria" name="criteria" disabled>
+                                        <textarea name="description" id="description" tabindex="4"></textarea>
                                     </div>
 
                                 </fieldset>
@@ -537,9 +549,9 @@
                                 <fieldset>
                                     
                                     <div class="form_-x-field">
-                                        <div class="form_-x-imagefield dropzone">
+                                        <button class="form_-x-imagefield dropzone" tabindex="5" type="button">
                                             <p>Tap here to upload image</p>
-                                        </div>
+                                        </button>
                                     </div>
 
                                     <div class="form_-x-field">
@@ -562,10 +574,18 @@
 
                             <div class="control_">
                                 <button class="button_ button_-secondary">Cancel</button>
-                                <button class="button_" type="submit">Submit</button>
+                                <button class="button_" type="submit" tabindex="6">Submit</button>
                             </div>
 
                         </form>
+
+                        <script type="text/javascript">
+
+                            document.addEventListener('DOMContentLoaded', function() {
+                                var fileInput = document.getElementById('file');
+                            });
+
+                        </script>
 
                     </code>
 
