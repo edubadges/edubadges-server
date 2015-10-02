@@ -4,6 +4,9 @@ var _ = require('lodash');
 // Stores
 var FormStore = require('../stores/FormStore');
 
+// Actions
+var FormActions = require('../actions/forms');
+
 
 /**
  * Usage:
@@ -74,15 +77,18 @@ DialogElement.prototype.showDialog = function() {
 var DialogOpener = React.createClass({
     propTypes: {
         dialog: React.PropTypes.node.isRequired,
-        dialogId: React.PropTypes.string.isRequired
+        dialogId: React.PropTypes.string.isRequired,
     },
+
     componentDidMount: function() {
         this.dialog = new DialogElement(this.props.dialog, this.props.dialogId);
         this.dialog.update();
     },
+
     componentWillUnmount: function() {
         this.dialog.destroy();
     },
+
     componentDidUpdate: function(prevProps, prevState) {
         this.dialog.update();
     },
@@ -113,15 +119,8 @@ var Dialog = React.createClass({
 
     getInitialState: function() {
         return {
-            hideControls: false,
-        }
-    },
-
-    handleFormDataUpdated: function() {
-        var formData = FormStore.getFormData(this.props.formId);
-        if (formData.formState.actionState === "complete") {
-            this.setState({'hideControls': true});
-        }
+            formWasCompleted: false,
+        };
     },
 
     componentDidMount: function() {
@@ -136,7 +135,19 @@ var Dialog = React.createClass({
         }
     },
 
+    handleFormDataUpdated: function() {
+        var formData = FormStore.getFormData(this.props.formId);
+        if (formData.formState.actionState === "complete") {
+            this.setState({'formWasCompleted': true});
+        }
+    },
+
     closeDialog: function() {
+        if (this.state.formWasCompleted) {
+            FormActions.resetForm(this.props.formId);
+            this.setState({formWasCompleted: false});
+        }
+
         var dialog = document.getElementById(this.props.dialogId)
         if (dialog) {
             if (!dialog.showModal)
@@ -150,7 +161,7 @@ var Dialog = React.createClass({
 
     render: function() {
         var divProps = _.omit(this.props, ['dialogId', 'actions'])
-        var controls = (this.props.hideControls || this.state.hideControls) ? "" : (
+        var controls = (this.props.hideControls || this.state.formWasCompleted) ? "" : (
             <div className="control_">
                 <button className="button_ button_-secondary" onClick={this.closeDialog}>Close</button>
                 {this.props.actions}
