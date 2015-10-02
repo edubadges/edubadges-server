@@ -17,10 +17,6 @@
     text-transform: uppercase;
   }
 
-  :focus:not([readonly]) {
-    box-shadow: rgba(map-get($colors, link), .5) 0 0 $layout-spacing/2 $layout-spacing/4;
-  }
-
   input,
   textarea {
     background: map-get($colors, solid);
@@ -32,6 +28,11 @@
     outline: none;
     padding: $layout-spacing;
     width: 100%;
+
+    &:focus:not([readonly]) {
+      box-shadow: rgba(map-get($colors, link), .5) 0 0 $layout-spacing/2 $layout-spacing/4;
+    }
+
   }
 
   textarea {
@@ -60,6 +61,11 @@
       line-height: 40px;
       padding: 0 $layout-spacing*2;
       white-space: nowrap;
+
+      &:focus {
+        box-shadow: rgba(map-get($colors, link), .5) 0 0 $layout-spacing/2 $layout-spacing/4;
+      }
+
     }
 
   }
