@@ -110,17 +110,55 @@ var DialogOpener = React.createClass({
 var Dialog = React.createClass({
     propTypes: {
         dialogId: React.PropTypes.string.isRequired,
-        hideControls: React.PropTypes.bool
+        hideControls: React.PropTypes.bool,
+        actionGenerator: React.PropTypes.func
     },
     getDefaultProps: function() {
         return {
             hideControls: false,
+            showCloseAction: true
         }
 
     },
+    handleUpdate: function(){
+        this.forceUpdate();
+    },
+    componentDidMount: function(){
+        var updateFunction;
 
+        if (this.props.selfUpdaters){
+            _.forEach(this.props.selfUpdaters, function(updater){
+                if (updater.handler)
+                    updateFunction = updater.handler.bind(this);
+                else
+                    updateFunction = this.handleUpdate;
+
+                updater.store.addListener(
+                    updater.listenFor,
+                    updateFunction
+                );
+            }, this);
+        }
+    },
+    componentWillUnmount: function(){
+        var updateFunction;
+
+        if (this.props.selfUpdaters){
+            _.forEach(this.props.selfUpdaters, function(updater){
+                if (updater.handler)
+                    updateFunction = updater.handler.bind(this);
+                else
+                    updateFunction = this.handleUpdate;
+
+                updater.store.removeListener(
+                    updater.listenFor,
+                    updateFunction
+                );
+            }, this);
+        }
+    },
     closeDialog: function() {
-        var dialog = document.getElementById(this.props.dialogId)
+        var dialog = document.getElementById(this.props.dialogId);
         if (dialog) {
             if (!dialog.showModal)
                 dialogPolyfill.registerDialog(dialog);
@@ -132,12 +170,15 @@ var Dialog = React.createClass({
     },
 
     render: function() {
-        var divProps = _.omit(this.props, ['dialogId', 'actions'])
+        var divProps = _.omit(this.props, ['dialogId', 'actions', 'actionGenerator', 'showCloseAction']);
         var controls = this.props.hideControls ? "" : (
             <div className="control_">
-                <button className="button_ button_-secondary" onClick={this.closeDialog}>Close</button>
-            {this.props.actions}
-            </div>);
+                {this.props.showCloseAction ? (<button className="button_ button_-secondary" onClick={this.closeDialog}>Close</button>) : null}
+                {this.props.actions}
+                {(!!this.props.actionGenerator) ? this.props.actionGenerator(): null}
+            </div>
+        );
+
         return (
             <div {...divProps}>
                 <button className="dialog_-x-close" onClick={this.closeDialog}>

@@ -136,7 +136,7 @@ badge was valid, but cannot be saved."
         else:  # 0.5 badges
             new_issuer, new_badge_class = None, None
 
-        new_instance, _ = LocalBadgeInstance.objects.get_or_create({
+        new_instance, instance_created = LocalBadgeInstance.objects.get_or_create({
             'recipient_user': request_user,
             'json': badge_instance_json,
             'badgeclass': new_badge_class,
@@ -146,6 +146,10 @@ badge was valid, but cannot be saved."
                 validated_data.get('image'), badge_instance, badge_class)
         }, identifier=badge_instance_url, recipient_user=request_user)
         # TODO: Prevent saving twice
+
+        if not instance_created:
+            raise serializers.ValidationError("This badge has already been uploaded.")
+
         new_instance.json['image'] = new_instance.image_url()
         new_instance.save()
 
