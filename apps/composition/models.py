@@ -34,9 +34,9 @@ class LocalBadgeInstance(AbstractBadgeInstance):
 
     def image_url(self):
         if getattr(settings, 'MEDIA_URL').startswith('http'):
-            return default_storage.url(self.image)
+            return default_storage.url(self.image.name)
         else:
-            return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image)
+            return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
 
 
 class Collection(cachemodel.CacheModel):
