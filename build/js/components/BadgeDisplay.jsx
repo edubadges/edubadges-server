@@ -143,18 +143,20 @@ var BadgeDisplayThumbnail = React.createClass({
     else if (this.props.handleClick)
       this.props.handleClick(this.props.id);
   },
-  wrapperClass: function(){
-    return this.props.columnClass + ' badge-display badge-display-thumbnail selected-' + this.props.selected;
-  },
   render: function() {
     return (
-      <div className={this.wrapperClass()} onClick={this.handleClick} >
-        <Property name='Badge Image' label={false} property={this.props.json.image} />
-        <div className="name-wrapper">
-            <Property name='Name' property={this.props.json.badge.name} />
+      <div className="card_">
+        <div className="badge_ viewdetails_" onClick={this.handleClick}>
+            <Property name='Badge Image' label={false} property={this.props.json.image} width="128" height="128" />
+            <div className="viewdetails_-x-details">
+                <button className="button_ button_-solid button_-uppercase">View Details</button>
+            </div>
         </div>
-        <div className="issuer-wrapper">
-            <Property name='Issuer' property={this.props.json.badge.issuer.name} />
+        <div className="title_">
+            <div>
+                <h1 className="title_-x-primary truncate_"><Property name='Name' property={this.props.json.badge.name} /></h1>
+                <p className="title_-x-secondary truncate_"><Property name='Issuer' property={this.props.json.badge.issuer.name} /></p>
+            </div>
         </div>
       </div>
     );

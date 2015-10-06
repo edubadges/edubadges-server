@@ -27,7 +27,7 @@ var EarnerBadgeList = React.createClass({
     }
 
     return (
-      <div className="earner-badges-list">
+      <div className="x-owner">
         <OpenBadgeList
           display={this.props.display || "thumbnail"}
           badges={badges}

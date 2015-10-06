@@ -36,25 +36,27 @@ var OpenBadgeList = React.createClass({
     //var badgesInList = this.props.badgeList.map(function(item, i){
     var badgesInList = this.props.badges.map(function(item, i){
       return (
-        <OpenBadge 
-          key={"key-" + item['id']}
-          id={item['id']}
-          display={this.props.display || "thumbnail"}
-          json={item['json']}
-          recipientId={item['recipient_id']}
-          errors={item['errors']}
-          clickable={this.props.clickable}
-          handleClick={this.props.handleClick}
-          type={item.type || 'earned badge'}
-          selected={(this.props.selectedBadgeIds.indexOf(item.id) > -1)}
-        />
+        <div>
+            <OpenBadge 
+            key={"key-" + item['id']}
+            id={item['id']}
+            display={this.props.display || "thumbnail"}
+            json={item['json']}
+            recipientId={item['recipient_id']}
+            errors={item['errors']}
+            clickable={this.props.clickable}
+            handleClick={this.props.handleClick}
+            type={item.type || 'earned badge'}
+            selected={(this.props.selectedBadgeIds.indexOf(item.id) > -1)}
+            />
+        </div>
       );
     }.bind(this));
     if (this.props.badges.length == 0 && this.props.showEmptyBadge){
       badgesInList = <EmptyOpenBadge clickEmptyBadge={this.props.clickEmptyBadge} />
     }
     return (
-      <div className="open-badge-list">
+      <div className="l-grid">
         { badgesInList }
       </div>
     );
