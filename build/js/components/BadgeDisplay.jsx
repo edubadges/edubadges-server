@@ -1,4 +1,5 @@
 var React = require('react');
+var _ =  require('lodash');
 
 // Actions
 var navigateLocalPath = require('../actions/clicks').navigateLocalPath;
@@ -8,8 +9,8 @@ var wrap_text_property = function(value){
   return {
     'type': 'xsd:string',
     '@value': value
-  }
-}
+  };
+};
 
 var Property = React.createClass({
   REQUIRED_VALUES_FOR_TYPE: {
@@ -27,7 +28,7 @@ var Property = React.createClass({
   },
   renderPropertyName: function(propName){
     return ( 
-      <span className={"propertyName  " + propName}>{propName}</span>
+      <span>{propName}</span>
     );
   },
   renderPropertyValue: function(property){
@@ -38,36 +39,33 @@ var Property = React.createClass({
       "image": this.renderImageValue,
       "email": this.renderEmailValue
     };
-    return KNOWN_TYPES[property.type](property);
+    var props = _.omit(this.props, ['name', 'label', 'property']);
+    return KNOWN_TYPES[property.type](property, props);
   },
-  renderStringValue: function(property){
+  renderStringValue: function(property, props){
     return (
-      <span className={"propertyValue  " + this.props.name}>{property['@value']}</span>
+      <span {...props}>{property['@value']}</span>
     );
   },
-  renderLinkValue: function(value){
+  renderLinkValue: function(value, props){
     // TODO: preventDefault() on thumbnail view
     //if (!this.props.linksClickable)
 
     return (
-        <span className={"propertyValue " + this.props.name}>
-          <a href={value.id} >{value.name || value.id }</a>
-        </span>
+        <a href={value.id} {...props}>{value.name || value.id }</a>
       );
   },
-  renderEmailValue: function(value){
+  renderEmailValue: function(value, props){
     // TODO: preventDefault() on thumbnail view
     //if (!this.props.linksClickable)
 
     return (
-        <span className={"propertyValue " + this.props.name}>
-          <a href={"mailto:" + value['@value']} >{value['@value']}</a>
-        </span>
+        <a href={"mailto:" + value['@value']} {...props}>{value['@value']}</a>
       );
   },
-  renderImageValue: function(value){
+  renderImageValue: function(value, props){
     return (
-      <img className="propertyImage" src={value.id} alt={value.name || this.props.name} />
+      <img src={value.id} alt={value.name || this.props.name} {...props} />
     );
   },
   hasRequiredValues: function(){
@@ -88,12 +86,12 @@ var Property = React.createClass({
     )
   },
   render: function(){
-    if (this.canIRender()){
+    if (this.canIRender()) {
       return (
-        <div className={"badgeProperty badgeProperty-type-" + this.props.property.type}>
+        <span className="x-owner">
           { this.props.label ? this.renderPropertyName(this.props.name) : null }
           { this.renderPropertyValue(this.props.property) }
-        </div>
+        </span>
       );
     }
     else
