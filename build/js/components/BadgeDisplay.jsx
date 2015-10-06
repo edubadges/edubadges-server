@@ -22,7 +22,7 @@ var Property = React.createClass({
   },
   getDefaultProps: function() {
     return {
-      label: true,
+      label: false,
       linksClickable: true
     };
   },
