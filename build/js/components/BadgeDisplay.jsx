@@ -28,7 +28,7 @@ var Property = React.createClass({
   },
   renderPropertyName: function(propName){
     return ( 
-      <span>{propName}</span>
+      <h2 className="detail_-x-meta">{propName}</h2>
     );
   },
   renderPropertyValue: function(property){
@@ -241,32 +241,44 @@ var BadgeDisplayFull = React.createClass({
     });
 
     return (
-      <div className='badge-display-full form-horizontal' onClick={this.handleClick}>
-        <div className='property-group image col-xs-2'>
-          <Property name='Badge Image' label={false} property={this.props.json.image} />
-        </div>
+      <div className="detail_" onClick={this.handleClick}>
+          <div>
+              <Property name='Badge Image' label={false} property={this.props.json.image} width="224" height="224" />
+          </div>
+  
+          <ul>
+              <li>
+                <Property label={true} name='Name' property={this.props.json.badge.name} />
+              </li>
+              <li>
+                <Property label={true} name='Description' property={this.props.json.badge.description} />
+              </li>
+              <li>
+                <Property label={true} name='Criteria' property={this.props.json.badge.criteria} />
+              </li>
+              <li>
+                <Property label={true} name='Issuer' property={this.props.json.badge.issuer.name} />
+              </li>
+              <li>
+                <Property label={true} name='Issuer Website' property={this.props.json.badge.issuer.url} />
+              </li>
+              <li>
+                <Property label={true} name='Issue Date' property={this.props.json.issuedOn} />
+              </li>
+              <li>
+                <Property label={true} name='Expiration Date' property={this.props.json.expires} />
+              </li>
+              <li>
+                <Property label={true} name='Evidence Link' property={this.props.json.evidence} />
+              </li>
+              <li>
+                <Property label={true} name='Recipient' property={wrap_text_property(this.props.recipientId)} />
+              </li>
+          </ul>
 
-        <div className='property-group badgeclass'>
-          <Property name='Name' property={this.props.json.badge.name} />
-          <Property name='Description' property={this.props.json.badge.description} />
-          <Property name='Criteria' property={this.props.json.badge.criteria} />
-        </div>
-
-        <div className='property-group issuer'>
-          <Property name='Issuer' property={this.props.json.badge.issuer.name} />
-          <Property name='Issuer Website' property={this.props.json.badge.issuer.url} />
-        </div>
-
-        <div className='property-group assertion'>
-          <Property name='Issue Date' property={this.props.json.issuedOn} />
-          <Property name='Expiration Date' property={this.props.json.expires} />
-          <Property name='Evidence Link' property={this.props.json.evidence} />
-          <Property name='Recipient' property={wrap_text_property(this.props.recipientId)} />
-        </div>
-
-        <div className='property-group validations'>
-          {errors}
-        </div>
+          <div className='property-group validations'>
+            {errors}
+          </div>
       </div>
     )
   }

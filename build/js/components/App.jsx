@@ -322,13 +322,11 @@ var App = React.createClass({
     ];
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <ActionBar 
+        <Heading
+          size="large"
           title={badge.json.badge.name['@value']}
-          viewId={viewId}
-          items={this.props.actionBars[viewId] || []}
-          updateActivePanel={this.updateActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
+          subtitle={badge.json.badge.description['@value']}
+          rule={true} />
         <OpenBadge
           id={badge.id}
           display="full"
