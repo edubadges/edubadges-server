@@ -23,17 +23,18 @@ var Badge = React.createClass({
     },
 
     render: function() {
+        var badgeClassList = ["badge_"], badgeAction;
 
-        var badgeAction;
         if ( ! this.props.noAction) {
+            badgeClassList.push("viewdetails_");
             badgeAction = (
-                <div className="badge_-x-action">
+                <div className="viewdetails_-x-details">
                     <button className="button_ button_-solid button_-uppercase">{this.props.label}</button>
                 </div>);
         }
 
         return (
-            <div className="badge_" onClick={this.props.handleClick}>
+            <div className={badgeClassList.join(" ")} onClick={this.props.handleClick}>
                 <img src={this.props.image} width={this.props.width} height={this.props.height} alt={this.props.description}/>
                 {badgeAction}
             </div>);
