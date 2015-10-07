@@ -285,7 +285,7 @@ var EarnerCollectionCard = React.createClass({
         return (
             <div className="card_">
                 <div className="collection_ viewdetails_">
-                    <h1 className="truncate_" onClick={this.handleClick} actions={cardActionItems}>{this.props.name}</h1>
+                    <h1 className="truncate_" actions={cardActionItems}>{this.props.name}</h1>
                     <OpenBadgeList
                         display="image only"
                         badges={badges}
@@ -296,7 +296,7 @@ var EarnerCollectionCard = React.createClass({
                         handleClick={this.props.handleClick}
                         />
                     <div className="viewdetails_-x-details">
-                        <button className="button_ button_-solid button_-uppercase" onClick={this.props.handleClick}>View Details</button>
+                        <button className="button_ button_-solid button_-uppercase" onClick={this.handleClick}>View Details</button>
                     </div>
                 </div>
                 <div className="title_">
