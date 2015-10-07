@@ -36,7 +36,7 @@ var OpenBadgeList = React.createClass({
     //var badgesInList = this.props.badgeList.map(function(item, i){
     var badgesInList = this.props.badges.map(function(item, i){
       return (
-        <div>
+        <div className="l-grid-x-item">
             <OpenBadge 
             key={"key-" + item['id']}
             id={item['id']}

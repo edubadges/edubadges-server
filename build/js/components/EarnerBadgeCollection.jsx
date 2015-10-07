@@ -9,11 +9,11 @@ var APISubmitData = require('../actions/api').APISubmitData;
 var APIStore = require('../stores/APIStore');
 
 // Components
-var ActionBar = require('../components/ActionBar.jsx').ActionBar;
 var Button = require('../components/Button.jsx').Button;
 var Card = require('../components/Card.jsx');
 var Property = require('../components/BadgeDisplay.jsx').Property;
 var EarnerBadgeList = require('../components/EarnerBadgeList.jsx');
+var OpenBadgeList = require('../components/OpenBadgeList.jsx');
 var LoadingComponent = require('../components/LoadingComponent.jsx');
 var Heading = require('../components/Heading.jsx').Heading;
 
@@ -278,17 +278,27 @@ var EarnerCollectionCard = React.createClass({
       badges.push(moreLinkBadgeJSON(this.props.badgeList.length - 7));
     }
     return (
-      <Card
-        title={this.props.name}
-        onClick={this.handleClick}
-        actions={cardActionItems}
-      >
-        <EarnerBadgeList
-          display="image only"
-          badges={badges}
-          moreLink={this.props.targetUrl || '/earner/collections/' + this.props.slug}
-        />
-      </Card>
+        <div className="card_">
+            <div className="collection_ viewdetails_">
+                <h1 className="truncate_" onClick={this.handleClick} actions={cardActionItems}>{this.props.name}</h1>
+                <OpenBadgeList
+                    display="image only"
+                    badges={badges}
+                    showEmptyBadge={this.props.showEmptyBadge}
+                    clickEmptyBadge={this.props.clickEmptyBadge}
+                    selectedBadgeIds={this.props.selectedBadgeIds}
+                    handleClick={this.props.handleClick}
+                    />
+                <div className="viewdetails_-x-details">
+                    <button className="button_ button_-solid button_-uppercase" onClick={this.props.handleClick}>View Details</button>
+                </div>
+            </div>
+            <div className="title_">
+                <div className="title_-x-section">
+                    <p className="title_-x-primary truncate_">{badges.length} Badge{(badges.length === 0 || badges.length > 1) ? 's' : ''}</p>
+                </div>
+            </div>
+        </div>
     );
   }
 });
@@ -305,19 +315,21 @@ var EarnerCollectionList = React.createClass({
   render: function() {
     var collections = this.props.collections.map(function(item, i){
       return (
-        <EarnerCollectionCard
-          key={'collection-' + i}
-          name={item.name}
-          slug={item.slug}
-          description={item.description}
-          share_url={item.share_url}
-          badgeList={item.badges || []}
-          clickable={this.props.clickable}
-        />
+        <div className="l-grid-x-item">
+            <EarnerCollectionCard
+                key={'collection-' + i}
+                name={item.name}
+                slug={item.slug}
+                description={item.description}
+                share_url={item.share_url}
+                badgeList={item.badges || []}
+                clickable={this.props.clickable}
+                />
+        </div>
       );
     }.bind(this));
     return (
-      <div className="earner-collection-list">
+      <div className="l-grid">
         {collections}
       </div>
     );
