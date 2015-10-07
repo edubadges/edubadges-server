@@ -26,6 +26,17 @@ main {
 
 }
 
+// When you want the items inside of the grid to have equal heights
+
+.l-grid-stretch {
+
+  > * {
+    align-items: stretch;
+    display: flex;
+  }
+
+}
+
 .l-horizontal {
   align-items: center;
   display: flex;
