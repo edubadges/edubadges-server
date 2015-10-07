@@ -186,8 +186,15 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
             self.fields['json'] = V1InstanceSerializer(source='extended_json')
 
         representation = super(BadgeInstanceSerializer, self).to_representation(instance)
-        representation['issuer'] = settings.HTTP_ORIGIN+reverse('issuer_json', kwargs={'slug': instance.cached_issuer.slug})
-        representation['badge_class'] = settings.HTTP_ORIGIN+reverse('badgeclass_json', kwargs={'slug': instance.cached_badgeclass.slug})
+        if self.context.get('include_issuer', False):
+            representation['issuer'] = IssuerSerializer(instance.cached_badgeclass.cached_issuer).data
+        else:
+            representation['issuer'] = settings.HTTP_ORIGIN+reverse('issuer_json', kwargs={'slug': instance.cached_issuer.slug})
+        if self.context.get('include_badge_class', False):
+            representation['badge_class'] = BadgeClassSerializer(instance.cached_badgeclass, context=self.context).data
+        else:
+            representation['badge_class'] = settings.HTTP_ORIGIN+reverse('badgeclass_json', kwargs={'slug': instance.cached_badgeclass.slug})
+
 
         # TODO: only bother doing this if badgebook is in INSTALLED_APPS
         from badgebook.models import BadgeObjectiveAward
