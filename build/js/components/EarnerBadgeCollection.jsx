@@ -279,7 +279,7 @@ var EarnerCollectionCard = React.createClass({
         }
 
         var badges = APIStore.filter('earner_badges', 'id', 
-            _.pluck(this.props.badgeList, 'id').slice(0,this.props.badgesToShow);
+            _.pluck(this.props.badgeList, 'id').slice(0,this.props.badgesToShow)
         );
 
         return (
@@ -321,7 +321,7 @@ var EarnerCollectionList = React.createClass({
   render: function() {
     var collections = this.props.collections.map(function(item, i){
       return (
-        <div className="l-grid-x-item">
+        <div>
             <EarnerCollectionCard
                 key={'collection-' + i}
                 name={item.name}
