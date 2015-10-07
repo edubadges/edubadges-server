@@ -102,8 +102,8 @@ main {
 }
 
 .l-wrapper-inset {
-  padding-left: $layout-spacing*3;
-  padding-right: $layout-spacing*3;
+  padding-left: $layout-spacing*6;
+  padding-right: $layout-spacing*6;
 
   @media (min-width: 1184px + $layout-spacing*6) {
     padding-left: calc(50% - 592px);
