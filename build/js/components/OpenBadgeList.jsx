@@ -26,41 +26,52 @@ var OpenBadgeList = React.createClass({
   getDefaultProps: function() {
     return {
       badges: [],
+      grid: true,
       clickEmptyBadge: function(){},
       showEmptyBadge: false,
       selectedBadgeIds: []
     };
   },
-  render: function(){  
+    render: function() {
 
-    //var badgesInList = this.props.badgeList.map(function(item, i){
-    var badgesInList = this.props.badges.map(function(item, i){
-      return (
-        <div className="l-grid-x-item">
-            <OpenBadge 
-            key={"key-" + item['id']}
-            id={item['id']}
-            display={this.props.display || "thumbnail"}
-            json={item['json']}
-            recipientId={item['recipient_id']}
-            errors={item['errors']}
-            clickable={this.props.clickable}
-            handleClick={this.props.handleClick}
-            type={item.type || 'earned badge'}
-            selected={(this.props.selectedBadgeIds.indexOf(item.id) > -1)}
-            />
-        </div>
-      );
-    }.bind(this));
-    if (this.props.badges.length == 0 && this.props.showEmptyBadge){
-      badgesInList = <EmptyOpenBadge clickEmptyBadge={this.props.clickEmptyBadge} />
+        //var badgesInList = this.props.badgeList.map(function(item, i){
+        var badgesInList = this.props.badges.map(function(item, i) {
+            var badge = (
+                <OpenBadge
+                    key={"key-" + item['id']}
+                    id={item['id']}
+                    display={this.props.display || "thumbnail"}
+                    json={item['json']}
+                    recipientId={item['recipient_id']}
+                    errors={item['errors']}
+                    clickable={this.props.clickable}
+                    handleClick={this.props.handleClick}
+                    type={item.type || 'earned badge'}
+                    selected={(this.props.selectedBadgeIds.indexOf(item.id) > -1)}
+                    />);
+
+            if (this.props.grid) {
+                return (
+                    <div>
+                        {badge}
+                    </div>
+                );
+            }
+            else {
+                return badge;
+            }
+        }.bind(this));
+
+        if (this.props.badges.length == 0 && this.props.showEmptyBadge){
+            badgesInList = <EmptyOpenBadge clickEmptyBadge={this.props.clickEmptyBadge} />
+        }
+
+        return (
+            <div className={ (this.props.grid) ? "l-grid" : "x-owner" }>
+                { badgesInList }
+            </div>
+        );
     }
-    return (
-      <div className="l-grid">
-        { badgesInList }
-      </div>
-    );
-  }
 });
 
 // Export the Menu class for rendering:
