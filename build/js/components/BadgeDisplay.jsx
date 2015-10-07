@@ -86,16 +86,25 @@ var Property = React.createClass({
     )
   },
   render: function(){
-    if (this.canIRender()) {
-      return (
-        <span className="x-owner">
-          { this.props.label ? this.renderPropertyName(this.props.name) : null }
-          { this.renderPropertyValue(this.props.property) }
-        </span>
-      );
-    }
-    else
-      return (<span className="missingProperty badgeProperty"></span>);
+      if (this.canIRender()) {
+          var propertyValue = this.renderPropertyValue(this.props.property);
+          var propertyLabel = this.props.label ? this.renderPropertyName(this.props.name) : undefined;
+
+          if (propertyLabel) {
+              return (
+                <span className="x-owner">
+                    { propertyLabel }
+                    { propertyValue }
+                </span>
+            );
+          }
+          else {
+              return (propertyValue);
+          }
+      }
+      else {
+          return (<span className="missingProperty badgeProperty"></span>);
+      }
   }
 });
 
@@ -288,7 +297,6 @@ var BadgeDisplayFull = React.createClass({
 var BadgeDisplayImage = React.createClass({
   getDefaultProps: function() {
     return {
-      columnClass: "col-xs-3",
       selected: false
     };
   },
@@ -312,9 +320,7 @@ var BadgeDisplayImage = React.createClass({
       );
     }
     return (
-      <div className={'badge-display-image ' + this.props.columnClass} onClick={this.handleClick}>
-        <Property name='Badge Image' label={false} property={this.props.json.image} />
-      </div>
+        <Property name='Badge Image' label={false} property={this.props.json.image} width="72" height="72" className="collection_-x-item" />
     )
   }
 });
