@@ -143,7 +143,9 @@ var Dialog = React.createClass({
     },
 
     closeDialog: function() {
-        if (this.state.formWasCompleted) {
+        var formData = FormStore.getFormData(this.props.formId);
+        var messageType = _.get(formData, 'formState.message.type');
+        if (this.state.formWasCompleted || messageType === 'danger') {
             FormActions.resetForm(this.props.formId);
             this.setState({formWasCompleted: false});
         }
