@@ -106,8 +106,7 @@ var Issuer = React.createClass({
                     </div>
                     <button className="issuer_-x-title" onClick={this.props.handleClick}>
                         <h1>{this.props.name}</h1>
-
-                        <p>{this.props.description}</p>
+                        <span>{this.props.description}</span>
                     </button>
                     <div className="issuer_-x-controls">
                         {badgelink}
