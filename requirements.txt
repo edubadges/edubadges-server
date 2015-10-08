@@ -19,7 +19,6 @@ git+https://github.com/concentricsky/django-cachemodel.git@v2.1.2
 git+https://github.com/concentricsky/django-basic-models.git@v2.1.2
 # CSky Client Admin
 git+https://github.com/concentricsky/django-sky-ckeditor.git@v0.9.8
-git+https://github.com/concentricsky/django-client-admin.git@v1.1.1
 # Revision and deleted object recovery
 django-reversion==1.8.5
 # Memcached cache

@@ -13,7 +13,6 @@ import logging
 
 INSTALLED_APPS = [
     # https://github.com/concentricsky/django-client-admin
-    'client_admin',
 
     'django.contrib.auth',
     'django.contrib.contenttypes',
