@@ -14,6 +14,15 @@ from .utils import find_recipient_user, baked_image_from_abi
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
+######
+#
+# !!! This app and all its models have been deprecated !!!
+# see the new 'composition' app
+#
+#####
+
+
+
 class AbstractStoredComponent(cachemodel.CacheModel):
     json = JSONField()
     errors = JSONField()
