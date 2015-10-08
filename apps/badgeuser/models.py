@@ -26,12 +26,12 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
     REQUIRED_FIELDS = ['email']
 
     class Meta:
-        verbose_name = _('badgeuser')
-        verbose_name_plural = _('badgeusers')
+        verbose_name = _('badge user')
+        verbose_name_plural = _('badge users')
         db_table = 'users'
 
     def __unicode__(self):
-        return self.username
+        return self.email
 
     def get_absolute_url(self):
         return "/user/%s/" % urlquote(self.username)
