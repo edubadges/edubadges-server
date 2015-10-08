@@ -40,7 +40,7 @@
   }
 
   .is-hover {
-    background: rgba(map-get($colors, link), .05);
+    background-color: rgba(map-get($colors, link), .05);
   }
 
 }
