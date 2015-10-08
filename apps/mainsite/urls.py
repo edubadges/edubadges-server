@@ -6,7 +6,8 @@ from django.views.generic.base import RedirectView, TemplateView
 
 from .views import SitemapView, info_view, email_unsubscribe
 
-admin.autodiscover()
+from mainsite.admin import badgr_admin
+badgr_admin.autodiscover()
 # make sure that any view/model/form imports occur AFTER admin.autodiscover
 
 TOKEN_REGEX = '(?P<uidb36>[0-9A-Za-z]{1,13})-(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})'
@@ -32,10 +33,8 @@ urlpatterns = patterns('',
     url(r'^sitemap$', SitemapView.as_view(), name='sitemap'),
     url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.sitemap', {'sitemaps': sitemaps}),
 
-    # Admin URLs from client_admin
-    # https://github.com/concentricsky/django-client-admin
-    url(r'^staff/', include('client_admin.urls')),
-    url(r'^staff/', include(admin.site.urls)),
+    # Admin URLs
+    url(r'^staff/', include(badgr_admin.urls)),
 
     # accounts:
     url(r'^accounts[/]?$', RedirectView.as_view(url='/accounts/email/')),
