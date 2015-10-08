@@ -39,6 +39,10 @@
     border-left: 0;
   }
 
+  .is-hover {
+    background: rgba(map-get($colors, link), .05);
+  }
+
 }
 
 .datatable-x-badgewrapper {

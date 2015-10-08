@@ -48,6 +48,15 @@
 
     }
 
+    tr:hover {
+
+      td,
+      th {
+        background: rgba(map-get($colors, link), .05);
+      }
+
+    }
+
   }
 
   .table_-x-minpad {
