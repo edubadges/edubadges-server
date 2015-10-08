@@ -8,7 +8,8 @@ from django.utils.translation import ugettext_lazy
 
 class BadgrAdminSite(AdminSite):
     site_header = ugettext_lazy('Badgr')
-    index_title = ugettext_lazy('Dashboard')
+    index_title = ugettext_lazy('Staff Dashboard')
+    site_title = 'Badgr'
 
     def autodiscover(self):
         autodiscover_modules('admin', register_to=self)

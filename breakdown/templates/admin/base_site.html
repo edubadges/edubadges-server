@@ -1,0 +1,44 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+#header {
+    background-color: #31383e;
+    height: 52px;
+    overflow: visible;
+    margin-top: -5px;
+}
+
+#user-tools {
+    padding: 2em 10px;
+}
+
+#content {
+    margin: 30px 15px;
+}
+
+div.breadcrumbs {
+    padding: 25px 8px 3px 8px;
+}
+
+body.login #branding {
+    margin-top: -5px;
+}
+body.login #header {
+    height: 47px;
+}
+</style>
+{% endblock %}
+
+{% block branding %}
+    <header>
+        <a href="{% url 'admin:index' %}" style="padding-left: 16px">
+            <img src="{{STATIC_URL}}images/header-logo-small.svg" width="153" height="75" />
+        </a>
+    </header>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
