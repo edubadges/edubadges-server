@@ -125,7 +125,7 @@ var IssuerList = React.createClass({
       }.bind(this));
     }
     return (
-      <div className="l-vertical l-wrapper l-wrapper-inset">
+      <div className="l-vertical l-wrapper">
         {issuers}
       </div>
     );
