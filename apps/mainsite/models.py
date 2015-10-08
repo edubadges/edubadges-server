@@ -74,6 +74,11 @@ class AbstractIssuer(AbstractComponent):
         super(AbstractIssuer, self).publish()
         self.publish_by('slug')
 
+    def delete(self, *args, **kwargs):
+        super(AbstractIssuer, self).delete(*args, **kwargs)
+        self.publish_delete("slug")
+
+
 
 class AbstractBadgeClass(AbstractComponent):
     """
@@ -103,6 +108,10 @@ class AbstractBadgeClass(AbstractComponent):
     def publish(self):
         super(AbstractBadgeClass, self).publish()
         self.publish_by('slug')
+
+    def delete(self, *args, **kwargs):
+        super(AbstractBadgeClass, self).delete(*args, **kwargs)
+        self.publish_delete('slug')
 
 
 class AbstractBadgeInstance(AbstractComponent):
@@ -157,6 +166,11 @@ class AbstractBadgeInstance(AbstractComponent):
         super(AbstractBadgeInstance, self).publish()
         self.publish_by('slug')
         self.publish_by('slug', 'revoked')
+
+    def delete(self, *args, **kwargs):
+        super(AbstractBadgeInstance, self).delete(*args, **kwargs)
+        self.publish_delete('slug')
+        self.publish_deleteby('slug', 'revoked')
 
 
 class EmailBlacklist(models.Model):

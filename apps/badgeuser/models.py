@@ -16,6 +16,12 @@ class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
         self.publish_by('email')
         self.user.publish()
 
+    def delete(self, *args, **kwargs):
+        user = self.user
+        super(CachedEmailAddress, self).delete(*args, **kwargs)
+        self.publish_delete('email')
+        user.publish()
+
 
 class BadgeUser(AbstractUser, cachemodel.CacheModel):
     """
@@ -48,6 +54,10 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
     def publish(self):
         super(BadgeUser, self).publish()
         self.publish_by('username')
+
+    def delete(self, *args, **kwargs):
+        super(BadgeUser, self).delete(*args, **kwargs)
+        self.publish_delete('username')
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_emails(self):
