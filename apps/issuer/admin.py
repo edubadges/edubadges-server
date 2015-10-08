@@ -33,7 +33,6 @@ class BadgeClassAdmin(ModelAdmin):
     list_display_links = ('badge_image', 'name')
     list_filter = ('created_at',)
     search_fields = ('name', 'slug', 'issuer__name',)
-    actions_on_top = True
     fieldsets = (
         ('Metadata', {'fields': ('created_by', 'created_at',), 'classes': ("collapse",)}),
         (None, {'fields': ('image', 'name', 'slug', 'issuer')}),
@@ -55,7 +54,6 @@ class BadgeInstanceAdmin(ModelAdmin):
     list_display_links = ('badge_image', 'recipient_identifier', )
     list_filter = ('created_at',)
     search_fields = ('slug', 'badgeclass__name', 'issuer__name')
-    actions_on_top = True
     fieldsets = (
         ('Metadata', {'fields': ('created_by', 'created_at',), 'classes': ("collapse",)}),
         (None, {'fields': ('image', 'slug', 'recipient_identifier', 'badgeclass', 'issuer')}),
