@@ -38,8 +38,8 @@ var Pagination = React.createClass({
             ( <button className="icon_ icon_-notext icon_-next" disabled="disabled">Next</button> );
 
         var last = this.props.last ?
-            ( <button className="icon_ icon_-notext icon_-next" onClick={this.handleClickLast}>Last</button> ) :
-            ( <button className="icon_ icon_-notext icon_-next" disabled="disabled">Last</button> );
+            ( <button className="icon_ icon_-notext icon_-last" onClick={this.handleClickLast}>Last</button> ) :
+            ( <button className="icon_ icon_-notext icon_-last" disabled="disabled">Last</button> );
 
 
         var idxFirst = 1+(this.props.page-1)*this.props.perPageCount;
