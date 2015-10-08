@@ -9,6 +9,13 @@ from credential_store.models import StoredBadgeInstance
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
+######
+#
+# !!! This app and all its models have been deprecated !!!
+# see the new 'composition' app
+#
+#####
+
 
 class Collection(cachemodel.CacheModel):
     name = models.CharField(max_length=128)

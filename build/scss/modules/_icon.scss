@@ -94,6 +94,14 @@
 
 }
 
+.icon_-copy {
+
+  &::after {
+    background-image: url('images/icon-copy.svg');
+  }
+
+}
+
 .icon_-more {
 
   &::after {

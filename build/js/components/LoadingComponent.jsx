@@ -2,8 +2,15 @@ var React = require('react');
 
 
 var LoadingComponent = React.createClass({
+  getDefaultProps: function() {
+      return {
+          label: "Loading..."
+      };
+  },
   render: function() {
-    return (<p className="status_">{this.props.label || "Loading …"}</p>);
+    return (
+          <span className="status_">{this.props.label}</span>
+    );
   }
 });
 

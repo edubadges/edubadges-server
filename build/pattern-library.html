@@ -9,12 +9,12 @@
 
         <link href="pattern-library.css?__inline=true" rel="stylesheet" type="text/css">
 		<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,400italic,700,700italic,300,300italic' rel='stylesheet' type='text/css'>
+        <!-- required for Fixed Data Table react component -->
+        <link href="{{ STATIC_URL }}css/fixed-data-table.css" media="screen" rel="stylesheet" type="text/css" >
 		<link href="{{ STATIC_URL }}css/dialog-polyfill.css" media="screen" rel="stylesheet" type="text/css" >
 		<link href="{{ STATIC_URL }}css/reset.css" media="screen" rel="stylesheet" type="text/css" >
 		<link href="{{ STATIC_URL }}css/screen.css" media="screen" rel="stylesheet" type="text/css" >
 
-        <!-- required for Fixed Data Table react component -->
-        <link href="{{ STATIC_URL }}css/fixed-data-table.css" media="screen" rel="stylesheet" type="text/css" >
 
 	</head>
 
@@ -67,9 +67,9 @@
 
                 <article data-pattern="pattern" id="badge_">
                     <code data-pattern="code">
-                        <div class="badge_">
+                        <div class="badge_ viewdetails_">
                             <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
-                            <div class="badge_-x-action">
+                            <div class="viewdetails_-x-details">
                                 <button class="button_ button_-solid button_-uppercase">View Details</button>
                             </div>
                         </div>
@@ -140,6 +140,35 @@
 
                     </div>
 
+                </article>
+
+                <article data-pattern="pattern" id="collection_">
+                    <code data-pattern="code">
+                        <div class="collection_ viewdetails_">
+                            <h1 class="truncate_">Named Collection #1</h1>
+                            <div class="collection_-x-item">
+                                <img srcst="http://placehold.it/144x144 2x, http://placehold.it/72x72" src="http://placehold.it/72x72" width="72" height="72" alt="badge description">
+                            </div>
+                            <div class="collection_-x-item">
+                                <img srcst="http://placehold.it/144x144 2x, http://placehold.it/72x72" src="http://placehold.it/72x72" width="72" height="72" alt="badge description">
+                            </div>
+                            <div class="collection_-x-item">
+                                <img srcst="http://placehold.it/144x144 2x, http://placehold.it/72x72" src="http://placehold.it/72x72" width="72" height="72" alt="badge description">
+                            </div>
+                            <div class="collection_-x-item">
+                                <img srcst="http://placehold.it/144x144 2x, http://placehold.it/72x72" src="http://placehold.it/72x72" width="72" height="72" alt="badge description">
+                            </div>
+                            <div class="collection_-x-item">
+                                <img srcst="http://placehold.it/144x144 2x, http://placehold.it/72x72" src="http://placehold.it/72x72" width="72" height="72" alt="badge description">
+                            </div>
+                            <div class="collection_-x-item">
+                                <img srcst="http://placehold.it/144x144 2x, http://placehold.it/72x72" src="http://placehold.it/72x72" width="72" height="72" alt="badge description">
+                            </div>
+                            <div class="viewdetails_-x-details">
+                                <button class="button_ button_-solid button_-uppercase">View Details</button>
+                            </div>
+                        </div>
+                    </code>
                 </article>
 
                 <article data-pattern="pattern" id="control_">
@@ -490,17 +519,29 @@
                                     
                                     <div class="form_-x-field">
                                         <label for="name">Name <span class="hint">(with a note)</span></label>
-                                        <input type="text" id="name" name="name" required>
+                                        <input type="text" id="name" name="name" tabindex="1" required>
+                                    </div>
+
+                                    <div class="form_-x-field">
+                                        <label for="action">Action <span class="hint">(with a note)</span></label>
+                                        <div class="form_-x-action">
+                                            <input type="text" id="action" name="action" readonly value="Here's some text to copy">
+                                            <button type="button" tabindex="2"><span class="icon_ icon_-copy">Copy</span></button>
+                                        </div>
+                                    </div>
+
+                                    <div class="form_-x-field">
+                                        <label for="file">Action <span class="hint">(with a note)</span></label>
+                                        <input type="file" id="file" name="file" class="hidden">
+                                        <div class="form_-x-action">
+                                            <input type="text" id="fakefile" name="fakefile" readonly>
+                                            <button type="button" tabindex="3">Browse</button>
+                                        </div>
                                     </div>
 
                                     <div class="form_-x-field">
                                         <label for="description">Description</label>
-                                        <textarea name="description" id="description"></textarea>
-                                    </div>
-
-                                    <div class="form_-x-field">
-                                        <label for="criteria">Criteria or URL Text</label>
-                                        <input type="text" id="criteria" name="criteria" disabled>
+                                        <textarea name="description" id="description" tabindex="4"></textarea>
                                     </div>
 
                                 </fieldset>
@@ -508,9 +549,9 @@
                                 <fieldset>
                                     
                                     <div class="form_-x-field">
-                                        <div class="form_-x-imagefield dropzone">
+                                        <button class="form_-x-imagefield dropzone" tabindex="5" type="button">
                                             <p>Tap here to upload image</p>
-                                        </div>
+                                        </button>
                                     </div>
 
                                     <div class="form_-x-field">
@@ -533,10 +574,18 @@
 
                             <div class="control_">
                                 <button class="button_ button_-secondary">Cancel</button>
-                                <button class="button_" type="submit">Submit</button>
+                                <button class="button_" type="submit" tabindex="6">Submit</button>
                             </div>
 
                         </form>
+
+                        <script type="text/javascript">
+
+                            document.addEventListener('DOMContentLoaded', function() {
+                                var fileInput = document.getElementById('file');
+                            });
+
+                        </script>
 
                     </code>
 
@@ -578,33 +627,35 @@
                                     <h1>Named Collection #2</h1>
                                     <p>Instructional or welcome text. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at risus commodo, mattis turpis non, molestie libero. Fusce pellentesque diam ac neque.</p>
                                 </div>
+                                <div class="heading_-x-actions">
+                                    <p class="status_">Checking for new badges &hellip;</p>
+                                    <button class="action_">Action</button>
+                                    <button class="action_">Action</button>
+                                    <button class="action_">Action</button>
+                                    <button class="action_">Action</button>
+                                    <button class="action_">Action</button>
+                                </div>
+                            </header>
+                        </code>
+                    </div>
+                    <div data-pattern="pattern-secondary" id="heading_-centered">
+                        <code data-pattern="code" data-pattern-helper="spacer">
+                            <header class="heading_ heading_-small heading_-centered">
+                                <div class="heading_-x-text">
+                                    <h1>Named Collection #2</h1>
+                                </div>
+                                <div class="heading_-x-actions">
+                                    <p class="status_">Checking for new badges &hellip;</p>
+                                    <button class="action_">Action</button>
+                                    <button class="action_">Action</button>
+                                    <button class="action_">Action</button>
+                                    <button class="action_">Action</button>
+                                    <button class="action_">Action</button>
+                                </div>
                             </header>
                         </code>
                     </div>
 				</article>
-
-                <!-- <article data-pattern="pattern" id="dropzone_">
-                    <code data-pattern="code">
-                        <code data-pattern="code">
-                            <article class="dropzone_">
-                                <img src="/static/images/add-badge.png" alt="Upload Badge">
-                                <h1>Upload Badge</h1>
-                                <p>Drag a bage here, or tap for advanced options.</p>
-                            </article>
-                        </code>
-                    </code>
-                </article> -->
-
-                <!-- <article data-pattern="pattern" id="form_-controls">
-                    <code data-pattern="code">
-                        <div class="form_">
-                            <div class="form_-controls">
-                                <button name="close" class="button button-secondary button-uppercase">Cancel</button>
-                                <button name="submit" class="button button-uppercase">Submit</button>
-                            </div>
-                        </div>
-                    </code>
-                </article> -->
 
                 <article data-pattern="pattern" id="headers">
 
@@ -765,9 +816,9 @@
                                     
                                     <div>
                                         <div class="card_">
-                                            <div class="badge_">
+                                            <div class="badge_ viewdetails_">
                                                 <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
-                                                <div class="badge_-x-action">
+                                                <div class="viewdetails_-x-details">
                                                     <button class="button_ button_-solid button_-uppercase">View Details</button>
                                                 </div>
                                             </div>
@@ -793,9 +844,9 @@
 
                                     <div>
                                         <div class="card_">
-                                            <div class="badge_">
+                                            <div class="badge_ viewdetails_">
                                                 <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
-                                                <div class="badge_-x-action">
+                                                <div class="viewdetails_-x-details">
                                                     <button class="button_ button_-solid button_-uppercase">View Details</button>
                                                 </div>
                                             </div>
@@ -821,9 +872,9 @@
 
                                     <div>
                                         <div class="card_">
-                                            <div class="badge_">
+                                            <div class="badge_ viewdetails_">
                                                 <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
-                                                <div class="badge_-x-action">
+                                                <div class="viewdetails_-x-details">
                                                     <button class="button_ button_-solid button_-uppercase">View Details</button>
                                                 </div>
                                             </div>
@@ -849,9 +900,9 @@
 
                                     <div>
                                         <div class="card_">
-                                            <div class="badge_">
+                                            <div class="badge_ viewdetails_">
                                                 <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
-                                                <div class="badge_-x-action">
+                                                <div class="viewdetails_-x-details">
                                                     <button class="button_ button_-solid button_-uppercase">View Details</button>
                                                 </div>
                                             </div>
@@ -912,9 +963,9 @@
                                     
                                     <div>
                                         <div class="card_">
-                                            <div class="badge_">
+                                            <div class="badge_ viewdetails_">
                                                 <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
-                                                <div class="badge_-x-action">
+                                                <div class="viewdetails_-x-details">
                                                     <button class="button_ button_-solid button_-uppercase">View Details</button>
                                                 </div>
                                             </div>
@@ -932,9 +983,9 @@
 
                                     <div>
                                         <div class="card_">
-                                            <div class="badge_">
+                                            <div class="badge_ viewdetails_">
                                                 <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
-                                                <div class="badge_-x-action">
+                                                <div class="viewdetails_-x-details">
                                                     <button class="button_ button_-solid button_-uppercase">View Details</button>
                                                 </div>
                                             </div>
@@ -960,9 +1011,9 @@
 
                                     <div>
                                         <div class="card_">
-                                            <div class="badge_">
+                                            <div class="badge_ viewdetails_">
                                                 <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
-                                                <div class="badge_-x-action">
+                                                <div class="viewdetails_-x-details">
                                                     <button class="button_ button_-solid button_-uppercase">View Details</button>
                                                 </div>
                                             </div>
@@ -988,9 +1039,9 @@
 
                                     <div>
                                         <div class="card_">
-                                            <div class="badge_">
+                                            <div class="badge_ viewdetails_">
                                                 <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
-                                                <div class="badge_-x-action">
+                                                <div class="viewdetails_-x-details">
                                                     <button class="button_ button_-solid button_-uppercase">View Details</button>
                                                 </div>
                                             </div>
@@ -1016,9 +1067,9 @@
 
                                     <div>
                                         <div class="card_">
-                                            <div class="badge_">
+                                            <div class="badge_ viewdetails_">
                                                 <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
-                                                <div class="badge_-x-action">
+                                                <div class="viewdetails_-x-details">
                                                     <button class="button_ button_-solid button_-uppercase">View Details</button>
                                                 </div>
                                             </div>
@@ -1044,9 +1095,9 @@
 
                                     <div>
                                         <div class="card_">
-                                            <div class="badge_">
+                                            <div class="badge_ viewdetails_">
                                                 <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
-                                                <div class="badge_-x-action">
+                                                <div class="viewdetails_-x-details">
                                                     <button class="button_ button_-solid button_-uppercase">View Details</button>
                                                 </div>
                                             </div>
@@ -1072,9 +1123,9 @@
 
                                     <div>
                                         <div class="card_">
-                                            <div class="badge_">
+                                            <div class="badge_ viewdetails_">
                                                 <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
-                                                <div class="badge_-x-action">
+                                                <div class="viewdetails_-x-details">
                                                     <button class="button_ button_-solid button_-uppercase">View Details</button>
                                                 </div>
                                             </div>
@@ -1094,6 +1145,54 @@
                                                 </div>
                                                 
 
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="l-grid-stretch">
+
+                        <code data-pattern="code">
+
+                            <div class="l-wrapper l-wrapper-inset">
+                                
+                                <div class="l-grid l-grid-stretch">
+                                    
+                                    <div>
+                                        <div class="card_">
+                                            <div class="badge_ viewdetails_">
+                                                <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
+                                                <div class="viewdetails_-x-details">
+                                                    <button class="button_ button_-solid button_-uppercase">View Details</button>
+                                                </div>
+                                            </div>
+                                            <div class="title_">
+                                                <div>
+                                                    <h1>pneumonoultramicros copicsilicovolcano coniosis</h1>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="card_">
+                                            <div class="badge_ viewdetails_">
+                                                <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
+                                                <div class="viewdetails_-x-details">
+                                                    <button class="button_ button_-solid button_-uppercase">View Details</button>
+                                                </div>
+                                            </div>
+                                            <div class="title_">
+                                                <div>
+                                                    <h1>pneumonoultramicr</h1>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1523,6 +1622,26 @@
                     <code data-pattern="code" data-pattern-helper="spacer">
 
                         <p class="truncate_">pneumonoultramicroscopicsilicovolcanoconiosis pneumonoultramicroscopicsilicovolcanoconiosis pneumonoultramicroscopicsilicovolcanoconiosis pneumonoultramicroscopicsilicovolcanoconiosis</p>
+
+                    </code>
+
+                </article>
+
+                <article data-pattern="pattern" id="viewdetails_">
+
+                    <code data-pattern="code" data-pattern-helper="spacer">
+
+                        <div class="viewdetails_">
+                            
+                            <p>Hover here to see more details.</p>
+
+                            <p>A new panel will appear.</p>
+
+                            <div class="viewdetails_-x-details">
+                                <button class="button_ button_-outline">View some details</button>
+                            </div>
+
+                        </div>
 
                     </code>
 

@@ -1,4 +1,7 @@
+var _ = require('lodash');
 var appDispatcher = require("../dispatcher/appDispatcher");
+var FormStore = require("../stores/FormStore");
+
 
 var patchFormAction = function(formId, patch) {
   appDispatcher.dispatch({ action: {
@@ -6,23 +9,30 @@ var patchFormAction = function(formId, patch) {
       formId: formId,
       update: patch
     }});
-}
+};
+
 
 var submitFormAction = function(formId, formType, requestContext) {
-  appDispatcher.dispatch({ action: {
-      type: 'FORM_SUBMIT',
-      formId: formId,
-      formType: formType,
-      requestContext: requestContext
-    }});
-}
+  var formActionStatus = _.get(FormStore.getFormData(formId), 'formState.actionState');
+  if (formActionStatus && formActionStatus !== "waiting")
+      appDispatcher.dispatch({
+          action: {
+              type: 'FORM_SUBMIT',
+              formId: formId,
+              formType: formType,
+              requestContext: requestContext
+          }
+      });
+};
+
 
 var resetFormAction = function(formId) {
   appDispatcher.dispatch({ action: {
       type: 'FORM_RESET',
       formId: formId
     }});
-}
+};
+
 
 module.exports.patchForm = patchFormAction;
 module.exports.submitForm = submitFormAction;

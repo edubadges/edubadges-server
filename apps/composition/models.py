@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.files.storage import default_storage
 from django.core.urlresolvers import reverse
 
 from autoslug import AutoSlugField
@@ -20,6 +21,10 @@ class LocalBadgeClass(AbstractBadgeClass):
                                on_delete=models.PROTECT,
                                related_name="badgeclasses")
 
+    class Meta:
+        verbose_name = 'local badge class'
+        verbose_name_plural = 'local badge classes'
+
 
 class LocalBadgeInstance(AbstractBadgeInstance):
     # 0.5 BadgeInstances have no notion of a BadgeClass
@@ -32,10 +37,10 @@ class LocalBadgeInstance(AbstractBadgeInstance):
     recipient_user = models.ForeignKey(AUTH_USER_MODEL)
 
     def image_url(self):
-        if getattr(settings, 'MEDIA_ROOT').startswith('http'):
-            return self.image.url
+        if getattr(settings, 'MEDIA_URL').startswith('http'):
+            return default_storage.url(self.image.name)
         else:
-            return getattr(settings, 'HTTP_ORIGIN') + self.image.url
+            return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
 
 
 class Collection(cachemodel.CacheModel):

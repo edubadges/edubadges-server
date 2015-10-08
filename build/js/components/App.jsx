@@ -443,7 +443,7 @@ var App = React.createClass({
           </Heading>
         <EarnerCollectionDetail
           name={collection.name}
-          slug={collection.slug}
+          slug={collectionSlug}
           clickable={false}
           description={collection.description}
           share_url={collection.share_url}
@@ -501,7 +501,7 @@ var App = React.createClass({
 
   issuerDetail: function(issuerSlug, params){
     if (!params['perPage'])
-      params['perPage'] = 10
+      params['perPage'] = -1
     if (!params['currentPage'])
       params['currentPage'] = 1
 

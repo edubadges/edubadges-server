@@ -13,7 +13,8 @@ var Button = React.createClass({
         label: React.PropTypes.string,
         labelFunction: React.PropTypes.func,
         isDisabled: React.PropTypes.bool,
-        isDisabledFunction: React.PropTypes.func
+        isDisabledFunction: React.PropTypes.func,
+        className: React.PropTypes.string
     },
     getDefaultProps: function() {
         return {

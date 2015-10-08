@@ -14,6 +14,12 @@
 
             <!-- dialog polyfill needs to be above screen.css -->
             <script src="{{STATIC_URL}}js/dialog-polyfill.js"></script>
+            <link rel="stylesheet" href="{{STATIC_URL}}css/dialog-polyfill.css" type="text/css" media="screen" />
+
+            <!-- 3rd party vendor stylesheets -->
+            <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/dialog-polyfill.css">
+            <link href="{{ STATIC_URL }}css/fixed-data-table.css" media="screen" rel="stylesheet" type="text/css" >
+            <link href="{{STATIC_URL}}css/plugins/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
             <!-- main (legacy) stylesheet -->
             <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/style.css">
@@ -21,9 +27,6 @@
             <link href="{{ STATIC_URL }}css/reset.css" media="screen" rel="stylesheet" type="text/css" >
             <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/screen.css">
 
-            <link href="{{ STATIC_URL }}css/fixed-data-table.css" media="screen" rel="stylesheet" type="text/css" >
-            <link href="{{STATIC_URL}}css/plugins/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-        
             {% block extrastyle %}{% endblock %}
 
             <script src="{{STATIC_URL}}js/libs/modernizr-2.5.3.min.js"></script>
@@ -58,7 +61,7 @@
 
         {% block footer %}
             <footer class="footer_ l-wrapper l-wrapper-inset">
-                <p>Powered by <a href="https://github.com/concentricsky/bagr-server" target="_blank">Badgr</a>  /  <a href="/docs" target="_blank">API documentation</a>  /  Copyright © 2015 <a href="http://concentricsky.com" target="_blank">Concentric Sky, Inc.</a></p>
+                <p>Powered by <a href="https://github.com/concentricsky/badgr-server" target="_blank">Badgr</a>  /  <a href="/docs" target="_blank">API documentation</a>  /  Copyright © 2015 <a href="http://concentricsky.com" target="_blank">Concentric Sky, Inc.</a></p>
             </footer>
         {% endblock %}
 

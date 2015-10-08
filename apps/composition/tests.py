@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 import responses
 from rest_framework.test import APITestCase
 
-from composition.models import LocalBadgeClass, LocalIssuer
+from composition.models import LocalBadgeClass, LocalIssuer, LocalBadgeInstance
 
 dir = os.path.dirname(__file__)
 
@@ -84,6 +84,9 @@ class TestBadgeUploads(APITestCase):
             get_response.data[0].get('json', {}).get('id'),
             'http://a.com/instance'
         )
+
+        new_instance = LocalBadgeInstance.objects.first()
+        self.assertEqual(get_response.data[0].get('json', {}).get('image', {}).get('id'), new_instance.image_url())
 
     @responses.activate
     def test_submit_basic_1_0_badge_from_image_url_baked_w_assertion(self):

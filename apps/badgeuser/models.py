@@ -16,6 +16,12 @@ class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
         self.publish_by('email')
         self.user.publish()
 
+    def delete(self, *args, **kwargs):
+        user = self.user
+        super(CachedEmailAddress, self).delete(*args, **kwargs)
+        self.publish_delete('email')
+        user.publish()
+
 
 class BadgeUser(AbstractUser, cachemodel.CacheModel):
     """
@@ -26,12 +32,12 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
     REQUIRED_FIELDS = ['email']
 
     class Meta:
-        verbose_name = _('badgeuser')
-        verbose_name_plural = _('badgeusers')
+        verbose_name = _('badge user')
+        verbose_name_plural = _('badge users')
         db_table = 'users'
 
     def __unicode__(self):
-        return self.username
+        return self.email
 
     def get_absolute_url(self):
         return "/user/%s/" % urlquote(self.username)
@@ -48,6 +54,10 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
     def publish(self):
         super(BadgeUser, self).publish()
         self.publish_by('username')
+
+    def delete(self, *args, **kwargs):
+        super(BadgeUser, self).delete(*args, **kwargs)
+        self.publish_delete('username')
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_emails(self):

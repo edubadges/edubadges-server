@@ -19,7 +19,6 @@ git+https://github.com/concentricsky/django-cachemodel.git@v2.1.2
 git+https://github.com/concentricsky/django-basic-models.git@v2.1.2
 # CSky Client Admin
 git+https://github.com/concentricsky/django-sky-ckeditor.git@v0.9.8
-git+https://github.com/concentricsky/django-client-admin.git@v1.1.1
 # Revision and deleted object recovery
 django-reversion==1.8.5
 # Memcached cache
@@ -43,7 +42,6 @@ MarkupSafe==0.23
 django-autoslug==1.7.2
 jingo==0.4
 wsgiref==0.1.2
-six==1.8.0
 sqlparse==0.1.14
 netaddr
 
@@ -67,3 +65,13 @@ git+ssh://git@stash.concentricsky.com/bp/badgecheck.git@v0.2.5
 celery==3.1.18
 django-celery==3.1.16
 python-json-logger==0.1.2
+
+# SSL Support
+cffi==1.2.1
+cryptography==1.0.2
+enum34==1.0.4
+idna==2.0
+ipaddress==1.0.14
+pyasn1==0.1.9
+pycparser==2.14
+six==1.9.0
