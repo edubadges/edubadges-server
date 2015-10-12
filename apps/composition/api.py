@@ -354,13 +354,14 @@ class CollectionDetail(APIView):
               type: string
               paramType: form
         """
+        name = request.data.get('name')
         description = request.data.get('description')
         try:
+            name = str(name)
             description = str(description)
         except TypeError:
             return serializers.ValidationError(
-                "Server could not understand description"
-            )
+                "Server could not understand PUT fields. Expected strings.")
 
         try:
             collection = self.queryset.get(
@@ -370,6 +371,8 @@ class CollectionDetail(APIView):
         except Collection.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
+        if name:
+            collection.name = name
         if description:
             collection.description = description
 
