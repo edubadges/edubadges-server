@@ -417,6 +417,8 @@ var App = React.createClass({
     });
     FormStore.getOrInitFormData(dialogFormId, formProps)
 
+    formProps.fieldsMeta.name.disabled = true;
+
     var actions=[
         <SubmitButton formId={dialogFormId} label="Edit Collection" />
     ];
