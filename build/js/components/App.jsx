@@ -408,13 +408,13 @@ var App = React.createClass({
     ];
 
     var dialogFormId = "EarnerCollectionEditForm";
-    var formProps = FormConfigStore.getConfig(dialogFormId, undefined, 
-            {
-                "collection": {
-                    "name": collection.name,
-                    "description": collection.description,
-                }
-            });
+    var formProps = FormConfigStore.getConfig(dialogFormId, {}, {
+        collection: {
+            slug: collectionSlug,
+            name: collection.name,
+            description: collection.description,
+        }
+    });
     FormStore.getOrInitFormData(dialogFormId, formProps)
 
     var actions=[
