@@ -12,6 +12,7 @@ from django.db import models
 from autoslug import AutoSlugField
 import cachemodel
 from jsonfield import JSONField
+from PIL import Image, ImageOps
 
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
@@ -78,6 +79,12 @@ class AbstractIssuer(AbstractComponent):
         super(AbstractIssuer, self).delete(*args, **kwargs)
         self.publish_delete("slug")
 
+    def save(self, *args, **kwargs):
+        image = Image.open(self.image)
+        fit_image = ImageOps.fit(image, (400, 400), Image.ANTIALIAS)
+        fit_image.save(self.image.path)
+
+        return super(AbstractIssuer, self).save(*args, **kwargs)
 
 
 class AbstractBadgeClass(AbstractComponent):
