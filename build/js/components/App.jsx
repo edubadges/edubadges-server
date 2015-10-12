@@ -249,7 +249,7 @@ var App = React.createClass({
     var dialog = (
         <Dialog formId={dialogFormId} dialogId="import-badge" actions={actions} className="closable">
             <Heading size="small"
-                        title="Create New Badge"
+                        title="Import Badge"
                         subtitle="Verify an Open Badge and add it to your library by uploading a badge image or entering its URL."/>
 
             <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
@@ -514,14 +514,17 @@ var App = React.createClass({
     ];
 
     var dialogFormId = "BadgeClassCreateUpdateForm"
-    var formProps = FormConfigStore.getConfig(dialogFormId);
+    var formProps = FormConfigStore.getConfig(dialogFormId, {}, {issuerSlug: issuerSlug});
     FormStore.getOrInitFormData(dialogFormId, formProps);
 
     var actions=[
-        <SubmitButton formId={dialogFormId} label="Add Collection" />
+        <SubmitButton formId={dialogFormId} label="Create" />
     ];
     var dialog = (
         <Dialog formId={dialogFormId} dialogId="issuer-add-badge" actions={actions} className="closable">
+            <Heading size="small"
+                        title="Create New Badge"
+                        subtitle=""/>
             <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
         </Dialog>);
 
