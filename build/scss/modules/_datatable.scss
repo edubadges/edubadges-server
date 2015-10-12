@@ -7,11 +7,14 @@
   .public_fixedDataTable_header,
   .public_fixedDataTable_header .public_fixedDataTableCell_main {
     background: map-get($colors, solid-light);
-    padding-top: $layout-spacing*2;
+
+    .fixedDataTableCellLayout_wrap3 {
+      vertical-align: bottom;
+    }
   }
 
   .public_fixedDataTableCell_cellContent {
-    padding: 0 $layout-spacing*2;
+    padding-bottom: 12px;
   }
 
   .public_fixedDataTableRow_highlighted,
