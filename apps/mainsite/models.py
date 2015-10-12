@@ -3,9 +3,11 @@ import base64
 from datetime import datetime, timedelta
 from hashlib import sha1
 import hmac
+import StringIO
 import uuid
 
 from django.conf import settings
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.urlresolvers import reverse
 from django.db import models
 
@@ -82,7 +84,13 @@ class AbstractIssuer(AbstractComponent):
     def save(self, *args, **kwargs):
         image = Image.open(self.image)
         fit_image = ImageOps.fit(image, (400, 400), Image.ANTIALIAS)
-        fit_image.save(self.image.path)
+
+        fit_image_string = StringIO.StringIO()
+        fit_image.save(fit_image_string, 'PNG')
+
+        self.image = InMemoryUploadedFile(fit_image_string, None,
+                                          self.image.name, 'image/png',
+                                          fit_image_string.len, None)
 
         return super(AbstractIssuer, self).save(*args, **kwargs)
 
