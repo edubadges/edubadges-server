@@ -27,8 +27,8 @@ python-memcached==1.53
 djangorestframework==3.1.1
 django-rest-swagger==0.2.9
 # Django Allauth
-#django-allauth==0.21.0
-git+https://github.com/concentricsky/django-allauth.git@0.21.0-csky
+#django-allauth==0.23.0
+git+https://github.com/concentricsky/django-allauth.git@0.23.0-csky
 oauthlib==0.7.2
 requests==2.5.1
 requests-oauthlib==0.4.2
