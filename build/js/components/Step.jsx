@@ -5,12 +5,14 @@ var Step = React.createClass({
         title: React.PropTypes.string.isRequired,
         subtitle: React.PropTypes.string,
         earned: React.PropTypes.bool,
+        handleClick: React.PropTypes.func,
     },
     getDefaultProps: function() {
         return {
             earned: false,
             title: "Title",
             subtitle: undefined,
+            handleClick: function() {},
         };
     },
 
@@ -18,7 +20,7 @@ var Step = React.createClass({
         var subtitle = this.props.subtitle ? (<p>{this.props.subtitle}</p>) : "";
 
         return (
-            <button className={"card_ step_ "+(this.props.earned ? 'step_-earned' : '')}>
+            <button className={"card_ step_ "+(this.props.earned ? 'step_-earned' : '')} onClick={this.props.handleClick}>
                 {this.props.title}
                 {subtitle}
             </button>);
