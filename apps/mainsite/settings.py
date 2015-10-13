@@ -101,10 +101,6 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.i18n',
 
-    # allauth specific context processors
-    "allauth.account.context_processors.account",
-    "allauth.socialaccount.context_processors.socialaccount",
-
     'mainsite.context_processors.help_email'
 ]
 
