@@ -22,3 +22,19 @@ badgr_admin = BadgrAdminSite(name='badgradmin')
 badgr_admin.disable_action('delete_selected')
 badgr_admin.add_action(delete_selected)
 
+
+
+# 3rd party apps
+
+from allauth.account.admin import EmailAddressAdmin, EmailConfirmationAdmin
+from allauth.account.models import EmailAddress, EmailConfirmation
+from django.contrib.auth.admin import GroupAdmin
+from django.contrib.auth.models import Group
+from django.contrib.sites.admin import SiteAdmin
+from django.contrib.sites.models import Site
+
+badgr_admin.register(Site, SiteAdmin)
+badgr_admin.register(Group, GroupAdmin)
+
+badgr_admin.register(EmailAddress, EmailAddressAdmin)
+badgr_admin.register(EmailConfirmation, EmailConfirmationAdmin)
