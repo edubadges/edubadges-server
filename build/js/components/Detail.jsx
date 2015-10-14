@@ -146,7 +146,7 @@ var Detail = React.createClass({
                     <Heading size="small" title={badgeName} subtitle={_.get(this.props, 'badge_class.json.description')}/>
                     <div className="detail_">
                         <div>
-                            <img src={_.get(this.props, 'badge_class.image')} width="224" height="224" alt={badgeName}/>
+                            <img src={_.get(this.props, 'badge_class.image')} width="144" height="144" alt={badgeName}/>
                         </div>
                         <ul>{properties}</ul>
                     </div>
