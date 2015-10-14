@@ -3,19 +3,17 @@ import base64
 from datetime import datetime, timedelta
 from hashlib import sha1
 import hmac
-import StringIO
 import uuid
 
 from django.conf import settings
-from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.urlresolvers import reverse
 from django.db import models
 
 from autoslug import AutoSlugField
 import cachemodel
 from jsonfield import JSONField
-from PIL import Image, ImageOps
-from resizeimage.resizeimage import resize_contain
+
+from .mixins import ResizeUploadedImage
 
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
@@ -52,7 +50,7 @@ class AbstractComponent(cachemodel.CacheModel):
         return self.json.get(property_name)
 
 
-class AbstractIssuer(AbstractComponent):
+class AbstractIssuer(ResizeUploadedImage, AbstractComponent):
     """
     Open Badges Specification IssuerOrg object
     """
@@ -82,23 +80,8 @@ class AbstractIssuer(AbstractComponent):
         super(AbstractIssuer, self).delete(*args, **kwargs)
         self.publish_delete("slug")
 
-    def save(self, *args, **kwargs):
-        image = Image.open(self.image)
 
-        if image.format == 'PNG':
-            new_image = resize_contain(image, (400, 400))
-
-            byte_string = StringIO.StringIO()
-            new_image.save(byte_string, 'PNG')
-
-            self.image = InMemoryUploadedFile(byte_string, None,
-                                              self.image.name, 'image/png',
-                                              byte_string.len, None)
-
-        return super(AbstractIssuer, self).save(*args, **kwargs)
-
-
-class AbstractBadgeClass(AbstractComponent):
+class AbstractBadgeClass(ResizeUploadedImage, AbstractComponent):
     """
     Open Badges Specification BadgeClass object
     """
