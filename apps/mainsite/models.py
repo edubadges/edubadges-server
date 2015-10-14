@@ -15,6 +15,7 @@ from autoslug import AutoSlugField
 import cachemodel
 from jsonfield import JSONField
 from PIL import Image, ImageOps
+from resizeimage.resizeimage import resize_contain
 
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
@@ -83,14 +84,16 @@ class AbstractIssuer(AbstractComponent):
 
     def save(self, *args, **kwargs):
         image = Image.open(self.image)
-        fit_image = ImageOps.fit(image, (400, 400), Image.ANTIALIAS)
 
-        fit_image_string = StringIO.StringIO()
-        fit_image.save(fit_image_string, 'PNG')
+        if image.format == 'PNG':
+            new_image = resize_contain(image, (400, 400))
 
-        self.image = InMemoryUploadedFile(fit_image_string, None,
-                                          self.image.name, 'image/png',
-                                          fit_image_string.len, None)
+            byte_string = StringIO.StringIO()
+            new_image.save(byte_string, 'PNG')
+
+            self.image = InMemoryUploadedFile(byte_string, None,
+                                              self.image.name, 'image/png',
+                                              byte_string.len, None)
 
         return super(AbstractIssuer, self).save(*args, **kwargs)
 
