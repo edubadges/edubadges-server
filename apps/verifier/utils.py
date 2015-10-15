@@ -15,6 +15,11 @@ def domain(url):
 
 def get_badge_instance_from_baked_image(baked_image):
     image_data = unbake(baked_image)
+
+    if not image_data:
+        raise ValidationError(
+            "No badge data found within the provided image.")
+
     badge_instance_type = _get_reference_type(image_data)
 
     if badge_instance_type == "json":
