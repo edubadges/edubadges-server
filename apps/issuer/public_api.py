@@ -119,7 +119,7 @@ class BadgeClassCriteria(ComponentPropertyDetailView):
 
 class BadgeInstanceJson(JSONComponentView):
     model = BadgeInstance
-    renderer_classes = (BadgeInstanceHTMLRenderer, JSONRenderer,)
+    renderer_classes = (JSONRenderer, BadgeInstanceHTMLRenderer,)
 
     def get_renderer_context(self, **kwargs):
         context = super(BadgeInstanceJson, self).get_renderer_context()
