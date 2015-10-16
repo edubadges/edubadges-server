@@ -9,11 +9,11 @@ var APISubmitData = require('../actions/api').APISubmitData;
 var APIStore = require('../stores/APIStore');
 
 // Components
-var ActionBar = require('../components/ActionBar.jsx').ActionBar;
 var Button = require('../components/Button.jsx').Button;
 var Card = require('../components/Card.jsx');
 var Property = require('../components/BadgeDisplay.jsx').Property;
 var EarnerBadgeList = require('../components/EarnerBadgeList.jsx');
+var OpenBadgeList = require('../components/OpenBadgeList.jsx');
 var LoadingComponent = require('../components/LoadingComponent.jsx');
 var Heading = require('../components/Heading.jsx').Heading;
 
@@ -256,41 +256,57 @@ var EarnerCollectionDetail = React.createClass({
 
 
 var EarnerCollectionCard = React.createClass({
-  handleClick: function(){
-    if (this.props.clickable)
-      navigateLocalPath(
-        this.props.targetUrl || '/earner/collections/' + this.props.slug
-      );
-  },
-  render: function() {
-    var cardActionItems = [];
-    if (this.props.share_url)
-      cardActionItems.push({
-        actionUrl: this.props.share_url,
-        iconClass: 'fa-external-link',
-        actionClass: 'pull-right',
-        title: "Share"
-      });
+    getDefaultProps: function() {
+        return {
+            badgesToShow: 6,
+        };
+    },
+    handleClick: function(){
+        navigateLocalPath(
+            this.props.targetUrl || '/earner/collections/' + this.props.slug
+        );
+    },
+    render: function() {
+        var cardActionItems = [];
 
-    var badges = APIStore.filter('earner_badges', 'id', _.pluck(this.props.badgeList, 'id').slice(0,7));
+        if (this.props.share_url) {
+            cardActionItems.push({
+                actionUrl: this.props.share_url,
+                iconClass: 'fa-external-link',
+                actionClass: 'pull-right',
+                title: "Share"
+            });
+        }
 
-    if (this.props.badgeList.length > 7){
-      badges.push(moreLinkBadgeJSON(this.props.badgeList.length - 7));
+        var badges = APIStore.filter('earner_badges', 'id', 
+            _.pluck(this.props.badgeList, 'id').slice(0,this.props.badgesToShow)
+        );
+
+        return (
+            <div className="card_">
+                <div className="collection_ viewdetails_">
+                    <h1 className="truncate_" actions={cardActionItems}>{this.props.name}</h1>
+                    <OpenBadgeList
+                        display="image only"
+                        badges={badges}
+                        grid={false}
+                        showEmptyBadge={this.props.showEmptyBadge}
+                        clickEmptyBadge={this.props.clickEmptyBadge}
+                        selectedBadgeIds={this.props.selectedBadgeIds}
+                        handleClick={this.props.handleClick}
+                        />
+                    <div className="viewdetails_-x-details">
+                        <button className="button_ button_-solid button_-uppercase" onClick={this.handleClick}>View Details</button>
+                    </div>
+                </div>
+                <div className="title_">
+                    <div className="title_-x-section">
+                    <h1 className="truncate_">{this.props.badgeList.length} Badge{(this.props.badgeList.length === 0 || this.props.badgeList.length > 1) ? 's' : ''}</h1>
+                </div>
+                </div>
+            </div>
+        );
     }
-    return (
-      <Card
-        title={this.props.name}
-        onClick={this.handleClick}
-        actions={cardActionItems}
-      >
-        <EarnerBadgeList
-          display="image only"
-          badges={badges}
-          moreLink={this.props.targetUrl || '/earner/collections/' + this.props.slug}
-        />
-      </Card>
-    );
-  }
 });
 
 /* 
@@ -305,19 +321,21 @@ var EarnerCollectionList = React.createClass({
   render: function() {
     var collections = this.props.collections.map(function(item, i){
       return (
-        <EarnerCollectionCard
-          key={'collection-' + i}
-          name={item.name}
-          slug={item.slug}
-          description={item.description}
-          share_url={item.share_url}
-          badgeList={item.badges || []}
-          clickable={this.props.clickable}
-        />
+        <div>
+            <EarnerCollectionCard
+                key={'collection-' + i}
+                name={item.name}
+                slug={item.slug}
+                description={item.description}
+                share_url={item.share_url}
+                badgeList={item.badges || []}
+                clickable={this.props.clickable}
+                />
+        </div>
       );
     }.bind(this));
     return (
-      <div className="earner-collection-list">
+      <div className="l-grid">
         {collections}
       </div>
     );
