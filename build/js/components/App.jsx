@@ -18,7 +18,6 @@ var ActiveActionStore = require('../stores/ActiveActionStore');
 var TopLinks = require('../components/TopLinks.jsx');
 var MainComponent = require ('../components/MainComponent.jsx');
 var SecondaryMenu = require('../components/SecondaryMenu.jsx');
-var BreadCrumbs = require('../components/BreadCrumbs.jsx');
 var ActionBar = require('../components/ActionBar.jsx').ActionBar;
 var Heading = require('../components/Heading.jsx').Heading;
 var Dialog = require('../components/Dialog.jsx').Dialog;
@@ -192,7 +191,7 @@ var App = React.createClass({
   },
 
   // Render the base structure for the app (top menu, sidebar, and main content area)
-  render_base: function(mainComponent, breadCrumbs) {
+  render_base: function(mainComponent) {
     return (
         <div className="x-owner">
             <header className="header_ l-wrapper">
@@ -208,8 +207,6 @@ var App = React.createClass({
                     showLabels={true} />
             </nav>
             </header>
-
-            { breadCrumbs ? <BreadCrumbs items={breadCrumbs} submodule="header" /> : null }
 
             <main className="wrap_ ">
                 <div className="l-wrapper l-wrapper-inset">
@@ -282,11 +279,6 @@ var App = React.createClass({
   earnerImportBadge: function(params){
     var viewId = 'earnerImportBadge';
     var dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
-    var breadCrumbs = [
-      { name: "Earner Home", url: '/earner'},
-      { name: "My Badges", url: '/earner/badges' },
-      { name: "Import New Badge", url: '/earner/badges/new' }
-    ];
     var navigateToBadgeList = function(){
       ClickActions.navigateLocalPath('/earner/badges');
     };
@@ -304,7 +296,7 @@ var App = React.createClass({
 
       </MainComponent>
     );
-    return this.render_base(mainComponent, breadCrumbs);
+    return this.render_base(mainComponent);
   },
 
   earnerBadgeDetail: function(badgeId) {
@@ -316,10 +308,6 @@ var App = React.createClass({
     if (!badge)
       return this.render_base("Badge not found!");
 
-    var breadCrumbs = [
-      { name: "My Badges", url: '/earner/badges' },
-      { name: badge.json.badge.name['@value'], url: '/earner/badges/' + badgeId }
-    ];
     var mainComponent = (
       <MainComponent viewId={viewId}>
         <Heading
@@ -338,15 +326,11 @@ var App = React.createClass({
     );
 
     // render the view
-    return this.render_base(mainComponent, breadCrumbs);
+    return this.render_base(mainComponent);
   },
 
   earnerCollections: function() {
     var viewId = 'earnerCollections';
-    var breadCrumbs = [
-      { name: "Earner Home", url: '/earner'},
-      { name: "My Collections", url: '/earner/collections' }
-    ];
 
     var dialogFormId = "EarnerCollectionCreateForm";
     var formProps = FormConfigStore.getConfig(dialogFormId);
@@ -383,7 +367,7 @@ var App = React.createClass({
     );
 
     // render the view
-    return this.render_base(mainComponent, breadCrumbs);
+    return this.render_base(mainComponent);
   },
 
   earnerCollectionDetail: function(collectionSlug) {
@@ -398,12 +382,6 @@ var App = React.createClass({
     badgesInCollection = APIStore.filter(
       'earner_badges', 'id', badgesIndexList
     ); 
-
-    var breadCrumbs = [
-      { name: "Earner Home", url: '/earner'},
-      { name: "My Collections", url: '/earner/collections' },
-      { name: collection.name, url: '/earner/collections/' + collectionSlug }
-    ];
 
     var dialogFormId = "EarnerCollectionEditForm";
     var formProps = FormConfigStore.getConfig(dialogFormId, {}, {
@@ -452,7 +430,7 @@ var App = React.createClass({
     );
 
     // render the view
-    return this.render_base(mainComponent, breadCrumbs);
+    return this.render_base(mainComponent);
   },
 
   issuerMain: function() {
@@ -506,10 +484,6 @@ var App = React.createClass({
     var viewId = "issuerDetail-" + issuerSlug;
     var issuer = APIStore.getFirstItemByPropertyValue('issuer_issuers', 'slug', issuerSlug);
     var badgeClasses = APIStore.filter('issuer_badgeclasses', 'issuer', issuer.json.id);
-    var breadCrumbs = [
-      { name: "My Issuers", url: '/issuer'},
-      { name: issuer.name, url: '/issuer/issuers/' + issuerSlug }
-    ];
 
     var dialogFormId = "BadgeClassCreateUpdateForm"
     var formProps = FormConfigStore.getConfig(dialogFormId, {}, {issuerSlug: issuerSlug});
@@ -549,7 +523,7 @@ var App = React.createClass({
       </MainComponent>
     )
 
-    return this.render_base(mainComponent, breadCrumbs);
+    return this.render_base(mainComponent);
   },
 
   badgeClassDetail: function(issuerSlug, badgeClassSlug){
@@ -560,14 +534,8 @@ var App = React.createClass({
     var badgeInstances = APIStore.filter('issuer_badgeinstances', 'badge_class', badgeClass.json.id);
     var instanceRequestStatus = null;
 
-    var breadCrumbs = [
-      { name: "My Issuers", url: '/issuer'},
-      { name: issuer.name, url: '/issuer/issuers/' + issuerSlug},
-      { name: badgeClass.name, url: "/issuer/issuers/" + issuerSlug + "/badges/" + badgeClass.slug}
-    ];
-
     // Trigger a get on instances if none are found and haven't been requested yet:
-    var instanceGetPath = '/v1' + breadCrumbs[2].url + '/assertions';
+    var instanceGetPath = "/v1/issuer/issuers/"+ issuerSlug +"/badges/"+ badgeClass.slug +"/assertions";
     if (badgeInstances.length == 0 && !APIStore.hasAlreadyRequested(instanceGetPath)){
       loadingInstances = "loading...";
       APIActions.APIGetData({
@@ -612,7 +580,7 @@ var App = React.createClass({
       </MainComponent>
     )
 
-    return this.render_base(mainComponent, breadCrumbs);
+    return this.render_base(mainComponent);
   },
 
   issuerCertificateForm: function() {
