@@ -68,7 +68,7 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
         if not self.username:
             # md5 hash the email and then encode as base64 to take up only 25 characters
             hashed = md5(self.email).digest().encode('base64')[:-1]  # strip last character because its a newline
-            self.username = "email{}".format(hashed[:25])
+            self.username = "badgr{}".format(hashed[:25])
 
         if getattr(settings, 'BADGEUSER_SKIP_LAST_LOGIN_TIME', True):
             # skip saving last_login to the database
