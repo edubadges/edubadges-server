@@ -1,5 +1,6 @@
 # Django stuff
 Django==1.7.1
+semver==2.2.1
 # Timezone support
 pytz==2014.7
 # PIL support

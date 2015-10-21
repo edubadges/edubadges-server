@@ -2,9 +2,15 @@ from __future__ import absolute_import
 
 import sys
 import os
+import semver
 
 
 __all__ = ['APPS_DIR','TOP_DIR']
+
+
+VERSION = (1, 1, 0)
+__version__ = semver.format_version(*VERSION)
+
 
 # assume we are ./apps/mainsite/__init__.py
 APPS_DIR = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
