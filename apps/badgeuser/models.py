@@ -5,6 +5,7 @@ from django.utils.http import urlquote
 from django.utils.translation import ugettext_lazy as _
 from django.core.mail import send_mail
 from django.contrib.auth.models import AbstractUser
+from hashlib import md5
 
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
@@ -64,6 +65,11 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
         return EmailAddress.objects.filter(user=self)
 
     def save(self, *args, **kwargs):
+        if not self.username:
+            # md5 hash the email and then encode as base64 to take up only 25 characters
+            hashed = md5(self.email).digest().encode('base64')[:-1]  # strip last character because its a newline
+            self.username = "email{}".format(hashed[:25])
+
         if getattr(settings, 'BADGEUSER_SKIP_LAST_LOGIN_TIME', True):
             # skip saving last_login to the database
             if 'update_fields' in kwargs and kwargs['update_fields'] is not None and 'last_login' in kwargs['update_fields']:

@@ -38,9 +38,9 @@
     <form class="login form-horizontal" method="POST" action="{% url 'account_login' %}">
         {% csrf_token %}
         <div class="form-group">
-            <label class="col-sm-2 control-label" for="id_login">Username:</label>
+            <label class="col-sm-2 control-label" for="id_login">E-Mail:</label>
             <div class="col-sm-6">
-                <input class="form-control" autofocus="autofocus" id="id_login" maxlength="30" name="login" placeholder="Username" type="text">
+                <input class="form-control" autofocus="autofocus" id="id_login" name="login" placeholder="E-Mail" type="text">
                     <div class="help-text">
                         {% for error in form.login.errors %}
                             <strong>{{ error|escape }}</strong>

@@ -14,7 +14,7 @@ class BadgeUserCreationForm(UserCreationForm):
 
     class Meta:
         model = BadgeUser
-        fields = ("username", "email", "first_name", "last_name")
+        fields = ("email", "first_name", "last_name")
 
     def signup(self, request, user):
         pass
