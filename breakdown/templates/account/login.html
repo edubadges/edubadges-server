@@ -35,6 +35,10 @@
     <h2 class="accounts-panel-heading">{% trans "Sign In" %}</h2>
 
     <p>If you have not created an account yet, then please <a href="/accounts/signup/">sign up</a> first.</p>
+
+    <p>Need to <a href="{% url "user_claim" %}"/>claim</a> an existing LTI account?</p>
+
+
     <form class="login form-horizontal" method="POST" action="{% url 'account_login' %}">
         {% csrf_token %}
         <div class="form-group">
