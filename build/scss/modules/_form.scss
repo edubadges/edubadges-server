@@ -18,6 +18,7 @@
   }
 
   input,
+  select,
   textarea {
     background: map-get($colors, solid);
     border: 1px solid map-get($colors, border-light);
@@ -31,6 +32,20 @@
 
     &:focus:not([readonly]) {
       box-shadow: rgba(map-get($colors, link), .5) 0 0 $layout-spacing/2 $layout-spacing/4;
+    }
+
+  }
+
+  select {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    background-image: url('images/form-dropdown.svg');
+    background-position: calc(100% - #{$layout-spacing*2}) center;
+    background-repeat: no-repeat;
+    padding-right: $layout-spacing*4;
+
+    &::-ms-expand {
+      display: none;
     }
 
   }

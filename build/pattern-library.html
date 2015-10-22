@@ -477,10 +477,18 @@
                                     </div>
 
                                     <div class="form_-x-field">
+                                        <label for="name">Select</label>
+                                        <select id="name" name="name" tabindex="2" required>
+                                            <option value="">Choose Collection &hellip;</option>
+                                            <option value="First Selection">First Selection</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form_-x-field">
                                         <label for="action">Action <span class="hint">(with a note)</span></label>
                                         <div class="form_-x-action">
                                             <input type="text" id="action" name="action" readonly value="Here's some text to copy">
-                                            <button type="button" tabindex="2"><span class="icon_ icon_-copy">Copy</span></button>
+                                            <button type="button" tabindex="3"><span class="icon_ icon_-copy">Copy</span></button>
                                         </div>
                                     </div>
 
@@ -489,13 +497,13 @@
                                         <input type="file" id="file" name="file" class="hidden">
                                         <div class="form_-x-action">
                                             <input type="text" id="fakefile" name="fakefile" readonly>
-                                            <button type="button" tabindex="3">Browse</button>
+                                            <button type="button" tabindex="4">Browse</button>
                                         </div>
                                     </div>
 
                                     <div class="form_-x-field">
                                         <label for="description">Description</label>
-                                        <textarea name="description" id="description" tabindex="4"></textarea>
+                                        <textarea name="description" id="description" tabindex="5"></textarea>
                                     </div>
 
                                 </fieldset>
@@ -503,7 +511,7 @@
                                 <fieldset>
                                     
                                     <div class="form_-x-field">
-                                        <button class="form_-x-imagefield dropzone" tabindex="5" type="button">
+                                        <button class="form_-x-imagefield dropzone" tabindex="6" type="button">
                                             <p>Tap here to upload image</p>
                                         </button>
                                     </div>
@@ -528,7 +536,7 @@
 
                             <div class="control_">
                                 <button class="button_ button_-secondary">Cancel</button>
-                                <button class="button_" type="submit" tabindex="6">Submit</button>
+                                <button class="button_" type="submit" tabindex="7">Submit</button>
                             </div>
 
                         </form>
