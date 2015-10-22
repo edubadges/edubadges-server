@@ -166,6 +166,14 @@
 
 }
 
+.icon_-search {
+
+  &::after {
+    background-image: url('images/icon-search.svg');
+  }
+
+}
+
 // Small Icons
 
 .icon_-small.icon_-dropdown {

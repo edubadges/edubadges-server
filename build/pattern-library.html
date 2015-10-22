@@ -1471,6 +1471,55 @@
 
                 </article>
 
+                <article data-pattern="pattern" id="search_">
+
+                    <code data-pattern="code" data-pattern-helper="spacer">
+
+                        <form action="" class="search_">
+                            <fieldset>
+                                <input type="text" placeholder="Search&hellip;">
+                                <button class="search_-x-submit icon_ icon_-search icon_-notext" type="submit">Search</button>
+                                <button class="search_-x-close icon_ icon_-small icon_-clear icon_-notext" type="button">Close</button>
+                            </fieldset>
+                        </form>
+
+                        <script type="text/javascript">
+
+                            document.addEventListener('DOMContentLoaded', function() {
+
+                                var searchContainer = document.querySelector('.search_ fieldset');
+                                var search = searchContainer.parentNode;
+                                var searchInput = search.querySelector('input');
+                                var searchClose = search.querySelector('.search_-x-close');
+
+                                searchContainer.addEventListener('mouseenter', function() {
+                                    search.classList.add('is-active');
+                                });
+
+                                searchContainer.addEventListener('mouseleave', function() {
+                                    if (!search.classList.contains('is-populated')) {
+                                        search.classList.remove('is-active');
+                                    }
+                                });
+
+                                searchInput.addEventListener('focus', function() {
+                                    search.classList.add('is-populated');
+                                });
+
+                                searchClose.addEventListener('click', function() {
+                                    search.classList.remove('is-active');
+                                    search.classList.remove('is-populated');
+                                    searchInput.value = '';
+                                });
+
+                            });
+
+                        </script>
+
+                    </code>
+
+                </article>
+
                 <article data-pattern="pattern" id="status_">
 
                     <code data-pattern="code" data-pattern-helper="spacer">
