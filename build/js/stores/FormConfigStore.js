@@ -208,7 +208,7 @@ FormConfigStore.getConfig = function(formType, overrides, context){
             { fields: ['collection', 'id'], className: '' },
         ],
         fieldsMeta: {
-            collection: {inputType: 'select', label: '', required: true},
+            collection: {inputType: 'select', selectOptions: contextGet('collections'), label: '', required: true},
             id: {inputType: 'hidden', label: '', required: true},
         },
 
@@ -217,11 +217,6 @@ FormConfigStore.getConfig = function(formType, overrides, context){
             message: "",
             collection: contextGet('defaultCollection'),
             id: contextGet('badgeId'),
-            fields: {
-                collection: {
-                    selectOptions: contextGet('collections'),
-                }
-            },
         },
 
         apiContext: {

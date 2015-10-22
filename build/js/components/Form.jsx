@@ -240,7 +240,7 @@ BasicAPIForm = React.createClass({
           else if (inputType == 'select'){
             return (
               <InputGroup name={fieldKey} key={this.props.formId + "-form-field-" + i + '-' + j}
-                selectOptions={this.state.fields[fieldKey].selectOptions} 
+                selectOptions={fieldProps.selectOptions}
                 value={value} 
                 handleChange={this.handleChange}
                 handleBlur={this.handleBlur}
