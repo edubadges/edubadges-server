@@ -39,27 +39,12 @@
   }
 
   .menu_-x-dropdown {
-    @include dropdown;
-    background-color: map-get($colors, solid);
     display: none;
+    opacity: 1;
     position: absolute;
     right: 0;
     top: 100%;
     z-index: $z-index-high;
-  }
-
-  .menu_-x-dropdownitem {
-    color: map-get($colors, bodycopy);
-    display: block;
-    font-size: $font-size-small;
-    padding: $layout-spacing*2;
-    text-decoration: none;
-    white-space: nowrap;
-
-    &:hover {
-      background-color: darken(map-get($colors, solid-light), 8%);
-    }
-
   }
 
 }
