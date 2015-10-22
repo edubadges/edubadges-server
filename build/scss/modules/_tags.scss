@@ -1,0 +1,32 @@
+.tags_ {
+  display: flex;
+  flex-wrap: wrap;
+
+  li {
+    border: 1px solid map-get($colors, border-light);
+    border-radius: $border-radius;
+    display: flex;
+  }
+
+  a {
+    color: map-get($colors, link);
+    display: block;
+    font-size: $font-size-small;
+    padding: $layout-spacing;
+    text-decoration: none;
+
+    &:hover {
+      color: map-get($colors, link-hover);
+    }
+    
+  }
+
+  button {
+    margin-right: $layout-spacing;
+  }
+
+  > :not(:last-child) {
+    margin-right: $layout-spacing;
+  }
+
+}
