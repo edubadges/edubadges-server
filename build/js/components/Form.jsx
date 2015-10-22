@@ -51,8 +51,8 @@ var InputGroup = React.createClass({
       // TODO: Add accept='image/*' ??
       return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="file" onChange={this.props.handleChange} required={this.props.required}  disabled={this.props.disabled} /> );
     }
-    else if (this.props.inputType == "text"){
-      return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="text" onChange={this.props.handleChange} onBlur={this.props.handleBlur} required={this.props.required}  disabled={this.props.disabled} /> );
+    else if (this.props.inputType == "text" || this.props.inputType == "hidden"){
+      return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type={this.props.inputType} onChange={this.props.handleChange} onBlur={this.props.handleBlur} required={this.props.required}  disabled={this.props.disabled} /> );
     }
     else if (this.props.inputType == "textarea"){
       return ( <textarea name={this.props.name} value={this.props.value} className={this.classNameForInput()} onChange={this.props.handleChange} onBlur={this.props.handleBlur} required={this.props.required}  disabled={this.props.disabled} /> );
@@ -258,7 +258,7 @@ BasicAPIForm = React.createClass({
               />
             );
           }
-          else if (["text", "textarea"].indexOf(inputType) > -1) {
+          else if (["text", "hidden", "textarea"].indexOf(inputType) > -1) {
             // for input types 'text', 'textarea'
             return (
               <InputGroup name={fieldKey} 

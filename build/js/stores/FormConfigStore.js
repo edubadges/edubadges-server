@@ -209,7 +209,7 @@ FormConfigStore.getConfig = function(formType, overrides, context){
         ],
         fieldsMeta: {
             collection: {inputType: 'select', label: '', required: true},
-            id: {inputType: 'text', label: '', required: true},
+            id: {inputType: 'hidden', label: '', required: true},
         },
 
         defaultValues: {
