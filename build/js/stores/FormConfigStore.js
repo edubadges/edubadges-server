@@ -11,7 +11,8 @@ FormConfigStore.genericFormTypes = function(){
     'BadgeInstanceCreateUpdateForm',
     'EarnerBadgeImportForm',
     'EarnerCollectionCreateForm',
-    'EarnerCollectionEditForm'
+    'EarnerCollectionEditForm',
+    'CollectionAddBadgeInstanceForm',
   ];
 }
 
@@ -199,6 +200,38 @@ FormConfigStore.getConfig = function(formType, overrides, context){
         successHttpStatus: [200],
         successMessage: "Collection successfully edited."
       }
+    },
+    CollectionAddBadgeInstanceForm: {
+        formId: overrides['formId'] || "CollectionAddBadgeInstanceForm",
+
+        columns: [
+            { fields: ['collection', 'id'], className: '' },
+        ],
+        fieldsMeta: {
+            collection: {inputType: 'select', label: '', required: true},
+            id: {inputType: 'text', label: '', required: true},
+        },
+
+        defaultValues: {
+            actionState: "ready",
+            message: "",
+            collection: contextGet('defaultCollection'),
+            id: contextGet('badgeId'),
+            fields: {
+                collection: {
+                    selectOptions: contextGet('collections'),
+                }
+            },
+        },
+
+        apiContext: {
+            formId: overrides['formId'] || "CollectionAddBadgeInstanceForm",
+            apiCollectionKey: "earner_collections",
+            actionUrl: "/v1/earner/collections/:collection/badges",
+            method: "POST",
+            successHttpStatus: [201],
+            successMessage: contextGet('badgeName') +" added to collection.",
+        },
     },
   };
 

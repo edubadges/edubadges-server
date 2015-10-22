@@ -62,7 +62,7 @@ var InputGroup = React.createClass({
     }
     else if (this.props.inputType == "select") {
       var selectOptions = this.props.selectOptions.map(function(option, index){
-        return ( <option value={option} key={this.props.name + '-' + index}>{option}</option>);
+        return ( <option value={option.slug} key={this.props.name + '-' + index}>{option.name}</option>);
       }.bind(this));
       return ( 
         <select name={this.props.name} value={this.props.value} className="input-xlarge" onChange={this.props.handleChange} onBlur={this.props.handleBlur} disabled={this.props.disabled}>
@@ -171,7 +171,8 @@ BasicAPIForm = React.createClass({
     }
     
     if (this.state.actionState != "waiting")
-      FormActions.submitForm(this.props.formId, this.props.formType);
+      // TODO: Test submission via form control rather than Dialog SubmitButton
+      FormActions.submitForm(this.props.formId, this.props.formType, this.state);
   },
   handleReset: function(e){
     e.preventDefault();
@@ -214,6 +215,7 @@ BasicAPIForm = React.createClass({
         formControls = "",
         closeButton = this.props.handleCloseForm ? (<Button name="close" label="Cancel" style="secondary" handleClick={this.handleReset} />) : "",
         loadingIcon = this.state.actionState == "waiting" ? (<LoadingIcon />) : "";
+
     if (["ready", "waiting"].indexOf(this.state.actionState) > -1){
 
       activeColumns = this.props.columns.map(function(item, i){
@@ -240,7 +242,6 @@ BasicAPIForm = React.createClass({
               <InputGroup name={fieldKey} key={this.props.formId + "-form-field-" + i + '-' + j}
                 selectOptions={this.state.fields[fieldKey].selectOptions} 
                 value={value} 
-                defaultValue={this.state.fields[fieldKey].defaultValue || this.state.fields[fieldKey].selectOptions[0]} 
                 handleChange={this.handleChange}
                 handleBlur={this.handleBlur}
                 {...fieldProps}
