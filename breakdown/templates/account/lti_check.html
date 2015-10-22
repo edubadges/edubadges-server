@@ -1,0 +1,16 @@
+{% extends "account/base.html" %}
+
+
+{% block content %}
+    <h3>Confirm your Canvas is authorized to work with Badgr</h3>
+
+
+    <form method="POST">
+
+        {{ form.as_p }}
+
+        <button class="btn btn-primary " type="submit">Verify</button>
+    </form>
+
+
+{% endblock %}

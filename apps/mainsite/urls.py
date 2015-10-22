@@ -78,7 +78,6 @@ if apps.is_installed('composition'):
 
 if apps.is_installed('badgebook'):
     urlpatterns += patterns('',
-        url(r'^accounts/lti$', 'badgebook.views.lti_info', name='badgebook_lti_info'),
         url(r'^v1/badgebook', include('badgebook.api_urls')),
         url(r'^badgebook', include('badgebook.urls')),
     )
