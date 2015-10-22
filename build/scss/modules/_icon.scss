@@ -102,6 +102,14 @@
 
 }
 
+.icon_-back {
+
+  &::after {
+    background-image: url('images/icon-back.svg');
+  }
+  
+}
+
 .icon_-more {
 
   &::after {

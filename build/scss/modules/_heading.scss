@@ -2,6 +2,7 @@
   align-items: flex-end;
   box-sizing: border-box;
   display: flex;
+  position: relative;
 
   .heading_-x-text {
     flex: 0 1 60%;
@@ -32,6 +33,12 @@
       margin-left: $layout-spacing*2;
     }
 
+  }
+
+  .heading_-x-back {
+    left: -$layout-spacing*5;
+    position: absolute;
+    top: $layout-spacing*1.5;
   }
 
 }
