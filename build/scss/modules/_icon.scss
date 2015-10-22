@@ -182,6 +182,22 @@
 
 }
 
+.icon_-selectempty {
+
+  &::after {
+    background-image: url('images/icon-selectempty.svg');
+  }
+
+}
+
+.icon_-selectfilled {
+
+  &::after {
+    background-image: url('images/icon-selectfilled.svg');
+  }
+
+}
+
 // Small Icons
 
 .icon_-small.icon_-dropdown {
