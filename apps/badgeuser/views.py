@@ -1,6 +1,7 @@
+from allauth.account.forms import ResetPasswordForm
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.views.generic.edit import UpdateView, FormView
-from badgeuser.forms import UserClaimForm
+from django.forms import forms
 
 from .models import BadgeUser
 
@@ -15,6 +16,22 @@ class UpdateBadgeUserIsActive(UpdateView):
 
     def get_success_url(self):
         return reverse('account_enabled')
+
+
+###
+# I had to put this form here because if I put it in badgeuser/forms.py (with the signup form)
+# then django-allauth fails the whole server in an import loop on startup
+#   --Wiggins
+###
+class UserClaimForm(ResetPasswordForm):
+    """A form for claiming an auto-generated LTI account"""
+
+    def clean_email(self):
+        email = super(UserClaimForm, self).clean_email()
+        user = self.users[0]
+        if user.password:
+            raise forms.ValidationError("Account already claimed")
+        return email
 
 
 class BadgeUserClaim(FormView):
