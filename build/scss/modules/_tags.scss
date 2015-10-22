@@ -6,6 +6,7 @@
     border: 1px solid map-get($colors, border-light);
     border-radius: $border-radius;
     display: flex;
+    margin-bottom: $layout-spacing;
   }
 
   a {
@@ -18,7 +19,7 @@
     &:hover {
       color: map-get($colors, link-hover);
     }
-    
+
   }
 
   button {
