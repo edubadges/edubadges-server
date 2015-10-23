@@ -91,9 +91,19 @@ var CollectionShareInfo = React.createClass({
     this.setState({ shared: ! this.state.shared, shareUrl: collection.share_url });
   },
 
-  selectAllText: function(e){
-    e.target.setSelectionRange(0, this.state.shareUrl.length);
+  selectAllText: function(ev) {
+    ev.target.select();
   },
+  copyShareLink: function(ev) {
+    var shareLink = document.getElementById('sharelink');
+    shareLink.select();
+
+    var successful = document.execCommand('copy');
+    if ( ! successful) {
+        alert('Could not copy text in this browser, please copy your link using the mouse.');
+    }
+  },
+
   render: function() {
     var embedField, shareLink;
 
@@ -104,10 +114,10 @@ var CollectionShareInfo = React.createClass({
             </div>);
         var shareLinkField = (
             <div className="form_-x-field">
-                <label htmlFor="shareurl">Link</label>
+                <label htmlFor="sharelink">Link</label>
                 <div className="form_-x-action">
-                    <input type="text" readOnly={true} name="shareurl" onClick={this.selectAllText} value={this.state.shareUrl} />
-                    <button type="button" tabindex="3"><span className="icon_ icon_-copy">Copy</span></button>
+                    <input id="sharelink" type="text" readOnly={true} name="sharelink" onClick={this.selectAllText} value={this.state.shareUrl} />
+                    <button type="button" tabindex="3"><span className="icon_ icon_-copy" onClick={this.copyShareLink}>Copy</span></button>
                 </div>
             </div>);
     }
