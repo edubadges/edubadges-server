@@ -67,36 +67,92 @@ var IFrameEmbedInfo = React.createClass({
 });
 
 var CollectionShareInfo = React.createClass({
-  getDefaultProps: function() {
-    return {
-      share_url: ''
-    };
+    propTypes: {
+        slug: React.PropTypes.string.isRequired,
+        initialShareUrl: React.PropTypes.string,
+    },
+
+    getInitialState: function() {
+        return {
+            shared: Boolean(this.props.initialShareUrl),
+            shareUrl: this.props.initialShareUrl,
+        };
+    },
+
+  componentDidMount: function(){
+    APIStore.addListener('DATA_UPDATED_shareCollection_' + this.props.collectionSlug, this.handleShareUpdate)
   },
+  componentWillUnmount: function(){
+    APIStore.removeListener('DATA_UPDATED_shareCollection_' + this.props.collectionSlug, this.handleShareUpdate);
+  },
+  handleShareUpdate: function(){
+    var collection = APIStore.getFirstItemByPropertyValue('earner_collections', 'slug', this.props.collectionSlug);
+    this.setState({ shared: ! this.state.shared, shareUrl: collection.share_url });
+  },
+
   selectAllText: function(e){
-    e.target.setSelectionRange(0, this.props.share_url.length);
+    e.target.setSelectionRange(0, this.state.shareUrl.length);
   },
   render: function() {
-    var embedInfo = this.props.share_url ? (<IFrameEmbedInfo share_url={this.props.share_url} />) : '';
+    var embedInfo = this.state.shared ? (<IFrameEmbedInfo share_url={this.state.shareUrl} />) : '';
 
     return (
-      <div className={this.props.share_url ? "card_ collection-share-info sharing-enabled" : "card_ collection-share-info sharing-disabled disabled"} style={{padding: '1em'}}>
+      <div className={this.state.shared ? "card_ collection-share-info sharing-enabled" : "card_ collection-share-info sharing-disabled disabled"} style={{padding: '1em'}}>
         <div className="sharing-input">
-          <input type="checkbox" name="sharecheck" checked={this.props.share_url ? true : false} className={"share-collection-checkbox"} onChange={this.props.handleChange} />
+          <input type="checkbox" name="sharecheck" checked={this.state.shared ? true : false} className={"share-collection-checkbox"} onChange={this.handleChange} />
           <label htmlFor="sharecheck">
             Generate sharing link
-            {this.props.share_url ? (<span className="hint">(Unchecking this box will disable sharing)</span>) : ''}
+            {this.state.shared ? (<span className="hint">(Unchecking this box will disable sharing)</span>) : ''}
           </label>
         </div>
         <div className="sharing-url-box">
           <label htmlFor="shareurl">Link:</label>
-          <input type="text" readOnly={true} name="shareurl" onClick={this.selectAllText} value={this.props.share_url} />
+          <input type="text" readOnly={true} name="shareurl" onClick={this.selectAllText} value={this.state.shareUrl} />
           {embedInfo}
         </div>
-        {this.props.share_url ? (<p className="hint">When enabled, anyone with the link will be able to view this collection.</p>) : ''}
-        {this.props.share_url ? (<p><a href={this.props.share_url}><button className='btn btn-primary'>View Share Page</button></a></p>) : ''}
+        {this.state.shared ? (<p className="hint">When enabled, anyone with the link will be able to view this collection.</p>) : ''}
+        {this.state.shared ? (<p><a href={this.state.shareUrl}><button className='btn btn-primary'>View Share Page</button></a></p>) : ''}
       </div>
     );
-  }
+  },
+  handleChange: function(e){
+    var apiContext;
+    if ( ! this.state.shared) {
+      // Turn sharing on
+      apiContext = {
+        formId: "shareCollection_" + this.props.collectionSlug,
+        apiCollectionKey: "earner_collections",
+        apiSearchKey: 'slug',
+        apiSearchValue: this.props.collectionSlug,
+        apiUpdateFieldWithResponse: 'share_url',
+
+        actionUrl: "/v1/earner/collections/" + this.props.collectionSlug + "/share",
+        method: "GET",
+        successHttpStatus: [200],
+        successMessage: "Collection updated"
+      };
+
+      APISubmitData(null, apiContext);
+    }
+    else {
+      // Delete share hash
+      apiContext = {
+        formId: "shareCollection_" + this.props.collectionSlug,
+        apiCollectionKey: "earner_collections",
+        apiSearchKey: 'slug',
+        apiSearchValue: this.props.collectionSlug,
+        //apiUpdateValuesTo: {share_url: undefined, share_hash: undefined},  // Delete the values of these fields
+        apiUpdateValuesFromResponse: ['share_url', 'share_hash'],  // The response would do the same as above as it doesn't have the fields in the response
+
+        actionUrl: "/v1/earner/collections/" + this.props.collectionSlug + "/share",
+        method: "DELETE",
+        doNotDeleteCollection: true,  // Very important
+        successHttpStatus: [204],
+        successMessage: "Collection updated"
+      };
+        APISubmitData(null, apiContext);
+    }
+  },
 });
 
 
@@ -147,39 +203,6 @@ var EarnerCollectionDetail = React.createClass({
     else
       this.setState({selectedBadgeIds: this.state.selectedBadgeIds.concat([id])})
   },
-  handleShareChange: function(e){
-    var apiContext;
-    if (!this.props.share_url) {
-      // Turn sharing on
-      apiContext = {
-        formId: "earnerCollection_" + this.props.slug,
-        apiCollectionKey: "earner_collections",
-        apiSearchKey: 'slug',
-        apiSearchValue: this.props.slug,
-        apiUpdateKey: 'share_url',
-        actionUrl: "/v1/earner/collections/" + this.props.slug + "/share",
-        method: "GET",
-        successHttpStatus: [200],
-        successMessage: "Collection updated"
-      };
-    }
-    else {
-      // Delete share hash
-      apiContext = {
-        formId: "earnerCollection_" + this.props.slug,
-        apiCollectionKey: "earner_collections",
-        apiSearchKey: 'slug',
-        apiSearchValue: this.props.slug,
-        apiUpdateKey: 'share_url',
-        actionUrl: "/v1/earner/collections/" + this.props.slug + "/share",
-        method: "DELETE",
-        successHttpStatus: [204],
-        successMessage: "Collection updated"
-      };
-    }
-
-    APISubmitData(null, apiContext);
-  },
   handleUpdate: function(){
     if (this.isMounted()){
       this.setState({
@@ -225,11 +248,6 @@ var EarnerCollectionDetail = React.createClass({
 
     return (
       <div>
-        <CollectionShareInfo
-          share_url={this.props.share_url}
-          handleChange={this.handleShareChange}
-        />
-
         {this.state.message ? (<div className={"alert alert-" + this.state.message.type}>{this.state.message.content}</div>) : ""}
         {this.state.formState == "waiting" ? <LoadingComponent /> : ""}
 
@@ -346,5 +364,6 @@ var EarnerCollectionList = React.createClass({
 module.exports = {
   EarnerCollectionList: EarnerCollectionList,
   EarnerCollectionCard: EarnerCollectionCard,
-  EarnerCollectionDetail: EarnerCollectionDetail
+  EarnerCollectionDetail: EarnerCollectionDetail,
+  CollectionShareInfo: CollectionShareInfo,
 };

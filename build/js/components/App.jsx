@@ -35,6 +35,7 @@ var IssuerDisplay = require('../components/IssuerDisplay.jsx').IssuerDisplay;
 var BadgeClassDetail = require('../components/BadgeClassDisplay.jsx').BadgeClassDetail;
 var BadgeInstanceList = require('../components/BadgeInstanceDisplay.jsx').BadgeInstanceList;
 var EarnerBadgeList = require('../components/EarnerBadgeList.jsx');
+var CollectionShareInfo = require('../components/EarnerBadgeCollection.jsx').CollectionShareInfo;
 var EarnerCollectionList = require('../components/EarnerBadgeCollection.jsx').EarnerCollectionList;
 var EarnerCollectionDetail = require('../components/EarnerBadgeCollection.jsx').EarnerCollectionDetail;
 var ConsumerBadgeList = require('../components/ConsumerBadgeList.jsx');
@@ -342,7 +343,7 @@ var App = React.createClass({
     var dialog = (
         <Dialog formId={dialogFormId} dialogId="add-collection" actions={actions} className="closable">
             <Heading size="small"
-                        title="Add to Collection"
+                        title="New Collection"
                         subtitle=""/>
 
             <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
@@ -393,11 +394,11 @@ var App = React.createClass({
     });
     FormStore.getOrInitFormData(dialogFormId, formProps)
 
-    var actions=[
+    var editActions=[
         <SubmitButton formId={dialogFormId} label="Edit Collection" />
     ];
-    var dialog = (
-        <Dialog formId={dialogFormId} dialogId="edit-collection" actions={actions} className="closable">
+    var editDialog = (
+        <Dialog formId={dialogFormId} dialogId="edit-collection" actions={editActions} className="closable">
             <Heading size="small"
                         title="Edit Collection"
                         subtitle=""/>
@@ -405,6 +406,14 @@ var App = React.createClass({
             <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
         </Dialog>);
 
+    var shareDialog = (
+        <Dialog formId={dialogFormId} dialogId="share-collection" className="closable">
+            <Heading size="small"
+                        title="Share Collection"
+                        subtitle="Once enabled, anyone with the link will be able to view this collection."/>
+
+            <CollectionShareInfo initialShareUrl={collection.share_url} collectionSlug={collectionSlug} />
+        </Dialog>);
 
     var mainComponent = (
       <MainComponent viewId={viewId}>
@@ -413,8 +422,11 @@ var App = React.createClass({
             title={collection.name}
             subtitle={collection.description}
             rule={true}>
-                <DialogOpener dialog={dialog} dialogId="edit-collection" key="edit-collection">
-                    <Button className="action_" label="Edit Details" propagateClick={true}/>
+                <DialogOpener dialog={editDialog} dialogId="edit-collection" key="edit-collection">
+                    <Button className="action_" label="Edit" propagateClick={true}/>
+                </DialogOpener>
+                <DialogOpener dialog={shareDialog} dialogId="share-collection" key="share-collection">
+                    <Button className="action_" label="Share" propagateClick={true}/>
                 </DialogOpener>
           </Heading>
         <EarnerCollectionDetail
@@ -422,7 +434,6 @@ var App = React.createClass({
           slug={collectionSlug}
           clickable={false}
           description={collection.description}
-          share_url={collection.share_url}
           badgeList={badgesInCollection}
           display="thumbnail"
         />
