@@ -59,9 +59,10 @@ var IFrameEmbedInfo = React.createClass({
   },
   render: function() {
     return (
-      <div className="collection-embed-info">
-        <textarea defaultValue={this.generateEmbed(this.props.share_url)} onClick={this.selectAllText} /> 
-      </div>
+        <div className="form_-x-field">
+            <label htmlFor="embed">Description</label>
+            <textarea name="embed" id="embed" rows="4" tabindex="5" defaultValue={this.generateEmbed(this.props.share_url)} onClick={this.selectAllText} />
+        </div>
     );
   }
 });
@@ -94,25 +95,34 @@ var CollectionShareInfo = React.createClass({
     e.target.setSelectionRange(0, this.state.shareUrl.length);
   },
   render: function() {
-    var embedInfo = this.state.shared ? (<IFrameEmbedInfo share_url={this.state.shareUrl} />) : '';
+    var embedField, shareLink;
+
+    if (this.state.shared) {
+        var embedField = (
+            <div className="form_-x-field">
+                <IFrameEmbedInfo share_url={this.state.shareUrl} />
+            </div>);
+        var shareLinkField = (
+            <div className="form_-x-field">
+                <label htmlFor="shareurl">Link</label>
+                <div className="form_-x-action">
+                    <input type="text" readOnly={true} name="shareurl" onClick={this.selectAllText} value={this.state.shareUrl} />
+                    <button type="button" tabindex="3"><span className="icon_ icon_-copy">Copy</span></button>
+                </div>
+            </div>);
+    }
+
+    var sharePage = this.state.shared ? (<a href={this.state.shareUrl}>View Share Page</a>) : '';
 
     return (
-      <div className={this.state.shared ? "card_ collection-share-info sharing-enabled" : "card_ collection-share-info sharing-disabled disabled"} style={{padding: '1em'}}>
-        <div className="sharing-input">
-          <input type="checkbox" name="sharecheck" checked={this.state.shared ? true : false} className={"share-collection-checkbox"} onChange={this.handleChange} />
-          <label htmlFor="sharecheck">
-            Generate sharing link
-            {this.state.shared ? (<span className="hint">(Unchecking this box will disable sharing)</span>) : ''}
-          </label>
+      <form className="form_">
+        <div className="form_-x-field">
+          <input type="checkbox" name="toggle-share" checked={this.state.shared ? true : false} className={"share-collection-checkbox"} onChange={this.handleChange} />
+          <label htmlFor="toggle-share">Generate sharing link {this.state.shared ? (<span className="hint">(Unchecking this box will disable sharing)</span>) : ''}</label>
         </div>
-        <div className="sharing-url-box">
-          <label htmlFor="shareurl">Link:</label>
-          <input type="text" readOnly={true} name="shareurl" onClick={this.selectAllText} value={this.state.shareUrl} />
-          {embedInfo}
-        </div>
-        {this.state.shared ? (<p className="hint">When enabled, anyone with the link will be able to view this collection.</p>) : ''}
-        {this.state.shared ? (<p><a href={this.state.shareUrl}><button className='btn btn-primary'>View Share Page</button></a></p>) : ''}
-      </div>
+        { shareLinkField }
+        { embedField }
+      </form>
     );
   },
   handleChange: function(e){
