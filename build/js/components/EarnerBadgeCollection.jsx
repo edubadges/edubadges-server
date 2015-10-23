@@ -129,7 +129,7 @@ var EarnerCollectionDetail = React.createClass({
       apiCollectionKey: "earner_collections",
       apiSearchKey: 'slug',
       apiSearchValue: this.props.slug,
-      apiUpdateKey: 'badges',
+      apiUpdateFieldWithResponse: 'badges',
       actionUrl: "/v1/earner/collections/" + this.props.slug + "/badges",
       method: "PUT",
       successHttpStatus: [200],
