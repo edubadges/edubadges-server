@@ -5,7 +5,7 @@
 {% block head_title %}{% trans "Claim Account" %}{% endblock %}
 
 {% block content %}
-    <h2>Claim Account</h2>
+    <h2>Sign Up</h2>
 
     {% for error in form.non_field_errors %}
         <div class="alert alert-error">
@@ -14,7 +14,6 @@
     {% endfor %}
 
 <p>{% blocktrans %}Already have an account? Then please <a href="{{ login_url }}">sign in</a>.{% endblocktrans %}</p>
-<p>If you have not created an account yet, then please <a href="/accounts/signup/">sign up</a> first.</p>
 
 <form class="claim form-horizontal" method="POST" action="{% url "user_claim" %}">
     {% csrf_token %}
@@ -33,7 +32,7 @@
 
     <div class="claim-action col-sm-6 col-sm-offset-2">
         <div class="col-sm-6">
-            <button class="btn btn-primary btn-block" type="submit">Claim Account</button>
+            <button class="btn btn-primary btn-block" type="submit">Sign Up</button>
         </div>
         <p class="forgot-password"><a class="pull-right" href="{% url 'account_reset_password' %}">Forgot your Password?</a></p>
 

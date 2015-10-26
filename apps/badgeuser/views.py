@@ -1,7 +1,9 @@
+from allauth.account.adapter import get_adapter
 from allauth.account.forms import ResetPasswordForm
+from allauth.account.utils import filter_users_by_email
 from django.core.urlresolvers import reverse, reverse_lazy
+from django.http import HttpResponseRedirect
 from django.views.generic.edit import UpdateView, FormView
-from django.forms import forms
 
 from .models import BadgeUser
 
@@ -27,10 +29,8 @@ class UserClaimForm(ResetPasswordForm):
     """A form for claiming an auto-generated LTI account"""
 
     def clean_email(self):
-        email = super(UserClaimForm, self).clean_email()
-        user = self.users[0]
-        if user.password:
-            raise forms.ValidationError("Account already claimed")
+        email = self.cleaned_data["email"]
+        email = get_adapter().clean_email(email)
         return email
 
 
@@ -40,6 +40,17 @@ class BadgeUserClaim(FormView):
     success_url = reverse_lazy('account_reset_password_done')
 
     def form_valid(self, form):
-        form.save(self.request)
-        return super(BadgeUserClaim, self).form_valid(form)
+        email = form.cleaned_data['email']
+        # if the email address is unknown to us, direct them to the regular signup page
+        # otherwise, send them through the forgot-password process to set a password
+        form.users = filter_users_by_email(email)
+        if len(form.users) < 1:
+            self.request.session['signup_email_address'] = email
+            return HttpResponseRedirect(reverse('account_signup'))
+        elif not form.users[0].password:
+            # this account needs to set a password
+            form.save(self.request)
+            return super(BadgeUserClaim, self).form_valid(form)
+        else:
+            return HttpResponseRedirect(reverse('account_login'))
 
