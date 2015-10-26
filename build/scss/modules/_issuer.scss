@@ -3,11 +3,13 @@
   header {
     align-items: center;
     display: flex;
+    min-height: 64px;
+    padding-left: $layout-spacing;
   }
 
   .issuer_-x-image {
     flex: 0 1 auto;
-    padding: $layout-spacing;
+    padding: $layout-spacing 0;
 
     img {
       display: block;
@@ -18,6 +20,7 @@
   .issuer_-x-title {
     flex: 1 1 auto;
     font-weight: 600;
+    padding-left: $layout-spacing;
     text-align: left;
     
     span {
