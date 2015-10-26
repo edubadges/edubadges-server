@@ -406,7 +406,7 @@ var App = React.createClass({
             <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
         </Dialog>);
 
-    var shareDialogAction = (<Button label="Toggle Share" onClick={() => document.getElementById('toggle-share').click()} />);
+    var shareDialogAction = (<Button label="Toggle Share" onClick={function() { document.getElementById('toggle-share').click() }} />);
     var shareDialog = (
         <Dialog formId={dialogFormId} actions={shareDialogAction} dialogId="share-collection" className="closable">
             <Heading size="small"
