@@ -50,23 +50,6 @@ var moreLinkBadgeJSON = function(moreCount){
   };
 };
 
-var IFrameEmbedInfo = React.createClass({
-  generateEmbed: function(url){
-    return '<iframe height="500" width="300" frameborder="0" src="' + url + '/embed' + '"></iframe>';
-  },
-  selectAllText: function(e){
-    e.target.setSelectionRange(0, this.generateEmbed(this.props.share_url).length);
-  },
-  render: function() {
-    return (
-        <div className="form_-x-field">
-            <label htmlFor="embed">Description</label>
-            <textarea name="embed" id="embed" rows="4" tabindex="5" defaultValue={this.generateEmbed(this.props.share_url)} onClick={this.selectAllText} />
-        </div>
-    );
-  }
-});
-
 var CollectionShareInfo = React.createClass({
     propTypes: {
         slug: React.PropTypes.string.isRequired,
@@ -105,33 +88,30 @@ var CollectionShareInfo = React.createClass({
   },
 
   render: function() {
-    var embedField, shareLink;
+    var shareLink, sharePage = '', embedCode = '';
 
     if (this.state.shared) {
-        var embedField = (
-            <div className="form_-x-field">
-                <IFrameEmbedInfo share_url={this.state.shareUrl} />
-            </div>);
-        var shareLinkField = (
-            <div className="form_-x-field">
-                <label htmlFor="sharelink">Link</label>
-                <div className="form_-x-action">
-                    <input id="sharelink" type="text" readOnly={true} name="sharelink" onClick={this.selectAllText} value={this.state.shareUrl} />
-                    <button type="button" tabindex="3"><span className="icon_ icon_-copy" onClick={this.copyShareLink}>Copy</span></button>
-                </div>
-            </div>);
+        embedCode = '<iframe height="500" width="300" frameborder="0" src="' + this.state.shareUrl + '/embed' + '"></iframe>';
+        sharePage = (<a href={this.state.shareUrl}>View Share Page</a>);
     }
-
-    var sharePage = this.state.shared ? (<a href={this.state.shareUrl}>View Share Page</a>) : '';
 
     return (
       <form className="form_">
-        <div className="form_-x-field">
-          <input type="checkbox" name="toggle-share" checked={this.state.shared ? true : false} className={"share-collection-checkbox"} onChange={this.handleChange} />
+        <div className="form_-x-field" style={{'display': 'none'}}>
+          <input id="toggle-share" type="checkbox" name="toggle-share" checked={this.state.shared ? true : false} className={"share-collection-checkbox"} onChange={this.handleChange} />
           <label htmlFor="toggle-share">Generate sharing link {this.state.shared ? (<span className="hint">(Unchecking this box will disable sharing)</span>) : ''}</label>
         </div>
-        { shareLinkField }
-        { embedField }
+        <div className="form_-x-field">
+            <label htmlFor="sharelink">Link</label>
+            <div className="form_-x-action">
+                <input id="sharelink" type="text" readOnly={true} name="sharelink" onClick={this.selectAllText} value={this.state.shareUrl} />
+                <button type="button" tabindex="3"><span className="icon_ icon_-copy" onClick={this.copyShareLink}>Copy</span></button>
+            </div>
+        </div>
+        <div className="form_-x-field">
+            <label htmlFor="embed">Description</label>
+            <textarea name="embed" id="embed" rows="4" tabindex="5" value={embedCode} onClick={this.selectAllText} />
+        </div>
       </form>
     );
   },
@@ -161,8 +141,8 @@ var CollectionShareInfo = React.createClass({
         apiCollectionKey: "earner_collections",
         apiSearchKey: 'slug',
         apiSearchValue: this.props.collectionSlug,
-        //apiUpdateValuesTo: {share_url: undefined, share_hash: undefined},  // Delete the values of these fields
-        apiUpdateValuesFromResponse: ['share_url', 'share_hash'],  // The response would do the same as above as it doesn't have the fields in the response
+        apiUpdateValuesTo: {share_url: undefined, share_hash: undefined},  // Delete the values of these fields
+        //apiUpdateValuesFromResponse: ['share_url', 'share_hash'],  // The response would do the same as above as it doesn't have the fields in the response
 
         actionUrl: "/v1/earner/collections/" + this.props.collectionSlug + "/share",
         method: "DELETE",

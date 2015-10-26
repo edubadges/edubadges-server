@@ -406,8 +406,9 @@ var App = React.createClass({
             <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
         </Dialog>);
 
+    var shareDialogAction = (<Button label="Toggle Share" onClick={() => document.getElementById('toggle-share').click()} />);
     var shareDialog = (
-        <Dialog formId={dialogFormId} dialogId="share-collection" className="closable">
+        <Dialog formId={dialogFormId} actions={shareDialogAction} dialogId="share-collection" className="closable">
             <Heading size="small"
                         title="Share Collection"
                         subtitle="Once enabled, anyone with the link will be able to view this collection."/>
