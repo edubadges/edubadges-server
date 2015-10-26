@@ -15,7 +15,7 @@ class BadgeUserDetail(generics.RetrieveUpdateAPIView):
     """
     queryset = BadgeUser.objects.all()
     serializer_class = BadgeUserSerializer
-    lookup_field = 'username'
+    lookup_field = 'pk'
 
     # TODO: rich authentication possibilitiesfor remote API clients
     authentication_classes = (
@@ -25,7 +25,7 @@ class BadgeUserDetail(generics.RetrieveUpdateAPIView):
     )
     permission_classes = (IsRequestUser,)
 
-    def get(self, request, username):
+    def get(self, request, user_id):
         """
         Return full details on a single badge the consumer is currently analyzing.
         """

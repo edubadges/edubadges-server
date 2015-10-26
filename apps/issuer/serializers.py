@@ -24,7 +24,7 @@ class AbstractComponentSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         representation = super(AbstractComponentSerializer, self).to_representation(instance)
-        representation['created_by'] = (settings.HTTP_ORIGIN+reverse('user_detail', kwargs={'username': BadgeUser.cached.get(pk=instance.created_by_id)})) if instance.created_by_id is not None else None
+        representation['created_by'] = (settings.HTTP_ORIGIN+reverse('user_detail', kwargs={'user_id': instance.created_by_id})) if instance.created_by_id is not None else None
         return representation
 
 
@@ -81,9 +81,9 @@ class IssuerSerializer(AbstractComponentSerializer):
     def to_representation(self, obj):
         representation = super(IssuerSerializer, self).to_representation(obj)
         representation['description'] = obj.json.get('description', '')
-        representation['owner'] = (settings.HTTP_ORIGIN+reverse('user_detail', kwargs={'username': BadgeUser.cached.get(pk=obj.created_by_id).username})) if obj.created_by_id is not None else None
-        representation['editors'] = [settings.HTTP_ORIGIN+reverse('user_detail', kwargs={'username': u.username}) for u in obj.cached_editors()]
-        representation['staff'] = [settings.HTTP_ORIGIN+reverse('user_detail', kwargs={'username': u.username}) for u in obj.cached_staff()]
+        representation['owner'] = (settings.HTTP_ORIGIN+reverse('user_detail', kwargs={'user_id': obj.created_by_id})) if obj.created_by_id is not None else None
+        representation['editors'] = [settings.HTTP_ORIGIN+reverse('user_detail', kwargs={'user_id': u.pk}) for u in obj.cached_editors()]
+        representation['staff'] = [settings.HTTP_ORIGIN+reverse('user_detail', kwargs={'user_id': u.pk}) for u in obj.cached_staff()]
         if self.context.get('embed_badgeclasses', False):
             representation['badgeclasses'] = BadgeClassSerializer(obj.badgeclasses.all(), many=True, context=self.context).data
 

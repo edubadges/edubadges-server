@@ -1,6 +1,7 @@
 from allauth.account.models import EmailAddress
 import cachemodel
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.utils.http import urlquote
 from django.utils.translation import ugettext_lazy as _
 from django.core.mail import send_mail
@@ -41,7 +42,7 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
         return self.email
 
     def get_absolute_url(self):
-        return "/user/%s/" % urlquote(self.username)
+        return reverse('user_detail', kwargs={'user_id': self.pk})
 
     def get_full_name(self):
         return "%s %s" % (self.first_name, self.last_name)
