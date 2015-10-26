@@ -82,11 +82,11 @@ var SubmitButton = React.createClass({
     },
 
     handleFormSubmit: function() {
-        formType = this.props.formType || this.props.formId;
+        var formType = this.props.formType || this.props.formId;
 
         var formData = FormStore.getFormData(this.props.formId);
-        if (formData.formState.actionState !== "waiting") {
-            FormActions.submitForm(this.props.formId, formType);
+        if (formData.formState && formData.formState.actionState !== "waiting") {
+            FormActions.submitForm(this.props.formId, formType, formData.formState);
         }
     },
 

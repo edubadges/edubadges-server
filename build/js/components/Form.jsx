@@ -51,8 +51,8 @@ var InputGroup = React.createClass({
       // TODO: Add accept='image/*' ??
       return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="file" onChange={this.props.handleChange} required={this.props.required}  disabled={this.props.disabled} /> );
     }
-    else if (this.props.inputType == "text"){
-      return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="text" onChange={this.props.handleChange} onBlur={this.props.handleBlur} required={this.props.required}  disabled={this.props.disabled} /> );
+    else if (this.props.inputType == "text" || this.props.inputType == "hidden"){
+      return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type={this.props.inputType} onChange={this.props.handleChange} onBlur={this.props.handleBlur} required={this.props.required}  disabled={this.props.disabled} /> );
     }
     else if (this.props.inputType == "textarea"){
       return ( <textarea name={this.props.name} value={this.props.value} className={this.classNameForInput()} onChange={this.props.handleChange} onBlur={this.props.handleBlur} required={this.props.required}  disabled={this.props.disabled} /> );
@@ -62,7 +62,7 @@ var InputGroup = React.createClass({
     }
     else if (this.props.inputType == "select") {
       var selectOptions = this.props.selectOptions.map(function(option, index){
-        return ( <option value={option} key={this.props.name + '-' + index}>{option}</option>);
+        return ( <option value={option.slug} key={this.props.name + '-' + index}>{option.name}</option>);
       }.bind(this));
       return ( 
         <select name={this.props.name} value={this.props.value} className="input-xlarge" onChange={this.props.handleChange} onBlur={this.props.handleBlur} disabled={this.props.disabled}>
@@ -171,7 +171,8 @@ BasicAPIForm = React.createClass({
     }
     
     if (this.state.actionState != "waiting")
-      FormActions.submitForm(this.props.formId, this.props.formType);
+      // TODO: Test submission via form control rather than Dialog SubmitButton
+      FormActions.submitForm(this.props.formId, this.props.formType, this.state);
   },
   handleReset: function(e){
     e.preventDefault();
@@ -214,6 +215,7 @@ BasicAPIForm = React.createClass({
         formControls = "",
         closeButton = this.props.handleCloseForm ? (<Button name="close" label="Cancel" style="secondary" handleClick={this.handleReset} />) : "",
         loadingIcon = this.state.actionState == "waiting" ? (<LoadingIcon />) : "";
+
     if (["ready", "waiting"].indexOf(this.state.actionState) > -1){
 
       activeColumns = this.props.columns.map(function(item, i){
@@ -238,9 +240,8 @@ BasicAPIForm = React.createClass({
           else if (inputType == 'select'){
             return (
               <InputGroup name={fieldKey} key={this.props.formId + "-form-field-" + i + '-' + j}
-                selectOptions={this.state.fields[fieldKey].selectOptions} 
+                selectOptions={fieldProps.selectOptions}
                 value={value} 
-                defaultValue={this.state.fields[fieldKey].defaultValue || this.state.fields[fieldKey].selectOptions[0]} 
                 handleChange={this.handleChange}
                 handleBlur={this.handleBlur}
                 {...fieldProps}
@@ -257,7 +258,7 @@ BasicAPIForm = React.createClass({
               />
             );
           }
-          else if (["text", "textarea"].indexOf(inputType) > -1) {
+          else if (["text", "hidden", "textarea"].indexOf(inputType) > -1) {
             // for input types 'text', 'textarea'
             return (
               <InputGroup name={fieldKey} 

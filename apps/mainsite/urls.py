@@ -24,7 +24,6 @@ urlpatterns = patterns('',
     url(r'^robots\.txt$', RedirectView.as_view(url='%srobots.txt' % settings.STATIC_URL)),
 
     # Pattern library & Temp Views
-    url(r'^pattern-library$', TemplateView.as_view(template_name='pattern-library.html'), name='pattern-library'),
     url(r'^temp/app$', TemplateView.as_view(template_name='temp-app.html'), name='temp-app'),
     url(r'^temp/canvas$', TemplateView.as_view(template_name='temp-canvas.html'), name='temp-canvas'),
 
@@ -78,7 +77,6 @@ if apps.is_installed('composition'):
 
 if apps.is_installed('badgebook'):
     urlpatterns += patterns('',
-        url(r'^accounts/lti$', 'badgebook.views.lti_info', name='badgebook_lti_info'),
         url(r'^v1/badgebook', include('badgebook.api_urls')),
         url(r'^badgebook', include('badgebook.urls')),
     )
@@ -109,4 +107,10 @@ if getattr(settings, 'DEBUG_STATIC', True):
         url(r'^%s(?P<path>.*)' % (static_url,), 'django.contrib.staticfiles.views.serve', kwargs={
             'insecure': True,
         })
+    ) + urlpatterns
+
+# Serve pattern library view only in debug mode or if explicitly declared
+if getattr(settings, 'DEBUG', True) or getattr(settings, 'SERVE_PATTERN_LIBRARY', False):
+    urlpatterns = patterns('',
+       url(r'^pattern-library$', TemplateView.as_view(template_name='pattern-library.html'), name='pattern-library')
     ) + urlpatterns

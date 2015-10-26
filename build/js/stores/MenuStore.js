@@ -14,7 +14,7 @@ MenuStore.defaultItems = {
     items: [
       { title: "user", url: "#", icon: "icon_-dropdownlight", children: [
         { title: "User Profile", url: "/accounts/", icon: "fa-user", children: [] },
-        { title: "LTI Info", url: "/accounts/lti", icon: "fa-gear", children: [] },
+        { title: "LTI Info", url: "/badgebook/lti", icon: "fa-gear", children: [] },
 
         // { title: "Settings", url: "/#user/settings", icon: "fa-gear", children: [] },
         { title: "Log Out", url: "/logout", icon: "fa-sign-out", children: [] }
