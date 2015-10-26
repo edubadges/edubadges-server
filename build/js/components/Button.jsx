@@ -1,6 +1,13 @@
 var React = require('react');
 var _ = require('lodash');
 
+// Stores
+var FormStore = require('../stores/FormStore');
+
+// Actions
+var FormActions = require('../actions/forms');
+
+
 var Button = React.createClass({
     propTypes: {
         label: React.PropTypes.string,
@@ -61,6 +68,35 @@ var Button = React.createClass({
     }
 });
 
+
+var SubmitButton = React.createClass({
+    propTypes: {
+        formId: React.PropTypes.string.isRequired,
+        formType: React.PropTypes.string,
+    },
+    getDefaultProps: function() {
+        return {
+            style: 'primary',
+            label: 'Submit',
+        }
+    },
+
+    handleFormSubmit: function() {
+        var formType = this.props.formType || this.props.formId;
+
+        var formData = FormStore.getFormData(this.props.formId);
+        if (formData.formState && formData.formState.actionState !== "waiting") {
+            FormActions.submitForm(this.props.formId, formType, formData.formState);
+        }
+    },
+
+    render: function() {
+        return (<Button style={this.props.style} type="submit" key="submit" handleClick={this.handleFormSubmit} label={this.props.label} />)
+    }
+});
+
+
 module.exports = {
-    Button: Button
+    Button: Button,
+    SubmitButton: SubmitButton,
 };

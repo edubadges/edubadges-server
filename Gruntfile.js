@@ -68,7 +68,8 @@ module.exports = function(grunt) {
                 },
                 files: {
                     'build/js/temp/app.js': 'build/js/app.jsx',
-                    'build/js/temp/lti-app.js': 'build/js/lti-app.jsx'
+                    'build/js/temp/lti-app.js': 'build/js/lti-app.jsx',
+                    'breakdown/static/js/pattern-library.js': 'build/js/pattern-library.jsx',
                 }
             }
         },
@@ -145,5 +146,5 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-inline');
 
     grunt.registerTask('default',['bs-init', 'sass', 'autoprefixer', 'browserify:dev', 'inline:dist', 'watch']);
-    grunt.registerTask('dist', ['env:dist', 'sass', 'autoprefixer', 'browserify:dist', 'uglify']);
-}
+    grunt.registerTask('dist', ['env:dist', 'sass', 'autoprefixer', 'browserify:dist', 'inline:dist', 'uglify']);
+};

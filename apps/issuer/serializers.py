@@ -80,6 +80,7 @@ class IssuerSerializer(AbstractComponentSerializer):
 
     def to_representation(self, obj):
         representation = super(IssuerSerializer, self).to_representation(obj)
+        representation['description'] = obj.json.get('description', '')
         representation['owner'] = (settings.HTTP_ORIGIN+reverse('user_detail', kwargs={'username': BadgeUser.cached.get(pk=obj.created_by_id).username})) if obj.created_by_id is not None else None
         representation['editors'] = [settings.HTTP_ORIGIN+reverse('user_detail', kwargs={'username': u.username}) for u in obj.cached_editors()]
         representation['staff'] = [settings.HTTP_ORIGIN+reverse('user_detail', kwargs={'username': u.username}) for u in obj.cached_staff()]

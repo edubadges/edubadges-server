@@ -1,7 +1,11 @@
-var _ = require('lodash');
 var React = require('react');
+var _ = require('lodash');
 
-var ClickActions = require('../actions/clicks');
+// Stores
+var FormStore = require('../stores/FormStore');
+
+// Actions
+var FormActions = require('../actions/forms');
 
 /**
  * Usage:
@@ -72,27 +76,27 @@ DialogElement.prototype.showDialog = function() {
 var DialogOpener = React.createClass({
     propTypes: {
         dialog: React.PropTypes.node.isRequired,
-        dialogId: React.PropTypes.string.isRequired
+        dialogId: React.PropTypes.string.isRequired,
     },
+
     componentDidMount: function() {
-        this.dialog = new DialogElement(this.props.dialog, this.props.dialogId)
+        this.dialog = new DialogElement(this.props.dialog, this.props.dialogId);
         this.dialog.update();
     },
+
     componentWillUnmount: function() {
         this.dialog.destroy();
     },
-    componentDidUpdate: function() {
+
+    componentDidUpdate: function(prevProps, prevState) {
         this.dialog.update();
     },
 
-    openDialog: function() {
-        this.dialog.showDialog();
-    },
-
     handleClick: function(e) {
-        this.openDialog();
+        this.dialog.showDialog();
+
         if (this.props.handleClick) {
-            this.props.handleClick(e)
+            this.props.handleClick(e);
         }
     },
 
@@ -102,76 +106,67 @@ var DialogOpener = React.createClass({
             <div onClick={this.handleClick} {...divProps}>
                 {this.props.children}
             </div>);
-
     }
-
 });
 
 var Dialog = React.createClass({
     propTypes: {
         dialogId: React.PropTypes.string.isRequired,
         hideControls: React.PropTypes.bool,
-        showCloseAction: React.PropTypes.bool,
-        actionGenerator: React.PropTypes.func
+        formId: React.PropTypes.string,
     },
-    getDefaultProps: function() {
+
+    getInitialState: function() {
         return {
-            hideControls: false,
-            showCloseAction: true
-        }
-
+            formWasCompleted: false,
+        };
     },
-    handleUpdate: function(){
-        this.forceUpdate();
-    },
-    componentDidMount: function(){
-        var updateFunction;
 
-        if (this.props.selfUpdaters){
-            _.forEach(this.props.selfUpdaters, function(updater){
-                if (updater.handler)
-                    updateFunction = updater.handler.bind(this);
-                else
-                    updateFunction = this.handleUpdate;
-
-                updater.store.addListener(
-                    updater.listenFor,
-                    updateFunction
-                );
-            }, this);
+    componentDidMount: function() {
+        if (this.props.formId) {
+            FormStore.addListener('FORM_DATA_UPDATED_'+ this.props.formId, this.handleFormDataUpdated);
         }
     },
-    componentWillUnmount: function(){
-        var updateFunction;
 
-        if (this.props.selfUpdaters){
-            _.forEach(this.props.selfUpdaters, function(updater){
-                if (updater.handler)
-                    updateFunction = updater.handler.bind(this);
-                else
-                    updateFunction = this.handleUpdate;
-
-                updater.store.removeListener(
-                    updater.listenFor,
-                    updateFunction
-                );
-            }, this);
+    componentWillUnmount: function() {
+        if (this.props.formId) {
+            FormStore.removeListener('FORM_DATA_UPDATED_'+ this.props.formId, this.handleFormDataUpdated);
         }
     },
+
+    handleFormDataUpdated: function() {
+        var formData = FormStore.getFormData(this.props.formId);
+        if (formData.formState.actionState === "complete") {
+            this.setState({'formWasCompleted': true});
+        }
+    },
+
     closeDialog: function() {
-        ClickActions.closeDialog(this.props.dialogId);
+        var formData = FormStore.getFormData(this.props.formId);
+        var messageType = _.get(formData, 'formState.message.type');
+        if (this.state.formWasCompleted || messageType === 'danger') {
+            FormActions.resetForm(this.props.formId);
+            this.setState({formWasCompleted: false});
+        }
+
+        var dialog = document.getElementById(this.props.dialogId)
+        if (dialog) {
+            if (!dialog.showModal)
+                dialogPolyfill.registerDialog(dialog);
+            dialog.close();
+            dialog.classList.remove('is-visible');
+        } else {
+            console.log("Unable to find dialog with dialogId="+this.props.dialogId)
+        }
     },
 
     render: function() {
-        var divProps = _.omit(this.props, ['dialogId', 'actions', 'actionGenerator', 'showCloseAction']);
-        var controls = this.props.hideControls ? "" : (
+        var divProps = _.omit(this.props, ['dialogId', 'actions'])
+        var controls = (this.props.hideControls || this.state.formWasCompleted) ? "" : (
             <div className="control_">
-                {this.props.showCloseAction ? (<button className="button_ button_-secondary" onClick={this.closeDialog}>Close</button>) : null}
+                <button className="button_ button_-secondary" onClick={this.closeDialog}>Close</button>
                 {this.props.actions}
-                {(!!this.props.actionGenerator) ? this.props.actionGenerator(): null}
-            </div>
-        );
-
+            </div>);
         return (
             <div {...divProps}>
                 <button className="dialog_-x-close" onClick={this.closeDialog}>

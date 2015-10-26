@@ -13,7 +13,6 @@ import logging
 
 INSTALLED_APPS = [
     # https://github.com/concentricsky/django-client-admin
-    'client_admin',
 
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -102,10 +101,6 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.i18n',
 
-    # allauth specific context processors
-    "allauth.account.context_processors.account",
-    "allauth.socialaccount.context_processors.socialaccount",
-
     'mainsite.context_processors.help_email'
 ]
 
@@ -163,6 +158,7 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
 
 ]
+ACCOUNT_ADAPTER = 'mainsite.account_adapter.BadgrAccountAdapter'
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_FORMS = {
@@ -334,6 +330,11 @@ REST_FRAMEWORK = {
         'mainsite.renderers.JSONLDRenderer',
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
     )
 }
 

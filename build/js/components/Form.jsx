@@ -49,23 +49,23 @@ var InputGroup = React.createClass({
   theInput: function(){
     if (this.props.inputType == "filebutton"){
       // TODO: Add accept='image/*' ??
-      return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="file" onChange={this.props.handleChange} required={this.props.required} /> );
+      return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="file" onChange={this.props.handleChange} required={this.props.required}  disabled={this.props.disabled} /> );
     }
-    else if (this.props.inputType == "text"){
-      return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="text" onChange={this.props.handleChange} onBlur={this.props.handleBlur} required={this.props.required} /> );
+    else if (this.props.inputType == "text" || this.props.inputType == "hidden"){
+      return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type={this.props.inputType} onChange={this.props.handleChange} onBlur={this.props.handleBlur} required={this.props.required}  disabled={this.props.disabled} /> );
     }
     else if (this.props.inputType == "textarea"){
-      return ( <textarea name={this.props.name} value={this.props.value} className={this.classNameForInput()} onChange={this.props.handleChange} onBlur={this.props.handleBlur} required={this.props.required} /> );
+      return ( <textarea name={this.props.name} value={this.props.value} className={this.classNameForInput()} onChange={this.props.handleChange} onBlur={this.props.handleBlur} required={this.props.required}  disabled={this.props.disabled} /> );
     }
     else if (this.props.inputType == "checkbox"){
-      return ( <input type="checkbox" name={this.props.name} checked={this.props.value} className={this.classNameForInput()} onChange={this.props.handleChange} required={this.props.required} /> );
+      return ( <input type="checkbox" name={this.props.name} checked={this.props.value} className={this.classNameForInput()} onChange={this.props.handleChange} required={this.props.required} disabled={this.props.disabled} /> );
     }
     else if (this.props.inputType == "select") {
       var selectOptions = this.props.selectOptions.map(function(option, index){
-        return ( <option value={option} key={this.props.name + '-' + index}>{option}</option>);
+        return ( <option value={option.slug} key={this.props.name + '-' + index}>{option.name}</option>);
       }.bind(this));
       return ( 
-        <select name={this.props.name} value={this.props.value} className="input-xlarge" onChange={this.props.handleChange} onBlur={this.props.handleBlur} >
+        <select name={this.props.name} value={this.props.value} className="input-xlarge" onChange={this.props.handleChange} onBlur={this.props.handleBlur} disabled={this.props.disabled}>
           { selectOptions }
         </select>
       );
@@ -171,7 +171,8 @@ BasicAPIForm = React.createClass({
     }
     
     if (this.state.actionState != "waiting")
-      FormActions.submitForm(this.props.formId, this.props.formType);
+      // TODO: Test submission via form control rather than Dialog SubmitButton
+      FormActions.submitForm(this.props.formId, this.props.formType, this.state);
   },
   handleReset: function(e){
     e.preventDefault();
@@ -214,15 +215,14 @@ BasicAPIForm = React.createClass({
         formControls = "",
         closeButton = this.props.handleCloseForm ? (<Button name="close" label="Cancel" style="secondary" handleClick={this.handleReset} />) : "",
         loadingIcon = this.state.actionState == "waiting" ? (<LoadingIcon />) : "";
+
     if (["ready", "waiting"].indexOf(this.state.actionState) > -1){
 
       activeColumns = this.props.columns.map(function(item, i){
         var thisColumnItems = item.fields.map(function(fieldKey, j){
-          var inputType = this.props.fieldsMeta[fieldKey].inputType;
           var value = this.state[fieldKey];
-          var label = this.props.fieldsMeta[fieldKey].label;
-          var required = this.props.fieldsMeta[fieldKey].required;
-          var hint = this.props.fieldsMeta[fieldKey].hint;
+          var fieldProps = this.props.fieldsMeta[fieldKey];
+          var inputType = fieldProps.inputType;
 
           if (inputType == 'image'){
             return (
@@ -232,8 +232,7 @@ BasicAPIForm = React.createClass({
                   image={this.state.image}
                   imageData={this.state.imageData}
                   imageDescription={this.props.formType == "IssuerCreateUpdateForm" ? "Image": "Badge"}
-                  hint={hint}
-                  required={required}
+                  {...fieldProps}
                 />
               </div>
             );
@@ -241,46 +240,38 @@ BasicAPIForm = React.createClass({
           else if (inputType == 'select'){
             return (
               <InputGroup name={fieldKey} key={this.props.formId + "-form-field-" + i + '-' + j}
-                inputType={inputType} selectOptions={this.state.fields[fieldKey].selectOptions} 
+                selectOptions={fieldProps.selectOptions}
                 value={value} 
-                defaultValue={this.state.fields[fieldKey].defaultValue || this.state.fields[fieldKey].selectOptions[0]} 
                 handleChange={this.handleChange}
                 handleBlur={this.handleBlur}
-                label={label}
-                hint={hint}
-                required={required}
+                {...fieldProps}
               />
             );
           }
           else if (inputType == 'checkbox'){
             return (
               <InputGroup name={fieldKey} key={this.props.formId + "-form-field-" + i + '-' + j}
-                inputType={inputType} 
                 value={value} 
                 handleChange={this.handleChange}
                 handleBlur={this.handleBlur}
-                label={label}
-                hint={hint}
-                required={required}
+                {...fieldProps}
               />
             );
           }
-          else if (["text", "textarea"].indexOf(inputType) > -1) {
+          else if (["text", "hidden", "textarea"].indexOf(inputType) > -1) {
             // for input types 'text', 'textarea'
             return (
               <InputGroup name={fieldKey} 
                 key={this.props.formId + "-form-field-" + i + '-' + j}
-                inputType={inputType}
-                value={value} label={label} 
+                value={value}
                 handleChange={this.handleChange} 
                 handleBlur={this.handleBlur}
-                hint={hint}
-                required={required}
+                {...fieldProps}
               />
             );
           }
           else if (inputType == 'divider'){
-            return (<p className="divider" key={"divider-" + i}><strong>{label}</strong></p>);
+            return (<p className="divider" key={"divider-" + i}><strong>{fieldProps.label}</strong></p>);
           }
         }.bind(this));
         return (

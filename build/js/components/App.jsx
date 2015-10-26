@@ -18,12 +18,12 @@ var ActiveActionStore = require('../stores/ActiveActionStore');
 var TopLinks = require('../components/TopLinks.jsx');
 var MainComponent = require ('../components/MainComponent.jsx');
 var SecondaryMenu = require('../components/SecondaryMenu.jsx');
-var BreadCrumbs = require('../components/BreadCrumbs.jsx');
 var ActionBar = require('../components/ActionBar.jsx').ActionBar;
 var Heading = require('../components/Heading.jsx').Heading;
 var Dialog = require('../components/Dialog.jsx').Dialog;
 var DialogOpener = require('../components/Dialog.jsx').DialogOpener;
 var Button = require('../components/Button.jsx').Button;
+var SubmitButton = require('../components/Button.jsx').SubmitButton;
 var HeadingBar = require('../components/ActionBar.jsx').HeadingBar;
 var ActivePanel = require('../components/ActivePanel.jsx');
 var OpenBadgeList = require('../components/OpenBadgeList.jsx');
@@ -35,10 +35,10 @@ var IssuerDisplay = require('../components/IssuerDisplay.jsx').IssuerDisplay;
 var BadgeClassDetail = require('../components/BadgeClassDisplay.jsx').BadgeClassDetail;
 var BadgeInstanceList = require('../components/BadgeInstanceDisplay.jsx').BadgeInstanceList;
 var EarnerBadgeList = require('../components/EarnerBadgeList.jsx');
+var CollectionShareInfo = require('../components/EarnerBadgeCollection.jsx').CollectionShareInfo;
 var EarnerCollectionList = require('../components/EarnerBadgeCollection.jsx').EarnerCollectionList;
 var EarnerCollectionDetail = require('../components/EarnerBadgeCollection.jsx').EarnerCollectionDetail;
 var ConsumerBadgeList = require('../components/ConsumerBadgeList.jsx');
-var LoadingComponent = require('../components/LoadingComponent.jsx');
 
 // Actions
 var LifeCycleActions = require('../actions/lifecycle');
@@ -192,7 +192,7 @@ var App = React.createClass({
   },
 
   // Render the base structure for the app (top menu, sidebar, and main content area)
-  render_base: function(mainComponent, breadCrumbs) {
+  render_base: function(mainComponent) {
     return (
         <div className="x-owner">
             <header className="header_ l-wrapper">
@@ -208,8 +208,6 @@ var App = React.createClass({
                     showLabels={true} />
             </nav>
             </header>
-
-            { breadCrumbs ? <BreadCrumbs items={breadCrumbs} submodule="header" /> : null }
 
             <main className="wrap_ ">
                 <div className="l-wrapper l-wrapper-inset">
@@ -228,62 +226,28 @@ var App = React.createClass({
 
   earnerBadges: function(params){
     var viewId = "earnerBadges",
-        formId = "EarnerBadgeImportForm",
         currentPage=parseInt(_.get(params, 'page')) || 1,
-        nextPage = currentPage + 1,
-        dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
+        nextPage = currentPage + 1;
+    dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
 
-    var formProps = FormConfigStore.getConfig(formId);
-    FormStore.getOrInitFormData(formId, formProps);
+    function handleFormSubmit(formId, formType) {
+        var formData = FormStore.getFormData(formId);
+        if (formData.formState.actionState !== "waiting") {
+            FormActions.submitForm(formId, formType);
+        }
+    }
 
-    var actionGenerator = function() {
-      var actions = [
-        (<Button
-          label="Close"
-          key="dialog-import-badge-close"
-          className="button_ button_-secondary"
-          handleClick={function() {
-            if (_.get(FormStore.getFormData(formId), 'formState.actionState') == 'waiting')
-              FormActions.resetForm(formId, formId);
-            ClickActions.closeDialog('import-badge');
-          }}
+    var dialogFormId = "EarnerBadgeImportForm"
+    var formProps = FormConfigStore.getConfig(dialogFormId);
+    FormStore.getOrInitFormData(dialogFormId, formProps);
 
-        />)
-      ],
-          formState = _.get(FormStore.getFormData(formId), 'formState.actionState');
-      if (formState == 'ready')
-        actions.push(
-          <Button
-            label="Import Badge"
-            type="submit"
-            key="import-badge-submit"
-            className="button_ button_-primary"
-            handleClick={function() { FormActions.submitForm(formId, formId); }}
-          />
-        );
-      else if (formState == 'waiting')
-        actions.push(<LoadingComponent key="import-badge-spinner" label="" />);
-      return actions;
-    };
-    var resetFormOnNewOpen = function(){
-      var formState = _.get(FormStore.getFormData('EarnerBadgeImportForm'), 'formState.actionState');
-      if (
-        formState == 'complete' ||
-        _.get(FormStore.getFormData('EarnerBadgeImportForm'), 'formState.message.type') == 'danger'
-      )
-        FormActions.resetForm('EarnerBadgeImportForm');
-    };
-
+    var actions=[
+        <SubmitButton formId={dialogFormId} label="Import Badge" />
+    ];
     var dialog = (
-        <Dialog key="dialog-import-badge"
-                dialogId="import-badge"
-                actionGenerator={actionGenerator}
-                className="closable"
-                showCloseAction={false}
-                selfUpdaters={[{store: FormStore, listenFor: 'FORM_DATA_UPDATED_EarnerBadgeImportForm' }]}
-            >
+        <Dialog formId={dialogFormId} dialogId="import-badge" actions={actions} className="closable">
             <Heading size="small"
-                        title="Create New Badge"
+                        title="Import Badge"
                         subtitle="Verify an Open Badge and add it to your library by uploading a badge image or entering its URL."/>
 
             <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
@@ -296,17 +260,10 @@ var App = React.createClass({
             title="My Badges"
             subtitle="Import your Open Badges with Badgr! Upload images to verify your badges, and then add them to collections to share with your friends and colleagues."
             rule={true}>
-                <DialogOpener dialog={dialog} dialogId="import-badge">
-                    <Button label="Import Badge" propagateClick={true} handleClick={resetFormOnNewOpen} />
+                <DialogOpener dialog={dialog} dialogId="import-badge" key="import-badge">
+                    <Button className="action_" label="Import Badge" propagateClick={true}/>
                 </DialogOpener>
           </Heading>
-        <ActivePanel
-          modal={true}
-          viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-        />
         <EarnerBadgeList
           viewId={viewId}
           badges={APIStore.getCollection('earner_badges')}
@@ -323,11 +280,6 @@ var App = React.createClass({
   earnerImportBadge: function(params){
     var viewId = 'earnerImportBadge';
     var dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
-    var breadCrumbs = [
-      { name: "Earner Home", url: '/earner'},
-      { name: "My Badges", url: '/earner/badges' },
-      { name: "Import New Badge", url: '/earner/badges/new' }
-    ];
     var navigateToBadgeList = function(){
       ClickActions.navigateLocalPath('/earner/badges');
     };
@@ -345,7 +297,7 @@ var App = React.createClass({
 
       </MainComponent>
     );
-    return this.render_base(mainComponent, breadCrumbs);
+    return this.render_base(mainComponent);
   },
 
   earnerBadgeDetail: function(badgeId) {
@@ -357,19 +309,13 @@ var App = React.createClass({
     if (!badge)
       return this.render_base("Badge not found!");
 
-    var breadCrumbs = [
-      { name: "My Badges", url: '/earner/badges' },
-      { name: badge.json.badge.name['@value'], url: '/earner/badges/' + badgeId }
-    ];
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <ActionBar 
+        <Heading
+          size="large"
           title={badge.json.badge.name['@value']}
-          viewId={viewId}
-          items={this.props.actionBars[viewId] || []}
-          updateActivePanel={this.updateActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
+          subtitle={badge.json.badge.description['@value']}
+          rule={true} />
         <OpenBadge
           id={badge.id}
           display="full"
@@ -381,34 +327,39 @@ var App = React.createClass({
     );
 
     // render the view
-    return this.render_base(mainComponent, breadCrumbs);
+    return this.render_base(mainComponent);
   },
 
   earnerCollections: function() {
     var viewId = 'earnerCollections';
-    var breadCrumbs = [
-      { name: "Earner Home", url: '/earner'},
-      { name: "My Collections", url: '/earner/collections' }
+
+    var dialogFormId = "EarnerCollectionCreateForm";
+    var formProps = FormConfigStore.getConfig(dialogFormId);
+    FormStore.getOrInitFormData(dialogFormId, formProps);
+
+    var actions=[
+        <SubmitButton formId={dialogFormId} label="Add Collection" />
     ];
+    var dialog = (
+        <Dialog formId={dialogFormId} dialogId="add-collection" actions={actions} className="closable">
+            <Heading size="small"
+                        title="New Collection"
+                        subtitle=""/>
+
+            <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
+        </Dialog>);
 
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <Heading
-          size="large"
-          title="My Collections"
+          <Heading
+            size="large"
+            title="My Collections"
           subtitle="Define collections to organize your badges, then display your collections to friends, employers, or other collaborators."
-          rule={true}>
-            <Button label="Add Collection" propagateClick={true}
-              handleClick={function(e){this.updateActivePanel(viewId,{'type': 'EarnerCollectionCreateForm'});}.bind(this)}
-            />
-        </Heading>
-        <ActivePanel
-          modal={true}
-          viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-        />
+            rule={true}>
+                <DialogOpener dialog={dialog} dialogId="add-collection" key="add-collection">
+                    <Button className="action_" label="Add Collection" propagateClick={true}/>
+                </DialogOpener>
+          </Heading>
         <EarnerCollectionList
           collections={APIStore.getCollection('earner_collections')}
           perPage={50}
@@ -417,7 +368,7 @@ var App = React.createClass({
     );
 
     // render the view
-    return this.render_base(mainComponent, breadCrumbs);
+    return this.render_base(mainComponent);
   },
 
   earnerCollectionDetail: function(collectionSlug) {
@@ -433,38 +384,56 @@ var App = React.createClass({
       'earner_badges', 'id', badgesIndexList
     ); 
 
-    var breadCrumbs = [
-      { name: "Earner Home", url: '/earner'},
-      { name: "My Collections", url: '/earner/collections' },
-      { name: collection.name, url: '/earner/collections/' + collectionSlug }
+    var dialogFormId = "EarnerCollectionEditForm";
+    var formProps = FormConfigStore.getConfig(dialogFormId, {}, {
+        collection: {
+            slug: collectionSlug,
+            name: collection.name,
+            description: collection.description,
+        }
+    });
+    FormStore.getOrInitFormData(dialogFormId, formProps)
+
+    var editActions=[
+        <SubmitButton formId={dialogFormId} label="Edit Collection" />
     ];
+    var editDialog = (
+        <Dialog formId={dialogFormId} dialogId="edit-collection" actions={editActions} className="closable">
+            <Heading size="small"
+                        title="Edit Collection"
+                        subtitle=""/>
+
+            <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
+        </Dialog>);
+
+    var shareDialog = (
+        <Dialog formId={dialogFormId} dialogId="share-collection" className="closable">
+            <Heading size="small"
+                        title="Share Collection"
+                        subtitle="Once enabled, anyone with the link will be able to view this collection."/>
+
+            <CollectionShareInfo initialShareUrl={collection.share_url} collectionSlug={collectionSlug} />
+        </Dialog>);
 
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <Heading
-          size="large"
-          title={collection.name}
-          subtitle={collection.description}
-          rule={false}>
-            <Button label="Edit Collection" propagateClick={true}
-              handleClick={function(e){this.updateActivePanel(viewId,{'type': 'EarnerCollectionEditForm'});}.bind(this)}
-            />
-        </Heading>
-        <ActivePanel
-          modal={true}
-          viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          collection={collection}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          formKey={collectionSlug}
-        />
+          <Heading
+            size="large"
+            title={collection.name}
+            subtitle={collection.description}
+            rule={true}>
+                <DialogOpener dialog={editDialog} dialogId="edit-collection" key="edit-collection">
+                    <Button className="action_" label="Edit" propagateClick={true}/>
+                </DialogOpener>
+                <DialogOpener dialog={shareDialog} dialogId="share-collection" key="share-collection">
+                    <Button className="action_" label="Share" propagateClick={true}/>
+                </DialogOpener>
+          </Heading>
         <EarnerCollectionDetail
           name={collection.name}
           slug={collectionSlug}
           clickable={false}
           description={collection.description}
-          share_url={collection.share_url}
           badgeList={badgesInCollection}
           display="thumbnail"
         />
@@ -472,30 +441,41 @@ var App = React.createClass({
     );
 
     // render the view
-    return this.render_base(mainComponent, breadCrumbs);
+    return this.render_base(mainComponent);
   },
 
   issuerMain: function() {
     var viewId = "issuerMain";
     dependenciesMet = APIStore.collectionsExist(this.dependencies['issuerMain']);
 
+    var dialogFormId = "IssuerCreateUpdateForm"
+    var formProps = FormConfigStore.getConfig(dialogFormId);
+    FormStore.getOrInitFormData(dialogFormId, formProps);
+
+    var actions=[
+        <SubmitButton formId={dialogFormId} label="Add Issuer" />
+    ];
+    var dialog = (
+        <Dialog formId={dialogFormId} dialogId="add-issuer" actions={actions} className="closable">
+            <Heading size="small"
+                        title="New Issuer"
+                        subtitle=""/>
+
+            <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
+        </Dialog>);
+
+
     var mainComponent = (
       <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet}>
-        <ActionBar
-          title="My Issuers"
-          viewId={viewId}
-          items={this.props.actionBars[viewId]}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
-        <ActivePanel
-          modal={true}
-          viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-        />
+          <Heading
+            size="large"
+            title="My Issuers"
+            subtitle=""
+            rule={true}>
+                <DialogOpener dialog={dialog} dialogId="add-issuer" key="add-issuer">
+                    <Button className="action_" label="Add Issuer" propagateClick={true}/>
+                </DialogOpener>
+          </Heading>
         <IssuerList
           viewId={viewId}
           issuers={APIStore.getCollection('issuer_issuers')}
@@ -515,30 +495,35 @@ var App = React.createClass({
     var viewId = "issuerDetail-" + issuerSlug;
     var issuer = APIStore.getFirstItemByPropertyValue('issuer_issuers', 'slug', issuerSlug);
     var badgeClasses = APIStore.filter('issuer_badgeclasses', 'issuer', issuer.json.id);
-    var breadCrumbs = [
-      { name: "My Issuers", url: '/issuer'},
-      { name: issuer.name, url: '/issuer/issuers/' + issuerSlug }
+
+    var dialogFormId = "BadgeClassCreateUpdateForm"
+    var formProps = FormConfigStore.getConfig(dialogFormId, {}, {issuerSlug: issuerSlug});
+    FormStore.getOrInitFormData(dialogFormId, formProps);
+
+    var actions=[
+        <SubmitButton formId={dialogFormId} label="Create" />
     ];
+    var dialog = (
+        <Dialog formId={dialogFormId} dialogId="issuer-add-badge" actions={actions} className="closable">
+            <Heading size="small"
+                        title="Create New Badge"
+                        subtitle=""/>
+            <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
+        </Dialog>);
+
+
     var mainComponent = (
       <MainComponent viewId={viewId}>
         <IssuerDisplay {...issuer} />
-        <ActionBar 
-          title="Active Badges"
-          viewId={viewId}
-          items={this.props.actionBars['issuerDetail']}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
-        <ActivePanel
-          viewId={viewId}
-          modal={true}
-          {...this.state.activePanels[viewId]}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          issuerSlug={issuerSlug}
-          formKey={issuerSlug}
-        />
+          <Heading
+            size="small"
+            title="Active Badges"
+            subtitle=""
+            rule={true}>
+                <DialogOpener dialog={dialog} dialogId="issuer-add-badge" key="issuer-add-badge">
+                    <Button className="action_" label="Add Badge" propagateClick={true}/>
+                </DialogOpener>
+          </Heading>
         <BadgeClassList
           issuerSlug={issuerSlug}
           badgeClasses={badgeClasses}
@@ -549,7 +534,7 @@ var App = React.createClass({
       </MainComponent>
     )
 
-    return this.render_base(mainComponent, breadCrumbs);
+    return this.render_base(mainComponent);
   },
 
   badgeClassDetail: function(issuerSlug, badgeClassSlug){
@@ -560,14 +545,8 @@ var App = React.createClass({
     var badgeInstances = APIStore.filter('issuer_badgeinstances', 'badge_class', badgeClass.json.id);
     var instanceRequestStatus = null;
 
-    var breadCrumbs = [
-      { name: "My Issuers", url: '/issuer'},
-      { name: issuer.name, url: '/issuer/issuers/' + issuerSlug},
-      { name: badgeClass.name, url: "/issuer/issuers/" + issuerSlug + "/badges/" + badgeClass.slug}
-    ];
-
     // Trigger a get on instances if none are found and haven't been requested yet:
-    var instanceGetPath = '/v1' + breadCrumbs[2].url + '/assertions';
+    var instanceGetPath = "/v1/issuer/issuers/"+ issuerSlug +"/badges/"+ badgeClass.slug +"/assertions";
     if (badgeInstances.length == 0 && !APIStore.hasAlreadyRequested(instanceGetPath)){
       loadingInstances = "loading...";
       APIActions.APIGetData({
@@ -612,7 +591,7 @@ var App = React.createClass({
       </MainComponent>
     )
 
-    return this.render_base(mainComponent, breadCrumbs);
+    return this.render_base(mainComponent);
   },
 
   issuerCertificateForm: function() {

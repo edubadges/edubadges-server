@@ -4,9 +4,12 @@ from django.conf import settings
 from django.contrib import admin
 from django.views.generic.base import RedirectView, TemplateView
 
+from rest_framework.authtoken.views import obtain_auth_token
+
 from .views import SitemapView, info_view, email_unsubscribe
 
-admin.autodiscover()
+from mainsite.admin import badgr_admin
+badgr_admin.autodiscover()
 # make sure that any view/model/form imports occur AFTER admin.autodiscover
 
 TOKEN_REGEX = '(?P<uidb36>[0-9A-Za-z]{1,13})-(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})'
@@ -21,7 +24,6 @@ urlpatterns = patterns('',
     url(r'^robots\.txt$', RedirectView.as_view(url='%srobots.txt' % settings.STATIC_URL)),
 
     # Pattern library & Temp Views
-    url(r'^pattern-library$', TemplateView.as_view(template_name='pattern-library.html'), name='pattern-library'),
     url(r'^temp/app$', TemplateView.as_view(template_name='temp-app.html'), name='temp-app'),
     url(r'^temp/canvas$', TemplateView.as_view(template_name='temp-canvas.html'), name='temp-canvas'),
 
@@ -32,10 +34,8 @@ urlpatterns = patterns('',
     url(r'^sitemap$', SitemapView.as_view(), name='sitemap'),
     url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.sitemap', {'sitemaps': sitemaps}),
 
-    # Admin URLs from client_admin
-    # https://github.com/concentricsky/django-client-admin
-    url(r'^staff/', include('client_admin.urls')),
-    url(r'^staff/', include(admin.site.urls)),
+    # Admin URLs
+    url(r'^staff/', include(badgr_admin.urls)),
 
     # accounts:
     url(r'^accounts[/]?$', RedirectView.as_view(url='/accounts/email/')),
@@ -47,10 +47,11 @@ urlpatterns = patterns('',
     # REST Framework-based APIs
     url(r'^user', include('badgeuser.urls')),
     url(r'^v1/user', include('badgeuser.api_urls')),
+    url(r'^api-auth/token$', obtain_auth_token),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     url(r'^public', include('issuer.public_api_urls')),
 
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^docs/', include('rest_framework_swagger.urls')),
 
     # Service health endpoint
@@ -107,4 +108,10 @@ if getattr(settings, 'DEBUG_STATIC', True):
         url(r'^%s(?P<path>.*)' % (static_url,), 'django.contrib.staticfiles.views.serve', kwargs={
             'insecure': True,
         })
+    ) + urlpatterns
+
+# Serve pattern library view only in debug mode or if explicitly declared
+if getattr(settings, 'DEBUG', True) or getattr(settings, 'SERVE_PATTERN_LIBRARY', False):
+    urlpatterns = patterns('',
+       url(r'^pattern-library$', TemplateView.as_view(template_name='pattern-library.html'), name='pattern-library')
     ) + urlpatterns

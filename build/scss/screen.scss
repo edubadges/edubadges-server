@@ -34,7 +34,8 @@ button {
 
 input,
 label,
-textarea {
+textarea,
+select {
   color: map-get($colors, bodycopy);
   font-family: $font-family;
   font-size: $font-size;
@@ -72,9 +73,11 @@ strong {
 'modules/message',
 'modules/pagination',
 'modules/rule',
+'modules/search',
 'modules/status',
 'modules/step',
 'modules/table',
+'modules/tags',
 'modules/title',
 'modules/truncate',
 'modules/viewdetails',
@@ -85,8 +88,8 @@ strong {
 .o-canvas {
   background-color: map-get($colors, bodybackground-light);
   
-  main {
-    padding-top: $layout-spacing*4;
-  }
+  //main {
+  //  padding-top: $layout-spacing*4;
+  //}
 
 }

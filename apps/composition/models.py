@@ -21,6 +21,10 @@ class LocalBadgeClass(AbstractBadgeClass):
                                on_delete=models.PROTECT,
                                related_name="badgeclasses")
 
+    class Meta:
+        verbose_name = 'local badge class'
+        verbose_name_plural = 'local badge classes'
+
 
 class LocalBadgeInstance(AbstractBadgeInstance):
     # 0.5 BadgeInstances have no notion of a BadgeClass

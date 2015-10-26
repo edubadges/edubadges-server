@@ -23,7 +23,8 @@ var Detail = React.createClass({
             badge_instance: undefined,
             recipient: undefined,
             actionGenerator: function(){},
-            showUnearnedStep: false
+            showUnearnedStep: false,
+            imageSize: "144"
         };
     },
     getInitialState: function(){
@@ -146,7 +147,7 @@ var Detail = React.createClass({
                     <Heading size="small" title={badgeName} subtitle={_.get(this.props, 'badge_class.json.description')}/>
                     <div className="detail_">
                         <div>
-                            <img src={_.get(this.props, 'badge_class.image')} width="224" height="224" alt={badgeName}/>
+                            <img src={_.get(this.props, 'badge_class.image')} width={this.props.imageSize} height={this.props.imageSize} alt={badgeName}/>
                         </div>
                         <ul>{properties}</ul>
                     </div>

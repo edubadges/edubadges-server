@@ -181,6 +181,11 @@
 }
 
 .issuer-display-detail {
+
+  + * {
+    clear: left;
+  }
+
   margin-top:21px;
   .propertyImage {
     border-radius: 4px;

@@ -109,17 +109,20 @@ APIStore.replaceCollectionItem = function(collectionKey, item){
   return item;
 };
 
-APIStore.partialUpdateCollectionItem = function(collectionKey, searchKey, searchValue, updateKey, updateValue){
+APIStore.updateReplaceOrCreateCollectionItem = function(collectionKey, searchKey, searchValue, updateKey, newItem){
+
   if (!APIStore.data.hasOwnProperty(collectionKey)) {
-    return APIStore.addCollectionItem(collectionKey, updateValue);
+      // Warning: Create a collection that has a single Item that may be an object or JUST A STRING!
+    return APIStore.addCollectionItem(collectionKey, newItem);
   }
+
   var foundIndex = _.findIndex(APIStore.data[collectionKey], function(el){ return el[searchKey] == searchValue; });
   if (foundIndex > -1){
-    // Optional updateKey parameter lets you update a single property. Without it, replace the whole object.
+    // Optional updateKey parameter lets you update a single field/property. Without it, replace the whole object.
     if (updateKey)
-      APIStore.data[collectionKey][foundIndex][updateKey] = updateValue;
+      APIStore.data[collectionKey][foundIndex][updateKey] = newItem;
     else
-      APIStore.data[collectionKey][foundIndex] = updateValue;
+      APIStore.data[collectionKey][foundIndex] = newItem;
 
     return APIStore.data[collectionKey][foundIndex]
   }
@@ -384,7 +387,7 @@ APIStore.postForm = function(fields, values, context, requestContext){
 
   // Attach data fields to request
   for (var field in fields) {
-    if (["text", "textarea", "select", "checkbox"].indexOf(fields[field].inputType) > -1 && values[field])
+    if (["text", "hidden", "textarea", "select", "checkbox"].indexOf(fields[field].inputType) > -1 && values[field])
       req.field(field, values[field]);
     else if (["image", "file"].indexOf(fields[field].inputType) > -1 && values[field] != null)
       req.attach(field, values[field], _.get(values[field], 'name', fields[field].filename));
@@ -437,10 +440,10 @@ APIStore.postForm = function(fields, values, context, requestContext){
 }
 
 
-/* requestData: a method of making partial updates to collection records based on
+/* updateWithResponseData: a method of making partial updates to collection records based on
  * an API interaction.
 */
-APIStore.requestData = function(data, context, requestContext){
+APIStore.updateWithResponseData = function(data, context, requestContext){
   url = APIStore.buildUrlWithContext(context.actionUrl, requestContext)
 
   var req;
@@ -468,25 +471,52 @@ APIStore.requestData = function(data, context, requestContext){
     else if (context.successHttpStatus.indexOf(response.status) == -1){
       APIStore.emit("API_RESULT")
     }
-    else if (context.method == 'DELETE'){
+    else if (context.method == 'DELETE' && ! context.doNotDeleteCollection){
       var foundIndex = _.findIndex(_.get(APIStore.data, context.apiCollectionKey), function(el){ return el[context.apiSearchKey] == context.apiSearchValue; });
       if (foundIndex > -1) {
         APIStore.data[context.apiCollectionKey].splice(foundIndex, 1);
-        APIStore.emit('DATA_UPDATED');
-      }
-    }
-    else{
-      var newValue = typeof response.text == 'string' && response.text ? JSON.parse(response.text) : '';
-      var newObject = APIStore.partialUpdateCollectionItem(context.apiCollectionKey, context.apiSearchKey, context.apiSearchValue, context.apiUpdateKey, newValue);
-      if (newObject){
         APIStore.emit('DATA_UPDATED');
         APIStore.emit('DATA_UPDATED_' + context.apiCollectionKey);
         if (context.hasOwnProperty('formId'))
           APIStore.emit('DATA_UPDATED_' + context.formId);
       }
-      else {
-        APIStore.emit('API_STORE_FAILURE');
-      }
+    }
+    else {
+        var apiResponse = typeof response.text == 'string' && response.text ? JSON.parse(response.text) : '';
+
+        var replaceCollectionItemField = ( ! context.apiUpdateValuesTo && ! context.apiUpdateValuesFromResponse && context.apiUpdateFieldWithResponse);
+
+        if (replaceCollectionItemField) {
+            var updatedObject = APIStore.updateReplaceOrCreateCollectionItem(context.apiCollectionKey, context.apiSearchKey, context.apiSearchValue, context.apiUpdateFieldWithResponse, apiResponse);
+            if ( ! updatedObject) {
+                APIStore.emit('API_STORE_FAILURE');
+            }
+        }
+        else if (context.apiUpdateValuesTo) {
+            for (var key in context.apiUpdateValuesTo) {
+                var value = context.apiUpdateValuesTo[key];
+                APIStore.updateReplaceOrCreateCollectionItem(context.apiCollectionKey, context.apiSearchKey, context.apiSearchValue, key, value);
+            }
+        }
+        else if (context.apiUpdateValuesFromResponse) {
+            context.apiUpdateValuesFromResponse.forEach(function(key) {
+                var value;  // If the response doesn't have any JSON keys, there are no values.
+                if (typeof apiResponse === "object") {
+                    value = apiResponse[key] || undefined;
+                }
+                APIStore.updateReplaceOrCreateCollectionItem(context.apiCollectionKey, context.apiSearchKey, context.apiSearchValue, key, value);
+            });
+        }
+        else {
+            APIStore.emit('API_STORE_FAILURE');
+            return;
+        }
+
+        APIStore.emit('DATA_UPDATED');
+        APIStore.emit('DATA_UPDATED_' + context.apiCollectionKey);
+        if (context.hasOwnProperty('formId')) {
+            APIStore.emit('DATA_UPDATED_' + context.formId);
+        }
     } 
   });
 
@@ -521,7 +551,7 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
       break;
 
     case 'API_SUBMIT_DATA':
-      APIStore.requestData(action.apiData, action.apiContext, action.requestContext || {});
+      APIStore.updateWithResponseData(action.apiData, action.apiContext, action.requestContext || {});
       break;
 
     case 'API_GET_DATA':

@@ -13,4 +13,24 @@
     opacity: 1;
   }
 
+  .dropdown_-x-item {
+    color: map-get($colors, bodycopy);
+    display: block;
+    font-size: $font-size-small;
+    line-height: 1.5;
+    padding: $layout-spacing*2;
+    text-align: left;
+    text-decoration: none;
+    white-space: nowrap;
+    width: 100%;
+
+    &:hover {
+      background-color: darken(map-get($colors, solid-light), 8%);
+    }
+  }
+
+}
+
+.tether-element.tether-enabled {
+  z-index: 5;
 }

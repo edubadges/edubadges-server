@@ -7,7 +7,7 @@ var Title = React.createClass({
             subtitle: undefined,
             options: undefined,
             centered: false,
-            truncate: false,
+            truncate: true,
         };
     },
 
@@ -18,8 +18,8 @@ var Title = React.createClass({
 
         var title = this.props.subtitle ?
             (<div>
-                <h1 className="title_-x-primary">{this.props.title}</h1>
-                <p className="title_-x-secondary">{this.props.subtitle}</p>
+                <h1 className="title_-x-primary truncate_">{this.props.title}</h1>
+                <p className="title_-x-secondary truncate_">{this.props.subtitle}</p>
              </div>) :
             (<div>
                 <h1 className={headerClassList.join(' ')}>{this.props.title}</h1>

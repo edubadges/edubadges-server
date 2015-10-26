@@ -63,8 +63,6 @@ def badge_email_matches_emails(badge_instance, verified_addresses):
     if email_type == "email":
         if badge_email in verified_addresses:
             return badge_email
-        else:
-            return False
 
     if email_type == "hash":
         try:

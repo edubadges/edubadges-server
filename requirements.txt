@@ -1,5 +1,6 @@
 # Django stuff
 Django==1.7.1
+semver==2.2.1
 # Timezone support
 pytz==2014.7
 # PIL support
@@ -19,7 +20,6 @@ git+https://github.com/concentricsky/django-cachemodel.git@v2.1.2
 git+https://github.com/concentricsky/django-basic-models.git@v2.1.2
 # CSky Client Admin
 git+https://github.com/concentricsky/django-sky-ckeditor.git@v0.9.8
-git+https://github.com/concentricsky/django-client-admin.git@v1.1.1
 # Revision and deleted object recovery
 django-reversion==1.8.5
 # Memcached cache
@@ -28,8 +28,8 @@ python-memcached==1.53
 djangorestframework==3.1.1
 django-rest-swagger==0.2.9
 # Django Allauth
-#django-allauth==0.21.0
-git+https://github.com/concentricsky/django-allauth.git@0.21.0-csky
+#django-allauth==0.23.0
+git+https://github.com/concentricsky/django-allauth.git@0.23.0-csky
 oauthlib==0.7.2
 requests==2.5.1
 requests-oauthlib==0.4.2
