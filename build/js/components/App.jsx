@@ -615,7 +615,6 @@ var App = React.createClass({
 
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <SecondaryMenu viewId={viewId} items={this.props.secondaryMenus[viewId]} />
         <ActionBar 
           title="Understand Badges"
           viewId={viewId}
