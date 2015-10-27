@@ -18,6 +18,9 @@
   {% block extrahead %}{% endblock %}
 
   {% endblock %}
+  {% if PINGDOM_MONITORING_ID %}
+    {% include 'pingdom/embded.html' %}
+  {% endif %}
 </head>
 <body class="{% block bodyclass %}accounts{% endblock %}">
   

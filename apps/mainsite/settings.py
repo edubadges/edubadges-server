@@ -101,7 +101,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.i18n',
 
-    'mainsite.context_processors.help_email'
+    'mainsite.context_processors.extra_settings'
 ]
 
 JINGO_EXCLUDE_APPS = (

@@ -30,6 +30,10 @@
             {% block extrastyle %}{% endblock %}
 
             <script src="{{STATIC_URL}}js/libs/modernizr-2.5.3.min.js"></script>
+
+            {% if PINGDOM_MONITORING_ID %}
+                {% include 'pingdom/embed.html' %}
+            {% endif %}
         {% endblock %}
 
         {% block extrahead %}{% endblock %}
@@ -69,16 +73,18 @@
             {% if initial_data %}
                 <script src="{{STATIC_URL}}js/app.js"></script>
             {% endif %}
+            {% if GOOGLE_ANALYTICS_ID %}
             <script type="text/javascript">
-                /* var _gaq = _gaq || [];
-                _gaq.push(['_setAccount', 'UA-#######-#']);
+                var _gaq = _gaq || [];
+                _gaq.push(['_setAccount', '{{ GOOGLE_ANALYTICS_ID }}']);
                 _gaq.push(['_trackPageview']);
                 (function() {
                     var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
                     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
                     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-                })(); */
+                })();
             </script>
+            {% endif %}
         {% endblock %}
     </body>
 </html>

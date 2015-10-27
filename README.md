@@ -36,7 +36,7 @@ badgr
 ```
 
 ### Install requirements
- *from within code directory* 
+*from within code directory* 
 
 * `pip install -r requirements-dev.txt`
 * `npm install`
@@ -58,5 +58,17 @@ badgr
 A browseable API is available at `/v1` and API documentation at `/docs`
 
 ### Additional configuration options
+Set these values in your settings_local.py file to configure the application to your specific needs. Required options are listed in bold.
+* *HELP_EMAIL* (Required)
+  - An email address for your support staff.
 * BADGR_APPROVED_ISSUERS_ONLY:
   - If you choose to use the BADGR_APPROVED_ISSUERS_ONLY flag, this means new user accounts will not be able to define new issuers (though they can be added as staff on issuers defined by others) unless they have the Django user permission 'issuer.add_issuer'. The recommended way to grant users this privilege is to create a group that grants it in the `/staff` admin area and addthe appropriate users to that group.
+* GOOGLE_ANALYTICS_ID:
+  - Google Analytics code will be inserted into your pages if this is set to your account tracking code, e.g. 'UA-3929083373-2'. See https://support.google.com/analytics/answer/1008080
+* PINGDOM_MONITORING_ID:
+  - If you use Pingdom to monitor site performance, including this setting will embed Pingdom tracking script into the header.
+* CELERY_ALWAYS_EAGER = True
+  - Celery is an asynchronous task runner built into Django and Badgr. Advanced deployments may separate celery workers from web nodes for improved performance. For development environments where Celery tasks should run synchronously, set this flag to true.
+* CANVAS_ENFORCE_SSL = False
+* CANVAS_API_VERIFY_SSL = False
+  - In order to work with a development instance of the Canvas server that is not running on a secure (HTTPS/SSL) connection, override these security defaults to False.
