@@ -14,7 +14,6 @@ var APIStore = require('../stores/APIStore');
 var FormStore = assign({}, EventEmitter.prototype);
 
 FormStore.requests = {};
-
 FormStore.data = {};
 
 FormStore.genericFormTypes = FormConfigStore.genericFormTypes();
