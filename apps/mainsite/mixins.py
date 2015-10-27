@@ -10,7 +10,7 @@ from resizeimage.resizeimage import resize_contain
 class ResizeUploadedImage(object):
 
     def save(self, *args, **kwargs):
-        if self.pk is None:
+        if self.pk is None and self.image:
             image = Image.open(self.image)
 
             if image.format == 'PNG':
