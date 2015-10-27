@@ -89,6 +89,23 @@ class TestBadgeUploads(APITestCase):
         self.assertEqual(get_response.data[0].get('json', {}).get('image', {}).get('id'), new_instance.image_url())
 
     @responses.activate
+    def test_submit_basic_1_0_badge_via_url_plain_json(self):
+        setup_basic_1_0()
+
+        post_input = {
+            'url': 'http://a.com/instance'
+        }
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        response = self.client.post(
+            '/v1/earner/badges?json_format=plain', post_input
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(
+            response.data.get('json').get('badge').get('description'),
+            u'Basic as it gets. v1.0'
+        )
+
+    @responses.activate
     def test_submit_basic_1_0_badge_from_image_url_baked_w_assertion(self):
         setup_basic_1_0()
 

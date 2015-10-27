@@ -63,7 +63,10 @@ class LocalBadgeInstanceList(APIView):
               paramType: form
         """
         serializer = LocalBadgeInstanceUploadSerializer(
-            data=request.data, context={'request': request})
+            data=request.data, context={
+                'request': request,
+                'format': request.query_params.get('json_format', 'v1')
+            })
 
         serializer.is_valid(raise_exception=True)
 
