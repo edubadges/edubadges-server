@@ -11,11 +11,14 @@ class BadgeInstanceHTMLRenderer(BrowsableAPIRenderer):
         context = super(BadgeInstanceHTMLRenderer, self).get_context(
             data, accepted_media_type, renderer_context)
 
-        context['badge_instance'] = renderer_context['badge_instance']
-        context['badge_class'] = renderer_context['badge_class']
-        context['issuer'] = renderer_context['issuer']
+        try:
+            context['badge_instance'] = renderer_context['badge_instance']
+            context['badge_class'] = renderer_context['badge_class']
+            context['issuer'] = renderer_context['issuer']
 
-        recipient_email = renderer_context['badge_instance'].recipient_identifier
-        context['obscured_recipient'] = utils.obscure_email_address(recipient_email)
+            recipient_email = renderer_context['badge_instance'].recipient_identifier
+            context['obscured_recipient'] = utils.obscure_email_address(recipient_email)
+        except KeyError:
+            pass
 
         return context

@@ -123,10 +123,10 @@ class BadgeInstanceJson(JSONComponentView):
 
     def get_renderer_context(self, **kwargs):
         context = super(BadgeInstanceJson, self).get_renderer_context()
-
-        context['badge_instance'] = self.current_object
-        context['badge_class'] = self.current_object.badgeclass
-        context['issuer'] = self.current_object.issuer
+        if getattr(self, 'current_object', None):
+            context['badge_instance'] = self.current_object
+            context['badge_class'] = self.current_object.badgeclass
+            context['issuer'] = self.current_object.issuer
 
         return context
 
@@ -135,7 +135,7 @@ class BadgeInstanceJson(JSONComponentView):
             current_object = self.model.cached.get(slug=slug)
             self.current_object = current_object
         except self.model.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response("Requested assertion not found.", status=status.HTTP_404_NOT_FOUND)
         else:
             if current_object.revoked is False:
 

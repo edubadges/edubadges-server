@@ -23,7 +23,7 @@
         {% endblock %}
 
         <main class="wrap_ {% block main_override %}{% endblock %}">
-
+        {% if badge_instance %}
             {% block content %}
             <div class=" l-wrapper">
                 <div class="card_" style="padding: 1em;">
@@ -92,7 +92,11 @@
                 <pre style="background-color: #eee; padding: 1em;">{{ content }}</pre>
                 {% endblock %}
             </div>
-            
+        {% else %}
+            <div class="l-wrapper">
+                404: Requested assertion not found.
+            </div>
+        {% endif %}
         </main>
 
         {% block footer %}
