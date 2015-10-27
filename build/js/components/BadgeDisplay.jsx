@@ -1,8 +1,21 @@
 var React = require('react');
 var _ =  require('lodash');
 
+// Components
+var Button = require('../components/Button.jsx').Button;
+var Dialog = require('../components/Dialog.jsx').Dialog;
+var DialogOpener = require('../components/Dialog.jsx').DialogOpener;
+var Heading = require('../components/Heading.jsx').Heading;
+var SubmitButton = require('../components/Button.jsx').SubmitButton;
+
+// Stores
+var APIStore = require('../stores/APIStore');
+var FormStore = require('../stores/FormStore');
+var FormConfigStore = require('../stores/FormConfigStore');
+
 // Actions
 var navigateLocalPath = require('../actions/clicks').navigateLocalPath;
+var APISubmitData = require('../actions/api').APISubmitData;
 
 
 var wrap_text_property = function(value){
@@ -152,7 +165,102 @@ var BadgeDisplayThumbnail = React.createClass({
     else if (this.props.handleClick)
       this.props.handleClick(this.props.id);
   },
+
+    componentDidMount: function() {
+        var badgeId = this.props.id;
+        FormStore.addListener('FORM_DATA_UPDATED_EarnerCollectionCreateForm-' + badgeId, this.handleNewCollection);
+        APIStore.addListener('DATA_UPDATED_earner_collections', this.handleAddedToNewCollection);
+    },
+    componentWillUnmount: function() {
+        var badgeId = this.props.id;
+        FormStore.removeListener('FORM_DATA_UPDATED_EarnerCollectionCreateForm-' + badgeId, this.handleNewCollection);
+        APIStore.removeListener('DATA_UPDATED_earner_collections', this.handleAddedToNewCollection);
+    },
+    handleNewCollection: function(ev) {
+        var badgeId = this.props.id;
+        var formId = 'EarnerCollectionCreateForm-'+ badgeId;
+        var newState = FormStore.getFormState(formId);
+        if (newState.actionState === "complete") {
+            // Add the Badge to the new Collection
+            var newestCollection = APIStore.getCollectionLastItem('earner_collections')
+
+            apiContext = {
+                formId: formId,
+                apiCollectionKey: "earner_collections",
+                apiSearchKey: 'slug',
+                apiSearchValue: newestCollection.slug,
+                apiUpdateFieldWithResponse: 'badges',
+                pushResponseToField: true,
+
+                actionUrl: "/v1/earner/collections/"+ newestCollection.slug +"/badges",
+                method: "POST",
+                successHttpStatus: [200, 201],
+                successMessage: "New collection created"
+            };
+
+            // Somehow we're still within a dispatcher here, so defer the execution
+            setTimeout(function() { APISubmitData({id: badgeId}, apiContext) }, 0);
+        }
+    },
+    handleAddedToNewCollection: function(ev) {
+        var badgeId = this.props.id;
+        var selectCollectionDialog = document.getElementById('select-collection-'+ badgeId);
+        if (selectCollectionDialog.hasAttribute('open')) {
+            selectCollectionDialog.close();
+        }
+    },
+    
   render: function() {
+    var badgeName = this.props.json.badge.name['@value'];
+    var badgeId = this.props.id;
+
+    // New Collection Dialog
+    var createCollectionFormType = "EarnerCollectionCreateForm";
+    var createCollectionFormId = createCollectionFormType +"-"+ badgeId;
+    var createCollectionFormProps = FormConfigStore.getConfig(createCollectionFormType, { formId: createCollectionFormId }, {});
+    FormStore.getOrInitFormData(createCollectionFormId, createCollectionFormProps);
+
+    var createCollectionActions=[
+        <SubmitButton formType={createCollectionFormType} formId={createCollectionFormId} label="Add Collection" />
+    ];
+    var addToNewCollectionDialog = (
+        <Dialog formId={createCollectionFormId} dialogId={"add-collection-"+ badgeId} key={"add-collection-"+ badgeId} actions={createCollectionActions} className="closable">
+            <Heading size="small"
+                     title="New Collection"
+                     subtitle={badgeName +" will automatically be added to this collection."}/>
+
+            <BasicAPIForm hideFormControls={true} actionState="ready" {...createCollectionFormProps} />
+        </Dialog>);
+
+    // Select Collection Dialog
+    var collections = APIStore.getCollection("earner_collections").map(function(object) { return {name: object.name, slug:object.slug} });
+
+    var selectCollectionFormType = "CollectionAddBadgeInstanceForm";
+    var selectCollectionFormId = selectCollectionFormType +"-"+ badgeId;
+    var selectCollectionFormProps = FormConfigStore.getConfig(selectCollectionFormType, { formId: selectCollectionFormId }, {
+        badgeId: badgeId,
+        collections: collections,
+        defaultCollection: collections[0].slug,
+        badgeName: badgeName,
+    });
+    FormStore.getOrInitFormData(selectCollectionFormId, selectCollectionFormProps)
+
+    var selectCollectionActions=[
+        <SubmitButton formType={selectCollectionFormType} formId={selectCollectionFormId} label="Add" />
+    ];
+    var selectCollectionDialog = (
+        <Dialog formId={selectCollectionFormId} dialogId={"select-collection-"+ badgeId} key={"select-collection-"+ badgeId} actions={selectCollectionActions} className="closable">
+            <Heading size="small"
+                     title="Add to Collection"
+                     subtitle={badgeName +" will automatically be added to the new collection."} />
+
+            <BasicAPIForm hideFormControls={true} actionState="ready" {...selectCollectionFormProps} />
+
+            <DialogOpener dialog={addToNewCollectionDialog} dialogId={"add-collection-"+ badgeId} key={"add-collection-"+ badgeId}>
+                <Button className="action_ action_-tertiary" label="CREATE NEW COLLECTION" propagateClick={true}/>
+            </DialogOpener>
+        </Dialog>);
+
     return (
       <div className="card_">
         <div className="badge_ viewdetails_" onClick={this.handleClick}>

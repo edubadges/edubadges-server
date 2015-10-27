@@ -109,7 +109,7 @@ APIStore.replaceCollectionItem = function(collectionKey, item){
   return item;
 };
 
-APIStore.updateReplaceOrCreateCollectionItem = function(collectionKey, searchKey, searchValue, updateKey, newItem){
+APIStore.updateReplaceOrCreateCollectionItem = function(collectionKey, searchKey, searchValue, updateKey, newItem, pushItem){
 
   if (!APIStore.data.hasOwnProperty(collectionKey)) {
       // Warning: Create a collection that has a single Item that may be an object or JUST A STRING!
@@ -119,10 +119,18 @@ APIStore.updateReplaceOrCreateCollectionItem = function(collectionKey, searchKey
   var foundIndex = _.findIndex(APIStore.data[collectionKey], function(el){ return el[searchKey] == searchValue; });
   if (foundIndex > -1){
     // Optional updateKey parameter lets you update a single field/property. Without it, replace the whole object.
-    if (updateKey)
-      APIStore.data[collectionKey][foundIndex][updateKey] = newItem;
-    else
+    if (updateKey) {
+        var itemField = APIStore.data[collectionKey][foundIndex][updateKey];
+        if (pushItem && typeof itemField.push === 'function') {
+            APIStore.data[collectionKey][foundIndex][updateKey].push(newItem);
+        }
+        else {
+            APIStore.data[collectionKey][foundIndex][updateKey] = newItem;
+        }
+    }
+    else {
       APIStore.data[collectionKey][foundIndex] = newItem;
+    }
 
     return APIStore.data[collectionKey][foundIndex]
   }
@@ -139,6 +147,7 @@ APIStore.resolveActiveGet = function(collectionKey){
 
 
 // listener utils
+APIStore.setMaxListeners(40);
 APIStore.addListener = function(type, callback) {
   APIStore.on(type, callback);
 };
@@ -484,10 +493,15 @@ APIStore.updateWithResponseData = function(data, context, requestContext){
     else {
         var apiResponse = typeof response.text == 'string' && response.text ? JSON.parse(response.text) : '';
 
-        var replaceCollectionItemField = ( ! context.apiUpdateValuesTo && ! context.apiUpdateValuesFromResponse && context.apiUpdateFieldWithResponse);
+        var updateCollectionItemField = ( ! context.apiUpdateValuesTo && ! context.apiUpdateValuesFromResponse && context.apiUpdateFieldWithResponse);
 
-        if (replaceCollectionItemField) {
-            var updatedObject = APIStore.updateReplaceOrCreateCollectionItem(context.apiCollectionKey, context.apiSearchKey, context.apiSearchValue, context.apiUpdateFieldWithResponse, apiResponse);
+        if (updateCollectionItemField) {
+            if (context.pushResponseToField) {
+                var updatedObject = APIStore.updateReplaceOrCreateCollectionItem(context.apiCollectionKey, context.apiSearchKey, context.apiSearchValue, context.apiUpdateFieldWithResponse, apiResponse, true);
+            }
+            else {
+                var updatedObject = APIStore.updateReplaceOrCreateCollectionItem(context.apiCollectionKey, context.apiSearchKey, context.apiSearchValue, context.apiUpdateFieldWithResponse, apiResponse);
+            }
             if ( ! updatedObject) {
                 APIStore.emit('API_STORE_FAILURE');
             }
@@ -589,5 +603,6 @@ module.exports = {
   getFirstItemByPropertyValue: APIStore.getFirstItemByPropertyValue,
   filter: APIStore.filter,
   fetchCollection: APIStore.fetchCollection,
-  buildUrlWithContext: APIStore.buildUrlWithContext
+  buildUrlWithContext: APIStore.buildUrlWithContext,
+  getCookie: APIStore.getCookie,
 };

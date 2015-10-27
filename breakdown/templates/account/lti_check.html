@@ -5,6 +5,7 @@
     <h3>Confirm Canvas is connected to Badgr. Enter your Canvas server domain.</h3>
 
     <form method="POST">
+        {% csrf_token %}
 
         {{ form.as_p }}
 
