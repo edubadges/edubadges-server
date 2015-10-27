@@ -13,6 +13,8 @@ from autoslug import AutoSlugField
 import cachemodel
 from jsonfield import JSONField
 
+from .mixins import ResizeUploadedImage
+
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
@@ -48,7 +50,7 @@ class AbstractComponent(cachemodel.CacheModel):
         return self.json.get(property_name)
 
 
-class AbstractIssuer(AbstractComponent):
+class AbstractIssuer(ResizeUploadedImage, AbstractComponent):
     """
     Open Badges Specification IssuerOrg object
     """
@@ -79,8 +81,7 @@ class AbstractIssuer(AbstractComponent):
         self.publish_delete("slug")
 
 
-
-class AbstractBadgeClass(AbstractComponent):
+class AbstractBadgeClass(ResizeUploadedImage, AbstractComponent):
     """
     Open Badges Specification BadgeClass object
     """
