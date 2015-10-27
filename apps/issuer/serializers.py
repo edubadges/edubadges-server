@@ -93,8 +93,15 @@ class IssuerSerializer(AbstractComponentSerializer):
 class IssuerRoleActionSerializer(serializers.Serializer):
     """ A serializer used for validating user role change POSTS """
     action = serializers.ChoiceField(('add', 'modify', 'remove'), allow_blank=True)
-    username = serializers.CharField(allow_blank=False)
+    username = serializers.CharField(allow_blank=True, required=False)
+    email = serializers.EmailField(allow_blank=True, required=False)
     editor = serializers.BooleanField(default=False)
+
+    def validate(self, attrs):
+        if attrs.get('username') and attrs.get('email'):
+            raise serializers.ValidationError(
+                'Either a username or email address must be provided, not both.')
+        return attrs
 
 
 class IssuerStaffSerializer(serializers.Serializer):

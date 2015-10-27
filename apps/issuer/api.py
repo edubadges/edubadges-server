@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 
+from allauth.account.models import EmailAddress
 from rest_framework import status, authentication, permissions
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.response import Response
@@ -225,7 +226,12 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
               type: string
               paramType: form
               description: The username of the user to add or remove from this role.
-              required: true
+              required: false
+            - name: email
+              type: string
+              paramType: form
+              description: A verified email address of the user to add or remove from this role.
+              required: false
             - name: editor
               type: boolean
               paramType: form
@@ -246,11 +252,19 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
             )
 
         try:
-            user_to_modify = get_user_model().objects.get(username=serializer.validated_data.get('username'))
-        except get_user_model().DoesNotExist:
+            if serializer.validated_data.get('username'):
+                user_id = serializer.validated_data.get('username')
+                user_to_modify = get_user_model().objects.get(username=user_id)
+            else:
+                user_id = serializer.validated_data.get('email')
+                user_to_modify = EmailAddress.objects.get(
+                    email=user_id).user
+        except (get_user_model().DoesNotExist, EmailAddress.DoesNotExist,):
+            error_text = "User {} not found. Cannot modify Issuer permissions.".format(user_id)
+            if user_id is None:
+                error_text = 'User not found. Neither email address or username was provided.'
             return Response(
-                "User %s not found. Cannot modify Issuer permissions." % serializer.validated_data.get('username'),
-                status=status.HTTP_404_NOT_FOUND
+                error_text, status=status.HTTP_404_NOT_FOUND
             )
 
         action = serializer.validated_data.get('action')

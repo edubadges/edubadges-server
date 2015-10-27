@@ -78,6 +78,7 @@ class IssuerTests(APITestCase):
     def test_add_user_to_issuer_editors_set(self):
         """ Authenticated user (pk=1) owns test-issuer. Add user (username=test3) as an editor. """
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+
         post_response = self.client.post(
             '/v1/issuer/issuers/test-issuer/staff',
             {'action': 'add', 'username': 'test3', 'editor': True}
@@ -85,6 +86,42 @@ class IssuerTests(APITestCase):
 
         self.assertEqual(post_response.status_code, 200)
         self.assertEqual(len(post_response.data), 2)  # Assert that there is now one editor
+
+    def test_add_user_to_issuer_editors_set_by_email(self):
+        """ Authenticated user (pk=1) owns test-issuer. Add user (username=test3) as an editor. """
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+
+        post_response = self.client.post(
+            '/v1/issuer/issuers/test-issuer/staff',
+            {'action': 'add', 'email': 'test3@example.com', 'editor': True}
+        )
+
+        self.assertEqual(post_response.status_code, 200)
+        self.assertEqual(len(post_response.data), 2)  # Assert that there is now one editor
+
+    def test_add_user_to_issuer_editors_set_too_many_methods(self):
+        """ Authenticated user (pk=1) owns test-issuer. Add user (username=test3) as an editor. """
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+
+        post_response = self.client.post(
+            '/v1/issuer/issuers/test-issuer/staff',
+            {'action': 'add', 'email': 'test3@example.com', 'username': 'test3', 'editor': True}
+        )
+
+        self.assertEqual(post_response.status_code, 400)
+
+    def test_add_user_to_issuer_editors_set_missing_identifier(self):
+        """ Authenticated user (pk=1) owns test-issuer. Add user (username=test3) as an editor. """
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+
+        post_response = self.client.post(
+            '/v1/issuer/issuers/test-issuer/staff',
+            {'action': 'add', 'editor': True}
+        )
+
+        self.assertEqual(post_response.status_code, 404)
+        self.assertEqual(post_response.data, 'User not found. Neither email address or username was provided.')
+
 
     def test_bad_action_issuer_editors_set(self):
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
