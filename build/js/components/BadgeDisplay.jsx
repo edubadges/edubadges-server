@@ -205,7 +205,7 @@ var BadgeDisplayThumbnail = React.createClass({
     handleAddedToNewCollection: function(ev) {
         var badgeId = this.props.id;
         var selectCollectionDialog = document.getElementById('select-collection-'+ badgeId);
-        if (selectCollectionDialog.hasAttribute('open')) {
+        if (selectCollectionDialog && selectCollectionDialog.hasAttribute('open')) {
             selectCollectionDialog.close();
         }
     },
