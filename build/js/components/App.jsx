@@ -17,7 +17,6 @@ var ActiveActionStore = require('../stores/ActiveActionStore');
 // Components
 var TopLinks = require('../components/TopLinks.jsx');
 var MainComponent = require ('../components/MainComponent.jsx');
-var SecondaryMenu = require('../components/SecondaryMenu.jsx');
 var ActionBar = require('../components/ActionBar.jsx').ActionBar;
 var Heading = require('../components/Heading.jsx').Heading;
 var Dialog = require('../components/Dialog.jsx').Dialog;
@@ -94,7 +93,6 @@ var App = React.createClass({
       path: urllite(window.location.href).pathname + urllite(window.location.href).search,
       appTitle: 'Badgr',
       actionBars: MenuStore.getAllItems('actionBars'),
-      secondaryMenus: MenuStore.getAllItems('secondaryMenus')
     };
   },
   getInitialState: function() {
