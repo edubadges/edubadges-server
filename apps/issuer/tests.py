@@ -95,6 +95,37 @@ class IssuerTests(APITestCase):
                 self.assertEqual(new_issuer.image.width, 400)
                 self.assertEqual(new_issuer.image.height, 400)
 
+    def test_create_issuer_image_450x450_resizes_to_400x400(self):
+        view = IssuerList.as_view()
+
+        with open(
+            os.path.join(os.path.dirname(__file__), 'testfiles', '450x450.png'),
+            'r') as badge_image:
+
+                issuer_fields_with_image = {
+                    'name': 'Awesome Issuer',
+                    'description': 'An issuer of awe-inspiring credentials',
+                    'url': 'http://example.com',
+                    'email': 'contact@example.org',
+                    'image': badge_image,
+                }
+
+                request = factory.post('/v1/issuer/issuers',
+                                       issuer_fields_with_image,
+                                       format='multipart')
+
+                force_authenticate(request,
+                                   user=get_user_model().objects.get(pk=1))
+                response = view(request)
+                self.assertEqual(response.status_code, 201)
+
+                badge_object = response.data.get('json')
+                derived_slug = badge_object['id'].split('/')[-1]
+                new_issuer = Issuer.objects.get(slug=derived_slug)
+
+                self.assertEqual(new_issuer.image.width, 400)
+                self.assertEqual(new_issuer.image.height, 400)
+
     def test_create_issuer_image_300x300_stays_300x300(self):
         view = IssuerList.as_view()
 
