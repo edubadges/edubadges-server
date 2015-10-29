@@ -57,6 +57,16 @@ var IssuerDisplay = React.createClass({
       url: {type: 'id', id: this.props.json.url, name: originUrl},
       description: {type: 'xsd:string', '@value': this.props.json.description}
     }
+
+    var emailField;
+    if (this.props.json.email) {
+        emailField = (
+            <li>
+                <h2 className="detail_-x-meta">Contact Email</h2>
+                <p><a href={this.props.json.email}>{this.props.json.email}</a></p>
+            </li>);
+    }
+
     return (
       <div className="detail_">
         <div>
@@ -64,17 +74,10 @@ var IssuerDisplay = React.createClass({
         </div>
         <ul>
           <li>
-            <h2 className="detail_-x-meta">Name</h2>
-            <p>{properties.name['@value']}</p>
-          </li>
-          <li>
-            <h2 className="detail_-x-meta">URL</h2>
+            <h2 className="detail_-x-meta">Website</h2>
             <p><a href="{properties.url.id}">{properties.url.name || properties.url.id}</a></p>
           </li>
-          <li>
-            <h2 className="detail_-x-meta">Description</h2>
-            <p>{properties.description['@value']}</p>
-          </li>
+          { emailField }
         </ul>
       </div>
     );

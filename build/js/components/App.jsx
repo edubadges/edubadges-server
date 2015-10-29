@@ -510,19 +510,20 @@ var App = React.createClass({
             <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
         </Dialog>);
 
-
     var mainComponent = (
       <MainComponent viewId={viewId}>
+        <Heading
+          title={issuer.name}
+          subtitle={issuer.description}
+          rule={true}>
+              <DialogOpener dialog={dialog} dialogId="issuer-add-badge" key="issuer-add-badge">
+                  <Button className="action_" label="Add Badge" propagateClick={true}/>
+              </DialogOpener>
+        </Heading>
         <IssuerDisplay {...issuer} />
-          <Heading
-            size="small"
-            title="Active Badges"
-            subtitle=""
-            rule={true}>
-                <DialogOpener dialog={dialog} dialogId="issuer-add-badge" key="issuer-add-badge">
-                    <Button className="action_" label="Add Badge" propagateClick={true}/>
-                </DialogOpener>
-          </Heading>
+        <Heading
+          size="small"
+          title="Active Badges" />
         <BadgeClassList
           issuerSlug={issuerSlug}
           badgeClasses={badgeClasses}
