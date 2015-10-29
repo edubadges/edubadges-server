@@ -171,7 +171,7 @@ class AbstractBadgeInstance(AbstractComponent):
     def delete(self, *args, **kwargs):
         super(AbstractBadgeInstance, self).delete(*args, **kwargs)
         self.publish_delete('slug')
-        self.publish_deleteby('slug', 'revoked')
+        self.publish_delete('slug', 'revoked')
 
 
 class EmailBlacklist(models.Model):
