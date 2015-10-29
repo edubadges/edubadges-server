@@ -11,21 +11,20 @@
   transition: all $transition-duration $transition-easing;
   user-select: none;
 
-  &:hover {
+  &:not(.is-disabled):hover {
     background-color: map-get($colors, button-hover);
     border-color: map-get($colors, button-hover);
     color: map-get($colors, solid);
   }
 
-  &:active {
+  &:not(.is-disabled):active {
     background-color: map-get($colors, button-active);
     border-color: map-get($colors, button-active);
     color: map-get($colors, solid);
   }
 
-  &[disabled] {
+  &.is-disabled {
     opacity: .3;
-    pointer-events: none;
   }
 }
 
@@ -40,8 +39,8 @@
   border-color: map-get($colors, solid);
   color: map-get($colors, solid);
 
-  &:active,
-  &:hover {
+  &:not(.is-disabled):active,
+  &:not(.is-disabled):hover {
     background: none;
     border-color: map-get($colors, solid);
     color: map-get($colors, solid);
@@ -56,12 +55,12 @@
   padding-left: $layout-spacing;
   padding-right: $layout-spacing;
 
-  &:hover {
+  &:not(.is-disabled):hover {
     background-color: map-get($colors, link-hover);
     border-color: map-get($colors, link-hover);
   }
 
-  &:active {
+  &:not(.is-disabled):active {
     background-color: map-get($colors, link-active);
     border-color: map-get($colors, link-active);
   }

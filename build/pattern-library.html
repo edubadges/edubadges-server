@@ -1434,6 +1434,63 @@
 
                 </article>
 
+                <article data-pattern="pattern" id="popover_">
+                        
+                    <code data-pattern="code" data-pattern-helper="spacer">
+
+                        <button class="button_ is-disabled" id="popoverTrigger">Popover</button>
+                        <p class="popover_" id="popover">All instances of this badge must be revoked before removing it.</p>
+                        
+
+                        <script type="text/javascript">
+
+                            document.addEventListener('DOMContentLoaded', function() {
+
+                                function openPopover(target, element) {
+
+                                    element.classList.add('is-active');
+
+                                    new Tether({
+                                        element: element,
+                                        target: target,
+                                        attachment: 'bottom right',
+                                        targetAttachment: 'top right',
+                                        constraints: [
+                                            {
+                                              to: 'window',
+                                              attachment: 'together',
+                                              pin: true
+                                            }
+                                          ]
+                                    });
+
+                                    Tether.position();
+
+                                    element.classList.add('is-visible');
+                                    element.classList.add('is-tethered');
+
+                                };
+
+                                var popoverTrigger = document.getElementById('popoverTrigger');
+                                var popover = document.getElementById('popover');
+
+                                popoverTrigger.addEventListener('mouseenter', function(event) {
+                                    openPopover(popoverTrigger, popover);
+                                });
+
+                                popoverTrigger.addEventListener('mouseleave', function(event) {
+                                    popover.classList.remove('is-active');
+                                    popover.classList.remove('is-visible');
+                                });
+
+                            });
+
+                        </script>
+
+                    </code>
+
+                </article>
+
                 <article data-pattern="pattern" id="rule_">
 
                     <code data-pattern="code">
