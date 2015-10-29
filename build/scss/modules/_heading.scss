@@ -15,6 +15,11 @@
       color: map-get($colors, heading);
       font-size: $font-size-large-5x;
       font-weight: 300;
+
+      span {
+        color: map-get($colors, loading);
+      }
+
     }
 
     p {
