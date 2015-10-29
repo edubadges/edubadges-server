@@ -8,7 +8,7 @@ var DropMenuItem = React.createClass({
   render: function() {
     return (
         <li>
-          <a className="menu_-x-dropdownitem" href={this.props.url} onClick={this.handleClick}>{this.props.title}</a>
+          <a className="dropdown_-x-item" href={this.props.url} onClick={this.handleClick}>{this.props.title}</a>
         </li>
       ); 
   }
@@ -21,7 +21,7 @@ var MenuList = React.createClass({
       return(<DropMenuItem url={item.url} title={item.title} iconClass={item.icon} key={item.title + '-item-' + i} />)
     }.bind(this));
     return (
-      <div className={'menu_-x-dropdown menu_-x-dropdown-' + this.props.title}>
+      <div className={'menu_-x-dropdown dropdown_ menu_-x-dropdown-' + this.props.title}>
         <ul>
           {secondLevelItems}
         </ul>

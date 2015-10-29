@@ -6,6 +6,7 @@ var Button = require('../components/Button.jsx').Button;
 var Dialog = require('../components/Dialog.jsx').Dialog;
 var DialogOpener = require('../components/Dialog.jsx').DialogOpener;
 var Heading = require('../components/Heading.jsx').Heading;
+var More = require('../components/Title.jsx').More;
 var SubmitButton = require('../components/Button.jsx').SubmitButton;
 
 // Stores
@@ -251,13 +252,13 @@ var BadgeDisplayThumbnail = React.createClass({
     var selectCollectionDialog = (
         <Dialog formId={selectCollectionFormId} dialogId={"select-collection-"+ badgeId} key={"select-collection-"+ badgeId} actions={selectCollectionActions} className="closable">
             <Heading size="small"
-                     title="Add to Collection"
-                     subtitle={badgeName +" will automatically be added to the new collection."} />
+                     title="Add to Collection" />
 
             <BasicAPIForm hideFormControls={true} actionState="ready" {...selectCollectionFormProps} />
 
             <DialogOpener dialog={addToNewCollectionDialog} dialogId={"add-collection-"+ badgeId} key={"add-collection-"+ badgeId}>
-                <Button className="action_ action_-tertiary" label="CREATE NEW COLLECTION" propagateClick={true}/>
+                <Button className="action_" label="CREATE NEW COLLECTION" propagateClick={true}/>
+                <p>{badgeName +" will automatically be added to the new collection."}</p>
             </DialogOpener>
         </Dialog>);
 
@@ -274,6 +275,13 @@ var BadgeDisplayThumbnail = React.createClass({
                 <h1 className="title_-x-primary truncate_"><Property name='Name' property={this.props.json.badge.name} /></h1>
                 <p className="title_-x-secondary truncate_"><Property name='Issuer' property={this.props.json.badge.issuer.name} /></p>
             </div>
+            <More>
+                <div className="dropdown_">
+                    <DialogOpener dialog={selectCollectionDialog} dialogId={"select-collection-"+ badgeId} key={"select-collection-"+ badgeId}>
+                        <button className="dropdown_-x-item"><span className="">Share</span></button>
+                    </DialogOpener>
+                </div>
+            </More>
         </div>
       </div>
     );

@@ -1,5 +1,8 @@
 var React = require('react');
 
+var TetherTarget = require('../components/Tether.jsx').TetherTarget;
+
+
 var Title = React.createClass({
     getDefaultProps: function() {
         return {
@@ -37,6 +40,29 @@ var Title = React.createClass({
 });
 
 
+More = React.createClass({
+    handleClick: function(ev) {
+        this.refs.TetherTarget.tethered.domNode.querySelector('.dropdown_').classList.add('is-active');
+        this.refs.TetherTarget.tethered.tether.position();
+        this.refs.TetherTarget.tethered.domNode.querySelector('.dropdown_').classList.add('is-visible', 'is-tethered');
+    },
+
+    render: function() {
+        var tetherOptions = {
+            attachment: 'top right',
+            targetAttachment: 'top right',
+        };
+
+        return (
+            <TetherTarget ref="TetherTarget" tethered={this.props.children} tetherOptions={tetherOptions} onClick={this.handleClick}>
+                <button className="icon_ icon_-notext icon_-right icon_-more">Options</button>
+            </TetherTarget>
+        );
+    }
+});
+
+
 module.exports = {
-    Title: Title
+    Title: Title,
+    More: More,
 };

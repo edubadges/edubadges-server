@@ -23,6 +23,10 @@ var clickHandler = function(e){
 
   }
 
+  if ( ! target.closest('.tether-target')) {
+    Array.prototype.forEach.call(document.querySelectorAll('.is-tethered'), function(el) { el.classList.remove('is-active', 'is-visible', 'is-tethered') });
+  }
+
   // Close any open menus.
   if (!target.closest('.closable'))
     clickActions.createOffMenuClickAction(target);
