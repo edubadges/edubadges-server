@@ -28,4 +28,11 @@
     margin-bottom: $layout-spacing/2;
   }
 
+  .detail_-x-footer {
+    color: map-get($colors, bodycopy-light);
+    border-top: 1px solid map-get($colors, solid-medium);
+    font-size: $font-size-small;
+    padding-top: $layout-spacing*2;
+  }
+
 }
