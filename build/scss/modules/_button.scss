@@ -23,10 +23,9 @@
     color: map-get($colors, solid);
   }
 
-  &.is-disabled, &.is-disabled:hover {
-    background-color: map-get($colors, bodybackground);
-    border-color: map-get($colors, border-light);
-    color: map-get($colors, border-light);
+  &[disabled] {
+    opacity: .3;
+    pointer-events: none;
   }
 }
 
