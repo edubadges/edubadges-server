@@ -452,6 +452,7 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
             - code: 200
               message: Badge has been deleted.
         """
+
         unissued_badgeclasses = self.queryset.filter(badgeinstances=None)
         current_badgeclass = self.get_list(badgeSlug, queryset=unissued_badgeclasses)
 

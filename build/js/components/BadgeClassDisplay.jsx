@@ -2,10 +2,18 @@ var _ = require('lodash');
 
 var React = require('react');
 
+// Stores
+var APIStore = require('../stores/APIStore');
+
 // Actions
+var APISubmitData = require('../actions/api.js').APISubmitData;
 var navigateLocalPath = require('../actions/clicks').navigateLocalPath;
 
 // Components
+var Button = require('../components/Button.jsx').Button;
+var Dialog = require('../components/Dialog.jsx').Dialog;
+var DialogOpener = require('../components/Dialog.jsx').DialogOpener;
+var Heading = require('../components/Heading.jsx').Heading;
 var Property = require('../components/BadgeDisplay.jsx').Property;
 
 BadgeClassThumbnail = React.createClass({
@@ -69,13 +77,66 @@ BadgeClassDetail = React.createClass({
 
 BadgeClassTable = React.createClass({
 
+    componentDidMount: function() {
+        // TODO: Presumption of deletion
+        APIStore.addListener('DATA_UPDATED_issuer_badgeclasses', this.handleDeletedBadge);
+    },
+    componentWillUnmount: function() {
+        APIStore.removeListener('DATA_UPDATED_issuer_badgeclasses', this.handleDeletedBadge);
+    },
+
+    handleDeletedBadge: function() {
+        // TODO: Success message?
+        this.forceUpdate();
+    },
+
     navigateToBadgeClassDetail: function(badgeClassSlug) {
         var badgeClassDetailPath = "/issuer/issuers/" + this.props.issuerSlug + "/badges/" + badgeClassSlug;
         navigateLocalPath(badgeClassDetailPath);
     },
 
+    deleteBadgeClass: function(badgeClass) {
+        apiContext = {
+            apiCollectionKey: "issuer_badgeclasses",
+            apiSearchKey: 'slug',
+            apiSearchValue: badgeClass.slug,
+
+            actionUrl: "/v1/issuer/issuers/"+ this.props.issuerSlug +"/badges/"+ badgeClass.slug,
+            method: "DELETE",
+            successHttpStatus: [200, 204],
+            successMessage: "Badge class deleted."
+        };
+
+        APISubmitData(null, apiContext);
+    },
+
+    getRemoveButton: function(badgeClass) {
+        if (badgeClass.recipient_count > 1) {
+            return (
+                <Button className="button_ button_-tertiary is-disabled" label="Remove"
+                    popover="All instances of this badge must be revoked before removing it." />);
+        }
+        else {
+            var actions=[
+                <Button label="Remove"
+                    onClick={this.deleteBadgeClass.bind(null, badgeClass)} />];
+            var dialog = (
+                <Dialog dialogId={"remove-badgeclass-"+ badgeClass.id} actions={actions} className="closable">
+                    <Heading size="small"
+                                title="Remove Badge"
+                                subtitle="Are you sure you want to remove this badge?"/>
+                </Dialog>);
+            return (
+                <DialogOpener dialog={dialog} dialogId={"remove-badgeclass-"+ badgeClass.id}>
+                    <Button className="button_ button_-tertiary" label="Remove" propagateClick={true} />
+                </DialogOpener>);
+        }
+    },
+
     render: function() {
         var badgeClasses = this.props.badgeClasses.map(function(badgeClass, i) {
+
+            var removeButton = this.getRemoveButton(badgeClass);
 
             return (
                 <tr>
@@ -92,8 +153,8 @@ BadgeClassTable = React.createClass({
                         <div className="l-horizontal">
                             <div>
                                 <button className="button_ button_-tertiary">Issue</button>
-                                <button className="button_ button_-tertiary">Edit</button>
-                                <button className="button_ button_-tertiary">Remove</button>
+                                <Button className="button_ button_-tertiary" label="Edit" />
+                                {removeButton}
                             </div>
                         </div>
                     </td>
