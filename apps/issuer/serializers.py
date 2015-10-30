@@ -117,7 +117,7 @@ class BadgeClassSerializer(AbstractComponentSerializer):
     image = serializers.ImageField(allow_empty_file=False, use_url=True)
     slug = serializers.CharField(max_length=255, allow_blank=True, required=False)
     criteria = serializers.CharField(allow_blank=True, required=False, write_only=True)
-    recipient_count = serializers.IntegerField()
+    recipient_count = serializers.IntegerField(required=False, read_only=True)
 
     def validate_image(self, image):
         # TODO: Make sure it's a PNG (square if possible), and remove any baked-in badge assertion that exists.
