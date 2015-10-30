@@ -32,6 +32,8 @@ var IssuerNotificationForm = require('../components/Form.jsx').IssuerNotificatio
 var IssuerList = require('../components/IssuerDisplay.jsx').IssuerList;
 var IssuerDisplay = require('../components/IssuerDisplay.jsx').IssuerDisplay;
 var BadgeClassDetail = require('../components/BadgeClassDisplay.jsx').BadgeClassDetail;
+var BadgeClassTable = require('../components/BadgeClassDisplay.jsx').BadgeClassTable;
+var BadgeClassList = require('../components/BadgeClassDisplay.jsx').BadgeClassList;
 var BadgeInstanceList = require('../components/BadgeInstanceDisplay.jsx').BadgeInstanceList;
 var EarnerBadgeList = require('../components/EarnerBadgeList.jsx');
 var CollectionShareInfo = require('../components/EarnerBadgeCollection.jsx').CollectionShareInfo;
@@ -493,7 +495,7 @@ var App = React.createClass({
 
     var viewId = "issuerDetail-" + issuerSlug;
     var issuer = APIStore.getFirstItemByPropertyValue('issuer_issuers', 'slug', issuerSlug);
-    var badgeClasses = APIStore.filter('issuer_badgeclasses', 'issuer', issuer.json.id);
+    var issuersBadgeClasses = APIStore.filter('issuer_badgeclasses', 'issuer', issuer.json.id);
 
     var dialogFormId = "BadgeClassCreateUpdateForm"
     var formProps = FormConfigStore.getConfig(dialogFormId, {}, {issuerSlug: issuerSlug});
@@ -524,12 +526,9 @@ var App = React.createClass({
         <Heading
           size="small"
           title="Active Badges" />
-        <BadgeClassList
+        <BadgeClassTable
           issuerSlug={issuerSlug}
-          badgeClasses={badgeClasses}
-          display="detail"
-          perPage={params.perPage}
-          currentPage={params.currentPage}
+          badgeClasses={issuersBadgeClasses}
         />
       </MainComponent>
     )

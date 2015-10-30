@@ -67,6 +67,59 @@ BadgeClassDetail = React.createClass({
   }
 });
 
+BadgeClassTable = React.createClass({
+
+    navigateToBadgeClassDetail: function(badgeClassSlug) {
+        var badgeClassDetailPath = "/issuer/issuers/" + this.props.issuerSlug + "/badges/" + badgeClassSlug;
+        navigateLocalPath(badgeClassDetailPath);
+    },
+
+    render: function() {
+        var badgeClasses = this.props.badgeClasses.map(function(badgeClass, i) {
+
+            return (
+                <tr>
+                    <th scope="row" onClick={this.navigateToBadgeClassDetail.bind(null, badgeClass.slug)}>
+                        <div className="l-horizontal">
+                            <div>
+                                <button><img src={badgeClass.image} width="48" height="48" alt="issuer description" /></button>
+                                <button className="truncate_ action_ action_-tertiary">{badgeClass.name}</button>
+                            </div>
+                        </div>
+                    </th>
+                    <td>{badgeClass.recipient_count}</td>
+                    <td>
+                        <div className="l-horizontal">
+                            <div>
+                                <button className="button_ button_-tertiary">Issue</button>
+                                <button className="button_ button_-tertiary">Edit</button>
+                                <button className="button_ button_-tertiary">Remove</button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            );
+        }.bind(this));
+
+        return (
+            <table className="table_">
+                <thead>
+                    <tr>
+                        <th scope="col">Badge</th>
+                        <th scope="col">No. of Recipients</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {badgeClasses}
+                </tbody>
+
+            </table>
+        );
+    },
+});
+
 BadgeClassList = React.createClass({
   getDefaultProps: function() {
     return {
@@ -141,6 +194,7 @@ BadgeClassList = React.createClass({
 
 
 module.exports = {
+  BadgeClassTable: BadgeClassTable,
   BadgeClassList: BadgeClassList,
   BadgeClassDetail: BadgeClassDetail
 };

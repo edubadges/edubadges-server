@@ -64,6 +64,10 @@ class BadgeClass(AbstractBadgeClass):
     def cached_issuer(self):
         return Issuer.cached.get(pk=self.issuer_id)
 
+    @cachemodel.cached_method(auto_publish=True)
+    def recipient_count(self):
+        return self.badgeinstances.count()
+
 
 class BadgeInstance(AbstractBadgeInstance):
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False,
