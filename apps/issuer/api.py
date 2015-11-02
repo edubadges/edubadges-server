@@ -10,7 +10,7 @@ from rest_framework import status, authentication, permissions
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from badgebook.models import BadgeObjectiveAward
+from badgebook.models import BadgeObjectiveAward, LmsCourseInfo
 import badgrlog
 
 from .models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
@@ -170,6 +170,48 @@ class IssuerDetail(AbstractIssuerAPIEndpoint):
         else:
             serializer = IssuerSerializer(current_issuer, context={'request': request})
             return Response(serializer.data)
+
+    def delete(self, request, slug):
+        """
+        DELETE an issuer if it hasn't issued any badges yet.
+        ---
+        parameters:
+            - name: slug
+              type: string
+              paramType: path
+              description: The slug of the issuer to delete.
+              required: true
+        """
+        issuer = self.get_object(slug)
+        if issuer is None:
+            return Response(
+                "Issuer {} not found. Authenticated user must have owner, editor or staff rights on the issuer.".format(slug),
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # determine if the issuer can be deleted
+        issued_count = sum(bc.recipient_count() for bc in issuer.cached_badgeclasses())
+        if issued_count > 0:
+            return Response(
+                "Issuer {} can not be removed since it has previously issued badges.".format(),
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # remove all badgeclasses owned by issuer
+        for bc in issuer.cached_badgeclasses():
+            bc.delete()
+
+        # remove issuer staff
+        IssuerStaff.objects.filter(issuer=issuer).delete()
+
+        # update LmsCourseInfo's that were using this issuer as the default_issuer
+        for course_info in LmsCourseInfo.objects.filter(default_issuer=issuer):
+            course_info.default_issuer = None
+            course_info.save()
+
+        # delete the issuer
+        issuer.delete()
+        return Response("Issuer {} has been deleted.".format(slug), status.HTTP_200_OK)
 
 
 class IssuerStaffList(AbstractIssuerAPIEndpoint):
