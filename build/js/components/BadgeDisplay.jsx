@@ -241,7 +241,7 @@ var BadgeDisplayThumbnail = React.createClass({
     var selectCollectionFormProps = FormConfigStore.getConfig(selectCollectionFormType, { formId: selectCollectionFormId }, {
         badgeId: badgeId,
         collections: collections,
-        defaultCollection: collections[0].slug,
+        defaultCollection: _.get(collections, "[0].slug", ''),
         badgeName: badgeName,
     });
     FormStore.getOrInitFormData(selectCollectionFormId, selectCollectionFormProps)
