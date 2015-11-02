@@ -36,16 +36,9 @@ module.exports = function(grunt) {
                     '<%= srcPath %>js/**/*.jsx',
                     '<%= srcPath %>js/**/*.js',
                     '<%= srcPath %>pattern-library.html',
-                    '<%= srcPath %>js/pattern-library.jsx',
+                    '<%= srcPath %>js/component-library.jsx'
                 ],
-                tasks: ['browserify:dev', 'inline:dist', 'bs-inject']
-            }
-        },
-
-        inline: {
-            dist: {
-                src: '<%= srcPath %>pattern-library.html',
-                dest: 'breakdown/templates/pattern-library.html'
+                tasks: ['browserify:dev', 'bs-inject']
             }
         },
 
@@ -58,7 +51,7 @@ module.exports = function(grunt) {
                 files: {
                     'breakdown/static/js/app.js': 'build/js/app.jsx',
                     'breakdown/static/js/lti-app.js': 'build/js/lti-app.jsx',
-                    'breakdown/static/js/pattern-library.js': 'build/js/pattern-library.jsx',
+                    'breakdown/static/js/component-library.js': 'build/js/component-library.jsx'
                 }
             },
             dist: {
@@ -69,7 +62,7 @@ module.exports = function(grunt) {
                 files: {
                     'build/js/temp/app.js': 'build/js/app.jsx',
                     'build/js/temp/lti-app.js': 'build/js/lti-app.jsx',
-                    'breakdown/static/js/pattern-library.js': 'build/js/pattern-library.jsx',
+                    'breakdown/static/js/component-library.js': 'build/js/component-library.jsx'
                 }
             }
         },
@@ -145,6 +138,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-shell-spawn');
     grunt.loadNpmTasks('grunt-inline');
 
-    grunt.registerTask('default',['bs-init', 'sass', 'autoprefixer', 'browserify:dev', 'inline:dist', 'watch']);
-    grunt.registerTask('dist', ['env:dist', 'sass', 'autoprefixer', 'browserify:dist', 'inline:dist', 'uglify']);
+    grunt.registerTask('default',['bs-init', 'sass', 'autoprefixer', 'browserify:dev', 'watch']);
+    grunt.registerTask('dist', ['env:dist', 'sass', 'autoprefixer', 'browserify:dist', 'uglify']);
 };
