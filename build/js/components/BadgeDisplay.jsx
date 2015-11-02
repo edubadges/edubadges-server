@@ -278,7 +278,7 @@ var BadgeDisplayThumbnail = React.createClass({
             <More>
                 <div className="dropdown_">
                     <DialogOpener dialog={selectCollectionDialog} dialogId={"select-collection-"+ badgeId} key={"select-collection-"+ badgeId}>
-                        <button className="dropdown_-x-item"><span className="">Share</span></button>
+                        <button className="dropdown_-x-item"><span className="icon_ icon_-add">Add to Collection</span></button>
                     </DialogOpener>
                 </div>
             </More>
