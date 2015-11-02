@@ -266,6 +266,21 @@ class IssuerTests(APITestCase):
         self.assertEqual(second_response.status_code, 200)
         self.assertEqual(len(test_issuer.staff.all()), 0)
 
+    def test_delete_issuer_successfully(self):
+        user = get_user_model().objects.get(pk=1)
+        self.client.force_authenticate(user=user)
+        test_issuer = Issuer(name='issuer who can be deleted', slug='issuer-deletable', owner=user)
+        test_issuer.save()
+
+        response = self.client.delete('/v1/issuer/issuers/issuer-deletable', {})
+        self.assertEqual(response.status_code, 200)
+
+    def test_cant_delete_issuer_with_issued_badge(self):
+        user = get_user_model().objects.get(pk=1)
+        self.client.force_authenticate(user=user)
+        response = self.client.delete('/v1/issuer/issuers/test-issuer-2', {})
+        self.assertEqual(response.status_code, 400)
+
 
 class BadgeClassTests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']

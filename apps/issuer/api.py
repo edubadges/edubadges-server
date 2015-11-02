@@ -193,7 +193,7 @@ class IssuerDetail(AbstractIssuerAPIEndpoint):
         issued_count = sum(bc.recipient_count() for bc in issuer.cached_badgeclasses())
         if issued_count > 0:
             return Response(
-                "Issuer {} can not be removed since it has previously issued badges.".format(),
+                "Issuer {} can not be removed since it has previously issued badges.".format(slug),
                 status=status.HTTP_400_BAD_REQUEST
             )
 
