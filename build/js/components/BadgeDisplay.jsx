@@ -373,12 +373,6 @@ var BadgeDisplayFull = React.createClass({
   
           <ul>
               <li>
-                <Property label={true} name='Name' property={this.props.json.badge.name} />
-              </li>
-              <li>
-                <Property label={true} name='Description' property={this.props.json.badge.description} />
-              </li>
-              <li>
                 <Property label={true} name='Criteria' property={this.props.json.badge.criteria} />
               </li>
               <li>
