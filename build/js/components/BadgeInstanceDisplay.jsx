@@ -5,6 +5,8 @@ var moment = require('moment');
 var navigateLocalPath = require('../actions/clicks').navigateLocalPath;
 
 // Components
+var Button = require('../components/Button.jsx').Button;
+var Heading = require('../components/Heading.jsx').Heading;
 var Property = require('../components/BadgeDisplay.jsx').Property;
 var LoadingIcon = require('../components/Widgets.jsx').LoadingIcon;
 
@@ -50,32 +52,41 @@ BadgeInstanceList = React.createClass({
     };
   },
   render: function() {
-    var badgeInstances = this.props.badgeInstances.slice(
-      this.props.perPage * (this.props.currentPage-1),
-      this.props.perPage + this.props.perPage * (this.props.currentPage-1)
-    ).map(function(instance, i){
-      var properties = {
-        email: instance.recipient_identifier,
-        slug: instance.slug,
-        issuedOn: instance.json.issuedOn,
-        key: "instance-" + i
-      };
-
-      if (instance.award) {
-        properties.email = "Student email not shown";
-      }
-
-      if (this.props.display == 'list'){
+    var badgeInstances = this.props.badgeInstances.map(function(badgeInstance, i) {
         return (
-          <BadgeInstanceShort {...properties} />
+            <tr>
+                <th scope="row">{badgeInstance.recipient_identifier} </th>
+                <td>{badgeInstance.json.issuedOn}</td>
+                <td>
+                    <div className="l-horizontal">
+                        <div>
+                            <Button className="button_ button_-tertiary is-disabled" label="Notify" />
+                            <Button className="button_ button_-tertiary is-disabled" label="Revoke" />
+                            <Button className="button_ button_-tertiary is-disabled" label="Evidence" />
+                        </div>
+                    </div>
+                </td>
+            </tr>
         );
-      }
-
     }.bind(this));
+
+    var loadingIcon = this.props.dataRequestStatus == "waiting" ? (<LoadingIcon />) : '';
+
     return (
-      <div className="badgeinstance-list container-fluid">
-        {this.props.dataRequestStatus == "waiting" ? (<LoadingIcon />) : ''}
-        {badgeInstances}
+      <div className="x-owner">
+        <Heading size="small" title="Badge Recipients" meta={this.props.badgeInstances.length} />
+        <table className="table_">
+            <thead>
+                <tr>
+                    <th scope="col">Recipient</th>
+                    <th scope="col">Issue Date</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {badgeInstances}
+            </tbody>
+        </table>
       </div>
     );
   }

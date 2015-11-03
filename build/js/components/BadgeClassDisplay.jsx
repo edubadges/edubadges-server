@@ -41,37 +41,30 @@ BadgeClassThumbnail = React.createClass({
 });
 
 BadgeClassDetail = React.createClass({
-  getDefaultProps: function() {
-    return {
-      handleClick: function(e){}
-    };
-  },
   render: function() {
-    var properties = {
-      image: {type: 'image', name: this.props.name + ' logo', id: this.props.image},
-      name: {type: 'xsd:string', '@value': this.props.name},
-      criteria: {type: 'id', id: this.props.json.criteria},
-      description: {type: 'xsd:string', '@value': this.props.json.description}
-    }
 
     return (
-      <div className="badge-display-full form-horizontal issuer-list xs-col-12" onClick={this.props.handleClick}>
-        <div className='property-group image col-xs-2'>
-          <Property name="Badge Image" label={false} property={properties.image} />
+      <div className="detail_">
+        <div>
+          <img src={this.props.image} width="112" height="112" />
         </div>
-        <div className="name-wrapper">
-            <Property name="Name" property={properties.name} />
-        </div>
-        <div className="detail-wrapper">
-            <div className="criteria-wrapper">
-                <Property name="Criteria" label={true} property={properties.criteria} />
-            </div>
-            <div className="description-wrapper">
-                <Property name="Description" label={true} property={properties.description} />
-            </div>
-        </div>
+        <ul>
+          <li>
+            <h2 className="detail_-x-meta">Criteria</h2>
+            <p>{this.props.json.criteria}</p>
+          </li>
+          <li>
+            <h2 className="detail_-x-meta">Issuer</h2>
+            <p>{this.props.issuer.name}</p>
+          </li>
+          <li>
+            <h2 className="detail_-x-meta">Issuer Website</h2>
+            <p>{this.props.issuer.json.url}</p>
+          </li>
+          <li className="detail_-x-footer">Created on <strong>{this.props.created_at}</strong> by <strong>{this.props.created_by}</strong></li>
+        </ul>
       </div>
-    );
+    )
   }
 });
 
