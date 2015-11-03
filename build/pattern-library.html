@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+
+		<title>Pattern Library</title>
+
+		<meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1">
+
+        <link href="pattern-library.css?__inline=true" rel="stylesheet" type="text/css">
+        <!-- required for Fixed Data Table react component -->
+        <link href="{{ STATIC_URL }}css/fixed-data-table.css" media="screen" rel="stylesheet" type="text/css" >
+		<link href="{{ STATIC_URL }}css/dialog-polyfill.css" media="screen" rel="stylesheet" type="text/css" >
+		<link href="{{ STATIC_URL }}css/reset.css" media="screen" rel="stylesheet" type="text/css" >
+		<link href="{{ STATIC_URL }}css/screen.css" media="screen" rel="stylesheet" type="text/css" >
+
+
+	</head>
+
+	<body>
+
+		<div data-pattern="container">
+
+			<button data-pattern="nav-toggle">Toggle Navigation</button>
+
+			<nav data-pattern="nav">
+
+				<!-- The navigation will be auto-generated here based on pattern IDs -->
+				
+				<ul data-pattern="nav-menu">
+				</ul>
+
+			</nav>
+
+			<!-- Place your patterns here (see example.) If you have a wrapper class for your layout, apply to to data-pattern="patterns" -->
+
+			<section data-pattern="patterns">
+
+                <article data-pattern="pattern" id="actions"> 
+
+                    <div data-pattern="pattern-secondary" id="action_">
+                        <code data-pattern="code" data-pattern-helper="spacer">
+                            <button class="action_">.action_</button>
+                        </code>
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="action_-secondary">
+                        <code data-pattern="code" data-pattern-helper="spacer">
+                            <button class="action_ action_-secondary">.action_-secondary</button>
+                        </code>
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="action_-faint">
+                        <code data-pattern="code" data-pattern-helper="spacer">
+                            <button class="action_ action_-faint">.action_-faint</button>
+                        </code>
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="action_-tertiary">
+                        <code data-pattern="code" data-pattern-helper="spacer">
+                            <button class="action_ action_-tertiary">.action_-tertiary</button>
+                        </code>
+                    </div>
+
+                </article>
+
+                <article data-pattern="pattern" id="badge_">
+                    <code data-pattern="code">
+                        <div class="badge_ viewdetails_">
+                            <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
+                            <div class="viewdetails_-x-details">
+                                <button class="button_ button_-solid button_-uppercase">View Details</button>
+                            </div>
+                        </div>
+                    </code>
+                </article>
+
+                <article data-pattern="pattern" id="breadcrumb_">
+                    <code data-pattern="code">
+                        <ul class="l-wrapper l-wrapper-inset breadcrumb_">
+                            <li><a href="">Top Level</a></li>
+                            <li><a href="">Child Level</a></li>
+                            <li><a href="">Child Level</a></li>
+                        </ul>
+                    </code>
+                </article>
+
+				<article data-pattern="pattern" id="buttons"> 
+
+					<div data-pattern="pattern-secondary" id="button_">
+						<code data-pattern="code" data-pattern-helper="spacer">
+                            <button class="button_">Button</button>
+						</code>
+					</div>
+
+					<div data-pattern="pattern-secondary" id="button_-secondary">
+						<code data-pattern="code" data-pattern-helper="spacer">
+                            <button class="button_ button_-secondary">Button Secondary</button>
+						</code>
+					</div>
+
+                    <div data-pattern="pattern-secondary" id="button_-tertiary">
+                        <code data-pattern="code" data-pattern-helper="spacer">
+                            <button class="button_ button_-tertiary">Button Tertiary</button>
+                        </code>
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="button_-solid">
+                        <code data-pattern="code" data-pattern-helper="spacer">
+                            <button class="button_ button_-solid">Button Solid</button>
+                        </code>
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="button_-uppercase">
+                        <code data-pattern="code" data-pattern-helper="spacer">
+                            <button class="button_ button_-uppercase">Button Uppercase</button>
+                        </code>
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="button_[disabled]">
+                        <code data-pattern="code" data-pattern-helper="spacer">
+                            <button class="button_" disabled>Button Disabled</button>
+                            <button class="button_ button_-secondary" disabled>Button Disabled</button>
+                            <button class="button_ button_-tertiary" disabled>Button Disabled</button>
+                            <button class="button_ button_-solid" disabled>Button Disabled</button>
+                        </code>
+                    </div>
+
+				</article>
+
+                <article data-pattern="pattern" id="cards">
+
+                    <div data-pattern="pattern-secondary" id="card_">
+
+                        <code data-pattern="code" data-pattern-helper="spacer">
+
+                            <div class="card_">
+                                <p>I'm a card</p>
+                            </div>
+
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="card_-hover">
+
+                        <code data-pattern="code" data-pattern-helper="spacer">
+
+                            <button class="card_ card_-hover">I'm a card</button>
+
+                        </code>
+
+                    </div>
+
+                </article>
+
+                <article data-pattern="pattern" id="collection_">
+                    <code data-pattern="code">
+                        <div class="collection_ viewdetails_">
+                            <h1 class="truncate_">Named Collection #1</h1>
+                            <div class="collection_-x-item">
+                                <img srcst="http://placehold.it/144x144 2x, http://placehold.it/72x72" src="http://placehold.it/72x72" width="72" height="72" alt="badge description">
+                            </div>
+                            <div class="collection_-x-item">
+                                <img srcst="http://placehold.it/144x144 2x, http://placehold.it/72x72" src="http://placehold.it/72x72" width="72" height="72" alt="badge description">
+                            </div>
+                            <div class="collection_-x-item">
+                                <img srcst="http://placehold.it/144x144 2x, http://placehold.it/72x72" src="http://placehold.it/72x72" width="72" height="72" alt="badge description">
+                            </div>
+                            <div class="collection_-x-item">
+                                <img srcst="http://placehold.it/144x144 2x, http://placehold.it/72x72" src="http://placehold.it/72x72" width="72" height="72" alt="badge description">
+                            </div>
+                            <div class="collection_-x-item">
+                                <img srcst="http://placehold.it/144x144 2x, http://placehold.it/72x72" src="http://placehold.it/72x72" width="72" height="72" alt="badge description">
+                            </div>
+                            <div class="collection_-x-item">
+                                <img srcst="http://placehold.it/144x144 2x, http://placehold.it/72x72" src="http://placehold.it/72x72" width="72" height="72" alt="badge description">
+                            </div>
+                            <div class="viewdetails_-x-details">
+                                <button class="button_ button_-solid button_-uppercase">View Details</button>
+                            </div>
+                        </div>
+                    </code>
+                </article>
+
+                <article data-pattern="pattern" id="control_">
+
+                    <code data-pattern="code">
+
+                        <div class="control_">
+                            <button class="button_ button_-secondary">Cancel</button>
+                            <button class="button_">Submit</button>
+                        </div>
+
+                    </code>
+
+                </article>
+
+                <article data-pattern="pattern" id="detail_">
+                    
+                    <code data-pattern="code" data-pattern-helper="spacer">
+
+                        <div class="detail_">
+                            
+                            <div>
+                                
+                                <img srcst="http://placehold.it/288x288 2x, http://placehold.it/144x144" src="http://placehold.it/144x144" width="144" height="144" alt="badge description">
+
+                            </div>
+
+                            <ul>
+                                <li>
+                                    <h2 class="detail_-x-meta">Criteria</h2>
+                                    <p><a href="https://badgr.io/public/badges/new-test-badge/criteria" target="_blank" title="Criteria to earn this badge">https://badgr.io/public/badges/new-test-badge/criteria</a></p>
+                                </li>
+                                <li>
+                                    <h2 class="detail_-x-meta">Issue Date</h2>
+                                    <p>January 23, 2016</p>
+                                </li>
+                                <li>
+                                    <h2 class="detail_-x-meta">Issuer</h2>
+                                    <p>Badge Issuer, Inc.</p>
+                                </li>
+                                <li>
+                                    <h2 class="detail_-x-meta">Issuer Website</h2>
+                                    <p><a href="https://www.badgeissuerinc.com" target="_blank" title="Website of badge issuer">https://www.badgeissuerinc.com</a></p>
+                                </li>
+                                <li>
+                                    <h2 class="detail_-x-meta">Evidence</h2>
+                                    <p><a href="https://www.evidencelink.com" target="_blank" title="Evidence of badge">https://www.evidencelink.com</a></p>
+                                </li>
+                                <li>
+                                    <h2 class="detail_-x-meta">Recipient</h2>
+                                    <p>jcowsill@concentricsky.com</p>
+                                </li>
+                                <li>
+                                    <div class="l-horizontal">
+                                        <div>
+                                            <button class="button_ button_-tertiary">Share on LinkedIn</button>
+                                            <button class="button_ button_-tertiary">Share on Twitter</button>
+                                            <button class="button_ button_-tertiary">Share on Facebook</button>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="detail_-x-footer">Created on <strong>January 23, 2016</strong> by <strong>jcowsill@concentricsky.com</strong></li>
+                            </ul>
+
+                            <ul>
+                                <li>
+                                    <h2 class="detail_-x-meta">Found in Collections(s)</h2>
+                                    <ul class="tags_">
+                                        <li>
+                                            <a href="">Voting Badges</a>
+                                            <button class="icon_ icon_-clear icon_-small icon_-notext">Remove</button>
+                                        </li>
+                                        <li>
+                                            <a href="">History</a>
+                                            <button class="icon_ icon_-clear icon_-small icon_-notext">Remove</button>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+
+                        </div>
+
+                    </code>
+
+                </article>
+
+                <article data-pattern="pattern" id="dialog_">
+                    
+                    <code data-pattern="code" data-pattern-helper="spacer">
+
+                        <!-- Requires dialog-polyfill.js above screen.css, dialog elements themselves need to be a child of body -->
+
+                        <button class="button_" id="dialogOpen">Open Dialog</button>
+
+                        <script src="{{STATIC_URL}}/js/dialog-polyfill.js" type="text/javascript"></script>
+
+                        <script type="text/javascript">
+                          document.addEventListener('DOMContentLoaded', function() {
+
+                            var dialogOpen = document.getElementById('dialogOpen');
+                            var dialogClose = document.getElementById('dialogClose');
+                            var dialog = document.getElementById('dialogID');
+                            dialogPolyfill.registerDialog(dialog);
+
+                            // Update button opens a modal dialog
+                            dialogOpen.addEventListener('click', function() {
+                              dialog.showModal();
+                              dialog.classList.add('is-visible');
+                            });
+
+                            // Form cancel button closes the dialog box
+                            dialogClose.addEventListener('click', function() {
+                              dialog.close();
+                              dialog.classList.remove('is-visible');
+                            });
+
+                          });
+                        </script>
+
+                    </code>
+
+                </article>
+
+                <article data-pattern="pattern" id="dropdown_">
+                        
+                    <code data-pattern="code" data-pattern-helper="spacer">
+
+                        <button class="icon_ icon_-small icon_-right icon_-dropdown" id="dropdownTrigger">Open a dropdown</button>
+
+                        <div class="dropdown_" id="dropdown">
+                            <button class="dropdown_-x-item"><span class="icon_ icon_-add">Recent</span></button>
+                            <button class="dropdown_-x-item">Issuer</button>
+                            <button class="dropdown_-x-item">Badge Name</button>
+                        </div>
+
+                        <script src="{{STATIC_URL}}js/tether.min.js" type="text/javascript"></script>
+
+                        <script type="text/javascript">
+
+                            document.addEventListener('DOMContentLoaded', function() {
+
+                                function isDescendant(parent, child) {
+                                    var node = child;
+                                        while (node != null) {
+
+                                            if (node == parent) {
+                                                return true;
+                                            }
+
+                                            node = node.parentNode;
+
+                                        }
+
+                                    return false;
+
+                                }
+
+                                function openTether(target, element) {
+
+                                    element.classList.add('is-active');
+
+                                    new Tether({
+                                        element: element,
+                                        target: target,
+                                        attachment: 'top right',
+                                        targetAttachment: 'top right',
+                                        constraints: [
+                                            {
+                                              to: document.body,
+                                              attachment: 'together',
+                                              pin: true
+                                            }
+                                          ]
+                                    });
+
+                                    Tether.position();
+
+                                    element.classList.add('is-visible');
+                                    element.classList.add('is-tethered');
+
+                                };
+
+                                document.addEventListener('click', function(event) {
+
+                                    var dropdownTrigger = document.getElementById('dropdownTrigger');
+                                    var dropdown = document.getElementById('dropdown');
+
+                                    var inDropdown = isDescendant(dropdown, event.target);
+                                    var inTrigger = isDescendant(dropdownTrigger, event.target);
+
+                                    if (!inDropdown && dropdown.classList.contains('is-active')) {
+                                        dropdown.classList.remove('is-active');
+                                        dropdown.classList.remove('is-visible');
+                                    } else if (inTrigger) {
+                                        openTether(dropdownTrigger, dropdown);
+                                    }
+
+                                });
+
+                            });
+
+                        </script>
+
+                    </code>
+
+                </article>
+
+                <article data-pattern="pattern" id="dropzones">
+
+                    <div data-pattern="pattern-secondary" id="dropzone_">
+                        
+                        <code data-pattern="code">
+                        
+                            <button class="dropzone_" type="button">
+                                <h1 class="dropzone_-x-title">Add Badge</h1>
+                                <p>Drop a badge here, or tap for advanced options.</p>
+                            </button>
+
+                        </code>
+
+                    </div>
+                    
+                    <div data-pattern="pattern-secondary" id="dropzone_-secondary">
+                        
+                        <code data-pattern="code">
+                        
+                            <button class="dropzone_ dropzone_-secondary" type="button">
+                                <p>Tap here to upload image</p>
+                            </button>
+
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="dropzone_-secondary.is-uploaded">
+                        
+                        <code data-pattern="code">
+
+                            <button class="dropzone_  dropzone_-secondary is-uploaded" type="button">
+                                <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
+                            </button>
+
+                        </code>
+
+                    </div>
+
+                </article>
+
+                <article data-pattern="pattern" id="filter_">
+                    
+                    <code data-pattern="code" data-pattern-helper="spacer">
+                        
+                        <div class="filter_">
+                            <form action="">
+                                <input type="text" placeholder="Filter By Name">
+                            </form>
+                            <ul>
+                                <li>
+                                    <button class="filter_-x-item">
+                                        <span><img srcst="http://placehold.it/80x80 2x, http://placehold.it/40x40" src="http://placehold.it/40x40" width="40" height="40" alt="badge description"></span>
+                                        <span class="truncate_">Legal Knowledge</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="filter_-x-item">
+                                        <span><img srcst="http://placehold.it/80x80 2x, http://placehold.it/40x40" src="http://placehold.it/40x40" width="40" height="40" alt="badge description"></span>
+                                        <span class="truncate_">Legal Knowledge</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="filter_-x-item">
+                                        <span><img srcst="http://placehold.it/80x80 2x, http://placehold.it/40x40" src="http://placehold.it/40x40" width="40" height="40" alt="badge description"></span>
+                                        <span class="truncate_">Legal Knowledge</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="filter_-x-item">
+                                        <span><img srcst="http://placehold.it/80x80 2x, http://placehold.it/40x40" src="http://placehold.it/40x40" width="40" height="40" alt="badge description"></span>
+                                        <span class="truncate_">Legal Knowledge</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="filter_-x-item">
+                                        <span><img srcst="http://placehold.it/80x80 2x, http://placehold.it/40x40" src="http://placehold.it/40x40" width="40" height="40" alt="badge description"></span>
+                                        <span class="truncate_">Legal Knowledge</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="filter_-x-item">
+                                        <span><img srcst="http://placehold.it/80x80 2x, http://placehold.it/40x40" src="http://placehold.it/40x40" width="40" height="40" alt="badge description"></span>
+                                        <span class="truncate_">Legal Knowledge</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="filter_-x-item">
+                                        <span><img srcst="http://placehold.it/80x80 2x, http://placehold.it/40x40" src="http://placehold.it/40x40" width="40" height="40" alt="badge description"></span>
+                                        <span class="truncate_">Legal Knowledge</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="filter_-x-item">
+                                        <span><img srcst="http://placehold.it/80x80 2x, http://placehold.it/40x40" src="http://placehold.it/40x40" width="40" height="40" alt="badge description"></span>
+                                        <span class="truncate_">Legal Knowledge</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="filter_-x-item">
+                                        <span><img srcst="http://placehold.it/80x80 2x, http://placehold.it/40x40" src="http://placehold.it/40x40" width="40" height="40" alt="badge description"></span>
+                                        <span class="truncate_">Legal Knowledge</span>
+                                    </button>
+                                </li>
+                            </ul>
+                            <p>You currently don’t have any badges defined. Use the link below to create one now.</p>
+                            <div class="filter_-x-action">
+                                <button class="button_ button_-uppercase">Create New Badge</button>
+                            </div>
+                        </div>
+
+                    </code>
+
+                </article>
+
+                <article data-pattern="pattern" id="footer_">
+                    
+                    <code data-pattern="code">
+                        
+                        <footer class="footer_ l-wrapper l-wrapper-inset">
+                            <p>Copyright &copy; 2015 <a href="http://concentricsky.com" target="_blank">Concentric Sky, Inc.</a>  /  Powered by <a href="" target="_blank">Badgr</a>  /  <a href="" target="_blank">API documentation</a></p>
+                        </footer>
+
+                    </code>
+
+                </article>
+
+                <article data-pattern="pattern" id="form_">
+                    
+                    <code data-pattern="code" data-pattern-helper="spacer">
+                        
+                        <form action="" class="form_">
+
+                            <div class="form_-x-imageupload">
+                                
+                                <fieldset>
+                                    
+                                    <div class="form_-x-field">
+                                        <label for="name">Name <span class="hint">(with a note)</span></label>
+                                        <input type="text" id="name" name="name" tabindex="1" required>
+                                    </div>
+
+                                    <div class="form_-x-field">
+                                        <label for="name">Select</label>
+                                        <select id="name" name="name" tabindex="2" required>
+                                            <option value="">Choose Collection &hellip;</option>
+                                            <option value="First Selection">First Selection</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form_-x-field">
+                                        <label for="action">Action <span class="hint">(with a note)</span></label>
+                                        <div class="form_-x-action">
+                                            <input type="text" id="action" name="action" readonly value="Here's some text to copy">
+                                            <button type="button" tabindex="3"><span class="icon_ icon_-copy">Copy</span></button>
+                                        </div>
+                                    </div>
+
+                                    <div class="form_-x-field">
+                                        <label for="file">Action <span class="hint">(with a note)</span></label>
+                                        <input type="file" id="file" name="file" class="hidden">
+                                        <div class="form_-x-action">
+                                            <input type="text" id="fakefile" name="fakefile" readonly>
+                                            <button type="button" tabindex="4">Browse</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="form_-x-field">
+                                        <label for="description">Description</label>
+                                        <textarea name="description" id="description" tabindex="5"></textarea>
+                                    </div>
+
+                                </fieldset>
+
+                                <fieldset>
+                                    
+                                    <div class="form_-x-field">
+                                        <button class="form_-x-imagefield dropzone_ dropzone_-secondary" tabindex="5" type="button">
+                                            <p>Tap here to upload image</p>
+                                        </button>
+                                    </div>
+
+                                    <div class="form_-x-field">
+                                        <div class="form_-x-imagefield dropzone_  dropzone_-secondary is-uploaded">
+                                            <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
+                                        </div>
+                                    </div>
+
+                                    <div class="form_-x-field">
+                                        <p>Or</p>
+                                    </div>
+
+                                    <div class="form_-x-field">
+                                        <button class="button_ button_-tertiary">Use Badge Studio</button>
+                                    </div>
+
+                                </fieldset>
+
+                            </div>
+
+                            <div class="control_">
+                                <button class="button_ button_-secondary">Cancel</button>
+                                <button class="button_" type="submit" tabindex="7">Submit</button>
+                            </div>
+
+                        </form>
+
+                        <script type="text/javascript">
+
+                            document.addEventListener('DOMContentLoaded', function() {
+                                var fileInput = document.getElementById('file');
+                            });
+
+                        </script>
+
+                    </code>
+
+                </article>
+
+				<article data-pattern="pattern" id="headings"> 
+					<div data-pattern="pattern-secondary" id="heading_">
+						<code data-pattern="code" data-pattern-helper="spacer">
+                            <div class="l-wrapper l-wrapper-inset">
+                                <header class="heading_">
+                                    <div class="heading_-x-text">
+                                        <h1>Named Collection #2 <span>(63)</span></h1>
+                                        <p>Instructional or welcome text. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at risus commodo, mattis turpis non, molestie libero. Fusce pellentesque diam ac neque.</p>
+                                    </div>
+                                    <div class="heading_-x-actions">
+                                        <button class="action_">Action</button>
+                                        <button class="action_">Action</button>
+                                        <button class="action_">Action</button>
+                                        <button class="action_">Action</button>
+                                        <button class="action_">Action</button>
+                                    </div>
+                                    <button class="heading_-x-back icon_ icon_-back icon_-notext">Back</button>
+                                </header>
+                            </div>
+						</code>
+					</div>
+                    <div data-pattern="pattern-secondary" id="heading_-medium">
+                        <code data-pattern="code" data-pattern-helper="spacer">
+                            <header class="heading_ heading_-medium">
+                                <div class="heading_-x-text">
+                                    <h1>Named Collection #2</h1>
+                                    <p>Instructional or welcome text. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at risus commodo, mattis turpis non, molestie libero. Fusce pellentesque diam ac neque.</p>
+                                </div>
+                            </header>
+                        </code>
+                    </div>
+                    <div data-pattern="pattern-secondary" id="heading_-small">
+                        <code data-pattern="code" data-pattern-helper="spacer">
+                            <header class="heading_ heading_-small">
+                                <div class="heading_-x-text">
+                                    <h1>Named Collection #2</h1>
+                                    <p>Instructional or welcome text. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla at risus commodo, mattis turpis non, molestie libero. Fusce pellentesque diam ac neque.</p>
+                                </div>
+                                <div class="heading_-x-actions">
+                                    <p class="status_">Checking for new badges &hellip;</p>
+                                    <button class="action_">Action</button>
+                                    <button class="action_">Action</button>
+                                    <button class="action_">Action</button>
+                                    <button class="action_">Action</button>
+                                    <button class="action_">Action</button>
+                                </div>
+                            </header>
+                        </code>
+                    </div>
+                    <div data-pattern="pattern-secondary" id="heading_-centered">
+                        <code data-pattern="code" data-pattern-helper="spacer">
+                            <header class="heading_ heading_-small heading_-centered">
+                                <div class="heading_-x-text">
+                                    <h1>Named Collection #2</h1>
+                                </div>
+                                <div class="heading_-x-actions">
+                                    <p class="status_">Checking for new badges &hellip;</p>
+                                    <button class="action_">Action</button>
+                                    <button class="action_">Action</button>
+                                    <button class="action_">Action</button>
+                                    <button class="action_">Action</button>
+                                    <button class="action_">Action</button>
+                                </div>
+                            </header>
+                        </code>
+                    </div>
+				</article>
+
+                <article data-pattern="pattern" id="headers">
+
+                    <div data-pattern="pattern-secondary" id="header_">
+
+                        <code data-pattern="code">
+
+                            <header class="header_ l-wrapper">
+
+                                <a class="header_-x-logo" href=""><img src="{{STATIC_URL}}/images/header-logo.svg" width="193" height="89"></a>
+
+                                <nav>
+
+                                    <ul class="menu_">
+                                        <li><a class="menu_-x-item is-active" href="">My Badges</a></li>
+                                        <li><a class="menu_-x-item" href="">My Collections</a></li>
+                                        <li><a class="menu_-x-item" href="">Issue Badges</a></li>
+                                        <li>
+                                            <span class="menu_-x-item"><span class="icon_ icon_-small icon_-right icon_-dropdownlight">username</span></span>
+                                            <div class="menu_-x-dropdown dropdown_">
+                                                <ul>
+                                                    <li><a class="dropdown_-x-item" href="">Dropdown Item</a></li>
+                                                    <li><a class="dropdown_-x-item" href="">Dropdown Item</a></li>
+                                                </ul>
+                                            </div>
+                                        </li>
+                                    </ul>
+
+                                </nav>
+
+                            </header>
+
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="header_-small">
+
+                        <code data-pattern="code">
+
+                            <header class="header_ header_-small l-wrapper">
+
+                                <a class="header_-x-logo" href=""><img src="{{STATIC_URL}}/images/header-logo-small.svg" width="153" height="65"></a>
+
+                                <nav>
+
+                                    <ul class="menu_ menu_-small">
+                                        <li><a class="menu_-x-item is-active" href="">My Badges</a></li>
+                                        <li><a class="menu_-x-item" href="">My Collections</a></li>
+                                        <li><a class="menu_-x-item" href="">Issue Badges</a></li>
+                                        <li>
+                                            <span class="menu_-x-item"><span class="icon_ icon_-small icon_-right icon_-dropdownlight">username</span></span>
+                                            <div class="menu_-x-dropdown dropdown_">
+                                                <ul>
+                                                    <li><a class="dropdown_-x-item" href="">Dropdown Item</a></li>
+                                                    <li><a class="dropdown_-x-item" href="">Dropdown Item</a></li>
+                                                </ul>
+                                            </div>
+                                        </li>
+                                    </ul>
+
+                                </nav>
+
+                            </header>
+
+                        </code>
+
+                    </div>
+
+                </article>
+
+                <article data-pattern="pattern" id="icons">
+
+                    <div data-pattern="pattern-secondary" id="icon_">
+
+                        <code data-pattern="code" data-pattern-helper="spacer">
+
+                            <span class="icon_ icon_-add">icon</span>
+
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="icon_-right">
+
+                        <code data-pattern="code" data-pattern-helper="spacer">
+
+                            <span class="icon_ icon_-right icon_-add">icon</span>
+
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="icon_-small">
+
+                        <code data-pattern="code" data-pattern-helper="spacer">
+
+                            <span class="icon_ icon_-small icon_-dropdown">icon</span>
+
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="icon_-small+icon_-right">
+
+                        <code data-pattern="code" data-pattern-helper="spacer">
+
+                            <span class="icon_ icon_-small icon_-right icon_-dropdown">icon</span>
+
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="icon_-notext">
+
+                        <code data-pattern="code" data-pattern-helper="spacer">
+
+                            <span class="icon_ icon_-notext icon_-add">icon</span>
+
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="icon_-notext+icon_-small">
+
+                        <code data-pattern="code" data-pattern-helper="spacer">
+
+                            <span class="icon_ icon_-small icon_-notext icon_-dropdown">icon</span>
+
+                        </code>
+
+                    </div>
+
+                </article>
+
+                <article data-pattern="pattern" id="issuer_">
+
+                    <code data-pattern="code" data-pattern-helper="spacer">
+
+                        <div class="issuer_" id="issuer">
+                            <header class="card_">
+                                <div class="issuer_-x-image">
+                                    <button><img srcst="{{STATIC_URL}}/images/issuer-placeholder-2x.png 2x, {{STATIC_URL}}/images/issuer-placeholder.png" src="{{STATIC_URL}}/images/issuer-placeholder.png" width="48" height="48" alt="issuer description"></button>
+                                </div>
+                                <button class="issuer_-x-title">
+                                    Issuer Name
+                                    <span>Issuer description. Fusce vehicula dolor arcu, sit amet blandit dolor mollis nec.</span>
+                                </button>
+                                <div class="issuer_-x-controls">
+                                    <button class="icon_ icon_-notext icon_-expand" id="issuerTrigger">Show Badges</button>
+                                    <button class="icon_ icon_-notext icon_-link">Do Link Thing</button>
+                                    <button class="icon_ icon_-notext icon_-add">Add Something</button>
+                                </div>
+                            </header>
+                            <div class="issuer_-x-badges">
+
+                                <div class="l-grid">
+                                    
+                                    <div>
+                                        <div class="card_">
+                                            <div class="badge_ viewdetails_">
+                                                <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
+                                                <div class="viewdetails_-x-details">
+                                                    <button class="button_ button_-solid button_-uppercase">View Details</button>
+                                                </div>
+                                            </div>
+                                            <div class="title_">
+
+                                                <div>
+
+                                                    <h1 class="title_-x-primary">Presidential Pro</h1>
+                                                    <p class="title_-x-secondary">J &amp; J Issuers United</p>
+
+                                                </div>
+                                                
+                                                <div>
+                                                    
+                                                    <button class="icon_ icon_-notext icon_-right icon_-more">Options</button>
+
+                                                </div>
+                                                
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="card_">
+                                            <div class="badge_ viewdetails_">
+                                                <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
+                                                <div class="viewdetails_-x-details">
+                                                    <button class="button_ button_-solid button_-uppercase">View Details</button>
+                                                </div>
+                                            </div>
+                                            <div class="title_">
+
+                                                <div>
+
+                                                    <h1 class="title_-x-primary">Presidential Pro</h1>
+                                                    <p class="title_-x-secondary">J &amp; J Issuers United</p>
+
+                                                </div>
+                                                
+                                                <div>
+                                                    
+                                                    <button class="icon_ icon_-notext icon_-right icon_-more">Options</button>
+
+                                                </div>
+                                                
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="card_">
+                                            <div class="badge_ viewdetails_">
+                                                <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
+                                                <div class="viewdetails_-x-details">
+                                                    <button class="button_ button_-solid button_-uppercase">View Details</button>
+                                                </div>
+                                            </div>
+                                            <div class="title_">
+
+                                                <div>
+
+                                                    <h1 class="title_-x-primary">Presidential Pro</h1>
+                                                    <p class="title_-x-secondary">J &amp; J Issuers United</p>
+
+                                                </div>
+                                                
+                                                <div>
+                                                    
+                                                    <button class="icon_ icon_-notext icon_-right icon_-more">Options</button>
+
+                                                </div>
+                                                
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="card_">
+                                            <div class="badge_ viewdetails_">
+                                                <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
+                                                <div class="viewdetails_-x-details">
+                                                    <button class="button_ button_-solid button_-uppercase">View Details</button>
+                                                </div>
+                                            </div>
+                                            <div class="title_">
+
+                                                <div>
+
+                                                    <h1 class="title_-x-primary">Presidential Pro</h1>
+                                                    <p class="title_-x-secondary">J &amp; J Issuers United</p>
+
+                                                </div>
+                                                
+                                                <div>
+                                                    
+                                                    <button class="icon_ icon_-notext icon_-right icon_-more">Options</button>
+
+                                                </div>
+                                                
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <script type="text/javascript">
+
+                            document.addEventListener('DOMContentLoaded', function() {
+                                var issuer = document.getElementById('issuer');
+                                var issuerTrigger = document.getElementById('issuerTrigger');
+
+                                issuerTrigger.addEventListener('click', function() {
+                                    issuer.classList.toggle('is-expanded');
+                                    issuerTrigger.classList.toggle('icon_-expand');
+                                    issuerTrigger.classList.toggle('icon_-collapse');
+                                });
+
+                            });
+
+                        </script>
+
+                    </code>
+
+                </article>
+
+                <article data-pattern="pattern" id="layouts">
+
+                    <div data-pattern="pattern-secondary" id="l-grid">
+
+                        <code data-pattern="code">
+
+                            <div class="l-wrapper l-wrapper-inset">
+                                
+                                <div class="l-grid">
+                                    
+                                    <div>
+                                        <div class="card_">
+                                            <div class="badge_ viewdetails_">
+                                                <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
+                                                <div class="viewdetails_-x-details">
+                                                    <button class="button_ button_-solid button_-uppercase">View Details</button>
+                                                </div>
+                                            </div>
+                                            <div class="title_">
+                                                <div>
+                                                    <h1 class="title_-x-primary truncate_">pneumonoultramicroscopicsilicovolcanoconiosis</h1>
+                                                    <p class="title_-x-secondary truncate_">pneumonoultramicroscopicsilicovolcanoconiosis</p>
+                                                </div>
+                                                <div>
+                                                    <button class="icon_ icon_-notext icon_-right icon_-more">Options</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="card_">
+                                            <div class="badge_ viewdetails_">
+                                                <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
+                                                <div class="viewdetails_-x-details">
+                                                    <button class="button_ button_-solid button_-uppercase">View Details</button>
+                                                </div>
+                                            </div>
+                                            <div class="title_">
+
+                                                <div>
+
+                                                    <h1 class="title_-x-primary">Presidential Pro</h1>
+                                                    <p class="title_-x-secondary">J &amp; J Issuers United</p>
+
+                                                </div>
+                                                
+                                                <div>
+                                                    
+                                                    <button class="icon_ icon_-notext icon_-right icon_-more">Options</button>
+
+                                                </div>
+                                                
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="card_">
+                                            <div class="badge_ viewdetails_">
+                                                <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
+                                                <div class="viewdetails_-x-details">
+                                                    <button class="button_ button_-solid button_-uppercase">View Details</button>
+                                                </div>
+                                            </div>
+                                            <div class="title_">
+
+                                                <div>
+
+                                                    <h1 class="title_-x-primary">Presidential Pro</h1>
+                                                    <p class="title_-x-secondary">J &amp; J Issuers United</p>
+
+                                                </div>
+                                                
+                                                <div>
+                                                    
+                                                    <button class="icon_ icon_-notext icon_-right icon_-more">Options</button>
+
+                                                </div>
+                                                
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="card_">
+                                            <div class="badge_ viewdetails_">
+                                                <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
+                                                <div class="viewdetails_-x-details">
+                                                    <button class="button_ button_-solid button_-uppercase">View Details</button>
+                                                </div>
+                                            </div>
+                                            <div class="title_">
+
+                                                <div>
+
+                                                    <h1 class="title_-x-primary">Presidential Pro</h1>
+                                                    <p class="title_-x-secondary">J &amp; J Issuers United</p>
+
+                                                </div>
+                                                
+                                                <div>
+                                                    
+                                                    <button class="icon_ icon_-notext icon_-right icon_-more">Options</button>
+
+                                                </div>
+                                                
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="card_">
+                                            <div class="badge_ viewdetails_">
+                                                <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
+                                                <div class="viewdetails_-x-details">
+                                                    <button class="button_ button_-solid button_-uppercase">View Details</button>
+                                                </div>
+                                            </div>
+                                            <div class="title_">
+
+                                                <div>
+
+                                                    <h1 class="title_-x-primary">Presidential Pro</h1>
+                                                    <p class="title_-x-secondary">J &amp; J Issuers United</p>
+
+                                                </div>
+                                                
+                                                <div>
+                                                    
+                                                    <button class="icon_ icon_-notext icon_-right icon_-more">Options</button>
+
+                                                </div>
+                                                
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="card_">
+                                            <div class="badge_ viewdetails_">
+                                                <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
+                                                <div class="viewdetails_-x-details">
+                                                    <button class="button_ button_-solid button_-uppercase">View Details</button>
+                                                </div>
+                                            </div>
+                                            <div class="title_">
+
+                                                <div>
+
+                                                    <h1 class="title_-x-primary">Presidential Pro</h1>
+                                                    <p class="title_-x-secondary">J &amp; J Issuers United</p>
+
+                                                </div>
+                                                
+                                                <div>
+                                                    
+                                                    <button class="icon_ icon_-notext icon_-right icon_-more">Options</button>
+
+                                                </div>
+                                                
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="card_">
+                                            <div class="badge_ viewdetails_">
+                                                <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
+                                                <div class="viewdetails_-x-details">
+                                                    <button class="button_ button_-solid button_-uppercase">View Details</button>
+                                                </div>
+                                            </div>
+                                            <div class="title_">
+
+                                                <div>
+
+                                                    <h1 class="title_-x-primary">Presidential Pro</h1>
+                                                    <p class="title_-x-secondary">J &amp; J Issuers United</p>
+
+                                                </div>
+                                                
+                                                <div>
+                                                    
+                                                    <button class="icon_ icon_-notext icon_-right icon_-more">Options</button>
+
+                                                </div>
+                                                
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="l-grid-stretch">
+
+                        <code data-pattern="code">
+
+                            <div class="l-wrapper l-wrapper-inset">
+                                
+                                <div class="l-grid l-grid-stretch">
+                                    
+                                    <div>
+                                        <div class="card_">
+                                            <div class="badge_ viewdetails_">
+                                                <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
+                                                <div class="viewdetails_-x-details">
+                                                    <button class="button_ button_-solid button_-uppercase">View Details</button>
+                                                </div>
+                                            </div>
+                                            <div class="title_">
+                                                <div>
+                                                    <h1>pneumonoultramicros copicsilicovolcano coniosis</h1>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="card_">
+                                            <div class="badge_ viewdetails_">
+                                                <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
+                                                <div class="viewdetails_-x-details">
+                                                    <button class="button_ button_-solid button_-uppercase">View Details</button>
+                                                </div>
+                                            </div>
+                                            <div class="title_">
+                                                <div>
+                                                    <h1>pneumonoultramicr</h1>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="l-horizontal">
+
+                        <code data-pattern="code">
+
+                            <div class="l-horizontal">
+
+                                <div>
+
+                                    <h1>Title</h1>
+
+                                    <button class="button">Button</button>
+
+                                </div>
+
+                                <div>
+
+                                    <button class="icon_ icon_-small icon_-right icon_-notext icon_-dropdown">Button</button>
+
+                                    <button class="icon_ icon_-small icon_-right icon_-notext icon_-dropdown">Button</button>
+
+                                </div>
+
+                            </div>
+
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="l-vertical">
+
+                        <code data-pattern="code">
+
+                            <div class="l-vertical l-wrapper l-wrapper-inset">
+
+                                <div>
+
+                                    <div class="issuer_">
+                                        <header class="card_">
+                                            <button class="issuer_-x-title">
+                                                Issuer Name
+                                                <span>July 8th 2015 - Ongoing</span>
+                                            </button>
+                                            <div class="issuer_-x-controls">
+                                                <button class="icon_ icon_-notext icon_-add">Add Something</button>
+                                            </div>
+                                        </header>
+                                    </div>
+                                    
+                                </div>
+
+                                <div>
+
+                                    <div class="issuer_">
+                                        <header class="card_">
+                                            <div class="issuer_-x-image">
+                                                <img srcst="http://placehold.it/96x96 2x, http://placehold.it/48x48" src="http://placehold.it/48x48" width="48" height="48" alt="issuer description">
+                                            </div>
+                                            <button class="issuer_-x-title">
+                                                Issuer Name
+                                                <span>Issuer description. Fusce vehicula dolor arcu, sit amet blandit dolor mollis nec.</span>
+                                            </button>
+                                            <div class="issuer_-x-controls">
+                                                <button class="icon_ icon_-notext icon_-add">Add Something</button>
+                                            </div>
+                                        </header>
+                                    </div>
+                                    
+                                </div>
+
+                            </div>
+
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="l-vertical-small">
+
+                        <code data-pattern="code">
+
+                            <div class="l-vertical l-vertical-small l-wrapper l-wrapper-inset">
+
+                                <div>
+
+                                    <div class="issuer_">
+                                        <header class="card_">
+                                            <div class="issuer_-x-image">
+                                                <img srcst="http://placehold.it/96x96 2x, http://placehold.it/48x48" src="http://placehold.it/48x48" width="48" height="48" alt="issuer description">
+                                            </div>
+                                            <button class="issuer_-x-title">
+                                                Issuer Name
+                                                <span>Issuer description. Fusce vehicula dolor arcu, sit amet blandit dolor mollis nec.</span>
+                                            </button>
+                                            <div class="issuer_-x-controls">
+                                                <button class="icon_ icon_-notext icon_-add">Add Something</button>
+                                            </div>
+                                        </header>
+                                    </div>
+                                    
+                                </div>
+
+                                <div>
+
+                                    <div class="issuer_">
+                                        <header class="card_">
+                                            <div class="issuer_-x-image">
+                                                <img srcst="http://placehold.it/96x96 2x, http://placehold.it/48x48" src="http://placehold.it/48x48" width="48" height="48" alt="issuer description">
+                                            </div>
+                                            <button class="issuer_-x-title">
+                                                Issuer Name
+                                                <span>Issuer description. Fusce vehicula dolor arcu, sit amet blandit dolor mollis nec.</span>
+                                            </button>
+                                            <div class="issuer_-x-controls">
+                                                <button class="icon_ icon_-notext icon_-add">Add Something</button>
+                                            </div>
+                                        </header>
+                                    </div>
+                                    
+                                </div>
+
+                            </div>
+
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="l-wrapper">
+
+                        <code data-pattern="code">
+                            
+                            <div class="l-wrapper">
+
+                                <p class="wrap wrap_-solid">l-wrapper</p>
+                                
+                            </div>
+
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="l-wrapper-inset">
+
+                        <code data-pattern="code">
+
+                            <div class="l-wrapper l-wrapper-inset">
+                                
+                                <p class="wrap wrap_-solid">l-wrapper-inset</p>
+
+                            </div>
+
+                        </code>
+
+                    </div>
+
+                </article>
+
+                <article class="wrap_ wrap_-body" data-pattern="pattern" id="menus">
+
+                    <div data-pattern="pattern-secondary" id="menu_">
+                        
+                        <code data-pattern="code">
+
+                            <ul class="menu_">
+                                <li><a class="menu_-x-item is-active" href="">My Badges</a></li>
+                                <li><a class="menu_-x-item" href="">My Collections</a></li>
+                                <li><a class="menu_-x-item" href="">Issue Badges</a></li>
+                                <li>
+                                    <span class="menu_-x-item"><span class="icon_ icon_-small icon_-right icon_-dropdownlight">username</span></span>
+                                    <div class="menu_-x-dropdown dropdown_">
+                                        <ul>
+                                            <li><a class="dropdown_-x-item" href="">Dropdown Item</a></li>
+                                            <li><a class="dropdown_-x-item" href="">Dropdown Item</a></li>
+                                        </ul>
+                                    </div>
+                                </li>
+                            </ul>
+
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="menu_-small">
+                        
+                        <code data-pattern="code">
+
+                            <ul class="menu_ menu_-small">
+                                <li><a class="menu_-x-item is-active" href="">My Badges</a></li>
+                                <li><a class="menu_-x-item" href="">My Collections</a></li>
+                                <li><a class="menu_-x-item" href="">Issue Badges</a></li>
+                                <li>
+                                    <span class="menu_-x-item"><span class="icon_ icon_-small icon_-right icon_-dropdownlight">username</span></span>
+                                    <div class="menu_-x-dropdown dropdown_">
+                                        <ul>
+                                            <li><a class="dropdown_-x-item" href="">Dropdown Item</a></li>
+                                            <li><a class="dropdown_-x-item" href="">Dropdown Item</a></li>
+                                        </ul>
+                                    </div>
+                                </li>
+                            </ul>
+
+                        </code>
+
+                    </div>
+
+                </article>
+
+                <article class="wrap_" data-pattern="pattern" id="message_">
+
+                    <code data-pattern="code">
+
+                        <div class="message_">
+                            
+                            <img srcset="{{STATIC_URL}}images/500-badgr-2x.png 2x, {{STATIC_URL}}images/500-badgr.png" src="{{STATIC_URL}}images/500-badgr.png" alt="Badgr with a notepad" width="312" height="317">
+
+                            <p>Error 500.</p>
+
+                        </div>
+
+                    </code>
+
+                </article>
+
+                <article data-pattern="pattern" id="pagination_">
+
+                    <code data-pattern="code">
+                        
+                        <div class="pagination_">
+                                
+                            <div>
+                                
+                                <nav>
+                                    <button class="icon_ icon_-notext icon_-first" disabled>First</button>
+                                    <button class="icon_ icon_-notext icon_-previous" disabled>Previous</button>
+                                    <form action="">
+                                        <p>Page</p>
+                                        <input type="text" placeholder="1" size="3">
+                                        <p>of 15</p>
+                                    </form>
+                                    <button class="icon_ icon_-notext icon_-next">Next</button>
+                                    <button class="icon_ icon_-notext icon_-last">Last</button>
+                                </nav>
+
+                                <p class="pagination_-x-status status_">Checking for new badges &hellip;</p>
+
+                            </div>
+
+                            <p>Displaying 1-35 of 523</p>
+
+                        </div>
+
+                    </code>
+
+                </article>
+
+                <article data-pattern="pattern" id="popover_">
+                        
+                    <code data-pattern="code" data-pattern-helper="spacer">
+
+                        <button class="button_ is-disabled" id="popoverTrigger">Popover</button>
+                        <p class="popover_" id="popover">All instances of this badge must be revoked before removing it.</p>
+                        
+
+                        <script type="text/javascript">
+
+                            document.addEventListener('DOMContentLoaded', function() {
+
+                                function openPopover(target, element) {
+
+                                    element.classList.add('is-active');
+
+                                    new Tether({
+                                        element: element,
+                                        target: target,
+                                        attachment: 'bottom right',
+                                        targetAttachment: 'top right',
+                                        constraints: [
+                                            {
+                                              to: 'window',
+                                              attachment: 'together',
+                                              pin: true
+                                            }
+                                          ]
+                                    });
+
+                                    Tether.position();
+
+                                    element.classList.add('is-visible');
+                                    element.classList.add('is-tethered');
+
+                                };
+
+                                var popoverTrigger = document.getElementById('popoverTrigger');
+                                var popover = document.getElementById('popover');
+
+                                popoverTrigger.addEventListener('mouseenter', function(event) {
+                                    openPopover(popoverTrigger, popover);
+                                });
+
+                                popoverTrigger.addEventListener('mouseleave', function(event) {
+                                    popover.classList.remove('is-active');
+                                    popover.classList.remove('is-visible');
+                                });
+
+                            });
+
+                        </script>
+
+                    </code>
+
+                </article>
+
+                <article data-pattern="pattern" id="rule_">
+
+                    <code data-pattern="code">
+
+                        <hr class="rule_">
+
+                    </code>
+
+                </article>
+
+                <article data-pattern="pattern" id="search_">
+
+                    <code data-pattern="code" data-pattern-helper="spacer">
+
+                        <form action="" class="search_">
+                            <fieldset>
+                                <input type="text" placeholder="Search&hellip;">
+                                <button class="search_-x-submit icon_ icon_-search icon_-notext" type="submit">Search</button>
+                                <button class="search_-x-close icon_ icon_-small icon_-clear icon_-notext" type="button">Close</button>
+                            </fieldset>
+                        </form>
+
+                        <script type="text/javascript">
+
+                            document.addEventListener('DOMContentLoaded', function() {
+
+                                var searchContainer = document.querySelector('.search_ fieldset');
+                                var search = searchContainer.parentNode;
+                                var searchInput = search.querySelector('input');
+                                var searchClose = search.querySelector('.search_-x-close');
+
+                                searchContainer.addEventListener('mouseenter', function() {
+                                    search.classList.add('is-active');
+                                });
+
+                                searchContainer.addEventListener('mouseleave', function() {
+                                    if (!search.classList.contains('is-populated')) {
+                                        search.classList.remove('is-active');
+                                    }
+                                });
+
+                                searchInput.addEventListener('focus', function() {
+                                    search.classList.add('is-populated');
+                                });
+
+                                searchClose.addEventListener('click', function() {
+                                    search.classList.remove('is-active');
+                                    search.classList.remove('is-populated');
+                                    searchInput.value = '';
+                                });
+
+                            });
+
+                        </script>
+
+                    </code>
+
+                </article>
+
+                <article data-pattern="pattern" id="status_">
+
+                    <code data-pattern="code" data-pattern-helper="spacer">
+
+                        <p class="status_">Status</p>
+
+                    </code>
+
+                </article>
+
+                <article data-pattern="pattern" id="steps">
+
+                    <div data-pattern="pattern-secondary" id="step_">
+                        
+                        <code data-pattern="code" data-pattern-helper="spacer">
+
+                            <button class="card_ card_-hover step_">The Declaration of Independence <p>Not earned</p></button>
+                        
+                        </code>
+
+                    </div>
+
+                    <div data-pattern="pattern-secondary" id="step_-earned">
+                        
+                        <code data-pattern="code" data-pattern-helper="spacer">
+
+                            <button class="card_ card_-hover step_ step_-earned">The Declaration of Independence <p>Earned January 21, 2016</p></button>
+                        
+                        </code>
+
+                    </div>
+
+                </article>
+
+                <article data-pattern="pattern" id="table_">
+
+                    <code data-pattern="code">
+
+                        <table class="table_">
+                            
+                            <thead>
+                                
+                                <tr>
+                                    <th scope="col">Col Head 1</th>
+                                    <th scope="col">Col Head 2</th>
+                                    <th scope="col">Col Head 3</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+                                
+                                <tr>
+                                    <th scope="row">Row Head</th>
+                                    <td class="table_-x-main table_-x-minpad">
+                                        <div class="l-horizontal">
+                                            <div>
+                                                <button><img srcst="http://placehold.it/96x96 2x, http://placehold.it/48x48" src="http://placehold.it/48x48" width="48" height="48" alt="issuer description"></button>
+                                                <button class="truncate_ action_ action_-tertiary">pneumonoultramicroscopicsilicovolcanoconiosis</button>
+                                            </div>
+                                            <div>
+                                                <button class="action_ action_-faint">Add/Create Badge</button>
+                                                <button class="icon_ icon_-small icon_-notext icon_-clear">Delete</button>
+                                                <button class="icon_ icon_-small icon_-notext icon_-dropdown">Delete</button>
+                                            </div>
+                                        </div>
+                                        
+                                    </td>
+                                    <td>Cell</td>
+                                </tr>
+
+                                <tr>
+                                    <th scope="row">Row Head</th>
+                                    <td class="table_-x-main">Cell</td>
+                                    <td>Cell</td>
+                                </tr>
+
+                                <tr>
+                                    <th scope="row">Row Head</th>
+                                    <td class="table_-x-main">Cell</td>
+                                    <td class="table_-x-centered">
+                                        <button><img srcst="http://placehold.it/96x96 2x, http://placehold.it/48x48" src="http://placehold.it/48x48" width="48" height="48" alt="issuer description"></button>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </code>
+
+                </article>
+
+                <article data-pattern="pattern" id="tags_">
+
+                    <code data-pattern="code" data-pattern-helper="spacer">
+                        <ul class="tags_">
+                            <li>
+                                <a href="">Voting Badges</a>
+                                <button class="icon_ icon_-clear icon_-small icon_-notext">Remove</button>
+                            </li>
+                            <li>
+                                <a href="">History</a>
+                                <button class="icon_ icon_-clear icon_-small icon_-notext">Remove</button>
+                            </li>
+                        </ul>
+                    </code>
+
+                </article>
+
+                <article data-pattern="pattern" id="title">
+
+                    <code data-pattern="code">
+                        
+                        <div class="title_">
+
+                            <div>
+
+                                <h1 class="title_-x-primary">Presidential Pro</h1>
+                                <p class="title_-x-secondary">J &amp; J Issuers United</p>
+
+                            </div>
+                            
+                            <div>
+                                
+                                <button class="icon_ icon_-notext icon_-right icon_-more">Options</button>
+
+                            </div>
+                            
+
+                        </div>
+
+                        <div class="title_">
+
+                            <div>
+
+                                <h1>Presidential Pro</h1>
+
+                            </div>
+                            
+                            <div>
+                                
+                                <button class="icon_ icon_-notext icon_-right icon_-more">Options</button>
+
+                            </div>
+                            
+
+                        </div>
+
+                        <div class="title_">
+
+                            <div class="title_-x-centered">
+
+                                <h1>Presidential Pro</h1>
+
+                            </div>
+
+                        </div>
+
+                    </code>
+
+                </article>
+
+                <article data-pattern="pattern" id="truncate_">
+
+                    <code data-pattern="code" data-pattern-helper="spacer">
+
+                        <p class="truncate_">pneumonoultramicroscopicsilicovolcanoconiosis pneumonoultramicroscopicsilicovolcanoconiosis pneumonoultramicroscopicsilicovolcanoconiosis pneumonoultramicroscopicsilicovolcanoconiosis</p>
+
+                    </code>
+
+                </article>
+
+                <article data-pattern="pattern" id="viewdetails_">
+
+                    <code data-pattern="code" data-pattern-helper="spacer">
+
+                        <div class="viewdetails_">
+                            
+                            <p>Hover here to see more details.</p>
+
+                            <p>A new panel will appear.</p>
+
+                            <div class="viewdetails_-x-details">
+                                <button class="button_ button_-outline">View some details</button>
+                            </div>
+
+                        </div>
+
+                    </code>
+
+                </article>
+
+            </section>
+
+            <section>
+                <div id="ReactPatterns">
+                    <!-- React component patterns in pattern-library.jsx will be inserted here -->
+                    <div>
+                        If you can read this message, your React elements aren't properly loaded.
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+		<dialog class="dialog_" id="dialogID">
+
+            <button class="dialog_-x-close" id="dialogClose"><span class="icon_ icon_-notext icon_-close">Close</span></button>
+
+            <div class="dialog_-x-content">
+                
+                <header class="heading_ heading_-small">
+                    <div class="heading_-x-text">
+                        <h1>Dialog Header</h1>
+                        <p>Dialog header text.</p>
+                    </div>
+                </header>
+
+                <div class="detail_">
+                    
+                    <div>
+                        
+                        <img srcst="http://placehold.it/288x288 2x, http://placehold.it/144x144" src="http://placehold.it/144x144" width="144" height="144" alt="badge description">
+
+                    </div>
+
+                    <ul>
+                        <li>
+                            <h2 class="detail_-x-meta">Criteria</h2>
+                            <p><a href="https://badgr.io/public/badges/new-test-badge/criteria" target="_blank" title="Criteria to earn this badge">https://badgr.io/public/badges/new-test-badge/criteria</a></p>
+                        </li>
+                        <li>
+                            <h2 class="detail_-x-meta">Issue Date</h2>
+                            <p>January 23, 2016</p>
+                        </li>
+                        <li>
+                            <h2 class="detail_-x-meta">Issuer</h2>
+                            <p>Badge Issuer, Inc.</p>
+                        </li>
+                        <li>
+                            <h2 class="detail_-x-meta">Issuer Website</h2>
+                            <p><a href="https://www.badgeissuerinc.com" target="_blank" title="Website of badge issuer">https://www.badgeissuerinc.com</a></p>
+                        </li>
+                        <li>
+                            <h2 class="detail_-x-meta">Evidence</h2>
+                            <p><a href="https://www.evidencelink.com" target="_blank" title="Evidence of badge">https://www.evidencelink.com</a></p>
+                        </li>
+                        <li>
+                            <h2 class="detail_-x-meta">Recipient</h2>
+                            <p>jcowsill@concentricsky.com</p>
+                        </li>
+                        <li>
+                            <div class="l-horizontal">
+                                <div>
+                                    <button class="button_ button_-tertiary">Share on LinkedIn</button>
+                                    <button class="button_ button_-tertiary">Share on Facebook</button>
+                                    <button class="button_ button_-tertiary">Share on Twitter</button>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+
+                </div>
+
+            </div>
+
+            <div class="control_">
+                <button class="button_ button_-secondary">Close</button>
+            </div>
+		  
+		</dialog>
+
+        <script type="text/javascript" src="{{ STATIC_URL }}js/pattern-library.js"></script>
+
+	</body>
+
+</html>

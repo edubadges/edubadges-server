@@ -1,11 +1,13 @@
 import json
 import os
 import os.path
+import png
 import shutil
 
 from django.core import mail
 from django.contrib.auth import get_user_model
 
+from openbadges_bakery import unbake
 from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
 
 from issuer.api import IssuerList
@@ -264,6 +266,21 @@ class IssuerTests(APITestCase):
         self.assertEqual(second_response.status_code, 200)
         self.assertEqual(len(test_issuer.staff.all()), 0)
 
+    def test_delete_issuer_successfully(self):
+        user = get_user_model().objects.get(pk=1)
+        self.client.force_authenticate(user=user)
+        test_issuer = Issuer(name='issuer who can be deleted', slug='issuer-deletable', owner=user)
+        test_issuer.save()
+
+        response = self.client.delete('/v1/issuer/issuers/issuer-deletable', {})
+        self.assertEqual(response.status_code, 200)
+
+    def test_cant_delete_issuer_with_issued_badge(self):
+        user = get_user_model().objects.get(pk=1)
+        self.client.force_authenticate(user=user)
+        response = self.client.delete('/v1/issuer/issuers/test-issuer-2', {})
+        self.assertEqual(response.status_code, 400)
+
 
 class BadgeClassTests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
@@ -413,10 +430,51 @@ class AssertionTests(APITestCase):
         self.assertEqual(response.status_code, 201)
 
         # assert that the BadgeInstance was published to and fetched from cache
-        with self.assertNumQueries(0):
+        with self.assertNumQueries(1): # 1 query allowed for Badgebook recipient obscuring
             slug = response.data.get('slug')
             response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions/{}'.format(slug))
             self.assertEqual(response.status_code, 200)
+
+    def test_resized_png_image_baked_properly(self):
+        current_user = get_user_model().objects.get(pk=1)
+        with open(
+            os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
+        ) as badge_image:
+
+            badgeclass_props = {
+                'name': 'Badge of Awesome',
+                'description': "An awesome badge only awarded to awesome people or non-existent test entities",
+                'image': badge_image,
+                'criteria': 'The earner of this badge must be truly, truly awesome.',
+            }
+
+            self.client.force_authenticate(user=current_user)
+            response_bc = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                badgeclass_props
+            )
+
+        assertion = {
+            "email": "test@example.com"
+        }
+        self.client.force_authenticate(user=current_user)
+        response = self.client.post('/v1/issuer/issuers/test-issuer/badges/badge-of-awesome/assertions', assertion)
+
+        instance = BadgeInstance.objects.get(slug=response.data.get('slug'))
+
+        instance.image.open()
+        self.assertIsNotNone(unbake(instance.image))
+        instance.image.close()
+        instance.image.open()
+
+        reader = png.Reader(file=instance.image)
+        for chunk in reader.chunks():
+            if chunk[0] == 'IDAT':
+                image_data_present = True
+            elif chunk[0] == 'iTXt' and chunk[1].startswith('openbadges\x00\x00\x00\x00\x00'):
+                badge_data_present = True
+
+        self.assertTrue(image_data_present and badge_data_present)
 
     def test_authenticated_editor_can_issue_badge(self):
         # load test image into media files if it doesn't exist

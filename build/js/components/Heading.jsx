@@ -1,5 +1,8 @@
 var React = require('react');
 
+//Actions
+var navigateLocalPath = require('../actions/clicks.js').navigateLocalPath;
+
 
 var Heading = React.createClass({
     getDefaultProps: function() {
@@ -9,6 +12,10 @@ var Heading = React.createClass({
             'size': undefined,
             'rule': undefined,
         };
+    },
+
+    handleBackButton: function(ev) {
+        navigateLocalPath(this.props.backButton);
     },
 
     render: function() {
@@ -30,6 +37,11 @@ var Heading = React.createClass({
             )
         }
 
+        var backButton;
+        if (this.props.backButton) {
+            backButton = (<button className="heading_-x-back icon_ icon_-back icon_-notext" onClick={this.handleBackButton}>Back</button>);
+        }
+
         if (this.props.rule) {
             rule = (<hr className="rule_" />)
         }
@@ -42,6 +54,7 @@ var Heading = React.createClass({
                         {subtitle}
                     </div>
                     {actions}
+                    {backButton}
                 </header>
                 {rule}
             </div>)

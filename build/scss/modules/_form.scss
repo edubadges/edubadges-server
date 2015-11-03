@@ -11,12 +11,6 @@
 
   }
 
-  p {
-    font-size: $font-size-small;
-    text-align: center;
-    text-transform: uppercase;
-  }
-
   input,
   select,
   textarea {
@@ -56,6 +50,13 @@
 
   .form_-x-field {
     margin-bottom: $layout-spacing*2;
+
+    > p {
+      font-size: $font-size-small;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
   }
 
   .form_-x-action {
@@ -81,43 +82,6 @@
         box-shadow: rgba(map-get($colors, link), .5) 0 0 $layout-spacing/2 $layout-spacing/4;
       }
 
-    }
-
-  }
-
-  .form_-x-imagefield {
-    background-color: map-get($colors, solid-light);
-    border: 2px dashed map-get($colors, border-light);
-    box-sizing: border-box;
-    color: map-get($colors, bodycopy-faint);
-    width: 100%;
-
-    p {
-      background-image: url('images/form-image.svg');
-      background-position: center $layout-spacing*3;
-      background-repeat: no-repeat;
-      cursor: pointer;
-      font-size: $font-size-small;
-      padding: $layout-spacing*9.5 $layout-spacing*1.5 $layout-spacing*3;
-      text-transform: none;
-      text-align: center;
-    }
-
-    img {
-      display: block;
-      height: auto;
-      width: 100%;
-    }
-
-    &.is-uploaded {
-      border: 0;
-    }
-
-    &:hover,
-    &:focus, 
-    &.is-active {
-      border-color: map-get($colors, loading);
-      box-shadow: none;
     }
 
   }

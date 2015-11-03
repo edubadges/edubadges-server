@@ -312,6 +312,7 @@ var App = React.createClass({
     var mainComponent = (
       <MainComponent viewId={viewId}>
         <Heading
+          backButton="/earner/badges"
           size="large"
           title={badge.json.badge.name['@value']}
           subtitle={badge.json.badge.description['@value']}
@@ -419,6 +420,7 @@ var App = React.createClass({
     var mainComponent = (
       <MainComponent viewId={viewId}>
           <Heading
+            backButton="/earner/collections"
             size="large"
             title={collection.name}
             subtitle={collection.description}
@@ -515,6 +517,7 @@ var App = React.createClass({
     var mainComponent = (
       <MainComponent viewId={viewId}>
         <Heading
+          backButton="/issuer"
           title={issuer.name}
           subtitle={issuer.description}
           rule={true}>

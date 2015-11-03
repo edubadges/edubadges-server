@@ -111,6 +111,7 @@ class IssuerStaffSerializer(serializers.Serializer):
 
 
 class BadgeClassSerializer(AbstractComponentSerializer):
+    id = serializers.IntegerField(required=False, read_only=True)
     issuer = serializers.HyperlinkedRelatedField(view_name='issuer_json', read_only=True, lookup_field='slug')
     json = WritableJSONField(max_length=16384, read_only=True, required=False)
     name = serializers.CharField(max_length=255)

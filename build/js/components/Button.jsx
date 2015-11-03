@@ -7,6 +7,9 @@ var FormStore = require('../stores/FormStore');
 // Actions
 var FormActions = require('../actions/forms');
 
+// Component
+var TetherTarget = require('../components/Tether.jsx').TetherTarget;
+
 
 var Button = React.createClass({
     propTypes: {
@@ -14,7 +17,8 @@ var Button = React.createClass({
         labelFunction: React.PropTypes.func,
         isDisabled: React.PropTypes.bool,
         isDisabledFunction: React.PropTypes.func,
-        className: React.PropTypes.string
+        className: React.PropTypes.string,
+        popover: React.PropTypes.string,
     },
     getDefaultProps: function() {
         return {
@@ -48,9 +52,22 @@ var Button = React.createClass({
             return false;
     },
 
+    handleMouseEnter: function(ev) {
+        var popover = this.refs.TetherTarget.tethered.domNode.querySelector('.popover_');
+        popover.classList.add('is-active');
+        this.refs.TetherTarget.tethered.tether.position();
+        popover.classList.add('is-visible', 'is-tethered');
+    },
+
+    handleMouseLeave: function(e) {
+        var popover = this.refs.TetherTarget.tethered.domNode.querySelector('.popover_');
+        popover.classList.remove('is-active');
+        popover.classList.remove('is-visible');
+    },
+
     render: function() {
         // omit props reserved for internal use from being passed along.
-        var props = _.omit(this.props, ['label', 'handleClick', 'isDisabled', 'style']);
+        var props = _.omit(this.props, ['label', 'handleClick', 'isDisabled', 'style', 'popover']);
 
         var buttonClass = "button_";
         var style = this.props.style ? this.props.style.toLowerCase() : "";
@@ -63,7 +80,33 @@ var Button = React.createClass({
             props.disabled = "disabled";
             cls += " is-disabled";
         }
-        return (<button className={cls} onClick={this.handleClick} {...props}>{this.label()}</button>);
+        var button = (<button className={cls} onClick={this.handleClick} {...props}>{this.label()}</button>);
+
+        if (this.props.popover) {
+            var popoverElement = (<p className="popover_">{this.props.popover}</p>);
+            var tetherOptions = {
+                attachment: 'bottom right',
+                targetAttachment: 'top center',
+                offset: '10px 0',
+                targetOffset: '0 25px',
+                constraints: [
+                    {
+                        to: 'window',
+                        attachment: 'together',
+                        pin: true
+                    }
+                ]
+            }
+
+            return (
+                <TetherTarget ref="TetherTarget" tethered={popoverElement} tetherOptions={tetherOptions} onMouseEnter={this.handleMouseEnter} onMouseLeave={this.handleMouseLeave}>
+                    {button}
+                </TetherTarget>
+            );
+        }
+        else {
+            return button
+        }
 
     }
 });
