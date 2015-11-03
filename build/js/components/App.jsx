@@ -583,7 +583,7 @@ var App = React.createClass({
 
         <ul className="l-wrapper l-wrapper-inset breadcrumb_">
             <li><a href="/issuer">Issue Badges</a></li>
-            <li><a href={"/issuer/issuers/"+issuerSlug}>{issuer.name}</a></li>
+            <li><a href={"/issuer/issuers/"+issuer.slug}>{issuer.name}</a></li>
         </ul>
 
 
