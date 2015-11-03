@@ -46,11 +46,22 @@ var Heading = React.createClass({
             rule = (<hr className="rule_" />)
         }
 
+        var title;
+        if (this.props.meta) {
+            title = (
+                <h1>
+                    <div style={{display: 'inline'}}>{this.props.title}</div> (<span>{this.props.meta}</span>)
+                </h1>);
+        }
+        else {
+            title = (<h1>{this.props.title}</h1>);
+        }
+
         return (
             <div className="x-owner">
                 <header className={headerClassList.join(" ")}>
                     <div className="heading_-x-text">
-                        <h1>{this.props.title}</h1>
+                        {title}
                         {subtitle}
                     </div>
                     {actions}

@@ -542,8 +542,8 @@ var App = React.createClass({
   badgeClassDetail: function(issuerSlug, badgeClassSlug){
     var loadingInstances = ""; var badgeInstanceDisplayLength;
     var viewId = "badgeClassDetail-" + badgeClassSlug;
-    var issuer = APIStore.getFirstItemByPropertyValue('issuer_issuers', 'slug', issuerSlug);
     var badgeClass = APIStore.getFirstItemByPropertyValue('issuer_badgeclasses', 'slug', badgeClassSlug);
+    var issuer = APIStore.getFirstItemByPropertyValue('issuer_issuers', 'slug', issuerSlug);
     var badgeInstances = APIStore.filter('issuer_badgeinstances', 'badge_class', badgeClass.json.id);
     var instanceRequestStatus = null;
 
@@ -560,30 +560,36 @@ var App = React.createClass({
     }
     badgeInstanceDisplayLength = loadingInstances != "" ? loadingInstances : badgeInstances.length
 
+    badgeClass.issuer = issuer;
+
+    var dialogFormId = "BadgeInstanceCreateUpdateForm";
+    var formProps = FormConfigStore.getConfig(dialogFormId, {}, {issuerSlug: issuerSlug, badgeClassSlug: badgeClass.slug});
+    FormStore.getOrInitFormData(dialogFormId, formProps);
+
+    var actions=[
+        <SubmitButton formId={dialogFormId} label="Submit" />
+    ];
+    var dialog = (
+        <Dialog formId={dialogFormId} dialogId="create-badge-instance" actions={actions} className="closable">
+            <Heading size="small"
+                        title="New Badge Instance"
+                        subtitle=""/>
+
+            <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
+        </Dialog>);
+
     var mainComponent = (
       <MainComponent viewId={viewId}>
-        <HeadingBar 
-          title={issuer.name + ": " + badgeClass.name}
-        />
+        <Heading
+          backButton={"/issuer/issuers/"+ issuer.slug}
+          title={badgeClass.name}
+          subtitle={badgeClass.description}
+          rule={true}>
+              <DialogOpener dialog={dialog} dialogId="create-badge-instance" key="create-badge-instance">
+                <Button className="action_" label="Issue Badge" propagateClick={true}/>
+              </DialogOpener>
+        </Heading>
         <BadgeClassDetail {...badgeClass} />
-        <ActionBar
-          title={"Recipients (" + badgeInstanceDisplayLength + ")"}
-          viewId={viewId}
-          items={this.props.actionBars['badgeClassDetail']}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
-        <ActivePanel
-          viewId={viewId}
-          modal={true}
-          {...this.state.activePanels[viewId]}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          issuerSlug={issuerSlug}
-          badgeClassSlug={badgeClassSlug}
-          formKey={issuerSlug + '/' + badgeClassSlug}
-        />
         <BadgeInstanceList
           issuerSlug={issuerSlug}
           badgeClass={badgeClass}
@@ -591,7 +597,7 @@ var App = React.createClass({
           dataRequestStatus={instanceRequestStatus}
         />
       </MainComponent>
-    )
+    );
 
     return this.render_base(mainComponent);
   },
