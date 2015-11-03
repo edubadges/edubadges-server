@@ -520,6 +520,22 @@ class AssertionTests(APITestCase):
         response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions')
 
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_issuer_instance_list_assertions(self):
+
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        response = self.client.get('/v1/issuer/issuers/test-issuer-2/assertions')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_issuer_instance_list_assertions_with_id(self):
+
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        response = self.client.get('/v1/issuer/issuers/test-issuer-2/assertions?recipient=test@example.com')
+
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
 
     def test_revoke_assertion(self):

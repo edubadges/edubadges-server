@@ -118,5 +118,21 @@
         },
         "model": "issuer.badgeinstance",
         "pk": 1
+    },
+    {
+        "fields": {
+            "revocation_reason": null,
+            "revoked": false,
+            "created_at": "2015-04-08T16:59:03Z",
+            "created_by": 1,
+            "slug": "92219015-18a6-4538-8b6d-2b228e47b8ab",
+            "json": "{\"issuedOn\":\"2015-04-08T09:59:03.679218\",\"verify\":{\"url\":\"http://localhost:8000/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8ab\",\"type\":\"hosted\"},\"image\":\"http://localhost:8000/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8ab/image\",\"recipient\":{\"type\":\"email\",\"salt\":\"9944f83b-c1df-420d-b2d9-5f2d8968ca1c\",\"hashed\":true,\"identity\":\"sha256$f90bfa9a05bad084790a0276d3d3d58fe925378f92b8a94dfe72e6b3c9d53cdf\"},\"type\":\"Assertion\",\"@context\":\"https://w3id.org/openbadges/v1\",\"badge\":\"http://localhost:8000/public/badges/badge-of-awesome\",\"id\":\"http://localhost:8000/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa\"}",
+            "badgeclass": 1,
+            "image": "issued/badges/49213a69dc3213270e95c2ac3c1fbd01.png",
+            "recipient_identifier": "test2@example.com",
+            "issuer": 2
+        },
+        "model": "issuer.badgeinstance",
+        "pk": 2
     }
 ]

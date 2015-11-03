@@ -620,11 +620,11 @@ class IssuerBadgeInstanceList(AbstractIssuerAPIEndpoint):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         if request.query_params.get('recipient') is not None:
-            instances = current_issuer.badgeinstances.filter(
+            instances = current_issuer.badgeinstance_set.filter(
                 recipient_identifier=request.query_params.get('recipient'),
                 revoked=False)
         else:
-            instances = current_issuer.badgeinstances.filter(revoked=False)
+            instances = current_issuer.badgeinstance_set.filter(revoked=False)
 
         serializer = BadgeInstanceSerializer(
             instances, context={'request': request}, many=True
