@@ -103,7 +103,7 @@ var ImageDropbox = React.createClass({
     var dropzoneStyle = {};
     return (
         <div className="form_-x-field">
-            <Dropzone onDrop={this.fileHandler} style={dropzoneStyle} activeClassName='is-active' className={'form_-x-imagefield dropzone'+ (this.props.imageData ? ' is-uploaded' : '')} required={this.props.required}>
+            <Dropzone onDrop={this.fileHandler} style={dropzoneStyle} activeClassName='is-active' className={'dropzone_ dropzone_-secondary'+ (this.props.imageData ? ' is-uploaded' : '')} required={this.props.required}>
                 {this.props.imageData ? <img src={this.props.imageData} /> : (<p>{this.props.hint}</p>)}
             </Dropzone>
         </div>
