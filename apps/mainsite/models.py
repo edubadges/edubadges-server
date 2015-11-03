@@ -49,6 +49,10 @@ class AbstractComponent(cachemodel.CacheModel):
     def prop(self, property_name):
         return self.json.get(property_name)
 
+    @property
+    def owner(self):
+        return self.created_by
+
 
 class AbstractIssuer(ResizeUploadedImage, AbstractComponent):
     """

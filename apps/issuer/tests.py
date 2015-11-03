@@ -523,6 +523,7 @@ class AssertionTests(APITestCase):
         self.assertEqual(len(response.data), 1)
 
     def test_revoke_assertion(self):
+
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.delete(
             '/v1/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa',
