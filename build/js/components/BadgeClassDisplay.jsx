@@ -145,8 +145,8 @@ BadgeClassTable = React.createClass({
                     <td>
                         <div className="l-horizontal">
                             <div>
-                                <button className="button_ button_-tertiary">Issue</button>
-                                <Button className="button_ button_-tertiary" label="Edit" />
+                                <Button className="button_ button_-tertiary is-disabled" label="Issue" />
+                                <Button className="button_ button_-tertiary is-disabled" label="Edit" />
                                 {removeButton}
                             </div>
                         </div>
