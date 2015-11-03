@@ -580,6 +580,13 @@ var App = React.createClass({
 
     var mainComponent = (
       <MainComponent viewId={viewId}>
+
+        <ul className="l-wrapper l-wrapper-inset breadcrumb_">
+            <li><a href="/issuer">Issue Badges</a></li>
+            <li><a href={"/issuer/issuers/"+issuerSlug}>{issuer.name}</a></li>
+        </ul>
+
+
         <Heading
           backButton={"/issuer/issuers/"+ issuer.slug}
           title={badgeClass.name}
