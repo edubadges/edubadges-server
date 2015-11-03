@@ -71,7 +71,7 @@ var BadgeSelectionTable = React.createClass({
             var headerRenderer = function(label, cellDataKey, columnData, rowData, width) {
                 if (colInfo.icon)
                     return (<span className={"icon_ icon_-notext " + colInfo.icon}></span> );
-                return (<p className="truncate_" title={label}>{label}</p>);
+                return (<span className="truncate_" title={label}>{label}</span>);
             };
             return (
                 <Column key={"award-column-"+i}
@@ -93,7 +93,7 @@ var BadgeSelectionTable = React.createClass({
                 rowsCount={this.props.badges.length}
                 width={this.props.widthHint}
                 maxHeight={this.props.heightHint}
-                headerHeight={56}
+                headerHeight={36}
                 >
                 {columns}
             </Table>
