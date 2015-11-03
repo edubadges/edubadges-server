@@ -7,8 +7,12 @@ var Column = FixedDataTable.Column;
 
 var BadgeSelectionTable = require('./components/BadgeSelectionTable.jsx').BadgeSelectionTable;
 
+var dummyBadges = [
+    {}, {}, {}, {}
+];
+
 var ReactPatterns = React.createClass({
-    /* CourseProgressTable: Used in the earner's collection management dialog */
+    /* BadgeSelectionTable: Used in the earner's collection management dialog */
     badgeSelectionTable: function(){
         return (
             <PatternItem
@@ -16,7 +20,7 @@ var ReactPatterns = React.createClass({
                 description="A list of selectable badges in tabular format"
             >
                 <BadgeSelectionTable
-                    badges={[]}
+                    badges={dummyBadges}
                 />
             </PatternItem>
         );
