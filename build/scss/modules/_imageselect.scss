@@ -28,7 +28,7 @@
   }
 
   input:checked + img {
-    border-color: map-get($colors, loading);
+    border-color: map-get($colors, solid-dark);
   }
 
 }

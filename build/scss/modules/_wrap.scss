@@ -13,6 +13,7 @@
 
 .wrap_-body {
   background-color: map-get($colors, bodycopy);
+  color: map-get($colors, solid);
 }
 
 .wrap_-shadow {
