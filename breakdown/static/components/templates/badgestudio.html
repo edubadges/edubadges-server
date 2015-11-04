@@ -1,0 +1,76 @@
+{{> molecules/header-small}}
+
+<main class="l-mainoverride">
+
+  <form action="" class="l-studio wrap_ wrap_-borderbottom">
+    
+    <nav class="wrap_ wrap_-shadow">
+
+      <h1 class="wrap_ wrap_-dark wrap_-borderbottom l-studio-x-header">Badge Studio</h1>
+      
+      <ul class="gallerynav_ ">
+        <li><a class="gallerynav_-x-item" href="#tab-shapes"><span class="icon_ icon_-shapes icon_-large">Shapes</span></a></li>
+        <li><a class="gallerynav_-x-item" href="#tab-shapes"><span class="icon_ icon_-backgrounds icon_-large">Backgrounds</span></a></li>
+        <li><a class="gallerynav_-x-item" href="#tab-shapes"><span class="icon_ icon_-graphics icon_-large">Graphics</span></a></li>
+        <li><a class="gallerynav_-x-item" href="#tab-shapes"><span class="icon_ icon_-colors icon_-large">Colors</span></a></li>
+        <li><a class="gallerynav_-x-item" href="#tab-shapes"><span class="icon_ icon_-branding icon_-large">Branding</span></a></li>
+      </ul>
+
+    </nav>
+
+    <div class="wrap_ wrap_-borderright">
+
+      <section id="tab-shapes">
+        
+        <h2 class="wrap_ wrap_-dark wrap_-borderbottom l-studio-x-header">Badges</h2>
+
+        <div>
+          
+          <ul class="optiongallery_">
+            <li>
+              <label>
+                <span>{shape_description}</span>
+                <img srcset="http://placehold.it/180x180 2x, http://placehold.it/90x90" src="http://placehold.it/90x90" alt="{shape_description}">
+                <input type="radio" name="shape" value="shape1">
+              </label>
+            </li>
+            <li>
+              <label>
+                <span>{shape_description}</span>
+                <img srcset="http://placehold.it/180x180 2x, http://placehold.it/90x90" src="http://placehold.it/90x90" alt="{shape_description}">
+                <input type="radio" name="shape" value="shape2">
+              </label>
+            </li>
+          </ul>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <div class="wrap_ wrap_-body">
+
+      <div>
+        
+        <canvas></canvas>
+
+        <p>Data about the Badge being created will go here.</p>
+
+      </div>
+      
+      <fieldset class="wrap_  wrap_-dark wrap_-borderbottom  l-studio-x-header">
+        
+        {{> atoms/button-secondary}}
+
+        {{> atoms/button}}
+
+      </fieldset>
+
+    </div>
+
+  </form>
+
+</main>
+
+{{> atoms/footer}}

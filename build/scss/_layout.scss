@@ -111,3 +111,47 @@ main {
   }
   
 }
+
+$l-studio-header: $layout-spacing*8;
+
+.l-studio {
+  align-items: stretch;
+  display: flex;
+  min-height: 700px;
+  overflow: hidden;
+
+  > :first-child {
+    flex-basis: 250px;
+    max-width: 250px;
+  }
+
+  > :nth-child(2) {
+    flex: 1 0 0;
+  }
+
+  > :last-child {
+    display: flex;
+    flex-basis: 300px;
+    flex-direction: column;
+    max-width: 300px;
+
+    fieldset {
+      order: 1;
+    }
+
+    div {
+      order: 2;
+    }
+
+  }
+
+  .l-studio-x-header {
+    align-items: center;
+    box-sizing: border-box;
+    display: flex;
+    height: $l-studio-header;
+    padding: $layout-spacing*2;
+    width: 100%;
+  }
+
+}

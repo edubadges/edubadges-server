@@ -1,4 +1,5 @@
-var browserSync = require("browser-sync");
+var browserSync = require('browser-sync');
+var styleguide = require('component-styleguide');
 
 module.exports = function(grunt) {
 
@@ -23,10 +24,6 @@ module.exports = function(grunt) {
             scss: {
                 files: '<%= srcPath %>**/*.scss',
                 tasks: ['sass', 'autoprefixer', 'bs-inject']
-            },
-            staticFiles: {
-                files: ['**/*.html'],
-                tasks: ['bs-inject']
             },
             browserify: {
                 files: [
@@ -116,16 +113,27 @@ module.exports = function(grunt) {
 
     });
 
-    grunt.registerTask("bs-init", function () {
+    grunt.registerTask('styleguide', function () {
+        styleguide({
+          components: 'breakdown/static/components',
+          staticLocalDir: 'breakdown/static',
+          staticPath: '/static',
+          stylesheets: ['css/dialog-polyfill.css', 'css/reset.css', 'css/screen.css'],
+          scripts: ['js/dialog-polyfill.js', 'js/pattern-library.js']
+        });
+    });
+
+    grunt.registerTask('bs-init', function () {
         var done = this.async();
         browserSync({
-            proxy: 'localhost:8000' // This needs to match your current server eg. localhost:5000 or mysite.design.concentricsky.com
+            proxy: 'localhost:3000', // This needs to match your current server eg. localhost:5000 or mysite.design.concentricsky.com
+            port: 8080
         }, function (err, bs) {
             done();
         });
     });
 
-    grunt.registerTask("bs-inject", function () {
+    grunt.registerTask('bs-inject', function () {
         browserSync.reload(['**/*.html','**/*.css']);
     });
 
@@ -136,8 +144,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-env');
     grunt.loadNpmTasks('grunt-shell-spawn');
-    grunt.loadNpmTasks('grunt-inline');
 
-    grunt.registerTask('default',['bs-init', 'sass', 'autoprefixer', 'browserify:dev', 'watch']);
+    grunt.registerTask('default',['sass', 'autoprefixer', 'browserify:dev', 'watch:browserify']);
+    grunt.registerTask('patternlibrary', ['styleguide', 'bs-init', 'sass', 'autoprefixer', 'watch:scss'])
     grunt.registerTask('dist', ['env:dist', 'sass', 'autoprefixer', 'browserify:dist', 'uglify']);
 };

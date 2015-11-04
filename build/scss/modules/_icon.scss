@@ -36,6 +36,12 @@
 
 }
 
+.icon_-large {
+  line-height: $layout-spacing*3;
+  min-height: $layout-spacing*3;
+  padding-left: $layout-spacing*6;
+}
+
 .icon_-right {
   padding-left: 0;
   padding-right: $layout-spacing*4;
@@ -51,6 +57,11 @@
 .icon_-right.icon_-small {
   padding-left: 0;
   padding-right: $layout-spacing*2;
+}
+
+.icon_-right.icon_-large {
+  padding-left: 0;
+  padding-right: $layout-spacing*6;
 }
 
 .icon_-notext {
@@ -221,5 +232,88 @@
   &::after {
     background-image: url('images/icon-clear.svg');
   }
+
+}
+
+// Large Icons
+// These were added for badge studio. Hover states don't quite make sense yet.
+
+.icon_-large.icon_-shapes {
+
+  &::after {
+    background-image: url('images/icon-shapes.svg');
+  }
+
+  // &:hover {
+
+  //   &::after {
+  //     background-image: url('images/icon-shapes-hover.svg');
+  //   }
+
+  // }
+
+}
+
+.icon_-large.icon_-backgrounds {
+
+  &::after {
+    background-image: url('images/icon-backgrounds.svg');
+  }
+
+  // &:hover {
+
+  //   &::after {
+  //     background-image: url('images/icon-backgrounds-hover.svg');
+  //   }
+
+  // }
+
+}
+
+.icon_-large.icon_-graphics {
+
+  &::after {
+    background-image: url('images/icon-graphics.svg');
+  }
+
+  // &:hover {
+
+  //   &::after {
+  //     background-image: url('images/icon-graphics-hover.svg');
+  //   }
+
+  // }
+
+}
+
+.icon_-large.icon_-colors {
+
+  &::after {
+    background-image: url('images/icon-colors.svg');
+  }
+
+  // &:hover {
+
+  //   &::after {
+  //     background-image: url('images/icon-colors-hover.svg');
+  //   }
+
+  // }
+
+}
+
+.icon_-large.icon_-branding {
+
+  &::after {
+    background-image: url('images/icon-branding.svg');
+  }
+
+  // &:hover {
+
+  //   &::after {
+  //     background-image: url('images/icon-branding-hover.svg');
+  //   }
+
+  // }
 
 }

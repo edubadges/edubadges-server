@@ -5,7 +5,7 @@ $colors: (
   bodycopy-light: #5b6c79,
   bodycopy-faint: #9B9B9B,
   border: #bbb,
-  border-light: #ccc,
+  border-light: rgba(#bbb, .35),
   button: #672F33,
   button-hover: #AB2430,
   button-active: #9D1F2A,
@@ -23,7 +23,7 @@ $colors: (
 $font-size-small-2x: 12px;
 $font-size-small: 14px;
 $font-size: 16px;
-$font-size-large: 16px;
+$font-size-large: 18px;
 $font-size-large-2x: 24px;
 $font-size-large-3x: 28px;
 $font-size-large-4x: 34px;
@@ -32,6 +32,9 @@ $font-size-large-5x: 40px;
 $layout-spacing: $font-size / 2;
 
 $border-radius: 2px;
+
+$box-shadow: 0 1px $layout-spacing/2 0 rgba(map-get($colors, solid-dark), .3);
+$box-shadow-secondary: 0 0 $layout-spacing*2 0 rgba(map-get($colors, solid-dark), .18), 0  $layout-spacing 0 rgba(map-get($colors, solid-dark), .24);
 
 @font-face {
   font-family: 'Open Sans';
@@ -112,7 +115,7 @@ $z-index-high: 3;
 @mixin dropdown {
   background: map-get($colors, solid-light);
   border-radius: $border-radius;
-  box-shadow: 0 1px $layout-spacing/2 0 rgba(map-get($colors, solid-dark), .3);
+  box-shadow: $box-shadow;
 }
 
 @keyframes rotate {

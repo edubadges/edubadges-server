@@ -17,6 +17,7 @@
   "devDependencies": {
     "browser-sync": "latest",
     "browserify": "~7.0.2",
+    "component-styleguide": "^1.2.2",
     "events": "~1.0.2",
     "fixed-data-table": "^0.4.6",
     "flux": "~2.0.1",
@@ -28,6 +29,7 @@
     "grunt-contrib-watch": "latest",
     "grunt-env": "~0.4.4",
     "grunt-inline": "^0.3.6",
+    "grunt-rerun": "0.0.4",
     "grunt-shell-spawn": "latest",
     "jshint-stylish": "~1.0.0",
     "moment": "~2.10.2",
