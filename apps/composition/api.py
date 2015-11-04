@@ -215,9 +215,11 @@ class CollectionLocalBadgeInstanceList(APIView):
                 item.get('id') for item in badges
             ]
 
-            LocalBadgeInstanceCollection.objects.filter(
+            badges_to_remove = LocalBadgeInstanceCollection.objects.filter(
                 collection=collection
-            ).exclude(instance__id__in=badge_ids).delete()
+            ).exclude(instance__id__in=badge_ids)
+            for badge in badges_to_remove:
+                badge.delete()
 
         serializer = CollectionLocalBadgeInstanceSerializer(
             collection.localbadgeinstancecollection_set.all(), many=True
