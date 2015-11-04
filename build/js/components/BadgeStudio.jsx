@@ -1,5 +1,6 @@
 var React = require('react');
 var Button = require('../components/Button.jsx').Button;
+var StudioCanvas = require('../components/StudioCanvas.jsx').StudioCanvas;
 
 
 var BadgeStudio = React.createClass({
@@ -13,7 +14,7 @@ var BadgeStudio = React.createClass({
     },
     getInitialState: function() {
         return {
-
+            'backgroundColor': '#555555'
         }
     },
 
@@ -29,10 +30,22 @@ var BadgeStudio = React.createClass({
             this.props.handleBadgeComplete();
     },
 
+    handleColorChange: function(e) {
+        var color = e.target.value;
+        console.log("color change", color)
+        this.setState({
+            'backgroundColor': color
+        })
+    },
+
     render: function() {
         return (<div>
             <p>
             badge studio...
+            </p>
+            <StudioCanvas width={400} height={400} backgroundColor={this.state.backgroundColor}/>
+            <p>
+            Color:<input type="text" onChange={this.handleColorChange} />
             </p>
             <p>
             <Button label="done" handleClick={this.handleBadgeComplete}/>
