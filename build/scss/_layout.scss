@@ -75,6 +75,17 @@ main {
 
 }
 
+.l-horizontalright {
+  align-items: center;
+  display: flex;
+  justify-content: flex-end;
+
+  > * {
+    margin-left: $layout-spacing;
+  }
+
+}
+
 .l-vertical {
   max-width: 100%;
 
@@ -166,23 +177,21 @@ $l-studio-header: $layout-spacing*8;
     flex-direction: column;
     max-width: 300px;
 
-    fieldset {
+    .l-studio-x-header {
       order: 1;
     }
 
-    div {
+    div:not(.l-studio-x-header) {
       order: 2;
-      padding: $layout-spacing;
+      padding: $layout-spacing*1.5;
     }
 
   }
 
   .l-studio-x-header {
-    align-items: center;
     box-sizing: border-box;
-    display: flex;
     height: $l-studio-header;
-    padding: $layout-spacing*2;
+    padding: $layout-spacing*3 $layout-spacing*1.5 $layout-spacing*3 $layout-spacing*3;
     width: 100%;
   }
 
