@@ -113,6 +113,11 @@ var ImageDropbox = React.createClass({
 
 
 BasicAPIForm = React.createClass({
+  getDefaultProps: function() {
+    return {
+      handleBadgeStudioClick: undefined
+    }
+  },
   getInitialState: function() {
     return FormStore.getFormState(this.props.formId);
   },
@@ -225,15 +230,30 @@ BasicAPIForm = React.createClass({
           var inputType = fieldProps.inputType;
 
           if (inputType == 'image'){
+            var badgeStudioButton;
+            if (this.props.handleBadgeStudioClick) {
+              var badgeStudioButton = (
+              <div>
+                <div className="form_-x-field">
+                    <p>Or</p>
+                </div>
+                <div className="form_-x-field">
+                    <button onClick={this.props.handleBadgeStudioClick} className="button_ button_-tertiary">Use Badge Studio</button>
+                </div>
+              </div>);
+            }
             return (
-              <div className="form_-x-field" key={this.props.formId + "-form-field-" + i + '-' + j}>
-                <ImageDropbox
-                  onDroppedImage={this.handleImageDrop}
-                  image={this.state.image}
-                  imageData={this.state.imageData}
-                  imageDescription={this.props.formType == "IssuerCreateUpdateForm" ? "Image": "Badge"}
-                  {...fieldProps}
-                />
+              <div>
+                <div className="form_-x-field" key={this.props.formId + "-form-field-" + i + '-' + j}>
+                  <ImageDropbox
+                    onDroppedImage={this.handleImageDrop}
+                    image={this.state.image}
+                    imageData={this.state.imageData}
+                    imageDescription={this.props.formType == "IssuerCreateUpdateForm" ? "Image": "Badge"}
+                    {...fieldProps}
+                  />
+                </div>
+                {badgeStudioButton}
               </div>
             );
           }
