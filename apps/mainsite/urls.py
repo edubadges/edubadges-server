@@ -23,10 +23,6 @@ urlpatterns = patterns('',
     url(r'^favicon\.ico[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL)),
     url(r'^robots\.txt$', RedirectView.as_view(url='%srobots.txt' % settings.STATIC_URL)),
 
-    # Pattern library & Temp Views
-    url(r'^temp/app$', TemplateView.as_view(template_name='temp-app.html'), name='temp-app'),
-    url(r'^temp/canvas$', TemplateView.as_view(template_name='temp-canvas.html'), name='temp-canvas'),
-
     # Home
     url(r'^$', info_view, name='index'),
 
@@ -112,6 +108,5 @@ if getattr(settings, 'DEBUG_STATIC', True):
 # Serve pattern library view only in debug mode or if explicitly declared
 if getattr(settings, 'DEBUG', True) or getattr(settings, 'SERVE_PATTERN_LIBRARY', False):
     urlpatterns = patterns('',
-       url(r'^pattern-library$', TemplateView.as_view(template_name='pattern-library.html'), name='pattern-library'),
        url(r'^component-library$', TemplateView.as_view(template_name='component-library.html'), name='component-library')
     ) + urlpatterns

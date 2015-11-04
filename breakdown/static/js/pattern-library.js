@@ -1,156 +1,190 @@
-/**
- * Concentric Sky Pattern Library:
- * Creates a navigation structure and source code example viewing in-browser for
- * defined modules (following SMACSS recommendations).
- */
+document.addEventListener('DOMContentLoaded', function() {
 
-function matchPattern(pattern) {
-    var matchedElements = [];
-    var allElements = document.getElementsByTagName('*');
-    for (var i = 0; i < allElements.length; i++) {
-        if (allElements[i].dataset.pattern == pattern) {
-            matchedElements.push(allElements[i]);
+    function dialog() {
+        var dialogOpen = document.getElementById('dialogOpen');
+        var dialogClose = document.getElementById('dialogClose');
+        var dialog = document.getElementById('dialogID');
+
+        if (dialog) {
+
+            dialogPolyfill.registerDialog(dialog);
+            // Update button opens a modal dialog
+            dialogOpen.addEventListener('click', function() {
+              dialog.showModal();
+              dialog.classList.add('is-visible');
+            });
+
+            // Form cancel button closes the dialog box
+            dialogClose.addEventListener('click', function() {
+              dialog.close();
+              dialog.classList.remove('is-visible');
+            });
+            
         }
-    }
-    return matchedElements;
-}
-
-// Toggle states for menu (on container)
-
-var container = document.querySelector('[data-pattern="container"]');
-
-var navToggle = document.querySelector('[data-pattern="nav-toggle"]');
-
-function toggleNav() {
-
-    if (container.className == 'menu-visible') {
-
-        container.className = '';
-
-    } else {
-
-        container.className = 'menu-visible';
-
+        
     }
 
-}
+    function dropdown() {
 
-navToggle.onclick = function(){
-    toggleNav();
-};
+        function isDescendant(parent, child) {
+            var node = child;
+                while (node != null) {
 
-var navItems = matchPattern('nav');
+                    if (node == parent) {
+                        return true;
+                    }
 
-for (var i = 0; i < navItems.length; i++) {
+                    node = node.parentNode;
 
-    var navItem = navItems[i];
+                }
 
-    navItem.onclick = function(){
-        container.className = '';
-    };
+            return false;
 
-}
+        }
 
-// Toggle states for code examples
+        function openTether(target, element) {
 
-function toggleContainer(element) {
+            element.classList.add('is-active');
 
-    var toggle = element;
+            new Tether({
+                element: element,
+                target: target,
+                attachment: 'top right',
+                targetAttachment: 'top right',
+                constraints: [
+                    {
+                      to: document.body,
+                      attachment: 'together',
+                      pin: true
+                    }
+                  ]
+            });
 
-    var toggleParent = toggle.parentNode;
+            Tether.position();
 
-    if (toggle.className == 'is-active') {
+            element.classList.add('is-visible');
+            element.classList.add('is-tethered');
 
-        toggle.className = '';
-        toggleParent.className = '';
+        };
 
-    } else {
+        document.addEventListener('click', function(event) {
 
-        toggle.className = 'is-active';
-        toggleParent.className = 'is-active';
+            var dropdownTrigger = document.getElementById('dropdownTrigger');
+            var dropdown = document.getElementById('dropdown');
+
+            if (dropdown) {
+                var inDropdown = isDescendant(dropdown, event.target);
+                var inTrigger = isDescendant(dropdownTrigger, event.target);
+
+                if (!inDropdown && dropdown.classList.contains('is-active')) {
+                    dropdown.classList.remove('is-active');
+                    dropdown.classList.remove('is-visible');
+                } else if (inTrigger) {
+                    openTether(dropdownTrigger, dropdown);
+                }
+            }
+            
+
+        });
 
     }
 
-}
+    function issuer() {
+        var issuer = document.getElementById('issuer');
+        var issuerTrigger = document.getElementById('issuerTrigger');
 
-// Create code examples
+        if (issuer) {
+            issuerTrigger.addEventListener('click', function() {
+                issuer.classList.toggle('is-expanded');
+                issuerTrigger.classList.toggle('icon_-expand');
+                issuerTrigger.classList.toggle('icon_-collapse');
+            });
+        }
+        
+    }
 
-var patternCode = document.querySelectorAll('[data-pattern="code"]');
+    function popover() {
 
-for (var i = 0; i < patternCode.length; i++) {
+        function openPopover(target, element) {
 
-    // Grab the current code example in the loop
-    var code = patternCode[i];
+            element.classList.add('is-active');
 
-    // Grab its content
-    var codeContent = code.innerHTML;
+            new Tether({
+                element: element,
+                target: target,
+                attachment: 'bottom right',
+                targetAttachment: 'top right',
+                constraints: [
+                    {
+                      to: 'window',
+                      attachment: 'together',
+                      pin: true
+                    }
+                  ]
+            });
 
-    // Find its parent
-    var codeParent = code.parentNode;
+            Tether.position();
 
-    // Create the container to put it in
-    var display = document.createElement('pre');
-    var displayCode = document.createElement('code');
-    var displayToggle = document.createElement('button');
+            element.classList.add('is-visible');
+            element.classList.add('is-tethered');
 
-    // Set up the toggle
-    displayToggle.textContent = 'Toggle Code';
-    displayToggle.setAttribute('data-pattern', 'code-toggle');
+        };
 
-    // Set the attribute on the container
-    display.setAttribute('data-pattern', 'code-display');
+        var popoverTrigger = document.getElementById('popoverTrigger');
+        var popover = document.getElementById('popover');
 
-    // Set the code content as text inside of our new element
-    displayCode.textContent = codeContent;
+        if (popoverTrigger && popover) {
 
-    // Put our code into the new container
-    display.appendChild(displayToggle);
-    display.appendChild(displayCode);
+            popoverTrigger.addEventListener('mouseenter', function(event) {
+                openPopover(popoverTrigger, popover);
+            });
 
+            popoverTrigger.addEventListener('mouseleave', function(event) {
+                popover.classList.remove('is-active');
+                popover.classList.remove('is-visible');
+            });
 
-    // Put the new container above the code example
-    codeParent.insertBefore(display, code);
+        }
 
-}
+    }
 
-var toggles = matchPattern('code-toggle');
+    function searchinput() {
 
-for (var i = 0; i < toggles.length; i++) {
+        var searchContainer = document.querySelector('.search_ fieldset');
+        var search = searchContainer.parentNode;
+        var searchInput = search.querySelector('input');
+        var searchClose = search.querySelector('.search_-x-close');
 
-    var toggle = toggles[i];
+        if (searchContainer) {
 
-    toggle.onclick = function(){
-        toggleContainer(this);
-    };
+           searchContainer.addEventListener('mouseenter', function() {
+               search.classList.add('is-active');
+           });
 
-}
+           searchContainer.addEventListener('mouseleave', function() {
+               if (!search.classList.contains('is-populated')) {
+                   search.classList.remove('is-active');
+               }
+           });
 
-// Create titles based on pattern IDs
+           searchInput.addEventListener('focus', function() {
+               search.classList.add('is-populated');
+           });
 
-var patterns = document.querySelectorAll('[data-pattern="pattern"], [data-pattern="pattern-secondary"]');
+           searchClose.addEventListener('click', function() {
+               search.classList.remove('is-active');
+               search.classList.remove('is-populated');
+               searchInput.value = '';
+           }); 
 
-for (var i = 0; i < patterns.length; i++) {
-    var pattern = patterns[i];
-    var patternID = pattern.id;
-    var title = document.createElement('div');
-    title.setAttribute('data-pattern', 'title');
-    title.textContent = patternID;
-    pattern.appendChild(title);
-    pattern.insertBefore(title, pattern.firstChild);
-}
+        }
 
-// Creates a navigation for primary patterns
+    }
 
-var primaryPatterns = document.querySelectorAll('[data-pattern="pattern"]');
+    dialog();
+    dropdown();
+    issuer();
+    popover();
+    searchinput();
 
-for (var i = 0; i < primaryPatterns.length; i++) {
-    var pattern = primaryPatterns[i];
-    var patternID = pattern.id;
-    var nav = document.querySelector('[data-pattern="nav-menu"]');
-    var navItem = document.createElement('li');
-    var navAnchor = document.createElement('a');
-    navAnchor.setAttribute('href', '#' + patternID);
-    navAnchor.textContent = patternID;
-    navItem.appendChild(navAnchor);
-    nav.insertBefore(navItem, nav.lastChild);
-}
+});

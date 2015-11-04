@@ -119,7 +119,7 @@ module.exports = function(grunt) {
           staticLocalDir: 'breakdown/static',
           staticPath: '/static',
           stylesheets: ['css/dialog-polyfill.css', 'css/reset.css', 'css/screen.css'],
-          scripts: ['js/dialog-polyfill.js', 'js/pattern-library.js']
+          scripts: ['js/dialog-polyfill.js', 'js/tether.min.js', 'js/pattern-library.js']
         });
     });
 
