@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <!-- Generator: Sketch 3.4 (15575) - http://www.bohemiancoding.com/sketch -->
+    <title>iconBackgrounds</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Badge-Studio" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="Badge-Studio-Notes" sketch:type="MSArtboardGroup" transform="translate(-62.000000, -526.000000)" fill="#31383E">
+            <g id="badgeStudio" sketch:type="MSLayerGroup" transform="translate(37.000000, 92.000000)">
+                <g id="sideNav" transform="translate(0.000000, 1.000000)" sketch:type="MSShapeGroup">
+                    <g id="sideNavItem" transform="translate(0.000000, 412.000000)">
+                        <g id="iconBackgrounds" transform="translate(25.000000, 21.000000)">
+                            <path d="M24,21.3333333 L24,2.66666667 C24,1.2 22.8,0 21.3333333,0 L2.66666667,0 C1.2,0 0,1.2 0,2.66666667 L0,21.3333333 C0,22.8 1.2,24 2.66666667,24 L21.3333333,24 C22.8,24 24,22.8 24,21.3333333 L24,21.3333333 Z M7.33333333,14 L10.6666667,18 L15.3333333,12 L21.3333333,20 L2.66666667,20 L7.33333333,14 L7.33333333,14 Z" id="Shape"></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
