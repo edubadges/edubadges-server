@@ -8,13 +8,7 @@
 
       <h1 class="wrap_ wrap_-dark wrap_-borderbottom l-studio-x-header">Badge Studio</h1>
       
-      <ul class="gallerynav_ ">
-        <li><a class="gallerynav_-x-item" href="#tab-shapes"><span class="icon_ icon_-shapes icon_-large">Shapes</span></a></li>
-        <li><a class="gallerynav_-x-item" href="#tab-shapes"><span class="icon_ icon_-backgrounds icon_-large">Backgrounds</span></a></li>
-        <li><a class="gallerynav_-x-item" href="#tab-shapes"><span class="icon_ icon_-graphics icon_-large">Graphics</span></a></li>
-        <li><a class="gallerynav_-x-item" href="#tab-shapes"><span class="icon_ icon_-colors icon_-large">Colors</span></a></li>
-        <li><a class="gallerynav_-x-item" href="#tab-shapes"><span class="icon_ icon_-branding icon_-large">Branding</span></a></li>
-      </ul>
+      {{> molecules/gallerynav}}
 
     </nav>
 
@@ -26,21 +20,20 @@
 
         <div>
           
-          <ul class="optiongallery_">
-            <li>
-              <label>
-                <span>{shape_description}</span>
-                <img srcset="http://placehold.it/180x180 2x, http://placehold.it/90x90" src="http://placehold.it/90x90" alt="{shape_description}">
-                <input type="radio" name="shape" value="shape1">
-              </label>
-            </li>
-            <li>
-              <label>
-                <span>{shape_description}</span>
-                <img srcset="http://placehold.it/180x180 2x, http://placehold.it/90x90" src="http://placehold.it/90x90" alt="{shape_description}">
-                <input type="radio" name="shape" value="shape2">
-              </label>
-            </li>
+          <ul class="l-wrappinglist">
+            <li>{{> atoms/imageselect count="1"}}</li>
+            <li>{{> atoms/imageselect count="2"}}</li>
+            <li>{{> atoms/imageselect count="3"}}</li>
+            <li>{{> atoms/imageselect count="4"}}</li>
+            <li>{{> atoms/imageselect count="5"}}</li>
+            <li>{{> atoms/imageselect count="6"}}</li>
+            <li>{{> atoms/imageselect count="7"}}</li>
+            <li>{{> atoms/imageselect count="8"}}</li>
+            <li>{{> atoms/imageselect count="9"}}</li>
+            <li>{{> atoms/imageselect count="10"}}</li>
+            <li>{{> atoms/imageselect count="11"}}</li>
+            <li>{{> atoms/imageselect count="12"}}</li>
+            <li>{{> atoms/imageselect count="13"}}</li>
           </ul>
 
         </div>

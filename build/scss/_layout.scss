@@ -92,6 +92,18 @@ main {
 
 }
 
+.l-wrappinglist {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: $layout-spacing*3;
+
+  > * {
+    margin-bottom: $layout-spacing*2;
+    margin-right: $layout-spacing*2;
+  }
+
+}
+
 .l-wrapper {
 
   @media (min-width: 1184px + $layout-spacing*6) {
@@ -117,6 +129,7 @@ $l-studio-header: $layout-spacing*8;
 .l-studio {
   align-items: stretch;
   display: flex;
+  height: 80vh;
   min-height: 700px;
   overflow: hidden;
 
@@ -127,6 +140,24 @@ $l-studio-header: $layout-spacing*8;
 
   > :nth-child(2) {
     flex: 1 0 0;
+    position: relative;
+
+    .l-studio-x-header {
+      position: relative;
+      z-index: $z-index-high;
+    }
+
+    div {
+      box-sizing: border-box;
+      height: 100%;
+      left: 0;
+      overflow-y: auto;
+      padding-top: $l-studio-header + $layout-spacing*3;
+      position: absolute;
+      top: 0;
+      width: 100%;
+    }
+
   }
 
   > :last-child {
