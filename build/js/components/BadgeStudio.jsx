@@ -31,8 +31,12 @@ var BadgeStudio = React.createClass({
 
     render: function() {
         return (<div>
+            <p>
             badge studio...
+            </p>
+            <p>
             <Button label="done" handleClick={this.handleBadgeComplete}/>
+            </p>
         </div>);
 
     }
