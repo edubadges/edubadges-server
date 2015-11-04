@@ -4,6 +4,7 @@ var _ = require('lodash');
 
 // Components
 var Button = require('../components/Button.jsx').Button;
+var StudioCanvas = require('../components/StudioCanvas.jsx').StudioCanvas;
 
 
 var StudioNavItem = React.createClass({
@@ -62,6 +63,7 @@ var BadgeStudio = React.createClass({
                 backgrounds: ['paisley.png', 'swirl.png', 'feathers.png', 'china.png'],
                 graphics: [],
             },
+			handleBadgeComplete: undefined
         };
     },
 
@@ -85,6 +87,11 @@ var BadgeStudio = React.createClass({
         this._canvas = instance;
     },
 
+    handleBadgeComplete: function() {
+        if (this.props.handleBadgeComplete)
+            this.props.handleBadgeComplete();
+    },
+
     render: function() {
         console.log("BadgeStudio state: ", this.state);
 
@@ -104,8 +111,14 @@ var BadgeStudio = React.createClass({
                 </div>
                 <div className="wrap_ wrap_-body">
                     <div>
-                        <canvas className="canvas_" width="280" height="280"></canvas>
-                        <div className="detail_">
+						<StudioCanvas 
+                			width={280} 
+                			height={280} 
+                			backgroundColor={this.state.backgroundColor}
+                			shape={this.state.shape}
+                			graphic={this.state.graphic}
+                		/>                        
+						<div className="detail_">
                         <ul>
                             <h2 className="detail_-x-meta">Some Stat</h2>
                             <p>Some detail.</p>
@@ -115,7 +128,7 @@ var BadgeStudio = React.createClass({
 
                     <div className="wrap_  wrap_-dark wrap_-borderbottom  l-studio-x-header l-horizontalright">
                         <button className="button_ button_-secondary">Button</button>
-                        <button className="button_ ">Button</button>
+                        <button onClick={this.handleBadgeComplete} className="button_ ">Button</button>
                     </div>
                 </div>
             </form>
