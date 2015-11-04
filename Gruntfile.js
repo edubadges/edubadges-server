@@ -145,7 +145,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-env');
     grunt.loadNpmTasks('grunt-shell-spawn');
 
-    grunt.registerTask('default',['sass', 'autoprefixer', 'browserify:dev', 'watch:browserify']);
+    grunt.registerTask('default',['sass', 'autoprefixer', 'browserify:dev', 'watch']);
     grunt.registerTask('patternlibrary', ['styleguide', 'bs-init', 'sass', 'autoprefixer', 'watch:scss'])
     grunt.registerTask('dist', ['env:dist', 'sass', 'autoprefixer', 'browserify:dist', 'uglify']);
 };
