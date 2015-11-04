@@ -7,39 +7,74 @@ var StudioCanvas = React.createClass({
     shape: React.PropTypes.string,
     backgroundImage: React.PropTypes.string,
     backgroundColor: React.PropTypes.string,
+    backgroundPattern: React.PropTypes.string,
     graphic: React.PropTypes.string,
     graphicColor: React.PropTypes.string,
   },
   getDefaultProps: function() {
     return {
-        width: 400,
-        height: 400,
+        width: 500,
+        height: 500,
         shape: 'shield',
         backgroundImage: undefined,
-        backgroundColor: '#555555',
+        backgroundColor: undefined,
         graphic: undefined,
         graphicColor: '#ffffff',
     };
   },
 
   componentDidMount: function() {
-    console.log("mounted", this.refs);
-    console.log("canvas", this.refs.canvas);
+
+    BadgeStudio.util.loadSVG = function(prefix, name, callback) {
+      var path = initialData.STATIC_URL + 'badgestudio/' + prefix + '/' + name + '.svg'
+      fabric.loadSVGFromURL(path, function (objects, options) {
+        return callback(new fabric.Group(objects))
+      })
+    }
 
     this.studio = new BadgeStudio(this.refs.canvas.getDOMNode());
-    this.studio.setBackgroundColor('rgba(24,124,255,0.3)');
+    this.updateBadgeStudio(this.props);
   },
 
   shouldComponentUpdate: function(nextProps, nextState) {
-    console.log("shouldComponentUpdate", nextProps, nextState)
     return false;
   },
 
   componentWillReceiveProps: function(nextProps) {
-    console.log("componentWillReceiveProps", nextProps, this.props)
-
-    this.studio.setBackgroundColor(nextProps.backgroundColor)
+    this.updateBadgeStudio(nextProps);
   },
+
+
+  updateBadgeStudio: function(props) {
+    if (props.shape) {
+        this.studio.setShape(props.shape);
+    }
+
+    if (props.backgroundImage) {
+        this.studio.setBackgroundImage(props.backgroundImage);
+    } else {
+        this.studio.removeBackgroundImage();
+        this.studio.setBackgroundColor(props.backgroundColor)
+    }
+
+    if (props.graphic) {
+        this.studio.setGlyphFromURL(props.graphic);
+    }
+    else {
+        this.studio.removeGlyph();
+    }
+
+    if (props.backgroundPattern) {
+        this.studio.setBackgroundPattern(props.backgroundPattern)
+    } else {
+        this.studio.removeBackgroundPattern();
+    }
+
+    if (props.graphicColor) {
+        this.studio.setGlyphColor(props.graphicColor);
+    }
+  },
+
 
   render: function() {
     return (

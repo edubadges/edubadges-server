@@ -14,7 +14,9 @@ var BadgeStudio = React.createClass({
     },
     getInitialState: function() {
         return {
-            'backgroundColor': '#555555'
+            'backgroundColor': '#f0f',
+            'shape': 'circle',
+            'graphic': initialData.STATIC_URL+'badgestudio/graphics/Flower.png'
         }
     },
 
@@ -32,7 +34,6 @@ var BadgeStudio = React.createClass({
 
     handleColorChange: function(e) {
         var color = e.target.value;
-        console.log("color change", color)
         this.setState({
             'backgroundColor': color
         })
@@ -43,9 +44,15 @@ var BadgeStudio = React.createClass({
             <p>
             badge studio...
             </p>
-            <StudioCanvas width={400} height={400} backgroundColor={this.state.backgroundColor}/>
+            <StudioCanvas 
+                width={500} 
+                height={500} 
+                backgroundColor={this.state.backgroundColor}
+                shape={this.state.shape}
+                graphic={this.state.graphic}
+                />
             <p>
-            Color:<input type="text" onChange={this.handleColorChange} />
+            Color:<input type="text" onChange={this.handleColorChange} value={this.state.backgroundColor} />
             </p>
             <p>
             <Button label="done" handleClick={this.handleBadgeComplete}/>
