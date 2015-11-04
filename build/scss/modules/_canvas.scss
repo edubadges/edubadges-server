@@ -1,0 +1,7 @@
+.canvas_ {
+  background: map-get($colors, solid) url('images/canvas-background.png');
+  border: 1px solid map-get($colors, border-light);
+  border-radius: $border-radius;
+  height: auto;
+  width: 100%;
+}

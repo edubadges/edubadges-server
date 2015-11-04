@@ -9,9 +9,12 @@
     padding: $layout-spacing*3;
     width: 100%;
 
-    &:hover,
+    &:hover {
+      background-color: darken(map-get($colors, bodybackground), 5%);
+    }
+
     &.gallerynav_-is-active {
-      background-color: map-get($colors, bodybackground);
+      background-color: map-get($colors, solid);
     }
 
   }

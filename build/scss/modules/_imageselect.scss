@@ -1,0 +1,34 @@
+.imageselect_ {
+  cursor: pointer;
+  display: block;
+  overflow: hidden;
+  position: relative;
+
+  span,
+  input {
+    left: -9999em;
+    position: absolute;
+    top: 0;
+  }
+
+  img {
+    border: 1px solid map-get($colors, border-light);
+    border-radius: $border-radius;
+    display: block;
+    overflow: hidden;
+    position: relative;
+  }
+
+  &:hover {
+
+    img {
+      border-color: map-get($colors, border);
+    }
+
+  }
+
+  input:checked + img {
+    border-color: map-get($colors, solid-dark);
+  }
+
+}
