@@ -12,7 +12,7 @@ body {
   // http://stackoverflow.com/questions/1373142/preloading-css-images
 
   &::after {
-    content: url('images/step-earned-hover.svg') url('images/icon-collapse.svg');
+    content: url('images/step-earned-hover.svg') url('images/icon-collapse.svg') url('images/form-check-checked.svg');
     display: none;
   }
 
