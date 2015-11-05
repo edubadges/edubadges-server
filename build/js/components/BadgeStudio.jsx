@@ -70,6 +70,11 @@ var BadgeStudio = React.createClass({
     getInitialState: function() {
         return {
             activeTab: 'shapes',
+            selectedOptions: {
+                shapes: undefined,
+                backgrounds: undefined,
+                graphics: undefined
+            },
         };
     },
 
@@ -114,9 +119,8 @@ var BadgeStudio = React.createClass({
 						<StudioCanvas 
                 			width={280} 
                 			height={280} 
-                			backgroundColor={this.state.backgroundColor}
-                			shape={this.state.shape}
-                			graphic={this.state.graphic}
+                            backgroundImage={this.state.selectedOptions.backgrounds}
+                			graphic={this.state.selectedOptions.graphics}
                 		/>                        
 						<div className="detail_">
                         <ul>

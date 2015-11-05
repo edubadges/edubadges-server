@@ -15,7 +15,7 @@ var StudioCanvas = React.createClass({
     return {
         width: 500,
         height: 500,
-        shape: 'shield',
+        shape: 'circle',
         backgroundImage: undefined,
         backgroundColor: undefined,
         graphic: undefined,
@@ -51,7 +51,7 @@ var StudioCanvas = React.createClass({
     }
 
     if (props.backgroundImage) {
-        this.studio.setBackgroundImage(props.backgroundImage);
+        this.studio.setBackgroundImage(initialData.STATIC_URL + "badgestudio/backgrounds/" + props.backgroundImage);
     } else {
         this.studio.removeBackgroundImage();
         this.studio.setBackgroundColor(props.backgroundColor)
