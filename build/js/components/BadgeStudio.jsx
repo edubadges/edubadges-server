@@ -59,9 +59,10 @@ var BadgeStudio = React.createClass({
     getDefaultProps: function() {
         return {
             assets: {
-                shapes: ['circle-1.svg', 'circle-2.png', 'rope-1.svg', 'shield-1.svg', 'starburst-1.svg'],
-                backgrounds: ['paisley.png', 'swirl.png', 'feathers.png', 'china.png'],
-                graphics: [],
+                shapes: ['circle.svg', 'circle-1.svg', 'rope-1.svg', 'shield-1.svg', 'starburst-1.svg'],
+                backgrounds: ['paisley.png', 'swirl.png', 'feathers.png', 'china.png', 'confectionary.png'],
+                graphics: ['maple-leaf.png'],
+                colors: []
             },
 			handleBadgeComplete: undefined
         };
@@ -121,6 +122,8 @@ var BadgeStudio = React.createClass({
                 			height={280} 
                             backgroundImage={this.state.selectedOptions.backgrounds}
                 			graphic={this.state.selectedOptions.graphics}
+                            shape={this.state.selectedOptions.shapes}
+                            colors={this.state.selectedOptions.colors}
                 		/>                        
 						<div className="detail_">
                         <ul>

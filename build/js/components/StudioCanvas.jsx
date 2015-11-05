@@ -15,11 +15,11 @@ var StudioCanvas = React.createClass({
     return {
         width: 500,
         height: 500,
-        shape: 'circle',
+        shape: undefined, // 'circle'
         backgroundImage: undefined,
         backgroundColor: undefined,
         graphic: undefined,
-        graphicColor: '#ffffff',
+        graphicColor: '#ffffff'
     };
   },
 
@@ -30,7 +30,7 @@ var StudioCanvas = React.createClass({
       fabric.loadSVGFromURL(path, function (objects, options) {
         return callback(new fabric.Group(objects))
       })
-    }
+    };
 
     this.studio = new BadgeStudio(this.refs.canvas.getDOMNode());
     this.updateBadgeStudio(this.props);
@@ -41,36 +41,41 @@ var StudioCanvas = React.createClass({
   },
 
   componentWillReceiveProps: function(nextProps) {
-    this.updateBadgeStudio(nextProps);
+    if (this.props != nextProps)
+      this.updateBadgeStudio(nextProps);
   },
 
 
   updateBadgeStudio: function(props) {
-    if (props.shape) {
-        this.studio.setShape(props.shape);
+    debugger;
+    if (props.shape != this.props.shape) {
+        this.studio.setShape(props.shape.split('.')[0]);
+    }
+    else if (!this.props.shape && !props.shape){
+        this.studio.setShape('circle');
     }
 
-    if (props.backgroundImage) {
+    if (props.backgroundImage != this.props.backgroundImage) {
         this.studio.setBackgroundImage(initialData.STATIC_URL + "badgestudio/backgrounds/" + props.backgroundImage);
-    } else {
+    } else if (this.props.backgroundImage && !props.backgroundImage) {
         this.studio.removeBackgroundImage();
         this.studio.setBackgroundColor(props.backgroundColor)
     }
 
-    if (props.graphic) {
-        this.studio.setGlyphFromURL(props.graphic);
+    if (props.graphic != this.props.graphic) {
+        this.studio.setGlyphFromURL(initialData.STATIC_URL + "badgestudio/graphics/" + props.graphic);
     }
-    else {
+    else if (this.props.graphic && !props.graphic){
         this.studio.removeGlyph();
     }
 
-    if (props.backgroundPattern) {
+    if (props.backgroundPattern != this.props.backgroundPattern) {
         this.studio.setBackgroundPattern(props.backgroundPattern)
-    } else {
+    } else if (this.props.backgroundPattern && !props.backgroundPattern) {
         this.studio.removeBackgroundPattern();
     }
 
-    if (props.graphicColor) {
+    if (props.graphicColor != this.props.graphicColor) {
         this.studio.setGlyphColor(props.graphicColor);
     }
   },
