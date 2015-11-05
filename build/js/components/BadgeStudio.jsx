@@ -102,6 +102,11 @@ var BadgeStudio = React.createClass({
         if (this.refs.studio_canvas) {
             dataURL = this.refs.studio_canvas.studio.toDataURL();
             blob = window.dataURLtoBlob && window.dataURLtoBlob(dataURL);
+            if (blob) {
+                // turn blob into a File
+                blob.lastModifiedDate = new Date();
+                blob.name = "custom badge";
+            }
         } else {
             console.log("Error: unable to find badge studio dataURL")
         }

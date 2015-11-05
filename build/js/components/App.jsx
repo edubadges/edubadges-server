@@ -512,7 +512,7 @@ var App = React.createClass({
     var handleBadgeComplete = function(dataURL, blob) {
 
       FormActions.patchForm(dialogFormId, {
-        'image': "custom badge",
+        'image': blob,
         'imageData': dataURL
       });
       
