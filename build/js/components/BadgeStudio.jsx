@@ -100,6 +100,7 @@ var BadgeStudio = React.createClass({
         var dataURL;
         var blob;
         if (this.refs.studio_canvas) {
+            this.refs.studio_canvas.studio.canvas.deactivateAll().renderAll();
             dataURL = this.refs.studio_canvas.studio.toDataURL();
             blob = window.dataURLtoBlob && window.dataURLtoBlob(dataURL);
             if (blob) {
