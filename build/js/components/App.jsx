@@ -40,6 +40,7 @@ var CollectionShareInfo = require('../components/EarnerBadgeCollection.jsx').Col
 var EarnerCollectionList = require('../components/EarnerBadgeCollection.jsx').EarnerCollectionList;
 var EarnerCollectionDetail = require('../components/EarnerBadgeCollection.jsx').EarnerCollectionDetail;
 var ConsumerBadgeList = require('../components/ConsumerBadgeList.jsx');
+var BadgeStudio = require('../components/BadgeStudio.jsx').BadgeStudio;
 
 // Actions
 var LifeCycleActions = require('../actions/lifecycle');
@@ -503,6 +504,24 @@ var App = React.createClass({
     var formProps = FormConfigStore.getConfig(dialogFormId, {}, {issuerSlug: issuerSlug});
     FormStore.getOrInitFormData(dialogFormId, formProps);
 
+    var showBadgeStudio = function(e) {
+      e.stopPropagation();
+
+      this.setState({showingBadgeStudio: true});
+    }.bind(this);
+    var hideBadgeStudio = function(e) {
+      this.setState({showingBadgeStudio: false}, function() {
+        var dialog = document.getElementById("issuer-add-badge")
+        if (dialog) {
+          dialog.showModal();
+          dialog.classList.add('is-visible');
+        }
+
+      });
+
+    }.bind(this);
+
+
     var actions=[
         <SubmitButton formId={dialogFormId} label="Create" />
     ];
@@ -511,30 +530,41 @@ var App = React.createClass({
             <Heading size="small"
                         title="Create New Badge"
                         subtitle=""/>
-            <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
+            <BasicAPIForm handleBadgeStudioClick={showBadgeStudio} hideFormControls={true} actionState="ready" {...formProps} />
         </Dialog>);
 
-    var mainComponent = (
-      <MainComponent viewId={viewId}>
-        <Heading
-          backButton="/issuer"
-          title={issuer.name}
-          subtitle={issuer.description}
-          rule={true}>
-              <DialogOpener dialog={dialog} dialogId="issuer-add-badge" key="issuer-add-badge">
-                  <Button className="action_" label="Add Badge" propagateClick={true}/>
-              </DialogOpener>
-        </Heading>
-        <IssuerDisplay {...issuer} />
-        <Heading
-          size="small"
-          title="Active Badges" />
-        <BadgeClassTable
-          issuerSlug={issuerSlug}
-          badgeClasses={issuersBadgeClasses}
-        />
-      </MainComponent>
-    )
+    if (this.state.showingBadgeStudio) {
+
+      var mainComponent = (
+        <MainComponent viewId={viewId}>
+          <BadgeStudio handleBadgeComplete={hideBadgeStudio}/>
+        </MainComponent>);
+
+    } else {
+
+      var mainComponent = (
+        <MainComponent viewId={viewId}>
+          <Heading
+            backButton="/issuer"
+            title={issuer.name}
+            subtitle={issuer.description}
+            rule={true}>
+                <DialogOpener dialog={dialog} dialogId="issuer-add-badge" key="issuer-add-badge">
+                    <Button className="action_" label="Add Badge" propagateClick={true}/>
+                </DialogOpener>
+          </Heading>
+          <IssuerDisplay {...issuer} />
+          <Heading
+            size="small"
+            title="Active Badges" />
+          <BadgeClassTable
+            issuerSlug={issuerSlug}
+            badgeClasses={issuersBadgeClasses}
+          />
+        </MainComponent>);
+
+    }
+
 
     return this.render_base(mainComponent);
   },

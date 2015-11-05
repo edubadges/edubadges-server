@@ -77,6 +77,13 @@ var DialogOpener = React.createClass({
     propTypes: {
         dialog: React.PropTypes.node.isRequired,
         dialogId: React.PropTypes.string.isRequired,
+        destroyDialogOnUnmount: React.PropTypes.bool
+    },
+    getDefaultProps: function() {
+        return {
+            destroyDialogOnUnmount: true
+        }
+
     },
 
     componentDidMount: function() {
@@ -85,7 +92,8 @@ var DialogOpener = React.createClass({
     },
 
     componentWillUnmount: function() {
-        this.dialog.destroy();
+        if (this.props.destroyDialogOnUnmount)
+            this.dialog.destroy();
     },
 
     componentDidUpdate: function(prevProps, prevState) {
