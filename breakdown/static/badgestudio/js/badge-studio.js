@@ -58,8 +58,8 @@
 
     // TODO: these should be configurable (and thus likely be attached
     // to the instance instead of the class)
-    width: 500,
-    height: 500
+    // width: 500,
+    // height: 500
   }
 
   BadgeStudio.shapes = {

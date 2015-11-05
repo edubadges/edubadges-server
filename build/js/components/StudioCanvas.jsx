@@ -28,9 +28,12 @@ var StudioCanvas = React.createClass({
     BadgeStudio.util.loadSVG = function(prefix, name, callback) {
       var path = initialData.STATIC_URL + 'badgestudio/' + prefix + '/' + name + '.svg'
       fabric.loadSVGFromURL(path, function (objects, options) {
-        return callback(new fabric.Group(objects))
-      })
-    };
+        var svg = new fabric.Group(objects)
+        svg.scaleX = this.props.width / svg.width;
+        svg.scaleY = this.props.height / svg.height;
+        return callback(svg)
+      }.bind(this))
+    }.bind(this);
 
     this.studio = new BadgeStudio(this.refs.canvas.getDOMNode());
     this.updateBadgeStudio(this.props);
@@ -69,7 +72,7 @@ var StudioCanvas = React.createClass({
     }
 
     if (props.backgroundPattern != this.props.backgroundPattern) {
-        this.studio.setBackgroundPattern(props.backgroundPattern)
+        this.studio.setBackgroundPattern(initialData.STATIC_URL + "badgestudio/backgrounds/" + props.backgroundPattern);
     } else if (this.props.backgroundPattern && !props.backgroundPattern) {
         this.studio.removeBackgroundPattern();
     }

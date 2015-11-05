@@ -120,7 +120,7 @@ var BadgeStudio = React.createClass({
 						<StudioCanvas 
                 			width={280} 
                 			height={280} 
-                            backgroundImage={this.state.selectedOptions.backgrounds}
+                            backgroundPattern={this.state.selectedOptions.backgrounds}
                 			graphic={this.state.selectedOptions.graphics}
                             shape={this.state.selectedOptions.shapes}
                             colors={this.state.selectedOptions.colors}
