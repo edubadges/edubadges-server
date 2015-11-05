@@ -151,11 +151,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function searchinput() {
 
         var searchContainer = document.querySelector('.search_ fieldset');
-        var search = searchContainer.parentNode;
-        var searchInput = search.querySelector('input');
-        var searchClose = search.querySelector('.search_-x-close');
-
+        
         if (searchContainer) {
+            var search = searchContainer.parentNode;
+            var searchInput = search.querySelector('input');
+            var searchClose = search.querySelector('.search_-x-close');
 
            searchContainer.addEventListener('mouseenter', function() {
                search.classList.add('is-active');

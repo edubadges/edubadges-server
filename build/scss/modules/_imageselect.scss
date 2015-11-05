@@ -1,10 +1,12 @@
 .imageselect_ {
   cursor: pointer;
   display: block;
+  height: 90px;
   overflow: hidden;
   position: relative;
+  width: 90px;
 
-  span,
+  .imageselect_-x-description,
   input {
     left: -9999em;
     position: absolute;
@@ -12,23 +14,37 @@
   }
 
   img {
+    display: block;
+    height: auto;
+    width: 100%;
+  }
+
+  .imageselect_-x-graphic {
+    align-items: stretch;
     border: 1px solid map-get($colors, border-light);
     border-radius: $border-radius;
-    display: block;
+    box-sizing: border-box;
+    display: flex;
+    height: 100%;
     overflow: hidden;
-    position: relative;
     transition: border $transition-duration $transition-easing;
+  }
+
+  .imageselect_-x-color {
+    display: block;
+    flex: 1;
+    text-indent: -9999em;
   }
 
   &:hover {
 
-    img {
+    .imageselect_-x-graphic {
       border-color: map-get($colors, border);
     }
 
   }
 
-  input:checked + img {
+  input:checked + .imageselect_-x-graphic {
     border-color: map-get($colors, solid-dark);
   }
 
