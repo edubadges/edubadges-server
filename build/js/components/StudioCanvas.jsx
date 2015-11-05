@@ -47,7 +47,6 @@ var StudioCanvas = React.createClass({
 
 
   updateBadgeStudio: function(props) {
-    debugger;
     if (props.shape != this.props.shape) {
         this.studio.setShape(props.shape.split('.')[0]);
     }
