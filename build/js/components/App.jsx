@@ -509,7 +509,13 @@ var App = React.createClass({
 
       this.setState({showingBadgeStudio: true});
     }.bind(this);
-    var hideBadgeStudio = function(e) {
+    var handleBadgeComplete = function(dataURL, blob) {
+
+      FormActions.patchForm(dialogFormId, {
+        'image': "custom badge",
+        'imageData': dataURL
+      });
+      
       this.setState({showingBadgeStudio: false}, function() {
         var dialog = document.getElementById("issuer-add-badge")
         if (dialog) {
@@ -537,7 +543,7 @@ var App = React.createClass({
 
       var mainComponent = (
         <MainComponent viewId={viewId}>
-          <BadgeStudio handleBadgeComplete={hideBadgeStudio}/>
+          <BadgeStudio handleBadgeComplete={handleBadgeComplete}/>
         </MainComponent>);
 
     } else {

@@ -93,9 +93,20 @@ var BadgeStudio = React.createClass({
         this._canvas = instance;
     },
 
-    handleBadgeComplete: function() {
+    handleBadgeComplete: function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+
+        var dataURL;
+        var blob;
+        if (this.refs.studio_canvas) {
+            dataURL = this.refs.studio_canvas.studio.toDataURL();
+            blob = window.dataURLtoBlob && window.dataURLtoBlob(dataURL);
+        } else {
+            console.log("Error: unable to find badge studio dataURL")
+        }
         if (this.props.handleBadgeComplete)
-            this.props.handleBadgeComplete();
+            this.props.handleBadgeComplete(dataURL, blob);
     },
 
     render: function() {
@@ -117,7 +128,7 @@ var BadgeStudio = React.createClass({
                 </div>
                 <div className="wrap_ wrap_-body">
                     <div>
-						<StudioCanvas 
+						<StudioCanvas ref={"studio_canvas"}
                 			width={280} 
                 			height={280} 
                             backgroundPattern={this.state.selectedOptions.backgrounds}
