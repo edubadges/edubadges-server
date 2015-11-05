@@ -17,6 +17,7 @@
     display: block;
     overflow: hidden;
     position: relative;
+    transition: border $transition-duration $transition-easing;
   }
 
   &:hover {

@@ -150,7 +150,7 @@ $l-studio-header: $layout-spacing*8;
   }
 
   > :nth-child(2) {
-    flex: 1 0 0;
+    flex: 1 0 auto;
     position: relative;
 
     .l-studio-x-header {
