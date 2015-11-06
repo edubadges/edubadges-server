@@ -29,6 +29,23 @@ var StudioOptionList = React.createClass({
         var assets;
         if (this.props.assets) {
             assets = this.props.assets.map(function(asset, i) {
+                if (this.props.palettes[asset]){
+                    return (
+                        <li key={i} onClick={this.props.onClick} data-label={asset}>
+                            <label className="imageselect_" htmlFor="imageselect">
+                                <input type="radio" name="imageselect" id="imageselect" value="imageselect" />
+                                <span className="imageselect_-x-graphic">
+                                    <span className="imageselect_-x-color" style={{'backgroundColor': this.props.palettes[asset][0]}}>
+                                        {asset.split('-')[0]}</span>
+                                    <span className="imageselect_-x-color" style={{'backgroundColor': this.props.palettes[asset][1]}}>
+                                        {asset.split('-')[1]}</span>
+                                </span>
+                                <span className="imageselect_-x-description">{asset}</span>
+                            </label>
+                        </li>
+                    );
+                }
+
                 return (
                     <li key={i} onClick={this.props.onClick} data-label={asset}>
                         <label className="imageselect_" htmlFor={asset}>
@@ -70,7 +87,12 @@ var BadgeStudio = React.createClass({
                     'puzzle.png', 'recycle.png', 'ship.png', 'sun.png', 'swimming.png', 'telephone.png',
                     'traffic-cone.png', 'trophy.png', 'umbrella.png', 'white-star.png', 'wireless.png', 'wrench.png'
                 ],
-                colors: []
+                colors: ['blue-green', 'aqua-purple', 'gray-red']
+            },
+            palettes: {
+                'blue-green': ['#617697', '#88aa5a'],
+                'aqua-purple': ['#27b2b7', '#524557'],
+                'gray-red': ['#d4d4d4', '#cd0000']
             },
 			handleBadgeComplete: undefined
         };
@@ -82,7 +104,8 @@ var BadgeStudio = React.createClass({
             selectedOptions: {
                 shapes: undefined,
                 backgrounds: undefined,
-                graphics: undefined
+                graphics: undefined,
+                colors: undefined
             },
         };
     },
@@ -92,9 +115,19 @@ var BadgeStudio = React.createClass({
     },
 
     handleOptionClick: function(ev) {
+        ev.stopPropagation(); ev.preventDefault();
         var selectedOptions = this.state.selectedOptions || {};
         selectedOptions[this.state.activeTab] = ev.currentTarget.dataset.label;
         this.setState({selectedOptions: selectedOptions});
+    },
+
+    getColors: function(){
+        // Take the filename of the palette image and return the array of the background and foreground
+        // colors that it represents.
+        if (this.state.selectedOptions.colors) {
+            return this.props.palettes[this.state.selectedOptions.colors];
+        }
+        return [undefined, undefined];
     },
 
     saveCanvas: function(instance) {
@@ -138,7 +171,11 @@ var BadgeStudio = React.createClass({
                     </ul>
                 </nav>
                 <div className="wrap_ wrap_-borderright">
-                    <StudioOptionList onClick={this.handleOptionClick} tab={this.state.activeTab} assets={this.props.assets[this.state.activeTab]}/>
+                    <StudioOptionList
+                        onClick={this.handleOptionClick}
+                        tab={this.state.activeTab}
+                        assets={this.props.assets[this.state.activeTab]}
+                        palettes={this.props.palettes}/>
                 </div>
                 <div className="wrap_ wrap_-body">
                     <div>
@@ -148,7 +185,9 @@ var BadgeStudio = React.createClass({
                             backgroundPattern={this.state.selectedOptions.backgrounds}
                 			graphic={this.state.selectedOptions.graphics}
                             shape={this.state.selectedOptions.shapes}
-                            colors={this.state.selectedOptions.colors}
+                            backgroundColor={this.getColors()[0]}
+                            graphicColor={this.getColors()[1]}
+
                 		/>                        
 						<div className="detail_">
                         <ul>

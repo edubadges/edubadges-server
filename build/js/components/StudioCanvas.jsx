@@ -19,7 +19,7 @@ var StudioCanvas = React.createClass({
         backgroundImage: undefined,
         backgroundColor: undefined,
         graphic: undefined,
-        graphicColor: '#ffffff'
+        graphicColor: undefined
     };
   },
 
@@ -52,8 +52,7 @@ var StudioCanvas = React.createClass({
   updateBadgeStudio: function(props) {
     if (props.shape != this.props.shape) {
         this.studio.setShape(props.shape.split('.')[0]);
-    }
-    else if (!this.props.shape && !props.shape){
+    } else if (!this.props.shape && !props.shape){
         this.studio.setShape('circle');
     }
 
@@ -61,11 +60,18 @@ var StudioCanvas = React.createClass({
         this.studio.setBackgroundImage(initialData.STATIC_URL + "badgestudio/backgrounds/" + props.backgroundImage);
     } else if (this.props.backgroundImage && !props.backgroundImage) {
         this.studio.removeBackgroundImage();
+        this.studio.setBackgroundColor(props.backgroundColor || '#ffffff')
+    } else if (props.backgroundColor != this.props.backgroundColor){
         this.studio.setBackgroundColor(props.backgroundColor)
     }
 
+
     if (props.graphic != this.props.graphic) {
-        this.studio.setGlyphFromURL(initialData.STATIC_URL + "badgestudio/graphics/" + props.graphic);
+        this.studio.setGlyphFromURL(initialData.STATIC_URL + "badgestudio/graphics/" + props.graphic, function(){
+            if (props.graphicColor)
+                this.studio.setGlyphColor(props.graphicColor || '#000000');
+        }.bind(this));
+
     }
     else if (this.props.graphic && !props.graphic){
         this.studio.removeGlyph();
