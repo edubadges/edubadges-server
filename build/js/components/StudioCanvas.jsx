@@ -112,7 +112,7 @@ var StudioCanvas = React.createClass({
 
   render: function() {
     return (
-        <canvas ref="canvas" className="canvas_" width={this.props.width} height={this.props.height}>
+        <canvas ref="canvas" width={this.props.width} height={this.props.height}>
         </canvas>
     );
   },

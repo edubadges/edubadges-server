@@ -35,9 +35,9 @@ var StudioOptionList = React.createClass({
                 if (this.props.palettes[asset]){
                     return (
                         <li key={i} onClick={this.props.onClick} data-label={asset}>
-                            <label className="imageselect_" htmlFor="imageselect">
+                            <label className={"imageselect_ "+(checked ? "imageselect_-is-checked" : "")} htmlFor="imageselect">
                                 <input type="radio" name="imageselect" id="imageselect" value="imageselect" />
-                                <span className={"imageselect_-x-graphic "+(checked ? "checked" :"")}>
+                                <span className="imageselect_-x-graphic ">
                                     <span className="imageselect_-x-color" style={{'backgroundColor': this.props.palettes[asset][0]}}>
                                         {asset.split('-')[0]}</span>
                                     <span className="imageselect_-x-color" style={{'backgroundColor': this.props.palettes[asset][1]}}>
@@ -57,9 +57,9 @@ var StudioOptionList = React.createClass({
                 }
                 return (
                     <li key={i} onClick={this.props.onClick} data-label={asset}>
-                        <label className="imageselect_" htmlFor={asset}>
+                        <label className={"imageselect_ "+(checked ? "imageselect_-is-checked" : "")} htmlFor={asset}>
                             <input type="radio" name="imageselect" value={asset} />
-                            <span className={"imageselect_-x-graphic "+(checked ? " checked" : "")}>
+                            <span className="imageselect_-x-graphic ">
                                 {img}
                             </span>
                         </label>
@@ -222,7 +222,7 @@ var BadgeStudio = React.createClass({
                 </div>
                 <div className="wrap_ wrap_-body">
                     <div>
-                        <div className="canvas_-background">
+                        <div className="canvas_">
     						<StudioCanvas ref={"studio_canvas"}
                                 width={this.props.canvas.width}
                                 height={this.props.canvas.height}
