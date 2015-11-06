@@ -1,11 +1,12 @@
 .canvas_-background {
   background: map-get($colors, solid) url('images/canvas-background.png');
   padding: 0 !important;
+  border: 1px solid map-get($colors, border-light);
+  border-radius: $border-radius;
 }
 
 .canvas_ {
-  border: 1px solid map-get($colors, border-light);
-  border-radius: $border-radius;
   height: auto;
   width: 100%;
+  padding-right: 6px;
 }
