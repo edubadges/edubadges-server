@@ -51,7 +51,7 @@
   }
 
   input:checked + .imageselect_-x-graphic,
-  .imageselect_-is-checked .imageselect_-x-graphic {
+  &.imageselect_-is-checked .imageselect_-x-graphic {
     border-color: map-get($colors, solid-dark);
     color: map-get($colors, bodycopy);
   }
