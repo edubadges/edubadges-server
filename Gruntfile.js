@@ -126,7 +126,7 @@ module.exports = function(grunt) {
     grunt.registerTask('bs-init', function () {
         var done = this.async();
         browserSync({
-            proxy: 'localhost:3000', // This needs to match your current server eg. localhost:5000 or mysite.design.concentricsky.com
+            proxy: 'localhost:'+(process.env.PORT || 3000), // This needs to match your current server eg. localhost:5000 or mysite.design.concentricsky.com
             port: 8080
         }, function (err, bs) {
             done();
