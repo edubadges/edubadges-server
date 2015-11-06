@@ -508,7 +508,18 @@ var App = React.createClass({
       e.stopPropagation();
 
       var formState = FormStore.getFormState(dialogFormId);
-      this.setState({showingBadgeStudio: true, badgeStudioDetail: formState});
+      this.setState({showingBadgeStudio: true, badgeStudioDetail: formState}, function() {
+        var dialog = document.getElementById("issuer-add-badge")
+        if (dialog) {
+          dialog.close();
+          dialog.classList.remove('is-visible');
+        }
+        var overlay = document.querySelector("body > div._dialog_overlay")
+        if (overlay) {
+          document.body.removeChild(overlay);
+        }
+
+      });
     }.bind(this);
     var handleBadgeComplete = function(dataURL, blob) {
       if (dataURL && blob) {
