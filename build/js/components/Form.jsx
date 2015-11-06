@@ -238,7 +238,7 @@ BasicAPIForm = React.createClass({
                     <p>Or</p>
                 </div>
                 <div className="form_-x-field">
-                    <button onClick={this.props.handleBadgeStudioClick} className="button_ button_-tertiary">Use Badge Studio</button>
+                    <button type="button" onClick={this.props.handleBadgeStudioClick} className="button_ button_-tertiary">Use Badge Studio</button>
                 </div>
               </div>);
             }

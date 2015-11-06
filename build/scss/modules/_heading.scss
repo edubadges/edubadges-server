@@ -16,8 +16,9 @@
       font-size: $font-size-large-5x;
       font-weight: 300;
 
-      span {
+      strong {
         color: map-get($colors, loading);
+        font-weight: 300;
       }
 
     }
@@ -75,6 +76,11 @@
     h1 {
       font-size: $font-size-large-2x;
       font-weight: normal;
+
+      strong {
+        font-weight: normal;
+      }
+
     }
 
     p {

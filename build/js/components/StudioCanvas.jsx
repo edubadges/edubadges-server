@@ -67,11 +67,13 @@ var StudioCanvas = React.createClass({
 
 
     if (props.graphic != this.props.graphic) {
-        this.studio.setGlyphFromURL(initialData.STATIC_URL + "badgestudio/graphics/" + props.graphic, function(){
+        this.studio.setGlyphFromURL(initialData.STATIC_URL + "badgestudio/graphics/" + props.graphic, function() {
             if (props.graphicColor)
                 this.studio.setGlyphColor(props.graphicColor || '#000000');
+            this.studio.glyph.set({scaleX: 0.7, scaleY: 0.7});
+            this.studio.glyph.center();
+            this.studio.canvas.renderAll();
         }.bind(this));
-
     }
     else if (this.props.graphic && !props.graphic){
         this.studio.removeGlyph();

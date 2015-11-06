@@ -75,6 +75,10 @@ var BadgeStudio = React.createClass({
 
     getDefaultProps: function() {
         return {
+            canvas: {
+                width: 280,
+                height: 280,
+            },
             assets: {
                 shapes: ['circle.svg', 'circle-1.svg', 'rope-1.svg', 'shield-1.svg', 'starburst-1.svg'],
                 backgrounds: ['paisley.png', 'swirl.png', 'feathers.png', 'china.png', 'confectionary.png'],
@@ -142,7 +146,7 @@ var BadgeStudio = React.createClass({
         var blob;
         if (this.refs.studio_canvas) {
             this.refs.studio_canvas.studio.canvas.deactivateAll().renderAll();
-            dataURL = this.refs.studio_canvas.studio.toDataURL();
+            dataURL = this.refs.studio_canvas.studio.canvas.toDataURL({format: 'png', multiplier: 400 / this.props.canvas.width});
             blob = window.dataURLtoBlob && window.dataURLtoBlob(dataURL);
             if (blob) {
                 // turn blob into a File
@@ -180,8 +184,8 @@ var BadgeStudio = React.createClass({
                 <div className="wrap_ wrap_-body">
                     <div>
 						<StudioCanvas ref={"studio_canvas"}
-                			width={280} 
-                			height={280} 
+                            width={this.props.canvas.width}
+                            height={this.props.canvas.height}
                             backgroundPattern={this.state.selectedOptions.backgrounds}
                 			graphic={this.state.selectedOptions.graphics}
                             shape={this.state.selectedOptions.shapes}
