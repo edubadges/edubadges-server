@@ -46,11 +46,17 @@ var StudioOptionList = React.createClass({
                     );
                 }
 
+                var img;
+                if (asset) {
+                    img = (<img src={"/static/badgestudio/"+ this.props.tab +"/"+ asset} width="100" height="100" />);
+                } else {
+                    img = (<img src={"/static/badgestudio/none.png"} width="100" height="100" />);
+                }
                 return (
                     <li key={i} onClick={this.props.onClick} data-label={asset}>
                         <label className="imageselect_" htmlFor={asset}>
                             <input type="radio" name="imageselect" value={asset} />
-                            <img src={"/static/badgestudio/"+ this.props.tab +"/"+ asset} width="100" height="100" />
+                            {img}
                         </label>
                     </li>
                 )
@@ -82,7 +88,7 @@ var BadgeStudio = React.createClass({
             },
             assets: {
                 shapes: ['circle.svg', 'circle-1.svg', 'rope-1.svg', 'shield-1.svg', 'starburst-1.svg'],
-                backgrounds: ['paisley.png', 'swirl.png', 'feathers.png', 'china.png', 'confectionary.png'],
+                backgrounds: ['paisley.png', 'swirl.png', 'feathers.png', 'china.png', 'confectionary.png', undefined],
                 graphics: [
                     'maple-leaf.png', 'airplane.png', 'approve.png', 'award.png', 'baggage.png', 'battery.png',
                     'beaker.png', 'beer.png', 'bell.png', 'car.png', 'cd.png', 'cinema.png', 'climbing.png',
@@ -90,7 +96,8 @@ var BadgeStudio = React.createClass({
                     'fire-extinguisher.png', 'hiker.png', 'horseback-trail.png', 'hospital-sign.png', 'iphone.png',
                     'keyhole.png', 'light-bulb.png', 'lock.png', 'mental-health.png', 'mushroom.png', 'power.png',
                     'puzzle.png', 'recycle.png', 'ship.png', 'sun.png', 'swimming.png', 'telephone.png',
-                    'traffic-cone.png', 'trophy.png', 'umbrella.png', 'white-star.png', 'wireless.png', 'wrench.png'
+                    'traffic-cone.png', 'trophy.png', 'umbrella.png', 'white-star.png', 'wireless.png', 'wrench.png', 
+                    undefined
                 ],
                 colors: ['blue-green', 'aqua-purple', 'gray-red']
             },

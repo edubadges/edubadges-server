@@ -50,44 +50,47 @@ var StudioCanvas = React.createClass({
 
 
   updateBadgeStudio: function(props) {
-    if (props.shape != this.props.shape) {
-        this.studio.setShape(props.shape.split('.')[0]);
-    } else if (!this.props.shape && !props.shape){
-        this.studio.setShape('circle');
+
+    // shape is required, default to circle
+    if (props.shape) {
+      this.studio.setShape(props.shape.split('.')[0]);
+    } else {
+      this.studio.setShape('circle');
     }
 
-    if (props.backgroundImage != this.props.backgroundImage) {
-        this.studio.setBackgroundImage(initialData.STATIC_URL + "badgestudio/backgrounds/" + props.backgroundImage);
-    } else if (this.props.backgroundImage && !props.backgroundImage) {
-        this.studio.removeBackgroundImage();
-        this.studio.setBackgroundColor(props.backgroundColor || '#ffffff')
-    } else if (props.backgroundColor != this.props.backgroundColor){
-        this.studio.setBackgroundColor(props.backgroundColor)
+    // background color is required, default to white
+    this.studio.setBackgroundColor(props.backgroundColor || '#ffffff')
+
+    // graphic color is required, default to black
+    this.studio.setGlyphColor(props.graphicColor || '#000000');
+
+    // remove background image if none is set
+    if (props.backgroundImage) {
+      this.studio.setBackgroundImage(initialData.STATIC_URL + "badgestudio/backgrounds/" + props.backgroundImage);
+    } else {
+      this.studio.removeBackgroundImage();
     }
 
-
-    if (props.graphic != this.props.graphic) {
-        this.studio.setGlyphFromURL(initialData.STATIC_URL + "badgestudio/graphics/" + props.graphic, function() {
-            if (props.graphicColor)
-                this.studio.setGlyphColor(props.graphicColor || '#000000');
-            this.studio.glyph.set({scaleX: 0.7, scaleY: 0.7});
-            this.studio.glyph.center();
-            this.studio.canvas.renderAll();
-        }.bind(this));
-    }
-    else if (this.props.graphic && !props.graphic){
-        this.studio.removeGlyph();
-    }
-
-    if (props.backgroundPattern != this.props.backgroundPattern) {
-        this.studio.setBackgroundPattern(initialData.STATIC_URL + "badgestudio/backgrounds/" + props.backgroundPattern);
-    } else if (this.props.backgroundPattern && !props.backgroundPattern) {
-        this.studio.removeBackgroundPattern();
+    // remove graphic if none is set
+    if (props.graphic) {
+      this.studio.setGlyphFromURL(initialData.STATIC_URL + "badgestudio/graphics/" + props.graphic, function() {
+          if (props.graphicColor)
+              this.studio.setGlyphColor(props.graphicColor || '#000000');
+          this.studio.glyph.set({scaleX: 0.7, scaleY: 0.7});
+          this.studio.glyph.center();
+          this.studio.canvas.renderAll();
+      }.bind(this));
+    } else {
+      this.studio.removeGlyph();
     }
 
-    if (props.graphicColor != this.props.graphicColor) {
-        this.studio.setGlyphColor(props.graphicColor);
+    // remove background pattern if none is set
+    if (props.backgroundPattern) {
+      this.studio.setBackgroundPattern(initialData.STATIC_URL + "badgestudio/backgrounds/" + props.backgroundPattern);
+    } else {
+      this.studio.removeBackgroundPattern();
     }
+
   },
 
 
