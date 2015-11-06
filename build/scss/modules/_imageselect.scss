@@ -24,10 +24,16 @@
     border: 1px solid map-get($colors, border-light);
     border-radius: $border-radius;
     box-sizing: border-box;
+    color: map-get($colors, bodycopy-faint);
     display: flex;
+    font-size: $font-size-small-2x;
     height: 100%;
+    justify-content: center;
+    letter-spacing: 2px;
+    line-height: 90px;
     overflow: hidden;
-    transition: border $transition-duration $transition-easing;
+    text-transform: uppercase;
+    transition: border $transition-duration $transition-easing, color $transition-duration $transition-easing;
   }
 
   .imageselect_-x-color {
@@ -45,11 +51,20 @@
   }
 
   input:checked + .imageselect_-x-graphic {
+    color: map-get($colors, bodycopy);
     border-color: map-get($colors, solid-dark);
   }
   .checked.imageselect_-x-graphic {
     border-color: map-get($colors, solid-dark);
   }
 
+
+}
+
+.imageselect_-inset {
+
+  .imageselect_-x-graphic {
+    padding: $layout-spacing;
+  }
 
 }

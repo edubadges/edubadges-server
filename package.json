@@ -12,7 +12,8 @@
   "homepage": "https://badgr.io",
   "dependencies": {
     "react": "0.13.x",
-    "lodash": "~3.10.0"
+    "lodash": "~3.10.0",
+    "component-styleguide": "~1.3.1"
   },
   "devDependencies": {
     "browser-sync": "latest",
