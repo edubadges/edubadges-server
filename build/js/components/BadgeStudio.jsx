@@ -114,10 +114,10 @@ var BadgeStudio = React.createClass({
         return {
             activeTab: 'shapes',
             selectedOptions: {
-                shapes: undefined,
+                shapes: 'circle.svg',
                 backgrounds: undefined,
                 graphics: undefined,
-                colors: undefined
+                colors: 'blue-green',
             },
         };
     },
@@ -214,7 +214,7 @@ var BadgeStudio = React.createClass({
                         palettes={this.props.palettes}/>
                 </div>
                 <div className="wrap_ wrap_-body">
-                    <div>
+                    <div className="canvas_">
 						<StudioCanvas ref={"studio_canvas"}
                             width={this.props.canvas.width}
                             height={this.props.canvas.height}

@@ -44,7 +44,7 @@ var StudioCanvas = React.createClass({
     }.bind(this);
 
     this.studio = new BadgeStudio(this.refs.canvas.getDOMNode());
-    this.updateBadgeStudio(this.props);
+    this.updateBadgeStudio(this.props, true);
   },
 
   shouldComponentUpdate: function(nextProps, nextState) {
@@ -57,48 +57,54 @@ var StudioCanvas = React.createClass({
   },
 
 
-  updateBadgeStudio: function(props) {
+  updateBadgeStudio: function(props, force) {
 
     // shape is required, default to circle
-    if (props.shape) {
-      this.studio.setShape(props.shape.split('.')[0], function() {
-        
-      });
-    } else {
-      this.studio.setShape('circle');
+    var shape = props.shape ? props.shape.split('.')[0] : 'circle'
+    if (shape != this.props.shape || force) {
+      this.studio.setShape(shape);
     }
 
     // background color is required, default to white
-    this.studio.setBackgroundColor(props.backgroundColor || '#ffffff')
+    if (props.backgroundColor != this.props.backgroundColor || force) {
+      this.studio.setBackgroundColor(props.backgroundColor || '#ffffff')
+    }
 
     // graphic color is required, default to black
-    this.studio.setGlyphColor(props.graphicColor || '#000000');
+    if (props.graphicColor != this.props.graphicColor || force) {
+      this.studio.setGlyphColor(props.graphicColor || '#000000');
+    }
 
     // remove background image if none is set
-    if (props.backgroundImage) {
-      this.studio.setBackgroundImage(initialData.STATIC_URL + "badgestudio/backgrounds/" + props.backgroundImage);
-    } else {
-      this.studio.removeBackgroundImage();
+    if (props.backgroundImage != this.props.backgroundImage || force) {
+      if (props.backgroundImage) {
+        this.studio.setBackgroundImage(initialData.STATIC_URL + "badgestudio/backgrounds/" + props.backgroundImage);
+      } else {
+        this.studio.removeBackgroundImage();
+      }
     }
 
     // remove graphic if none is set
-    if (props.graphic) {
-      this.studio.setGlyphFromURL(initialData.STATIC_URL + "badgestudio/graphics/" + props.graphic, function() {
-          if (props.graphicColor)
-              this.studio.setGlyphColor(props.graphicColor || '#000000');
-          this.studio.glyph.set({scaleX: 0.7, scaleY: 0.7});
-          this.studio.glyph.center();
-          this.studio.canvas.renderAll();
-      }.bind(this));
-    } else {
-      this.studio.removeGlyph();
+    if (props.graphic != this.props.graphic || force) {
+      if (props.graphic) {
+        this.studio.setGlyphFromURL(initialData.STATIC_URL + "badgestudio/graphics/" + props.graphic, function() {
+            this.studio.setGlyphColor(props.graphicColor || '#000000');
+            this.studio.glyph.set({scaleX: 0.7, scaleY: 0.7});
+            this.studio.glyph.center();
+            this.studio.canvas.renderAll();
+        }.bind(this));
+      } else {
+        this.studio.removeGlyph();
+      }
     }
 
     // remove background pattern if none is set
-    if (props.backgroundPattern) {
-      this.studio.setBackgroundPattern(initialData.STATIC_URL + "badgestudio/backgrounds/" + props.backgroundPattern);
-    } else {
-      this.studio.removeBackgroundPattern();
+    if (props.backgroundPattern != this.props.backgroundPattern || force) {
+      if (props.backgroundPattern) {
+        this.studio.setBackgroundPattern(initialData.STATIC_URL + "badgestudio/backgrounds/" + props.backgroundPattern);
+      } else {
+        this.studio.removeBackgroundPattern();
+      }
     }
 
   },
