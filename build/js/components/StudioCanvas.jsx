@@ -29,8 +29,16 @@ var StudioCanvas = React.createClass({
       var path = initialData.STATIC_URL + 'badgestudio/' + prefix + '/' + name + '.svg'
       fabric.loadSVGFromURL(path, function (objects, options) {
         var svg = new fabric.Group(objects)
-        svg.scaleX = this.props.width / svg.width;
-        svg.scaleY = this.props.height / svg.height;
+
+        var scale;
+        if (this.props.width > this.props.height) {
+          scale = this.props.width / svg.width;
+        }
+        else {
+          scale = this.props.height / svg.height;
+        }
+        svg.scaleX = scale;
+        svg.scaleY = scale;
         return callback(svg)
       }.bind(this))
     }.bind(this);
@@ -53,7 +61,9 @@ var StudioCanvas = React.createClass({
 
     // shape is required, default to circle
     if (props.shape) {
-      this.studio.setShape(props.shape.split('.')[0]);
+      this.studio.setShape(props.shape.split('.')[0], function() {
+        
+      });
     } else {
       this.studio.setShape('circle');
     }
