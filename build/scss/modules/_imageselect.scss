@@ -47,5 +47,9 @@
   input:checked + .imageselect_-x-graphic {
     border-color: map-get($colors, solid-dark);
   }
+  .checked.imageselect_-x-graphic {
+    border-color: map-get($colors, solid-dark);
+  }
+
 
 }

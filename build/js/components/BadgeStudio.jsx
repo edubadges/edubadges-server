@@ -23,18 +23,20 @@ var StudioOptionList = React.createClass({
     propTypes: {
         tab: React.PropTypes.string.isRequired,
         assets: React.PropTypes.array,
+        selected: React.PropTypes.string,
     },
 
     render: function() {
         var assets;
         if (this.props.assets) {
             assets = this.props.assets.map(function(asset, i) {
+                var checked = (this.props.selected == asset);
                 if (this.props.palettes[asset]){
                     return (
                         <li key={i} onClick={this.props.onClick} data-label={asset}>
                             <label className="imageselect_" htmlFor="imageselect">
                                 <input type="radio" name="imageselect" id="imageselect" value="imageselect" />
-                                <span className="imageselect_-x-graphic">
+                                <span className={"imageselect_-x-graphic "+(checked ? "checked" :"")}>
                                     <span className="imageselect_-x-color" style={{'backgroundColor': this.props.palettes[asset][0]}}>
                                         {asset.split('-')[0]}</span>
                                     <span className="imageselect_-x-color" style={{'backgroundColor': this.props.palettes[asset][1]}}>
@@ -56,7 +58,9 @@ var StudioOptionList = React.createClass({
                     <li key={i} onClick={this.props.onClick} data-label={asset}>
                         <label className="imageselect_" htmlFor={asset}>
                             <input type="radio" name="imageselect" value={asset} />
-                            {img}
+                            <span className={"imageselect_-x-graphic "+(checked ? " checked" : "")}>
+                                {img}
+                            </span>
                         </label>
                     </li>
                 )
@@ -211,7 +215,9 @@ var BadgeStudio = React.createClass({
                         onClick={this.handleOptionClick}
                         tab={this.state.activeTab}
                         assets={this.props.assets[this.state.activeTab]}
-                        palettes={this.props.palettes}/>
+                        palettes={this.props.palettes}
+                        selected={this.state.selectedOptions[this.state.activeTab]}
+                        />
                 </div>
                 <div className="wrap_ wrap_-body">
                     <div className="canvas_">
