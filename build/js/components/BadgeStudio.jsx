@@ -9,10 +9,11 @@ var StudioCanvas = require('../components/StudioCanvas.jsx').StudioCanvas;
 
 var StudioNavItem = React.createClass({
     render: function() {
+        var dataLabel = this.props['data-label'];
         return (
             <li>
-                <a {...this.props} className="gallerynav_-x-item gallerynav_-is-active" href="#tab-shapes">
-                    <span className="icon_ icon_-shapes icon_-large">{this.props.children}</span>
+                <a {...this.props} className="gallerynav_-x-item gallerynav_-is-active" href={"#tab-"+dataLabel}>
+                    <span className={"icon_ icon_-large icon_-"+dataLabel}>{this.props.children}</span>
                 </a>
             </li>
         )
@@ -220,17 +221,19 @@ var BadgeStudio = React.createClass({
                         />
                 </div>
                 <div className="wrap_ wrap_-body">
-                    <div className="canvas_">
-						<StudioCanvas ref={"studio_canvas"}
-                            width={this.props.canvas.width}
-                            height={this.props.canvas.height}
-                            backgroundPattern={this.state.selectedOptions.backgrounds}
-                			graphic={this.state.selectedOptions.graphics}
-                            shape={this.state.selectedOptions.shapes}
-                            backgroundColor={this.getColors()[0]}
-                            graphicColor={this.getColors()[1]}
+                    <div>
+                        <div className="canvas_-background">
+    						<StudioCanvas ref={"studio_canvas"}
+                                width={this.props.canvas.width}
+                                height={this.props.canvas.height}
+                                backgroundPattern={this.state.selectedOptions.backgrounds}
+                    			graphic={this.state.selectedOptions.graphics}
+                                shape={this.state.selectedOptions.shapes}
+                                backgroundColor={this.getColors()[0]}
+                                graphicColor={this.getColors()[1]}
 
-                		/>                        
+                    		/>                        
+                        </div>
                         {detail}
                     </div>
 
