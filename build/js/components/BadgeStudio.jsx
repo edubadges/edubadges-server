@@ -75,6 +75,7 @@ var BadgeStudio = React.createClass({
 
     getDefaultProps: function() {
         return {
+            badgeDetail: undefined,
             canvas: {
                 width: 280,
                 height: 280,
@@ -160,9 +161,33 @@ var BadgeStudio = React.createClass({
             this.props.handleBadgeComplete(dataURL, blob);
     },
 
-    render: function() {
-        console.log("BadgeStudio state: ", this.state);
+    handleCancel: function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.props.handleBadgeComplete)
+            this.props.handleBadgeComplete();
+    },
 
+    render: function() {
+        var badgeName = _.get(this.props.badgeDetail, 'name')
+        var badgeDescription = _.get(this.props.badgeDetail, 'description')
+        var badgeCriteria = _.get(this.props.badgeDetail, 'criteria')
+
+        var name = badgeName ? (<li><h2 className="detail_-x-meta">Name</h2>
+                                <p>{_.get(this.props.badgeDetail, 'name')}</p></li>) : "";
+        var description = badgeDescription ? (<li><h2 className="detail_-x-meta">Description</h2>
+                                <p>{_.get(this.props.badgeDetail, 'description')}</p></li>) : "";
+        var criteria = badgeCriteria ? (<li><h2 className="detail_-x-meta">Criteria</h2>
+                                <p>{_.get(this.props.badgeDetail, 'criteria')}</p></li>) : "";
+        var detail = (
+            <div className="detail_">
+            <ul>
+                {name}
+                {description}
+                {criteria}
+            </ul>
+            </div>
+        );
         return (
             <form className="l-studio wrap_ wrap_-borderbottom">
                 <nav className="wrap_ wrap_-shadow wrap_-dark">
@@ -193,17 +218,12 @@ var BadgeStudio = React.createClass({
                             graphicColor={this.getColors()[1]}
 
                 		/>                        
-						<div className="detail_">
-                        <ul>
-                            <h2 className="detail_-x-meta">Some Stat</h2>
-                            <p>Some detail.</p>
-                        </ul>
-                        </div>
+                        {detail}
                     </div>
 
                     <div className="wrap_  wrap_-dark wrap_-borderbottom  l-studio-x-header l-horizontalright">
-                        <button className="button_ button_-secondary">Button</button>
-                        <button onClick={this.handleBadgeComplete} className="button_ ">Button</button>
+                        <button onClick={this.handleCancel} className="button_ button_-secondary">Cancel</button>
+                        <button onClick={this.handleBadgeComplete} className="button_ ">Save</button>
                     </div>
                 </div>
             </form>

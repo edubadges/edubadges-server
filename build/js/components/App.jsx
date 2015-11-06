@@ -507,14 +507,18 @@ var App = React.createClass({
     var showBadgeStudio = function(e) {
       e.stopPropagation();
 
-      this.setState({showingBadgeStudio: true});
+      var formState = FormStore.getFormState(dialogFormId);
+      this.setState({showingBadgeStudio: true, badgeStudioDetail: formState});
     }.bind(this);
     var handleBadgeComplete = function(dataURL, blob) {
+      if (dataURL && blob) {
 
-      FormActions.patchForm(dialogFormId, {
-        'image': blob,
-        'imageData': dataURL
-      });
+        FormActions.patchForm(dialogFormId, {
+          'image': blob,
+          'imageData': dataURL
+        });
+
+      }
       
       this.setState({showingBadgeStudio: false}, function() {
         var dialog = document.getElementById("issuer-add-badge")
@@ -543,7 +547,7 @@ var App = React.createClass({
 
       var mainComponent = (
         <MainComponent viewId={viewId}>
-          <BadgeStudio handleBadgeComplete={handleBadgeComplete}/>
+          <BadgeStudio handleBadgeComplete={handleBadgeComplete} badgeDetail={this.state.badgeStudioDetail}/>
         </MainComponent>);
 
     } else {
