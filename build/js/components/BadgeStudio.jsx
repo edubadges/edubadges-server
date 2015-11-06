@@ -55,9 +55,10 @@ var StudioOptionList = React.createClass({
                 } else {
                     img = "None";
                 }
+                var inset = (this.props.tab == 'graphics' && asset) ? " imageselect_-inset" : "";
                 return (
                     <li key={i} onClick={this.props.onClick} data-label={asset}>
-                        <label className={"imageselect_ "+(checked ? "imageselect_-is-checked" : "")} htmlFor={asset}>
+                        <label className={"imageselect_ "+(checked ? "imageselect_-is-checked" : "")+inset} htmlFor={asset}>
                             <input type="radio" name="imageselect" value={asset} />
                             <span className="imageselect_-x-graphic ">
                                 {img}
