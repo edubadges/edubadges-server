@@ -20,6 +20,8 @@ var Search = React.createClass({
     close: function() {
         this.setState({'active': false, 'populated': false}, function() {
             this.refs.search.getDOMNode().value = '';
+            if (this.props.handleClick)
+                this.props.handleClick('');
         })
     },
     setPopulated: function() {
