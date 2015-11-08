@@ -94,8 +94,8 @@ var BadgeStudio = React.createClass({
             },
             assets: {
                 shapes: ['circle.svg', 'hexagon.svg', 'shield.svg', 'diamond.svg', 'shield-1.svg', 'starburst-1.svg'],
-                backgrounds: ['paisley.png', 'swirl.png', 'feathers.png', 'china.png', 'confectionary.png', undefined],
-                graphics: [
+                backgrounds: [undefined, 'paisley.png', 'swirl.png', 'feathers.png', 'china.png', 'confectionary.png'],
+                graphics: [undefined,
                     'maple-leaf.png', 'airplane.png', 'approve.png', 'award.png', 'baggage.png', 'battery.png',
                     'beaker.png', 'beer.png', 'bell.png', 'car.png', 'cd.png', 'cinema.png', 'climbing.png',
                     'cocktail-glass.png', 'coffeeshop.png', 'cycling.png', 'factory.png', 'film.png', 'fir-tree.png',
@@ -103,7 +103,6 @@ var BadgeStudio = React.createClass({
                     'keyhole.png', 'light-bulb.png', 'lock.png', 'mental-health.png', 'mushroom.png', 'power.png',
                     'puzzle.png', 'recycle.png', 'ship.png', 'sun.png', 'swimming.png', 'telephone.png',
                     'traffic-cone.png', 'trophy.png', 'umbrella.png', 'white-star.png', 'wireless.png', 'wrench.png', 
-                    undefined
                 ],
                 colors: ['blue-green', 'aqua-purple', 'gray-red']
             },
