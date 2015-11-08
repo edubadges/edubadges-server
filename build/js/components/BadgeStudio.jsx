@@ -94,7 +94,6 @@ var BadgeStudio = React.createClass({
             },
             assets: {
                 shapes: ['circle.svg', 'hexagon.svg', 'shield.svg', 'diamond.svg', 'shield-1.svg', 'starburst-1.svg'],
-                backgrounds: [undefined, 'paisley.png', 'swirl.png', 'feathers.png', 'china.png', 'confectionary.png'],
                 graphics: [undefined,
                     'maple-leaf.png', 'airplane.png', 'approve.png', 'award.png', 'baggage.png', 'battery.png',
                     'beaker.png', 'beer.png', 'bell.png', 'car.png', 'cd.png', 'cinema.png', 'climbing.png',
@@ -120,7 +119,6 @@ var BadgeStudio = React.createClass({
             activeTab: 'shapes',
             selectedOptions: {
                 shapes: 'circle.svg',
-                backgrounds: undefined,
                 graphics: undefined,
                 colors: 'blue-green',
             },
@@ -206,7 +204,6 @@ var BadgeStudio = React.createClass({
                     <h1 className="wrap_ wrap_-dark wrap_-borderbottom textindent_ l-studio-x-header">Badge Studio</h1>
                     <ul className="gallerynav_">
                         <StudioNavItem onClick={this.handleTabClick} data-label="shapes">Shapes</StudioNavItem>
-                        <StudioNavItem onClick={this.handleTabClick} data-label="backgrounds">Backgrounds</StudioNavItem>
                         <StudioNavItem onClick={this.handleTabClick} data-label="graphics">Graphics</StudioNavItem>
                         <StudioNavItem onClick={this.handleTabClick} data-label="colors">Colors</StudioNavItem>
                     </ul>
@@ -226,7 +223,6 @@ var BadgeStudio = React.createClass({
     						<StudioCanvas ref={"studio_canvas"}
                                 width={this.props.canvas.width}
                                 height={this.props.canvas.height}
-                                backgroundPattern={this.state.selectedOptions.backgrounds}
                     			graphic={this.state.selectedOptions.graphics}
                                 shape={this.state.selectedOptions.shapes}
                                 backgroundColor={this.getColors()[0]}
