@@ -103,6 +103,11 @@ main {
 
 }
 
+.l-verticaloffset {
+  margin-top: $layout-spacing*3;
+  margin-bottom: $layout-spacing*6;
+}
+
 .l-wrappinglist {
   display: flex;
   flex-wrap: wrap;
