@@ -155,7 +155,8 @@ var BadgeDisplayThumbnail = React.createClass({
     return {
       json: {badge: {issuer:{}}},
       columnClass: 'col-xs-3',
-      selected: false
+      selected: false,
+      selectMode: false,
     };
   },
   handleClick: function(){
@@ -262,12 +263,27 @@ var BadgeDisplayThumbnail = React.createClass({
             </DialogOpener>
         </Dialog>);
 
+    var style = {};
+    if (this.props.selected) {
+        style = {border: '2px solid  #31383E'};
+    }
+
+    var hoverText = this.props.hoverText;
+    if (this.props.selectMode) {
+        if ( ! this.props.selected) {
+            hoverText = "Select Badge";
+        }
+        else {
+            hoverText = "Deselect Badge";
+        }
+    }
+
     return (
-      <div className="card_">
+      <div className="card_" style={style}>
         <div className="badge_ viewdetails_" onClick={this.handleClick}>
             <Property name='Badge Image' label={false} property={this.props.json.image} width="128" height="128" />
             <div className="viewdetails_-x-details">
-                <button className="button_ button_-solid button_-uppercase">View Details</button>
+                <button className="button_ button_-solid button_-uppercase">{hoverText || "View Details"}</button>
             </div>
         </div>
         <div className="title_">
