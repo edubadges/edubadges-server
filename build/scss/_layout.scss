@@ -170,6 +170,12 @@ $l-studio-header: $layout-spacing*8;
     }
     .l-studio-x-colorpicker {
       padding-bottom: $layout-spacing*3;
+
+      // this is the container that the color picker generates/styles
+      > div > div > div > div > div {
+        width: 250px !important;
+        padding-left: 150px !important;
+      }
     }
   }
 
