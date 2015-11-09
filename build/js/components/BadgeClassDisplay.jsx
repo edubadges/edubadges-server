@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var moment = require('moment');
 
 var React = require('react');
 
@@ -46,6 +47,7 @@ BadgeClassThumbnail = React.createClass({
 BadgeClassDetail = React.createClass({
   render: function() {
 
+    var createdOn = moment(this.props.created_at).format('MMMM D, YYYY');
     return (
       <div className="detail_">
         <div>
@@ -54,7 +56,7 @@ BadgeClassDetail = React.createClass({
         <ul>
           <li>
             <h2 className="detail_-x-meta">Criteria</h2>
-            <p>{this.props.json.criteria}</p>
+            <p><a href={this.props.json.criteria} target="_blank">{this.props.json.criteria}</a></p>
           </li>
           <li>
             <h2 className="detail_-x-meta">Issuer</h2>
@@ -62,9 +64,9 @@ BadgeClassDetail = React.createClass({
           </li>
           <li>
             <h2 className="detail_-x-meta">Issuer Website</h2>
-            <p>{this.props.issuer.json.url}</p>
+            <p><a href={this.props.issuer.json.url} target="_blank">{this.props.issuer.json.url}</a></p>
           </li>
-          <li className="detail_-x-footer">Created on <strong>{this.props.created_at}</strong> by <strong>{this.props.created_by}</strong></li>
+          <li className="detail_-x-footer">Created on <strong>{createdOn}</strong></li>
         </ul>
       </div>
     )
