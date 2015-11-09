@@ -53,16 +53,23 @@ BadgeInstanceList = React.createClass({
   },
   render: function() {
     var badgeInstances = this.props.badgeInstances.map(function(badgeInstance, i) {
+        var issuedOn = moment(badgeInstance.json.issuedOn).format('MMMM D, YYYY');
+        var evidence;
+        if (badgeInstance.json.evidence) {
+          var clickEvidence = function() {
+            window.open(badgeInstance.json.evidence, '_blank');
+          }
+          evidence = (<Button style="tertiary" label="Evidence" handleClick={clickEvidence}/>)
+        }
         return (
             <tr>
                 <th scope="row">{badgeInstance.recipient_identifier} </th>
-                <td>{badgeInstance.json.issuedOn}</td>
+                <td>{issuedOn}</td>
                 <td>
                     <div className="l-horizontal">
                         <div>
-                            <Button className="button_ button_-tertiary is-disabled" label="Notify" />
-                            <Button className="button_ button_-tertiary is-disabled" label="Revoke" />
-                            <Button className="button_ button_-tertiary is-disabled" label="Evidence" />
+                            <Button style="tertiary" label="Revoke" />
+                            {evidence}
                         </div>
                     </div>
                 </td>
