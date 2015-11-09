@@ -4,6 +4,8 @@ var React = require('react');
 
 // Stores
 var APIStore = require('../stores/APIStore');
+var FormStore = require('../stores/FormStore');
+var FormConfigStore = require('../stores/FormConfigStore');
 
 // Actions
 var APISubmitData = require('../actions/api.js').APISubmitData;
@@ -11,6 +13,7 @@ var navigateLocalPath = require('../actions/clicks').navigateLocalPath;
 
 // Components
 var Button = require('../components/Button.jsx').Button;
+var SubmitButton = require('../components/Button.jsx').SubmitButton;
 var Dialog = require('../components/Dialog.jsx').Dialog;
 var DialogOpener = require('../components/Dialog.jsx').DialogOpener;
 var Heading = require('../components/Heading.jsx').Heading;
@@ -126,9 +129,33 @@ BadgeClassTable = React.createClass({
         }
     },
 
+    getIssueButton: function(badgeClass) {
+      var dialogFormId = "BadgeInstanceCreateUpdateForm";
+      var formProps = FormConfigStore.getConfig(dialogFormId, {}, {issuerSlug: this.props.issuerSlug, badgeClassSlug: badgeClass.slug});
+      FormStore.getOrInitFormData(dialogFormId, formProps);
+      var actions=[
+          <SubmitButton key="submit" formId={dialogFormId} label="Submit" />
+      ];
+      var dialog = (
+          <Dialog formId={dialogFormId} dialogId="create-badge-instance" actions={actions} className="closable">
+              <Heading size="small"
+                          title="New Badge Instance"
+                          subtitle=""/>
+
+              <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
+          </Dialog>);
+
+      return (
+        <DialogOpener dialog={dialog} dialogId="create-badge-instance" key="create-badge-instance">
+          <Button style="tertiary" label="Issue" propagateClick={true}/>
+        </DialogOpener> );
+
+    },
+
     render: function() {
         var badgeClasses = this.props.badgeClasses.map(function(badgeClass, i) {
 
+            var issueButton = this.getIssueButton(badgeClass);
             var removeButton = this.getRemoveButton(badgeClass);
 
             return (
@@ -145,9 +172,8 @@ BadgeClassTable = React.createClass({
                     <td>
                         <div className="l-horizontal">
                             <div>
-                                <Button className="button_ button_-tertiary is-disabled" label="Issue" />
-                                <Button className="button_ button_-tertiary is-disabled" label="Edit" />
                                 {removeButton}
+                                {issueButton}
                             </div>
                         </div>
                     </td>

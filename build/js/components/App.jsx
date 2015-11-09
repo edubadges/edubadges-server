@@ -457,7 +457,7 @@ var App = React.createClass({
     FormStore.getOrInitFormData(dialogFormId, formProps);
 
     var actions=[
-        <SubmitButton formId={dialogFormId} label="Add Issuer" />
+        <SubmitButton key="submit" formId={dialogFormId} label="Add Issuer" />
     ];
     var dialog = (
         <Dialog formId={dialogFormId} dialogId="add-issuer" actions={actions} className="closable">
@@ -618,7 +618,7 @@ var App = React.createClass({
     FormStore.getOrInitFormData(dialogFormId, formProps);
 
     var actions=[
-        <SubmitButton formId={dialogFormId} label="Submit" />
+        <SubmitButton key="submit" formId={dialogFormId} label="Submit" />
     ];
     var dialog = (
         <Dialog formId={dialogFormId} dialogId="create-badge-instance" actions={actions} className="closable">
