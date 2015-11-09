@@ -158,17 +158,19 @@ $l-studio-header: $layout-spacing*8;
       z-index: $z-index-high;
     }
 
-    div {
+    .l-studio-x-list {
       box-sizing: border-box;
       height: 100%;
       left: 0;
       overflow-y: auto;
-      padding-top: $l-studio-header + $layout-spacing*3;
+      padding-top: $l-studio-header;
       position: absolute;
       top: 0;
       width: 100%;
     }
-
+    .l-studio-x-colorpicker {
+      padding-bottom: $layout-spacing*3;
+    }
   }
 
   > :last-child {

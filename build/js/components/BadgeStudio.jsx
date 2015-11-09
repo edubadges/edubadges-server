@@ -1,4 +1,5 @@
 var React = require('react');
+var ColorPicker = require('react-color');
 
 var _ = require('lodash');
 
@@ -72,7 +73,10 @@ var StudioOptionList = React.createClass({
         return (
             <section id="tab-shapes">
                 <h2 className="wrap_ wrap_-dark wrap_-borderbottom label_ l-studio-x-header">Badges</h2>
-                <div>
+                <div className="l-studio-x-list">
+                    <div className="l-studio-x-colorpicker">
+                        <ColorPicker type="compact"/>
+                    </div>
                     <ul className="l-wrappinglist">
                         {assets}
                     </ul>
