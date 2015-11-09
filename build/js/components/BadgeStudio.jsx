@@ -75,7 +75,7 @@ var StudioOptionList = React.createClass({
                 <h2 className="wrap_ wrap_-dark wrap_-borderbottom label_ l-studio-x-header">Badges</h2>
                 <div className="l-studio-x-list">
                     <div className="l-studio-x-colorpicker">
-                        <ColorPicker type="compact"/>
+                        <ColorPicker type="compact" color={this.props.selectedColor} onChangeComplete={this.props.onColorChange}/>
                     </div>
                     <ul className="l-wrappinglist">
                         {assets}
@@ -125,6 +125,8 @@ var BadgeStudio = React.createClass({
                 shapes: 'circle.svg',
                 graphics: undefined,
                 colors: 'blue-green',
+                backgroundColor: '#0062b1',
+                foregroundColor: '#fcdc00'
             },
         };
     },
@@ -202,6 +204,18 @@ var BadgeStudio = React.createClass({
             </ul>
             </div>
         );
+
+        var tab = this.state.activeTab;
+        var colorChange = function(color) {
+            var selected = this.state.selectedOptions
+            if (tab == "shapes") {
+                selected['backgroundColor'] = '#'+color.hex
+            }
+            else if (tab == "graphics") {
+                selected['foregroundColor'] = '#'+color.hex
+            }
+            this.setState({'selectedOptions': this.state.selectedOptions})
+        }.bind(this)
         return (
             <form className="l-studio wrap_ wrap_-borderbottom">
                 <nav className="wrap_ wrap_-shadow wrap_-dark">
@@ -209,7 +223,6 @@ var BadgeStudio = React.createClass({
                     <ul className="gallerynav_">
                         <StudioNavItem onClick={this.handleTabClick} data-label="shapes">Shapes</StudioNavItem>
                         <StudioNavItem onClick={this.handleTabClick} data-label="graphics">Graphics</StudioNavItem>
-                        <StudioNavItem onClick={this.handleTabClick} data-label="colors">Colors</StudioNavItem>
                     </ul>
                 </nav>
                 <div className="wrap_ wrap_-borderright">
@@ -219,6 +232,8 @@ var BadgeStudio = React.createClass({
                         assets={this.props.assets[this.state.activeTab]}
                         palettes={this.props.palettes}
                         selected={this.state.selectedOptions[this.state.activeTab]}
+                        onColorChange={colorChange}
+                        selectedColor={this.state.activeTab == "shapes" ? this.state.selectedOptions.backgroundColor : this.state.selectedOptions.foregroundColor}
                         />
                 </div>
                 <div className="wrap_ wrap_-body">
@@ -229,8 +244,8 @@ var BadgeStudio = React.createClass({
                                 height={this.props.canvas.height}
                     			graphic={this.state.selectedOptions.graphics}
                                 shape={this.state.selectedOptions.shapes}
-                                backgroundColor={this.getColors()[0]}
-                                graphicColor={this.getColors()[1]}
+                                backgroundColor={this.state.selectedOptions.backgroundColor}
+                                graphicColor={this.state.selectedOptions.foregroundColor}
 
                     		/>                        
                         </div>
