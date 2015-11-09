@@ -74,6 +74,17 @@ var InputGroup = React.createClass({
 
   render: function(){
     var hint = this.props.hint ? (<span className="hint">{this.props.hint}</span>) : "";
+
+    if (this.props.inputType == "checkbox") {
+      return (
+        <div className="form_-x-checkbox">
+          <label>
+            {this.theInput()}
+            <span className="form_-x-checkbox-text">{this.props.label} {hint}</span>
+          </label>
+        </div>);
+    }
+
     return (
         <div className="form_-x-field">
           <label htmlFor={this.props.name}>{this.props.label} {hint}</label>
