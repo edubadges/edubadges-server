@@ -111,7 +111,7 @@ BadgeClassTable = React.createClass({
     },
 
     getRemoveButton: function(badgeClass) {
-        if (badgeClass.recipient_count > 1) {
+        if (badgeClass.recipient_count >= 1) {
             return (
                 <Button className="button_ button_-tertiary is-disabled" label="Remove"
                     popover="All instances of this badge must be revoked before removing it." />);
