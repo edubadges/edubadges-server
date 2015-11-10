@@ -30,8 +30,9 @@ var StudioCanvas = React.createClass({
       fabric.loadSVGFromURL(path, function (objects, options) {
         var svg = new fabric.Group(objects)
 
+        // scale svg to fit into our viewport
         var scale;
-        if (this.props.width > this.props.height) {
+        if (svg.width > svg.height) {
           scale = this.props.width / svg.width;
         }
         else {
@@ -39,6 +40,9 @@ var StudioCanvas = React.createClass({
         }
         svg.scaleX = scale;
         svg.scaleY = scale;
+        // center svg in viewport
+        svg.left = (this.props.width - (svg.width*svg.scaleX))/2;
+        svg.top = (this.props.height - (svg.height*svg.scaleY))/2;
         return callback(svg)
       }.bind(this))
     }.bind(this);

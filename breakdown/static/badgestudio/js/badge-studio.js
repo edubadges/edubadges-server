@@ -53,8 +53,8 @@
   }
 
   BadgeStudio.defaultShapeOptions = {
-    top: 0,
-    left: 0,
+    // top: 0,
+    // left: 0,
 
     // TODO: these should be configurable (and thus likely be attached
     // to the instance instead of the class)
