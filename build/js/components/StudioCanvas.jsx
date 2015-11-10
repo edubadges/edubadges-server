@@ -30,13 +30,17 @@ var StudioCanvas = React.createClass({
       fabric.loadSVGFromURL(path, function (objects, options) {
         var svg = new fabric.Group(objects)
 
+        var padding = 10;
+        var width = this.props.width - padding*2
+        var height = this.props.height - padding*2
+
         // scale svg to fit into our viewport
         var scale;
         if (svg.width > svg.height) {
-          scale = this.props.width / svg.width;
+          scale = width / svg.width;
         }
         else {
-          scale = this.props.height / svg.height;
+          scale = height / svg.height;
         }
         svg.scaleX = scale;
         svg.scaleY = scale;
