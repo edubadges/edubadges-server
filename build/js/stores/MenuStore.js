@@ -137,7 +137,7 @@ MenuStore.storeInitialData = function() {
     );
   if (initialData.installed_apps.indexOf('issuer') > -1)
     newItems.push(
-      { title: "Issue", url: "/issuer", icon: "", children: []}
+      { title: "Issue Badges", url: "/issuer", icon: "", children: []}
     );
   if (initialData.installed_apps.indexOf('consumer') > -1)
     newItems.push(
