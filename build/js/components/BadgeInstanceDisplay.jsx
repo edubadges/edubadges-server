@@ -68,7 +68,6 @@ BadgeInstanceList = React.createClass({
                 <td>
                     <div className="l-horizontal">
                         <div>
-                            <Button style="tertiary" label="Revoke" />
                             {evidence}
                         </div>
                     </div>
