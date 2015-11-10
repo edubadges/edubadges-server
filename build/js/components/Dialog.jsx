@@ -77,11 +77,9 @@ var DialogOpener = React.createClass({
     propTypes: {
         dialog: React.PropTypes.node.isRequired,
         dialogId: React.PropTypes.string.isRequired,
-        destroyDialogOnUnmount: React.PropTypes.bool
     },
     getDefaultProps: function() {
         return {
-            destroyDialogOnUnmount: true
         }
 
     },
@@ -92,8 +90,7 @@ var DialogOpener = React.createClass({
     },
 
     componentWillUnmount: function() {
-        if (this.props.destroyDialogOnUnmount)
-            this.dialog.destroy();
+        this.dialog.destroy();
     },
 
     componentDidUpdate: function(prevProps, prevState) {
@@ -122,6 +119,7 @@ var Dialog = React.createClass({
         dialogId: React.PropTypes.string.isRequired,
         hideControls: React.PropTypes.bool,
         formId: React.PropTypes.string,
+        handleCloseDialog: React.PropTypes.func,
     },
 
     getInitialState: function() {
@@ -155,6 +153,10 @@ var Dialog = React.createClass({
         if (this.state.formWasCompleted || messageType === 'danger') {
             FormActions.resetForm(this.props.formId);
             this.setState({formWasCompleted: false});
+        }
+
+        if (this.props.handleCloseDialog) {
+            return this.props.handleCloseDialog();
         }
 
         var dialog = document.getElementById(this.props.dialogId)
