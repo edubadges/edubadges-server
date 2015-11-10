@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="499px" height="382px" viewBox="0 0 499 382" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <!-- Generator: Sketch 3.4.1 (15681) - http://www.bohemiancoding.com/sketch -->
+    <title>shape-18</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Badge-Studio" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="Shapes" sketch:type="MSArtboardGroup" transform="translate(0.000000, -61.000000)" fill="#CCCCCC">
+            <g id="shape-18" sketch:type="MSLayerGroup" transform="translate(-1.000000, 61.000000)">
+                <path d="M437.437162,32.1391892 L340.579054,32.1391892 C291.977703,28.2945946 250.579054,0.45 250.579054,0.45 C250.579054,0.45 208.869595,28.2945946 160.214189,32.1391892 L63.4101351,32.1391892 C63.4101351,104.936486 0.997972973,103.666216 0.997972973,103.666216 L0.997972973,277.889189 C0.997972973,277.889189 63.4101351,276.585135 63.4101351,349.395946 L160.214189,349.395946 C208.869595,353.254054 250.579054,381.132432 250.579054,381.132432 C250.579054,381.091892 291.977703,353.254054 340.579054,349.395946 L437.437162,349.395946 C437.437162,276.585135 499.842568,277.889189 499.842568,277.889189 L499.842568,103.666216 C499.842568,103.666216 437.437162,104.936486 437.437162,32.1391892" id="Fill-1" sketch:type="MSShapeGroup"></path>
+            </g>
+        </g>
+    </g>
+</svg>

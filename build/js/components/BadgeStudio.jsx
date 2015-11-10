@@ -97,7 +97,8 @@ var BadgeStudio = React.createClass({
                 height: 280,
             },
             assets: {
-                shapes: ['circle.svg', 'hexagon.svg', 'shield.svg', 'diamond.svg', 'shield-1.svg', 'starburst-1.svg'],
+                shapes: ['shape-1.svg', 'shape-2.svg', 'shape-3.svg', 'shape-4.svg', 'shape-5.svg', 'shape-6.svg', 'shape-7.svg', 'shape-8.svg', 'shape-9.svg', 'shape-10.svg', 'shape-11.svg', 'shape-12.svg', 'shape-13.svg', 'shape-14.svg', 'shape-15.svg', 'shape-16.svg', 'shape-17.svg', 'shape-18.svg', 'shape-19.svg', 'shape-20.svg', 'shape-21.svg', 'shape-22.svg', 'shape-23.svg', 'shape-24.svg', 'shape-25.svg', 'shape-27.svg', 'shape-28.svg', 'shape-29.svg',
+                'circle.svg', 'hexagon.svg', 'shield.svg', 'diamond.svg', 'shield-1.svg', 'starburst-1.svg'],
                 graphics: [undefined,
                     'maple-leaf.png', 'airplane.png', 'approve.png', 'award.png', 'baggage.png', 'battery.png',
                     'beaker.png', 'beer.png', 'bell.png', 'car.png', 'cd.png', 'cinema.png', 'climbing.png',
