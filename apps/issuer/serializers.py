@@ -280,11 +280,8 @@ class IssuerPortalSerializer(serializers.Serializer):
     def to_representation(self, user):
         view_data = {}
 
-        user_issuers = Issuer.objects.filter(
-            Q(owner__id=user.id) |
-            Q(staff__id=user.id)
-        ).distinct().select_related('badgeclasses')
-        user_issuer_badgeclasses = chain.from_iterable(i.badgeclasses.all() for i in user_issuers)
+        user_issuers = user.cached_issuers()
+        user_issuer_badgeclasses = user.cached_badgeclasses()
 
         issuer_data = IssuerSerializer(
             user_issuers,

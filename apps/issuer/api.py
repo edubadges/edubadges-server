@@ -495,20 +495,20 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
               message: Badge has been deleted.
         """
 
-        unissued_badgeclasses = self.queryset.filter(badgeinstances=None)
-        current_badgeclass = self.get_list(badgeSlug, queryset=unissued_badgeclasses)
-
-        if current_badgeclass.exists():
-            old_badgeclass = current_badgeclass[0].json
-            current_badgeclass[0].delete()
-            logger.event(badgrlog.BadgeClassDeletedEvent(old_badgeclass, request.user))
+        try:
+            current_badgeclass = BadgeClass.cached.get(slug=badgeSlug)
+            self.check_object_permissions(self.request, current_badgeclass)
+        except (BadgeClass.DoesNotExist, PermissionDenied):
+            return Response(status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response(
-                "Badge Class either couldn't be deleted. It may have already been issued, or it may already not exist.",
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            if len(current_badgeclass.cached_badgeinstances()) < 1:
+                old_badgeclass = current_badgeclass.json
+                current_badgeclass.delete()
+                logger.event(badgrlog.BadgeClassDeletedEvent(old_badgeclass, request.user))
+                return Response("Badge " + badgeSlug + " has been deleted.", status.HTTP_200_OK)
+            else:
+                return Response("Badge class could not be deleted. It has already been issued at least once.", status=status.HTTP_400_BAD_REQUEST)
 
-        return Response("Badge " + badgeSlug + " has been deleted.", status.HTTP_200_OK)
 
 
 class BadgeInstanceList(AbstractIssuerAPIEndpoint):
@@ -558,6 +558,7 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
             created_by=request.user
         )
         badge_instance = serializer.data
+
 
         logger.event(badgrlog.BadgeInstanceCreatedEvent(badge_instance, request.user))
         return Response(badge_instance, status=status.HTTP_201_CREATED)

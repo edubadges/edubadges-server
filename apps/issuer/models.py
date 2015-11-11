@@ -28,6 +28,14 @@ class Issuer(AbstractIssuer):
                               on_delete=models.PROTECT, null=False)
     staff = models.ManyToManyField(AUTH_USER_MODEL, through='IssuerStaff')
 
+    def delete(self, *args, **kwargs):
+        staff = self.cached_staff()
+        owner = self.owner
+        super(Issuer, self).delete(*args, **kwargs)
+        owner.publish()
+        for member in staff:
+            member.publish()
+
     @cachemodel.cached_method(auto_publish=True)
     def cached_staff(self):
         return self.staff.all()
@@ -60,6 +68,11 @@ class BadgeClass(AbstractBadgeClass):
         super(BadgeClass, self).publish()
         self.issuer.publish()
 
+    def delete(self, *args, **kwargs):
+        issuer = self.issuer
+        super(BadgeClass, self).delete(*args, **kwargs)
+        issuer.publish()
+
     @property
     def cached_issuer(self):
         return Issuer.cached.get(pk=self.issuer_id)
@@ -67,6 +80,10 @@ class BadgeClass(AbstractBadgeClass):
     @cachemodel.cached_method(auto_publish=True)
     def recipient_count(self):
         return self.badgeinstances.count()
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_badgeinstances(self):
+        return self.badgeinstances.all()
 
 
 class BadgeInstance(AbstractBadgeInstance):
@@ -116,6 +133,15 @@ class BadgeInstance(AbstractBadgeInstance):
 
         # TODO: If we don't want AutoSlugField to ensure uniqueness, configure it
         super(BadgeInstance, self).save(*args, **kwargs)
+
+    def publish(self):
+        super(BadgeInstance, self).publish()
+        self.badgeclass.publish()
+
+    def delete(self, *args, **kwargs):
+        badgeclass = self.badgeclass
+        super(BadgeInstance, self).delete(*args, **kwargs)
+        badgeclass.publish()
 
     def notify_earner(self):
         """

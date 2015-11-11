@@ -10,6 +10,7 @@ var FormConfigStore = require('../stores/FormConfigStore');
 
 // Actions
 var APISubmitData = require('../actions/api.js').APISubmitData;
+var APIReloadCollections = require('../actions/api.js').APIReloadCollections;
 var navigateLocalPath = require('../actions/clicks').navigateLocalPath;
 
 // Components
@@ -17,6 +18,7 @@ var Button = require('../components/Button.jsx').Button;
 var SubmitButton = require('../components/Button.jsx').SubmitButton;
 var Dialog = require('../components/Dialog.jsx').Dialog;
 var DialogOpener = require('../components/Dialog.jsx').DialogOpener;
+var DialogElement = require('../components/Dialog.jsx').DialogElement;
 var Heading = require('../components/Heading.jsx').Heading;
 var Property = require('../components/BadgeDisplay.jsx').Property;
 
@@ -132,25 +134,35 @@ BadgeClassTable = React.createClass({
     },
 
     getIssueButton: function(badgeClass) {
-      var dialogFormId = "BadgeInstanceCreateUpdateForm";
-      var formProps = FormConfigStore.getConfig(dialogFormId, {}, {issuerSlug: this.props.issuerSlug, badgeClassSlug: badgeClass.slug});
-      FormStore.getOrInitFormData(dialogFormId, formProps);
-      var actions=[
-          <SubmitButton key="submit" formId={dialogFormId} label="Submit" />
-      ];
-      var dialog = (
-          <Dialog formId={dialogFormId} dialogId="create-badge-instance" actions={actions} className="closable">
-              <Heading size="small"
-                          title="New Badge Instance"
-                          subtitle=""/>
 
-              <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
-          </Dialog>);
 
-      return (
-        <DialogOpener dialog={dialog} dialogId="create-badge-instance" key="create-badge-instance">
-          <Button style="tertiary" label="Issue" propagateClick={true}/>
-        </DialogOpener> );
+      var openIssueDialog = function() {
+        var dialogId="create-badge-instance";
+        var dialogFormId = "BadgeInstanceCreateUpdateForm";
+        var formProps = FormConfigStore.getConfig(dialogFormId, {}, {issuerSlug: this.props.issuerSlug, badgeClassSlug: badgeClass.slug});
+        FormStore.getOrInitFormData(dialogFormId, formProps);
+        var actions=[
+            <SubmitButton key="submit" formId={dialogFormId} label="Submit" />
+        ];
+        var closeDialog = function() {
+            APIReloadCollections(['issuer_badgeclasses'])
+            dialog_element.closeDialog();
+        }
+        var dialog = (
+            <Dialog formId={dialogFormId} dialogId="create-badge-instance" actions={actions} className="closable" handleCloseDialog={closeDialog}>
+                <Heading size="small"
+                            title="New Badge Instance"
+                            subtitle=""/>
+
+                <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
+            </Dialog>);
+
+        var dialog_element = new DialogElement(dialog, dialogId);
+        dialog_element.update();
+        dialog_element.showDialog();
+      }.bind(this);
+
+      return (<Button style="tertiary" label="Issue" handleClick={openIssueDialog}/>);
 
     },
 

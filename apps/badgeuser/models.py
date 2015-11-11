@@ -1,12 +1,15 @@
+from itertools import chain
 from allauth.account.models import EmailAddress
 import cachemodel
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.utils.http import urlquote
 from django.utils.translation import ugettext_lazy as _
 from django.core.mail import send_mail
 from django.contrib.auth.models import AbstractUser
 from hashlib import md5
+from issuer.models import Issuer
 
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
@@ -64,6 +67,13 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
     @cachemodel.cached_method(auto_publish=True)
     def cached_emails(self):
         return EmailAddress.objects.filter(user=self)
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_issuers(self):
+        return Issuer.objects.filter( Q(owner__id=self.id) | Q(staff__id=self.id) ).distinct()
+
+    def cached_badgeclasses(self):
+        return chain.from_iterable(issuer.cached_badgeclasses() for issuer in self.cached_issuers())
 
     def save(self, *args, **kwargs):
         if not self.username:
