@@ -97,7 +97,19 @@ var StudioCanvas = React.createClass({
       if (props.graphic) {
         this.studio.setGlyphFromURL(initialData.STATIC_URL + "badgestudio/graphics/" + props.graphic, function() {
             this.studio.setGlyphColor(props.graphicColor || '#000000');
-            this.studio.glyph.set({scaleX: 0.7, scaleY: 0.7});
+
+            // scale glyph to 1/3 the viewport 
+            var width = this.props.width/3
+            var height = this.props.height/3
+            var scale;
+            if (this.studio.glyph.width > this.studio.glyph.height) {
+              scale = width / this.studio.glyph.width;
+            }
+            else {
+              scale = height / this.studio.glyph.height;
+            }
+
+            this.studio.glyph.set({scaleX: scale, scaleY: scale});
             this.studio.glyph.center();
             this.studio.canvas.renderAll();
         }.bind(this));

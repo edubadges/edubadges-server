@@ -63,12 +63,10 @@
   }
 
   BadgeStudio.shapes = {
-    hexagon: {ribbonOptions: { top: 20 }, shapeOptions: {top: 0, left: 19}},
+    hexagon: {ribbonOptions: { top: 20 }},
     square: {ribbonOptions: { left: 75 }},
     diamond: {ribbonOptions: { top: 45, left: 120 }},
     circle: {},
-    shield: {shapeOptions: {top: 0, left: 20}},
-    'shield-1': {shapeOptions: {top: 0, left: 25}}
   }
 
   /**
