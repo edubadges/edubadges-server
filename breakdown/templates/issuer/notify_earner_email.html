@@ -58,9 +58,11 @@
 
               <!-- Callout Panel -->
               <p class="callout" style="font-weight: normal; font-size: 14px; line-height: 1.6; background-color: #ECF8FF; margin: 0 0 15px; padding: 15px;">
-                You can save this image and store it wherever you keep your Open Digital Badges. We suggest <a href="http://badgrapp.com/" style="color: #185E73; font-weight: bold;">Badgr</a> or the <a href="http://backpack.openbadges.org" style="color: #185E73; font-weight: bold; ">Open Badges Backpack.</a> Wherever you take it, portable information about your achievement will be locked inside. <br /><a href="{{ image_url }}" class="btn" style="color: #FFF; text-decoration: none; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; background-color: #3B8252; margin: 0 10px 0 0; padding: 8px 16px;" download>Download your badge! &raquo;</a>
+                You can save this image and store it wherever you keep your Open Digital Badges. We suggest <a href="https://badgr.io/" style="color: #185E73; font-weight: bold;">Badgr</a> or the <a href="http://backpack.openbadges.org" style="color: #185E73; font-weight: bold; ">Open Badges Backpack.</a> Wherever you take it, portable information about your achievement will be locked inside. <br />
+                <a href="{{ image_url }}" class="btn" style="color: #FFF; text-decoration: none; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; background-color: #3B8252; margin: 0 10px 0 0; padding: 8px 16px;" download>Download your badge! &raquo;</a>
 
-                {% if badgr_import_url %}
+                {% if badgr_import_url and false %}
+                  <!-- TODO: Add this back in when the feature works again. Shameful derp. -->
                   <a href="{{ badgr_import_url }}" class="btn" style="color: #FFF; text-decoration: none; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; background-color: #bd2233; margin: 0 10px 0 0; padding: 8px 16px;">Add to Badgr! &raquo;</a>
                 {% endif %}
               </p><!-- /Callout Panel -->
