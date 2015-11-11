@@ -74,6 +74,9 @@ var StudioOptionList = React.createClass({
             <section id="tab-shapes">
                 <h2 className="wrap_ wrap_-dark wrap_-borderbottom label_ l-studio-x-header">Badges</h2>
                 <div className="l-studio-x-list">
+                    <style htmlType="text/css">
+                        {".flexbox-fix {display: -webkit-box; display: -moz-box; display: -ms-flexbox; display: -webkit-flex; display: flex; }"}
+                    </style>
                     <div className="l-studio-x-colorpicker">
                         <ColorPicker type="compact" color={this.props.selectedColor} onChangeComplete={this.props.onColorChange}/>
                     </div>
