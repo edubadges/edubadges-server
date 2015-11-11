@@ -441,7 +441,7 @@ class BadgeClassTests(APITestCase):
         }
     }
 )
-AssertionTests(APITestCase):
+class AssertionTests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
 
     def ensure_image_exists(self, badge_object):
