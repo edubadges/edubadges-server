@@ -6,12 +6,16 @@ import shutil
 
 from django.core import mail
 from django.contrib.auth import get_user_model
+from django.test import modify_settings, override_settings
 
 from openbadges_bakery import unbake
 from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
 
 from issuer.api import IssuerList
 from issuer.models import Issuer, BadgeClass, BadgeInstance
+
+from mainsite import TOP_DIR
+
 
 factory = APIRequestFactory()
 
@@ -23,6 +27,16 @@ example_issuer_props = {
 }
 
 
+@override_settings(
+    CELERY_ALWAYS_EAGER=True,
+    SESSION_ENGINE='django.contrib.sessions.backends.cache',
+    CACHES={
+        'default': {
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
+        }
+    }
+)
 class IssuerTests(APITestCase):
     fixtures = ['0001_initial_superuser', 'test_badge_objects.json']
 
@@ -282,6 +296,16 @@ class IssuerTests(APITestCase):
         self.assertEqual(response.status_code, 400)
 
 
+@override_settings(
+    CELERY_ALWAYS_EAGER=True,
+    SESSION_ENGINE='django.contrib.sessions.backends.cache',
+    CACHES={
+        'default': {
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
+        }
+    }
+)
 class BadgeClassTests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
 
@@ -407,7 +431,17 @@ class BadgeClassTests(APITestCase):
             )
 
 
-class AssertionTests(APITestCase):
+@override_settings(
+    CELERY_ALWAYS_EAGER=True,
+    SESSION_ENGINE='django.contrib.sessions.backends.cache',
+    CACHES={
+        'default': {
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
+        }
+    }
+)
+AssertionTests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
 
     def ensure_image_exists(self, badge_object):
@@ -560,6 +594,16 @@ class AssertionTests(APITestCase):
         self.assertEqual(response.status_code, 400)
 
 
+@override_settings(
+    CELERY_ALWAYS_EAGER=True,
+    SESSION_ENGINE='django.contrib.sessions.backends.cache',
+    CACHES={
+        'default': {
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
+        }
+    }
+)
 class PublicAPITests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
     """
