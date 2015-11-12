@@ -9,8 +9,11 @@ var APISubmitData = require('../actions/api').APISubmitData;
 var APIStore = require('../stores/APIStore');
 
 // Components
+var BadgeSelectionTable = require('../components/BadgeSelectionTable.jsx').BadgeSelectionTable;
 var Button = require('../components/Button.jsx').Button;
 var Card = require('../components/Card.jsx');
+var Dialog = require ('../components/Dialog.jsx').Dialog;
+var DialogOpener = require('../components/Dialog.jsx').DialogOpener;
 var Property = require('../components/BadgeDisplay.jsx').Property;
 var EarnerBadgeList = require('../components/EarnerBadgeList.jsx');
 var OpenBadgeList = require('../components/OpenBadgeList.jsx');
@@ -52,7 +55,7 @@ var moreLinkBadgeJSON = function(moreCount){
 
 var CollectionShareInfo = React.createClass({
     propTypes: {
-        slug: React.PropTypes.string.isRequired,
+        collectionSlug: React.PropTypes.string.isRequired,
         initialShareUrl: React.PropTypes.string,
     },
 
@@ -105,12 +108,12 @@ var CollectionShareInfo = React.createClass({
             <label htmlFor="sharelink">Link</label>
             <div className="form_-x-action">
                 <input id="sharelink" type="text" readOnly={true} name="sharelink" onClick={this.selectAllText} value={this.state.shareUrl} />
-                <button type="button" tabindex="3"><span className="icon_ icon_-copy" onClick={this.copyShareLink}>Copy</span></button>
+                <button type="button" tabIndex="3"><span className="icon_ icon_-copy" onClick={this.copyShareLink}>Copy</span></button>
             </div>
         </div>
         <div className="form_-x-field">
             <label htmlFor="embed">Description</label>
-            <textarea name="embed" id="embed" rows="4" tabindex="5" value={embedCode} onClick={this.selectAllText} />
+            <textarea name="embed" id="embed" rows="4" tabIndex="5" value={embedCode} onClick={this.selectAllText} />
         </div>
       </form>
     );
@@ -244,7 +247,18 @@ var EarnerCollectionDetail = React.createClass({
       // needs testing: when waiting on API response, set the included badges to the selected set.
       badges = APIStore.filter('earner_badges', 'id', this.state.selectedBadgeIds);
     }
-
+    var dialog = (
+        <Dialog actions={[]} dialogId="manage-collection-badges">
+            <Heading
+                size="medium"
+                title="Add / Remove Badges"
+                rule={true}
+                />
+            <BadgeSelectionTable
+              badges={APIStore.getCollection('earner_badges')}
+              initialSelectedBadges={_.pluck(this.props.badgeList, 'id')} />
+        </Dialog>
+    );
 
     return (
       <div>
@@ -256,10 +270,13 @@ var EarnerCollectionDetail = React.createClass({
           title={"Badges in Collection"}
           subtitle={this.state.formState == 'editing' ? "Manage and save which badges appear in this collection." : "Badges with a gray highlighed background will remain in the collection when you click save."}
           rule={false}>
-            <Button label={this.state.formState == 'editing' ? "Save": "Select Badges"} propagateClick={true}
-              handleClick={panelFunction}
-            />
+            <DialogOpener dialog={dialog} dialogId="manage-collection-badges" key="manage-collection-badges">
+              <Button label="Manage" propagateClick={true} />
+            </DialogOpener>
         </Heading>
+        <Button label={this.state.formState == 'editing' ? "Save": "Select Badges"} propagateClick={true}
+          handleClick={panelFunction}
+        />
         <EarnerBadgeList
           display="thumbnail"
           badges={badges}

@@ -19,21 +19,29 @@ var Button = require('../components/Button.jsx').Button;
 
 // Cell rendering helpers
 var renderSelectCell = function(cellData, cellDataKey, rowData, rowIndex, columnData, width){
-    return (<span className="icon_ icon_-notext icon_-add">icon</span>);
+    return (
+      <span className={rowData.selected ? "icon_ icon_-notext icon_-selectfilled" : "icon_ icon_-notext icon_-selectempty"}>
+          {rowData.selected ? "Selected" : "Not selected"}
+      </span>
+    );
 };
 var renderBadgeName = function(cellData, cellDataKey, rowData, rowIndex, columnData, width){
     return (
         <div className="l-horizontal">
-            <button><img srcst="http://placehold.it/96x96 2x, http://placehold.it/48x48" src="http://placehold.it/48x48" width="48" height="48" alt="Badge Image" /></button>
-            <button className="truncate_ action_ action_-tertiary">Badge Name</button>
+            <button>
+                <img src={_.get(rowData, 'json.image.id')} width="48" height="48" alt={_.get(rowData, 'json.badge.name[@value]')} />
+            </button>
+            <button className="truncate_ action_ action_-tertiary">
+                {_.get(rowData, 'json.badge.name[@value]')}
+            </button>
         </div>
     );
 };
 var renderIssuerName = function(cellData, cellDataKey, rowData, rowIndex, columnData, width){
-    return "Issuer Name"
+    return _.get(rowData, 'json.badge.issuer.name[@value]');
 };
 var renderIssueDateCell = function(cellData, cellDataKey, rowData, rowIndex, columnData, width){
-  return moment("2015-11-02T16:20Z").format('MMMM Do YYYY, h:mm:ss a');
+  return moment(_.get(rowData, 'json.issuedOn[@value]')).format('MMMM Do YYYY');
 };
 
 
@@ -46,19 +54,36 @@ var BadgeSelectionTable = React.createClass({
     getDefaultProps: function(){
         return {
             badges: [],
+            initialSelectedBadges: [],
             widthHint: 800,
             heightHint: 600,
             cellRenderer: this.cellRenderer
         };
     },
+    getInitialState: function(){
+        var state = {
+            selected: []
+        };
+        for (var i=0; i<this.props.badges.length; i++){
+            state['selected'][i] = this.props.initialSelectedBadges.indexOf(this.props.badges[i].id) > -1
+        }
+        return state;
+    },
 
     rowGetter: function(rowIndex) {
-        return this.props.badges[rowIndex];
+        var data = this.props.badges[rowIndex];
+        data['selected'] = this.state.selected[rowIndex];
+        return data;
     },
     cellRenderer: function(cellData, cellDataKey, rowData, rowIndex, columnData, width){
         return (<div className="fixeddatatable-x-cell">{cellData}</div>);
     },
-
+    onRowClick: function(ev, rowIndex, rowData){
+        var selected = this.state.selected;
+        selected[rowIndex] = !selected[rowIndex];
+        this.setState({selected: selected});
+        this.forceUpdate();
+    },
     render: function() {
 
         var headings = [
@@ -94,6 +119,7 @@ var BadgeSelectionTable = React.createClass({
                 width={this.props.widthHint}
                 maxHeight={this.props.heightHint}
                 headerHeight={36}
+                onRowClick={this.onRowClick}
                 >
                 {columns}
             </Table>
