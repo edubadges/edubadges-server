@@ -21,11 +21,13 @@
   }
 
   > :first-child {
-    flex: 1 1 0;
+    flex: 1;
+    min-width: 0;
     padding: 0 $layout-spacing*2;
   }
 
   > :last-child {
+    flex: 0 1 auto;
     padding-right: $layout-spacing*2;
   }
 
