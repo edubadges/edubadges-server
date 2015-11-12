@@ -65,7 +65,7 @@ main {
     }
 
     &:first-child:not(:only-child) {
-      flex: 1 1 0;
+      flex: 1;
     }
 
     &:last-child:not(:only-child) {
