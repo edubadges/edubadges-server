@@ -55,6 +55,7 @@ main {
     &:first-child {
 
       > * {
+        flex-basis: auto;
         margin-right: $layout-spacing;
       }
 
