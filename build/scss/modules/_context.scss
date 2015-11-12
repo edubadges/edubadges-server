@@ -1,0 +1,64 @@
+.context_ {
+  background: map-get($colors, solid-light);
+  box-shadow: map-get($colors, border-light) 0 0 0 1px;
+  box-sizing: border-box;
+  display: none;
+  font-size: $font-size;
+  margin-top: -$layout-spacing*2 + 4px;
+  opacity: 0;
+  padding: $layout-spacing*3 $layout-spacing*6 $layout-spacing*3 $layout-spacing*3;
+  position: relative;
+  transition: opacity $transition-duration $transition-easing;
+  width: 100%;
+  z-index: $z-index-low;
+
+  &::after {
+    background: map-get($colors, solid-light);
+    border-radius: $border-radius;
+    bottom: -$layout-spacing;
+    box-shadow: map-get($colors, border-light) 1px 1px 0 0;
+    content: '';
+    display: block;
+    height: $layout-spacing*2;
+    left: $layout-spacing*2;
+    position: absolute;
+    transform: rotate(45deg);
+    width: $layout-spacing*2;
+    z-index: $z-index-med;
+  }
+
+  p {
+    line-height: 1.5;
+
+    &:not(:last-child) {
+      margin-bottom: $layout-spacing*2;
+    }
+
+  }
+
+  .context_-x-close {
+    position: absolute;
+    right: $layout-spacing*2;
+    top: $layout-spacing*3;
+  }
+
+  &.context-is-active {
+    display: block;
+  }
+
+  &.context-is-visible {
+    opacity: 1;
+  }
+
+  &.tether-target-attached-bottom {
+    margin-top: $layout-spacing*2 - 4px;
+
+    &::after {
+      bottom: auto;
+      top: -$layout-spacing;
+      transform: rotate(-135deg);
+    }
+
+  }
+
+}

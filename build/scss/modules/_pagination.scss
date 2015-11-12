@@ -6,13 +6,13 @@
   font-size: $font-size-small-2x;
   justify-content: space-between;
   line-height: $font-size-large-2x;
-  padding: $layout-spacing $layout-spacing*2 $layout-spacing 0;
+  padding: $layout-spacing $layout-spacing*2;
 
   nav {
     display: flex;
 
     > * {
-      margin-left: $layout-spacing*2;
+      margin-right: $layout-spacing*2;
     }
 
   }
