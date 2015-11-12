@@ -41,10 +41,17 @@ APIStore.collectionsExist = function(collections){
 
 APIStore.getCollection = function(collectionType) {
     if (APIStore.data.hasOwnProperty(collectionType)) {
-        return APIStore.data[collectionType].map(function(item) {
-            // Create a copy so the caller cannot not directly mutate the store
-            return _.extend({},  item);
-        });
+        var collection = APIStore.data[collectionType];
+        // Create a copy so the caller cannot not directly mutate the store
+        if (collection instanceof Array) {
+            return collection.map(function(item) {
+                return _.extend({}, item);
+            });
+        }
+        else {
+            // A collection can be a single object not an array of collection items
+            return _.extend({}, collection);
+        }
     }
     return [];
 };
