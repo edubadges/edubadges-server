@@ -38,48 +38,44 @@ APIStore.collectionsExist = function(collections){
   }
   return true;
 };
+
 APIStore.getCollection = function(collectionType) {
-  if (APIStore.data.hasOwnProperty(collectionType))
-    return APIStore.data[collectionType];
-  else
+    if (APIStore.data.hasOwnProperty(collectionType)) {
+        return APIStore.data[collectionType].map(function(item) {
+            // Create a copy so the caller cannot not directly mutate the store
+            return _.extend({},  item);
+        });
+    }
     return [];
 };
 APIStore.getCollectionLastItem = function(collectionType) {
-  var collection = APIStore.getCollection(collectionType);
-  if (collection.length > 0)
-    return collection[collection.length -1];
-  else
+    var collection = APIStore.getCollection(collectionType);
+    if (collection.length > 0) {
+        return collection[collection.length - 1];
+    }
     return {};
 };
 APIStore.getFirstItemByPropertyValue = function(collectionType, propName, value){
   // Will return the first item that matches -- don't use for queries where you want multiple results.
   var collection = APIStore.getCollection(collectionType);
-  if (!!collection && collection.length > 0) {
-    for (var i=0; i<collection.length; i++){
+
+  for (var i=0; i < collection.length; i++){
       if (collection[i].hasOwnProperty(propName) && collection[i][propName] == value){
-        return collection[i];
+          return collection[i];
       }
-    }
   }
   return {};
 };
 APIStore.filter = function(collectionType, propName, value){
-  if (!APIStore.data.hasOwnProperty(collectionType)){
-    APIStore.data[collectionType] = [];
-  }
-  var collection = APIStore.getCollection(collectionType);
-  function match(el, index, collection){
+  function match(item) {
     if (Array.isArray(value))
-      return (el.hasOwnProperty(propName) && value.indexOf(el[propName]) > -1);
+      return (item.hasOwnProperty(propName) && value.indexOf(item[propName]) > -1);
     else
-      return (el.hasOwnProperty(propName) && el[propName] == value);
+      return (item.hasOwnProperty(propName) && item[propName] == value);
   }
 
-  if (!!collection && collection.length > 0){
-    return collection.filter(match);
-  }
-  else
-    return [];
+  var collection = APIStore.getCollection(collectionType);
+  return collection.filter(match);
 };
 
 APIStore.addCollectionItem = function(collectionKey, item, isNew){
