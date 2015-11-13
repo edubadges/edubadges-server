@@ -174,14 +174,14 @@ BadgeClassTable = React.createClass({
 
             return (
                 <tr>
-                    <th scope="row" onClick={this.navigateToBadgeClassDetail.bind(null, badgeClass.slug)}>
+                    <td className="table_-x-main table_-x-minpad" onClick={this.navigateToBadgeClassDetail.bind(null, badgeClass.slug)}>
                         <div className="l-horizontal">
                             <div>
-                                <button><img src={badgeClass.image} width="48" height="48" alt="issuer description" /></button>
+                                <button className="thumbnail_"><img src={badgeClass.image} width="48" height="48" alt="issuer description" /></button>
                                 <button className="truncate_ action_ action_-tertiary">{badgeClass.name}</button>
                             </div>
                         </div>
-                    </th>
+                    </td>
                     <td>{badgeClass.recipient_count}</td>
                     <td>
                         <div className="l-horizontal">
