@@ -39,6 +39,10 @@ APIStore.collectionsExist = function(collections){
   return true;
 };
 
+APIStore.collectionExists = function(collectionKey) {
+    return APIStore.data.hasOwnProperty(collectionKey);
+};
+
 APIStore.getCollection = function(collectionType) {
     if (APIStore.data.hasOwnProperty(collectionType)) {
         var collection = APIStore.data[collectionType];
@@ -351,7 +355,7 @@ APIStore.getData = function(context, requestContext, pagination_url, retriedAtte
         collectionKey = context.apiCollectionKey+":"+pagination_url;
       }
 
-      if (!APIStore.collectionsExist(collectionKey) || context['replaceCollection']){
+      if ( ! APIStore.collectionExists(collectionKey) || context['replaceCollection']){
         APIStore.data[collectionKey] = [];
       }
 
