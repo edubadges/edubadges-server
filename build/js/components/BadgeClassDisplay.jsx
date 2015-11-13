@@ -95,21 +95,6 @@ BadgeClassTable = React.createClass({
         navigateLocalPath(badgeClassDetailPath);
     },
 
-    deleteBadgeClass: function(badgeClass) {
-        apiContext = {
-            apiCollectionKey: "issuer_badgeclasses",
-            apiSearchKey: 'slug',
-            apiSearchValue: badgeClass.slug,
-
-            actionUrl: "/v1/issuer/issuers/"+ this.props.issuerSlug +"/badges/"+ badgeClass.slug,
-            method: "DELETE",
-            successHttpStatus: [200, 204],
-            successMessage: "Badge class deleted."
-        };
-
-        APISubmitData(null, apiContext);
-    },
-
     getRemoveButton: function(badgeClass) {
         if (badgeClass.recipient_count >= 1) {
             return (
@@ -117,19 +102,45 @@ BadgeClassTable = React.createClass({
                     popover="All instances of this badge must be revoked before removing it." />);
         }
         else {
-            var actions=[
-                <Button label="Remove"
-                    onClick={this.deleteBadgeClass.bind(null, badgeClass)} />];
+          var openRemoveDialog = function() {
+
+            var deleteBadgeClass = function() {
+              apiContext = {
+                  apiCollectionKey: "issuer_badgeclasses",
+                  apiSearchKey: 'slug',
+                  apiSearchValue: badgeClass.slug,
+
+                  actionUrl: "/v1/issuer/issuers/"+ this.props.issuerSlug +"/badges/"+ badgeClass.slug,
+                  method: "DELETE",
+                  successHttpStatus: [200, 204],
+                  successMessage: "Badge class deleted."
+              };
+              APISubmitData(null, apiContext);
+
+              closeDialog();
+
+            }.bind(this)
+
+
+
+            var dialogId = "remove-badgeclass-"+ badgeClass.id;
+            var actions = [
+                <Button key="remove" label="Remove" onClick={deleteBadgeClass} />];
+            var closeDialog = function() {
+              dialog_element.closeDialog();
+            }
             var dialog = (
-                <Dialog dialogId={"remove-badgeclass-"+ badgeClass.id} actions={actions} className="closable">
+                <Dialog dialogId={dialogId} actions={actions} className="closable" handleCloseDialog={closeDialog}>
                     <Heading size="small"
                                 title="Remove Badge"
                                 subtitle="Are you sure you want to remove this badge?"/>
                 </Dialog>);
-            return (
-                <DialogOpener dialog={dialog} dialogId={"remove-badgeclass-"+ badgeClass.id}>
-                    <Button className="button_ button_-tertiary" label="Remove" propagateClick={true} />
-                </DialogOpener>);
+            var dialog_element = new DialogElement(dialog, dialogId);
+            dialog_element.update();
+            dialog_element.showDialog();
+          }.bind(this);
+
+          return (<Button className="button_ button_-tertiary" label="Remove" handleClick={openRemoveDialog} />);
         }
     },
 
