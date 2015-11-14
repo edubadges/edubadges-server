@@ -157,7 +157,7 @@ BadgeClassTable = React.createClass({
         ];
         var closeDialog = function() {
             APIReloadCollections(['issuer_badgeclasses'])
-            dialog_element.closeDialog();
+            dialog_element.destroy();
         }
         var dialog = (
             <Dialog formId={dialogFormId} dialogId="create-badge-instance" actions={actions} className="closable" handleCloseDialog={closeDialog}>
