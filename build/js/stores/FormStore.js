@@ -35,6 +35,15 @@ FormStore.getFormState = function(formId){
     return FormStore.data[formId].formState;
 };
 
+FormStore.initFormData = function(formId, initialData) {
+    FormStore.data[formId] = initialData;
+
+  if (!FormStore.data[formId].formState)
+    FormStore.data[formId].formState = _.clone(initialData.defaultValues);
+
+  return FormStore.getFormData(formId);
+};
+
 FormStore.getOrInitFormData = function(formId, initialData){
   if (
       !FormStore.data.hasOwnProperty(formId) ||
@@ -131,6 +140,7 @@ module.exports = {
   getFormState: FormStore.getFormState,
   resetFormData: FormStore.resetFormData,
   getOrInitFormData: FormStore.getOrInitFormData,
+  initFormData: FormStore.initFormData,
   patchFormData: FormStore.patchFormProperty,
   getFieldValue: FormStore.getFieldValue,
   genericFormTypes: FormStore.genericFormTypes,
