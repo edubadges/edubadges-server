@@ -437,7 +437,7 @@ APIStore.postForm = function(fields, values, context, requestContext){
       }
       var newObject = APIStore.addCollectionItem(context.apiCollectionKey, JSON.parse(response.text), (context.method == 'PUT'));
       if (newObject){
-        APIStore.emit('DATA_UPDATED');
+        APIStore.emit('DATA_UPDATED', context.apiCollectionKey);
         if (context.formId){
           APIActions.APIFormResultSuccess({
             formId: context.formId,
