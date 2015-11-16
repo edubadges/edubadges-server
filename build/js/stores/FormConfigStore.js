@@ -226,6 +226,11 @@ FormConfigStore.getConfig = function(formType, overrides, context){
             method: "POST",
             successHttpStatus: [201],
             successMessage: contextGet('badgeName') +" added to collection.",
+            updateFunction: function(request, APIStore, requestContext) {
+                var collection = APIStore.filter(this.apiCollectionKey, 'slug', requestContext.collection)[0];
+                collection.badges.push(request.body);
+                return request.body;
+            },
         },
     },
   };
