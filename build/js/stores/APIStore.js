@@ -423,31 +423,25 @@ APIStore.postForm = function(fields, values, context, requestContext){
         }
       });
     }
-    else{
-      if (!!context.updateFunction){
+    else {
+      if (typeof context.updateFunction === "function"){
         newObject = context.updateFunction(response, APIStore, requestContext);
-        APIStore.emit('DATA_UPDATED');
-        if (context.formId){
-          APIActions.APIFormResultSuccess({
-            formId: context.formId,
-            message: {type: 'success', content: context.successMessage},
-            result: newObject
-          })
-        }
-      }
-      var newObject = APIStore.addCollectionItem(context.apiCollectionKey, JSON.parse(response.text), (context.method == 'PUT'));
-      if (newObject){
-        APIStore.emit('DATA_UPDATED', context.apiCollectionKey);
-        if (context.formId){
-          APIActions.APIFormResultSuccess({
-            formId: context.formId,
-            message: {type: 'success', content: context.successMessage},
-            result: newObject
-          });
-        }
       }
       else {
-        APIStore.emit('API_STORE_FAILURE');
+        newObject = APIStore.addCollectionItem(context.apiCollectionKey, JSON.parse(response.text), (context.method == 'PUT'));
+        if ( ! newObject) {
+            APIStore.emit('API_STORE_FAILURE');
+            return;
+        }
+      }
+
+      APIStore.emit('DATA_UPDATED', context.apiCollectionKey);
+      if (context.formId) {
+          APIActions.APIFormResultSuccess({
+              formId: context.formId,
+              message: {type: 'success', content: context.successMessage},
+              result: newObject
+          });
       }
     } 
   });
