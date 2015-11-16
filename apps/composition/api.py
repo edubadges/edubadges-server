@@ -203,23 +203,22 @@ class CollectionLocalBadgeInstanceList(APIView):
         except Collection.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        if badges:
-            serializer = CollectionLocalBadgeInstanceSerializer(
-                data=badges, many=isinstance(badges, list),
-                context={'collection': collection, 'request': request}
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
+        serializer = CollectionLocalBadgeInstanceSerializer(
+            data=badges, many=isinstance(badges, list),
+            context={'collection': collection, 'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-            badge_ids = [
-                item.get('id') for item in badges
-            ]
+        badge_ids = [
+            item.get('id') for item in badges
+        ]
 
-            badges_to_remove = LocalBadgeInstanceCollection.objects.filter(
-                collection=collection
-            ).exclude(instance__id__in=badge_ids)
-            for badge in badges_to_remove:
-                badge.delete()
+        badges_to_remove = LocalBadgeInstanceCollection.objects.filter(
+            collection=collection
+        ).exclude(instance__id__in=badge_ids)
+        for badge in badges_to_remove:
+            badge.delete()
 
         serializer = CollectionLocalBadgeInstanceSerializer(
             collection.localbadgeinstancecollection_set.all(), many=True
