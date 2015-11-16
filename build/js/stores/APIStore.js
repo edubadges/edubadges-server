@@ -425,7 +425,7 @@ APIStore.postForm = function(fields, values, context, requestContext){
     }
     else{
       if (!!context.updateFunction){
-        newObject = context.updateFunction(response, APIStore);
+        newObject = context.updateFunction(response, APIStore, requestContext);
         APIStore.emit('DATA_UPDATED');
         if (context.formId){
           APIActions.APIFormResultSuccess({
