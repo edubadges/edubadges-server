@@ -508,6 +508,15 @@ var App = React.createClass({
     var formProps = FormConfigStore.getConfig(dialogFormId, {}, {issuerSlug: issuerSlug});
     FormStore.getOrInitFormData(dialogFormId, formProps);
 
+    var formData = FormStore.getFormData(dialogFormId);
+    if (formData.apiContext) {
+        var parseSlug = new RegExp("/v1/issuer/issuers/([^/]+)/badges");
+        var actionSlug = parseSlug.exec(formData.apiContext.actionUrl).pop();
+        if (actionSlug && actionSlug !== issuerSlug) {
+            FormStore.initFormData(dialogFormId, formProps);
+        }
+    }
+
     var showBadgeStudio = function(e) {
       e.stopPropagation();
 
