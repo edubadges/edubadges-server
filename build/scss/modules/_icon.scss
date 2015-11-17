@@ -68,7 +68,8 @@
   text-indent: -9999em;
   padding-left: $layout-spacing;
   padding-right: $layout-spacing;
-  max-width: 0;
+  max-width: 0 !important; // To override legacy
+  width: 0 !important; // To override legacy
 
   &::after {
     background-position: center center;
