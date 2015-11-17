@@ -115,7 +115,11 @@ var App = React.createClass({
   componentDidMount: function() {
     MenuStore.addListener('UNCAUGHT_DOCUMENT_CLICK', this.hideOpenTopMenu);
     RouteStore.addListener('ROUTE_CHANGED', this.handleRouteChange);
-    APIStore.addListener('DATA_UPDATED', function(){
+    APIStore.addListener('DATA_UPDATED', function(collectionKey){
+        if (collectionKey === 'issuer_badgeinstances') {
+            // An update to issuer_badgeinstances should always update issuer_badgeclasses as recipient_count will be stale
+            APIActions.APIFetchCollections(['issuer_badgeclasses']);
+        }
       if (this.isMounted())
         this.setState({});
     }.bind(this));

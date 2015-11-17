@@ -181,10 +181,72 @@ document.addEventListener('DOMContentLoaded', function() {
 
     }
 
+    function context() {
+
+      var context = document.getElementById('context');
+
+      function activateContext() {
+        context.classList.add(activeClass);
+
+        new Tether({
+            element: context,
+            target: contextTrigger,
+            attachment: 'bottom middle',
+            targetAttachment: 'top middle',
+            constraints: [
+                {
+                  to: 'window',
+                  attachment: 'together',
+                  pin: true
+                }
+              ]
+        });
+
+        Tether.position();
+
+        context.classList.add(visibleClass);
+        context.classList.add('context-is-tethered');
+      }
+
+      function toggleContext() {
+        context.classList.toggle(visibleClass);
+        context.classList.toggle(activeClass);
+      }
+
+      if (context) {
+
+        var contextTrigger = document.getElementById('context-trigger');
+        var contextClose = document.getElementById('context-close');
+
+        var activeClass = 'context-is-active';
+        var visibleClass = 'context-is-visible';
+
+        var contextIsActive = false;
+
+        contextClose.addEventListener('click', function(event) {
+          toggleContext();
+        });
+
+        contextTrigger.addEventListener('click', function(event) {
+
+          if (contextIsActive == false) {
+            activateContext();
+            contextIsActive = true;
+          } else {
+            toggleContext();
+          }
+          
+        });
+
+      }
+
+    }
+
     dialog();
     dropdown();
     issuer();
     popover();
     searchinput();
+    context();
 
 });

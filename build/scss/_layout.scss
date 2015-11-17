@@ -5,10 +5,14 @@ main {
   z-index: $z-index-low;
 }
 
+// Removes standard top offset for main element
+
 .l-mainoverride {
   padding-bottom: 0;
   padding-top: 0;
 }
+
+// Primarly used for lists of badges and collections
 
 .l-grid {
   display: flex;
@@ -26,7 +30,7 @@ main {
 
 }
 
-// When you want the items inside of the grid to have equal heights
+// Forces direct children of a l-grid layout to have equal heights
 
 .l-grid-stretch {
 
@@ -36,6 +40,8 @@ main {
   }
 
 }
+
+// General-purpose "space-between" horizontal layouts
 
 .l-horizontal {
   align-items: center;
@@ -49,6 +55,7 @@ main {
     &:first-child {
 
       > * {
+        flex-basis: auto;
         margin-right: $layout-spacing;
       }
 
@@ -59,7 +66,7 @@ main {
     }
 
     &:first-child:not(:only-child) {
-      flex: 1 1 0;
+      flex: 1;
     }
 
     &:last-child:not(:only-child) {
@@ -75,6 +82,8 @@ main {
 
 }
 
+// Right-aligned horizontal layouts
+
 .l-horizontalright {
   align-items: center;
   display: flex;
@@ -86,6 +95,8 @@ main {
 
 }
 
+// Equally-spaced vertical layouts
+
 .l-vertical {
   max-width: 100%;
 
@@ -95,6 +106,8 @@ main {
 
 }
 
+// Equally-spaced vertical layouts, with smaller margins
+
 .l-vertical-small {
 
   > *:not(:last-child) {
@@ -103,10 +116,14 @@ main {
 
 }
 
+// Offsets an item in an l-vertical layout
+
 .l-verticaloffset {
   margin-top: $layout-spacing*3;
   margin-bottom: $layout-spacing*6;
 }
+
+// For creating equally-spaced vertical layouts
 
 .l-wrappinglist {
   display: flex;
@@ -120,6 +137,8 @@ main {
 
 }
 
+// Offsets a container horizontally
+
 .l-wrapper {
 
   @media (min-width: 1184px + $layout-spacing*6) {
@@ -128,6 +147,8 @@ main {
   }
 
 }
+
+// Creates additional horizontal spacing for l-wrapper
 
 .l-wrapper-inset {
   padding-left: $layout-spacing*6;
@@ -139,6 +160,8 @@ main {
   }
   
 }
+
+// Badge studio page layout
 
 $l-studio-header: $layout-spacing*8;
 
@@ -206,6 +229,29 @@ $l-studio-header: $layout-spacing*8;
     height: $l-studio-header;
     padding: $layout-spacing*3 $layout-spacing*1.5 $layout-spacing*3 $layout-spacing*3;
     width: 100%;
+  }
+
+}
+
+// Sets the main element to take up the space not used by the header and footer (wraps entire page)
+
+.l-fillvertical {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+
+  > header {
+    flex: 0 0 auto;
+  }
+
+  main {
+    flex: 1 0 auto;
+    overflow-y: auto;
+  }
+
+  > footer {
+    flex: 0 0 auto;
   }
 
 }

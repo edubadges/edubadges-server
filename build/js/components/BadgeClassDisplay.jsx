@@ -95,58 +95,69 @@ BadgeClassTable = React.createClass({
         navigateLocalPath(badgeClassDetailPath);
     },
 
-    deleteBadgeClass: function(badgeClass) {
-        apiContext = {
-            apiCollectionKey: "issuer_badgeclasses",
-            apiSearchKey: 'slug',
-            apiSearchValue: badgeClass.slug,
-
-            actionUrl: "/v1/issuer/issuers/"+ this.props.issuerSlug +"/badges/"+ badgeClass.slug,
-            method: "DELETE",
-            successHttpStatus: [200, 204],
-            successMessage: "Badge class deleted."
-        };
-
-        APISubmitData(null, apiContext);
-    },
-
     getRemoveButton: function(badgeClass) {
-        if (badgeClass.recipient_count > 1) {
+        if (badgeClass.recipient_count >= 1) {
             return (
                 <Button className="button_ button_-tertiary is-disabled" label="Remove"
                     popover="All instances of this badge must be revoked before removing it." />);
         }
         else {
-            var actions=[
-                <Button label="Remove"
-                    onClick={this.deleteBadgeClass.bind(null, badgeClass)} />];
+          var openRemoveDialog = function() {
+
+            var deleteBadgeClass = function() {
+              apiContext = {
+                  apiCollectionKey: "issuer_badgeclasses",
+                  apiSearchKey: 'slug',
+                  apiSearchValue: badgeClass.slug,
+
+                  actionUrl: "/v1/issuer/issuers/"+ this.props.issuerSlug +"/badges/"+ badgeClass.slug,
+                  method: "DELETE",
+                  successHttpStatus: [200, 204],
+                  successMessage: "Badge class deleted."
+              };
+              APISubmitData(null, apiContext);
+
+              closeDialog();
+
+            }.bind(this)
+
+
+
+            var dialogId = "remove-badgeclass-"+ badgeClass.id;
+            var actions = [
+                <Button key="remove" label="Remove" onClick={deleteBadgeClass} />];
+            var closeDialog = function() {
+              dialog_element.closeDialog();
+            }
             var dialog = (
-                <Dialog dialogId={"remove-badgeclass-"+ badgeClass.id} actions={actions} className="closable">
+                <Dialog dialogId={dialogId} actions={actions} className="closable" handleCloseDialog={closeDialog}>
                     <Heading size="small"
                                 title="Remove Badge"
                                 subtitle="Are you sure you want to remove this badge?"/>
                 </Dialog>);
-            return (
-                <DialogOpener dialog={dialog} dialogId={"remove-badgeclass-"+ badgeClass.id}>
-                    <Button className="button_ button_-tertiary" label="Remove" propagateClick={true} />
-                </DialogOpener>);
+            var dialog_element = new DialogElement(dialog, dialogId);
+            dialog_element.update();
+            dialog_element.showDialog();
+          }.bind(this);
+
+          return (<Button className="button_ button_-tertiary" label="Remove" handleClick={openRemoveDialog} />);
         }
     },
 
     getIssueButton: function(badgeClass) {
 
 
-      var openIssueDialog = function() {
+      var openIssueDialog = function(badgeClass) {
         var dialogId="create-badge-instance";
         var dialogFormId = "BadgeInstanceCreateUpdateForm";
         var formProps = FormConfigStore.getConfig(dialogFormId, {}, {issuerSlug: this.props.issuerSlug, badgeClassSlug: badgeClass.slug});
-        FormStore.getOrInitFormData(dialogFormId, formProps);
+        FormStore.initFormData(dialogFormId, formProps);
         var actions=[
             <SubmitButton key="submit" formId={dialogFormId} label="Submit" />
         ];
         var closeDialog = function() {
             APIReloadCollections(['issuer_badgeclasses'])
-            dialog_element.closeDialog();
+            dialog_element.destroy();
         }
         var dialog = (
             <Dialog formId={dialogFormId} dialogId="create-badge-instance" actions={actions} className="closable" handleCloseDialog={closeDialog}>
@@ -160,7 +171,7 @@ BadgeClassTable = React.createClass({
         var dialog_element = new DialogElement(dialog, dialogId);
         dialog_element.update();
         dialog_element.showDialog();
-      }.bind(this);
+      }.bind(this, badgeClass);
 
       return (<Button style="tertiary" label="Issue" handleClick={openIssueDialog}/>);
 
@@ -174,14 +185,14 @@ BadgeClassTable = React.createClass({
 
             return (
                 <tr>
-                    <th scope="row" onClick={this.navigateToBadgeClassDetail.bind(null, badgeClass.slug)}>
+                    <td className="table_-x-main table_-x-minpad" onClick={this.navigateToBadgeClassDetail.bind(null, badgeClass.slug)}>
                         <div className="l-horizontal">
                             <div>
-                                <button><img src={badgeClass.image} width="48" height="48" alt="issuer description" /></button>
+                                <button className="thumbnail_"><img src={badgeClass.image} width="48" height="48" alt="issuer description" /></button>
                                 <button className="truncate_ action_ action_-tertiary">{badgeClass.name}</button>
                             </div>
                         </div>
-                    </th>
+                    </td>
                     <td>{badgeClass.recipient_count}</td>
                     <td>
                         <div className="l-horizontal">

@@ -209,6 +209,14 @@
 
 }
 
+.icon_-help {
+
+  &::after {
+    background-image: url('images/icon-help.svg');
+  }
+
+}
+
 // Small Icons
 
 .icon_-small.icon_-dropdown {

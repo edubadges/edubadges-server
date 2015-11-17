@@ -38,48 +38,55 @@ APIStore.collectionsExist = function(collections){
   }
   return true;
 };
+
+APIStore.collectionExists = function(collectionKey) {
+    return APIStore.data.hasOwnProperty(collectionKey);
+};
+
 APIStore.getCollection = function(collectionType) {
-  if (APIStore.data.hasOwnProperty(collectionType))
-    return APIStore.data[collectionType];
-  else
+    if (APIStore.data.hasOwnProperty(collectionType)) {
+        var collection = APIStore.data[collectionType];
+        // Create a copy so the caller cannot not directly mutate the store
+        if (collection instanceof Array) {
+            return collection.map(function(item) {
+                return _.extend({}, item);
+            });
+        }
+        else {
+            // A collection can be a single object not an array of collection items
+            return _.extend({}, collection);
+        }
+    }
     return [];
 };
 APIStore.getCollectionLastItem = function(collectionType) {
-  var collection = APIStore.getCollection(collectionType);
-  if (collection.length > 0)
-    return collection[collection.length -1];
-  else
+    var collection = APIStore.getCollection(collectionType);
+    if (collection.length > 0) {
+        return collection[collection.length - 1];
+    }
     return {};
 };
 APIStore.getFirstItemByPropertyValue = function(collectionType, propName, value){
   // Will return the first item that matches -- don't use for queries where you want multiple results.
   var collection = APIStore.getCollection(collectionType);
-  if (!!collection && collection.length > 0) {
-    for (var i=0; i<collection.length; i++){
+
+  for (var i=0; i < collection.length; i++){
       if (collection[i].hasOwnProperty(propName) && collection[i][propName] == value){
-        return collection[i];
+          return collection[i];
       }
-    }
   }
   return {};
 };
 APIStore.filter = function(collectionType, propName, value){
-  if (!APIStore.data.hasOwnProperty(collectionType)){
-    APIStore.data[collectionType] = [];
-  }
-  var collection = APIStore.getCollection(collectionType);
-  function match(el, index, collection){
+  function match(item) {
     if (Array.isArray(value))
-      return (el.hasOwnProperty(propName) && value.indexOf(el[propName]) > -1);
+      return (item.hasOwnProperty(propName) && value.indexOf(item[propName]) > -1);
     else
-      return (el.hasOwnProperty(propName) && el[propName] == value);
+      return (item.hasOwnProperty(propName) && item[propName] == value);
   }
 
-  if (!!collection && collection.length > 0){
-    return collection.filter(match);
-  }
-  else
-    return [];
+  var collection = APIStore.getCollection(collectionType);
+  return collection.filter(match);
 };
 
 APIStore.addCollectionItem = function(collectionKey, item, isNew){
@@ -348,7 +355,7 @@ APIStore.getData = function(context, requestContext, pagination_url, retriedAtte
         collectionKey = context.apiCollectionKey+":"+pagination_url;
       }
 
-      if (!APIStore.collectionsExist(collectionKey) || context['replaceCollection']){
+      if ( ! APIStore.collectionExists(collectionKey) || context['replaceCollection']){
         APIStore.data[collectionKey] = [];
       }
 
@@ -416,31 +423,25 @@ APIStore.postForm = function(fields, values, context, requestContext){
         }
       });
     }
-    else{
-      if (!!context.updateFunction){
-        newObject = context.updateFunction(response, APIStore);
-        APIStore.emit('DATA_UPDATED');
-        if (context.formId){
-          APIActions.APIFormResultSuccess({
-            formId: context.formId,
-            message: {type: 'success', content: context.successMessage},
-            result: newObject
-          })
-        }
-      }
-      var newObject = APIStore.addCollectionItem(context.apiCollectionKey, JSON.parse(response.text), (context.method == 'PUT'));
-      if (newObject){
-        APIStore.emit('DATA_UPDATED');
-        if (context.formId){
-          APIActions.APIFormResultSuccess({
-            formId: context.formId,
-            message: {type: 'success', content: context.successMessage},
-            result: newObject
-          });
-        }
+    else {
+      if (typeof context.updateFunction === "function"){
+        newObject = context.updateFunction(response, APIStore, requestContext);
       }
       else {
-        APIStore.emit('API_STORE_FAILURE');
+        newObject = APIStore.addCollectionItem(context.apiCollectionKey, JSON.parse(response.text), (context.method == 'PUT'));
+        if ( ! newObject) {
+            APIStore.emit('API_STORE_FAILURE');
+            return;
+        }
+      }
+
+      APIStore.emit('DATA_UPDATED', context.apiCollectionKey);
+      if (context.formId) {
+          APIActions.APIFormResultSuccess({
+              formId: context.formId,
+              message: {type: 'success', content: context.successMessage},
+              result: newObject
+          });
       }
     } 
   });
