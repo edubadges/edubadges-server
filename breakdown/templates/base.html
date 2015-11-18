@@ -25,7 +25,7 @@
             <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/style.css">
             <!-- main (incoming and future ruler of the realm) stylesheet -->
             <link href="{{ STATIC_URL }}css/reset.css" media="screen" rel="stylesheet" type="text/css" >
-            <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/screen.css">
+            <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/screen.css?v={{ ARTIFACT_VERSION }}">
 
             {% block extrastyle %}{% endblock %}
 
@@ -75,7 +75,7 @@
 
         {% block scripts %}
             {% if initial_data %}
-                <script src="{{STATIC_URL}}js/app.js"></script>
+                <script src="{{STATIC_URL}}js/app.js?v={{ARTIFACT_VERSION}}"></script>
             {% endif %}
             {% if GOOGLE_ANALYTICS_ID %}
             <script type="text/javascript">
