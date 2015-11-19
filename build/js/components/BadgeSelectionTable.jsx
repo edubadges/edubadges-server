@@ -4,10 +4,16 @@ var moment = require('moment');
 var Table = require('fixed-data-table').Table;
 var Column = require('fixed-data-table').Column;
 
-var APIActions = require('../actions/api');
+// Stores
 var APIStore = require('../stores/APIStore');
+var CollectionStore = require('../stores/CollectionStore').CollectionStore;
 var FormStore = require('../stores/FormStore');
 
+// Actions
+var APIActions = require('../actions/api');
+var CollectionStoreActions = require('../actions/CollectionStoreActions').CollectionStoreActions;
+
+// Components
 var Pagination = require('../components/Pagination.jsx').Pagination;
 var Dialog = require('../components/Dialog.jsx').Dialog;
 var DialogOpener = require('../components/Dialog.jsx').DialogOpener;
@@ -77,34 +83,59 @@ var BadgeSelectionTable = React.createClass({
         initialSelectedBadges: React.PropTypes.array,
         widthHint: React.PropTypes.number,
         heightHint: React.PropTypes.number,
+        stored: React.PropTypes.bool,
+        onRowClick: React.PropTypes.func,
     },
 
-    getDefaultProps: function(){
+    getDefaultProps: function() {
         return {
             badges: [],
             initialSelectedBadges: [],
             widthHint: 800,
             heightHint: 600,
+            stored: false,
+            onRowClick: function(){},
         };
     },
 
-    getInitialState: function(){
-        return {
-            selected: this.props.badges.map(function(badge, i) {
-                return (this.props.initialSelectedBadges.indexOf(badge.id) !== -1);
-            }.bind(this))
+    getInitialState: function() {
+        var selected = this.props.badges.map(function(badge, i) {
+            return (this.props.initialSelectedBadges.indexOf(badge.id) !== -1);
+        }.bind(this));
+
+        if (this.props.stored) {
+            CollectionStoreActions.init(selected.slice());
         }
+
+        return {
+            selected: selected.slice(),
+        }
+    },
+
+    componentDidMount: function() {
+        CollectionStore.addListener('COLLECTION_BADGE_TOGGLED', this.toggleCollectionState); 
+    },
+
+    onRowClick: function(ev, rowIndex, rowData) {
+        this.props.onRowClick();
+
+        if (this.props.stored) {
+            CollectionStoreActions.toggle(rowIndex, rowData);
+        }
+        else {
+            this.toggleCollectionState(rowIndex, rowData);
+        }
+    },
+
+    toggleCollectionState: function(rowIndex, rowData) {
+        var newSelectionArray = this.state.selected.slice();
+        newSelectionArray[rowIndex] = ! newSelectionArray[rowIndex]; 
+        this.setState({selected: newSelectionArray});
     },
 
     rowGetter: function(rowIndex) {
         return _.extend({ selected: this.state.selected[rowIndex] },
                         this.props.badges[rowIndex]);
-    },
-
-    onRowClick: function(ev, rowIndex, rowData) {
-        var newSelectionArray = _.extend({}, this.state.selected);
-        newSelectionArray[rowIndex] = ! newSelectionArray[rowIndex]; 
-        this.setState({selected: newSelectionArray});
     },
 
     render: function() {
