@@ -1,10 +1,8 @@
 var React = require('react');
 var _ = require('lodash');
 var moment = require('moment');
-var FixedDataTable = require('fixed-data-table');
-var Table = FixedDataTable.Table;
-var Column = FixedDataTable.Column;
-
+var Table = require('fixed-data-table').Table;
+var Column = require('fixed-data-table').Column;
 
 var APIActions = require('../actions/api');
 var APIStore = require('../stores/APIStore');
@@ -17,98 +15,110 @@ var Detail = require('../components/Detail.jsx').Detail;
 var Button = require('../components/Button.jsx').Button;
 
 
-// Cell rendering helpers
-var renderSelectCell = function(cellData, cellDataKey, rowData, rowIndex, columnData, width){
-    return (
-      <span className={rowData.selected ? "icon_ icon_-notext icon_-selectfilled" : "icon_ icon_-notext icon_-selectempty"}>
-          {rowData.selected ? "Selected" : "Not selected"}
-      </span>
-    );
-};
-var renderBadgeName = function(cellData, cellDataKey, rowData, rowIndex, columnData, width){
-    return (
-        <div className="l-horizontal">
-            <button>
-                <img src={_.get(rowData, 'json.image.id')} width="48" height="48" alt={_.get(rowData, 'json.badge.name[@value]')} />
-            </button>
-            <button className="truncate_ action_ action_-tertiary">
-                {_.get(rowData, 'json.badge.name[@value]')}
-            </button>
-        </div>
-    );
-};
-var renderIssuerName = function(cellData, cellDataKey, rowData, rowIndex, columnData, width){
-    return _.get(rowData, 'json.badge.issuer.name[@value]');
-};
-var renderIssueDateCell = function(cellData, cellDataKey, rowData, rowIndex, columnData, width){
-  return moment(_.get(rowData, 'json.issuedOn[@value]')).format('MMMM Do YYYY');
-};
+// Cell rendering helpers for the FixedDataTable React component
+var fixedDataTable = {
+    headerRenderer: function(column, label, cellDataKey, columnData, rowData, width) {
+        if (column.icon) {
+            return (<span className={"icon_ icon_-notext " + column.icon}></span> );
+        }
+        return (<span className="truncate_" title={label}>{label}</span>);
+    },
 
+    tableColumns: [
+        {
+            label: "Select",
+            icon: "icon_-add",
+            width: 56,
+            render: function(cellData, cellDataKey, rowData, rowIndex, columnData, width) {
+                return (
+                    <span className={"icon_ icon_-notext icon_-select" + (rowData.selected ? "filled" : "empty")}>
+                        {rowData.selected ? "Selected" : "Not selected"}
+                    </span>
+                );
+            }
+        },
+        {
+            label: "Badge Name",
+            align: "left",
+            width: 240,
+            render: function(cellData, cellDataKey, rowData, rowIndex, columnData, width) {
+                return (
+                    <div className="l-horizontal">
+                        <button>
+                            <img src={_.get(rowData, 'json.image.id')} width="48" height="48" alt={_.get(rowData, 'json.badge.name[@value]')} />
+                        </button>
+                        <button className="truncate_ action_ action_-tertiary">
+                            {_.get(rowData, 'json.badge.name[@value]')}
+                        </button>
+                    </div>
+                );
+            }
+        },
+        {
+            label: "Issuer",
+            align: "left",
+            render: function(cellData, cellDataKey, rowData, rowIndex, columnData, width) {
+                return _.get(rowData, 'json.badge.issuer.name[@value]');
+            }
+        },
+        {
+            label: "Issue Date",
+            align: "left",
+            render: function(cellData, cellDataKey, rowData, rowIndex, columnData, width) {
+                return moment(_.get(rowData, 'json.issuedOn[@value]')).format('MMMM Do YYYY');
+            }
+        },
+    ],
+}
 
 var BadgeSelectionTable = React.createClass({
-    proptypes: {
+    propTypes: {
         badges: React.PropTypes.array.isRequired,
+        initialSelectedBadges: React.PropTypes.array,
         widthHint: React.PropTypes.number,
         heightHint: React.PropTypes.number,
     },
+
     getDefaultProps: function(){
         return {
             badges: [],
             initialSelectedBadges: [],
             widthHint: 800,
             heightHint: 600,
-            cellRenderer: this.cellRenderer
         };
     },
+
     getInitialState: function(){
-        var state = {
-            selected: []
-        };
-        for (var i=0; i<this.props.badges.length; i++){
-            state['selected'][i] = this.props.initialSelectedBadges.indexOf(this.props.badges[i].id) > -1
+        return {
+            selected: this.props.badges.map(function(badge, i) {
+                return (this.props.initialSelectedBadges.indexOf(badge.id) !== -1);
+            }.bind(this))
         }
-        return state;
     },
 
     rowGetter: function(rowIndex) {
-        var data = this.props.badges[rowIndex];
-        data['selected'] = this.state.selected[rowIndex];
-        return data;
+        return _.extend({ selected: this.state.selected[rowIndex] },
+                        this.props.badges[rowIndex]);
     },
-    cellRenderer: function(cellData, cellDataKey, rowData, rowIndex, columnData, width){
-        return (<div className="fixeddatatable-x-cell">{cellData}</div>);
-    },
-    onRowClick: function(ev, rowIndex, rowData){
-        var selected = this.state.selected;
-        selected[rowIndex] = !selected[rowIndex];
-        this.setState({selected: selected});
-        this.forceUpdate();
-    },
-    render: function() {
 
-        var headings = [
-            {label: "Select", icon: "icon_-add", cellRenderer: renderSelectCell, width: 56},
-            {label: "Badge Name", cellRenderer: renderBadgeName, width: 240, align: "left"},
-            {label: "Issuer", cellRenderer: renderIssuerName, align: "left"},
-            {label: "Issue Date", cellRenderer: renderIssueDateCell, align: "left"}
-        ];
-        var columns = headings.map(function(colInfo, i){
-            var headerRenderer = function(label, cellDataKey, columnData, rowData, width) {
-                if (colInfo.icon)
-                    return (<span className={"icon_ icon_-notext " + colInfo.icon}></span> );
-                return (<span className="truncate_" title={label}>{label}</span>);
-            };
+    onRowClick: function(ev, rowIndex, rowData) {
+        var newSelectionArray = _.extend({}, this.state.selected);
+        newSelectionArray[rowIndex] = ! newSelectionArray[rowIndex]; 
+        this.setState({selected: newSelectionArray});
+    },
+
+    render: function() {
+        var renderedColumns = fixedDataTable.tableColumns.map(function(column, i) {
             return (
                 <Column key={"award-column-"+i}
-                    label={colInfo.label}
-                    headerRenderer={headerRenderer}
-                    cellRenderer={colInfo.cellRenderer}
-                    align={colInfo.align || "center"}
-                    width={colInfo.width || 120}
+                    label={column.label}
+                    headerRenderer={fixedDataTable.headerRenderer.bind(this, column)}
+                    cellRenderer={column.render}
+                    align={column.align || "center"}
+                    width={column.width || 120}
                     dataKey={"col-" + i}
                     fixed={false}
-                    flexGrow={1}
-                     />);
+                    flexGrow={1} />);
         }.bind(this));
 
         return (
@@ -119,14 +129,14 @@ var BadgeSelectionTable = React.createClass({
                 width={this.props.widthHint}
                 maxHeight={this.props.heightHint}
                 headerHeight={36}
-                onRowClick={this.onRowClick}
-                >
-                {columns}
+                onRowClick={this.onRowClick}>
+                    {renderedColumns}
             </Table>
         );
     }
 });
 
-module.exports.BadgeSelectionTable = BadgeSelectionTable;
 
-
+module.exports = {
+    BadgeSelectionTable:BadgeSelectionTable,
+}
