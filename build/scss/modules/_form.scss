@@ -1,4 +1,5 @@
 .form_ {
+  position: relative;
 
   label {
     display: block;
@@ -122,6 +123,23 @@
       flex-basis: 136px;
       margin-right: $layout-spacing*3;
       order: 1;
+    }
+
+  }
+
+  .form_-x-loading {
+    display: none;
+  }
+
+  &.form_-is-submitted {
+
+    > * {
+      visibility: hidden;
+    }
+
+    .form_-x-loading {
+      display: flex;
+      visibility: visible;
     }
 
   }

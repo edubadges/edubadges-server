@@ -4,9 +4,8 @@
   border-radius: $border-radius;
   box-shadow: $layout-spacing/2 $layout-spacing $layout-spacing*2.5 $layout-spacing rgba(map-get($colors, solid-dark), .30);
   max-height: calc(100vh - #{$layout-spacing*6});
-  max-width: 75%;
+  max-width: 545px;
   min-height: $layout-spacing*4;
-  min-width: 75%;
   opacity: 0;
   overflow-y: auto;
   padding: 0;
@@ -14,7 +13,7 @@
   top: $layout-spacing*3;
   transform: translate3d(0, -100%, 0);
   transition: all $transition-duration $transition-easing;
-  width: 60%;
+  width: 75%;
   
   + .backdrop,
   &::backdrop {
@@ -57,4 +56,8 @@
 
   }
 
+}
+
+.dialog_-large {
+  max-width: 865px;
 }

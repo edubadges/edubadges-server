@@ -1,0 +1,34 @@
+.loading_ {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+
+  p {
+    color: map-get($colors, bodycopy-light);
+    display: inline-block;
+    font-size: $font-size-large-4x;
+    padding-left: 36px + $layout-spacing;
+    position: relative;
+
+    &::after {
+      @include pseudobase;
+      animation: rotate .75s ease-in-out infinite forwards;
+      border: 4px solid map-get($colors, loading);
+      border-radius: 50%;
+      border-right-color: transparent;
+      box-sizing: border-box;
+      height: 36px;
+      left: 0;
+      position: absolute;
+      top: calc(50% - 18px);
+      width: 36px;
+    }
+
+  }
+
+}

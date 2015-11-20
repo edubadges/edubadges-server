@@ -1,7 +1,10 @@
 main {
+  box-sizing: border-box;
   display: block; // IE
+  min-height: 80vh;
   padding-bottom: $layout-spacing*2;
   padding-top: $layout-spacing*7;
+  position: relative;
   z-index: $z-index-low;
 }
 
