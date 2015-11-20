@@ -58,7 +58,7 @@ class AbstractIssuer(ResizeUploadedImage, AbstractComponent):
     """
     Open Badges Specification IssuerOrg object
     """
-    image = models.ImageField(upload_to='uploads/issuers', blank=True,
+    image = models.FileField(upload_to='uploads/issuers', blank=True,
                               null=True)
     name = models.CharField(max_length=1024)
     slug = AutoSlugField(max_length=255, populate_from='name', unique=True,
@@ -94,7 +94,7 @@ class AbstractBadgeClass(ResizeUploadedImage, AbstractComponent):
     #                             related_name="badgeclasses")
 
     criteria_text = models.TextField(blank=True, null=True)  # TODO: CKEditor field
-    image = models.ImageField(upload_to='uploads/badges', blank=True)
+    image = models.FileField(upload_to='uploads/badges', blank=True)
     name = models.CharField(max_length=255)
     slug = AutoSlugField(max_length=255, populate_from='name', unique=True,
                          blank=False, editable=True)
@@ -132,7 +132,7 @@ class AbstractBadgeInstance(AbstractComponent):
 
     recipient_identifier = models.EmailField(max_length=1024, blank=False,
                                              null=False)
-    image = models.ImageField(upload_to='uploads/badges', blank=True)  # upload_to='issued' in cred_store
+    image = models.FileField(upload_to='uploads/badges', blank=True)  # upload_to='issued' in cred_store
     slug = AutoSlugField(max_length=255, populate_from='populate_slug',
                          unique=True, blank=False, editable=False)
 

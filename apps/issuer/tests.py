@@ -5,6 +5,7 @@ import png
 import shutil
 
 from django.core import mail
+from django.core.files.images import get_image_dimensions
 from django.contrib.auth import get_user_model
 
 from openbadges_bakery import unbake
@@ -69,10 +70,8 @@ class IssuerTests(APITestCase):
     def test_create_issuer_image_500x300_resizes_to_400x400(self):
         view = IssuerList.as_view()
 
-        with open(
-            os.path.join(os.path.dirname(__file__), 'testfiles', '500x300.png'),
-            'r') as badge_image:
-
+        with open(os.path.join(os.path.dirname(__file__), 'testfiles',
+                               '500x300.png'), 'r') as badge_image:
                 issuer_fields_with_image = {
                     'name': 'Awesome Issuer',
                     'description': 'An issuer of awe-inspiring credentials',
@@ -94,8 +93,10 @@ class IssuerTests(APITestCase):
                 derived_slug = badge_object['id'].split('/')[-1]
                 new_issuer = Issuer.objects.get(slug=derived_slug)
 
-                self.assertEqual(new_issuer.image.width, 400)
-                self.assertEqual(new_issuer.image.height, 400)
+                image_width, image_height = \
+                    get_image_dimensions(new_issuer.image.file)
+                self.assertEqual(image_width, 400)
+                self.assertEqual(image_height, 400)
 
     def test_create_issuer_image_450x450_resizes_to_400x400(self):
         view = IssuerList.as_view()
@@ -125,8 +126,10 @@ class IssuerTests(APITestCase):
                 derived_slug = badge_object['id'].split('/')[-1]
                 new_issuer = Issuer.objects.get(slug=derived_slug)
 
-                self.assertEqual(new_issuer.image.width, 400)
-                self.assertEqual(new_issuer.image.height, 400)
+                image_width, image_height = \
+                    get_image_dimensions(new_issuer.image.file)
+                self.assertEqual(image_width, 400)
+                self.assertEqual(image_height, 400)
 
     def test_create_issuer_image_300x300_stays_300x300(self):
         view = IssuerList.as_view()
@@ -156,8 +159,10 @@ class IssuerTests(APITestCase):
                 derived_slug = badge_object['id'].split('/')[-1]
                 new_issuer = Issuer.objects.get(slug=derived_slug)
 
-                self.assertEqual(new_issuer.image.width, 300)
-                self.assertEqual(new_issuer.image.height, 300)
+                image_width, image_height = \
+                    get_image_dimensions(new_issuer.image.file)
+                self.assertEqual(image_width, 300)
+                self.assertEqual(image_height, 300)
 
     def test_private_issuer_detail_get(self):
         # GET on single badge should work if user has privileges
