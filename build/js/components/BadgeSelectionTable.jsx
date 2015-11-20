@@ -25,9 +25,9 @@ var Button = require('../components/Button.jsx').Button;
 var fixedDataTable = {
     headerRenderer: function(column, label, cellDataKey, columnData, rowData, width) {
         if (column.icon) {
-            return (<span className={"icon_ icon_-notext " + column.icon}></span> );
+            return (<p className={"icon_ icon_-notext " + column.icon}>Selected</p> );
         }
-        return (<span className="truncate_" title={label}>{label}</span>);
+        return (<p className="truncate_" title={label}>{label}</p>);
     },
 
     tableColumns: [
@@ -50,12 +50,14 @@ var fixedDataTable = {
             render: function(cellData, cellDataKey, rowData, rowIndex, columnData, width) {
                 return (
                     <div className="l-horizontal">
-                        <button>
-                            <img src={_.get(rowData, 'json.image.id')} width="48" height="48" alt={_.get(rowData, 'json.badge.name[@value]')} />
-                        </button>
-                        <button className="truncate_ action_ action_-tertiary">
-                            {_.get(rowData, 'json.badge.name[@value]')}
-                        </button>
+                        <div>
+                            <button>
+                                <img src={_.get(rowData, 'json.image.id')} width="40" height="40" alt={_.get(rowData, 'json.badge.name[@value]')} />
+                            </button>
+                            <button className="truncate_">
+                                {_.get(rowData, 'json.badge.name[@value]')}
+                            </button>
+                        </div>
                     </div>
                 );
             }
@@ -159,7 +161,7 @@ var BadgeSelectionTable = React.createClass({
                 rowsCount={this.props.badges.length}
                 width={this.props.widthHint}
                 maxHeight={this.props.heightHint}
-                headerHeight={36}
+                headerHeight={56}
                 onRowClick={this.onRowClick}>
                     {renderedColumns}
             </Table>

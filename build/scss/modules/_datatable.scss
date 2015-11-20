@@ -15,6 +15,17 @@
 
   .public_fixedDataTableCell_cellContent {
     padding-bottom: 12px;
+
+    &.icon_-add::after {
+      background-position-y: 3px;
+    }
+    &.icon_-notext::after {
+      width: 20px;
+    }
+
+    button {
+      font-size: 12px;
+    }
   }
 
   .public_fixedDataTableRow_highlighted,
@@ -46,6 +57,13 @@
     background-color: rgba(map-get($colors, link), .05);
   }
 
+}
+
+.dialog_-x-content {
+  .fixedDataTableCellGroupLayout_cellGroup {
+    cursor: pointer;
+    user-select: none;
+  }
 }
 
 .datatable-x-badgewrapper {
