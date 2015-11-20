@@ -117,7 +117,7 @@ var BadgeSelectionTable = React.createClass({
     },
 
     onRowClick: function(ev, rowIndex, rowData) {
-        this.props.onRowClick();
+        this.props.onRowClick(ev, rowIndex, rowData);
 
         if (this.props.stored) {
             CollectionStoreActions.toggle(rowIndex, rowData);
