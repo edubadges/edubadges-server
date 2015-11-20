@@ -1,5 +1,6 @@
 from itertools import chain
 import logging
+from django.apps import apps
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -10,7 +11,6 @@ from rest_framework import status, authentication, permissions
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from badgebook.models import BadgeObjectiveAward, LmsCourseInfo
 import badgrlog
 
 from .models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
@@ -685,12 +685,17 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
         current_assertion.image.delete()
         current_assertion.save()
 
-        try:
-            award = BadgeObjectiveAward.cached.get(badge_instance_id=current_assertion.id)
-        except BadgeObjectiveAward.DoesNotExist:
-            pass
-        else:
-            award.delete()
+        if apps.is_installed('badgebook'):
+            try:
+                from badgebook.models import BadgeObjectiveAward, LmsCourseInfo
+                try:
+                    award = BadgeObjectiveAward.cached.get(badge_instance_id=current_assertion.id)
+                except BadgeObjectiveAward.DoesNotExist:
+                    pass
+                else:
+                    award.delete()
+            except ImportError:
+                pass
 
         logger.event(badgrlog.BadgeAssertionRevokedEvent(current_assertion, request.user))
         return Response(
