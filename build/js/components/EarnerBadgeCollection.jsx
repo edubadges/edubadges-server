@@ -7,7 +7,6 @@ var APISubmitData = require('../actions/api').APISubmitData;
 
 //Stores
 var APIStore = require('../stores/APIStore');
-var CollectionStore = require('../stores/CollectionStore').CollectionStore;
 
 // Components
 var BadgeSelectionTable = require('../components/BadgeSelectionTable.jsx').BadgeSelectionTable;
@@ -167,108 +166,99 @@ var EarnerCollectionDetail = React.createClass({
         targetUrl: React.PropTypes.string,
     },
 
-  getInitialState: function() {
-    return {
-      selectedBadgeIds: _.pluck(this.props.badgeList, 'id'),
-    };
-  },
+    getInitialState: function() {
+        return {
+            selectedBadgeIds: _.pluck(this.props.badgeList, 'id'),
+        };
+    },
 
-  componentDidMount: function(){
-    APIStore.addListener('DATA_UPDATED_earnerCollection_' + this.props.slug, this.earnerCollectionStoreUpdated)
-  },
+    componentDidMount: function(){
+        APIStore.addListener('DATA_UPDATED_earnerCollection_' + this.props.slug, this.earnerCollectionStoreUpdated)
+    },
 
-  componentWillUnmount: function(){
-    APIStore.removeListener('DATA_UPDATED_earnerCollection_' + this.props.slug, this.earnerCollectionStoreUpdated);
-  },
+    componentWillUnmount: function(){
+        APIStore.removeListener('DATA_UPDATED_earnerCollection_' + this.props.slug, this.earnerCollectionStoreUpdated);
+    },
 
-  save: function(){
-      this.setState({formState: "waiting"});
+    save: function(){
+        var apiContext = {
+            formId: "earnerCollection_" + this.props.slug,
+            apiCollectionKey: "earner_collections",
+            apiSearchKey: 'slug',
+            apiSearchValue: this.props.slug,
+            apiUpdateFieldWithResponse: 'badges',
+            actionUrl: "/v1/earner/collections/" + this.props.slug + "/badges",
+            method: "PUT",
+            successHttpStatus: [200],
+            successMessage: "Collection updated"
+        };
 
-    var apiContext = {
-      formId: "earnerCollection_" + this.props.slug,
-      apiCollectionKey: "earner_collections",
-      apiSearchKey: 'slug',
-      apiSearchValue: this.props.slug,
-      apiUpdateFieldWithResponse: 'badges',
-      actionUrl: "/v1/earner/collections/" + this.props.slug + "/badges",
-      method: "PUT",
-      successHttpStatus: [200],
-      successMessage: "Collection updated"
-    };
+        var data = this.state.selectedBadgeIds.map(function(badgeId){
+            return {id: badgeId};
+        }.bind(this));
 
-    // Works through EarnerCollectionDetail parent state management
-    var data = this.state.selectedBadgeIds.map(function(badgeId){
-      return {id: badgeId};
-    }.bind(this));
+        this.setState({formState: 'waiting'});
+        APISubmitData(data, apiContext);
+    },
 
-    // Works through BadgeSelectionTable store state management
-    var badges = APIStore.getCollection('earner_badges');
-    var storeData = CollectionStore.getSelections().reduce(function(output, isSelected, rowIndex) {
-        if (isSelected) { output.push(badges[rowIndex]); }
-        return output;
-    }, []);
+    earnerCollectionStoreUpdated: function() {
+        this.setState({
+            formState: undefined,
+            message: {type: 'success', content: 'Collection updated.'},
+        });
+        this.refs.manage.closeDialog();
+    },
 
-    APISubmitData(data, apiContext);
-  },
+    onRowClick: function(ev, rowIndex, rowData) {
+        var newSelectedBadgeArray = this.state.selectedBadgeIds.slice();
 
-  earnerCollectionStoreUpdated: function() {
-      this.setState({
-          formState: undefined,
-          message: {type: 'success', content: 'Collection updated.'},
-      });
-  },
+        var toBeSelected = ! rowData.selected;
+        if (toBeSelected) newSelectedBadgeArray.push(rowData.id);
+        else newSelectedBadgeArray.splice(newSelectedBadgeArray.indexOf(rowData.id), 1);
 
-  onRowClick: function(ev, rowIndex, rowData) {
-      var newSelectedBadgeArray = this.state.selectedBadgeIds.slice();
+        this.setState({selectedBadgeIds: newSelectedBadgeArray});
+    },
 
-      var toBeSelected = ! rowData.selected;
-      if (toBeSelected) newSelectedBadgeArray.push(rowData.id);
-      else newSelectedBadgeArray.splice(newSelectedBadgeArray.indexOf(rowData.id), 1);
+    render: function() {
+        var allBadges = APIStore.getCollection('earner_badges');
+        var collectionBadges = APIStore.filter('earner_badges', 'id', _.pluck(this.props.badgeList, 'id'));
 
-      this.setState({selectedBadgeIds: newSelectedBadgeArray});
-  },
+        var actions = (<Button type="button" label="Update collection" onClick={this.save} />);
+        var dialog = (
+            <Dialog ref="manage" actions={actions} dialogId="manage-collection-badges">
+                <Heading
+                    size="medium"
+                    title="Add / Remove Badges" />
+                <BadgeSelectionTable
+                    badges={allBadges}
+                    initialSelectedBadges={_.pluck(this.props.badgeList, 'id')}
+                    onRowClick={this.onRowClick} />
+            </Dialog>
+        );
 
-  render: function() {
-    var allBadges = APIStore.getCollection('earner_badges');
-    var collectionBadges = APIStore.filter('earner_badges', 'id', _.pluck(this.props.badgeList, 'id'));
+        return (
+            <div>
+                {this.state.message ? (<div className={"alert alert-" + this.state.message.type}>{this.state.message.content}</div>) : ""}
+                <Heading
+                    size="medium"
+                    title="Badges in Collection"
+                    subtitle="Manage and save which badges appear in this collection."
+                    rule={false}>
+                    <DialogOpener dialog={dialog} dialogId="manage-collection-badges" key="manage-collection-badges">
+                        <Button label="Manage" propagateClick={true} />
+                    </DialogOpener>
+                </Heading>
 
-    var actions = (<Button type="button" label="Update collection" onClick={this.save} />);
-    var dialog = (
-        <Dialog actions={actions} dialogId="manage-collection-badges">
-            <Heading
-                size="medium"
-                title="Add / Remove Badges" />
-            <BadgeSelectionTable
-              badges={allBadges}
-              initialSelectedBadges={_.pluck(this.props.badgeList, 'id')}
-              onRowClick={this.onRowClick} />
-        </Dialog>
-    );
+                {this.state.formState == "waiting" ? <LoadingComponent /> : ""}
 
-    return (
-      <div>
-        {this.state.message ? (<div className={"alert alert-" + this.state.message.type}>{this.state.message.content}</div>) : ""}
-        <Heading
-          size="medium"
-          title="Badges in Collection"
-          subtitle="Manage and save which badges appear in this collection."
-          rule={false}>
-            <DialogOpener dialog={dialog} dialogId="manage-collection-badges" key="manage-collection-badges">
-              <Button label="Manage" propagateClick={true} />
-            </DialogOpener>
-        </Heading>
-
-        {this.state.formState == "waiting" ? <LoadingComponent /> : ""}
-
-        <EarnerBadgeList
-          display="thumbnail"
-          badges={collectionBadges}
-          moreLink={this.props.targetUrl || '/earner/collections/' + this.props.slug}
-          handleClick={this.selectBadgeId}
-          stored={true} />
-      </div>
-    );
-  }
+                <EarnerBadgeList
+                    display="thumbnail"
+                    badges={collectionBadges}
+                    moreLink={this.props.targetUrl || '/earner/collections/' + this.props.slug}
+                    handleClick={this.selectBadgeId} />
+            </div>
+        );
+    }
 });
 
 
