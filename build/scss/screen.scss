@@ -7,15 +7,6 @@ body {
   font-size: $font-size;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
-
-  // Preload hover-state images
-  // http://stackoverflow.com/questions/1373142/preloading-css-images
-
-  &::after {
-    content: url('images/step-earned-hover.svg') url('images/icon-collapse.svg') url('images/form-check-checked.svg');
-    display: none;
-  }
-
 }
 
 button {
@@ -95,6 +86,8 @@ strong {
 'modules/wrap';
 
 // Overrides
+
+// When in the canvas/LTI views this overrides the body background to match the design 
 
 .o-canvas {
   background-color: map-get($colors, bodybackground-light);

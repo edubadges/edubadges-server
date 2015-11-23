@@ -99,6 +99,7 @@ main {
 }
 
 // Equally-spaced vertical layouts
+// Note that l-vertical may be nested due to how react functions
 
 .l-vertical {
   max-width: 100%;
