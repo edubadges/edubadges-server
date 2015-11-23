@@ -248,7 +248,7 @@ var EarnerCollectionDetail = React.createClass({
                     title="Badges in Collection"
                     subtitle="Manage and save which badges appear in this collection."
                     rule={false}>
-                    <DialogOpener handleClick={this.openDialog} dialog={dialog} dialogId="manage-collection-badges" key="manage-collection-badges">
+                    <DialogOpener handleClick={this.openDialog} dialog={dialog} dialogId="manage-collection-badges" key="manage-collection-badges" dialogClass="dialog_-large">
                         <Button label="Manage" propagateClick={true} />
                     </DialogOpener>
                 </Heading>
