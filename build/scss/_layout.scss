@@ -143,8 +143,8 @@ main {
 .l-wrapper {
 
   @media (min-width: 1184px + $layout-spacing*6) {
-    padding-left: calc(50% - 680px);
-    padding-right: calc(50% - 680px);
+    padding-left: calc(50vw - 680px);
+    padding-right: calc(50vw - 680px);
   }
 
 }
@@ -156,8 +156,8 @@ main {
   padding-right: $layout-spacing*6;
 
   @media (min-width: 1184px + $layout-spacing*6) {
-    padding-left: calc(50% - 592px);
-    padding-right: calc(50% - 592px);
+    padding-left: calc(50vw - 592px);
+    padding-right: calc(50vw - 592px);
   }
   
 }
