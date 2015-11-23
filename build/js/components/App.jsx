@@ -384,9 +384,7 @@ var App = React.createClass({
     if (!collection)
       return this.render_base("Collection not found.");
     badgesIndexList = _.pluck(collection.badges, 'id');
-    badgesInCollection = APIStore.filter(
-      'earner_badges', 'id', badgesIndexList
-    ); 
+    badgesInCollection = APIStore.filter('earner_badges', 'id', badgesIndexList); 
 
     var dialogFormId = "EarnerCollectionEditForm";
     var formProps = FormConfigStore.getConfig(dialogFormId, {}, {
@@ -435,14 +433,7 @@ var App = React.createClass({
                     <Button className="action_" label="Share" propagateClick={true}/>
                 </DialogOpener>
           </Heading>
-        <EarnerCollectionDetail
-          name={collection.name}
-          slug={collectionSlug}
-          clickable={false}
-          description={collection.description}
-          badgeList={badgesInCollection}
-          display="thumbnail"
-        />
+        <EarnerCollectionDetail slug={collectionSlug} badgeList={badgesInCollection} />
       </MainComponent>
     );
 
