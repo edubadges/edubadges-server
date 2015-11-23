@@ -248,11 +248,31 @@ $l-studio-header: $layout-spacing*8;
 
   main {
     flex: 1 0 auto;
-    overflow-y: auto;
   }
 
   > footer {
     flex: 0 0 auto;
+  }
+
+  .l-fillvertical-x-overflow {
+    display: flex;
+    flex-direction: column;
+
+    .l-fillvertical-x-container {
+      flex: 1 0 auto;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .l-fillvertical-x-content {
+      height: 100%;
+      left: 0;
+      overflow-y: auto;
+      position: absolute;
+      top: 0;
+      width: 100%;
+    }
+
   }
 
 }
