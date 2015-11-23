@@ -645,7 +645,7 @@ var App = React.createClass({
     var mainComponent = (
       <MainComponent viewId={viewId}>
 
-        <ul className="l-wrapper l-wrapper-inset breadcrumb_">
+        <ul className="breadcrumb_">
             <li><a href="/issuer">Issue Badges</a></li>
             <li><a href={"/issuer/issuers/"+issuer.slug}>{issuer.name}</a></li>
         </ul>
