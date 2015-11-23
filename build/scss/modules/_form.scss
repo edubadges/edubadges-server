@@ -12,7 +12,7 @@
 
   }
 
-  input:not([type="checkbox"]),
+  input:not([type='checkbox']),
   select,
   textarea {
     background: map-get($colors, solid);
@@ -32,8 +32,7 @@
   }
 
   select {
-    -moz-appearance: none;
-    -webkit-appearance: none;
+    appearance: none;
     background-image: url('images/form-dropdown.svg');
     background-position: calc(100% - #{$layout-spacing*2}) center;
     background-repeat: no-repeat;
@@ -65,8 +64,8 @@
     overflow: hidden;
 
     input {
-      position: absolute;
       left: -9999px;
+      position: absolute;
     }
 
     .form_-x-checkbox-text {
@@ -89,8 +88,8 @@
     display: flex;
 
     input {
-      border-top-right-radius: 0;
       border-bottom-right-radius: 0;
+      border-top-right-radius: 0;
     }
 
     button {

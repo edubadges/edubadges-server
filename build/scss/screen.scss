@@ -5,12 +5,11 @@ body {
   color: map-get($colors, bodycopy);
   font-family: $font-family;
   font-size: $font-size;
-  -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
 button {
-  -webkit-apperance: none;
+  appearance: none;
   background: none;
   border: 0;
   color: map-get($colors, bodycopy);

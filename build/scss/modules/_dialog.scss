@@ -2,7 +2,7 @@
   background: map-get($colors, solid);
   border: 0;
   border-radius: $border-radius;
-  box-shadow: $layout-spacing/2 $layout-spacing $layout-spacing*2.5 $layout-spacing rgba(map-get($colors, solid-dark), .30);
+  box-shadow: $layout-spacing/2 $layout-spacing $layout-spacing*2.5 $layout-spacing rgba(map-get($colors, solid-dark), .3);
   max-height: calc(100vh - #{$layout-spacing*6});
   max-width: 545px;
   min-height: $layout-spacing*4;
@@ -12,13 +12,18 @@
   position: fixed;
   top: $layout-spacing*3;
   transform: translate3d(0, -100%, 0);
-  transition: all $transition-duration $transition-easing;
+  transition: opacity $transition-duration $transition-easing, transform $transition-duration $transition-easing;
   width: 75%;
-  
-  + .backdrop,
-  &::backdrop {
-    opacity: 0;
+
+  + .backdrop {
     background: rgba(map-get($colors, solid-dark), .5);
+    opacity: 0;
+    transition: opacity $transition-duration $transition-easing;
+  }
+
+  &::backdrop {
+    background: rgba(map-get($colors, solid-dark), .5);
+    opacity: 0;
     transition: opacity $transition-duration $transition-easing;
   }
 
@@ -47,9 +52,12 @@
 
   &.is-visible {
     opacity: 1;
-    transform: translate3d(0, 0, 0);
+    transform: none;
 
-    + .backdrop,
+    + .backdrop {
+      opacity: 1;
+    }
+
     &::backdrop {
       opacity: 1;
     }

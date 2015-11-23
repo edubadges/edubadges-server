@@ -1,8 +1,12 @@
 .filter_ {
   width: 286px;
 
-  > *:not(:first-child) {
-    border-top: 1px solid map-get($colors, border-light);
+  > * {
+
+    &:not(:first-child) {
+      border-top: 1px solid map-get($colors, border-light);
+    }
+
   }
 
   input {
