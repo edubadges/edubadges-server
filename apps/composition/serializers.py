@@ -16,7 +16,7 @@ logger = badgrlog.BadgrLogger()
 
 class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
     # Form submission fields as populated by request.data in the API
-    image = serializers.ImageField(required=False, write_only=True)
+    image = serializers.FileField(required=False, write_only=True)
     url = serializers.URLField(required=False, write_only=True)
     assertion = serializers.CharField(required=False, write_only=True)
 
