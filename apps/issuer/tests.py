@@ -339,6 +339,31 @@ class BadgeClassTests(APITestCase):
                 response = self.client.get('/v1/issuer/issuers/test-issuer/badges/{}'.format(slug))
                 self.assertEqual(response.status_code, 200)
 
+    def test_create_badgeclass_with_svg(self):
+        with open(
+                os.path.join(TOP_DIR, 'breakdown', 'static', 'badgestudio', 'shapes', 'heart.svg'), 'r'
+        ) as badge_image:
+
+            example_badgeclass_props = {
+                'name': 'Badge of Awesome',
+                'description': "An awesome badge only awarded to awesome people or non-existent test entities",
+                'image': badge_image,
+                'criteria': 'http://wikipedia.org/Awesome',
+            }
+
+            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            response = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                example_badgeclass_props
+            )
+            self.assertEqual(response.status_code, 201)
+
+            # assert that the BadgeClass was published to and fetched from the cache
+            with self.assertNumQueries(0):
+                slug = response.data.get('slug')
+                response = self.client.get('/v1/issuer/issuers/test-issuer/badges/{}'.format(slug))
+                self.assertEqual(response.status_code, 200)
+
     def test_create_criteriatext_badgeclass_for_issuer_authenticated(self):
         """
         Ensure that when criteria text is submitted instead of a URL, the criteria address
