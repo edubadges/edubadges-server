@@ -68,7 +68,7 @@ var IssuerDisplay = React.createClass({
     }
 
     return (
-      <div className="detail_">
+      <div className="detail_ l-vertical-x-offset">
         <div>
           <img src={properties.image.id} width="112" height="112" />
         </div>
@@ -128,7 +128,7 @@ var IssuerList = React.createClass({
       }.bind(this));
     }
     return (
-      <div className="l-vertical l-wrapper">
+      <div className="l-vertical">
         {issuers}
       </div>
     );

@@ -51,7 +51,7 @@ BadgeClassDetail = React.createClass({
 
     var createdOn = moment(this.props.created_at).format('MMMM D, YYYY');
     return (
-      <div className="detail_">
+      <div className="detail_ l-vertical-x-offset">
         <div>
           <img src={this.props.image} width="112" height="112" />
         </div>
