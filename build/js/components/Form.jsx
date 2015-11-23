@@ -9,7 +9,6 @@ var FormStore = require('../stores/FormStore');
 // Components
 var OpenBadge = require('../components/BadgeDisplay.jsx').OpenBadge;
 var Dropzone = require('react-dropzone');
-var LoadingIcon = require('../components/Widgets.jsx').LoadingIcon;
 
 var Button = require('../components/Button.jsx').Button;
 
@@ -230,7 +229,10 @@ BasicAPIForm = React.createClass({
         activeHelpText = !this.state.message && this.props.helpText ? <div className="form-help-text">{this.props.helpText}</div> : "",
         formControls = "",
         closeButton = this.props.handleCloseForm ? (<Button name="close" label="Cancel" style="secondary" handleClick={this.handleReset} />) : "",
-        loadingIcon = this.state.actionState == "waiting" ? (<LoadingIcon />) : "";
+        loadingIcon = this.state.actionState == "waiting" ? (
+          <div className="form_-x-loaing loading_">
+            <p>Saving&hellip;</p>
+          </div>) : "";
 
     if (["ready", "waiting"].indexOf(this.state.actionState) > -1){
 
@@ -331,10 +333,16 @@ BasicAPIForm = React.createClass({
       formControls = "";
     }
 
+    if (this.state.actionState == "waiting") {
+      activeMessage = "";
+      activeHelpText = "";
+    }
+
     return (
       <div className="form-container issuer-notification-form-container">
         {activeMessage} {activeHelpText}
-        <form action="" className="form_" onSubmit={this.handleSubmit}>
+        {loadingIcon}
+        <form action="" className={"form_ "+(this.state.actionState == "waiting" ? " form_-is-submitted " : "")} onSubmit={this.handleSubmit}>
           <div className="form_-x-imageupload">
             {activeColumns}
           </div>
