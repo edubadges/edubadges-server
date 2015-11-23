@@ -7,7 +7,7 @@
   .heading_-x-text {
     flex: 0 1 60%;
 
-    > *:not(:only-child) {
+    > *:not(:last-child) {
       margin-bottom: $layout-spacing*2;
     }
     

@@ -107,6 +107,11 @@ main {
     margin-bottom: $layout-spacing*2;
   }
 
+  .l-vertical-x-offset {
+    margin-bottom: $layout-spacing*6;
+    margin-top: $layout-spacing*3;
+  }
+
 }
 
 // Equally-spaced vertical layouts, with smaller margins
@@ -117,13 +122,6 @@ main {
     margin-bottom: $layout-spacing;
   }
 
-}
-
-// Offsets an item in an l-vertical layout
-
-.l-verticaloffset {
-  margin-top: $layout-spacing*3;
-  margin-bottom: $layout-spacing*6;
 }
 
 // For creating equally-spaced vertical layouts
