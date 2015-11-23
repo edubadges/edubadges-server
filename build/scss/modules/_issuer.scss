@@ -1,9 +1,12 @@
 .issuer_ {
-  
+
+  // Height instead of min-height to fix IE 11 issue
+  // http://stackoverflow.com/questions/19371626/flexbox-not-centering-vertically-in-ie
+
   header {
     align-items: center;
     display: flex;
-    min-height: 64px;
+    height: 64px;  // *
     padding-left: $layout-spacing;
   }
 
