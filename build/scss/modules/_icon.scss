@@ -9,7 +9,8 @@ body {
     content:
       url('images/step-earned-hover.svg')
       url('images/icon-collapse.svg')
-      url('images/form-check-checked.svg');
+      url('images/form-check-checked.svg')
+      url('images/icon-check-active.svg');
     display: none;
   }
 
@@ -231,6 +232,22 @@ body {
 
   &::after {
     background-image: url('images/icon-help.svg');
+  }
+
+}
+
+.icon_-check {
+
+  &::after {
+    background-image: url('images/icon-check.svg');
+  }
+
+  &.icon_-check-is-active {
+
+    &::after {
+      background-image: url('images/icon-check-active.svg');
+    }
+
   }
 
 }
