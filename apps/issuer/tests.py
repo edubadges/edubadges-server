@@ -5,6 +5,7 @@ import png
 import shutil
 
 from django.core import mail
+from django.core.files.images import get_image_dimensions
 from django.contrib.auth import get_user_model
 from django.test import modify_settings, override_settings
 
@@ -83,10 +84,8 @@ class IssuerTests(APITestCase):
     def test_create_issuer_image_500x300_resizes_to_400x400(self):
         view = IssuerList.as_view()
 
-        with open(
-            os.path.join(os.path.dirname(__file__), 'testfiles', '500x300.png'),
-            'r') as badge_image:
-
+        with open(os.path.join(os.path.dirname(__file__), 'testfiles',
+                               '500x300.png'), 'r') as badge_image:
                 issuer_fields_with_image = {
                     'name': 'Awesome Issuer',
                     'description': 'An issuer of awe-inspiring credentials',
@@ -108,8 +107,10 @@ class IssuerTests(APITestCase):
                 derived_slug = badge_object['id'].split('/')[-1]
                 new_issuer = Issuer.objects.get(slug=derived_slug)
 
-                self.assertEqual(new_issuer.image.width, 400)
-                self.assertEqual(new_issuer.image.height, 400)
+                image_width, image_height = \
+                    get_image_dimensions(new_issuer.image.file)
+                self.assertEqual(image_width, 400)
+                self.assertEqual(image_height, 400)
 
     def test_create_issuer_image_450x450_resizes_to_400x400(self):
         view = IssuerList.as_view()
@@ -139,8 +140,10 @@ class IssuerTests(APITestCase):
                 derived_slug = badge_object['id'].split('/')[-1]
                 new_issuer = Issuer.objects.get(slug=derived_slug)
 
-                self.assertEqual(new_issuer.image.width, 400)
-                self.assertEqual(new_issuer.image.height, 400)
+                image_width, image_height = \
+                    get_image_dimensions(new_issuer.image.file)
+                self.assertEqual(image_width, 400)
+                self.assertEqual(image_height, 400)
 
     def test_create_issuer_image_300x300_stays_300x300(self):
         view = IssuerList.as_view()
@@ -170,8 +173,10 @@ class IssuerTests(APITestCase):
                 derived_slug = badge_object['id'].split('/')[-1]
                 new_issuer = Issuer.objects.get(slug=derived_slug)
 
-                self.assertEqual(new_issuer.image.width, 300)
-                self.assertEqual(new_issuer.image.height, 300)
+                image_width, image_height = \
+                    get_image_dimensions(new_issuer.image.file)
+                self.assertEqual(image_width, 300)
+                self.assertEqual(image_height, 300)
 
     def test_private_issuer_detail_get(self):
         # GET on single badge should work if user has privileges
@@ -312,6 +317,31 @@ class BadgeClassTests(APITestCase):
     def test_create_badgeclass_for_issuer_authenticated(self):
         with open(
             os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
+        ) as badge_image:
+
+            example_badgeclass_props = {
+                'name': 'Badge of Awesome',
+                'description': "An awesome badge only awarded to awesome people or non-existent test entities",
+                'image': badge_image,
+                'criteria': 'http://wikipedia.org/Awesome',
+            }
+
+            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            response = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                example_badgeclass_props
+            )
+            self.assertEqual(response.status_code, 201)
+
+            # assert that the BadgeClass was published to and fetched from the cache
+            with self.assertNumQueries(0):
+                slug = response.data.get('slug')
+                response = self.client.get('/v1/issuer/issuers/test-issuer/badges/{}'.format(slug))
+                self.assertEqual(response.status_code, 200)
+
+    def test_create_badgeclass_with_svg(self):
+        with open(
+                os.path.join(TOP_DIR, 'breakdown', 'static', 'badgestudio', 'shapes', 'heart.svg'), 'r'
         ) as badge_image:
 
             example_badgeclass_props = {

@@ -8,19 +8,23 @@
   font-size: $font-size-small;
   padding: $layout-spacing $layout-spacing*2;
   text-align: center;
-  transition: all $transition-duration $transition-easing;
+  transition: background $transition-duration $transition-easing, border-color $transition-duration $transition-easing, color $transition-duration $transition-easing;
   user-select: none;
 
-  &:not(.is-disabled):hover {
-    background-color: map-get($colors, button-hover);
-    border-color: map-get($colors, button-hover);
-    color: map-get($colors, solid);
-  }
+  &:not(.is-disabled) {
 
-  &:not(.is-disabled):active {
-    background-color: map-get($colors, button-active);
-    border-color: map-get($colors, button-active);
-    color: map-get($colors, solid);
+    &:hover {
+      background-color: map-get($colors, button-hover);
+      border-color: map-get($colors, button-hover);
+      color: map-get($colors, solid);
+    }
+
+    &:active {
+      background-color: map-get($colors, button-active);
+      border-color: map-get($colors, button-active);
+      color: map-get($colors, solid);
+    }
+
   }
 
   &.is-disabled {
@@ -29,7 +33,7 @@
 }
 
 .button_-secondary {
-  background-color: #fff;
+  background-color: map-get($colors, solid);
   border: 1px solid map-get($colors, button);
   color: map-get($colors, button);
 }
@@ -39,11 +43,15 @@
   border-color: map-get($colors, solid);
   color: map-get($colors, solid);
 
-  &:not(.is-disabled):active,
-  &:not(.is-disabled):hover {
-    background: none;
-    border-color: map-get($colors, solid);
-    color: map-get($colors, solid);
+  &:not(.is-disabled) {
+
+    &:active,
+    &:hover {
+      background: none;
+      border-color: map-get($colors, solid);
+      color: map-get($colors, solid);
+    }
+
   }
 
 }
@@ -55,14 +63,18 @@
   padding-left: $layout-spacing;
   padding-right: $layout-spacing;
 
-  &:not(.is-disabled):hover {
-    background-color: map-get($colors, link-hover);
-    border-color: map-get($colors, link-hover);
-  }
+  &:not(.is-disabled) {
 
-  &:not(.is-disabled):active {
-    background-color: map-get($colors, link-active);
-    border-color: map-get($colors, link-active);
+    &:hover {
+      background-color: map-get($colors, link-hover);
+      border-color: map-get($colors, link-hover);
+    }
+
+    &:active {
+      background-color: map-get($colors, link-active);
+      border-color: map-get($colors, link-active);
+    }
+
   }
 
 }

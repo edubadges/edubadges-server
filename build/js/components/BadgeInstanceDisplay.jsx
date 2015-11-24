@@ -80,7 +80,6 @@ BadgeInstanceList = React.createClass({
 
     return (
       <div className="x-owner">
-        <Heading size="small" title="Badge Recipients" meta={this.props.badgeInstances.length} />
         <table className="table_">
             <thead>
                 <tr>

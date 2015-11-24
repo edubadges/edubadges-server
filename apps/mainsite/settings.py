@@ -369,6 +369,24 @@ USE_TZ = True
 
 ##
 #
+#  artifact version
+#
+##
+
+
+def determine_version():
+    version_path = os.path.join(TOP_DIR, 'version.txt')
+    if os.path.exists(version_path):
+        with open(version_path, 'r') as version_file:
+            return version_file.readline()
+    import mainsite
+    return mainsite.__version__
+
+ARTIFACT_VERSION = determine_version()
+
+
+##
+#
 #  Import settings_local.
 #
 ##

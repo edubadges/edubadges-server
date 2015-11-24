@@ -35,12 +35,12 @@ var button = (
 
 // !!! NOTE: This is not a react component.  It's a plain js object that manages a react component
 
-function DialogElement(reactComponent, dialogId) {
+function DialogElement(reactComponent, dialogId, dialogClass) {
     this.reactComponent = reactComponent;
     this.dialogId = dialogId;
 
     this.domNode = document.createElement('dialog');
-    this.domNode.className = "dialog_";
+    this.domNode.className = ( ! dialogClass) ? "dialog_" : "dialog_ "+ dialogClass;
     this.domNode.id = dialogId;
     document.body.appendChild(this.domNode);
 
@@ -77,15 +77,11 @@ var DialogOpener = React.createClass({
     propTypes: {
         dialog: React.PropTypes.node.isRequired,
         dialogId: React.PropTypes.string.isRequired,
-    },
-    getDefaultProps: function() {
-        return {
-        }
-
+        handleClick: React.PropTypes.func,
     },
 
     componentDidMount: function() {
-        this.dialog = new DialogElement(this.props.dialog, this.props.dialogId);
+        this.dialog = new DialogElement(this.props.dialog, this.props.dialogId, this.props.dialogClass);
         this.dialog.update();
     },
 

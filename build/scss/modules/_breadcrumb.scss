@@ -6,16 +6,20 @@
     padding-right: $layout-spacing*3;
     position: relative;
 
-    &:not(:last-child)::after {
-      background-color: map-get($colors, bodycopy);
-      content: '';
-      display: block;
-      height: 100%;
-      position: absolute;
-      right: $layout-spacing*1.25;
-      top: 0;
-      transform: rotate(20deg);
-      width: 1px;
+    &:not(:last-child) {
+
+      &::after {
+        background-color: map-get($colors, bodycopy);
+        content: '';
+        display: block;
+        height: 100%;
+        position: absolute;
+        right: $layout-spacing*1.25;
+        top: 0;
+        transform: rotate(20deg);
+        width: 1px;
+      }
+
     }
 
   }
@@ -24,6 +28,7 @@
     color: map-get($colors, button);
     line-height: 1;
     text-decoration: none;
+    transition: color $transition-duration $transition-easing;
 
     &:hover {
       color: map-get($colors, button-hover);

@@ -214,10 +214,8 @@ var App = React.createClass({
             </nav>
             </header>
 
-            <main className="wrap_ ">
-                <div className="l-wrapper l-wrapper-inset">
-                    { mainComponent }
-                </div>
+            <main className="wrap_ wrap_-borderbottom l-wrapper l-wrapper-inset">
+                { mainComponent }
             </main>
         </div>
     );
@@ -259,7 +257,7 @@ var App = React.createClass({
         </Dialog>);
 
     var mainComponent = (
-      <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet} >
+      <MainComponent className="l-vertical" viewId={viewId} dependenciesLoaded={dependenciesMet}>
           <Heading
             size="large"
             title="My Badges"
@@ -291,7 +289,7 @@ var App = React.createClass({
 
     var importUrl = params['url'];
     var mainComponent = (
-      <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet} >
+      <MainComponent className="l-vertical" viewId={viewId} dependenciesLoaded={dependenciesMet}>
         <ActivePanel 
           viewId={viewId}
           type="EarnerBadgeImportForm"
@@ -315,7 +313,7 @@ var App = React.createClass({
       return this.render_base("Badge not found!");
 
     var mainComponent = (
-      <MainComponent viewId={viewId}>
+      <MainComponent className="l-vertical" viewId={viewId}>
         <Heading
           backButton="/earner/badges"
           size="large"
@@ -356,7 +354,7 @@ var App = React.createClass({
         </Dialog>);
 
     var mainComponent = (
-      <MainComponent viewId={viewId}>
+      <MainComponent className="l-vertical" viewId={viewId}>
           <Heading
             size="large"
             title="My Collections"
@@ -386,9 +384,7 @@ var App = React.createClass({
     if (!collection)
       return this.render_base("Collection not found.");
     badgesIndexList = _.pluck(collection.badges, 'id');
-    badgesInCollection = APIStore.filter(
-      'earner_badges', 'id', badgesIndexList
-    ); 
+    badgesInCollection = APIStore.filter('earner_badges', 'id', badgesIndexList); 
 
     var dialogFormId = "EarnerCollectionEditForm";
     var formProps = FormConfigStore.getConfig(dialogFormId, {}, {
@@ -423,7 +419,7 @@ var App = React.createClass({
         </Dialog>);
 
     var mainComponent = (
-      <MainComponent viewId={viewId}>
+      <MainComponent className="l-vertical" viewId={viewId}>
           <Heading
             backButton="/earner/collections"
             size="large"
@@ -437,14 +433,7 @@ var App = React.createClass({
                     <Button className="action_" label="Share" propagateClick={true}/>
                 </DialogOpener>
           </Heading>
-        <EarnerCollectionDetail
-          name={collection.name}
-          slug={collectionSlug}
-          clickable={false}
-          description={collection.description}
-          badgeList={badgesInCollection}
-          display="thumbnail"
-        />
+        <EarnerCollectionDetail slug={collectionSlug} badgeList={badgesInCollection} />
       </MainComponent>
     );
 
@@ -474,7 +463,7 @@ var App = React.createClass({
 
 
     var mainComponent = (
-      <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet}>
+      <MainComponent className="l-vertical" viewId={viewId} dependenciesLoaded={dependenciesMet}>
           <Heading
             size="large"
             title="My Issuers"
@@ -507,6 +496,15 @@ var App = React.createClass({
     var dialogFormId = "BadgeClassCreateUpdateForm"
     var formProps = FormConfigStore.getConfig(dialogFormId, {}, {issuerSlug: issuerSlug});
     FormStore.getOrInitFormData(dialogFormId, formProps);
+
+    var formData = FormStore.getFormData(dialogFormId);
+    if (formData.apiContext) {
+        var parseSlug = new RegExp("/v1/issuer/issuers/([^/]+)/badges");
+        var actionSlug = parseSlug.exec(formData.apiContext.actionUrl).pop();
+        if (actionSlug && actionSlug !== issuerSlug) {
+            FormStore.initFormData(dialogFormId, formProps);
+        }
+    }
 
     var showBadgeStudio = function(e) {
       e.stopPropagation();
@@ -561,14 +559,14 @@ var App = React.createClass({
     if (this.state.showingBadgeStudio) {
 
       var mainComponent = (
-        <MainComponent viewId={viewId}>
+        <MainComponent className="l-vertical" viewId={viewId}>
           <BadgeStudio handleBadgeComplete={handleBadgeComplete} badgeDetail={this.state.badgeStudioDetail}/>
         </MainComponent>);
 
     } else {
 
       var mainComponent = (
-        <MainComponent viewId={viewId}>
+        <MainComponent className="l-vertical" viewId={viewId}>
           <Heading
             backButton="/issuer"
             title={issuer.name}
@@ -634,9 +632,9 @@ var App = React.createClass({
         </Dialog>);
 
     var mainComponent = (
-      <MainComponent viewId={viewId}>
+      <MainComponent className="l-vertical" viewId={viewId}>
 
-        <ul className="l-wrapper l-wrapper-inset breadcrumb_">
+        <ul className="breadcrumb_">
             <li><a href="/issuer">Issue Badges</a></li>
             <li><a href={"/issuer/issuers/"+issuer.slug}>{issuer.name}</a></li>
         </ul>
@@ -652,6 +650,7 @@ var App = React.createClass({
               </DialogOpener>
         </Heading>
         <BadgeClassDetail {...badgeClass} />
+        <Heading size="small" title="Badge Recipients" meta={badgeInstances.length} />
         <BadgeInstanceList
           issuerSlug={issuerSlug}
           badgeClass={badgeClass}
@@ -683,7 +682,7 @@ var App = React.createClass({
     }
 
     var mainComponent = (
-      <MainComponent viewId={viewId}>
+      <MainComponent className="l-vertical" viewId={viewId}>
         <ActionBar 
           title="Understand Badges"
           viewId={viewId}

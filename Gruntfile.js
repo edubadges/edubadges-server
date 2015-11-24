@@ -118,7 +118,7 @@ module.exports = function(grunt) {
           components: 'breakdown/static/components',
           staticLocalDir: 'breakdown/static',
           staticPath: '/static',
-          stylesheets: ['css/dialog-polyfill.css', 'css/reset.css', 'css/screen.css'],
+          stylesheets: ['css/bootstrap/css/bootstrap.css', 'css/style.css','css/dialog-polyfill.css', 'css/reset.css', 'css/screen.css'],
           scripts: ['js/dialog-polyfill.js', 'js/tether.min.js', 'js/pattern-library.js']
         });
     });
