@@ -229,11 +229,12 @@ var EarnerCollectionDetail = React.createClass({
 
         var actions = (<Button type="button" label="Update collection" onClick={this.save} />);
         var dialog = (
-            <Dialog ref="manage" actions={actions} dialogId="manage-collection-badges">
-                <Heading
-                    size="medium"
-                    title="Add / Remove Badges" />
+            <Dialog noContent={true} ref="manage" actions={actions} dialogId="manage-collection-badges">
+                <div className="dialog_-x-content">
+                    <Heading size="medium" title="Add / Remove Badges" />
+                </div>
                 <BadgeSelectionTable
+                    widthHint={865}
                     badges={allBadges}
                     initialSelectedBadges={_.pluck(this.props.badgeList, 'id')}
                     onRowClick={this.onRowClick} />

@@ -173,14 +173,17 @@ var Dialog = React.createClass({
                 <button className="button_ button_-secondary" onClick={this.closeDialog}>Close</button>
                 {this.props.actions}
             </div>);
+        var children = (this.props.noContent) ? this.props.children : (
+                <div className="dialog_-x-content">
+                    {this.props.children}
+                </div>);
+
         return (
             <div {...divProps}>
                 <button className="dialog_-x-close" onClick={this.closeDialog}>
                     <span className="icon_ icon_-notext icon_-close">Close</span>
                 </button>
-                <div className="dialog_-x-content">
-                    {this.props.children}
-                </div>
+                {children}
                 {controls}
             </div>);
     }
