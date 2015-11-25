@@ -1,6 +1,8 @@
 from base64 import b64decode
+import itertools
 import json
 import re
+import simplejson
 from urlparse import urlparse
 
 from jwt import api_jws, InvalidTokenError
@@ -11,6 +13,15 @@ import requests
 
 def domain(url):
     return urlparse(url).netloc
+
+def merge_details(new_detail, old_detail):
+    if not isinstance(new_detail, (list, tuple,)):
+        new_detail = [new_detail]
+    if not isinstance(old_detail, (list, tuple,)):
+        old_detail = [old_detail]
+
+    return list(itertools.chain(new_detail, old_detail))
+
 
 
 def get_badge_instance_from_baked_image(baked_image):
@@ -43,8 +54,11 @@ def find_and_get_badge_class(badge_reference):
         try:
             return get_badge_component_from_url(badge_reference)
         except ValidationError as e:
-            raise ValidationError("Error attempting to retrieve the hosted \
-                                  BadgeClass file: {}".format(e.message))
+            raise ValidationError(merge_details(
+                "Error attempting to retrieve the hosted BadgeClass file: {}"
+                .format(badge_reference),
+                e.detail
+            ))
 
 
 def find_and_get_issuer(issuer_reference):
@@ -57,8 +71,12 @@ def find_and_get_issuer(issuer_reference):
         try:
             return get_badge_component_from_url(issuer_reference)
         except ValidationError as e:
-            raise ValidationError("Error attempting to retrieve the hosted \
-                                  Issuer file: {}".format(e.message))
+
+            raise ValidationError(merge_details(
+                "Error attempting to retrieve the hosted Issuer file: {}"
+                .format(issuer_reference),
+                e.detail
+            ))
 
 
 def get_badge_instance_from_json(json_data):
@@ -69,8 +87,7 @@ def get_badge_instance_from_json(json_data):
 
     if json_data['verify']['type'] == 'signed':
         raise ValidationError(
-            "A signed badge instance must be received via JWT string, not \
-            JSON.")
+            "A signed badge instance must be received via JWT string, not JSON.")
     url = json_data['verify']['url']
     return get_badge_component_from_url(url)
 
@@ -83,8 +100,13 @@ def get_badge_component_from_url(url, **kwargs):
             badge_component = _fetch(url)
         except requests.exceptions.RequestException as e:
             raise ValidationError(
-                "Unable to fetch a badge component: \
-                {}".format(e.message)
+                "Unable to fetch a badge component: {}"
+                .format(e.message)
+            )
+        except simplejson.JSONDecodeError:
+            raise ValidationError(
+                "Unable to find a valid json component at url: {}"
+                .format(url)
             )
     return (url, badge_component)
 
@@ -96,8 +118,7 @@ def get_badge_instance_from_jwt(jwt_string):
     badge_instance = json.loads(b64decode(payload))
     if badge_instance['verify']['type'] == 'hosted':
         raise ValidationError(
-            "A signed badge instance must be validated via public key not \
-            hosted.")
+            "A signed badge instance must be validated via public key not hosted.")
     url = badge_instance['verify']['url']
     public_key = _fetch(url)
 
@@ -106,8 +127,7 @@ def get_badge_instance_from_jwt(jwt_string):
                                  algorithm=algorithm)
     except InvalidTokenError:
         raise ValidationError(
-            "The signed badge instance did not validate against its public \
-            key.")
+            "The signed badge instance did not validate against its public key.")
 
     badge_instance = badge_instance
     return (None, badge_instance)

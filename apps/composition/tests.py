@@ -316,5 +316,24 @@ class TestBadgeUploads(APITestCase):
         self.assertTrue(response.data['details']['instance']['BadgeInstanceSerializerV1_0']['issuedOn'][0]
                         .startswith('Invalid format'))
 
+    @responses.activate
+    def test_submit_badge_invalid_component_json(self):
+        setup_basic_1_0(**{'exclude': ['http://a.com/issuer']})
+        setup_resources([
+            {'url': 'http://a.com/issuer',
+             'filename': '1_0_basic_issuer_invalid_json.json'}
+        ])
+
+        post_input = {
+            'url': 'http://a.com/instance'
+        }
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        response = self.client.post(
+            '/v1/earner/badges', post_input
+        )
+        self.assertEqual(response.status_code, 400)
+
+        self.assertTrue(response.data[1].startswith('Unable to find a valid json component'))
+
 class TestCollectionOperations(APITestCase):
     pass
