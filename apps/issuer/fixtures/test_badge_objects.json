@@ -96,6 +96,20 @@
     },
     {
         "fields": {
+            "name": "Badge of SVG Testing",
+            "created_at": "2015-04-08T15:20:25Z",
+            "created_by": 1,
+            "json": "{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-svg-testing/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-svg-testing/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"type\":\"BadgeClass\",\"id\":\"http://localhost:8000/public/badges/badge-of-svg-testing\",\"name\":\"Badge of SVG Testing\"}",
+            "image": "uploads/badges/test_badgeclass.svg",
+            "criteria_text": "Be cool, dawg.",
+            "slug": "badge-of-svg-testing",
+            "issuer": 2
+        },
+        "model": "issuer.badgeclass",
+        "pk": 5
+    },
+    {
+        "fields": {
             "user": 2,
             "issuer": 3,
             "editor": true

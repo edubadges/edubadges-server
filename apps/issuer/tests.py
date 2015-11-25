@@ -405,7 +405,7 @@ class BadgeClassTests(APITestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.data, list)  # Ensure we receive a list of badgeclasses
-        self.assertEqual(len(response.data), 2)  # Ensure that we receive the 3 badgeclasses in fixture as expected
+        self.assertEqual(len(response.data), 3)  # Ensure that we receive the 3 badgeclasses in fixture as expected
 
     def test_unauthenticated_cant_get_badgeclass_list(self):
         """
@@ -460,6 +460,26 @@ class BadgeClassTests(APITestCase):
                 r'badge_of_slugs_99/criteria$'
             )
 
+    def test_create_badgeclass_with_svg_image(self):
+        with open(
+            os.path.join(os.path.dirname(__file__), 'testfiles', 'test_badgeclass.svg'), 'r'
+        ) as badge_image:
+
+            example_badgeclass_props = {
+                'name': 'Badge of Awesome',
+                'description': "An awesome badge only awarded to awesome people or non-existent test entities",
+                'image': badge_image,
+                'criteria': 'http://wikipedia.org/Awesome',
+            }
+
+            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            response = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                example_badgeclass_props
+            )
+            self.assertEqual(response.status_code, 201)
+
+
 
 @override_settings(
     CELERY_ALWAYS_EAGER=True,
@@ -474,10 +494,10 @@ class BadgeClassTests(APITestCase):
 class AssertionTests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
 
-    def ensure_image_exists(self, badge_object):
+    def ensure_image_exists(self, badge_object, image_filename='guinea_pig_testing_badge.png'):
         if not os.path.exists(badge_object.image.path):
             shutil.copy2(
-                os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'),
+                os.path.join(os.path.dirname(__file__), 'testfiles', image_filename),
                 badge_object.image.path
             )
 
@@ -622,6 +642,22 @@ class AssertionTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, 400)
+
+    def test_issue_svg_badge(self):
+        # load test image into media files if it doesn't exist
+        self.ensure_image_exists(BadgeClass.objects.get(slug='badge-of-svg-testing'), 'test_badgeclass.svg')
+
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        assertion = {
+            "email": "test@example.com"
+        }
+        response = self.client.post('/v1/issuer/issuers/test-issuer-2/badges/badge-of-svg-testing/assertions', assertion)
+
+        self.assertEqual(response.status_code, 201)
+
+        slug = response.data.get('slug')
+        response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-svg-testing/assertions/{}'.format(slug))
+        self.assertEqual(response.status_code, 200)
 
 
 @override_settings(
