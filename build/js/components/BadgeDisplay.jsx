@@ -252,12 +252,11 @@ var BadgeDisplayThumbnail = React.createClass({
     ];
     var selectCollectionDialog = (
         <Dialog formId={selectCollectionFormId} dialogId={"select-collection-"+ badgeId} key={"select-collection-"+ badgeId} actions={selectCollectionActions} className="closable">
-            <Heading size="small"
-                     title="Add to Collection" />
+            <Heading size="small" title="Add to Collection" />
 
             <BasicAPIForm hideFormControls={true} actionState="ready" {...selectCollectionFormProps} />
 
-            <DialogOpener dialog={addToNewCollectionDialog} dialogId={"add-collection-"+ badgeId} key={"add-collection-"+ badgeId}>
+            <DialogOpener className="l-vertical" dialog={addToNewCollectionDialog} dialogId={"add-collection-"+ badgeId} key={"add-collection-"+ badgeId}>
                 <Button className="action_" label="CREATE NEW COLLECTION" propagateClick={true}/>
                 <p>{badgeName +" will automatically be added to the new collection."}</p>
             </DialogOpener>
