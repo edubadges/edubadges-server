@@ -159,11 +159,11 @@ var CollectionShareInfo = React.createClass({
 });
 
 
-var EarnerCollectionDetail = React.createClass({
+var ManageCollection = React.createClass({
     propTypes: {
         slug: React.PropTypes.string.isRequired,
         badgeList: React.PropTypes.array,
-        targetUrl: React.PropTypes.string,
+        label: React.PropTypes.string,
     },
 
     getInitialState: function() {
@@ -197,20 +197,11 @@ var EarnerCollectionDetail = React.createClass({
             return {id: badgeId};
         }.bind(this));
 
-        this.setState({formState: 'waiting'});
         APISubmitData(data, apiContext);
     },
 
     earnerCollectionStoreUpdated: function() {
-        this.setState({
-            formState: undefined,
-            message: {type: 'success', content: 'Collection updated.'},
-        });
         this.refs.manage.closeDialog();
-    },
-
-    openDialog: function(ev) {
-        this.setState({message: undefined});
     },
 
     onRowClick: function(ev, rowIndex, rowData) {
@@ -242,26 +233,9 @@ var EarnerCollectionDetail = React.createClass({
         );
 
         return (
-            <div>
-                {this.state.message ? (<div className={"alert alert-" + this.state.message.type}>{this.state.message.content}</div>) : ""}
-                <Heading
-                    size="medium"
-                    title="Badges in Collection"
-                    subtitle="Manage and save which badges appear in this collection."
-                    rule={false}>
-                    <DialogOpener handleClick={this.openDialog} dialog={dialog} dialogId="manage-collection-badges" key="manage-collection-badges" dialogClass="dialog_-large">
-                        <Button label="Manage" propagateClick={true} />
-                    </DialogOpener>
-                </Heading>
-
-                {this.state.formState == "waiting" ? <LoadingComponent /> : ""}
-
-                <EarnerBadgeList
-                    display="thumbnail"
-                    badges={collectionBadges}
-                    moreLink={this.props.targetUrl || '/earner/collections/' + this.props.slug}
-                    handleClick={this.selectBadgeId} />
-            </div>
+            <DialogOpener dialog={dialog} dialogId="manage-collection-badges" key="manage-collection-badges" dialogClass="dialog_-large">
+                <Button className="action_" label={this.props.label || "Manage"} propagateClick={true} />
+            </DialogOpener>
         );
     }
 });
@@ -358,6 +332,6 @@ var EarnerCollectionList = React.createClass({
 module.exports = {
   EarnerCollectionList: EarnerCollectionList,
   EarnerCollectionCard: EarnerCollectionCard,
-  EarnerCollectionDetail: EarnerCollectionDetail,
+  ManageCollection: ManageCollection,
   CollectionShareInfo: CollectionShareInfo,
 };
