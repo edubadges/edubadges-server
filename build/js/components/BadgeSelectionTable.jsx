@@ -140,6 +140,12 @@ var BadgeSelectionTable = React.createClass({
                         this.props.badges[rowIndex]);
     },
 
+    rowClassNameGetter: function(rowIndex) {
+        if (this.state.selected[rowIndex]) {
+            return "is-selected";
+        }
+    },
+
     render: function() {
         var renderedColumns = fixedDataTable.tableColumns.map(function(column, i) {
             return (
@@ -158,6 +164,7 @@ var BadgeSelectionTable = React.createClass({
             <Table
                 rowHeight={56}
                 rowGetter={this.rowGetter}
+                rowClassNameGetter={this.rowClassNameGetter}
                 rowsCount={this.props.badges.length}
                 width={this.props.widthHint}
                 maxHeight={this.props.heightHint}
