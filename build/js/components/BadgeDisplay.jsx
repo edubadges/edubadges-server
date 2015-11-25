@@ -156,7 +156,6 @@ var BadgeDisplayThumbnail = React.createClass({
       json: {badge: {issuer:{}}},
       columnClass: 'col-xs-3',
       selected: false,
-      selectMode: false,
     };
   },
   handleClick: function(){
@@ -268,14 +267,6 @@ var BadgeDisplayThumbnail = React.createClass({
     }
 
     var hoverText = this.props.hoverText;
-    if (this.props.selectMode) {
-        if ( ! this.props.selected) {
-            hoverText = "Select Badge";
-        }
-        else {
-            hoverText = "Deselect Badge";
-        }
-    }
 
     return (
       <div className="card_" style={style}>
