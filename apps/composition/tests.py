@@ -335,5 +335,24 @@ class TestBadgeUploads(APITestCase):
 
         self.assertTrue(response.data[1].startswith('Unable to find a valid json component'))
 
+    @responses.activate
+    def test_submit_badge_invalid_assertion_json(self):
+        setup_resources([
+            {'url': 'http://a.com/instance',
+             'filename': '1_0_basic_issuer_invalid_json.json'}
+        ])
+
+        post_input = {
+            'url': 'http://a.com/instance'
+        }
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        response = self.client.post(
+            '/v1/earner/badges', post_input
+        )
+        self.assertEqual(response.status_code, 400)
+
+        self.assertTrue(response.data[0].startswith('Unable to get valid baked image or valid json response from'))
+
+
 class TestCollectionOperations(APITestCase):
     pass
