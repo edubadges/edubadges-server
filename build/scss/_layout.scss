@@ -70,10 +70,12 @@ main {
 
     &:first-child:not(:only-child) {
       flex: 1;
+      min-width: 0; // Fixes any text overflow for IE Edge
     }
 
     &:last-child:not(:only-child) {
       flex: 0 1 auto;
+      min-width: 0;
 
       > * {
         margin: 0 $layout-spacing*1.5;

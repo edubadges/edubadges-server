@@ -38,7 +38,7 @@ var BadgeInstanceList = require('../components/BadgeInstanceDisplay.jsx').BadgeI
 var EarnerBadgeList = require('../components/EarnerBadgeList.jsx');
 var CollectionShareInfo = require('../components/EarnerBadgeCollection.jsx').CollectionShareInfo;
 var EarnerCollectionList = require('../components/EarnerBadgeCollection.jsx').EarnerCollectionList;
-var EarnerCollectionDetail = require('../components/EarnerBadgeCollection.jsx').EarnerCollectionDetail;
+var ManageCollection = require('../components/EarnerBadgeCollection.jsx').ManageCollection;
 var ConsumerBadgeList = require('../components/ConsumerBadgeList.jsx');
 var BadgeStudio = require('../components/BadgeStudio.jsx').BadgeStudio;
 
@@ -418,6 +418,8 @@ var App = React.createClass({
             <CollectionShareInfo initialShareUrl={collection.share_url} collectionSlug={collectionSlug} />
         </Dialog>);
 
+    var badgeIdsInCollection = APIStore.filter('earner_badges', 'id', _.pluck(badgesInCollection, 'id'));
+
     var mainComponent = (
       <MainComponent className="l-vertical" viewId={viewId}>
           <Heading
@@ -432,8 +434,13 @@ var App = React.createClass({
                 <DialogOpener dialog={shareDialog} dialogId="share-collection" key="share-collection">
                     <Button className="action_" label="Share" propagateClick={true}/>
                 </DialogOpener>
+                <ManageCollection label="Add / Remove badges" slug={collectionSlug} badgeList={badgesInCollection} />
           </Heading>
-        <EarnerCollectionDetail slug={collectionSlug} badgeList={badgesInCollection} />
+          <EarnerBadgeList
+              display="thumbnail"
+              badges={badgeIdsInCollection}
+              moreLink={'/earner/collections/' + collectionSlug}
+              handleClick={this.selectBadgeId} />
       </MainComponent>
     );
 

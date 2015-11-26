@@ -57,6 +57,12 @@
     background-color: rgba(map-get($colors, link), .05);
   }
 
+  .is-selected {
+    .public_fixedDataTableCell_main {
+      background-color: rgba(map-get($colors, link), .05);
+    }
+  }
+
 }
 
 .dialog_-x-content {

@@ -25,7 +25,7 @@ var Button = require('../components/Button.jsx').Button;
 var fixedDataTable = {
     headerRenderer: function(column, label, cellDataKey, columnData, rowData, width) {
         if (column.icon) {
-            return (<p className={"icon_ icon_-notext " + column.icon}>Selected</p> );
+            return (<p className={"icon_ icon_-notext icon_-check " + column.icon}>Selected</p> );
         }
         return (<p className="truncate_" title={label}>{label}</p>);
     },
@@ -37,7 +37,7 @@ var fixedDataTable = {
             width: 56,
             render: function(cellData, cellDataKey, rowData, rowIndex, columnData, width) {
                 return (
-                    <span className={"icon_ icon_-notext icon_-select" + (rowData.selected ? "filled" : "empty")}>
+                    <span className={"icon_ icon_-notext icon_-check " + (rowData.selected ? "icon_-check-is-active" : "")}>
                         {rowData.selected ? "Selected" : "Not selected"}
                     </span>
                 );
@@ -140,6 +140,12 @@ var BadgeSelectionTable = React.createClass({
                         this.props.badges[rowIndex]);
     },
 
+    rowClassNameGetter: function(rowIndex) {
+        if (this.state.selected[rowIndex]) {
+            return "is-selected";
+        }
+    },
+
     render: function() {
         var renderedColumns = fixedDataTable.tableColumns.map(function(column, i) {
             return (
@@ -158,6 +164,7 @@ var BadgeSelectionTable = React.createClass({
             <Table
                 rowHeight={56}
                 rowGetter={this.rowGetter}
+                rowClassNameGetter={this.rowClassNameGetter}
                 rowsCount={this.props.badges.length}
                 width={this.props.widthHint}
                 maxHeight={this.props.heightHint}

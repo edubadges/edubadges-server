@@ -63,7 +63,7 @@ var IssuerDisplay = React.createClass({
         emailField = (
             <li>
                 <h2 className="detail_-x-meta">Contact Email</h2>
-                <p><a href={this.props.json.email}>{this.props.json.email}</a></p>
+                <p><a href={'mailto:'+ this.props.json.email}>{this.props.json.email}</a></p>
             </li>);
     }
 
@@ -75,7 +75,7 @@ var IssuerDisplay = React.createClass({
         <ul>
           <li>
             <h2 className="detail_-x-meta">Website</h2>
-            <p><a href="{properties.url.id}">{properties.url.name || properties.url.id}</a></p>
+            <p><a href={properties.url.id}>{properties.url.name || properties.url.id}</a></p>
           </li>
           { emailField }
         </ul>
