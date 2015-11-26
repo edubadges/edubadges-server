@@ -5,6 +5,7 @@ import png
 import shutil
 
 from django.core import mail
+from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
 from django.contrib.auth import get_user_model
 from django.test import modify_settings, override_settings
@@ -40,6 +41,9 @@ example_issuer_props = {
 )
 class IssuerTests(APITestCase):
     fixtures = ['0001_initial_superuser', 'test_badge_objects.json']
+
+    def setUp(self):
+        cache.clear()
 
     def test_create_issuer_unauthenticated(self):
         view = IssuerList.as_view()
@@ -314,6 +318,9 @@ class IssuerTests(APITestCase):
 class BadgeClassTests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
 
+    def setUp(self):
+        cache.clear()
+
     def test_create_badgeclass_for_issuer_authenticated(self):
         with open(
             os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
@@ -479,6 +486,30 @@ class BadgeClassTests(APITestCase):
             )
             self.assertEqual(response.status_code, 201)
 
+    def test_new_badgeclass_updates_cached_issuer(self):
+        user = get_user_model().objects.get(pk=1)
+        number_of_badgeclasses = len(list(user.cached_badgeclasses()))
+
+        with open(
+            os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
+        ) as badge_image:
+
+            example_badgeclass_props = {
+                'name': 'Badge of Freshness',
+                'description': "Fresh Badge",
+                'image': badge_image,
+                'criteria': 'http://wikipedia.org/Freshness',
+            }
+
+            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            response = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                example_badgeclass_props
+            )
+            self.assertEqual(response.status_code, 201)
+
+            self.assertEqual(len(list(user.cached_badgeclasses())), number_of_badgeclasses + 1)
+
 
 
 @override_settings(
@@ -493,6 +524,9 @@ class BadgeClassTests(APITestCase):
 )
 class AssertionTests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
+
+    def setUp(self):
+        cache.clear()
 
     def ensure_image_exists(self, badge_object, image_filename='guinea_pig_testing_badge.png'):
         if not os.path.exists(badge_object.image.path):

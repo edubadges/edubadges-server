@@ -349,17 +349,10 @@ class AllBadgeClassesList(AbstractIssuerAPIEndpoint):
         serializer: BadgeClassSerializer
         """
         # Ensure current user has permissions on current issuer
-        user_issuers = Issuer.objects.filter(
-            Q(owner__id=request.user.id) |
-            Q(staff__id=request.user.id)
-        ).distinct().select_related('badgeclasses')
-        issuer_badgeclasses = [
-            bc for bc in chain.from_iterable(i.badgeclasses.all()
-                for i in user_issuers)
-        ]
+        user_badgeclasses = request.user.cached_badgeclasses()
 
         serializer = BadgeClassSerializer(
-            issuer_badgeclasses, many=True, context={'request': request}
+            user_badgeclasses, many=True, context={'request': request}
         )
         return Response(serializer.data)
 

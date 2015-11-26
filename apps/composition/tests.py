@@ -1,6 +1,7 @@
 import json
 import os
 
+from django.core.cache import cache
 from django.contrib.auth import get_user_model
 
 import responses
@@ -65,6 +66,9 @@ def setup_basic_0_5_0(**kwargs):
 
 class TestBadgeUploads(APITestCase):
     fixtures = ['0001_initial_superuser']
+
+    def setUp(self):
+        cache.clear()
 
     @responses.activate
     def test_submit_basic_1_0_badge_via_url(self):
