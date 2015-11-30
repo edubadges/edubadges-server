@@ -304,6 +304,45 @@ class IssuerTests(APITestCase):
         response = self.client.delete('/v1/issuer/issuers/test-issuer-2', {})
         self.assertEqual(response.status_code, 400)
 
+    def test_new_issuer_updates_cached_user_issuers(self):
+
+        user = get_user_model().objects.get(pk=1)
+        self.client.force_authenticate(user=user)
+        badgelist = self.client.get('/v1/issuer/all-badges')
+
+        example_issuer_props = {
+            'name': 'Fresh Issuer',
+            'description': "Fresh Issuer",
+            'url': 'http://freshissuer.com',
+            'email': 'prince@freshissuer.com',
+        }
+
+        response = self.client.post(
+            '/v1/issuer/issuers',
+            example_issuer_props
+        )
+        self.assertEqual(response.status_code, 201)
+
+        with open(
+            os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
+        ) as badge_image:
+
+            example_badgeclass_props = {
+                'name': 'Badge of Freshness',
+                'description': "Fresh Badge",
+                'image': badge_image,
+                'criteria': 'http://wikipedia.org/Freshness',
+            }
+
+            response = self.client.post(
+                '/v1/issuer/issuers/fresh-issuer/badges',
+                example_badgeclass_props
+            )
+            self.assertEqual(response.status_code, 201)
+
+        new_badgelist = self.client.get('/v1/issuer/all-badges')
+
+        self.assertEqual(len(new_badgelist.data), len(badgelist.data) + 1)
 
 @override_settings(
     CELERY_ALWAYS_EAGER=True,
@@ -511,6 +550,32 @@ class BadgeClassTests(APITestCase):
             self.assertEqual(len(list(user.cached_badgeclasses())), number_of_badgeclasses + 1)
 
 
+    def test_new_badgeclass_updates_cached_user_badgeclasses(self):
+        user = get_user_model().objects.get(pk=1)
+        self.client.force_authenticate(user=user)
+        badgelist = self.client.get('/v1/issuer/all-badges')
+
+        with open(
+            os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
+        ) as badge_image:
+
+            example_badgeclass_props = {
+                'name': 'Badge of Freshness',
+                'description': "Fresh Badge",
+                'image': badge_image,
+                'criteria': 'http://wikipedia.org/Freshness',
+            }
+
+            response = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                example_badgeclass_props
+            )
+            self.assertEqual(response.status_code, 201)
+
+        new_badgelist = self.client.get('/v1/issuer/all-badges')
+
+        self.assertEqual(len(new_badgelist.data), len(badgelist.data) + 1)
+
 
 @override_settings(
     CELERY_ALWAYS_EAGER=True,
@@ -692,6 +757,29 @@ class AssertionTests(APITestCase):
         slug = response.data.get('slug')
         response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-svg-testing/assertions/{}'.format(slug))
         self.assertEqual(response.status_code, 200)
+
+    def test_new_assertion_updates_cached_user_badgeclasses(self):
+
+        user = get_user_model().objects.get(pk=1)
+
+        self.client.force_authenticate(user=user)
+        badgelist = self.client.get('/v1/issuer/all-badges')
+        badge_data = badgelist.data[0]
+        number_of_assertions = badge_data['recipient_count']
+        # self.ensure_image_exists(badge, 'test_badgeclass.svg') # replace with that badge's filename
+
+        new_assertion_props = {
+            'email': 'test3@example.com',
+        }
+
+        response = self.client.post('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions', new_assertion_props)
+        self.assertEqual(response.status_code, 201)
+
+        new_badgelist = self.client.get('/v1/issuer/all-badges')
+        new_badge_data = new_badgelist.data[0]
+        updated_number_of_assertions = new_badge_data['recipient_count']
+
+        self.assertEqual(updated_number_of_assertions, number_of_assertions + 1)
 
 
 @override_settings(
