@@ -29,11 +29,9 @@ class Issuer(AbstractIssuer):
     staff = models.ManyToManyField(AUTH_USER_MODEL, through='IssuerStaff')
 
     def publish(self, *args, **kwargs):
-        staff = self.cached_staff()
-        owner = self.owner
         super(Issuer, self).publish(*args, **kwargs)
-        owner.publish()
-        for member in staff:
+        self.owner.publish()
+        for member in self.cached_staff():
             member.publish()
 
     def delete(self, *args, **kwargs):
