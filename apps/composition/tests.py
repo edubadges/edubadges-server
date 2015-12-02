@@ -1,6 +1,7 @@
 import json
 import os
 
+from django.core.cache import cache
 from django.contrib.auth import get_user_model
 
 import responses
@@ -65,6 +66,9 @@ def setup_basic_0_5_0(**kwargs):
 
 class TestBadgeUploads(APITestCase):
     fixtures = ['0001_initial_superuser']
+
+    def setUp(self):
+        cache.clear()
 
     @responses.activate
     def test_submit_basic_1_0_badge_via_url(self):
@@ -315,6 +319,44 @@ class TestBadgeUploads(APITestCase):
 
         self.assertTrue(response.data['details']['instance']['BadgeInstanceSerializerV1_0']['issuedOn'][0]
                         .startswith('Invalid format'))
+
+    @responses.activate
+    def test_submit_badge_invalid_component_json(self):
+        setup_basic_1_0(**{'exclude': ['http://a.com/issuer']})
+        setup_resources([
+            {'url': 'http://a.com/issuer',
+             'filename': '1_0_basic_issuer_invalid_json.json'}
+        ])
+
+        post_input = {
+            'url': 'http://a.com/instance'
+        }
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        response = self.client.post(
+            '/v1/earner/badges', post_input
+        )
+        self.assertEqual(response.status_code, 400)
+
+        self.assertTrue(response.data[1].startswith('Unable to find a valid json component'))
+
+    @responses.activate
+    def test_submit_badge_invalid_assertion_json(self):
+        setup_resources([
+            {'url': 'http://a.com/instance',
+             'filename': '1_0_basic_issuer_invalid_json.json'}
+        ])
+
+        post_input = {
+            'url': 'http://a.com/instance'
+        }
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        response = self.client.post(
+            '/v1/earner/badges', post_input
+        )
+        self.assertEqual(response.status_code, 400)
+
+        self.assertTrue(response.data[0].startswith('Unable to get valid baked image or valid json response from'))
+
 
 class TestCollectionOperations(APITestCase):
     pass

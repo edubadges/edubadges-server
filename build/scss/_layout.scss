@@ -1,7 +1,10 @@
 main {
+  box-sizing: border-box;
   display: block; // IE
+  min-height: 80vh;
   padding-bottom: $layout-spacing*2;
   padding-top: $layout-spacing*7;
+  position: relative;
   z-index: $z-index-low;
 }
 
@@ -67,10 +70,12 @@ main {
 
     &:first-child:not(:only-child) {
       flex: 1;
+      min-width: 0; // Fixes any text overflow for IE Edge
     }
 
     &:last-child:not(:only-child) {
       flex: 0 1 auto;
+      min-width: 0;
 
       > * {
         margin: 0 $layout-spacing*1.5;
@@ -96,12 +101,18 @@ main {
 }
 
 // Equally-spaced vertical layouts
+// Note that l-vertical may be nested due to how react functions
 
 .l-vertical {
   max-width: 100%;
 
   > *:not(:last-child) {
     margin-bottom: $layout-spacing*2;
+  }
+
+  .l-vertical-x-offset {
+    margin-bottom: $layout-spacing*6;
+    margin-top: $layout-spacing*3;
   }
 
 }
@@ -114,13 +125,6 @@ main {
     margin-bottom: $layout-spacing;
   }
 
-}
-
-// Offsets an item in an l-vertical layout
-
-.l-verticaloffset {
-  margin-top: $layout-spacing*3;
-  margin-bottom: $layout-spacing*6;
 }
 
 // For creating equally-spaced vertical layouts
@@ -142,8 +146,8 @@ main {
 .l-wrapper {
 
   @media (min-width: 1184px + $layout-spacing*6) {
-    padding-left: calc(50% - 680px);
-    padding-right: calc(50% - 680px);
+    padding-left: calc(50vw - 680px);
+    padding-right: calc(50vw - 680px);
   }
 
 }
@@ -155,8 +159,8 @@ main {
   padding-right: $layout-spacing*6;
 
   @media (min-width: 1184px + $layout-spacing*6) {
-    padding-left: calc(50% - 592px);
-    padding-right: calc(50% - 592px);
+    padding-left: calc(50vw - 592px);
+    padding-right: calc(50vw - 592px);
   }
   
 }
@@ -247,11 +251,31 @@ $l-studio-header: $layout-spacing*8;
 
   main {
     flex: 1 0 auto;
-    overflow-y: auto;
   }
 
   > footer {
     flex: 0 0 auto;
+  }
+
+  .l-fillvertical-x-overflow {
+    display: flex;
+    flex-direction: column;
+
+    .l-fillvertical-x-container {
+      flex: 1 0 auto;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .l-fillvertical-x-content {
+      height: 100%;
+      left: 0;
+      overflow-y: auto;
+      position: absolute;
+      top: 0;
+      width: 100%;
+    }
+
   }
 
 }

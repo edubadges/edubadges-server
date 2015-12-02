@@ -22,3 +22,20 @@ class BadgeInstanceHTMLRenderer(BrowsableAPIRenderer):
             pass
 
         return context
+
+
+class BadgeClassCriteriaHTMLRenderer(BrowsableAPIRenderer):
+    media_type = 'text/html'
+    template = 'issuer/badge_class_criteria.html'
+
+    def get_context(self, data, accepted_media_type, renderer_context):
+        context = super(BadgeClassCriteriaHTMLRenderer, self).get_context(
+            data, accepted_media_type, renderer_context)
+
+        try:
+            context['badge_class'] = renderer_context['badge_class']
+            context['issuer'] = renderer_context['issuer']
+        except KeyError:
+            pass
+
+        return context

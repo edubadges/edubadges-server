@@ -1,7 +1,18 @@
 .rule_ {
-  background: map-get($colors, border-light);
   border: 0;
   height: 1px;
-  margin: $layout-spacing 0;
+  padding: $layout-spacing 0;
+  position: relative;
   width: 100%;
+
+  &::after {
+    @include pseudobase;
+    background: map-get($colors, border-light);
+    height: 1px;
+    left: 0;
+    position: absolute;
+    top: $layout-spacing;
+    width: 100%;
+  }
+
 }

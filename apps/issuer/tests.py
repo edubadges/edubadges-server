@@ -5,13 +5,19 @@ import png
 import shutil
 
 from django.core import mail
+from django.core.cache import cache
+from django.core.files.images import get_image_dimensions
 from django.contrib.auth import get_user_model
+from django.test import modify_settings, override_settings
 
 from openbadges_bakery import unbake
 from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
 
 from issuer.api import IssuerList
 from issuer.models import Issuer, BadgeClass, BadgeInstance
+
+from mainsite import TOP_DIR
+
 
 factory = APIRequestFactory()
 
@@ -23,8 +29,21 @@ example_issuer_props = {
 }
 
 
+@override_settings(
+    CELERY_ALWAYS_EAGER=True,
+    SESSION_ENGINE='django.contrib.sessions.backends.cache',
+    CACHES={
+        'default': {
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
+        }
+    }
+)
 class IssuerTests(APITestCase):
     fixtures = ['0001_initial_superuser', 'test_badge_objects.json']
+
+    def setUp(self):
+        cache.clear()
 
     def test_create_issuer_unauthenticated(self):
         view = IssuerList.as_view()
@@ -69,10 +88,8 @@ class IssuerTests(APITestCase):
     def test_create_issuer_image_500x300_resizes_to_400x400(self):
         view = IssuerList.as_view()
 
-        with open(
-            os.path.join(os.path.dirname(__file__), 'testfiles', '500x300.png'),
-            'r') as badge_image:
-
+        with open(os.path.join(os.path.dirname(__file__), 'testfiles',
+                               '500x300.png'), 'r') as badge_image:
                 issuer_fields_with_image = {
                     'name': 'Awesome Issuer',
                     'description': 'An issuer of awe-inspiring credentials',
@@ -94,8 +111,10 @@ class IssuerTests(APITestCase):
                 derived_slug = badge_object['id'].split('/')[-1]
                 new_issuer = Issuer.objects.get(slug=derived_slug)
 
-                self.assertEqual(new_issuer.image.width, 400)
-                self.assertEqual(new_issuer.image.height, 400)
+                image_width, image_height = \
+                    get_image_dimensions(new_issuer.image.file)
+                self.assertEqual(image_width, 400)
+                self.assertEqual(image_height, 400)
 
     def test_create_issuer_image_450x450_resizes_to_400x400(self):
         view = IssuerList.as_view()
@@ -125,8 +144,10 @@ class IssuerTests(APITestCase):
                 derived_slug = badge_object['id'].split('/')[-1]
                 new_issuer = Issuer.objects.get(slug=derived_slug)
 
-                self.assertEqual(new_issuer.image.width, 400)
-                self.assertEqual(new_issuer.image.height, 400)
+                image_width, image_height = \
+                    get_image_dimensions(new_issuer.image.file)
+                self.assertEqual(image_width, 400)
+                self.assertEqual(image_height, 400)
 
     def test_create_issuer_image_300x300_stays_300x300(self):
         view = IssuerList.as_view()
@@ -156,8 +177,10 @@ class IssuerTests(APITestCase):
                 derived_slug = badge_object['id'].split('/')[-1]
                 new_issuer = Issuer.objects.get(slug=derived_slug)
 
-                self.assertEqual(new_issuer.image.width, 300)
-                self.assertEqual(new_issuer.image.height, 300)
+                image_width, image_height = \
+                    get_image_dimensions(new_issuer.image.file)
+                self.assertEqual(image_width, 300)
+                self.assertEqual(image_height, 300)
 
     def test_private_issuer_detail_get(self):
         # GET on single badge should work if user has privileges
@@ -281,13 +304,90 @@ class IssuerTests(APITestCase):
         response = self.client.delete('/v1/issuer/issuers/test-issuer-2', {})
         self.assertEqual(response.status_code, 400)
 
+    def test_new_issuer_updates_cached_user_issuers(self):
 
+        user = get_user_model().objects.get(pk=1)
+        self.client.force_authenticate(user=user)
+        badgelist = self.client.get('/v1/issuer/all-badges')
+
+        example_issuer_props = {
+            'name': 'Fresh Issuer',
+            'description': "Fresh Issuer",
+            'url': 'http://freshissuer.com',
+            'email': 'prince@freshissuer.com',
+        }
+
+        response = self.client.post(
+            '/v1/issuer/issuers',
+            example_issuer_props
+        )
+        self.assertEqual(response.status_code, 201)
+
+        with open(
+            os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
+        ) as badge_image:
+
+            example_badgeclass_props = {
+                'name': 'Badge of Freshness',
+                'description': "Fresh Badge",
+                'image': badge_image,
+                'criteria': 'http://wikipedia.org/Freshness',
+            }
+
+            response = self.client.post(
+                '/v1/issuer/issuers/fresh-issuer/badges',
+                example_badgeclass_props
+            )
+            self.assertEqual(response.status_code, 201)
+
+        new_badgelist = self.client.get('/v1/issuer/all-badges')
+
+        self.assertEqual(len(new_badgelist.data), len(badgelist.data) + 1)
+
+@override_settings(
+    CELERY_ALWAYS_EAGER=True,
+    SESSION_ENGINE='django.contrib.sessions.backends.cache',
+    CACHES={
+        'default': {
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
+        }
+    }
+)
 class BadgeClassTests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
+
+    def setUp(self):
+        cache.clear()
 
     def test_create_badgeclass_for_issuer_authenticated(self):
         with open(
             os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
+        ) as badge_image:
+
+            example_badgeclass_props = {
+                'name': 'Badge of Awesome',
+                'description': "An awesome badge only awarded to awesome people or non-existent test entities",
+                'image': badge_image,
+                'criteria': 'http://wikipedia.org/Awesome',
+            }
+
+            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            response = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                example_badgeclass_props
+            )
+            self.assertEqual(response.status_code, 201)
+
+            # assert that the BadgeClass was published to and fetched from the cache
+            with self.assertNumQueries(0):
+                slug = response.data.get('slug')
+                response = self.client.get('/v1/issuer/issuers/test-issuer/badges/{}'.format(slug))
+                self.assertEqual(response.status_code, 200)
+
+    def test_create_badgeclass_with_svg(self):
+        with open(
+                os.path.join(TOP_DIR, 'breakdown', 'static', 'badgestudio', 'shapes', 'heart.svg'), 'r'
         ) as badge_image:
 
             example_badgeclass_props = {
@@ -351,7 +451,7 @@ class BadgeClassTests(APITestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.data, list)  # Ensure we receive a list of badgeclasses
-        self.assertEqual(len(response.data), 2)  # Ensure that we receive the 3 badgeclasses in fixture as expected
+        self.assertEqual(len(response.data), 3)  # Ensure that we receive the 3 badgeclasses in fixture as expected
 
     def test_unauthenticated_cant_get_badgeclass_list(self):
         """
@@ -406,14 +506,97 @@ class BadgeClassTests(APITestCase):
                 r'badge_of_slugs_99/criteria$'
             )
 
+    def test_create_badgeclass_with_svg_image(self):
+        with open(
+            os.path.join(os.path.dirname(__file__), 'testfiles', 'test_badgeclass.svg'), 'r'
+        ) as badge_image:
 
+            example_badgeclass_props = {
+                'name': 'Badge of Awesome',
+                'description': "An awesome badge only awarded to awesome people or non-existent test entities",
+                'image': badge_image,
+                'criteria': 'http://wikipedia.org/Awesome',
+            }
+
+            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            response = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                example_badgeclass_props
+            )
+            self.assertEqual(response.status_code, 201)
+
+    def test_new_badgeclass_updates_cached_issuer(self):
+        user = get_user_model().objects.get(pk=1)
+        number_of_badgeclasses = len(list(user.cached_badgeclasses()))
+
+        with open(
+            os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
+        ) as badge_image:
+
+            example_badgeclass_props = {
+                'name': 'Badge of Freshness',
+                'description': "Fresh Badge",
+                'image': badge_image,
+                'criteria': 'http://wikipedia.org/Freshness',
+            }
+
+            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            response = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                example_badgeclass_props
+            )
+            self.assertEqual(response.status_code, 201)
+
+            self.assertEqual(len(list(user.cached_badgeclasses())), number_of_badgeclasses + 1)
+
+
+    def test_new_badgeclass_updates_cached_user_badgeclasses(self):
+        user = get_user_model().objects.get(pk=1)
+        self.client.force_authenticate(user=user)
+        badgelist = self.client.get('/v1/issuer/all-badges')
+
+        with open(
+            os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
+        ) as badge_image:
+
+            example_badgeclass_props = {
+                'name': 'Badge of Freshness',
+                'description': "Fresh Badge",
+                'image': badge_image,
+                'criteria': 'http://wikipedia.org/Freshness',
+            }
+
+            response = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                example_badgeclass_props
+            )
+            self.assertEqual(response.status_code, 201)
+
+        new_badgelist = self.client.get('/v1/issuer/all-badges')
+
+        self.assertEqual(len(new_badgelist.data), len(badgelist.data) + 1)
+
+
+@override_settings(
+    CELERY_ALWAYS_EAGER=True,
+    SESSION_ENGINE='django.contrib.sessions.backends.cache',
+    CACHES={
+        'default': {
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
+        }
+    }
+)
 class AssertionTests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
 
-    def ensure_image_exists(self, badge_object):
+    def setUp(self):
+        cache.clear()
+
+    def ensure_image_exists(self, badge_object, image_filename='guinea_pig_testing_badge.png'):
         if not os.path.exists(badge_object.image.path):
             shutil.copy2(
-                os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'),
+                os.path.join(os.path.dirname(__file__), 'testfiles', image_filename),
                 badge_object.image.path
             )
 
@@ -559,7 +742,56 @@ class AssertionTests(APITestCase):
 
         self.assertEqual(response.status_code, 400)
 
+    def test_issue_svg_badge(self):
+        # load test image into media files if it doesn't exist
+        self.ensure_image_exists(BadgeClass.objects.get(slug='badge-of-svg-testing'), 'test_badgeclass.svg')
 
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        assertion = {
+            "email": "test@example.com"
+        }
+        response = self.client.post('/v1/issuer/issuers/test-issuer-2/badges/badge-of-svg-testing/assertions', assertion)
+
+        self.assertEqual(response.status_code, 201)
+
+        slug = response.data.get('slug')
+        response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-svg-testing/assertions/{}'.format(slug))
+        self.assertEqual(response.status_code, 200)
+
+    def test_new_assertion_updates_cached_user_badgeclasses(self):
+
+        user = get_user_model().objects.get(pk=1)
+
+        self.client.force_authenticate(user=user)
+        badgelist = self.client.get('/v1/issuer/all-badges')
+        badge_data = badgelist.data[0]
+        number_of_assertions = badge_data['recipient_count']
+        # self.ensure_image_exists(badge, 'test_badgeclass.svg') # replace with that badge's filename
+
+        new_assertion_props = {
+            'email': 'test3@example.com',
+        }
+
+        response = self.client.post('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions', new_assertion_props)
+        self.assertEqual(response.status_code, 201)
+
+        new_badgelist = self.client.get('/v1/issuer/all-badges')
+        new_badge_data = new_badgelist.data[0]
+        updated_number_of_assertions = new_badge_data['recipient_count']
+
+        self.assertEqual(updated_number_of_assertions, number_of_assertions + 1)
+
+
+@override_settings(
+    CELERY_ALWAYS_EAGER=True,
+    SESSION_ENGINE='django.contrib.sessions.backends.cache',
+    CACHES={
+        'default': {
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
+        }
+    }
+)
 class PublicAPITests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
     """

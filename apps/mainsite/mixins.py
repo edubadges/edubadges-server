@@ -11,7 +11,10 @@ class ResizeUploadedImage(object):
 
     def save(self, *args, **kwargs):
         if self.pk is None and self.image:
-            image = Image.open(self.image)
+            try:
+                image = Image.open(self.image)
+            except IOError:
+                return super(ResizeUploadedImage, self).save(*args, **kwargs)
 
             if image.format == 'PNG':
                 max_square = getattr(settings, 'IMAGE_FIELD_MAX_PX', 400)

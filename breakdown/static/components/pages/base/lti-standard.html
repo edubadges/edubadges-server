@@ -1,0 +1,23 @@
+{{> molecules/header-small}}
+
+<!-- For LTI views main does not receive wrap_ and wrap_bottomborder -->
+
+<main class="l-wrapper l-wrapper-inset">
+
+  <!-- React requires an additional wrapper for modules, otherwise l-vertical could go on the main element -->
+
+  <div class="l-vertical">
+    
+    <p>(module here)</p>
+
+    <p>(module here)</p>
+
+  </div>
+
+</main>
+
+<script>
+  // Body receives an override for all canvas views
+  // Adding via JavaScript for pattern library purposes
+  document.body.classList.add('o-canvas');
+</script>

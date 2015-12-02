@@ -20,6 +20,12 @@ $colors: (
   solid-dark: #000
 );
 
+$states: (
+  pending: #f5a623,
+  primary: map-get($colors, button),
+  verified: map-get($colors, loading)
+);
+
 $font-size-small-2x: 12px;
 $font-size-small: 14px;
 $font-size: 16px;

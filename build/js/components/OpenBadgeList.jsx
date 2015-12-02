@@ -29,7 +29,6 @@ var OpenBadgeList = React.createClass({
       grid: true,
       clickEmptyBadge: function(){},
       showEmptyBadge: false,
-      selectedBadgeIds: []
     };
   },
     render: function() {
@@ -47,8 +46,6 @@ var OpenBadgeList = React.createClass({
                     clickable={this.props.clickable}
                     handleClick={this.props.handleClick}
                     type={item.type || 'earned badge'}
-                    selectMode={this.props.selectMode}
-                    selected={(this.props.selectedBadgeIds.indexOf(item.id) > -1)}
                     />);
 
             if (this.props.grid) {

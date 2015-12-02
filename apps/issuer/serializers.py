@@ -32,7 +32,7 @@ class IssuerSerializer(AbstractComponentSerializer):
     json = WritableJSONField(max_length=16384, read_only=True, required=False)
     name = serializers.CharField(max_length=1024)
     slug = serializers.CharField(max_length=255, allow_blank=True, required=False)
-    image = serializers.ImageField(allow_empty_file=False, use_url=True, required=False)
+    image = serializers.FileField(allow_empty_file=False, use_url=True, required=False)
     email = serializers.EmailField(max_length=255, required=True, write_only=True)
     description = serializers.CharField(max_length=1024, required=True, write_only=True)
     url = serializers.URLField(max_length=1024, required=True, write_only=True)
@@ -115,7 +115,7 @@ class BadgeClassSerializer(AbstractComponentSerializer):
     issuer = serializers.HyperlinkedRelatedField(view_name='issuer_json', read_only=True, lookup_field='slug')
     json = WritableJSONField(max_length=16384, read_only=True, required=False)
     name = serializers.CharField(max_length=255)
-    image = serializers.ImageField(allow_empty_file=False, use_url=True)
+    image = serializers.FileField(allow_empty_file=False, use_url=True)
     slug = serializers.CharField(max_length=255, allow_blank=True, required=False)
     criteria = serializers.CharField(allow_blank=True, required=False, write_only=True)
     recipient_count = serializers.IntegerField(required=False, read_only=True)
@@ -182,7 +182,7 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
     #issuer = serializers.HyperlinkedRelatedField(view_name='issuer_json', read_only=True,  lookup_field='slug')
     #badgeclass = serializers.HyperlinkedRelatedField(view_name='badgeclass_json', read_only=True, lookup_field='slug')
     slug = serializers.CharField(max_length=255, read_only=True)
-    image = serializers.ImageField(read_only=True)  # use_url=True, might be necessary
+    image = serializers.FileField(read_only=True)  # use_url=True, might be necessary
     recipient_identifier = serializers.EmailField(max_length=1024)
     evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
 

@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 
 from .api import AbstractIssuerAPIEndpoint
 from .models import Issuer, BadgeClass, BadgeInstance
-from .renderers import BadgeInstanceHTMLRenderer
+from .renderers import BadgeInstanceHTMLRenderer, BadgeClassCriteriaHTMLRenderer
 
 import utils
 import badgrlog
@@ -99,15 +99,23 @@ class BadgeClassCriteria(ComponentPropertyDetailView):
     model = BadgeClass
     prop = 'criteria'
     queryset = BadgeClass.objects.all()
+    renderer_classes = (JSONRenderer, BadgeClassCriteriaHTMLRenderer,)
+
+    def get_renderer_context(self, **kwargs):
+        context = super(BadgeClassCriteria, self).get_renderer_context(**kwargs)
+        if getattr(self, 'current_object', None):
+            context['badge_class'] = self.current_object
+            context['issuer'] = self.current_object.issuer
+        return context
 
     def get(self, request, slug):
-        # TODO: Improve rendered HTML view template.
         current_query = self.queryset.filter(slug=slug)
 
         if not current_query.exists():
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         current_object = current_query[0]
+        self.current_object = current_object
 
         logger.event(badgrlog.BadgeClassCriteriaRetrievedEvent(current_object, request))
 

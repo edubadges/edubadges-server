@@ -1,3 +1,21 @@
+// Icons could be scaled instead of specifically sized and sourced, will help with specificity as well
+
+body {
+
+  // Preload hover-state images
+  // http://stackoverflow.com/questions/1373142/preloading-css-images
+
+  &::after {
+    content:
+      url('images/step-earned-hover.svg')
+      url('images/icon-collapse.svg')
+      url('images/form-check-checked.svg')
+      url('images/icon-check-active.svg');
+    display: none;
+  }
+
+}
+
 .icon_ {
   background: none;
   border: 0;
@@ -52,23 +70,23 @@
     right: 0;
   }
 
-}
+  &.icon_-large {
+    padding-left: 0;
+    padding-right: $layout-spacing*6;
+  }
 
-.icon_-right.icon_-small {
-  padding-left: 0;
-  padding-right: $layout-spacing*2;
-}
+  &.icon_-small {
+    padding-left: 0;
+    padding-right: $layout-spacing*2;
+  }
 
-.icon_-right.icon_-large {
-  padding-left: 0;
-  padding-right: $layout-spacing*6;
 }
 
 .icon_-notext {
-  text-indent: -9999em;
+  max-width: 0 !important; // To override legacy
   padding-left: $layout-spacing;
   padding-right: $layout-spacing;
-  max-width: 0 !important; // To override legacy
+  text-indent: -9999em;
   width: 0 !important; // To override legacy
 
   &::after {
@@ -76,14 +94,14 @@
     width: $layout-spacing*2;
   }
 
-}
+  &.icon_-small {
+    padding-left: $layout-spacing/2;
+    padding-right: $layout-spacing/2;
 
-.icon_-notext.icon_-small {
-  padding-left: $layout-spacing/2;
-  padding-right: $layout-spacing/2;
+    &::after {
+      width: $layout-spacing;
+    }
 
-  &::after {
-    width: $layout-spacing;
   }
 
 }
@@ -214,6 +232,22 @@
 
   &::after {
     background-image: url('images/icon-help.svg');
+  }
+
+}
+
+.icon_-check {
+
+  &::after {
+    background-image: url('images/icon-check.svg');
+  }
+
+  &.icon_-check-is-active {
+
+    &::after {
+      background-image: url('images/icon-check-active.svg');
+    }
+
   }
 
 }

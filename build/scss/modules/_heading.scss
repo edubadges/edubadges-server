@@ -7,10 +7,14 @@
   .heading_-x-text {
     flex: 0 1 60%;
 
-    > *:not(:only-child) {
-      margin-bottom: $layout-spacing*2;
+    > * {
+
+      &:not(:last-child) {
+        margin-bottom: $layout-spacing*2;
+      }
+
     }
-    
+
     h1 {
       color: map-get($colors, heading);
       font-size: $font-size-large-5x;
@@ -69,8 +73,12 @@
 
   .heading_-x-text {
 
-    > *:not(:only-child) {
-      margin-bottom: $layout-spacing;
+    > * {
+
+      &:not(:only-child) {
+        margin-bottom: $layout-spacing;
+      }
+      
     }
 
     h1 {

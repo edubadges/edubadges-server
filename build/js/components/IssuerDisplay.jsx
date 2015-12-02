@@ -63,19 +63,19 @@ var IssuerDisplay = React.createClass({
         emailField = (
             <li>
                 <h2 className="detail_-x-meta">Contact Email</h2>
-                <p><a href={this.props.json.email}>{this.props.json.email}</a></p>
+                <p><a href={'mailto:'+ this.props.json.email}>{this.props.json.email}</a></p>
             </li>);
     }
 
     return (
-      <div className="detail_">
+      <div className="detail_ l-vertical-x-offset">
         <div>
           <img src={properties.image.id} width="112" height="112" />
         </div>
         <ul>
           <li>
             <h2 className="detail_-x-meta">Website</h2>
-            <p><a href="{properties.url.id}">{properties.url.name || properties.url.id}</a></p>
+            <p><a href={properties.url.id}>{properties.url.name || properties.url.id}</a></p>
           </li>
           { emailField }
         </ul>
@@ -128,7 +128,7 @@ var IssuerList = React.createClass({
       }.bind(this));
     }
     return (
-      <div className="l-vertical l-wrapper">
+      <div className="l-vertical">
         {issuers}
       </div>
     );

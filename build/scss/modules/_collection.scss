@@ -6,10 +6,10 @@
   > :first-child {
     box-sizing: border-box;
     flex: 0 0 100%;
-    max-width: 100%;
     font-size: $font-size-small;
     font-weight: 600;
     margin-bottom: $layout-spacing*2;
+    max-width: 100%;
     padding-right: $layout-spacing*2;
   }
 

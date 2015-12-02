@@ -36,9 +36,15 @@ def get_verified_badge_instance_from_form(validated_data):
                 **{'preloaded_response': url_response}
             )
         except simplejson.JSONDecodeError:
-            return get_badge_instance_from_baked_image(
-                ContentFile(url_response.content, 'baked_image.png')
-            )
+            try:
+                return get_badge_instance_from_baked_image(
+                    ContentFile(url_response.content, 'baked_image.png')
+                )
+            except ValidationError:
+                raise ValidationError(
+                    "Unable to get valid baked image or valid json response from {}"
+                    .format(validated_data['url'])
+                )
 
     raise ValidationError(
         "No badge instance found from the given form input.")
@@ -68,7 +74,7 @@ def badge_email_matches_emails(badge_instance, verified_addresses):
         try:
             hash_algorithm, hash_string = badge_email.split('$')
         except ValueError:
-            raise ValidationError("Recipient hash string {} is poorly formed." \
+            raise ValidationError("Recipient hash string {} is poorly formed."
                                   .format(badge_email))
 
         # TODO: Ensure hash is one of two possibilities or return False
