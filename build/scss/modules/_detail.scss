@@ -1,7 +1,8 @@
 .detail_ {
   display: flex;
 
-  > * {
+  > *:not(:last-child) {
+    flex: 1 0 auto;
     margin-right: $layout-spacing*2;
   }
 
