@@ -204,10 +204,15 @@ class IssuerDetail(AbstractIssuerAPIEndpoint):
         # remove issuer staff
         IssuerStaff.objects.filter(issuer=issuer).delete()
 
-        # update LmsCourseInfo's that were using this issuer as the default_issuer
-        for course_info in LmsCourseInfo.objects.filter(default_issuer=issuer):
-            course_info.default_issuer = None
-            course_info.save()
+        if apps.is_installed('badgebook'):
+            try:
+                from badgebook.models import LmsCourseInfo
+                # update LmsCourseInfo's that were using this issuer as the default_issuer
+                for course_info in LmsCourseInfo.objects.filter(default_issuer=issuer):
+                    course_info.default_issuer = None
+                    course_info.save()
+            except ImportError:
+                pass
 
         # delete the issuer
         issuer.delete()

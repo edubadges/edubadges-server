@@ -1,6 +1,7 @@
 from itertools import chain
 import os
 import uuid
+from django.apps import apps
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
@@ -205,16 +206,18 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
         else:
             representation['badge_class'] = settings.HTTP_ORIGIN+reverse('badgeclass_json', kwargs={'slug': instance.cached_badgeclass.slug})
 
-
-        # TODO: only bother doing this if badgebook is in INSTALLED_APPS
-        from badgebook.models import BadgeObjectiveAward
-        from badgebook.serializers import BadgeObjectiveAwardSerializer
-        try:
-            award = BadgeObjectiveAward.cached.get(badge_instance_id=instance.id)
-        except BadgeObjectiveAward.DoesNotExist:
-            representation['award'] = None
-        else:
-            representation['award'] = BadgeObjectiveAwardSerializer(award).data
+        if apps.is_installed('badgebook'):
+            try:
+                from badgebook.models import BadgeObjectiveAward
+                from badgebook.serializers import BadgeObjectiveAwardSerializer
+                try:
+                    award = BadgeObjectiveAward.cached.get(badge_instance_id=instance.id)
+                except BadgeObjectiveAward.DoesNotExist:
+                    representation['award'] = None
+                else:
+                    representation['award'] = BadgeObjectiveAwardSerializer(award).data
+            except ImportError:
+                pass
 
         return representation
 

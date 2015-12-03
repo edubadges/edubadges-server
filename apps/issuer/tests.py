@@ -1,6 +1,7 @@
 import json
 import os
 import os.path
+from django.apps import apps
 import png
 import shutil
 
@@ -613,7 +614,8 @@ class AssertionTests(APITestCase):
         self.assertEqual(response.status_code, 201)
 
         # assert that the BadgeInstance was published to and fetched from cache
-        with self.assertNumQueries(1): # 1 query allowed for Badgebook recipient obscuring
+        query_count = 1 if apps.is_installed('badgebook') else 0
+        with self.assertNumQueries(query_count):
             slug = response.data.get('slug')
             response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions/{}'.format(slug))
             self.assertEqual(response.status_code, 200)

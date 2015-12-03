@@ -27,6 +27,7 @@ module.exports = function(grunt) {
             },
             browserify: {
                 files: [
+                    '<%= srcPath %>badgebook/*.jsx',
                     '<%= srcPath %>js/*.jsx',
                     '<%= srcPath %>*.js',
                     '<%= srcPath %>*.html',
@@ -47,7 +48,7 @@ module.exports = function(grunt) {
                 },
                 files: {
                     'breakdown/static/js/app.js': 'build/js/app.jsx',
-                    'breakdown/static/js/lti-app.js': 'build/js/lti-app.jsx',
+                    'breakdown/static/js/lti-app.js': 'build/badgebook/lti-app.jsx',
                     'breakdown/static/js/component-library.js': 'build/js/component-library.jsx'
                 }
             },
@@ -58,7 +59,7 @@ module.exports = function(grunt) {
                 },
                 files: {
                     'build/js/temp/app.js': 'build/js/app.jsx',
-                    'build/js/temp/lti-app.js': 'build/js/lti-app.jsx',
+                    'build/js/temp/lti-app.js': 'build/badgebook/lti-app.jsx',
                     'breakdown/static/js/component-library.js': 'build/js/component-library.jsx'
                 }
             }
