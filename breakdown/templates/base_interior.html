@@ -1,17 +1,11 @@
 {% extends "base.html" %}
 
-
-{% block body_class %}interior{% endblock %}
-
-
-{% block pre_content %}
-    
-    {{super()}}
-
-    {% if content_title %}
-      <h2>{% block content_title %}{{ title }}{% endblock %}</h2>
-    {% endif %}
-
-    {% block breadcrumbs %}{% endblock %}
-
+{% block footer %}
+    <footer class="footer_ l-wrapper l-wrapper-inset">
+        <ul class="breadcrumb_">
+            <li>Powered by <a href="https://github.com/concentricsky/badgr-server" target="_blank">Badgr</a></li>
+            <li><a href="/docs" target="_blank">API documentation</a></li>
+            <li>Copyright © 2015 <a href="http://concentricsky.com" target="_blank">Concentric Sky, Inc.</a></li>
+        </ul>
+    </footer>
 {% endblock %}

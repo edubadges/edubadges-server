@@ -1,0 +1,19 @@
+.action-bar {
+  clear: both;
+  margin-bottom: 21px;
+  border-bottom: 1px solid #ddd;
+  
+  h3 {
+    margin: 0;
+    a {
+      color: inherit;
+    }
+  }
+  ul {
+    margin: 25px 0 0 0;
+  }
+  li {
+    display: inline-block;
+    float: right;
+  }
+}

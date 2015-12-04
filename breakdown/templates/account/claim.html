@@ -1,0 +1,45 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Claim Account" %}{% endblock %}
+
+{% block content %}
+    <h2>Sign Up</h2>
+
+    {% for error in form.non_field_errors %}
+        <div class="alert alert-error">
+            <strong>{{ error|escape }}</strong>
+        </div>
+    {% endfor %}
+
+<p>{% blocktrans %}Already have an account? Then please <a href="{{ login_url }}">sign in</a>.{% endblocktrans %}</p>
+
+<form class="claim form-horizontal" method="POST" action="{% url "user_claim" %}">
+    {% csrf_token %}
+    <div class="form-group">
+        <label class="col-sm-2 control-label" for="id_email">E-Mail:</label>
+        <div class="col-sm-6">
+            <input class="form-control" autofocus="autofocus" id="id_email" name="email" placeholder="E-Mail" type="text">
+                <div class="help-text">
+                    {% for error in form.email.errors %}
+                        <strong>{{ error|escape }}</strong>
+                    {% endfor %}
+                </div>
+        </div>
+    </div>
+
+
+    <div class="claim-action col-sm-6 col-sm-offset-2">
+        <div class="col-sm-6">
+            <button class="btn btn-primary btn-block" type="submit">Sign Up</button>
+        </div>
+        <p class="forgot-password"><a class="pull-right" href="{% url 'account_reset_password' %}">Forgot your Password?</a></p>
+
+        {% if redirect_field_value %}
+          <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
+    </div>
+</form>
+
+{% endblock %}

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="434px" height="500px" viewBox="0 0 434 500" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <!-- Generator: Sketch 3.4.1 (15681) - http://www.bohemiancoding.com/sketch -->
+    <title>hexagon</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Badge-Studio" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="Shapes" sketch:type="MSArtboardGroup" transform="translate(-33.000000, 0.000000)" fill="#CCCCCC">
+            <g id="hexagon" sketch:type="MSLayerGroup" transform="translate(33.000000, 0.000000)">
+                <path d="M0.5,375 L0.5,125 L217,0 L433.5,125 L433.5,375 L217,500 L0.5,375 Z" id="Shape" sketch:type="MSShapeGroup"></path>
+            </g>
+        </g>
+    </g>
+</svg>

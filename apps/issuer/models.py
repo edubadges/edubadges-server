@@ -2,19 +2,20 @@ import datetime
 import json
 import re
 import uuid
+import cachemodel
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.loader import get_template
 
-from autoslug import AutoSlugField
-import cachemodel
-from jsonfield import JSONField
+from openbadges_bakery import bake
 
-from bakery import bake
+from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
+                             AbstractBadgeInstance)
 
 from .utils import generate_sha256_hashstring, badgr_import_url
 
@@ -22,51 +23,37 @@ from .utils import generate_sha256_hashstring, badgr_import_url
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
-class Component(cachemodel.CacheModel):
-    """
-    A base class for Issuer badge objects, those that are part of badges issue
-    by users on this system.
-    """
-    created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True, related_name="+")
-
-    json = JSONField()
-
-    class Meta:
-        abstract = True
-
-    def __unicode__(self):
-        return self.name
-
-    def get_full_url(self):
-        return settings.HTTP_ORIGIN + self.get_absolute_url()
-
-    def prop(self, property_name):
-        try:
-            return self.json.get(property_name)
-        except Exception:
-            return None
-
-
-class Issuer(Component):
-    """
-    Open Badges Specification IssuerOrg object
-    """
-    name = models.CharField(max_length=1024)
-    slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
-
-    owner = models.ForeignKey(AUTH_USER_MODEL, related_name='owner', on_delete=models.PROTECT, null=False)
+class Issuer(AbstractIssuer):
+    owner = models.ForeignKey(AUTH_USER_MODEL, related_name='issuers',
+                              on_delete=models.PROTECT, null=False)
     staff = models.ManyToManyField(AUTH_USER_MODEL, through='IssuerStaff')
 
-    image = models.ImageField(upload_to='uploads/issuers', blank=True)
+    def publish(self, *args, **kwargs):
+        super(Issuer, self).publish(*args, **kwargs)
+        self.owner.publish()
+        for member in self.cached_staff():
+            member.publish()
 
-    def get_absolute_url(self):
-        return reverse('issuer_json', kwargs={'slug': self.slug})
+    def delete(self, *args, **kwargs):
+        staff = self.cached_staff()
+        owner = self.owner
+        super(Issuer, self).delete(*args, **kwargs)
+        owner.publish()
+        for member in staff:
+            member.publish()
 
-    @property
-    def editors(self):
-        # TODO Test this:
-        return self.staff.filter(issuerstaff__editor=True)
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_staff(self):
+        return self.staff.all()
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_editors(self):
+        UserModel = get_user_model()
+        return UserModel.objects.filter(issuerstaff__issuer=self, issuerstaff__editor=True)
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_badgeclasses(self):
+        return self.badgeclasses.all()
 
 
 class IssuerStaff(models.Model):
@@ -78,55 +65,54 @@ class IssuerStaff(models.Model):
         unique_together = ('issuer', 'user')
 
 
-class BadgeClass(Component):
-    """
-    Open Badges Specification BadgeClass object
-    """
-    issuer = models.ForeignKey(Issuer, blank=False, null=False, on_delete=models.PROTECT, related_name="badgeclasses")
-    name = models.CharField(max_length=255)
-    slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
-    criteria_text = models.TextField(blank=True, null=True)  # TODO: CKEditor field
-    image = models.ImageField(upload_to='uploads/badges', blank=True)
+class BadgeClass(AbstractBadgeClass):
+    issuer = models.ForeignKey(Issuer, blank=False, null=False,
+                               on_delete=models.PROTECT,
+                               related_name="badgeclasses")
 
-    class Meta:
-        verbose_name_plural = "Badge classes"
+    def publish(self):
+        super(BadgeClass, self).publish()
+        self.issuer.publish()
 
-    @property
-    def owner(self):
-        return self.issuer.owner
+    def delete(self, *args, **kwargs):
+        issuer = self.issuer
+        super(BadgeClass, self).delete(*args, **kwargs)
+        issuer.publish()
 
     @property
-    def criteria_url(self):
-        return self.json.get('criteria')
+    def cached_issuer(self):
+        return Issuer.cached.get(pk=self.issuer_id)
 
-    def get_absolute_url(self):
-        return reverse('badgeclass_json', kwargs={'slug': self.slug})
+    @cachemodel.cached_method(auto_publish=True)
+    def recipient_count(self):
+        return self.badgeinstances.count()
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_badgeinstances(self):
+        return self.badgeinstances.all()
 
 
-class BadgeInstance(Component):
-    """
-    Open Badges Specification Assertion object
-    """
-    badgeclass = models.ForeignKey(
-        BadgeClass,
-        blank=False,
-        null=False,
-        on_delete=models.PROTECT,
-        related_name='assertions'
-    )
-    email = models.EmailField(max_length=255, blank=False, null=False)
-    issuer = models.ForeignKey(Issuer, blank=False, null=False, related_name='assertions')
-    slug = AutoSlugField(max_length=255, populate_from='get_new_slug', unique=True, blank=False, editable=False)
-    image = models.ImageField(upload_to='issued', blank=True)
-    revoked = models.BooleanField(default=False)
-    revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
-
-    def __unicode__(self):
-        return "%s issued to %s" % (self.badgeclass.name, self.email,)
+class BadgeInstance(AbstractBadgeInstance):
+    badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False,
+                                   on_delete=models.PROTECT,
+                                   related_name='badgeinstances')
+    issuer = models.ForeignKey(Issuer, blank=False, null=False)
 
     @property
-    def owner(self):
-        return self.issuer.owner
+    def extended_json(self):
+        extended_json = self.json
+        extended_json['badge'] = self.badgeclass.json
+        extended_json['badge']['issuer'] = self.issuer.json
+
+        return extended_json
+
+    @property
+    def cached_issuer(self):
+        return Issuer.cached.get(pk=self.issuer_id)
+
+    @property
+    def cached_badgeclass(self):
+        return BadgeClass.cached.get(pk=self.badgeclass_id)
 
     def get_absolute_url(self):
         return reverse('badgeinstance_json', kwargs={'slug': self.slug})
@@ -137,7 +123,8 @@ class BadgeInstance(Component):
     def save(self, *args, **kwargs):
         if self.pk is None:
             self.json['recipient']['salt'] = salt = self.get_new_slug()
-            self.json['recipient']['identity'] = generate_sha256_hashstring(self.email, salt)
+            self.json['recipient']['identity'] = \
+                generate_sha256_hashstring(self.recipient_identifier, salt)
 
             self.created_at = datetime.datetime.now()
             self.json['issuedOn'] = self.created_at.isoformat()
@@ -152,6 +139,15 @@ class BadgeInstance(Component):
 
         # TODO: If we don't want AutoSlugField to ensure uniqueness, configure it
         super(BadgeInstance, self).save(*args, **kwargs)
+
+    def publish(self):
+        super(BadgeInstance, self).publish()
+        self.badgeclass.publish()
+
+    def delete(self, *args, **kwargs):
+        badgeclass = self.badgeclass
+        super(BadgeInstance, self).delete(*args, **kwargs)
+        badgeclass.publish()
 
     def notify_earner(self):
         """
@@ -183,7 +179,7 @@ class BadgeInstance(Component):
         mail_meta = {
             'subject': 'Congratulations, you earned a badge!',
             'from_address': '"' + email_context['issuer_name'] + '" <' + getattr(settings, 'DEFAULT_FROM_EMAIL') + '>',
-            'to_addresses': [self.email]
+            'to_addresses': [self.recipient_identifier]
         }
 
         try:

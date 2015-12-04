@@ -1,0 +1,60 @@
+.menu_ {
+  display: flex;
+
+  li {
+    position: relative;
+
+    &.is-open,
+    &:hover {
+      
+      .menu_-x-dropdown {
+        display: block;
+      }
+
+    }
+
+  }
+
+  .menu_-x-item {
+    color: map-get($colors, bodybackground);
+    display: block;
+    height: $layout-spacing*8;
+    line-height: $layout-spacing*8;
+    padding: 0 $layout-spacing*2;
+    text-decoration: none;
+    transition: background-color $transition-duration $transition-easing;
+
+    &:hover {
+      cursor: pointer;
+    }
+
+    &[href]:hover {
+      background-color: map-get($colors, bodycopy-light);
+    }
+
+    &.is-active {
+      background-color: map-get($colors, bodycopy-light);
+    }
+
+  }
+
+  .menu_-x-dropdown {
+    display: none;
+    opacity: 1;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    z-index: $z-index-high;
+  }
+
+}
+
+.menu_-small {
+
+  .menu_-x-item {
+    height: $layout-spacing*6;
+    line-height: $layout-spacing*6;
+    padding: 0 $layout-spacing*3;
+  }
+
+}

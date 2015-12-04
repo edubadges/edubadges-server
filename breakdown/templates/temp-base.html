@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Badgr - Temp View</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
+
+        <link href="{{ STATIC_URL }}css/dialog-polyfill.css" media="screen" rel="stylesheet" type="text/css" >
+        <link href="{{ STATIC_URL }}css/reset.css" media="screen" rel="stylesheet" type="text/css" >
+        <link href="{{ STATIC_URL }}css/screen.css" media="screen" rel="stylesheet" type="text/css" >
+    </head>
+    <body class="{% block bodyclass %}{% endblock %}">
+
+        {% block header %}
+
+        {% endblock %}
+
+        <main class="wrap_ {% block main_override %}{% endblock %}">
+
+            {% block content %}
+
+            {% endblock %}
+            
+        </main>
+
+        {% block footer %}
+
+        {% endblock %}
+
+        {% block scripts %}
+
+        {% endblock %}
+
+    </body>
+</html>

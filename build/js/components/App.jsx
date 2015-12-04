@@ -3,7 +3,7 @@ var RouterMixin = require('react-mini-router').RouterMixin;
 var navigate = require('react-mini-router').navigate;
 var assign = require('object-assign');
 var urllite = require('urllite/lib/core');
-var _ = require('underscore');
+var _ = require('lodash');
 
 // Stores
 var RouteStore = require('../stores/RouteStore');
@@ -16,25 +16,31 @@ var ActiveActionStore = require('../stores/ActiveActionStore');
 
 // Components
 var TopLinks = require('../components/TopLinks.jsx');
-var SideBarNav = require('../components/SideBarNav.jsx');
 var MainComponent = require ('../components/MainComponent.jsx');
-var SecondaryMenu = require('../components/SecondaryMenu.jsx');
-var BreadCrumbs = require('../components/BreadCrumbs.jsx');
 var ActionBar = require('../components/ActionBar.jsx').ActionBar;
+var Heading = require('../components/Heading.jsx').Heading;
+var Dialog = require('../components/Dialog.jsx').Dialog;
+var DialogOpener = require('../components/Dialog.jsx').DialogOpener;
+var Button = require('../components/Button.jsx').Button;
+var SubmitButton = require('../components/Button.jsx').SubmitButton;
 var HeadingBar = require('../components/ActionBar.jsx').HeadingBar;
 var ActivePanel = require('../components/ActivePanel.jsx');
 var OpenBadgeList = require('../components/OpenBadgeList.jsx');
 var OpenBadge = require('../components/BadgeDisplay.jsx').OpenBadge;
 var EarnerBadgeForm = require('../components/Form.jsx').EarnerBadgeForm;
-var IssuerNotificationForm = require('../components/Form.jsx').IssuerNotificationForm
+var IssuerNotificationForm = require('../components/Form.jsx').IssuerNotificationForm;
 var IssuerList = require('../components/IssuerDisplay.jsx').IssuerList;
 var IssuerDisplay = require('../components/IssuerDisplay.jsx').IssuerDisplay;
 var BadgeClassDetail = require('../components/BadgeClassDisplay.jsx').BadgeClassDetail;
-var BadgeInstanceList = require('../components/BadgeInstanceDisplay.jsx').BadgeInstanceList
+var BadgeClassTable = require('../components/BadgeClassDisplay.jsx').BadgeClassTable;
+var BadgeClassList = require('../components/BadgeClassDisplay.jsx').BadgeClassList;
+var BadgeInstanceList = require('../components/BadgeInstanceDisplay.jsx').BadgeInstanceList;
 var EarnerBadgeList = require('../components/EarnerBadgeList.jsx');
+var CollectionShareInfo = require('../components/EarnerBadgeCollection.jsx').CollectionShareInfo;
 var EarnerCollectionList = require('../components/EarnerBadgeCollection.jsx').EarnerCollectionList;
-var EarnerCollectionDetail = require('../components/EarnerBadgeCollection.jsx').EarnerCollectionDetail;
+var ManageCollection = require('../components/EarnerBadgeCollection.jsx').ManageCollection;
 var ConsumerBadgeList = require('../components/ConsumerBadgeList.jsx');
+var BadgeStudio = require('../components/BadgeStudio.jsx').BadgeStudio;
 
 // Actions
 var LifeCycleActions = require('../actions/lifecycle');
@@ -48,7 +54,7 @@ var App = React.createClass({
 
   // Route configuration: 
   routes: {
-    '/': 'home',
+    '/': 'earnerMain',
     '/earner': 'earnerMain',
     '/earner/badges': 'earnerBadges',
     '/earner/badges/new': 'earnerImportBadge',
@@ -73,6 +79,14 @@ var App = React.createClass({
       this.handleDependencies(this.dependencies['earnerMain']);
     else if (newRoute.startsWith('/issuer'))
       this.handleDependencies(this.dependencies['issuerMain']);
+    else if (newRoute.startsWith('/explorer'))
+      this.handleDependencies([])
+
+    var currentItem = _.find(this.state.topMenu.items, function(o) { return o.url == newRoute; }, this);
+    if (this.isMounted() && currentItem && currentItem.title != this.state.activeTopMenu) {
+        this.setState({'activeTopMenu': currentItem.title});
+    }
+
     navigate(newRoute);
   },
 
@@ -80,9 +94,8 @@ var App = React.createClass({
   getDefaultProps: function() {
     return {
       path: urllite(window.location.href).pathname + urllite(window.location.href).search,
-      appTitle: 'Badgr Server',
+      appTitle: 'Badgr',
       actionBars: MenuStore.getAllItems('actionBars'),
-      secondaryMenus: MenuStore.getAllItems('secondaryMenus')
     };
   },
   getInitialState: function() {
@@ -90,43 +103,60 @@ var App = React.createClass({
       earnerBadges: [],
       requestedCollections: [],
       activePanels: ActiveActionStore.getAllActiveActions(),
-      roleMenu: MenuStore.getAllItems('roleMenu')
+      topMenu: MenuStore.getAllItems('topMenu'),
+      activeTopMenu: null,
+      openTopMenu: null
     };
   },
   componentWillMount: function() {
+    MenuStore.addListener('INITIAL_DATA_LOADED', function(){ this.updateMenu('topMenu');}.bind(this));
     LifeCycleActions.appWillMount();
   },
   componentDidMount: function() {
-    MenuStore.addListener('INITIAL_DATA_LOADED', function(){ this.updateMenu('roleMenu');});
-    MenuStore.addListener('UNCAUGHT_DOCUMENT_CLICK', this._hideMenu);
+    MenuStore.addListener('UNCAUGHT_DOCUMENT_CLICK', this.hideOpenTopMenu);
     RouteStore.addListener('ROUTE_CHANGED', this.handleRouteChange);
-    APIStore.addListener('DATA_UPDATED', function(){
-      this.setState({});
+    APIStore.addListener('DATA_UPDATED', function(collectionKey){
+        if (collectionKey === 'issuer_badgeinstances') {
+            // An update to issuer_badgeinstances should always update issuer_badgeclasses as recipient_count will be stale
+            APIActions.APIFetchCollections(['issuer_badgeclasses']);
+        }
+      if (this.isMounted())
+        this.setState({});
     }.bind(this));
     ActiveActionStore.addListener('ACTIVE_ACTION_UPDATED', this.handleActivePanelUpdate);
   },
 
   // Menu visual display functions:
-
-  setActiveTopMenu: function(key){
-    if (this.isMounted())
-      this.setState({activeTopMenu: key});
+  setOpenTopMenu: function(key){
+    if (this.state.openTopMenu != key)
+      this.setState({openTopMenu: key});
+    else
+      this.setState({openTopMenu: null});
   },
-  _hideMenu: function(){
-    if (this.state.activeTopMenu != null)
-      this.setState({activeTopMenu: null});
+  hideOpenTopMenu: function(){
+    /* Handler called to close open sub-menus:
+    It runs whenever a click is made outside a '.closable' element.
+    */
+    if (this.isMounted() && this.state.openTopMenu != null)
+      this.setState({openTopMenu: null});
   },
   updateMenu: function(key){
-    if (this.isMounted()){
-      var newState = {}
-      newState[key] = MenuStore.getAllItems(key);
+    if (this.isMounted()) {
+
+        var newState = {}
+        newState[key] = MenuStore.getAllItems(key);
+
+        if (key == 'topMenu') {
+          var currentItem = _.find(newState[key].items, function(o) { return o.url == this.props.path; }, this);
+          if (currentItem) {
+            newState.activeTopMenu = currentItem.title;
+          }
+        }
       this.setState(newState);
     }
   },
 
   updateActivePanel: function(viewId, update){
-    console.log("Updating active panel " + viewId);
-    console.log(update);
     ActiveActions.updateActiveAction(
       viewId,
       //updates vary by type; example: { type: "OpenBadgeDisplay", content: { badgeId: id, detailLevel: 'detail' }}
@@ -142,31 +172,21 @@ var App = React.createClass({
       this.setState(update);
     }
   },
-  contextPropsForActivePanel: function(viewId){
-    if (!(viewId in this.state.activePanels))
-      return {};
-
-    var context = {};
-    var panel = this.state.activePanels[viewId];
-
-    if (panel.type == "EarnerBadgeImportForm") {
-      context = {
-        recipientIds: UserStore.getProperty('earnerIds'),
-        badgeId: panel.content.badgeId
-      };
-    }
-    return context;
-  },
 
   handleDependencies: function(collectionKeys){
-    var collectionKeys;
-    var dependenciesMet = APIStore.collectionsExist(collectionKeys);
-    if (!dependenciesMet && this.state.requestedCollections.length == 0){
-      this.setState({requestedCollections: collectionKeys}, function(){
-        APIActions.APIFetchCollections(collectionKeys);
+    toFetch = collectionKeys.filter(function(key, index){
+      if (!APIStore.collectionsExist([key]) && this.state.requestedCollections.indexOf(key) == -1)
+        return true;
+      return false;
+    }, this);
+
+    if (toFetch.length > 0){
+      this.setState({requestedCollections: this.state.requestedCollections.concat(toFetch)}, function(){
+        APIActions.APIFetchCollections(toFetch);
       });
+      return true;
     }
-    return dependenciesMet;
+    return false;
   },
 
 
@@ -179,132 +199,80 @@ var App = React.createClass({
   // Render the base structure for the app (top menu, sidebar, and main content area)
   render_base: function(mainComponent) {
     return (
-      <div id="wrapper" className="wrapper">
-        <header className="main-header">
-          <div className="wrap">
-            <nav className="navbar navbar-default navbar-static-top" role="navigation">
-
-              <div className="navbar-header">
-                <a className="navbar-brand" href="/issuer">
-                  <span>{ this.props.appTitle }</span>
-                </a>
-                <div className="navbar-right">
-                  <TopLinks items={MenuStore.getAllItems('roleMenu').items} setActive={function(key){}} active={null} showLabels={true} />
-                  <TopLinks items={MenuStore.getAllItems('topMenu').items} setActive={this.setActiveTopMenu} active={this.state.activeTopMenu} showLabels={true} />
-                </div>
-              </div>  
+        <div className="x-owner">
+            <header className="header_ l-wrapper">
+            <a className="header_-x-logo" href="/">
+                <img src="/static/images/header-logo.svg" width="193" height="89" />
+            </a>
+            <nav>
+                <TopLinks
+                    items={MenuStore.getAllItems('topMenu').items}
+                    setOpen={this.setOpenTopMenu}
+                    active={this.state.activeTopMenu}
+                    open={this.state.openTopMenu}
+                    showLabels={true} />
             </nav>
-          </div>
-        </header>
+            </header>
 
-        <section className="main-section content-container">
-          <div className="wrap page-wrapper">
-            <div className="container-fluid">
+            <main className="wrap_ wrap_-borderbottom l-wrapper l-wrapper-inset">
                 { mainComponent }
-            </div>
-          </div>
-        </section>
-
-      </div>
+            </main>
+        </div>
     );
   },
 
-
-  home: function() {
-    var mainComponent = "HOME"
-    return this.render_base(mainComponent);
-  },
 
   earnerMain: function() {
-    var viewId = 'earnerHome';
-    var dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
-    var clickeEmptyBadgeUpdate = {}
-    var mainComponent = (
-      <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet}>
-        <ActionBar 
-          title="My Badges"
-          titleLink="/earner/badges"
-          viewId={viewId}
-          items={this.props.actionBars['earnerBadges']}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
-        <ActivePanel
-          viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-        />
-        <EarnerBadgeList
-          viewId={viewId}
-          badges={APIStore.getCollection('earner_badges')}
-          perPage={12}
-          moreLink="/earner/badges"
-          clickEmptyBadge={function(){this.updateActivePanel(viewId, clickeEmptyBadgeUpdate)}.bind(this)}
-          showEmptyBadge={true}
-        />
-
-        <ActionBar 
-          title="My Collections"
-          titleLink="/earner/collections"
-          viewId={'earnerMainCollections'}
-          items={this.props.actionBars['earnerCollections']}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          activePanel={this.state.activePanels['earnerMainCollections']}
-        />
-        <ActivePanel
-          viewId={'earnerMainCollections'}
-          {...this.state.activePanels['earnerMainCollections']}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-        />
-        <EarnerCollectionList
-          collections={APIStore.getCollection('earner_collections')}
-          perPage={12}
-        />
-      </MainComponent>
-    );
-
-    // render the view
-    return this.render_base(mainComponent);
+    ClickActions.navigateLocalPath('/earner/badges');
+    return this.render_base("Loading My Badges...");
   },
 
-  earnerBadges: function(){
-    var viewId = "earnerBadges";
+  earnerBadges: function(params){
+    var viewId = "earnerBadges",
+        currentPage=parseInt(_.get(params, 'page')) || 1,
+        nextPage = currentPage + 1;
     dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
 
-    var breadCrumbs = [
-      { name: "Earner Home", url: '/earner'},
-      { name: "My Badges", url: '/earner/badges' }
+    function handleFormSubmit(formId, formType) {
+        var formData = FormStore.getFormData(formId);
+        if (formData.formState.actionState !== "waiting") {
+            FormActions.submitForm(formId, formType);
+        }
+    }
+
+    var dialogFormId = "EarnerBadgeImportForm"
+    var formProps = FormConfigStore.getConfig(dialogFormId);
+    FormStore.getOrInitFormData(dialogFormId, formProps);
+
+    var actions=[
+        <SubmitButton formId={dialogFormId} label="Import Badge" />
     ];
+    var dialog = (
+        <Dialog formId={dialogFormId} dialogId="import-badge" actions={actions} className="closable">
+            <Heading size="small"
+                        title="Import Badge"
+                        subtitle="Verify an Open Badge and add it to your library by uploading a badge image or entering its URL."/>
+
+            <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
+        </Dialog>);
 
     var mainComponent = (
-      <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet} >
-        <BreadCrumbs items={breadCrumbs} />
-        <ActionBar 
-          title="My Badges"
-          titleLink="/earner/badges"
-          viewId={viewId}
-          items={this.props.actionBars['earnerBadges']}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
-        <ActivePanel
-          viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-        />
+      <MainComponent className="l-vertical" viewId={viewId} dependenciesLoaded={dependenciesMet}>
+          <Heading
+            size="large"
+            title="My Badges"
+            subtitle="Import your Open Badges with Badgr! Upload images to verify your badges, and then add them to collections to share with your friends and colleagues."
+            rule={true}>
+                <DialogOpener dialog={dialog} dialogId="import-badge" key="import-badge">
+                    <Button className="action_" label="Import Badge" propagateClick={true}/>
+                </DialogOpener>
+          </Heading>
         <EarnerBadgeList
           viewId={viewId}
           badges={APIStore.getCollection('earner_badges')}
-          perPage={50}
-          moreLink="/earner/badges"
+          perPage={20}
+          currentPage={currentPage}
+          moreLink={"/earner/badges?page=" + nextPage}
         />
       </MainComponent>
     );
@@ -315,20 +283,13 @@ var App = React.createClass({
   earnerImportBadge: function(params){
     var viewId = 'earnerImportBadge';
     var dependenciesMet = APIStore.collectionsExist(this.dependencies['earnerMain']);
-    var breadCrumbs = [
-      { name: "Earner Home", url: '/earner'},
-      { name: "My Badges", url: '/earner/badges' },
-      { name: "Import New Badge", url: '/earner/badges/new' }
-    ];
     var navigateToBadgeList = function(){
       ClickActions.navigateLocalPath('/earner/badges');
     };
 
     var importUrl = params['url'];
-    debugger;
     var mainComponent = (
-      <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet} >
-        <BreadCrumbs items={breadCrumbs} />
+      <MainComponent className="l-vertical" viewId={viewId} dependenciesLoaded={dependenciesMet}>
         <ActivePanel 
           viewId={viewId}
           type="EarnerBadgeImportForm"
@@ -351,28 +312,14 @@ var App = React.createClass({
     if (!badge)
       return this.render_base("Badge not found!");
 
-    var breadCrumbs = [
-      { name: "Earner Home", url: '/earner'},
-      { name: "My Badges", url: '/earner/badges' },
-      { name: badge.json.badge.name['@value'], url: '/earner/badges/' + badgeId }
-    ];
     var mainComponent = (
-      <MainComponent viewId={viewId}>
-        <BreadCrumbs items={breadCrumbs} />
-        <ActionBar 
+      <MainComponent className="l-vertical" viewId={viewId}>
+        <Heading
+          backButton="/earner/badges"
+          size="large"
           title={badge.json.badge.name['@value']}
-          viewId={viewId}
-          items={this.props.actionBars[viewId] || []}
-          updateActivePanel={this.updateActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
-        <ActivePanel
-          viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-        />
+          subtitle={badge.json.badge.description['@value']}
+          rule={true} />
         <OpenBadge
           id={badge.id}
           display="full"
@@ -389,28 +336,34 @@ var App = React.createClass({
 
   earnerCollections: function() {
     var viewId = 'earnerCollections';
-    var breadCrumbs = [
-      { name: "Earner Home", url: '/earner'},
-      { name: "My Collections", url: '/earner/collections' }
+
+    var dialogFormId = "EarnerCollectionCreateForm";
+    var formProps = FormConfigStore.getConfig(dialogFormId);
+    FormStore.getOrInitFormData(dialogFormId, formProps);
+
+    var actions=[
+        <SubmitButton formId={dialogFormId} label="Add Collection" />
     ];
+    var dialog = (
+        <Dialog formId={dialogFormId} dialogId="add-collection" actions={actions} className="closable">
+            <Heading size="small"
+                        title="New Collection"
+                        subtitle=""/>
+
+            <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
+        </Dialog>);
 
     var mainComponent = (
-      <MainComponent viewId={viewId}>
-        <BreadCrumbs items={breadCrumbs} />
-        <ActionBar 
-          title="My Collections"
-          viewId={viewId}
-          items={this.props.actionBars[viewId] || []}
-          updateActivePanel={this.updateActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
-        <ActivePanel
-          viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-        />
+      <MainComponent className="l-vertical" viewId={viewId}>
+          <Heading
+            size="large"
+            title="My Collections"
+          subtitle="Define collections to organize your badges, then display your collections to friends, employers, or other collaborators."
+            rule={true}>
+                <DialogOpener dialog={dialog} dialogId="add-collection" key="add-collection">
+                    <Button className="action_" label="Add Collection" propagateClick={true}/>
+                </DialogOpener>
+          </Heading>
         <EarnerCollectionList
           collections={APIStore.getCollection('earner_collections')}
           perPage={50}
@@ -431,43 +384,63 @@ var App = React.createClass({
     if (!collection)
       return this.render_base("Collection not found.");
     badgesIndexList = _.pluck(collection.badges, 'id');
-    badgesInCollection = APIStore.filter(
-      'earner_badges', 'id', badgesIndexList
-    ); 
+    badgesInCollection = APIStore.filter('earner_badges', 'id', badgesIndexList); 
 
-    var breadCrumbs = [
-      { name: "Earner Home", url: '/earner'},
-      { name: "My Collections", url: '/earner/collections' },
-      { name: collection.name, url: '/earner/collections/' + collectionSlug }
+    var dialogFormId = "EarnerCollectionEditForm";
+    var formProps = FormConfigStore.getConfig(dialogFormId, {}, {
+        collection: {
+            slug: collectionSlug,
+            name: collection.name,
+            description: collection.description,
+        }
+    });
+    FormStore.getOrInitFormData(dialogFormId, formProps)
+
+    var editActions=[
+        <SubmitButton formId={dialogFormId} label="Edit Collection" />
     ];
+    var editDialog = (
+        <Dialog formId={dialogFormId} dialogId="edit-collection" actions={editActions} className="closable">
+            <Heading size="small"
+                        title="Edit Collection"
+                        subtitle=""/>
+
+            <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
+        </Dialog>);
+
+    var shareDialogAction = (<Button label="Toggle Share" onClick={function() { document.getElementById('toggle-share').click() }} />);
+    var shareDialog = (
+        <Dialog formId={dialogFormId} actions={shareDialogAction} dialogId="share-collection" className="closable">
+            <Heading size="small"
+                        title="Share Collection"
+                        subtitle="Once enabled, anyone with the link will be able to view this collection."/>
+
+            <CollectionShareInfo initialShareUrl={collection.share_url} collectionSlug={collectionSlug} />
+        </Dialog>);
+
+    var badgeIdsInCollection = APIStore.filter('earner_badges', 'id', _.pluck(badgesInCollection, 'id'));
 
     var mainComponent = (
-      <MainComponent viewId={viewId}>
-        <BreadCrumbs items={breadCrumbs} />
-        <ActionBar 
-          title={collection.name}
-          viewId={viewId}
-          items={this.props.actionBars[viewId] || []}
-          updateActivePanel={this.updateActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
-        <ActivePanel
-          viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
-          collection={collection}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-        />
-        <EarnerCollectionDetail
-          name={collection.name}
-          slug={collection.slug}
-          clickable={false}
-          description={collection.description}
-          share_url={collection.share_url}
-          badgeList={badgesInCollection}
-          display="thumbnail"
-        />
+      <MainComponent className="l-vertical" viewId={viewId}>
+          <Heading
+            backButton="/earner/collections"
+            size="large"
+            title={collection.name}
+            subtitle={collection.description}
+            rule={true}>
+                <DialogOpener dialog={editDialog} dialogId="edit-collection" key="edit-collection">
+                    <Button className="action_" label="Edit" propagateClick={true}/>
+                </DialogOpener>
+                <DialogOpener dialog={shareDialog} dialogId="share-collection" key="share-collection">
+                    <Button className="action_" label="Share" propagateClick={true}/>
+                </DialogOpener>
+                <ManageCollection label="Add / Remove badges" slug={collectionSlug} badgeList={badgesInCollection} />
+          </Heading>
+          <EarnerBadgeList
+              display="thumbnail"
+              badges={badgeIdsInCollection}
+              moreLink={'/earner/collections/' + collectionSlug}
+              handleClick={this.selectBadgeId} />
       </MainComponent>
     );
 
@@ -479,23 +452,34 @@ var App = React.createClass({
     var viewId = "issuerMain";
     dependenciesMet = APIStore.collectionsExist(this.dependencies['issuerMain']);
 
+    var dialogFormId = "IssuerCreateUpdateForm"
+    var formProps = FormConfigStore.getConfig(dialogFormId);
+    FormStore.getOrInitFormData(dialogFormId, formProps);
+
+    var actions=[
+        <SubmitButton key="submit" formId={dialogFormId} label="Add Issuer" />
+    ];
+    var dialog = (
+        <Dialog formId={dialogFormId} dialogId="add-issuer" actions={actions} className="closable">
+            <Heading size="small"
+                        title="New Issuer"
+                        subtitle=""/>
+
+            <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
+        </Dialog>);
+
+
     var mainComponent = (
-      <MainComponent viewId={viewId} dependenciesLoaded={dependenciesMet}>
-        <ActionBar
-          title="My Issuers"
-          viewId={viewId}
-          items={this.props.actionBars[viewId]}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
-        <ActivePanel
-          viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-        />
+      <MainComponent className="l-vertical" viewId={viewId} dependenciesLoaded={dependenciesMet}>
+          <Heading
+            size="large"
+            title="My Issuers"
+            subtitle=""
+            rule={true}>
+                <DialogOpener dialog={dialog} dialogId="add-issuer" key="add-issuer">
+                    <Button className="action_" label="Add Issuer" propagateClick={true}/>
+                </DialogOpener>
+          </Heading>
         <IssuerList
           viewId={viewId}
           issuers={APIStore.getCollection('issuer_issuers')}
@@ -508,46 +492,109 @@ var App = React.createClass({
 
   issuerDetail: function(issuerSlug, params){
     if (!params['perPage'])
-      params['perPage'] = 10
+      params['perPage'] = -1
     if (!params['currentPage'])
       params['currentPage'] = 1
 
     var viewId = "issuerDetail-" + issuerSlug;
     var issuer = APIStore.getFirstItemByPropertyValue('issuer_issuers', 'slug', issuerSlug);
-    var badgeClasses = APIStore.filter('issuer_badgeclasses', 'issuer', issuer.json.id);
-    var breadCrumbs = [
-      { name: "My Issuers", url: '/issuer'},
-      { name: issuer.name, url: '/issuer/issuers/' + issuerSlug }
+    var issuersBadgeClasses = APIStore.filter('issuer_badgeclasses', 'issuer', issuer.json.id);
+
+    var dialogFormId = "BadgeClassCreateUpdateForm"
+    var formProps = FormConfigStore.getConfig(dialogFormId, {}, {issuerSlug: issuerSlug});
+    FormStore.getOrInitFormData(dialogFormId, formProps);
+
+    var formData = FormStore.getFormData(dialogFormId);
+    if (formData.apiContext) {
+        var parseSlug = new RegExp("/v1/issuer/issuers/([^/]+)/badges");
+        var actionSlug = parseSlug.exec(formData.apiContext.actionUrl).pop();
+        if (actionSlug && actionSlug !== issuerSlug) {
+            FormStore.initFormData(dialogFormId, formProps);
+        }
+    }
+
+    var showBadgeStudio = function(e) {
+      e.stopPropagation();
+
+      var formState = FormStore.getFormState(dialogFormId);
+      this.setState({showingBadgeStudio: true, badgeStudioDetail: formState}, function() {
+        var dialog = document.getElementById("issuer-add-badge")
+        if (dialog) {
+          dialog.close();
+          dialog.classList.remove('is-visible');
+        }
+        var overlay = document.querySelector("body > div._dialog_overlay")
+        if (overlay) {
+          document.body.removeChild(overlay);
+        }
+
+      });
+    }.bind(this);
+    var handleBadgeComplete = function(dataURL, blob) {
+      if (dataURL && blob) {
+
+        FormActions.patchForm(dialogFormId, {
+          'image': blob,
+          'imageData': dataURL
+        });
+
+      }
+      
+      this.setState({showingBadgeStudio: false}, function() {
+        var dialog = document.getElementById("issuer-add-badge")
+        if (dialog) {
+          dialog.showModal();
+          dialog.classList.add('is-visible');
+        }
+
+      });
+
+    }.bind(this);
+
+
+    var actions=[
+        <SubmitButton formId={dialogFormId} label="Create" />
     ];
-    var mainComponent = (
-      <MainComponent viewId={viewId}>
-        <BreadCrumbs items={breadCrumbs} />
-        <IssuerDisplay {...issuer} />
-        <ActionBar 
-          title="Active Badges"
-          viewId={viewId}
-          items={this.props.actionBars['issuerDetail']}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
-        <ActivePanel
-          viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          issuerSlug={issuerSlug}
-        />
-        <BadgeClassList
-          issuerSlug={issuerSlug}
-          badgeClasses={badgeClasses}
-          display="detail"
-          perPage={params.perPage}
-          currentPage={params.currentPage}
-        />
-      </MainComponent>
-    )
+    var dialog = (
+        <Dialog formId={dialogFormId} dialogId="issuer-add-badge" actions={actions} className="closable">
+            <Heading size="small"
+                        title="Create New Badge"
+                        subtitle=""/>
+            <BasicAPIForm handleBadgeStudioClick={showBadgeStudio} hideFormControls={true} actionState="ready" {...formProps} />
+        </Dialog>);
+
+    if (this.state.showingBadgeStudio) {
+
+      var mainComponent = (
+        <MainComponent className="l-vertical" viewId={viewId}>
+          <BadgeStudio handleBadgeComplete={handleBadgeComplete} badgeDetail={this.state.badgeStudioDetail}/>
+        </MainComponent>);
+
+    } else {
+
+      var mainComponent = (
+        <MainComponent className="l-vertical" viewId={viewId}>
+          <Heading
+            backButton="/issuer"
+            title={issuer.name}
+            subtitle={issuer.description}
+            rule={true}>
+                <DialogOpener dialog={dialog} dialogId="issuer-add-badge" key="issuer-add-badge">
+                    <Button className="action_" label="Add Badge" propagateClick={true}/>
+                </DialogOpener>
+          </Heading>
+          <IssuerDisplay {...issuer} />
+          <Heading
+            size="small"
+            title="Active Badges" />
+          <BadgeClassTable
+            issuerSlug={issuerSlug}
+            badgeClasses={issuersBadgeClasses}
+          />
+        </MainComponent>);
+
+    }
+
 
     return this.render_base(mainComponent);
   },
@@ -555,19 +602,13 @@ var App = React.createClass({
   badgeClassDetail: function(issuerSlug, badgeClassSlug){
     var loadingInstances = ""; var badgeInstanceDisplayLength;
     var viewId = "badgeClassDetail-" + badgeClassSlug;
-    var issuer = APIStore.getFirstItemByPropertyValue('issuer_issuers', 'slug', issuerSlug);
     var badgeClass = APIStore.getFirstItemByPropertyValue('issuer_badgeclasses', 'slug', badgeClassSlug);
-    var badgeInstances = APIStore.filter('issuer_badgeinstances', 'badgeclass', badgeClass.json.id);
+    var issuer = APIStore.getFirstItemByPropertyValue('issuer_issuers', 'slug', issuerSlug);
+    var badgeInstances = APIStore.filter('issuer_badgeinstances', 'badge_class', badgeClass.json.id);
     var instanceRequestStatus = null;
 
-    var breadCrumbs = [
-      { name: "My Issuers", url: '/issuer'},
-      { name: issuer.name, url: '/issuer/issuers/' + issuerSlug},
-      { name: badgeClass.name, url: "/issuer/issuers/" + issuerSlug + "/badges/" + badgeClass.slug}
-    ];
-
     // Trigger a get on instances if none are found and haven't been requested yet:
-    var instanceGetPath = '/v1' + breadCrumbs[2].url + '/assertions';
+    var instanceGetPath = "/v1/issuer/issuers/"+ issuerSlug +"/badges/"+ badgeClass.slug +"/assertions";
     if (badgeInstances.length == 0 && !APIStore.hasAlreadyRequested(instanceGetPath)){
       loadingInstances = "loading...";
       APIActions.APIGetData({
@@ -579,30 +620,44 @@ var App = React.createClass({
     }
     badgeInstanceDisplayLength = loadingInstances != "" ? loadingInstances : badgeInstances.length
 
+    badgeClass.issuer = issuer;
+
+    var dialogFormId = "BadgeInstanceCreateUpdateForm";
+    var formProps = FormConfigStore.getConfig(dialogFormId, {}, {issuerSlug: issuerSlug, badgeClassSlug: badgeClass.slug});
+    FormStore.getOrInitFormData(dialogFormId, formProps);
+
+    var actions=[
+        <SubmitButton key="submit" formId={dialogFormId} label="Submit" />
+    ];
+    var dialog = (
+        <Dialog formId={dialogFormId} dialogId="create-badge-instance" actions={actions} className="closable">
+            <Heading size="small"
+                        title="New Badge Instance"
+                        subtitle=""/>
+
+            <BasicAPIForm hideFormControls={true} actionState="ready" {...formProps} />
+        </Dialog>);
+
     var mainComponent = (
-      <MainComponent viewId={viewId}>
-        <BreadCrumbs items={breadCrumbs} />
-        <HeadingBar 
-          title={issuer.name + ": " + badgeClass.name}
-        />
+      <MainComponent className="l-vertical" viewId={viewId}>
+
+        <ul className="breadcrumb_">
+            <li><a href="/issuer">Issue Badges</a></li>
+            <li><a href={"/issuer/issuers/"+issuer.slug}>{issuer.name}</a></li>
+        </ul>
+
+
+        <Heading
+          backButton={"/issuer/issuers/"+ issuer.slug}
+          title={badgeClass.name}
+          subtitle={badgeClass.description}
+          rule={true}>
+              <DialogOpener dialog={dialog} dialogId="create-badge-instance" key="create-badge-instance">
+                <Button className="action_" label="Issue Badge" propagateClick={true}/>
+              </DialogOpener>
+        </Heading>
         <BadgeClassDetail {...badgeClass} />
-        <ActionBar
-          title={"Recipients (" + badgeInstanceDisplayLength + ")"}
-          viewId={viewId}
-          items={this.props.actionBars['badgeClassDetail']}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          activePanel={this.state.activePanels[viewId]}
-        />
-        <ActivePanel
-          viewId={viewId}
-          {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
-          updateActivePanel={this.updateActivePanel}
-          clearActivePanel={this.clearActivePanel}
-          issuerSlug={issuerSlug}
-          badgeClassSlug={badgeClassSlug}
-        />
+        <Heading size="small" title="Badge Recipients" meta={badgeInstances.length} />
         <BadgeInstanceList
           issuerSlug={issuerSlug}
           badgeClass={badgeClass}
@@ -610,7 +665,7 @@ var App = React.createClass({
           dataRequestStatus={instanceRequestStatus}
         />
       </MainComponent>
-    )
+    );
 
     return this.render_base(mainComponent);
   },
@@ -634,8 +689,7 @@ var App = React.createClass({
     }
 
     var mainComponent = (
-      <MainComponent viewId={viewId}>
-        <SecondaryMenu viewId={viewId} items={this.props.secondaryMenus[viewId]} />
+      <MainComponent className="l-vertical" viewId={viewId}>
         <ActionBar 
           title="Understand Badges"
           viewId={viewId}
@@ -646,7 +700,6 @@ var App = React.createClass({
         <ActivePanel
           viewId={viewId}
           {...this.state.activePanels[viewId]}
-          {...this.contextPropsForActivePanel(viewId)}
           updateActivePanel={this.updateActivePanel}
           clearActivePanel={this.clearActivePanel}
         />

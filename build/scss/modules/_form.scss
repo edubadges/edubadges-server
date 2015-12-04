@@ -1,0 +1,146 @@
+.form_ {
+  position: relative;
+
+  label {
+    display: block;
+    font-size: $font-size-small;
+    margin-bottom: $layout-spacing;
+
+    .hint {
+      color: map-get($colors, bodycopy-faint);
+    }
+
+  }
+
+  input:not([type='checkbox']),
+  select,
+  textarea {
+    background: map-get($colors, solid);
+    border: 1px solid map-get($colors, border-light);
+    border-radius: $border-radius;
+    box-shadow: inset 0 1px $layout-spacing/2 0 rgba(map-get($colors, solid-dark), .2);
+    box-sizing: border-box;
+    display: block;
+    outline: none;
+    padding: $layout-spacing;
+    width: 100%;
+
+    &:focus:not([readonly]) {
+      box-shadow: rgba(map-get($colors, link), .5) 0 0 $layout-spacing/2 $layout-spacing/4;
+    }
+
+  }
+
+  select {
+    appearance: none;
+    background-image: url('images/form-dropdown.svg');
+    background-position: calc(100% - #{$layout-spacing*2}) center;
+    background-repeat: no-repeat;
+    padding-right: $layout-spacing*4;
+
+    &::-ms-expand {
+      display: none;
+    }
+
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  .form_-x-field {
+    margin-bottom: $layout-spacing*2;
+
+    > p {
+      font-size: $font-size-small;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+  }
+
+  .form_-x-checkbox {
+    margin-bottom: $layout-spacing*2;
+    overflow: hidden;
+
+    input {
+      left: -9999px;
+      position: absolute;
+    }
+
+    .form_-x-checkbox-text {
+      background: url('images/form-check.svg') left center no-repeat;
+      cursor: pointer;
+      display: block;
+      height: 18px;
+      line-height: 18px;
+      padding-left: 18px + $layout-spacing;
+    }
+
+    input:checked + .form_-x-checkbox-text {
+      background-image: url('images/form-check-checked.svg');
+    }
+
+  }
+
+  .form_-x-action {
+    align-items: stretch;
+    display: flex;
+
+    input {
+      border-bottom-right-radius: 0;
+      border-top-right-radius: 0;
+    }
+
+    button {
+      background-color: map-get($colors, solid);
+      border: 1px solid map-get($colors, border-light);
+      border-bottom-right-radius: $border-radius;
+      border-left: 0;
+      border-top-right-radius: $border-radius;
+      line-height: 40px;
+      padding: 0 $layout-spacing*2;
+      white-space: nowrap;
+
+      &:focus {
+        box-shadow: rgba(map-get($colors, link), .5) 0 0 $layout-spacing/2 $layout-spacing/4;
+      }
+
+    }
+
+  }
+
+  .form_-x-imageupload {
+    display: flex;
+
+    > :first-child {
+      flex: 1 1 auto;
+      order: 2;
+    }
+
+    > :last-child {
+      flex-basis: 136px;
+      margin-right: $layout-spacing*3;
+      order: 1;
+    }
+
+  }
+
+  .form_-x-loading {
+    display: none;
+  }
+
+  &.form_-is-submitted {
+
+    > * {
+      visibility: hidden;
+    }
+
+    .form_-x-loading {
+      display: flex;
+      visibility: visible;
+    }
+
+  }
+
+}

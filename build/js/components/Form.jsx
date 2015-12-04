@@ -1,7 +1,6 @@
-var _ = require('underscore');
-
 var React = require('react');
 var ReactPropTypes = React.PropTypes;
+var _ = require('lodash');
 
 // Stores
 var APIStore = require('../stores/APIStore');
@@ -10,7 +9,8 @@ var FormStore = require('../stores/FormStore');
 // Components
 var OpenBadge = require('../components/BadgeDisplay.jsx').OpenBadge;
 var Dropzone = require('react-dropzone');
-var LoadingIcon = require('../components/Widgets.jsx').LoadingIcon;
+
+var Button = require('../components/Button.jsx').Button;
 
 // Actions
 var EarnerActions = require('../actions/earner');
@@ -26,13 +26,21 @@ var InputGroup = React.createClass({
     inputType: ReactPropTypes.string,
     selectOptions: ReactPropTypes.arrayOf(ReactPropTypes.string),
     handleChange: ReactPropTypes.func,
-    placeholder: ReactPropTypes.string
+    placeholder: ReactPropTypes.string,
+    hint: ReactPropTypes.string,
+    required: ReactPropTypes.bool,
+  },
+  getDefaultProps: function() {
+    return {
+      required: false,
+    }
   },
   classNameForInput: function(){
     var classes = {
       "filebutton": "input-file",
-      "textarea": "input-textarea", //wrong. double-check. http://getbootstrap.com/components/#input-groups says you can't use textarea in .input-group
+      "textarea": "input-textarea form-control", //wrong. double-check. http://getbootstrap.com/components/#input-groups says you can't use textarea in .input-group
       "select": "input-group-select",
+      "text": "form-control",
       "checkbox": "input-checkbox"
     };
     return classes[this.props.inputType];
@@ -40,124 +48,86 @@ var InputGroup = React.createClass({
   theInput: function(){
     if (this.props.inputType == "filebutton"){
       // TODO: Add accept='image/*' ??
-      return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="file" onChange={this.props.handleChange} /> );
+      return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="file" onChange={this.props.handleChange} required={this.props.required}  disabled={this.props.disabled} /> );
     }
-    else if (this.props.inputType == "text"){
-      return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type="text" onChange={this.props.handleChange} onBlur={this.props.handleBlur} /> );
+    else if (this.props.inputType == "text" || this.props.inputType == "hidden"){
+      return ( <input name={this.props.name} value={this.props.value} className={this.classNameForInput()} type={this.props.inputType} onChange={this.props.handleChange} onBlur={this.props.handleBlur} required={this.props.required}  disabled={this.props.disabled} /> );
     }
     else if (this.props.inputType == "textarea"){
-      return ( <textarea name={this.props.name} value={this.props.value} onChange={this.props.handleChange} onBlur={this.props.handleBlur} /> );
+      return ( <textarea name={this.props.name} value={this.props.value} className={this.classNameForInput()} onChange={this.props.handleChange} onBlur={this.props.handleBlur} required={this.props.required}  disabled={this.props.disabled} /> );
     }
     else if (this.props.inputType == "checkbox"){
-      return ( <input type="checkbox" name={this.props.name} checked={this.props.value} className={this.classNameForInput()} onChange={this.props.handleChange} /> );
+      return ( <input type="checkbox" name={this.props.name} checked={this.props.value} className={this.classNameForInput()} onChange={this.props.handleChange} required={this.props.required} disabled={this.props.disabled} /> );
     }
     else if (this.props.inputType == "select") {
       var selectOptions = this.props.selectOptions.map(function(option, index){
-        return ( <option value={option} key={this.props.name + '-' + index}>{option}</option>);
+        return ( <option value={option.slug} key={this.props.name + '-' + index}>{option.name}</option>);
       }.bind(this));
       return ( 
-        <select name={this.props.name} value={this.props.value} className="input-xlarge" onChange={this.props.handleChange} onBlur={this.props.handleBlur} >
+        <select name={this.props.name} value={this.props.value} className="input-xlarge" onChange={this.props.handleChange} onBlur={this.props.handleBlur} disabled={this.props.disabled}>
           { selectOptions }
         </select>
       );
     }
   },
+
   render: function(){
+    var hint = this.props.hint ? (<span className="hint">{this.props.hint}</span>) : "";
+
+    if (this.props.inputType == "checkbox") {
+      return (
+        <div className="form_-x-checkbox">
+          <label>
+            {this.theInput()}
+            <span className="form_-x-checkbox-text">{this.props.label} {hint}</span>
+          </label>
+        </div>);
+    }
+
     return (
-      <div className={"control-group form-group-" + this.props.name}>
-        <label className="control-label" htmlFor={this.props.name}>{this.props.label}</label>
-        <div className="controls">
-          { this.theInput() }
-        </div>
-      </div>
-    )
+        <div className="form_-x-field">
+          <label htmlFor={this.props.name}>{this.props.label} {hint}</label>
+          {this.theInput()}
+        </div>);
   }
 });
 
 /* A droppable zone for image files. Must send in handler(file) for when images are dropped and set image prop with that file from above. */
 var ImageDropbox = React.createClass({
+  getDefaultProps: function() {
+    return {
+      'hint': "Tap here to upload image",
+    }
+  },
   validateFileType: function(file){
-    if (file instanceof File && (file.type && (file.type == 'image/png' || file.type == 'image/svg')))
+    if (file instanceof File && (file.type && (file.type == 'image/png' || file.type == 'image/svg+xml')))
       return true;
-    else
-      console.log("FILE DID NOT SEEM TO VALIDATE.")
   },
   fileHandler: function(files){
     file = files[0];
-    console.log("A file has been dropped on the Dropzone!");
-    console.log(file);
     if (this.validateFileType(file)){
       this.props.onDroppedImage(file);
     }
   },
   render: function() {
-    var imageDisplay = this.props.imageData ? (<img src={this.props.imageData} />) : (<div className="dropzone-empty">Click to select file, or drop image here</div>);
     var dropzoneStyle = {};
     return (
-      <div className="control-group form-group-dropzone">
-        <label className="control-label" htmlFor={this.props.name}>{this.props.label}</label>
-        <div className={ "controls"}>
-          <Dropzone onDrop={this.fileHandler} style={dropzoneStyle}>
-            {imageDisplay}
-          </Dropzone>
+        <div className="form_-x-field">
+            <Dropzone onDrop={this.fileHandler} style={dropzoneStyle} activeClassName='is-active' className={'dropzone_ dropzone_-secondary'+ (this.props.imageData ? ' is-uploaded' : '')} required={this.props.required}>
+                {this.props.imageData ? <img src={this.props.imageData} /> : (<p>{this.props.hint}</p>)}
+            </Dropzone>
         </div>
-      </div>
     );
   }
 });
-
-
-var SubmitButton = React.createClass({
-  handleClick: function(e){
-    if (!this.props.isDisabled)
-      this.props.handleClick(e);
-    e.preventDefault();
-    e.stopPropagation();
-  },
-  render: function() {
-    return (
-      <div className="control-group submit-button">
-        <label className="control-label sr-only" htmlFor={this.props.name}>{ this.props.label || "Submit" }</label>
-        <div className="controls">
-          <button name={this.props.name} className="btn btn-primary" onClick={this.handleClick}>{this.props.label || "Submit" }</button>
-        </div>
-      </div>
-    );
-  }
-});
-
-var ResetButton = React.createClass({
-  render: function() {
-    return (
-      <div className="control-group reset-button">
-        <label className="control-label sr-only" htmlFor={this.props.name}>{ this.props.label || "Reset" }</label>
-        <div className="controls">
-          <button name={this.props.name} className="btn btn-danger" onClick={this.props.handleClick}>{this.props.label || "Reset" }</button>
-        </div>
-      </div>
-    );
-  }
-});
-
-var PlainButton = React.createClass({
-  render: function() {
-    return (
-      <div className="control-group button">
-        <label className="control-label sr-only" htmlFor={this.props.name}>{this.props.label}</label>
-        <div className="controls">
-          <button name={this.props.name} className="btn btn-default" onClick={this.props.handleClick}>{this.props.label}</button>
-        </div>
-      </div>
-    );
-  }
-});
-
-
-
-
 
 
 BasicAPIForm = React.createClass({
+  getDefaultProps: function() {
+    return {
+      handleBadgeStudioClick: undefined
+    }
+  },
   getInitialState: function() {
     return FormStore.getFormState(this.props.formId);
   },
@@ -176,14 +146,16 @@ BasicAPIForm = React.createClass({
       event.preventDefault();
       return;
     }
+    var change = {};
 
     // Update Store immediately for checkbox fields
     if (this.props.fieldsMeta[event.target.name].inputType == 'checkbox') {
-      this.handleBlur(event);
+      change[event.target.name] = (!_.get(this.state, event.target.name)) ? "on": false;
+      FormActions.patchForm(this.props.formId, change);
+
       return;
     }
 
-    var change = {};
     change[event.target.name] = event.target.value;
     this.setState(change);
   },
@@ -214,13 +186,17 @@ BasicAPIForm = React.createClass({
     }
     
     if (this.state.actionState != "waiting")
-      FormActions.submitForm(this.props.formId);
+      // TODO: Test submission via form control rather than Dialog SubmitButton
+      FormActions.submitForm(this.props.formId, this.props.formType, this.state);
   },
   handleReset: function(e){
     e.preventDefault();
     e.stopPropagation();
 
-    FormActions.resetForm(this.props.formId);   
+    FormActions.resetForm(this.props.formId);
+    if (this.props.handleCloseForm){
+      this.props.handleCloseForm();
+    }
   },
   handleImageDrop: function(file){
     // To make sure any changes within the focused element are recorded in the form state
@@ -231,112 +207,148 @@ BasicAPIForm = React.createClass({
       if (this.isMounted()){
         FormActions.patchForm(this.props.formId, { image: file, imageData: reader.result });
       }
-      else
-        console.log("TRIED TO SET FILE TO STATE, FAILED. WAS BUSY MOUNTING."); 
     }.bind(this);
     reader.readAsDataURL(file);
 
   },
   render: function() {
-    var activeColumns = "", 
-        activeMessage = (this.state.message) ? (<div className={"alert alert-" + this.state.message.type} >{this.state.message.content}</div>) : "",
-        activeHelpText = !this.state.message && this.props.helpText ? <div className="alert alert-info">{this.props.helpText}</div> : "",
+    var messageText = _.get(this.state, 'message.content'),
+        messageDescription = (_.get(this.state.message, 'detail.detail')) ? (<p>{_.get(this.state.message, 'detail.detail')}</p>) : null;
+        // TODO: Create pattern library modules for the different types of content that could be in this.state.message.detail
+        messageDetail = (this.state.message && this.state.message.detail) ? (
+            <div className='message-x-detail'>
+              <h4>{_.get(this.state.message, 'detail.message', JSON.stringify(this.state.message.detail))}</h4>
+              {messageDescription}
+            </div>
+        ) : null;
+    var activeColumns = "",
+        activeMessage = (this.state.message) ? (<div className={"alert alert-" + this.state.message.type}>
+          {messageText}
+          {messageDetail}
+        </div>) : "",
+        activeHelpText = !this.state.message && this.props.helpText ? <div className="form-help-text">{this.props.helpText}</div> : "",
         formControls = "",
-        closeButton = this.props.handleCloseForm ? (<PlainButton name="close" label="Close" handleClick={this.props.handleCloseForm} />) : "",
-        loadingIcon = this.state.actionState == "waiting" ? (<LoadingIcon />) : "";
+        closeButton = this.props.handleCloseForm ? (<Button name="close" label="Cancel" style="secondary" handleClick={this.handleReset} />) : "",
+        loadingIcon = this.state.actionState == "waiting" ? (
+          <div className="form_-x-loaing loading_">
+            <p>Saving&hellip;</p>
+          </div>) : "";
+
     if (["ready", "waiting"].indexOf(this.state.actionState) > -1){
 
       activeColumns = this.props.columns.map(function(item, i){
         var thisColumnItems = item.fields.map(function(fieldKey, j){
-          var inputType = this.props.fieldsMeta[fieldKey].inputType;
           var value = this.state[fieldKey];
-          var label = this.props.fieldsMeta[fieldKey].label;
-          var required = this.props.fieldsMeta[fieldKey].required;
-          
+          var fieldProps = this.props.fieldsMeta[fieldKey];
+          var inputType = fieldProps.inputType;
+
           if (inputType == 'image'){
+            var badgeStudioButton;
+            if (this.props.handleBadgeStudioClick) {
+              var badgeStudioButton = (
+              <div>
+                <div className="form_-x-field">
+                    <p>Or</p>
+                </div>
+                <div className="form_-x-field">
+                    <button type="button" onClick={this.props.handleBadgeStudioClick} className="button_ button_-tertiary">Use Badge Studio</button>
+                </div>
+              </div>);
+            }
             return (
-              <div className="image-input" key={this.props.formId + "-form-field-" + i + '-' + j}>
-                <ImageDropbox label={label} 
-                  onDroppedImage={this.handleImageDrop}
-                  image={this.state.image}
-                  imageData={this.state.imageData}
-                />
+              <div>
+                <div className="form_-x-field" key={this.props.formId + "-form-field-" + i + '-' + j}>
+                  <ImageDropbox
+                    onDroppedImage={this.handleImageDrop}
+                    image={this.state.image}
+                    imageData={this.state.imageData}
+                    imageDescription={this.props.formType == "IssuerCreateUpdateForm" ? "Image": "Badge"}
+                    {...fieldProps}
+                  />
+                </div>
+                {badgeStudioButton}
               </div>
             );
           }
           else if (inputType == 'select'){
             return (
               <InputGroup name={fieldKey} key={this.props.formId + "-form-field-" + i + '-' + j}
-                inputType={inputType} selectOptions={this.state.fields[fieldKey].selectOptions} 
+                selectOptions={fieldProps.selectOptions}
                 value={value} 
-                defaultValue={this.state.fields[fieldKey].defaultValue || this.state.fields[fieldKey].selectOptions[0]} 
                 handleChange={this.handleChange}
                 handleBlur={this.handleBlur}
-                label={label}
+                {...fieldProps}
               />
             );
           }
           else if (inputType == 'checkbox'){
             return (
               <InputGroup name={fieldKey} key={this.props.formId + "-form-field-" + i + '-' + j}
-                inputType={inputType} 
                 value={value} 
                 handleChange={this.handleChange}
                 handleBlur={this.handleBlur}
-                label={label}
+                {...fieldProps}
               />
             );
           }
-          else if (["text", "textarea"].indexOf(inputType) > -1) {
+          else if (["text", "hidden", "textarea"].indexOf(inputType) > -1) {
             // for input types 'text', 'textarea'
             return (
               <InputGroup name={fieldKey} 
                 key={this.props.formId + "-form-field-" + i + '-' + j}
-                inputType={inputType}
-                value={value} label={label} 
+                value={value}
                 handleChange={this.handleChange} 
                 handleBlur={this.handleBlur}
+                {...fieldProps}
               />
             );
           }
+          else if (inputType == 'divider'){
+            return (<p className="divider" key={"divider-" + i}><strong>{fieldProps.label}</strong></p>);
+          }
         }.bind(this));
         return (
-          <div className={item.className} key={this.props.formId + "-form-column-" + i}>
+          <fieldset className={item.className} key={this.props.formId + "-form-column-" + i}>
             {thisColumnItems}
-          </div>
+          </fieldset>
         );
       }.bind(this));
-
       formControls = (
-        <div className="row form-controls">
+        <div className="control_">
           {closeButton}
-          <ResetButton name="reset" handleClick={this.handleReset} />
-          <SubmitButton name="submit" handleClick={this.handleSubmit} />
+          <Button type="submit" name="submit" label={_.get(this.props, 'formControls.submit.label', 'Submit')} handleClick={this.handleSubmit} />
           {loadingIcon}
         </div>
       );
     }
     else {
       formControls = (
-        <div className="row form-controls">
+        <div className="control_">
           {closeButton}
-          <ResetButton name="reset" handleClick={this.handleReset} />
         </div>
       );
     }
 
+    if (this.props.hideFormControls) {
+      formControls = "";
+    }
+
+    if (this.state.actionState == "waiting") {
+      activeMessage = "";
+      activeHelpText = "";
+    }
 
     return (
       <div className="form-container issuer-notification-form-container">
         {activeMessage} {activeHelpText}
-        <div className={this.state.actionState == "waiting" ? "form-horizontal disabled" : "form-horizontal"}>
-          <fieldset className="row">
+        {loadingIcon}
+        <form action="" className={"form_ "+(this.state.actionState == "waiting" ? " form_-is-submitted " : "")} onSubmit={this.handleSubmit}>
+          <div className="form_-x-imageupload">
             {activeColumns}
-          </fieldset>
+          </div>
           {formControls}
-        </div>
-      </div>
-    );
+        </form>
+      </div>);
   }
 });
 

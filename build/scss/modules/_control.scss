@@ -1,0 +1,13 @@
+.control_ {
+  border-top: 1px solid map-get($colors, border-light);
+  box-sizing: border-box;
+  display: flex;
+  justify-content: flex-end;
+  padding: $layout-spacing*2 $layout-spacing*3;
+
+  > * {
+    flex: 0 0 auto;
+    margin-left: $layout-spacing*2;
+  }
+
+}

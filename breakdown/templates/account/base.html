@@ -11,10 +11,10 @@
   <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/bootstrap/css/bootstrap.css">
 
   <!-- main stylesheet -->
-  <!-- <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/style.css"> -->
+  <!-- <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/screen.css"> -->
 
   <!-- accounts stylesheet -->
-  <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/style-new.css">
+  <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/style-accounts.css">
 
   {% block extrastyle %}{% endblock %}
 
@@ -89,8 +89,8 @@
           <h4>Get in Touch</h4>
           <ul>
             <li>(541) 342-8456</li>
-            <li>Twitter. <a href="" target="_blank">@concentricsky</a></li>
-            <li>Email. <a href="mailto:hello@concentricsky.com">hello@concentricsky.com</a></li>
+            <li>Twitter. <a href="https://twitter.com/concentricsky" target="_blank">@concentricsky</a></li>
+            <li>Email. <a href="{{ HELP_EMAIL }}">{{ HELP_EMAIL }}</a></li>
           </ul>
         </div>
       </div>

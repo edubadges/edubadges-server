@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Badge Instance Detail</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
+
+        <link href="{{ STATIC_URL }}css/dialog-polyfill.css" media="screen" rel="stylesheet" type="text/css" >
+        <link href="{{ STATIC_URL }}css/reset.css" media="screen" rel="stylesheet" type="text/css" >
+        <link href="{{ STATIC_URL }}css/screen.css" media="screen" rel="stylesheet" type="text/css" >
+    </head>
+    <body class="{% block bodyclass %}{% endblock %}">
+
+        {% block header %}
+        <header class="header_ l-wrapper">
+            <a class="header_-x-logo" href=""><img src="{{ STATIC_URL }}/images/header-logo.svg" width="193" height="89"></a>
+        </header>
+        {% endblock %}
+
+        <main class="wrap_ {% block main_override %}{% endblock %}">
+        {% if badge_instance %}
+            {% block content %}
+            <div class=" l-wrapper">
+                <div class="card_" style="padding: 1em;">
+
+                    <header class="heading_ heading_-medium">
+                        <div class="heading_-x-text">
+                            <h1>Badge Instance Detail</h1>
+                            <p>The baked image and record of a badge issued to a single recipient</p>
+                        </div>
+                    </header>
+
+                    <div class="detail_">
+                        <div>
+                            <img src="{{ badge_instance.json['image'] }}" width="224" height="224" alt="baked badge image">
+                        </div>
+
+                        <ul>
+                            <li>
+                                <h2 class="detail_-x-meta">Criteria</h2>
+                                <p>
+                                    {% if badge_class.criteria_text %}
+                                        {{ badge_class.criteria_text }}
+                                        <a href="{{ badge_class.json['criteria'] }}" target="_blank" title="Criteria to earn this badge">(link)</a>
+                                    {% else %}
+                                        <a href="{{ badge_class.json['criteria'] }}" target="_blank" title="Criteria to earn this badge">
+                                            {{ badge_class.json['criteria'] }}
+                                        </a>
+                                    {% endif %}
+                                </p>
+                            </li>
+                            <li>
+                                <h2 class="detail_-x-meta">Issue Date</h2>
+                                <p>{{ badge_instance.json['issuedOn'] }}</p>
+                            </li>
+                            <li>
+                                <h2 class="detail_-x-meta">Issuer</h2>
+                                <p>{{ issuer.json['name'] }}</p>
+                            </li>
+                            <li>
+                                <h2 class="detail_-x-meta">Issuer Website</h2>
+                                <p><a href="{{ issuer.json['url'] }}" target="_blank" title="Website of badge issuer">{{ issuer.json['url'] }}</a></p>
+                            </li>
+                            {% if badge_instance.json['evidence'] %}
+                            <li>
+                                <h2 class="detail_-x-meta">Evidence</h2>
+                                <p><a href="{{ badge_instance.json['evidence'] }}" target="_blank" title="Badge evidence">{{ badge_instance.json['evidence'] }}</a></p>
+                            </li>
+                            {% endif %}
+                            <li>
+                                <h2 class="detail_-x-meta">Recipient</h2>
+                                <p>
+                                    {{ obscured_recipient }}
+
+                                    <button class="button_" href="https://badgecheck.io/?url={{ badge_instance.json['id'] }}">
+                                        Verify Badge Recipient
+                                    </button>
+                                </p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="l-wrapper">
+                <pre style="background-color: #eee; padding: 1em;">{{ content }}</pre>
+                {% endblock %}
+            </div>
+        {% else %}
+            <div class="l-wrapper">
+                404: Requested assertion not found.
+            </div>
+        {% endif %}
+        </main>
+
+        {% block footer %}
+
+        {% endblock %}
+
+        {% block scripts %}
+
+        {% endblock %}
+
+    </body>
+</html>

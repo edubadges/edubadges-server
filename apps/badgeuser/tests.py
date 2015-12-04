@@ -1,14 +1,5 @@
-from django.test import TestCase
-from django.core import mail
-from django.test.utils import override_settings
-from rest_framework.test import APIRequestFactory, APIClient, APITestCase, force_authenticate
-
-import json
-import os
-
-from api import *
-from serializers import *
-from models import *
+from rest_framework.test import APIRequestFactory, APITestCase
+from badgeuser.models import BadgeUser
 
 factory = APIRequestFactory()
 

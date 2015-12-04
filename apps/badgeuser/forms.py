@@ -1,8 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django import forms
 
-# from allauth.account import forms as allauth_forms
-
 from .models import BadgeUser
 
 
@@ -14,7 +12,7 @@ class BadgeUserCreationForm(UserCreationForm):
 
     class Meta:
         model = BadgeUser
-        fields = ("username", "email", "first_name", "last_name")
+        fields = ("email", "first_name", "last_name")
 
     def signup(self, request, user):
         pass
@@ -29,3 +27,5 @@ class BadgeUserChangeForm(UserChangeForm):
     class Meta:
         model = BadgeUser
         exclude = []
+
+

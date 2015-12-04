@@ -1,4 +1,4 @@
-var _ = require('underscore');
+var _ = require('lodash');
 var assign = require('object-assign');
 var EventEmitter = require('events').EventEmitter;
 
@@ -11,11 +11,12 @@ FormConfigStore.genericFormTypes = function(){
     'BadgeInstanceCreateUpdateForm',
     'EarnerBadgeImportForm',
     'EarnerCollectionCreateForm',
-    'EarnerCollectionEditForm'
+    'EarnerCollectionEditForm',
+    'CollectionAddBadgeInstanceForm',
   ];
 }
 
-FormConfigStore.getConfig = function(formId, overrides, context){
+FormConfigStore.getConfig = function(formType, overrides, context){
   if (!overrides)
     overrides = {};
   if (!context)
@@ -29,7 +30,7 @@ FormConfigStore.getConfig = function(formId, overrides, context){
 
   var configDefaults = {
     IssuerCreateUpdateForm: {
-      formId: "IssuerCreateUpdateForm",
+      formId: overrides['formId'] || "IssuerCreateUpdateForm",
       fieldsMeta: {
         name: {inputType: "text", label: "Issuer Name", required: true},
         description: {inputType: "textarea", label: "Issuer Description", required: true},
@@ -48,11 +49,14 @@ FormConfigStore.getConfig = function(formId, overrides, context){
         message: ""
       },
       columns: [
-        { fields: ['image'], className:'col-xs-5 col-sm-4 col-md-3' },
-        { fields: ['name', 'description', 'url', 'email'], className:'col-xs-7 col-sm-8 col-md-9' }
+        { fields: ['name', 'description', 'url', 'email'], className:'' },
+        { fields: ['image'], className:'' },
       ],
+      formControls: {
+        "submit": {"label": "Add Issuer"}
+      },
       apiContext: {
-        formId: "IssuerCreateUpdateForm",
+        formId: overrides['formId'] || "IssuerCreateUpdateForm",
         apiCollectionKey: "issuer_issuers",
         actionUrl: "/v1/issuer/issuers",
         method: "POST",
@@ -62,12 +66,12 @@ FormConfigStore.getConfig = function(formId, overrides, context){
     },
 
     BadgeClassCreateUpdateForm: {
-      formId: "BadgeClassCreateUpdateForm",
+      formId: overrides['formId'] || "BadgeClassCreateUpdateForm",
       fieldsMeta: {
         name: {inputType: "text", label: "Badge Name", required: true},
         description: {inputType: "textarea", label: "Badge Description", required: true},
         criteria: {inputType: "textarea", label: "Criteria URL or text", required: true},
-        image: {inputType: "image", label: "Badge Image (Square PNG)", required: false, filename: "badge_image.png"}
+        image: {inputType: "image", label: "Badge Image (Square PNG)", required: true, filename: "badge_image.png"}
       },
       defaultValues: {
         name: "",
@@ -79,11 +83,11 @@ FormConfigStore.getConfig = function(formId, overrides, context){
         message: ""
       },
       columns: [
-        { fields: ['image'], className:'col-xs-5 col-sm-4 col-md-3' },
-        { fields: ['name', 'description', 'criteria'], className:'col-xs-7 col-sm-8 col-md-9' }
+        { fields: ['name', 'description', 'criteria'], className:'' },
+        { fields: ['image'], className:'' },
       ],
       apiContext: {
-        formId: "BadgeClassCreateUpdateForm",
+        formId: overrides['formId'] || "BadgeClassCreateUpdateForm",
         apiCollectionKey: "issuer_badgeclasses",
         actionUrl: "/v1/issuer/issuers/" + contextGet('issuerSlug', '') + "/badges",
         method: "POST",
@@ -92,7 +96,7 @@ FormConfigStore.getConfig = function(formId, overrides, context){
       }
     },
     BadgeInstanceCreateUpdateForm: {
-      formId: "BadgeInstanceCreateUpdateForm",
+      formId: overrides['formId'] || "BadgeInstanceCreateUpdateForm",
       fieldsMeta: {
         email: {inputType: "text", label: "Recipient Email", required: true},
         evidence: {inputType: "text", label: "Evidence URL", required: false},
@@ -109,7 +113,7 @@ FormConfigStore.getConfig = function(formId, overrides, context){
         { fields: ['email', 'evidence', 'create_notification'], className:'col-xs-12' }
       ],
       apiContext: {
-        formId: "BadgeInstanceCreateUpdateForm",
+        formId: overrides['formId'] || "BadgeInstanceCreateUpdateForm",
         apiCollectionKey: "issuer_badgeinstances",
         actionUrl: "/v1/issuer/issuers/" + contextGet('issuerSlug', '') + "/badges/" + contextGet('badgeClassSlug', '') + '/assertions',
         method: "POST",
@@ -119,7 +123,7 @@ FormConfigStore.getConfig = function(formId, overrides, context){
     },
     EarnerBadgeImportForm: {
       formId: "EarnerBadgeImportForm",
-      helpText: "Fill out one of the following fields to upload your badge. Usually, the baked badge image is available.",
+      //helpText: "Verify an Open Badge and add it to your library by uploading a badge image or entering its URL.",
       fieldsMeta: {
         image: {inputType: "image", label: "Badge Image", required: false, filename: "earned_badge.png"},
         url: {inputType: "text", label: "Assertion URL", required: false},
@@ -134,11 +138,14 @@ FormConfigStore.getConfig = function(formId, overrides, context){
         message: ""
       },
       columns: [
-        { fields: ['image'], className:'col-xs-5 col-sm-4 col-md-3' },
-        { fields: ['url', 'assertion'], className:'col-xs-7 col-sm-8 col-md-9' }
+        { fields: ['url', 'assertion'], className:'' },
+        { fields: ['image'], className:'' },
       ],
+      formControls: {
+        "submit": {"label": "Import Badge"}
+      },
       apiContext: {
-        formId: "EarnerBadgeImportForm",
+        formId: overrides['formId'] || "EarnerBadgeImportForm",
         apiCollectionKey: "earner_badges",
         actionUrl: "/v1/earner/badges",
         method: "POST",
@@ -147,7 +154,7 @@ FormConfigStore.getConfig = function(formId, overrides, context){
       }
     },
     EarnerCollectionCreateForm: {
-      formId: "EarnerCollectionCreateForm",
+      formId: overrides['formId'] || "EarnerCollectionCreateForm",
       fieldsMeta: {
         name: {inputType: "text", label: "Name", required: true},
         description: {inputType: "textarea", label: "Description", required: false}
@@ -162,7 +169,7 @@ FormConfigStore.getConfig = function(formId, overrides, context){
         { fields: ['name', 'description'], className:'col-xs-12' },
       ],
       apiContext: {
-        formId: "EarnerCollectionCreateForm",
+        formId: overrides['formId'] || "EarnerCollectionCreateForm",
         apiCollectionKey: "earner_collections",
         actionUrl: "/v1/earner/collections",
         method: "POST",
@@ -171,7 +178,7 @@ FormConfigStore.getConfig = function(formId, overrides, context){
       }
     },
     EarnerCollectionEditForm: {
-      formId: "EarnerCollectionEditForm",
+      formId: overrides['formId'] || "EarnerCollectionEditForm",
       fieldsMeta: {
         name: {inputType: "text", label: "Name", required: true},
         description: {inputType: "textarea", label: "Description", required: false}
@@ -186,17 +193,49 @@ FormConfigStore.getConfig = function(formId, overrides, context){
         { fields: ['name', 'description'], className:'col-xs-12' },
       ],
       apiContext: {
-        formId: "EarnerCollectionEditForm",
+        formId: overrides['formId'] || "EarnerCollectionEditForm",
         apiCollectionKey: "earner_collections",
         actionUrl: "/v1/earner/collections/" + contextGet('collection', {slug:''}).slug,
         method: "PUT",
         successHttpStatus: [200],
         successMessage: "Collection successfully edited."
       }
-    }
+    },
+    CollectionAddBadgeInstanceForm: {
+        formId: overrides['formId'] || "CollectionAddBadgeInstanceForm",
+
+        columns: [
+            { fields: ['collection', 'id'], className: '' },
+        ],
+        fieldsMeta: {
+            collection: {inputType: 'select', selectOptions: contextGet('collections'), label: '', required: true},
+            id: {inputType: 'hidden', label: '', required: true},
+        },
+
+        defaultValues: {
+            actionState: "ready",
+            message: "",
+            collection: contextGet('defaultCollection'),
+            id: contextGet('badgeId'),
+        },
+
+        apiContext: {
+            formId: overrides['formId'] || "CollectionAddBadgeInstanceForm",
+            apiCollectionKey: "earner_collections",
+            actionUrl: "/v1/earner/collections/:collection/badges",
+            method: "POST",
+            successHttpStatus: [201],
+            successMessage: contextGet('badgeName') +" added to collection.",
+            updateFunction: function(request, APIStore, requestContext) {
+                var collection = APIStore.filter(this.apiCollectionKey, 'slug', requestContext.collection)[0];
+                collection.badges.push(request.body);
+                return request.body;
+            },
+        },
+    },
   };
 
-  var configData = configDefaults[formId] || {};
+  var configData = configDefaults[formType] || {};
   return _.defaults(overrides, configData);
 };
 

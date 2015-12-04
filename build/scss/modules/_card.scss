@@ -1,0 +1,18 @@
+.card_ {
+  background: map-get($colors, solid);
+  border-radius: $border-radius;
+  box-shadow: 0 1px $layout-spacing/2 0 rgba(map-get($colors, solid-dark), .3), 0 0 0 1px rgba(map-get($colors, border), .25);
+  box-sizing: border-box;
+  display: block;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.card_-hover {
+
+  &:hover {
+    box-shadow: 0 1px $layout-spacing/2 0 rgba(map-get($colors, solid-dark), .3), 0 0 0 1px map-get($colors, border);
+  }
+
+}

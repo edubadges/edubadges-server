@@ -1,0 +1,34 @@
+@import "../colors";
+
+.iframe-embed-container {
+  header.main-app-container {
+    border-radius: 5px;
+  }
+  .main-header {
+    border-radius: 5px 5px 0 0;
+  }
+  .wrap {
+    padding: 0 10px;
+  }
+  .main-component {
+    padding: 5px 0 10px 0;
+  }
+  .main-component-content-title {
+    padding: 0;
+  }
+  .badge-display {
+    h1 {
+      margin: 0;
+      font-size: 18px;
+    }
+    font-size: 0.8em;
+  }
+  .col-embed-6 {
+    width: 50%;
+    float: left;
+  }
+  .embed-info {
+    font-size: 0.8em;
+    color: $medium;
+  }
+}

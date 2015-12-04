@@ -1,0 +1,198 @@
+.table {
+  background-color: transparent;
+  width: 100%;
+  max-width: 100%;
+  border: none;
+  margin-bottom: 20px;
+  thead {
+    tr {
+      &:first-child {
+        th {
+          border: 0;
+        }
+      }
+      th {
+        border-bottom: 2px solid #ddd;
+        color:#999;
+        &.actions-col {
+//          text-align:center;
+        }
+      }
+    }
+  }
+  tbody {
+    tr {
+      td, th {
+        border-top: 1px solid #ddd2d2;
+        border-width: 1px 0 0 0;
+        &.col {
+          color:#666;
+          padding: 14px 7px;
+          vertical-align: middle;
+          &.name-col {
+            color:#444;
+          }
+          &.badge-col {
+            .badge-select {
+              width: 300px;
+              text-align: left;
+              .fa {
+                color: #666;
+                float: right;
+                background: #f8f8f8;
+                border-radius: 0 4px 4px 0;
+                height: 33px;
+                padding: 9px 7px;
+                margin: -6px -12px;
+                border-left: 1px solid #ddd2d2;
+                &:hover {
+                  background:#eee;
+                }
+              }
+              &.closable {
+                border-radius:4px 4px 0 0;
+              }
+            }
+            .remove-badge {
+
+            }
+            .new-badge {
+
+            }
+            .badge-class-chooser {
+              //box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+              list-style: none;
+              position:absolute;
+              padding:0;
+              margin:0 0 0 0;
+              background: #fff;
+              width: 300px;
+              max-height: 260px;
+              overflow-x: scroll;
+              z-index: 10;
+              border-bottom: 1px solid #ddd2d2;
+              li {
+                padding:7px;
+                border:1px solid #ddd2d2;
+                border-width:0 1px 1px 1px;
+                display:block;
+                cursor:pointer;
+                &:first-child {
+                  border-width:1px 1px 1px 1px;
+                }
+                &:hover {
+                  background: #f8f8f8;
+                  img {
+                    border:1px solid #eee;
+                  }
+                }
+                img {
+                  border:1px solid transparent;
+                }
+              }
+            }
+            .badge-class-chosen {
+              width: 300px;
+              &.chooser-open {
+                border-radius:4px 4px 0 0;
+                .fa {
+                  background:#eee;
+                }
+              }
+            }
+            .badge-class-chosen, .badge-class-chooser-item {
+              height:81px;
+              img {
+                width: 65px;
+                height:65px;
+                margin-right:7px;
+                border-radius:2px;
+                float:left;
+              }
+              .badge-class-details {
+                float:left;
+                width: 180px;
+                h5 {
+                  margin-bottom:5px;
+                  padding-bottom:0;
+                  margin-top:7px;
+                }
+                p {
+                  color:#777;
+                  font-weight: normal;
+                  margin:0;
+                  padding:0;
+                  line-height:1em;
+                }
+              }
+              .fa {
+                float: right;
+                background: #f8f8f8;
+                border-radius: 0 4px 4px 0;
+                height: 79px;
+                padding: 33px 7px;
+                margin: -7px -7px -7px 0;
+                border-left: 1px solid #ddd2d2;
+                &:hover {
+                  background:#eee;
+                }
+              }
+            }
+
+            .badge-class-chosen {
+              padding:7px;
+              border:1px solid #ddd2d2;
+              border-radius: 4px;
+              display:block;
+              background:#fff;
+              cursor:pointer;
+              &:hover {
+                border:1px solid #ccc2d2;
+              }
+            }
+          }
+          &.actions-col {
+            width:300px;
+//            text-align:right;
+            .btn {
+              margin-right:7px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.badgebook-course-progress-report {
+  .table {
+    border: 1px solid #ddd2d2;
+    thead {
+      tr {
+        th {
+          text-align: center;
+          border-left: 1px solid #ddd2d2;
+          &:first-child {
+            text-align: left;
+            border-left: none;
+          }
+        }
+      }
+    }
+
+    td {
+      vertical-align: middle;
+      border-left: 1px solid #ddd2d2;
+      &:first-child {
+        border-left: none;
+      }
+      .award {
+        text-align: center;
+        img {
+          height: 65px;
+          width: 65px;
+        }
+      }
+    }
+  }
+}

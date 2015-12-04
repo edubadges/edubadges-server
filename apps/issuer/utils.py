@@ -19,10 +19,18 @@ def generate_md5_hashstring(identifier, salt):
 
 def is_probable_url(string):
     earl = re.compile(r'^https?')
+    if string is None:
+        return False
     return earl.match(string)
 
 
 def badgr_import_url(instance):
-    if apps.is_installed('composer'):
+    if apps.is_installed('composition'):
         return getattr(settings, 'HTTP_ORIGIN') \
             + '/earner/badges/new?url=' + instance.get_full_url()
+
+
+def obscure_email_address(email):
+    charlist = list(email)
+
+    return ''.join(letter if letter in ('@', '.',) else '*' for letter in charlist)

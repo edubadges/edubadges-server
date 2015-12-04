@@ -2,14 +2,15 @@ from django.apps import apps
 from django.conf.urls import patterns, include, url
 from django.conf import settings
 from django.contrib import admin
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.views.generic.base import RedirectView
+from django.views.generic.base import RedirectView, TemplateView
 
-admin.autodiscover()
+from rest_framework.authtoken.views import obtain_auth_token
+
+from .views import SitemapView, info_view, email_unsubscribe
+
+from mainsite.admin import badgr_admin
+badgr_admin.autodiscover()
 # make sure that any view/model/form imports occur AFTER admin.autodiscover
-
-from django.views.generic.base import RedirectView
-from mainsite.views import Error404, Error500, SitemapView, info_view
 
 TOKEN_REGEX = '(?P<uidb36>[0-9A-Za-z]{1,13})-(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})'
 
@@ -29,29 +30,32 @@ urlpatterns = patterns('',
     url(r'^sitemap$', SitemapView.as_view(), name='sitemap'),
     url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.sitemap', {'sitemaps': sitemaps}),
 
-    # Admin URLs from client_admin
-    # https://github.com/concentricsky/django-client-admin
-    url(r'^staff/', include('client_admin.urls')),
-    url(r'^staff/', include(admin.site.urls)),
+    # Admin URLs
+    url(r'^staff/', include(badgr_admin.urls)),
 
     # accounts:
     url(r'^accounts[/]?$', RedirectView.as_view(url='/accounts/email/')),
     url(r'^accounts/', include('allauth.urls')),
+    url(r'^unsubscribe/(?P<email_encoded>[^/]+)/(?P<expiration>[^/]+)/(?P<signature>[^/]+)', email_unsubscribe, name='unsubscribe'),
     url(r'^login', RedirectView.as_view(url='/accounts/login', permanent=False, query_string=True), name='login'),
     url(r'^logout', RedirectView.as_view(url='/accounts/logout', permanent=False), name='logout'),
 
     # REST Framework-based APIs
     url(r'^user', include('badgeuser.urls')),
     url(r'^v1/user', include('badgeuser.api_urls')),
-    url(r'^v1/verifier', include('integrity_verifier.api_urls')),
+    url(r'^api-auth/token$', obtain_auth_token),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     url(r'^public', include('issuer.public_api_urls')),
 
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^docs/', include('rest_framework_swagger.urls')),
 
     # Service health endpoint
     url(r'^health', include('health.urls')),
+
+    # JSON-LD Context
+    url(r'^json-ld/', include('badgrlog.urls')),
+
 )
 
 if apps.is_installed('issuer'):
@@ -61,13 +65,21 @@ if apps.is_installed('issuer'):
         url(r'^issuer', include('issuer.urls')),
     )
 
-if apps.is_installed('composer'):
+if apps.is_installed('composition'):
     urlpatterns += patterns('',
-        url(r'^v1/earner', include('composer.api_urls')),
-        url(r'^earner', include('composer.urls')),
+        url(r'^v1/earner', include('composition.api_urls')),
+        url(r'^earner', include('composition.urls')),
+    )
+
+if apps.is_installed('badgebook'):
+    urlpatterns += patterns('',
+        url(r'^v1/badgebook', include('badgebook.api_urls')),
+        url(r'^badgebook', include('badgebook.urls')),
     )
 
 
+handler404 = 'mainsite.views.error404'
+handler500 = 'mainsite.views.error500'
 # Test URLs to allow you to see these pages while DEBUG is True
 if getattr(settings, 'DEBUG_ERRORS', False):
     urlpatterns = patterns('mainsite.views',
@@ -91,4 +103,10 @@ if getattr(settings, 'DEBUG_STATIC', True):
         url(r'^%s(?P<path>.*)' % (static_url,), 'django.contrib.staticfiles.views.serve', kwargs={
             'insecure': True,
         })
+    ) + urlpatterns
+
+# Serve pattern library view only in debug mode or if explicitly declared
+if getattr(settings, 'DEBUG', True) or getattr(settings, 'SERVE_PATTERN_LIBRARY', False):
+    urlpatterns = patterns('',
+       url(r'^component-library$', TemplateView.as_view(template_name='component-library.html'), name='component-library')
     ) + urlpatterns

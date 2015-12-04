@@ -1,0 +1,242 @@
+.open-badge-list {
+  display:flex;
+  flex-wrap:wrap;
+  text-align:center;
+}
+
+.badge-display-thumbnail {
+  position: relative;
+  max-width: 235px;
+  overflow: hidden;
+  margin: 0 14px 14px 0;
+  background-color: #fff;
+  transition:.5s;
+  border-radius: 2px;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+  border:1px solid #ddd;
+  transform: scale(1);
+  cursor:pointer;
+  .badgeProperty-type-image {
+    background:#fff;
+    text-align:center;
+    .propertyImage {
+      width: 150px;
+      height: 150px;
+    }
+  }
+  .name-wrapper {
+    padding:0 11px 7px 11px;
+    .propertyName {
+      &.Name {
+        display: none;
+      }
+    }
+    .propertyValue {
+      &.Name {
+        text-align:center;
+        font-weight:600;
+        color:#333;
+      }
+    }
+  }
+  .issuer-wrapper {
+    background: #672f33;
+    padding: 7px 11px;
+    .propertyName {
+      &.Issuer {
+        color: #ad9393;
+        display: block;
+        font-size: .8em;
+        text-align: left;
+      }
+    }
+    .propertyValue {
+      &.Issuer {
+        color: #fff;
+        display: block;
+        text-align: left;
+        background: #672f33;
+      }
+    }
+  }
+  .detail-wrapper {
+    border-top:1px solid #ddd;
+    padding: 11px;
+    .propertyName {
+      &.Criteria, &.Description {
+        color: #ad9393;
+        display: block;
+        font-size: .8em;
+        text-align: left;
+      }
+    }
+    .propertyValue {
+      text-align:left;
+      &.Criteria {
+        display: block;
+        max-width:95%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom:7px;
+      }
+      &.Description {
+        display: block;
+      }
+    }
+  }
+  &:hover {
+    transition: .5s;
+    transform: scale(1.05);
+  }
+  &.award {
+    &.unearned {
+      opacity: 0.2;
+    }
+  }
+}
+
+.badge-display-full {
+  display:block;
+  width: 100%;
+  text-align: left;
+  padding-top: 28px;
+  .property-group.image {
+    margin-top:-28px;
+  }
+  .badgeProperty {
+    margin-bottom:7px;
+    .propertyName {
+      color: #333;
+      font-weight: 700;
+      text-align:right;
+      padding-right:21px;
+      width: 16.66666667%;
+      float: left;
+      position: relative;
+      min-height: 1px;
+      box-sizing: border-box;
+    }
+    .propertyValue {
+      width: 66.66666667%;
+      display: inline-block;
+    }
+    &.badgeProperty-type-image {
+      cursor:pointer;
+      img {
+        width:100%;
+      }
+    }
+  }
+}
+
+.issuer-list {
+  margin-bottom:11px;
+}
+
+.issuer-display {
+  .panel-heading {
+    padding:14px 14px 7px 14px;
+    img {
+      width:65px;
+      height:65px;
+      margin:0;
+      padding:0;
+      float:left;
+      margin-right:14px;
+      border-radius:4px;
+    }
+    .propertyName.Name {
+      display:none;
+    }
+    .propertyValue.Name {
+      margin-top: 0;
+      margin-bottom: 0;
+      font-size: 16px;
+      color: inherit;
+      font-weight:500;
+    }
+    .basic-data {
+      position:relative;
+      top:-4px;
+    }
+  }
+  .panel-body {
+    .open-badge-list {
+      .badge-display-thumbnail {
+        max-width:180px;
+        &:hover {
+          transform: none;
+        }
+      }
+    }
+  }
+  &:hover {
+    background:transparent;
+  }
+}
+
+.badgeclass-list.badgeclass-list-thumbnail {
+  display:flex;
+}
+
+.issuer-display-detail {
+
+  + * {
+    clear: left;
+  }
+
+  margin-top:21px;
+  .propertyImage {
+    border-radius: 4px;
+  }
+  .propertyName {
+    color: #333;
+    font-weight: 700;
+    text-align:right;
+    padding-right:21px;
+    width: 16.66666667%;
+    float: left;
+    position: relative;
+    min-height: 1px;
+    box-sizing: border-box;
+  }
+  .propertyValue {
+    width: 66.66666667%;
+    display: inline-block;
+    &.Criteria {
+      a {
+        word-wrap: break-word;
+      }
+    }
+  }
+  &.badgeProperty-type-image {
+    img {
+      width:100%;
+    }
+  }
+}
+
+.property-group {
+  margin-bottom: 1em;
+  &.validations { clear: both; }
+}
+
+
+.selected-true {
+  background-color: #d1d1d1;
+}
+
+.issuer-display-short, .badgeclass-list .badgeclass-display-detail {
+  cursor: pointer;
+  &:hover {
+
+  }
+}
+
+.badgeinstance-display-short:hover { background-color: #eee; }
+
+.earner-collection-list .card img {
+    max-width: 100%;
+    height: auto;
+}

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <title>{% block head_title %}Badgr{% endblock %}</title>
+    <link rel="shortcut icon" href="{{STATIC_URL}}favicon.png" />
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/bootstrap/css/bootstrap.css">
+
+    <!-- main stylesheet -->
+    <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/screen.css">
+
+    {% block extrastyle %}{% endblock %}
+
+    {% block extrahead %}{% endblock %}
+
+    {% endblock %}
+    <base target="_parent" />
+</head>
+<body class="badgr embedded-body">
+
+  <div class="iframe-embed-container">
+    <div class="wrapper main-app-container">
+        <header class="main-header">
+            <div class="wrap">
+                <div class="navbar navbar-default navbar-static-top">
+                    <div class="navbar-header">
+                        <a class="navbar-brand" href="https://badgr.io">
+                            <span>Badgr</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-section content-container">
+            <div class="wrap page-wrapper">
+                <div class="main-component clearfix">
+                    <div class="action-bar clearfix">
+                        <div class="main-component-content-title col-xs-12">
+                            <h4><a href="{{collection.share_url}}">{{collection.name}}</a></h4>
+                        </div>
+                    </div>
+                    <p class="collection-owner">Badges earned by {{collection.owner.get_full_name()}}</p>
+                    <p class="collection-description">{{collection.description}}</p>
+
+                    <div class="collection-badges-list container-fluid">
+                    {% for instance in collection.instances.all() %}
+                        {% set metadata = instance.localbadgeinstancecollection_set.get(collection=collection) %}
+                        <div class="row badge-display badge-display-full col-xs-12">
+                            <div class="row col-xs-12">
+                                <h1>{{instance.json.get('badge').get('name')}}</h1>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <div class="col-embed-6">
+                                        <img src="{{instance.image.url}}" />
+                                    </div>
+                                    <p>
+                                        <label>Description:</label>
+                                        <span>{{ instance.json.get('badge').get('description') }}</span>
+                                    </p>
+                                    <p>
+                                        <label>Criteria:</label>
+                                        <span><a href="{{instance.json.get('badge').get('criteria')}}">{{instance.json.get('badge').get('criteria')}}</a></span>
+                                    </p>
+                                    <p>
+                                        <label>Issuer:</label>
+                                        <span><a href="{{instance.json.get('badge').get('issuer').get('url')}}">{{instance.json.get('badge').get('issuer').get('name')}}</a></span>
+                                    </p>
+
+                                  
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12">
+
+                                    <p>
+                                        <label>Recipient identifier:</label>
+                                        <span>{{instance.recipient_identifier}}</span>
+                                    </p>
+                                    {% if metadata.description %}
+                                    <p>
+                                        <label>Earner's description:</label>
+                                        <span>{{metadata.description}}</span>
+                                    </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                        </div>
+                    {% endfor %}
+                    </div>
+                    <p class="embed-info">This badge collection verified by <a href="https://badgr.io">Badgr</a>. <a href="{{collection.share_url}}">View details</a>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+
+</body>
+</html>

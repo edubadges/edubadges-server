@@ -1,0 +1,34 @@
+@import "../colors";
+
+.card {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  padding: 0.25em;
+  float: left;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+
+  .headerImage {
+
+  }
+  .title {
+    font-size: 1.5em;
+    a {
+      color: $badgr-red;
+      font-weight: bold;
+    }
+  }
+  .card-actions {
+    width: 100%;
+    .card-action {
+      display: inline-block;
+      i { margin-right: 0.25em; }
+      &.pull-right {
+        float: right;
+      }
+    }
+  }
+  .content {
+
+  }
+}

@@ -26,8 +26,9 @@ class EarnerBadgeList(APIView):
 
     def get(self, request):
         """
-        GET a list of all the logged-in user's earned badges
+        THIS PACKAGE IS DEPRECATED, PLEASE REMOVE "COMPOSER" FROM URLS
         ---
+        deprecated: true
         serializer: EarnerBadgeSerializer
         """
         user_badges = self.queryset.filter(recipient_user=request.user)
@@ -42,10 +43,9 @@ class EarnerBadgeList(APIView):
 
     def post(self, request):
         """
-        POST badge information to add a badge to the logged-in user's account.
-        Badgealong with either a badge image file, hosted
-        badge assertion URL, or badge assertion content itself.
+        THIS PACKAGE IS DEPRECATED, PLEASE REMOVE "COMPOSER" FROM URLS
         ---
+        deprecated: true
         serializer: EarnerBadgeSerializer
         parameters:
             - name: image
@@ -81,8 +81,9 @@ class EarnerBadgeDetail(APIView):
     """
     def get(self, request, badge_id):
         """
-        GET details on one badge
+        THIS PACKAGE IS DEPRECATED, PLEASE REMOVE "COMPOSER" FROM URLS
         ---
+        deprecated: true
         serializer: EarnerBadgeSerializer
         parameters:
             - name: badge_id
@@ -109,8 +110,9 @@ class EarnerBadgeDetail(APIView):
 
     def delete(self, request, badge_id):
         """
-        DELETE one stored badge from the logged-in earner's collection
+        THIS PACKAGE IS DEPRECATED, PLEASE REMOVE "COMPOSER" FROM URLS
         ---
+        deprecated: true
         parameters:
             - name: badge_id
               description: the unique id of the earner's badge to delete
@@ -137,8 +139,9 @@ class EarnerCollectionList(APIView):
 
     def get(self, request):
         """
-        GET a list of the logged-in user's Collections.
+        THIS PACKAGE IS DEPRECATED, PLEASE REMOVE "COMPOSER" FROM URLS
         ---
+        deprecated: true
         serializer: CollectionSerializer
         """
         user_collections = self.queryset.filter(owner=request.user)
@@ -151,8 +154,9 @@ class EarnerCollectionList(APIView):
 
     def post(self, request):
         """
-        POST a new collection to the logged-in user's account.
+        THIS PACKAGE IS DEPRECATED, PLEASE REMOVE "COMPOSER" FROM URLS
         ---
+        deprecated: true
         serializer: CollectionSerializer
         """
         serializer = CollectionSerializer(
@@ -174,7 +178,7 @@ class EarnerCollectionDetail(APIView):
 
     def get(self, request, slug):
         """
-        GET a single collection details, by slug
+        THIS PACKAGE IS DEPRECATED, PLEASE REMOVE "COMPOSER" FROM URLS
         """
         try:
             user_collection = self.queryset.get(
@@ -191,8 +195,9 @@ class EarnerCollectionDetail(APIView):
 
     def put(self, request, slug):
         """
-        Update the description of a badge collection.
+        THIS PACKAGE IS DEPRECATED, PLEASE REMOVE "COMPOSER" FROM URLS
         ---
+        deprecated: true
         serializer: CollectionSerializer
         parameters:
             - name: slug
@@ -232,8 +237,9 @@ class EarnerCollectionDetail(APIView):
 
     def delete(self, request, slug):
         """
-        Delete a collection
+        THIS PACKAGE IS DEPRECATED, PLEASE REMOVE "COMPOSER" FROM URLS
         ---
+        deprecated: true
         parameters:
             - name: slug
               description: "The collection's slug identifier"
@@ -264,7 +270,7 @@ class EarnerCollectionBadgesList(APIView):
 
     def get(self, request, slug):
         """
-        GET the badges in a single Collection
+        THIS PACKAGE IS DEPRECATED, PLEASE REMOVE "COMPOSER" FROM URLS
         """
         collection_badges = self.queryset.filter(
             collection__slug=slug, instance__recipient_user=request.user
@@ -277,8 +283,7 @@ class EarnerCollectionBadgesList(APIView):
 
     def post(self, request, slug):
         """
-        POST new badge(s) to add them to a existing Collection.
-        Returns resulting complete list of collection contents.
+        THIS PACKAGE IS DEPRECATED, PLEASE REMOVE "COMPOSER" FROM URLS
         """
         try:
             collection = Collection.objects.get(
@@ -311,13 +316,9 @@ class EarnerCollectionBadgesList(APIView):
 
     def put(self, request, slug):
         """
-        Update the list of badges included in a collection among
-        those added to the logged-in user's badges. Cannot be used to
-        change the description of a badge in the collection, but can
-        be used to add descriptions to new badges to be added from the
-        user's existing badges. Cannot be used to add new badges to the
-        user's account at this time.
+        THIS PACKAGE IS DEPRECATED, PLEASE REMOVE "COMPOSER" FROM URLS
         ---
+        deprecated: true
         parameters:
             - name: slug
               description: The collection's slug identifier
@@ -370,6 +371,9 @@ class EarnerCollectionBadgeDetail(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, collection_slug, badge_id):
+        """
+        THIS PACKAGE IS DEPRECATED, PLEASE REMOVE "COMPOSER" FROM URLS
+        """
         try:
             item = self.queryset.get(
                 instance__recipient_user=request.user,
@@ -384,8 +388,9 @@ class EarnerCollectionBadgeDetail(APIView):
 
     def put(self, request, collection_slug, badge_id):
         """
-        Update the description of a badge in a collection.
+        THIS PACKAGE IS DEPRECATED, PLEASE REMOVE "COMPOSER" FROM URLS
         ---
+        deprecated: true
         parameters:
             - name: description
               description: Earner's annotation about a badge particular to this collection's audience.
@@ -429,9 +434,9 @@ class EarnerCollectionBadgeDetail(APIView):
 
     def delete(self, request, collection_slug, badge_id):
         """
-        Remove a badge from a collection (does not delete it
-        from the earner's account)
+        THIS PACKAGE IS DEPRECATED, PLEASE REMOVE "COMPOSER" FROM URLS
         ---
+        deprecated: true
         parameters:
             - name: collection_slug
               description: The collection's slug identifier
@@ -464,6 +469,9 @@ class EarnerCollectionGenerateShare(APIView):
     permission_classes = (permissions.IsAuthenticated, IsOwner,)
 
     def get(self, request, slug):
+        """
+        THIS PACKAGE IS DEPRECATED, PLEASE REMOVE "COMPOSER" FROM URLS
+        """
         try:
             collection = self.queryset.get(
                 owner=request.user,
@@ -482,6 +490,9 @@ class EarnerCollectionGenerateShare(APIView):
         )
 
     def delete(self, request, slug):
+        """
+        THIS PACKAGE IS DEPRECATED, PLEASE REMOVE "COMPOSER" FROM URLS
+        """
         try:
             collection = self.queryset.get(
                 owner=request.user,

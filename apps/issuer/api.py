@@ -1,13 +1,17 @@
 from itertools import chain
+import logging
+from django.apps import apps
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 
+from allauth.account.models import EmailAddress
 from rest_framework import status, authentication, permissions
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
+import badgrlog
 
 from .models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from .serializers import (IssuerSerializer, BadgeClassSerializer,
@@ -15,6 +19,9 @@ from .serializers import (IssuerSerializer, BadgeClassSerializer,
                           IssuerStaffSerializer)
 from .permissions import (MayIssueBadgeClass, MayEditBadgeClass,
                           IsEditor, IsStaff, IsOwnerOrStaff)
+
+
+logger = badgrlog.BadgrLogger()
 
 
 class AbstractIssuerAPIEndpoint(APIView):
@@ -134,8 +141,10 @@ class IssuerList(AbstractIssuerAPIEndpoint):
             owner=request.user,
             created_by=request.user
         )
+        issuer = serializer.data
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        logger.event(badgrlog.IssuerCreatedEvent(issuer))
+        return Response(issuer, status=status.HTTP_201_CREATED)
 
 
 class IssuerDetail(AbstractIssuerAPIEndpoint):
@@ -154,13 +163,60 @@ class IssuerDetail(AbstractIssuerAPIEndpoint):
         serializer: IssuerSerializer
         """
         try:
-            current_issuer = Issuer.objects.get(slug=slug)
+            current_issuer = Issuer.cached.get(slug=slug)
         except Issuer.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         else:
             serializer = IssuerSerializer(current_issuer, context={'request': request})
             return Response(serializer.data)
+
+    def delete(self, request, slug):
+        """
+        DELETE an issuer if it hasn't issued any badges yet.
+        ---
+        parameters:
+            - name: slug
+              type: string
+              paramType: path
+              description: The slug of the issuer to delete.
+              required: true
+        """
+        issuer = self.get_object(slug)
+        if issuer is None:
+            return Response(
+                "Issuer {} not found. Authenticated user must have owner, editor or staff rights on the issuer.".format(slug),
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # determine if the issuer can be deleted
+        issued_count = sum(bc.recipient_count() for bc in issuer.cached_badgeclasses())
+        if issued_count > 0:
+            return Response(
+                "Issuer {} can not be removed since it has previously issued badges.".format(slug),
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # remove all badgeclasses owned by issuer
+        for bc in issuer.cached_badgeclasses():
+            bc.delete()
+
+        # remove issuer staff
+        IssuerStaff.objects.filter(issuer=issuer).delete()
+
+        if apps.is_installed('badgebook'):
+            try:
+                from badgebook.models import LmsCourseInfo
+                # update LmsCourseInfo's that were using this issuer as the default_issuer
+                for course_info in LmsCourseInfo.objects.filter(default_issuer=issuer):
+                    course_info.default_issuer = None
+                    course_info.save()
+            except ImportError:
+                pass
+
+        # delete the issuer
+        issuer.delete()
+        return Response("Issuer {} has been deleted.".format(slug), status.HTTP_200_OK)
 
 
 class IssuerStaffList(AbstractIssuerAPIEndpoint):
@@ -217,7 +273,12 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
               type: string
               paramType: form
               description: The username of the user to add or remove from this role.
-              required: true
+              required: false
+            - name: email
+              type: string
+              paramType: form
+              description: A verified email address of the user to add or remove from this role.
+              required: false
             - name: editor
               type: boolean
               paramType: form
@@ -238,11 +299,19 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
             )
 
         try:
-            user_to_modify = get_user_model().objects.get(username=serializer.validated_data.get('username'))
-        except get_user_model().DoesNotExist:
+            if serializer.validated_data.get('username'):
+                user_id = serializer.validated_data.get('username')
+                user_to_modify = get_user_model().objects.get(username=user_id)
+            else:
+                user_id = serializer.validated_data.get('email')
+                user_to_modify = EmailAddress.objects.get(
+                    email=user_id).user
+        except (get_user_model().DoesNotExist, EmailAddress.DoesNotExist,):
+            error_text = "User {} not found. Cannot modify Issuer permissions.".format(user_id)
+            if user_id is None:
+                error_text = 'User not found. Neither email address or username was provided.'
             return Response(
-                "User %s not found. Cannot modify Issuer permissions." % serializer.validated_data.get('username'),
-                status=status.HTTP_404_NOT_FOUND
+                error_text, status=status.HTTP_404_NOT_FOUND
             )
 
         action = serializer.validated_data.get('action')
@@ -285,17 +354,10 @@ class AllBadgeClassesList(AbstractIssuerAPIEndpoint):
         serializer: BadgeClassSerializer
         """
         # Ensure current user has permissions on current issuer
-        user_issuers = Issuer.objects.filter(
-            Q(owner__id=request.user.id) |
-            Q(staff__id=request.user.id)
-        ).distinct().select_related('badgeclasses')
-        issuer_badgeclasses = [
-            bc for bc in chain.from_iterable(i.badgeclasses.all() 
-                for i in user_issuers)
-        ]
+        user_badgeclasses = request.user.cached_badgeclasses()
 
         serializer = BadgeClassSerializer(
-            issuer_badgeclasses, many=True, context={'request': request}
+            user_badgeclasses, many=True, context={'request': request}
         )
         return Response(serializer.data)
 
@@ -386,8 +448,10 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
             created_by=request.user,
             description=request.data.get('description')
         )
+        badge_class = serializer.data
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        logger.event(badgrlog.BadgeClassCreatedEvent(badge_class, request.data.get('image')))
+        return Response(badge_class, status=status.HTTP_201_CREATED)
 
 
 class BadgeClassDetail(AbstractIssuerAPIEndpoint):
@@ -405,17 +469,17 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
         serializer: BadgeClassSerializer
         """
 
-        current_issuer_queryset = self.queryset.filter(issuer__slug=issuerSlug)
-        current_badgeclass = self.get_object(badgeSlug, queryset=current_issuer_queryset)
-
-        if current_badgeclass is None:
+        try:
+            current_badgeclass = BadgeClass.cached.get(slug=badgeSlug)
+            self.check_object_permissions(self.request, current_badgeclass)
+        except (BadgeClass.DoesNotExist, PermissionDenied):
             return Response(
                 "BadgeClass %s could not be found, or inadequate permissions." % badgeSlug,
                 status=status.HTTP_404_NOT_FOUND
             )
-
-        serializer = BadgeClassSerializer(current_badgeclass, context={'request': request})
-        return Response(serializer.data)
+        else:
+            serializer = BadgeClassSerializer(current_badgeclass, context={'request': request})
+            return Response(serializer.data)
 
     def delete(self, request, issuerSlug, badgeSlug):
         """
@@ -428,18 +492,21 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
             - code: 200
               message: Badge has been deleted.
         """
-        unissued_badgeclasses = self.queryset.filter(assertions=None)
-        current_badgeclass = self.get_list(badgeSlug, queryset=unissued_badgeclasses)
 
-        if current_badgeclass.exists():
-            current_badgeclass[0].delete()
+        try:
+            current_badgeclass = BadgeClass.cached.get(slug=badgeSlug)
+            self.check_object_permissions(self.request, current_badgeclass)
+        except (BadgeClass.DoesNotExist, PermissionDenied):
+            return Response(status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response(
-                "Badge Class either couldn't be deleted. It may have already been issued, or it may already not exist.",
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            if len(current_badgeclass.cached_badgeinstances()) < 1:
+                old_badgeclass = current_badgeclass.json
+                current_badgeclass.delete()
+                logger.event(badgrlog.BadgeClassDeletedEvent(old_badgeclass, request.user))
+                return Response("Badge " + badgeSlug + " has been deleted.", status.HTTP_200_OK)
+            else:
+                return Response("Badge class could not be deleted. It has already been issued at least once.", status=status.HTTP_400_BAD_REQUEST)
 
-        return Response("Badge " + badgeSlug + " has been deleted.", status.HTTP_200_OK)
 
 
 class BadgeInstanceList(AbstractIssuerAPIEndpoint):
@@ -468,8 +535,13 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
             )
 
         data = {}
-        if request.data.get('email') is not None:
-            data['email'] = request.data.get('email')
+        if request.data.get('recipient_identifier') is not None:
+            data['recipient_identifier'] = \
+                request.data.get('recipient_identifier')
+        elif request.data.get('recipient_id') is not None:
+            data['recipient_identifier'] = request.data.get('recipient_id')
+        elif request.data.get('email') is not None:
+            data['recipient_identifier'] = request.data.get('email')
         if request.data.get('evidence') is not None:
             data['evidence'] = request.data.get('evidence')
         if request.data.get('create_notification') is not None:
@@ -483,7 +555,11 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
             badgeclass=current_badgeclass,
             created_by=request.user
         )
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        badge_instance = serializer.data
+
+
+        logger.event(badgrlog.BadgeInstanceCreatedEvent(badge_instance, request.user))
+        return Response(badge_instance, status=status.HTTP_201_CREATED)
 
     def get(self, request, issuerSlug, badgeSlug):
         """
@@ -491,21 +567,24 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
         ---
         serializer: BadgeInstanceSerializer
         """
-        badgeclass_queryset = self.queryset.filter(issuer__slug=issuerSlug).select_related('assertions')
+        badgeclass_queryset = self.queryset.filter(issuer__slug=issuerSlug) \
+            .select_related('badgeinstances')
         # Ensure current user has permissions on current badgeclass
-        current_badgeclass = self.get_object(badgeSlug, queryset=badgeclass_queryset)
+        current_badgeclass = self.get_object(badgeSlug,
+                                             queryset=badgeclass_queryset)
         if current_badgeclass is None:
             return Response(
                 "BadgeClass %s not found or inadequate permissions." % badgeSlug,
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        assertions = current_badgeclass.assertions.all()
+        badge_instances = current_badgeclass.badgeinstances.all()
 
-        if not assertions.exists():
+        if not badge_instances.exists():
             return Response([], status=status.HTTP_200_OK)
 
-        serializer = BadgeInstanceSerializer(assertions, many=True, context={'request': request})
+        serializer = BadgeInstanceSerializer(badge_instances, many=True,
+                                             context={'request': request})
         return Response(serializer.data)
 
 
@@ -513,7 +592,7 @@ class IssuerBadgeInstanceList(AbstractIssuerAPIEndpoint):
     """
     Retrieve assertions by a recipient identifier within one issuer
     """
-    queryset = Issuer.objects.all().select_related('assertions')
+    queryset = Issuer.objects.all().select_related('badgeinstances')
     model = Issuer
     permission_classes = (IsStaff,)
 
@@ -540,9 +619,11 @@ class IssuerBadgeInstanceList(AbstractIssuerAPIEndpoint):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         if request.query_params.get('recipient') is not None:
-            instances = current_issuer.assertions.filter(email=request.query_params.get('recipient'), revoked=False)
+            instances = current_issuer.badgeinstance_set.filter(
+                recipient_identifier=request.query_params.get('recipient'),
+                revoked=False)
         else:
-            instances = current_issuer.assertions.filter(revoked=False)
+            instances = current_issuer.badgeinstance_set.filter(revoked=False)
 
         serializer = BadgeInstanceSerializer(
             instances, context={'request': request}, many=True
@@ -568,13 +649,13 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
         ---
         serializer: BadgeInstanceSerializer
         """
-        current_assertion = self.get_object(assertionSlug)
-        if current_assertion is None:
+        try:
+            current_assertion = BadgeInstance.cached.get(slug=assertionSlug)
+        except (BadgeInstance.DoesNotExist, PermissionDenied):
             return Response(status=status.HTTP_404_NOT_FOUND)
-
-        serializer = BadgeInstanceSerializer(current_assertion, context={'request': request})
-
-        return Response(serializer.data)
+        else:
+            serializer = BadgeInstanceSerializer(current_assertion, context={'request': request})
+            return Response(serializer.data)
 
     def delete(self, request, issuerSlug, badgeSlug, assertionSlug):
         """
@@ -609,6 +690,19 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
         current_assertion.image.delete()
         current_assertion.save()
 
+        if apps.is_installed('badgebook'):
+            try:
+                from badgebook.models import BadgeObjectiveAward, LmsCourseInfo
+                try:
+                    award = BadgeObjectiveAward.cached.get(badge_instance_id=current_assertion.id)
+                except BadgeObjectiveAward.DoesNotExist:
+                    pass
+                else:
+                    award.delete()
+            except ImportError:
+                pass
+
+        logger.event(badgrlog.BadgeAssertionRevokedEvent(current_assertion, request.user))
         return Response(
             "Assertion {} has been revoked.".format(current_assertion.slug),
             status=status.HTTP_200_OK

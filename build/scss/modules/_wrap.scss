@@ -1,0 +1,30 @@
+.wrap_ {
+  background-color: map-get($colors, bodybackground-light);
+  z-index: $z-index-low;
+}
+
+.wrap_-dark {
+  background: map-get($colors, bodybackground);
+}
+
+.wrap_-solid {
+  background-color: map-get($colors, solid);
+}
+
+.wrap_-body {
+  background-color: map-get($colors, bodycopy);
+  color: map-get($colors, solid);
+}
+
+.wrap_-shadow {
+  box-shadow: $box-shadow-secondary;
+  z-index: $z-index-med;
+}
+
+.wrap_-borderbottom {
+  border-bottom: 1px solid map-get($colors, border-light);
+}
+
+.wrap_-borderright {
+  border-right: 1px solid map-get($colors, border-light);
+}

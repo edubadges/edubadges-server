@@ -2,6 +2,7 @@ var Dispatcher = require('../dispatcher/appDispatcher');
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
 
+var MenuStore = require('../stores/MenuStore');
 
 /*
 The concept of an ActiveAction is a task-and-context-oriented way 
@@ -46,13 +47,14 @@ ActiveActionStore.getAllActiveActions = function() {
 ActiveActionStore.addListener = function(type, callback) {
   ActiveActionStore.on(type, callback);
 };
-// ActiveActionStore.removeListener = function(type, callback) {
-//   ActiveActionStore.removeListener(type, callback);
-// };
+ ActiveActionStore.removeStoreListener = function(type, callback) {
+   ActiveActionStore.removeListener(type, callback);
+ };
 
 
 // Register with the dispatcher
 ActiveActionStore.dispatchToken = appDispatcher.register(function(payload){
+  Dispatcher.waitFor([MenuStore.dispatchToken]);
   var action = payload.action;
 
   switch(action.type){
@@ -71,7 +73,7 @@ ActiveActionStore.dispatchToken = appDispatcher.register(function(payload){
 
 module.exports = {
   addListener: ActiveActionStore.addListener,
-  removeListener: ActiveActionStore.removeListener,
+  removeListener: ActiveActionStore.removeStoreListener,
   getActiveAction: ActiveActionStore.getActiveAction,
   getAllActiveActions: ActiveActionStore.getAllActiveActions
 };

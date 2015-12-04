@@ -1,12 +1,18 @@
 from django.shortcuts import redirect
 
 from rest_framework import status, permissions
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .api import AbstractIssuerAPIEndpoint
 from .models import Issuer, BadgeClass, BadgeInstance
+from .renderers import BadgeInstanceHTMLRenderer, BadgeClassCriteriaHTMLRenderer
+
 import utils
+import badgrlog
+
+logger = badgrlog.BadgrLogger()
 
 
 class JSONComponentView(AbstractIssuerAPIEndpoint):
@@ -15,12 +21,16 @@ class JSONComponentView(AbstractIssuerAPIEndpoint):
     """
     permission_classes = (permissions.AllowAny,)
 
+    def log(self, obj):
+        pass
+
     def get(self, request, slug):
         try:
-            current_object = self.model.objects.get(slug=slug)
+            current_object = self.model.cached.get(slug=slug)
         except self.model.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
+            self.log(current_object)
             return Response(current_object.json)
 
 
@@ -30,17 +40,17 @@ class ComponentPropertyDetailView(APIView):
     """
     permission_classes = (permissions.AllowAny,)
 
+    def log(self, obj):
+        pass
+
     def get(self, request, slug):
-        current_query = self.queryset.filter(slug=slug)
-        if not current_query.exists():
+        try:
+            current_object = self.model.cached.get(slug=slug)
+        except self.model.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-
-        current_object = current_query[0]
-
-        p = getattr(current_object, self.prop)
-        if not bool(p):
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        return redirect(p.url)
+        else:
+            self.log(current_object)
+            return redirect(getattr(current_object, self.prop).url)
 
 
 class IssuerJson(JSONComponentView):
@@ -49,6 +59,9 @@ class IssuerJson(JSONComponentView):
     """
     model = Issuer
 
+    def log(self, obj):
+        logger.event(badgrlog.IssuerRetrievedEvent(obj, self.request))
+
 
 class IssuerImage(ComponentPropertyDetailView):
     """
@@ -56,7 +69,9 @@ class IssuerImage(ComponentPropertyDetailView):
     """
     model = Issuer
     prop = 'image'
-    queryset = Issuer.objects.exclude(image=None)
+
+    def log(self, obj):
+        logger.event(badgrlog.IssuerImageRetrievedEvent(obj, self.request))
 
 
 class BadgeClassJson(JSONComponentView):
@@ -65,6 +80,9 @@ class BadgeClassJson(JSONComponentView):
     """
     model = BadgeClass
 
+    def log(self, obj):
+        logger.event(badgrlog.BadgeClassRetrievedEvent(obj, self.request))
+
 
 class BadgeClassImage(ComponentPropertyDetailView):
     """
@@ -72,22 +90,35 @@ class BadgeClassImage(ComponentPropertyDetailView):
     """
     model = BadgeClass
     prop = 'image'
-    queryset = BadgeClass.objects.exclude(image=None)
+
+    def log(self, obj):
+        logger.event(badgrlog.BadgeClassImageRetrievedEvent(obj, self.request))
 
 
 class BadgeClassCriteria(ComponentPropertyDetailView):
     model = BadgeClass
     prop = 'criteria'
     queryset = BadgeClass.objects.all()
+    renderer_classes = (JSONRenderer, BadgeClassCriteriaHTMLRenderer,)
+
+    def get_renderer_context(self, **kwargs):
+        context = super(BadgeClassCriteria, self).get_renderer_context(**kwargs)
+        if getattr(self, 'current_object', None):
+            context['badge_class'] = self.current_object
+            context['issuer'] = self.current_object.issuer
+        return context
 
     def get(self, request, slug):
-        # TODO: Improve rendered HTML view template.
         current_query = self.queryset.filter(slug=slug)
 
         if not current_query.exists():
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         current_object = current_query[0]
+        self.current_object = current_object
+
+        logger.event(badgrlog.BadgeClassCriteriaRetrievedEvent(current_object, request))
+
         if current_object.criteria_text is None or current_object.criteria_text == "":
             return redirect(current_object.criteria_url)
 
@@ -96,14 +127,27 @@ class BadgeClassCriteria(ComponentPropertyDetailView):
 
 class BadgeInstanceJson(JSONComponentView):
     model = BadgeInstance
+    renderer_classes = (JSONRenderer, BadgeInstanceHTMLRenderer,)
+
+    def get_renderer_context(self, **kwargs):
+        context = super(BadgeInstanceJson, self).get_renderer_context()
+        if getattr(self, 'current_object', None):
+            context['badge_instance'] = self.current_object
+            context['badge_class'] = self.current_object.badgeclass
+            context['issuer'] = self.current_object.issuer
+
+        return context
 
     def get(self, request, slug):
         try:
-            current_object = self.model.objects.get(slug=slug)
+            current_object = self.model.cached.get(slug=slug)
+            self.current_object = current_object
         except self.model.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response("Requested assertion not found.", status=status.HTTP_404_NOT_FOUND)
         else:
             if current_object.revoked is False:
+
+                logger.event(badgrlog.BadgeAssertionCheckedEvent(current_object, request))
                 return Response(current_object.json)
             else:
                 # TODO update terms based on final accepted terms in response to
@@ -114,10 +158,24 @@ class BadgeInstanceJson(JSONComponentView):
                     'revoked': True,
                     'revocationReason': current_object.revocation_reason
                 }
+
+                logger.event(badgrlog.RevokedBadgeAssertionCheckedEvent(current_object, request))
                 return Response(revocation_info, status=status.HTTP_410_GONE)
 
 
 class BadgeInstanceImage(ComponentPropertyDetailView):
     model = BadgeInstance
     prop = 'image'
-    queryset = BadgeInstance.objects.filter(revoked=False)
+
+    def log(self, badge_instance):
+        logger.event(badgrlog.BadgeInstanceDownloadedEvent(badge_instance, self.request))
+
+    def get(self, request, slug):
+        try:
+            current_object = self.model.cached.get(slug=slug, revoked=False)
+        except self.model.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            self.log(current_object)
+            return redirect(getattr(current_object, self.prop).url)
+

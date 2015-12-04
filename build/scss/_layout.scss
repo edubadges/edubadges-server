@@ -1,0 +1,281 @@
+main {
+  box-sizing: border-box;
+  display: block; // IE
+  min-height: 80vh;
+  padding-bottom: $layout-spacing*2;
+  padding-top: $layout-spacing*7;
+  position: relative;
+  z-index: $z-index-low;
+}
+
+// Removes standard top offset for main element
+
+.l-mainoverride {
+  padding-bottom: 0;
+  padding-top: 0;
+}
+
+// Primarly used for lists of badges and collections
+
+.l-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: -$layout-spacing*2;
+  padding: $layout-spacing*2 $layout-spacing 0;
+  width: calc(100% + #{$layout-spacing*2});
+
+  > * {
+    box-sizing: border-box;
+    flex: 0 0 25%;
+    max-width: 25%;
+    padding: 0 $layout-spacing $layout-spacing*2;
+  }
+
+}
+
+// Forces direct children of a l-grid layout to have equal heights
+
+.l-grid-stretch {
+
+  > * {
+    align-items: stretch;
+    display: flex;
+  }
+
+}
+
+// General-purpose "space-between" horizontal layouts
+
+.l-horizontal {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+
+  > * {
+    align-items: center;
+    display: flex;
+
+    &:first-child {
+
+      > * {
+        flex-basis: auto;
+        margin-right: $layout-spacing;
+      }
+
+      button {
+        text-align: left;
+      }
+
+    }
+
+    &:first-child:not(:only-child) {
+      flex: 1;
+      min-width: 0; // Fixes any text overflow for IE Edge
+    }
+
+    &:last-child:not(:only-child) {
+      flex: 0 1 auto;
+      min-width: 0;
+
+      > * {
+        margin: 0 $layout-spacing*1.5;
+      }
+
+    }
+
+  }
+
+}
+
+// Right-aligned horizontal layouts
+
+.l-horizontalright {
+  align-items: center;
+  display: flex;
+  justify-content: flex-end;
+
+  > * {
+    margin-left: $layout-spacing;
+  }
+
+}
+
+// Equally-spaced vertical layouts
+// Note that l-vertical may be nested due to how react functions
+
+.l-vertical {
+  max-width: 100%;
+
+  > *:not(:last-child) {
+    margin-bottom: $layout-spacing*2;
+  }
+
+  .l-vertical-x-offset {
+    margin-bottom: $layout-spacing*6;
+    margin-top: $layout-spacing*3;
+  }
+
+}
+
+// Equally-spaced vertical layouts, with smaller margins
+
+.l-vertical-small {
+
+  > *:not(:last-child) {
+    margin-bottom: $layout-spacing;
+  }
+
+}
+
+// For creating equally-spaced vertical layouts
+
+.l-wrappinglist {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: $layout-spacing*3;
+
+  > * {
+    margin-bottom: $layout-spacing*2;
+    margin-right: $layout-spacing*2;
+  }
+
+}
+
+// Offsets a container horizontally
+
+.l-wrapper {
+
+  @media (min-width: 1184px + $layout-spacing*6) {
+    padding-left: calc(50vw - 680px);
+    padding-right: calc(50vw - 680px);
+  }
+
+}
+
+// Creates additional horizontal spacing for l-wrapper
+
+.l-wrapper-inset {
+  padding-left: $layout-spacing*6;
+  padding-right: $layout-spacing*6;
+
+  @media (min-width: 1184px + $layout-spacing*6) {
+    padding-left: calc(50vw - 592px);
+    padding-right: calc(50vw - 592px);
+  }
+  
+}
+
+// Badge studio page layout
+
+$l-studio-header: $layout-spacing*8;
+
+.l-studio {
+  align-items: stretch;
+  display: flex;
+  height: 80vh;
+  min-height: 700px;
+  overflow: hidden;
+
+  > :first-child {
+    flex-basis: 250px;
+    max-width: 250px;
+  }
+
+  > :nth-child(2) {
+    flex: 1 0 auto;
+    position: relative;
+
+    .l-studio-x-header {
+      position: relative;
+      z-index: $z-index-high;
+    }
+
+    .l-studio-x-list {
+      box-sizing: border-box;
+      height: 100%;
+      left: 0;
+      overflow-y: auto;
+      padding-top: $l-studio-header;
+      position: absolute;
+      top: 0;
+      width: 100%;
+    }
+    .l-studio-x-colorpicker {
+      padding-bottom: $layout-spacing*3;
+
+      // this is the container that the color picker generates/styles
+      > div > div > div > div > div {
+        width: 250px !important;
+        padding-left: 150px !important;
+      }
+    }
+  }
+
+  > :last-child {
+    display: flex;
+    flex-basis: 300px;
+    flex-direction: column;
+    max-width: 300px;
+
+    .l-studio-x-header {
+      order: 1;
+    }
+
+    div:not(.l-studio-x-header) {
+      order: 2;
+      padding: $layout-spacing*1.5;
+    }
+
+  }
+
+  .l-studio-x-header {
+    box-sizing: border-box;
+    height: $l-studio-header;
+    padding: $layout-spacing*3 $layout-spacing*1.5 $layout-spacing*3 $layout-spacing*3;
+    width: 100%;
+  }
+
+}
+
+// Sets the main element to take up the space not used by the header and footer (wraps entire page)
+
+.l-fillvertical {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+
+  > header {
+    flex: 0 0 auto;
+  }
+
+  main {
+    flex: 1 0 auto;
+  }
+
+  > footer {
+    flex: 0 0 auto;
+  }
+
+  .l-fillvertical-x-overflow {
+    display: flex;
+    flex-direction: column;
+
+    .l-fillvertical-x-container {
+      flex: 1 0 auto;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .l-fillvertical-x-content {
+      height: 100%;
+      left: 0;
+      overflow-y: auto;
+      position: absolute;
+      top: 0;
+      width: 100%;
+    }
+
+  }
+
+}

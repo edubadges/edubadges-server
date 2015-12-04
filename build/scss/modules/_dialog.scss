@@ -1,0 +1,71 @@
+.dialog_ {
+  background: map-get($colors, solid);
+  border: 0;
+  border-radius: $border-radius;
+  box-shadow: $layout-spacing/2 $layout-spacing $layout-spacing*2.5 $layout-spacing rgba(map-get($colors, solid-dark), .3);
+  max-height: calc(100vh - #{$layout-spacing*6});
+  max-width: 545px;
+  min-height: $layout-spacing*4;
+  opacity: 0;
+  overflow-y: auto;
+  padding: 0;
+  position: fixed;
+  top: $layout-spacing*3;
+  transform: translate3d(0, -100%, 0);
+  transition: opacity $transition-duration $transition-easing, transform $transition-duration $transition-easing;
+  width: 75%;
+
+  + .backdrop {
+    background: rgba(map-get($colors, solid-dark), .5);
+    opacity: 0;
+    transition: opacity $transition-duration $transition-easing;
+  }
+
+  &::backdrop {
+    background: rgba(map-get($colors, solid-dark), .5);
+    opacity: 0;
+    transition: opacity $transition-duration $transition-easing;
+  }
+
+  .dialog_-x-close {
+    background: none;
+    border: 0;
+    cursor: pointer;
+    display: block;
+    height: 15px;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    right: $layout-spacing*3;
+    top: $layout-spacing*3;
+    z-index: $z-index-high;
+  }
+
+  .dialog_-x-content {
+    padding: $layout-spacing*3 $layout-spacing*3 0;
+
+    > * {
+      margin-bottom: $layout-spacing*2;
+    }
+
+  }
+
+  &.is-visible {
+    opacity: 1;
+    transform: none;
+
+    + .backdrop {
+      opacity: 1;
+    }
+
+    &::backdrop {
+      opacity: 1;
+    }
+
+  }
+
+}
+
+.dialog_-large {
+  max-width: 865px;
+}

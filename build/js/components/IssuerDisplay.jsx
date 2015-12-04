@@ -9,6 +9,7 @@ var APIStore = require('../stores/APIStore');
 // Components
 var Property = require('../components/BadgeDisplay.jsx').Property;
 var BadgeClassList = require('./BadgeClassDisplay.jsx').BadgeClassList;
+var Issuer = require('../components/Issuer.jsx').Issuer;
 
 
 var IssuerDisplayShort = React.createClass({
@@ -22,16 +23,20 @@ var IssuerDisplayShort = React.createClass({
     }
 
     return (
-      <div className="issuer-display issuer-display-short col-xs-12" onClick={this.props.handleClick}>
-        <div className='row'>
-          <div className='property-group image col-xs-3'>
+      <div className="issuer-display issuer-display-short panel panel-default" onClick={this.props.handleClick}>
+        <div className='panel-heading'>
+          <div className='property-group image'>
             <Property name="Issuer Logo" label={false} property={properties.image} />
           </div>
-          <div className='property-group basic-data col-xs-9'>
+          <div className='property-group basic-data'>
             <Property name="Name" property={properties.name} />
             <Property name="URL" label={false} property={properties.url} />
-            <BadgeClassList display="thumbnail" max={4} badgeClasses={this.props.badgeClasses} />
           </div>
+        </div>
+        <div className="panel-body">
+            <div className="">
+                <BadgeClassList display="thumbnail" max={4} badgeClasses={this.props.badgeClasses} />
+            </div>
         </div>
       </div>
     );
@@ -52,16 +57,28 @@ var IssuerDisplay = React.createClass({
       url: {type: 'id', id: this.props.json.url, name: originUrl},
       description: {type: 'xsd:string', '@value': this.props.json.description}
     }
+
+    var emailField;
+    if (this.props.json.email) {
+        emailField = (
+            <li>
+                <h2 className="detail_-x-meta">Contact Email</h2>
+                <p><a href={'mailto:'+ this.props.json.email}>{this.props.json.email}</a></p>
+            </li>);
+    }
+
     return (
-      <div className="issuer-display issuer-display-detail col-xs-12">
-        <div className='property-group image col-xs-3'>
-          <Property name="Issuer Logo" label={false} property={properties.image} />
+      <div className="detail_ l-vertical-x-offset">
+        <div>
+          <img src={properties.image.id} width="112" height="112" />
         </div>
-        <div className='property-group image col-xs-9'>
-          <Property name="Name" property={properties.name} />
-          <Property name="URL" label={false} property={properties.url} />
-          <Property name="Description" label={false} property={properties.description} />
-        </div>
+        <ul>
+          <li>
+            <h2 className="detail_-x-meta">Website</h2>
+            <p><a href={properties.url.id}>{properties.url.name || properties.url.id}</a></p>
+          </li>
+          { emailField }
+        </ul>
       </div>
     );
   }
@@ -85,20 +102,33 @@ var IssuerList = React.createClass({
           function(el,i,array){ return (el.issuer == issuer.json.id); }
         );
         var handleClick = function(e){navigateLocalPath(issuerPath);};
+        var providedHandler = this.props.handleClick;
+        if (providedHandler) {
+          handleClick = function(e){ providedHandler(e, issuer); };
+        }
         return (
-            <IssuerDisplayShort
-              name={issuer.name}
-              image={issuer.image}
-              url={issuer.json.url}
-              key={"issuer-" + i}
-              handleClick={handleClick}
-              badgeClasses={badgeClasses}
-            />
-        );
+            <div key={"issuer-"+i}>
+                <Issuer name={issuer.name}
+                        image={issuer.image}
+                        description={issuer.description}
+                        badgeClasses={badgeClasses}
+                        handleClick={handleClick}/>
+            </div>);
+
+        //return (
+        //    <IssuerDisplayShort
+        //      name={issuer.name}
+        //      image={issuer.image}
+        //      url={issuer.json.url}
+        //      key={"issuer-" + i}
+        //      handleClick={handleClick}
+        //      badgeClasses={badgeClasses}
+        //    />
+        //);
       }.bind(this));
     }
     return (
-      <div className={listClass}>
+      <div className="l-vertical">
         {issuers}
       </div>
     );

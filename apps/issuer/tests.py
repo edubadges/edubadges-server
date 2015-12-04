@@ -1,16 +1,24 @@
 import json
 import os
 import os.path
+from django.apps import apps
+import png
 import shutil
 
 from django.core import mail
+from django.core.cache import cache
+from django.core.files.images import get_image_dimensions
 from django.contrib.auth import get_user_model
+from django.test import modify_settings, override_settings
 
+from openbadges_bakery import unbake
 from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
 
-from .api import *
-from .serializers import *
-from .models import *
+from issuer.api import IssuerList
+from issuer.models import Issuer, BadgeClass, BadgeInstance
+
+from mainsite import TOP_DIR
+
 
 factory = APIRequestFactory()
 
@@ -22,8 +30,21 @@ example_issuer_props = {
 }
 
 
+@override_settings(
+    CELERY_ALWAYS_EAGER=True,
+    SESSION_ENGINE='django.contrib.sessions.backends.cache',
+    CACHES={
+        'default': {
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
+        }
+    }
+)
 class IssuerTests(APITestCase):
     fixtures = ['0001_initial_superuser', 'test_badge_objects.json']
+
+    def setUp(self):
+        cache.clear()
 
     def test_create_issuer_unauthenticated(self):
         view = IssuerList.as_view()
@@ -59,6 +80,109 @@ class IssuerTests(APITestCase):
         self.assertIsNotNone(badge_object.get('id'))
         self.assertIsNotNone(badge_object.get('@context'))
 
+        # assert that the issuer was published to and fetched from the cache
+        with self.assertNumQueries(0):
+            slug = response.data.get('slug')
+            response = self.client.get('/v1/issuer/issuers/{}'.format(slug))
+            self.assertEqual(response.status_code, 200)
+
+    def test_create_issuer_image_500x300_resizes_to_400x400(self):
+        view = IssuerList.as_view()
+
+        with open(os.path.join(os.path.dirname(__file__), 'testfiles',
+                               '500x300.png'), 'r') as badge_image:
+                issuer_fields_with_image = {
+                    'name': 'Awesome Issuer',
+                    'description': 'An issuer of awe-inspiring credentials',
+                    'url': 'http://example.com',
+                    'email': 'contact@example.org',
+                    'image': badge_image,
+                }
+
+                request = factory.post('/v1/issuer/issuers',
+                                       issuer_fields_with_image,
+                                       format='multipart')
+
+                force_authenticate(request,
+                                   user=get_user_model().objects.get(pk=1))
+                response = view(request)
+                self.assertEqual(response.status_code, 201)
+
+                badge_object = response.data.get('json')
+                derived_slug = badge_object['id'].split('/')[-1]
+                new_issuer = Issuer.objects.get(slug=derived_slug)
+
+                image_width, image_height = \
+                    get_image_dimensions(new_issuer.image.file)
+                self.assertEqual(image_width, 400)
+                self.assertEqual(image_height, 400)
+
+    def test_create_issuer_image_450x450_resizes_to_400x400(self):
+        view = IssuerList.as_view()
+
+        with open(
+            os.path.join(os.path.dirname(__file__), 'testfiles', '450x450.png'),
+            'r') as badge_image:
+
+                issuer_fields_with_image = {
+                    'name': 'Awesome Issuer',
+                    'description': 'An issuer of awe-inspiring credentials',
+                    'url': 'http://example.com',
+                    'email': 'contact@example.org',
+                    'image': badge_image,
+                }
+
+                request = factory.post('/v1/issuer/issuers',
+                                       issuer_fields_with_image,
+                                       format='multipart')
+
+                force_authenticate(request,
+                                   user=get_user_model().objects.get(pk=1))
+                response = view(request)
+                self.assertEqual(response.status_code, 201)
+
+                badge_object = response.data.get('json')
+                derived_slug = badge_object['id'].split('/')[-1]
+                new_issuer = Issuer.objects.get(slug=derived_slug)
+
+                image_width, image_height = \
+                    get_image_dimensions(new_issuer.image.file)
+                self.assertEqual(image_width, 400)
+                self.assertEqual(image_height, 400)
+
+    def test_create_issuer_image_300x300_stays_300x300(self):
+        view = IssuerList.as_view()
+
+        with open(
+            os.path.join(os.path.dirname(__file__), 'testfiles', '300x300.png'),
+            'r') as badge_image:
+
+                issuer_fields_with_image = {
+                    'name': 'Awesome Issuer',
+                    'description': 'An issuer of awe-inspiring credentials',
+                    'url': 'http://example.com',
+                    'email': 'contact@example.org',
+                    'image': badge_image,
+                }
+
+                request = factory.post('/v1/issuer/issuers',
+                                       issuer_fields_with_image,
+                                       format='multipart')
+
+                force_authenticate(request,
+                                   user=get_user_model().objects.get(pk=1))
+                response = view(request)
+                self.assertEqual(response.status_code, 201)
+
+                badge_object = response.data.get('json')
+                derived_slug = badge_object['id'].split('/')[-1]
+                new_issuer = Issuer.objects.get(slug=derived_slug)
+
+                image_width, image_height = \
+                    get_image_dimensions(new_issuer.image.file)
+                self.assertEqual(image_width, 300)
+                self.assertEqual(image_height, 300)
+
     def test_private_issuer_detail_get(self):
         # GET on single badge should work if user has privileges
         # Eventually, implement PUT for updates (if permitted)
@@ -73,6 +197,7 @@ class IssuerTests(APITestCase):
     def test_add_user_to_issuer_editors_set(self):
         """ Authenticated user (pk=1) owns test-issuer. Add user (username=test3) as an editor. """
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+
         post_response = self.client.post(
             '/v1/issuer/issuers/test-issuer/staff',
             {'action': 'add', 'username': 'test3', 'editor': True}
@@ -80,6 +205,42 @@ class IssuerTests(APITestCase):
 
         self.assertEqual(post_response.status_code, 200)
         self.assertEqual(len(post_response.data), 2)  # Assert that there is now one editor
+
+    def test_add_user_to_issuer_editors_set_by_email(self):
+        """ Authenticated user (pk=1) owns test-issuer. Add user (username=test3) as an editor. """
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+
+        post_response = self.client.post(
+            '/v1/issuer/issuers/test-issuer/staff',
+            {'action': 'add', 'email': 'test3@example.com', 'editor': True}
+        )
+
+        self.assertEqual(post_response.status_code, 200)
+        self.assertEqual(len(post_response.data), 2)  # Assert that there is now one editor
+
+    def test_add_user_to_issuer_editors_set_too_many_methods(self):
+        """ Authenticated user (pk=1) owns test-issuer. Add user (username=test3) as an editor. """
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+
+        post_response = self.client.post(
+            '/v1/issuer/issuers/test-issuer/staff',
+            {'action': 'add', 'email': 'test3@example.com', 'username': 'test3', 'editor': True}
+        )
+
+        self.assertEqual(post_response.status_code, 400)
+
+    def test_add_user_to_issuer_editors_set_missing_identifier(self):
+        """ Authenticated user (pk=1) owns test-issuer. Add user (username=test3) as an editor. """
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+
+        post_response = self.client.post(
+            '/v1/issuer/issuers/test-issuer/staff',
+            {'action': 'add', 'editor': True}
+        )
+
+        self.assertEqual(post_response.status_code, 404)
+        self.assertEqual(post_response.data, 'User not found. Neither email address or username was provided.')
+
 
     def test_bad_action_issuer_editors_set(self):
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
@@ -129,9 +290,76 @@ class IssuerTests(APITestCase):
         self.assertEqual(second_response.status_code, 200)
         self.assertEqual(len(test_issuer.staff.all()), 0)
 
+    def test_delete_issuer_successfully(self):
+        user = get_user_model().objects.get(pk=1)
+        self.client.force_authenticate(user=user)
+        test_issuer = Issuer(name='issuer who can be deleted', slug='issuer-deletable', owner=user)
+        test_issuer.save()
 
+        response = self.client.delete('/v1/issuer/issuers/issuer-deletable', {})
+        self.assertEqual(response.status_code, 200)
+
+    def test_cant_delete_issuer_with_issued_badge(self):
+        user = get_user_model().objects.get(pk=1)
+        self.client.force_authenticate(user=user)
+        response = self.client.delete('/v1/issuer/issuers/test-issuer-2', {})
+        self.assertEqual(response.status_code, 400)
+
+    def test_new_issuer_updates_cached_user_issuers(self):
+
+        user = get_user_model().objects.get(pk=1)
+        self.client.force_authenticate(user=user)
+        badgelist = self.client.get('/v1/issuer/all-badges')
+
+        example_issuer_props = {
+            'name': 'Fresh Issuer',
+            'description': "Fresh Issuer",
+            'url': 'http://freshissuer.com',
+            'email': 'prince@freshissuer.com',
+        }
+
+        response = self.client.post(
+            '/v1/issuer/issuers',
+            example_issuer_props
+        )
+        self.assertEqual(response.status_code, 201)
+
+        with open(
+            os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
+        ) as badge_image:
+
+            example_badgeclass_props = {
+                'name': 'Badge of Freshness',
+                'description': "Fresh Badge",
+                'image': badge_image,
+                'criteria': 'http://wikipedia.org/Freshness',
+            }
+
+            response = self.client.post(
+                '/v1/issuer/issuers/fresh-issuer/badges',
+                example_badgeclass_props
+            )
+            self.assertEqual(response.status_code, 201)
+
+        new_badgelist = self.client.get('/v1/issuer/all-badges')
+
+        self.assertEqual(len(new_badgelist.data), len(badgelist.data) + 1)
+
+@override_settings(
+    CELERY_ALWAYS_EAGER=True,
+    SESSION_ENGINE='django.contrib.sessions.backends.cache',
+    CACHES={
+        'default': {
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
+        }
+    }
+)
 class BadgeClassTests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
+
+    def setUp(self):
+        cache.clear()
 
     def test_create_badgeclass_for_issuer_authenticated(self):
         with open(
@@ -151,6 +379,37 @@ class BadgeClassTests(APITestCase):
                 example_badgeclass_props
             )
             self.assertEqual(response.status_code, 201)
+
+            # assert that the BadgeClass was published to and fetched from the cache
+            with self.assertNumQueries(0):
+                slug = response.data.get('slug')
+                response = self.client.get('/v1/issuer/issuers/test-issuer/badges/{}'.format(slug))
+                self.assertEqual(response.status_code, 200)
+
+    def test_create_badgeclass_with_svg(self):
+        with open(
+                os.path.join(TOP_DIR, 'breakdown', 'static', 'badgestudio', 'shapes', 'heart.svg'), 'r'
+        ) as badge_image:
+
+            example_badgeclass_props = {
+                'name': 'Badge of Awesome',
+                'description': "An awesome badge only awarded to awesome people or non-existent test entities",
+                'image': badge_image,
+                'criteria': 'http://wikipedia.org/Awesome',
+            }
+
+            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            response = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                example_badgeclass_props
+            )
+            self.assertEqual(response.status_code, 201)
+
+            # assert that the BadgeClass was published to and fetched from the cache
+            with self.assertNumQueries(0):
+                slug = response.data.get('slug')
+                response = self.client.get('/v1/issuer/issuers/test-issuer/badges/{}'.format(slug))
+                self.assertEqual(response.status_code, 200)
 
     def test_create_criteriatext_badgeclass_for_issuer_authenticated(self):
         """
@@ -193,7 +452,7 @@ class BadgeClassTests(APITestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.data, list)  # Ensure we receive a list of badgeclasses
-        self.assertEqual(len(response.data), 2)  # Ensure that we receive the 3 badgeclasses in fixture as expected
+        self.assertEqual(len(response.data), 3)  # Ensure that we receive the 3 badgeclasses in fixture as expected
 
     def test_unauthenticated_cant_get_badgeclass_list(self):
         """
@@ -248,14 +507,97 @@ class BadgeClassTests(APITestCase):
                 r'badge_of_slugs_99/criteria$'
             )
 
+    def test_create_badgeclass_with_svg_image(self):
+        with open(
+            os.path.join(os.path.dirname(__file__), 'testfiles', 'test_badgeclass.svg'), 'r'
+        ) as badge_image:
 
+            example_badgeclass_props = {
+                'name': 'Badge of Awesome',
+                'description': "An awesome badge only awarded to awesome people or non-existent test entities",
+                'image': badge_image,
+                'criteria': 'http://wikipedia.org/Awesome',
+            }
+
+            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            response = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                example_badgeclass_props
+            )
+            self.assertEqual(response.status_code, 201)
+
+    def test_new_badgeclass_updates_cached_issuer(self):
+        user = get_user_model().objects.get(pk=1)
+        number_of_badgeclasses = len(list(user.cached_badgeclasses()))
+
+        with open(
+            os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
+        ) as badge_image:
+
+            example_badgeclass_props = {
+                'name': 'Badge of Freshness',
+                'description': "Fresh Badge",
+                'image': badge_image,
+                'criteria': 'http://wikipedia.org/Freshness',
+            }
+
+            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            response = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                example_badgeclass_props
+            )
+            self.assertEqual(response.status_code, 201)
+
+            self.assertEqual(len(list(user.cached_badgeclasses())), number_of_badgeclasses + 1)
+
+
+    def test_new_badgeclass_updates_cached_user_badgeclasses(self):
+        user = get_user_model().objects.get(pk=1)
+        self.client.force_authenticate(user=user)
+        badgelist = self.client.get('/v1/issuer/all-badges')
+
+        with open(
+            os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
+        ) as badge_image:
+
+            example_badgeclass_props = {
+                'name': 'Badge of Freshness',
+                'description': "Fresh Badge",
+                'image': badge_image,
+                'criteria': 'http://wikipedia.org/Freshness',
+            }
+
+            response = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                example_badgeclass_props
+            )
+            self.assertEqual(response.status_code, 201)
+
+        new_badgelist = self.client.get('/v1/issuer/all-badges')
+
+        self.assertEqual(len(new_badgelist.data), len(badgelist.data) + 1)
+
+
+@override_settings(
+    CELERY_ALWAYS_EAGER=True,
+    SESSION_ENGINE='django.contrib.sessions.backends.cache',
+    CACHES={
+        'default': {
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
+        }
+    }
+)
 class AssertionTests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
 
-    def ensure_image_exists(self, badge_object):
+    def setUp(self):
+        cache.clear()
+
+    def ensure_image_exists(self, badge_object, image_filename='guinea_pig_testing_badge.png'):
         if not os.path.exists(badge_object.image.path):
             shutil.copy2(
-                os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'),
+                os.path.join(os.path.dirname(__file__), 'testfiles', image_filename),
                 badge_object.image.path
             )
 
@@ -270,6 +612,54 @@ class AssertionTests(APITestCase):
         response = self.client.post('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions', assertion)
 
         self.assertEqual(response.status_code, 201)
+
+        # assert that the BadgeInstance was published to and fetched from cache
+        query_count = 1 if apps.is_installed('badgebook') else 0
+        with self.assertNumQueries(query_count):
+            slug = response.data.get('slug')
+            response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions/{}'.format(slug))
+            self.assertEqual(response.status_code, 200)
+
+    def test_resized_png_image_baked_properly(self):
+        current_user = get_user_model().objects.get(pk=1)
+        with open(
+            os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
+        ) as badge_image:
+
+            badgeclass_props = {
+                'name': 'Badge of Awesome',
+                'description': "An awesome badge only awarded to awesome people or non-existent test entities",
+                'image': badge_image,
+                'criteria': 'The earner of this badge must be truly, truly awesome.',
+            }
+
+            self.client.force_authenticate(user=current_user)
+            response_bc = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                badgeclass_props
+            )
+
+        assertion = {
+            "email": "test@example.com"
+        }
+        self.client.force_authenticate(user=current_user)
+        response = self.client.post('/v1/issuer/issuers/test-issuer/badges/badge-of-awesome/assertions', assertion)
+
+        instance = BadgeInstance.objects.get(slug=response.data.get('slug'))
+
+        instance.image.open()
+        self.assertIsNotNone(unbake(instance.image))
+        instance.image.close()
+        instance.image.open()
+
+        reader = png.Reader(file=instance.image)
+        for chunk in reader.chunks():
+            if chunk[0] == 'IDAT':
+                image_data_present = True
+            elif chunk[0] == 'iTXt' and chunk[1].startswith('openbadges\x00\x00\x00\x00\x00'):
+                badge_data_present = True
+
+        self.assertTrue(image_data_present and badge_data_present)
 
     def test_authenticated_editor_can_issue_badge(self):
         # load test image into media files if it doesn't exist
@@ -315,9 +705,26 @@ class AssertionTests(APITestCase):
         response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions')
 
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_issuer_instance_list_assertions(self):
+
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        response = self.client.get('/v1/issuer/issuers/test-issuer-2/assertions')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_issuer_instance_list_assertions_with_id(self):
+
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        response = self.client.get('/v1/issuer/issuers/test-issuer-2/assertions?recipient=test@example.com')
+
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
 
     def test_revoke_assertion(self):
+
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.delete(
             '/v1/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa',
@@ -337,24 +744,84 @@ class AssertionTests(APITestCase):
 
         self.assertEqual(response.status_code, 400)
 
+    def test_issue_svg_badge(self):
+        # load test image into media files if it doesn't exist
+        self.ensure_image_exists(BadgeClass.objects.get(slug='badge-of-svg-testing'), 'test_badgeclass.svg')
 
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        assertion = {
+            "email": "test@example.com"
+        }
+        response = self.client.post('/v1/issuer/issuers/test-issuer-2/badges/badge-of-svg-testing/assertions', assertion)
+
+        self.assertEqual(response.status_code, 201)
+
+        slug = response.data.get('slug')
+        response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-svg-testing/assertions/{}'.format(slug))
+        self.assertEqual(response.status_code, 200)
+
+    def test_new_assertion_updates_cached_user_badgeclasses(self):
+
+        user = get_user_model().objects.get(pk=1)
+
+        self.client.force_authenticate(user=user)
+        badgelist = self.client.get('/v1/issuer/all-badges')
+        badge_data = badgelist.data[0]
+        number_of_assertions = badge_data['recipient_count']
+        # self.ensure_image_exists(badge, 'test_badgeclass.svg') # replace with that badge's filename
+
+        new_assertion_props = {
+            'email': 'test3@example.com',
+        }
+
+        response = self.client.post('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions', new_assertion_props)
+        self.assertEqual(response.status_code, 201)
+
+        new_badgelist = self.client.get('/v1/issuer/all-badges')
+        new_badge_data = new_badgelist.data[0]
+        updated_number_of_assertions = new_badge_data['recipient_count']
+
+        self.assertEqual(updated_number_of_assertions, number_of_assertions + 1)
+
+
+@override_settings(
+    CELERY_ALWAYS_EAGER=True,
+    SESSION_ENGINE='django.contrib.sessions.backends.cache',
+    CACHES={
+        'default': {
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
+        }
+    }
+)
 class PublicAPITests(APITestCase):
     fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
     """
     Tests the ability of an anonymous user to GET one public badge object
     """
+    def setUp(self):
+        # ensure records are published to cache
+        Issuer.cached.get(slug='test-issuer')
+        BadgeClass.cached.get(slug='badge-of-testing')
+        BadgeInstance.cached.get(slug='92219015-18a6-4538-8b6d-2b228e47b8aa', revoked=False)
+        pass
+
     def test_get_issuer_object(self):
-        response = self.client.get('/public/issuers/test-issuer')
-        self.assertEqual(response.status_code, 200)
+        with self.assertNumQueries(0):
+            response = self.client.get('/public/issuers/test-issuer')
+            self.assertEqual(response.status_code, 200)
 
     def test_get_issuer_object_that_doesnt_exist(self):
-        response = self.client.get('/public/issuers/imaginary-issuer')
-        self.assertEqual(response.status_code, 404)
+        with self.assertNumQueries(1):
+            response = self.client.get('/public/issuers/imaginary-issuer')
+            self.assertEqual(response.status_code, 404)
 
     def test_get_badgeclass_image_with_redirect(self):
-        response = self.client.get('/public/badges/badge-of-testing/image')
-        self.assertEqual(response.status_code, 302)
+        with self.assertNumQueries(0):
+            response = self.client.get('/public/badges/badge-of-testing/image')
+            self.assertEqual(response.status_code, 302)
 
     def test_get_assertion_image_with_redirect(self):
-        response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa/image')
-        self.assertEqual(response.status_code, 302)
+        with self.assertNumQueries(0):
+            response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa/image')
+            self.assertEqual(response.status_code, 302)

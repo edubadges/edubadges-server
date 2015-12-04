@@ -1,5 +1,5 @@
 var React = require('react');
-var _ = require('underscore');
+var _ = require('lodash');
 
 // Actions
 var navigateLocalPath = require('../actions/clicks').navigateLocalPath;
@@ -9,11 +9,16 @@ var APISubmitData = require('../actions/api').APISubmitData;
 var APIStore = require('../stores/APIStore');
 
 // Components
-var ActionBar = require('../components/ActionBar.jsx').ActionBar;
+var BadgeSelectionTable = require('../components/BadgeSelectionTable.jsx').BadgeSelectionTable;
+var Button = require('../components/Button.jsx').Button;
 var Card = require('../components/Card.jsx');
+var Dialog = require ('../components/Dialog.jsx').Dialog;
+var DialogOpener = require('../components/Dialog.jsx').DialogOpener;
 var Property = require('../components/BadgeDisplay.jsx').Property;
 var EarnerBadgeList = require('../components/EarnerBadgeList.jsx');
+var OpenBadgeList = require('../components/OpenBadgeList.jsx');
 var LoadingComponent = require('../components/LoadingComponent.jsx');
+var Heading = require('../components/Heading.jsx').Heading;
 
 var moreLinkBadgeJSON = function(moreCount){
   return {
@@ -48,250 +53,246 @@ var moreLinkBadgeJSON = function(moreCount){
   };
 };
 
-var IFrameEmbedInfo = React.createClass({
-  generateEmbed: function(url){
-    return '<iframe height="500" width="300" frameborder="0" src="' + url + '/embed' + '"></iframe>';
-  },
-  selectAllText: function(e){
-    e.target.setSelectionRange(0, this.generateEmbed(this.props.share_url).length);
-  },
-  render: function() {
-    return (
-      <div className="collection-embed-info">
-        <textarea defaultValue={this.generateEmbed(this.props.share_url)} onClick={this.selectAllText} /> 
-      </div>
-    );
-  }
-});
-
 var CollectionShareInfo = React.createClass({
-  getDefaultProps: function() {
-    return {
-      share_url: ''
-    };
-  },
-  selectAllText: function(e){
-    e.target.setSelectionRange(0, this.props.share_url.length);
-  },
-  render: function() {
-    var embedInfo = this.props.share_url ? (<IFrameEmbedInfo share_url={this.props.share_url} />) : '';
+    propTypes: {
+        collectionSlug: React.PropTypes.string.isRequired,
+        initialShareUrl: React.PropTypes.string,
+    },
 
-    return (
-      <div className={this.props.share_url ? "collection-share-info sharing-enabled" : "collection-share-info sharing-disabled disabled"}>
-        <div className="sharing-input">
-          <input type="checkbox" name="sharecheck" checked={this.props.share_url ? true : false} className={"share-collection-checkbox"} onChange={this.props.handleChange} />
-          <label htmlFor="sharecheck">
-            Generate sharing link
-            {this.props.share_url ? (<span className="hint">(Unchecking this box will disable sharing)</span>) : ''}
-          </label>
-        </div>
-        <div className="sharing-url-box">
-          <label htmlFor="shareurl">Link:</label>
-          <input type="text" readOnly={true} name="shareurl" onClick={this.selectAllText} value={this.props.share_url} />
-          {embedInfo}
-        </div>
-        {this.props.share_url ? (<p className="hint">When enabled, anyone with the link will be able to view this collection.</p>) : ''}
-        {this.props.share_url ? (<p><a href={this.props.share_url}><button className='btn btn-primary'>View Share Page</button></a></p>) : ''}
-      </div>
-    );
-  }
-});
+    getInitialState: function() {
+        return {
+            shared: Boolean(this.props.initialShareUrl),
+            shareUrl: this.props.initialShareUrl,
+        };
+    },
 
-
-var EarnerCollectionDetail = React.createClass({
-  getInitialState: function() {
-    return {
-      formState: "inactive",
-      selectedBadgeIds: [],
-      message: ''
-    };
-  },
   componentDidMount: function(){
-    APIStore.addListener('DATA_UPDATED_earnerCollection_' + this.props.slug, this.handleUpdate)
+    APIStore.addListener('DATA_UPDATED_shareCollection_' + this.props.collectionSlug, this.handleShareUpdate)
   },
   componentWillUnmount: function(){
-    APIStore.removeListener('DATA_UPDATED_earnerCollection_' + this.props.slug, this.handleUpdate);
+    APIStore.removeListener('DATA_UPDATED_shareCollection_' + this.props.collectionSlug, this.handleShareUpdate);
   },
-  startEditing: function(){
-    this.setState({
-      formState: "editing",
-      selectedBadgeIds: _.pluck(this.props.badgeList, 'id'),
-      message: ''
-    });
+  handleShareUpdate: function(){
+    var collection = APIStore.getFirstItemByPropertyValue('earner_collections', 'slug', this.props.collectionSlug);
+    this.setState({ shared: ! this.state.shared, shareUrl: collection.share_url });
   },
-  save: function(){
-    console.log("SAVING....");
-    this.setState({formState: "waiting"});
 
-    var apiContext = {
-      formId: "earnerCollection_" + this.props.slug,
-      apiCollectionKey: "earner_collections",
-      apiSearchKey: 'slug',
-      apiSearchValue: this.props.slug,
-      apiUpdateKey: 'badges',
-      actionUrl: "/v1/earner/collections/" + this.props.slug + "/badges",
-      method: "PUT",
-      successHttpStatus: [200],
-      successMessage: "Collection updated"
-    };
-    var data = this.state.selectedBadgeIds.map(function(el, index){
-      return {"id": el};
-    }.bind(this));
-    console.log(data);
-    APISubmitData(data, apiContext);
+  selectAllText: function(ev) {
+    ev.target.select();
+  },
+  copyShareLink: function(ev) {
+    var shareLink = document.getElementById('sharelink');
+    shareLink.select();
 
+    var successful = document.execCommand('copy');
+    if ( ! successful) {
+        alert('Could not copy text in this browser, please copy your link using the mouse.');
+    }
   },
-  selectBadgeId: function(id){
-    if (this.state.selectedBadgeIds.indexOf(id) > -1)
-      this.setState({selectedBadgeIds: _.without(this.state.selectedBadgeIds, id)});
-    else
-      this.setState({selectedBadgeIds: this.state.selectedBadgeIds.concat([id])})
+
+  render: function() {
+    var shareLink, sharePage = '', embedCode = '';
+
+    if (this.state.shared) {
+        embedCode = '<iframe height="500" width="300" frameborder="0" src="' + this.state.shareUrl + '/embed' + '"></iframe>';
+        sharePage = (<a href={this.state.shareUrl}>View Share Page</a>);
+    }
+
+    return (
+      <form className="form_">
+        <div className="form_-x-field" style={{'display': 'none'}}>
+          <input id="toggle-share" type="checkbox" name="toggle-share" checked={this.state.shared ? true : false} className={"share-collection-checkbox"} onChange={this.handleChange} />
+          <label htmlFor="toggle-share">Generate sharing link {this.state.shared ? (<span className="hint">(Unchecking this box will disable sharing)</span>) : ''}</label>
+        </div>
+        <div className="form_-x-field">
+            <label htmlFor="sharelink">Link</label>
+            <div className="form_-x-action">
+                <input id="sharelink" type="text" readOnly={true} name="sharelink" onClick={this.selectAllText} value={this.state.shareUrl} />
+                <button type="button" tabIndex="3"><span className="icon_ icon_-copy" onClick={this.copyShareLink}>Copy</span></button>
+            </div>
+        </div>
+        <div className="form_-x-field">
+            <label htmlFor="embed">Description</label>
+            <textarea name="embed" id="embed" rows="4" tabIndex="5" value={embedCode} onClick={this.selectAllText} />
+        </div>
+      </form>
+    );
   },
-  handleShareChange: function(e){
+  handleChange: function(e){
     var apiContext;
-    if (!this.props.share_url) {
+    if ( ! this.state.shared) {
       // Turn sharing on
       apiContext = {
-        formId: "earnerCollection_" + this.props.slug,
+        formId: "shareCollection_" + this.props.collectionSlug,
         apiCollectionKey: "earner_collections",
         apiSearchKey: 'slug',
-        apiSearchValue: this.props.slug,
-        apiUpdateKey: 'share_url',
-        actionUrl: "/v1/earner/collections/" + this.props.slug + "/share",
+        apiSearchValue: this.props.collectionSlug,
+        apiUpdateFieldWithResponse: 'share_url',
+
+        actionUrl: "/v1/earner/collections/" + this.props.collectionSlug + "/share",
         method: "GET",
         successHttpStatus: [200],
         successMessage: "Collection updated"
       };
+
+      APISubmitData(null, apiContext);
     }
     else {
       // Delete share hash
       apiContext = {
-        formId: "earnerCollection_" + this.props.slug,
+        formId: "shareCollection_" + this.props.collectionSlug,
         apiCollectionKey: "earner_collections",
         apiSearchKey: 'slug',
-        apiSearchValue: this.props.slug,
-        apiUpdateKey: 'share_url',
-        actionUrl: "/v1/earner/collections/" + this.props.slug + "/share",
+        apiSearchValue: this.props.collectionSlug,
+        apiUpdateValuesTo: {share_url: undefined, share_hash: undefined},  // Delete the values of these fields
+        //apiUpdateValuesFromResponse: ['share_url', 'share_hash'],  // The response would do the same as above as it doesn't have the fields in the response
+
+        actionUrl: "/v1/earner/collections/" + this.props.collectionSlug + "/share",
         method: "DELETE",
+        doNotDeleteCollection: true,  // Very important
         successHttpStatus: [204],
         successMessage: "Collection updated"
       };
-    }
-
-    APISubmitData(null, apiContext);
-  },
-  handleUpdate: function(){
-    if (this.isMounted()){
-      this.setState({
-        message: {type: 'success', content: 'Collection updated.'},
-        formState: 'inactive',
-        selectedBadgeIds: []
-      });
+        APISubmitData(null, apiContext);
     }
   },
-  render: function() {
-    var badges, editBadgeButtonConfig, panelFunction;
+});
 
 
-    if (this.state.formState == 'inactive'){
-      badges = APIStore.filter('earner_badges', 'id', _.pluck(this.props.badgeList, 'id'));
+var ManageCollection = React.createClass({
+    propTypes: {
+        slug: React.PropTypes.string.isRequired,
+        badgeList: React.PropTypes.array,
+        label: React.PropTypes.string,
+    },
 
-      editBadgeButtonConfig = { 
-        title: "Select Badges",
-        buttonType: "primary",
-        icon: "fa-certificate", 
-        activePanelCommand: {} 
-      };
-      panelFunction = this.startEditing;
+    getInitialState: function() {
+        return {
+            selectedBadgeIds: _.pluck(this.props.badgeList, 'id'),
+        };
+    },
+
+    componentDidMount: function(){
+        APIStore.addListener('DATA_UPDATED_earnerCollection_' + this.props.slug, this.earnerCollectionStoreUpdated)
+    },
+
+    componentWillUnmount: function(){
+        APIStore.removeListener('DATA_UPDATED_earnerCollection_' + this.props.slug, this.earnerCollectionStoreUpdated);
+    },
+
+    save: function(){
+        var apiContext = {
+            formId: "earnerCollection_" + this.props.slug,
+            apiCollectionKey: "earner_collections",
+            apiSearchKey: 'slug',
+            apiSearchValue: this.props.slug,
+            apiUpdateFieldWithResponse: 'badges',
+            actionUrl: "/v1/earner/collections/" + this.props.slug + "/badges",
+            method: "PUT",
+            successHttpStatus: [200],
+            successMessage: "Collection updated"
+        };
+
+        var data = this.state.selectedBadgeIds.map(function(badgeId){
+            return {id: badgeId};
+        }.bind(this));
+
+        APISubmitData(data, apiContext);
+    },
+
+    earnerCollectionStoreUpdated: function() {
+        this.refs.manage.closeDialog();
+    },
+
+    onRowClick: function(ev, rowIndex, rowData) {
+        var newSelectedBadgeArray = this.state.selectedBadgeIds.slice();
+
+        var toBeSelected = ! rowData.selected;
+        if (toBeSelected) newSelectedBadgeArray.push(rowData.id);
+        else newSelectedBadgeArray.splice(newSelectedBadgeArray.indexOf(rowData.id), 1);
+
+        this.setState({selectedBadgeIds: newSelectedBadgeArray});
+    },
+
+    render: function() {
+        var allBadges = APIStore.getCollection('earner_badges');
+        var collectionBadges = APIStore.filter('earner_badges', 'id', _.pluck(this.props.badgeList, 'id'));
+
+        var actions = (<Button type="button" label="Update collection" onClick={this.save} />);
+        var dialog = (
+            <Dialog noContent={true} ref="manage" actions={actions} dialogId="manage-collection-badges">
+                <div className="dialog_-x-content">
+                    <Heading size="medium" title="Add / Remove Badges" />
+                </div>
+                <BadgeSelectionTable
+                    widthHint={865}
+                    badges={allBadges}
+                    initialSelectedBadges={_.pluck(this.props.badgeList, 'id')}
+                    onRowClick={this.onRowClick} />
+            </Dialog>
+        );
+
+        return (
+            <DialogOpener dialog={dialog} dialogId="manage-collection-badges" key="manage-collection-badges" dialogClass="dialog_-large">
+                <Button className="action_" label={this.props.label || "Manage"} propagateClick={true} />
+            </DialogOpener>
+        );
     }
-
-    else if (this.state.formState == 'editing' || this.state.formState == 'waiting') {
-      badges = APIStore.getCollection('earner_badges');
-
-      editBadgeButtonConfig = { 
-        title: "Save",
-        buttonType: "primary",
-        icon: "fa-floppy-o", 
-        activePanelCommand: {} 
-      };
-      panelFunction = this.save;
-    }
-
-    else {
-      // needs testing: when waiting on API response, set the included badges to the selected set.
-      badges = APIStore.filter('earner_badges', 'id', this.state.selectedBadgeIds);
-    }
-
-
-    return (
-      <div className="earner-collection-detail">
-        <p className="earner-collection-description row">
-          <span className="text-label col-xs-12 col-sm-4">Description</span>
-          <span className="text-content col-xs-12 col-sm-8">{this.props.description}</span>
-        </p>
-
-        <CollectionShareInfo
-          share_url={this.props.share_url}
-          handleChange={this.handleShareChange}
-        />
-
-        {this.state.message ? (<div className={"alert alert-" + this.state.message.type}>{this.state.message.content}</div>) : ""}
-        {this.state.formState == "waiting" ? <LoadingComponent /> : ""}
-        <ActionBar 
-          title="Badges in collection"
-          viewId={'earnerCollectionDetail' + this.props.slug}
-          items={[editBadgeButtonConfig]}
-          updateActivePanel={panelFunction}
-        />
-        <EarnerBadgeList
-          display="thumbnail"
-          badges={badges}
-          moreLink={this.props.targetUrl || '/earner/collections/' + this.props.slug}
-          handleClick={this.state.formState == 'editing' ? this.selectBadgeId : null}
-          selectedBadgeIds={this.state.selectedBadgeIds}
-        />
-      </div>
-    );
-  }
 });
 
 
 var EarnerCollectionCard = React.createClass({
-  handleClick: function(){
-    if (this.props.clickable)
-      navigateLocalPath(
-        this.props.targetUrl || '/earner/collections/' + this.props.slug
-      );
-  },
-  render: function() {
-    var cardActionItems = [];
-    if (this.props.share_url)
-      cardActionItems.push({
-        actionUrl: this.props.share_url,
-        iconClass: 'fa-external-link',
-        actionClass: 'pull-right',
-        title: "Share"
-      });
+    getDefaultProps: function() {
+        return {
+            badgesToShow: 6,
+        };
+    },
+    handleClick: function(){
+        navigateLocalPath(
+            this.props.targetUrl || '/earner/collections/' + this.props.slug
+        );
+    },
+    render: function() {
+        var cardActionItems = [];
 
-    var badges = APIStore.filter('earner_badges', 'id', _.pluck(this.props.badgeList, 'id').slice(0,7));
+        if (this.props.share_url) {
+            cardActionItems.push({
+                actionUrl: this.props.share_url,
+                iconClass: 'fa-external-link',
+                actionClass: 'pull-right',
+                title: "Share"
+            });
+        }
 
-    if (this.props.badgeList.length > 7){
-      badges.push(moreLinkBadgeJSON(this.props.badgeList.length - 7));
+        var badges = APIStore.filter('earner_badges', 'id', 
+            _.pluck(this.props.badgeList, 'id').slice(0,this.props.badgesToShow)
+        );
+
+        return (
+            <div className="card_">
+                <div className="collection_ viewdetails_">
+                    <h1 className="truncate_" actions={cardActionItems}>{this.props.name}</h1>
+                    <OpenBadgeList
+                        display="image only"
+                        badges={badges}
+                        grid={false}
+                        showEmptyBadge={this.props.showEmptyBadge}
+                        clickEmptyBadge={this.props.clickEmptyBadge}
+                        selectedBadgeIds={this.props.selectedBadgeIds}
+                        handleClick={this.props.handleClick}
+                        />
+                    <div className="viewdetails_-x-details">
+                        <button className="button_ button_-solid button_-uppercase" onClick={this.handleClick}>View Details</button>
+                    </div>
+                </div>
+                <div className="title_">
+                    <div className="title_-x-section">
+                    <h1 className="truncate_">{this.props.badgeList.length} Badge{(this.props.badgeList.length === 0 || this.props.badgeList.length > 1) ? 's' : ''}</h1>
+                </div>
+                </div>
+            </div>
+        );
     }
-    return (
-      <Card
-        title={this.props.name}
-        onClick={this.handleClick}
-        actions={cardActionItems}
-      >
-        <EarnerBadgeList
-          display="image only"
-          badges={badges}
-          moreLink={this.props.targetUrl || '/earner/collections/' + this.props.slug}
-        />
-      </Card>
-    );
-  }
 });
 
 /* 
@@ -306,19 +307,21 @@ var EarnerCollectionList = React.createClass({
   render: function() {
     var collections = this.props.collections.map(function(item, i){
       return (
-        <EarnerCollectionCard
-          key={'collection-' + i}
-          name={item.name}
-          slug={item.slug}
-          description={item.description}
-          share_url={item.share_url}
-          badgeList={item.badges || []}
-          clickable={this.props.clickable}
-        />
+        <div>
+            <EarnerCollectionCard
+                key={'collection-' + i}
+                name={item.name}
+                slug={item.slug}
+                description={item.description}
+                share_url={item.share_url}
+                badgeList={item.badges || []}
+                clickable={this.props.clickable}
+                />
+        </div>
       );
     }.bind(this));
     return (
-      <div className="earner-collection-list">
+      <div className="l-grid">
         {collections}
       </div>
     );
@@ -329,5 +332,6 @@ var EarnerCollectionList = React.createClass({
 module.exports = {
   EarnerCollectionList: EarnerCollectionList,
   EarnerCollectionCard: EarnerCollectionCard,
-  EarnerCollectionDetail: EarnerCollectionDetail
+  ManageCollection: ManageCollection,
+  CollectionShareInfo: CollectionShareInfo,
 };

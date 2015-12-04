@@ -1,0 +1,93 @@
+@import 'base';
+
+body {
+  background: map-get($colors, bodybackground);
+  color: map-get($colors, bodycopy);
+  font-family: $font-family;
+  font-size: $font-size;
+  overflow-x: hidden;
+}
+
+button {
+  appearance: none;
+  background: none;
+  border: 0;
+  color: map-get($colors, bodycopy);
+  cursor: pointer;
+  font-family: $font-family;
+  font-size: $font-size;
+  line-height: 1;
+  margin: 0;
+  outline: none;
+  padding: 0;
+}
+
+input,
+label,
+textarea,
+select {
+  color: map-get($colors, bodycopy);
+  font-family: $font-family;
+  font-size: $font-size;
+}
+
+strong {
+  font-weight: 600;
+}
+
+@import 'layout';
+
+// Modules
+
+@import
+'modules/action',
+'modules/badge',
+'modules/breadcrumb',
+'modules/button',
+'modules/canvas',
+'modules/card',
+'modules/collection',
+'modules/context',
+'modules/control',
+'modules/datatable',
+'modules/detail',
+'modules/dialog',
+'modules/dropdown',
+'modules/dropzone',
+'modules/filter',
+'modules/footer',
+'modules/form',
+'modules/gallerynav',
+'modules/heading',
+'modules/header',
+'modules/hidden',
+'modules/icon',
+'modules/imageselect',
+'modules/issuer',
+'modules/label',
+'modules/loading',
+'modules/menu',
+'modules/message',
+'modules/pagination',
+'modules/popover',
+'modules/rule',
+'modules/search',
+'modules/state',
+'modules/status',
+'modules/step',
+'modules/table',
+'modules/tags',
+'modules/textindent',
+'modules/thumbnail',
+'modules/title',
+'modules/truncate',
+'modules/viewdetails',
+'modules/wrap';
+
+// Overrides
+
+// When in the canvas/LTI views this overrides the body background to match the design 
+
+.o-canvas {
+  background-color: map-get($colors, bodybackground-light);
+}

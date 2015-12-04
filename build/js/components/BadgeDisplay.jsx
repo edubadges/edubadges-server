@@ -1,15 +1,30 @@
 var React = require('react');
+var _ =  require('lodash');
+
+// Components
+var Button = require('../components/Button.jsx').Button;
+var Dialog = require('../components/Dialog.jsx').Dialog;
+var DialogOpener = require('../components/Dialog.jsx').DialogOpener;
+var Heading = require('../components/Heading.jsx').Heading;
+var More = require('../components/Title.jsx').More;
+var SubmitButton = require('../components/Button.jsx').SubmitButton;
+
+// Stores
+var APIStore = require('../stores/APIStore');
+var FormStore = require('../stores/FormStore');
+var FormConfigStore = require('../stores/FormConfigStore');
 
 // Actions
 var navigateLocalPath = require('../actions/clicks').navigateLocalPath;
+var APISubmitData = require('../actions/api').APISubmitData;
 
 
 var wrap_text_property = function(value){
   return {
     'type': 'xsd:string',
     '@value': value
-  }
-}
+  };
+};
 
 var Property = React.createClass({
   REQUIRED_VALUES_FOR_TYPE: {
@@ -21,13 +36,13 @@ var Property = React.createClass({
   },
   getDefaultProps: function() {
     return {
-      label: true,
+      label: false,
       linksClickable: true
     };
   },
   renderPropertyName: function(propName){
     return ( 
-      <span className={"propertyName " + propName}>{propName}</span>
+      <h2 className="detail_-x-meta">{propName}</h2>
     );
   },
   renderPropertyValue: function(property){
@@ -38,36 +53,33 @@ var Property = React.createClass({
       "image": this.renderImageValue,
       "email": this.renderEmailValue
     };
-    return KNOWN_TYPES[property.type](property);
+    var props = _.omit(this.props, ['name', 'label', 'property']);
+    return KNOWN_TYPES[property.type](property, props);
   },
-  renderStringValue: function(property){
+  renderStringValue: function(property, props){
     return (
-      <span className={"propertyValue " + this.props.name}>{property['@value']}</span>
+      <span {...props}>{property['@value']}</span>
     );
   },
-  renderLinkValue: function(value){
+  renderLinkValue: function(value, props){
     // TODO: preventDefault() on thumbnail view
     //if (!this.props.linksClickable)
 
     return (
-        <span className={"propertyValue " + this.props.name}>
-          <a href={value.id} >{value.name || value.id }</a>
-        </span>
+        <a href={value.id} {...props}>{value.name || value.id }</a>
       );
   },
-  renderEmailValue: function(value){
+  renderEmailValue: function(value, props){
     // TODO: preventDefault() on thumbnail view
     //if (!this.props.linksClickable)
 
     return (
-        <span className={"propertyValue " + this.props.name}>
-          <a href={"mailto:" + value['@value']} >{value['@value']}</a>
-        </span>
+        <a href={"mailto:" + value['@value']} {...props}>{value['@value']}</a>
       );
   },
-  renderImageValue: function(value){
+  renderImageValue: function(value, props){
     return (
-      <img className="propertyImage" src={value.id} alt={value.name || this.props.name} />
+      <img src={value.id} alt={value.name || this.props.name} {...props} />
     );
   },
   hasRequiredValues: function(){
@@ -88,16 +100,25 @@ var Property = React.createClass({
     )
   },
   render: function(){
-    if (this.canIRender()){
-      return (
-        <div className={"badgeProperty badgeProperty-type-" + this.props.property.type}>
-          { this.props.label ? this.renderPropertyName(this.props.name) : null }
-          { this.renderPropertyValue(this.props.property) }
-        </div>
-      );
-    }
-    else
-      return (<span className="missingProperty badgeProperty"></span>);
+      if (this.canIRender()) {
+          var propertyValue = this.renderPropertyValue(this.props.property);
+          var propertyLabel = this.props.label ? this.renderPropertyName(this.props.name) : undefined;
+
+          if (propertyLabel) {
+              return (
+                <span className="x-owner">
+                    { propertyLabel }
+                    { propertyValue }
+                </span>
+            );
+          }
+          else {
+              return (propertyValue);
+          }
+      }
+      else {
+          return (<span className="missingProperty badgeProperty"></span>);
+      }
   }
 });
 
@@ -133,8 +154,8 @@ var BadgeDisplayThumbnail = React.createClass({
   getDefaultProps: function() {
     return {
       json: {badge: {issuer:{}}},
-      columnClass: 'col-xs-3 col-md-2',
-      selected: false
+      columnClass: 'col-xs-3',
+      selected: false,
     };
   },
   handleClick: function(){
@@ -145,15 +166,129 @@ var BadgeDisplayThumbnail = React.createClass({
     else if (this.props.handleClick)
       this.props.handleClick(this.props.id);
   },
-  wrapperClass: function(){
-    return this.props.columnClass + ' badge-display badge-display-thumbnail selected-' + this.props.selected;
-  },
+
+    componentDidMount: function() {
+        var badgeId = this.props.id;
+        FormStore.addListener('FORM_DATA_UPDATED_EarnerCollectionCreateForm-' + badgeId, this.handleNewCollection);
+        APIStore.addListener('DATA_UPDATED_earner_collections', this.handleAddedToNewCollection);
+    },
+    componentWillUnmount: function() {
+        var badgeId = this.props.id;
+        FormStore.removeListener('FORM_DATA_UPDATED_EarnerCollectionCreateForm-' + badgeId, this.handleNewCollection);
+        APIStore.removeListener('DATA_UPDATED_earner_collections', this.handleAddedToNewCollection);
+    },
+    handleNewCollection: function(ev) {
+        var badgeId = this.props.id;
+        var formId = 'EarnerCollectionCreateForm-'+ badgeId;
+        var newState = FormStore.getFormState(formId);
+        if (newState.actionState === "complete") {
+            // Add the Badge to the new Collection
+            var newestCollection = APIStore.getCollectionLastItem('earner_collections')
+
+            apiContext = {
+                formId: formId,
+                apiCollectionKey: "earner_collections",
+                apiSearchKey: 'slug',
+                apiSearchValue: newestCollection.slug,
+                apiUpdateFieldWithResponse: 'badges',
+                pushResponseToField: true,
+
+                actionUrl: "/v1/earner/collections/"+ newestCollection.slug +"/badges",
+                method: "POST",
+                successHttpStatus: [200, 201],
+                successMessage: "New collection created"
+            };
+
+            // Somehow we're still within a dispatcher here, so defer the execution
+            setTimeout(function() { APISubmitData({id: badgeId}, apiContext) }, 0);
+        }
+    },
+    handleAddedToNewCollection: function(ev) {
+        var badgeId = this.props.id;
+        var selectCollectionDialog = document.getElementById('select-collection-'+ badgeId);
+        if (selectCollectionDialog && selectCollectionDialog.hasAttribute('open')) {
+            selectCollectionDialog.close();
+        }
+    },
+    
   render: function() {
+    var badgeName = this.props.json.badge.name['@value'];
+    var badgeId = this.props.id;
+
+    // New Collection Dialog
+    var createCollectionFormType = "EarnerCollectionCreateForm";
+    var createCollectionFormId = createCollectionFormType +"-"+ badgeId;
+    var createCollectionFormProps = FormConfigStore.getConfig(createCollectionFormType, { formId: createCollectionFormId }, {});
+    FormStore.getOrInitFormData(createCollectionFormId, createCollectionFormProps);
+
+    var createCollectionActions=[
+        <SubmitButton formType={createCollectionFormType} formId={createCollectionFormId} label="Add Collection" />
+    ];
+    var addToNewCollectionDialog = (
+        <Dialog formId={createCollectionFormId} dialogId={"add-collection-"+ badgeId} key={"add-collection-"+ badgeId} actions={createCollectionActions} className="closable">
+            <Heading size="small"
+                     title="New Collection"
+                     subtitle={badgeName +" will automatically be added to this collection."}/>
+
+            <BasicAPIForm hideFormControls={true} actionState="ready" {...createCollectionFormProps} />
+        </Dialog>);
+
+    // Select Collection Dialog
+    var collections = APIStore.getCollection("earner_collections").map(function(object) { return {name: object.name, slug:object.slug} });
+
+    var selectCollectionFormType = "CollectionAddBadgeInstanceForm";
+    var selectCollectionFormId = selectCollectionFormType +"-"+ badgeId;
+    var selectCollectionFormProps = FormConfigStore.getConfig(selectCollectionFormType, { formId: selectCollectionFormId }, {
+        badgeId: badgeId,
+        collections: collections,
+        defaultCollection: _.get(collections, "[0].slug", ''),
+        badgeName: badgeName,
+    });
+    FormStore.getOrInitFormData(selectCollectionFormId, selectCollectionFormProps)
+
+    var selectCollectionActions=[
+        <SubmitButton formType={selectCollectionFormType} formId={selectCollectionFormId} label="Add" />
+    ];
+    var selectCollectionDialog = (
+        <Dialog formId={selectCollectionFormId} dialogId={"select-collection-"+ badgeId} key={"select-collection-"+ badgeId} actions={selectCollectionActions} className="closable">
+            <Heading size="small" title="Add to Collection" />
+
+            <BasicAPIForm hideFormControls={true} actionState="ready" {...selectCollectionFormProps} />
+
+            <DialogOpener className="l-vertical" dialog={addToNewCollectionDialog} dialogId={"add-collection-"+ badgeId} key={"add-collection-"+ badgeId}>
+                <Button className="action_" label="CREATE NEW COLLECTION" propagateClick={true}/>
+                <p>{badgeName +" will automatically be added to the new collection."}</p>
+            </DialogOpener>
+        </Dialog>);
+
+    var style = {};
+    if (this.props.selected) {
+        style = {border: '2px solid  #31383E'};
+    }
+
+    var hoverText = this.props.hoverText;
+
     return (
-      <div className={this.wrapperClass()} onClick={this.handleClick} >
-        <Property name='Badge Image' label={false} property={this.props.json.image} />
-        <Property name='Name' property={this.props.json.badge.name} />
-        <Property name='Issuer' property={this.props.json.badge.issuer.name} />
+      <div className="card_" style={style}>
+        <div className="badge_ viewdetails_" onClick={this.handleClick}>
+            <Property name='Badge Image' label={false} property={this.props.json.image} width="128" height="128" />
+            <div className="viewdetails_-x-details">
+                <button className="button_ button_-solid button_-uppercase">{hoverText || "View Details"}</button>
+            </div>
+        </div>
+        <div className="title_">
+            <div>
+                <h1 className="title_-x-primary truncate_"><Property name='Name' property={this.props.json.badge.name} /></h1>
+                <p className="title_-x-secondary truncate_"><Property name='Issuer' property={this.props.json.badge.issuer.name} /></p>
+            </div>
+            <More>
+                <div className="dropdown_">
+                    <DialogOpener dialog={selectCollectionDialog} dialogId={"select-collection-"+ badgeId} key={"select-collection-"+ badgeId}>
+                        <button className="dropdown_-x-item"><span className="icon_ icon_-add">Add to Collection</span></button>
+                    </DialogOpener>
+                </div>
+            </More>
+        </div>
       </div>
     );
   }
@@ -183,11 +318,11 @@ var BadgeDisplayDetail = React.createClass({
       <div className={this.wrapperClass()} onClick={this.handleClick} >
         <div className='row'>
 
-          <div className='property-group image col-xs-4'>
+          <div className='property-group image'>
             <Property name='Badge Image' label={false} property={this.props.json.image} />
           </div>
 
-          <div className='col-xs-8'>
+          <div className=''>
             <div className='property-group badgeclass'>
               <Property name='Name' property={this.props.json.badge.name} />
               <Property name='Description' property={this.props.json.badge.description} />
@@ -237,32 +372,38 @@ var BadgeDisplayFull = React.createClass({
     });
 
     return (
-      <div className='badge-display badge-display-full' onClick={this.handleClick}>
-        <div className='property-group image col-xs-4'>
-          <Property name='Badge Image' label={false} property={this.props.json.image} />
-        </div>
+      <div className="detail_" onClick={this.handleClick}>
+          <div>
+              <Property name='Badge Image' label={false} property={this.props.json.image} width="224" height="224" />
+          </div>
+  
+          <ul>
+              <li>
+                <Property label={true} name='Criteria' property={this.props.json.badge.criteria} />
+              </li>
+              <li>
+                <Property label={true} name='Issuer' property={this.props.json.badge.issuer.name} />
+              </li>
+              <li>
+                <Property label={true} name='Issuer Website' property={this.props.json.badge.issuer.url} />
+              </li>
+              <li>
+                <Property label={true} name='Issue Date' property={this.props.json.issuedOn} />
+              </li>
+              <li>
+                <Property label={true} name='Expiration Date' property={this.props.json.expires} />
+              </li>
+              <li>
+                <Property label={true} name='Evidence Link' property={this.props.json.evidence} />
+              </li>
+              <li>
+                <Property label={true} name='Recipient' property={wrap_text_property(this.props.recipientId)} />
+              </li>
+          </ul>
 
-        <div className='property-group badgeclass'>
-          <Property name='Name' property={this.props.json.badge.name} />
-          <Property name='Description' property={this.props.json.badge.description} />
-          <Property name='Criteria' property={this.props.json.badge.criteria} />
-        </div>
-
-        <div className='property-group issuer'>
-          <Property name='Issuer' property={this.props.json.badge.issuer.name} />
-          <Property name='Website' label={false} property={this.props.json.badge.issuer.url} />
-        </div>
-
-        <div className='property-group assertion'>
-          <Property name='Issue Date' property={this.props.json.issuedOn} />
-          <Property name='Expiration Date' property={this.props.json.expires} />
-          <Property name='Evidence Link' property={this.props.json.evidence} />
-          <Property name='Recipient' property={wrap_text_property(this.props.recipientId)} />
-        </div>
-
-        <div className='property-group validations'>
-          {errors}
-        </div>
+          <div className='property-group validations'>
+            {errors}
+          </div>
       </div>
     )
   }
@@ -272,7 +413,6 @@ var BadgeDisplayFull = React.createClass({
 var BadgeDisplayImage = React.createClass({
   getDefaultProps: function() {
     return {
-      columnClass: "col-xs-3",
       selected: false
     };
   },
@@ -296,9 +436,7 @@ var BadgeDisplayImage = React.createClass({
       );
     }
     return (
-      <div className={'badge-display-image ' + this.props.columnClass} onClick={this.handleClick}>
-        <Property name='Badge Image' label={false} property={this.props.json.image} />
-      </div>
+        <Property name='Badge Image' label={false} property={this.props.json.image} width="72" height="72" className="collection_-x-item" />
     )
   }
 });

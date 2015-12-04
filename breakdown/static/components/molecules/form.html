@@ -1,0 +1,82 @@
+<form action="" class="form_">
+
+    <div class="form_-x-imageupload">
+
+        <fieldset>
+
+            <div class="form_-x-field">
+                <label for="name">Name <span class="hint">(with a note)</span></label>
+                <input type="text" id="name" name="name" tabindex="1" required>
+            </div>
+
+            <div class="form_-x-field">
+                <label for="name">Select</label>
+                <select id="name" name="name" tabindex="2" required>
+                    <option value="">Choose Collection &hellip;</option>
+                    <option value="First Selection">First Selection</option>
+                </select>
+            </div>
+
+            <div class="form_-x-field">
+                <label for="action">Action <span class="hint">(with a note)</span></label>
+                <div class="form_-x-action">
+                    <input type="text" id="action" name="action" readonly value="Here's some text to copy">
+                    <button type="button" tabindex="3"><span class="icon_ icon_-copy">Copy</span></button>
+                </div>
+            </div>
+
+            <div class="form_-x-field">
+                <label for="file">Action <span class="hint">(with a note)</span></label>
+                <input type="file" id="file" name="file" class="hidden">
+                <div class="form_-x-action">
+                    <input type="text" id="fakefile" name="fakefile" readonly>
+                    <button type="button" tabindex="4">Browse</button>
+                </div>
+            </div>
+
+            <div class="form_-x-field">
+                <label for="description">Description</label>
+                <textarea name="description" id="description" tabindex="5"></textarea>
+            </div>
+
+            <div class="form_-x-checkbox">
+                <label>
+                    <input type="checkbox" id="checkbox" name="checkbox" tabindex="6" required>
+                    <span class="form_-x-checkbox-text">Check the box? <span class="hint">(with a note)</span></span>
+                </label>
+            </div>
+
+        </fieldset>
+
+        <fieldset>
+
+            <div class="form_-x-field">
+                <button class="form_-x-imagefield dropzone" tabindex="7" type="button">
+                    <p>Tap here to upload image</p>
+                </button>
+            </div>
+
+            <div class="form_-x-field">
+                <div class="form_-x-imagefield dropzone is-uploaded">
+                    <img srcst="http://placehold.it/256x256 2x, http://placehold.it/128x128" src="http://placehold.it/128x128" width="128" height="128" alt="badge description">
+                </div>
+            </div>
+
+            <div class="form_-x-field">
+                <p>Or</p>
+            </div>
+
+            <div class="form_-x-field">
+                <button class="button_ button_-tertiary">Use Badge Studio</button>
+            </div>
+
+        </fieldset>
+
+    </div>
+
+    <div class="control_">
+        <button class="button_ button_-secondary">Cancel</button>
+        <button class="button_" type="submit" tabindex="7">Submit</button>
+    </div>
+
+</form>

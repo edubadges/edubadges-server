@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <!-- Generator: Sketch 3.4.2 (15857) - http://www.bohemiancoding.com/sketch -->
+    <title>iconSelectionEmpty</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="My-Collections" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="My-Collections---Add-/-Remove-Badges" sketch:type="MSArtboardGroup" transform="translate(-314.000000, -626.000000)" fill="#DDDDDD">
+            <g id="modal" sketch:type="MSLayerGroup" transform="translate(287.000000, 209.500000)">
+                <g id="table" transform="translate(0.000000, 62.500000)" sketch:type="MSShapeGroup">
+                    <g id="TR-7-Odd" transform="translate(1.000000, 335.000000)">
+                        <g id="iconSelectionEmpty" transform="translate(26.000000, 19.000000)">
+                            <path d="M10,0 C4.5,0 0,4.5 0,10 C0,15.5 4.5,20 10,20 C15.5,20 20,15.5 20,10 C20,4.5 15.5,0 10,0 L10,0 Z M10,18 C5.6,18 2,14.4 2,10 C2,5.6 5.6,2 10,2 C14.4,2 18,5.6 18,10 C18,14.4 14.4,18 10,18 L10,18 Z"></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

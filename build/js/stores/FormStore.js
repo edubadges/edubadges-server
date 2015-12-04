@@ -1,4 +1,4 @@
-var _ = require('underscore')
+var _ = require('lodash')
 var Dispatcher = require('../dispatcher/appDispatcher');
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
@@ -14,14 +14,13 @@ var APIStore = require('../stores/APIStore');
 var FormStore = assign({}, EventEmitter.prototype);
 
 FormStore.requests = {};
-
-FormStore.data = {}
+FormStore.data = {};
 
 FormStore.genericFormTypes = FormConfigStore.genericFormTypes();
 
 FormStore.idValid = function(formId){
   return (FormStore.data.hasOwnProperty(formId))
-}
+};
 
 FormStore.getFormData = function(formId){
   if (!FormStore.idValid(formId))
@@ -36,15 +35,28 @@ FormStore.getFormState = function(formId){
     return FormStore.data[formId].formState;
 };
 
-FormStore.getOrInitFormData = function(formId, initialData){
-  if (!FormStore.data.hasOwnProperty(formId))
-    FormStore.data[formId] = initialData
+FormStore.initFormData = function(formId, initialData) {
+    FormStore.data[formId] = initialData;
 
   if (!FormStore.data[formId].formState)
     FormStore.data[formId].formState = _.clone(initialData.defaultValues);
 
   return FormStore.getFormData(formId);
-}
+};
+
+FormStore.getOrInitFormData = function(formId, initialData){
+  if (
+      !FormStore.data.hasOwnProperty(formId) ||
+      (FormStore.data.hasOwnProperty(formId) && _.get(FormStore.data[formId], "formState.actionState") == 'complete')
+  ) {
+    FormStore.data[formId] = initialData
+  }
+
+  if (!FormStore.data[formId].formState)
+    FormStore.data[formId].formState = _.clone(initialData.defaultValues);
+
+  return FormStore.getFormData(formId);
+};
 
 FormStore.resetForm = function(formId){
   if (FormStore.idValid(formId))
@@ -54,8 +66,6 @@ FormStore.resetForm = function(formId){
 FormStore.patchFormProperty = function(formId, propName, value){
   if (FormStore.idValid(formId)) // for state not specified in fieldsMeta
     FormStore.data[formId].formState[propName] = value;
-  else
-    console.log("Error: Could not patch form " + formId + " property " + propName);
 };
 FormStore.patchForm = function(id, data){
   for (key in data){
@@ -63,9 +73,9 @@ FormStore.patchForm = function(id, data){
   }
 };
 FormStore.getFieldValue = function(formId, field){
-  if (FormStore.idValid(formId) && field in FormStore.data[formId].fieldsMeta)
-    return FormStore.data[formId][field];
-}
+  if (FormStore.idValid(formId))
+    return _.get(FormStore.data, formId + '.formState.' + field);
+};
 
 
 // listener utils
@@ -73,9 +83,9 @@ FormStore.addListener = function(type, callback) {
   FormStore.on(type, callback);
 };
 
-// FormStore.removeListener = function(type, callback) {
-//   FormStore.removeListener(type, callback);
-// };
+ FormStore.removeStoreListener = function(type, callback) {
+   FormStore.removeListener(type, callback);
+ };
 
 
 
@@ -124,15 +134,16 @@ FormStore.dispatchToken = Dispatcher.register(function(payload){
 
 module.exports = {
   addListener: FormStore.addListener,
-  removeListener: FormStore.removeListener,
+  removeListener: FormStore.removeStoreListener,
   getCollection: FormStore.getCollection,
   getFormData: FormStore.getFormData,
   getFormState: FormStore.getFormState,
   resetFormData: FormStore.resetFormData,
   getOrInitFormData: FormStore.getOrInitFormData,
+  initFormData: FormStore.initFormData,
   patchFormData: FormStore.patchFormProperty,
   getFieldValue: FormStore.getFieldValue,
   genericFormTypes: FormStore.genericFormTypes,
   listeners: FormStore.listeners,
   dispatchToken: FormStore.dispatchToken
-}
+};

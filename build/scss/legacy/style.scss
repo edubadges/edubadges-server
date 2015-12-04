@@ -1,0 +1,133 @@
+
+@import "components/header";
+@import "components/footer";
+@import "components/badge-display";
+@import "components/earner-badge-list";
+@import "components/action-bar";
+@import "components/active-panel";
+@import "components/badge-form";
+@import "components/main-component";
+@import "components/breadcrumbs";
+@import "components/accounts";
+@import "components/buttons";
+@import "components/card";
+@import "components/iframe-embed-container";
+@import "components/badgebook";
+
+// refactoring from this SB2 stylesheet as source, moving things into 
+// components as possible. Eventually this won't be needed:
+@import "components/sb2";
+@import "components/metismenu";
+
+@import "./colors";
+
+* {
+  margin: 0;
+}
+html, body {
+  height: 100%;
+}
+
+.col-xs-1, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5,
+.col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9, .col-xs-10,
+.col-xs-11, .col-xs-12 {
+  padding:0;
+}
+
+// Grid adjustments so that on the smallest screens, 
+// col-xs classes are 100% width
+@media only screen and (max-width: 479px){
+  .col-xs-1, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5,
+  .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9, .col-xs-10, 
+  .col-xs-11, .col-xs-12 {
+    width: 100%;
+  }
+}
+
+.sidebar-nav{
+  li ul {
+    //margin-left: 2em; 
+  }
+  li.expanded-false ul { display: none; }
+} 
+
+body.badgr {
+  background-color: $badgr-background;
+
+}
+body.embedded-body {
+  background-color: transparent;
+}
+
+.main-app-container {
+  padding-bottom: 2em;
+  min-height: 100%;
+  margin: 0 auto -100px;
+  padding-bottom:100px;
+}
+
+a {
+  color: $badgr-red;
+}
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+  color: $black;
+}
+
+//img {
+//  max-width: 100%;
+//  height: auto;
+//}
+
+.btn.btn-info {
+  background-color: #672f33;
+  border-color: #672f33;
+  &:hover {
+    background:#56282b;
+    border-color: #56282b;
+  }
+}
+
+.btn.btn-primary {
+  background-color: #672f33;
+  border-color: #672f33;
+  &:hover {
+    background:#56282b;
+    border-color: #56282b;
+  }
+}
+
+.btn.btn-warning {
+  background-color: #f1971d;
+  border-color: #f1971d;
+  &:hover {
+    background:#cd8018;
+    border-color: #cd8018;
+  }
+}
+
+.btn {
+  .fa {
+    margin-right: 4px;
+  }
+}
+
+.loading-icon {
+  height: 2em; width: 2em;
+  background: transparent url('/static/images/ajax-loader.gif') no-repeat center center;
+}
+form.disabled, form.disabled textarea { background-color: #ddd; }
+
+.dropzone img { max-width: 200px; height: auto; }
+
+#page-wrapper {
+  border-left: 0;
+  margin: 0 auto;
+}
+.wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+.main-header {
+  border-bottom: 1px solid #e7e7e7;
+}

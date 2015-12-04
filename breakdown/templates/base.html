@@ -4,112 +4,95 @@
         {% block head %}
             <meta charset="utf-8">
             <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    
             <title>{% block head_title %}Badgr{% endblock %}</title>
             <link rel="shortcut icon" href="{{STATIC_URL}}images/favicon.ico" />
-        
+            <meta name="description" content="">
             <meta name="viewport" content="width=device-width,initial-scale=1">
-
+            <!-- <link rel="apple-touch-icon" href="apple-touch-icon.png"> -->
+        
             <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/bootstrap/css/bootstrap.css">
-            <!-- TODO: replace with min later: 
-            <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/bootstrap/bootstrap.min.css">
-            -->
 
+            <!-- dialog polyfill needs to be above screen.css -->
+            <script src="{{STATIC_URL}}js/dialog-polyfill.js"></script>
+            <link rel="stylesheet" href="{{STATIC_URL}}css/dialog-polyfill.css" type="text/css" media="screen" />
 
-            <!-- Custom Fonts -->
+            <!-- 3rd party vendor stylesheets -->
+            <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/dialog-polyfill.css">
+            <link href="{{ STATIC_URL }}css/fixed-data-table.css" media="screen" rel="stylesheet" type="text/css" >
             <link href="{{STATIC_URL}}css/plugins/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
-            <!-- main stylesheet -->
+            <!-- main (legacy) stylesheet -->
             <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/style.css">
+            <!-- main (incoming and future ruler of the realm) stylesheet -->
+            <link href="{{ STATIC_URL }}css/reset.css" media="screen" rel="stylesheet" type="text/css" >
+            <link rel="stylesheet" media="screen" type="text/css" href="{{STATIC_URL}}css/screen.css?v={{ ARTIFACT_VERSION }}">
 
-            <!-- TODO: create print stylesheet
-            <link rel="stylesheet" media="print" type="text/css" href="{{STATIC_URL}}css/print.css">
-            -->
-        
             {% block extrastyle %}{% endblock %}
+
+            <script src="{{STATIC_URL}}badgestudio/js/fabric-1.4.0.min.js"></script>
+            <script src="{{STATIC_URL}}badgestudio/js/badge-studio.js"></script>
+            <script src="{{STATIC_URL}}badgestudio/js/canvas-to-blob.min.js"></script>
 
             <script src="{{STATIC_URL}}js/libs/modernizr-2.5.3.min.js"></script>
 
+            {% if PINGDOM_MONITORING_ID %}
+                {% include 'pingdom/embed.html' %}
+            {% endif %}
         {% endblock %}
 
         {% block extrahead %}{% endblock %}
 
-        {% block initial_data %}
-            {% if initial_data %}
-                <script type="text/javascript">
-                    var initialData = {{ initial_data | safe }};
-                </script>
-            {% endif %}
-        {% endblock %}
+        {% if initial_data %}
+            <script type="text/javascript">
+                var initialData = {{ initial_data | safe }};
+            </script>
+        {% endif %}
     </head>
 
-    <body class="badgr {% block bodyclass %}{% endblock %}">
+    <body class="{% block bodyclass %}{% endblock %}">
         {% block pre_content %}{% endblock %}
 
         {% block content %}
             {% if initial_data %}
-            <div id="app" class="main-app-container">
-            <!-- React App renders here -->
-                <div class="container">
-                    <div class="jumbotron loading-react">
+                <div id="app" class="x-owner">
+                    <!-- React App renders within #app -->
+                    <div class="loading-react">
                         <h1>{{ self.head_title() }}</h1>
                         <p>Loading...</p>
                         <p class="loading-spinner"><img src="{{STATIC_URL}}images/ajax-loader.gif"></p>
                     </div>
                 </div>
-            </div>
+            {% else %}
+                <!-- No react content to render -->
             {% endif %}
         {% endblock %}
 
         {% block footer %}
-            <footer class="main-footer clearfix wrap page-wrapper">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-xs-6 col-sm-4">
-                          <span class="vendor-info">
-                            Powered by <a href="https://github.com/concentricsky/badgr-server">Badgr</a>
-                          </span>
-                        </div>
-                        <div class="col-xs-6 col-sm-8">
-                            <ul class="footer-links">
-                                <!-- <li>About</li> -->
-                                <li><a href="/docs">API documentation</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+            <footer class="footer_ l-wrapper l-wrapper-inset">
+                <ul class="breadcrumb_">
+                    <li>Powered by <a href="https://github.com/concentricsky/badgr-server" target="_blank">Badgr</a></li>
+                    <li><a href="/docs" target="_blank">API documentation</a></li>
+                    <li>Copyright © 2015 <a href="http://concentricsky.com" target="_blank">Concentric Sky, Inc.</a></li>
+                </ul>
             </footer>
         {% endblock %}
 
         {% block scripts %}
-
-            <script src="{{STATIC_URL}}js/libs/jquery.min.js"></script>
-
-            <!-- Bootstrap Core JavaScript -->
-            <script src="{{STATIC_URL}}css/bootstrap/js/bootstrap.min.js"></script>
-
-            <!-- Metis Menu Plugin JavaScript -->
-            <script src="{{STATIC_URL}}js/libs/metisMenu.min.js"></script>
-
-            <!-- Custom Theme JavaScript -->
-            <script src="{{STATIC_URL}}js/libs/sb-admin-2.js"></script>
-
             {% if initial_data %}
-                <script src="{{STATIC_URL}}js/script.js"></script>
+                <script src="{{STATIC_URL}}js/app.js?v={{ARTIFACT_VERSION}}"></script>
             {% endif %}
-
+            {% if GOOGLE_ANALYTICS_ID %}
             <script type="text/javascript">
-              /* var _gaq = _gaq || [];
-              _gaq.push(['_setAccount', 'UA-#######-#']);
-              _gaq.push(['_trackPageview']);
-              (function() {
-                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-              })(); */
+                var _gaq = _gaq || [];
+                _gaq.push(['_setAccount', '{{ GOOGLE_ANALYTICS_ID }}']);
+                _gaq.push(['_trackPageview']);
+                (function() {
+                    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+                })();
             </script>
+            {% endif %}
         {% endblock %}
     </body>
 </html>
-
-

@@ -12,10 +12,7 @@ var MenuStore = assign({}, EventEmitter.prototype);
 MenuStore.defaultItems = {
   topMenu: {
     items: [
-      // { title: "messages", url: "#", icon: "fa-envelope", children: [] },
-      // { title: "tasks", url: "#", icon: "fa-tasks", children: []},
-      // { title: "alerts", url: "#", icon: "fa-bell", children: [] },
-      { title: "user", url: "#", icon: "fa-user", children: [
+      { title: "user", url: "#", icon: "icon_-dropdownlight", children: [
         { title: "User Profile", url: "/accounts/", icon: "fa-user", children: [] },
 
         // { title: "Settings", url: "/#user/settings", icon: "fa-gear", children: [] },
@@ -23,8 +20,11 @@ MenuStore.defaultItems = {
       ] }
     ]
   },
-  roleMenu: {
-    items: []
+  badgebookMenu: {
+    items: [
+      { title: "Objectives", url: "/badgebook/objectives", icon: "", children: [] },
+      { title: "Progress", url: "/badgebook/progress", icon: "", children: [] }
+    ]
   },
   secondaryMenus: {
       earnerHome: [
@@ -45,7 +45,6 @@ MenuStore.defaultItems = {
         { 
           title: "Import Badge",
           buttonType: "primary",
-          icon: "fa-certificate", 
           activePanelCommand: { type: "EarnerBadgeImportForm", content: { badgeId: null } } 
         }
       ],
@@ -53,7 +52,7 @@ MenuStore.defaultItems = {
         { 
           title: "Add Collection",
           buttonType: "primary",
-          icon: "fa-folder-open", 
+          icon: "fa-folder-open",
           activePanelCommand: { type: "EarnerCollectionCreateForm", content: {} } 
         }
       ],
@@ -90,13 +89,13 @@ MenuStore.defaultItems = {
           icon: "fa-upload", 
           activePanelCommand: { type: "ConsumerBadgeForm", content: { badgeId: null } } 
         }
-      ]
+      ],
   }
 };
 
 MenuStore.menus = {
   topMenu: MenuStore.defaultItems.topMenu,
-  roleMenu: MenuStore.defaultItems.roleMenu,
+  badgebookMenu: MenuStore.defaultItems.badgebookMenu,
   secondaryMenus: MenuStore.defaultItems.secondaryMenus,
   actionBars: MenuStore.defaultItems.actionBars
 }
@@ -111,35 +110,50 @@ MenuStore.addListener = function(type, callback) {
   MenuStore.on(type, callback);
 };
 
-// MenuStore.removeListener = function(type, callback) {
-//   MenuStore.removeListener(type, callback);
-// };
+MenuStore.removeStoreListener = function(type, callback) {
+   MenuStore.removeListener(type, callback);
+ };
 
 MenuStore.storeInitialData = function() {
   if (typeof initialData == 'undefined')
     return;
 
+  var newItems = [], item;
   // try to load the variable declared as initialData in the view template
-  if (initialData.installed_apps.indexOf('issuer') > -1)
-    MenuStore.menus.roleMenu.items.push(
-      { title: "Issue", url: "/issuer", icon: "fa-mail-forward", children: []}
+  if (initialData.installed_apps.indexOf('composition') > -1)
+    newItems.push(
+      { title: "My Badges", url: "/earner/badges", icon: "", children: [] },
+      { title: "My Collections", url: "/earner/collections", icon: "", children: [] }
     );
-  if (initialData.installed_apps.indexOf('composer') > -1)
-    MenuStore.menus.roleMenu.items.push(
-      { title: "Earn", url: "/earner", icon: "fa-certificate", children: [] }
+  if (initialData.installed_apps.indexOf('issuer') > -1)
+    newItems.push(
+      { title: "Issue Badges", url: "/issuer", icon: "", children: []}
     );
   if (initialData.installed_apps.indexOf('consumer') > -1)
-    MenuStore.menus.roleMenu.items.push(  
-      { title: "Understand", url: "/understand", icon: "fa-info-circle", children: [] }
+    newItems.push(
+      { title: "Understand", url: "/understand", icon: "", children: [] }
     );
-  if ('user' in initialData){
-    for (index in MenuStore.menus.topMenu.items){
-      item = MenuStore.menus.topMenu.items[index];
-      if (item.title = 'user')
-        item['title'] = initialData.user.username
-      break;
-    }
 
+  if ('user' in initialData) {
+    for (index in MenuStore.menus.topMenu.items) {
+      item = MenuStore.menus.topMenu.items[index];
+      if (item.title = 'user') {
+        var name = (initialData.user.earnerIds && initialData.user.earnerIds.length > 0) ?
+                    initialData.user.earnerIds[0] :
+                    initialData.user.username;
+        item['title'] = name;
+        if (initialData.installed_apps.indexOf('badgebook') > -1) {
+          item['children'].splice(1, 0, {title: "LTI Info", url: "/badgebook/lti", icon: "fa-gear", children: []});
+        }
+        newItems.push(item);
+        break;
+      }
+    }
+  }
+  MenuStore.menus.topMenu.items = newItems;
+
+  if (initialData.lti_learner) {
+    MenuStore.menus.badgebookMenu.items = [];
   }
 
   if ('user' in initialData && initialData.user.approvedIssuer){
@@ -161,12 +175,16 @@ MenuStore.dispatchToken = appDispatcher.register(function(payload){
 
   switch(action.type){
     case 'APP_WILL_MOUNT':
-      MenuStore.storeInitialData()
+      MenuStore.storeInitialData();
       MenuStore.emit('INITIAL_DATA_LOADED');
       break;
 
     case 'CLICK_CLOSE_MENU':
       MenuStore.emit('UNCAUGHT_DOCUMENT_CLICK');
+      break;
+
+    case 'CLOSE_MODAL':
+      MenuStore.emit('CLOSE_MODAL');
       break;
 
     default:
@@ -177,5 +195,10 @@ MenuStore.dispatchToken = appDispatcher.register(function(payload){
 module.exports = {
   getAllItems: MenuStore.getAllItems,
   addListener: MenuStore.addListener,
-  removeListener: MenuStore.removeListener
-}
+  removeListener: MenuStore.removeStoreListener,
+  listeners: MenuStore.listeners,
+  once: MenuStore.once,
+  on: MenuStore.addListener,
+  dispatchToken: MenuStore.dispatchToken,
+  emit: MenuStore.emit
+};

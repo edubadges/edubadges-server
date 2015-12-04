@@ -5,6 +5,7 @@ from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
 from badgeuser.serializers import UserProfileField
+from mainsite import settings
 
 from .serializers import IssuerPortalSerializer
 
@@ -28,6 +29,7 @@ class IssuerPortal(TemplateView):
         context['issuer_badgeclasses'] = issuer_serializer.data['issuer_badgeclasses']
         context['user'] = UserProfileField(kwargs['request'].user, context=kwargs).data
         context['installed_apps'] = issuer_serializer.data['installed_apps']
+        context['STATIC_URL'] = settings.STATIC_URL
 
         context_data['initial_data'] = json.dumps(context)
         return context_data

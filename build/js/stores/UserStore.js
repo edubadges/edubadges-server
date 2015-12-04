@@ -26,8 +26,10 @@ UserStore.addListener = function(type, callback) {
   UserStore.on(type, callback);
 };
 
-// Part of eventemitter
-// UserStore.removeListener = function(type, callback)
+// Wrap listener removal so that eventemitter gets the same object listener was added to
+UserStore.removeStoreListener = function(type, callback){
+  UserStore.removeListener(type, callback);
+}
 
 
 // on startup
@@ -63,7 +65,7 @@ UserStore.dispatchToken = appDispatcher.register(function(payload){
 
 module.exports = {
   addListener: UserStore.addListener,
-  removeListener: UserStore.removeListener,
+  removeListener: UserStore.removeStoreListener,
   getProperty: UserStore.getProperty,
   getProfile:UserStore.getProfile
 }
