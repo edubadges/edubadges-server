@@ -1,3 +1,4 @@
+var _ = require('lodash');
 var React = require('react');
 
 // Actions
@@ -66,11 +67,12 @@ var IssuerDisplay = React.createClass({
                 <p><a href={'mailto:'+ this.props.json.email}>{this.props.json.email}</a></p>
             </li>);
     }
+    var image = (_.get(properties, 'image.id')) ? (<img src={_.get(properties, 'image.id')} width="112" height="112" />) : null;
 
     return (
       <div className="detail_ l-vertical-x-offset">
         <div>
-          <img src={properties.image.id} width="112" height="112" />
+          {image}
         </div>
         <ul>
           <li>
