@@ -8,6 +8,7 @@ Badgr Server is a web application for issuing [Open Badges](http://openbadges.or
 ## How to get started on your local development environment.
 Prerequisites:
 
+* git
 * python 2.7.x
 * virtualenv
 * npm
@@ -15,10 +16,17 @@ Prerequisites:
 * sass
 * mysql
   
-Optional extras:
+#### Optional extras:
 
 * memcached
 * amqp broker (e.g. RabbitMQ)
+
+#### System-specific requirements:
+* OS X: [XCode Command line tools](http://osxdaily.com/2014/02/12/install-command-line-tools-mac-os-x/)
+* Ubuntu 12.04 (install packages with apt-get): git, git-core, python-virtualenv, gcc, python-pip, python-devel, libjpeg-turbo, libjpeg-turbo-devel, zlib-devel, mariadb-devel, openldap-devel, cyrus-sasl-devel, swig, libxslt-devel, automake, autoconf, libtool, libffi-devel
+* CentOS 7.x (install packages with yum): git, git-core, python-virtualenv, gcc, python-pip, python-devel, libjpeg-turbo, libjpeg-turbo-devel, zlib-devel, mariadb-devel, openldap-devel, cyrus-sasl-devel, swig, libxslt-devel, automake, autoconf, libtool, libffi-devel
+
+Note: some of these packages would introduce additional security considerations if left installed on a server used in production.
 
 ### Create project directory and environment
 
