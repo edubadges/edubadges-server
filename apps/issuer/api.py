@@ -154,7 +154,7 @@ class IssuerDetail(AbstractIssuerAPIEndpoint):
     queryset = Issuer.objects.all()
     model = Issuer
     serializer_class = IssuerSerializer
-    permission_classes = (IsStaff,)
+    permission_classes = (permissions.IsAuthenticated, IsStaff,)
 
     def get(self, request, slug):
         """
@@ -224,7 +224,7 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
     role = 'staff'
     queryset = Issuer.objects.all()
     model = Issuer
-    permission_classes = (IsOwnerOrStaff,)
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrStaff,)
 
     def get(self, request, slug):
         """
@@ -344,7 +344,7 @@ class AllBadgeClassesList(AbstractIssuerAPIEndpoint):
     """
     queryset = Issuer.objects.all()
     model = Issuer
-    permission_classes = (IsEditor,)
+    permission_classes = (permissions.IsAuthenticated, IsEditor,)
 
     def get(self, request):
         """
@@ -369,7 +369,7 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
     """
     queryset = Issuer.objects.all()
     model = Issuer
-    permission_classes = (IsEditor,)
+    permission_classes = (permissions.IsAuthenticated, IsEditor,)
 
     def get(self, request, issuerSlug):
         """
@@ -460,7 +460,7 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
     """
     queryset = BadgeClass.objects.all()
     model = BadgeClass
-    permission_classes = (MayEditBadgeClass,)
+    permission_classes = (permissions.IsAuthenticated, MayEditBadgeClass,)
 
     def get(self, request, issuerSlug, badgeSlug):
         """
@@ -517,7 +517,7 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
     queryset = BadgeClass.objects.all()
     model = BadgeClass
     serializer_class = BadgeInstanceSerializer
-    permission_classes = (MayIssueBadgeClass,)
+    permission_classes = (permissions.IsAuthenticated, MayIssueBadgeClass,)
 
     def post(self, request, issuerSlug, badgeSlug):
         """
@@ -594,7 +594,7 @@ class IssuerBadgeInstanceList(AbstractIssuerAPIEndpoint):
     """
     queryset = Issuer.objects.all().select_related('badgeinstances')
     model = Issuer
-    permission_classes = (IsStaff,)
+    permission_classes = (permissions.IsAuthenticated, IsStaff,)
 
     def get(self, request, issuerSlug):
         """
@@ -638,7 +638,7 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
     """
     queryset = BadgeInstance.objects.all()
     model = BadgeInstance
-    permission_classes = (MayEditBadgeClass,)
+    permission_classes = (permissions.IsAuthenticated, MayEditBadgeClass,)
 
     def get(self, request, issuerSlug, badgeSlug, assertionSlug):
         """

@@ -59,16 +59,9 @@ class IssuerTests(APITestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_create_issuer_authenticated(self):
-        view = IssuerList.as_view()
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        response = self.client.post('/v1/issuer/issuers', example_issuer_props)
 
-        request = factory.post(
-            '/v1/issuer/issuers',
-            json.dumps(example_issuer_props),
-            content_type='application/json'
-        )
-
-        force_authenticate(request, user=get_user_model().objects.get(pk=1))
-        response = view(request)
         self.assertEqual(response.status_code, 201)
 
         # assert that name, description, url, etc are set properly in response badge object
