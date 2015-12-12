@@ -88,3 +88,5 @@ Set these values in your settings_local.py file to configure the application to 
 * CANVAS_ENFORCE_SSL = False
 * CANVAS_API_VERIFY_SSL = False
   - In order to work with a development instance of the Canvas server that is not running on a secure (HTTPS/SSL) connection, override these security defaults to False.
+* OPEN_FOR_SIGNUP = True
+  - This defaults to True, but allows you to turn off signup if you would like to use Badgr for only single-account use.

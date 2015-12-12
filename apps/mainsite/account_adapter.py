@@ -11,3 +11,6 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
 
         msg = self.render_mail(template_prefix, email, context)
         msg.send()
+
+    def is_open_for_signup(self, request):
+        return getattr(settings, 'OPEN_FOR_SIGNUP', True)
