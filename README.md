@@ -22,13 +22,13 @@ Optional extras:
 
 ### Create project directory and environment
 
-* `mkdir badgr`
+* `mkdir badgr && cd badgr`
 * `virtualenv env`
 * `source env/bin/activate` *Activate the environment (each time you start a session working with the code)*
 
 *Obtain source code and clone into code directory*
 
-* `git clone git@github.com:concentricsky/badgr-server.git code`
+* `git clone https://github.com/concentricsky/badgr-server.git`
 * `cd code`
 
 *Your Directory structure will look like this with default logs and mediafiles locations:*
