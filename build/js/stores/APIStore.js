@@ -313,8 +313,17 @@ APIStore.getData = function(context, requestContext, pagination_url, retriedAtte
   APIStore.getRequests.push(url);
 
   var req = request.get(url)
-    .set('X-CSRFToken', getCookie('csrftoken'))
     .accept('application/json');
+
+    var cookie = getCookie('csrftoken');
+    if (cookie) {
+        req.set('X-CSRFToken', cookie);
+    }
+
+    var token = initialData.token;
+    if (token) {
+        req.set('Authorization', 'Token '+ token);
+    }
 
   req.end(function(error, response){
     APIStore.resolveActiveGet(context.apiCollectionKey);
@@ -398,8 +407,17 @@ APIStore.postForm = function(fields, values, context, requestContext){
   else if (context.method == 'PUT')
     var req = request.put(url);
 
-  req.set('X-CSRFToken', getCookie('csrftoken'))
-  .accept('application/json');
+  req.accept('application/json');
+
+  var cookie = getCookie('csrftoken');
+  if (cookie) {
+      req.set('X-CSRFToken', cookie);
+  }
+
+  var token = initialData.token;
+  if (token) {
+      req.set('Authorization', 'Token '+ token);
+  }
 
   // Attach data fields to request
   for (var field in fields) {
