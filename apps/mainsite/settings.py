@@ -23,7 +23,6 @@ INSTALLED_APPS = [
     'django.contrib.admin',
 
     'badgeuser',
-    'badgecheck',
 
     'allauth',
     'allauth.account',
@@ -47,7 +46,7 @@ INSTALLED_APPS = [
     'composition',
     'verifier',
 
-
+    # deprecated packages to remove in v1.2
     'composer',
     'credential_store',
 ]
