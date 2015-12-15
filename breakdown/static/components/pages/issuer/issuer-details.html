@@ -10,7 +10,36 @@
 
   {{> molecules/heading-small}}
 
-  {{> atoms/table}}
+  <table class="table_">
+    <thead>
+      <tr>
+        <th scope="col">Badge</th>
+        <th scope="col">No. of Recipients</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">
+            <div class="l-horizontal">
+               <div>
+                   {{> atoms/thumbnail}}
+                   <button class="truncate_ action_ action_-tertiary">pneumonoultramicroscopicsilicovolcanoconiosislypneumonoultramicroscopicsilicovolcanoconiosispneumonoultramicroscopicsilicovolcanoconiosislypneumonoultramicroscopicsilicovolcanoconiosis</button>
+               </div>
+          </div>
+        </th>
+        <td>10</td>
+        <td>
+          <div class="l-horizontal">
+            <div>
+              {{> atoms/button-tertiary}}
+              {{> atoms/button-tertiary}}
+            </div>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 
 </main>
 
