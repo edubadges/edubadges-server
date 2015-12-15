@@ -12,8 +12,8 @@ Prerequisites:
 * python 2.7.x
 * virtualenv
 * npm
-* grunt
-* sass
+* grunt, grunt-cli
+* sass (requires ruby)
 * mysql
   
 #### Optional extras:
@@ -36,7 +36,7 @@ Note: some of these packages would introduce additional security considerations 
 
 *Obtain source code and clone into code directory*
 
-* `git clone https://github.com/concentricsky/badgr-server.git`
+* `git clone https://github.com/concentricsky/badgr-server.git code`
 * `cd code`
 
 *Your Directory structure will look like this with default logs and mediafiles locations:*
@@ -64,7 +64,7 @@ badgr
 ### Migrate databases, build front-end components
 * `./manage.py migrate`
 * `grunt dist` *or `grunt watch` for local development
-* `./manage py createsuperuser` *follow prompts to create your first admin user account*
+* `./manage.py createsuperuser` *follow prompts to create your first admin user account*
 
 ### Run a server locally for development
 * `./manage.py runserver`
