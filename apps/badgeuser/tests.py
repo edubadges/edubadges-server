@@ -1,3 +1,4 @@
+from rest_framework.authtoken.models import Token
 from rest_framework.test import APIRequestFactory, APITestCase
 from badgeuser.models import BadgeUser
 
@@ -25,9 +26,9 @@ class AuthTokenTests(APITestCase):
         """
         Ensure that a PUT request updates a user token.
         """
-
+        user = BadgeUser.objects.get(pk=1)
         # Create a token for the first time.
-        self.client.force_authenticate(user=BadgeUser.objects.get(pk=1))
+        self.client.force_authenticate(user)
         response = self.client.get('/v1/user/auth-token')
         self.assertEqual(response.status_code, 200)
         token = response.data.get('token')
@@ -37,3 +38,6 @@ class AuthTokenTests(APITestCase):
         second_response = self.client.put('/v1/user/auth-token')
         self.assertNotEqual(token, second_response.data.get('token'))
         self.assertTrue(second_response.data.get('replace'))
+
+        self.assertEqual(user.cached_token(), second_response.data.get('token'))
+        self.assertEqual(Token.objects.get(user=user).key, user.cached_token())

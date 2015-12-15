@@ -45,6 +45,9 @@ class UserProfileField(serializers.Serializer):
             'earnerIds': addresses
         }
 
+        if self.context.get('include_token', False):
+            profile['token'] = obj.cached_token()
+
         if getattr(settings, 'BADGR_APPROVED_ISSUERS_ONLY', False):
             profile['approvedIssuer'] = obj.has_perm('issuer.add_issuer')
         else:
@@ -66,16 +69,3 @@ class BadgeUserSerializer(serializers.ModelSerializer):
     # earnerBadges = EarnerBadgeSerializer(many=True, read_only=True, source='earnerbadge_set')
     # consumerBadges = ConsumerBadgeDetailSerializer(many=True, read_only=True, source='consumerbadge_set')
     # issuerRoles
-
-
-class TokenSerializer(serializers.Serializer):
-    username = serializers.SlugRelatedField(slug_field='username', queryset=BadgeUser.objects.all())
-    replace = serializers.BooleanField(default=False, required=False, write_only=True)
-    token = serializers.CharField(max_length=40, read_only=True)
-
-    def create(self, validated_data, **kwargs):
-        if validated_data.get('replace') is True:
-            Token.objects.filter(user=validated_data.get('username')).delete()
-
-        token, created = Token.objects.get_or_create(user=validated_data.get('username'))
-        return token.key

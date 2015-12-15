@@ -320,7 +320,7 @@ APIStore.getData = function(context, requestContext, pagination_url, retriedAtte
         req.set('X-CSRFToken', cookie);
     }
 
-    var token = initialData.token;
+    var token = _.get(APIStore.getCollection('user'), 'token');
     if (token) {
         req.set('Authorization', 'Token '+ token);
     }
@@ -414,7 +414,7 @@ APIStore.postForm = function(fields, values, context, requestContext){
       req.set('X-CSRFToken', cookie);
   }
 
-  var token = initialData.token;
+  var token = _.get(APIStore.getCollection('user'), 'token');
   if (token) {
       req.set('Authorization', 'Token '+ token);
   }
