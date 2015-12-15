@@ -6,6 +6,7 @@
   border: 2px dashed map-get($colors, border-light);
   box-sizing: border-box;
   color: map-get($colors, bodycopy-faint);
+  cursor: pointer;
   font-size: $font-size-small;
   line-height: 1.3;
   padding: $layout-spacing*13 $layout-spacing*1.5 $layout-spacing*7;
@@ -19,11 +20,6 @@
     width: 100%;
   }
 
-  &.is-uploaded {
-    border: 0;
-    padding-top: 0;
-  }
-
   .dropzone_-x-title {
     font-size: $font-size*1.4;
     font-weight: bold;
@@ -34,8 +30,14 @@
   &:hover,
   &:focus, 
   &.is-active {
-    border-color: map-get($colors, loading);
+    border-color: map-get($colors, link-active);
     box-shadow: none;
+  }
+
+  &.dropzone_-is-uploaded {
+    border: 0;
+    cursor: normal;
+    padding: 0;
   }
 
 }

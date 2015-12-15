@@ -14,7 +14,6 @@ MenuStore.defaultItems = {
     items: [
       { title: "user", url: "#", icon: "icon_-dropdownlight", children: [
         { title: "User Profile", url: "/accounts/", icon: "fa-user", children: [] },
-        { title: "LTI Info", url: "/badgebook/lti", icon: "fa-gear", children: [] },
 
         // { title: "Settings", url: "/#user/settings", icon: "fa-gear", children: [] },
         { title: "Log Out", url: "/logout", icon: "fa-sign-out", children: [] }
@@ -91,15 +90,6 @@ MenuStore.defaultItems = {
           activePanelCommand: { type: "ConsumerBadgeForm", content: { badgeId: null } } 
         }
       ],
-      badgebookProgress: [],
-      badgebookObjectives: [
-        {
-          title: "Create New Badge",
-          buttonType: "primary",
-          icon: "fa-pencil-square-o",
-          activePanelCommand: { type: "BadgeClassCreateUpdateForm", content: {}}
-        }
-      ],
   }
 };
 
@@ -143,6 +133,7 @@ MenuStore.storeInitialData = function() {
     newItems.push(
       { title: "Understand", url: "/understand", icon: "", children: [] }
     );
+
   if ('user' in initialData) {
     for (index in MenuStore.menus.topMenu.items) {
       item = MenuStore.menus.topMenu.items[index];
@@ -151,6 +142,9 @@ MenuStore.storeInitialData = function() {
                     initialData.user.earnerIds[0] :
                     initialData.user.username;
         item['title'] = name;
+        if (initialData.installed_apps.indexOf('badgebook') > -1) {
+          item['children'].splice(1, 0, {title: "LTI Info", url: "/badgebook/lti", icon: "fa-gear", children: []});
+        }
         newItems.push(item);
         break;
       }

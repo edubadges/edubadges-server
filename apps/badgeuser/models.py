@@ -9,6 +9,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.mail import send_mail
 from django.contrib.auth.models import AbstractUser
 from hashlib import md5
+from rest_framework.authtoken.models import Token
+
 from issuer.models import Issuer
 
 
@@ -74,6 +76,19 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
 
     def cached_badgeclasses(self):
         return chain.from_iterable(issuer.cached_badgeclasses() for issuer in self.cached_issuers())
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_token(self):
+        user_token, created = \
+                Token.objects.get_or_create(user=self)
+        return user_token.key
+
+    def replace_token(self):
+        Token.objects.filter(user=self).delete()
+        # user_token, created = \
+        #         Token.objects.get_or_create(user=self)
+        self.save()
+        return self.cached_token()
 
     def save(self, *args, **kwargs):
         if not self.username:

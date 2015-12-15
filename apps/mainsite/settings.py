@@ -23,7 +23,6 @@ INSTALLED_APPS = [
     'django.contrib.admin',
 
     'badgeuser',
-    'badgecheck',
 
     'allauth',
     'allauth.account',
@@ -47,9 +46,7 @@ INSTALLED_APPS = [
     'composition',
     'verifier',
 
-    'badgebook',
-    'badgebook.canvaslms',
-
+    # deprecated packages to remove in v1.2
     'composer',
     'credential_store',
 ]
@@ -147,9 +144,6 @@ LOGIN_REDIRECT_URL = '/earner'
 AUTHENTICATION_BACKENDS = [
     # Object permissions for issuing badges
     'rules.permissions.ObjectPermissionBackend',
-
-    # LTI authentication
-    'badgebook.backends.CanvasLtiAuthBackend',
 
     # Needed to login by username in Django admin, regardless of `allauth`
     "badgeuser.backends.CachedModelBackend",

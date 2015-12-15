@@ -18,7 +18,8 @@
   thead {
 
     th {
-      border-bottom: 2px solid map-get($colors, border-light);
+      border: 1px solid map-get($colors, border-light);
+      border-bottom-width: 2px;
       font-weight: 600;
       padding-bottom: $layout-spacing*1.5;
       padding-top: $layout-spacing*3;

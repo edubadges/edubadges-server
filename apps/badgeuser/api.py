@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 from mainsite.permissions import IsRequestUser
 
 from .models import BadgeUser
-from .serializers import TokenSerializer, BadgeUserSerializer
+from .serializers import BadgeUserSerializer
 
 
 class BadgeUserDetail(generics.RetrieveUpdateAPIView):
@@ -41,26 +41,14 @@ class BadgeUserDetail(generics.RetrieveUpdateAPIView):
 
 class BadgeUserToken(APIView):
     model = BadgeUser
-
-    authentication_classes = (
-        authentication.SessionAuthentication,
-        authentication.BasicAuthentication,
-    )
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
         """
         Get the authenticated user's auth token.
         A new auth token will be created if none already exist for this user.
-        This request must be authenticated by a method other than TokenAuthentication.
         """
-        token_input = {'username': request.user.username, 'replace': False}
-        serializer = TokenSerializer(data=token_input)
-        if serializer.is_valid():
-            token_input['token'] = serializer.save()
-        else:
-            return Response("Could not validate token request", status=status.HTTP_400_BAD_REQUEST)
-
+        token_input = {'username': request.user.username, 'token': request.user.cached_token()}
         return Response(token_input, status=status.HTTP_200_OK)
 
     def put(self, request):
@@ -69,13 +57,9 @@ class BadgeUserToken(APIView):
         """
         token_input = {
             'username': request.user.username,
+            'token': request.user.replace_token(),
             'replace': True
         }
-        serializer = TokenSerializer(data=token_input)
-
-        if serializer.is_valid():
-            token_input['token'] = serializer.save()
-        else:
-            return Response("Could not validate token request", status=status.HTTP_400_BAD_REQUEST)
+        request.user.save()
 
         return Response(token_input, status=status.HTTP_201_CREATED)

@@ -1,5 +1,6 @@
 from itertools import chain
 import logging
+from django.apps import apps
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -10,7 +11,6 @@ from rest_framework import status, authentication, permissions
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from badgebook.models import BadgeObjectiveAward, LmsCourseInfo
 import badgrlog
 
 from .models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
@@ -154,7 +154,7 @@ class IssuerDetail(AbstractIssuerAPIEndpoint):
     queryset = Issuer.objects.all()
     model = Issuer
     serializer_class = IssuerSerializer
-    permission_classes = (IsStaff,)
+    permission_classes = (permissions.IsAuthenticated, IsStaff,)
 
     def get(self, request, slug):
         """
@@ -204,10 +204,15 @@ class IssuerDetail(AbstractIssuerAPIEndpoint):
         # remove issuer staff
         IssuerStaff.objects.filter(issuer=issuer).delete()
 
-        # update LmsCourseInfo's that were using this issuer as the default_issuer
-        for course_info in LmsCourseInfo.objects.filter(default_issuer=issuer):
-            course_info.default_issuer = None
-            course_info.save()
+        if apps.is_installed('badgebook'):
+            try:
+                from badgebook.models import LmsCourseInfo
+                # update LmsCourseInfo's that were using this issuer as the default_issuer
+                for course_info in LmsCourseInfo.objects.filter(default_issuer=issuer):
+                    course_info.default_issuer = None
+                    course_info.save()
+            except ImportError:
+                pass
 
         # delete the issuer
         issuer.delete()
@@ -219,7 +224,7 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
     role = 'staff'
     queryset = Issuer.objects.all()
     model = Issuer
-    permission_classes = (IsOwnerOrStaff,)
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrStaff,)
 
     def get(self, request, slug):
         """
@@ -339,7 +344,7 @@ class AllBadgeClassesList(AbstractIssuerAPIEndpoint):
     """
     queryset = Issuer.objects.all()
     model = Issuer
-    permission_classes = (IsEditor,)
+    permission_classes = (permissions.IsAuthenticated, IsEditor,)
 
     def get(self, request):
         """
@@ -364,7 +369,7 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
     """
     queryset = Issuer.objects.all()
     model = Issuer
-    permission_classes = (IsEditor,)
+    permission_classes = (permissions.IsAuthenticated, IsEditor,)
 
     def get(self, request, issuerSlug):
         """
@@ -455,7 +460,7 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
     """
     queryset = BadgeClass.objects.all()
     model = BadgeClass
-    permission_classes = (MayEditBadgeClass,)
+    permission_classes = (permissions.IsAuthenticated, MayEditBadgeClass,)
 
     def get(self, request, issuerSlug, badgeSlug):
         """
@@ -512,7 +517,7 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
     queryset = BadgeClass.objects.all()
     model = BadgeClass
     serializer_class = BadgeInstanceSerializer
-    permission_classes = (MayIssueBadgeClass,)
+    permission_classes = (permissions.IsAuthenticated, MayIssueBadgeClass,)
 
     def post(self, request, issuerSlug, badgeSlug):
         """
@@ -589,7 +594,7 @@ class IssuerBadgeInstanceList(AbstractIssuerAPIEndpoint):
     """
     queryset = Issuer.objects.all().select_related('badgeinstances')
     model = Issuer
-    permission_classes = (IsStaff,)
+    permission_classes = (permissions.IsAuthenticated, IsStaff,)
 
     def get(self, request, issuerSlug):
         """
@@ -633,7 +638,7 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
     """
     queryset = BadgeInstance.objects.all()
     model = BadgeInstance
-    permission_classes = (MayEditBadgeClass,)
+    permission_classes = (permissions.IsAuthenticated, MayEditBadgeClass,)
 
     def get(self, request, issuerSlug, badgeSlug, assertionSlug):
         """
@@ -685,12 +690,17 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
         current_assertion.image.delete()
         current_assertion.save()
 
-        try:
-            award = BadgeObjectiveAward.cached.get(badge_instance_id=current_assertion.id)
-        except BadgeObjectiveAward.DoesNotExist:
-            pass
-        else:
-            award.delete()
+        if apps.is_installed('badgebook'):
+            try:
+                from badgebook.models import BadgeObjectiveAward, LmsCourseInfo
+                try:
+                    award = BadgeObjectiveAward.cached.get(badge_instance_id=current_assertion.id)
+                except BadgeObjectiveAward.DoesNotExist:
+                    pass
+                else:
+                    award.delete()
+            except ImportError:
+                pass
 
         logger.event(badgrlog.BadgeAssertionRevokedEvent(current_assertion, request.user))
         return Response(

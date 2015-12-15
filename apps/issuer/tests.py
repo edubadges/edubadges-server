@@ -1,6 +1,7 @@
 import json
 import os
 import os.path
+from django.apps import apps
 import png
 import shutil
 
@@ -58,16 +59,9 @@ class IssuerTests(APITestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_create_issuer_authenticated(self):
-        view = IssuerList.as_view()
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        response = self.client.post('/v1/issuer/issuers', example_issuer_props)
 
-        request = factory.post(
-            '/v1/issuer/issuers',
-            json.dumps(example_issuer_props),
-            content_type='application/json'
-        )
-
-        force_authenticate(request, user=get_user_model().objects.get(pk=1))
-        response = view(request)
         self.assertEqual(response.status_code, 201)
 
         # assert that name, description, url, etc are set properly in response badge object
@@ -613,7 +607,8 @@ class AssertionTests(APITestCase):
         self.assertEqual(response.status_code, 201)
 
         # assert that the BadgeInstance was published to and fetched from cache
-        with self.assertNumQueries(1): # 1 query allowed for Badgebook recipient obscuring
+        query_count = 1 if apps.is_installed('badgebook') else 0
+        with self.assertNumQueries(query_count):
             slug = response.data.get('slug')
             response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions/{}'.format(slug))
             self.assertEqual(response.status_code, 200)

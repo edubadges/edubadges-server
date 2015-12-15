@@ -22,4 +22,6 @@ breakdown/static/css/*.map
 .ropeproject
 .idea/*
 
+build/badgebook/
+
 test.cache/

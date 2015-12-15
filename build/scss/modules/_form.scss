@@ -144,3 +144,24 @@
   }
 
 }
+
+.form_-inline {
+  align-items: center;
+  display: flex;
+
+  > * {
+    flex: 0 0 auto;
+
+    &:not(:last-child) {
+      margin-right: $layout-spacing;
+    }
+
+  }
+
+  input:not([type='checkbox']),
+  select,
+  textarea {
+    max-width: 300px;
+  }
+
+}

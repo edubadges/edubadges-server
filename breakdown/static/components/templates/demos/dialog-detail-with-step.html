@@ -1,0 +1,44 @@
+<!-- Requires dialog-polyfill.js above screen.css, dialog elements themselves need to be a child of body -->
+<button class="button_" id="dialogOpen">Open Dialog</button>
+<dialog class="dialog_" id="dialogID">
+<button class="dialog_-x-close" id="dialogClose"><span class="icon_ icon_-notext icon_-close">Close</span></button>
+<div class="dialog_-x-content">
+  
+  <header class="heading_ heading_-small">
+    <div class="heading_-x-text">
+      <h1>I am the key!</h1>
+    </div>
+  </header>
+  <div class="detail_">
+    <div>
+      <img srcst="http://placehold.it/288x288 2x, http://placehold.it/144x144" src="http://placehold.it/144x144" width="144" height="144" alt="badge description">
+    </div>
+    <ul>
+      <li>
+        {{> molecules/step-earned}}
+      </li>
+      <li>
+        <h2 class="detail_-x-meta">Issue Date</h2>
+        <p>January 23, 2016</p>
+      </li>
+      <li>
+        <h2 class="detail_-x-meta">Criteria</h2>
+        <p><a href="https://badgr.io/public/badges/new-test-badge/criteria" target="_blank" title="Criteria to earn this badge">asdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfsdfasdfasdfasdfasdfasdfasdfasfasdfasdfasdfasdfasfasdfasdfasdfasdfa</a></p>
+      </li>
+      <li>
+        <h2 class="detail_-x-meta">Issuer</h2>
+        <p>Badge Issuer, Inc.</p>
+      </li>
+      <li>
+        <div class="l-horizontal">
+          <div>
+            {{> atoms/button-tertiary}}
+            {{> atoms/button-tertiary}}
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+</dialog>

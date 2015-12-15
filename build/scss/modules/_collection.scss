@@ -1,6 +1,7 @@
 .collection_ {
   display: flex;
   flex-wrap: wrap;
+  min-height: 135px;
   padding: $layout-spacing*2 0 0 $layout-spacing*2;
 
   > :first-child {
