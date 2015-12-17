@@ -214,6 +214,11 @@ var ManageCollection = React.createClass({
         this.setState({selectedBadgeIds: newSelectedBadgeArray});
     },
 
+    batchRowClick: function(rowDatas, selected) {
+        var newSelectedBadgeArray = (selected) ? rowDatas.map(function(rowData) { return rowData.id }) : [];
+        this.setState({selectedBadgeIds: newSelectedBadgeArray});
+    },
+
     render: function() {
         var allBadges = APIStore.getCollection('earner_badges');
         var collectionBadges = APIStore.filter('earner_badges', 'id', _.pluck(this.props.badgeList, 'id'));
@@ -228,7 +233,9 @@ var ManageCollection = React.createClass({
                     widthHint={865}
                     badges={allBadges}
                     initialSelectedBadges={_.pluck(this.props.badgeList, 'id')}
-                    onRowClick={this.onRowClick} />
+                    onRowClick={this.onRowClick}
+                    batchRowClick={this.batchRowClick}
+                />
             </Dialog>
         );
 
