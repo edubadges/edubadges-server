@@ -3,6 +3,7 @@ var moment = require('moment');
 
 // Actions
 var navigateLocalPath = require('../actions/clicks').navigateLocalPath;
+var APISubmitData = require('../actions/api.js').APISubmitData;
 
 // Components
 var Button = require('../components/Button.jsx').Button;
@@ -51,16 +52,46 @@ BadgeInstanceList = React.createClass({
       dataRequestStatus: null
     };
   },
+
+  revokeBadgeInstance: function(badgeInstance, ev) {
+      badgeClassUrl = badgeInstance.badge_class;
+      badgeClassSlug = badgeClassUrl.substr(badgeClassUrl.lastIndexOf('/')+1);
+
+      issuerUrl = badgeInstance.issuer;
+      issuerSlug = issuerUrl.substr(issuerUrl.lastIndexOf('/')+1);
+
+      apiContext = {
+          //apiCollectionKey: "issuer_badgeinstances",
+          //apiSearchKey: 'slug',
+          //apiSearchValue: badgeInstance.slug,
+
+          actionUrl: "/v1/issuer/issuers/"+ issuerSlug +"/badges/"+ badgeClassSlug +"/assertions/"+ badgeInstance.slug,
+          method: "DELETE",
+          successHttpStatus: [200],
+          successMessage: "Badge instance revoked."
+      };
+      APISubmitData({revocation_reason: 'Manually revoked by issuer.'}, apiContext);
+  },
+
   render: function() {
     var badgeInstances = this.props.badgeInstances.map(function(badgeInstance, i) {
+
         var issuedOn = moment(badgeInstance.json.issuedOn).format('MMMM D, YYYY');
-        var evidence;
+        var evidenceButton;
         if (badgeInstance.json.evidence) {
           var clickEvidence = function() {
             window.open(badgeInstance.json.evidence, '_blank');
           }
-          evidence = (<Button style="tertiary" label="Evidence" handleClick={clickEvidence}/>)
+          evidenceButton = (<Button style="tertiary" label="Evidence" handleClick={clickEvidence}/>)
         }
+
+        var revokeButton = (<Button className="button_ button_-tertiary" label="Revoke"
+                                    onClick={this.revokeBadgeInstance.bind(this, badgeInstance)} />);
+        if (badgeInstance.revoked) {
+            revokeButton = (<Button className="button_ button_-tertiary is-disabled" label="Revoke"
+                                    popover={badgeInstance.revocation_reason} />);
+        }
+
         return (
             <tr>
                 <th scope="row">{badgeInstance.recipient_identifier} </th>
@@ -68,7 +99,8 @@ BadgeInstanceList = React.createClass({
                 <td>
                     <div className="l-horizontal">
                         <div>
-                            {evidence}
+                            {revokeButton}
+                            {evidenceButton}
                         </div>
                     </div>
                 </td>
