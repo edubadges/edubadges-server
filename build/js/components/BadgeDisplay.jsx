@@ -209,6 +209,7 @@ var BadgeDisplayThumbnail = React.createClass({
         if (selectCollectionDialog && selectCollectionDialog.hasAttribute('open')) {
             selectCollectionDialog.close();
         }
+        this.refs.selectDialog.dialog.update();
     },
     
   render: function() {
@@ -267,7 +268,7 @@ var BadgeDisplayThumbnail = React.createClass({
         // fieldsMeta.collection.selectOptions) so re-rendering it does nothing new.
         // Here, as a work-around we pass it an entirely new reactComponent instead.
         this.refs.selectDialog.dialog.reactComponent = selectCollectionDialog;
-        this.refs.selectDialog.dialog.update();
+        // this.refs.selectDialog.dialog.update();
     }
 
     var style = {};
