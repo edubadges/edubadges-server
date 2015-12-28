@@ -209,6 +209,7 @@ var BadgeDisplayThumbnail = React.createClass({
         if (selectCollectionDialog && selectCollectionDialog.hasAttribute('open')) {
             selectCollectionDialog.close();
         }
+        this.refs.selectDialog.dialog.update();
     },
     
   render: function() {
@@ -244,7 +245,7 @@ var BadgeDisplayThumbnail = React.createClass({
         defaultCollection: _.get(collections, "[0].slug", ''),
         badgeName: badgeName,
     });
-    FormStore.getOrInitFormData(selectCollectionFormId, selectCollectionFormProps)
+    FormStore.initFormData(selectCollectionFormId, selectCollectionFormProps)
 
     var selectCollectionActions=[
         <SubmitButton formType={selectCollectionFormType} formId={selectCollectionFormId} label="Add" />
@@ -260,6 +261,15 @@ var BadgeDisplayThumbnail = React.createClass({
                 <p>{badgeName +" will automatically be added to the new collection."}</p>
             </DialogOpener>
         </Dialog>);
+
+    if (this.refs.selectDialog) {
+        // Presumably the this.reactComponent created initially has a stale reference
+        // to the old selectCollectionFormProps (without the new additional
+        // fieldsMeta.collection.selectOptions) so re-rendering it does nothing new.
+        // Here, as a work-around we pass it an entirely new reactComponent instead.
+        this.refs.selectDialog.dialog.reactComponent = selectCollectionDialog;
+        // this.refs.selectDialog.dialog.update();
+    }
 
     var style = {};
     if (this.props.selected) {
@@ -283,7 +293,7 @@ var BadgeDisplayThumbnail = React.createClass({
             </div>
             <More>
                 <div className="dropdown_">
-                    <DialogOpener dialog={selectCollectionDialog} dialogId={"select-collection-"+ badgeId} key={"select-collection-"+ badgeId}>
+                    <DialogOpener ref="selectDialog" dialog={selectCollectionDialog} dialogId={"select-collection-"+ badgeId} key={"select-collection-"+ badgeId}>
                         <button className="dropdown_-x-item"><span className="icon_ icon_-add">Add to Collection</span></button>
                     </DialogOpener>
                 </div>
