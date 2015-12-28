@@ -214,9 +214,7 @@ var App = React.createClass({
             </nav>
             </header>
 
-            <main className="wrap_ wrap_-borderbottom l-wrapper l-wrapper-inset">
-                { mainComponent }
-            </main>
+            { mainComponent }
         </div>
     );
   },
@@ -566,7 +564,7 @@ var App = React.createClass({
     if (this.state.showingBadgeStudio) {
 
       var mainComponent = (
-        <MainComponent className="l-vertical" viewId={viewId}>
+        <MainComponent className="l-vertical" mainClassName="l-mainoverride" viewId={viewId}>
           <BadgeStudio handleBadgeComplete={handleBadgeComplete} badgeDetail={this.state.badgeStudioDetail}/>
         </MainComponent>);
 

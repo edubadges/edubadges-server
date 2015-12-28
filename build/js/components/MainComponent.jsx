@@ -5,16 +5,19 @@ var LoadingComponent = require('../components/LoadingComponent.jsx');
 var MainComponent = React.createClass({
   getDefaultProps: function() {
     return {
-      dependenciesLoaded: true
+      dependenciesLoaded: true,
+      mainClassName: "wrap_ wrap_-borderbottom l-wrapper l-wrapper-inset"
     };
   },
   render: function() {
     var spinner = (<div className="message_" style={{marginTop: '50px'}}>
         <LoadingComponent/></div>);
     return (
-      <div className={( ! this.props.className) ? "x-owner" : "x-owner "+ this.props.className}>
-        {this.props.dependenciesLoaded ? this.props.children : spinner}
-      </div>
+      <main className={this.props.mainClassName}>
+        <div className={( ! this.props.className) ? "x-owner" : "x-owner "+ this.props.className}>
+          {this.props.dependenciesLoaded ? this.props.children : spinner}
+        </div>
+      </main>
     );
   }
 });
