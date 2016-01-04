@@ -92,5 +92,15 @@
         },
         "model": "account.emailaddress",
         "pk": 4
+    },
+    {
+        "fields": {
+            "verified": false,
+            "user": 3,
+            "primary": false,
+            "email": "unclaimed1@example.com"
+        },
+        "model": "account.emailaddress",
+        "pk": 5
     }
 ]
