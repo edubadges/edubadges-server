@@ -14,7 +14,7 @@ var MainComponent = React.createClass({
         <LoadingComponent/></div>);
     return (
       <main className={this.props.mainClassName}>
-        <div className={( ! this.props.className) ? "x-owner" : "x-owner "+ this.props.className}>
+        <div className={"x-owner " + this.props.className}>
           {this.props.dependenciesLoaded ? this.props.children : spinner}
         </div>
       </main>
