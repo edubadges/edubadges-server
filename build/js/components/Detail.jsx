@@ -144,7 +144,7 @@ var Detail = React.createClass({
 
             return (
                 <div className="dialog_-x_content">
-                    <Heading size="small" title={badgeName} subtitle={_.get(this.props, 'badge_class.json.description')}/>
+                    <Heading truncate={true} size="small" title={badgeName} subtitle={_.get(this.props, 'badge_class.json.description')}/>
                     <div className="detail_">
                         <div>
                             <img src={_.get(this.props, 'badge_class.image')} width={this.props.imageSize} height={this.props.imageSize} alt={badgeName}/>
