@@ -1,8 +1,11 @@
 from django.core import mail
+from django.test import TestCase
 
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIRequestFactory, APITestCase
-from badgeuser.models import BadgeUser
+
+from .models import BadgeUser
+from .serializers import UserProfileField
 
 factory = APIRequestFactory()
 
@@ -86,3 +89,17 @@ class UserCreateTests(APITestCase):
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(len(mail.outbox), 1)
+
+
+class UserUnitTests(TestCase):
+    def test_user_can_have_unicode_characters_in_name(self):
+        user = BadgeUser(
+            username='abc', email='abc@example.com',
+            first_name=u'\xe2', last_name=u'Bowie')
+        import pdb; pdb.set_trace();
+
+        self.assertEqual(user.get_full_name(), u'\xe2 Bowie')
+
+        serializer = UserProfileField(user)
+        UserProfileField.to_representation(user)
+

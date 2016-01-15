@@ -50,7 +50,7 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
         return reverse('user_detail', kwargs={'user_id': self.pk})
 
     def get_full_name(self):
-        return "%s %s" % (self.first_name, self.last_name)
+        return u"%s %s" % (self.first_name, self.last_name)
 
     def email_user(self, subject, message, from_email=None, **kwargs):
         """
