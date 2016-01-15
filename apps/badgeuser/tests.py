@@ -96,10 +96,5 @@ class UserUnitTests(TestCase):
         user = BadgeUser(
             username='abc', email='abc@example.com',
             first_name=u'\xe2', last_name=u'Bowie')
-        import pdb; pdb.set_trace();
 
         self.assertEqual(user.get_full_name(), u'\xe2 Bowie')
-
-        serializer = UserProfileField(user)
-        UserProfileField.to_representation(user)
-
