@@ -578,7 +578,7 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        badge_instances = current_badgeclass.badgeinstances.all()
+        badge_instances = current_badgeclass.badgeinstances.filter(revoked=False)
 
         if not badge_instances.exists():
             return Response([], status=status.HTTP_200_OK)
