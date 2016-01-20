@@ -59,6 +59,9 @@ BadgeInstanceList = React.createClass({
       // TODO: Factor state into store
       this.setState({revoking: badgeInstance.slug});
   },
+  cancelRevokeInstance: function(ev){
+      this.setState({revoking: null});
+  },
   revokeBadgeInstance: function(badgeInstance, ev) {
       badgeClassUrl = badgeInstance.badge_class;
       badgeClassSlug = badgeClassUrl.substr(badgeClassUrl.lastIndexOf('/')+1);
@@ -92,21 +95,27 @@ BadgeInstanceList = React.createClass({
           evidenceButton = (<Button style="tertiary" label="Evidence" handleClick={clickEvidence}/>)
         }
 
-        var revokeButton = null, revokeWarning = null;
+        var leftCellGroup = (<div></div>), rightCellGroup = (<div></div>);
         if (this.state.revoking && this.state.revoking == badgeInstance.slug){
-            revokeButton = (
-                <Button className="button_ button_-tertiary" label="Confirm Revoke"
-                        onClick={this.revokeBadgeInstance.bind(this, badgeInstance)}
-                />
+            rightCellGroup = (
+                <div>
+                    Are you sure?
+                    <Button className="button_ button_-tertiary" label="Cancel"
+                            onClick={this.cancelRevokeInstance} />
+                    <Button className="button_" label="Confirm Revoke"
+                            onClick={this.revokeBadgeInstance.bind(this, badgeInstance)} />
+                </div>
             );
-            revokeWarning = "Are you sure?";
         }
         else {
-            revokeButton = (
-                <Button
-                    className="button_ button_-tertiary" label="Revoke"
-                    onClick={this.initRevokeInstance.bind(this, badgeInstance)}
-                />
+            leftCellGroup = (
+                <div>
+                    <Button
+                        className="button_ button_-tertiary" label="Revoke"
+                        onClick={this.initRevokeInstance.bind(this, badgeInstance)}
+                    />
+                    {evidenceButton}
+                </div>
             );
         }
 
@@ -116,11 +125,8 @@ BadgeInstanceList = React.createClass({
                 <td>{issuedOn}</td>
                 <td>
                     <div className="l-horizontal">
-                        <div>
-                            {revokeWarning}
-                            {revokeButton}
-                            {evidenceButton}
-                        </div>
+                        {leftCellGroup}
+                        {rightCellGroup}
                     </div>
                 </td>
             </tr>
@@ -136,7 +142,7 @@ BadgeInstanceList = React.createClass({
                 <tr>
                     <th scope="col">Recipient</th>
                     <th scope="col">Issue Date</th>
-                    <th scope="col" style={{minWidth:"255px"}}>Actions</th>
+                    <th scope="col">Actions</th>
                 </tr>
             </thead>
             <tbody>
