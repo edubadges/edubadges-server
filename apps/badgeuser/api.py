@@ -1,4 +1,5 @@
 from rest_framework import authentication, permissions, status, generics
+from rest_framework.exceptions import NotAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
@@ -6,12 +7,12 @@ from rest_framework.exceptions import ValidationError
 from mainsite.permissions import IsRequestUser
 
 from .models import BadgeUser
-from .serializers import BadgeUserSerializer
+from .serializers import BadgeUserSerializer, BadgeUserProfileSerializer
 
 
 class BadgeUserDetail(generics.RetrieveUpdateAPIView):
     """
-    View a single user profile by username
+    View another user's profile by username. Currently permissions only allow you to view your own profile.
     """
     queryset = BadgeUser.objects.all()
     serializer_class = BadgeUserSerializer
@@ -27,7 +28,7 @@ class BadgeUserDetail(generics.RetrieveUpdateAPIView):
 
     def get(self, request, user_id):
         """
-        Return full details on a single badge the consumer is currently analyzing.
+        Return public profile information on another user.
         """
         user = self.get_object()
 
@@ -35,8 +36,34 @@ class BadgeUserDetail(generics.RetrieveUpdateAPIView):
 
         return Response(serializer.data)
 
-    def put(self, resuest, pk):
-        raise ValidationError("updating a single user not implemented")
+
+class BadgeUserProfile(APIView):
+    """
+    View or update your own profile, or register a new account.
+    """
+    serializer_class = BadgeUserProfileSerializer
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request):
+
+        serializer = self.serializer_class(
+            data=request.data, context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        new_user = serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def get(self, request):
+        if request.user.is_anonymous():
+            raise NotAuthenticated()
+
+        serializer = self.serializer_class(request.user)
+        return Response(serializer.data)
+
+    # def put(self, request):
+    #     pass
 
 
 class BadgeUserToken(APIView):
@@ -48,7 +75,10 @@ class BadgeUserToken(APIView):
         Get the authenticated user's auth token.
         A new auth token will be created if none already exist for this user.
         """
-        token_input = {'username': request.user.username, 'token': request.user.cached_token()}
+        token_input = {
+            'username': request.user.username,
+            'token': request.user.cached_token()
+        }
         return Response(token_input, status=status.HTTP_200_OK)
 
     def put(self, request):

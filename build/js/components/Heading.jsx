@@ -55,7 +55,7 @@ var Heading = React.createClass({
             <div className="x-owner">
                 <header className={headerClassList.join(" ")}>
                     <div className="heading_-x-text">
-                        <h1>{this.props.title} {meta}</h1>
+                        <h1 className={this.props.truncate ? "truncate_" : ""}>{this.props.title} {meta}</h1>
                         {subtitle}
                     </div>
                     {actions}

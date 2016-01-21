@@ -35,6 +35,7 @@
   }
 
   &.dropzone_-is-uploaded {
+    background-image: none;
     border: 0;
     cursor: normal;
     padding: 0;
@@ -46,4 +47,9 @@
   background-image: url('images/dropzone-add-secondary.svg');
   background-position: center $layout-spacing*3;
   padding: $layout-spacing*9.5 $layout-spacing*1.5 $layout-spacing*3;
+
+  &.dropzone_-is-uploaded {
+    background-image: none;
+  }
+
 }

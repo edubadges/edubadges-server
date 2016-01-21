@@ -63,7 +63,7 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
                 "Badge components not well formed. Missing structure: {}"
                 .format(e.message))
 
-        # Find and assign a Serialier to each badge Component
+        # Find and assign a Serializer to each badge Component
         components = ComponentsSerializer(badge_instance, badge_class, issuer)
         if not components.is_valid():
             error = {

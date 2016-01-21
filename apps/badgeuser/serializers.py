@@ -1,5 +1,6 @@
 from django.conf import settings
 
+from allauth.account.models import EmailConfirmation, EmailAddress
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
@@ -69,3 +70,51 @@ class BadgeUserSerializer(serializers.ModelSerializer):
     # earnerBadges = EarnerBadgeSerializer(many=True, read_only=True, source='earnerbadge_set')
     # consumerBadges = ConsumerBadgeDetailSerializer(many=True, read_only=True, source='consumerbadge_set')
     # issuerRoles
+
+
+class BadgeUserProfileSerializer(serializers.Serializer):
+
+    first_name = serializers.CharField(max_length=30, allow_blank=True)
+    last_name = serializers.CharField(max_length=30, allow_blank=True)
+    email = serializers.EmailField()
+    password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+
+        try:
+            email_address = EmailAddress.objects.get(email=validated_data['email'])
+        except EmailAddress.DoesNotExist:
+            pass
+        else:
+            if email_address.verified is False:
+                email_address.delete()
+            else:
+                raise serializers.ValidationError(
+                    'Account could not be created. An account with this email address may already exist.'
+                )
+
+        user = BadgeUser(
+            email=validated_data['email'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name']
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+
+        EmailAddress.objects.add_email(
+            request, user, validated_data['email'], confirm=True, signup=True
+        )
+
+        return user
+
+    # def update(self, instance, validated_data):
+    #     if validated_data['first_name']:
+    #         instance.first_name = validated_data['first_name']
+    #     if validated_data['last_name']:
+    #         instance.last_name = validated_data['last_name']
+    #
+    #     if validated_data.get('first_name', validated_data.get('last_name')):
+    #         instance.save()
+    #
+    #     return instance

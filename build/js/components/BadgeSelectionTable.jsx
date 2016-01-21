@@ -24,8 +24,9 @@ var Button = require('../components/Button.jsx').Button;
 // Cell rendering helpers for the FixedDataTable React component
 var fixedDataTable = {
     headerRenderer: function(column, label, cellDataKey, columnData, rowData, width) {
+        var allSelected = this.state.selected.every(function(selected) { return selected; });
         if (column.icon) {
-            return (<p className={"icon_ icon_-notext icon_-check " + column.icon}>Selected</p> );
+            return (<p onClick={this.toggleAll} className={"icon_ icon_-notext icon_-check " + (allSelected ? "icon_-check-is-active" : "")}>Selected</p> );
         }
         return (<p className="truncate_" title={label}>{label}</p>);
     },
@@ -33,7 +34,7 @@ var fixedDataTable = {
     tableColumns: [
         {
             label: "Select",
-            icon: "icon_-add",
+            icon: "icon_-check",
             width: 56,
             render: function(cellData, cellDataKey, rowData, rowIndex, columnData, width) {
                 return (
@@ -87,6 +88,7 @@ var BadgeSelectionTable = React.createClass({
         heightHint: React.PropTypes.number,
         stored: React.PropTypes.bool,
         onRowClick: React.PropTypes.func,
+        batchRowClick: React.PropTypes.func,
     },
 
     getDefaultProps: function() {
@@ -132,6 +134,14 @@ var BadgeSelectionTable = React.createClass({
     toggleCollectionState: function(rowIndex, rowData) {
         var newSelectionArray = this.state.selected.slice();
         newSelectionArray[rowIndex] = ! newSelectionArray[rowIndex]; 
+        this.setState({selected: newSelectionArray});
+    },
+
+    toggleAll: function() {
+        var allSelected = this.state.selected.every(function(selected) { return selected; });
+        var newSelectionArray = this.state.selected.slice();
+        newSelectionArray = newSelectionArray.map(function() { return ! allSelected; });
+        this.props.batchRowClick(this.props.badges, ! allSelected);
         this.setState({selected: newSelectionArray});
     },
 

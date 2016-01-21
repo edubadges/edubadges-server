@@ -3,6 +3,7 @@ var moment = require('moment');
 
 // Actions
 var navigateLocalPath = require('../actions/clicks').navigateLocalPath;
+var APISubmitData = require('../actions/api.js').APISubmitData;
 
 // Components
 var Button = require('../components/Button.jsx').Button;
@@ -51,25 +52,81 @@ BadgeInstanceList = React.createClass({
       dataRequestStatus: null
     };
   },
+  getInitialState: function(){
+      return {};
+  },
+  initRevokeInstance: function(badgeInstance, ev) {
+      // TODO: Factor state into store
+      this.setState({revoking: badgeInstance.slug});
+  },
+  cancelRevokeInstance: function(ev){
+      this.setState({revoking: null});
+  },
+  revokeBadgeInstance: function(badgeInstance, ev) {
+      badgeClassUrl = badgeInstance.badge_class;
+      badgeClassSlug = badgeClassUrl.substr(badgeClassUrl.lastIndexOf('/')+1);
+
+      issuerUrl = badgeInstance.issuer;
+      issuerSlug = issuerUrl.substr(issuerUrl.lastIndexOf('/')+1);
+
+      apiContext = {
+          apiCollectionKey: "issuer_badgeinstances",
+          apiSearchKey: 'slug',
+          apiSearchValue: badgeInstance.slug,
+
+          actionUrl: "/v1/issuer/issuers/"+ issuerSlug +"/badges/"+ badgeClassSlug +"/assertions/"+ badgeInstance.slug,
+          method: "DELETE",
+          successHttpStatus: [200],
+          successMessage: "Badge instance revoked."
+      };
+      APISubmitData({revocation_reason: 'Manually revoked by issuer.'}, apiContext);
+      this.setState({revoking: null});
+  },
+
   render: function() {
     var badgeInstances = this.props.badgeInstances.map(function(badgeInstance, i) {
+
         var issuedOn = moment(badgeInstance.json.issuedOn).format('MMMM D, YYYY');
-        var evidence;
+        var evidenceButton;
         if (badgeInstance.json.evidence) {
           var clickEvidence = function() {
             window.open(badgeInstance.json.evidence, '_blank');
-          }
-          evidence = (<Button style="tertiary" label="Evidence" handleClick={clickEvidence}/>)
+          };
+          evidenceButton = (<Button style="tertiary" label="Evidence" handleClick={clickEvidence}/>)
         }
+
+        var leftCellGroup = (<div></div>), rightCellGroup = (<div></div>);
+        if (this.state.revoking && this.state.revoking == badgeInstance.slug){
+            rightCellGroup = (
+                <div className="l-horizontal l-horizontalright">
+                    <p style={{textAlign: "right"}}>Are you sure?</p>
+                    <Button className="button_ button_-tertiary" label="Cancel"
+                            onClick={this.cancelRevokeInstance} />
+                    <Button className="button_" label="Confirm Revoke"
+                            onClick={this.revokeBadgeInstance.bind(this, badgeInstance)} />
+                </div>
+            );
+        }
+        else {
+            leftCellGroup = (
+                <div>
+                    <Button
+                        className="button_ button_-tertiary" label="Revoke"
+                        onClick={this.initRevokeInstance.bind(this, badgeInstance)}
+                    />
+                    {evidenceButton}
+                </div>
+            );
+        }
+
         return (
-            <tr>
+            <tr key={badgeInstance.slug}>
                 <th scope="row">{badgeInstance.recipient_identifier} </th>
                 <td>{issuedOn}</td>
                 <td>
-                    <div className="l-horizontal">
-                        <div>
-                            {evidence}
-                        </div>
+                    <div>
+                        {leftCellGroup}
+                        {rightCellGroup}
                     </div>
                 </td>
             </tr>
@@ -92,6 +149,7 @@ BadgeInstanceList = React.createClass({
                 {badgeInstances}
             </tbody>
         </table>
+        {loadingIcon}
       </div>
     );
   }

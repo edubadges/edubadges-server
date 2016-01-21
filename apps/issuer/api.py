@@ -578,7 +578,7 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        badge_instances = current_badgeclass.badgeinstances.all()
+        badge_instances = current_badgeclass.badgeinstances.filter(revoked=False)
 
         if not badge_instances.exists():
             return Response([], status=status.HTTP_200_OK)
@@ -677,16 +677,19 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
               message: Assertion not found or user has inadequate permissions.
         """
         if request.data.get('revocation_reason') is None:
-            raise ValidationError("revocation_reason is required to revoke a badge assertion")
+            raise ValidationError("The parameter revocation_reason is required \
+                                  to revoke a badge assertion")
         current_assertion = self.get_object(assertionSlug)
         if current_assertion is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         if current_assertion.revoked is True:
-            return Response("Assertion is already revoked.", status=status.HTTP_400_BAD_REQUEST)
+            return Response("Assertion is already revoked.",
+                            status=status.HTTP_400_BAD_REQUEST)
 
         current_assertion.revoked = True
-        current_assertion.revocation_reason = request.data.get('revocation_reason')
+        current_assertion.revocation_reason = \
+            request.data.get('revocation_reason')
         current_assertion.image.delete()
         current_assertion.save()
 

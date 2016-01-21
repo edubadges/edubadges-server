@@ -55,12 +55,13 @@
         {% block content %}
             {% if initial_data %}
                 <div id="app" class="x-owner">
+                    <header class="header_ l-wrapper"><a class="header_-x-logo"><img src="/static/images/header-logo.svg" width="193" height="89"></a></header>
                     <!-- React App renders within #app -->
-                    <div class="loading-react">
-                        <h1>{{ self.head_title() }}</h1>
-                        <p>Loading...</p>
-                        <p class="loading-spinner"><img src="{{STATIC_URL}}images/ajax-loader.gif"></p>
-                    </div>
+                    <main class="wrap_ wrap_-borderbottom">
+                        <div class="loading_">
+                            <p>Badgr is Loading&hellip;</p>
+                        </div>
+                    </main>
                 </div>
             {% else %}
                 <!-- No react content to render -->

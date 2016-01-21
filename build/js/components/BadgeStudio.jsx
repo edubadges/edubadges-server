@@ -11,9 +11,10 @@ var StudioCanvas = require('../components/StudioCanvas.jsx').StudioCanvas;
 var StudioNavItem = React.createClass({
     render: function() {
         var dataLabel = this.props['data-label'];
+        var linkClass = this.props.isActive ? "gallerynav_-x-item gallerynav_-is-active" : "gallerynav_-x-item";
         return (
             <li>
-                <a {...this.props} className="gallerynav_-x-item gallerynav_-is-active" href={"#tab-"+dataLabel}>
+                <a {...this.props} className={linkClass} href={"#tab-"+dataLabel}>
                     <span className={"icon_ icon_-large icon_-"+dataLabel}>{this.props.children}</span>
                 </a>
             </li>
@@ -231,8 +232,14 @@ var BadgeStudio = React.createClass({
                 <nav className="wrap_ wrap_-shadow wrap_-dark">
                     <h1 className="wrap_ wrap_-dark wrap_-borderbottom textindent_ l-studio-x-header">Badge Studio</h1>
                     <ul className="gallerynav_">
-                        <StudioNavItem onClick={this.handleTabClick} data-label="shapes">Shapes</StudioNavItem>
-                        <StudioNavItem onClick={this.handleTabClick} data-label="graphics">Graphics</StudioNavItem>
+                        <StudioNavItem
+                            onClick={this.handleTabClick}
+                            isActive={this.state.activeTab == "shapes"}
+                            data-label="shapes">Shapes</StudioNavItem>
+                        <StudioNavItem
+                            onClick={this.handleTabClick}
+                            isActive={this.state.activeTab == "graphics"}
+                            data-label="graphics">Graphics</StudioNavItem>
                     </ul>
                 </nav>
                 <div className="wrap_ wrap_-borderright">
