@@ -98,8 +98,8 @@ BadgeInstanceList = React.createClass({
         var leftCellGroup = (<div></div>), rightCellGroup = (<div></div>);
         if (this.state.revoking && this.state.revoking == badgeInstance.slug){
             rightCellGroup = (
-                <div>
-                    Are you sure?
+                <div className="l-horizontal l-horizontalright">
+                    <p style={{textAlign: "right"}}>Are you sure?</p>
                     <Button className="button_ button_-tertiary" label="Cancel"
                             onClick={this.cancelRevokeInstance} />
                     <Button className="button_" label="Confirm Revoke"
@@ -120,11 +120,11 @@ BadgeInstanceList = React.createClass({
         }
 
         return (
-            <tr>
+            <tr key={badgeInstance.slug}>
                 <th scope="row">{badgeInstance.recipient_identifier} </th>
                 <td>{issuedOn}</td>
                 <td>
-                    <div className="l-horizontal">
+                    <div>
                         {leftCellGroup}
                         {rightCellGroup}
                     </div>
