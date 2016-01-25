@@ -342,8 +342,17 @@ APIStore.getData = function(context, requestContext, pagination_url, retriedAtte
       }.bind(this), wait*1000);
     }
     else if (context.successfulHttpStatus.indexOf(response.status) == -1){
+      var errorContent;
+      try {
+          errorContent = JSON.parse(response.text);
+      }
+      catch(e){
+          errorContent = response.text;
+      }
+
+      var errorMessage = _.get(errorContent, 'detail', errorContent);
       APIActions.APIGetResultFailure({
-        message: {type: 'danger', content: response.status + " Error getting data: " + response.text}
+        message: {type: 'danger', content: response.status + " Error getting data: " + errorMessage}
       });
     }
     else {
