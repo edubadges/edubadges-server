@@ -179,7 +179,7 @@ var BadgeStudio = React.createClass({
             if (blob) {
                 // turn blob into a File
                 blob.lastModifiedDate = new Date();
-                blob.name = "custom badge";
+                blob.name = "custombadge.png";
             }
         } else {
             console.log("Error: unable to find badge studio dataURL")
