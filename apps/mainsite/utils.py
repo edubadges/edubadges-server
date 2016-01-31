@@ -1,6 +1,8 @@
 """
 Utility functions and constants that might be used across the project.
 """
+import hashlib
+
 from django.apps import apps
 from django.conf import settings
 from django.core.urlresolvers import get_callable
@@ -30,3 +32,14 @@ def client_ip_from_request(request):
         ip = request.META.get("REMOTE_ADDR", "")
     return ip
 
+
+"""
+Cache Utilities
+"""
+def filter_cache_key(key, key_prefix, version):
+    generated_key = ':'.join([key_prefix, str(version), key])
+    if len(generated_key) > 250:
+        h = hashlib.md5()
+        h.update(generated_key)
+        generated_key = h.hexdigest()
+    return generated_key
