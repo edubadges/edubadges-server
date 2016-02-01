@@ -39,7 +39,5 @@ Cache Utilities
 def filter_cache_key(key, key_prefix, version):
     generated_key = ':'.join([key_prefix, str(version), key])
     if len(generated_key) > 250:
-        h = hashlib.md5()
-        h.update(generated_key)
-        generated_key = h.hexdigest()
+        return hashlib.md5(generated_key).hexdigest()
     return generated_key
