@@ -38,6 +38,7 @@ requests-oauthlib==0.4.2
 rules==0.4
 
 # Some extras
+django-cors-headers==1.1.0
 Django-Select2==4.2.2
 django-debug-toolbar==1.2.2
 MarkupSafe==0.23

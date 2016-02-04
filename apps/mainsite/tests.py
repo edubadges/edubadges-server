@@ -1,8 +1,13 @@
 import os
 import warnings
 
+from django.core import mail
 from django.core.cache import cache, CacheKeyWarning
+from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
+
+from allauth.account.models import EmailConfirmation
+from rest_framework.test import APITestCase
 
 from mainsite.settings import TOP_DIR
 
@@ -41,3 +46,25 @@ class TestCacheSettings(TestCase):
                 retrieved = cache.get(long_key_string)
 
                 self.assertEqual(retrieved, "hello cached world")
+
+
+class TestSignup(APITestCase):
+    def test_user_signup_email_confirmation_redirect(self):
+        post_data = {
+            'first_name': 'Tester',
+            'last_name': 'McSteve',
+            'email': 'test12345@example.com',
+            'password': '1234567'
+        }
+        self.client.post('/v1/user/profile', post_data)
+
+        self.assertEqual(len(mail.outbox), 1)
+
+        confirmation = EmailConfirmation.objects.first()
+
+        with self.settings(ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL='http://frontend.ui/login/'):
+            response = self.client.get(
+                reverse('account_confirm_email', kwargs={ 'key': confirmation.key }),
+                follow=False
+            )
+            self.assertRedirects(response, 'http://frontend.ui/login/Tester', fetch_redirect_response=False)

@@ -26,6 +26,7 @@ INSTALLED_APPS = [
 
     'allauth',
     'allauth.account',
+    'corsheaders',
 
     # 'skycms.structure',
     'reversion',
@@ -52,6 +53,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE_CLASSES = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -164,6 +166,15 @@ ACCOUNT_FORMS = {
     'add_email': 'badgeuser.account_forms.AddEmailForm'
 }
 ACCOUNT_SIGNUP_FORM_CLASS = 'badgeuser.forms.BadgeUserCreationForm'
+
+CORS_URLS_REGEX = r'^.*$'
+
+# TODO: REMOVE TEMPORARY HARDCODED REVIEW SERVER URL:
+CORS_ORIGIN_WHITELIST = (
+    'badgr-ui.review.concentricsky.com',
+    'localhost:3000',
+)
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = 'http://badgr-ui.review.concentricsky.com/login/'
 
 ##
 #
