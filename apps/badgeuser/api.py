@@ -198,7 +198,12 @@ class BadgeUserEmailDetail(APIView):
               type: boolean
               paramType: form
               description: Should this email be primary contact for the user
-              required: true
+              required: false
+            - name: resend
+              type: boolean
+              paramType: form
+              description: Request the verification email be resent
+              required: false
         """
         email_address = self.get_email(id)
         if email_address is None:
@@ -206,10 +211,14 @@ class BadgeUserEmailDetail(APIView):
         if email_address.user_id != request.user.id:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        serializer = ExistingEmailSerializer(email_address, context={'request': request})
+        if email_address.verified:
+            if request.data.get('primary'):
+                email_address.set_as_primary()
+        else:
+            if request.data.get('resend'):
+                email_address.send_confirmation(request=request)
 
-        if request.data.get('primary') and email_address.verified:
-            email_address.set_as_primary()
+        serializer = ExistingEmailSerializer(email_address, context={'request': request})
         serialized = serializer.data
         return Response(serialized, status=status.HTTP_200_OK)
 
