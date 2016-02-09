@@ -180,6 +180,9 @@ class BadgeUserEmailDetail(APIView):
         if email_address.user_id != request.user.id:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
+        if email_address.primary:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
         email_address.delete()
         return Response("Email '{}' has been deleted.".format(email_address.email), status.HTTP_200_OK)
 
