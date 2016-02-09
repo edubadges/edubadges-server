@@ -7,7 +7,7 @@ from rest_framework.authtoken.models import Token
 #from earner.serializers import EarnerBadgeSerializer
 #from consumer.serializers import ConsumerBadgeDetailSerializer
 
-from .models import BadgeUser
+from .models import BadgeUser, CachedEmailAddress
 
 
 class VerifiedEmailsField(serializers.Field):
@@ -118,3 +118,17 @@ class BadgeUserProfileSerializer(serializers.Serializer):
     #         instance.save()
     #
     #     return instance
+
+
+class NewEmailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CachedEmailAddress
+        fields = ('id', 'email', 'verified', 'primary')
+        read_only_fields = ('id', 'verified', 'primary')
+
+
+class ExistingEmailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CachedEmailAddress
+        fields = ('id', 'email', 'verified', 'primary')
+        read_only_fields = ('id', 'email', 'verified')
