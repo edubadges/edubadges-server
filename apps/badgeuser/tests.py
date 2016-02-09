@@ -213,4 +213,21 @@ class UserEmailTests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(mail.outbox), 1)
 
+    def test_user_can_request_forgot_password(self):
+        self.client.logout()
+
+        # dont send recovery to unknown emails
+        response = self.client.post('/v1/user/forgot-password', {
+            'email': 'unknown-test2@example.com.fake',
+        })
+        self.assertEqual(response.status_code, 200, "Does not leak information about account emails")
+        self.assertEqual(len(mail.outbox), 0)
+
+        # successfully send recovery email
+        response = self.client.post('/v1/user/forgot-password', {
+            'email': 'test2@example.com',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(mail.outbox), 1)
+
 

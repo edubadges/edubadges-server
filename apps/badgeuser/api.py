@@ -1,4 +1,12 @@
+from allauth.account.adapter import get_adapter
+from allauth.account.utils import user_pk_to_url_str
+from allauth.utils import build_absolute_uri
+from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.sites.models import get_current_site
+from django.core.urlresolvers import reverse
 from django.db import IntegrityError
+from django.http import Http404
 from rest_framework import authentication, permissions, status, generics, serializers
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework.views import APIView
@@ -130,17 +138,20 @@ class BadgeUserEmailList(APIView):
         return Response(email, status=status.HTTP_201_CREATED)
 
 
-class BadgeUserEmailDetail(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-    mode = CachedEmailAddress
 
-    def get_email(self, email_id):
+class BadgeUserEmailView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_email(self, **kwargs):
         try:
-            email_address = CachedEmailAddress.cached.get(pk=email_id)
+            email_address = CachedEmailAddress.cached.get(**kwargs)
         except CachedEmailAddress.DoesNotExist:
             return None
         else:
             return email_address
+
+class BadgeUserEmailDetail(BadgeUserEmailView):
+    model = CachedEmailAddress
 
     def get(self, request, id):
         """
@@ -154,7 +165,7 @@ class BadgeUserEmailDetail(APIView):
               description: the id of the registered email
               required: true
         """
-        email_address = self.get_email(id)
+        email_address = self.get_email(pk=id)
         if email_address is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
         if email_address.user_id != self.request.user.id:
@@ -174,7 +185,7 @@ class BadgeUserEmailDetail(APIView):
               description: the id of the registered email
               required: true
         """
-        email_address = self.get_email(id)
+        email_address = self.get_email(pk=id)
         if email_address is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
         if email_address.user_id != request.user.id:
@@ -208,7 +219,7 @@ class BadgeUserEmailDetail(APIView):
               description: Request the verification email be resent
               required: false
         """
-        email_address = self.get_email(id)
+        email_address = self.get_email(pk=id)
         if email_address is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
         if email_address.user_id != request.user.id:
@@ -225,3 +236,40 @@ class BadgeUserEmailDetail(APIView):
         serialized = serializer.data
         return Response(serialized, status=status.HTTP_200_OK)
 
+
+class BadgeUserForgotPassword(BadgeUserEmailView):
+    permission_classes = ()
+
+    def post(self, request):
+        """
+        Request an account recovery email.
+        ---
+        parameters:
+            - name: email
+              type: string
+              paramType: form
+              description: The email address on file to send recovery email
+              required: true
+        """
+
+        email = request.data.get('email')
+        email_address = self.get_email(email=email)
+        if email_address is None:
+            # return 200 here because we don't want to expose information about which emails we know about
+            return Response(status=status.HTTP_200_OK)
+
+        # taken from allauth.account.forms.ResetPasswordForm
+        temp_key = default_token_generator.make_token(email_address.user)
+        path = reverse("account_reset_password_from_key", kwargs={
+            'uidb36': user_pk_to_url_str(email_address.user),
+            'key': temp_key
+        })
+        reset_url = build_absolute_uri(request, path, protocol=getattr(settings, 'DEFAULT_HTTP_PROTOCOL', 'http'))
+        email_context = {
+            "site": get_current_site(request),
+            "user": email_address.user,
+            "password_reset_url": reset_url,
+        }
+        get_adapter().send_mail('account/email/password_reset_key', email, email_context)
+
+        return Response(status=status.HTTP_200_OK)
