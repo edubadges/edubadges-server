@@ -5,55 +5,45 @@ from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.models import get_current_site
 from django.core.urlresolvers import reverse
-from django.db import IntegrityError
 from django.http import Http404
-from rest_framework import authentication, permissions, status, generics, serializers
+from rest_framework import permissions, status, generics
 from rest_framework.exceptions import NotAuthenticated
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from mainsite.permissions import IsRequestUser
-
 from .models import BadgeUser, CachedEmailAddress
-from .serializers import BadgeUserSerializer, BadgeUserProfileSerializer, ExistingEmailSerializer, NewEmailSerializer
+from .serializers import BadgeUserProfileSerializer, ExistingEmailSerializer, NewEmailSerializer, \
+    BadgeUserExistingProfileSerializer
 
 
-class BadgeUserDetail(generics.RetrieveUpdateAPIView):
+class BadgeUserDetail(generics.RetrieveAPIView):
     """
-    View another user's profile by username. Currently permissions only allow you to view your own profile.
+    View user's profile. Currently permissions only allow you to view your own profile.
     """
-    queryset = BadgeUser.objects.all()
-    serializer_class = BadgeUserSerializer
-    lookup_field = 'pk'
-
-    # TODO: rich authentication possibilities for remote API clients
-    authentication_classes = (
-        # authentication.TokenAuthentication,
-        authentication.SessionAuthentication,
-        authentication.BasicAuthentication,
-    )
+    serializer_class = BadgeUserExistingProfileSerializer
+    model = BadgeUser
     permission_classes = (IsRequestUser,)
 
-    def get(self, request, user_id):
-        """
-        Return public profile information on another user.
-        """
-        user = self.get_object()
-
-        serializer = BadgeUserSerializer(user)
-
-        return Response(serializer.data)
+    def get_object(self):
+        try:
+            obj = BadgeUser.cached.get(pk=self.kwargs.get('user_id'))
+            self.check_object_permissions(self.request, obj)
+            return obj
+        except BadgeUser.DoesNotExist:
+            raise Http404()
 
 
 class BadgeUserProfile(APIView):
-    """
-    View or update your own profile, or register a new account.
-    """
     serializer_class = BadgeUserProfileSerializer
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
-
+        """
+        Signup for a new account
+        ---
+        serializer: BadgeUserProfileSerializer
+        """
         serializer = self.serializer_class(
             data=request.data, context={'request': request}
         )
@@ -64,14 +54,31 @@ class BadgeUserProfile(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get(self, request):
+        """
+        Get the current user's profile
+        ---
+        serializer: BadgeUserProfileSerializer
+        """
         if request.user.is_anonymous():
             raise NotAuthenticated()
 
-        serializer = self.serializer_class(request.user)
+        serializer = BadgeUserExistingProfileSerializer(request.user)
         return Response(serializer.data)
 
-    # def put(self, request):
-    #     pass
+    def put(self, request):
+        """
+        Update the current user's profile
+        ---
+        serializer: BadgeUserExistingProfileSerializer
+        """
+        if request.user.is_anonymous():
+            raise NotAuthenticated()
+
+        serializer = BadgeUserExistingProfileSerializer(request.user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        updated_user = serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class BadgeUserToken(APIView):
