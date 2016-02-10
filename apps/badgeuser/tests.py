@@ -1,5 +1,7 @@
 import os
 import random
+import re
+
 import time
 from django.contrib.auth import SESSION_KEY
 
@@ -13,6 +15,7 @@ from rest_framework.test import APIRequestFactory, APITestCase
 
 from badgeuser.models import BadgeUser
 from mainsite import TOP_DIR
+from mainsite.models import BadgrApp
 
 factory = APIRequestFactory()
 
@@ -129,6 +132,11 @@ class UserEmailTests(APITestCase):
         # scramble the cache key each time
         cache.key_prefix = "test{}".format(str(time.time()))
 
+        self.badgr_app = BadgrApp(cors='testserver',
+                                  email_confirmation_redirect='http://testserver/login/',
+                                  forgot_password_redirect='http://testserver/reset-password/')
+        self.badgr_app.save()
+
         self.client.force_authenticate(user=BadgeUser.objects.get(pk=1))
         response = self.client.get('/v1/user/auth-token')
         self.assertEqual(response.status_code, 200)
@@ -223,12 +231,32 @@ class UserEmailTests(APITestCase):
         self.assertEqual(response.status_code, 200, "Does not leak information about account emails")
         self.assertEqual(len(mail.outbox), 0)
 
-        # successfully send recovery email
-        response = self.client.post('/v1/user/forgot-password', {
-            'email': 'test2@example.com',
-        })
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(mail.outbox), 1)
+        with self.settings(BADGR_APP_ID=self.badgr_app.id):
+            # successfully send recovery email
+            response = self.client.post('/v1/user/forgot-password', {
+                'email': 'test2@example.com',
+            })
+            self.assertEqual(response.status_code, 200)
+            # received email with recovery url
+            self.assertEqual(len(mail.outbox), 1)
+            matches = re.search(r'http://testserver/reset-password/(.*)', mail.outbox[0].body)
+            self.assertIsNotNone(matches)
+            token = matches.group(1)
+            new_password = 'new-password-ee'
+
+            # able to use token received in email to reset password
+            response = self.client.put('/v1/user/forgot-password', {
+                'token': token,
+                'password': new_password
+            })
+            self.assertEqual(response.status_code, 200)
+
+            response = self.client.post('/api-auth/token', {
+                'username': "test2",
+                'password': new_password,
+            })
+            self.assertEqual(response.status_code, 200)
+
 
 
 @override_settings(

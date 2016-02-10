@@ -1,3 +1,5 @@
+import re
+
 from allauth.account.adapter import get_adapter
 from allauth.account.utils import user_pk_to_url_str, url_str_to_user_pk
 from allauth.utils import build_absolute_uri
@@ -301,13 +303,21 @@ class BadgeUserForgotPassword(BadgeUserEmailView):
         """
         token = request.data.get('token')
         password = request.data.get('password')
-        uidb36, key = token.split('-', 2)
+
+        matches = re.search(r'([0-9A-Za-z]+)-(.*)', token)
+        if not matches:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        uidb36 = matches.group(1)
+        key = matches.group(2)
+        if not (uidb36 and key):
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
         user = self._get_user(uidb36)
         if user is None or not default_token_generator.check_token(user, key):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         user.set_password(password)
+        user.save()
         return Response(status=status.HTTP_200_OK)
 
     def _get_user(self, uidb36):
