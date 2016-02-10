@@ -9,6 +9,7 @@ from django.test import TestCase, override_settings
 from allauth.account.models import EmailConfirmation
 from rest_framework.test import APITestCase
 
+from mainsite.models import BadgrApp
 from mainsite.settings import TOP_DIR
 
 
@@ -50,6 +51,11 @@ class TestCacheSettings(TestCase):
 
 class TestSignup(APITestCase):
     def test_user_signup_email_confirmation_redirect(self):
+        badgr_app = BadgrApp(cors='testserver',
+                             email_confirmation_redirect='http://testserver/login/',
+                             forgot_password_redirect='http://testserver/forgot-password/')
+        badgr_app.save()
+
         post_data = {
             'first_name': 'Tester',
             'last_name': 'McSteve',
@@ -67,4 +73,4 @@ class TestSignup(APITestCase):
                 reverse('account_confirm_email', kwargs={ 'key': confirmation.key }),
                 follow=False
             )
-            self.assertRedirects(response, 'http://frontend.ui/login/Tester', fetch_redirect_response=False)
+            self.assertRedirects(response, 'http://testserver/login/Tester', fetch_redirect_response=False)

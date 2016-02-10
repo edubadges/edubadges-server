@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.contrib.auth import logout
 from django.core.urlresolvers import resolve, Resolver404
@@ -5,6 +7,8 @@ from django.core.urlresolvers import resolve, Resolver404
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.account import app_settings
 from allauth.account.models import EmailConfirmation
+
+from mainsite.models import BadgrApp
 
 
 class BadgrAccountAdapter(DefaultAccountAdapter):
@@ -23,9 +27,15 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
         """
         The URL to return to after successful e-mail confirmation.
         """
+        badgr_app = BadgrApp.objects.get_current(request)
+        if not badgr_app:
+            logger = logging.getLogger(self.__class__.__name__)
+            logger.warning("Could not determine authorized badgr app")
+            return super(BadgrAccountAdapter, self).get_email_confirmation_redirect_url(request)
+
         try:
             resolverMatch = resolve(request.path)
             user = EmailConfirmation.objects.get(key=resolverMatch.kwargs.get('key')).email_address.user
-            return app_settings.EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL + user.first_name
+            return badgr_app.email_confirmation_redirect + user.first_name
         except Resolver404, EmailConfirmation.DoesNotExist:
-            return app_settings.EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL
+            return badgr_app.email_confirmation_redirect

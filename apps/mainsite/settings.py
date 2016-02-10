@@ -167,14 +167,11 @@ ACCOUNT_FORMS = {
 }
 ACCOUNT_SIGNUP_FORM_CLASS = 'badgeuser.forms.BadgeUserCreationForm'
 
-CORS_URLS_REGEX = r'^.*$'
 
-# TODO: REMOVE TEMPORARY HARDCODED REVIEW SERVER URL:
-CORS_ORIGIN_WHITELIST = (
-    'badgr-ui.review.concentricsky.com',
-    'localhost:3000',
-)
-ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = 'http://badgr-ui.review.concentricsky.com/login/'
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_URLS_REGEX = r'^.*$'
+CORS_MODEL = 'mainsite.BadgrApp'
+
 
 ##
 #
@@ -371,6 +368,7 @@ USE_I18N = False
 USE_L10N = False
 USE_TZ = True
 
+BADGR_APP_ID = 1
 
 ##
 #

@@ -11,9 +11,8 @@ from django.core.cache import cache
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIRequestFactory, APITestCase
 
+from badgeuser.models import BadgeUser
 from mainsite import TOP_DIR
-from .models import BadgeUser
-from .serializers import UserProfileField
 
 factory = APIRequestFactory()
 
