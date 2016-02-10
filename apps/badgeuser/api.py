@@ -1,7 +1,8 @@
 from allauth.account.adapter import get_adapter
-from allauth.account.utils import user_pk_to_url_str
+from allauth.account.utils import user_pk_to_url_str, url_str_to_user_pk
 from allauth.utils import build_absolute_uri
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.models import get_current_site
 from django.core.urlresolvers import reverse
@@ -11,6 +12,7 @@ from rest_framework.exceptions import NotAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from mainsite.models import BadgrApp
 from mainsite.permissions import IsRequestUser
 from .models import BadgeUser, CachedEmailAddress
 from .serializers import BadgeUserProfileSerializer, ExistingEmailSerializer, NewEmailSerializer, \
@@ -267,11 +269,11 @@ class BadgeUserForgotPassword(BadgeUserEmailView):
 
         # taken from allauth.account.forms.ResetPasswordForm
         temp_key = default_token_generator.make_token(email_address.user)
-        path = reverse("account_reset_password_from_key", kwargs={
-            'uidb36': user_pk_to_url_str(email_address.user),
-            'key': temp_key
-        })
-        reset_url = build_absolute_uri(request, path, protocol=getattr(settings, 'DEFAULT_HTTP_PROTOCOL', 'http'))
+        token = "{uidb36}-{key}".format(uidb36=user_pk_to_url_str(email_address.user),
+                                        key=temp_key)
+        badgr_app = BadgrApp.objects.get_current(request)
+        reset_url = badgr_app.forgot_password_redirect + token
+
         email_context = {
             "site": get_current_site(request),
             "user": email_address.user,
@@ -280,3 +282,40 @@ class BadgeUserForgotPassword(BadgeUserEmailView):
         get_adapter().send_mail('account/email/password_reset_key', email, email_context)
 
         return Response(status=status.HTTP_200_OK)
+
+    def put(self, request):
+        """
+        Recover an account and set a new password.
+        ---
+        parameters:
+            - name: token
+              type: string
+              paramType: form
+              description: The token received in the recovery email
+              required: true
+            - name: password
+              type: string
+              paramType: form
+              description: The new password to use
+              required: true
+        """
+        token = request.data.get('token')
+        password = request.data.get('password')
+        uidb36, key = token.split('-', 2)
+
+        user = self._get_user(uidb36)
+        if user is None or not default_token_generator.check_token(user, key):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        user.set_password(password)
+        return Response(status=status.HTTP_200_OK)
+
+    def _get_user(self, uidb36):
+        User = get_user_model()
+        try:
+            pk = url_str_to_user_pk(uidb36)
+            return User.objects.get(pk=pk)
+        except (ValueError, User.DoesNotExist):
+            return None
+
+
