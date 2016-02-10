@@ -8,6 +8,7 @@ from allauth.account.adapter import DefaultAccountAdapter
 from allauth.account import app_settings
 from allauth.account.models import EmailConfirmation
 
+from badgeuser.models import CachedEmailAddress
 from mainsite.models import BadgrApp
 
 
@@ -35,7 +36,10 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
 
         try:
             resolverMatch = resolve(request.path)
-            user = EmailConfirmation.objects.get(key=resolverMatch.kwargs.get('key')).email_address.user
-            return badgr_app.email_confirmation_redirect + user.first_name
+            confirmation = EmailConfirmation.objects.get(key=resolverMatch.kwargs.get('key'))
+            # publish changes to cache
+            email_address = CachedEmailAddress.objects.get(pk=confirmation.email_address_id)
+            email_address.save()
+            return badgr_app.email_confirmation_redirect + email_address.user.first_name
         except Resolver404, EmailConfirmation.DoesNotExist:
             return badgr_app.email_confirmation_redirect
