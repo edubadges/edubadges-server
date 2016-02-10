@@ -1,6 +1,7 @@
 import os
 import random
 import time
+from django.contrib.auth import SESSION_KEY
 
 from django.core import mail
 from django.core.cache.backends.filebased import FileBasedCache
@@ -231,3 +232,55 @@ class UserEmailTests(APITestCase):
         self.assertEqual(len(mail.outbox), 1)
 
 
+@override_settings(
+    SESSION_ENGINE='django.contrib.sessions.backends.cache',
+    CACHES={
+        'default': {
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
+        }
+    },
+)
+class UserProfileTests(APITestCase):
+    fixtures = ['0001_initial_superuser']
+
+    @classmethod
+    def tearDownClass(cls):
+        c = FileBasedCache(os.path.join(TOP_DIR, 'test.cache'), {})
+        c.clear()
+
+    def setUp(self):
+        # scramble the cache key each time
+        cache.key_prefix = "test{}".format(str(time.time()))
+
+    def test_user_can_change_profile(self):
+        first = 'firsty'
+        last = 'lastington'
+        new_password = 'new-password'
+        username = 'testinguser'
+        original_password = 'password'
+
+        user = BadgeUser(username=username, is_active=True)
+        user.set_password(original_password)
+        user.save()
+        self.client.login(username=username, password=original_password)
+        self.assertUserLoggedIn()
+
+        response = self.client.put('/v1/user/profile', {
+            'first_name': first,
+            'last_name': last,
+            'password': new_password,
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(first, response.data.get('first_name'))
+        self.assertEqual(last, response.data.get('last_name'))
+
+        self.client.logout()
+        self.client.login(username=username, password=new_password)
+        self.assertUserLoggedIn()
+
+    def assertUserLoggedIn(self, user_pk=None):
+        self.assertIn(SESSION_KEY, self.client.session)
+        if user_pk is not None:
+            self.assertEqual(self.client.session[SESSION_KEY], user_pk)
+            
