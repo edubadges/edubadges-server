@@ -168,7 +168,7 @@ ACCOUNT_FORMS = {
 ACCOUNT_SIGNUP_FORM_CLASS = 'badgeuser.forms.BadgeUserCreationForm'
 
 
-CORS_ORIGIN_ALLOW_ALL = False
+CORS_ORIGIN_ALLOW_ALL = True
 CORS_URLS_REGEX = r'^.*$'
 CORS_MODEL = 'mainsite.BadgrApp'
 
