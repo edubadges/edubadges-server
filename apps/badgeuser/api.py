@@ -239,6 +239,7 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
         if email_address.verified:
             if request.data.get('primary'):
                 email_address.set_as_primary()
+                email_address.publish()
         else:
             if request.data.get('resend'):
                 email_address.send_confirmation(request=request)
