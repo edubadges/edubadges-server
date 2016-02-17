@@ -26,6 +26,7 @@ INSTALLED_APPS = [
 
     'allauth',
     'allauth.account',
+    'corsheaders',
 
     # 'skycms.structure',
     'reversion',
@@ -52,6 +53,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE_CLASSES = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -164,6 +166,12 @@ ACCOUNT_FORMS = {
     'add_email': 'badgeuser.account_forms.AddEmailForm'
 }
 ACCOUNT_SIGNUP_FORM_CLASS = 'badgeuser.forms.BadgeUserCreationForm'
+
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_URLS_REGEX = r'^.*$'
+CORS_MODEL = 'mainsite.BadgrApp'
+
 
 ##
 #
@@ -360,6 +368,7 @@ USE_I18N = False
 USE_L10N = False
 USE_TZ = True
 
+BADGR_APP_ID = 1
 
 ##
 #

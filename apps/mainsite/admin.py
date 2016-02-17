@@ -5,6 +5,7 @@ from django.contrib.admin import AdminSite
 from django.utils.module_loading import autodiscover_modules
 from django.utils.translation import ugettext_lazy
 from mainsite.admin_actions import delete_selected
+from mainsite.models import BadgrApp
 
 
 class BadgrAdminSite(AdminSite):
@@ -22,6 +23,14 @@ badgr_admin = BadgrAdminSite(name='badgradmin')
 badgr_admin.disable_action('delete_selected')
 badgr_admin.add_action(delete_selected)
 
+
+class BadgrAppAdmin(basic_models.DefaultModelAdmin):
+    fieldsets = (
+        ('Meta', {'fields': ('is_active', 'created_at', 'created_by', 'updated_at', 'updated_by'),
+                  'classes': ('collapse',)}),
+        (None, {'fields': ('cors', 'email_confirmation_redirect', 'forgot_password_redirect')})
+    )
+badgr_admin.register(BadgrApp, BadgrAppAdmin)
 
 
 # 3rd party apps

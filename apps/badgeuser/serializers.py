@@ -7,7 +7,7 @@ from rest_framework.authtoken.models import Token
 #from earner.serializers import EarnerBadgeSerializer
 #from consumer.serializers import ConsumerBadgeDetailSerializer
 
-from .models import BadgeUser
+from .models import BadgeUser, CachedEmailAddress
 
 
 class VerifiedEmailsField(serializers.Field):
@@ -57,21 +57,6 @@ class UserProfileField(serializers.Serializer):
         return profile
 
 
-class BadgeUserSerializer(serializers.ModelSerializer):
-    """
-    The BadgeUserSerializer brings together the necessary context information about
-    a user's roles as Issuer, Earner, and Consumer
-    """
-    class Meta:
-        model = BadgeUser
-        fields = ('userProfile',)
-
-    userProfile = UserProfileField(source='*', read_only=True)
-    # earnerBadges = EarnerBadgeSerializer(many=True, read_only=True, source='earnerbadge_set')
-    # consumerBadges = ConsumerBadgeDetailSerializer(many=True, read_only=True, source='consumerbadge_set')
-    # issuerRoles
-
-
 class BadgeUserProfileSerializer(serializers.Serializer):
 
     first_name = serializers.CharField(max_length=30, allow_blank=True)
@@ -108,13 +93,41 @@ class BadgeUserProfileSerializer(serializers.Serializer):
 
         return user
 
-    # def update(self, instance, validated_data):
-    #     if validated_data['first_name']:
-    #         instance.first_name = validated_data['first_name']
-    #     if validated_data['last_name']:
-    #         instance.last_name = validated_data['last_name']
-    #
-    #     if validated_data.get('first_name', validated_data.get('last_name')):
-    #         instance.save()
-    #
-    #     return instance
+
+class BadgeUserExistingProfileSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False)
+
+    class Meta:
+        model = BadgeUser
+        fields = ('id', 'first_name', 'email', 'last_name', 'password')
+        write_only_fields = ('password',)
+        read_only_fields = ('id', 'email',)
+
+    def update(self, instance, validated_data):
+        first_name = validated_data.get('first_name')
+        last_name = validated_data.get('last_name')
+        password = validated_data.get('password')
+        if first_name:
+            instance.first_name = first_name
+        if last_name:
+            instance.last_name = last_name
+
+        if password:
+            instance.set_password(password)
+
+        instance.save()
+        return instance
+
+
+class NewEmailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CachedEmailAddress
+        fields = ('id', 'email', 'verified', 'primary')
+        read_only_fields = ('id', 'verified', 'primary')
+
+
+class ExistingEmailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CachedEmailAddress
+        fields = ('id', 'email', 'verified', 'primary')
+        read_only_fields = ('id', 'email', 'verified')

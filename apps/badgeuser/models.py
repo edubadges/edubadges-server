@@ -25,8 +25,8 @@ class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
 
     def delete(self, *args, **kwargs):
         user = self.user
-        super(CachedEmailAddress, self).delete(*args, **kwargs)
         self.publish_delete('email')
+        super(CachedEmailAddress, self).delete(*args, **kwargs)
         user.publish()
 
 

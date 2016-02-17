@@ -1,11 +1,15 @@
 import abc
 import base64
+from urlparse import urlparse
+
+import basic_models
 from datetime import datetime, timedelta
 from hashlib import sha1
 import hmac
 import uuid
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.db import models
 
@@ -203,3 +207,28 @@ class EmailBlacklist(models.Model):
 
         hashed = hmac.new(secret_key, email_encoded + expiration, sha1)
         return hmac.compare_digest(hashed.hexdigest(), str(signature))
+
+
+class BadgrAppManager(basic_models.ActiveModelManager):
+    def get_current(self, request):
+        origin = request.META.get('HTTP_ORIGIN')
+        if origin:
+            url = urlparse(origin)
+            try:
+                return self.get(cors=url.netloc)
+            except self.model.DoesNotExist:
+                pass
+        badgr_app_id = getattr(settings, 'BADGR_APP_ID', None)
+        if not badgr_app_id:
+            raise ImproperlyConfigured("Must specify a BADGR_APP_ID")
+        return self.get(id=badgr_app_id)
+
+
+class BadgrApp(basic_models.DefaultModel):
+    cors = models.CharField(max_length=254, unique=True)
+    email_confirmation_redirect = models.URLField()
+    forgot_password_redirect = models.URLField()
+    objects = BadgrAppManager()
+
+    def __unicode__(self):
+        return self.cors
