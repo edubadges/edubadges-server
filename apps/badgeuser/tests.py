@@ -201,6 +201,7 @@ class UserEmailTests(APITestCase):
             'email': 'new+email@newemail.com',
         })
         self.assertEqual(response.status_code, 201)
+        self.assertEqual(len(mail.outbox), 1)
 
         response = self.client.get('/v1/user/emails')
         self.assertEqual(response.status_code, 200)
@@ -212,14 +213,14 @@ class UserEmailTests(APITestCase):
             'resend': True
         })
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(len(mail.outbox), 1)
 
         # gets an email for an unverified email
         response = self.client.put('/v1/user/emails/{}'.format(not_verified.get('id')), {
             'resend': True
         })
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox), 2)
 
     def test_user_can_request_forgot_password(self):
         self.client.logout()
