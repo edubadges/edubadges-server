@@ -142,12 +142,10 @@ class BadgeUserEmailList(APIView):
         serializer = NewEmailSerializer(data=request.data, context={'request: request'})
         serializer.is_valid(raise_exception=True)
 
-        serializer.save(user=request.user)
+        email_address = serializer.save(user=request.user)
         email = serializer.data
-
-        # logger.event(badgrlog.UserAddedEmail())
+        email_address.send_confirmation(request)
         return Response(email, status=status.HTTP_201_CREATED)
-
 
 
 class BadgeUserEmailView(APIView):
