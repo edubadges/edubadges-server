@@ -79,6 +79,11 @@ class BadgeUserProfileSerializer(serializers.Serializer):
                     'Account could not be created. An account with this email address may already exist.'
                 )
 
+        if BadgeUser.objects.filter(email=validated_data['email']).exists():
+            raise serializers.ValidationError(
+                'Account could not be created. An account with this email address may already exist.'
+            )
+
         user = BadgeUser(
             email=validated_data['email'],
             first_name=validated_data['first_name'],
