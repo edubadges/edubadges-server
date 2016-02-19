@@ -113,6 +113,17 @@ class UserCreateTests(APITestCase):
             'email': email
         })
         self.assertEqual(response.status_code, 400)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_should_signup_with_email_with_plus(self):
+        response = self.client.post('/v1/user/profile', {
+            'first_name': 'existing',
+            'last_name': 'user',
+            'password': 'secret',
+            'email': 'nonexistent23+extra@test.nonexistent'
+        })
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(len(mail.outbox), 1)
 
 
 class UserUnitTests(TestCase):
