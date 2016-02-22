@@ -4,9 +4,10 @@ from django.conf import settings
 from django.contrib.auth import logout
 from django.core.urlresolvers import resolve, Resolver404
 
-from allauth.account.adapter import DefaultAccountAdapter
+from allauth.account.adapter import DefaultAccountAdapter, get_adapter
 from allauth.account import app_settings
 from allauth.account.models import EmailConfirmation
+from allauth.utils import get_current_site
 
 from badgeuser.models import CachedEmailAddress
 from mainsite.models import BadgrApp
@@ -43,3 +44,23 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
             return badgr_app.email_confirmation_redirect + email_address.user.first_name
         except Resolver404, EmailConfirmation.DoesNotExist:
             return badgr_app.email_confirmation_redirect
+
+    def send_confirmation_mail(self, request, emailconfirmation, signup):
+        current_site = get_current_site(request)
+        activate_url = self.get_email_confirmation_url(
+            request,
+            emailconfirmation)
+        ctx = {
+            "user": emailconfirmation.email_address.user,
+            "email": emailconfirmation.email_address,
+            "activate_url": activate_url,
+            "current_site": current_site,
+            "key": emailconfirmation.key,
+        }
+        if signup:
+            email_template = 'account/email/email_confirmation_signup'
+        else:
+            email_template = 'account/email/email_confirmation'
+        get_adapter().send_mail(email_template,
+                                emailconfirmation.email_address.email,
+                                ctx)

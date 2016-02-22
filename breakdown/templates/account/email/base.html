@@ -1,0 +1,162 @@
+{% load account %}
+{% load i18n %}
+
+<html style="">
+  <head>
+     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--[if !mso]><!-- -->
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700' rel='stylesheet' type='text/css'>
+    <!--<![endif]-->
+    <style type="text/css">
+      @media (max-width: 640px) {
+        .title {
+          padding: 20px 0 !important;
+        }
+      }
+      @media (max-width: 320px) {
+        .header {
+          padding: 20px 0 20px 0 !important;
+        }
+        .logo {
+          width: 79px !important;
+        }
+        .bodycontainer {
+          padding: 0 25px !important;
+        }
+        .bodytext {
+          font-size: 14px !important;
+          padding: 20px 20px 20px 20px !important;
+        }
+        .footer {
+          font-size: 14px !important;
+          padding: 20px 20px 20px 20px !important;
+        }
+      }
+    </style>
+  </head>
+  <body style="padding: 0; margin: 0;">
+    <table cellspacing="0" cellpadding="0" style="
+      width: 100%;
+    ">
+      <tr>
+        <td class="header" style="
+          background-color: #31383E;
+          padding: 68px 0;
+          text-align: center;
+        ">
+          <img class="logo" src="{{ HTTP_ORIGIN }}{{ STATIC_URL }}images/emaillogo.png" alt="Badgr Logo">
+        </td>
+      </tr>
+      <tr>
+        <td class="bodycontainer" style="
+          background-color: #FDFDFD;
+          padding: 0 30px;
+        ">
+          <table cellspacing="0" cellpadding="0" style="
+            margin: 0 auto;
+            max-width: 720px;
+            ">
+            <tr>
+              <td class="title" style="
+              color: #3D1719;
+              font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+              font-size: 18px;
+              font-weight: bold;
+              line-height: 1.5;
+              padding: 35px 35px 35px 35px;
+              text-align: center;
+              word-break: break-word;
+              ">
+                Please verify your email address on Badgr, <br>
+                <a href="#" style="
+                  color: #3D1719;
+                  text-decoration: none;
+                ">
+                    {{ email.email }}
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <table cellspacing="0" cellpadding="0" style="
+                  border: 1px solid #DDDDDD;
+                  border-radius: 7px;
+                  width: 100%;
+                ">
+                  <tr>
+                    <td class="bodytext" style="
+                      color: #31383E;
+                      font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                      font-size: 18px;
+                      line-height: 1.5;
+                      padding: 35px 35px 35px 35px;
+                      text-align: center;
+                    ">
+                        {% block confirmation_body %}
+                      A Badgr user has requested to add this email to their account. Please click the link below to verify this operation, and then you may upload badges that have
+been issued to this address to your account.
+                        {% endblock %}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="
+                      padding: 0 0 35px 0;
+                      text-align: center;
+                    ">
+                      <table  cellspacing="0" cellpadding="0" style="
+                        margin: 0 auto;
+                      ">
+                        <tr>
+                          <td valign="middle" style="
+                            background-color: #672F33;
+                            border-radius: 3px;
+                            padding: 8px 16px 8px 16px;
+                          ">
+                          <a href="{{ activate_url }}" style="
+                              color: #ffffff;
+                              font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                              font-size: 14px;
+                              font-weight: 600;
+                              text-decoration: none;
+                              text-transform: uppercase;">
+                              Confirm Now
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td class="footer" style="
+                color: #5B6C79;
+                font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                font-size: 16px;
+                line-height: 1.5;
+                padding: 35px 35px 35px 35px;
+                text-align: center;
+                word-break: break-word;
+              ">
+              Or, you can copy/paste this link into your browser: <a href="{{ activate_url }}" style="color: #4A90E2; text-decoration: none;">{{ activate_url }}</a>
+              </td>
+            </tr>
+            <tr>
+              <td class="footer" style="
+                color: #5B6C79;
+                font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                font-size: 16px;
+                line-height: 1.5;
+                padding: 0 35px 35px 35px;
+                text-align: center;
+              ">
+                If you didn't make this request, you can safely ignore this email. This email address will not be added to a Badgr account.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
