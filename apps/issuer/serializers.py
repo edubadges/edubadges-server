@@ -9,6 +9,7 @@ from django.db.models import Q
 
 from rest_framework import serializers
 from badgeuser.models import BadgeUser
+from mainsite.drf_fields import Base64FileField
 
 from mainsite.serializers import WritableJSONField
 from mainsite.utils import installed_apps_list
@@ -33,7 +34,7 @@ class IssuerSerializer(AbstractComponentSerializer):
     json = WritableJSONField(max_length=16384, read_only=True, required=False)
     name = serializers.CharField(max_length=1024)
     slug = serializers.CharField(max_length=255, allow_blank=True, required=False)
-    image = serializers.FileField(allow_empty_file=False, use_url=True, required=False)
+    image = Base64FileField(allow_empty_file=False, use_url=True, required=False)
     email = serializers.EmailField(max_length=255, required=True, write_only=True)
     description = serializers.CharField(max_length=1024, required=True, write_only=True)
     url = serializers.URLField(max_length=1024, required=True, write_only=True)
