@@ -33,7 +33,3 @@ class Base64FileField(FileField):
         except (ValueError, binascii.Error):
             return super(Base64FileField, self).to_internal_value(data)
 
-    def to_representation(self, value):
-        if not value:
-            return None
-        return value.url
