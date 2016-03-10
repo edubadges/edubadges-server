@@ -22,6 +22,7 @@ MenuStore.defaultItems = {
   },
   badgebookMenu: {
     items: [
+      { title: "Leaderboard", url: "/badgebook/leaderboard", icon: "", children: [] },
       { title: "Objectives", url: "/badgebook/objectives", icon: "", children: [] },
       { title: "Progress", url: "/badgebook/progress", icon: "", children: [] }
     ]
@@ -153,7 +154,14 @@ MenuStore.storeInitialData = function() {
   MenuStore.menus.topMenu.items = newItems;
 
   if (initialData.lti_learner) {
-    MenuStore.menus.badgebookMenu.items = [];
+    if (initialData.course_leaderboard_enabled) {
+        MenuStore.menus.badgebookMenu.items = [
+          { title: "Leaderboard", url: "/badgebook/leaderboard", icon: "", children: [] },
+          { title: "Progress", url: "/badgebook/student", icon: "", children: [] }
+        ];
+    } else {
+      MenuStore.menus.badgebookMenu.items = [];
+    }
   }
 
   if ('user' in initialData && initialData.user.approvedIssuer){
