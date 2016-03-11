@@ -154,7 +154,7 @@ MenuStore.storeInitialData = function() {
   MenuStore.menus.topMenu.items = newItems;
 
   if (initialData.lti_learner) {
-    if (initialData.course_leaderboard_enabled) {
+    if (initialData.course_info && initialData.course_info.leaderboard_enabled) {
         MenuStore.menus.badgebookMenu.items = [
           { title: "Leaderboard", url: "/badgebook/leaderboard", icon: "", children: [] },
           { title: "Progress", url: "/badgebook/student", icon: "", children: [] }
