@@ -22,9 +22,9 @@ MenuStore.defaultItems = {
   },
   badgebookMenu: {
     items: [
-      { title: "Leaderboard", url: "/badgebook/leaderboard", icon: "", children: [] },
       { title: "Objectives", url: "/badgebook/objectives", icon: "", children: [] },
-      { title: "Progress", url: "/badgebook/progress", icon: "", children: [] }
+      { title: "Progress", url: "/badgebook/progress", icon: "", children: [] },
+      { title: "Leaderboard", url: "/badgebook/leaderboard", icon: "", children: [] }
     ]
   },
   secondaryMenus: {
@@ -156,8 +156,8 @@ MenuStore.storeInitialData = function() {
   if (initialData.lti_learner) {
     if (initialData.course_info && initialData.course_info.leaderboard_enabled) {
         MenuStore.menus.badgebookMenu.items = [
-          { title: "Leaderboard", url: "/badgebook/leaderboard", icon: "", children: [] },
-          { title: "Progress", url: "/badgebook/student", icon: "", children: [] }
+          { title: "Progress", url: "/badgebook/student", icon: "", children: [] },
+          { title: "Leaderboard", url: "/badgebook/leaderboard", icon: "", children: [] }
         ];
     } else {
       MenuStore.menus.badgebookMenu.items = [];

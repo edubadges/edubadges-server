@@ -10,6 +10,10 @@
 
     .fixedDataTableCellLayout_wrap3 {
       vertical-align: bottom;
+
+      .truncate_ {
+        max-width: 12vw;
+      }
     }
   }
 
@@ -50,7 +54,7 @@
   }
 
   .fixedDataTableRowLayout_fixedColumnsDivider {
-    border-left: 0;
+    //border-left: 0;
   }
 
   .is-hover {
@@ -63,6 +67,18 @@
     }
   }
 
+  .public_fixedDataTableRow_main.highlighted-row .public_fixedDataTableCell_main {
+    background-color: rgb(240, 244, 248);
+  }
+
+  .fixeddatatable-x-cell.real-name {
+    font-weight: 600;
+  }
+  .fixeddatatable-x-cell.scrambled-name {
+    font-size: 80%;
+    font-weight: 400;
+    padding-top: 0.1rem;
+  }
 }
 
 .dialog_-x-content {
@@ -74,4 +90,11 @@
 
 .datatable-x-badgewrapper {
   text-align: center;
+}
+
+.control_-leaderboard-checkbox {
+  padding-top: 0.3rem;
+  label {
+    margin-left: 0.5rem;
+  }
 }
