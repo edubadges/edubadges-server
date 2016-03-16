@@ -41,7 +41,13 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
             # publish changes to cache
             email_address = CachedEmailAddress.objects.get(pk=confirmation.email_address_id)
             email_address.save()
-            return badgr_app.email_confirmation_redirect + email_address.user.first_name
+
+            return "{}{}?email={}".format(
+                badgr_app.email_confirmation_redirect,
+                email_address.user.first_name,
+                email_address.email
+            )
+
         except Resolver404, EmailConfirmation.DoesNotExist:
             return badgr_app.email_confirmation_redirect
 
