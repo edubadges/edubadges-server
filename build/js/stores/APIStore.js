@@ -243,6 +243,12 @@ APIStore.defaultContexts = {
       replaceCollection: true,
       formId: 'badgebook_checkstudentprogress',
     },
+    badgebook_leaderboard: {
+        actionUrl: '/v1/badgebook/leaderboard/:tool_guid/:course_id?page=:page',
+        successfulHttpStatus: [200, 204],
+        apiCollectionKey: 'badgebook_leaderboard',
+        replaceCollection: true,
+    },
 };
 
 APIStore.fetchCollections = function(collectionKeys, requestContext){

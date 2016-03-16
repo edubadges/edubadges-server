@@ -59,6 +59,7 @@ PyJWT==1.4.0
 
 # LTI support
 git+https://github.com/concentricsky/django-auth-lti@v1.2.1-csky
+git+https://github.com/concentricsky/python-randomnames@v1.0.1
 
 # Badgr related utilities
 openbadges-bakery==0.4
@@ -76,3 +77,4 @@ ipaddress==1.0.14
 pyasn1==0.1.9
 pycparser==2.14
 six==1.9.0
+

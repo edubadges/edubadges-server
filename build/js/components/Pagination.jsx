@@ -15,13 +15,41 @@ var Pagination = React.createClass({
             totalCount: undefined,
             checkingProgress: true,
             verboseName: undefined,
+            handleClickNext: undefined,
+            handleClickPrev: undefined,
+            handleClickFirst: undefined,
+            handleClickLast: undefined,
         };
     },
 
-    handleClickNext: function() { if (this.props.next) { ClickActions.navigateLocalPath(this.props.next); } },
-    handleClickPrev: function() { if (this.props.prev) { ClickActions.navigateLocalPath(this.props.prev); } },
-    handleClickFirst: function() { if (this.props.first) { ClickActions.navigateLocalPath(this.props.first); } },
-    handleClickLast: function() { if (this.props.last) { ClickActions.navigateLocalPath(this.props.last); } },
+    handleClickNext: function() { 
+        if (this.props.handleClickNext) {
+            this.props.handleClickNext();
+        } else if (this.props.next) {
+            ClickActions.navigateLocalPath(this.props.next); 
+        } 
+    },
+    handleClickPrev: function() { 
+        if (this.props.handleClickPrev) {
+            this.props.handleClickPrev();
+        } else if (this.props.prev) {
+            ClickActions.navigateLocalPath(this.props.prev); 
+        } 
+    },
+    handleClickFirst: function() { 
+        if (this.props.handleClickFirst) {
+            this.props.handleClickFirst();
+        } else if (this.props.first) {
+            ClickActions.navigateLocalPath(this.props.first); 
+        } 
+    },
+    handleClickLast: function() { 
+        if (this.props.handleClickLast) {
+            this.props.handleClickLast();
+        } else if (this.props.last) {
+            ClickActions.navigateLocalPath(this.props.last); 
+        } 
+    },
 
     render: function() {
 
