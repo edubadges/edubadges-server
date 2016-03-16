@@ -112,8 +112,9 @@ var Detail = React.createClass({
             var badge_instance = _.find([this.props.badge_instance, this.state.badge_instance], function(bi){
                 return (!!_.get(bi, 'json.issuedOn'));
             });
-
+            var imageUrl = _.get(this.props, 'badge_class.image');
             if (badge_instance) {
+                imageUrl = badge_instance.image;
                 properties.unshift(
                     <li key="recipient">
                         <h2 className="detail_-x-meta">Recipient</h2>
@@ -155,7 +156,6 @@ var Detail = React.createClass({
                     </li>
                 );
             }
-            var imageUrl = badge_instance.image || _.get(this.props, 'badge_class.image');
             return (
                 <div className="dialog_-x_content">
                     <Heading truncate={true} size="small" title={badgeName} subtitle={_.get(this.props, 'badge_class.json.description')}/>
