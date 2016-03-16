@@ -13,6 +13,18 @@
         <link href="{{ STATIC_URL }}css/dialog-polyfill.css" media="screen" rel="stylesheet" type="text/css" >
         <link href="{{ STATIC_URL }}css/reset.css" media="screen" rel="stylesheet" type="text/css" >
         <link href="{{ STATIC_URL }}css/screen.css" media="screen" rel="stylesheet" type="text/css" >
+
+
+        <meta property="og:url"                content="{{ badge_instance.id }}" />
+        <meta property="og:title"              content="{{ badge_class.name }}" />
+        <meta property="og:description"        content="I earned a badge on Badgr: {{ badge_class.json['description'] }}" />
+
+        <meta property="og:image"              content="{{ badge_instance.json['image'] }}" />
+        <meta property="og:image:secure_url"   content="{{ badge_instance.json['image'] }}" />
+        <meta property="og:image:width"        content="400" />
+        <meta property="og:image:height"       content="400" />
+
+        <meta property="og:site_name"          content="Badgr" />
     </head>
     <body class="{% block bodyclass %}{% endblock %}">
 
