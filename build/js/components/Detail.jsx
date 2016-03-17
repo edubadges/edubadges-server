@@ -114,7 +114,7 @@ var Detail = React.createClass({
             });
             var imageUrl = _.get(this.props, 'badge_class.image');
             if (badge_instance) {
-                imageUrl = badge_instance.image;
+                imageUrl = this.props.showDownloadButton ? _.get(badge_instance, 'json.id')+"/image" : _.get(this.props, 'badge_class.image');
                 properties.unshift(
                     <li key="recipient">
                         <h2 className="detail_-x-meta">Recipient</h2>
@@ -162,7 +162,7 @@ var Detail = React.createClass({
                     <div className="detail_">
                         <div>
                             <img src={imageUrl} width={this.props.imageSize} height={this.props.imageSize} alt={badgeName}/>
-                            {this.props.showDownloadButton ? <div><a className="button_ button_-tertiary" href={imageUrl} download={getImageFileNameFromUrl(imageUrl)}>Download</a></div> : null}
+                            {this.props.showDownloadButton ? <div style={{"text-align": "center"}}><a className="button_ button_-tertiary" target="_blank" href={imageUrl} download={getImageFileNameFromUrl(imageUrl)}>Download</a></div> : null}
                         </div>
                         <ul>{properties}</ul>
                     </div>
