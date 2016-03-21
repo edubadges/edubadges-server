@@ -1,7 +1,7 @@
 {
   "name": "Badgr",
   "description": "Badgr provides an API for issuing Open Badges (http://openbadges.org). Providing integrated badge management and sharing for badge earners and tools for inspection, exploration and discovery of Open Badges and a world of learning opportunities.",
-  "version": "1.1.8-rc.1",
+  "version": "1.1.8-rc.5",
   "keywords": [
     "badges",
     "openbadges",
