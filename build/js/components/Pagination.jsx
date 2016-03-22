@@ -19,6 +19,7 @@ var Pagination = React.createClass({
             handleClickPrev: undefined,
             handleClickFirst: undefined,
             handleClickLast: undefined,
+            displayLast: true
         };
     },
 
@@ -68,7 +69,7 @@ var Pagination = React.createClass({
         var last = this.props.last ?
             ( <button className="icon_ icon_-notext icon_-last" onClick={this.handleClickLast}>Last</button> ) :
             ( <button className="icon_ icon_-notext icon_-last" disabled="disabled">Last</button> );
-
+        last = this.props.displayLast? last : null;
 
         var idxFirst = 1+(this.props.page-1)*this.props.perPageCount;
         var idxLast = (this.props.page-1)*this.props.perPageCount + this.props.thisPageCount;

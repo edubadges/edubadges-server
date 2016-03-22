@@ -1,4 +1,5 @@
 var React = require('react');
+var TextTruncate = require('../components/TextTruncate');
 
 var Step = React.createClass({
     propTypes: {
@@ -18,10 +19,9 @@ var Step = React.createClass({
 
     render: function() {
         var subtitle = this.props.subtitle ? (<p>{this.props.subtitle}</p>) : "";
-
         return (
             <button className={"card_ step_ "+(this.props.earned ? 'step_-earned' : '')} onClick={this.props.handleClick}>
-                {this.props.title}
+                <TextTruncate element="span" line={this.props.subtitle ? 1 : 2} truncateText="…" text={this.props.title} showTitle={true} className=""/>
                 {subtitle}
             </button>);
     }

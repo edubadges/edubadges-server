@@ -5,6 +5,7 @@ var _ = require('lodash');
 var FormStore = require('../stores/FormStore');
 
 // Actions
+var ClickActions = require('../actions/clicks');
 var FormActions = require('../actions/forms');
 
 /**
@@ -95,6 +96,7 @@ var DialogOpener = React.createClass({
 
     handleClick: function(e) {
         this.dialog.showDialog();
+        ClickActions.openDialog(this.props.dialogId);
 
         if (this.props.handleClick) {
             this.props.handleClick(e);

@@ -195,6 +195,9 @@ MenuStore.dispatchToken = appDispatcher.register(function(payload){
       MenuStore.emit('CLOSE_MODAL');
       break;
 
+    case 'OPEN_DIALOG':
+      MenuStore.emit('OPEN_DIALOG');
+
     default:
       // do naaathing.
   }
