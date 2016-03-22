@@ -149,9 +149,12 @@ BadgeClassTable = React.createClass({
 
       var openIssueDialog = function(badgeClass) {
         var dialogId="create-badge-instance";
-        var dialogFormId = "BadgeInstanceCreateUpdateForm";
-        var formProps = FormConfigStore.getConfig(dialogFormId, {}, {issuerSlug: this.props.issuerSlug, badgeClassSlug: badgeClass.slug});
+        var dialogFormId = "BadgeInstanceCreateUpdateForm" + this.props.issuerSlug + badgeClass.slug;
+        var formProps = FormConfigStore.getConfig("BadgeInstanceCreateUpdateForm", {}, {issuerSlug: this.props.issuerSlug, badgeClassSlug: badgeClass.slug});
+        formProps.formId = dialogFormId;
+        formProps.apiContext.formId = dialogFormId;
         FormStore.initFormData(dialogFormId, formProps);
+
         var actions=[
             <SubmitButton key="submit" formId={dialogFormId} label="Submit" />
         ];
