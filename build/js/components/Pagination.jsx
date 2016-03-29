@@ -15,13 +15,42 @@ var Pagination = React.createClass({
             totalCount: undefined,
             checkingProgress: true,
             verboseName: undefined,
+            handleClickNext: undefined,
+            handleClickPrev: undefined,
+            handleClickFirst: undefined,
+            handleClickLast: undefined,
+            displayLast: true
         };
     },
 
-    handleClickNext: function() { if (this.props.next) { ClickActions.navigateLocalPath(this.props.next); } },
-    handleClickPrev: function() { if (this.props.prev) { ClickActions.navigateLocalPath(this.props.prev); } },
-    handleClickFirst: function() { if (this.props.first) { ClickActions.navigateLocalPath(this.props.first); } },
-    handleClickLast: function() { if (this.props.last) { ClickActions.navigateLocalPath(this.props.last); } },
+    handleClickNext: function() { 
+        if (this.props.handleClickNext) {
+            this.props.handleClickNext();
+        } else if (this.props.next) {
+            ClickActions.navigateLocalPath(this.props.next); 
+        } 
+    },
+    handleClickPrev: function() { 
+        if (this.props.handleClickPrev) {
+            this.props.handleClickPrev();
+        } else if (this.props.prev) {
+            ClickActions.navigateLocalPath(this.props.prev); 
+        } 
+    },
+    handleClickFirst: function() { 
+        if (this.props.handleClickFirst) {
+            this.props.handleClickFirst();
+        } else if (this.props.first) {
+            ClickActions.navigateLocalPath(this.props.first); 
+        } 
+    },
+    handleClickLast: function() { 
+        if (this.props.handleClickLast) {
+            this.props.handleClickLast();
+        } else if (this.props.last) {
+            ClickActions.navigateLocalPath(this.props.last); 
+        } 
+    },
 
     render: function() {
 
@@ -40,7 +69,7 @@ var Pagination = React.createClass({
         var last = this.props.last ?
             ( <button className="icon_ icon_-notext icon_-last" onClick={this.handleClickLast}>Last</button> ) :
             ( <button className="icon_ icon_-notext icon_-last" disabled="disabled">Last</button> );
-
+        last = this.props.displayLast? last : null;
 
         var idxFirst = 1+(this.props.page-1)*this.props.perPageCount;
         var idxLast = (this.props.page-1)*this.props.perPageCount + this.props.thisPageCount;

@@ -498,8 +498,10 @@ var App = React.createClass({
     var issuer = APIStore.getFirstItemByPropertyValue('issuer_issuers', 'slug', issuerSlug);
     var issuersBadgeClasses = APIStore.filter('issuer_badgeclasses', 'issuer', issuer.json.id);
 
-    var dialogFormId = "BadgeClassCreateUpdateForm"
-    var formProps = FormConfigStore.getConfig(dialogFormId, {}, {issuerSlug: issuerSlug});
+    var dialogFormId = "BadgeClassCreateUpdateForm" + issuerSlug;
+    var formProps = FormConfigStore.getConfig("BadgeClassCreateUpdateForm", {}, {issuerSlug: issuerSlug});
+    formProps.formId = dialogFormId;
+    formProps.apiContext.formId = dialogFormId;
     FormStore.getOrInitFormData(dialogFormId, formProps);
 
     var formData = FormStore.getFormData(dialogFormId);
@@ -620,8 +622,10 @@ var App = React.createClass({
 
     badgeClass.issuer = issuer;
 
-    var dialogFormId = "BadgeInstanceCreateUpdateForm";
-    var formProps = FormConfigStore.getConfig(dialogFormId, {}, {issuerSlug: issuerSlug, badgeClassSlug: badgeClass.slug});
+    var dialogFormId = "BadgeInstanceCreateUpdateForm" + issuerSlug + badgeClassSlug;
+    var formProps = FormConfigStore.getConfig("BadgeInstanceCreateUpdateForm", {}, {issuerSlug: issuerSlug, badgeClassSlug: badgeClass.slug});
+    formProps.formId = dialogFormId;
+    formProps.apiContext.formId = dialogFormId;
     FormStore.getOrInitFormData(dialogFormId, formProps);
 
     var actions=[

@@ -142,6 +142,18 @@ class BadgeInstanceJson(JSONComponentView):
 
         return context
 
+    def get_renderers(self):
+        """
+        Instantiates and returns the list of renderers that this view can use.
+        """
+        try:
+            if self.request.META['HTTP_ACCEPT'] == '*/*':
+                return [BadgeInstanceHTMLRenderer(),]
+        except KeyError:
+            pass
+
+        return [renderer() for renderer in self.renderer_classes]
+
     def get(self, request, slug):
         try:
             current_object = self.model.cached.get(slug=slug)

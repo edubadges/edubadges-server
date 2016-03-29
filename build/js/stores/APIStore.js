@@ -243,6 +243,12 @@ APIStore.defaultContexts = {
       replaceCollection: true,
       formId: 'badgebook_checkstudentprogress',
     },
+    badgebook_leaderboard: {
+        actionUrl: '/v1/badgebook/leaderboard/:tool_guid/:course_id?page=:page',
+        successfulHttpStatus: [200, 204],
+        apiCollectionKey: 'badgebook_leaderboard',
+        replaceCollection: true,
+    },
 };
 
 APIStore.fetchCollections = function(collectionKeys, requestContext){
@@ -331,10 +337,10 @@ APIStore.getData = function(context, requestContext, pagination_url, retriedAtte
     if (error){
       APIStore.emit('API_STORE_FAILURE');
     }
-    else if (response.status == 202 && response.body.resume) {
+    else if (response.status == 202) {
       var resume = response.body.resume;
       var wait = response.body.wait || 8;
-      if (url.indexOf('resume=') == -1) {
+      if (resume && url.indexOf('resume=') == -1) {
         url += (url.indexOf('?') == -1 ? '?' : '&')+"resume="+resume;
       }
       setTimeout(function() {
@@ -582,10 +588,8 @@ APIStore.dispatchToken = Dispatcher.register(function(payload){
       // make sure form updates have occurred before processing submits
       Dispatcher.waitFor([FormStore.dispatchToken]);
 
-      if (FormStore.genericFormTypes.indexOf(action.formType) > -1){
-        var formData = FormStore.getFormData(action.formId);
-        APIStore.postForm(formData.fieldsMeta, formData.formState, formData.apiContext, action.requestContext || {});
-      }
+      var formData = FormStore.getFormData(action.formId);
+      APIStore.postForm(formData.fieldsMeta, formData.formState, formData.apiContext, action.requestContext || {});
       break;
 
     case 'API_POST_FORM':

@@ -2,11 +2,23 @@ var React = require('react');
 var moment = require('moment');
 var _ = require('lodash');
 
-
 var FacebookButton = require("../components/ShareButtons.jsx").FacebookButton;
 var LinkedInButton = require("../components/ShareButtons.jsx").LinkedInButton;
 var Heading = require('../components/Heading.jsx').Heading;
 var Step = require('../components/Step.jsx').Step;
+
+
+function getImageFileNameFromUrl(url) {
+    //this removes the anchor at the end, if there is one
+    url = url.substring(0, (url.indexOf("#") == -1) ? url.length : url.indexOf("#"));
+    //this removes the query after the file name, if there is one
+    url = url.substring(0, (url.indexOf("?") == -1) ? url.length : url.indexOf("?"));
+    //this removes everything before the last slash in the path
+    url = url.substring(url.lastIndexOf("/") + 1, url.length);
+    //return
+    return url;
+}
+
 
 var Detail = React.createClass({
     proptypes: {
@@ -16,7 +28,8 @@ var Detail = React.createClass({
         recipient: React.PropTypes.string,
         selfUpdaters: React.PropTypes.arrayOf(React.PropTypes.object),
         actionGenerator: React.PropTypes.func,
-        showUnearnedStep: React.PropTypes.bool
+        showUnearnedStep: React.PropTypes.bool,
+        showDownloadButton: React.PropTypes.bool
     },
     getDefaultProps: function() {
         return {
@@ -24,6 +37,7 @@ var Detail = React.createClass({
             recipient: undefined,
             actionGenerator: function(){},
             showUnearnedStep: false,
+            showDownloadButton: false,
             imageSize: "144"
         };
     },
@@ -98,8 +112,9 @@ var Detail = React.createClass({
             var badge_instance = _.find([this.props.badge_instance, this.state.badge_instance], function(bi){
                 return (!!_.get(bi, 'json.issuedOn'));
             });
-
+            var imageUrl = _.get(this.props, 'badge_class.image');
             if (badge_instance) {
+                imageUrl = this.props.showDownloadButton ? _.get(badge_instance, 'json.id')+"/image" : _.get(this.props, 'badge_class.image');
                 properties.unshift(
                     <li key="recipient">
                         <h2 className="detail_-x-meta">Recipient</h2>
@@ -141,13 +156,13 @@ var Detail = React.createClass({
                     </li>
                 );
             }
-
             return (
                 <div className="dialog_-x_content">
                     <Heading truncate={true} size="small" title={badgeName} subtitle={_.get(this.props, 'badge_class.json.description')}/>
                     <div className="detail_">
                         <div>
-                            <img src={_.get(this.props, 'badge_class.image')} width={this.props.imageSize} height={this.props.imageSize} alt={badgeName}/>
+                            <img src={imageUrl} width={this.props.imageSize} height={this.props.imageSize} alt={badgeName}/>
+                            {this.props.showDownloadButton ? <div style={{"text-align": "center"}}><a className="button_ button_-tertiary" target="_blank" href={imageUrl} download={getImageFileNameFromUrl(imageUrl)}>Download</a></div> : null}
                         </div>
                         <ul>{properties}</ul>
                     </div>

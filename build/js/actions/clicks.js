@@ -46,6 +46,14 @@ var navigateOut = function(path){
   window.location.assign(path);
 };
 
+openDialog =function(dialogId){
+    appDispatcher.dispatch({
+        action: {
+            type: 'OPEN_DIALOG',
+            id: dialogId
+        }
+    });
+};
 closeDialog = function(dialogId){
   var dialog = document.getElementById(dialogId);
   if (dialog) {
@@ -64,5 +72,6 @@ module.exports = {
   createLinkClickAction: createLinkClickAction,
   navigateLocalPath: navigateLocalPath,
   navigateOut: navigateOut,
+  openDialog: openDialog,
   closeDialog: closeDialog
 };
