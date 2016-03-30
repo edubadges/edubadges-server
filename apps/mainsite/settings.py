@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'issuer',
     'composition',
     'verifier',
+    'pathway',
 
     # deprecated packages to remove in v1.2
     'composer',

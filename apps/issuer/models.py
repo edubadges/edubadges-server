@@ -55,6 +55,10 @@ class Issuer(AbstractIssuer):
     def cached_badgeclasses(self):
         return self.badgeclasses.all()
 
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_pathways(self):
+        return self.pathway_set.all()
+
 
 class IssuerStaff(models.Model):
     issuer = models.ForeignKey(Issuer)
