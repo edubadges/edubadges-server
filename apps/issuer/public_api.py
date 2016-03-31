@@ -137,8 +137,8 @@ class BadgeInstanceJson(JSONComponentView):
         context = super(BadgeInstanceJson, self).get_renderer_context()
         if getattr(self, 'current_object', None):
             context['badge_instance'] = self.current_object
-            context['badge_class'] = self.current_object.badgeclass
-            context['issuer'] = self.current_object.issuer
+            context['badge_class'] = self.current_object.cached_badgeclass
+            context['issuer'] = self.current_object.cached_issuer
 
         return context
 
@@ -146,11 +146,12 @@ class BadgeInstanceJson(JSONComponentView):
         """
         Instantiates and returns the list of renderers that this view can use.
         """
-        try:
-            if self.request.META['HTTP_ACCEPT'] == '*/*':
-                return [BadgeInstanceHTMLRenderer(),]
-        except KeyError:
-            pass
+        HTTP_USER_AGENTS = ['LinkedInBot',]
+        user_agent = self.request.META.get('HTTP_USER_AGENT', '')
+
+        if self.request.META.get('HTTP_ACCEPT') == '*/*' or \
+                len([agent for agent in HTTP_USER_AGENTS if agent in user_agent]):
+            return [BadgeInstanceHTMLRenderer(),]
 
         return [renderer() for renderer in self.renderer_classes]
 
@@ -188,10 +189,13 @@ class BadgeInstanceImage(ComponentPropertyDetailView):
 
     def get(self, request, slug):
         try:
-            current_object = self.model.cached.get(slug=slug, revoked=False)
+            current_object = self.model.cached.get(slug=slug)
         except self.model.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
+            if current_object.revoked:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+
             self.log(current_object)
             return redirect(getattr(current_object, self.prop).url)
 

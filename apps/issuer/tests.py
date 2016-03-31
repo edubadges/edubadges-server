@@ -793,10 +793,13 @@ class PublicAPITests(APITestCase):
     Tests the ability of an anonymous user to GET one public badge object
     """
     def setUp(self):
+        cache.clear()
         # ensure records are published to cache
         Issuer.cached.get(slug='test-issuer')
+        Issuer.cached.get(pk=2)
         BadgeClass.cached.get(slug='badge-of-testing')
-        BadgeInstance.cached.get(slug='92219015-18a6-4538-8b6d-2b228e47b8aa', revoked=False)
+        BadgeClass.cached.get(pk=1)
+        BadgeInstance.cached.get(slug='92219015-18a6-4538-8b6d-2b228e47b8aa')
         pass
 
     def test_get_issuer_object(self):
@@ -816,5 +819,42 @@ class PublicAPITests(APITestCase):
 
     def test_get_assertion_image_with_redirect(self):
         with self.assertNumQueries(0):
-            response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa/image')
+            response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa/image', follow=False)
             self.assertEqual(response.status_code, 302)
+
+    def test_get_assertion_json_explicit(self):
+        with self.assertNumQueries(0):
+            response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa',
+                                       **{'HTTP_ACCEPT': 'application/json'})
+            self.assertEqual(response.status_code, 200)
+
+            # Will raise error if response is not JSON.
+            content = json.loads(response.content)
+
+            self.assertEqual(content['type'], 'Assertion')
+
+    def test_get_assertion_json_implicit(self):
+        # Make sure we serve JSON by default if there is a missing Accept header.
+        with self.assertNumQueries(0):
+            response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa')
+            self.assertEqual(response.status_code, 200)
+
+            # Will raise error if response is not JSON.
+            content = json.loads(response.content)
+
+            self.assertEqual(content['type'], 'Assertion')
+
+    def test_get_assertion_html(self):
+        with self.assertNumQueries(0):
+            response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa', **{'HTTP_ACCEPT': '*/*'})
+            self.assertEqual(response.status_code, 200)
+
+            self.assertContains(response, '<meta property="og:url"')
+
+    def test_get_assertion_html_linkedin(self):
+        with self.assertNumQueries(0):
+            response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa',
+                                       **{'HTTP_USER_AGENT': 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'})
+            self.assertEqual(response.status_code, 200)
+
+            self.assertContains(response, '<meta property="og:url"')
