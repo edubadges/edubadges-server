@@ -1,4 +1,6 @@
 # Created by wiggins@concentricsky.com on 3/31/16.
+from collections import OrderedDict
+
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from rest_framework import serializers
@@ -12,23 +14,24 @@ class RecipientProfileSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         representation = super(RecipientProfileSerializer, self).to_representation(instance)
-        representation.update({
-            '@id': u"mailto:{}".format(instance.recipient_identifier),
-            '@type': "RecipientProfile",
-            'name': instance.display_name,
-        })
+        representation.update([
+            ('@id', u"mailto:{}".format(instance.recipient_identifier)),
+            ('@type', "RecipientProfile"),
+            ('slug', instance.slug),
+            ('name', instance.display_name),
+        ])
         return representation
 
 
 class RecipientGroupMembershipSerializer(serializers.Serializer):
     def to_representation(self, instance):
         representation = super(RecipientGroupMembershipSerializer, self).to_representation(instance)
-        representation.update({
-            '@id': u"mailto:{}".format(instance.recipient_profile.recipient_identifier),
-            '@type': "RecipientProfile",
-            'name': instance.membership_name,
-            'pk': instance.pk,
-        })
+        representation.update([
+            ('@id', u"mailto:{}".format(instance.recipient_profile.recipient_identifier)),
+            ('@type', "RecipientProfile"),
+            ('slug', instance.slug),
+            ('name', instance.membership_name),
+        ])
         return representation
 
 
@@ -43,12 +46,14 @@ class RecipientGroupSerializer(serializers.Serializer):
         if not issuer_slug:
             raise ValidationError("No issuer")
 
-        representation = super(RecipientGroupSerializer, self).to_representation(instance)
-        representation.update({
-            '@id': settings.HTTP_ORIGIN+reverse('recipient_group_detail', kwargs={'issuer_slug': issuer_slug, 'pk': instance.pk}),
-            '@type': "RecipientGroup",
-            'pk': instance.pk
-        })
+        # representation = super(RecipientGroupSerializer, self).to_representation(instance)
+        representation = OrderedDict([
+            ('@id', settings.HTTP_ORIGIN+reverse('recipient_group_detail', kwargs={'issuer_slug': issuer_slug, 'group_slug': instance.slug})),
+            ('@type', "RecipientGroup"),
+            ('slug', instance.slug),
+            ('name', instance.name),
+            ('description', instance.description)
+        ])
         members_serializer = RecipientGroupMembershipSerializer(instance.cached_members(), many=True, context=self.context)
         if embed_recipients:
             representation['members'] = members_serializer.data
@@ -80,12 +85,12 @@ class RecipientGroupListSerializer(serializers.Serializer):
         if not issuer_slug:
             raise ValidationError("Invalid issuer_slug")
         groups_serializer = RecipientGroupSerializer(recipient_groups, many=True, context=self.context)
-        return {
-            "@context": settings.HTTP_ORIGIN+"/public/context/pathways",
-            "@type": "IssuerRecipientGroupList",
-            "issuer": settings.HTTP_ORIGIN+reverse('issuer_json', kwargs={'slug': issuer_slug}),
-            "recipientGroups": groups_serializer.data
-        }
+        return OrderedDict([
+            ("@context", settings.HTTP_ORIGIN+"/public/context/pathways"),
+            ("@type", "IssuerRecipientGroupList"),
+            ("issuer", settings.HTTP_ORIGIN+reverse('issuer_json', kwargs={'slug': issuer_slug})),
+            ("recipientGroups", groups_serializer.data)
+        ])
 
 
 class RecipientGroupMembershipListSerializer(serializers.Serializer):
@@ -93,14 +98,14 @@ class RecipientGroupMembershipListSerializer(serializers.Serializer):
         issuer_slug = self.context.get('issuer_slug', None)
         if not issuer_slug:
             raise ValidationError("Invalid issuer_slug")
-        recipient_group_pk = self.context.get('recipient_group_pk', None)
-        if not recipient_group_pk:
-            raise ValidationError("Invalid recipient_group_pk")
+        recipient_group_slug = self.context.get('recipient_group_slug', None)
+        if not recipient_group_slug:
+            raise ValidationError("Invalid recipient_group_slug")
 
         members_serializer = RecipientGroupMembershipSerializer(memberships, many=True, context=self.context)
-        return {
-            "@context": settings.HTTP_ORIGIN+"/public/context/pathways",
-            "@type": "IssuerRecipientGroupMembershipList",
-            "recipientGroup": settings.HTTP_ORIGIN+reverse('recipient_group_detail', kwargs={'issuer_slug': issuer_slug, 'group_pk': recipient_group_pk}),
-            "memberships": members_serializer.data
-        }
+        return OrderedDict([
+            ("@context", settings.HTTP_ORIGIN+"/public/context/pathways"),
+            ("@type", "IssuerRecipientGroupMembershipList"),
+            ("recipientGroup", settings.HTTP_ORIGIN+reverse('recipient_group_detail', kwargs={'issuer_slug': issuer_slug, 'group_slug': recipient_group_slug})),
+            ("memberships", members_serializer.data),
+        ])

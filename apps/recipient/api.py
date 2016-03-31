@@ -87,7 +87,7 @@ class RecipientGroupList(AbstractIssuerAPIEndpoint):
 
 
 class RecipientGroupAPIEndpoint(AbstractIssuerAPIEndpoint):
-    def _get_issuer_and_group(self, issuer_slug, group_pk):
+    def _get_issuer_and_group(self, issuer_slug, group_slug):
         try:
             issuer = Issuer.cached.get(slug=issuer_slug)
         except Issuer.DoesNotExist:
@@ -98,7 +98,7 @@ class RecipientGroupAPIEndpoint(AbstractIssuerAPIEndpoint):
             return None, None
 
         try:
-            recipient_group = RecipientGroup.cached.get(pk=group_pk)
+            recipient_group = RecipientGroup.cached.get(slug=group_slug)
         except RecipientGroup.DoesNotExist:
             return issuer, None
 
@@ -110,7 +110,7 @@ class RecipientGroupAPIEndpoint(AbstractIssuerAPIEndpoint):
 
 class RecipientGroupDetail(RecipientGroupAPIEndpoint):
 
-    def get(self, request, issuer_slug, group_pk):
+    def get(self, request, issuer_slug, group_slug):
         """
         GET detailed information about a Recipient Group
         ---
@@ -123,7 +123,7 @@ class RecipientGroupDetail(RecipientGroupAPIEndpoint):
               type: boolean
               paramType: query
         """
-        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_pk)
+        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_slug)
         if issuer is None or recipient_group is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -136,12 +136,12 @@ class RecipientGroupDetail(RecipientGroupAPIEndpoint):
         })
         return Response(serializer.data)
 
-    def delete(self, request, issuer_slug, group_pk):
+    def delete(self, request, issuer_slug, group_slug):
         """
         DELETE a Recipient Group
         ---
         """
-        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_pk)
+        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_slug)
         if issuer is None or recipient_group is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -150,7 +150,7 @@ class RecipientGroupDetail(RecipientGroupAPIEndpoint):
         recipient_group.delete()
         return Response(u"Recipient Group '{}' was removed.".format(old_name), status=status.HTTP_200_OK)
 
-    def put(self, request, issuer_slug, group_pk):
+    def put(self, request, issuer_slug, group_slug):
         """
         Update an existing Recipient Group
         ---
@@ -167,12 +167,12 @@ class RecipientGroupDetail(RecipientGroupAPIEndpoint):
               paramType: form
         """
 
-        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_pk)
+        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_slug)
         if issuer is None or recipient_group is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         try:
-            new_name = unicode(request.data.get('name',''))
+            new_name = unicode(request.data.get('name', ''))
         except TypeError:
             return ValidationError("Invalid name")
 
@@ -194,23 +194,23 @@ class RecipientGroupDetail(RecipientGroupAPIEndpoint):
 
 
 class RecipientGroupMembershipList(RecipientGroupAPIEndpoint):
-    def get(self, request, issuer_slug, group_pk):
+    def get(self, request, issuer_slug, group_slug):
         """
         GET the list of Recipients in a Recipient Group
         ---
         serializer: RecipientProfileSerializer
         """
-        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_pk)
+        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_slug)
         if issuer is None or recipient_group is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = RecipientGroupMembershipListSerializer(recipient_group.cached_members(), context={
             'request': request,
             'issuer_slug': issuer_slug,
-            'recipient_group_pk': group_pk,
+            'recipient_group_slug': group_slug,
         })
         return Response(serializer.data)
 
-    def post(self, request, issuer_slug, group_pk):
+    def post(self, request, issuer_slug, group_slug):
         """
         Add a recipient to a Recipient Group
         ---
@@ -226,7 +226,7 @@ class RecipientGroupMembershipList(RecipientGroupAPIEndpoint):
               required: true
               paramType: form
         """
-        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_pk)
+        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_slug)
         if issuer is None or recipient_group is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -252,7 +252,7 @@ class RecipientGroupMembershipList(RecipientGroupAPIEndpoint):
 
 
 class RecipientGroupMembershipDetail(RecipientGroupAPIEndpoint):
-    def put(self, request, issuer_slug, group_pk, membership_pk):
+    def put(self, request, issuer_slug, group_slug, membership_slug):
         """
         Update an existing Recipient Group Membership
         ---
@@ -264,12 +264,12 @@ class RecipientGroupMembershipDetail(RecipientGroupAPIEndpoint):
               required: true
               paramType: form
         """
-        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_pk)
+        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_slug)
         if issuer is None or recipient_group is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         try:
-            membership = RecipientGroupMembership.cached.get(pk=membership_pk)
+            membership = RecipientGroupMembership.cached.get(slug=membership_slug)
         except RecipientGroupMembership.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         if membership.recipient_group != recipient_group:
@@ -282,17 +282,17 @@ class RecipientGroupMembershipDetail(RecipientGroupAPIEndpoint):
         })
         return Response(serializer.data)
 
-    def delete(self, request, issuer_slug, group_pk, membership_pk):
+    def delete(self, request, issuer_slug, group_slug, membership_slug):
         """
         Remove a Recipient from a Recipient Group
         ---
         """
-        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_pk)
+        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_slug)
         if issuer is None or recipient_group is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         try:
-            membership = RecipientGroupMembership.cached.get(pk=membership_pk)
+            membership = RecipientGroupMembership.cached.get(slug=membership_slug)
         except RecipientGroupMembership.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         if membership.recipient_group != recipient_group:
