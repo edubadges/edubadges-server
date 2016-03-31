@@ -59,6 +59,10 @@ class Issuer(AbstractIssuer):
     def cached_pathways(self):
         return self.pathway_set.all()
 
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_recipient_groups(self):
+        return self.recipientgroup_set.all()
+
 
 class IssuerStaff(models.Model):
     issuer = models.ForeignKey(Issuer)
