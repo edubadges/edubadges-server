@@ -30,12 +30,30 @@ class PathwaySerializer(serializers.Serializer):
         if not issuer_slug:
             raise ValidationError("Invalid issuer_slug")
 
-        representation = OrderedDict([
+        representation = OrderedDict()
+
+        if self.context.get('include_context', False):
+            representation.update([
+                ("@context", "https://badgr.io/public/contexts/pathways"),
+                ("@type", "Pathway"),
+            ])
+
+        representation.update([
             ("@id", settings.HTTP_ORIGIN+reverse('pathway_detail', kwargs={'issuer_slug': issuer_slug, 'pathway_slug': instance.slug})),
             ('slug', instance.slug),
             ('name', instance.cached_root_element.name),
             ('description', instance.cached_root_element.description),
         ])
+
+        if self.context.get('include_structure', False):
+            element_serializer = PathwayElementSerializer(instance.cached_elements(), many=True, context=self.context)
+            representation.update([
+                ('rootElement', settings.HTTP_ORIGIN+reverse('pathway_element_detail', kwargs={
+                    'issuer_slug': issuer_slug,
+                    'pathway_slug': instance.slug,
+                    'element_slug': instance.cached_root_element.slug})),
+                ('elements', element_serializer.data)
+            ])
         return representation
 
     def create(self, validated_data, **kwargs):
@@ -62,9 +80,27 @@ class PathwaySerializer(serializers.Serializer):
         pathway.save()
         return pathway
 
-    def update(self, instance, validated_data):
-        pass
 
+class PathwayElementSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    description = serializers.CharField()
 
-
+    def to_representation(self, instance):
+        issuer_slug = self.context.get('issuer_slug', None)
+        if not issuer_slug:
+            raise ValidationError("Invalid issuer_slug")
+        pathway_slug = self.context.get('pathway_slug', None)
+        if not pathway_slug:
+            raise ValidationError("Invalid pathway_slug")
+        representation = OrderedDict()
+        representation.update([
+            ('@id', settings.HTTP_ORIGIN+reverse('pathway_element_detail', kwargs={
+                'issuer_slug': issuer_slug,
+                'pathway_slug': pathway_slug,
+                'element_slug': instance.slug})),
+            ('slug', instance.slug),
+            ('name', instance.name),
+            ('description', instance.description),
+        ])
+        return representation
 

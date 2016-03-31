@@ -6,8 +6,8 @@ from rest_framework.status import HTTP_201_CREATED
 
 from issuer.api import AbstractIssuerAPIEndpoint
 from issuer.models import Issuer
-from pathway.models import Pathway
-from pathway.serializers import PathwaySerializer, PathwayListSerializer
+from pathway.models import Pathway, PathwayElement
+from pathway.serializers import PathwaySerializer, PathwayListSerializer, PathwayElementSerializer
 
 
 class PathwayList(AbstractIssuerAPIEndpoint):
@@ -99,6 +99,34 @@ class PathwayDetail(PathwayAPIEndpoint):
         serializer = PathwaySerializer(pathway, context={
             'request': request,
             'issuer_slug': issuer_slug,
+            'pathway_slug': pathway_slug,
+            'include_structure': True
+        })
+        return Response(serializer.data)
+
+
+class PathwayElementDetail(PathwayAPIEndpoint):
+
+    def get(self, request, issuer_slug, pathway_slug, element_slug):
+        """
+        GET detail on a pathway, starting at a particular Pathway Element
+        ---
+        """
+        issuer, pathway = self._get_issuer_and_pathway(issuer_slug, pathway_slug)
+        if issuer is None or pathway is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            element = PathwayElement.cached.get(slug=element_slug)
+        except PathwayElement.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if element.pathway != pathway:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = PathwayElementSerializer(element, context={
+            'request': request,
+            'issuer_slug': issuer_slug,
+            'pathway_slug': pathway_slug,
             'include_structure': True
         })
         return Response(serializer.data)

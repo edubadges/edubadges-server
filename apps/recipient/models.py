@@ -17,6 +17,10 @@ class RecipientProfile(cachemodel.CacheModel):
             return self.display_name
         return self.recipient_identifier
 
+    def publish(self):
+        super(RecipientProfile, self).publish()
+        self.publish_by('slug')
+
 
 class RecipientGroup(basic_models.DefaultModel):
     issuer = models.ForeignKey('issuer.Issuer')
@@ -53,6 +57,7 @@ class RecipientGroupMembership(cachemodel.CacheModel):
 
     def publish(self):
         super(RecipientGroupMembership, self).publish()
+        self.publish_by('slug')
         self.recipient_group.publish()
 
     def delete(self, *args, **kwargs):

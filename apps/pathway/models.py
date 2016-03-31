@@ -15,6 +15,7 @@ class Pathway(cachemodel.CacheModel):
 
     def publish(self):
         super(Pathway, self).publish()
+        self.publish_by('slug')
         self.issuer.publish()
 
     def delete(self, *args, **kwargs):
@@ -26,6 +27,10 @@ class Pathway(cachemodel.CacheModel):
     @property
     def cached_root_element(self):
         return PathwayElement.cached.get(pk=self.root_element_id)
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_elements(self):
+        return self.pathwayelement_set.all()
 
     def populate_slug(self):
         return getattr(self, 'name_hint', str(uuid.uuid4()))
@@ -53,6 +58,17 @@ class PathwayElement(basic_models.DefaultModel):
 
     def populate_slug(self):
         return u'{}-{}'.format(self.pathway.slug, self.name)
+
+    def publish(self):
+        super(PathwayElement, self).publish()
+        self.publish_by('slug')
+        self.pathway.publish()
+
+    def delete(self, *args, **kwargs):
+        pathway = self.pathway
+        ret = super(PathwayElement, self).delete(*args, **kwargs)
+        pathway.publish()
+        return ret
 
 
 class PathwayElementBadge(cachemodel.CacheModel):
