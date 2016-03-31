@@ -1,11 +1,13 @@
 # Created by wiggins@concentricsky.com on 3/30/16.
 from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED
 
 from issuer.api import AbstractIssuerAPIEndpoint
 from issuer.models import Issuer
-from pathway.serializers import PathwaySerializer
+from pathway.models import Pathway
+from pathway.serializers import PathwaySerializer, PathwayListSerializer
 
 
 class PathwayList(AbstractIssuerAPIEndpoint):
@@ -23,7 +25,7 @@ class PathwayList(AbstractIssuerAPIEndpoint):
             return Response("Could not find issuer", status=status.HTTP_404_NOT_FOUND)
 
         pathways = issuer.cached_pathways()
-        serializer = PathwaySerializer(pathways, many=True, context={
+        serializer = PathwayListSerializer(pathways, context={
             'request': request,
             'issuer_slug': issuer_slug,
         })
@@ -61,3 +63,42 @@ class PathwayList(AbstractIssuerAPIEndpoint):
         # logger.event(badgrlog.PathwayCreatedEvent(pathway))
         return Response(pathway, status=HTTP_201_CREATED)
 
+
+class PathwayAPIEndpoint(AbstractIssuerAPIEndpoint):
+    def _get_issuer_and_pathway(self, issuer_slug, pathway_slug):
+        try:
+            issuer = Issuer.cached.get(slug=issuer_slug)
+        except Issuer.DoesNotExist:
+            return None, None
+        try:
+            self.check_object_permissions(self.request, issuer)
+        except PermissionDenied:
+            return None, None
+
+        try:
+            pathway = Pathway.cached.get(slug=pathway_slug)
+        except Pathway.DoesNotExist:
+            return issuer, None
+        if pathway.issuer != issuer:
+            return issuer, None
+
+        return issuer, pathway
+
+
+class PathwayDetail(PathwayAPIEndpoint):
+
+    def get(self, request, issuer_slug, pathway_slug):
+        """
+        GET detail on a pathway
+        ---
+        """
+        issuer, pathway = self._get_issuer_and_pathway(issuer_slug, pathway_slug)
+        if issuer is None or pathway is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = PathwaySerializer(pathway, context={
+            'request': request,
+            'issuer_slug': issuer_slug,
+            'include_structure': True
+        })
+        return Response(serializer.data)

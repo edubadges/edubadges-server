@@ -1,4 +1,8 @@
 # Created by wiggins@concentricsky.com on 3/30/16.
+from collections import OrderedDict
+
+from django.conf import settings
+from django.core.urlresolvers import reverse
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -6,18 +10,32 @@ from issuer.models import Issuer
 from pathway.models import Pathway, PathwayElement
 
 
+class PathwayListSerializer(serializers.Serializer):
+
+    def to_representation(self, pathways):
+        pathways_serializer = PathwaySerializer(pathways, many=True, context=self.context)
+        return OrderedDict([
+            ("@context", "https://badgr.io/public/contexts/pathways"),
+            ("@type", "IssuerPathwayList"),
+            ("pathways", pathways_serializer.data),
+        ])
+
+
 class PathwaySerializer(serializers.Serializer):
-    id = serializers.IntegerField(required=False, read_only=True)
-    issuer = serializers.HyperlinkedRelatedField(view_name='issuer_json', read_only=True, lookup_field='slug')
     name = serializers.CharField(max_length=254, write_only=True)
     description = serializers.CharField(write_only=True)
 
     def to_representation(self, instance):
-        representation = super(PathwaySerializer, self).to_representation(instance)
-        representation.update({
-            'name': instance.cached_root_element.name,
-            'description': instance.cached_root_element.description,
-        })
+        issuer_slug = self.context.get('issuer_slug', None)
+        if not issuer_slug:
+            raise ValidationError("Invalid issuer_slug")
+
+        representation = OrderedDict([
+            ("@id", settings.HTTP_ORIGIN+reverse('pathway_detail', kwargs={'issuer_slug': issuer_slug, 'pathway_slug': instance.slug})),
+            ('slug', instance.slug),
+            ('name', instance.cached_root_element.name),
+            ('description', instance.cached_root_element.description),
+        ])
         return representation
 
     def create(self, validated_data, **kwargs):
@@ -29,12 +47,14 @@ class PathwaySerializer(serializers.Serializer):
         except Issuer.DoesNotExist:
             raise ValidationError("Could not determine issuer")
 
+        name = validated_data.get('name')
+
         pathway = Pathway(issuer=issuer)
-        pathway.save()
+        pathway.save(name_hint=name)
         root_element = PathwayElement(
             pathway=pathway,
             parent_element=None,
-            name=validated_data.get('name'),
+            name=name,
             description=validated_data.get('description'),
         )
         root_element.save()
