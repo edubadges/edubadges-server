@@ -37,7 +37,7 @@ class RecipientGroup(basic_models.DefaultModel):
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_members(self):
-        return self.members.all()
+        return RecipientGroupMembership.objects.filter(recipient_group=self)
 
 
 class RecipientGroupMembership(cachemodel.CacheModel):
