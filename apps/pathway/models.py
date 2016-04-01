@@ -7,6 +7,8 @@ from autoslug import AutoSlugField
 from django.db import models
 from jsonfield import JSONField
 
+from issuer.models import BadgeClass
+
 
 class Pathway(cachemodel.CacheModel):
     issuer = models.ForeignKey('issuer.Issuer')
@@ -76,8 +78,32 @@ class PathwayElement(basic_models.DefaultModel):
     def cached_children(self):
         return self.pathwayelement_set.all()
 
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_badges(self):
+        return self.pathwayelementbadge_set.all()
+
 
 class PathwayElementBadge(cachemodel.CacheModel):
     pathway = models.ForeignKey('pathway.Pathway')
     element = models.ForeignKey('pathway.PathwayElement')
     badgeclass = models.ForeignKey('issuer.BadgeClass')
+
+    def publish(self):
+        super(PathwayElementBadge, self).publish()
+        self.publish_by('element', 'badgeclass')
+        self.element.publish()
+
+    def delete(self, *args, **kwargs):
+        element = self.element
+        ret = super(PathwayElementBadge, self).delete(*args, **kwargs)
+        self.publish_delete('element', 'badgeclass')
+        element.publish()
+        return ret
+
+    @property
+    def cached_element(self):
+        return PathwayElement.cached.get(pk=self.element_id)
+
+    @property
+    def cached_badgeclass(self):
+        return BadgeClass.cached.get(pk=self.badgeclass_id)

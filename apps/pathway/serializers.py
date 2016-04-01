@@ -116,6 +116,13 @@ class PathwayElementSerializer(serializers.Serializer):
                 'pathway_slug': pathway_slug,
                 'element_slug': child.slug}) for child in instance.cached_children()
         ]
+        representation['badges'] = [
+            settings.HTTP_ORIGIN+reverse('pathway_element_badge_detail', kwargs={
+                'issuer_slug': issuer_slug,
+                'pathway_slug': pathway_slug,
+                'element_slug': instance.slug,
+                'badge_slug': peb.badgeclass.slug}) for peb in instance.cached_badges()
+            ]
 
         return representation
 
@@ -159,3 +166,40 @@ class PathwayElementSerializer(serializers.Serializer):
                                  completion_badgeclass=completion_badge)
         element.save()
         return element
+
+
+class PathwayElementBadgeSerializer(serializers.Serializer):
+    def to_representation(self, instance):
+        issuer_slug = self.context.get('issuer_slug', None)
+        if not issuer_slug:
+            raise ValidationError("Invalid issuer_slug")
+        pathway_slug = self.context.get('pathway_slug', None)
+        if not pathway_slug:
+            raise ValidationError("Invalid pathway_slug")
+        element_slug = self.context.get('element_slug', None)
+        if not element_slug:
+            raise ValidationError("Invalid element_slug")
+
+        return OrderedDict([
+            ('@id', settings.HTTP_ORIGIN+reverse('pathway_element_badge_detail', kwargs={
+                'issuer_slug': issuer_slug,
+                'pathway_slug': pathway_slug,
+                'element_slug': element_slug,
+                'badge_slug': instance.badgeclass.slug,
+            })),
+            ('badge', settings.HTTP_ORIGIN+reverse('badgeclass_detail', kwargs= {
+                'issuerSlug': issuer_slug,
+                'badgeSlug': instance.badgeclass.slug,
+            })),
+        ])
+
+
+class PathwayElementBadgeListSerializer(serializers.Serializer):
+    def to_representation(self, element_badges):
+        serializer = PathwayElementBadgeSerializer(element_badges, many=True, context=self.context)
+        return OrderedDict([
+            ("@context", "https://badgr.io/public/contexts/pathways"),
+            ("@type", "PathwayElementBadgeList"),
+            ("elementBadges", serializer.data),
+        ])
+
