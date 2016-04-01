@@ -43,7 +43,7 @@ class Pathway(cachemodel.CacheModel):
 
 
 class PathwayElement(basic_models.DefaultModel):
-    slug = AutoSlugField(max_length=254, populate_from='populate_slug', unique=True, blank=False)
+    slug = AutoSlugField(max_length=254, populate_from='name', unique=True, blank=False)
     pathway = models.ForeignKey('pathway.Pathway')
     parent_element = models.ForeignKey('pathway.PathwayElement', blank=True, null=True)
     name = models.CharField(max_length=254)
@@ -56,19 +56,25 @@ class PathwayElement(basic_models.DefaultModel):
     class Meta:
         ordering = ('ordering',)
 
-    def populate_slug(self):
-        return u'{}-{}'.format(self.pathway.slug, self.name)
-
     def publish(self):
         super(PathwayElement, self).publish()
         self.publish_by('slug')
         self.pathway.publish()
+        if self.parent_element:
+            self.parent_element.publish()
 
     def delete(self, *args, **kwargs):
         pathway = self.pathway
+        parent_element = self.parent_element
         ret = super(PathwayElement, self).delete(*args, **kwargs)
         pathway.publish()
+        if parent_element:
+           parent_element.publish()
         return ret
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_children(self):
+        return self.pathwayelement_set.all()
 
 
 class PathwayElementBadge(cachemodel.CacheModel):

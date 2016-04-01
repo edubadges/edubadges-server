@@ -95,6 +95,8 @@ class PathwayDetail(PathwayAPIEndpoint):
         issuer, pathway = self._get_issuer_and_pathway(issuer_slug, pathway_slug)
         if issuer is None or pathway is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
+        if pathway.issuer != issuer:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
         serializer = PathwaySerializer(pathway, context={
             'request': request,
@@ -103,6 +105,77 @@ class PathwayDetail(PathwayAPIEndpoint):
             'include_structure': True
         })
         return Response(serializer.data)
+
+
+class PathwayElementList(PathwayAPIEndpoint):
+    def get(self, request, issuer_slug, pathway_slug):
+        """
+        GET a flat list of Pathway Elements defined on a pathway
+        ---
+        """
+        issuer, pathway = self._get_issuer_and_pathway(issuer_slug, pathway_slug)
+        if issuer is None or pathway is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if pathway.issuer != issuer:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = PathwaySerializer(pathway, context={
+            'request': request,
+            'issuer_slug': issuer_slug,
+            'pathway_slug': pathway_slug,
+            'include_structure': True,
+        })
+        return Response(serializer.data)
+
+    def post(self, request, issuer_slug, pathway_slug):
+        """
+        Add a new Pathway Element
+        ---
+        serializer: PathwayElementSerializer
+        parameters:
+            - name: parent
+              description: The slug of the parent Pathway Element to attach to
+              type: string
+              required: true
+              paramType: form
+            - name: name
+              description: The name of the Pathway Element
+              type: string
+              required: true
+              paramType: form
+            - name: description
+              description: The description of the Pathway Element
+              type: string
+              required: true
+              paramType: form
+            - name: ordering
+              description: The child order of this Pathway Element relative to its siblings
+              type: number
+              required: false
+              default: 99
+              paramType: form
+            - name: alignmentUrl
+              description: The external Alignment URL this Element aligns to
+              type: string
+              required: false
+              paramType: form
+            - name: completionBadge
+              description: The slug of the Badge Class to award when element is completed
+              type: string
+              required: false
+              paramType: form
+        """
+        serializer = PathwayElementSerializer(data=request.data, context={
+            'request': request,
+            'issuer_slug': issuer_slug,
+            'pathway_slug': pathway_slug,
+        })
+        serializer.is_valid(raise_exception=True)
+        serializer.save(created_by=request.user)
+        element = serializer.data
+
+        # logger.event(badgrlog.PathwayCreatedEvent(pathway))
+        return Response(element, status=HTTP_201_CREATED)
 
 
 class PathwayElementDetail(PathwayAPIEndpoint):

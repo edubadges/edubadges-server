@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from issuer.models import Issuer
+from issuer.models import Issuer, BadgeClass
 from pathway.models import Pathway, PathwayElement
 
 
@@ -84,6 +84,10 @@ class PathwaySerializer(serializers.Serializer):
 class PathwayElementSerializer(serializers.Serializer):
     name = serializers.CharField()
     description = serializers.CharField()
+    parent = serializers.CharField()
+    alignmentUrl = serializers.CharField(required=False)
+    ordering = serializers.IntegerField(required=False, default=99)
+    completionBadge = serializers.CharField(required=False)
 
     def to_representation(self, instance):
         issuer_slug = self.context.get('issuer_slug', None)
@@ -101,6 +105,57 @@ class PathwayElementSerializer(serializers.Serializer):
             ('slug', instance.slug),
             ('name', instance.name),
             ('description', instance.description),
+            ('alignmentUrl', instance.alignment_url),
+            ('ordering', instance.ordering),
+            ('completionBadge', instance.completion_badgeclass),
         ])
+
+        representation['children'] = [
+            settings.HTTP_ORIGIN+reverse('pathway_element_detail', kwargs={
+                'issuer_slug': issuer_slug,
+                'pathway_slug': pathway_slug,
+                'element_slug': child.slug}) for child in instance.cached_children()
+        ]
+
         return representation
 
+    def create(self, validated_data):
+        pathway_slug = self.context.get('pathway_slug', None)
+        if not pathway_slug:
+            raise ValidationError("Could not determine pathway")
+        try:
+            pathway = Pathway.cached.get(slug=pathway_slug)
+        except Pathway.DoesNotExist:
+            raise ValidationError("Could not determine pathway")
+
+        parent_slug = validated_data.get('parent')
+        try:
+            parent_element = PathwayElement.cached.get(slug=parent_slug)
+        except PathwayElement.DoesNotExist:
+            raise ValidationError("Invalid parent")
+        else:
+            if parent_element.pathway != pathway:
+                raise ValidationError("Invalid parent")
+
+        badge_slug = validated_data.get('completionBadge')
+        completion_badge = None
+        if badge_slug:
+            try:
+                completion_badge = BadgeClass.cached.get(slug=badge_slug)
+            except BadgeClass.DoesNotExist:
+                raise ValidationError("Invalid completionBadge")
+
+        try:
+            ordering = int(validated_data.get('ordering', 99))
+        except ValueError:
+            ordering = 99
+
+        element = PathwayElement(pathway=pathway,
+                                 parent_element=parent_element,
+                                 ordering=ordering,
+                                 name=validated_data.get('name'),
+                                 description=validated_data.get('description', None),
+                                 alignment_url=validated_data.get('alignmentUrl', None),
+                                 completion_badgeclass=completion_badge)
+        element.save()
+        return element
