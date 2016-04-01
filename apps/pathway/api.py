@@ -6,6 +6,7 @@ from rest_framework.status import HTTP_201_CREATED
 
 from issuer.api import AbstractIssuerAPIEndpoint
 from issuer.models import Issuer, BadgeClass
+from pathway.completionspec import CompletionRequirementSpec
 from pathway.models import Pathway, PathwayElement, PathwayElementBadge
 from pathway.serializers import PathwaySerializer, PathwayListSerializer, PathwayElementSerializer, \
     PathwayElementBadgeSerializer, PathwayElementBadgeListSerializer
@@ -250,6 +251,11 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
               type: string
               required: false
               paramType: form
+            - name: requirements
+              description: The CompletionRequirementSpec for the element
+              type: json
+              required: false
+              paramType: form
         """
         issuer, pathway, element = self._get_issuer_and_pathway_element(issuer_slug, pathway_slug, element_slug)
         if issuer is None or pathway is None or element is None:
@@ -269,12 +275,21 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
             except BadgeClass.DoesNotExist:
                 raise ValidationError("Invalid completionBadge")
 
+        completion_requirements = None
+        requirements = request.data.get('requirements', None)
+        if requirements:
+            try:
+                completion_requirements = CompletionRequirementSpec.parse(requirements)
+            except ValueError as e:
+                raise ValidationError("Invalid requirements: {}".format(e))
+
         element.parent_element = parent_element
         element.completion_badge = completion_badge
         element.name = request.data.get('name')
         element.description = request.data.get('description')
         element.alignment_url = request.data.get('alignmentUrl')
         element.ordering = int(request.data.get('ordering', 99))
+        element.completion_requirements = completion_requirements.serialize()
         element.save()
         serializer = PathwayElementSerializer(element, context={
             'request': request,

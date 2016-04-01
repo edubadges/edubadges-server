@@ -7,6 +7,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from issuer.models import Issuer, BadgeClass
+from pathway.completionspec import CompletionRequirementSpec
 from pathway.models import Pathway, PathwayElement
 
 
@@ -96,6 +97,9 @@ class PathwayElementSerializer(serializers.Serializer):
         pathway_slug = self.context.get('pathway_slug', None)
         if not pathway_slug:
             raise ValidationError("Invalid pathway_slug")
+
+        include_requirements = self.context.get('include_requirements', True)
+
         representation = OrderedDict()
         representation.update([
             ('@id', settings.HTTP_ORIGIN+reverse('pathway_element_detail', kwargs={
@@ -123,6 +127,10 @@ class PathwayElementSerializer(serializers.Serializer):
                 'element_slug': instance.slug,
                 'badge_slug': peb.badgeclass.slug}) for peb in instance.cached_badges()
             ]
+
+        if include_requirements and instance.completion_requirements:
+            completion_serializer = PathwayElementCompletionSpecSerializer(instance.completion_requirements, context=self.context)
+            representation['requirements'] = completion_serializer.data
 
         return representation
 
@@ -157,13 +165,22 @@ class PathwayElementSerializer(serializers.Serializer):
         except ValueError:
             ordering = 99
 
+        completion_requirements = None
+        requirement_string = validated_data.get('requirements', None)
+        if requirement_string:
+            try:
+                completion_requirements = CompletionRequirementSpec.parse(requirement_string)
+            except ValueError as e:
+                raise ValidationError("Invalid completion spec: {}".format(e.message))
+
         element = PathwayElement(pathway=pathway,
                                  parent_element=parent_element,
                                  ordering=ordering,
                                  name=validated_data.get('name'),
                                  description=validated_data.get('description', None),
                                  alignment_url=validated_data.get('alignmentUrl', None),
-                                 completion_badgeclass=completion_badge)
+                                 completion_badgeclass=completion_badge,
+                                 completion_requirements=completion_requirements)
         element.save()
         return element
 
@@ -203,3 +220,7 @@ class PathwayElementBadgeListSerializer(serializers.Serializer):
             ("elementBadges", serializer.data),
         ])
 
+
+class PathwayElementCompletionSpecSerializer(serializers.Serializer):
+    def to_representation(self, instance):
+        return instance
