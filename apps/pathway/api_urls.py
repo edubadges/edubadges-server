@@ -2,7 +2,7 @@
 from django.conf.urls import url
 
 from pathway.api import PathwayList, PathwayDetail, PathwayElementDetail, PathwayElementList, PathwayElementBadgesList, \
-    PathwayElementBadgesDetail
+    PathwayElementBadgesDetail, PathwayCompletionDetail
 
 urlpatterns = [
 
@@ -13,4 +13,5 @@ urlpatterns = [
     url(r'^/(?P<pathway_slug>[^/]+)/elements/(?P<element_slug>[^/]+)/badges$', PathwayElementBadgesList.as_view(), name='pathway_element_badges'),
     url(r'^/(?P<pathway_slug>[^/]+)/elements/(?P<element_slug>[^/]+)/badges/(?P<badge_slug>[^/]+)$', PathwayElementBadgesDetail.as_view(), name='pathway_element_badge_detail'),
 
+    url(r'^/(?P<pathway_slug>[^/]+)/completion/(?P<element_slug>[^/]+)$', PathwayCompletionDetail.as_view(), name='pathway_completion_detail'),
 ]
