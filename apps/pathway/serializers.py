@@ -7,7 +7,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from issuer.models import Issuer, BadgeClass
-from pathway.completionspec import CompletionRequirementSpec
+from pathway.completionspec import CompletionRequirementSpecFactory
 from pathway.models import Pathway, PathwayElement
 
 
@@ -105,10 +105,7 @@ class PathwayElementSerializer(serializers.Serializer):
 
         representation = OrderedDict()
         representation.update([
-            ('@id', settings.HTTP_ORIGIN+reverse('pathway_element_detail', kwargs={
-                'issuer_slug': issuer_slug,
-                'pathway_slug': pathway_slug,
-                'element_slug': instance.slug})),
+            ('@id', instance.json_id),
             ('slug', instance.slug),
             ('name', instance.name),
             ('description', instance.description),
@@ -118,10 +115,7 @@ class PathwayElementSerializer(serializers.Serializer):
         ])
 
         representation['children'] = [
-            settings.HTTP_ORIGIN+reverse('pathway_element_detail', kwargs={
-                'issuer_slug': issuer_slug,
-                'pathway_slug': pathway_slug,
-                'element_slug': child.slug}) for child in instance.cached_children()
+            child.json_id for child in instance.cached_children()
         ]
         representation['badges'] = [
             settings.HTTP_ORIGIN+reverse('pathway_element_badge_detail', kwargs={
@@ -172,7 +166,7 @@ class PathwayElementSerializer(serializers.Serializer):
         requirement_string = validated_data.get('requirements', None)
         if requirement_string:
             try:
-                completion_requirements = CompletionRequirementSpec.parse(requirement_string)
+                completion_requirements = CompletionRequirementSpecFactory.parse(requirement_string)
             except ValueError as e:
                 raise ValidationError("Invalid completion spec: {}".format(e.message))
 
