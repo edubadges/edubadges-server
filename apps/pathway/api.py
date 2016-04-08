@@ -431,8 +431,14 @@ class PathwayCompletionDetail(PathwayElementAPIEndpoint):
             except RecipientGroup.DoesNotExist:
                 return Response(u"Invalid Recipient Group '{}'".format(s), status=status.HTTP_400_BAD_REQUEST)
 
-        completions = []
-        serializer = PathwayElementCompletionSerializer(completions, context={
+        for group in groups:
+            recipients.extend([member.recipient_profile for member in group.cached_members()])
+
+        recipientCompletions = {}
+        for recipient in recipients:
+            recipientCompletions[recipient] = recipient.cached_completions(pathway)
+
+        serializer = PathwayElementCompletionSerializer(recipientCompletions, context={
             'request': request,
             'issuer_slug': issuer_slug,
             'pathway_slug': pathway_slug,

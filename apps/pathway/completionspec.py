@@ -60,22 +60,26 @@ class BadgeJunctionCompletionRequirementSpec(CompletionRequirementSpec):
             raise ValueError("badges are required when @type is {}".format(self.completion_type))
 
     def check_completion(self, instances=()):
+        completion = {
+            'completed': False,
+        }
         if self.required_number < 1:
-            return True
+            return completion
         earned_count = len(instances)
         if earned_count < self.required_number:
-            # short circuit
-            return False
+            return completion
 
         all_earned_badges = set(reverse('badgeclass_json', kwargs={'slug': i.cached_badgeclass.slug}) for i in instances)
         required_earned_badges = self.badges & all_earned_badges
+        completion['completedBadges'] = required_earned_badges
 
         if self.junction_type == CompletionRequirementSpecFactory.JUNCTION_TYPE_DISJUNCTION:
             if len(required_earned_badges) >= self.required_number:
-                return True
+                completion['completed'] = True
         elif self.junction_type == CompletionRequirementSpecFactory.JUNCTION_TYPE_JUNCTION:
             if self.badges <= required_earned_badges:  # every element in self.badges is in required_earned_badges
-                return True
+                completion['completed'] = True
+        return completion
 
 
 class CompletionRequirementSpecFactory(object):

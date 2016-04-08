@@ -225,7 +225,11 @@ class PathwayElementCompletionSpecSerializer(serializers.Serializer):
 
 class RecipientCompletionSerializer(serializers.Serializer):
     def to_representation(self, instance):
-        return instance
+        profile, completions = instance
+        return OrderedDict([
+            ('@id', profile.json_id),
+            ('completions', completions)
+        ])
 
 
 class PathwayElementCompletionSerializer(serializers.Serializer):
@@ -240,7 +244,7 @@ class PathwayElementCompletionSerializer(serializers.Serializer):
         if not element_slug:
             raise ValidationError("Invalid element_slug")
 
-        completions_serializer = RecipientCompletionSerializer(completions, many=True, context=self.context)
+        completions_serializer = RecipientCompletionSerializer(completions.items(), many=True, context=self.context)
 
         return OrderedDict([
             ("@context", "https://badgr.io/public/contexts/pathways"),
