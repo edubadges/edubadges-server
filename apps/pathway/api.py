@@ -9,7 +9,8 @@ from issuer.models import Issuer, BadgeClass
 from pathway.completionspec import CompletionRequirementSpec
 from pathway.models import Pathway, PathwayElement, PathwayElementBadge
 from pathway.serializers import PathwaySerializer, PathwayListSerializer, PathwayElementSerializer, \
-    PathwayElementBadgeSerializer, PathwayElementBadgeListSerializer
+    PathwayElementBadgeSerializer, PathwayElementBadgeListSerializer, PathwayElementCompletionSerializer
+from recipient.models import RecipientGroup, RecipientProfile
 
 
 class PathwayList(AbstractIssuerAPIEndpoint):
@@ -384,3 +385,63 @@ class PathwayElementBadgesDetail(PathwayElementAPIEndpoint):
 
         element_badge.delete()
         return Response(status=status.HTTP_200_OK)
+
+
+class PathwayCompletionDetail(PathwayElementAPIEndpoint):
+
+    def get(self, request, issuer_slug, pathway_slug, element_slug):
+        """
+        Get detailed completion state for a set of Recipients or Recipient Groups
+        ---
+        parameters:
+            - name: recipientGroup[]
+              description: Recipient Group(s) to return completions for
+              type: array
+              items: {
+                type: string
+              }
+              required: false
+              paramType: query
+            - name: recipient[]
+              description: Recipient(s) to return completions for
+              type: array
+              items: {
+                type: string
+              }
+              required: false
+              paramType: query
+        """
+        issuer, pathway, element = self._get_issuer_and_pathway_element(issuer_slug, pathway_slug, element_slug)
+        if issuer is None or pathway is None or element is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        recipient_slugs = request.query_params.getlist('recipient[]')
+        recipients = []
+        for s in recipient_slugs:
+            try:
+                recipients.append(RecipientProfile.cached.get(slug=s))
+            except RecipientProfile.DoesNotExist:
+                return Response(u"Invalid Recipient '{}'".format(s), status=status.HTTP_400_BAD_REQUEST)
+
+        group_slugs = request.query_params.getlist('recipientGroup[]')
+        groups = []
+        for s in group_slugs:
+            try:
+                groups.append(RecipientGroup.cached.get(slug=s))
+            except RecipientGroup.DoesNotExist:
+                return Response(u"Invalid Recipient Group '{}'".format(s), status=status.HTTP_400_BAD_REQUEST)
+
+        for group in groups:
+            recipients.extend([member.recipient_profile for member in group.cached_members()])
+
+        recipientCompletions = {}
+        for recipient in recipients:
+            recipientCompletions[recipient] = recipient.cached_completions(pathway)
+
+        serializer = PathwayElementCompletionSerializer(recipientCompletions, context={
+            'request': request,
+            'issuer_slug': issuer_slug,
+            'pathway_slug': pathway_slug,
+            'element_slug': element_slug
+        })
+        return Response(serializer.data)

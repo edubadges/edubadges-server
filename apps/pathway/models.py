@@ -3,11 +3,14 @@ import uuid
 
 import cachemodel
 import basic_models
+import itertools
 from autoslug import AutoSlugField
+from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.db import models
 from jsonfield import JSONField
 
-from issuer.models import BadgeClass
+from issuer.models import BadgeClass, Issuer
 
 
 class Pathway(cachemodel.CacheModel):
@@ -27,12 +30,20 @@ class Pathway(cachemodel.CacheModel):
         return ret
 
     @property
+    def cached_issuer(self):
+        return Issuer.cached.get(pk=self.issuer_id)
+
+    @property
     def cached_root_element(self):
         return PathwayElement.cached.get(pk=self.root_element_id)
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_elements(self):
         return self.pathwayelement_set.all()
+
+    def cached_badgeclasses(self):
+        badgeclasses = [[eb.cached_badgeclass for eb in e.cached_badges()] for e in self.cached_elements()]
+        return itertools.chain.from_iterable(badgeclasses)
 
     def populate_slug(self):
         return getattr(self, 'name_hint', str(uuid.uuid4()))
@@ -42,6 +53,27 @@ class Pathway(cachemodel.CacheModel):
         if name_hint:
             self.name_hint = name_hint
         return super(Pathway, self).save(*args, **kwargs)
+
+    def build_element_tree(self):
+        index = {}
+        for element in self.cached_elements():
+            index[element.json_id] = element
+
+        tree = {
+            'element': self.cached_root_element,
+        }
+
+        def _build(parent, node):
+            node['children'] = []
+            for child in node['element'].cached_children():
+                new_node = {
+                    'element': child,
+                }
+                _build(node, new_node)
+                node['children'].append(new_node)
+
+        _build(None, tree)
+        return tree
 
 
 class PathwayElement(basic_models.DefaultModel):
@@ -57,6 +89,9 @@ class PathwayElement(basic_models.DefaultModel):
 
     class Meta:
         ordering = ('ordering',)
+
+    def __unicode__(self):
+        return self.json_id
 
     def publish(self):
         super(PathwayElement, self).publish()
@@ -81,6 +116,20 @@ class PathwayElement(basic_models.DefaultModel):
     @cachemodel.cached_method(auto_publish=True)
     def cached_badges(self):
         return self.pathwayelementbadge_set.all()
+
+    @property
+    def cached_pathway(self):
+        return Pathway.cached.get(pk=self.pathway_id)
+
+    @property
+    def json_id(self):
+        return settings.HTTP_ORIGIN+reverse('pathway_element_detail', kwargs={
+            'issuer_slug': self.cached_pathway.cached_issuer.slug,
+            'pathway_slug': self.cached_pathway.slug,
+            'element_slug': self.slug})
+
+    def recipient_completion(self, recipient, badge_instances):
+        pass
 
 
 class PathwayElementBadge(cachemodel.CacheModel):

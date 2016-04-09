@@ -7,7 +7,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from issuer.models import Issuer, BadgeClass
-from pathway.completionspec import CompletionRequirementSpec
+from pathway.completionspec import CompletionRequirementSpecFactory
 from pathway.models import Pathway, PathwayElement
 
 
@@ -42,9 +42,12 @@ class PathwaySerializer(serializers.Serializer):
         representation.update([
             ("@id", settings.HTTP_ORIGIN+reverse('pathway_detail', kwargs={'issuer_slug': issuer_slug, 'pathway_slug': instance.slug})),
             ('slug', instance.slug),
-            ('name', instance.cached_root_element.name),
-            ('description', instance.cached_root_element.description),
         ])
+        if instance.root_element_id:
+            representation.update([
+                ('name', instance.cached_root_element.name),
+                ('description', instance.cached_root_element.description),
+            ])
 
         if self.context.get('include_structure', False):
             element_serializer = PathwayElementSerializer(instance.cached_elements(), many=True, context=self.context)
@@ -102,10 +105,7 @@ class PathwayElementSerializer(serializers.Serializer):
 
         representation = OrderedDict()
         representation.update([
-            ('@id', settings.HTTP_ORIGIN+reverse('pathway_element_detail', kwargs={
-                'issuer_slug': issuer_slug,
-                'pathway_slug': pathway_slug,
-                'element_slug': instance.slug})),
+            ('@id', instance.json_id),
             ('slug', instance.slug),
             ('name', instance.name),
             ('description', instance.description),
@@ -115,10 +115,7 @@ class PathwayElementSerializer(serializers.Serializer):
         ])
 
         representation['children'] = [
-            settings.HTTP_ORIGIN+reverse('pathway_element_detail', kwargs={
-                'issuer_slug': issuer_slug,
-                'pathway_slug': pathway_slug,
-                'element_slug': child.slug}) for child in instance.cached_children()
+            child.json_id for child in instance.cached_children()
         ]
         representation['badges'] = [
             settings.HTTP_ORIGIN+reverse('pathway_element_badge_detail', kwargs={
@@ -169,7 +166,7 @@ class PathwayElementSerializer(serializers.Serializer):
         requirement_string = validated_data.get('requirements', None)
         if requirement_string:
             try:
-                completion_requirements = CompletionRequirementSpec.parse(requirement_string)
+                completion_requirements = CompletionRequirementSpecFactory.parse(requirement_string)
             except ValueError as e:
                 raise ValidationError("Invalid completion spec: {}".format(e.message))
 
@@ -204,7 +201,7 @@ class PathwayElementBadgeSerializer(serializers.Serializer):
                 'element_slug': element_slug,
                 'badge_slug': instance.badgeclass.slug,
             })),
-            ('badge', settings.HTTP_ORIGIN+reverse('badgeclass_detail', kwargs= {
+            ('badge', settings.HTTP_ORIGIN+reverse('badgeclass_detail', kwargs={
                 'issuerSlug': issuer_slug,
                 'badgeSlug': instance.badgeclass.slug,
             })),
@@ -224,3 +221,39 @@ class PathwayElementBadgeListSerializer(serializers.Serializer):
 class PathwayElementCompletionSpecSerializer(serializers.Serializer):
     def to_representation(self, instance):
         return instance
+
+
+class RecipientCompletionSerializer(serializers.Serializer):
+    def to_representation(self, instance):
+        profile, completions = instance
+        return OrderedDict([
+            ('@id', profile.json_id),
+            ('completions', completions)
+        ])
+
+
+class PathwayElementCompletionSerializer(serializers.Serializer):
+    def to_representation(self, completions):
+        issuer_slug = self.context.get('issuer_slug', None)
+        if not issuer_slug:
+            raise ValidationError("Invalid issuer_slug")
+        pathway_slug = self.context.get('pathway_slug', None)
+        if not pathway_slug:
+            raise ValidationError("Invalid pathway_slug")
+        element_slug = self.context.get('element_slug', None)
+        if not element_slug:
+            raise ValidationError("Invalid element_slug")
+
+        completions_serializer = RecipientCompletionSerializer(completions.items(), many=True, context=self.context)
+
+        return OrderedDict([
+            ("@context", "https://badgr.io/public/contexts/pathways"),
+            ("@type", "PathwayElementsCompletionReport"),
+            ("rootElement", settings.HTTP_ORIGIN+reverse("pathway_element_detail", kwargs={
+                'issuer_slug': issuer_slug,
+                'pathway_slug': pathway_slug,
+                'element_slug': element_slug
+            })),
+            ("recipientCompletions", completions_serializer.data),
+
+        ])

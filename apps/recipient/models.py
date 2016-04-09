@@ -4,6 +4,9 @@ from autoslug import AutoSlugField
 from django.db import models
 import cachemodel
 
+from issuer.models import BadgeInstance
+from pathway.completionspec import CompletionRequirementSpecFactory
+
 
 class RecipientProfile(cachemodel.CacheModel):
     slug = AutoSlugField(max_length=254, populate_from='recipient_identifier', unique=True, blank=False)
@@ -20,6 +23,46 @@ class RecipientProfile(cachemodel.CacheModel):
     def publish(self):
         super(RecipientProfile, self).publish()
         self.publish_by('slug')
+
+    @property
+    def json_id(self):
+        return u'mailto:{}'.format(self.recipient_identifier)
+
+    # @cachemodel.cached_method(auto_publish=False)
+    def cached_completions(self, pathway):
+        # get recipients instances that are aligned to this pathway
+        badgeclasses = pathway.cached_badgeclasses()
+        instances = BadgeInstance.objects.filter(badgeclass__in=badgeclasses, recipient_identifier=self.recipient_identifier)
+
+        # recurse the tree to build completions
+        tree = pathway.build_element_tree()
+        completions = []
+
+        def _find_child_with_id(children, id):
+            for child in children:
+                if id == child['element'].json_id:
+                    return child
+
+        def _recurse(node):
+            completion = {
+                "element": node['element'].json_id,
+                "completed": False,
+                "completedRequirementCount": 0,
+            }
+            # recurse depth first
+            if node['element'].completion_requirements:
+                completion_spec = node['element'].completion_spec
+                completion['completedRequirementCount'] = completion_spec.required_number
+                if completion_spec.completion_type == CompletionRequirementSpecFactory.ELEMENT_JUNCTION:
+                    for element_id in completion_spec.elements:
+                        child = _find_child_with_id(node['children'], element_id)
+                        _recurse(child)
+                elif node.completion_spec.completion_type == CompletionRequirementSpecFactory.BADGE_JUNCTION:
+                    completion.update(node.completion_spec.check_completion(instances))
+            completions.append(completion)
+        _recurse(tree)
+
+        return completions
 
 
 class RecipientGroup(basic_models.DefaultModel):
