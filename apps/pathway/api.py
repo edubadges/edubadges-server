@@ -279,7 +279,7 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
         requirements = request.data.get('requirements', None)
         if requirements:
             try:
-                completion_requirements = CompletionRequirementSpec.parse(requirements)
+                completion_requirements = CompletionRequirementSpec.parse(requirements).serialize()
             except ValueError as e:
                 raise ValidationError("Invalid requirements: {}".format(e))
 
@@ -289,7 +289,7 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
         element.description = request.data.get('description')
         element.alignment_url = request.data.get('alignmentUrl')
         element.ordering = int(request.data.get('ordering', 99))
-        element.completion_requirements = completion_requirements.serialize()
+        element.completion_requirements = completion_requirements
         element.save()
         serializer = PathwayElementSerializer(element, context={
             'request': request,
