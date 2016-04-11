@@ -1,4 +1,5 @@
 var React = require('react');
+var _ = require('lodash');
 var moment = require('moment');
 
 // Actions
@@ -49,7 +50,8 @@ BadgeInstanceList = React.createClass({
       perPage: 50,
       currentPage: 1,
       badgeInstances: [],
-      dataRequestStatus: null
+      dataRequestStatus: null,
+      badgeClass: null
     };
   },
   getInitialState: function(){
@@ -63,13 +65,20 @@ BadgeInstanceList = React.createClass({
       this.setState({revoking: null});
   },
   revokeBadgeInstance: function(badgeInstance, ev) {
-      badgeClassUrl = badgeInstance.badge_class;
-      badgeClassSlug = badgeClassUrl.substr(badgeClassUrl.lastIndexOf('/')+1);
+      var badgeClassUrl = badgeInstance.badge_class;
+      var badgeClassSlug = badgeClassUrl.substr(badgeClassUrl.lastIndexOf('/')+1);
 
-      issuerUrl = badgeInstance.issuer;
-      issuerSlug = issuerUrl.substr(issuerUrl.lastIndexOf('/')+1);
+      var issuerUrl = badgeInstance.issuer;
+      var issuerSlug = issuerUrl.substr(issuerUrl.lastIndexOf('/')+1);
+      var successFunction = function(response, APIStore, requestContext) {
+          // decrement the recipient count that appears for this badge.
+          APIStore.updateReplaceOrCreateCollectionItem(
+              'issuer_badgeclasses', 'slug', badgeClassSlug,
+              'recipient_count', _.get(this.props, 'badgeClass.recipient_count', 1) - 1
+          );
+      }.bind(this);
 
-      apiContext = {
+      var apiContext = {
           apiCollectionKey: "issuer_badgeinstances",
           apiSearchKey: 'slug',
           apiSearchValue: badgeInstance.slug,
@@ -77,7 +86,8 @@ BadgeInstanceList = React.createClass({
           actionUrl: "/v1/issuer/issuers/"+ issuerSlug +"/badges/"+ badgeClassSlug +"/assertions/"+ badgeInstance.slug,
           method: "DELETE",
           successHttpStatus: [200],
-          successMessage: "Badge instance revoked."
+          successMessage: "Badge instance revoked.",
+          successFunction: successFunction
       };
       APISubmitData({revocation_reason: 'Manually revoked by issuer.'}, apiContext);
       this.setState({revoking: null});
