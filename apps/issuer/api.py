@@ -499,7 +499,7 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
         except (BadgeClass.DoesNotExist, PermissionDenied):
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
-            if len(current_badgeclass.cached_badgeinstances()) < 1:
+            if current_badgeclass.recipient_count() < 1:
                 old_badgeclass = current_badgeclass.json
                 current_badgeclass.delete()
                 logger.event(badgrlog.BadgeClassDeletedEvent(old_badgeclass, request.user))
