@@ -27,12 +27,12 @@ class CompletionRequirementSpec(object):
 
 class ElementJunctionCompletionRequirementSpec(CompletionRequirementSpec):
     def __init__(self, *args, **kwargs):
-        self.elements = set(kwargs.pop('elements'))
+        self.elements = set(kwargs.get('elements', []))
         super(ElementJunctionCompletionRequirementSpec, self).__init__(*args, **kwargs)
 
     def serialize(self):
         obj = super(ElementJunctionCompletionRequirementSpec, self).serialize()
-        obj.update([("elements", self.elements)])
+        obj.update([("elements", list(self.elements))])
         return obj
 
     def handle_json(self, json_obj):
@@ -46,12 +46,12 @@ class ElementJunctionCompletionRequirementSpec(CompletionRequirementSpec):
 
 class BadgeJunctionCompletionRequirementSpec(CompletionRequirementSpec):
     def __init__(self, *args, **kwargs):
-        self.badges = set(kwargs.pop('badges'))
+        self.badges = set(kwargs.get('badges', []))
         super(BadgeJunctionCompletionRequirementSpec, self).__init__(*args, **kwargs)
 
     def serialize(self):
         obj = super(BadgeJunctionCompletionRequirementSpec, self).serialize()
-        obj.update([("badges", self.badges)])
+        obj.update([("badges", list(self.badges))])
         return obj
 
     def handle_json(self, json_obj):
@@ -96,8 +96,10 @@ class CompletionRequirementSpecFactory(object):
 
     @classmethod
     def parse(cls, json_str):
-        json_obj = json.loads(json_str)
+        return cls.parse_obj(json.loads(json_str))
 
+    @classmethod
+    def parse_obj(cls, json_obj):
         completion_type = json_obj.get('@type')
         if completion_type not in cls.COMPLETION_TYPES.keys():
             raise ValueError("Invalid @type: {}".format(completion_type))
@@ -111,12 +113,15 @@ class CompletionRequirementSpecFactory(object):
             raise ValueError("Invalid junctionConfig @type: {}".format(junction_type))
 
         required_number = junction_conf.get("requiredNumber")
-        if not required_number:
-            raise ValueError("Invalid junctionConfig missing requiredNumber")
-        try:
-            junction_required = int(required_number)
-        except ValueError:
-            raise ValueError("Invalid requiredNumber: {}".format(required_number))
+        if junction_type == cls.JUNCTION_TYPE_DISJUNCTION:
+            if not required_number:
+                raise ValueError("Invalid junctionConfig missing requiredNumber")
+            try:
+                junction_required = int(required_number)
+            except ValueError:
+                raise ValueError("Invalid requiredNumber: {}".format(required_number))
+        else:
+            junction_required = None
 
         spec_cls = cls.COMPLETION_TYPES.get(completion_type)
         spec = spec_cls(completion_type=completion_type,

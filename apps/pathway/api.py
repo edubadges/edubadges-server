@@ -6,7 +6,7 @@ from rest_framework.status import HTTP_201_CREATED
 
 from issuer.api import AbstractIssuerAPIEndpoint
 from issuer.models import Issuer, BadgeClass
-from pathway.completionspec import CompletionRequirementSpec
+from pathway.completionspec import CompletionRequirementSpec, CompletionRequirementSpecFactory
 from pathway.models import Pathway, PathwayElement, PathwayElementBadge
 from pathway.serializers import PathwaySerializer, PathwayListSerializer, PathwayElementSerializer, \
     PathwayElementBadgeSerializer, PathwayElementBadgeListSerializer, PathwayElementCompletionSerializer
@@ -280,7 +280,7 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
         requirements = request.data.get('requirements', None)
         if requirements:
             try:
-                completion_requirements = CompletionRequirementSpec.parse(requirements).serialize()
+                completion_requirements = CompletionRequirementSpecFactory.parse_obj(requirements).serialize()
             except ValueError as e:
                 raise ValidationError("Invalid requirements: {}".format(e))
 
