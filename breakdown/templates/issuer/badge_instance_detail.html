@@ -44,7 +44,7 @@
                             <p>The baked image and record of a badge issued to a single recipient</p>
                         </div>
                     </header>
-
+                    {% if not badge_instance.revoked %}
                     <div class="detail_">
                         <div>
                             <img src="{{ badge_instance.json['image'] }}" width="224" height="224" alt="baked badge image">
@@ -94,6 +94,9 @@
                             </li>
                         </ul>
                     </div>
+                    {% else %}
+                    <div class="detail_"><p>Revoked.</p></div>
+                    {% endif %}
                 </div>
 
             </div>
