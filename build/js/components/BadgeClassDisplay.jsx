@@ -57,6 +57,10 @@ BadgeClassDetail = React.createClass({
         </div>
         <ul>
           <li>
+            <h2 className="detail_-x-meta">Description</h2>
+            <p>{this.props.json.description}</p>
+          </li>
+          <li>
             <h2 className="detail_-x-meta">Criteria</h2>
             <p><a href={this.props.json.criteria} target="_blank">{this.props.json.criteria}</a></p>
           </li>

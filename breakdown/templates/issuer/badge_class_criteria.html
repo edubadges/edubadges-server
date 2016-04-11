@@ -28,7 +28,7 @@
                 <header class="heading_">
                     <div class="heading_-x-text">
                         <h1>{{ badge_class.name }}</h1>
-                        <p>{{ badge_class.description }}</p>
+                        <p>{{ badge_class.json.get('description') }}</p>
                     </div>
                 </header>
 
@@ -39,7 +39,7 @@
                     <div class="detail_">
 
                         <div>
-                            <img src="{{ badge_class.image.url }}" width="144" height="144" alt="{{ badge_class.description }}">
+                            <img src="{{ badge_class.image.url }}" width="144" height="144" alt="{{ badge_class.json['description'] }}">
                         </div>
 
                         <ul>
