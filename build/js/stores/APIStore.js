@@ -520,6 +520,11 @@ APIStore.updateWithResponseData = function(data, context, requestContext){
         APIStore.data[context.apiCollectionKey].splice(foundIndex, 1);
         APIStore.emit('DATA_UPDATED');
         APIStore.emit('DATA_UPDATED_' + context.apiCollectionKey);
+
+        if (context.successFunction) {
+            context.successFunction(response, APIStore, requestContext);
+        }
+
         if (context.hasOwnProperty('formId'))
           APIStore.emit('DATA_UPDATED_' + context.formId);
       }
