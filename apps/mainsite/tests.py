@@ -68,9 +68,10 @@ class TestSignup(APITestCase):
 
         confirmation = EmailConfirmation.objects.first()
 
-        with self.settings(ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL='http://frontend.ui/login/'):
+        with self.settings(ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL='http://frontend.ui/login/',
+                           BADGR_APP_ID=badgr_app.id):
             response = self.client.get(
                 reverse('account_confirm_email', kwargs={ 'key': confirmation.key }),
                 follow=False
             )
-            self.assertRedirects(response, 'http://testserver/login/Tester', fetch_redirect_response=False)
+            self.assertRedirects(response, 'http://testserver/login/Tester?email={}'.format(post_data['email']), fetch_redirect_response=False)
