@@ -1,7 +1,7 @@
 {
   "name": "Badgr",
   "description": "Badgr provides an API for issuing Open Badges (http://openbadges.org). Providing integrated badge management and sharing for badge earners and tools for inspection, exploration and discovery of Open Badges and a world of learning opportunities.",
-  "version": "1.1.8",
+  "version": "1.1.10",
   "keywords": [
     "badges",
     "openbadges",
@@ -22,6 +22,7 @@
     "events": "~1.0.2",
     "fixed-data-table": "^0.4.6",
     "flux": "~2.0.1",
+    "grunt": "0.4.5",
     "grunt-autoprefixer": "latest",
     "grunt-browserify": "~4.0.1",
     "grunt-contrib-requirejs": "latest",

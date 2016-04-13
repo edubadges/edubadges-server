@@ -10,6 +10,7 @@ from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.db.models import ProtectedError
 from django.template.loader import get_template
 
 from openbadges_bakery import bake
@@ -35,6 +36,9 @@ class Issuer(AbstractIssuer):
             member.publish()
 
     def delete(self, *args, **kwargs):
+        if len(self.cached_badgeclasses()) > 0:
+            raise ProtectedError("Issuer may only be deleted after all its defined BadgeClasses have been deleted.")
+
         staff = self.cached_staff()
         owner = self.owner
         super(Issuer, self).delete(*args, **kwargs)
@@ -67,7 +71,7 @@ class IssuerStaff(models.Model):
 
 class BadgeClass(AbstractBadgeClass):
     issuer = models.ForeignKey(Issuer, blank=False, null=False,
-                               on_delete=models.PROTECT,
+                               on_delete=models.CASCADE,
                                related_name="badgeclasses")
 
     def publish(self):
@@ -75,6 +79,9 @@ class BadgeClass(AbstractBadgeClass):
         self.issuer.publish()
 
     def delete(self, *args, **kwargs):
+        if self.recipient_count() > 0:
+            raise ProtectedError("BadgeClass may only be deleted if all BadgeInstances have been revoked.")
+
         issuer = self.issuer
         super(BadgeClass, self).delete(*args, **kwargs)
         issuer.publish()
@@ -85,7 +92,7 @@ class BadgeClass(AbstractBadgeClass):
 
     @cachemodel.cached_method(auto_publish=True)
     def recipient_count(self):
-        return self.badgeinstances.count()
+        return self.badgeinstances.filter(revoked=False).count()
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeinstances(self):
@@ -94,7 +101,7 @@ class BadgeClass(AbstractBadgeClass):
 
 class BadgeInstance(AbstractBadgeInstance):
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False,
-                                   on_delete=models.PROTECT,
+                                   on_delete=models.CASCADE,
                                    related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
 

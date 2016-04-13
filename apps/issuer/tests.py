@@ -292,6 +292,17 @@ class IssuerTests(APITestCase):
         response = self.client.delete('/v1/issuer/issuers/issuer-deletable', {})
         self.assertEqual(response.status_code, 200)
 
+    def test_delete_issuer_with_unissued_badgeclass_successfully(self):
+        user = get_user_model().objects.get(pk=1)
+        self.client.force_authenticate(user=user)
+        test_issuer = Issuer(name='issuer who can be deleted', slug="issuer-deletable", owner=user)
+        test_issuer.save()
+        test_badgeclass = BadgeClass(name="Deletable Badge", owner=user, issuer=test_issuer)
+        test_badgeclass.save()
+
+        response = self.client.delete('/v1/issuer/issuers/issuer-deletable', {})
+        self.assertEqual(response.status_code, 200)
+
     def test_cant_delete_issuer_with_issued_badge(self):
         user = get_user_model().objects.get(pk=1)
         self.client.force_authenticate(user=user)
