@@ -224,7 +224,7 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
             - name: parent
               description: The slug of the parent Pathway Element to attach to
               type: string
-              required: true
+              required: false
               paramType: form
             - name: name
               description: The name of the Pathway Element
@@ -263,10 +263,12 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         parent_element = None
-        try:
-            parent_element = PathwayElement.cached.get(slug=request.data.get('parent'))
-        except PathwayElement.DoesNotExist:
-            raise ValidationError("Invalid parent")
+        parent_slug = request.data.get('parent', None)
+        if parent_slug:
+            try:
+                parent_element = PathwayElement.cached.get(slug=parent_slug)
+            except PathwayElement.DoesNotExist:
+                raise ValidationError("Invalid parent")
 
         completion_badge = None
         badge_slug = request.data.get('completionBadge', None)
@@ -284,7 +286,8 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
             except ValueError as e:
                 raise ValidationError("Invalid requirements: {}".format(e))
 
-        element.parent_element = parent_element
+        if parent_element:
+            element.parent_element = parent_element
         element.completion_badge = completion_badge
         element.name = request.data.get('name')
         element.description = request.data.get('description')
