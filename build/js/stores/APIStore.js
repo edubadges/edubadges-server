@@ -39,6 +39,14 @@ APIStore.collectionsExist = function(collections){
   return true;
 };
 
+APIStore.removeCollections = function(collections) {
+  for (var index in collections){
+    if (APIStore.data.hasOwnProperty(collections[index])) {
+      delete APIStore.data[collections[index]];
+    }
+  }
+};
+
 APIStore.collectionExists = function(collectionKey) {
     return APIStore.data.hasOwnProperty(collectionKey);
 };
@@ -635,6 +643,7 @@ module.exports = {
   removeListener: APIStore.removeStoreListener,
   hasAlreadyRequested: APIStore.hasAlreadyRequested,
   collectionsExist: APIStore.collectionsExist,
+  removeCollections: APIStore.removeCollections,
   getCollection: APIStore.getCollection,
   getCollectionLastItem: APIStore.getCollectionLastItem,
   getFirstItemByPropertyValue: APIStore.getFirstItemByPropertyValue,
