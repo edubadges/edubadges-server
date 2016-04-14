@@ -27,7 +27,7 @@ django-reversion==1.8.5
 python-memcached==1.53
 # Django Rest Framework
 djangorestframework==3.1.1
-django-rest-swagger==0.2.9
+django-rest-swagger==0.3.5
 # Django Allauth
 #django-allauth==0.23.0
 git+https://github.com/concentricsky/django-allauth.git@0.23.0-csky

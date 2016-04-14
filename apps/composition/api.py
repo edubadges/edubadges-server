@@ -359,6 +359,11 @@ class CollectionDetail(APIView):
               required: false
               type: string
               paramType: form
+            - name: badges
+              type: array
+              items: {
+                type: string
+              }
         """
         name = request.data.get('name')
         description = request.data.get('description')
@@ -423,6 +428,12 @@ class CollectionList(APIView):
         GET a list of the logged-in user's Collections.
         ---
         serializer: CollectionSerializer
+        parameters:
+            - name: badges
+              type: array
+              items: {
+                type: string
+              }
         """
         user_collections = self.queryset.filter(owner=request.user)
 
@@ -436,6 +447,12 @@ class CollectionList(APIView):
         POST a new collection to the logged-in user's account.
         ---
         serializer: CollectionSerializer
+        parameters:
+            - name: badges
+              type: array
+              items: {
+                type: string
+              }
         """
         serializer = CollectionSerializer(data=request.data,
                                           context={'request': request})
