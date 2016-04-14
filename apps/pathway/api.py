@@ -1,4 +1,6 @@
 # Created by wiggins@concentricsky.com on 3/30/16.
+from django.conf import settings
+from django.core.urlresolvers import resolve, Resolver404
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
@@ -105,7 +107,8 @@ class PathwayDetail(PathwayAPIEndpoint):
             'request': request,
             'issuer_slug': issuer_slug,
             'pathway_slug': pathway_slug,
-            'include_structure': True
+            'include_structure': True,
+            'include_requirements': False,
         })
         return Response(serializer.data)
 
@@ -257,6 +260,14 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
               type: json
               required: false
               paramType: form
+            - name: children
+              description: An array of @ids that will be children of this element
+              items: {
+                type: string
+              }
+              type: array
+              required: false
+              paramType: form
         """
         issuer, pathway, element = self._get_issuer_and_pathway_element(issuer_slug, pathway_slug, element_slug)
         if issuer is None or pathway is None or element is None:
@@ -285,6 +296,25 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
                 completion_requirements = CompletionRequirementSpecFactory.parse_obj(requirements).serialize()
             except ValueError as e:
                 raise ValidationError("Invalid requirements: {}".format(e))
+
+        child_ids = request.data.get('children', None)
+        order = 1
+        if child_ids:
+            for element_id in child_ids:
+                try:
+                    r = resolve(element_id.replace(settings.HTTP_ORIGIN, ''))
+                except Resolver404:
+                    raise ValidationError("Invalid child id: {}".format(element_id))
+                element_slug = r.kwargs.get('element_slug')
+                try:
+                    child = PathwayElement.cached.get(slug=element_slug)
+                except PathwayElement.DoesNotExist:
+                    raise ValidationError("Invalid child id: {}".format(element_id))
+                else:
+                    child.parent_element = element
+                    child.ordering = order
+                    order += 1
+                    child.save()
 
         if parent_element:
             element.parent_element = parent_element
