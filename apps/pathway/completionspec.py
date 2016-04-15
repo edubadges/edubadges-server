@@ -37,8 +37,6 @@ class ElementJunctionCompletionRequirementSpec(CompletionRequirementSpec):
 
     def handle_json(self, json_obj):
         self.elements = set(json_obj.get('elements'))
-        if not self.elements:
-            raise ValueError("elements are required when @type is {}".format(self.completion_type))
 
     def check_completion(self, elements=()):
         raise NotImplementedError
