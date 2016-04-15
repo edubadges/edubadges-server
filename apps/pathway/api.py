@@ -108,7 +108,7 @@ class PathwayDetail(PathwayAPIEndpoint):
             'issuer_slug': issuer_slug,
             'pathway_slug': pathway_slug,
             'include_structure': True,
-            'include_requirements': False,
+            'include_requirements': True,
         })
         return Response(serializer.data)
 
