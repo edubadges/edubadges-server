@@ -261,7 +261,15 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
               required: false
               paramType: form
             - name: children
-              description: An array of @ids that will be children of this element
+              description: An array of Pathway Element @ids that will be children of this element
+              items: {
+                type: string
+              }
+              type: array
+              required: false
+              paramType: form
+            - name: badges
+              description: An array of Badge Class @ids that will be connected to this element
               items: {
                 type: string
               }
@@ -315,6 +323,28 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
                     child.ordering = order
                     order += 1
                     child.save()
+
+        badge_ids = request.data.get('badges', None)
+        order = 1
+        if badge_ids:
+            for badge_id in badge_ids:
+                try:
+                    r = resolve(badge_id.replace(settings.HTTP_ORIGIN, ''))
+                except Resolver404:
+                    raise ValidationError("Invalid badge id: {}".format(badge_id))
+                badge_slug = r.kwargs.get('slug')
+                try:
+                    badgeclass = BadgeClass.cached.get(slug=badge_slug)
+                except BadgeClass.DoesNotExist:
+                    raise ValidationError("Invalid badge id: {}".format(element_id))
+
+                try:
+                    pathway_badge = PathwayElementBadge.cached.get(element=element, badgeclass=badgeclass)
+                except PathwayElementBadge.DoesNotExist:
+                    pathway_badge = PathwayElementBadge(pathway=pathway, element=element, badgeclass=badgeclass)
+                pathway_badge.ordering = order
+                order += 1
+                pathway_badge.save()
 
         if parent_element:
             element.parent_element = parent_element

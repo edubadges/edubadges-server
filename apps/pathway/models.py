@@ -136,6 +136,10 @@ class PathwayElementBadge(cachemodel.CacheModel):
     pathway = models.ForeignKey('pathway.Pathway')
     element = models.ForeignKey('pathway.PathwayElement')
     badgeclass = models.ForeignKey('issuer.BadgeClass')
+    ordering = models.IntegerField(default=99)
+
+    class Meta:
+        ordering = ('ordering',)
 
     def publish(self):
         super(PathwayElementBadge, self).publish()
