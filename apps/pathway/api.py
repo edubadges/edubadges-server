@@ -346,8 +346,11 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
                 order += 1
                 pathway_badge.save()
 
+        old_parent = None
         if parent_element:
+            old_parent = element.parent_element
             element.parent_element = parent_element
+
         element.completion_badgeclass = completion_badge
         element.name = request.data.get('name')
         element.description = request.data.get('description')
@@ -355,6 +358,8 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
         element.ordering = int(request.data.get('ordering', 99))
         element.completion_requirements = completion_requirements
         element.save()
+        if old_parent:
+            old_parent.publish()
         serializer = PathwayElementSerializer(element, context={
             'request': request,
             'issuer_slug': issuer_slug,
