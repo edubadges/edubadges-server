@@ -76,7 +76,7 @@ class BadgeJunctionCompletionRequirementSpec(CompletionRequirementSpec):
         if self.junction_type == CompletionRequirementSpecFactory.JUNCTION_TYPE_DISJUNCTION:
             if len(required_earned_badges) >= self.required_number:
                 completion['completed'] = True
-        elif self.junction_type == CompletionRequirementSpecFactory.JUNCTION_TYPE_JUNCTION:
+        elif self.junction_type == CompletionRequirementSpecFactory.JUNCTION_TYPE_CONJUNCTION:
             if self.badges <= required_earned_badges:  # every element in self.badges is in required_earned_badges
                 completion['completed'] = True
         return completion
@@ -91,8 +91,8 @@ class CompletionRequirementSpecFactory(object):
     }
 
     JUNCTION_TYPE_DISJUNCTION = 'Disjunction'
-    JUNCTION_TYPE_JUNCTION = 'Junction'
-    JUNCTION_TYPES = (JUNCTION_TYPE_DISJUNCTION, JUNCTION_TYPE_JUNCTION)
+    JUNCTION_TYPE_CONJUNCTION = 'Conjunction'
+    JUNCTION_TYPES = (JUNCTION_TYPE_DISJUNCTION, JUNCTION_TYPE_CONJUNCTION)
 
     @classmethod
     def parse(cls, json_str):
