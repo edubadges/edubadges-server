@@ -318,7 +318,7 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
 
         if parent_element:
             element.parent_element = parent_element
-        element.completion_badge = completion_badge
+        element.completion_badgeclass = completion_badge
         element.name = request.data.get('name')
         element.description = request.data.get('description')
         element.alignment_url = request.data.get('alignmentUrl')
