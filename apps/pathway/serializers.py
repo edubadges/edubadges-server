@@ -117,12 +117,9 @@ class PathwayElementSerializer(serializers.Serializer):
             child.json_id for child in instance.cached_children()
         ]
         representation['badges'] = [
-            settings.HTTP_ORIGIN+reverse('pathway_element_badge_detail', kwargs={
-                'issuer_slug': issuer_slug,
-                'pathway_slug': pathway_slug,
-                'element_slug': instance.slug,
-                'badge_slug': peb.badgeclass.slug}) for peb in instance.cached_badges()
-            ]
+            settings.HTTP_ORIGIN+reverse('badgeclass_json', kwargs={'slug': peb.badgeclass.slug})
+                for peb in instance.cached_badges()
+        ]
 
         if include_requirements and instance.completion_requirements:
             completion_serializer = PathwayElementCompletionSpecSerializer(instance.completion_requirements, context=self.context)
