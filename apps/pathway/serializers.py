@@ -102,7 +102,6 @@ class PathwayElementSerializer(serializers.Serializer):
             raise ValidationError("Invalid pathway_slug")
 
         include_requirements = self.context.get('include_requirements', True)
-
         representation = OrderedDict()
         representation.update([
             ('@id', instance.json_id),
@@ -111,7 +110,7 @@ class PathwayElementSerializer(serializers.Serializer):
             ('description', instance.description),
             ('alignmentUrl', instance.alignment_url),
             ('ordering', instance.ordering),
-            ('completionBadge', instance.completion_badgeclass),
+            ('completionBadge', instance.completion_badgeclass.slug if instance.completion_badgeclass else None),
         ])
 
         representation['children'] = [
