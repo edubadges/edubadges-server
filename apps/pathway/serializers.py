@@ -68,7 +68,7 @@ class PathwaySerializer(serializers.Serializer):
         if not issuer_slug:
             raise ValidationError("Could not determine issuer")
         try:
-            issuer = Issuer.cached.get(slug=issuer_slug)
+            issuer = Issuer.cached.get_by_slug_or_id(issuer_slug)
         except Issuer.DoesNotExist:
             raise ValidationError("Could not determine issuer")
 
@@ -135,13 +135,13 @@ class PathwayElementSerializer(serializers.Serializer):
         if not pathway_slug:
             raise ValidationError("Could not determine pathway")
         try:
-            pathway = Pathway.cached.get(slug=pathway_slug)
+            pathway = Pathway.cached.get_by_slug_or_id(pathway_slug)
         except Pathway.DoesNotExist:
             raise ValidationError("Could not determine pathway")
 
         parent_slug = validated_data.get('parent')
         try:
-            parent_element = PathwayElement.cached.get(slug=parent_slug)
+            parent_element = PathwayElement.cached.get_by_slug_or_id(parent_slug)
         except PathwayElement.DoesNotExist:
             raise ValidationError("Invalid parent")
         else:
@@ -152,7 +152,7 @@ class PathwayElementSerializer(serializers.Serializer):
         completion_badge = None
         if badge_slug:
             try:
-                completion_badge = BadgeClass.cached.get(slug=badge_slug)
+                completion_badge = BadgeClass.cached.get_by_slug_or_id(badge_slug)
             except BadgeClass.DoesNotExist:
                 raise ValidationError("Invalid completionBadge")
 

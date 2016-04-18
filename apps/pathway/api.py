@@ -141,7 +141,7 @@ class PathwayElementList(PathwayAPIEndpoint):
         serializer: PathwayElementSerializer
         parameters:
             - name: parent
-              description: The slug of the parent Pathway Element to attach to
+              description: The id or slug of the parent Pathway Element to attach to
               type: string
               required: true
               paramType: form
@@ -167,7 +167,7 @@ class PathwayElementList(PathwayAPIEndpoint):
               required: false
               paramType: form
             - name: completionBadge
-              description: The slug of the Badge Class to award when element is completed
+              description: The id or slug of the Badge Class to award when element is completed
               type: string
               required: false
               paramType: form
@@ -226,7 +226,7 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
         serializer: PathwayElementSerializer
         parameters:
             - name: parent
-              description: The slug of the parent Pathway Element to attach to
+              description: The id or slug of the parent Pathway Element to attach to
               type: string
               required: false
               paramType: form
@@ -252,7 +252,7 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
               required: false
               paramType: form
             - name: completionBadge
-              description: The slug of the Badge Class to award when element is completed
+              description: The id or slug of the Badge Class to award when element is completed
               type: string
               required: false
               paramType: form
@@ -286,7 +286,7 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
         parent_slug = request.data.get('parent', None)
         if parent_slug:
             try:
-                parent_element = PathwayElement.cached.get(slug=parent_slug)
+                parent_element = PathwayElement.cached.get_by_slug_or_id(parent_slug)
             except PathwayElement.DoesNotExist:
                 raise ValidationError("Invalid parent")
 
@@ -294,7 +294,7 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
         badge_slug = request.data.get('completionBadge', None)
         if badge_slug:
             try:
-                completion_badge = BadgeClass.cached.get(slug=badge_slug)
+                completion_badge = BadgeClass.cached.get_by_slug_or_id(badge_slug)
             except BadgeClass.DoesNotExist:
                 raise ValidationError("Invalid completionBadge")
 
@@ -406,7 +406,7 @@ class PathwayElementBadgesList(PathwayElementAPIEndpoint):
         ---
         parameters:
             - name: badge
-              description: The slug of the Badge Class to align
+              description: The id or slug of the Badge Class to align
               type: string
               required: true
               paramType: form
@@ -416,7 +416,7 @@ class PathwayElementBadgesList(PathwayElementAPIEndpoint):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         try:
-            badgeclass = BadgeClass.cached.get(slug=request.data.get('badge'))
+            badgeclass = BadgeClass.cached.get_by_slug_or_id(request.data.get('badge'))
         except BadgeClass.DoesNotExist:
             raise ValidationError("Invalid badge")
 

@@ -11,12 +11,14 @@ from django.db import models
 from jsonfield import JSONField
 
 from issuer.models import BadgeClass, Issuer
+from mainsite.managers import SlugOrJsonIdCacheModelManager
 
 
 class Pathway(cachemodel.CacheModel):
     issuer = models.ForeignKey('issuer.Issuer')
     slug = AutoSlugField(max_length=254, populate_from='populate_slug', unique=True, blank=False)
     root_element = models.OneToOneField('pathway.PathwayElement', related_name='toplevel_pathway', null=True)
+    cached = SlugOrJsonIdCacheModelManager('pathway_slug')
 
     def publish(self):
         super(Pathway, self).publish()
@@ -86,6 +88,7 @@ class PathwayElement(basic_models.DefaultModel):
     alignment_url = models.URLField(blank=True, null=True)
     completion_badgeclass = models.ForeignKey('issuer.BadgeClass', blank=True, null=True)
     completion_requirements = JSONField(blank=True, null=True)
+    cached = SlugOrJsonIdCacheModelManager('element_slug')
 
     class Meta:
         ordering = ('ordering',)
