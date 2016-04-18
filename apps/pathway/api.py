@@ -60,6 +60,7 @@ class PathwayList(AbstractIssuerAPIEndpoint):
         serializer = PathwaySerializer(data=request.data, context={
             'request': request,
             'issuer_slug': issuer_slug,
+            'include_structure': True
         })
         serializer.is_valid(raise_exception=True)
         serializer.save(created_by=request.user)
@@ -336,7 +337,7 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
                 try:
                     badgeclass = BadgeClass.cached.get(slug=badge_slug)
                 except BadgeClass.DoesNotExist:
-                    raise ValidationError("Invalid badge id: {}".format(element_id))
+                    raise ValidationError("Invalid badge id: {}".format(badge_id))
 
                 try:
                     pathway_badge = PathwayElementBadge.cached.get(element=element, badgeclass=badgeclass)

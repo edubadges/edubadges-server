@@ -50,6 +50,9 @@ class PathwaySerializer(serializers.Serializer):
             ])
 
         if self.context.get('include_structure', False):
+            self.context.update({
+                'pathway_slug': instance.slug,
+            })
             element_serializer = PathwayElementSerializer(instance.cached_elements(), many=True, context=self.context)
             representation.update([
                 ('rootElement', settings.HTTP_ORIGIN+reverse('pathway_element_detail', kwargs={
