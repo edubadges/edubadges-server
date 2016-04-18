@@ -92,9 +92,9 @@ class PathwayElementSerializer(serializers.Serializer):
     name = serializers.CharField()
     description = serializers.CharField()
     parent = serializers.CharField()
-    alignmentUrl = serializers.CharField(required=False)
+    alignmentUrl = serializers.CharField(required=False, allow_null=True)
     ordering = serializers.IntegerField(required=False, default=99)
-    completionBadge = serializers.CharField(required=False)
+    completionBadge = serializers.CharField(required=False, allow_null=True)
 
     def to_representation(self, instance):
         issuer_slug = self.context.get('issuer_slug', None)
