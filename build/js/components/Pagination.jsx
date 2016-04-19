@@ -19,7 +19,9 @@ var Pagination = React.createClass({
             handleClickPrev: undefined,
             handleClickFirst: undefined,
             handleClickLast: undefined,
-            displayLast: true
+            displayLast: true,
+            handleAction: undefined,
+            actionLabel: "action",
         };
     },
 
@@ -78,6 +80,10 @@ var Pagination = React.createClass({
 
         var progress = this.props.checkingProgress ? (<p className="pagination_-x-status status_">Checking for new badges …</p>) : "";
 
+        var action;
+        if (this.props.handleAction) {
+            action = (<span><a onClick={this.props.handleAction} href="#">{this.props.actionLabel}</a> | </span>);
+        }
         return (
             <div className="pagination_">
                 <div>
@@ -93,7 +99,7 @@ var Pagination = React.createClass({
                     </nav>
                     {progress}
                 </div>
-                <p>Displaying {idxFirst}-{idxLast} {this.props.verboseName} {totalCount}</p>
+                <p>{action}Displaying {idxFirst}-{idxLast} {this.props.verboseName} {totalCount}</p>
             </div>);
     }
 });
