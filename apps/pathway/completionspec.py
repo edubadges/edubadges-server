@@ -54,8 +54,6 @@ class BadgeJunctionCompletionRequirementSpec(CompletionRequirementSpec):
 
     def handle_json(self, json_obj):
         self.badges = set(json_obj.get('badges'))
-        if not self.badges:
-            raise ValueError("badges are required when @type is {}".format(self.completion_type))
 
     def check_completion(self, instances=()):
         completion = {
