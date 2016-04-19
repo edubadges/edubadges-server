@@ -65,6 +65,12 @@ if apps.is_installed('issuer'):
         url(r'^issuer', include('issuer.urls')),
     )
 
+if apps.is_installed('pathway'):
+    urlpatterns += patterns('',
+        url(r'^v2/issuers/(?P<issuer_slug>[^/]+)/pathways', include('pathway.api_urls')),
+        url(r'^v2/issuers/(?P<issuer_slug>[^/]+)/recipient-groups', include('recipient.api_urls')),
+    )
+
 if apps.is_installed('composition'):
     urlpatterns += patterns('',
         url(r'^v1/earner', include('composition.api_urls')),

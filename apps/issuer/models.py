@@ -15,6 +15,7 @@ from django.template.loader import get_template
 
 from openbadges_bakery import bake
 
+from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
                              AbstractBadgeInstance)
 
@@ -28,6 +29,7 @@ class Issuer(AbstractIssuer):
     owner = models.ForeignKey(AUTH_USER_MODEL, related_name='issuers',
                               on_delete=models.PROTECT, null=False)
     staff = models.ManyToManyField(AUTH_USER_MODEL, through='IssuerStaff')
+    cached = SlugOrJsonIdCacheModelManager()
 
     def publish(self, *args, **kwargs):
         super(Issuer, self).publish(*args, **kwargs)
@@ -59,6 +61,14 @@ class Issuer(AbstractIssuer):
     def cached_badgeclasses(self):
         return self.badgeclasses.all()
 
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_pathways(self):
+        return self.pathway_set.all()
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_recipient_groups(self):
+        return self.recipientgroup_set.all()
+
 
 class IssuerStaff(models.Model):
     issuer = models.ForeignKey(Issuer)
@@ -73,6 +83,7 @@ class BadgeClass(AbstractBadgeClass):
     issuer = models.ForeignKey(Issuer, blank=False, null=False,
                                on_delete=models.CASCADE,
                                related_name="badgeclasses")
+    cached = SlugOrJsonIdCacheModelManager()
 
     def publish(self):
         super(BadgeClass, self).publish()
