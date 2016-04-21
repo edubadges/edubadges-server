@@ -99,7 +99,7 @@ class PathwayElement(basic_models.DefaultModel):
     def publish(self):
         super(PathwayElement, self).publish()
         self.publish_by('slug')
-        self.pathway.publish()
+        self.cached_pathway.publish()
         if self.parent_element:
             self.parent_element.publish()
 
