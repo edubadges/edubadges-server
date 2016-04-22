@@ -47,6 +47,9 @@ class PathwaySerializer(serializers.Serializer):
             representation.update([
                 ('name', instance.cached_root_element.name),
                 ('description', instance.cached_root_element.description),
+                ('completionBadge', instance.cached_root_element.completion_badgeclass.slug if instance.cached_root_element.completion_badgeclass else None),
+                ('elementCount', instance.pathwayelement_set.count()),
+                ('rootChildCount', instance.cached_root_element.pathwayelement_set.count()),
             ])
 
         if self.context.get('include_structure', False):
