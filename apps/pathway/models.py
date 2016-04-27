@@ -134,6 +134,11 @@ class PathwayElement(basic_models.DefaultModel):
     def recipient_completion(self, recipient, badge_instances):
         pass
 
+    def get_alignment_url(self):
+        if self.alignment_url:
+            return self.alignment_url
+        return self.json_id
+
 
 class PathwayElementBadge(cachemodel.CacheModel):
     pathway = models.ForeignKey('pathway.Pathway')

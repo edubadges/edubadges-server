@@ -114,7 +114,7 @@ class PathwayElementSerializer(serializers.Serializer):
             ('slug', instance.slug),
             ('name', instance.name),
             ('description', instance.description),
-            ('alignmentUrl', instance.alignment_url),
+            ('alignmentUrl', instance.get_alignment_url()),
             ('ordering', instance.ordering),
             ('completionBadge', instance.completion_badgeclass.slug if instance.completion_badgeclass else None),
         ])
