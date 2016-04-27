@@ -8,10 +8,9 @@ from rest_framework.status import HTTP_201_CREATED
 
 from issuer.api import AbstractIssuerAPIEndpoint
 from issuer.models import Issuer, BadgeClass
-from pathway.completionspec import CompletionRequirementSpec, CompletionRequirementSpecFactory
+from pathway.completionspec import CompletionRequirementSpecFactory
 from pathway.models import Pathway, PathwayElement, PathwayElementBadge
-from pathway.serializers import PathwaySerializer, PathwayListSerializer, PathwayElementSerializer, \
-    PathwayElementBadgeSerializer, PathwayElementBadgeListSerializer, PathwayElementCompletionSerializer
+from pathway.serializers import PathwaySerializer, PathwayListSerializer, PathwayElementSerializer, PathwayElementCompletionSerializer
 from recipient.models import RecipientGroup, RecipientProfile
 
 
@@ -171,6 +170,11 @@ class PathwayElementList(PathwayAPIEndpoint):
               type: string
               required: false
               paramType: form
+            - name: requirements
+              description: The CompletionRequirementSpec for the element
+              type: json
+              required: false
+              paramType: form
         """
         serializer = PathwayElementSerializer(data=request.data, context={
             'request': request,
@@ -269,14 +273,6 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
               type: array
               required: false
               paramType: form
-            - name: badges
-              description: An array of Badge Class @ids that will be connected to this element
-              items: {
-                type: string
-              }
-              type: array
-              required: false
-              paramType: form
         """
         issuer, pathway, element = self._get_issuer_and_pathway_element(issuer_slug, pathway_slug, element_slug)
         if issuer is None or pathway is None or element is None:
@@ -325,28 +321,6 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
                     order += 1
                     child.save()
 
-        badge_ids = request.data.get('badges', None)
-        order = 1
-        if badge_ids:
-            for badge_id in badge_ids:
-                try:
-                    r = resolve(badge_id.replace(settings.HTTP_ORIGIN, ''))
-                except Resolver404:
-                    raise ValidationError("Invalid badge id: {}".format(badge_id))
-                badge_slug = r.kwargs.get('slug')
-                try:
-                    badgeclass = BadgeClass.cached.get(slug=badge_slug)
-                except BadgeClass.DoesNotExist:
-                    raise ValidationError("Invalid badge id: {}".format(badge_id))
-
-                try:
-                    pathway_badge = PathwayElementBadge.cached.get(element=element, badgeclass=badgeclass)
-                except PathwayElementBadge.DoesNotExist:
-                    pathway_badge = PathwayElementBadge(pathway=pathway, element=element, badgeclass=badgeclass)
-                pathway_badge.ordering = order
-                order += 1
-                pathway_badge.save()
-
         old_parent = None
         if parent_element:
             old_parent = element.parent_element
@@ -379,80 +353,6 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         element.delete()
-        return Response(status=status.HTTP_200_OK)
-
-
-class PathwayElementBadgesList(PathwayElementAPIEndpoint):
-    def get(self, request, issuer_slug, pathway_slug, element_slug):
-        """
-        GET list of Badge Classes aligned to a Pathway Element
-        ---
-        """
-        issuer, pathway, element = self._get_issuer_and_pathway_element(issuer_slug, pathway_slug, element_slug)
-        if issuer is None or pathway is None or element is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        serializer = PathwayElementBadgeListSerializer(element.cached_badges(), context={
-            'request': request,
-            'issuer_slug': issuer_slug,
-            'pathway_slug': pathway_slug,
-            'element_slug': element_slug
-        })
-        return Response(serializer.data)
-
-    def post(self, request, issuer_slug, pathway_slug, element_slug):
-        """
-        Add a Badge Class to a Pathway Element
-        ---
-        parameters:
-            - name: badge
-              description: The id or slug of the Badge Class to align
-              type: string
-              required: true
-              paramType: form
-        """
-        issuer, pathway, element = self._get_issuer_and_pathway_element(issuer_slug, pathway_slug, element_slug)
-        if issuer is None or pathway is None or element is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        try:
-            badgeclass = BadgeClass.cached.get_by_slug_or_id(request.data.get('badge'))
-        except BadgeClass.DoesNotExist:
-            raise ValidationError("Invalid badge")
-
-        element_badge, created = PathwayElementBadge.cached.get_or_create(pathway=pathway,
-                                                                          element=element,
-                                                                          badgeclass=badgeclass)
-        serializer = PathwayElementBadgeSerializer(element_badge, context={
-            'request': request,
-            'issuer_slug': issuer_slug,
-            'pathway_slug': pathway_slug,
-            'element_slug': element_slug
-        })
-        return Response(serializer.data)
-
-
-class PathwayElementBadgesDetail(PathwayElementAPIEndpoint):
-
-    def delete(self, request, issuer_slug, pathway_slug, element_slug, badge_slug):
-        """
-        Remove a Badge Class alignment from a Pathway Element
-        """
-        issuer, pathway, element = self._get_issuer_and_pathway_element(issuer_slug, pathway_slug, element_slug)
-        if issuer is None or pathway is None or element is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        try:
-            badgeclass = BadgeClass.cached.get(slug=badge_slug)
-        except BadgeClass.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        try:
-            element_badge = PathwayElementBadge.cached.get(element=element, badgeclass=badgeclass)
-        except PathwayElementBadge.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        element_badge.delete()
         return Response(status=status.HTTP_200_OK)
 
 

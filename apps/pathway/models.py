@@ -6,7 +6,8 @@ import basic_models
 import itertools
 from autoslug import AutoSlugField
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.core.exceptions import ValidationError
+from django.core.urlresolvers import reverse, resolve, Resolver404
 from django.db import models
 from jsonfield import JSONField
 
@@ -96,6 +97,12 @@ class PathwayElement(basic_models.DefaultModel):
     def __unicode__(self):
         return self.json_id
 
+    def save(self, *args, **kwargs):
+        ret = super(PathwayElement, self).save(*args, **kwargs)
+        if self.completion_requirements:
+            self._update_badges_from_completion_requirements()
+        return ret
+
     def publish(self):
         super(PathwayElement, self).publish()
         self.publish_by('slug')
@@ -138,6 +145,35 @@ class PathwayElement(basic_models.DefaultModel):
         if self.alignment_url:
             return self.alignment_url
         return self.json_id
+
+    def _update_badges_from_completion_requirements(self):
+        if self.completion_requirements and self.completion_requirements.get('badges'):
+            _idx = {badge.pk: badge for badge in self.cached_badges()}
+            order = 1
+            for badge_id in self.completion_requirements.get('badges'):
+                try:
+                    r = resolve(badge_id.replace(settings.HTTP_ORIGIN, ''))
+                except Resolver404:
+                    raise ValidationError("Invalid badge id: {}".format(badge_id))
+                badge_slug = r.kwargs.get('slug')
+                try:
+                    badgeclass = BadgeClass.cached.get(slug=badge_slug)
+                except BadgeClass.DoesNotExist:
+                    raise ValidationError("Invalid badge id: {}".format(badge_id))
+
+                try:
+                    pathway_badge = PathwayElementBadge.cached.get(element=self, badgeclass=badgeclass)
+                    if pathway_badge.pk in _idx:
+                        del _idx[pathway_badge.pk]
+                except PathwayElementBadge.DoesNotExist:
+                    pathway_badge = PathwayElementBadge(pathway=self.cached_pathway, element=self, badgeclass=badgeclass)
+                pathway_badge.ordering = order
+                order += 1
+                pathway_badge.save()
+            if len(_idx):
+                for badge in _idx.values():
+                    badge.delete()
+            self.publish()
 
 
 class PathwayElementBadge(cachemodel.CacheModel):

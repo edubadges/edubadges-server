@@ -1,4 +1,5 @@
 # Created by wiggins@concentricsky.com on 4/16/16.
+import json
 import os
 import time
 
@@ -128,7 +129,7 @@ class PathwayApiTests(APITestCase, CachingTestCase):
             'parent': plumber_element['@id'],
             'name': 'Intro to Plumbing',
             'description': 'You learn the basics of plumbing.',
-            'requirements': {
+            'requirements': json.dumps({
                 '@type': 'BadgeJunction',
                 'junctionConfig': {
                     '@type': 'Conjunction',
@@ -137,7 +138,7 @@ class PathwayApiTests(APITestCase, CachingTestCase):
                 'badges': [
                     intro_plumbing_badge['json']['id']
                 ],
-            }
+            })
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, "Created pathway element")
         intro_plumbing_element = response.data
@@ -150,7 +151,7 @@ class PathwayApiTests(APITestCase, CachingTestCase):
              'parent': plumber_element['@id'],
              'name': 'Advanced Plumbing',
              'description': 'You learn all about plumbing.',
-             'requirements': {
+             'requirements': json.dumps({
                  '@type': 'BadgeJunction',
                  'junctionConfig': {
                      '@type': 'Disjunction',
@@ -160,7 +161,7 @@ class PathwayApiTests(APITestCase, CachingTestCase):
                      adv1_plumbing_badge['json']['id'],
                      adv2_plumbing_badge['json']['id']
                  ],
-             }
+             })
          }, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, "Created pathway element")
         adv_plumbing_element = response.data
