@@ -36,33 +36,12 @@ class RecipientProfile(cachemodel.CacheModel):
 
         # recurse the tree to build completions
         tree = pathway.build_element_tree()
-        completions = []
+        completion_spec = CompletionRequirementSpecFactory.parse_element(tree['element'])
 
-        def _find_child_with_id(children, id):
-            for child in children:
-                if id == child['element'].json_id:
-                    return child
-
-        def _recurse(node):
-            completion = {
-                "element": node['element'].json_id,
-                "completed": False,
-                "completedRequirementCount": 0,
-            }
-            # recurse depth first
-            if node['element'].completion_requirements:
-                completion_spec = node['element'].completion_spec
-                completion['completedRequirementCount'] = completion_spec.required_number
-                if completion_spec.completion_type == CompletionRequirementSpecFactory.ELEMENT_JUNCTION:
-                    for element_id in completion_spec.elements:
-                        child = _find_child_with_id(node['children'], element_id)
-                        _recurse(child)
-                elif node.completion_spec.completion_type == CompletionRequirementSpecFactory.BADGE_JUNCTION:
-                    completion.update(node.completion_spec.check_completion(instances))
-            completions.append(completion)
-        _recurse(tree)
-
-        return completions
+        if completion_spec.completion_type == CompletionRequirementSpecFactory.BADGE_JUNCTION:
+            return [completion_spec.check_completion(instances)]
+        elif completion_spec.completion_type == CompletionRequirementSpecFactory.ELEMENT_JUNCTION:
+            return completion_spec.check_completions(tree, instances)
 
 
 class RecipientGroup(basic_models.DefaultModel):

@@ -2,6 +2,7 @@
 import json
 from collections import OrderedDict
 
+from django.conf import settings
 from django.core.urlresolvers import reverse
 
 
@@ -38,8 +39,56 @@ class ElementJunctionCompletionRequirementSpec(CompletionRequirementSpec):
     def handle_json(self, json_obj):
         self.elements = set(json_obj.get('elements'))
 
-    def check_completion(self, elements=()):
-        raise NotImplementedError
+    def check_completion(self, completion, completions, req_number=None):
+        completion.update({
+            'completedElements': [],
+            'completedRequirementCount': 0
+        })
+
+        for element_id in self.elements:
+            for completion_report in completions:
+                if element_id == completion_report['element'] and completion_report['completed']:
+                    completion['completedElements'].append(element_id)
+                    completion['completedRequirementCount'] += 1
+
+        if completion['completedRequirementCount'] >= self.required_number:
+            completion['completed'] = True
+
+        return completion
+
+    def check_completions(self, tree, instances):
+        completions = []
+
+        def _completion_base(node):
+            return {
+                "element": node['element'].json_id,
+                "completed": False,
+            }
+
+        def _find_child_with_id(children, id):
+            for child in children:
+                if id == child['element'].json_id:
+                    return child
+
+        def _recurse(node):
+            node_completion = _completion_base(node)
+
+            if node['element'].completion_requirements:
+                completion_spec = CompletionRequirementSpecFactory.parse_obj(
+                    node['element'].completion_requirements
+                )
+
+                if completion_spec.completion_type == CompletionRequirementSpecFactory.ELEMENT_JUNCTION:
+                    for element_id in completion_spec.elements:
+                        child = _find_child_with_id(node['children'], element_id)
+                        _recurse(child)
+                    node_completion.update(completion_spec.check_completion(node_completion, completions))
+                elif completion_spec.completion_type == CompletionRequirementSpecFactory.BADGE_JUNCTION:
+                    node_completion.update(completion_spec.check_completion(node_completion, instances))
+            completions.append(node_completion)
+        _recurse(tree)
+
+        return completions
 
 
 class BadgeJunctionCompletionRequirementSpec(CompletionRequirementSpec):
@@ -55,19 +104,11 @@ class BadgeJunctionCompletionRequirementSpec(CompletionRequirementSpec):
     def handle_json(self, json_obj):
         self.badges = set(json_obj.get('badges'))
 
-    def check_completion(self, instances=()):
-        completion = {
-            'completed': False,
-        }
-        if self.required_number < 1:
-            return completion
-        earned_count = len(instances)
-        if earned_count < self.required_number:
-            return completion
-
-        all_earned_badges = set(reverse('badgeclass_json', kwargs={'slug': i.cached_badgeclass.slug}) for i in instances)
+    def check_completion(self, completion, instances=()):
+        all_earned_badges = set(i.cached_badgeclass.json['id'] for i in instances)
         required_earned_badges = self.badges & all_earned_badges
         completion['completedBadges'] = required_earned_badges
+        completion['completedRequirementCount'] = len(required_earned_badges)
 
         if self.junction_type == CompletionRequirementSpecFactory.JUNCTION_TYPE_DISJUNCTION:
             if len(required_earned_badges) >= self.required_number:
@@ -95,6 +136,10 @@ class CompletionRequirementSpecFactory(object):
         return cls.parse_obj(json.loads(json_str))
 
     @classmethod
+    def parse_element(cls, element):
+        return cls.parse_obj(element.completion_requirements)
+
+    @classmethod
     def parse_obj(cls, json_obj):
         completion_type = json_obj.get('@type')
         if completion_type not in cls.COMPLETION_TYPES.keys():
@@ -116,8 +161,10 @@ class CompletionRequirementSpecFactory(object):
                 junction_required = int(required_number)
             except ValueError:
                 raise ValueError("Invalid requiredNumber: {}".format(required_number))
+        elif completion_type == cls.ELEMENT_JUNCTION:
+            junction_required = len(json_obj['elements'])
         else:
-            junction_required = None
+            junction_required = len(json_obj['badges'])
 
         spec_cls = cls.COMPLETION_TYPES.get(completion_type)
         spec = spec_cls(completion_type=completion_type,
