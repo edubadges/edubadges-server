@@ -334,6 +334,9 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
                 "User %s has been removed from %s staff." % (user_to_modify.username, current_issuer.name),
                 status=status.HTTP_200_OK)
 
+        # update cached issuers and badgeclasses for user
+        user_to_modify.save()
+
         return Response(IssuerStaffSerializer(staff_instance).data)
 
 

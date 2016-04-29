@@ -203,6 +203,9 @@ class IssuerTests(APITestCase):
         """ Authenticated user (pk=1) owns test-issuer. Add user (username=test3) as an editor. """
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
 
+        user_to_update = get_user_model().objects.get(email='test3@example.com')
+        user_issuers = user_to_update.cached_issuers()
+
         post_response = self.client.post(
             '/v1/issuer/issuers/test-issuer/staff',
             {'action': 'add', 'email': 'test3@example.com', 'editor': True}
@@ -210,6 +213,7 @@ class IssuerTests(APITestCase):
 
         self.assertEqual(post_response.status_code, 200)
         self.assertEqual(len(post_response.data), 2)  # Assert that there is now one editor
+        self.assertTrue(len(user_issuers) < len(user_to_update.cached_issuers()))
 
     def test_add_user_to_issuer_editors_set_too_many_methods(self):
         """ Authenticated user (pk=1) owns test-issuer. Add user (username=test3) as an editor. """
