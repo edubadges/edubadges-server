@@ -105,16 +105,20 @@ class BadgeJunctionCompletionRequirementSpec(CompletionRequirementSpec):
         self.badges = set(json_obj.get('badges'))
 
     def check_completion(self, completion, instances=()):
-        all_earned_badges = set(i.cached_badgeclass.json['id'] for i in instances)
-        required_earned_badges = self.badges & all_earned_badges
-        completion['completedBadges'] = required_earned_badges
-        completion['completedRequirementCount'] = len(required_earned_badges)
+        completion['completedBadges'] = []
+        for i in instances:
+            if i.cached_badgeclass.json['id'] in self.badges:
+                completion['completedBadges'].append(
+                    {'@id': i.cached_badgeclass.json['id'], 'assertion': i.json['id']}
+                )
+        completion['completedRequirementCount'] = len(completion['completedBadges'])
 
         if self.junction_type == CompletionRequirementSpecFactory.JUNCTION_TYPE_DISJUNCTION:
-            if len(required_earned_badges) >= self.required_number:
+            if completion['completedRequirementCount'] >= self.required_number:
                 completion['completed'] = True
         elif self.junction_type == CompletionRequirementSpecFactory.JUNCTION_TYPE_CONJUNCTION:
-            if self.badges <= required_earned_badges:  # every element in self.badges is in required_earned_badges
+            # every element in self.badges is in required_earned_badges
+            if self.badges <= set([badge.get('@id') for badge in completion['completedBadges']]):
                 completion['completed'] = True
         return completion
 
