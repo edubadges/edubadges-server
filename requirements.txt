@@ -19,6 +19,8 @@ python-resize-image==1.1.10
 # CSky models
 git+https://github.com/concentricsky/django-cachemodel.git@v2.1.4
 git+https://github.com/concentricsky/django-basic-models.git@v2.1.2
+git+https://github.com/concentricsky/django-ismigrated.git@v0.1.7
+
 # CSky Client Admin
 git+https://github.com/concentricsky/django-sky-ckeditor.git@v0.9.8
 # Revision and deleted object recovery
