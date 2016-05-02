@@ -29,7 +29,7 @@ class RecipientGroupMembershipSerializer(serializers.Serializer):
         representation.update([
             ('@id', u"mailto:{}".format(instance.recipient_profile.recipient_identifier)),
             ('@type', "RecipientProfile"),
-            ('slug', instance.slug),
+            ('slug', instance.recipient_profile.slug),
             ('name', instance.membership_name),
         ])
         return representation
