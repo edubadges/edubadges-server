@@ -29,6 +29,17 @@ class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
         super(CachedEmailAddress, self).delete(*args, **kwargs)
         user.publish()
 
+    def set_as_primary(self, conditional=False):
+        # shadow parent function, but use CachedEmailAddress manager to ensure cache gets updated
+        old_primary = CachedEmailAddress.objects.get_primary(self.user)
+        if old_primary:
+            if conditional:
+                return False
+            old_primary.primary = False
+            old_primary.save()
+        return super(CachedEmailAddress, self).set_as_primary(conditional=conditional)
+
+
 
 class BadgeUser(AbstractUser, cachemodel.CacheModel):
     """
