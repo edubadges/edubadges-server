@@ -47,6 +47,9 @@ class PathwaySerializer(serializers.Serializer):
             representation.update([
                 ('name', instance.cached_root_element.name),
                 ('description', instance.cached_root_element.description),
+                ('completionBadge', instance.cached_root_element.completion_badgeclass.slug if instance.cached_root_element.completion_badgeclass else None),
+                ('elementCount', instance.pathwayelement_set.count()),
+                ('rootChildCount', instance.cached_root_element.pathwayelement_set.count()),
             ])
 
         if self.context.get('include_structure', False):
@@ -95,6 +98,7 @@ class PathwayElementSerializer(serializers.Serializer):
     alignmentUrl = serializers.CharField(required=False, allow_null=True)
     ordering = serializers.IntegerField(required=False, default=99)
     completionBadge = serializers.CharField(required=False, allow_null=True)
+    requirements = serializers.CharField(required=False, allow_null=True)
 
     def to_representation(self, instance):
         issuer_slug = self.context.get('issuer_slug', None)
@@ -111,17 +115,13 @@ class PathwayElementSerializer(serializers.Serializer):
             ('slug', instance.slug),
             ('name', instance.name),
             ('description', instance.description),
-            ('alignmentUrl', instance.alignment_url),
+            ('alignmentUrl', instance.get_alignment_url()),
             ('ordering', instance.ordering),
             ('completionBadge', instance.completion_badgeclass.slug if instance.completion_badgeclass else None),
         ])
 
         representation['children'] = [
             child.json_id for child in instance.cached_children()
-        ]
-        representation['badges'] = [
-            settings.HTTP_ORIGIN+reverse('badgeclass_json', kwargs={'slug': peb.badgeclass.slug})
-                for peb in instance.cached_badges()
         ]
 
         if include_requirements and instance.completion_requirements:
@@ -165,7 +165,7 @@ class PathwayElementSerializer(serializers.Serializer):
         requirement_string = validated_data.get('requirements', None)
         if requirement_string:
             try:
-                completion_requirements = CompletionRequirementSpecFactory.parse(requirement_string)
+                completion_requirements = CompletionRequirementSpecFactory.parse(requirement_string).serialize()
             except ValueError as e:
                 raise ValidationError("Invalid completion spec: {}".format(e.message))
 
@@ -179,42 +179,6 @@ class PathwayElementSerializer(serializers.Serializer):
                                  completion_requirements=completion_requirements)
         element.save()
         return element
-
-
-class PathwayElementBadgeSerializer(serializers.Serializer):
-    def to_representation(self, instance):
-        issuer_slug = self.context.get('issuer_slug', None)
-        if not issuer_slug:
-            raise ValidationError("Invalid issuer_slug")
-        pathway_slug = self.context.get('pathway_slug', None)
-        if not pathway_slug:
-            raise ValidationError("Invalid pathway_slug")
-        element_slug = self.context.get('element_slug', None)
-        if not element_slug:
-            raise ValidationError("Invalid element_slug")
-
-        return OrderedDict([
-            ('@id', settings.HTTP_ORIGIN+reverse('pathway_element_badge_detail', kwargs={
-                'issuer_slug': issuer_slug,
-                'pathway_slug': pathway_slug,
-                'element_slug': element_slug,
-                'badge_slug': instance.badgeclass.slug,
-            })),
-            ('badge', settings.HTTP_ORIGIN+reverse('badgeclass_detail', kwargs={
-                'issuerSlug': issuer_slug,
-                'badgeSlug': instance.badgeclass.slug,
-            })),
-        ])
-
-
-class PathwayElementBadgeListSerializer(serializers.Serializer):
-    def to_representation(self, element_badges):
-        serializer = PathwayElementBadgeSerializer(element_badges, many=True, context=self.context)
-        return OrderedDict([
-            ("@context", "https://badgr.io/public/contexts/pathways"),
-            ("@type", "PathwayElementBadgeList"),
-            ("elementBadges", serializer.data),
-        ])
 
 
 class PathwayElementCompletionSpecSerializer(serializers.Serializer):
