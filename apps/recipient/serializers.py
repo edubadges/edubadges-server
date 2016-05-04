@@ -50,6 +50,7 @@ class RecipientGroupSerializer(serializers.Serializer):
         representation = OrderedDict([
             ('@id', settings.HTTP_ORIGIN+reverse('recipient_group_detail', kwargs={'issuer_slug': issuer_slug, 'group_slug': instance.slug})),
             ('@type', "RecipientGroup"),
+            ("issuer", settings.HTTP_ORIGIN+reverse('issuer_json', kwargs={'slug': issuer_slug})),
             ('slug', instance.slug),
             ('name', instance.name),
             ('description', instance.description)
@@ -79,7 +80,6 @@ class RecipientGroupSerializer(serializers.Serializer):
 
 
 class RecipientGroupListSerializer(serializers.Serializer):
-
     def to_representation(self, recipient_groups):
         issuer_slug = self.context.get('issuer_slug', None)
         if not issuer_slug:

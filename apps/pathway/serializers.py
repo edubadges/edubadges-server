@@ -41,7 +41,8 @@ class PathwaySerializer(serializers.Serializer):
 
         representation.update([
             ("@id", settings.HTTP_ORIGIN+reverse('pathway_detail', kwargs={'issuer_slug': issuer_slug, 'pathway_slug': instance.slug})),
-            ('slug', instance.slug),
+            ('issuer', settings.HTTP_ORIGIN+reverse('issuer_json', kwargs={'slug': issuer_slug})),
+            ('slug', instance.slug)
         ])
         if instance.root_element_id:
             representation.update([
