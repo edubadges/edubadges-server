@@ -71,7 +71,7 @@
             "name": "Badge of Edited Testing",
             "created_at": "2015-04-08T15:20:25Z",
             "created_by": 1,
-            "json": "{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-edited-testing/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-awesome/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"type\":\"BadgeClass\",\"id\":\"http://localhost:8000/public/badges/badge-of-testing\",\"name\":\"Badge of Awesome\"}",
+            "json": "{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-edited-testing/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-edited-testing/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/edited-test-issuer\",\"type\":\"BadgeClass\",\"id\":\"http://localhost:8000/public/badges/badge-of-edited-testing\",\"name\":\"Badge of Edited Testing\"}",
             "image": "uploads/badges/guinea_pig_testing_badge.png",
             "criteria_text": "Be cool, dawg.",
             "slug": "badge-of-edited-testing",

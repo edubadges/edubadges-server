@@ -111,7 +111,7 @@ class PathwayElementSerializer(serializers.Serializer):
         include_requirements = self.context.get('include_requirements', True)
         representation = OrderedDict()
         representation.update([
-            ('@id', instance.json_id),
+            ('@id', instance.jsonld_id),
             ('slug', instance.slug),
             ('name', instance.name),
             ('description', instance.description),
@@ -121,7 +121,7 @@ class PathwayElementSerializer(serializers.Serializer):
         ])
 
         representation['children'] = [
-            child.json_id for child in instance.cached_children()
+            child.jsonld_id for child in instance.cached_children()
         ]
 
         if include_requirements and instance.completion_requirements:
@@ -190,7 +190,7 @@ class RecipientCompletionSerializer(serializers.Serializer):
     def to_representation(self, instance):
         profile, completions = instance
         return OrderedDict([
-            ('@id', profile.json_id),
+            ('@id', profile.jsonld_id),
             ('completions', completions)
         ])
 
@@ -218,5 +218,4 @@ class PathwayElementCompletionSerializer(serializers.Serializer):
                 'element_slug': element_slug
             })),
             ("recipientCompletions", completions_serializer.data),
-
         ])

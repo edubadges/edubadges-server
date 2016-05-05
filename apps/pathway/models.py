@@ -60,7 +60,7 @@ class Pathway(cachemodel.CacheModel):
     def build_element_tree(self):
         index = {}
         for element in self.cached_elements():
-            index[element.json_id] = element
+            index[element.jsonld_id] = element
 
         tree = {
             'element': self.cached_root_element,
@@ -95,7 +95,7 @@ class PathwayElement(basic_models.DefaultModel):
         ordering = ('ordering',)
 
     def __unicode__(self):
-        return self.json_id
+        return self.jsonld_id
 
     def save(self, *args, **kwargs):
         ret = super(PathwayElement, self).save(*args, **kwargs)
@@ -132,7 +132,7 @@ class PathwayElement(basic_models.DefaultModel):
         return Pathway.cached.get(pk=self.pathway_id)
 
     @property
-    def json_id(self):
+    def jsonld_id(self):
         return settings.HTTP_ORIGIN+reverse('pathway_element_detail', kwargs={
             'issuer_slug': self.cached_pathway.cached_issuer.slug,
             'pathway_slug': self.cached_pathway.slug,
@@ -144,7 +144,7 @@ class PathwayElement(basic_models.DefaultModel):
     def get_alignment_url(self):
         if self.alignment_url:
             return self.alignment_url
-        return self.json_id
+        return self.jsonld_id
 
     def _update_badges_from_completion_requirements(self):
         if self.completion_requirements and self.completion_requirements.get('badges'):

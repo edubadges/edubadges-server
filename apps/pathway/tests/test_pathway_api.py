@@ -4,6 +4,7 @@ import os
 import time
 
 from allauth.account.models import EmailAddress
+from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.cache.backends.filebased import FileBasedCache
 from django.core.urlresolvers import reverse
@@ -12,17 +13,22 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from badgeuser.models import BadgeUser
+from issuer.models import BadgeClass
+from issuer.serializers import BadgeInstanceSerializer
 from mainsite import TOP_DIR
+from pathway.completionspec import CompletionRequirementSpecFactory
+from pathway.models import Pathway, PathwayElement
+from pathway.serializers import PathwaySerializer, PathwayElementSerializer
+from recipient.models import RecipientProfile, RecipientGroupMembership, RecipientGroup
 
+CACHE_OVERRIDE = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
+    }
+}
 
-@override_settings(
-    CACHES={
-        'default': {
-            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
-        }
-    },
-)
+@override_settings(CACHES = CACHE_OVERRIDE)
 class CachingTestCase(TestCase):
     @classmethod
     def tearDownClass(cls):
@@ -195,7 +201,7 @@ class PathwayApiTests(APITestCase, CachingTestCase):
         }), {
             'parent': pathway['rootElement'],
             'name': 'Teacher',
-            'description': 'You can teache people things.',
+            'description': 'You can teach people things.',
             'ordering': 1,
             'alignmentUrl': "http://unit.fake.test",
         }, format='json')
@@ -203,3 +209,117 @@ class PathwayApiTests(APITestCase, CachingTestCase):
         teacher_element = response.data
 
 
+@override_settings(CACHES = CACHE_OVERRIDE)
+class PathwayCompletionTests(APITestCase):
+    fixtures = ['0001_initial_superuser', 'test_badge_objects.json']
+
+    def setUp(self):
+        pass
+
+    def create_group(self):
+        # Authenticate as an editor of the issuer in question
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=3))
+        data = {'name': 'Group of Testing', 'description': 'A group used for testing.'}
+        return self.client.post('/v2/issuers/edited-test-issuer/recipient-groups', data)
+
+    def test_tree_built_properly(self):
+        editor = get_user_model().objects.get(pk=3)
+        pathway_info = {'name': 'New Path', 'description': 'A new path through learning'}
+        serializer = PathwaySerializer(data=pathway_info, context={
+            'issuer_slug': 'edited-test-issuer'
+        })
+        serializer.is_valid(raise_exception=True)
+        serializer.save(created_by=editor)
+        pathway = serializer.instance
+
+        self.assertEqual(pathway.name_hint, 'New Path')
+        self.assertEqual(pathway.root_element.name, 'New Path')
+
+        element_infos = [
+            {'name': 'First Element', 'description': 'Element numero uno', 'parent': pathway.slug},
+            {'name': 'Second Element', 'description': 'Element numero dos', 'parent': pathway.slug},
+            {'name': 'Third Element', 'description': 'Element numero tres', 'parent': pathway.slug}
+        ]
+        children = []
+        for element_info in element_infos:
+            el_serializer = PathwayElementSerializer(data=element_info, context={
+                'issuer_slug': 'edited-test-issuer',
+                'pathway_slug': pathway.slug,
+            })
+            el_serializer.is_valid(raise_exception=True)
+            el_serializer.save(created_by=editor)
+
+            requirements = {
+                "junctionConfig": {
+                    "requiredNumber": 1,
+                    "@type": "Disjunction"
+                },
+                "@type": "BadgeJunction",
+                "badges": [
+                  "http://localhost:8000/public/badges/badge-of-edited-testing"
+                ]
+            }
+
+            el_serializer.instance.completion_requirements = \
+                    CompletionRequirementSpecFactory.parse_obj(requirements).serialize()
+            el_serializer.instance.save()
+            children.append(el_serializer.instance.jsonld_id)
+
+        root_requirements = {
+            "junctionConfig": {
+                "requiredNumber": 1,
+                "@type": "Disjunction"
+            },
+            "@type": "ElementJunction",
+            "elements": [
+              children[0], children[1]
+            ]
+        }
+
+        pathway.root_element.completion_requirements = \
+                CompletionRequirementSpecFactory.parse_obj(root_requirements).serialize()
+        pathway.root_element.save()
+
+        self.assertIsNotNone(pathway.root_element.completion_requirements)
+
+        self.create_group()
+        recipient_group = RecipientGroup.objects.first()
+        member_data = {'recipient': 'testrecipient@example.com', 'name': 'Test Recipient'}
+        profile, _ = RecipientProfile.cached.get_or_create(recipient_identifier=member_data['recipient'])
+        membership, _ = RecipientGroupMembership.cached.get_or_create(
+            recipient_group=recipient_group,
+            recipient_profile=profile,
+        )
+        membership.name = member_data['name']
+        membership.save()
+
+        # Award a badge to recipient
+        current_badgeclass = BadgeClass.objects.get(slug='badge-of-edited-testing')
+        award_data = {'create_notification': False, 'recipient_identifier': member_data['recipient']}
+        serializer = BadgeInstanceSerializer(data=award_data)
+        serializer.is_valid(raise_exception=True)
+
+        serializer.save(
+            issuer=current_badgeclass.issuer,
+            badgeclass=current_badgeclass,
+            created_by=editor
+        )
+        badge_instance = serializer.instance
+
+        # Check if optional element is reported in profile.cached_completions(pathway)
+        completion_response = self.client.get(
+
+            reverse('pathway_completion_detail',
+                    kwargs={
+                        'issuer_slug': badge_instance.issuer.slug,
+                        'pathway_slug': pathway.slug,
+                        'element_slug': pathway.root_element.slug
+                    }) + '?recipient%5B%5D=testrecipientexamplecom'
+        )
+
+        # 'v2/issuers/{}/pathways/{}/completion/{}?recipient%5B%5D={}'.format(
+        #         badge_instance.issuer.slug, pathway.slug, pathway.root_element.slug,'testrecipientexamplecom'
+            #)
+        # Assert that 4 elements are measured complete (root, 2 required children, 1 optional child)
+        self.assertEqual(completion_response.status_code, 200)
+        self.assertEqual(len(completion_response.data.get('recipientCompletions')[0]['completions']), 4)

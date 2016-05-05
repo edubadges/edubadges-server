@@ -61,13 +61,13 @@ class ElementJunctionCompletionRequirementSpec(CompletionRequirementSpec):
 
         def _completion_base(node):
             return {
-                "element": node['element'].json_id,
+                "element": node['element'].jsonld_id,
                 "completed": False,
             }
 
         def _find_child_with_id(children, id):
             for child in children:
-                if id == child['element'].json_id:
+                if id == child['element'].jsonld_id:
                     return child
 
         def _recurse(node):
@@ -80,6 +80,11 @@ class ElementJunctionCompletionRequirementSpec(CompletionRequirementSpec):
 
                 if completion_spec.completion_type == CompletionRequirementSpecFactory.ELEMENT_JUNCTION:
                     for element_id in completion_spec.elements:
+                        child = _find_child_with_id(node['children'], element_id)
+                        _recurse(child)
+                    # check optional children
+                    for element_id in set([el.jsonld_id for el in node['element'].cached_children()]) - \
+                            set(completion_spec.elements):
                         child = _find_child_with_id(node['children'], element_id)
                         _recurse(child)
                     node_completion.update(completion_spec.check_completion(node_completion, completions))

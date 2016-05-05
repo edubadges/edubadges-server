@@ -2,10 +2,13 @@
 import basic_models
 from autoslug import AutoSlugField
 from django.db import models
+from django.conf import settings
+from django.core.urlresolvers import reverse
 import cachemodel
 
 from issuer.models import BadgeInstance
 from pathway.completionspec import CompletionRequirementSpecFactory
+from pathway.models import Pathway
 
 
 class RecipientProfile(cachemodel.CacheModel):
@@ -25,7 +28,7 @@ class RecipientProfile(cachemodel.CacheModel):
         self.publish_by('slug')
 
     @property
-    def json_id(self):
+    def jsonld_id(self):
         return u'mailto:{}'.format(self.recipient_identifier)
 
     # @cachemodel.cached_method(auto_publish=False)
