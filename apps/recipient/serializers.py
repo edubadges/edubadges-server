@@ -126,7 +126,6 @@ class RecipientGroupSerializer(LinkedDataEntitySerializer):
         return instance
 
 class RecipientGroupListSerializer(serializers.Serializer):
-
     def to_representation(self, recipient_groups):
         issuer_slug = self.context.get('issuer_slug', None)
         if not issuer_slug:

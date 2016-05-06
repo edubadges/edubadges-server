@@ -40,8 +40,11 @@ class PathwaySerializer(serializers.Serializer):
         representation = super(PathwaySerializer, self).to_representation(instance)
 
         representation['@id'] = instance.jsonld_id
-        representation['@context'] = "https://badgr.io/public/contexts/pathways"
-        representation["@type"] = "Pathway"
+        if self.context.get('include_context', False):
+            representation.update([
+                ('@context',"https://badgr.io/public/contexts/pathways"),
+                ("@type", "Pathway")
+            ])
 
         if self.context.get('include_structure', False):
             self.context.update({
