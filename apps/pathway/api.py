@@ -112,6 +112,27 @@ class PathwayDetail(PathwayAPIEndpoint):
         })
         return Response(serializer.data)
 
+    def put(self, request, issuer_slug, pathway_slug):
+        """
+        PUT updates to pathway details and group memberships
+        ---
+        serializer: PathwaySerializer
+        parameters:
+            - name: groups
+              description: the list of groups subscribed to this pathway, as a list of ids or a list of LinkedDataReferences
+              type: array
+              required: false
+              paramType: form
+        """
+        issuer, pathway = self._get_issuer_and_pathway(issuer_slug, pathway_slug)
+        if issuer is None or pathway is None or pathway.issuer != issuer:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = PathwaySerializer(pathway, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
 
 class PathwayElementList(PathwayAPIEndpoint):
     def get(self, request, issuer_slug, pathway_slug):

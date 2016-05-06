@@ -19,6 +19,8 @@ class Pathway(cachemodel.CacheModel):
     issuer = models.ForeignKey('issuer.Issuer')
     slug = AutoSlugField(max_length=254, populate_from='populate_slug', unique=True, blank=False)
     root_element = models.OneToOneField('pathway.PathwayElement', related_name='toplevel_pathway', null=True)
+    # recipient_groups = reverse M2M relation to subscribed instances of recipient.RecipientGroup
+
     cached = SlugOrJsonIdCacheModelManager('pathway_slug')
 
     def publish(self):
@@ -33,6 +35,26 @@ class Pathway(cachemodel.CacheModel):
         return ret
 
     @property
+    def jsonld_id(self):
+        return settings.HTTP_ORIGIN+reverse('pathway_detail', kwargs={
+            'issuer_slug': self.cached_issuer.slug,
+            'pathway_slug': self.slug
+        })
+
+    @property
+    def name(self):
+        return self.cached_root_element.name
+
+    @property
+    def description(self):
+        return self.cached_root_element.description
+
+    @property
+    def completion_badge(self):
+        if self.cached_root_element.completion_badgeclass:
+            return self.cached_root_element.completion_badgeclass
+
+    @property
     def cached_issuer(self):
         return Issuer.cached.get(pk=self.issuer_id)
 
@@ -43,6 +65,10 @@ class Pathway(cachemodel.CacheModel):
     @cachemodel.cached_method(auto_publish=True)
     def cached_elements(self):
         return self.pathwayelement_set.all()
+
+    @property
+    def groups(self):
+        return self.recipient_groups.all()
 
     def cached_badgeclasses(self):
         badgeclasses = [[eb.cached_badgeclass for eb in e.cached_badges()] for e in self.cached_elements()]

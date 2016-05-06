@@ -50,6 +50,10 @@ class AbstractComponent(cachemodel.CacheModel):
             else:
                 return '_:null'
 
+    @property
+    def jsonld_id(self):
+        return self.get_full_url()
+
     def prop(self, property_name):
         return self.json.get(property_name)
 

@@ -208,6 +208,24 @@ class PathwayApiTests(APITestCase, CachingTestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, "Created pathway element")
         teacher_element = response.data
 
+        """
+        def test_can_update_pathway_groups(self):
+        """
+        group_data = {'name': 'Group of Testing', 'description': 'A group used for testing.'}
+        response = self.client.post('/v2/issuers/{}/recipient-groups'.format(self.issuer.get('slug')), group_data)
+
+        update_data = {
+            'groups': [response.data.get('@id')]
+        }
+        response = self.client.put(
+            '/v2/issuers/{}/pathways/{}'.format(self.issuer.get('slug'), pathway.get('slug')),
+            update_data
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data.get('groups')[0].get('slug'), 'group-of-testing')
+
+
 
 @override_settings(CACHES = CACHE_OVERRIDE)
 class PathwayCompletionTests(APITestCase):

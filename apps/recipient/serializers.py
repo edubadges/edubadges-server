@@ -7,7 +7,9 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from issuer.models import Issuer
+from mainsite.serializers import LinkedDataReferenceField, LinkedDataEntitySerializer
 from recipient.models import RecipientGroup
+from pathway.models import Pathway
 
 
 class RecipientProfileSerializer(serializers.Serializer):
@@ -35,29 +37,40 @@ class RecipientGroupMembershipSerializer(serializers.Serializer):
         return representation
 
 
-class RecipientGroupSerializer(serializers.Serializer):
-    name = serializers.CharField(required=False)
-    description = serializers.CharField(required=False)
-
-    def to_representation(self, instance):
-        embed_recipients = self.context.get('embedRecipients', False)
-
+class RecipientGroupMembershipListSerializer(serializers.Serializer):
+    def to_representation(self, memberships):
         issuer_slug = self.context.get('issuer_slug', None)
         if not issuer_slug:
-            raise ValidationError("No issuer")
+            raise ValidationError("Invalid issuer_slug")
+        recipient_group_slug = self.context.get('recipient_group_slug', None)
+        if not recipient_group_slug:
+            raise ValidationError("Invalid recipient_group_slug")
 
-        # representation = super(RecipientGroupSerializer, self).to_representation(instance)
-        representation = OrderedDict([
-            ('@id', settings.HTTP_ORIGIN+reverse('recipient_group_detail', kwargs={'issuer_slug': issuer_slug, 'group_slug': instance.slug})),
-            ('@type', "RecipientGroup"),
-            ('slug', instance.slug),
-            ('name', instance.name),
-            ('description', instance.description)
+        members_serializer = RecipientGroupMembershipSerializer(memberships, many=True, context=self.context)
+        return OrderedDict([
+            ("@context", settings.HTTP_ORIGIN+"/public/context/pathways"),
+            ("@type", "IssuerRecipientGroupMembershipList"),
+            ("recipientGroup", settings.HTTP_ORIGIN+reverse('recipient_group_detail', kwargs={'issuer_slug': issuer_slug, 'group_slug': recipient_group_slug})),
+            ("memberships", members_serializer.data),
         ])
-        members_serializer = RecipientGroupMembershipSerializer(instance.cached_members(), many=True, context=self.context)
-        if embed_recipients:
-            representation['members'] = members_serializer.data
-        return representation
+
+
+class RecipientGroupSerializer(LinkedDataEntitySerializer):
+    jsonld_type = "RecipientGroup"
+
+    name = serializers.CharField(required=False)
+    description = serializers.CharField(required=False)
+    slug = serializers.CharField(read_only=True)
+    issuer = LinkedDataReferenceField(['slug'], Issuer)
+    member_count = serializers.IntegerField(read_only=True)
+    members = RecipientGroupMembershipSerializer(many=True, source='cached_members')
+    pathways = LinkedDataReferenceField(['slug'], Pathway, many=True)
+
+    def to_representation(self, instance):
+        if not self.context.get('embedRecipients', False):
+            self.fields.pop('members')
+
+        return super(RecipientGroupSerializer, self).to_representation(instance)
 
     def create(self, validated_data):
         issuer_slug = self.context.get('issuer_slug', None)
@@ -77,6 +90,40 @@ class RecipientGroupSerializer(serializers.Serializer):
         recipient_group.save()
         return recipient_group
 
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.description = validated_data.get('description', instance.description)
+
+        if validated_data.get('pathways'):
+            existing_pathway_ids = set(instance.cached_pathways())
+            updated_pathway_ids = set(validated_data.get('pathways'))
+
+            pathways_to_delete = existing_pathway_ids - updated_pathway_ids
+            pathways_to_add = updated_pathway_ids - existing_pathway_ids
+
+            for p in pathways_to_delete:
+                instance.pathways.remove(p)
+
+            for p in pathways_to_add:
+                instance.pathways.add(p)
+
+        if validated_data.get('members'):
+            existing_member_slugs = set([i.jsonld_id for i in instance.cached_members])
+            updated_pathway_ids = set(validated_data.get('members'))
+
+            pathways_to_delete = existing_pathway_ids - updated_pathway_ids
+            pathways_to_add = updated_pathway_ids - existing_pathway_ids
+
+            for p in pathways_to_delete:
+                path = Pathway.cached.get_by_slug_or_id(p)
+                instance.pathways.remove(p)
+
+            for p in pathways_to_add:
+                path = Pathway.cached.get_by_slug_or_id(p)
+                instance.pathways.add(p)
+
+        instance.save()
+        return instance
 
 class RecipientGroupListSerializer(serializers.Serializer):
 
@@ -90,22 +137,4 @@ class RecipientGroupListSerializer(serializers.Serializer):
             ("@type", "IssuerRecipientGroupList"),
             ("issuer", settings.HTTP_ORIGIN+reverse('issuer_json', kwargs={'slug': issuer_slug})),
             ("recipientGroups", groups_serializer.data)
-        ])
-
-
-class RecipientGroupMembershipListSerializer(serializers.Serializer):
-    def to_representation(self, memberships):
-        issuer_slug = self.context.get('issuer_slug', None)
-        if not issuer_slug:
-            raise ValidationError("Invalid issuer_slug")
-        recipient_group_slug = self.context.get('recipient_group_slug', None)
-        if not recipient_group_slug:
-            raise ValidationError("Invalid recipient_group_slug")
-
-        members_serializer = RecipientGroupMembershipSerializer(memberships, many=True, context=self.context)
-        return OrderedDict([
-            ("@context", settings.HTTP_ORIGIN+"/public/context/pathways"),
-            ("@type", "IssuerRecipientGroupMembershipList"),
-            ("recipientGroup", settings.HTTP_ORIGIN+reverse('recipient_group_detail', kwargs={'issuer_slug': issuer_slug, 'group_slug': recipient_group_slug})),
-            ("memberships", members_serializer.data),
         ])

@@ -21,3 +21,6 @@ class SlugOrJsonIdCacheModelManager(cachemodel.CacheModelManager):
             except Resolver404 as e:
                 raise self.model.DoesNotExist
         return self.get(slug=slug)
+
+    def get_by_id(self, idstring):
+        return self.get_by_slug_or_id(idstring)

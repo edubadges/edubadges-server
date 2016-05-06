@@ -82,7 +82,7 @@ class RecipientGroupList(AbstractIssuerAPIEndpoint):
         serializer.save(created_by=request.user)
         recipient_group = serializer.data
 
-        # logger.event(badgrlog.RecipientGroupCreatedEvent(recipient_group))
+        # TODO: logger.event(badgrlog.RecipientGroupCreatedEvent(recipient_group))
         return Response(recipient_group, status=status.HTTP_201_CREATED)
 
 
@@ -171,25 +171,13 @@ class RecipientGroupDetail(RecipientGroupAPIEndpoint):
         if issuer is None or recipient_group is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        try:
-            new_name = unicode(request.data.get('name', ''))
-        except TypeError:
-            return ValidationError("Invalid name")
-
-        try:
-            new_description = unicode(request.data.get('description',''))
-        except TypeError:
-            return ValidationError("Invalid description")
-
-        recipient_group.name = new_name
-        recipient_group.description = new_description
-
-        recipient_group.save()
-        serializer = RecipientGroupSerializer(recipient_group, context={
+        serializer = RecipientGroupSerializer(recipient_group, data=request.data, context={
             'request': request,
             'embedRecipients': False,
             'issuer_slug': issuer_slug,
         })
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data)
 
 
@@ -248,7 +236,7 @@ class RecipientGroupMembershipList(RecipientGroupAPIEndpoint):
         serializer = RecipientGroupMembershipSerializer(membership, context={
             'request': request,
         })
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class RecipientGroupMembershipDetail(RecipientGroupAPIEndpoint):

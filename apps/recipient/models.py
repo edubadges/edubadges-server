@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 import cachemodel
 
 from issuer.models import BadgeInstance
+from mainsite.managers import SlugOrJsonIdCacheModelManager
 from pathway.completionspec import CompletionRequirementSpecFactory
 from pathway.models import Pathway
 
@@ -53,6 +54,9 @@ class RecipientGroup(basic_models.DefaultModel):
     slug = AutoSlugField(max_length=254, populate_from='name', unique=True, blank=False)
     description = models.TextField(blank=True, null=True)
     members = models.ManyToManyField('RecipientProfile', through='recipient.RecipientGroupMembership')
+    pathways = models.ManyToManyField('pathway.Pathway', related_name='recipient_groups')
+
+    cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='group_slug')
 
     def __unicode__(self):
         return self.name
@@ -72,6 +76,20 @@ class RecipientGroup(basic_models.DefaultModel):
     @cachemodel.cached_method(auto_publish=True)
     def cached_members(self):
         return RecipientGroupMembership.objects.filter(recipient_group=self)
+
+    def member_count(self):
+        return len(self.cached_members())
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_pathways(self):
+        return self.pathways.all()
+
+    @property
+    def jsonld_id(self):
+        return settings.HTTP_ORIGIN+reverse(
+            'recipient_group_detail',
+            kwargs={'issuer_slug': self.issuer.slug, 'group_slug': self.slug}
+        )
 
 
 class RecipientGroupMembership(cachemodel.CacheModel):

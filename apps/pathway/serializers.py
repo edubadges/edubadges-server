@@ -7,8 +7,10 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from issuer.models import Issuer, BadgeClass
+from mainsite.serializers import LinkedDataReferenceField
 from pathway.completionspec import CompletionRequirementSpecFactory
 from pathway.models import Pathway, PathwayElement
+from recipient.models import RecipientGroup
 
 
 class PathwayListSerializer(serializers.Serializer):
@@ -23,34 +25,23 @@ class PathwayListSerializer(serializers.Serializer):
 
 
 class PathwaySerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=254, write_only=True)
-    description = serializers.CharField(write_only=True)
+    slug = serializers.CharField(read_only=True)
+    name = serializers.CharField(max_length=254, required=False)
+    description = serializers.CharField(required=False)
+    issuer = LinkedDataReferenceField(['slug'], Issuer, many=False, read_only=True)
+    groups = LinkedDataReferenceField(['slug'], RecipientGroup, many=True, required=False)
+    completionBadge = LinkedDataReferenceField(['slug'], BadgeClass, read_only=True, source='completion_badge')
+    rootChildCount = serializers.IntegerField(read_only=True, source='cached_root_element.pathwayelement_set.count')
+    elementCount = serializers.IntegerField(read_only=True, source='pathwayelement_set.count')
 
     def to_representation(self, instance):
-        issuer_slug = self.context.get('issuer_slug', None)
-        if not issuer_slug:
-            raise ValidationError("Invalid issuer_slug")
+        issuer_slug = instance.cached_issuer.slug
 
-        representation = OrderedDict()
+        representation = super(PathwaySerializer, self).to_representation(instance)
 
-        if self.context.get('include_context', False):
-            representation.update([
-                ("@context", "https://badgr.io/public/contexts/pathways"),
-                ("@type", "Pathway"),
-            ])
-
-        representation.update([
-            ("@id", settings.HTTP_ORIGIN+reverse('pathway_detail', kwargs={'issuer_slug': issuer_slug, 'pathway_slug': instance.slug})),
-            ('slug', instance.slug),
-        ])
-        if instance.root_element_id:
-            representation.update([
-                ('name', instance.cached_root_element.name),
-                ('description', instance.cached_root_element.description),
-                ('completionBadge', instance.cached_root_element.completion_badgeclass.slug if instance.cached_root_element.completion_badgeclass else None),
-                ('elementCount', instance.pathwayelement_set.count()),
-                ('rootChildCount', instance.cached_root_element.pathwayelement_set.count()),
-            ])
+        representation['@id'] = instance.jsonld_id
+        representation['@context'] = "https://badgr.io/public/contexts/pathways"
+        representation["@type"] = "Pathway"
 
         if self.context.get('include_structure', False):
             self.context.update({
@@ -67,6 +58,10 @@ class PathwaySerializer(serializers.Serializer):
         return representation
 
     def create(self, validated_data, **kwargs):
+        # TODO: Replace with validate_name and validate_description methods that check for self.instance
+        if not validated_data.get('name') or not validated_data.get('description'):
+            raise ValidationError("Values for name and description are required to create a Pathway.")
+
         issuer_slug = self.context.get('issuer_slug', None)
         if not issuer_slug:
             raise ValidationError("Could not determine issuer")
@@ -90,6 +85,22 @@ class PathwaySerializer(serializers.Serializer):
         pathway.save()
         return pathway
 
+    def update(self, instance, validated_data):
+        if validated_data.get('groups'):
+            existing_groups = set(instance.recipient_groups.all())
+            updated_groups = set(validated_data.get('groups'))
+
+            groups_to_delete = existing_groups - updated_groups
+            groups_to_add = updated_groups - existing_groups
+
+            for g in groups_to_delete:
+                instance.recipient_groups.remove(g)
+
+            for g in groups_to_add:
+                instance.recipient_groups.add(g)
+
+        instance.save() # update caches, sloppily
+        return instance
 
 class PathwayElementSerializer(serializers.Serializer):
     name = serializers.CharField()
