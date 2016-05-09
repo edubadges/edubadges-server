@@ -63,11 +63,11 @@ class RecipientGroupSerializer(LinkedDataEntitySerializer):
     slug = serializers.CharField(read_only=True)
     issuer = LinkedDataReferenceField(['slug'], Issuer)
     member_count = serializers.IntegerField(read_only=True)
-    members = RecipientGroupMembershipSerializer(many=True, source='cached_members')
-    pathways = LinkedDataReferenceField(['slug'], Pathway, many=True)
+    members = RecipientGroupMembershipSerializer(many=True, source='cached_members', required=False)
+    pathways = LinkedDataReferenceField(['slug'], Pathway, many=True, required=False)
 
     def to_representation(self, instance):
-        if not self.context.get('embedRecipients', False):
+        if not self.context.get('embedRecipients', False) and 'members' in self.fields:
             self.fields.pop('members')
 
         return super(RecipientGroupSerializer, self).to_representation(instance)
