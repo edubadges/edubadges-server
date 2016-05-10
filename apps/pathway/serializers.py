@@ -30,7 +30,7 @@ class PathwaySerializer(serializers.Serializer):
     description = serializers.CharField(required=False)
     issuer = LinkedDataReferenceField(['slug'], Issuer, many=False, read_only=True)
     groups = LinkedDataReferenceField(['slug'], RecipientGroup, many=True, required=False)
-    completionBadge = LinkedDataReferenceField(['slug'], BadgeClass, read_only=True, source='completion_badge')
+    completionBadge = LinkedDataReferenceField(['slug'], BadgeClass, read_only=True, required=False, allow_null=True, source='completion_badge')
     rootChildCount = serializers.IntegerField(read_only=True, source='cached_root_element.pathwayelement_set.count')
     elementCount = serializers.IntegerField(read_only=True, source='pathwayelement_set.count')
 
@@ -113,7 +113,15 @@ class PathwayElementSerializer(LinkedDataEntitySerializer):
     parent = serializers.CharField(required=False)
     alignmentUrl = serializers.CharField(required=False, allow_null=True)
     ordering = serializers.IntegerField(required=False, default=99)
-    completionBadge = LinkedDataReferenceField(['slug'], BadgeClass, read_only=False, queryset=BadgeClass.objects.none(), source='completion_badgeclass')
+    completionBadge = LinkedDataReferenceField(
+        ['slug'],
+        BadgeClass,
+        read_only=False,
+        required=False,
+        allow_null=True,
+        queryset=BadgeClass.objects.none(),
+        source='completion_badgeclass'
+    )
     requirements = serializers.DictField(required=False, allow_null=True)
 
     def to_representation(self, instance):
