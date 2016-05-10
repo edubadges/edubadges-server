@@ -249,119 +249,25 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
         Update a Pathway Element
         ---
         serializer: PathwayElementSerializer
-        parameters:
-            - name: parent
-              description: The id or slug of the parent Pathway Element to attach to
-              type: string
-              required: false
-              paramType: form
-            - name: name
-              description: The name of the Pathway Element
-              type: string
-              required: true
-              paramType: form
-            - name: description
-              description: The description of the Pathway Element
-              type: string
-              required: true
-              paramType: form
-            - name: ordering
-              description: The child order of this Pathway Element relative to its siblings
-              type: number
-              required: false
-              default: 99
-              paramType: form
-            - name: alignmentUrl
-              description: The external Alignment URL this Element aligns to
-              type: string
-              required: false
-              paramType: form
-            - name: completionBadge
-              description: The id or slug of the Badge Class to award when element is completed
-              type: string
-              required: false
-              paramType: form
-            - name: requirements
-              description: The CompletionRequirementSpec for the element
-              type: json
-              required: false
-              paramType: form
-            - name: children
-              description: An array of Pathway Element @ids that will be children of this element
-              items: {
-                type: string
-              }
-              type: array
-              required: false
-              paramType: form
         """
-        issuer, pathway, element = self._get_issuer_and_pathway_element(issuer_slug, pathway_slug, element_slug)
-        if issuer is None or pathway is None or element is None:
+
+        issuer, pathway, pathway_element = self._get_issuer_and_pathway_element(issuer_slug, pathway_slug, element_slug)
+        if issuer is None or pathway_element is None or pathway.issuer != issuer or pathway_element.pathway != pathway:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        parent_element = None
-        parent_slug = request.data.get('parent', None)
-        if parent_slug:
-            try:
-                parent_element = PathwayElement.cached.get_by_slug_or_id(parent_slug)
-            except PathwayElement.DoesNotExist:
-                raise ValidationError("Invalid parent")
+        serializer = PathwayElementSerializer(
+            pathway_element,
+            data=request.data,
+            context={
+                'request': request,
+                'issuer_slug': issuer_slug,
+                'pathway_slug': pathway_slug,
+                'include_structure': True
+            }
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-        completion_badge = None
-        badge_slug = request.data.get('completionBadge', None)
-        if badge_slug:
-            try:
-                completion_badge = BadgeClass.cached.get_by_slug_or_id(badge_slug)
-            except BadgeClass.DoesNotExist:
-                raise ValidationError("Invalid completionBadge")
-
-        completion_requirements = None
-        requirements = request.data.get('requirements', None)
-        if requirements:
-            try:
-                completion_requirements = CompletionRequirementSpecFactory.parse_obj(requirements).serialize()
-            except ValueError as e:
-                raise ValidationError("Invalid requirements: {}".format(e))
-
-        child_ids = request.data.get('children', None)
-        order = 1
-        if child_ids:
-            for element_id in child_ids:
-                try:
-                    r = resolve(element_id.replace(settings.HTTP_ORIGIN, ''))
-                except Resolver404:
-                    raise ValidationError("Invalid child id: {}".format(element_id))
-                element_slug = r.kwargs.get('element_slug')
-                try:
-                    child = PathwayElement.cached.get(slug=element_slug)
-                except PathwayElement.DoesNotExist:
-                    raise ValidationError("Invalid child id: {}".format(element_id))
-                else:
-                    child.parent_element = element
-                    child.ordering = order
-                    order += 1
-                    child.save()
-
-        old_parent = None
-        if parent_element:
-            old_parent = element.parent_element
-            element.parent_element = parent_element
-
-        element.completion_badgeclass = completion_badge
-        element.name = request.data.get('name')
-        element.description = request.data.get('description')
-        element.alignment_url = request.data.get('alignmentUrl')
-        element.ordering = int(request.data.get('ordering', 99))
-        element.completion_requirements = completion_requirements
-        element.save()
-        if old_parent:
-            old_parent.publish()
-        serializer = PathwayElementSerializer(element, context={
-            'request': request,
-            'issuer_slug': issuer_slug,
-            'pathway_slug': pathway_slug,
-            'include_structure': True
-        })
         return Response(serializer.data)
 
     def delete(self, request, issuer_slug, pathway_slug, element_slug):

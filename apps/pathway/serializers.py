@@ -2,12 +2,12 @@
 from collections import OrderedDict
 
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, resolve, Resolver404
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from issuer.models import Issuer, BadgeClass
-from mainsite.serializers import LinkedDataReferenceField
+from mainsite.serializers import LinkedDataReferenceField, LinkedDataEntitySerializer
 from pathway.completionspec import CompletionRequirementSpecFactory
 from pathway.models import Pathway, PathwayElement
 from recipient.models import RecipientGroup
@@ -105,34 +105,20 @@ class PathwaySerializer(serializers.Serializer):
         instance.save() # update caches, sloppily
         return instance
 
-class PathwayElementSerializer(serializers.Serializer):
+
+class PathwayElementSerializer(LinkedDataEntitySerializer):
     name = serializers.CharField()
+    slug = serializers.CharField()
     description = serializers.CharField()
-    parent = serializers.CharField()
+    parent = serializers.CharField(required=False)
     alignmentUrl = serializers.CharField(required=False, allow_null=True)
     ordering = serializers.IntegerField(required=False, default=99)
-    completionBadge = serializers.CharField(required=False, allow_null=True)
-    requirements = serializers.CharField(required=False, allow_null=True)
+    completionBadge = LinkedDataReferenceField(['slug'], BadgeClass, read_only=False, queryset=BadgeClass.objects.none(), source='completion_badgeclass')
+    requirements = serializers.DictField(required=False, allow_null=True)
 
     def to_representation(self, instance):
-        issuer_slug = self.context.get('issuer_slug', None)
-        if not issuer_slug:
-            raise ValidationError("Invalid issuer_slug")
-        pathway_slug = self.context.get('pathway_slug', None)
-        if not pathway_slug:
-            raise ValidationError("Invalid pathway_slug")
-
         include_requirements = self.context.get('include_requirements', True)
-        representation = OrderedDict()
-        representation.update([
-            ('@id', instance.jsonld_id),
-            ('slug', instance.slug),
-            ('name', instance.name),
-            ('description', instance.description),
-            ('alignmentUrl', instance.get_alignment_url()),
-            ('ordering', instance.ordering),
-            ('completionBadge', instance.completion_badgeclass.slug if instance.completion_badgeclass else None),
-        ])
+        representation = super(PathwayElementSerializer, self).to_representation(instance)
 
         representation['children'] = [
             child.jsonld_id for child in instance.cached_children()
@@ -162,14 +148,6 @@ class PathwayElementSerializer(serializers.Serializer):
             if parent_element.pathway != pathway:
                 raise ValidationError("Invalid parent")
 
-        badge_slug = validated_data.get('completionBadge')
-        completion_badge = None
-        if badge_slug:
-            try:
-                completion_badge = BadgeClass.cached.get_by_slug_or_id(badge_slug)
-            except BadgeClass.DoesNotExist:
-                raise ValidationError("Invalid completionBadge")
-
         try:
             ordering = int(validated_data.get('ordering', 99))
         except ValueError:
@@ -189,9 +167,65 @@ class PathwayElementSerializer(serializers.Serializer):
                                  name=validated_data.get('name'),
                                  description=validated_data.get('description', None),
                                  alignment_url=validated_data.get('alignmentUrl', None),
-                                 completion_badgeclass=completion_badge,
+                                 completion_badgeclass=validated_data.get('completion_badgeclass'),
                                  completion_requirements=completion_requirements)
         element.save()
+        return element
+
+    def update(self, element, validated_data):
+        parent_element = None
+        parent_slug = validated_data.get('parent')
+        if parent_slug:
+            try:
+                parent_element = PathwayElement.cached.get_by_slug_or_id(parent_slug)
+            except PathwayElement.DoesNotExist:
+                raise ValidationError("Invalid parent")
+
+        completion_requirements = None
+        requirements = validated_data.get('requirements')
+        if requirements:
+            try:
+                completion_requirements = CompletionRequirementSpecFactory.parse_obj(requirements).serialize()
+            except ValueError as e:
+                raise ValidationError("Invalid requirements: {}".format(e))
+
+        child_ids = validated_data.get('children')
+        order = 1
+        if child_ids:
+            for element_id in child_ids:
+                try:
+                    r = resolve(element_id.replace(settings.HTTP_ORIGIN, ''))
+                except Resolver404:
+                    raise ValidationError("Invalid child id: {}".format(element_id))
+
+                element_slug = r.kwargs.get('element_slug')
+
+                try:
+                    child = PathwayElement.cached.get(slug=element_slug)
+                except PathwayElement.DoesNotExist:
+                    raise ValidationError("Invalid child id: {}".format(element_id))
+                else:
+                    child.parent_element = element
+                    child.ordering = order
+                    order += 1
+                    child.save()
+
+        old_parent = None
+        if parent_element:
+            old_parent = element.parent_element
+            element.parent_element = parent_element
+
+        element.completion_badgeclass = validated_data.get('completion_badgeclass')
+        element.name = validated_data.get('name')
+        element.description = validated_data.get('description')
+        element.alignment_url = validated_data.get('alignmentUrl')
+        element.ordering = validated_data.get('ordering', 99)
+        element.completion_requirements = completion_requirements
+        element.save()
+
+        if old_parent:
+            old_parent.publish()
+
         return element
 
 
