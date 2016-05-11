@@ -165,6 +165,10 @@ class RecipientGroupDetail(RecipientGroupAPIEndpoint):
               required: false
               type: string
               paramType: form
+            - name: active
+              required: false
+              type: boolean
+              paramType: form
         """
 
         issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_slug)
