@@ -121,6 +121,9 @@ class PathwayDetail(PathwayAPIEndpoint):
             - name: groups
               description: the list of groups subscribed to this pathway, as a list of ids or a list of LinkedDataReferences
               type: array
+              items: {
+                type: string
+              }
               required: false
               paramType: form
         """
