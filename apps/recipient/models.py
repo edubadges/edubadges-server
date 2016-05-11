@@ -12,7 +12,7 @@ from pathway.completionspec import CompletionRequirementSpecFactory
 from pathway.models import Pathway
 
 
-class RecipientProfile(cachemodel.CacheModel):
+class RecipientProfile(basic_models.DefaultModel):
     slug = AutoSlugField(max_length=254, populate_from='recipient_identifier', unique=True, blank=False)
     badge_user = models.ForeignKey('badgeuser.BadgeUser', null=True, blank=True)
     recipient_identifier = models.EmailField(max_length=1024)
