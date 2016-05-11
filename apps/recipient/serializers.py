@@ -61,7 +61,7 @@ class RecipientGroupSerializer(LinkedDataEntitySerializer):
     name = serializers.CharField(required=False)
     description = serializers.CharField(required=False)
     slug = serializers.CharField(read_only=True)
-    active = serializers.BooleanField(source='is_active')
+    active = serializers.BooleanField(source='is_active', default=True)
     issuer = LinkedDataReferenceField(['slug'], Issuer)
     member_count = serializers.IntegerField(read_only=True)
     members = RecipientGroupMembershipSerializer(many=True, source='cached_members', required=False)
