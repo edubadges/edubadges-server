@@ -42,10 +42,17 @@ class RecipientProfile(cachemodel.CacheModel):
         tree = pathway.build_element_tree()
         completion_spec = CompletionRequirementSpecFactory.parse_element(tree['element'])
 
-        if completion_spec.completion_type == CompletionRequirementSpecFactory.BADGE_JUNCTION:
-            return [completion_spec.check_completion(instances)]
-        elif completion_spec.completion_type == CompletionRequirementSpecFactory.ELEMENT_JUNCTION:
-            return completion_spec.check_completions(tree, instances)
+        if completion_spec:
+            if completion_spec.completion_type == CompletionRequirementSpecFactory.BADGE_JUNCTION:
+                return [completion_spec.check_completion(instances)]
+            elif completion_spec.completion_type == CompletionRequirementSpecFactory.ELEMENT_JUNCTION:
+                return completion_spec.check_completions(tree, instances)
+        else:
+            return []
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_group_memberships(self):
+        return RecipientGroupMembership.objects.filter(recipient_profile=self)
 
 
 class RecipientGroup(basic_models.DefaultModel):
@@ -102,11 +109,14 @@ class RecipientGroupMembership(cachemodel.CacheModel):
         super(RecipientGroupMembership, self).publish()
         self.publish_by('slug')
         self.recipient_group.publish()
+        self.recipient_profile.publish()
 
     def delete(self, *args, **kwargs):
         group = self.recipient_group
+        profile = self.recipient_profile
         ret = super(RecipientGroupMembership, self).delete(*args, **kwargs)
         group.publish()
+        profile.publish()
         return ret
 
     def populate_slug(self):

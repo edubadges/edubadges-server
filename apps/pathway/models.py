@@ -23,6 +23,9 @@ class Pathway(cachemodel.CacheModel):
 
     cached = SlugOrJsonIdCacheModelManager('pathway_slug')
 
+    def __unicode__(self):
+        return self.jsonld_id
+
     def publish(self):
         super(Pathway, self).publish()
         self.publish_by('slug')
@@ -72,7 +75,7 @@ class Pathway(cachemodel.CacheModel):
 
     def cached_badgeclasses(self):
         badgeclasses = [[eb.cached_badgeclass for eb in e.cached_badges()] for e in self.cached_elements()]
-        return itertools.chain.from_iterable(badgeclasses)
+        return list(itertools.chain.from_iterable(badgeclasses))
 
     def populate_slug(self):
         return getattr(self, 'name_hint', str(uuid.uuid4()))

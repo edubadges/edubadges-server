@@ -246,7 +246,11 @@ class RecipientCompletionSerializer(serializers.Serializer):
     def to_representation(self, instance):
         profile, completions = instance
         return OrderedDict([
-            ('@id', profile.jsonld_id),
+            ('recipient', OrderedDict([
+                ('@id', profile.jsonld_id),
+                ('slug', profile.slug),
+                ('recipientGroups', [{'@id': m.recipient_group.jsonld_id, 'slug': m.recipient_group.slug} for m in profile.cached_group_memberships()]),
+            ])),
             ('completions', completions)
         ])
 

@@ -5,6 +5,8 @@ from collections import OrderedDict
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
+from pathway.models import PathwayElement
+
 
 class CompletionRequirementSpec(object):
     def __init__(self, completion_type=None, junction_type=None, required_number=None):
@@ -47,9 +49,13 @@ class ElementJunctionCompletionRequirementSpec(CompletionRequirementSpec):
 
         for element_id in self.elements:
             for completion_report in completions:
-                if element_id == completion_report['element'] and completion_report['completed']:
-                    completion['completedElements'].append(element_id)
-                    completion['completedRequirementCount'] += 1
+                if element_id == completion_report['element']['@id'] and completion_report['completed']:
+                    try:
+                        element = PathwayElement.cached.get_by_slug_or_id(element_id)
+                        completion['completedElements'].append({'@id': element_id, 'slug': element.slug})
+                        completion['completedRequirementCount'] += 1
+                    except PathwayElement.DoesNotExist:
+                        pass
 
         if completion['completedRequirementCount'] >= self.required_number:
             completion['completed'] = True
@@ -61,7 +67,10 @@ class ElementJunctionCompletionRequirementSpec(CompletionRequirementSpec):
 
         def _completion_base(node):
             return {
-                "element": node['element'].jsonld_id,
+                "element": {
+                    '@id': node['element'].jsonld_id,
+                    'slug': node['element'].slug,
+                },
                 "completed": False,
             }
 
@@ -113,9 +122,11 @@ class BadgeJunctionCompletionRequirementSpec(CompletionRequirementSpec):
         completion['completedBadges'] = []
         for i in instances:
             if i.cached_badgeclass.json['id'] in self.badges:
-                completion['completedBadges'].append(
-                    {'@id': i.cached_badgeclass.json['id'], 'assertion': i.json['id']}
-                )
+                completion['completedBadges'].append({
+                    '@id': i.cached_badgeclass.json['id'],
+                    'slug': i.cached_badgeclass.slug,
+                    'assertion': i.json['id'],
+                })
         completion['completedRequirementCount'] = len(completion['completedBadges'])
 
         if self.junction_type == CompletionRequirementSpecFactory.JUNCTION_TYPE_DISJUNCTION:
@@ -146,7 +157,8 @@ class CompletionRequirementSpecFactory(object):
 
     @classmethod
     def parse_element(cls, element):
-        return cls.parse_obj(element.completion_requirements)
+        if element.completion_requirements:
+            return cls.parse_obj(element.completion_requirements)
 
     @classmethod
     def parse_obj(cls, json_obj):
