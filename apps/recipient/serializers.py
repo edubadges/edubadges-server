@@ -94,7 +94,7 @@ class RecipientGroupSerializer(LinkedDataEntitySerializer):
         instance.name = validated_data.get('name', instance.name)
         instance.description = validated_data.get('description', instance.description)
 
-        if validated_data.get('pathways'):
+        if 'pathways' in validated_data:
             existing_pathway_ids = set(instance.cached_pathways())
             updated_pathway_ids = set(validated_data.get('pathways'))
 
@@ -107,7 +107,7 @@ class RecipientGroupSerializer(LinkedDataEntitySerializer):
             for p in pathways_to_add:
                 instance.pathways.add(p)
 
-        if validated_data.get('members'):
+        if 'members' in validated_data:
             existing_member_slugs = set([i.jsonld_id for i in instance.cached_members])
             updated_pathway_ids = set(validated_data.get('members'))
 

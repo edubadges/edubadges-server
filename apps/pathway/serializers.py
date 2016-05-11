@@ -89,7 +89,7 @@ class PathwaySerializer(serializers.Serializer):
         return pathway
 
     def update(self, instance, validated_data):
-        if validated_data.get('groups'):
+        if 'groups' in validated_data:
             existing_groups = set(instance.recipient_groups.all())
             updated_groups = set(validated_data.get('groups'))
 
