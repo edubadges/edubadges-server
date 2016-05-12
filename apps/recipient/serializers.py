@@ -85,7 +85,11 @@ class RecipientGroupSerializer(LinkedDataEntitySerializer):
         name = validated_data.get('name')
         description = validated_data.get('description', '')
 
-        recipient_group = RecipientGroup(issuer=issuer, name=name)
+        recipient_group = RecipientGroup(
+            issuer=issuer,
+            name=name,
+            is_active=validated_data.get('is_active', True)
+        )
         if description:
             recipient_group.description = description
         recipient_group.save()
@@ -94,6 +98,7 @@ class RecipientGroupSerializer(LinkedDataEntitySerializer):
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
         instance.description = validated_data.get('description', instance.description)
+        instance.is_active = validated_data.get('is_active', instance.is_active)
 
         if 'pathways' in validated_data:
             existing_pathway_ids = set(instance.cached_pathways())
