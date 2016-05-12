@@ -8,6 +8,20 @@ from django.conf import settings
 from django.core.urlresolvers import get_callable
 
 
+class ObjectView(object):
+    """
+    A simple utility that allows Rest Framework Serializers to serialize dict-based input
+    when there is no appropriate model Class to instantiate.
+
+    Instantiate an ObjectView(source_dict) in the serializer's to_internal_value() method.
+    """
+    def __init__(self, d):
+        self.__dict__ = d
+
+    def __unicode__(self):
+        return str(self.__dict__)
+
+
 slugify_function_path = \
     getattr(settings, 'AUTOSLUG_SLUGIFY_FUNCTION', 'autoslug.utils.slugify')
 

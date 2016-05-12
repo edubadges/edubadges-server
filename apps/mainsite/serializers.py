@@ -68,6 +68,9 @@ class LinkedDataReferenceField(serializers.RelatedField):
         return output
 
     def to_internal_value(self, data):
+        if isinstance(data, self.model):
+            return data
+
         if not isinstance(data, basestring):
             idstring = data.get('@id')
         else:

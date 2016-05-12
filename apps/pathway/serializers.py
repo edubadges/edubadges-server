@@ -8,9 +8,10 @@ from rest_framework.exceptions import ValidationError
 
 from issuer.models import Issuer, BadgeClass
 from mainsite.serializers import LinkedDataReferenceField, LinkedDataEntitySerializer
+from mainsite.utils import ObjectView
 from pathway.completionspec import CompletionRequirementSpecFactory
 from pathway.models import Pathway, PathwayElement
-from recipient.models import RecipientGroup
+from recipient.models import RecipientGroup, RecipientProfile
 
 
 class PathwayListSerializer(serializers.Serializer):
@@ -108,7 +109,7 @@ class PathwaySerializer(serializers.Serializer):
 
 class PathwayElementSerializer(LinkedDataEntitySerializer):
     name = serializers.CharField()
-    slug = serializers.CharField()
+    slug = serializers.CharField(required=False)
     description = serializers.CharField()
     parent = serializers.CharField(required=False)
     alignmentUrl = serializers.CharField(required=False, allow_null=True)
@@ -243,39 +244,26 @@ class PathwayElementCompletionSpecSerializer(serializers.Serializer):
 
 
 class RecipientCompletionSerializer(serializers.Serializer):
-    def to_representation(self, instance):
-        profile, completions = instance
-        return OrderedDict([
-            ('recipient', OrderedDict([
-                ('@id', profile.jsonld_id),
-                ('slug', profile.slug),
-                ('recipientGroups', [{'@id': m.recipient_group.jsonld_id, 'slug': m.recipient_group.slug} for m in profile.cached_group_memberships()]),
-            ])),
-            ('completions', completions)
-        ])
+    recipient = LinkedDataReferenceField(['slug'], RecipientProfile)
+    completions = serializers.ListField(child=serializers.DictField())
 
 
 class PathwayElementCompletionSerializer(serializers.Serializer):
-    def to_representation(self, completions):
-        issuer_slug = self.context.get('issuer_slug', None)
-        if not issuer_slug:
-            raise ValidationError("Invalid issuer_slug")
-        pathway_slug = self.context.get('pathway_slug', None)
-        if not pathway_slug:
-            raise ValidationError("Invalid pathway_slug")
-        element_slug = self.context.get('element_slug', None)
-        if not element_slug:
-            raise ValidationError("Invalid element_slug")
+    pathway = LinkedDataReferenceField(['slug'], Pathway, read_only=False, queryset=Pathway.objects.none())
+    recipients = LinkedDataReferenceField(['slug'], RecipientProfile, many=True, read_only=False, queryset=RecipientProfile.objects.none())
+    recipientGroups = LinkedDataReferenceField(['slug'], RecipientGroup, many=True, read_only=False, queryset=RecipientGroup.objects.none())
+    recipientCompletions = RecipientCompletionSerializer(many=True)
 
-        completions_serializer = RecipientCompletionSerializer(completions.items(), many=True, context=self.context)
+    def to_representation(self, data):
+        representation = super(PathwayElementCompletionSerializer, self).to_representation(data)
 
-        return OrderedDict([
-            ("@context", "https://badgr.io/public/contexts/pathways"),
-            ("@type", "PathwayElementsCompletionReport"),
-            ("rootElement", settings.HTTP_ORIGIN+reverse("pathway_element_detail", kwargs={
-                'issuer_slug': issuer_slug,
-                'pathway_slug': pathway_slug,
-                'element_slug': element_slug
-            })),
-            ("recipientCompletions", completions_serializer.data),
-        ])
+        representation.update({
+            "@context": "https://badgr.io/public/contexts/pathways",
+            "@type": "PathwayElementsCompletionReport",
+        })
+        return representation
+
+    def to_internal_value(self, validated_data):
+        obj = ObjectView(validated_data)
+        obj.pk = None
+        return obj

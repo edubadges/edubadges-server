@@ -333,14 +333,18 @@ class PathwayCompletionDetail(PathwayElementAPIEndpoint):
         for group in groups:
             recipients.extend([member.recipient_profile for member in group.cached_members()])
 
-        recipientCompletions = {}
+        recipient_completions = []
         for recipient in recipients:
-            recipientCompletions[recipient] = recipient.cached_completions(pathway)
+            recipient_completions.append({
+                'recipient': recipient,
+                 'completions': recipient.cached_completions(pathway)
+            })
 
-        serializer = PathwayElementCompletionSerializer(recipientCompletions, context={
-            'request': request,
-            'issuer_slug': issuer_slug,
-            'pathway_slug': pathway_slug,
-            'element_slug': element_slug
+        serializer = PathwayElementCompletionSerializer(data={
+            'pathway': pathway,
+            'recipientCompletions': recipient_completions,
+            'recipients': recipients,
+            'recipientGroups': groups
         })
+        serializer.is_valid(raise_exception=True)
         return Response(serializer.data)
