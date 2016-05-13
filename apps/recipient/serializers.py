@@ -124,7 +124,7 @@ class RecipientGroupSerializer(LinkedDataEntitySerializer):
 
             for member_email in members_to_delete:
                 profile = RecipientProfile.cached.get(recipient_identifier=member_email)
-                membership = RecipientGroupMembership.cached.get(recipient_group=instance, recipient_profile=profile)
+                membership = RecipientGroupMembership.objects.get(recipient_group=instance, recipient_profile=profile)
                 membership.delete()
 
             for member in api_members:
