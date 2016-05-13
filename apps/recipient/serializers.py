@@ -8,7 +8,7 @@ from rest_framework.exceptions import ValidationError
 
 from issuer.models import Issuer
 from mainsite.serializers import LinkedDataReferenceField, LinkedDataEntitySerializer, LinkedDataReferenceList
-from recipient.models import RecipientGroup, RecipientProfile, RecipientGroupMembership
+from recipient.models import RecipientGroup, RecipientGroupMembership, RecipientProfile
 from pathway.models import Pathway
 
 
@@ -26,9 +26,9 @@ class RecipientProfileSerializer(serializers.Serializer):
 
 
 class RecipientGroupMembershipSerializer(LinkedDataEntitySerializer):
-    jsonld_type = "RecipientProfile"
+    jsonld_type = "RecipientGroupMembership"
 
-    recipient = serializers.EmailField(write_only=True)
+    email = serializers.EmailField(write_only=True, source='recipient_identifier')
     name = serializers.CharField(source='membership_name')
     slug = serializers.CharField(source='recipient_profile.slug', read_only=True)
 
@@ -41,11 +41,11 @@ class RecipientGroupMembershipSerializer(LinkedDataEntitySerializer):
             )
 
         try:
-            profile = RecipientProfile.objects.get(recipient_identifier=data.get('recipient'))
+            profile = RecipientProfile.objects.get(recipient_identifier=data.get('email'))
             exists = True
         except RecipientProfile.DoesNotExist:
             profile = RecipientProfile(
-                recipient_identifier=data.get('recipient'),
+                recipient_identifier=data.get('email'),
                 display_name=data.get('name')
             )
             exists = False

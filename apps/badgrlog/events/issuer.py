@@ -23,14 +23,17 @@ class BadgeClassCreatedEvent(BaseBadgrEvent):
 
     def to_representation(self):
 
+        image_data = {
+            'id': self.badge_class.get('json', {}).get('image'),
+        }
+        if hasattr(self.image, 'size'):
+            image_data['size'] = self.image.size
+        if hasattr(self.image, 'content_type'):
+            image_data['fileType'] = self.image.content_type
         return {
             'creator': self.badge_class.get('created_by'),
             'badgeClass': self.badge_class.get('json'),
-            'image': {
-                'id': self.badge_class.get('json', {}).get('image'),
-                'size': self.image.size,
-                'fileType': self.image.content_type,
-            }
+            'image': image_data
         }
 
 

@@ -92,9 +92,9 @@ class RecipientApiTests(APITestCase, CachingTestCase):
 
         data = """{
             "members": [
-                {"name": "Tester Steve", "recipient": "testersteve@example.com"},
-                {"name": "Tester Sue", "recipient": "testersue@example.com"},
-                {"name": "Tester Sammi", "recipient": "testersammi@example.com"}
+                {"name": "Tester Steve", "email": "testersteve@example.com"},
+                {"name": "Tester Sue", "email": "testersue@example.com"},
+                {"name": "Tester Sammi", "email": "testersammi@example.com"}
             ]
         }"""
 
@@ -108,8 +108,8 @@ class RecipientApiTests(APITestCase, CachingTestCase):
 
         data = """{
             "members": [
-                {"name": "Tester Steve", "recipient": "testersteve@example.com"},
-                {"name": "Tester Sue", "recipient": "testersue@example.com"}
+                {"name": "Tester Steve", "email": "testersteve@example.com"},
+                {"name": "Tester Sue", "email": "testersue@example.com"}
             ]
         }"""
 
@@ -125,8 +125,8 @@ class RecipientApiTests(APITestCase, CachingTestCase):
 
         data = """{
             "members": [
-                {"name": "Tester Steve", "recipient": "testersteve@example.com"},
-                {"name": "Tester Sammi", "recipient": "testersammi@example.com"}
+                {"name": "Tester Steve", "email": "testersteve@example.com"},
+                {"name": "Tester Sammi", "email": "testersammi@example.com"}
             ]
         }"""
 
