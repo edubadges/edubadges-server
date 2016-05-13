@@ -21,6 +21,7 @@ class RecipientProfileSerializer(serializers.Serializer):
             ('@type', "RecipientProfile"),
             ('slug', instance.slug),
             ('name', instance.display_name),
+            ('email', instance.recipient_identifier)
         ])
         return representation
 
@@ -31,6 +32,12 @@ class RecipientGroupMembershipSerializer(LinkedDataEntitySerializer):
     email = serializers.EmailField(write_only=True, source='recipient_identifier')
     name = serializers.CharField(source='membership_name')
     slug = serializers.CharField(source='recipient_profile.slug', read_only=True)
+
+    def to_representation(self, instance):
+        json = super(RecipientGroupMembershipSerializer, self).to_representation(instance)
+        json.update([('email', instance.recipient_identifier)])
+
+        return json
 
     def to_internal_value(self, data):
         membership = None
