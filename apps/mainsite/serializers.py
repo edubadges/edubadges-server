@@ -83,3 +83,24 @@ class LinkedDataReferenceField(serializers.RelatedField):
                 "LinkedDataReferenceField model must be declared and use cache " +
                 "manager that implements get_by_id method."
             )
+
+class LinkedDataReferenceList(serializers.ListField):
+    # child must be declared in implementation.
+    def get_value(self, dictionary):
+        try:
+            return dictionary.getlist(self.field_name, serializers.empty)
+        except AttributeError:
+            return dictionary.get(self.field_name, serializers.empty)
+
+
+class JSONDictField(serializers.DictField):
+    """
+    A DictField that also accepts JSON strings as input
+    """
+    def to_internal_value(self, data):
+        try:
+            data = json.loads(data)
+        except TypeError:
+            pass
+
+        return super(JSONDictField, self).to_internal_value(data)
