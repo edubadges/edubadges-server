@@ -11,13 +11,14 @@ from mainsite.managers import SlugOrJsonIdCacheModelManager
 from pathway.completionspec import CompletionRequirementSpecFactory
 from pathway.models import Pathway
 
-
 class RecipientProfile(basic_models.DefaultModel):
     slug = AutoSlugField(max_length=254, populate_from='recipient_identifier', unique=True, blank=False)
     badge_user = models.ForeignKey('badgeuser.BadgeUser', null=True, blank=True)
     recipient_identifier = models.EmailField(max_length=1024)
     public = models.BooleanField(default=False)
     display_name = models.CharField(max_length=254)
+
+    cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='slug')
 
     def __unicode__(self):
         if self.display_name:
@@ -104,6 +105,14 @@ class RecipientGroupMembership(cachemodel.CacheModel):
     recipient_profile = models.ForeignKey('recipient.RecipientProfile')
     recipient_group = models.ForeignKey('recipient.RecipientGroup')
     membership_name = models.CharField(max_length=254)
+
+    @property
+    def jsonld_id(self):
+        return u"mailto:{}".format(self.recipient_identifier)
+
+    @property
+    def recipient_identifier(self):
+        return self.recipient_profile.recipient_identifier
 
     def publish(self):
         super(RecipientGroupMembership, self).publish()

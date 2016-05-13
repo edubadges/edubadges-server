@@ -2,13 +2,15 @@
 from collections import OrderedDict
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from issuer.models import Issuer
 from mainsite.serializers import LinkedDataReferenceField, LinkedDataEntitySerializer
-from recipient.models import RecipientGroup
+from recipient.models import RecipientGroup, RecipientGroupMembership, RecipientProfile
 from pathway.models import Pathway
 
 
@@ -25,16 +27,13 @@ class RecipientProfileSerializer(serializers.Serializer):
         return representation
 
 
-class RecipientGroupMembershipSerializer(serializers.Serializer):
-    def to_representation(self, instance):
-        representation = super(RecipientGroupMembershipSerializer, self).to_representation(instance)
-        representation.update([
-            ('@id', u"mailto:{}".format(instance.recipient_profile.recipient_identifier)),
-            ('@type', "RecipientProfile"),
-            ('slug', instance.recipient_profile.slug),
-            ('name', instance.membership_name),
-        ])
-        return representation
+class RecipientGroupMembershipSerializer(LinkedDataEntitySerializer):
+    jsonld_type = 'RecipientGroupMembership'
+
+    name = serializers.CharField(source='membership_name')
+    email = serializers.CharField(source='recipient_identifier')
+    slug = serializers.CharField(read_only=True)
+
 
 
 class RecipientGroupMembershipListSerializer(serializers.Serializer):
@@ -113,20 +112,48 @@ class RecipientGroupSerializer(LinkedDataEntitySerializer):
             for p in pathways_to_add:
                 instance.pathways.add(p)
 
-        if 'members' in validated_data:
-            existing_member_slugs = set([i.jsonld_id for i in instance.cached_members])
-            updated_pathway_ids = set(validated_data.get('members'))
+        if 'cached_members' in validated_data:
+            api_members = validated_data.get('cached_members')
 
-            pathways_to_delete = existing_pathway_ids - updated_pathway_ids
-            pathways_to_add = updated_pathway_ids - existing_pathway_ids
+            api_members_by_email = dict((m[u'recipient_identifier'], m) for m in api_members)
 
-            for p in pathways_to_delete:
-                path = Pathway.cached.get_by_slug_or_id(p)
-                instance.pathways.remove(p)
+            existing_member_emails = set([m.recipient_profile.recipient_identifier for m in instance.cached_members()])
+            updated_member_emails = set([m[u'recipient_identifier'] for m in api_members])
 
-            for p in pathways_to_add:
-                path = Pathway.cached.get_by_slug_or_id(p)
-                instance.pathways.add(p)
+            members_to_delete = existing_member_emails - updated_member_emails
+
+            for member_email in members_to_delete:
+                profile = RecipientProfile.cached.get(recipient_identifier=member_email)
+                membership = RecipientGroupMembership.cached.get(recipient_group=instance, recipient_profile=profile)
+                membership.delete()
+
+            for member in api_members:
+                member_name = member[u'membership_name']
+                member_email = member[u'recipient_identifier']
+
+                try:
+                    profile = RecipientProfile.objects.get(recipient_identifier=member_email)
+                except ObjectDoesNotExist:
+                    profile = RecipientProfile(
+                        recipient_identifier=member_email,
+                        display_name=member_name
+                    )
+                    profile.save()
+
+                try:
+                    membership = RecipientGroupMembership.objects.get(recipient_group=instance, recipient_profile=profile)
+                except ObjectDoesNotExist:
+                    membership = RecipientGroupMembership(
+                        recipient_group=instance,
+                        recipient_profile=profile,
+                        membership_name=member_name
+                    )
+                    membership.save()
+
+                if membership.membership_name != member_name:
+                    membership.membership_name = member_name
+                    membership.save()
+
 
         instance.save()
         return instance

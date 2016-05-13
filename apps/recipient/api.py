@@ -175,9 +175,11 @@ class RecipientGroupDetail(RecipientGroupAPIEndpoint):
         if issuer is None or recipient_group is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
+        embed_recipients = _scrub_boolean(request.query_params.get('embedRecipients', False))
+
         serializer = RecipientGroupSerializer(recipient_group, data=request.data, context={
             'request': request,
-            'embedRecipients': False,
+            'embedRecipients': embed_recipients,
             'issuer_slug': issuer_slug,
         })
         serializer.is_valid(raise_exception=True)
