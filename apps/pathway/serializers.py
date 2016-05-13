@@ -7,7 +7,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from issuer.models import Issuer, BadgeClass
-from mainsite.serializers import LinkedDataReferenceField, LinkedDataEntitySerializer
+from mainsite.serializers import JSONDictField, LinkedDataReferenceField, LinkedDataEntitySerializer, \
+    LinkedDataReferenceList
 from mainsite.utils import ObjectView
 from pathway.completionspec import CompletionRequirementSpecFactory
 from pathway.models import Pathway, PathwayElement
@@ -29,8 +30,11 @@ class PathwaySerializer(serializers.Serializer):
     slug = serializers.CharField(read_only=True)
     name = serializers.CharField(max_length=254, required=False)
     description = serializers.CharField(required=False)
-    issuer = LinkedDataReferenceField(['slug'], Issuer, many=False, read_only=True)
-    groups = LinkedDataReferenceField(['slug'], RecipientGroup, many=True, required=False)
+    issuer = LinkedDataReferenceField(keys=['slug'], model=Issuer, many=False, read_only=True)
+    groups = LinkedDataReferenceList(
+        required=False, read_only=False,
+        child=LinkedDataReferenceField(keys=['slug'], model=RecipientGroup, read_only=False)
+    )
     completionBadge = LinkedDataReferenceField(['slug'], BadgeClass, read_only=True, required=False, allow_null=True, source='completion_badge')
     rootChildCount = serializers.IntegerField(read_only=True, source='cached_root_element.pathwayelement_set.count')
     elementCount = serializers.IntegerField(read_only=True, source='pathwayelement_set.count')
@@ -87,6 +91,11 @@ class PathwaySerializer(serializers.Serializer):
         root_element.save()
         pathway.root_element = root_element
         pathway.save()
+
+        if 'groups' in validated_data and len(validated_data.get('groups')):
+            pathway.recipient_groups.add(set(validated_data.get('groups')))
+            pathway.save()  # update cache
+
         return pathway
 
     def update(self, instance, validated_data):
@@ -103,7 +112,7 @@ class PathwaySerializer(serializers.Serializer):
             for g in groups_to_add:
                 instance.recipient_groups.add(g)
 
-        instance.save() # update caches, sloppily
+        instance.save()  # update caches, sloppily
         return instance
 
 
@@ -115,15 +124,14 @@ class PathwayElementSerializer(LinkedDataEntitySerializer):
     alignmentUrl = serializers.CharField(required=False, allow_null=True)
     ordering = serializers.IntegerField(required=False, default=99)
     completionBadge = LinkedDataReferenceField(
-        ['slug'],
-        BadgeClass,
+        keys=['slug'],
+        model=BadgeClass,
         read_only=False,
         required=False,
         allow_null=True,
-        queryset=BadgeClass.objects.none(),
         source='completion_badgeclass'
     )
-    requirements = serializers.DictField(required=False, allow_null=True)
+    requirements = JSONDictField(required=False, allow_null=True)
 
     def to_representation(self, instance):
         include_requirements = self.context.get('include_requirements', True)
@@ -194,7 +202,7 @@ class PathwayElementSerializer(LinkedDataEntitySerializer):
         requirements = validated_data.get('requirements')
         if requirements:
             try:
-                completion_requirements = CompletionRequirementSpecFactory.parse_obj(requirements).serialize()
+                completion_requirements = CompletionRequirementSpecFactory.parse(requirements).serialize()
             except ValueError as e:
                 raise ValidationError("Invalid requirements: {}".format(e))
 
@@ -244,26 +252,22 @@ class PathwayElementCompletionSpecSerializer(serializers.Serializer):
 
 
 class RecipientCompletionSerializer(serializers.Serializer):
-    recipient = LinkedDataReferenceField(['slug'], RecipientProfile)
+    recipient = LinkedDataReferenceField(keys=['slug'], model=RecipientProfile)
     completions = serializers.ListField(child=serializers.DictField())
 
 
 class PathwayElementCompletionSerializer(serializers.Serializer):
-    pathway = LinkedDataReferenceField(['slug'], Pathway, read_only=False, queryset=Pathway.objects.none())
-    recipients = LinkedDataReferenceField(['slug'], RecipientProfile, many=True, read_only=False, queryset=RecipientProfile.objects.none())
-    recipientGroups = LinkedDataReferenceField(['slug'], RecipientGroup, many=True, read_only=False, queryset=RecipientGroup.objects.none())
+    pathway = LinkedDataReferenceField(keys=['slug'], model=Pathway, read_only=False)
+    recipients = LinkedDataReferenceField(keys=['slug'], model=RecipientProfile, many=True, read_only=False)
+    recipientGroups = LinkedDataReferenceField(keys=['slug'], model=RecipientGroup, many=True, read_only=False)
     recipientCompletions = RecipientCompletionSerializer(many=True)
 
     def to_representation(self, data):
-        representation = super(PathwayElementCompletionSerializer, self).to_representation(data)
+        base_representation = super(PathwayElementCompletionSerializer, self).to_representation(data)
 
-        representation.update({
-            "@context": "https://badgr.io/public/contexts/pathways",
-            "@type": "PathwayElementsCompletionReport",
-        })
-        return representation
+        ret = OrderedDict()
+        ret["@context"] = "https://badgr.io/public/contexts/pathways"
+        ret["@type"] = "PathwayElementsCompletionReport"
+        ret.update(base_representation)
 
-    def to_internal_value(self, validated_data):
-        obj = ObjectView(validated_data)
-        obj.pk = None
-        return obj
+        return ret

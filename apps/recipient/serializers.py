@@ -7,8 +7,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from issuer.models import Issuer
-from mainsite.serializers import LinkedDataReferenceField, LinkedDataEntitySerializer
-from recipient.models import RecipientGroup
+from mainsite.serializers import LinkedDataReferenceField, LinkedDataEntitySerializer, LinkedDataReferenceList
+from recipient.models import RecipientGroup, RecipientProfile, RecipientGroupMembership
 from pathway.models import Pathway
 
 
@@ -25,16 +25,51 @@ class RecipientProfileSerializer(serializers.Serializer):
         return representation
 
 
-class RecipientGroupMembershipSerializer(serializers.Serializer):
-    def to_representation(self, instance):
-        representation = super(RecipientGroupMembershipSerializer, self).to_representation(instance)
-        representation.update([
-            ('@id', u"mailto:{}".format(instance.recipient_profile.recipient_identifier)),
-            ('@type', "RecipientProfile"),
-            ('slug', instance.recipient_profile.slug),
-            ('name', instance.membership_name),
-        ])
-        return representation
+class RecipientGroupMembershipSerializer(LinkedDataEntitySerializer):
+    jsonld_type = "RecipientProfile"
+
+    recipient = serializers.EmailField(write_only=True)
+    name = serializers.CharField(source='membership_name')
+    slug = serializers.CharField(source='recipient_profile.slug', read_only=True)
+
+    def to_internal_value(self, data):
+        membership = None
+
+        if not 'recipient_group' in self.context:
+            raise ValidationError(
+                "RecipientGroup must be present in the context to identify a RecipientProfile."
+            )
+
+        try:
+            profile = RecipientProfile.objects.get(recipient_identifier=data.get('recipient'))
+            exists = True
+        except RecipientProfile.DoesNotExist:
+            profile = RecipientProfile(
+                recipient_identifier=data.get('recipient'),
+                display_name=data.get('name')
+            )
+            exists = False
+
+        if exists:
+            try:
+                membership = RecipientGroupMembership.objects.get(
+                    recipient_profile=profile,
+                    recipient_group=self.context.get('recipient_group')
+                )
+                if membership.membership_name != data.get('name'):
+                    membership.membership_name = data.get('name')
+                    membership.save()
+            except RecipientGroupMembership.DoesNotExist:
+                pass
+
+        if not membership:
+            membership = RecipientGroupMembership(
+                recipient_profile=profile,
+                recipient_group=self.context.get('recipient_group'),
+                membership_name=data.get('name')
+            )
+
+        return membership
 
 
 class RecipientGroupMembershipListSerializer(serializers.Serializer):
@@ -62,10 +97,15 @@ class RecipientGroupSerializer(LinkedDataEntitySerializer):
     description = serializers.CharField(required=False)
     slug = serializers.CharField(read_only=True)
     active = serializers.BooleanField(source='is_active', default=True)
-    issuer = LinkedDataReferenceField(['slug'], Issuer)
+    issuer = LinkedDataReferenceField(keys=['slug'], model=Issuer)
     member_count = serializers.IntegerField(read_only=True)
-    members = RecipientGroupMembershipSerializer(many=True, source='cached_members', required=False)
-    pathways = LinkedDataReferenceField(['slug'], Pathway, many=True, required=False)
+    members = RecipientGroupMembershipSerializer(
+        read_only=False, many=True, required=False, source='cached_members'
+    )
+    pathways = LinkedDataReferenceList(
+        read_only=False, required=False, source='cached_pathways',
+        child=LinkedDataReferenceField(read_only=False, keys=['slug'], model=Pathway)
+    )
 
     def to_representation(self, instance):
         if not self.context.get('embedRecipients', False) and 'members' in self.fields:
@@ -100,9 +140,9 @@ class RecipientGroupSerializer(LinkedDataEntitySerializer):
         instance.description = validated_data.get('description', instance.description)
         instance.is_active = validated_data.get('is_active', instance.is_active)
 
-        if 'pathways' in validated_data:
+        if 'cached_pathways' in validated_data:
             existing_pathway_ids = set(instance.cached_pathways())
-            updated_pathway_ids = set(validated_data.get('pathways'))
+            updated_pathway_ids = set(validated_data.get('cached_pathways'))
 
             pathways_to_delete = existing_pathway_ids - updated_pathway_ids
             pathways_to_add = updated_pathway_ids - existing_pathway_ids
@@ -113,22 +153,27 @@ class RecipientGroupSerializer(LinkedDataEntitySerializer):
             for p in pathways_to_add:
                 instance.pathways.add(p)
 
-        if 'members' in validated_data:
-            existing_member_slugs = set([i.jsonld_id for i in instance.cached_members])
-            updated_pathway_ids = set(validated_data.get('members'))
+        if 'cached_members' in validated_data:
+            existing_members = set(instance.cached_members())
+            updated_members = set()
 
-            pathways_to_delete = existing_pathway_ids - updated_pathway_ids
-            pathways_to_add = updated_pathway_ids - existing_pathway_ids
+            for m in validated_data.get('cached_members'):
+                # Save any newly defined profiles directly to the list,
+                # save existing members for comparison
+                if m.pk:
+                    updated_members.add(m)
+                else:
+                    if not m.recipient_profile.pk:
+                        m.recipient_profile.save()
+                        m.recipient_profile_id = m.recipient_profile.pk
+                    m.save()
 
-            for p in pathways_to_delete:
-                path = Pathway.cached.get_by_slug_or_id(p)
-                instance.pathways.remove(p)
+            members_to_delete = existing_members - updated_members
 
-            for p in pathways_to_add:
-                path = Pathway.cached.get_by_slug_or_id(p)
-                instance.pathways.add(p)
+            for m in members_to_delete:
+                m.delete()
 
-        instance.save()
+        instance.save() # update cache
         return instance
 
 class RecipientGroupListSerializer(serializers.Serializer):

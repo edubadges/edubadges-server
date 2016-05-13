@@ -2,7 +2,6 @@ import json
 from collections import OrderedDict
 
 from django.conf import settings
-
 from rest_framework import serializers
 
 
@@ -39,17 +38,16 @@ class LinkedDataEntitySerializer(serializers.Serializer):
         return representation
 
 
-class LinkedDataReferenceField(serializers.RelatedField):
+class LinkedDataReferenceField(serializers.Serializer):
     """
     A read-only field for embedding representations of entities that have Linked Data identifiers.
     Includes their @id by default and any additional identifier keys that are the named
     properties on the instance.
     """
-    def __init__(self, included_keys=[], model=None, read_only=True, **kwargs):
-        if kwargs.get('many') is not None:
-            kwargs.pop('many')
+    def __init__(self, keys=[], model=None, read_only=True, **kwargs):
+        kwargs.pop('many', None)
         super(LinkedDataReferenceField, self).__init__(read_only=read_only, **kwargs)
-        self.included_keys = included_keys
+        self.included_keys = keys
         self.model = model
 
     def to_representation(self, obj):
@@ -68,9 +66,6 @@ class LinkedDataReferenceField(serializers.RelatedField):
         return output
 
     def to_internal_value(self, data):
-        if isinstance(data, self.model):
-            return data
-
         if not isinstance(data, basestring):
             idstring = data.get('@id')
         else:

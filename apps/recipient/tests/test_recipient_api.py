@@ -86,7 +86,58 @@ class RecipientApiTests(APITestCase, CachingTestCase):
 
 
     def test_can_add_multiple_members_to_group(self):
-        pass
+        _ = self.create_group()
+
+        group = RecipientGroup.objects.get(slug=_.data.get('slug'))
+
+        data = """{
+            "members": [
+                {"name": "Tester Steve", "recipient": "testersteve@example.com"},
+                {"name": "Tester Sue", "recipient": "testersue@example.com"},
+                {"name": "Tester Sammi", "recipient": "testersammi@example.com"}
+            ]
+        }"""
+
+        response = self.client.put(
+            '/v2/issuers/{}/recipient-groups/{}?embedRecipients=true'.format(group.issuer.slug, group.slug),
+            data, content_type='application/json'
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(group.cached_members()), 3)
+
+        data = """{
+            "members": [
+                {"name": "Tester Steve", "recipient": "testersteve@example.com"},
+                {"name": "Tester Sue", "recipient": "testersue@example.com"}
+            ]
+        }"""
+
+        response = self.client.put(
+            '/v2/issuers/{}/recipient-groups/{}?embedRecipients=true'.format(group.issuer.slug, group.slug),
+            data, content_type='application/json'
+        )
+        sammi = RecipientProfile.objects.get(recipient_identifier='testersammi@example.com')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(group.cached_members()), 2)
+        self.assertFalse(sammi in [m.recipient_profile for m in group.cached_members()])
+
+        data = """{
+            "members": [
+                {"name": "Tester Steve", "recipient": "testersteve@example.com"},
+                {"name": "Tester Sammi", "recipient": "testersammi@example.com"}
+            ]
+        }"""
+
+        response = self.client.put(
+            '/v2/issuers/{}/recipient-groups/{}?embedRecipients=true'.format(group.issuer.slug, group.slug),
+            data, content_type='application/json'
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(group.cached_members()), 2)
+        self.assertTrue(sammi in [m.recipient_profile for m in group.cached_members()])
 
     def test_can_delete_member_from_group(self):
         pass

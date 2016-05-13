@@ -153,7 +153,10 @@ class CompletionRequirementSpecFactory(object):
 
     @classmethod
     def parse(cls, json_str):
-        return cls.parse_obj(json.loads(json_str))
+        try:
+            cls.parse_obj(json.loads(json_str))
+        except TypeError:
+            return cls.parse_obj(json_str)
 
     @classmethod
     def parse_element(cls, element):

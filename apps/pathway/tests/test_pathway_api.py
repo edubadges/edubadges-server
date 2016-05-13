@@ -135,7 +135,7 @@ class PathwayApiTests(APITestCase, CachingTestCase):
             'parent': plumber_element['@id'],
             'name': 'Intro to Plumbing',
             'description': 'You learn the basics of plumbing.',
-            'requirements': json.dumps({
+            'requirements': {
                 '@type': 'BadgeJunction',
                 'junctionConfig': {
                     '@type': 'Conjunction',
@@ -144,12 +144,12 @@ class PathwayApiTests(APITestCase, CachingTestCase):
                 'badges': [
                     intro_plumbing_badge['json']['id']
                 ],
-            })
+            }
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, "Created pathway element")
         intro_plumbing_element = response.data
 
-        # Advanced Plumbing
+        # Advanced Plumbing (testing sending a json string for requirements)
         response = self.client.post(reverse('pathway_element_list', kwargs={
             'issuer_slug': self.issuer.get('slug'),
             'pathway_slug': pathway.get('slug')
@@ -341,3 +341,4 @@ class PathwayCompletionTests(APITestCase):
         # Assert that 4 elements are measured complete (root, 2 required children, 1 optional child)
         self.assertEqual(completion_response.status_code, 200)
         self.assertEqual(len(completion_response.data.get('recipientCompletions')[0]['completions']), 4)
+        self.assertEqual(len(completion_response.data.get('recipients')), 1)

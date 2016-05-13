@@ -19,6 +19,8 @@ class RecipientProfile(basic_models.DefaultModel):
     public = models.BooleanField(default=False)
     display_name = models.CharField(max_length=254)
 
+    cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='slug')
+
     def __unicode__(self):
         if self.display_name:
             return self.display_name
@@ -121,3 +123,7 @@ class RecipientGroupMembership(cachemodel.CacheModel):
 
     def populate_slug(self):
         return "{}-{}".format(self.recipient_group.slug, self.recipient_profile.slug)
+
+    @property
+    def jsonld_id(self):
+        return self.recipient_profile.jsonld_id

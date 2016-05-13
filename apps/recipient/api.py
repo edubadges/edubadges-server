@@ -165,7 +165,7 @@ class RecipientGroupDetail(RecipientGroupAPIEndpoint):
               required: false
               type: string
               paramType: form
-            - name: active
+            - name: is_active
               required: false
               type: boolean
               paramType: form
@@ -177,8 +177,9 @@ class RecipientGroupDetail(RecipientGroupAPIEndpoint):
 
         serializer = RecipientGroupSerializer(recipient_group, data=request.data, context={
             'request': request,
-            'embedRecipients': False,
+            'embedRecipients': _scrub_boolean(request.query_params.get('embedRecipients', False)),
             'issuer_slug': issuer_slug,
+            'recipient_group': recipient_group
         })
         serializer.is_valid(raise_exception=True)
         serializer.save()

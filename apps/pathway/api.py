@@ -8,6 +8,7 @@ from rest_framework.status import HTTP_201_CREATED
 
 from issuer.api import AbstractIssuerAPIEndpoint
 from issuer.models import Issuer, BadgeClass
+from mainsite.utils import ObjectView
 from pathway.completionspec import CompletionRequirementSpecFactory
 from pathway.models import Pathway, PathwayElement, PathwayElementBadge
 from pathway.serializers import PathwaySerializer, PathwayListSerializer, PathwayElementSerializer, PathwayElementCompletionSerializer
@@ -340,11 +341,11 @@ class PathwayCompletionDetail(PathwayElementAPIEndpoint):
                  'completions': recipient.cached_completions(pathway)
             })
 
-        serializer = PathwayElementCompletionSerializer(data={
+        serializer = PathwayElementCompletionSerializer(ObjectView({
             'pathway': pathway,
             'recipientCompletions': recipient_completions,
             'recipients': recipients,
             'recipientGroups': groups
-        })
-        serializer.is_valid(raise_exception=True)
+        }))
+
         return Response(serializer.data)
