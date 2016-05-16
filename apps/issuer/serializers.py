@@ -15,6 +15,7 @@ from mainsite.serializers import WritableJSONField
 from mainsite.utils import installed_apps_list
 from badgeuser.serializers import UserProfileField
 from composition.format import V1InstanceSerializer
+from pathway.tasks import check_element_completions_triggered_by_badge_award
 
 from .models import Issuer, BadgeClass, BadgeInstance
 import utils
@@ -266,6 +267,8 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
             BadgeInstance._meta.get_field('slug').pre_save(new_assertion, add=True)
 
         new_assertion.save()
+
+        check_element_completions_triggered_by_badge_award.delay(new_assertion)
 
         if create_notification is True:
             new_assertion.notify_earner()

@@ -167,7 +167,15 @@ class PathwayElement(basic_models.DefaultModel):
             'pathway_slug': self.cached_pathway.slug,
             'element_slug': self.slug})
 
-    def recipient_completion(self, recipient, badge_instances):
+    def recipient_completion(self, recipient_profile, badge_instances):
+        """
+        Checks if element is completed by the expected recipient, given a set of
+        their earned BadgeInstances.
+
+        :param recipient_profile: RecipientProfile
+        :param badge_instances: [issuer.BadgeInstance]
+        :return: boolean
+        """
         pass
 
     def get_alignment_url(self):
