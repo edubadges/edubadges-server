@@ -136,6 +136,7 @@ class PathwayElementSerializer(LinkedDataEntitySerializer):
     def to_representation(self, instance):
         include_requirements = self.context.get('include_requirements', True)
         representation = super(PathwayElementSerializer, self).to_representation(instance)
+        representation['alignmentUrl'] = instance.alignment_url
 
         representation['children'] = [
             child.jsonld_id for child in instance.cached_children()
