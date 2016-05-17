@@ -1,13 +1,14 @@
 import logging
+import urlparse
 
 from django.conf import settings
 from django.contrib.auth import logout
-from django.core.urlresolvers import resolve, Resolver404
+from django.core.urlresolvers import resolve, Resolver404, reverse
 
 from allauth.account.adapter import DefaultAccountAdapter, get_adapter
 from allauth.account import app_settings
 from allauth.account.models import EmailConfirmation
-from allauth.utils import get_current_site
+from allauth.utils import get_current_site, build_absolute_uri
 
 from badgeuser.models import CachedEmailAddress
 from mainsite.models import BadgrApp
@@ -42,6 +43,9 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
             email_address = CachedEmailAddress.objects.get(pk=confirmation.email_address_id)
             email_address.save()
 
+            if resolverMatch.url_name == 'legacy_confirm_email':
+                return reverse('account_login')
+
             return "{}{}?email={}".format(
                 badgr_app.email_confirmation_redirect,
                 email_address.user.first_name,
@@ -50,6 +54,19 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
 
         except Resolver404, EmailConfirmation.DoesNotExist:
             return badgr_app.email_confirmation_redirect
+
+    def get_email_confirmation_url(self, request, emailconfirmation):
+        if request is not None:
+            referer = request.META.get('HTTP_REFERER')
+            parsed = urlparse.urlparse(referer)
+            try:
+                badgr_app = BadgrApp.cached.get(cors=parsed.netloc)
+            except BadgrApp.DoesNotExist as e:
+                # we couldn't determine a BadgrApp from the referer, default to legacy frontend
+                url = reverse("legacy_confirm_email", args=[emailconfirmation.key])
+                ret = build_absolute_uri(request, url, protocol=app_settings.DEFAULT_HTTP_PROTOCOL)
+                return ret
+        return super(BadgrAccountAdapter, self).get_email_confirmation_url(request, emailconfirmation)
 
     def send_confirmation_mail(self, request, emailconfirmation, signup):
         current_site = get_current_site(request)

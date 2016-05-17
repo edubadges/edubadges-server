@@ -1,3 +1,4 @@
+from allauth.account.views import confirm_email
 from django.apps import apps
 from django.conf.urls import patterns, include, url
 from django.conf import settings
@@ -39,6 +40,10 @@ urlpatterns = patterns('',
     url(r'^unsubscribe/(?P<email_encoded>[^/]+)/(?P<expiration>[^/]+)/(?P<signature>[^/]+)', email_unsubscribe, name='unsubscribe'),
     url(r'^login', RedirectView.as_view(url='/accounts/login', permanent=False, query_string=True), name='login'),
     url(r'^logout', RedirectView.as_view(url='/accounts/logout', permanent=False), name='logout'),
+
+    # this URL route exists to satisfy running the legacy frontend signup pages.
+    # to be expunged when legacy frontend is removed
+    url(r"^legacy/confirm-email/(?P<key>\w+)/$", confirm_email, name="legacy_confirm_email"),
 
     # REST Framework-based APIs
     url(r'^user', include('badgeuser.urls')),
