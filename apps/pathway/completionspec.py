@@ -31,7 +31,10 @@ class CompletionRequirementSpec(object):
 class ElementJunctionCompletionRequirementSpec(CompletionRequirementSpec):
     def __init__(self, *args, **kwargs):
         self.elements = set(kwargs.get('elements', []))
-        super(ElementJunctionCompletionRequirementSpec, self).__init__(*args, **kwargs)
+        super(ElementJunctionCompletionRequirementSpec, self).__init__(
+            *args,
+            completion_type=kwargs.pop('completion_type', CompletionRequirementSpecFactory.ELEMENT_JUNCTION),
+            **kwargs)
 
     def serialize(self):
         obj = super(ElementJunctionCompletionRequirementSpec, self).serialize()
@@ -108,7 +111,10 @@ class ElementJunctionCompletionRequirementSpec(CompletionRequirementSpec):
 class BadgeJunctionCompletionRequirementSpec(CompletionRequirementSpec):
     def __init__(self, *args, **kwargs):
         self.badges = set(kwargs.get('badges', []))
-        super(BadgeJunctionCompletionRequirementSpec, self).__init__(*args, **kwargs)
+        super(BadgeJunctionCompletionRequirementSpec, self).__init__(
+            *args,
+            completion_type=kwargs.pop('completion_type', CompletionRequirementSpecFactory.BADGE_JUNCTION),
+            **kwargs)
 
     def serialize(self):
         obj = super(BadgeJunctionCompletionRequirementSpec, self).serialize()

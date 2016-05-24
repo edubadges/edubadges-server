@@ -8,7 +8,7 @@ import cachemodel
 
 from issuer.models import BadgeInstance
 from mainsite.managers import SlugOrJsonIdCacheModelManager
-from pathway.completionspec import CompletionRequirementSpecFactory
+from pathway.completionspec import CompletionRequirementSpecFactory, ElementJunctionCompletionRequirementSpec
 from pathway.models import Pathway
 
 class RecipientProfile(basic_models.DefaultModel):
@@ -43,12 +43,19 @@ class RecipientProfile(basic_models.DefaultModel):
         tree = pathway.build_element_tree()
         completion_spec = CompletionRequirementSpecFactory.parse_element(tree['element'])
 
-        if completion_spec:
-            if completion_spec.completion_type == CompletionRequirementSpecFactory.BADGE_JUNCTION:
-                return [completion_spec.check_completion(instances)]
-            elif completion_spec.completion_type == CompletionRequirementSpecFactory.ELEMENT_JUNCTION:
-                return completion_spec.check_completions(tree, instances)
+        if not completion_spec:
+            # if there is no completionspec, infer one of elementjunction of all children elements
+            completion_spec = ElementJunctionCompletionRequirementSpec(
+                junction_type=CompletionRequirementSpecFactory.JUNCTION_TYPE_CONJUNCTION,
+                required_number=len(tree['children']),
+                elements=(c['element'].jsonld_id for c in tree['children']))
+
+        if completion_spec.completion_type == CompletionRequirementSpecFactory.BADGE_JUNCTION:
+            return [completion_spec.check_completion(instances)]
+        elif completion_spec.completion_type == CompletionRequirementSpecFactory.ELEMENT_JUNCTION:
+            return completion_spec.check_completions(tree, instances)
         else:
+            # unsupported completion_type
             return []
 
     @cachemodel.cached_method(auto_publish=True)
