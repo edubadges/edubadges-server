@@ -164,7 +164,8 @@ class IssuerDetail(AbstractIssuerAPIEndpoint):
         """
         try:
             current_issuer = Issuer.cached.get(slug=slug)
-        except Issuer.DoesNotExist:
+            self.check_object_permissions(self.request, current_issuer)
+        except (Issuer.DoesNotExist, PermissionDenied) as e:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         else:
