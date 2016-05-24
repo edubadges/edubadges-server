@@ -86,13 +86,32 @@ class Pathway(cachemodel.CacheModel):
             self.name_hint = name_hint
         return super(Pathway, self).save(*args, **kwargs)
 
-    def build_element_tree(self):
+    def build_element_tree(self, tree_root_element=None):
+        """
+        Returns a python dict-based structure of nodes and their children
+        of a pathway from the tree_root_element down.
+
+        :param tree_root_element: PathwayElement
+        :return:
+        {
+            'element': PathwayElement::tree_root_element,
+            'children': [
+                {
+                    'element': PathwayElement,
+                    'children' []
+                }
+            ]
+        }
+        """
+        if tree_root_element is None:
+            tree_root_element = self.cached_root_element
+
         index = {}
         for element in self.cached_elements():
             index[element.jsonld_id] = element
 
         tree = {
-            'element': self.cached_root_element,
+            'element': tree_root_element,
         }
 
         def _build(parent, node):
@@ -176,7 +195,7 @@ class PathwayElement(basic_models.DefaultModel):
         :param badge_instances: [issuer.BadgeInstance]
         :return: boolean
         """
-        pass
+
 
     def get_alignment_url(self):
         if self.alignment_url:

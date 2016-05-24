@@ -240,18 +240,33 @@ class PathwayCompletionTests(APITestCase):
         data = {'name': 'Group of Testing', 'description': 'A group used for testing.'}
         return self.client.post('/v2/issuers/edited-test-issuer/recipient-groups', data)
 
-    def test_tree_built_properly(self):
-        editor = get_user_model().objects.get(pk=3)
+    def create_pathway(self, creator):
         pathway_info = {'name': 'New Path', 'description': 'A new path through learning'}
         serializer = PathwaySerializer(data=pathway_info, context={
             'issuer_slug': 'edited-test-issuer'
         })
         serializer.is_valid(raise_exception=True)
-        serializer.save(created_by=editor)
+        serializer.save(created_by=creator)
         pathway = serializer.instance
 
         self.assertEqual(pathway.name_hint, 'New Path')
         self.assertEqual(pathway.root_element.name, 'New Path')
+
+        return pathway
+
+    def create_element(self, pathway, element_info, creator):
+        serializer = PathwayElementSerializer(data=element_info, context={
+            'issuer_slug': 'edited-test-issuer',
+            'pathway_slug': pathway.slug,
+        })
+        serializer.is_valid(raise_exception=True)
+        serializer.save(created_by=creator)
+
+        return serializer.instance
+
+    def test_tree_built_properly(self):
+        editor = get_user_model().objects.get(pk=3)
+        pathway = self.create_pathway(creator=editor)
 
         element_infos = [
             {'name': 'First Element', 'description': 'Element numero uno', 'parent': pathway.slug},
@@ -260,12 +275,7 @@ class PathwayCompletionTests(APITestCase):
         ]
         children = []
         for element_info in element_infos:
-            el_serializer = PathwayElementSerializer(data=element_info, context={
-                'issuer_slug': 'edited-test-issuer',
-                'pathway_slug': pathway.slug,
-            })
-            el_serializer.is_valid(raise_exception=True)
-            el_serializer.save(created_by=editor)
+            new_element = self.create_element(pathway, element_info, creator=editor)
 
             requirements = {
                 "junctionConfig": {
@@ -278,10 +288,10 @@ class PathwayCompletionTests(APITestCase):
                 ]
             }
 
-            el_serializer.instance.completion_requirements = \
+            new_element.completion_requirements = \
                     CompletionRequirementSpecFactory.parse_obj(requirements).serialize()
-            el_serializer.instance.save()
-            children.append(el_serializer.instance.jsonld_id)
+            new_element.save()
+            children.append(new_element.jsonld_id)
 
         root_requirements = {
             "junctionConfig": {
@@ -342,3 +352,73 @@ class PathwayCompletionTests(APITestCase):
         self.assertEqual(completion_response.status_code, 200)
         self.assertEqual(len(completion_response.data.get('recipientCompletions')[0]['completions']), 4)
         self.assertEqual(len(completion_response.data.get('recipients')), 1)
+
+
+    def test_completion_check_when_root_requirements_null(self):
+        editor = get_user_model().objects.get(pk=3)
+        pathway = self.create_pathway()
+
+        element_infos = [
+            {'name': 'First Element', 'description': 'Element numero uno', 'parent': pathway.slug},
+            {'name': 'Second Element', 'description': 'Element numero dos', 'parent': pathway.slug},
+            {'name': 'Third Element', 'description': 'Element numero tres', 'parent': pathway.slug},
+            {'name': 'Fourth Element', 'description': 'Element numero cuatro', 'parent': pathway.slug},
+            {'name': 'First Child of Fourth', 'description': '1st child of 4th Element', 'parent': 'fourth-element'},
+            {'name': 'Second Child of Fourth', 'description': '2nd child of 4th Element', 'parent': 'fourth-element'}
+        ]
+
+        elements = []
+        for element_info in element_infos:
+            elements = elements + self.create_element(pathway, element_info, creator=editor)
+
+        req = {
+            "junctionConfig": {
+                "requiredNumber": 1,
+                "@type": "Disjunction"
+            },
+            "@type": "BadgeJunction",
+            "badges": [
+              "http://localhost:8000/public/badges/badge-of-edited-testing"
+            ]
+        }
+        elements[4].completion_requirements = CompletionRequirementSpecFactory.parse_obj(req).serialize()
+        elements[5].completion_requirements = CompletionRequirementSpecFactory.parse_obj(req).serialize()
+
+        req = {
+            "junctionConfig": {
+                "requiredNumber": 1,
+                "@type": "Disjunction"
+            },
+            "@type": "BadgeJunction",
+            "badges": [
+              "http://localhost:8000/public/badges/badge-of-edited-testing"
+            ]
+        }
+
+        elements[3]
+
+
+        children = []
+        for element_info in element_infos:
+            el_serializer = PathwayElementSerializer(data=element_info, context={
+                'issuer_slug': 'edited-test-issuer',
+                'pathway_slug': pathway.slug,
+            })
+            el_serializer.is_valid(raise_exception=True)
+            el_serializer.save(created_by=editor)
+
+            requirements = {
+                "junctionConfig": {
+                    "requiredNumber": 1,
+                    "@type": "Disjunction"
+                },
+                "@type": "BadgeJunction",
+                "badges": [
+                  "http://localhost:8000/public/badges/badge-of-edited-testing"
+                ]
+            }
+
+            el_serializer.instance.completion_requirements = \
+                    CompletionRequirementSpecFactory.parse_obj(requirements).serialize()
+            el_serializer.instance.save()
+            children.append(el_serializer.instance.jsonld_id)

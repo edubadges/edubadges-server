@@ -110,6 +110,11 @@ class BadgeClass(AbstractBadgeClass):
         return self.badgeinstances.all()
 
 
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_pathway_elements(self):
+        self.pathwayelement_set.all()
+
+
 class BadgeInstance(AbstractBadgeInstance):
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False,
                                    on_delete=models.CASCADE,

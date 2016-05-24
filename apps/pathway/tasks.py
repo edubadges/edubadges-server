@@ -22,31 +22,31 @@ badgrLogger = badgrlog.BadgrLogger()
 def check_element_completions_triggered_by_badge_award(badgeinstance):
     lock_key = "_task_lock_completion_trigger_{}{}".format(
         badgeinstance.slug, badgeinstance.recipient_identifier)
+    awards = []
+    completions = []
 
     if _acquire_lock(lock_key, self.request.id):
         try:
             # lock acquired
 
             from issuer.serializers import BadgeInstanceSerializer  # avoid circular import
-            awards = []
             badgeclass = badgeinstance.cached_badgeclass
-            element_triggers = PathwayElementBadge.objects.filter(
-                badgeclass=badgeclass).select_related('element')
+            completable_elements = badgeclass.cached_pathway_elements()
 
-            if not element_triggers.exists():
+            if not completable_elements:
                 return {'status': 'done', 'awards': awards}
 
-            elements = [et.element for et in element_triggers]
+            pathways = set([ce.element.pathway for ce in completable_elements])
 
-            recipient_profile = RecipientProfile.objects.get(
-                recipient_identifier=badgeinstance.recipient_identifier)
+            try:
+                recipient_profile = RecipientProfile.objects.get(
+                    recipient_identifier=badgeinstance.recipient_identifier)
+            except RecipientProfile.DoesNotExist:
+                return {'status': 'error', 'awards': [], 'error': 'RecipientProfile not found.'}
 
-            recipient_instances = RecipientProfile.cached_badgeinstances()
 
-
-            for element in elements:
-                awards = awards + _cascade_completion_checks(
-                    element, recipient_profile, recipient_instances)
+            for pathway in pathways:
+                completions = completions + recipient_profile.cached_completions(pathway)
 
 
         finally:
@@ -62,38 +62,41 @@ def check_element_completions_triggered_by_badge_award(badgeinstance):
     }
 
 
-def _cascade_completion_checks(element, recipient_profile, recipient_instances):
-    awards = []
+@app.task(bind=True)
+def award_completion_badge(element, recipient_profile):
 
     if element.recipient_completion(recipient_profile, recipient_instances):
 
         if element.completion_badgeclass \
                 and not _is_badgeclass_awarded(element.completion_badgeclass, recipient_instances):
 
-            from issuer.serializers import BadgeInstanceSerializer
+            if element.is_completed_by(recipient_profile, recipient_instances):
 
-            # new_instance = Award completion badgeclass
-            data = {
-                'recipient_identifier': recipient_profile.recipient_identifier,
-                'create_notification': getattr(settings, 'ISSUER_NOTIFY_DEFAULT', True),
-                'badgeclass': element.completion_badgeclass
-            }
+                element_subtree = element.pathway.build_element_tree(element)
 
-            logger.info("Awarding element badge {}\n".format(data))
+                from issuer.serializers import BadgeInstanceSerializer
 
-            serializer = BadgeInstanceSerializer(data=data)
-            serializer.is_valid(raise_exception=True)
-            new_instance = serializer.save()
+                # new_instance = Award completion badgeclass
+                data = {
+                    'recipient_identifier': recipient_profile.recipient_identifier,
+                    'create_notification': getattr(settings, 'ISSUER_NOTIFY_DEFAULT', True),
+                    'badgeclass': element.completion_badgeclass
+                }
 
-            recipient_instances = recipient_profile.cached_badgeinstances()
-            awards.append(new_instance)
+                logger.info("Awarding element badge {}\n".format(data))
+
+                serializer = BadgeInstanceSerializer(data=data)
+                serializer.is_valid(raise_exception=True)
+                new_instance = serializer.save()
+
+                recipient_instances = recipient_profile.cached_badgeinstances()
+                awards.append(new_instance)
 
         if element.parent_element:
             return awards + _cascade_completion_checks(
                 element.parent_element, recipient_profile, recipient_instances)
 
     return awards
-
 
 def _is_badgeclass_awarded(badgeclass, instances):
     for instance in instances:
