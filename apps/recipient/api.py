@@ -72,6 +72,13 @@ class RecipientGroupList(AbstractIssuerAPIEndpoint):
               required: false
               type: string
               paramType: form
+            - name: pathways
+              required: false
+              type: array
+              items: {
+                type: string
+              }
+              paramType: form
         """
         serializer = RecipientGroupSerializer(data=request.data, context={
             'request': request,
