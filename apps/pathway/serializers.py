@@ -30,6 +30,7 @@ class PathwaySerializer(serializers.Serializer):
     slug = serializers.CharField(read_only=True)
     name = serializers.CharField(max_length=254, required=False)
     description = serializers.CharField(required=False)
+    alignmentUrl = serializers.CharField(required=False, allow_null=True)
     issuer = LinkedDataReferenceField(keys=['slug'], model=Issuer, many=False, read_only=True)
     groups = LinkedDataReferenceList(
         required=False, read_only=False,
@@ -87,6 +88,7 @@ class PathwaySerializer(serializers.Serializer):
             parent_element=None,
             name=name,
             description=validated_data.get('description'),
+            alignment_url=validated_data.get('alignmentUrl')
         )
         root_element.save()
         pathway.root_element = root_element
