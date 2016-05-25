@@ -33,12 +33,7 @@ class RecipientProfile(basic_models.DefaultModel):
     def jsonld_id(self):
         return u'mailto:{}'.format(self.recipient_identifier)
 
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_badgeinstances(self):
-        return BadgeInstance.objects.filter(
-            recipient_identifier=self.recipient_identifier)
-
-    # @cachemodel.cached_method(auto_publish=False)
+    @cachemodel.cached_method(auto_publish=False)
     def cached_completions(self, pathway):
         # get recipients instances that are aligned to this pathway
         badgeclasses = pathway.cached_badgeclasses()

@@ -109,10 +109,9 @@ class BadgeClass(AbstractBadgeClass):
     def cached_badgeinstances(self):
         return self.badgeinstances.all()
 
-
     @cachemodel.cached_method(auto_publish=True)
     def cached_pathway_elements(self):
-        self.pathwayelement_set.all()
+        return [peb.element for peb in self.pathwayelementbadge_set.all()]
 
 
 class BadgeInstance(AbstractBadgeInstance):

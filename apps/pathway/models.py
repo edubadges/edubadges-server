@@ -164,7 +164,7 @@ class PathwayElement(basic_models.DefaultModel):
         ret = super(PathwayElement, self).delete(*args, **kwargs)
         pathway.publish()
         if parent_element:
-           parent_element.publish()
+            parent_element.publish()
         return ret
 
     @cachemodel.cached_method(auto_publish=True)
@@ -195,7 +195,6 @@ class PathwayElement(basic_models.DefaultModel):
         :param badge_instances: [issuer.BadgeInstance]
         :return: boolean
         """
-
 
     def get_alignment_url(self):
         if self.alignment_url:
@@ -245,12 +244,15 @@ class PathwayElementBadge(cachemodel.CacheModel):
         super(PathwayElementBadge, self).publish()
         self.publish_by('element', 'badgeclass')
         self.element.publish()
+        self.badgeclass.publish()
 
     def delete(self, *args, **kwargs):
         element = self.element
+        badgeclass = self.badgeclass
         ret = super(PathwayElementBadge, self).delete(*args, **kwargs)
         self.publish_delete('element', 'badgeclass')
         element.publish()
+        badgeclass.publish()
         return ret
 
     @property
