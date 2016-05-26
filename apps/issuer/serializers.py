@@ -219,6 +219,7 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
         return representation
 
     def create(self, validated_data, **kwargs):
+        check_completions = validated_data.pop('check_completions', True)
         # Assemble Badge Object
         validated_data['json'] = {
             # 'id': TO BE ADDED IN SAVE
@@ -263,7 +264,8 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
 
         new_assertion.save()
 
-        award_badges_for_pathway_completion.delay(new_assertion.slug)
+        if check_completions:
+            award_badges_for_pathway_completion.delay(new_assertion.slug)
 
         if create_notification is True:
             new_assertion.notify_earner()

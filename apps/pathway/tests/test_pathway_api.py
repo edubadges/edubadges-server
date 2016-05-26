@@ -13,7 +13,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from badgeuser.models import BadgeUser
-from issuer.models import BadgeClass
+from issuer.models import BadgeClass, BadgeInstance
 from issuer.serializers import BadgeInstanceSerializer
 from mainsite import TOP_DIR
 from pathway.completionspec import CompletionRequirementSpecFactory
@@ -229,13 +229,11 @@ class PathwayApiTests(APITestCase, CachingTestCase):
 
 @override_settings(
     CACHES=CACHE_OVERRIDE,
-    CELERY_ALWAYS_EAGER=True
+    CELERY_ALWAYS_EAGER=True,
+    ISSUER_NOTIFY_DEFAULT=False
 )
-class PathwayCompletionTests(APITestCase):
+class PathwayCompletionTests(APITestCase, CachingTestCase):
     fixtures = ['0001_initial_superuser', 'test_badge_objects.json']
-
-    def setUp(self):
-        pass
 
     def create_group(self):
         # Authenticate as an editor of the issuer in question
@@ -397,3 +395,47 @@ class PathwayCompletionTests(APITestCase):
         # all 4 elements should be complete
         self.assertEqual(len(completions), 4)
         self.assertNotIn(False, [c.get('completed', False) for c in completions])
+
+    def test_completion_badge_awarding(self):
+        editor = get_user_model().objects.get(pk=3)
+        pathway = self.build_pathway(creator=editor)
+        completed_badgeclass = BadgeClass.objects.get(slug='second-badge-of-testing')
+        pathway.root_element.completion_badgeclass = completed_badgeclass
+        pathway.root_element.save()
+
+        self.create_group()
+        recipient_group = RecipientGroup.objects.first()
+        recipient = 'testrecipient2@example.com'
+        profile, _ = RecipientProfile.cached.get_or_create(recipient_identifier=recipient)
+
+        # award badge to recipient, should complete pathway and get a completion badge
+        badgeclass = BadgeClass.objects.get(slug='badge-of-edited-testing')
+        serializer = BadgeInstanceSerializer(data={
+            'create_notification': False,
+            'recipient_identifier': recipient
+        })
+        serializer.is_valid(raise_exception=True)
+        serializer.save(
+            issuer=badgeclass.issuer,
+            badgeclass=badgeclass,
+            created_by=editor
+        )
+        badge_instance = serializer.instance
+
+        # get completion detail to force badge awarding
+        response = self.client.get(reverse('pathway_completion_detail', kwargs={
+            'issuer_slug': badge_instance.issuer.slug,
+            'pathway_slug': pathway.slug,
+            'element_slug': pathway.root_element.slug
+        }) + '?recipient%5B%5D={}'.format(profile.slug))
+        self.assertEqual(response.status_code, 200)
+
+        # check that completion badge was awarded
+        try:
+            awarded = BadgeInstance.objects.get(
+                badgeclass=completed_badgeclass,
+                recipient_identifier=recipient
+            )
+        except BadgeInstance.DoesNotExist:
+            self.fail("Completion Badge was not awarded")
+

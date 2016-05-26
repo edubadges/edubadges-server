@@ -69,13 +69,19 @@ class ElementJunctionCompletionRequirementSpec(CompletionRequirementSpec):
         completions = []
 
         def _completion_base(node):
-            return {
+            completion = {
                 "element": {
                     '@id': node['element'].jsonld_id,
                     'slug': node['element'].slug,
                 },
                 "completed": False,
             }
+            if node['element'].completion_badgeclass:
+                completion['completionBadge'] = {
+                    '@id': node['element'].completion_badgeclass.jsonld_id,
+                    'slug': node['element'].completion_badgeclass.slug,
+                }
+            return completion
 
         def _find_child_with_id(children, id):
             for child in children:

@@ -1,10 +1,11 @@
 # Created by notto@concentricsky and wiggins@concentricsky.com on 5/25/16.
 import itertools
 from celery.utils.log import get_task_logger
+from django.conf import settings
 from django.core.cache import cache
 
 import badgrlog
-from issuer.models import BadgeInstance
+from issuer.models import BadgeInstance, BadgeClass
 from mainsite.celery import app
 from recipient.models import RecipientProfile
 
@@ -27,7 +28,6 @@ def award_badges_for_pathway_completion(self, badgeinstance_slug):
             except BadgeInstance.DoesNotExist:
                 return {'status': 'error', 'error': 'BadgeInstance {} not found'.format(badgeinstance_slug)}
 
-            from issuer.serializers import BadgeInstanceSerializer  # avoid circular import
             badgeclass = badgeinstance.cached_badgeclass
 
             recipient_profile = badgeinstance.cached_recipient_profile
@@ -40,12 +40,32 @@ def award_badges_for_pathway_completion(self, badgeinstance_slug):
                 return {'status': 'done', 'awards': awards}
 
             completions = list(itertools.chain.from_iterable([recipient_profile.cached_completions(p) for p in pathways]))
-            # for completion in completions:
-            #     if completion['completed']:
-
-            pass
-
-
+            for completion in completions:
+                if 'completionBadge' in completion:
+                    try:
+                        completion_badgeclass = BadgeClass.cached.get(slug=completion.get('completionBadge').get('slug'))
+                        try:
+                            awarded_badge = BadgeInstance.objects.get(
+                                recipient_identifier=recipient_profile.recipient_identifier,
+                                badgeclass=completion_badgeclass)
+                            # badge was already awarded
+                        except BadgeInstance.DoesNotExist:
+                            # need to award badge
+                            from issuer.serializers import BadgeInstanceSerializer
+                            serializer = BadgeInstanceSerializer(data={
+                                'recipient_identifier': recipient_profile.recipient_identifier,
+                                'create_notification': getattr(settings, 'ISSUER_NOTIFY_DEFAULT', True),
+                            })
+                            serializer.is_valid(raise_exception=True)
+                            new_instance = serializer.save(
+                                check_completions=False,
+                                issuer=completion_badgeclass.issuer,
+                                badgeclass=completion_badgeclass
+                            )
+                            pass
+                    except BadgeClass.DoesNotExist:
+                        # got an erroneous badgeclass for a completionBadge
+                        pass
 
         finally:
             _release_lock(lock_key)
