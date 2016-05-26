@@ -30,8 +30,11 @@ class CompletionRequirementSpec(object):
 
 class ElementJunctionCompletionRequirementSpec(CompletionRequirementSpec):
     def __init__(self, *args, **kwargs):
-        self.elements = set(kwargs.get('elements', []))
-        super(ElementJunctionCompletionRequirementSpec, self).__init__(*args, **kwargs)
+        self.elements = set(kwargs.pop('elements', []))
+        super(ElementJunctionCompletionRequirementSpec, self).__init__(
+            *args,
+            completion_type=kwargs.pop('completion_type', CompletionRequirementSpecFactory.ELEMENT_JUNCTION),
+            **kwargs)
 
     def serialize(self):
         obj = super(ElementJunctionCompletionRequirementSpec, self).serialize()
@@ -66,13 +69,19 @@ class ElementJunctionCompletionRequirementSpec(CompletionRequirementSpec):
         completions = []
 
         def _completion_base(node):
-            return {
+            completion = {
                 "element": {
                     '@id': node['element'].jsonld_id,
                     'slug': node['element'].slug,
                 },
                 "completed": False,
             }
+            if node['element'].completion_badgeclass:
+                completion['completionBadge'] = {
+                    '@id': node['element'].completion_badgeclass.jsonld_id,
+                    'slug': node['element'].completion_badgeclass.slug,
+                }
+            return completion
 
         def _find_child_with_id(children, id):
             for child in children:
@@ -107,8 +116,11 @@ class ElementJunctionCompletionRequirementSpec(CompletionRequirementSpec):
 
 class BadgeJunctionCompletionRequirementSpec(CompletionRequirementSpec):
     def __init__(self, *args, **kwargs):
-        self.badges = set(kwargs.get('badges', []))
-        super(BadgeJunctionCompletionRequirementSpec, self).__init__(*args, **kwargs)
+        self.badges = set(kwargs.pop('badges', []))
+        super(BadgeJunctionCompletionRequirementSpec, self).__init__(
+            *args,
+            completion_type=kwargs.pop('completion_type', CompletionRequirementSpecFactory.BADGE_JUNCTION),
+            **kwargs)
 
     def serialize(self):
         obj = super(BadgeJunctionCompletionRequirementSpec, self).serialize()
