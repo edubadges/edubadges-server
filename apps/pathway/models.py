@@ -86,13 +86,32 @@ class Pathway(cachemodel.CacheModel):
             self.name_hint = name_hint
         return super(Pathway, self).save(*args, **kwargs)
 
-    def build_element_tree(self):
+    def build_element_tree(self, tree_root_element=None):
+        """
+        Returns a python dict-based structure of nodes and their children
+        of a pathway from the tree_root_element down.
+
+        :param tree_root_element: PathwayElement
+        :return:
+        {
+            'element': PathwayElement::tree_root_element,
+            'children': [
+                {
+                    'element': PathwayElement,
+                    'children' []
+                }
+            ]
+        }
+        """
+        if tree_root_element is None:
+            tree_root_element = self.cached_root_element
+
         index = {}
         for element in self.cached_elements():
             index[element.jsonld_id] = element
 
         tree = {
-            'element': self.cached_root_element,
+            'element': tree_root_element,
         }
 
         def _build(parent, node):
@@ -145,7 +164,7 @@ class PathwayElement(basic_models.DefaultModel):
         ret = super(PathwayElement, self).delete(*args, **kwargs)
         pathway.publish()
         if parent_element:
-           parent_element.publish()
+            parent_element.publish()
         return ret
 
     @cachemodel.cached_method(auto_publish=True)
@@ -167,8 +186,15 @@ class PathwayElement(basic_models.DefaultModel):
             'pathway_slug': self.cached_pathway.slug,
             'element_slug': self.slug})
 
-    def recipient_completion(self, recipient, badge_instances):
-        pass
+    def recipient_completion(self, recipient_profile, badge_instances):
+        """
+        Checks if element is completed by the expected recipient, given a set of
+        their earned BadgeInstances.
+
+        :param recipient_profile: RecipientProfile
+        :param badge_instances: [issuer.BadgeInstance]
+        :return: boolean
+        """
 
     def get_alignment_url(self):
         if self.alignment_url:
@@ -218,12 +244,15 @@ class PathwayElementBadge(cachemodel.CacheModel):
         super(PathwayElementBadge, self).publish()
         self.publish_by('element', 'badgeclass')
         self.element.publish()
+        self.badgeclass.publish()
 
     def delete(self, *args, **kwargs):
         element = self.element
+        badgeclass = self.badgeclass
         ret = super(PathwayElementBadge, self).delete(*args, **kwargs)
         self.publish_delete('element', 'badgeclass')
         element.publish()
+        badgeclass.publish()
         return ret
 
     @property

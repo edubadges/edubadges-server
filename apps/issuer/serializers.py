@@ -1,23 +1,19 @@
-from itertools import chain
 import os
 import uuid
+
 from django.apps import apps
 from django.conf import settings
 from django.core.urlresolvers import reverse
-
-from django.db.models import Q
-
 from rest_framework import serializers
-from badgeuser.models import BadgeUser
-from mainsite.drf_fields import Base64FileField
 
-from mainsite.serializers import WritableJSONField
-from mainsite.utils import installed_apps_list
+import utils
 from badgeuser.serializers import UserProfileField
 from composition.format import V1InstanceSerializer
-
-from .models import Issuer, BadgeClass, BadgeInstance
-import utils
+from mainsite.drf_fields import Base64FileField
+from mainsite.serializers import WritableJSONField
+from mainsite.utils import installed_apps_list
+from pathway.tasks import award_badges_for_pathway_completion
+from issuer.models import Issuer, BadgeClass, BadgeInstance
 
 
 class AbstractComponentSerializer(serializers.Serializer):
@@ -223,6 +219,7 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
         return representation
 
     def create(self, validated_data, **kwargs):
+        check_completions = validated_data.pop('check_completions', True)
         # Assemble Badge Object
         validated_data['json'] = {
             # 'id': TO BE ADDED IN SAVE
@@ -266,6 +263,9 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
             BadgeInstance._meta.get_field('slug').pre_save(new_assertion, add=True)
 
         new_assertion.save()
+
+        if check_completions:
+            award_badges_for_pathway_completion.delay(new_assertion.slug)
 
         if create_notification is True:
             new_assertion.notify_earner()

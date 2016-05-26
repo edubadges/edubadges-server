@@ -58,14 +58,15 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
     def get_email_confirmation_url(self, request, emailconfirmation):
         if request is not None:
             referer = request.META.get('HTTP_REFERER')
-            parsed = urlparse.urlparse(referer)
-            try:
-                badgr_app = BadgrApp.cached.get(cors=parsed.netloc)
-            except BadgrApp.DoesNotExist as e:
-                # we couldn't determine a BadgrApp from the referer, default to legacy frontend
-                url = reverse("legacy_confirm_email", args=[emailconfirmation.key])
-                ret = build_absolute_uri(request, url, protocol=app_settings.DEFAULT_HTTP_PROTOCOL)
-                return ret
+            if referer:
+                parsed = urlparse.urlparse(referer)
+                try:
+                    badgr_app = BadgrApp.cached.get(cors=parsed.netloc)
+                except BadgrApp.DoesNotExist as e:
+                    # we couldn't determine a BadgrApp from the referer, default to legacy frontend
+                    url = reverse("legacy_confirm_email", args=[emailconfirmation.key])
+                    ret = build_absolute_uri(request, url, protocol=app_settings.DEFAULT_HTTP_PROTOCOL)
+                    return ret
         return super(BadgrAccountAdapter, self).get_email_confirmation_url(request, emailconfirmation)
 
     def send_confirmation_mail(self, request, emailconfirmation, signup):
