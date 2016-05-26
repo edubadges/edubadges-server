@@ -165,11 +165,13 @@ class BadgeInstance(AbstractBadgeInstance):
     def publish(self):
         super(BadgeInstance, self).publish()
         self.badgeclass.publish()
+        self.publish_by('slug')
 
     def delete(self, *args, **kwargs):
         badgeclass = self.badgeclass
         super(BadgeInstance, self).delete(*args, **kwargs)
         badgeclass.publish()
+        self.publish_delete('slug')
 
     def notify_earner(self):
         """
@@ -215,3 +217,11 @@ class BadgeInstance(AbstractBadgeInstance):
             )
         except Exception as e:
             raise e
+
+    @property
+    def cached_recipient_profile(self):
+        from recipient.models import RecipientProfile
+        try:
+            return RecipientProfile.cached.get(recipient_identifier=self.recipient_identifier)
+        except RecipientProfile.DoesNotExist:
+            return None

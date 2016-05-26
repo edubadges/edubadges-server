@@ -1,17 +1,11 @@
-# Created by wiggins@concentricsky.com on 7/30/15.
-import StringIO
-import csv
+# Created by notto@concentricsky and wiggins@concentricsky.com on 5/25/16.
 import itertools
-import time
-from allauth.account.adapter import get_adapter
-
 from celery.utils.log import get_task_logger
-from django.conf import settings
 from django.core.cache import cache
 
 import badgrlog
+from issuer.models import BadgeInstance
 from mainsite.celery import app
-from pathway.models import PathwayElement, PathwayElementBadge
 from recipient.models import RecipientProfile
 
 logger = get_task_logger(__name__)
@@ -19,9 +13,8 @@ badgrLogger = badgrlog.BadgrLogger()
 
 
 @app.task(bind=True)
-def check_element_completions_triggered_by_badge_award(badgeinstance):
-    lock_key = "_task_lock_completion_trigger_{}{}".format(
-        badgeinstance.slug, badgeinstance.recipient_identifier)
+def award_badges_for_pathway_completion(self, badgeinstance_slug):
+    lock_key = "_task_lock_completion_trigger_{}".format(badgeinstance_slug)
     awards = []
     completions = []
 
@@ -29,24 +22,29 @@ def check_element_completions_triggered_by_badge_award(badgeinstance):
         try:
             # lock acquired
 
+            try:
+                badgeinstance = BadgeInstance.cached.get(slug=badgeinstance_slug)
+            except BadgeInstance.DoesNotExist:
+                return {'status': 'error', 'error': 'BadgeInstance {} not found'.format(badgeinstance_slug)}
+
             from issuer.serializers import BadgeInstanceSerializer  # avoid circular import
             badgeclass = badgeinstance.cached_badgeclass
-            completable_elements = badgeclass.cached_pathway_elements()
 
-            if not completable_elements:
-                return {'status': 'done', 'awards': awards}
-
-            pathways = set([ce.element.pathway for ce in completable_elements])
-
-            try:
-                recipient_profile = RecipientProfile.objects.get(
-                    recipient_identifier=badgeinstance.recipient_identifier)
-            except RecipientProfile.DoesNotExist:
+            recipient_profile = badgeinstance.cached_recipient_profile
+            if not recipient_profile:
                 return {'status': 'error', 'awards': [], 'error': 'RecipientProfile not found.'}
 
+            completable_elements = badgeclass.cached_pathway_elements()
+            pathways = set([ce.cached_pathway for ce in completable_elements])
+            if not pathways:
+                return {'status': 'done', 'awards': awards}
 
-            for pathway in pathways:
-                completions = completions + recipient_profile.cached_completions(pathway)
+            completions = list(itertools.chain.from_iterable([recipient_profile.cached_completions(p) for p in pathways]))
+            # for completion in completions:
+            #     if completion['completed']:
+
+            pass
+
 
 
         finally:
@@ -60,49 +58,6 @@ def check_element_completions_triggered_by_badge_award(badgeinstance):
         'locked': True,
         'resume': _lock_resume(lock_key)
     }
-
-
-@app.task(bind=True)
-def award_completion_badge(element, recipient_profile):
-
-    if element.recipient_completion(recipient_profile, recipient_instances):
-
-        if element.completion_badgeclass \
-                and not _is_badgeclass_awarded(element.completion_badgeclass, recipient_instances):
-
-            if element.is_completed_by(recipient_profile, recipient_instances):
-
-                element_subtree = element.pathway.build_element_tree(element)
-
-                from issuer.serializers import BadgeInstanceSerializer
-
-                # new_instance = Award completion badgeclass
-                data = {
-                    'recipient_identifier': recipient_profile.recipient_identifier,
-                    'create_notification': getattr(settings, 'ISSUER_NOTIFY_DEFAULT', True),
-                    'badgeclass': element.completion_badgeclass
-                }
-
-                logger.info("Awarding element badge {}\n".format(data))
-
-                serializer = BadgeInstanceSerializer(data=data)
-                serializer.is_valid(raise_exception=True)
-                new_instance = serializer.save()
-
-                recipient_instances = recipient_profile.cached_badgeinstances()
-                awards.append(new_instance)
-
-        if element.parent_element:
-            return awards + _cascade_completion_checks(
-                element.parent_element, recipient_profile, recipient_instances)
-
-    return awards
-
-def _is_badgeclass_awarded(badgeclass, instances):
-    for instance in instances:
-        if instance.badgeclass == badgeclass:
-            return True
-    return False
 
 
 def _acquire_lock(key, taskId, expiration=60*5):

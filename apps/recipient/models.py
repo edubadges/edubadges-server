@@ -33,7 +33,7 @@ class RecipientProfile(basic_models.DefaultModel):
     def jsonld_id(self):
         return u'mailto:{}'.format(self.recipient_identifier)
 
-    @cachemodel.cached_method(auto_publish=False)
+    # @cachemodel.cached_method(auto_publish=False)
     def cached_completions(self, pathway):
         # get recipients instances that are aligned to this pathway
         badgeclasses = pathway.cached_badgeclasses()
@@ -49,6 +49,7 @@ class RecipientProfile(basic_models.DefaultModel):
                 junction_type=CompletionRequirementSpecFactory.JUNCTION_TYPE_CONJUNCTION,
                 required_number=len(tree['children']),
                 elements=(c['element'].jsonld_id for c in tree['children']))
+            tree['element'].completion_requirements = completion_spec.serialize()
 
         if completion_spec.completion_type == CompletionRequirementSpecFactory.BADGE_JUNCTION:
             return [completion_spec.check_completion(instances)]
