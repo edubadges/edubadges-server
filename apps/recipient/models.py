@@ -37,7 +37,7 @@ class RecipientProfile(basic_models.DefaultModel):
     def cached_completions(self, pathway):
         # get recipients instances that are aligned to this pathway
         badgeclasses = pathway.cached_badgeclasses()
-        instances = BadgeInstance.objects.filter(badgeclass__in=badgeclasses, recipient_identifier=self.recipient_identifier)
+        instances = BadgeInstance.objects.filter(revoked=False, badgeclass__in=badgeclasses, recipient_identifier=self.recipient_identifier)
 
         # recurse the tree to build completions
         tree = pathway.build_element_tree()
