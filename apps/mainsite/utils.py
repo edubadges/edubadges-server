@@ -48,7 +48,7 @@ def client_ip_from_request(request):
 
 
 class OriginSetting(object):
-    DefaultOrigin = "http://localhost:8000/"
+    DefaultOrigin = "http://localhost:8000"
     HTTP = getattr(settings, 'HTTP_ORIGIN', DefaultOrigin)
     JSON = getattr(settings, 'JSON_ORIGIN', HTTP)
 
