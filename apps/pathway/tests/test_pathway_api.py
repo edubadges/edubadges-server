@@ -16,6 +16,7 @@ from badgeuser.models import BadgeUser
 from issuer.models import BadgeClass, BadgeInstance
 from issuer.serializers import BadgeInstanceSerializer
 from mainsite import TOP_DIR
+from mainsite.utils import OriginSetting
 from pathway.completionspec import CompletionRequirementSpecFactory
 from pathway.models import Pathway, PathwayElement
 from pathway.serializers import PathwaySerializer, PathwayElementSerializer
@@ -226,11 +227,12 @@ class PathwayApiTests(APITestCase, CachingTestCase):
         self.assertEqual(response.data.get('groups')[0].get('slug'), 'group-of-testing')
 
 
-
 @override_settings(
     CACHES=CACHE_OVERRIDE,
     CELERY_ALWAYS_EAGER=True,
-    ISSUER_NOTIFY_DEFAULT=False
+    ISSUER_NOTIFY_DEFAULT=False,
+    HTTP_ORIGIN="http://localhost:8000",
+    JSON_ORIGIN="http://localhost:8000",
 )
 class PathwayCompletionTests(APITestCase, CachingTestCase):
     fixtures = ['0001_initial_superuser', 'test_badge_objects.json']
@@ -284,7 +286,7 @@ class PathwayCompletionTests(APITestCase, CachingTestCase):
                 },
                 "@type": "BadgeJunction",
                 "badges": [
-                    "http://localhost:8000/public/badges/badge-of-edited-testing"
+                    OriginSetting.JSON+"/public/badges/badge-of-edited-testing"
                 ]
             }
 

@@ -47,11 +47,18 @@ def client_ip_from_request(request):
     return ip
 
 
-class OriginSetting(object):
+class OriginSettingsObject(object):
     DefaultOrigin = "http://localhost:8000"
-    HTTP = getattr(settings, 'HTTP_ORIGIN', DefaultOrigin)
-    JSON = getattr(settings, 'JSON_ORIGIN', HTTP)
 
+    @property
+    def HTTP(self):
+        return getattr(settings, 'HTTP_ORIGIN', OriginSettingsObject.DefaultOrigin)
+
+    @property
+    def JSON(self):
+        return getattr(settings, 'JSON_ORIGIN', self.HTTP)
+
+OriginSetting = OriginSettingsObject()
 
 """
 Cache Utilities
