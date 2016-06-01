@@ -8,6 +8,7 @@ from rest_framework.exceptions import ValidationError
 
 from issuer.models import Issuer
 from mainsite.serializers import LinkedDataReferenceField, LinkedDataEntitySerializer, LinkedDataReferenceList
+from mainsite.utils import OriginSetting
 from recipient.models import RecipientGroup, RecipientGroupMembership, RecipientProfile
 from pathway.models import Pathway
 
@@ -90,9 +91,9 @@ class RecipientGroupMembershipListSerializer(serializers.Serializer):
 
         members_serializer = RecipientGroupMembershipSerializer(memberships, many=True, context=self.context)
         return OrderedDict([
-            ("@context", settings.HTTP_ORIGIN+"/public/context/pathways"),
+            ("@context", OriginSetting.HTTP+"/public/context/pathways"),
             ("@type", "IssuerRecipientGroupMembershipList"),
-            ("recipientGroup", settings.HTTP_ORIGIN+reverse('recipient_group_detail', kwargs={'issuer_slug': issuer_slug, 'group_slug': recipient_group_slug})),
+            ("recipientGroup", OriginSetting.JSON+reverse('recipient_group_detail', kwargs={'issuer_slug': issuer_slug, 'group_slug': recipient_group_slug})),
             ("memberships", members_serializer.data),
         ])
 
@@ -190,8 +191,8 @@ class RecipientGroupListSerializer(serializers.Serializer):
             raise ValidationError("Invalid issuer_slug")
         groups_serializer = RecipientGroupSerializer(recipient_groups, many=True, context=self.context)
         return OrderedDict([
-            ("@context", settings.HTTP_ORIGIN+"/public/context/pathways"),
+            ("@context", OriginSetting.HTTP+"/public/context/pathways"),
             ("@type", "IssuerRecipientGroupList"),
-            ("issuer", settings.HTTP_ORIGIN+reverse('issuer_json', kwargs={'slug': issuer_slug})),
+            ("issuer", OriginSetting.JSON+reverse('issuer_json', kwargs={'slug': issuer_slug})),
             ("recipientGroups", groups_serializer.data)
         ])

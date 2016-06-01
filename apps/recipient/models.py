@@ -8,6 +8,7 @@ import cachemodel
 
 from issuer.models import BadgeInstance
 from mainsite.managers import SlugOrJsonIdCacheModelManager
+from mainsite.utils import OriginSetting
 from pathway.completionspec import CompletionRequirementSpecFactory, ElementJunctionCompletionRequirementSpec
 from pathway.models import Pathway
 
@@ -102,7 +103,7 @@ class RecipientGroup(basic_models.DefaultModel):
 
     @property
     def jsonld_id(self):
-        return settings.HTTP_ORIGIN+reverse(
+        return OriginSetting.JSON+reverse(
             'recipient_group_detail',
             kwargs={'issuer_slug': self.issuer.slug, 'group_slug': self.slug}
         )

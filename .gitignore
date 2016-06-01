@@ -7,7 +7,9 @@ AppleDouble
 *.sqlite*
 *.sass-cache
 staticfiles/*
+mediafiles
 mediafiles/*
+mediafiles_*/*
 logs/*
 node_modules/*
 bower_components/*
@@ -21,6 +23,7 @@ breakdown/static/css/screen.css
 breakdown/static/css/*.map
 .ropeproject
 .idea/*
+*.iml
 
 build/badgebook/
 

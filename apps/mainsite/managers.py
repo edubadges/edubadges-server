@@ -3,6 +3,8 @@ import cachemodel
 from django.conf import settings
 from django.core.urlresolvers import resolve, Resolver404
 
+from mainsite.utils import OriginSetting
+
 
 class SlugOrJsonIdCacheModelManager(cachemodel.CacheModelManager):
     def __init__(self, slug_kwarg_name='slug'):
@@ -13,8 +15,8 @@ class SlugOrJsonIdCacheModelManager(cachemodel.CacheModelManager):
         return self.slug_kwarg_name
 
     def get_by_slug_or_id(self, slug):
-        if slug.startswith(settings.HTTP_ORIGIN):
-            path = slug[len(settings.HTTP_ORIGIN):]
+        if slug.startswith(OriginSetting.JSON):
+            path = slug[len(OriginSetting.JSON):]
             try:
                 r = resolve(path)
                 slug = r.kwargs.get(self.get_slug_kwarg_name())

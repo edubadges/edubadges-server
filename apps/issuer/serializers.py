@@ -11,7 +11,7 @@ from badgeuser.serializers import UserProfileField
 from composition.format import V1InstanceSerializer
 from mainsite.drf_fields import Base64FileField
 from mainsite.serializers import WritableJSONField
-from mainsite.utils import installed_apps_list
+from mainsite.utils import installed_apps_list, OriginSetting
 from pathway.tasks import award_badges_for_pathway_completion
 from issuer.models import Issuer, BadgeClass, BadgeInstance
 
@@ -22,7 +22,7 @@ class AbstractComponentSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         representation = super(AbstractComponentSerializer, self).to_representation(instance)
-        representation['created_by'] = (settings.HTTP_ORIGIN+reverse('user_detail', kwargs={'user_id': instance.created_by_id})) if instance.created_by_id is not None else None
+        representation['created_by'] = (OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': instance.created_by_id})) if instance.created_by_id is not None else None
         return representation
 
 
@@ -79,9 +79,9 @@ class IssuerSerializer(AbstractComponentSerializer):
     def to_representation(self, obj):
         representation = super(IssuerSerializer, self).to_representation(obj)
         representation['description'] = obj.json.get('description', '')
-        representation['owner'] = (settings.HTTP_ORIGIN+reverse('user_detail', kwargs={'user_id': obj.created_by_id})) if obj.created_by_id is not None else None
-        representation['editors'] = [settings.HTTP_ORIGIN+reverse('user_detail', kwargs={'user_id': u.pk}) for u in obj.cached_editors()]
-        representation['staff'] = [settings.HTTP_ORIGIN+reverse('user_detail', kwargs={'user_id': u.pk}) for u in obj.cached_staff()]
+        representation['owner'] = (OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': obj.created_by_id})) if obj.created_by_id is not None else None
+        representation['editors'] = [OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': u.pk}) for u in obj.cached_editors()]
+        representation['staff'] = [OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': u.pk}) for u in obj.cached_staff()]
         if self.context.get('embed_badgeclasses', False):
             representation['badgeclasses'] = BadgeClassSerializer(obj.badgeclasses.all(), many=True, context=self.context).data
 
@@ -110,13 +110,18 @@ class IssuerStaffSerializer(serializers.Serializer):
 
 class BadgeClassSerializer(AbstractComponentSerializer):
     id = serializers.IntegerField(required=False, read_only=True)
-    issuer = serializers.HyperlinkedRelatedField(view_name='issuer_json', read_only=True, lookup_field='slug')
+    # issuer = serializers.HyperlinkedRelatedField(view_name='issuer_json', read_only=True, lookup_field='slug')
     json = WritableJSONField(max_length=16384, read_only=True, required=False)
     name = serializers.CharField(max_length=255)
     image = Base64FileField(allow_empty_file=False, use_url=True)
     slug = serializers.CharField(max_length=255, allow_blank=True, required=False)
     criteria = serializers.CharField(allow_blank=True, required=False, write_only=True)
     recipient_count = serializers.IntegerField(required=False, read_only=True)
+
+    def to_representation(self, instance):
+        representation = super(BadgeClassSerializer, self).to_representation(instance)
+        representation['issuer'] = OriginSetting.JSON+reverse('issuer_json', kwargs={'slug': instance.cached_issuer.slug})
+        return representation
 
     def validate_image(self, image):
         # TODO: Make sure it's a PNG (square if possible), and remove any baked-in badge assertion that exists.
@@ -197,11 +202,11 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
         if self.context.get('include_issuer', False):
             representation['issuer'] = IssuerSerializer(instance.cached_badgeclass.cached_issuer).data
         else:
-            representation['issuer'] = settings.HTTP_ORIGIN+reverse('issuer_json', kwargs={'slug': instance.cached_issuer.slug})
+            representation['issuer'] = OriginSetting.JSON+reverse('issuer_json', kwargs={'slug': instance.cached_issuer.slug})
         if self.context.get('include_badge_class', False):
             representation['badge_class'] = BadgeClassSerializer(instance.cached_badgeclass, context=self.context).data
         else:
-            representation['badge_class'] = settings.HTTP_ORIGIN+reverse('badgeclass_json', kwargs={'slug': instance.cached_badgeclass.slug})
+            representation['badge_class'] = OriginSetting.JSON+reverse('badgeclass_json', kwargs={'slug': instance.cached_badgeclass.slug})
 
         if apps.is_installed('badgebook'):
             try:
