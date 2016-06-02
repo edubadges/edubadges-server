@@ -13,6 +13,7 @@ from jsonfield import JSONField
 
 from issuer.models import BadgeClass, Issuer
 from mainsite.managers import SlugOrJsonIdCacheModelManager
+from mainsite.utils import OriginSetting
 
 
 class Pathway(cachemodel.CacheModel):
@@ -39,7 +40,7 @@ class Pathway(cachemodel.CacheModel):
 
     @property
     def jsonld_id(self):
-        return settings.HTTP_ORIGIN+reverse('pathway_detail', kwargs={
+        return OriginSetting.JSON+reverse('pathway_detail', kwargs={
             'issuer_slug': self.cached_issuer.slug,
             'pathway_slug': self.slug
         })
@@ -181,7 +182,7 @@ class PathwayElement(basic_models.DefaultModel):
 
     @property
     def jsonld_id(self):
-        return settings.HTTP_ORIGIN+reverse('pathway_element_detail', kwargs={
+        return OriginSetting.JSON+reverse('pathway_element_detail', kwargs={
             'issuer_slug': self.cached_pathway.cached_issuer.slug,
             'pathway_slug': self.cached_pathway.slug,
             'element_slug': self.slug})
@@ -207,7 +208,7 @@ class PathwayElement(basic_models.DefaultModel):
             order = 1
             for badge_id in self.completion_requirements.get('badges'):
                 try:
-                    r = resolve(badge_id.replace(settings.HTTP_ORIGIN, ''))
+                    r = resolve(badge_id.replace(OriginSetting.JSON,''))
                 except Resolver404:
                     raise ValidationError("Invalid badge id: {}".format(badge_id))
                 badge_slug = r.kwargs.get('slug')

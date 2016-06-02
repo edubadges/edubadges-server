@@ -17,6 +17,7 @@ from autoslug import AutoSlugField
 import cachemodel
 from jsonfield import JSONField
 
+from mainsite.utils import OriginSetting
 from .mixins import ResizeUploadedImage
 
 
@@ -46,7 +47,7 @@ class AbstractComponent(cachemodel.CacheModel):
             return self.json['id']
         except (KeyError, TypeError):
             if self.get_absolute_url().startswith('/'):
-                return settings.HTTP_ORIGIN + self.get_absolute_url()
+                return OriginSetting.JSON + self.get_absolute_url()
             else:
                 return '_:null'
 

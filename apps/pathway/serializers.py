@@ -9,7 +9,7 @@ from rest_framework.exceptions import ValidationError
 from issuer.models import Issuer, BadgeClass
 from mainsite.serializers import JSONDictField, LinkedDataReferenceField, LinkedDataEntitySerializer, \
     LinkedDataReferenceList
-from mainsite.utils import ObjectView
+from mainsite.utils import ObjectView, OriginSetting
 from pathway.completionspec import CompletionRequirementSpecFactory
 from pathway.models import Pathway, PathwayElement
 from recipient.models import RecipientGroup, RecipientProfile
@@ -58,7 +58,7 @@ class PathwaySerializer(serializers.Serializer):
             })
             element_serializer = PathwayElementSerializer(instance.cached_elements(), many=True, context=self.context)
             representation.update([
-                ('rootElement', settings.HTTP_ORIGIN+reverse('pathway_element_detail', kwargs={
+                ('rootElement', OriginSetting.JSON+reverse('pathway_element_detail', kwargs={
                     'issuer_slug': issuer_slug,
                     'pathway_slug': instance.slug,
                     'element_slug': instance.cached_root_element.slug})),
@@ -214,7 +214,7 @@ class PathwayElementSerializer(LinkedDataEntitySerializer):
         if child_ids:
             for element_id in child_ids:
                 try:
-                    r = resolve(element_id.replace(settings.HTTP_ORIGIN, ''))
+                    r = resolve(element_id.replace(OriginSetting.JSON, ''))
                 except Resolver404:
                     raise ValidationError("Invalid child id: {}".format(element_id))
 
