@@ -46,7 +46,7 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
             if resolverMatch.url_name == 'legacy_confirm_email':
                 return reverse('account_login')
 
-            return "{}{}?email={}".format(
+            return u"{}{}?email={}".format(
                 badgr_app.email_confirmation_redirect,
                 email_address.user.first_name,
                 email_address.email
