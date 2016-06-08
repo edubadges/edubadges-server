@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'django_object_actions',
 
     'badgeuser',
 
@@ -115,7 +116,8 @@ JINGO_EXCLUDE_APPS = (
     'rest_framework',
     'allauth',
     'account',
-    'rest_framework_swagger'
+    'rest_framework_swagger',
+    'django_object_actions'
 )
 
 
