@@ -114,7 +114,7 @@ var Detail = React.createClass({
             });
             var imageUrl = _.get(this.props, 'badge_class.image');
             if (badge_instance) {
-                imageUrl = this.props.showDownloadButton ? _.get(badge_instance, 'json.id')+"/image" : _.get(this.props, 'badge_class.image');
+                imageUrl = this.props.showDownloadButton ? _.get(badge_instance, 'image') : _.get(this.props, 'badge_class.image');
                 properties.unshift(
                     <li key="recipient">
                         <h2 className="detail_-x-meta">Recipient</h2>
