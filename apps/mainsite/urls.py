@@ -102,7 +102,7 @@ if getattr(settings, 'DEBUG_ERRORS', False):
 if getattr(settings, 'DEBUG_MEDIA', True):
     media_url = getattr(settings, 'MEDIA_URL', '/media/').lstrip('/')
     urlpatterns = patterns('',
-        url(r'^%s(?P<path>.*)$' % (media_url,), 'django.views.static.serve', {
+        url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {
             'document_root': settings.MEDIA_ROOT
         }),
     ) + urlpatterns

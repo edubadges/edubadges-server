@@ -17,13 +17,13 @@ class BadgeInstanceHTMLRenderer(BrowsableAPIRenderer):
             context['badge_instance'] = renderer_context['badge_instance']
             context['badge_class'] = renderer_context['badge_class']
             context['issuer'] = renderer_context['issuer']
-            context['badge_instance_image_url'] = OriginSetting.HTTP+renderer_context['badge_instance'].image.url
+            context['badge_instance_image_url'] = renderer_context['badge_instance'].image.url
             context['badge_instance_public_url'] = OriginSetting.HTTP+reverse('badgeinstance_json', kwargs={
-                'slug': renderer_context['instance'].slug})
+                'slug': renderer_context['badge_instance'].slug})
 
             recipient_email = renderer_context['badge_instance'].recipient_identifier
             context['obscured_recipient'] = utils.obscure_email_address(recipient_email)
-        except KeyError:
+        except KeyError as e:
             pass
 
         return context
