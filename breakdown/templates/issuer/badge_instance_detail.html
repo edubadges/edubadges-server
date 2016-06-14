@@ -15,12 +15,12 @@
         <link href="{{ STATIC_URL }}css/screen.css" media="screen" rel="stylesheet" type="text/css" >
 
         <meta property="og:type"               content="website" />
-        <meta property="og:url"                content="{{ badge_instance.json['id'] }}" />
+        <meta property="og:url"                content="{{ badge_instance_public_url }}" />
         <meta property="og:title"              content="{{ badge_class.name }}" />
         <meta property="og:description"        content="{{ badge_class.json['description'] }}" />
 
-        <meta property="og:image"              content="{{ badge_instance.json['image'] }}" />
-        <meta property="og:image:secure_url"   content="{{ badge_instance.json['image'] }}" />
+        <meta property="og:image"              content="{{ badge_instance_image_url }}" />
+        <meta property="og:image:secure_url"   content="{{ badge_instance_image_url }}" />
 
         <meta property="og:site_name"          content="Badgr" />
     </head>
@@ -47,7 +47,7 @@
                     {% if not badge_instance.revoked %}
                     <div class="detail_">
                         <div>
-                            <img src="{{ badge_instance.json['image'] }}" width="224" height="224" alt="baked badge image">
+                            <img src="{{ badge_instance_image_url }}" width="224" height="224" alt="baked badge image">
                         </div>
 
                         <ul>
@@ -87,7 +87,7 @@
                                 <p>
                                     {{ obscured_recipient }}
 
-                                    <button class="button_" href="https://badgecheck.io/?url={{ badge_instance.json['id'] }}">
+                                    <button class="button_" href="https://badgecheck.io/?url={{ badge_instance_public_url }}">
                                         Verify Badge Recipient
                                     </button>
                                 </p>

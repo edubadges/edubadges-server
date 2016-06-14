@@ -208,6 +208,8 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
         else:
             representation['badge_class'] = OriginSetting.JSON+reverse('badgeclass_json', kwargs={'slug': instance.cached_badgeclass.slug})
 
+        representation['public_url'] = OriginSetting.HTTP+reverse('badgeinstance_json', kwargs={'slug': instance.slug})
+
         if apps.is_installed('badgebook'):
             try:
                 from badgebook.models import BadgeObjectiveAward

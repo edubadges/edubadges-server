@@ -114,7 +114,7 @@ var Detail = React.createClass({
             });
             var imageUrl = _.get(this.props, 'badge_class.image');
             if (badge_instance) {
-                imageUrl = this.props.showDownloadButton ? _.get(badge_instance, 'json.id')+"/image" : _.get(this.props, 'badge_class.image');
+                imageUrl = this.props.showDownloadButton ? _.get(badge_instance, 'image') : _.get(this.props, 'badge_class.image');
                 properties.unshift(
                     <li key="recipient">
                         <h2 className="detail_-x-meta">Recipient</h2>
@@ -127,15 +127,15 @@ var Detail = React.createClass({
                         <Step title={stepName} subtitle={"Earned "+dateString} earned={true}/>
                     </li>
                 );
-                addToBadgr = (<button className="button_ button_-tertiary" href={"/earner/badges/new?url=" + _.get(badge_instance, 'json.id')} target="_blank">
+                addToBadgr = (<button className="button_ button_-tertiary" href={"/earner/badges/new?url=" + _.get(badge_instance, 'public_url')} target="_blank">
                                 Add to Badgr
                               </button>);
 
                 var actions = this.props.actions || this.props.actionGenerator() || [
-                    (<LinkedInButton key="linkedin" url={_.get(badge_instance, 'json.id')} title="I earned a badge!" message={badgeName} className='button_ button_-tertiary'>
+                    (<LinkedInButton key="linkedin" url={_.get(badge_instance, 'public_url')} title="I earned a badge!" message={badgeName} className='button_ button_-tertiary'>
                         Share on LinkedIn
                     </LinkedInButton>),
-                    (<FacebookButton key="facebook" url={_.get(badge_instance, 'json.id')} className='button_ button_-tertiary'>
+                    (<FacebookButton key="facebook" url={_.get(badge_instance, 'public_url')} className='button_ button_-tertiary'>
                         Share on Facebook
                     </FacebookButton>),
                 ];
