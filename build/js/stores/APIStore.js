@@ -327,7 +327,8 @@ APIStore.getData = function(context, requestContext, pagination_url, retriedAtte
   APIStore.getRequests.push(url);
 
   var req = request.get(url)
-    .accept('application/json');
+    .accept('application/json')
+		.withCredentials();
 
     var cookie = getCookie('csrftoken');
     if (cookie) {
