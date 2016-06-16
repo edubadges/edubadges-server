@@ -513,6 +513,10 @@ APIStore.updateWithResponseData = function(data, context, requestContext){
      .accept('application/json')
      .withCredentials();
 
+  var token = _.get(APIStore.getCollection('user'), 'token');
+  if (token) {
+    req.set('Authorization', 'Token ' + token);
+  }
 
   if (data)
     req.type('application/json');
