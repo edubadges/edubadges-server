@@ -431,7 +431,8 @@ APIStore.postForm = function(fields, values, context, requestContext){
   else if (context.method == 'PUT')
     var req = request.put(url);
 
-  req.accept('application/json');
+  req.accept('application/json')
+     .withCredentials();
 
   var cookie = getCookie('csrftoken');
   if (cookie) {
@@ -509,7 +510,9 @@ APIStore.updateWithResponseData = function(data, context, requestContext){
     req = request.get(url);
 
   req.set('X-CSRFToken', getCookie('csrftoken'))
-  .accept('application/json')
+     .accept('application/json')
+     .withCredentials();
+
 
   if (data)
     req.type('application/json');
