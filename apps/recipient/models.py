@@ -34,11 +34,10 @@ class RecipientProfile(basic_models.DefaultModel):
     def jsonld_id(self):
         return u'mailto:{}'.format(self.recipient_identifier)
 
-    # @cachemodel.cached_method(auto_publish=False)
     def cached_completions(self, pathway):
         # get recipients instances that are aligned to this pathway
         badgeclasses = pathway.cached_badgeclasses()
-        instances = BadgeInstance.objects.filter(revoked=False, badgeclass__in=badgeclasses, recipient_identifier=self.recipient_identifier)
+        instances = filter(lambda i: not i.revoked and i.cached_badgeclass in badgeclasses, self.cached_badge_instances())
 
         # recurse the tree to build completions
         tree = pathway.build_element_tree()
@@ -63,6 +62,12 @@ class RecipientProfile(basic_models.DefaultModel):
     @cachemodel.cached_method(auto_publish=True)
     def cached_group_memberships(self):
         return RecipientGroupMembership.objects.filter(recipient_profile=self)
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_badge_instances(self):
+        return BadgeInstance.objects.filter(revoked=False, recipient_identifier=self.recipient_identifier)
+
+
 
 
 class RecipientGroup(basic_models.DefaultModel):
