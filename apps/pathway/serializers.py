@@ -134,6 +134,7 @@ class PathwayElementSerializer(LinkedDataEntitySerializer):
         source='completion_badgeclass'
     )
     requirements = JSONDictField(required=False, allow_null=True)
+    children = serializers.ListField(required=False, allow_null=True, child=serializers.CharField(required=False, allow_null=False))
 
     def to_representation(self, instance):
         include_requirements = self.context.get('include_requirements', True)

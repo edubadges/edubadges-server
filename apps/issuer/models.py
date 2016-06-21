@@ -165,12 +165,17 @@ class BadgeInstance(AbstractBadgeInstance):
     def publish(self):
         super(BadgeInstance, self).publish()
         self.badgeclass.publish()
+        if self.cached_recipient_profile:
+            self.cached_recipient_profile.publish()
         self.publish_by('slug')
 
     def delete(self, *args, **kwargs):
         badgeclass = self.badgeclass
+        recipient_profile = self.cached_recipient_profile
         super(BadgeInstance, self).delete(*args, **kwargs)
         badgeclass.publish()
+        if recipient_profile:
+            recipient_profile.publish()
         self.publish_delete('slug')
 
     def notify_earner(self):

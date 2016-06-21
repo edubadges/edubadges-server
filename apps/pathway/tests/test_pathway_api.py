@@ -425,12 +425,13 @@ class PathwayCompletionTests(APITestCase, CachingTestCase):
         badge_instance = serializer.instance
 
         # get completion detail to force badge awarding
-        response = self.client.get(reverse('pathway_completion_detail', kwargs={
-            'issuer_slug': badge_instance.issuer.slug,
-            'pathway_slug': pathway.slug,
-            'element_slug': pathway.root_element.slug
-        }) + '?recipient%5B%5D={}'.format(profile.slug))
-        self.assertEqual(response.status_code, 200)
+        with self.assertNumQueries(0):
+            response = self.client.get(reverse('pathway_completion_detail', kwargs={
+                'issuer_slug': badge_instance.issuer.slug,
+                'pathway_slug': pathway.slug,
+                'element_slug': pathway.root_element.slug
+            }) + '?recipient%5B%5D={}'.format(profile.slug))
+            self.assertEqual(response.status_code, 200)
 
         # check that completion badge was awarded
         try:

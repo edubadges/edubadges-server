@@ -200,6 +200,14 @@ class PathwayElementList(PathwayAPIEndpoint):
               type: json
               required: false
               paramType: form
+            - name: children
+              description: Array of ids or slugs of PathwayElements that are children of this element (ordering is preserved)
+              type: array
+              items: {
+                type: string
+              }
+              required: false
+              paramType: form
         """
         serializer = PathwayElementSerializer(data=request.data, context={
             'request': request,
@@ -253,6 +261,15 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
         Update a Pathway Element
         ---
         serializer: PathwayElementSerializer
+        parameters:
+            - name: children
+              description: Array of ids or slugs of PathwayElements that are children of this element (ordering is preserved)
+              type: array
+              items: {
+                type: string
+              }
+              required: false
+              paramType: form
         """
 
         issuer, pathway, pathway_element = self._get_issuer_and_pathway_element(issuer_slug, pathway_slug, element_slug)

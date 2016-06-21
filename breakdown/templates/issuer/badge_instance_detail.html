@@ -87,9 +87,9 @@
                                 <p>
                                     {{ obscured_recipient }}
 
-                                    <button class="button_" href="https://badgecheck.io/?url={{ badge_instance_public_url }}">
+                                    <a class="button_" href="https://badgecheck.io/?url={{ badge_instance_public_url }}">
                                         Verify Badge Recipient
-                                    </button>
+                                    </a>
                                 </p>
                             </li>
                         </ul>
@@ -101,10 +101,12 @@
 
             </div>
 
+	          {# hide json
             <div class="l-wrapper">
                 <pre style="background-color: #eee; padding: 1em;">{{ content }}</pre>
-                {% endblock %}
             </div>
+	           #}
+            {% endblock %}
         {% else %}
             <div class="l-wrapper">
                 404: Requested assertion not found.
