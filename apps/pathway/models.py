@@ -75,8 +75,12 @@ class Pathway(cachemodel.CacheModel):
         return self.recipient_groups.all()
 
     def cached_badgeclasses(self):
-        badgeclasses = [[eb.cached_badgeclass for eb in e.cached_badges()] for e in self.cached_elements()]
-        return list(itertools.chain.from_iterable(badgeclasses))
+        # memoized to improve tree iteration performance
+        if not hasattr(self, '_cached_badgeclasses'):
+            badgeclasses = [[eb.cached_badgeclass for eb in e.cached_badges()] for e in self.cached_elements()]
+            self._cached_badgeclasses = list(itertools.chain.from_iterable(badgeclasses))
+        return self._cached_badgeclasses
+
 
     def populate_slug(self):
         return getattr(self, 'name_hint', str(uuid.uuid4()))
@@ -86,6 +90,13 @@ class Pathway(cachemodel.CacheModel):
         if name_hint:
             self.name_hint = name_hint
         return super(Pathway, self).save(*args, **kwargs)
+
+    @property
+    def element_tree(self):
+        # memoized to improve tree iteration performance
+        if not hasattr(self, '_element_tree'):
+            self._element_tree = self.build_element_tree()
+        return self._element_tree
 
     def build_element_tree(self, tree_root_element=None):
         """
@@ -129,6 +140,9 @@ class Pathway(cachemodel.CacheModel):
 
 
 class PathwayElement(basic_models.DefaultModel):
+    # this should match the path in api_urls.py but used internally to improve performance
+    PathwayElementUrl = '/v2/issuers/{issuer_slug}/pathways/{pathway_slug}/elements/{element_slug}'
+
     slug = AutoSlugField(max_length=254, populate_from='name', unique=True, blank=False)
     pathway = models.ForeignKey('pathway.Pathway')
     parent_element = models.ForeignKey('pathway.PathwayElement', blank=True, null=True)
@@ -178,14 +192,21 @@ class PathwayElement(basic_models.DefaultModel):
 
     @property
     def cached_pathway(self):
-        return Pathway.cached.get(pk=self.pathway_id)
+        # memoized to improve tree iteration performance
+        if not hasattr(self, '_pathway'):
+            self._cached_pathway = Pathway.cached.get(pk=self.pathway_id)
+        return self._cached_pathway
 
     @property
     def jsonld_id(self):
-        return OriginSetting.JSON+reverse('pathway_element_detail', kwargs={
-            'issuer_slug': self.cached_pathway.cached_issuer.slug,
-            'pathway_slug': self.cached_pathway.slug,
-            'element_slug': self.slug})
+        # memoized to improve tree iteration performance
+        # avoiding a call to django.urlresolvers.reverse() here to improve tree performance
+        if not hasattr(self, '_jsonld_id'):
+            self._jsonld_id = OriginSetting.JSON+PathwayElement.PathwayElementUrl.format(
+                issuer_slug=self.cached_pathway.cached_issuer.slug,
+                pathway_slug=self.cached_pathway.slug,
+                element_slug=self.slug)
+        return self._jsonld_id
 
     def recipient_completion(self, recipient_profile, badge_instances):
         """

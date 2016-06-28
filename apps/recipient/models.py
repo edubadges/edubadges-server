@@ -40,7 +40,7 @@ class RecipientProfile(basic_models.DefaultModel):
         instances = filter(lambda i: not i.revoked and i.cached_badgeclass in badgeclasses, self.cached_badge_instances())
 
         # recurse the tree to build completions
-        tree = pathway.build_element_tree()
+        tree = pathway.element_tree
         completion_spec = CompletionRequirementSpecFactory.parse_element(tree['element'])
 
         if not completion_spec:
