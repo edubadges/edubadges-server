@@ -48,7 +48,7 @@ class RecipientProfile(basic_models.DefaultModel):
             completion_spec = ElementJunctionCompletionRequirementSpec(
                 junction_type=CompletionRequirementSpecFactory.JUNCTION_TYPE_CONJUNCTION,
                 required_number=len(tree['children']),
-                elements=(c['element'].jsonld_id for c in tree['children']))
+                elements=(c['element'].jsonld_id for c in tree['children'].itervalues()))
             tree['element'].completion_requirements = completion_spec.serialize()
 
         if completion_spec.completion_type == CompletionRequirementSpecFactory.BADGE_JUNCTION:

@@ -107,12 +107,12 @@ class Pathway(cachemodel.CacheModel):
         :return:
         {
             'element': PathwayElement::tree_root_element,
-            'children': [
-                {
+            'children': {
+                'element_jsonld_id': {
                     'element': PathwayElement,
-                    'children' []
+                    'children': {}
                 }
-            ]
+            }
         }
         """
         if tree_root_element is None:
@@ -127,13 +127,13 @@ class Pathway(cachemodel.CacheModel):
         }
 
         def _build(parent, node):
-            node['children'] = []
+            node['children'] = {}
             for child in node['element'].cached_children():
                 new_node = {
                     'element': child,
                 }
                 _build(node, new_node)
-                node['children'].append(new_node)
+                node['children'][new_node['element'].jsonld_id] = new_node
 
         _build(None, tree)
         return tree
