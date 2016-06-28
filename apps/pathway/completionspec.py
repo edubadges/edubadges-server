@@ -53,12 +53,9 @@ class ElementJunctionCompletionRequirementSpec(CompletionRequirementSpec):
         for element_id in self.elements:
             for completion_report in completions:
                 if element_id == completion_report['element']['@id'] and completion_report['completed']:
-                    try:
-                        element = PathwayElement.cached.get_by_slug_or_id(element_id)
-                        completion['completedElements'].append({'@id': element_id, 'slug': element.slug})
-                        completion['completedRequirementCount'] += 1
-                    except PathwayElement.DoesNotExist:
-                        pass
+                    # not using PathwayElement.cached.get_by_slug_or_id to lookup the slug here to improve performance
+                    completion['completedElements'].append({'@id': element_id})
+                    completion['completedRequirementCount'] += 1
 
         if completion['completedRequirementCount'] >= self.required_number:
             completion['completed'] = True
