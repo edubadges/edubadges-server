@@ -53,12 +53,9 @@ class ElementJunctionCompletionRequirementSpec(CompletionRequirementSpec):
         for element_id in self.elements:
             for completion_report in completions:
                 if element_id == completion_report['element']['@id'] and completion_report['completed']:
-                    try:
-                        element = PathwayElement.cached.get_by_slug_or_id(element_id)
-                        completion['completedElements'].append({'@id': element_id, 'slug': element.slug})
-                        completion['completedRequirementCount'] += 1
-                    except PathwayElement.DoesNotExist:
-                        pass
+                    # not using PathwayElement.cached.get_by_slug_or_id to lookup the slug here to improve performance
+                    completion['completedElements'].append({'@id': element_id})
+                    completion['completedRequirementCount'] += 1
 
         if completion['completedRequirementCount'] >= self.required_number:
             completion['completed'] = True
@@ -83,10 +80,6 @@ class ElementJunctionCompletionRequirementSpec(CompletionRequirementSpec):
                 }
             return completion
 
-        def _find_child_with_id(children, id):
-            for child in children:
-                if id == child['element'].jsonld_id:
-                    return child
 
         def _recurse(node):
             node_completion = _completion_base(node)
@@ -98,12 +91,11 @@ class ElementJunctionCompletionRequirementSpec(CompletionRequirementSpec):
 
                 if completion_spec.completion_type == CompletionRequirementSpecFactory.ELEMENT_JUNCTION:
                     for element_id in completion_spec.elements:
-                        child = _find_child_with_id(node['children'], element_id)
+                        child = node['children'][element_id]
                         _recurse(child)
                     # check optional children
-                    for element_id in set([el.jsonld_id for el in node['element'].cached_children()]) - \
-                            set(completion_spec.elements):
-                        child = _find_child_with_id(node['children'], element_id)
+                    for element_id in set(node['children'].keys()) - set(completion_spec.elements):
+                        child = node['children'][element_id]
                         _recurse(child)
                     node_completion.update(completion_spec.check_completion(node_completion, completions))
                 elif completion_spec.completion_type == CompletionRequirementSpecFactory.BADGE_JUNCTION:

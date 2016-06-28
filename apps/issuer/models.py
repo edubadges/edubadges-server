@@ -134,7 +134,10 @@ class BadgeInstance(AbstractBadgeInstance):
 
     @property
     def cached_badgeclass(self):
-        return BadgeClass.cached.get(pk=self.badgeclass_id)
+        # memoized to improve performance
+        if not hasattr(self, '_cached_badgeclass'):
+            self._cached_badgeclass = BadgeClass.cached.get(pk=self.badgeclass_id)
+        return self._cached_badgeclass
 
     def get_absolute_url(self):
         return reverse('badgeinstance_json', kwargs={'slug': self.slug})
