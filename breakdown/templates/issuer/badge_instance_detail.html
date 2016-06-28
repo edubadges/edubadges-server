@@ -38,13 +38,13 @@
             <div class=" l-wrapper">
                 <div class="card_" style="padding: 1em;">
 
+                    {% if not badge_instance.revoked %}
                     <header class="heading_ heading_-medium">
                         <div class="heading_-x-text">
                             <h1>Badge Instance Detail</h1>
                             <p>The baked image and record of a badge issued to a single recipient</p>
                         </div>
                     </header>
-                    {% if not badge_instance.revoked %}
                     <div class="detail_">
                         <div>
                             <img src="{{ badge_instance_image_url }}" width="224" height="224" alt="baked badge image">
@@ -95,7 +95,12 @@
                         </ul>
                     </div>
                     {% else %}
-                    <div class="detail_"><p>Revoked.</p></div>
+                    <div class="detail_">
+                        <p>This badge has been revoked.</p>
+                        {% if badge_instance and badge_instance.revocation_reason %}
+                        <p>{{badge_instance.revocation_reason}}</p>
+                        {%endif%}
+                    </div>
                     {% endif %}
                 </div>
 

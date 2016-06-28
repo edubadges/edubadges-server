@@ -17,7 +17,7 @@ class BadgeInstanceHTMLRenderer(BrowsableAPIRenderer):
             context['badge_instance'] = renderer_context['badge_instance']
             context['badge_class'] = renderer_context['badge_class']
             context['issuer'] = renderer_context['issuer']
-            context['badge_instance_image_url'] = renderer_context['badge_instance'].image.url
+            context['badge_instance_image_url'] = renderer_context['badge_instance'].image.url if renderer_context['badge_instance'].image else None
             context['badge_instance_public_url'] = OriginSetting.HTTP+reverse('badgeinstance_json', kwargs={
                 'slug': renderer_context['badge_instance'].slug})
 
