@@ -16,29 +16,12 @@ from badgeuser.models import BadgeUser
 from issuer.models import BadgeClass, BadgeInstance
 from issuer.serializers import BadgeInstanceSerializer
 from mainsite import TOP_DIR
+from mainsite.tests import CachingTestCase
 from mainsite.utils import OriginSetting
 from pathway.completionspec import CompletionRequirementSpecFactory
 from pathway.models import Pathway, PathwayElement
 from pathway.serializers import PathwaySerializer, PathwayElementSerializer
 from recipient.models import RecipientProfile, RecipientGroupMembership, RecipientGroup
-
-CACHE_OVERRIDE = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
-    }
-}
-
-@override_settings(CACHES = CACHE_OVERRIDE)
-class CachingTestCase(TestCase):
-    @classmethod
-    def tearDownClass(cls):
-        test_cache = FileBasedCache(os.path.join(TOP_DIR, 'test.cache'), {})
-        test_cache.clear()
-
-    def setUp(self):
-        # scramble the cache key each time
-        cache.key_prefix = "test{}".format(str(time.time()))
 
 
 class PathwayApiTests(APITestCase, CachingTestCase):
