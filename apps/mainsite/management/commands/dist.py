@@ -1,4 +1,5 @@
 import os
+import sys
 from subprocess import call
 
 from django.apps import apps
@@ -20,11 +21,13 @@ class Command(BaseCommand):
             import pkg_resources
             gruntfile_path = pkg_resources.resource_filename('badgebook', 'Gruntfile.js')
             badgebook_dir = os.path.dirname(gruntfile_path)
+            sys.stdout.write("running npm install in {}\n".format(badgebook_dir))
             ret = call(['npm', 'install'], cwd=badgebook_dir)
             if ret != 0:
                 raise CommandError("badgebook npm install failed")
 
-            ret = call(['grunt', '--gruntfile', gruntfile_path, 'dist'])
+            sys.stdout.write("running grunt dist --gruntfile {} in {}\n".format(gruntfile_path, badgebook_dir))
+            ret = call(['grunt', '--gruntfile', gruntfile_path, 'dist'], cwd=badgebook_dir)
             if ret != 0:
                 raise CommandError("badgebook grunt dist failed")
 
