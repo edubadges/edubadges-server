@@ -191,12 +191,17 @@ class BadgeInstance(AbstractBadgeInstance):
         the notification model instance (which would link through to the OpenBadge)
         """
         try:
+            if self.issuer.image:
+                issuer_image_url = self.issuer.get_full_url() + '/image'
+            else:
+                issuer_image_url = None
+
             email_context = {
                 'badge_name': self.badgeclass.name,
                 'badge_description': self.badgeclass.prop('description'),
                 'issuer_name': re.sub(r'[^\w\s]+', '', self.issuer.name, 0, re.I),
                 'issuer_url': self.issuer.prop('url'),
-                'issuer_image_url': self.issuer.get_full_url() + '/image',
+                'issuer_image_url': issuer_image_url,
                 'image_url': self.get_full_url() + '/image',
                 'badgr_import_url': badgr_import_url(self)
             }
