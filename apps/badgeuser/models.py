@@ -1,14 +1,14 @@
+from hashlib import md5
 from itertools import chain
-from allauth.account.models import EmailAddress
+
 import cachemodel
+from allauth.account.models import EmailAddress, EmailConfirmation
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db.models import Q
-from django.utils.http import urlquote
 from django.utils.translation import ugettext_lazy as _
-from django.core.mail import send_mail
-from django.contrib.auth.models import AbstractUser
-from hashlib import md5
 from rest_framework.authtoken.models import Token
 
 from issuer.models import Issuer
@@ -17,6 +17,8 @@ from issuer.models import Issuer
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
     class Meta:
         proxy = True
+        verbose_name = _("email address")
+        verbose_name_plural = _("email addresses")
 
     def publish(self):
         super(CachedEmailAddress, self).publish()
@@ -40,6 +42,12 @@ class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
             old_primary.save()
         return super(CachedEmailAddress, self).set_as_primary(conditional=conditional)
 
+
+class ProxyEmailConfirmation(EmailConfirmation):
+    class Meta:
+        proxy = True
+        verbose_name = _("email confirmation")
+        verbose_name_plural = _("email confirmations")
 
 
 class BadgeUser(AbstractUser, cachemodel.CacheModel):
