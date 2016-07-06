@@ -22,7 +22,10 @@
             <td style="margin: 0; padding: 0;">
               <div style="margin: 0 auto;">
                 <a href="{{ issuer_url }}" style="margin: 0; padding: 0; text-align: center;">
-                  <img src="{{ issuer_image_url }}" alt="{{ issuer_name }}" style="max-height: 100px; width: auto;"><h3>{{ issuer_name }}</h3>
+                  {% if issuer_image_url %}
+                    <img src="{{ issuer_image_url }}" alt="{{ issuer_name }}" style="max-height: 100px; width: auto;">
+                  {% endif %}
+                  <h3>{{ issuer_name }}</h3>
                 </a>
               </div>
             </td>
