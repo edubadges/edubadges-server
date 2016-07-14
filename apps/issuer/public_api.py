@@ -24,7 +24,7 @@ class JSONComponentView(AbstractIssuerAPIEndpoint):
     def log(self, obj):
         pass
 
-    def get(self, request, slug):
+    def get(self, request, slug, format='html'):
         try:
             current_object = self.model.cached.get(slug=slug)
         except self.model.DoesNotExist:
@@ -155,7 +155,7 @@ class BadgeInstanceJson(JSONComponentView):
 
         return [renderer() for renderer in self.renderer_classes]
 
-    def get(self, request, slug):
+    def get(self, request, slug, format='html'):
         try:
             current_object = self.model.cached.get(slug=slug)
             self.current_object = current_object
