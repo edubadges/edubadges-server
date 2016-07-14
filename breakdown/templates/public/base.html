@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
-	<title>{{ page_title }}</title>
+	<title>{% block page_title %}{% endblock %}</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -30,8 +30,8 @@
 		<nav class="menu" id="menu">
 			<h1 class="visuallyhidden">Main Navigation</h1>
 			<ul>
-				<li class="menuitem" routerLinkActive="menuitem-is-active"><a href="https://badgr.io/login">Sign In</a></li>
-				<li class="menuitem" routerLinkActive="menuitem-is-active"><a href="https://badgr.io/signup">Sign Up</a></li>
+				<li class="menuitem" ><a href="https://badgr.io/login">Sign In</a></li>
+				<li class="menuitem" ><a href="https://badgr.io/signup">Sign Up</a></li>
 			</ul>
 		</nav>
 	</header>

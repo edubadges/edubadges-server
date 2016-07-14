@@ -7,7 +7,7 @@ from mainsite.utils import OriginSetting
 
 class BadgeInstanceHTMLRenderer(BrowsableAPIRenderer):
     media_type = 'text/html'
-    template = 'issuer/badge_instance_detail.html'
+    template = 'public/assertion.html'
 
     def get_context(self, data, accepted_media_type, renderer_context):
         context = super(BadgeInstanceHTMLRenderer, self).get_context(
@@ -29,12 +29,12 @@ class BadgeInstanceHTMLRenderer(BrowsableAPIRenderer):
         return context
 
 
-class BadgeClassCriteriaHTMLRenderer(BrowsableAPIRenderer):
+class BadgeClassHTMLRenderer(BrowsableAPIRenderer):
     media_type = 'text/html'
-    template = 'issuer/badge_class_criteria.html'
+    template = 'public/badge_class.html'
 
     def get_context(self, data, accepted_media_type, renderer_context):
-        context = super(BadgeClassCriteriaHTMLRenderer, self).get_context(
+        context = super(BadgeClassHTMLRenderer, self).get_context(
             data, accepted_media_type, renderer_context)
 
         try:
