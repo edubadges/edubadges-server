@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 
 from .api import AbstractIssuerAPIEndpoint
 from .models import Issuer, BadgeClass, BadgeInstance
-from .renderers import BadgeInstanceHTMLRenderer, BadgeClassHTMLRenderer
+from .renderers import BadgeInstanceHTMLRenderer, BadgeClassHTMLRenderer, IssuerHTMLRenderer
 
 import utils
 import badgrlog
@@ -81,9 +81,18 @@ class IssuerJson(JSONComponentView):
     GET the actual OBI badge object for an issuer via the /public/issuers/ endpoint
     """
     model = Issuer
+    renderer_classes = (JSONRenderer, IssuerHTMLRenderer,)
+    html_renderer_class = IssuerHTMLRenderer
 
     def log(self, obj):
         logger.event(badgrlog.IssuerRetrievedEvent(obj, self.request))
+
+    def get_renderer_context(self, **kwargs):
+        context = super(IssuerJson, self).get_renderer_context(**kwargs)
+        if getattr(self, 'current_object', None):
+            context['issuer'] = self.current_object
+            context['badge_classes'] = self.current_object.cached_badgeclasses()
+        return context
 
 
 class IssuerImage(ComponentPropertyDetailView):
