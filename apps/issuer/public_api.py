@@ -1,4 +1,6 @@
+from django.http import Http404
 from django.shortcuts import redirect
+from django.views.generic import RedirectView
 
 from rest_framework import status, permissions
 from rest_framework.renderers import JSONRenderer
@@ -99,34 +101,18 @@ class BadgeClassImage(ComponentPropertyDetailView):
         logger.event(badgrlog.BadgeClassImageRetrievedEvent(obj, self.request))
 
 
-class BadgeClassCriteria(ComponentPropertyDetailView):
+class BadgeClassCriteria(RedirectView):
     model = BadgeClass
     prop = 'criteria'
     queryset = BadgeClass.objects.all()
     renderer_classes = (JSONRenderer, BadgeClassCriteriaHTMLRenderer,)
 
-    def get_renderer_context(self, **kwargs):
-        context = super(BadgeClassCriteria, self).get_renderer_context(**kwargs)
-        if getattr(self, 'current_object', None):
-            context['badge_class'] = self.current_object
-            context['issuer'] = self.current_object.issuer
-        return context
-
-    def get(self, request, slug):
-        current_query = self.queryset.filter(slug=slug)
-
-        if not current_query.exists():
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        current_object = current_query[0]
-        self.current_object = current_object
-
-        logger.event(badgrlog.BadgeClassCriteriaRetrievedEvent(current_object, request))
-
-        if current_object.criteria_text is None or current_object.criteria_text == "":
-            return redirect(current_object.criteria_url)
-
-        return Response(current_object.criteria_text)
+    def get_redirect_url(self, *args, **kwargs):
+        try:
+            badge_class = BadgeClass.cached.get(slug=kwargs.get('slug'))
+        except BadgeClass.DoesNotExist:
+            raise Http404
+        return badge_class.get_absolute_url()
 
 
 class BadgeInstanceJson(JSONComponentView):
