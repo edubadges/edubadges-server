@@ -151,19 +151,19 @@ Layout Rules
 
 Styleguide 2.0
 */
-app {
+body {
   display: block; }
-  app > header {
+  body > header {
     position: relative;
     z-index: 4; }
   @media (min-width: 768px) {
-    app {
+    body {
       padding-top: 78px; }
-      app > header {
+      body > header {
         left: 0;
         position: fixed;
         top: 0; }
-      app > nav {
+      body > nav {
         position: fixed;
         right: 0;
         top: 0;
@@ -689,7 +689,7 @@ Gives negative bottom margin - used when ghost buttons abut to their containers
 Markup:
 <div class="l-offsetbottom">Offset</div>
 
-Styleguide 2.12 
+Styleguide 2.12
 */
 .l-offsetbottom {
   margin-bottom: -8px; }
@@ -2168,6 +2168,7 @@ Styleguide 3.24
   color: #78768d;
   font-size: 14px;
   line-height: 1.5;
+  margin-top: 120px;
   padding-bottom: 24px;
   padding-top: 24px;
   text-align: center; }

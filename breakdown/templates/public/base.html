@@ -27,17 +27,14 @@
 			</picture>
 		</a>
 		<a class="header-x-menu" href="javascript:void(0)" onclick="document.getElementById('menu').scrollIntoView(false)">Main Navigation</a>
-		<nav class="menu" id="menu">
-			<h1 class="visuallyhidden">Main Navigation</h1>
-			<ul>
-				<li class="menuitem" ><a href="https://badgr.io/login">Sign In</a></li>
-				<li class="menuitem" ><a href="https://badgr.io/signup">Sign Up</a></li>
-			</ul>
-		</nav>
 	</header>
 
-	{% block content %}
-	{% endblock %}
+	<main>
+
+		{% block content %}
+		{% endblock %}
+
+	</main>
 
 	<footer class="wrap l-containerhorizontal">
 		<div class="footer">
@@ -49,6 +46,12 @@
 		</div>
 	</footer>
 
-
+	<nav class="menu" id="menu">
+		<h1 class="visuallyhidden">Main Navigation</h1>
+		<ul>
+			<li class="menuitem" ><a href="https://badgr.io/login">Sign In</a></li>
+			<li class="menuitem" ><a href="https://badgr.io/signup">Sign Up</a></li>
+		</ul>
+	</nav>
 
 </body>
