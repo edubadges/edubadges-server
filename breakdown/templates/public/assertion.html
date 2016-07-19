@@ -3,6 +3,7 @@
 {% block page_title %}Badge Assertion Detail{% endblock %}
 
 {% block extra_head %}
+	{% if badge_instance and badge_class and issuer %}
         <meta property="og:type"               content="website" />
         <meta property="og:url"                content="{{ badge_instance_public_url }}" />
         <meta property="og:title"              content="{{ badge_class.name }}" />
@@ -12,9 +13,16 @@
         <meta property="og:image:secure_url"   content="{{ badge_instance_image_url }}" />
 
         <meta property="og:site_name"          content="Badgr" />
+	{% endif %}
 {% endblock %}
 
 {% block content %}
+	{% if not (badge_instance and badge_class and issuer) %}
+		<div class="wrap wrap-light l-containerhorizontal l-heading">
+			<img srcset="{{ STATIC_URL }}images/500-badgr-2x.png 2x, {{ STATIC_URL }}images/500-badgr.png" src="{{ STATIC_URL }}images/500-badgr.png" alt="Badgr is sorry :(" width="312" height="317">
+			<p>The Badge you are looking for could not be found.</p>
+		</div>
+	{% else %}
     <header class="wrap wrap-light l-containerhorizontal l-heading">
 
 	    <div class="heading">
@@ -69,8 +77,6 @@
 	    </div>
 
     </header>
+	{% endif %}
 
-    <div class="l-headeredsection">
-
-    </div>
 {% endblock %}

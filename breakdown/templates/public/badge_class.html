@@ -1,8 +1,14 @@
 {% extends "public/base.html" %}
 
-{% block page_title %}{{ badge_class.name }} Badge{% endblock %}
+{% block page_title %}{% if badge_class %}{{ badge_class.name }} Badge{% else %}BadgeClass not found{% endif %}{% endblock %}
 
 {% block content %}
+	{% if not badge_class %}
+		<div class="wrap wrap-light l-containerhorizontal l-heading">
+			<img srcset="{{ STATIC_URL }}images/500-badgr-2x.png 2x, {{ STATIC_URL }}images/500-badgr.png" src="{{ STATIC_URL }}images/500-badgr.png" alt="Badgr is sorry :(" width="312" height="317">
+			<p>The BadgeClass you are looking for could not be found.</p>
+		</div>
+	{% else %}
     <header class="wrap wrap-light l-containerhorizontal l-heading">
 
 	    <div class="heading">
@@ -55,9 +61,6 @@
 	    </div>
 
     </header>
-
-    <div class="l-headeredsection">
-      
-    </div>
+	{% endif %}
 
 {% endblock %}

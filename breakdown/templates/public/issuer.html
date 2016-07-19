@@ -1,8 +1,14 @@
 {% extends "public/base.html" %}
 
-{% block page_title %}{{ issuer.name }} Issuer{% endblock %}
+{% block page_title %}{% if issuer %}{{ issuer.name }} Issuer{% else %}Issuer not found{% endif %}{% endblock %}
 
 {% block content %}
+	{% if not issuer %}
+		<div class="wrap wrap-light l-containerhorizontal l-heading">
+			<img srcset="{{ STATIC_URL }}images/500-badgr-2x.png 2x, {{ STATIC_URL }}images/500-badgr.png" src="{{ STATIC_URL }}images/500-badgr.png" alt="Badgr is sorry :(" width="312" height="317">
+			<p>The Issuer you are looking for could not be found.</p>
+		</div>
+	{% else %}
 	<header class="wrap wrap-light l-containerhorizontal l-heading ">
 
 		<div class="heading">
@@ -50,4 +56,5 @@
 			</table>
 		</div>
 	</div>
+	{% endif %}
 {% endblock %}
