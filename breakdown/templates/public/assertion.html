@@ -22,6 +22,10 @@
 			<img srcset="{{ STATIC_URL }}images/500-badgr-2x.png 2x, {{ STATIC_URL }}images/500-badgr.png" src="{{ STATIC_URL }}images/500-badgr.png" alt="Badgr is sorry :(" width="312" height="317">
 			<p>The Badge you are looking for could not be found.</p>
 		</div>
+	{% elif badge_instance.revoked %}
+		<div class="wrap wrap-light l-containerhorizontal l-heading">
+			<p>This badge has been revoked. {{ badge_instance.revocation_reason }}</p>
+		</div>
 	{% else %}
     <header class="wrap wrap-light l-containerhorizontal l-heading">
 
