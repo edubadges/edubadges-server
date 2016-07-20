@@ -34,7 +34,7 @@ class BadgeUserDetail(generics.RetrieveAPIView):
             obj = BadgeUser.cached.get(pk=self.kwargs.get('user_id'))
             self.check_object_permissions(self.request, obj)
             return obj
-        except BadgeUser.DoesNotExist:
+        except (BadgeUser.DoesNotExist, ValueError) as e:
             raise Http404()
 
 
