@@ -203,6 +203,9 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
         if email_address.primary:
             return Response({'error': "Can not remove primary email address"}, status=status.HTTP_400_BAD_REQUEST)
 
+        if self.request.user.emailaddress_set.count() == 1:
+            return Response({'error': "Can not remove only email address"}, status=status.HTTP_400_BAD_REQUEST)
+
         email_address.delete()
         return Response("Email '{}' has been deleted.".format(email_address.email), status.HTTP_200_OK)
 
