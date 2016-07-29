@@ -78,9 +78,10 @@ class BadgeCheck(BadgeCheckBase):
             raise ValidationError(
                 "Components assembled with different specification versions.")
 
-        return "All components of the Open Badge were properly structured, and \
-            their versions are compatible: '{}'".format(
-                self.badge_instance.version)
+        return "All components of the Open Badge were properly structured, " + \
+               "and their versions are compatible: '{}'".format(
+                    self.badge_instance.version
+               )
 
     def check_badge_belongs_to_recipient(self):
         # Request.user specific validation
@@ -88,12 +89,13 @@ class BadgeCheck(BadgeCheckBase):
                                                    self.verified_emails)
         if not recipient_id:
             raise ValidationError(
-                "The badge you are trying to import does not belong to one of \
-                your verified e-mail addresses.")
+                "The badge you are trying to import does not belong to one of " +
+                "your verified e-mail addresses."
+            )
 
         self.recipient_id = recipient_id
 
-        return "The badge was issued to '{}' as expected".format(recipient_id);
+        return "The badge was issued to '{}' as expected".format(recipient_id)
 
 
 class BadgeCheckTests_V0_5(BadgeCheck):
@@ -101,13 +103,15 @@ class BadgeCheckTests_V0_5(BadgeCheck):
     def __init__(self, *args, **kwargs):
         super(BadgeCheckTests_V0_5, self).__init__(*args, **kwargs)
         self.warnings.extend(
-            ['check_issuing_platform_domain_against_assertion_host'])
+            ['check_issuing_platform_domain_against_assertion_host']
+        )
 
     def validate(self):
         # Form-specific badge instance validation (reliance on URL input)
         if not self.instance_url:
             raise ValidationError(
-                "We cannot verify a v0.5 badge without its hosted URL.")
+                "We cannot verify a v0.5 badge without its hosted URL."
+            )
 
         super(BadgeCheckTests_V0_5, self).validate()
 
@@ -116,9 +120,9 @@ class BadgeCheckTests_V0_5(BadgeCheck):
         if not (domain(self.issuer['origin']) ==
                 domain(self.instance_url)):  # TODO: Can come from baked image
             raise ValidationError(
-                "The URL of the institution does not match the verifiable \
-                host of the assertion, and authorized use of a remote platform \
-                could not be verified.")
+                "The URL of the institution does not match the verifiable " +
+                "host of the assertion, and authorized use of a remote platform " +
+                "could not be verified.")
 
         return "This badge was issued from a platform on the issuer's domain."
 
@@ -139,8 +143,8 @@ class BadgeCheckTests_V1_0(BadgeCheck):
                                 for resource in resources])) == 1
         if not same_domains:
             raise ValidationError(
-                "Badge components are not all hosted on the same domain, \
-                which indicates a counterfeit badge.")
+                "Badge components are not all hosted on the same domain, " +
+                "which indicates a counterfeit badge.")
 
         return "Badge components are properly hosted on the same domain."
 
@@ -149,8 +153,8 @@ class BadgeCheckTests_V1_0(BadgeCheck):
         if not (domain(self.issuer['url']) ==
                 domain(self.instance_url)):  # TODO: Can come from baked image
             raise ValidationError(
-                "The URL of the institution does not match the verifiable \
-                host of the assertion, and authorized use of a remote platform \
-                could not be verified.")
+                "The URL of the institution does not match the verifiable " +
+                "host of the assertion, and authorized use of a remote platform " +
+                "could not be verified.")
 
         return "This badge was issued from a platform on the issuer's domain."
