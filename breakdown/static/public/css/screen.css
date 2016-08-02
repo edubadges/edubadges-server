@@ -2820,8 +2820,7 @@ Styleguide 3.5
       display: -ms-flexbox;
       display: flex;
       font-size: 12px;
-      max-width: 560px;
-      text-transform: uppercase; }
+      max-width: 560px; }
       .heading .heading-x-text > h2::after {
         background-color: #e1e0e5;
         content: '';
@@ -2831,12 +2830,19 @@ Styleguide 3.5
             -ms-flex: 1 1 0;
                 flex: 1 1 0;
         margin-left: 8px; }
+    .heading .heading-x-text > h3 {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 7px !important; }
     .heading .heading-x-text > p,
     .heading .heading-x-text > ul,
     .heading .heading-x-text > ol {
       font-size: 14px;
       line-height: 1.5;
       max-width: 560px; }
+  .heading .heading-x-meta {
+    color: rgba(5, 1, 44, 0.38);
+  }
   .heading .heading-x-edit {
     background: url("images/heading-edit.svg") left center no-repeat;
     color: rgba(5, 1, 44, 0.38);
