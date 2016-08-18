@@ -8,6 +8,7 @@ from rest_framework.authtoken.models import Token
 #from consumer.serializers import ConsumerBadgeDetailSerializer
 
 from .models import BadgeUser, CachedEmailAddress
+from .utils import notify_on_password_change
 
 
 class VerifiedEmailsField(serializers.Field):
@@ -108,20 +109,21 @@ class BadgeUserExistingProfileSerializer(serializers.ModelSerializer):
         write_only_fields = ('password',)
         read_only_fields = ('id', 'email',)
 
-    def update(self, instance, validated_data):
+    def update(self, user, validated_data):
         first_name = validated_data.get('first_name')
         last_name = validated_data.get('last_name')
         password = validated_data.get('password')
         if first_name:
-            instance.first_name = first_name
+            user.first_name = first_name
         if last_name:
-            instance.last_name = last_name
+            user.last_name = last_name
 
         if password:
-            instance.set_password(password)
+            user.set_password(password)
+            notify_on_password_change(user)
 
-        instance.save()
-        return instance
+        user.save()
+        return user
 
 
 class NewEmailSerializer(serializers.ModelSerializer):

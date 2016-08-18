@@ -1,5 +1,31 @@
 {% extends "account/email/base.html" %}
 
-{% block confirmation_body %}
-    A Badgr user has requested to add this email to their account. Please click the link below to verify this operation, and then you may upload badges that have been issued to this address to your account.
+{% block action_callout %}
+    Please verify your email address on Badgr, <br>
+    {{ email.email }}
+{% endblock %}
+
+{% block message_body %}
+    A Badgr user has requested to add this email to their account. Please click the link below to verify this operation,
+    and then you may upload badges that have been issued to this address to your account.
+{% endblock %}
+
+{% block action_button %}
+<a href="{{ activate_url }}" style="
+color: #ffffff;
+font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+font-size: 14px;
+font-weight: 600;
+text-decoration: none;
+text-transform: uppercase;">
+    Confirm Now
+</a>
+{% endblock %}
+
+{% block alternate_action %}
+    Or, you can copy/paste this link into your browser: <a href="{{ activate_url }}" style="color: #4A90E2; text-decoration: none;">{{ activate_url }}</a>
+{% endblock %}
+
+{% block footer %}
+If you didn't make this request, you can safely ignore this email, and no action will be taken on your behalf.
 {% endblock %}
