@@ -164,6 +164,13 @@ class AbstractBadgeInstance(AbstractComponent):
     def get_absolute_url(self):
         return reverse('badgeinstance_json', kwargs={'slug': self.slug})
 
+    def get_public_url(self):
+        return OriginSetting.HTTP+self.get_absolute_url()
+
+    @property
+    def public_url(self):
+        return self.get_public_url()
+
     def populate_slug(self):
         return str(uuid.uuid4())
 

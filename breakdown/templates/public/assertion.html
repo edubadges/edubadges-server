@@ -1,0 +1,86 @@
+{% extends "public/base.html" %}
+
+{% block page_title %}Badge Assertion Detail{% endblock %}
+
+{% block extra_head %}
+	{% if badge_instance and badge_class and issuer %}
+        <meta property="og:type"               content="website" />
+        <meta property="og:url"                content="{{ badge_instance_public_url }}" />
+        <meta property="og:title"              content="{{ badge_class.name }}" />
+        <meta property="og:description"        content="{{ badge_class.json['description'] }}" />
+
+        <meta property="og:image"              content="{{ badge_instance_image_url }}" />
+        <meta property="og:image:secure_url"   content="{{ badge_instance_image_url }}" />
+
+        <meta property="og:site_name"          content="Badgr" />
+	{% endif %}
+{% endblock %}
+
+{% block content %}
+	{% if not (badge_instance and badge_class and issuer) %}
+		<div class="wrap wrap-light l-containerhorizontal l-heading">
+			<img srcset="{{ STATIC_URL }}images/500-badgr-2x.png 2x, {{ STATIC_URL }}images/500-badgr.png" src="{{ STATIC_URL }}images/500-badgr.png" alt="Badgr is sorry :(" width="312" height="317">
+			<p>The Badge you are looking for could not be found.</p>
+		</div>
+	{% elif badge_instance.revoked %}
+		<div class="wrap wrap-light l-containerhorizontal l-heading">
+			<p>This badge has been revoked. {{ badge_instance.revocation_reason }}</p>
+		</div>
+	{% else %}
+    <header class="wrap wrap-light l-containerhorizontal l-heading">
+
+	    <div class="heading">
+		    <div class="heading-x-image">
+			    <img src="{{badge_instance_image_url}}" alt="{{badge_class.name}} image">
+		    </div>
+		    <div class="heading-x-text">
+
+			    <h1>
+				    {{ badge_class.name }}
+			    </h1>
+
+			    <p class="heading-x-meta">
+				    Issued {{ badge_instance.created_at.strftime('%B %d, %Y') }} to {{ obscured_recipient }}
+			    </p>
+
+			    <p>
+				    {{ badge_class.json['description'] }}
+			    </p>
+
+		      <h3>Criteria</h3>
+			    <p>
+				    {{ badge_class.criteria_text }}
+			    </p>
+
+			    <div class="l-childrenhorizontal l-childrenhorizontal-small l-offsetleft">
+				    {% if badge_instance.json['evidence'] %}
+				    <a class="button button-primaryghost" href="{{ badge_instance.json['evidence'] }}" target="_blank">View evidence</a>
+				    {% endif %}
+				    <a class="button button-primaryghost" href="{{ badge_instance_public_url }}.json" target="_blank">View JSON</a>
+			    </div>
+
+			    <h2 class="titledivider">Issuer</h2>
+
+			    <a class="stack" target="_blank" href="{{ issuer.json['url'] }}">
+				    <div class="stack-x-image">
+					    <img src="{% if issuer.json['image'] %}{{ issuer.json['image'] }}{% else %}{{STATIC_URL}}public/images/issuer-placeholder.png{% endif %}"
+					         width="40"
+					         alt="{{ issuer.json['name'] }}" />
+				    </div>
+				    <div class="stack-x-text">
+					    <h2>{{ issuer.json['name'] }}</h2>
+				    </div>
+			    </a>
+
+		    </div>
+
+        <div class="heading-x-actions">
+          <a class="button button-major button-large" target="_blank" href="https://badgecheck.io/?url={{ badge_instance_public_url }}">Verify Badge</a>
+        </div>
+
+	    </div>
+
+    </header>
+	{% endif %}
+
+{% endblock %}

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.8.2 (29753) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-close-white</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Icon-/-Close-/-White">
+            <g id="icon">
+                <rect id="bounds" x="0" y="0" width="24" height="24"></rect>
+                <polygon id="icon-close" fill="#FFFFFF" points="10.7692308 12 4 18.7692308 5.23076923 20 12 13.2307692 18.7692308 20 20 18.7692308 13.2307692 12 20 5.23076923 18.7692308 4 12 10.7692308 5.23076923 4 4 5.23076923 10.7692308 12"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>

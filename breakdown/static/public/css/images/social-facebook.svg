@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="6px" height="12px" viewBox="0 0 6 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.8.2 (29753) - http://www.bohemiancoding.com/sketch -->
+    <title>Fill 1</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="My-Badges" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="HD---List---Cards" transform="translate(-489.000000, -310.000000)" fill="#FFFFFF">
+            <g id="modal">
+                <g id="Modal-/-Share" transform="translate(464.000000, 160.000000)">
+                    <g id="content" transform="translate(0.000000, 48.000000)">
+                        <g id="bg">
+                            <g id="secondary" transform="translate(16.000000, 96.000000)">
+                                <g id="facebook">
+                                    <path d="M14.57085,12.004425 L12.88935,12.004425 L12.88935,17.999925 L10.39785,17.999925 L10.39785,12.004425 L9.2121,12.004425 L9.2121,9.886425 L10.39785,9.886425 L10.39785,8.515425 C10.39785,7.535175 10.8636,5.999925 12.91185,5.999925 L14.7576,6.007425 L14.7576,8.063925 L13.4181,8.063925 C13.19985,8.063925 12.88935,8.174175 12.88935,8.641425 L12.88935,9.886425 L14.7891,9.886425 L14.57085,12.004425 Z" id="Fill-1"></path>
+                                </g>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

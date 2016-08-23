@@ -1,4 +1,6 @@
+from django.http import Http404
 from django.shortcuts import redirect
+from django.views.generic import RedirectView
 
 from rest_framework import status, permissions
 from rest_framework.renderers import JSONRenderer
@@ -7,7 +9,7 @@ from rest_framework.views import APIView
 
 from .api import AbstractIssuerAPIEndpoint
 from .models import Issuer, BadgeClass, BadgeInstance
-from .renderers import BadgeInstanceHTMLRenderer, BadgeClassCriteriaHTMLRenderer
+from .renderers import BadgeInstanceHTMLRenderer, BadgeClassHTMLRenderer, IssuerHTMLRenderer
 
 import utils
 import badgrlog
@@ -20,18 +22,35 @@ class JSONComponentView(AbstractIssuerAPIEndpoint):
     Abstract Component Class
     """
     permission_classes = (permissions.AllowAny,)
+    html_renderer_class = None
 
     def log(self, obj):
         pass
 
-    def get(self, request, slug):
+    def get(self, request, slug, format='html'):
         try:
-            current_object = self.model.cached.get(slug=slug)
+            self.current_object = self.model.cached.get(slug=slug)
         except self.model.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
-            self.log(current_object)
-            return Response(current_object.json)
+            self.log(self.current_object)
+            return Response(self.current_object.json)
+
+    def get_renderers(self):
+        """
+        Instantiates and returns the list of renderers that this view can use.
+        """
+        HTTP_USER_AGENTS = ['LinkedInBot',]
+        user_agent = self.request.META.get('HTTP_USER_AGENT', '')
+
+        if self.request.META.get('HTTP_ACCEPT') == '*/*' or \
+                len([agent for agent in HTTP_USER_AGENTS if agent in user_agent]):
+            return [self.get_html_renderer_class,]
+
+        return [renderer() for renderer in self.renderer_classes]
+
+    def get_html_renderer_class(self):
+        return self.html_renderer_class
 
 
 class ComponentPropertyDetailView(APIView):
@@ -62,9 +81,18 @@ class IssuerJson(JSONComponentView):
     GET the actual OBI badge object for an issuer via the /public/issuers/ endpoint
     """
     model = Issuer
+    renderer_classes = (JSONRenderer, IssuerHTMLRenderer,)
+    html_renderer_class = IssuerHTMLRenderer
 
     def log(self, obj):
         logger.event(badgrlog.IssuerRetrievedEvent(obj, self.request))
+
+    def get_renderer_context(self, **kwargs):
+        context = super(IssuerJson, self).get_renderer_context(**kwargs)
+        if getattr(self, 'current_object', None):
+            context['issuer'] = self.current_object
+            context['badge_classes'] = self.current_object.cached_badgeclasses()
+        return context
 
 
 class IssuerImage(ComponentPropertyDetailView):
@@ -83,6 +111,15 @@ class BadgeClassJson(JSONComponentView):
     GET the actual OBI badge object for a badgeclass via public/badges/:slug endpoint
     """
     model = BadgeClass
+    renderer_classes = (JSONRenderer, BadgeClassHTMLRenderer,)
+    html_renderer_class = BadgeClassHTMLRenderer
+
+    def get_renderer_context(self, **kwargs):
+        context = super(BadgeClassJson, self).get_renderer_context(**kwargs)
+        if getattr(self, 'current_object', None):
+            context['badge_class'] = self.current_object
+            context['issuer'] = self.current_object.cached_issuer
+        return context
 
     def log(self, obj):
         logger.event(badgrlog.BadgeClassRetrievedEvent(obj, self.request))
@@ -99,39 +136,19 @@ class BadgeClassImage(ComponentPropertyDetailView):
         logger.event(badgrlog.BadgeClassImageRetrievedEvent(obj, self.request))
 
 
-class BadgeClassCriteria(ComponentPropertyDetailView):
-    model = BadgeClass
-    prop = 'criteria'
-    queryset = BadgeClass.objects.all()
-    renderer_classes = (JSONRenderer, BadgeClassCriteriaHTMLRenderer,)
-
-    def get_renderer_context(self, **kwargs):
-        context = super(BadgeClassCriteria, self).get_renderer_context(**kwargs)
-        if getattr(self, 'current_object', None):
-            context['badge_class'] = self.current_object
-            context['issuer'] = self.current_object.issuer
-        return context
-
-    def get(self, request, slug):
-        current_query = self.queryset.filter(slug=slug)
-
-        if not current_query.exists():
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        current_object = current_query[0]
-        self.current_object = current_object
-
-        logger.event(badgrlog.BadgeClassCriteriaRetrievedEvent(current_object, request))
-
-        if current_object.criteria_text is None or current_object.criteria_text == "":
-            return redirect(current_object.criteria_url)
-
-        return Response(current_object.criteria_text)
+class BadgeClassCriteria(RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        try:
+            badge_class = BadgeClass.cached.get(slug=kwargs.get('slug'))
+        except BadgeClass.DoesNotExist:
+            raise Http404
+        return badge_class.get_absolute_url()
 
 
 class BadgeInstanceJson(JSONComponentView):
     model = BadgeInstance
     renderer_classes = (JSONRenderer, BadgeInstanceHTMLRenderer,)
+    html_renderer_class = BadgeInstanceHTMLRenderer
 
     def get_renderer_context(self, **kwargs):
         context = super(BadgeInstanceJson, self).get_renderer_context()
@@ -142,20 +159,7 @@ class BadgeInstanceJson(JSONComponentView):
 
         return context
 
-    def get_renderers(self):
-        """
-        Instantiates and returns the list of renderers that this view can use.
-        """
-        HTTP_USER_AGENTS = ['LinkedInBot',]
-        user_agent = self.request.META.get('HTTP_USER_AGENT', '')
-
-        if self.request.META.get('HTTP_ACCEPT') == '*/*' or \
-                len([agent for agent in HTTP_USER_AGENTS if agent in user_agent]):
-            return [BadgeInstanceHTMLRenderer(),]
-
-        return [renderer() for renderer in self.renderer_classes]
-
-    def get(self, request, slug):
+    def get(self, request, slug, format='html'):
         try:
             current_object = self.model.cached.get(slug=slug)
             self.current_object = current_object

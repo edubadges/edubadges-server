@@ -1,8 +1,10 @@
 import os
 import warnings
 
+import time
 from django.core import mail
 from django.core.cache import cache, CacheKeyWarning
+from django.core.cache.backends.filebased import FileBasedCache
 from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
 
@@ -75,3 +77,22 @@ class TestSignup(APITestCase):
                 follow=False
             )
             self.assertRedirects(response, 'http://testserver/login/Tester?email={}'.format(post_data['email']), fetch_redirect_response=False)
+
+
+@override_settings(
+    CACHES={
+        'default': {
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
+        }
+    },
+)
+class CachingTestCase(TestCase):
+    @classmethod
+    def tearDownClass(cls):
+        test_cache = FileBasedCache(os.path.join(TOP_DIR, 'test.cache'), {})
+        test_cache.clear()
+
+    def setUp(self):
+        # scramble the cache key each time
+        cache.key_prefix = "test{}".format(str(time.time()))

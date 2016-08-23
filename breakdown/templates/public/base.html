@@ -1,0 +1,57 @@
+<!doctype html>
+<html prefix="og: http://ogp.me/ns#">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<title>{% block page_title %}{% endblock %} - Badgr</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link rel="apple-touch-icon" href="apple-touch-icon.png">
+	<!-- Place favicon.ico in the root directory -->
+
+	<link href="{{ STATIC_URL }}public/css/dialog-polyfill.css" media="screen" rel="stylesheet" type="text/css" >
+	<link href="{{ STATIC_URL }}public/css/reset.css" media="screen" rel="stylesheet" type="text/css" >
+	<link href="{{ STATIC_URL }}public/css/screen.css" media="screen" rel="stylesheet" type="text/css" >
+
+	{% block extra_head %}
+	{% endblock %}
+</head>
+<body>
+
+	<header class="header l-containerhorizontal">
+		<a href="/">
+			<picture>
+				<source media="(min-width: 640px)" srcset="{{ STATIC_URL }}public/images/logo-desktop.svg">
+				<img src="{{ STATIC_URL }}public/images/logo.svg" alt="Badgr logo">
+			</picture>
+		</a>
+		<a class="header-x-menu" href="javascript:void(0)" onclick="document.getElementById('menu').scrollIntoView(false)">Main Navigation</a>
+	</header>
+
+	<main>
+
+		{% block content %}
+		{% endblock %}
+
+	</main>
+
+	<footer class="wrap l-containerhorizontal">
+		<div class="footer">
+			<ul>
+				<li>Copyright &copy; {{ copyrightYear }} <a href="https://concentricsky.com" target="_blank">Concentric Sky, Inc.</a></li>
+				<li>Powered by <a href="https://github.com/concentricsky/badgr-server" target="_blank">Badgr</a></li>
+			</ul>
+			<a href="https://badgr.io/docs/" target="_blank">API documentation</a>
+		</div>
+	</footer>
+
+	<nav class="menu" id="menu">
+		<h1 class="visuallyhidden">Main Navigation</h1>
+		<ul>
+			<li class="menuitem" ><a href="https://badgr.io/login">Sign In</a></li>
+			<li class="menuitem" ><a href="https://badgr.io/signup">Sign Up</a></li>
+		</ul>
+	</nav>
+
+</body>

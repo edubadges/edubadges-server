@@ -1,0 +1,60 @@
+{% extends "public/base.html" %}
+
+{% block page_title %}{% if issuer %}{{ issuer.name }} Issuer{% else %}Issuer not found{% endif %}{% endblock %}
+
+{% block content %}
+	{% if not issuer %}
+		<div class="wrap wrap-light l-containerhorizontal l-heading">
+			<img srcset="{{ STATIC_URL }}images/500-badgr-2x.png 2x, {{ STATIC_URL }}images/500-badgr.png" src="{{ STATIC_URL }}images/500-badgr.png" alt="Badgr is sorry :(" width="312" height="317">
+			<p>The Issuer you are looking for could not be found.</p>
+		</div>
+	{% else %}
+	<header class="wrap wrap-light l-containerhorizontal l-heading ">
+
+		<div class="heading">
+			<div class="heading-x-image">
+				<img src="{% if issuer.image %}{{issuer.image.url}}{% else %}{{ STATIC_URL }}public/images/issuer-placeholder-2x.png{% endif %}" alt="{{issuer.name}} logo " />
+			</div>
+			<div class="heading-x-text">
+				<h1>{{issuer.json['name']}}</h1>
+				<p>{{issuer.json['description']}}</p>
+				<div class="l-childrenhorizontal">
+					<a class="button button-primaryghost l-offsetleft" href="{{issuer.json['url']}}" target="_blank">Visit Website</a>
+					<a class="button button-primaryghost l-offsetleft" href="mailto:{{issuer.json['email']}}">Contact Issuer</a>
+				</div>
+			</div>
+		</div>
+
+	</header>
+
+	<div class="wrap l-containerhorizontal l-headeredsection">
+		<header class="l-childrenhorizontal l-childrenhorizontal-spacebetween l-childrenhorizontal-spacebetween">
+			<h2 class="title title-is-smallmobile">Badge Classes</h2>
+		</header>
+
+		<div class="l-overflowhorizontal">
+			<table class="table">
+				<thead>
+					<tr>
+						<th scope="col">Badge</th>
+						<th class="hidden hidden-is-desktop" scope="col">Created</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for badge_class in badge_classes %}
+						<tr>
+							<th scope="row">
+								<div class="l-childrenhorizontal l-childrenhorizontal-small">
+									<img class="l-childrenhorizontal-x-offset" src="{{badge_class.json['image']}}" alt="{{badge_class.json['name']}}" width="40">
+									<a href="{{ badge_class.json['id'] }}">{{badge_class.json['name']}}</a>
+								</div>
+							</th>
+							<td class="hidden hidden-is-desktop">{{badge_class.created_at.strftime("%B %d, %Y")}}</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	{% endif %}
+{% endblock %}

@@ -13,27 +13,12 @@ from rest_framework.test import APITestCase
 
 from badgeuser.models import BadgeUser
 from mainsite import TOP_DIR
+from mainsite.tests import CachingTestCase
 
 from pathway.models import Pathway, PathwayElement, PathwayElementBadge
 from recipient.models import RecipientGroup, RecipientGroupMembership, RecipientProfile
 
-@override_settings(
-    CACHES={
-        'default': {
-            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
-        }
-    },
-)
-class CachingTestCase(TestCase):
-    @classmethod
-    def tearDownClass(cls):
-        test_cache = FileBasedCache(os.path.join(TOP_DIR, 'test.cache'), {})
-        test_cache.clear()
 
-    def setUp(self):
-        # scramble the cache key each time
-        cache.key_prefix = "test{}".format(str(time.time()))
 
 
 class RecipientApiTests(APITestCase, CachingTestCase):

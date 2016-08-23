@@ -1,9 +1,9 @@
 import os
-from django.core import management
-from django.core.management.base import BaseCommand, CommandError
-from django.apps import apps
+import sys
 from subprocess import call
-from mainsite import TOP_DIR
+
+from django.apps import apps
+from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
@@ -17,17 +17,19 @@ class Command(BaseCommand):
         """
 
         if apps.is_installed('badgebook'):
-            # if badgebook is present, pull in its assets
+            # if badgebook is present, build its grunt
             import pkg_resources
-            import shutil
-            components = pkg_resources.resource_listdir('badgebook', 'jsx')
-            pkg_path = pkg_resources.resource_filename('badgebook', 'jsx')
+            gruntfile_path = pkg_resources.resource_filename('badgebook', 'Gruntfile.js')
+            badgebook_dir = os.path.dirname(gruntfile_path)
+            sys.stdout.write("running npm install in {}\n".format(badgebook_dir))
+            ret = call(['npm', 'install'], cwd=badgebook_dir)
+            if ret != 0:
+                raise CommandError("badgebook npm install failed")
 
-            dest = os.path.join(TOP_DIR, 'build', 'badgebook')
-            if not os.path.isdir(dest):
-                os.mkdir(dest)
-            for component in components:
-                shutil.copy2(os.path.join(pkg_path, component), dest)
+            sys.stdout.write("running grunt dist --gruntfile {} in {}\n".format(gruntfile_path, badgebook_dir))
+            ret = call(['grunt', '--gruntfile', gruntfile_path, 'dist'], cwd=badgebook_dir)
+            if ret != 0:
+                raise CommandError("badgebook grunt dist failed")
 
         ret = call(['grunt', 'dist'])
         if ret != 0:

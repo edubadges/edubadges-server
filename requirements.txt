@@ -23,6 +23,7 @@ git+https://github.com/concentricsky/django-ismigrated.git@v0.1.7
 
 # CSky Client Admin
 git+https://github.com/concentricsky/django-sky-ckeditor.git@v0.9.8
+django-object-actions==0.8.2
 # Revision and deleted object recovery
 django-reversion==1.8.5
 # Memcached cache

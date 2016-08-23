@@ -91,12 +91,14 @@ class ElementJunctionCompletionRequirementSpec(CompletionRequirementSpec):
 
                 if completion_spec.completion_type == CompletionRequirementSpecFactory.ELEMENT_JUNCTION:
                     for element_id in completion_spec.elements:
-                        child = node['children'][element_id]
-                        _recurse(child)
+                        child = node['children'].get(element_id, None)
+                        if child:
+                            _recurse(child)
                     # check optional children
                     for element_id in set(node['children'].keys()) - set(completion_spec.elements):
-                        child = node['children'][element_id]
-                        _recurse(child)
+                        child = node['children'].get(element_id, None)
+                        if child:
+                            _recurse(child)
                     node_completion.update(completion_spec.check_completion(node_completion, completions))
                 elif completion_spec.completion_type == CompletionRequirementSpecFactory.BADGE_JUNCTION:
                     node_completion.update(completion_spec.check_completion(node_completion, instances))

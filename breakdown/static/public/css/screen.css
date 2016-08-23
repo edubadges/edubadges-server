@@ -1,0 +1,4826 @@
+/*
+Base Rules
+
+Styleguide 1.0
+*/
+/*
+Colors
+
+#c30a28 - $color-primary
+#f7e1e5 - $color-primary-light
+#05012c - $color-secondary
+#ffb500 - $color-tertiary
+#93ab23 - $color-quaternary
+#fff - $color-fill-light-1
+#fcfcfc - $color-fill-light-2
+#f7f7f7 - $color-fill-light-3
+#252247 - $color-fill-dark-1
+#78768d - $color-fill-dark-2
+#a09eaf - $color-fill-dark-3
+#e1e0e5 - $color-fill-dark-4
+
+Markup:
+<div style="background: {$modifiers};" class="styleguide-color">{$modifiers}</div>
+
+Styleguide 1.1
+*/
+/*
+Colors (States)
+
+#f01f31 - error
+#ffb500 - pending
+#93ab23 - success
+
+Markup:
+<div style="background: {$modifiers};" class="styleguide-color">{$modifiers}</div>
+
+Styleguide 1.1.2
+*/
+/*
+Font Size
+
+10px - $font-size-small-2x
+12px - $font-size-small-2x
+14px - $font-size-small
+16px - $font-size
+20px - $font-size-large
+24px - $font-size-large
+28px - $font-size-large
+34px - $font-size-large
+40px - $font-size-large-2x
+
+Markup:
+<p style="font-size: {$modifiers};">{$modifiers}</p>
+
+Styleguide 1.2
+*/
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: bold;
+  src: url("fonts/opensans-bold-webfont.woff2") format("woff2"), url("fonts/opensans-bold-webfont.woff") format("woff"); }
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-weight: bold;
+  src: url("fonts/opensans-bolditalic-webfont.woff2") format("woff2"), url("fonts/opensans-bolditalic-webfont.woff") format("woff"); }
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-weight: normal;
+  src: url("fonts/opensans-italic-webfont.woff2") format("woff2"), url("fonts/opensans-italic-webfont.woff") format("woff"); }
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 300;
+  src: url("fonts/opensans-light-webfont.woff2") format("woff2"), url("fonts/opensans-light-webfont.woff") format("woff"); }
+@font-face {
+  font-family: 'open_sanslight_italic';
+  font-style: italic;
+  font-weight: 300;
+  src: url("fonts/opensans-lightitalic-webfont.woff2") format("woff2"), url("fonts/opensans-lightitalic-webfont.woff") format("woff"); }
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: normal;
+  src: url("fonts/opensans-regular-webfont.woff2") format("woff2"), url("fonts/opensans-regular-webfont.woff") format("woff"); }
+@font-face {
+  font-family: 'Open Sans';
+  src: url("fonts/opensans-semibold-webfont.woff2") format("woff2"), url("fonts/opensans-semibold-webfont.woff") format("woff");
+  font-weight: 600;
+  font-style: normal; }
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-weight: 600;
+  src: url("fonts/opensans-semibolditalic-webfont.woff2") format("woff2"), url("fonts/opensans-semibolditalic-webfont.woff") format("woff"); }
+@-webkit-keyframes rotate {
+  from {
+    -webkit-transform: rotate(0);
+            transform: rotate(0); }
+  to {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg); } }
+@keyframes rotate {
+  from {
+    -webkit-transform: rotate(0);
+            transform: rotate(0); }
+  to {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg); } }
+body {
+  background: #fcfcfc;
+  color: #252247;
+  font-family: "Open Sans", sans-serif;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden; }
+
+button {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  background: none;
+  border: 0;
+  color: #252247;
+  cursor: pointer;
+  font-family: "Open Sans", sans-serif;
+  font-size: 16px;
+  line-height: 1;
+  margin: 0;
+  outline: none;
+  padding: 0; }
+
+input,
+label,
+textarea,
+select {
+  color: #252247;
+  font-family: "Open Sans", sans-serif;
+  font-size: 16px; }
+
+a {
+  color: #c30a28;
+  text-decoration: none; }
+
+strong {
+  font-weight: 600; }
+
+/*
+Layout Rules
+
+Styleguide 2.0
+*/
+body {
+  display: block; }
+  body > header {
+    position: relative;
+    z-index: 4; }
+  @media (min-width: 768px) {
+    body {
+      padding-top: 78px; }
+      body > header {
+        left: 0;
+        position: fixed;
+        top: 0; }
+      body > nav {
+        position: fixed;
+        right: 0;
+        top: 0;
+        z-index: 5; } }
+
+main {
+  display: block;
+  position: relative; }
+  main .formmessage {
+    left: 0;
+    position: absolute;
+    top: 0; }
+  @media (min-width: 768px) {
+    main .formmessage {
+      position: fixed;
+      top: 78px; } }
+
+/*
+Article
+
+Used for pathway details views. Has a main content section and a sidebar which stack on mobile views.
+
+Markup:
+<div class="l-article">
+  <div>Main Content</div>
+  <div>Aside Content</div>
+</div>
+
+Styleguide 2.3
+*/
+.l-article > :first-child {
+  margin-bottom: 16px; }
+@media (min-width: 1024px) {
+  .l-article {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between; }
+    .l-article > :first-child {
+      -ms-flex-preferred-size: 67%;
+          flex-basis: 67%;
+      margin-bottom: 0;
+      min-width: 0; }
+    .l-article > :last-child {
+      -ms-flex-preferred-size: 30%;
+          flex-basis: 30%;
+      min-width: 0; } }
+
+/*
+Children Horizontal
+
+Used to lay out elements horizontally with space between each child
+
+Default - Left aligned, first children have spacing
+.l-childrenhorizontal-small - Left aligned, first children have less spacing
+.l-childrenhorizontal-right - Right aligned
+.l-childrenhorizontal-spacebetween - Children pushed to either side
+.l-childrenhorizontal-stackmobile -  On mobile children stack
+
+Markup:
+<div class="l-childrenhorizontal {$modifiers}">
+  <div>
+    <div>Content</div>
+    <div>Content</div>
+  </div>
+  <div>
+    <div>Content</div>
+    <div>Content</div>
+  </div>
+</div>
+
+Styleguide 2.2
+*/
+.l-childrenhorizontal {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap; }
+  .l-childrenhorizontal > *:not(:last-child) {
+    margin-right: 16px; }
+  .l-childrenhorizontal .l-childrenhorizontal-x-offset {
+    margin-right: 24px; }
+
+.l-childrenhorizontal-small > *:not(:last-child) {
+  margin-right: 8px; }
+.l-childrenhorizontal-small .l-childrenhorizontal-x-offset {
+  margin-right: 16px; }
+
+.l-childrenhorizontal-right {
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end; }
+
+.l-childrenhorizontal-spacebetween {
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between; }
+
+@media (max-width: 1023px) {
+  .l-childrenhorizontal-stackmobile {
+    -webkit-box-align: start;
+        -ms-flex-align: start;
+                -ms-grid-row-align: flex-start;
+            align-items: flex-start;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-pack: start;
+        -ms-flex-pack: start;
+            justify-content: flex-start; }
+    .l-childrenhorizontal-stackmobile > *:not(:last-child) {
+      margin-bottom: 8px;
+      margin-right: 0; }
+    .l-childrenhorizontal-stackmobile .l-childrenhorizontal-x-offset {
+      margin-bottom: 16px;
+      margin-right: 0; } }
+
+/*
+Children Vertical
+
+Default - Consistent vertical spacing, which gets larger on desktop.
+.l-childrenvertical-is-smalldesktop - Doesn't increase spacing on desktop
+
+Markup:
+<div class="l-childrenvertical {$modifiers}">
+  <div>Content</div>
+  <div class="l-childrenvertical-x-offset">Content</div>
+  <div>Content</div>
+  <div>Content</div>
+<div>
+
+Styleguide 2.1
+*/
+.l-childrenvertical > *:not(:last-child) {
+  margin-bottom: 14px; }
+  .l-childrenvertical > *:not(:last-child).l-childrenvertical-x-offset {
+    margin-bottom: 28px; }
+@media (min-width: 768px) {
+  .l-childrenvertical > *:not(:last-child) {
+    margin-bottom: 24px; }
+  .l-childrenvertical.l-childrenvertical-is-smalldesktop > *:not(:last-child) {
+    margin-bottom: 16px; }
+    .l-childrenvertical.l-childrenvertical-is-smalldesktop > *:not(:last-child).l-childrenvertical-x-offset {
+      margin-bottom: 28px; } }
+
+/*
+Container Horizontal
+
+Sets left and right padding on any container.
+
+Markup:
+<div class="l-containerhorizontal">
+  <div>Content</div>
+  <div>Content</div>
+  <div>Content</div>
+</div>
+
+Styleguide 2.4
+*/
+.l-containerhorizontal {
+  box-sizing: border-box;
+  display: block;
+  padding-left: 16px;
+  padding-right: 16px; }
+  @media (min-width: 768px) {
+    .l-containerhorizontal {
+      padding-left: 32px;
+      padding-right: 32px; } }
+  @media (min-width: 1088px) {
+    .l-containerhorizontal {
+      padding-left: calc(50vw - 512px);
+      padding-right: calc(50vw - 512px); } }
+
+/*
+Container Vertical
+
+Sets top and bottom padding on any container.
+
+Default - Standard vertical spacing
+.l-containervertical-small - Smaller
+
+Markup:
+<div class="l-containervertical {$modifiers}">
+  <div>Content</div>
+  <div>Content</div>
+  <div>Content</div>
+</div>
+
+Styleguide 2.5
+*/
+.l-containervertical {
+  box-sizing: border-box;
+  display: block;
+  padding-bottom: 16px;
+  padding-top: 16px;
+  position: relative;
+  z-index: 1; }
+  @media (min-width: 768px) {
+    .l-containervertical {
+      padding-bottom: 48px;
+      padding-top: 48px; } }
+
+.l-containervertical-small {
+  min-height: auto;
+  padding-bottom: 16px;
+  padding-top: 16px; }
+  @media (min-width: 768px) {
+    .l-containervertical-small {
+      padding-bottom: 16px;
+      padding-top: 16px; } }
+
+/*
+Controls
+
+Control wraps a series of inputs at the top of the view.
+
+Markup:
+<div class="l-controls bordered bordered-bottom">
+    <div>
+      <input type="text" class="search" placeholder="Search Badges">
+    </div>
+    <div>
+      <label class="formcheckbox" for="remember-me">
+        <input name="remember-me" id="remember-me" type="checkbox">
+        <span class="formcheckbox-x-text">Remember me</span>
+      </label>
+      <div class="radiobuttons">
+        <input type="radio" name="radiobutton" id="radiobutton1" value="grid" checked="checked">
+        <label class="radiobuttons-x-grid" for="radiobutton1">Grid</label>
+        <input type="radio" name="radiobutton" id="radiobutton2" value="list">
+        <label class="radiobuttons-x-list" for="radiobutton2">List</label>
+      </div>
+    </div>
+</div>
+
+Styleguide 2.18
+*/
+.l-controls {
+  padding-bottom: 16px;
+  padding-top: 16px; }
+  .l-controls > :first-child {
+    margin-bottom: 16px; }
+  .l-controls > :last-child {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between; }
+  @media (min-width: 768px) {
+    .l-controls {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex; }
+      .l-controls > :first-child {
+        -webkit-box-flex: 0;
+            -ms-flex: 0 1 auto;
+                flex: 0 1 auto;
+        margin-bottom: 0;
+        margin-right: 24px; }
+      .l-controls > :last-child {
+        -webkit-box-flex: 1;
+            -ms-flex: 1 0 0;
+                flex: 1 0 0; } }
+
+/*
+Form
+
+Lays out form elements
+
+Default - Standard form
+.l-form-span - Extends to 100% width
+
+Markup:
+<form class="l-form {$modifiers}" action="">
+    <fieldset>
+        <sg-insert>3.25-1</sg-insert>
+        <sg-insert>3.25-2</sg-insert>
+        <sg-insert>3.26-1</sg-insert>
+        <sg-insert>3.25-3</sg-insert>
+    </fieldset>
+    <sg-insert>3.30-1</sg-insert>
+</form>
+
+
+Styleguide 2.6
+*/
+.l-form fieldset > * {
+  margin-bottom: 16px; }
+.l-form .l-form-x-offset {
+  padding-top: 16px; }
+@media (min-width: 768px) {
+  .l-form {
+    max-width: 460px; } }
+
+@media (min-width: 768px) {
+  .l-form-span {
+    max-width: 100%; } }
+
+/*
+Grid Three
+
+Open the example in a new tab to see correct behavior. Use `<div>` wrappers if direct styling of children causes issues with other modules.
+
+Markup:
+<div class="l-gridthree">
+  <div><sg-insert>3.6.1-1</sg-insert></div>
+  <div><sg-insert>3.6.1-1</sg-insert></div>
+  <div><sg-insert>3.6.1-1</sg-insert></div>
+  <div><sg-insert>3.6.1-1</sg-insert></div>
+  <div><sg-insert>3.6.1-1</sg-insert></div>
+</div>
+
+Styleguide 2.8
+*/
+.l-gridthree > * {
+  margin-bottom: 16px; }
+@media (min-width: 768px) {
+  .l-gridthree {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+    margin-left: -8px; }
+    .l-gridthree > * {
+      -webkit-box-align: stretch;
+          -ms-flex-align: stretch;
+              align-items: stretch;
+      box-sizing: border-box;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-flex: 0;
+          -ms-flex: 0 0 50%;
+              flex: 0 0 50%;
+      padding-left: 8px;
+      padding-right: 8px; }
+      .l-gridthree > * > * {
+        width: 100%; } }
+@media (min-width: 1024px) {
+  .l-gridthree > * {
+    -ms-flex-preferred-size: 33.33%;
+        flex-basis: 33.33%; } }
+
+/*
+Grid Two
+
+Open the example in a new tab to see correct behavior. Use `<div>` wrappers if direct styling of children causes issues with other modules.
+
+Markup:
+<div class="l-gridtwo">
+  <div><sg-insert>3.6.1-1</sg-insert></div>
+  <div><sg-insert>3.6.1-1</sg-insert></div>
+  <div><sg-insert>3.6.1-1</sg-insert></div>
+  <div><sg-insert>3.6.1-1</sg-insert></div>
+  <div><sg-insert>3.6.1-1</sg-insert></div>
+</div>
+
+Styleguide 2.7
+*/
+.l-gridtwo {
+  margin-bottom: -8px; }
+  .l-gridtwo > * {
+    margin-bottom: 8px; }
+  @media (min-width: 768px) {
+    .l-gridtwo {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap;
+      -webkit-box-pack: justify;
+          -ms-flex-pack: justify;
+              justify-content: space-between;
+      margin-bottom: -16px; }
+      .l-gridtwo > * {
+        -webkit-box-align: stretch;
+            -ms-flex-align: stretch;
+                align-items: stretch;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        margin-bottom: 16px;
+        min-width: 0;
+        width: 49%; }
+        .l-gridtwo > * > * {
+          -webkit-box-flex: 1;
+              -ms-flex: 1;
+                  flex: 1; } }
+
+/*
+Heading
+
+This wraps a heading/breadcrumbs combination with some slight variations on the standard l-containervertical and l-childrenvertical patterns.
+
+Markup:
+<heading class="l-heading">
+  <nav>
+    <h1 class="visuallyhidden">Breadcrumbs</h1>
+    <sg-insert>3.19-1</sg-insert>
+  </nav>
+  <sg-insert>3.5-1</sg-insert>
+</heading>
+
+Styleguide 2.16
+*/
+.l-heading {
+  padding-bottom: 24px;
+  padding-top: 24px; }
+  .l-heading > nav {
+    display: none; }
+  @media (min-width: 768px) {
+    .l-heading {
+      padding-bottom: 32px;
+      padding-top: 1px; }
+      .l-heading > nav {
+        display: block;
+        margin-top: 24px; }
+      .l-heading > :last-child {
+        margin-top: 32px; } }
+
+/*
+Headered Section
+
+This is a container/child hybrid wrapper that sets vertical container padding and then spaces children with less bottom margins for headers.
+
+Markup:
+<div class="l-headeredsection">
+  <div>Content</div>
+  <header>Header</header>
+  <div>Content</div>
+  <div>Content</div>
+  <header>Header</header>
+  <div>Content</div>
+</div>
+
+Styleguide 2.17
+*/
+.l-headeredsection {
+  padding-bottom: 80px;
+  padding-top: 32px; }
+  .l-headeredsection > *:not(:last-child) {
+    margin-bottom: 32px; }
+  .l-headeredsection > header:not(:last-child) {
+    margin-bottom: 16px; }
+  @media (min-width: 768px) {
+    .l-headeredsection {
+      padding-top: 40px; }
+      .l-headeredsection > *:not(:last-child) {
+        margin-bottom: 40px; } }
+  @media (min-width: 1024px) {
+    .l-headeredsection {
+      padding-bottom: 104px; }
+      .l-headeredsection > *:not(:last-child) {
+        margin-bottom: 48px; } }
+
+/*
+Integrations
+
+Wraps a set of links and an article description for the integrations detail view.
+
+Markup:
+<div class="l-integrations">
+  <div>
+    <sg-insert>3.25.4-1</sg-insert>
+    <sg-insert>3.25.4-1</sg-insert>
+    <sg-insert>3.25.4-1</sg-insert>
+  </div>
+  <sg-insert>3.53-1</sg-insert>
+</div>
+
+Styleguide 2.20
+*/
+.l-integrations > * {
+  box-sizing: border-box; }
+.l-integrations > :first-child {
+  margin-bottom: 48px;
+  max-width: 420px; }
+  .l-integrations > :first-child > *:not(:last-child) {
+    margin-bottom: 16px; }
+@media (min-width: 1024px) {
+  .l-integrations {
+    -webkit-box-align: start;
+        -ms-flex-align: start;
+            align-items: flex-start;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex; }
+    .l-integrations > :first-child {
+      -webkit-box-flex: 0;
+          -ms-flex: 0 0 32%;
+              flex: 0 0 32%;
+      margin-top: 48px;
+      -webkit-box-ordinal-group: 3;
+          -ms-flex-order: 2;
+              order: 2;
+      padding: 8px 0 24px 48px; }
+    .l-integrations > :last-child {
+      -webkit-box-flex: 0;
+          -ms-flex: 0 0 68%;
+              flex: 0 0 68%;
+      -webkit-box-ordinal-group: 2;
+          -ms-flex-order: 1;
+              order: 1;
+      padding-right: 48px; } }
+
+/*
+Offset Bottom
+
+Gives negative bottom margin - used when ghost buttons abut to their containers
+
+Markup:
+<div class="l-offsetbottom">Offset</div>
+
+Styleguide 2.12
+*/
+.l-offsetbottom {
+  margin-bottom: -8px; }
+
+/*
+Offset Bottom
+
+Gives negative left margin - used when ghost buttons abut to their containers
+
+Markup:
+<div class="l-offsetleft">Offset</div>
+
+Styleguide 2.13
+*/
+.l-offsetleft {
+  margin-left: -8px; }
+
+/*
+Offset Bottom
+
+Gives negative right margin - used when ghost buttons abut to their containers
+
+Markup:
+<div class="l-offsetright">Offset</div>
+
+Styleguide 2.14
+*/
+.l-offsetright {
+  margin-right: -8px; }
+
+/*
+Offset Bottom
+
+Gives negative top margin - used when ghost buttons abut to their containers
+
+Markup:
+<div class="l-offsettop">Offset</div>
+
+Styleguide 2.15
+*/
+.l-offsetright {
+  margin-top: -8px; }
+
+/*
+Overflow Horizontal
+
+Contains children that extend 100% width of their container (tables) and offer an overflow scroll.
+
+Markup:
+<div class="l-overflowhorizontal">
+  <sg-insert>3.16-1</sg-insert>
+</div>
+
+Styleguide 2.10
+*/
+.l-overflowhorizontal {
+  max-width: 100%;
+  overflow-x: auto; }
+
+/*
+Overflow List
+
+Used for connection dialogs in pathway and group views.
+
+Markup:
+<section class="l-overflowlist">
+  <header class="l-childrenvertical l-childrenvertical-is-smalldesktop bordered bordered-dark bordered-bottom">
+  	<h1 class="title">Select Completion Badge</h1>
+  	<div class="l-childrenhorizontal l-childrenhorizontal-stackmobile">
+  		<input class="search l-childrenhorizontal-x-offset" placeholder="Filter your badges by name or issuer" type="text">
+  		<sg-insert>3.38-1</sg-insert>
+  	</div>
+  </header>
+  <div class="l-overflowlist-x-list">
+  	<div>
+  		<div>
+  				<h2 class="bordered bordered-dark bordered-bottom title title-small">Pacific Science Center</h2>
+          <sg-insert>3.10-1</sg-insert>
+          <sg-insert>3.10-1</sg-insert>
+          <sg-insert>3.10-1</sg-insert>
+          <sg-insert>3.10-1</sg-insert>
+          <sg-insert>3.10-1</sg-insert>
+  		</div>
+  	</div>
+  </div>
+  <footer>
+  	<div class="bordered bordered-dark bordered-top l-childrenhorizontal l-childrenhorizontal-right">
+  		<button class="button button-secondary">Cancel</button>
+  		<button class="button">Apply</button>
+  	</div>
+  </footer>
+</section>
+
+Styleguide 2.19
+*/
+.l-overflowlist {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  height: 100vh; }
+  .l-overflowlist > header {
+    padding: 24px; }
+  .l-overflowlist > footer > div:last-of-type {
+    padding: 24px; }
+  .l-overflowlist .l-overflowlist-x-list {
+    -webkit-box-flex: 1;
+        -ms-flex: 1;
+            flex: 1;
+    overflow-y: auto; }
+    .l-overflowlist .l-overflowlist-x-list h2 {
+      padding: 24px;
+      /* Keep opaque and the header fully across the container when pinned */
+      background: #fff; }
+  .l-overflowlist .l-overflowlist-x-selected {
+    min-height: 100px;
+    padding: 24px 24px 0; }
+    .l-overflowlist .l-overflowlist-x-selected > *:not(:last-child) {
+      margin-bottom: 24px; }
+    .l-overflowlist .l-overflowlist-x-selected > div {
+      -webkit-box-align: center;
+          -ms-flex-align: center;
+              align-items: center;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap; }
+      .l-overflowlist .l-overflowlist-x-selected > div > * {
+        margin: 0 16px 16px 0; }
+  @media (min-width: 768px) {
+    .l-overflowlist {
+      height: calc(100vh - 48px); } }
+
+/*
+Scroll Pinned
+
+Pins the first child of the element to the top of a scrolling parent.
+
+Implemented by scroll-pin.component.ts
+
+Styleguide 2.11
+*/
+.l-scrollpin {
+  z-index: 3;
+  position: relative; }
+
+/*
+Module Rules
+
+Styleguide 3.0
+*/
+/*
+Article
+
+Styles general-purpose blocks of text.
+
+Markup:
+<article class="article">
+  <h1>Heading 1</h1>
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam augue nisi, blandit sed ante ut, tincidunt ultrices elit. Praesent ullamcorper consectetur elit, a tincidunt dui hendrerit non. Morbi tempus arcu sit amet turpis tempor, ut bibendum ex pulvinar. Donec rutrum egestas eros eu cursus. Nullam ut iaculis est. Etiam egestas nulla eu elit pulvinar faucibus. Maecenas mattis purus massa, in faucibus neque tristique at. Quisque quis sapien in risus blandit ultrices. Nullam vel diam libero.</p>
+  <img src="http://placehold.it/680x340" alt="Example image">
+  <sg-insert>3.16-1</sg-insert>
+</article>
+
+Styleguide 3.15
+*/
+.article > * {
+  margin-bottom: 24px; }
+.article > h1 {
+  color: #05012c;
+  font-size: 24px;
+  font-weight: 600; }
+.article > p {
+  line-height: 1.5;
+  white-space: pre-wrap; }
+.article > img {
+  height: auto;
+  max-width: 100%; }
+.article > table {
+  max-width: 785px; }
+
+/*
+Badge
+
+The most abstract representation of a badge, just the image. The size of the badge module is determined by the size of the image.
+
+Default - Standard thumbnail
+.badge-is-active - Sets a border on the badge to indicate that it's active/selected
+.badge-flat - Removes the base padding
+
+Markup:
+<div class="badge {$modifiers}">
+  <img src="http://placehold.it/68x68" width="68" height="68" alt="Badge Description">
+</div>
+
+Styleguide 3.14
+*/
+.badge {
+  box-sizing: border-box;
+  display: inline-block;
+  padding: 4px;
+  position: relative;
+  -webkit-transition: background-color 0.25s ease-out, box-shadow 0.25s ease-out;
+  transition: background-color 0.25s ease-out, box-shadow 0.25s ease-out; }
+  .badge img {
+    display: block;
+    height: auto;
+    width: 100%; }
+  .badge.badge-is-active {
+    background-color: #fff;
+    box-shadow: 0 0 0 1px #a09eaf; }
+
+:checked + label .badge {
+  background: #fff;
+  box-shadow: 0 0 0 1px #a09eaf; }
+
+.badge-flat {
+  padding: 0; }
+
+/*
+Bordered
+
+Assists in creating borders around custom layouts and containers. Sub modules can be mixed and matched (`.bordered.bordered-light.bordered-top` would put a lighter border on top for example.)
+
+Default - Borders on all sides, default color
+.bordered-light - A lighter border
+.bordered-dark - A darker border
+.bordered-top - Top border
+.bordered-right - Right border
+.bordered-bottom - Bottom border
+.bordered-left - Left border
+
+Markup:
+<div class="bordered {$modifiers}">Bordered</div>
+
+Styleguide 3.18
+*/
+.bordered {
+  border: 1px solid #e1e0e5; }
+  @media (max-width: 1023px) {
+    .bordered.bordered-is-desktoponly {
+      border: 0; } }
+
+.bordered-light {
+  border-color: #e1e0e5; }
+
+.bordered-dark {
+  border-color: #a09eaf; }
+
+.bordered-top {
+  border-bottom: 0;
+  border-left: 0;
+  border-right: 0; }
+
+.bordered-right {
+  border-bottom: 0;
+  border-left: 0;
+  border-top: 0; }
+
+.bordered-bottom {
+  border-left: 0;
+  border-right: 0;
+  border-top: 0; }
+
+.bordered-left {
+  border-bottom: 0;
+  border-right: 0;
+  border-top: 0; }
+
+/*
+Breadcrumb
+
+Markup:
+<ul class="breadcrumb">
+    <li><a href="">Top Level</a></li>
+    <li><a href="">Child Level</a></li>
+    <li><a href="" class="breadcrumb-x-current">Child Level</a></li>
+</ul>
+
+Styleguide 3.19
+*/
+.breadcrumb {
+  border-bottom: 1px solid #e1e0e5;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 14px;
+  padding-bottom: 24px;
+  width: 100%; }
+  .breadcrumb li {
+    color: #a09eaf;
+    padding-right: 24px;
+    position: relative;
+    text-transform: uppercase; }
+    .breadcrumb li:not(:last-child)::after {
+      background-color: #a09eaf;
+      content: '';
+      display: block;
+      height: 100%;
+      position: absolute;
+      right: 10px;
+      top: 0;
+      width: 1px; }
+    .breadcrumb li:last-child a {
+      font-weight: bold; }
+  .breadcrumb a {
+    color: #a09eaf;
+    font-weight: bold;
+    line-height: 1;
+    text-decoration: none;
+    -webkit-transition: color 0.25s ease-out;
+    transition: color 0.25s ease-out; }
+    .breadcrumb a:hover {
+      color: #c30a28; }
+    .breadcrumb a:active {
+      color: #c30a28; }
+  .breadcrumb .breadcrumb-x-current {
+    font-weight: normal;
+    padding-right: 0; }
+
+/*
+Button
+
+Buttons can be either `<button>` or `<a>` elements.
+
+Default - Primary actions
+.button-is-disabled - Disabled button
+.button-primaryghost - Less of a button-looking button, until you hover
+.button-primaryghost.button-is-disabled - Disabled primary ghost button
+.button-secondaryghost - Less of a button-looking button, non-primary color
+.button-secondaryghost.button-is-disabled - Disabled primary ghost secondary button
+.button-major - For something really important, usually in headers
+.button-major.button-is-disabled - This major button is disabled
+.button-large - A larger version of any button
+
+Markup:
+<button class="button {$modifiers}">Button</button>
+
+Styleguide 3.20
+*/
+.button {
+  background-color: #fff;
+  border: 1px solid #c30a28;
+  border-radius: 4px;
+  box-sizing: border-box;
+  color: #c30a28;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 12px 16px;
+  position: relative;
+  text-align: center;
+  text-transform: uppercase;
+  -webkit-transition: background 0.125s ease-out, border-color 0.125s ease-out, color 0.125s ease-out, box-shadow 0.125s ease-out, -webkit-transform 0.125s ease-out;
+  transition: background 0.125s ease-out, border-color 0.125s ease-out, color 0.125s ease-out, box-shadow 0.125s ease-out, -webkit-transform 0.125s ease-out;
+  transition: background 0.125s ease-out, border-color 0.125s ease-out, color 0.125s ease-out, box-shadow 0.125s ease-out, transform 0.125s ease-out;
+  transition: background 0.125s ease-out, border-color 0.125s ease-out, color 0.125s ease-out, box-shadow 0.125s ease-out, transform 0.125s ease-out, -webkit-transform 0.125s ease-out;
+  white-space: nowrap; }
+  .button:not(.button-is-disabled):hover {
+    background-color: #c30a28;
+    box-shadow: 0 0 2px 0 #e1e0e5, 0 2px 2px 0 #a09eaf;
+    color: #fff;
+    text-decoration: none;
+    -webkit-transform: translate3d(0, -2px, 0);
+            transform: translate3d(0, -2px, 0); }
+    .button:not(.button-is-disabled):hover::after {
+      content: '';
+      display: block;
+      height: 2px;
+      left: 0;
+      position: absolute;
+      top: 100%;
+      width: 100%; }
+  .button:not(.button-is-disabled):active {
+    background-color: #f7e1e5;
+    border-color: transparent;
+    box-shadow: none;
+    color: #c30a28;
+    -webkit-transform: none;
+            transform: none; }
+    .button:not(.button-is-disabled):active::after {
+      display: none; }
+  .button.button-is-disabled {
+    cursor: default;
+    opacity: .2; }
+
+.button-primaryghost {
+  background-color: transparent;
+  border-color: transparent;
+  padding-left: 8px;
+  padding-right: 8px; }
+  .button-primaryghost:not(.button-is-disabled):hover {
+    background-color: transparent;
+    border-color: #c30a28;
+    box-shadow: none;
+    color: #c30a28;
+    -webkit-transform: none;
+            transform: none; }
+    .button-primaryghost:not(.button-is-disabled):hover::after {
+      display: none; }
+  .button-primaryghost:not(.button-is-disabled):active {
+    background-color: #f7e1e5;
+    border-color: transparent; }
+
+.button-secondaryghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: #a09eaf;
+  padding-left: 8px;
+  padding-right: 8px; }
+  .button-secondaryghost:not(.button-is-disabled):hover {
+    background-color: #fff;
+    border-color: #a09eaf;
+    box-shadow: none;
+    color: #a09eaf;
+    -webkit-transform: none;
+            transform: none; }
+    .button-secondaryghost:not(.button-is-disabled):hover::after {
+      display: none; }
+  .button-secondaryghost:not(.button-is-disabled):active {
+    background-color: #e1e0e5;
+    border-color: transparent;
+    color: #a09eaf; }
+
+.button-large {
+  font-size: 16px;
+  padding-bottom: 16px;
+  padding-top: 16px; }
+
+.button-major {
+  background-color: #c30a28;
+  color: #fff; }
+
+/*
+Card
+
+Cards wrap lists of badges, pathways, and groups with a consistent "card" appearance.
+
+Default - Used to wrap badges, pathways, and groups
+.card-placeholder - Placeholder for where a new card may go
+
+Markup:
+<div class="card {$modifiers}">
+  <a class="card-x-main" href="">
+    <div class="card-x-image">
+      <sg-insert>3.14-3</sg-insert>
+    </div>
+    <div class="card-x-text">
+      <h1>DCA Training</h1>
+      <small>Pacific Science Center</small>
+      <p>This badge is awarded to students who have completed the Discovery Corps</p>
+    </div>
+  </a>
+  <div class="card-x-actions">
+    <time datetime="2016-05-11">May 11, 2016</time>
+    <button class="button button-secondaryghost l-offsetright l-offsetbottom">Share</button>
+  </div>
+</div>
+
+Styleguide 3.45
+*/
+.card {
+  -webkit-box-align: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
+  background-color: #fff;
+  border: 1px solid #e1e0e5;
+  border-radius: 4px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  font-size: 12px;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  min-height: 128px;
+  -webkit-transition: box-shadow 0.25s ease-out;
+  transition: box-shadow 0.25s ease-out; }
+  .card .card-x-main {
+    color: #252247;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-flex: 1;
+        -ms-flex: 1 0 auto;
+            flex: 1 0 auto;
+    padding: 16px; }
+    .card .card-x-main h1 {
+      color: #c30a28;
+      font-size: 16px; }
+    .card .card-x-main small {
+      color: #78768d; }
+    .card .card-x-main p,
+    .card .card-x-main ul,
+    .card .card-x-main ol {
+      margin-top: 8px; }
+    .card .card-x-main:hover {
+      text-decoration: none; }
+  .card .card-x-image {
+    -webkit-box-flex: 0;
+        -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
+    margin-right: 16px;
+    width: 40px; }
+  .card .card-x-text {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 0;
+            flex: 1 1 0;
+    line-height: 1.5; }
+    .card .card-x-text p {
+      white-space: pre-wrap; }
+    .card .card-x-text ul {
+      -webkit-box-align: start;
+          -ms-flex-align: start;
+              align-items: flex-start;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap;
+      margin-bottom: -8px; }
+    .card .card-x-text li {
+      margin-bottom: 8px;
+      width: 16.666666667%; }
+  .card .card-x-more {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    background-color: #e1e0e5;
+    border-radius: 100%;
+    color: #78768d;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    font-size: 12px;
+    font-weight: bold;
+    height: 40px;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    line-height: 1;
+    text-align: center;
+    width: 40px; }
+    .card .card-x-more span {
+      display: block;
+      font-size: 8px;
+      text-transform: uppercase; }
+  .card .card-x-actions {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    padding: 16px; }
+    .card .card-x-actions time,
+    .card .card-x-actions small {
+      color: #78768d; }
+  .card .card-x-add {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    box-sizing: border-box;
+    color: #c30a28;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    font-size: 14px;
+    font-weight: bold;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    line-height: 1.3;
+    padding: 16px;
+    text-align: center;
+    text-transform: uppercase;
+    width: 100%; }
+    .card .card-x-add:hover {
+      text-decoration: none; }
+    .card .card-x-add::before {
+      background: url("images/card-placeholder.svg") no-repeat;
+      background-size: contain;
+      content: '';
+      display: block;
+      height: 46px;
+      margin-bottom: 16px;
+      width: 46px; }
+  .card:hover {
+    box-shadow: 0 4px 4px 0 #e1e0e5, 0 0 2px 0 #e1e0e5; }
+
+.card-placeholder {
+  border-style: dashed; }
+  .card-placeholder:hover {
+    border-style: solid; }
+
+.card-largeimage .card-x-image {
+  width: 80px; }
+
+/*
+Card Large
+
+Markup:
+<div class="card card-large">
+  <a class="card-x-main" href="">
+      <div class="card-x-image">
+        <div class="badge">
+          <img src="http://placehold.it/80x80" alt="Image description" width="80" height="80">
+        </div>
+      </div>
+      <div class="card-x-text">
+        <h1>Galatic Empire</h1>
+        <p>Finest producer of local-to-this-galaxy Deathstars and Super Star Destroyers. Largest employer in the galaxy.</p>
+        <sg-insert>3.52-1</sg-insert>
+      </div>
+  </a>
+  <div class="card-x-actions">
+    <h2 class="titledivider">Top Badges</h2>
+    <sg-insert>3.48-2</sg-insert>
+    <sg-insert>3.48-2</sg-insert>
+    <sg-insert>3.48-2</sg-insert>
+  </div>
+</div>
+
+Styleguide 3.45.1
+*/
+.card-large {
+  padding: 16px 16px 24px; }
+  .card-large .card-x-main {
+    padding: 0; }
+    .card-large .card-x-main h1 {
+      color: #05012c; }
+  .card-large .card-x-image {
+    width: 40px; }
+  .card-large .card-x-actions {
+    display: none;
+    padding: 0; }
+  @media (min-width: 768px) {
+    .card-large {
+      padding: 24px 24px 32px; }
+      .card-large .card-x-main h1 {
+        color: #c30a28;
+        font-size: 24px; }
+      .card-large .card-x-main p {
+        font-size: 14px;
+        margin-top: 16px; }
+      .card-large .card-x-main ol,
+      .card-large .card-x-main ul {
+        margin-top: 24px; }
+      .card-large .card-x-image {
+        margin-right: 24px;
+        width: 80px; }
+      .card-large .card-x-text {
+        -ms-flex-preferred-size: 432px;
+            flex-basis: 432px;
+        -webkit-box-flex: 0;
+            -ms-flex-positive: 0;
+                flex-grow: 0; } }
+  @media (min-width: 1024px) {
+    .card-large {
+      -webkit-box-align: end;
+          -ms-flex-align: end;
+                  -ms-grid-row-align: flex-end;
+              align-items: flex-end;
+      -webkit-box-orient: horizontal;
+      -webkit-box-direction: normal;
+          -ms-flex-direction: row;
+              flex-direction: row; }
+      .card-large .card-x-main {
+        -ms-flex-negative: 1;
+            flex-shrink: 1; }
+      .card-large .card-x-actions {
+        display: block;
+        -webkit-box-flex: 1;
+            -ms-flex: 1 0 312px;
+                flex: 1 0 312px; }
+        .card-large .card-x-actions > div:not(:last-child) {
+          margin-bottom: 8px; }
+        .card-large .card-x-actions > h2 {
+          margin-bottom: 16px; } }
+
+/*
+Card with Collection
+
+Markup:
+<div class="card card-collection">
+  <a class="card-x-main" href="">
+    <span class="card-x-text">
+      <h1>DCA Training</h1>
+      <small>Pacific Science Center</small>
+      <ul>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <span class="card-x-more">12<span> More</span></span>
+        </li>
+      </ul>
+    </span>
+  </a>
+  <div class="card-x-actions">
+    <sg-insert>3.55-1</sg-insert>
+    <button class="button button-secondaryghost l-offsetright l-offsetbottom">Share</button>
+  </div>
+</div>
+
+Styleguide 3.45.2
+*/
+/*
+Checklist
+
+Default - Expects a checkbox input
+.checklist-radio - Expects a radio input (demo works as a checkbox)
+
+Markup:
+<input class="checklist {$modifiers}" type="checkbox" id="checklist{$modifiers}">
+<label for="checklist{$modifiers}">
+	<span class="badge">
+		<img height="50" width="50" src="http://placehold.it/50x50" alt="Badge Description">
+	</span>
+  <span class="checklist-x-title">
+    <span>
+      Badge Title
+      <span>The Discovery Corps Career Ladder is a youth development program that puts young people on the front line of pacific Science Center's mission to inspire a lifelong interest in science, math and technology.</span>
+    </span>
+    <span>Created: 03/13/2016</span>
+  </span>
+</label>
+
+Styleguide 3.10
+*/
+.checklist {
+  display: none; }
+  .checklist span {
+    display: block; }
+  .checklist + label {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    border-bottom: 1px solid #e1e0e5;
+    cursor: pointer;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    padding-bottom: 8px;
+    padding-top: 8px;
+    -webkit-transition: background-color 0.25s ease-out;
+    transition: background-color 0.25s ease-out;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none; }
+    .checklist + label::before {
+      border-radius: 4px;
+      box-shadow: 0 0 0 2px #e1e0e5 inset;
+      content: '';
+      display: block;
+      -webkit-box-flex: 0;
+          -ms-flex: 0 0 auto;
+              flex: 0 0 auto;
+      height: 22px;
+      margin: 0 24px;
+      -webkit-transition: background-color 0.25s ease-out, box-shadow 0.25s ease-out;
+      transition: background-color 0.25s ease-out, box-shadow 0.25s ease-out;
+      width: 22px; }
+    .checklist + label > * {
+      margin-right: 8px; }
+    .checklist + label .checklist-x-title {
+      -webkit-box-align: center;
+          -ms-flex-align: center;
+              align-items: center;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-flex: 1;
+          -ms-flex: 1 1 auto;
+              flex: 1 1 auto;
+      -webkit-box-pack: justify;
+          -ms-flex-pack: justify;
+              justify-content: space-between; }
+      .checklist + label .checklist-x-title span {
+        display: block;
+        -webkit-box-flex: 1;
+            -ms-flex: 1;
+                flex: 1; }
+        .checklist + label .checklist-x-title span:first-child {
+          font-weight: bold;
+          margin-right: 8px; }
+          .checklist + label .checklist-x-title span:first-child span {
+            display: block;
+            font-weight: normal;
+            line-height: 1.35;
+            margin-top: 8px; }
+        .checklist + label .checklist-x-title span:last-child {
+          text-align: right; }
+  .checklist:checked + label {
+    background-color: #fcfcfc; }
+    .checklist:checked + label::before {
+      background: url("images/checklist.svg") center center no-repeat #c30a28;
+      box-shadow: 0 0 0 0 #c30a28; }
+
+.checklist-radio + label::before {
+  border-radius: 22px; }
+.checklist-radio:checked + label::before {
+  background-image: url("images/checklist-radio.svg"); }
+
+/*
+Confirm Switch
+
+Default - The state before user input
+.confirmswitch-is-active - When the user is prompted to confirm
+
+Markup:
+<div class="confirmswitch {$modifiers}">
+  <div class="l-childrenhorizontal l-childrenhorizontal-stackmobile">
+      <button type="button" class="button button-tertiaryghost">Re-send Verification</button>
+      <button type="button" class="confirmswitch-x-toggle button button-tertiaryghost" onclick="event.target.parentNode.parentNode.classList.toggle('confirmswitch-is-active')">Remove</button>
+      <button type="button" class="button button-tertiaryghost">Make Primary</button>
+  </div>
+  <div class="l-childrenhorizontal l-childrenhorizontal-right l-childrenhorizontal-stackmobile">
+    <p class="l-childrenhorizontal-x-offset"><strong>Are you sure?</strong></p>
+    <button type="button" class="button">Confirm Remove</button>
+    <button type="button" class="confirmswitch-x-toggle button button-tertiaryghost" onclick="event.target.parentNode.parentNode.classList.toggle('confirmswitch-is-active')">Cancel</button>
+  </div>
+</div>
+
+Styleguide 3.21
+*/
+.confirmswitch {
+  position: relative; }
+  .confirmswitch > * {
+    -webkit-transition: opacity 0.25s ease-out;
+    transition: opacity 0.25s ease-out; }
+  .confirmswitch > :first-child {
+    z-index: 2; }
+  .confirmswitch > :last-child {
+    height: 100%;
+    left: 0;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    visibility: hidden;
+    width: 100%;
+    z-index: 1; }
+  .confirmswitch.confirmswitch-is-active > :first-child {
+    height: 100%;
+    left: 0;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    visibility: hidden;
+    width: 100%;
+    z-index: 1; }
+  .confirmswitch.confirmswitch-is-active > :last-child {
+    left: auto;
+    opacity: 1;
+    position: relative;
+    top: auto;
+    visibility: visible;
+    z-index: 2; }
+
+/*
+Connected Badge
+
+Markup:
+<a class="connectedbadge {$modifiers}" href="">
+  <sg-insert>3.14-1</sg-insert>
+  <div>
+    <h1>Touch a Brain</h1>
+    <p>This badge is awarded to students who have demonstrated their ability to handle the sheep brain, allowing visitors to touch it using plastic bags while asking them to compare its size, shape, and color to a model of the human brain.	</p>
+  </div>
+</a>
+
+Styleguide 3.13
+*/
+.connectedbadge {
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  border: 1px solid #e1e0e5;
+  border-radius: 4px;
+  box-sizing: border-box;
+  color: #252247;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 14px;
+  min-height: 130px;
+  padding: 24px;
+  position: relative; }
+  .connectedbadge h1 {
+    color: #252247;
+    font-weight: 600;
+    margin-bottom: 8px; }
+  .connectedbadge p {
+    line-height: 1.35; }
+  .connectedbadge > div:first-of-type {
+    margin-right: 16px; }
+  .connectedbadge > div:last-of-type {
+    margin-top: 4px; }
+  .connectedbadge:hover {
+    color: #252247; }
+
+/*
+Connected Card
+
+Accepts a module and assumes a dismiss button.
+
+Markup:
+<div class="connectedcard {$modifiers}">
+  <button type="button">Remove</button>
+  <sg-insert>3.7-1</sg-insert>
+</div>
+
+Styleguide 3.6
+*/
+.connectedcard {
+  -webkit-box-align: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative; }
+  .connectedcard::after {
+    content: '';
+    display: block;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    -webkit-transition: box-shadow 0.25s ease-out, opacity 0.25s ease-out;
+    transition: box-shadow 0.25s ease-out, opacity 0.25s ease-out;
+    width: 100%;
+    z-index: 1; }
+  .connectedcard > button {
+    background-image: url("images/connectedcard-remove.svg");
+    color: transparent;
+    height: 24px;
+    overflow: hidden;
+    position: absolute;
+    right: 16px;
+    top: 22px;
+    width: 24px;
+    z-index: 3; }
+    .connectedcard > button:hover + * {
+      opacity: .5; }
+  .connectedcard > :last-child {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+    min-width: 0;
+    position: relative;
+    -webkit-transition: opacity 0.25s ease-out;
+    transition: opacity 0.25s ease-out;
+    z-index: 2; }
+  .connectedcard:hover::after {
+    box-shadow: 0 1px 4px 0 rgba(37, 34, 71, 0.3); }
+
+/*
+Connected Card Light
+
+Accepts a module (with a light background) and assumes a dismiss button.
+
+Markup:
+<div class="connectedcard connectedcard-light">
+  <button type="button">Remove</button>
+  <sg-insert>3.13-1</sg-insert>
+</div>
+
+Styleguide 3.6.1
+*/
+.connectedcard-light > button {
+  background-image: url("images/connectedcard-remove-light.svg"); }
+
+/*
+Connected Item
+
+Used to represent connected groups and connected pathways.
+
+Markup:
+<a class="connecteditem" href="">
+  <h1>Blue Group</h1>
+  <p>(19 Members)</p>
+</a>
+
+Styleguide 3.7
+*/
+.connecteditem {
+  background: #c30a28;
+  color: #fff;
+  display: block;
+  padding: 16px 56px 16px 16px; }
+  .connecteditem h1 {
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1.2;
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap; }
+  .connecteditem p {
+    font-size: 14px; }
+  .connecteditem:hover {
+    color: #fff; }
+
+/*
+Detail
+
+Used to present a list of details about an item.
+
+Markup:
+<div class="detail">
+  <article>
+    <h1>Website</h1>
+    <p><a href="http://www.w3.org">www.w3.org</a></p>
+  </article>
+  <article>
+    <h1>Contact Email</h1>
+    <p><a href="mailto:azimalonglastname@wc3.com">azimalonglastname@wc3.com</a></p>
+  </article>
+</div>
+
+Styleguide 3.22
+*/
+.detail article {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap; }
+  .detail article h1 {
+    margin: 0 10px 8px 0; }
+  .detail article:not(:last-child) {
+    margin-bottom: 8px; }
+@media (min-width: 1024px) {
+  .detail {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap; }
+    .detail article {
+      margin-right: 48px; }
+      .detail article h1 {
+        margin-bottom: 0; }
+      .detail article:not(:last-child) {
+        margin-bottom: 0; } }
+
+/*
+Dialog
+
+Default - Standard size
+.dialog-large - Large dialog
+
+Markup:
+<button class="button" aria-controls="dialog{$modifiers}">Open Dialog</button>
+<dialog class="dialog {$modifiers}" id="dialog{$modifiers}">
+        <button class="dialog-x-close" aria-controls="dialog{$modifiers}"><span class="icon icon-notext icon-close">Close</span></button>
+        <div class="dialog-x-content">
+            <h1 class="title">Add Badge</h1>
+            <p>Add a badge you've already received by utilizing one of the options below.</p>
+            <div class="formfield">
+              <p class="formfield-x-label">Upload Badge Image</p>
+              <div class="l-childrenhorizontal l-childrenhorizontal-small">
+                <button class="button">Choose File</button>
+                <p class="small">No file choosen</p>
+              </div>
+            </div>
+            <sg-insert>3.51-1</sg-insert>
+            <div class="formfield">
+              <label>Paste Badge URL</label>
+              <input type="text" placeholder="Enter URL">
+            </div>
+            <button class="button button-secondaryghost l-offsetleft" type="button">Show Advanced</button>
+            <div class="formfield">
+              <label>Paste Badge JSON</label>
+              <textarea></textarea>
+            </div>
+            <div class="l-childrenhorizontal l-childrenhorizontal-small l-childrenhorizontal-right">
+              <button class="button button-primaryghost" type="button">Cancel</button>
+              <button class="button">Add Badge</button>
+            </div>
+        </div>
+</dialog>
+
+Styleguide 3.23
+*/
+.dialog {
+  background: #fff;
+  border: 0;
+  color: #252247;
+  height: 100vh;
+  min-height: 32px;
+  opacity: 0;
+  overflow-y: auto;
+  padding: 0;
+  position: fixed;
+  top: 50%;
+  -webkit-transform: scale3d(0.75, 0.75, 0.75) translateY(-50%);
+          transform: scale3d(0.75, 0.75, 0.75) translateY(-50%);
+  -webkit-transition: opacity 0.25s ease-out, box-shadow 0.25s ease-out, -webkit-transform 0.25s ease-out;
+  transition: opacity 0.25s ease-out, box-shadow 0.25s ease-out, -webkit-transform 0.25s ease-out;
+  transition: opacity 0.25s ease-out, transform 0.25s ease-out, box-shadow 0.25s ease-out;
+  transition: opacity 0.25s ease-out, transform 0.25s ease-out, box-shadow 0.25s ease-out, -webkit-transform 0.25s ease-out;
+  width: 100vw; }
+  .dialog + .backdrop {
+    background: rgba(5, 1, 44, 0.12);
+    opacity: 0;
+    -webkit-transition: opacity 0.25s ease-out;
+    transition: opacity 0.25s ease-out; }
+  .dialog::-webkit-backdrop {
+    background: rgba(5, 1, 44, 0.12);
+    opacity: 0;
+    -webkit-transition: opacity 0.25s ease-out;
+    transition: opacity 0.25s ease-out; }
+  .dialog::backdrop {
+    background: rgba(5, 1, 44, 0.12);
+    opacity: 0;
+    -webkit-transition: opacity 0.25s ease-out;
+    transition: opacity 0.25s ease-out; }
+  .dialog .dialog-x-close {
+    background: url("images/dialog-close.svg");
+    border: 0;
+    cursor: pointer;
+    display: block;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    right: 24px;
+    text-indent: -9999px;
+    top: 24px;
+    width: 24px;
+    z-index: 3; }
+  .dialog .dialog-x-content {
+    padding: 20px 16px 16px; }
+    .dialog .dialog-x-content p {
+      line-height: 1.35; }
+    .dialog .dialog-x-content > *:not(:last-child) {
+      margin-bottom: 16px; }
+  .dialog .dialog-x-footer {
+    padding: 16px 24px; }
+  .dialog.dialog-is-visible {
+    box-shadow: 0 4px 4px 0 rgba(5, 1, 44, 0.12), 0 0 2px 0 rgba(5, 1, 44, 0.12);
+    opacity: 1;
+    -webkit-transform: scale3d(1, 1, 1) translateY(-50%);
+            transform: scale3d(1, 1, 1) translateY(-50%); }
+    .dialog.dialog-is-visible + .backdrop {
+      opacity: 1; }
+    .dialog.dialog-is-visible::-webkit-backdrop {
+      opacity: 1; }
+    .dialog.dialog-is-visible::backdrop {
+      opacity: 1; }
+  @media (min-width: 768px) {
+    .dialog {
+      border-radius: 4px;
+      height: auto;
+      max-height: calc(100vh - 48px);
+      max-width: 440px; } }
+
+.dialog-large {
+  max-width: 865px; }
+
+/*
+Dialog Titled
+
+Markup:
+<button class="button" aria-controls="dialog-titled">Open Dialog</button>
+<dialog class="dialog dialog-titled" id="dialog-titled">
+  <header class="dialog-x-titlebar">
+    <h1>Share Badge</h1>
+    <button class="dialog-x-close" aria-controls="dialog{$modifiers}"><span class="icon icon-notext icon-close">Close</span></button>
+  </header>
+  <div class="dialog-x-content">
+  <sg-insert>3.25.3-1</sg-insert>
+  <div class="l-childrenhorizontal l-childrenhorizontal-spacebetween">
+    <div class="l-childrenhorizontal l-childrenhorizontal-small">
+      <a class="social social-facebook" href="">Facebook</a>
+      <a class="social social-linkedin" href="">LinkedIn</a>
+    </div>
+    <button class="small">Open link in a new window</button>
+  </div>
+  </div>
+</dialog>
+
+Styleguide 3.23.1
+*/
+.dialog-titled .dialog-x-titlebar {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  background: #05012c;
+  color: #fff;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 12px;
+  font-weight: bold;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  padding: 16px;
+  text-transform: uppercase; }
+.dialog-titled .dialog-x-close {
+  background: url("images/dialog-titled-close.svg");
+  position: relative;
+  right: auto;
+  top: auto; }
+
+/*
+Dropzone
+
+Default - A large dropzone, usually as the last item of a list
+.dropzone-inline - For use in smaller "inline" lists
+
+Markup:
+<button class="dropzone {$modifiers}">Dropzone</button>
+
+Styleguide 3.8
+*/
+.dropzone {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  border: 2px dashed #e1e0e5;
+  box-sizing: border-box;
+  cursor: pointer;
+  color: #252247;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  font-size: 14px;
+  font-weight: bold;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  line-height: 1.3;
+  min-height: 230px;
+  padding: 16px;
+  text-align: center;
+  text-transform: uppercase;
+  -webkit-transition: border-color 0.25s ease-out;
+  transition: border-color 0.25s ease-out;
+  width: 100%; }
+  .dropzone::before {
+    background: url("images/dropzone-add.svg") no-repeat;
+    background-size: contain;
+    content: '';
+    display: block;
+    height: 58px;
+    margin-bottom: 16px;
+    width: 58px; }
+  .dropzone:hover, .dropzone:focus, .dropzone.is-active {
+    border-color: #f7e1e5;
+    box-shadow: none;
+    color: #252247; }
+
+.dropzone-inline {
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  min-height: 0; }
+  .dropzone-inline::before {
+    height: 24px;
+    margin-bottom: 0;
+    margin-right: 16px;
+    width: 24px; }
+
+/*
+Empty
+
+Used to indicate an empty state of a list.
+
+Default - Has an avatar image, left aligned
+.empty-table - Center aligned, darker aesthetic. Assumes being nested to empty table heads.
+
+Markup:
+<h1 class="empty {$modifiers}">No Entries</h1>
+
+Styleguide 3.11
+*/
+.empty {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  background-size: #fff;
+  border: 2px solid #e1e0e5;
+  border-radius: 4px;
+  box-sizing: border-box;
+  color: #78768d;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 24px;
+  height: 120px;
+  padding: 16px; }
+  .empty::before {
+    -ms-flex-item-align: start;
+        align-self: flex-start;
+    background: url("images/empty.svg");
+    background-size: contain;
+    content: '';
+    display: block;
+    height: 50px;
+    margin-right: 16px;
+    margin-top: 8px;
+    width: 50px; }
+  @media (min-width: 768px) {
+    .empty::before {
+      -ms-flex-item-align: center;
+          align-self: center;
+      height: 70px;
+      width: 70px; } }
+
+.empty-table {
+  background-color: #fcfcfc;
+  border: 1px solid #e1e0e5;
+  color: #252247;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center; }
+  .empty-table::before {
+    display: none; }
+
+/*
+Empty Illustration
+
+Markup:
+<article class="emptyillustration">
+  <h1>You have no badges</h1>
+  <img src="http://placehold.it/736x314" alt="Illustration description">
+</article>
+
+Styleguide 3.56
+*/
+@-webkit-keyframes emptyillustration {
+  0% {
+    opacity: 0;
+    -webkit-transform: scale3d(0.75, 0.75, 0.75);
+            transform: scale3d(0.75, 0.75, 0.75); }
+  100% {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none; } }
+@keyframes emptyillustration {
+  0% {
+    opacity: 0;
+    -webkit-transform: scale3d(0.75, 0.75, 0.75);
+            transform: scale3d(0.75, 0.75, 0.75); }
+  100% {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none; } }
+.emptyillustration {
+  color: #05012c;
+  font-size: 24px;
+  font-weight: bold;
+  padding-bottom: 160px;
+  text-align: center; }
+  .emptyillustration h1 {
+    margin-bottom: 24px; }
+  .emptyillustration img {
+    -webkit-animation: emptyillustration 0.25s ease-out forwards;
+            animation: emptyillustration 0.25s ease-out forwards;
+    display: block;
+    height: auto;
+    margin: 0 auto;
+    max-width: 100%; }
+  @media (min-width: 768px) {
+    .emptyillustration {
+      padding-bottom: 200px; }
+      .emptyillustration img {
+        max-width: 736px; } }
+
+/*
+Footer
+
+Appears at the bottom of the document
+
+Markup:
+<div class="footer">
+  <ul>
+    <li>Copyright &copy; 2016 <a href="http://concentricsky.com" target="_blank">Concentric Sky, Inc.</a></li>
+    <li>Powered by <a href="" target="_blank">Badgr</a></li>
+  </ul>
+  <a href="" target="_blank">API documentation</a>
+</div>
+
+Styleguide 3.24
+*/
+.footer {
+  border-top: 1px solid #e1e0e5;
+  color: #78768d;
+  font-size: 14px;
+  line-height: 1.5;
+  padding-bottom: 24px;
+  padding-top: 24px;
+  text-align: center; }
+  .footer > *:not(last-child) {
+    margin-bottom: 16px; }
+  .footer a {
+    color: #78768d;
+    -webkit-transition: color 0.25s ease-out;
+    transition: color 0.25s ease-out; }
+    .footer a:hover, .footer a:active {
+      color: #c30a28; }
+  .footer ul a {
+    text-decoration: underline; }
+  .footer > a {
+    color: #a09eaf;
+    font-weight: bold;
+    text-transform: uppercase; }
+  @media (min-width: 768px) {
+    .footer {
+      -webkit-box-align: center;
+          -ms-flex-align: center;
+              align-items: center;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: justify;
+          -ms-flex-pack: justify;
+              justify-content: space-between;
+      padding-bottom: 32px;
+      padding-top: 32px;
+      text-align: left; }
+      .footer ul {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        line-height: 1; }
+        .footer ul > *:not(:last-child) {
+          margin-right: 8px;
+          padding-right: 8px;
+          position: relative; }
+          .footer ul > *:not(:last-child)::after {
+            background-color: #a09eaf;
+            content: '';
+            display: block;
+            height: 100%;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 1px; } }
+
+/*
+Form Checkbox
+
+Markup:
+<label class="formcheckbox" for="remember-me">
+  <input name="remember-me" id="remember-me" type="checkbox">
+  <span class="formcheckbox-x-text">Remember me</span>
+</label>
+
+Styleguide 3.26
+*/
+.formcheckbox {
+  display: block;
+  overflow: hidden;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none; }
+  .formcheckbox input {
+    left: -9999px;
+    position: absolute; }
+  .formcheckbox .formcheckbox-x-text {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    color: #a09eaf;
+    cursor: pointer;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    font-size: 12px;
+    -webkit-transition: color 0.25s ease-out;
+    transition: color 0.25s ease-out; }
+    .formcheckbox .formcheckbox-x-text span {
+      color: #78768d; }
+    .formcheckbox .formcheckbox-x-text::before {
+      background: center center no-repeat;
+      border: 1px solid #e1e0e5;
+      border-radius: 4px;
+      content: '';
+      display: block;
+      height: 16px;
+      margin-right: 8px;
+      -webkit-transition: border-color 0.25s ease-out, background 0.25s ease-out;
+      transition: border-color 0.25s ease-out, background 0.25s ease-out;
+      width: 16px; }
+    .formcheckbox .formcheckbox-x-text:hover::before {
+      border-color: #05012c; }
+  .formcheckbox input:focus + .formcheckbox-x-text::before {
+    border-color: #05012c; }
+  .formcheckbox input:checked + .formcheckbox-x-text {
+    color: rgba(5, 1, 44, 0.54); }
+    .formcheckbox input:checked + .formcheckbox-x-text::before {
+      background-color: #05012c;
+      background-image: url("images/formcheckbox-checked.svg");
+      border-color: #05012c; }
+  .formcheckbox:hover .formcheckbox-x-text {
+    color: rgba(5, 1, 44, 0.54); }
+  .formcheckbox.formcheckbox-is-disabled {
+    opacity: .3;
+    pointer-events: none; }
+
+/*
+Form Field
+
+Formfield is a container on form inputs themselves, which can accept its own states.
+
+Default - Basic static version
+.formfield-locked - Displays a lock icon
+
+Markup:
+<div class="formfield {$modifiers}">
+  <label for="formfield">Label <span>(Required)</span></label>
+  <input id="formfield" type="text" placeholder="Placeholder">
+</div>
+
+Styleguide 3.25
+*/
+/*
+Form Field
+
+Formfield is a container on form inputs themselves, which can accept its own states.
+
+Markup:
+<div class="formfield formfield-is-error">
+  <label for="formfield">Label <span>(Required)</span></label>
+  <input id="formfield" type="text" placeholder="Placeholder">
+  <p class="formfield-x-error">Here is some error text.</p>
+</div>
+
+Styleguide 3.25.1
+*/
+/*
+Form Field (with Select)
+
+Default - Basic static version
+.formfield-is-error - When something has gone wrong
+
+Markup:
+<div class="formfield {$modifiers}">
+  <label for="formfield">Label <span>(Required)</span></label>
+  <select id="formfield">
+    <option value="option1">Option 1</option>
+    <option value="option2">Option 2</option>
+  </select>
+</div>
+
+Styleguide 3.25.2
+*/
+/*
+Form Field (with Textarea)
+
+Default - Basic static version
+.formfield-is-error - When something has gone wrong
+
+Markup:
+<div class="formfield {$modifiers}">
+  <label for="formfield">Label <span>(Required)</span></label>
+  <textarea id="formfield"></textarea>
+</div>
+
+Styleguide 3.25.3
+*/
+/*
+Form Field (with action)
+
+Default - Basic static version
+.formfield-is-error - When something has gone wrong
+
+Markup:
+<div class="formfield {$modifiers}">
+  <label for="formfield">Label <span>(Required)</span></label>
+  <div class="formfield-x-action">
+    <input id="formfield" type="text" value="http://mylink.biz" disabled>
+    <button class="button button-major" type="button">Copy</button>
+  </div>
+</div>
+
+Styleguide 3.25.4
+*/
+.formfield {
+  display: block; }
+  .formfield label,
+  .formfield .formfield-x-label {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    color: #252247;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    font-size: 12px;
+    font-weight: bold;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    margin-bottom: 8px;
+    text-transform: uppercase; }
+    .formfield label span,
+    .formfield .formfield-x-label span {
+      color: #78768d; }
+    .formfield label a,
+    .formfield .formfield-x-label a {
+      font-size: 14px;
+      font-weight: normal;
+      text-transform: none; }
+    .formfield label button,
+    .formfield .formfield-x-label button {
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase; }
+  .formfield input:not([type='checkbox']),
+  .formfield select,
+  .formfield textarea {
+    background: #fff;
+    border: 1px solid rgba(5, 1, 44, 0.38);
+    border-radius: 4px;
+    box-sizing: border-box;
+    display: block;
+    font-size: 14px;
+    line-height: 1.7;
+    min-width: 150px;
+    outline: none;
+    padding: 8px 16px;
+    -webkit-transition: border-color 0.25s ease-out;
+    transition: border-color 0.25s ease-out;
+    width: 100%; }
+    .formfield input:not([type='checkbox'])::-webkit-input-placeholder, .formfield input:not([type='checkbox'])::-webkit-input-placeholder, .formfield input:not([type='checkbox'])::-moz-placeholder, .formfield input:not([type='checkbox']):-ms-input-placeholder,
+    .formfield select::-webkit-input-placeholder,
+    .formfield select::-webkit-input-placeholder,
+    .formfield select::-moz-placeholder,
+    .formfield select:-ms-input-placeholder,
+    .formfield textarea::-webkit-input-placeholder,
+    .formfield textarea::-webkit-input-placeholder,
+    .formfield textarea::-moz-placeholder,
+    .formfield textarea:-ms-input-placeholder {
+      color: #a09eaf; }
+    .formfield input:not([type='checkbox'])::placeholder, .formfield input:not([type='checkbox'])::-webkit-input-placeholder, .formfield input:not([type='checkbox'])::-moz-placeholder, .formfield input:not([type='checkbox']):-ms-input-placeholder,
+    .formfield select::placeholder,
+    .formfield select::-webkit-input-placeholder,
+    .formfield select::-moz-placeholder,
+    .formfield select:-ms-input-placeholder,
+    .formfield textarea::placeholder,
+    .formfield textarea::-webkit-input-placeholder,
+    .formfield textarea::-moz-placeholder,
+    .formfield textarea:-ms-input-placeholder {
+      color: #a09eaf; }
+    .formfield input:not([type='checkbox'])[disabled], .formfield input:not([type='checkbox'])[readonly],
+    .formfield select[disabled],
+    .formfield select[readonly],
+    .formfield textarea[disabled],
+    .formfield textarea[readonly] {
+      color: #a09eaf; }
+    .formfield input:not([type='checkbox']):hover:not([readonly]):not([disabled]),
+    .formfield select:hover:not([readonly]):not([disabled]),
+    .formfield textarea:hover:not([readonly]):not([disabled]) {
+      border-color: #05012c; }
+    .formfield input:not([type='checkbox']):focus:not([readonly]):not([disabled]),
+    .formfield select:focus:not([readonly]):not([disabled]),
+    .formfield textarea:focus:not([readonly]):not([disabled]) {
+      border-color: #78768d; }
+  .formfield select {
+    -webkit-appearance: none;
+       -moz-appearance: none;
+            appearance: none;
+    background-image: url("images/form-dropdown.svg");
+    background-position: calc(100% - 16px) center;
+    background-repeat: no-repeat;
+    padding-right: 32px; }
+    .formfield select::-ms-expand {
+      display: none; }
+  .formfield textarea {
+    resize: vertical; }
+  .formfield .formfield-x-action {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex; }
+    .formfield .formfield-x-action input:not([type='checkbox']),
+    .formfield .formfield-x-action select,
+    .formfield .formfield-x-action textarea {
+      border-bottom-right-radius: 0;
+      border-top-right-radius: 0; }
+    .formfield .formfield-x-action a,
+    .formfield .formfield-x-action button {
+      border-bottom-left-radius: 0;
+      border-top-left-radius: 0; }
+  .formfield .formfield-x-description {
+    font-size: 12px;
+    margin-bottom: 8px; }
+  .formfield .formfield-x-error {
+    color: #f01f31;
+    font-size: 12px;
+    margin-top: 8px; }
+  .formfield.formfield-is-error input,
+  .formfield.formfield-is-error select,
+  .formfield.formfield-is-error textarea {
+    border-color: #f01f31; }
+    .formfield.formfield-is-error input:hover:not([readonly]):not([disabled]), .formfield.formfield-is-error input:focus:not([readonly]):not([disabled]),
+    .formfield.formfield-is-error select:hover:not([readonly]):not([disabled]),
+    .formfield.formfield-is-error select:focus:not([readonly]):not([disabled]),
+    .formfield.formfield-is-error textarea:hover:not([readonly]):not([disabled]),
+    .formfield.formfield-is-error textarea:focus:not([readonly]):not([disabled]) {
+      border-color: #f01f31; }
+
+.formfield-locked input:not([type='checkbox']),
+.formfield-locked select,
+.formfield-locked textarea {
+  background: #fff url("images/formfield-locked.svg") 16px center no-repeat;
+  padding-left: 40px; }
+
+/*
+Form Image
+
+Markup:
+<div class="formimage">
+  <p>Issuer Image</p>
+  <input type="file" accept="image/*" name="issuer_image" id="issuer_image">
+  <label for="issuer_image">
+    <span class="formimage-x-image">
+      <img src="/images/placeholderavatar.svg" alt="Placeholder image" width="80" height="80">
+    </span>
+    <span class="formimage-x-text">
+      <span class="formimage-x-label">Drop image or <span>browse</span>.</span>
+      <span class="formimage-x-button button button-primaryghost l-offsetleft l-offsetbottom">Change</span>
+    </span>
+  </label>
+</div>
+
+
+Styleguide 3.27
+*/
+.formimage p {
+  color: #252247;
+  font-size: 12px;
+  font-weight: bold;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  margin-bottom: 8px;
+  text-transform: uppercase; }
+.formimage input {
+  display: none; }
+.formimage label {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  border: 1px dashed #a09eaf;
+  border-radius: 4px;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  padding: 16px;
+  -webkit-transition: border-color 0.25s ease-out, border-style 0.25s ease-out;
+  transition: border-color 0.25s ease-out, border-style 0.25s ease-out; }
+  .formimage label:hover, .formimage label:focus {
+    border-color: #05012c;
+    border-style: solid; }
+.formimage .formimage-x-image {
+  display: block;
+  margin-right: 16px; }
+  .formimage .formimage-x-image img {
+    display: block; }
+.formimage .formimage-x-text {
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column; }
+.formimage .formimage-x-label {
+  color: #78768d;
+  font-size: 14px; }
+  .formimage .formimage-x-label span {
+    color: #c30a28; }
+.formimage .formimage-x-button {
+  margin-top: 8px; }
+
+/*
+Form Inline
+
+Markup:
+<form action="" class="forminline">
+  <div class="formfield">
+    <label for="id" class="visuallyhidden">Email</label>
+    <input type="text" name="name" id="id">
+  </div>
+  <button type="submit" class="button">Add Email</button>
+</form>
+
+Styleguide 3.28
+*/
+.forminline {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex; }
+  .forminline > :first-child {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 0 auto;
+            flex: 1 0 auto; }
+  .forminline > :last-child {
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 auto;
+            flex: 0 0 auto; }
+  @media (max-width: 768px) {
+    .forminline > :first-child input {
+      border-bottom-right-radius: 0;
+      border-right: 0;
+      border-top-right-radius: 0; }
+    .forminline > :last-child {
+      border-bottom-left-radius: 0;
+      border-top-left-radius: 0; } }
+  @media (min-width: 768px) {
+    .forminline > :first-child {
+      margin-right: 16px; } }
+  @media (min-width: 1024px) {
+    .forminline > :first-child {
+      -webkit-box-flex: 0;
+          -ms-flex: 0 0 320px;
+              flex: 0 0 320px; } }
+
+/*
+Form Message
+
+Positioning is controlled by main under layouts
+
+Default - Hidden by default
+.formmessage-is-active - Activates/shows the form message
+.formmessage-is-active.formmessage-is-error - Error
+.formmessage-is-active.formmessage-is-pending - Pending
+.formmessage-is-active.formmessage-is-success - Success
+
+Markup:
+<div class="formmessage {$modifiers}">
+  <p>Message</p>
+  <button class="icon icon-close-light icon-right" type="button" onclick="event.target.parentNode.classList.remove('formmessage-is-active')">Dismiss</button>
+</div>
+
+Styleguide 3.29
+*/
+.formmessage {
+  background-color: #c30a28;
+  box-sizing: border-box;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0;
+  padding: 16px;
+  position: relative;
+  text-align: center;
+  -webkit-transform: translate3d(0, -100%, 0);
+          transform: translate3d(0, -100%, 0);
+  -webkit-transition: opacity 0.25s ease-out, -webkit-transform 0.25s ease-out;
+  transition: opacity 0.25s ease-out, -webkit-transform 0.25s ease-out;
+  transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+  transition: transform 0.25s ease-out, opacity 0.25s ease-out, -webkit-transform 0.25s ease-out;
+  width: 100%;
+  z-index: 2; }
+  .formmessage button {
+    background: url("images/formmessage-close.svg") right center no-repeat;
+    color: #fff;
+    font-size: 14px;
+    padding-right: 24px;
+    position: absolute;
+    right: 16px;
+    text-indent: -9999px;
+    top: calc(50% - 8px); }
+  .formmessage p {
+    line-height: 1.5;
+    padding-left: 48px;
+    padding-right: 48px; }
+  .formmessage.formmessage-is-active {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none; }
+  .formmessage.formmessage-is-error {
+    background-color: #f01f31; }
+  .formmessage.formmessage-is-pending {
+    background-color: #ffb500; }
+  .formmessage.formmessage-is-success {
+    background-color: #93ab23; }
+  @media (min-width: 768px) {
+    .formmessage button {
+      text-indent: 0; }
+    .formmessage p {
+      padding-left: 80px;
+      padding-right: 80px; } }
+
+/*
+Form Submit
+
+Markup:
+<div class="formsubmit">
+  <sg-insert>3.26-1</sg-insert>
+  <div>
+    <sg-insert>3.20-1</sg-insert>
+    <a href="">Forgot Password?</a>
+  </div>
+</div>
+
+Styleguide 3.30
+*/
+.formsubmit {
+  padding-top: 8px; }
+  .formsubmit > *:not(:last-child) {
+    margin-bottom: 16px; }
+  .formsubmit button {
+    width: 100%; }
+  .formsubmit div {
+    text-align: center; }
+    .formsubmit div a,
+    .formsubmit div button {
+      display: block; }
+    .formsubmit div > *:not(:last-child) {
+      margin-bottom: 16px; }
+  @media (min-width: 768px) {
+    .formsubmit {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: justify;
+          -ms-flex-pack: justify;
+              justify-content: space-between; }
+      .formsubmit button {
+        width: auto; }
+      .formsubmit div {
+        -webkit-box-align: end;
+            -ms-flex-align: end;
+                align-items: flex-end;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-flex: 1;
+            -ms-flex: 1 0 auto;
+                flex: 1 0 auto;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+            -ms-flex-direction: column;
+                flex-direction: column;
+        -webkit-box-pack: end;
+            -ms-flex-pack: end;
+                justify-content: flex-end;
+        text-align: left; } }
+
+/*
+Heading
+
+Default - Stanard heading
+.heading-small - Smaller version
+
+Markup:
+<header class="heading {$modifiers}">
+    <div class="heading-x-image">
+      <img srcset="http://placehold.it/140x80 2x" src="http://placehold.it/70x40" alt="Web Design and Programming logo">
+    </div>
+    <div class="heading-x-text">
+        <h1>Web Design and Programming <span>12 of Something</span> <button class="heading-x-edit" type="button">Edit</button></h1>
+        <p>World Wide Web Consortium</p>
+    </div>
+    <div class="heading-x-actions">
+        <a href class="button">Create Badge</a>
+    </div>
+</header>
+
+Styleguide 3.5
+*/
+.heading {
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  box-sizing: border-box;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column; }
+  .heading .heading-x-image {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    -ms-flex-item-align: start;
+        align-self: flex-start;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 40px;
+            flex: 0 0 40px;
+    height: 40px;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    margin-bottom: 16px;
+    margin-right: 16px;
+    max-width: 40px;
+    width: 40px; }
+    .heading .heading-x-image a {
+      display: block;
+      width: 100%; }
+    .heading .heading-x-image img {
+      display: block;
+      max-height: 100%;
+      max-width: 100%; }
+  .heading .heading-x-text {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto; }
+    .heading .heading-x-text > *:not(:only-child):not(:last-child) {
+      margin-bottom: 16px; }
+    .heading .heading-x-text a:not(.button) {
+      color: #05012c; }
+    .heading .heading-x-text small {
+      color: #78768d;
+      font-size: 14px; }
+    .heading .heading-x-text > h1 {
+      color: #05012c;
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 1.35;
+      margin-bottom: 8px; }
+      .heading .heading-x-text > h1 span {
+        color: #78768d;
+        font-size: 14px;
+        font-weight: normal; }
+      .heading .heading-x-text > h1:only-child {
+        margin-bottom: 0; }
+    .heading .heading-x-text > h2 {
+      -webkit-box-align: center;
+          -ms-flex-align: center;
+              align-items: center;
+      color: #78768d;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      font-size: 12px;
+      max-width: 560px; }
+      .heading .heading-x-text > h2::after {
+        background-color: #e1e0e5;
+        content: '';
+        display: block;
+        height: 1px;
+        -webkit-box-flex: 1;
+            -ms-flex: 1 1 0;
+                flex: 1 1 0;
+        margin-left: 8px; }
+    .heading .heading-x-text > h3 {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 7px !important; }
+    .heading .heading-x-text > p,
+    .heading .heading-x-text > ul,
+    .heading .heading-x-text > ol {
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 560px; }
+  .heading .heading-x-meta {
+    color: rgba(5, 1, 44, 0.38);
+  }
+  .heading .heading-x-edit {
+    background: url("images/heading-edit.svg") left center no-repeat;
+    color: rgba(5, 1, 44, 0.38);
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    padding-left: 24px;
+    text-transform: uppercase; }
+  .heading .heading-x-actions {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    margin-top: 16px; }
+    .heading .heading-x-actions > *:not(:last-child) {
+      margin-bottom: 8px; }
+  @media (min-width: 768px) {
+    .heading .heading-x-text h1 {
+      font-size: 42px;
+      font-weight: bold;
+      line-height: 1;
+      margin-bottom: 16px; }
+      .heading .heading-x-text h1 span {
+        font-size: 16px; } }
+  @media (min-width: 1024px) {
+    .heading {
+      -webkit-box-orient: horizontal;
+      -webkit-box-direction: normal;
+          -ms-flex-direction: row;
+              flex-direction: row;
+      -webkit-box-pack: justify;
+          -ms-flex-pack: justify;
+              justify-content: space-between; }
+      .heading .heading-x-image {
+        -webkit-box-flex: 0;
+            -ms-flex: 0 0 70px;
+                flex: 0 0 70px;
+        height: 70px;
+        margin-right: 24px;
+        max-width: 70px;
+        width: 70px; }
+      .heading .heading-x-text {
+        -webkit-box-flex: 1;
+            -ms-flex: 1 1 60%;
+                flex: 1 1 60%; }
+      .heading .heading-x-actions {
+        -webkit-box-flex: 1;
+            -ms-flex: 1 1 0;
+                flex: 1 1 0;
+        margin-top: 0; } }
+
+.heading-small {
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+              -ms-grid-row-align: flex-start;
+          align-items: flex-start; }
+  .heading-small .heading-x-text {
+    margin-bottom: 16px; }
+    .heading-small .heading-x-text h1,
+    .heading-small .heading-x-text p {
+      font-size: 14px; }
+    .heading-small .heading-x-text h1 {
+      margin-bottom: 16px; }
+  @media (min-width: 768px) {
+    .heading-small .heading-x-image {
+      -ms-flex-item-align: start;
+          align-self: flex-start; }
+    .heading-small .heading-x-text {
+      margin-bottom: 0; }
+      .heading-small .heading-x-text h1 {
+        margin-bottom: 4px; } }
+  @media (min-width: 1024px) {
+    .heading-small .heading-x-text h1 {
+      font-size: 24px; }
+    .heading-small .heading-x-text p {
+      font-size: 16px; } }
+
+/*
+Header
+
+`<header.header>`'s position is on the page is controlled under the base layout rules. `<header.header>` contains `.menuitem` modules.
+
+Markup:
+<header class="header">
+	<a href="/">
+		<picture>
+			<source media="(min-width: 640px)" srcset="images/logo-desktop.svg">
+			<img src="images/logo.svg" alt="Badgr logo">
+		</picture>
+	</a>
+	<a class="header-x-menu" href="#navigation">Main Navigation</a>
+</header>
+
+Styleguide 3.1
+*/
+.header {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  background-color: #fff;
+  border-bottom: 1px solid #e1e0e5;
+  box-shadow: 0 2px 0 0 #e1e0e5;
+  box-sizing: border-box;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  height: 78px;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  width: 100%;
+  z-index: 3; }
+  .header .header-x-menu {
+    background: url("images/header-menu.svg") center center no-repeat;
+    color: transparent;
+    display: block;
+    height: 24px;
+    overflow: hidden;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+    width: 24px; }
+  @media (min-width: 768px) {
+    .header .header-x-menu {
+      display: none; } }
+
+/*
+Hidden
+
+This module hides any element with this class, optionally each state can show the element for certain breakpoints.
+
+Default - Nothing happens
+.hidden-is-tablet - Only shows for tablets and up
+.hidden-is-desktop - Only shows for desktops and up
+
+Markup:
+<div class="hidden {$modifiers}">Hidden</div>
+
+Styleguide 3.46
+*/
+@media (max-width: 767px) {
+  .hidden.hidden-is-tablet {
+    display: none !important; } }
+@media (max-width: 1023px) {
+  .hidden.hidden-is-desktop {
+    display: none !important; } }
+
+/*
+Inactive
+
+When you need to isolate a single item on the page, apply this to all other siblings.
+
+Markup:
+<p>Active</p>
+<p class="inactive">Inactive</p>
+
+Styleguide 3.9
+*/
+@-webkit-keyframes inactive {
+  0% {
+    opacity: 1; }
+  100% {
+    opacity: .1; } }
+@keyframes inactive {
+  0% {
+    opacity: 1; }
+  100% {
+    opacity: .1; } }
+.inactive {
+  -webkit-animation: inactive 0.25s ease-out forwards;
+          animation: inactive 0.25s ease-out forwards;
+  pointer-events: none; }
+
+/*
+Integration
+
+Markup:
+<article class="integration">
+  <h1>Integrating Badgr into Canvas</h1>
+  <ol>
+    <li>Make sure your Badgr account has the <a href="">email address confirmed</a> that you log into Canvas with.</li>
+    <li>In Canvas: <strong>a)</strong> Go to Settings, <strong>b)</strong> select Apps, and <strong>c)</strong> click the Add App button.
+      <ol>
+        <li>
+          <a class="integrationthumb" href="#integration-1-1" data-index="0">
+            <span>A<span> (Open Thumnail)</span></span>
+            <img srcset="http://placehold.it/396x288 2x" src="http://placehold.it/198x154" alt="thumbnail description">
+          </a>
+        </li>
+        <li>
+          <a class="integrationthumb" href="#integration-1-2" data-index="1">
+            <span>B<span> (Open Thumnail)</span></span>
+            <img srcset="http://placehold.it/396x288 2x" src="http://placehold.it/198x154" alt="thumbnail description">
+          </a>
+        </li>
+        <li>
+          <a class="integrationthumb" href="#integration-1-3" data-index="2">
+            <span>C<span> (Open Thumnail)</span></span>
+            <img srcset="http://placehold.it/396x288 2x" src="http://placehold.it/198x154" alt="thumbnail description">
+          </a>
+        </li>
+      </ol>
+    </li>
+    <li>Select the Add URL method, and fill out the form using the Consumer Key, Shared Secret and Confif URL, shown below.
+      <ol>
+        <li>
+          <a class="integrationthumb" href="#integration-1-3" data-index="2">
+            <span><span> (Open Thumnail)</span></span>
+            <img srcset="http://placehold.it/396x288 2x" src="http://placehold.it/198x154" alt="thumbnail description">
+          </a>
+        </li>
+      </ol>
+    </li>
+</article>
+
+Styleguide 3.53
+*/
+.integration h1 {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3; }
+.integration > ol > li {
+  font-size: 14px;
+  line-height: 1.7;
+  list-style: decimal outside;
+  margin-bottom: 24px;
+  margin-left: 1em;
+  padding-left: 8px; }
+.integration > ol ol {
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  margin-top: 8px; }
+  .integration > ol ol li:not(:last-child) {
+    margin-bottom: 16px; }
+.integration > *:not(:last-child) {
+  margin-bottom: 16px; }
+@media (min-width: 768px) {
+  .integration > ol ol {
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: row;
+            flex-direction: row;
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+    margin-bottom: -16px; }
+    .integration > ol ol li {
+      margin-bottom: 16px; }
+      .integration > ol ol li:not(:last-child) {
+        margin-right: 16px; } }
+
+/*
+Integration Thumbnail
+
+Markup:
+<a class="integrationthumb" href="#integration-1-1" data-index="0">
+  <span>A<span> (Open Thumnail)</span></span>
+  <img srcset="http://placehold.it/396x288 2x" src="http://placehold.it/198x154" alt="thumbnail description">
+</a>
+
+Styleguide 3.54
+*/
+.integrationthumb {
+  border: 1px solid rgba(5, 1, 44, 0.12);
+  border-radius: 4px;
+  display: block;
+  overflow: hidden;
+  position: relative; }
+  .integrationthumb > span {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    background-color: #05012c;
+    bottom: 0;
+    box-sizing: border-box;
+    color: #fff;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    font-weight: bold;
+    height: 30px;
+    left: 0;
+    padding-left: 8px;
+    padding-right: 8px;
+    position: absolute;
+    text-transform: lowercase;
+    width: 100%; }
+    .integrationthumb > span span {
+      background: url("images/integrationthumb.svg") center center no-repeat;
+      color: transparent;
+      height: 20px;
+      position: absolute;
+      right: 8px;
+      top: calc(50% - 10px);
+      -webkit-user-select: none;
+         -moz-user-select: none;
+          -ms-user-select: none;
+              user-select: none;
+      width: 20px; }
+  .integrationthumb img {
+    display: block; }
+
+/*
+Issuer
+
+Markup:
+<article class="issuer">
+  <header class="heading heading-small">
+    <div class="heading-x-image">
+      <img srcset="http://placehold.it/800x800 2x" src="http://placehold.it/400x400" alt="Web Design and Programming logo">
+    </div>
+    <div class="heading-x-text">
+      <h1>Web Design and Programming</h1>
+      <p>World Wide Web Consortium</p>
+    </div>
+    <div class="heading-x-actions">
+      <a href="" class="button button-tertiaryghost">View Issuer</a>
+    </div>
+  </header>
+  <section>
+    <h1>Most Recently Issued Badges <strong>22 Badges Total</strong></h1>
+    <div class="issuer-x-badges">
+      <article>
+        <div>
+          <img srcset="http://placehold.it/160x160 2x" src="http://placehold.it/80x80" alt="Badge description">
+        </div>
+        <div>
+          <h1><a href="">HTML/CSS</a></h1>
+          <p><strong>5 Earners</strong></p>
+          <p>Fundamentals of HTML and Building a website.</p>
+        </div>
+      </article>
+      <article>
+        <div>
+          <img srcset="http://placehold.it/160x160 2x" src="http://placehold.it/80x80" alt="Badge description">
+        </div>
+        <div>
+          <h1><a href="">HTML/CSS</a></h1>
+          <p><strong>5 Earners</strong></p>
+          <p>Fundamentals of HTML and Building a website.</p>
+        </div>
+      </article>
+      <article>
+        <div>
+          <img srcset="http://placehold.it/160x160 2x" src="http://placehold.it/80x80" alt="Badge description">
+        </div>
+        <div>
+          <h1><a href="">HTML/CSS</a></h1>
+          <p><strong>5 Earners</strong></p>
+          <p>Fundamentals of HTML and Building a website.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+</article>
+
+Styleguide 3.31
+*/
+.issuer {
+  border: 2px solid #e1e0e5;
+  border-radius: 4px; }
+  .issuer a {
+    color: #05012c; }
+  .issuer header {
+    padding: 16px; }
+  .issuer > section > h1 {
+    border-top: 1px solid #e1e0e5;
+    box-sizing: border-box;
+    display: none;
+    padding: 16px;
+    width: 100%; }
+  .issuer h1 strong {
+    padding-left: 24px; }
+  .issuer strong {
+    color: #93ab23;
+    font-weight: bold; }
+  .issuer article {
+    border-top: 1px solid #e1e0e5;
+    box-sizing: border-box;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    padding: 16px; }
+    .issuer article h1,
+    .issuer article p {
+      line-height: 1.35;
+      margin-bottom: 8px; }
+    .issuer article p:last-child {
+      padding-top: 8px; }
+    .issuer article img {
+      display: block;
+      height: auto;
+      width: 100%; }
+    .issuer article h1 {
+      font-weight: 600; }
+    .issuer article > :first-child {
+      -webkit-box-flex: 0;
+          -ms-flex: 0 0 40px;
+              flex: 0 0 40px;
+      margin-right: 16px; }
+  @media (min-width: 768px) {
+    .issuer > section > h1 {
+      display: block; }
+    .issuer article p:last-child {
+      padding-top: 0; }
+    .issuer article > :first-child {
+      -ms-flex-preferred-size: 90px;
+          flex-basis: 90px; } }
+  @media (min-width: 1024px) {
+    .issuer .issuer-x-badges {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex; }
+    .issuer article {
+      -webkit-box-flex: 1;
+          -ms-flex: 1;
+              flex: 1; }
+      .issuer article > :first-child {
+        -ms-flex-preferred-size: 70px;
+            flex-basis: 70px; }
+      .issuer article:not(:last-child) {
+        border-right: 1px solid #e1e0e5; } }
+  @media (min-width: 1440px) {
+    .issuer article {
+      padding: 32px; }
+      .issuer article > :first-child {
+        -ms-flex-preferred-size: 85px;
+            flex-basis: 85px;
+        margin-right: 32px; }
+    .issuer header {
+      margin: 32px; }
+    .issuer > section > h1 {
+      padding-left: 32px;
+      padding-right: 32px; } }
+
+/*
+Link List
+
+Displays a list of links associated with an item.
+
+Markup:
+<ul class="linklist">
+  <li><a href=""><img src="http://placehold.it/48x48" alt="text" width="24" height="24">Text</a></li>
+  <li><a href="">Text</a></li>
+</ul>
+
+Styleguide 3.32
+*/
+.linklist li {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex; }
+  .linklist li:not(:last-child) {
+    margin-bottom: 8px; }
+  .linklist li > *:not(:last-child) {
+    margin-right: 12px; }
+.linklist a {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex; }
+.linklist button {
+  color: #c30a28; }
+.linklist img {
+  display: block;
+  height: 24px;
+  margin-right: 12px;
+  width: 24px; }
+@media (min-width: 768px) {
+  .linklist {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex; }
+    .linklist li:not(:first-child) {
+      padding-left: 16px; }
+    .linklist li:not(:last-child) {
+      border-right: 2px solid #e1e0e5;
+      margin-bottom: 0;
+      padding-right: 16px; } }
+
+/*
+Loading
+
+Large message displayed when the app/view is loading.
+
+Markup:
+<div class="loading">
+  <p>Loading&hellip;</p>
+</div>
+
+Styleguide 3.33
+*/
+.loading {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  height: 100%;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%; }
+  .loading p {
+    color: #78768d;
+    display: inline-block;
+    font-size: 24px;
+    padding-left: 44px;
+    position: relative; }
+    .loading p::after {
+      content: '';
+      display: block;
+      -webkit-animation: rotate .75s ease-in-out infinite forwards;
+              animation: rotate .75s ease-in-out infinite forwards;
+      border: 4px solid #93ab23;
+      border-radius: 50%;
+      border-right-color: transparent;
+      box-sizing: border-box;
+      height: 36px;
+      left: 0;
+      position: absolute;
+      top: calc(50% - 18px);
+      width: 36px; }
+
+.dots {
+  font-size: 10px;
+  position: relative;
+  width: 4em;
+  height: 1em;
+  margin: 100px auto; }
+  .dots.inline {
+    position: absolute;
+    top: 0.5em;
+    margin: 0 auto; }
+  .dots .dot {
+    width: 1em;
+    height: 1em;
+    border-radius: 0.5em;
+    background: #262929;
+    position: absolute;
+    -webkit-animation: fade 2s ease infinite;
+            animation: fade 2s ease infinite;
+    opacity: 0; }
+    .dots .dot:nth-child(1) {
+      left: 0; }
+    .dots .dot:nth-child(2) {
+      left: 1.5em;
+      -webkit-animation-delay: 0.2s;
+              animation-delay: 0.2s; }
+    .dots .dot:nth-child(3) {
+      left: 3em;
+      -webkit-animation-delay: 0.5s;
+              animation-delay: 0.5s; }
+
+@-webkit-keyframes fade {
+  0% {
+    opacity: 0; }
+  50% {
+    opacity: 1; }
+  100% {
+    opacity: 0; } }
+
+@keyframes fade {
+  0% {
+    opacity: 0; }
+  50% {
+    opacity: 1; }
+  100% {
+    opacity: 0; } }
+/*
+Loading Error
+
+Markup:
+<div class="loadingerror {$modifiers}">
+  <p>Message</p>
+  <button class="icon icon-close-light icon-right" type="button" onclick="event.target.parentNode.classList.remove('formmessage-is-active')">Dismiss</button>
+</div>
+
+Styleguide 3.49
+*/
+.loadingerror {
+  display: block;
+  text-align: center;
+  padding: 48px; }
+  .loadingerror p {
+    display: inline-block;
+    border: 1px solid #c30a28;
+    box-sizing: border-box;
+    color: #c30a28;
+    font-size: 24px;
+    font-weight: 600;
+    position: relative;
+    text-align: center;
+    z-index: 2;
+    margin: auto;
+    line-height: 1.5;
+    padding: 48px; }
+
+.menu {
+  background-color: #05012c;
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding-top: 32px; }
+  @media (min-width: 768px) {
+    .menu {
+      background-color: transparent;
+      min-height: 0;
+      padding-right: 40px;
+      padding-top: 0; }
+      .menu > ul {
+        -webkit-box-align: center;
+            -ms-flex-align: center;
+                align-items: center;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        height: 78px; }
+        .menu > ul > li {
+          margin-left: 8px; } }
+  @media (min-width: 1088px) {
+    .menu {
+      padding-right: calc(50vw - 512px); } }
+
+/*
+Menu Item
+
+Menu items are the individual targets within the `<header.header>` module.
+
+Default - Default state
+.menuitem-is-active - Sets the menu item as the currently active page
+.menuitem-is-open - Opens the nested set of menu items
+
+Markup:
+<div class="menuitem {$modifiers}">
+  <button type="button">Profile</button>
+  <ul>
+    <li class="menuitem-secondary"><a href="#">Profile</a></li>
+    <li class="menuitem-secondary"><a href="#">LTI Info</a></li>
+    <li class="menuitem-secondary"><a href="#">Log Out</a></li>
+  </ul>
+</div>
+
+Styleguide 3.2
+*/
+.menuitem {
+  position: relative; }
+  .menuitem a,
+  .menuitem button {
+    -webkit-appearance: none;
+       -moz-appearance: none;
+            appearance: none;
+    box-sizing: border-box;
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    text-transform: uppercase;
+    -webkit-transition: background-color 0.125s ease-out, border-color 0.125s ease-out, color 0.125s ease-out;
+    transition: background-color 0.125s ease-out, border-color 0.125s ease-out, color 0.125s ease-out; }
+  .menuitem ul {
+    display: none;
+    z-index: 3; }
+  .menuitem.menuitem-is-open ul {
+    display: block; }
+  @media (max-width: 767px) {
+    .menuitem a,
+    .menuitem button {
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      padding: 16px;
+      text-align: left;
+      width: 100%; }
+    .menuitem button {
+      background-image: url("images/menuitem.svg");
+      background-position: calc(100% - 16px) center;
+      background-repeat: no-repeat;
+      cursor: pointer;
+      padding-right: 44px;
+      position: relative; }
+      .menuitem button:hover {
+        background-image: url("images/menuitem-hover.svg"); }
+    .menuitem:hover > a,
+    .menuitem:hover > button, .menuitem.menuitem-is-active > a,
+    .menuitem.menuitem-is-active > button, .menuitem.menuitem-is-open > a,
+    .menuitem.menuitem-is-open > button {
+      background-color: #fff;
+      border-top: 1px solid #e1e0e5;
+      color: #c30a28; }
+    .menuitem:hover button, .menuitem.menuitem-is-active button, .menuitem.menuitem-is-open button {
+      background-image: url("images/menuitem-hover.svg"); } }
+  @media (min-width: 768px) {
+    .menuitem a,
+    .menuitem button {
+      color: #c30a28;
+      padding: 12px 8px; }
+      .menuitem a:hover,
+      .menuitem button:hover {
+        border-color: #c30a28; }
+      .menuitem a:active,
+      .menuitem button:active {
+        background-color: #f7e1e5;
+        border-color: transparent; }
+    .menuitem > a,
+    .menuitem > button {
+      border: 1px solid transparent;
+      border-radius: 4px; }
+    .menuitem > button {
+      background-image: url("images/menuitem-desktop.svg");
+      background-position: calc(100% - 8px) center;
+      background-repeat: no-repeat;
+      padding-right: 24px; }
+    .menuitem ul {
+      background-color: #fff;
+      border-radius: 4px;
+      box-shadow: 0 4px 5px 0 #e1e0e5, 0 0 4px 0 #e1e0e5;
+      position: absolute;
+      right: 0;
+      top: calc(100% + 16px);
+      width: 145px; }
+      .menuitem ul::before {
+        background-color: #fff;
+        box-shadow: 0.5px 0.5px 1px 0 #e1e0e5;
+        content: '';
+        height: 16px;
+        position: absolute;
+        right: 16px;
+        top: -8px;
+        -webkit-transform: rotate(-135deg);
+                transform: rotate(-135deg);
+        width: 16px; }
+    .menuitem.menuitem-is-active > a,
+    .menuitem.menuitem-is-active > button, .menuitem.menu-item-is-open > a,
+    .menuitem.menu-item-is-open > button {
+      background-color: #f7e1e5;
+      border-color: transparent; } }
+
+@media (max-width: 767px) {
+  .menuitem-secondary > a {
+    background-color: #f7f7f7;
+    border-top: 1px solid #e1e0e5;
+    color: #c30a28; }
+    .menuitem-secondary > a:hover {
+      background-color: #c30a28;
+      color: #fff; }
+    .menuitem-secondary > a:active {
+      background-color: #f7e1e5;
+      color: #c30a28; } }
+@media (min-width: 768px) {
+  .menuitem-secondary > a {
+    border: 0;
+    border-radius: 0; }
+    .menuitem-secondary > a:hover {
+      background-color: #c30a28;
+      border-top-color: transparent;
+      color: #fff; }
+    .menuitem-secondary > a:active {
+      background-color: #f7e1e5;
+      color: #c30a28; }
+  .menuitem-secondary:first-of-type > a {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px; }
+  .menuitem-secondary:last-of-type > a {
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px; }
+  .menuitem-secondary:not(:first-of-type) > a {
+    border-top: 1px solid #e1e0e5; } }
+
+/*
+Menu More
+
+Default - Closed state
+.menumore-is-active - Open state
+
+Markup:
+<div class="menumore {$modifiers}">
+	<button aria-controls="menumore1" type="button">
+		Toggle Menu
+	</button>
+	<ul aria-hidden="true">
+		<li><sg-insert>3.35-1</sg-insert></li>
+		<li><sg-insert>3.35-1</sg-insert></li>
+		<li><sg-insert>3.35-1</sg-insert></li>
+	</ul>
+</div>
+
+Styleguide 3.34
+*/
+.menumore {
+  position: relative; }
+  .menumore > button {
+    background: url("images/menumore.svg") center center no-repeat;
+    display: block;
+    height: 68px;
+    text-indent: -9999px;
+    -webkit-transition: background-color 0.25s ease-out;
+    transition: background-color 0.25s ease-out;
+    width: 68px; }
+    .menumore > button:hover {
+      background-color: #c30a28; }
+    .menumore > button[disabled] {
+      opacity: .3;
+      pointer-events: none; }
+  .menumore ul {
+    border: 1px solid #e1e0e5;
+    border-right-width: 2px;
+    border-top: 0;
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    -webkit-transition: opacity 0.25s ease-out;
+    transition: opacity 0.25s ease-out;
+    width: 240px;
+    z-index: 3; }
+    .menumore ul[aria-hidden="true"] {
+      display: none; }
+  .menumore li {
+    background: #fff; }
+    .menumore li:not(:last-child) {
+      border-bottom: 1px solid #e1e0e5; }
+  .menumore.menumore-is-active > button {
+    background-color: #c30a28; }
+  .menumore.menumore-is-active ul {
+    opacity: 1; }
+
+/*
+Menu More Item
+
+Markup:
+<button class="menumoreitem" type="button">Menu More Item</button>
+
+Styleguide 3.35
+*/
+.menumoreitem {
+  box-sizing: border-box;
+  color: #252247;
+  display: block;
+  padding: 16px;
+  text-align: left;
+  -webkit-transition: color 0.25s ease-out;
+  transition: color 0.25s ease-out;
+  width: 100%; }
+  .menumoreitem:hover {
+    color: #c30a28; }
+  .menumoreitem[disabled], .menumoreitem.menumoreitem-is-disabled {
+    opacity: .5;
+    pointer-events: none; }
+
+/*
+Pathway
+
+Default - Standard pathway state
+.pathway-is-activemove - Pathway is  currently being moved
+.pathway-is-inactivemove - Pathway is currently not being moved
+
+Markup:
+<div class="pathway {$modifiers}">
+  <sg-insert>3.4-1</sg-insert>
+</div>
+
+Styleguide 3.3
+*/
+.pathway {
+  display: block;
+  background-color: #fcfcfc;
+  box-shadow: 0 0 0 2px #e1e0e5 inset;
+  margin-bottom: -1px;
+  padding-bottom: 1px;
+  position: relative; }
+  .pathway > .pathway {
+    margin-left: 64px;
+    margin-top: -2px; }
+    .pathway > .pathway > button {
+      margin-bottom: 2px; }
+    .pathway > .pathway:nth-child(2)::after {
+      background-image: url("images/pathway-nested.svg");
+      content: '';
+      display: block;
+      height: 35px;
+      position: absolute;
+      right: calc(100% + 24px);
+      top: 8px;
+      width: 35px; }
+    .pathway > .pathway.pathway-is-dropzone, .pathway > .pathway.pathway-is-addchild {
+      margin-right: 16px; }
+  .pathway.pathway-is-dropzone, .pathway.pathway-is-addchild {
+    box-shadow: none;
+    margin-bottom: 16px;
+    margin-top: 16px; }
+  .pathway.pathway-is-addchild {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: end;
+        -ms-flex-pack: end;
+            justify-content: flex-end; }
+  .pathway.pathway-is-activemove > .pathway-x-content {
+    box-shadow: 0 0 10px 0 rgba(37, 34, 71, 0.25); }
+    .pathway.pathway-is-activemove > .pathway-x-content > div {
+      border: 0; }
+  .pathway.pathway-is-inactivemove > .pathway-x-content {
+    opacity: .5;
+    pointer-events: none; }
+
+/*
+Pathway Detail
+
+**Note:** `.pathway-x-content` is not required for this module. This is to allow embedding into `.pathway`.
+
+Markup:
+<section class="pathway-x-content pathwaydetail">
+  <header>
+    <h1>Discovery Corps Assistant (DCA)</h1>
+    <div class="pathwaydetail-x-controls">
+      <a class="button button-solid button-flat" href="">View Details</a>
+      <div class="menumore">
+        <button type="button" aria-controls="menumore1">Toggle Menu</button>
+        <ul id="menumore1" aria-hidden="true">
+          <li><button class="menumoreitem" type="button">Move</button></li>
+          <li><a class="menumoreitem menumoreitem-is-disabled" href="">Edit</a></li>
+          <li><button class="menumoreitem" disabled>Delete</button></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+  <div class="l-childrenvertical">
+    <div class="article">
+      <p>The first level of the Discovery Corps program. This level is a primary welcome to Pacific Science Center level and focuses of helping students gain the basics of science interpretation.</p>
+    </div>
+    <footer class="l-childrenhorizontal l-childrenhorizontal-spacebetween">
+      <label class="formcheckbox">
+        <input name="remember-me" id="remember-me" type="checkbox">
+        <span class="formcheckbox-x-text">Required for Completion</span>
+      </label>
+      <div class="l-childrenhorizontal">
+        <div class="l-childrenhorizontal">
+          <a class="badge badge-flat" href=""><img src="http://placehold.it/100x100" width="40" height="40" alt="Badge description"></a>
+          <a class="badge badge-flat" href=""><img src="http://placehold.it/100x100" width="40" height="40" alt="Badge description"></a>
+        </div>
+        <button class="button">Connect Badge</button>
+      </div>
+    </footer>
+  </div>
+</section>
+
+Styleguide 3.4
+*/
+.pathwaydetail {
+  background-color: #fff;
+  box-shadow: 0 0 0 2px #e1e0e5 inset;
+  color: #252247;
+  display: block; }
+  .pathwaydetail > div {
+    border-top: 0;
+    box-sizing: border-box;
+    min-height: 160px;
+    padding: 24px; }
+  .pathwaydetail > form {
+    border: 2px solid #e1e0e5;
+    padding: 24px; }
+  .pathwaydetail header {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    background: #c30a28;
+    color: #fff;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between; }
+  .pathwaydetail h1 {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+    font-size: 24px;
+    overflow: hidden;
+    padding: 24px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 0; }
+    .pathwaydetail h1 a {
+      color: #fff; }
+  .pathwaydetail .pathwaydetail-x-controls {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex; }
+  .pathwaydetail > div {
+    -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+            align-items: stretch;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between; }
+  .pathwaydetail:hover {
+    color: #252247; }
+
+/*
+Radio Buttons
+
+Styles a default radio input and label pair.
+
+Markup:
+<div class="radiobuttons">
+  <input type="radio" name="radiobutton" id="radiobutton1" value="grid" checked="checked">
+  <label class="radiobuttons-x-grid" for="radiobutton1">Grid</label>
+  <input type="radio" name="radiobutton" id="radiobutton2" value="list">
+  <label class="radiobuttons-x-list" for="radiobutton2">List</label>
+</div>
+
+Styleguide 3.47
+*/
+.radiobuttons {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative;
+  z-index: 1; }
+  .radiobuttons input {
+    position: absolute;
+    visibility: hidden;
+    z-index: 1; }
+  .radiobuttons label {
+    background: center center no-repeat;
+    border: 1px solid #e1e0e5;
+    color: transparent;
+    cursor: pointer;
+    display: block;
+    height: 40px;
+    -webkit-transition: background 0.25s ease-out, border-color 0.25s ease-out;
+    transition: background 0.25s ease-out, border-color 0.25s ease-out;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+    width: 40px;
+    z-index: 2; }
+    .radiobuttons label:hover {
+      border-color: #05012c; }
+    .radiobuttons label:first-of-type {
+      border-bottom-left-radius: 4px;
+      border-top-left-radius: 4px; }
+    .radiobuttons label:last-of-type {
+      border-bottom-right-radius: 4px;
+      border-top-right-radius: 4px; }
+    .radiobuttons label:not(:first-of-type) {
+      margin-left: -1px; }
+  .radiobuttons .radiobuttons-x-grid {
+    background-image: url("images/radiobuttons-grid.svg"); }
+  .radiobuttons .radiobuttons-x-list {
+    background-image: url("images/radiobuttons-list.svg"); }
+  .radiobuttons input:focus + label {
+    border-color: #05012c; }
+  .radiobuttons input:checked + label {
+    background-color: #05012c;
+    border-color: #05012c;
+    z-index: 3; }
+    .radiobuttons input:checked + label.radiobuttons-x-grid {
+      background-image: url("images/radiobuttons-grid-checked.svg"); }
+    .radiobuttons input:checked + label.radiobuttons-x-list {
+      background-image: url("images/radiobuttons-list-checked.svg"); }
+
+/*
+Rule
+
+Creates a semantic (and visual) separation between content horizontally.
+
+Markup:
+<hr class="rule">
+
+Styleguide 3.36
+*/
+.rule {
+  border: 0;
+  display: block;
+  height: 1px;
+  margin: 0;
+  position: relative;
+  width: 100%; }
+  .rule::after {
+    content: '';
+    display: block;
+    background: #e1e0e5;
+    height: 1px;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%; }
+
+/*
+Search
+
+Standalone form input for searching.
+
+Markup:
+<input type="text" class="search" placeholder="Filter your badges by name or issuer">
+
+Styleguide 3.37
+*/
+.search {
+  background: #fff url("images/search.svg") calc(100% - 8px) center no-repeat;
+  border: 1px solid #e1e0e5;
+  border-radius: 4px;
+  box-sizing: border-box;
+  display: block;
+  font-size: 14px;
+  outline: none;
+  padding: 8px 40px 8px 16px;
+  -webkit-transition: border-color 0.25s ease-out, background 0.25s ease-out;
+  transition: border-color 0.25s ease-out, background 0.25s ease-out;
+  width: 100%; }
+  .search:hover {
+    border-color: #05012c; }
+  .search:focus {
+    background-image: url("images/search-focus.svg");
+    border-color: #05012c; }
+  @media (min-width: 768px) {
+    .search {
+      width: auto; } }
+
+/*
+Select
+
+Standalone select input.
+
+Markup:
+<label class="select">
+  Sort by
+  <select>
+    <option value="name">Badge Name</option>
+    <option value="newest-first">Newest First</option>
+    <option value="oldest-first">Oldest First</option>
+  </select>
+</label>
+
+Styleguide 3.38
+*/
+.select {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  color: #78768d;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex; }
+  .select select {
+    -webkit-appearance: none;
+       -moz-appearance: none;
+            appearance: none;
+    background: url("images/select.svg") calc(100% - 8px) center no-repeat;
+    border: 1px solid #e1e0e5;
+    border-radius: 4px;
+    box-sizing: border-box;
+    display: block;
+    font-size: 16px;
+    margin-left: 16px;
+    padding: 16px 33px 16px 16px; }
+
+.select-inputonly {
+  text-indent: -9999px; }
+  .select-inputonly select {
+    margin-left: 0; }
+
+.select-secondary select {
+  background-image: url("images/select-secondary.svg");
+  border-color: #c30a28;
+  color: #c30a28;
+  font-size: 14px;
+  padding: 8px 41px 8px 16px; }
+
+/*
+Selected Item
+
+Wraps text (or a module) with a border and a dismissable button
+
+Default - Static state
+.selecteditem-is-removed - Animates out when the close button is clicked
+
+Markup:
+<div class="selecteditem {$modifiers}">
+  <button type="button">Remove</button>
+  Career Ladder
+</div>
+
+Styleguide 3.44
+*/
+.selecteditem {
+  background-color: #fff;
+  box-shadow: 0 0 0 1px #a09eaf;
+  box-sizing: border-box;
+  display: inline-block;
+  padding: 8px;
+  position: relative;
+  -webkit-transition: opacity 0.25s ease-out, -webkit-transform 0.25s ease-out;
+  transition: opacity 0.25s ease-out, -webkit-transform 0.25s ease-out;
+  transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+  transition: transform 0.25s ease-out, opacity 0.25s ease-out, -webkit-transform 0.25s ease-out; }
+  .selecteditem button {
+    background: url("images/selecteditem-remove.svg") #78768d center center no-repeat;
+    border-radius: 20px;
+    color: transparent;
+    height: 20px;
+    overflow: hidden;
+    position: absolute;
+    right: -10px;
+    top: -10px;
+    width: 20px;
+    z-index: 2; }
+  .selecteditem.selecteditem-is-removed {
+    opacity: 0;
+    -webkit-transform: scale3d(0, 0, 0);
+            transform: scale3d(0, 0, 0); }
+
+/*
+Selected Item Badge
+
+Has less padding when containing a badge.
+
+Markup:
+<div class="selecteditem selecteditem-badge">
+  <button type="button">Remove</button>
+  <sg-insert>3.14-3</sg-insert>
+</div>
+
+Styleguide 3.44.1
+*/
+.selecteditem-badge {
+  padding: 4px; }
+
+.social {
+  background: #05012c center center no-repeat;
+  border-radius: 4px;
+  color: transparent;
+  height: 24px;
+  overflow: hidden;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  width: 24px; }
+
+.social-facebook {
+  background-image: url("images/social-facebook.svg"); }
+
+.social-linkedin {
+  background-image: url("images/social-linkedin.svg"); }
+
+/*
+Small
+
+Sets the font-size to the smallest font size used. Used as a quick override, such as a tiny string of text.
+
+Markup:
+<a class="small" href="">Open link in a new tab</a>
+
+Styleguide 3.50
+*/
+.small {
+  font-size: 12px; }
+
+/*
+Stack
+
+Very compressed view of issuers.
+
+Default - Used in headings
+.stack-small - Used in cards
+
+Markup:
+<div class="stack {$modifiers}">
+  <div class="stack-x-image">
+    <img src="http://placehold.it/40x40" alt="">
+  </div>
+  <div class="stack-x-text">
+    <h2>Issuer Name</h2>
+    <small>52 Badges</small>
+  </div>
+</div>
+
+Styleguide 3.48
+*/
+.stack {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex; }
+  .stack img {
+    display: block;
+    height: auto;
+    width: 100%; }
+  .stack h1,
+  .stack h2,
+  .stack h3,
+  .stack h4,
+  .stack h5,
+  .stack h6 {
+    color: #05012c; }
+  .stack small {
+    color: #78768d;
+    display: block;
+    font-size: 12px;
+    margin-top: 8px; }
+  .stack .stack-x-image {
+    margin-right: 16px;
+    width: 40px; }
+
+.stack-small h1,
+.stack-small h2,
+.stack-small h3,
+.stack-small h4,
+.stack-small h5,
+.stack-small h6 {
+  color: #05012c;
+  font-size: 12px; }
+.stack-small small {
+  margin-top: 4px; }
+.stack-small .stack-x-image {
+  width: 40px; }
+
+/*
+State
+
+Default - Not used
+.state-is-error - Error
+.state-is-pending - Pending
+.state-is-success - Success
+.state-pill - Alternate styling
+.state-pill.state-is-error - Error
+.state-pill.state-is-pending - Pending
+.state-pill.state-is-success - Success
+
+Markup:
+<span class="state {$modifiers}">Verified</span>
+
+Styleguide 3.39
+*/
+.state {
+  font-weight: 600; }
+  .state.state-is-error {
+    color: #f01f31; }
+  .state.state-is-pending {
+    color: #ffb500; }
+  .state.state-is-success {
+    color: #93ab23; }
+
+.state-pill {
+  border-radius: 4px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1;
+  padding: 5px;
+  text-transform: uppercase; }
+  .state-pill.state-is-error {
+    background-color: #f01f31;
+    color: #fff; }
+  .state-pill.state-is-pending {
+    background-color: #ffb500;
+    color: #fff; }
+  .state-pill.state-is-success {
+    background-color: #93ab23;
+    color: #fff; }
+
+/*
+Stat List
+
+Markup:
+<ul class="statlist">
+  <li class="statlist-x-badge"><strong>25</strong> Badges</li>
+  <li class="statlist-x-earner"><strong>25</strong> Earners</li>
+  <li class="statlist-x-group"><strong>25</strong> Groups</li>
+  <li class="statlist-x-pathway"><strong>25</strong> Pathways</li>
+</ul>
+
+Styleguide 3.52
+*/
+.statlist {
+  color: #a09eaf;
+  font-size: 14px; }
+  .statlist li {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex; }
+    .statlist li strong {
+      margin-right: .3em; }
+    .statlist li::before {
+      background: center center no-repeat;
+      content: '';
+      display: block;
+      height: 24px;
+      margin-right: 8px;
+      width: 24px; }
+    .statlist li:not(:last-child) {
+      margin-bottom: 8px; }
+  .statlist .statlist-x-badge::before {
+    background-image: url("images/statlist-badge.svg"); }
+  .statlist .statlist-x-earner::before {
+    background-image: url("images/statlist-earner.svg"); }
+  .statlist .statlist-x-group::before {
+    background-image: url("images/statlist-group.svg"); }
+  .statlist .statlist-x-pathway::before {
+    background-image: url("images/statlist-pathway.svg"); }
+  @media (min-width: 768px) {
+    .statlist {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap; }
+      .statlist li {
+        -webkit-box-flex: 1;
+            -ms-flex: 1 1 50%;
+                flex: 1 1 50%; }
+        .statlist li:nth-last-child(2) {
+          margin-bottom: 0; } }
+
+/*
+Status Select
+
+A styled select menu which has a status indicator.
+
+Default - Text only, for use in tables
+.statusselect-is-active - Active states
+.statusselect-is-inactive - Inactive State
+.statusselect-bordered - A button-like appearance, for use in headers
+.statusselect-bordered.statusselect-is-active - Bordered active
+.statusselect-bordered.statusselect-is-inactive - Bordered inactive
+
+Markup:
+<div class="statusselect {$modifiers}">
+  <label class="visuallyhidden" for="statusselect{$modifiers}">Status</label>
+  <select id="statusselect{$modifiers}">
+    <option value="null">Status</option>
+    <option value="active">Active</option>
+    <option value="inactive">Inactive</option>
+  </select>
+</div>
+
+Styleguide 3.12
+*/
+.statusselect {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  box-sizing: border-box;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  padding-left: 16px; }
+  .statusselect::before {
+    border-radius: 8px;
+    content: '';
+    display: none;
+    height: 8px;
+    margin-right: 8px;
+    width: 8px; }
+  .statusselect select {
+    -webkit-appearance: none;
+       -moz-appearance: none;
+            appearance: none;
+    background: url("images/statusselect.svg") right center transparent no-repeat;
+    border: 0;
+    box-sizing: border-box;
+    -webkit-box-flex: 1;
+        -ms-flex: 1;
+            flex: 1;
+    padding-right: 26px; }
+    .statusselect select::-ms-expand {
+      display: none; }
+  .statusselect.statusselect-is-active::before {
+    background-color: #c30a28;
+    display: block; }
+  .statusselect.statusselect-is-inactive::before {
+    background-color: #e1e0e5;
+    display: block; }
+
+.statusselect-bordered {
+  border: 1px solid #c30a28;
+  border-radius: 4px;
+  padding: 8px 16px; }
+  .statusselect-bordered select {
+    background-image: url("images/statusselect-bordered.svg");
+    color: #c30a28; }
+
+/*
+Switch
+
+Default - When there's just a single set of toggle text
+.switch-bold - Bolds the switch value
+
+Markup:
+<input class="switch {$modifiers}" type="checkbox" id="switch{$modifiers}" name="switch{$modifiers}" value="private">
+<label for="switch{$modifiers}">
+  <span class="switch-x-text">Your collection is </span>
+  <span class="switch-x-toggletext">
+    <span class="switch-x-unchecked"><span class="switch-x-hiddenlabel">Unchecked: </span>Private</span>
+    <span class="switch-x-checked"><span class="switch-x-hiddenlabel">Checked: </span>Public</span>
+  </span>
+</label>
+
+Styleguide 3.55
+*/
+.switch {
+  display: none; }
+  .switch + label {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    color: #78768d;
+    cursor: pointer;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    font-size: 12px;
+    line-height: 15px;
+    position: relative;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none; }
+    .switch + label::before, .switch + label::after {
+      content: '';
+      display: block; }
+    .switch + label::before {
+      background-color: #05012c;
+      border-radius: 500px;
+      height: 15px;
+      margin-right: 8px;
+      -webkit-transition: background-color 0.125s ease-out;
+      transition: background-color 0.125s ease-out;
+      width: 25px; }
+    .switch + label::after {
+      background-color: #fff;
+      border-radius: 13px;
+      box-shadow: 0 3px 1px 0 rgba(37, 34, 71, 0.05), 0 2px 2px 0 rgba(37, 34, 71, 0.1), 0 3px 3px 0 rgba(37, 34, 71, 0.05);
+      height: 13px;
+      left: 1px;
+      position: absolute;
+      top: 1px;
+      -webkit-transition: -webkit-transform 0.125s ease-out;
+      transition: -webkit-transform 0.125s ease-out;
+      transition: transform 0.125s ease-out;
+      transition: transform 0.125s ease-out, -webkit-transform 0.125s ease-out;
+      width: 13px; }
+    .switch + label .switch-x-text {
+      display: block;
+      margin-right: .3em; }
+    .switch + label .switch-x-toggletext {
+      display: block;
+      height: 15px;
+      overflow: hidden;
+      position: relative;
+      width: 45px; }
+    .switch + label .switch-x-unchecked,
+    .switch + label .switch-x-checked {
+      left: 0;
+      position: absolute;
+      top: 0;
+      -webkit-transition: opacity 0.125s ease-out, -webkit-transform 0.125s ease-out;
+      transition: opacity 0.125s ease-out, -webkit-transform 0.125s ease-out;
+      transition: transform 0.125s ease-out, opacity 0.125s ease-out;
+      transition: transform 0.125s ease-out, opacity 0.125s ease-out, -webkit-transform 0.125s ease-out; }
+    .switch + label .switch-x-unchecked {
+      opacity: 1;
+      -webkit-transform: none;
+              transform: none; }
+    .switch + label .switch-x-checked {
+      opacity: 0;
+      -webkit-transform: translate3d(0, 100%, 0);
+              transform: translate3d(0, 100%, 0); }
+    .switch + label .switch-x-hiddenlabel {
+      position: absolute;
+      visibility: hidden; }
+  .switch:checked + label::before {
+    background-color: #ffb500; }
+  .switch:checked + label::after {
+    -webkit-transform: translate3d(10px, 0, 0);
+            transform: translate3d(10px, 0, 0); }
+  .switch:checked + label .switch-x-unchecked {
+    opacity: 0;
+    -webkit-transform: translate3d(0, -100%, 0);
+            transform: translate3d(0, -100%, 0); }
+  .switch:checked + label .switch-x-checked {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none; }
+
+.switch-bold + label .switch-x-toggletext {
+  font-weight: bold; }
+
+/*
+Table
+
+General-purpose table. `.table-x-actions` should be used on the containing cell for any interactive elements that may arbitrarily change the table dimensions.
+
+Markup:
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Member Name</th>
+      <th scope="col">Email Address</th>
+      <th class="hidden hidden-is-tablet" scope="col">Actions</th>
+      <th class="hidden hidden-is-desktop table-x-hidetext" scope="col">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">
+        Member Name
+      </th>
+      <td>
+        member@members.com
+      </td>
+      <td class="hidden hidden-is-tablet">
+        Actions
+      </td>
+      <td class="table-x-actions hidden hidden-is-desktop">
+        <div class="l-childrenhorizontal l-childrenhorizontal-right">
+          <sg-insert>3.20-3</sg-insert>
+          <sg-insert>3.20-3</sg-insert>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th scope="row">
+        Member Name
+      </th>
+      <td>
+        member@members.com
+      </td>
+      <td class="hidden hidden-is-tablet">
+        Actions
+      </td>
+      <td class="table-x-actions hidden hidden-is-desktop">
+        <div class="l-childrenhorizontal l-childrenhorizontal-right">
+          <sg-insert>3.20-3</sg-insert>
+          <sg-insert>3.20-3</sg-insert>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+Styleguide 3.16
+*/
+/*
+Table (Faked)
+
+You can use the table module to build a fake table as well, assuming the DOM structure is consistent and the proper x-selectors are included.
+
+Markup:
+<div class="table">
+  <div class="table-x-thead">
+    <div class="table-x-tr">
+      <div class="table-x-th">Member Name</div>
+      <div class="table-x-th">Email Address</div>
+      <div class="table-x-th hidden hidden-is-tablet">Actions</div>
+      <div class="table-x-th hidden hidden-is-desktop table-x-hidetext">Actions</div>
+    </div>
+  </div>
+  <div class="table-x-tbody">
+    <div class="table-x-tr">
+      <div class="table-x-th">
+        Member Name
+      </div>
+      <div class="table-x-td">
+        member@members.com
+      </div>
+      <div class="table-x-td  hidden hidden-is-tablet">
+        Actions
+      </div>
+      <div class="table-x-td table-x-actions  hidden hidden-is-desktop">
+        <div class="l-childrenhorizontal l-childrenhorizontal-right">
+          <sg-insert>3.20-3</sg-insert>
+          <sg-insert>3.20-3</sg-insert>
+        </div>
+      </div>
+    </div>
+    <div class="table-x-tr">
+      <div class="table-x-th">
+        Member Name
+      </div>
+      <div class="table-x-td">
+        member@members.com
+      </div>
+      <div class="table-x-td hidden hidden-is-tablet">
+        Actions
+      </div>
+      <div class="table-x-td table-x-actions hidden hidden-is-desktop">
+        <div class="l-childrenhorizontal l-childrenhorizontal-right">
+          <sg-insert>3.20-3</sg-insert>
+          <sg-insert>3.20-3</sg-insert>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+Styleguide 3.16.1
+*/
+.table {
+  border-collapse: collapse;
+  box-shadow: 0 0 0 1px #e1e0e5 inset;
+  border-radius: 4px;
+  display: table;
+  overflow: hidden;
+  text-align: left;
+  width: 100%;
+  white-space: nowrap; }
+  .table a:not(.button):hover {
+    text-decoration: underline; }
+  .table td,
+  .table .table-x-td,
+  .table th,
+  .table .table-x-th {
+    display: table-cell;
+    vertical-align: middle; }
+  .table thead,
+  .table .table-x-thead {
+    display: table-header-group; }
+    .table thead th,
+    .table thead .table-x-th,
+    .table .table-x-thead th,
+    .table .table-x-thead .table-x-th {
+      background-color: #05012c;
+      box-sizing: border-box;
+      font-size: 12px;
+      font-weight: bold;
+      height: 48px;
+      padding: 16px;
+      text-transform: uppercase;
+      white-space: nowrap; }
+    .table thead th:not(.table-x-hidetext),
+    .table thead .table-x-th:not(.table-x-hidetext),
+    .table .table-x-thead th:not(.table-x-hidetext),
+    .table .table-x-thead .table-x-th:not(.table-x-hidetext) {
+      color: #fff; }
+  .table tbody,
+  .table .table-x-tbody {
+    display: table-row-group; }
+    .table tbody td,
+    .table tbody .table-x-td,
+    .table tbody th,
+    .table tbody .table-x-th,
+    .table .table-x-tbody td,
+    .table .table-x-tbody .table-x-td,
+    .table .table-x-tbody th,
+    .table .table-x-tbody .table-x-th {
+      border-top: 1px solid #e1e0e5;
+      box-sizing: border-box;
+      height: 65px;
+      padding: 8px 16px;
+      vertical-align: middle; }
+    .table tbody th,
+    .table tbody .table-x-th,
+    .table .table-x-tbody th,
+    .table .table-x-tbody .table-x-th {
+      width: 100%; }
+    .table tbody td,
+    .table tbody .table-x-td,
+    .table .table-x-tbody td,
+    .table .table-x-tbody .table-x-td {
+      font-size: 14px; }
+    .table tbody tr:first-child td,
+    .table tbody tr:first-child .table-x-td,
+    .table tbody tr:first-child th,
+    .table tbody tr:first-child .table-x-th,
+    .table tbody .table-x-tr:first-child td,
+    .table tbody .table-x-tr:first-child .table-x-td,
+    .table tbody .table-x-tr:first-child th,
+    .table tbody .table-x-tr:first-child .table-x-th,
+    .table .table-x-tbody tr:first-child td,
+    .table .table-x-tbody tr:first-child .table-x-td,
+    .table .table-x-tbody tr:first-child th,
+    .table .table-x-tbody tr:first-child .table-x-th,
+    .table .table-x-tbody .table-x-tr:first-child td,
+    .table .table-x-tbody .table-x-tr:first-child .table-x-td,
+    .table .table-x-tbody .table-x-tr:first-child th,
+    .table .table-x-tbody .table-x-tr:first-child .table-x-th {
+      border-top: 0; }
+  .table .table-x-tr {
+    display: table-row; }
+  .table .table-x-actions {
+    min-width: 400px; }
+  .table .table-x-hidetext {
+    color: transparent;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none; }
+  .table .table-x-inlineheader {
+    background-color: #e1e0e5;
+    border: 0;
+    color: #78768d;
+    height: auto;
+    padding-bottom: 12px;
+    padding-top: 12px; }
+  .table .table-x-active th,
+  .table .table-x-active .table-x-th,
+  .table .table-x-active td,
+  .table .table-x-active .table-x-td {
+    background-color: #e1e0e5;
+    box-shadow: rgba(5, 1, 44, 0.12) 0 -1px 0 0 inset; }
+    .table .table-x-active th:first-child,
+    .table .table-x-active .table-x-th:first-child,
+    .table .table-x-active td:first-child,
+    .table .table-x-active .table-x-td:first-child {
+      box-shadow: rgba(5, 1, 44, 0.12) 1px -1px 0 0 inset; }
+    .table .table-x-active th:last-child,
+    .table .table-x-active .table-x-th:last-child,
+    .table .table-x-active td:last-child,
+    .table .table-x-active .table-x-td:last-child {
+      box-shadow: rgba(5, 1, 44, 0.12) -1px -1px 0 0 inset; }
+
+/*
+Title
+
+This likely should replace subheading...generic standalone title
+
+Default - Standard sizing
+.title-is-smallmobile - Smaller size on mobile only
+.title-small - Smaller
+.title-small-2x - Even smaller
+
+Markup:
+<h1 class="title {$modifiers}">Title<h1>
+
+Styleguide 3.40
+*/
+.title {
+  color: #05012c;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1; }
+  .title span {
+    color: #78768d;
+    font-size: 14px;
+    font-weight: normal; }
+  @media (max-width: 767px) {
+    .title.title-is-smallmobile {
+      font-size: 24px; } }
+
+.title-small {
+  font-size: 16px; }
+
+.title-small-2x {
+  color: #78768d;
+  font-size: 14px;
+  font-weight: 600; }
+
+/*
+Title Divider
+
+This acts a secondary title which inserts a horizontal alongside the text. Used in forms.
+
+Markup:
+<h2 class="titledivider">Or</h2>
+
+Styleguide 3.51
+*/
+.titledivider {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  color: rgba(5, 1, 44, 0.38);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 12px; }
+  .titledivider::after {
+    background-color: rgba(5, 1, 44, 0.12);
+    content: '';
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+    height: 1px;
+    margin-left: 8px; }
+
+/*
+Video Watch
+
+A trigger that starts a video.
+
+Markup:
+<button class="videowatch">Watch Pathways Tutorial Video</button>
+
+Styleguide 3.41
+*/
+.videowatch {
+  background: url("images/videowatch.svg") left center no-repeat;
+  color: #c30a28;
+  font-size: 14px;
+  height: 27px;
+  line-height: 27px;
+  padding-left: 43px;
+  text-transform: uppercase;
+  white-space: nowrap; }
+
+/*
+Visually Hidden
+
+Hides any element, while keeping it in the DOM.
+
+Markup:
+<p class="visuallyhidden">I'm hidden</p>
+
+Styleguide 3.42
+*/
+.visuallyhidden {
+  border: 0 !important;
+  clip: rect(0 0 0 0) !important;
+  height: 1px !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  position: absolute !important;
+  width: 1px !important; }
+
+/*
+Wrap
+
+Sets the background on any container element.
+
+Default - Sets body background
+.wrap-light - Lighter background color
+
+Markup:
+<div class="wrap {$modifiers}">Wrap</div>
+
+Styleguide 3.43
+*/
+.wrap {
+  background-color: #fcfcfc;
+  z-index: 1; }
+
+.wrap-light {
+  background-color: #f7f7f7; }
+
+.o-canvas {
+  background-color: #fff; }
+
+/*# sourceMappingURL=screen.css.map */
