@@ -1,13 +1,13 @@
 # Created by wiggins@concentricsky.com on 10/8/15.
 import basic_models
 
-from django.contrib.admin import AdminSite
+from django.contrib.admin import AdminSite, ModelAdmin
 from django.utils.module_loading import autodiscover_modules
 from django.utils.translation import ugettext_lazy
 
 from badgeuser.models import CachedEmailAddress, ProxyEmailConfirmation
 from mainsite.admin_actions import delete_selected
-from mainsite.models import BadgrApp
+from mainsite.models import BadgrApp, EmailBlacklist
 
 
 class BadgrAdminSite(AdminSite):
@@ -34,6 +34,12 @@ class BadgrAppAdmin(basic_models.DefaultModelAdmin):
     )
 badgr_admin.register(BadgrApp, BadgrAppAdmin)
 
+
+class EmailBlacklistAdmin(ModelAdmin):
+    readonly_fields = ('email',)
+    list_display = ('email',)
+    search_fields = ('email',)
+badgr_admin.register(EmailBlacklist, EmailBlacklistAdmin)
 
 # 3rd party apps
 

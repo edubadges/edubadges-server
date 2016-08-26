@@ -1,4 +1,10 @@
-{% load account %}{% user_display user as user_display %}{% load i18n %}{% autoescape off %}{% blocktrans with current_site.name as site_name %}User {{ user_display }} at {{ site_name }} has given this as an email address.
+Please verify your email address on Badgr,
+{{ email.email }}
 
-To activate your account, visit {{ activate_url }}
-{% endblocktrans %}{% endautoescape %}
+A Badgr user has requested to add this email to their account. Please click the
+link below to verify this operation, and then you may upload badges that have
+been issued to this address to your account.
+
+{{ activate_url }}
+
+If you didn't make this request, you can safely ignore this email, and no action will be taken on your behalf.

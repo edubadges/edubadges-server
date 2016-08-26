@@ -1,0 +1,10 @@
+Please verify your email address on Badgr,
+{{ email.email }}
+
+Confirm your email address to activate your Badgr account.
+Click the link below, or copy/paste it into your browser url bar.
+
+{{ activate_url }}
+
+If you didn't make this request, you can safely ignore this email,
+and no action will be taken on your behalf.

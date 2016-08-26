@@ -1,5 +1,12 @@
-{% extends "account/email/base.html" %}
+{% extends "account/email/email_confirmation_message.html" %}
 
-{% block confirmation_body %}
-    Confirm your email address to activate your Badgr account. <br>It's easy &ndash; just click the button below.
+{% block action_callout %}
+    Please verify your Badgr account, <br>
+    {{ email.email }}
 {% endblock %}
+
+{% block message_body %}
+    Confirm your email address to activate your Badgr account.
+    <br>It's easy &ndash; just click the button below.
+{% endblock %}
+

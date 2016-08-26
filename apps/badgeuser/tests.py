@@ -331,6 +331,7 @@ class UserProfileTests(APITestCase):
         self.client.logout()
         self.client.login(username=username, password=new_password)
         self.assertUserLoggedIn()
+        self.assertEqual(len(mail.outbox), 1)
 
     def assertUserLoggedIn(self, user_pk=None):
         self.assertIn(SESSION_KEY, self.client.session)

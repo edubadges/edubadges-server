@@ -67,15 +67,7 @@
               text-align: center;
               word-break: break-word;
               ">
-                {% block action_callout %}
-                    Please verify your email address on Badgr, <br>
-                    <a href="#" style="
-                      color: #3D1719;
-                      text-decoration: none;
-                    ">
-                        {{ email.email }}
-                    </a>
-                {% endblock %}
+                {% block action_callout %}{% endblock %}
               </td>
             </tr>
             <tr>
@@ -94,12 +86,10 @@
                       padding: 35px 35px 35px 35px;
                       text-align: center;
                     ">
-                        {% block confirmation_body %}
-                      A Badgr user has requested to add this email to their account. Please click the link below to verify this operation, and then you may upload badges that have
-been issued to this address to your account.
-                        {% endblock %}
+                        {% block message_body %}{% endblock %}
                     </td>
                   </tr>
+                  {% block action_button_override %}
                   <tr>
                     <td style="
                       padding: 0 0 35px 0;
@@ -114,22 +104,13 @@ been issued to this address to your account.
                             border-radius: 3px;
                             padding: 8px 16px 8px 16px;
                           ">
-                          {% block action_button %}
-                            <a href="{{ activate_url }}" style="
-                              color: #ffffff;
-                              font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-                              font-size: 14px;
-                              font-weight: 600;
-                              text-decoration: none;
-                              text-transform: uppercase;">
-                              Confirm Now
-                            </a>
-                          {% endblock %}
+                          {% block action_button %}{% endblock %}
                           </td>
                         </tr>
                       </table>
                     </td>
                   </tr>
+                  {% endblock %}
                 </table>
               </td>
             </tr>
@@ -143,7 +124,7 @@ been issued to this address to your account.
                 text-align: center;
                 word-break: break-word;
               ">
-              {% block copy_link %}Or, you can copy/paste this link into your browser: <a href="{{ activate_url }}" style="color: #4A90E2; text-decoration: none;">{{ activate_url }}</a>{% endblock %}
+              {% block alternate_action %}{% endblock %}
               </td>
             </tr>
             <tr>
@@ -155,7 +136,7 @@ been issued to this address to your account.
                 padding: 0 35px 35px 35px;
                 text-align: center;
               ">
-                If you didn't make this request, you can safely ignore this email, and no action will be taken on your behalf.
+                {% block footer %}{% endblock %}
               </td>
             </tr>
           </table>
