@@ -17,7 +17,7 @@ from openbadges_bakery import bake
 
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
-                             AbstractBadgeInstance)
+                             AbstractBadgeInstance, EmailBlacklist)
 
 from .utils import generate_sha256_hashstring, badgr_import_url
 
@@ -191,6 +191,15 @@ class BadgeInstance(AbstractBadgeInstance):
         the notification model instance (which would link through to the OpenBadge)
         """
         try:
+            EmailBlacklist.objects.get(email=self.recipient_identifier)
+        except EmailBlacklist.DoesNotExist:
+            # Allow sending, as this email is not blacklisted.
+            pass
+        else:
+            return
+            # TODO: Report email non-delivery somewhere.
+
+        try:
             if self.issuer.image:
                 issuer_image_url = self.issuer.get_full_url() + '/image'
             else:
@@ -202,8 +211,10 @@ class BadgeInstance(AbstractBadgeInstance):
                 'issuer_name': re.sub(r'[^\w\s]+', '', self.issuer.name, 0, re.I),
                 'issuer_url': self.issuer.prop('url'),
                 'issuer_image_url': issuer_image_url,
+                'badge_instance_url': self.get_full_url(),
                 'image_url': self.get_full_url() + '/image',
-                'badgr_import_url': badgr_import_url(self)
+                'badgr_import_url': badgr_import_url(self),
+                'unsubscribe_url': getattr(settings, 'HTTP_ORIGIN') + EmailBlacklist.generate_email_signature(self.recipient_identifier)
             }
         except KeyError as e:
             # A property isn't stored right in json

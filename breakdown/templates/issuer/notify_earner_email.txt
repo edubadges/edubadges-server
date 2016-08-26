@@ -1,31 +1,43 @@
-Congratulations! You earned a badge
------------------------------------
+************************************
+Congratulations, you earned a badge!
+************************************
 
+-----
 {{badge_name}}
---------------
+-----
+
+Download
 
 {{ badge_description }}
-Issued by {{ issuer_name }} ( {{issuer_url}} ).
 
-You can save this image and store it wherever you
-keep your Open Digital Badges. We suggest Badgr ( http://badgrapp.com/ ) or 
-the Open Badges Backpack. ( http://backpack.openbadges.org ) Wherever you take 
-it, portable information about your achievement will be locked inside.
-Download your badge! » ( {{image_url}} )
+Issuer
+------
 
-Open Badges Portable digital credentials
-----------------------------------------
+{{ issuer_name }}
+{{issuer_url}}
 
-Open digital badges let you take your credentials
-from the many places you learn, and combine them to tell a
-cohesive story about your learning.
+----------
+How to use
+----------
 
-This credential issued through the Oregon Badge
-Alliance and the Oregon Center for Digital Learning. This credential issued through the Oregon Badge Alliance and the Oregon Center for Digital Learning. 
+You can save this image and store it wherever you keep your Open Digital badges.
+We suggest Badgr ( https://badgr.io ) or the Open Badges Backpack
+( https://backpack.openbadges.org ). Wherever you take it, portable information
+about your achievement will be locked inside.
 
-In 2015, the OCDL and its partners will offer a variety of programs that award digital badges and will be building software to help earners turn their credentials into jobs and opportunities.
-Learn more ( http://orlearning.org/ )
+-----------
+Open Badges
+-----------
 
-Unsubscribe (
-mailto:ocdigitallearning+unsubscribe@@gmail.com?subject=Unsubscribe+from+badge+award+letters&body=Please+block+me+from+future+badge+awards
-)
+Portable digital credentials
+----------------------------
+
+Open digital badges let you take your credentials from the many places you learn,
+and combine them to tell a cohesive story about your learning.
+
+Learn more at https://openbadges.org
+
+
+Unsubscribe: If you wish not to be notified of any future badge awards from
+this service, click the link below:
+{{ unsubscribe_url }}

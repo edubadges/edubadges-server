@@ -1,115 +1,484 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Badgr</title>
+    <style type="text/css">
 
-<html xmlns="http://www.w3.org/1999/xhtml" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; margin: 0; padding: 0;">
-<head>
-  <!-- If you delete this tag, the sky will fall on your head -->
-  <meta name="viewport" content="width=device-width" />
+      @import 'https://fonts.googleapis.com/css?family=Open+Sans:400,600,700';
 
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <title>Congratulations! You've earned a badge!</title>
-</head>
+      @media (max-width: 560px) {
 
-<body bgcolor="#FFFFFF" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; width: 100% !important; height: 100%; margin: 0; padding: 0;">
+        .maincontent {
+          width: 100% !important;
+        }
 
-<!-- HEADER -->
-<table class="head-wrap" bgcolor="#D1D1D1" style="width: 100%; margin: 0; padding: 0;">
-  <tr style="margin: 0; padding: 0;">
-    <td style="margin: 0; padding: 0;"></td>
-    <td class="header container" style="display: block !important; max-width: 600px !important; clear: both !important; margin: 0 auto; padding: 0;">
+        .wrapper {
+          padding-left: 24px !important;
+          padding-right: 24px !important;
+        }
 
-      <div class="content" style="margin: 0 auto; padding: 15px;">
-        <table bgcolor="#D1D1D1" style="margin: 0; padding: 0;">
-          <tr style="margin: 0; padding: 0;">
-            <td style="margin: 0; padding: 0;">
-              <div style="margin: 0 auto;">
-                <a href="{{ issuer_url }}" style="margin: 0; padding: 0; text-align: center;">
-                  {% if issuer_image_url %}
-                    <img src="{{ issuer_image_url }}" alt="{{ issuer_name }}" style="max-height: 100px; width: auto;">
-                  {% endif %}
-                  <h3>{{ issuer_name }}</h3>
-                </a>
-              </div>
-            </td>
-          </tr>
-        </table>
-      </div>
+        .badge {
+          height: 160px !important;
+          width: 160px !important;
+        }
 
-    </td>
-    <td style="margin: 0; padding: 0;"></td>
-  </tr>
-</table><!-- /HEADER -->
+      }
 
+    </style>
 
-<!-- BODY -->
-<table class="body-wrap" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; width: 100%; margin: 0; padding: 0;">
-  <tr style="margin: 0; padding: 0;">
-    <td style="margin: 0; padding: 0;"></td>
-    <td class="container" bgcolor="#FFFFFF" style="display: block !important; max-width: 600px !important; clear: both !important; margin: 0 auto; padding: 0;">
+    <!--[if mso]>
+    <style type=”text/css”>
+      .mstext {
+        font-family: Trebuchet, sans-serif !important;
+      }
+    </style>
+    <![endif]-->
 
-      <div class="content" style="max-width: 600px; display: block; margin: 0 auto; padding: 15px;">
-        <table style="width: 100%; margin: 0; padding: 0;">
-          <tr style="margin: 0; padding: 0;">
-            <td style="margin: 0; padding: 0;">
-
-              <h3 style="font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif; line-height: 1.1; color: #000; font-weight: 500; font-size: 27px; margin: 0 0 15px; padding: 0;">Congratulations! You earned a badge</h3>
-              <p>
-
-              <!-- Save this badge image! -->
-              <div style="margin: 0 0 10px; padding: 0;"><p><a href="{{ image_url }}" download><img src="{{ image_url }}" style="max-width: 100%; height: auto; margin: 0 auto; padding: 0;" alt="Your portable badge image for {{ badge_name }}. Save this image!" /></a></p>
-                <h3 style="font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif; line-height: 1.1; color: #000; font-weight: 500; font-size: 27px; margin: 25px 0 15px 0; padding: 0;">{{badge_name}}</h3>
-                <p class="lead" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; font-weight: normal; font-size: 17px; line-height: 1.6; margin: 0 0 10px; padding: 0;">{{ badge_description }} <br /><small> Issued by <a href="{{ issuer_url }}" style="color: #2BA6CB; margin: 0; padding: 0;">{{ issuer_name }}</a>.</small></p>
-              </div><!-- /badge image -->
-
-              <!-- Callout Panel -->
-              <p class="callout" style="font-weight: normal; font-size: 14px; line-height: 1.6; background-color: #ECF8FF; margin: 0 0 15px; padding: 15px;">
-                You can save this image and store it wherever you keep your Open Digital Badges. We suggest <a href="https://badgr.io/" style="color: #185E73; font-weight: bold;">Badgr</a> or the <a href="http://backpack.openbadges.org" style="color: #185E73; font-weight: bold; ">Open Badges Backpack.</a> Wherever you take it, portable information about your achievement will be locked inside. <br />
-                <a href="{{ image_url }}" class="btn" style="color: #FFF; text-decoration: none; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; background-color: #3B8252; margin: 0 10px 0 0; padding: 8px 16px;" download>Download your badge! &raquo;</a>
-
-                {% if badgr_import_url and false %}
-                  <!-- TODO: Add this back in when the feature works again. Shameful derp. -->
-                  <a href="{{ badgr_import_url }}" class="btn" style="color: #FFF; text-decoration: none; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; background-color: #bd2233; margin: 0 10px 0 0; padding: 8px 16px;">Add to Badgr! &raquo;</a>
-                {% endif %}
-              </p><!-- /Callout Panel -->
-
-              <h3 style="font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif; line-height: 1.1; color: #000; font-weight: 500; font-size: 27px; margin: 25px 0 15px 0; padding: 0;">Open Badges <small style="font-size: 60%; color: #6f6f6f; line-height: 0; text-transform: none; margin: 0; padding: 0;">Portable digital credentials</small></h3>
-              <p style="font-weight: normal; font-size: 14px; line-height: 1.6; margin: 0 0 10px; padding: 0;">Open digital badges let you take your credentials from the many places you learn, and combine them to tell a cohesive story about your learning.<br /><a href="http://openbadges.org/" class="btn" style="color: #FFF; text-decoration: none; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; background-color: #3B8252; margin: 0 10px 0 0; padding: 8px 16px;">Learn more</a></p>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-    </td>
-    <td></td>
-  </tr>
-</table><!-- /BODY -->
-
-<!-- FOOTER -->
-<table class="footer-wrap" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; width: 100%; max-width: 600px; clear: both !important; margin: 0; padding: 0;">
-  <tr style="margin: 0; padding: 0;">
-    <td style="margin: 0; padding: 0;"></td>
-    <td class="container" style="display: block !important; max-width: 600px !important; clear: both !important; margin: 0 auto; padding: 0;">
-
-      <!-- content -->
-      <div class="content" style="max-width: 600px; display: block; margin: 0 auto; padding: 15px;">
-        <table style="width: 100%; margin: 0; padding: 0;">
-          <tr style="margin: 0; padding: 0;">
-            <td align="center" style="margin: 0; padding: 0;">
-              <p style="font-weight: normal; font-size: 12px; line-height: 1.6; margin: 0 0 10px; padding: 0;">
-                <a href="mailto:ocdigitallearning+unsubscribe@@gmail.com?subject=Unsubscribe+from+badge+award+letters&body=Please+block+me+from+future+badge+awards" style="color: #185E73; margin: 0; padding: 0;"><unsubscribe style="margin: 0; padding: 0;">Unsubscribe</unsubscribe></a>
-              </p>
-            </td>
-          </tr>
-        </table>
-      </div><!-- /content -->
-
-    </td>
-    <td style="margin: 0; padding: 0;"></td>
-  </tr>
-</table><!-- /FOOTER -->
-
-
-<style type="text/css">
-  img { max-width: 100% !important; }
-  body { -webkit-font-smoothing: antialiased !important; -webkit-text-size-adjust: none !important; width: 100% !important; height: 100% !important; }
-</style>
-</body>
+  </head>
+  <body style="
+    height: 100%;
+    font-family: Trebuchet, sans-serif;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  ">
+    <table cellpadding="0" cellspacing="0" style="
+      background-color: #E1E0E5;
+      border-collapse: collapse;
+      width: 100%;
+    ">
+      <tbody>
+        <tr>
+          <!-- Begin Centering Container -->
+          <td align="center">
+            <!-- Begin Main Content -->
+            <table class="maincontent" cellpadding="0" cellspacing="0" style="
+              border-collapse: collapse;
+              background-color: #ffffff;
+              width: 560px;
+            ">
+              <tbody>
+                <tr>
+                  <td>
+                    <table cellpadding="0" cellspacing="0" style="
+                      border-collapse: collapse;
+                      width: 100%;
+                    ">
+                      <tbody>
+                        <!-- Begin Badge Section -->
+                        <tr>
+                          <td class="wrapper" style="
+                            border-bottom: 1px solid #E1E0E5;
+                            padding-bottom: 24px;
+                            padding-left: 48px;
+                            padding-right: 48px;
+                            padding-top: 32px;
+                          ">
+                            <table cellpadding="0" cellspacing="0" style="
+                              border-collapse: collapse;
+                            ">
+                              <tbody>
+                                <!-- Begin Title Row -->
+                                <tr>
+                                  <td style="
+                                    padding-bottom: 48px;
+                                  ">
+                                    <h1 class="mstext" style="
+                                      color: #05012C;
+                                      font-family: 'Open Sans', Trebuchet, sans-serif;
+                                      font-weight: normal;
+                                      font-size: 24px;
+                                      font-weight: 600;
+                                      line-height: 32px;
+                                      margin: 0;
+                                      text-align: center;
+                                    ">
+                                      Congratulations, you earned a badge!
+                                    </h1>
+                                  </td>
+                                </tr>
+                                <!-- Begin Badge Row -->
+                                <tr>
+                                  <td align="center" style="
+                                    padding-bottom: 16px;
+                                  ">
+                                    <a href="{{ badge_instance_url }}" style="
+                                      text-decoration: none;
+                                    ">
+                                      <img class="badge" src="{{ image_url }}" alt="Badge" style="max-width: 75%; height: auto;" />
+                                    </a>
+                                  </td>
+                                </tr>
+                                <!-- Begin Badge Title Row -->
+                                <tr>
+                                  <td style="
+                                    padding-bottom: 16px;
+                                  ">
+                                    <h2 class="mstext" style="
+                                      color: #05012C;
+                                      font-family: 'Open Sans', Trebuchet, sans-serif;
+                                      font-weight: normal;
+                                      font-size: 24px;
+                                      font-weight: 600;
+                                      line-height: 32px;
+                                      margin: 0;
+                                      text-align: center;
+                                    ">
+                                      {{ badge_name }}
+                                    </h2>
+                                  </td>
+                                </tr>
+                                <!-- Begin Buttons Row -->
+                                <tr>
+                                  <td align="center">
+                                    <table cellpadding="0" cellspacing="0" style="
+                                      border-collapse: collapse;
+                                    ">
+                                      <tr>
+                                        <td style="
+                                          padding-bottom: 16px;
+                                          padding-left: 8px;
+                                          padding-right: 8px;
+                                        ">
+                                          <table cellpadding="0" cellspacing="0" style="
+                                            border-collapse: collapse;
+                                          ">
+                                            <tbody>
+                                              <tr>
+                                                <td bgcolor="#FFFFFF" style="
+                                                  border-radius: 4px;
+                                                ">
+                                                  <a class="mstext" href="{{ image_url }}" style="
+                                                    border: 1px solid #C30A28;
+                                                    border-radius: 4px;
+                                                    color: #C30A28;
+                                                    display: inline-block;
+                                                    font-family: 'Open Sans', Trebuchet, sans-serif;
+                                                    font-size: 14px;
+                                                    font-weight: bold;
+                                                    padding-bottom: 8px;
+                                                    padding-left: 16px;
+                                                    padding-right: 16px;
+                                                    padding-top: 8px;
+                                                    text-decoration: none;
+                                                    text-transform: uppercase;
+                                                  ">
+                                                    Download
+                                                  </a>
+                                                </td>
+                                              </tr>
+                                            </tbody>
+                                          </table>
+                                        </td>
+                                        <td style="
+                                          padding-bottom: 16px;
+                                          padding-left: 8px;
+                                          padding-right: 8px;
+                                        ">
+                                          <table cellpadding="0" cellspacing="0" style="
+                                            border-collapse: collapse;
+                                          ">
+                                            <tbody>
+                                              <tr>
+                                                <td bgcolor="#C30A28" style="
+                                                  border-radius: 4px;
+                                                "><!--
+                                                  <a class="mstext" href="{{ badgr_import_url }}" style="
+                                                    background-color: #C30A28;
+                                                    border: 1px solid #C30A28;
+                                                    border-radius: 4px;
+                                                    color: #FFFFFF;
+                                                    display: inline-block;
+                                                    font-family: 'Open Sans', Trebuchet, sans-serif;
+                                                    font-size: 14px;
+                                                    font-weight: bold;
+                                                    padding-bottom: 8px;
+                                                    padding-left: 16px;
+                                                    padding-right: 16px;
+                                                    padding-top: 8px;
+                                                    text-decoration: none;
+                                                    text-transform: uppercase;
+                                                  ">
+                                                    Add To Badgr
+                                                  </a>-->
+                                                </td>
+                                              </tr>
+                                            </tbody>
+                                          </table>
+                                        </td>
+                                      </tr>
+                                    </table>
+                                  </td>
+                                </tr>
+                                <!-- Begin Description Row -->
+                                <tr>
+                                  <td style="
+                                    padding-bottom: 8px;
+                                  ">
+                                    <p class="mstext" style="
+                                      color: #05012C;
+                                      font-family: 'Open Sans', Trebuchet, sans-serif;
+                                      font-size: 14px;
+                                      line-height: 24px;
+                                      margin: 0;
+                                    ">
+                                      {{ badge_description }}
+                                    </p>
+                                  </td>
+                                </tr>
+                                <!-- Begin Issuer Header Row -->
+                                <tr>
+                                  <td style="
+                                    padding-bottom: 16px;
+                                  ">
+                                    <div style="
+                                      position: relative;
+                                    ">
+                                      <h3 class="mstext" style="
+                                        background-color: #FFFFFF;
+                                        color: #E1E0E5;
+                                        font-family: 'Open Sans', Trebuchet, sans-serif;
+                                        font-size: 12px;
+                                        font-weight: normal;
+                                        display: inline-block;
+                                        line-height: 16px;
+                                        margin: 0;
+                                        padding-right: 8px;
+                                        position: relative;
+                                        z-index: 2;
+                                      ">
+                                        Issuer
+                                      </h3>
+                                      <div style="
+                                        background-color: #E1E0E5;
+                                        height: 1px;
+                                        left: 0;
+                                        position: absolute;
+                                        top: 10px;
+                                        width: 100%;
+                                        z-index: 1;
+                                      "></div>
+                                    </div>
+                                  </td>
+                                </tr>
+                                <!-- Begin Issuer Row -->
+                                <tr>
+                                  <td>
+                                    <table cellpadding="0" cellspacing="0" style="
+                                      border-collapse: collapse;
+                                    ">
+                                      <tbody>
+                                        <tr>
+                                          {% if issuer_image_url %}
+                                          <td style="
+                                            padding-right: 16px;
+                                          ">
+                                            <a href="{{ issuer_url }}" style="
+                                              text-decoration: none;
+                                            ">
+                                              <img src="{{ issuer_image_url }}" alt="" style="max-width: 80px; height: auto;">
+                                            </a>
+                                          </td>
+                                          {% endif %}
+                                          <td>
+                                            <a class="mstext" href="{{ issuer_url }}" style="
+                                              color: #05012C;
+                                              font-family: 'Open Sans', Trebuchet, sans-serif;
+                                              font-weight: normal;
+                                              font-size: 16px;
+                                              line-height: 24px;
+                                              margin: 0;
+                                              text-decoration: none;
+                                            ">
+                                              {{ issuer_name }}
+                                            </a>
+                                          </td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                        <!-- End Badge Section -->
+                        <!-- Begin Description Section -->
+                        <tr>
+                          <td class="wrapper" style="
+                            padding-bottom: 24px;
+                            padding-left: 48px;
+                            padding-right: 48px;
+                            padding-top: 24px;
+                          ">
+                            <table>
+                              <tbody cellpadding="0" cellspacing="0" style="
+                                border-collapse: collapse;
+                              ">
+                                <!-- Begin How To Use Title Row -->
+                                <tr>
+                                  <td style="
+                                    padding-bottom: 8px;
+                                  ">
+                                    <h2 class="mstext" style="
+                                    color: #05012C;
+                                    font-family: 'Open Sans', Trebuchet, sans-serif;
+                                    font-weight: normal;
+                                    font-size: 24px;
+                                    font-weight: 600;
+                                    line-height: 32px;
+                                    margin: 0;
+                                    ">
+                                      How to use
+                                    </h2>
+                                  </td>
+                                </tr>
+                                <!-- Begin How To Use Body Row -->
+                                <tr>
+                                  <td style="
+                                    padding-bottom: 32px;
+                                  ">
+                                    <p class="mstext" style="
+                                      color: #05012C;
+                                      font-family: 'Open Sans', Trebuchet, sans-serif;
+                                      font-size: 14px;
+                                      line-height: 24px;
+                                      margin: 0;
+                                    ">
+                                      You can save this image and store it wherever you keep your Open Digital badges.
+                                      We suggest <a href="https://badgr.io">Badgr</a> or the <a href="https://backpack.openbadges.org">Open Badges Backpack</a>.
+                                      Wherever you take it, portable information about your achievement will be locked inside.
+                                    </p>
+                                  </td>
+                                </tr>
+                                <!-- Begin Open Badges Row -->
+                                <tr>
+                                  <td style="
+                                    padding-bottom: 8px;
+                                  ">
+                                    <h2 class="mstext" style="
+                                      color: #05012C;
+                                      font-family: 'Open Sans', Trebuchet, sans-serif;
+                                      font-weight: normal;
+                                      font-size: 24px;
+                                      font-weight: 600;
+                                      line-height: 32px;
+                                      margin: 0;
+                                    ">
+                                      Open Badges
+                                    </h2>
+                                    <h3 class="mstext" style="
+                                      color: #05012C;
+                                      font-family: 'Open Sans', Trebuchet, sans-serif;
+                                      font-weight: normal;
+                                      font-size: 16px;
+                                      font-weight: normal;
+                                      line-height: 24px;
+                                      margin: 0;
+                                    ">
+                                      Portable digital credentials
+                                    </h3>
+                                  </td>
+                                </tr>
+                                <!-- Begin Open Badges Body Row -->
+                                <tr>
+                                  <td style="
+                                    padding-bottom: 16px;
+                                  ">
+                                    <p class="mstext" style="
+                                      color: #05012C;
+                                      font-family: 'Open Sans', Trebuchet, sans-serif;
+                                      font-size: 14px;
+                                      line-height: 24px;
+                                      margin: 0;
+                                    ">
+                                      Open digital badges let you take your credentials from the many places you learn,
+                                      and combine them to tell a cohesive story about your learning.
+                                    </p>
+                                  </td>
+                                </tr>
+                                <!-- Begin Learn More Link Row -->
+                                <tr>
+                                  <td>
+                                    <table cellpadding="0" cellspacing="0" style="
+                                      border-collapse: collapse;
+                                    ">
+                                      <tbody>
+                                        <tr>
+                                          <td style="
+                                            padding-bottom: 32px;
+                                          ">
+                                            <table cellpadding="0" cellspacing="0" style="
+                                              border-collapse: collapse;
+                                            ">
+                                              <tbody>
+                                                <tr>
+                                                  <td bgcolor="#FFFFFF" style="
+                                                    border-radius: 4px;
+                                                  ">
+                                                    <a class="mstext" href="https://openbadges.org" style="
+                                                      border: 1px solid #C30A28;
+                                                      border-radius: 4px;
+                                                      color: #C30A28;
+                                                      display: inline-block;
+                                                      font-family: 'Open Sans', Trebuchet, sans-serif;
+                                                      font-size: 14px;
+                                                      font-weight: bold;
+                                                      padding-bottom: 8px;
+                                                      padding-left: 16px;
+                                                      padding-right: 16px;
+                                                      padding-top: 8px;
+                                                      text-decoration: none;
+                                                      text-transform: uppercase;
+                                                    ">
+                                                      Learn More
+                                                    </a>
+                                                  </td>
+                                                </tr>
+                                              </tbody>
+                                            </table>
+                                          </td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </td>
+                                </tr>
+                                <!-- Begin Unsubscribe Row -->
+                                <tr>
+                                  <td align="center" style="
+                                    border-top: 1px solid #E1E0E5;
+                                    padding-top: 28px;
+                                  ">
+                                    <a class="mstext" href="{{ unsubscribe_url }}" style="
+                                      color: #E1E0E5;
+                                      font-family: 'Open Sans', Trebuchet, sans-serif;
+                                      font-weight: bold;
+                                      font-size: 14px;
+                                      text-align: center;
+                                      text-decoration: none;
+                                      text-transform: uppercase;
+                                    ">
+                                      Unsubscribe
+                                    </a>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                        <!-- End Description Section -->
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <!-- End Main Content -->
+          </td>
+          <!-- End Centering Container -->
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

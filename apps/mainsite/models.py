@@ -197,6 +197,10 @@ class AbstractBadgeInstance(AbstractComponent):
 class EmailBlacklist(models.Model):
     email = models.EmailField(unique=True)
 
+    class Meta:
+        verbose_name = 'Blacklisted email'
+        verbose_name_plural = 'Blacklisted emails'
+
     @staticmethod
     def generate_email_signature(email):
         secret_key = settings.UNSUBSCRIBE_SECRET_KEY
