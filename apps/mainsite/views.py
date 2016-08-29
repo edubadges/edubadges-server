@@ -10,6 +10,11 @@ from django.template import loader, TemplateDoesNotExist, Context
 from django.template.response import SimpleTemplateResponse
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import TemplateView
+from rest_framework.permissions import AllowAny
+from rest_framework.renderers import JSONRenderer
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.views import APIView
 
 from .models import EmailBlacklist
 
@@ -76,3 +81,21 @@ def email_unsubscribe(request, *args, **kwargs):
 
     return HttpResponse("You will no longer receive email notifications for \
                         earned badges from this domain.")
+
+
+class AppleAppSiteAssociation(APIView):
+    renderer_classes = (JSONRenderer,)
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        data = {
+            "applinks": {
+                "apps": [],
+                "details": []
+            }
+        }
+
+        for app_id in getattr(settings, 'APPLE_APP_IDS', []):
+            data['applinks']['details'].append(app_id)
+
+        return Response(data=data)
