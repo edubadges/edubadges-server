@@ -5,9 +5,7 @@ from django.conf import settings
 from django.core.cache import cache
 
 import badgrlog
-from issuer.models import BadgeInstance, BadgeClass
 from mainsite.celery import app
-from recipient.models import RecipientProfile
 
 logger = get_task_logger(__name__)
 badgrLogger = badgrlog.BadgrLogger()
@@ -15,6 +13,8 @@ badgrLogger = badgrlog.BadgrLogger()
 
 @app.task(bind=True)
 def award_badges_for_pathway_completion(self, badgeinstance_slug):
+    from issuer.models import BadgeInstance, BadgeClass
+
     lock_key = "_task_lock_completion_trigger_{}".format(badgeinstance_slug)
     awards = []
     completions = []
@@ -51,21 +51,16 @@ def award_badges_for_pathway_completion(self, badgeinstance_slug):
                             # badge was already awarded
                         except BadgeInstance.DoesNotExist:
                             # need to award badge
-                            from issuer.serializers import BadgeInstanceSerializer
-                            serializer = BadgeInstanceSerializer(data={
-                                'recipient_identifier': recipient_profile.recipient_identifier,
-                                'create_notification': getattr(settings, 'ISSUER_NOTIFY_DEFAULT', True),
-                            })
-                            serializer.is_valid(raise_exception=True)
-                            new_instance = serializer.save(
-                                check_completions=False,
-                                issuer=completion_badgeclass.issuer,
-                                badgeclass=completion_badgeclass
+                            awarded_badge = completion_badgeclass.issue(
+                                recipient_profile.recipient_identifier,
+                                notify=getattr(settings, 'ISSUER_NOTIFY_DEFAULT', True),
+                                created_by=None
                             )
-                            pass
                     except BadgeClass.DoesNotExist:
                         # got an erroneous badgeclass for a completionBadge
                         pass
+                    else:
+                        awards.append(awarded_badge)
 
         finally:
             _release_lock(lock_key)

@@ -534,36 +534,20 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
 
         if current_badgeclass is None:
             return Response(
-                "Issuer not found or current user lacks permission to issue badges.",
+                "Issuer not found or current user lacks permission to issue this badge.",
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        data = {}
-        if request.data.get('recipient_identifier') is not None:
-            data['recipient_identifier'] = \
-                request.data.get('recipient_identifier')
-        elif request.data.get('recipient_id') is not None:
-            data['recipient_identifier'] = request.data.get('recipient_id')
-        elif request.data.get('email') is not None:
-            data['recipient_identifier'] = request.data.get('email')
-        if request.data.get('evidence') is not None:
-            data['evidence'] = request.data.get('evidence')
-        if request.data.get('create_notification') is not None:
-            data['create_notification'] = True
-
-        serializer = BadgeInstanceSerializer(data=data, context={'request': request})
+        serializer = BadgeInstanceSerializer(
+            data=request.data,
+            context={'request': request, 'badgeclass': current_badgeclass}
+        )
         serializer.is_valid(raise_exception=True)
 
-        serializer.save(
-            issuer=current_badgeclass.issuer,
-            badgeclass=current_badgeclass,
-            created_by=request.user
-        )
-        badge_instance = serializer.data
+        serializer.save()
 
-
-        logger.event(badgrlog.BadgeInstanceCreatedEvent(badge_instance, request.user))
-        return Response(badge_instance, status=status.HTTP_201_CREATED)
+        logger.event(badgrlog.BadgeInstanceCreatedEvent(serializer.data, request.user))
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get(self, request, issuerSlug, badgeSlug):
         """
