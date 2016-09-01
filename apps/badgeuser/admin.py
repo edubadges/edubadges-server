@@ -1,7 +1,7 @@
 from django.contrib.admin import ModelAdmin
 from mainsite.admin import badgr_admin
 
-from .models import BadgeUser
+from .models import BadgeUser, EmailAddressVariant
 
 
 class BadgeUserAdmin(ModelAdmin):
@@ -18,3 +18,10 @@ class BadgeUserAdmin(ModelAdmin):
     pass
 
 badgr_admin.register(BadgeUser, BadgeUserAdmin)
+
+class EmailAddressVariantAdmin(ModelAdmin):
+    search_fields = ('canonical_email', 'email',)
+    list_display = ('email', 'canonical_email',)
+    raw_id_fields = ('canonical_email',)
+
+badgr_admin.register(EmailAddressVariant, EmailAddressVariantAdmin)

@@ -78,8 +78,8 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
             raise serializers.ValidationError(error)
 
         # Check non-structural business logic checks and constraints
-        verified_emails = request_user.emailaddress_set.filter(verified=True) \
-            .values_list('email', flat=True)
+        verified_emails = [e.email for e in request_user.emailaddress_set.filter(verified=True)] \
+                          + [e.email for e in request_user.cached_email_variants()]
         badge_check = BadgeCheck(
             components.badge_instance, components.badge_class,
             components.issuer, verified_emails, badge_instance_url)

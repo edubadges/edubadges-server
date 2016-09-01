@@ -5,8 +5,10 @@ import cachemodel
 from allauth.account.models import EmailAddress, EmailConfirmation
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
+from django.db import models
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.authtoken.models import Token
@@ -50,6 +52,23 @@ class ProxyEmailConfirmation(EmailConfirmation):
         verbose_name_plural = _("email confirmations")
 
 
+class EmailAddressVariant(models.Model):
+    email = models.EmailField(blank=False)
+    canonical_email = models.ForeignKey(CachedEmailAddress, blank=False)
+
+    def save(self, *args, **kwargs):
+        if not self.canonical_email.verified:
+            raise ValidationError("EmailAddress must be verified before registering variants.")
+
+        if not self.canonical_email.email.lower() == self.email.lower():
+            raise ValidationError("EmailAddressVariant converted to lowercase does not match stored email address.")
+        super(EmailAddressVariant, self).save(*args, **kwargs)
+        self.canonical_email.user.save()
+
+    def __unicode__(self):
+        return "{} | {}".format(self.email, self.canonical_email.email.lower())
+
+
 class BadgeUser(AbstractUser, cachemodel.CacheModel):
     """
     A full-featured user model that can be an Earner, Issuer, or Consumer of Open Badges
@@ -89,6 +108,10 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
     @cachemodel.cached_method(auto_publish=True)
     def cached_emails(self):
         return EmailAddress.objects.filter(user=self)
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_email_variants(self):
+        return EmailAddressVariant.objects.filter(canonical_email__user=self)
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):
