@@ -45,7 +45,7 @@ class JSONComponentView(AbstractIssuerAPIEndpoint):
 
         if self.request.META.get('HTTP_ACCEPT') == '*/*' or \
                 len([agent for agent in HTTP_USER_AGENTS if agent in user_agent]):
-            return [self.get_html_renderer_class,]
+            return [self.get_html_renderer_class()(), ]
 
         return [renderer() for renderer in self.renderer_classes]
 
