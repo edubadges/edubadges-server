@@ -16,7 +16,7 @@ from rest_framework.test import APIRequestFactory, APITestCase, force_authentica
 
 from issuer.api import IssuerList
 from issuer.models import Issuer, BadgeClass, BadgeInstance
-
+from issuer.serializers import BadgeInstanceSerializer
 from mainsite import TOP_DIR
 
 
@@ -609,6 +609,17 @@ class AssertionTests(APITestCase):
                 badge_object.image.path
             )
 
+    def test_badge_instance_serializer_notification_validation(self):
+        data = {
+            "email": "test@example.com",
+            "create_notification": False
+        }
+
+        serializer = BadgeInstanceSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        self.assertEqual(serializer.validated_data.get('create_notification'), data['create_notification'])
+
     def test_authenticated_owner_issue_badge(self):
         # load test image into media files if it doesn't exist
         self.ensure_image_exists(BadgeClass.objects.get(slug='badge-of-testing'))
@@ -623,7 +634,7 @@ class AssertionTests(APITestCase):
         self.assertEqual(response.status_code, 201)
 
         # Assert mail not sent if "create_notification" param included but set to false
-        self.assertEqual(len(mail.outbox),0)
+        self.assertEqual(len(mail.outbox), 0)
 
         # assert that the BadgeInstance was published to and fetched from cache
         query_count = 1 if apps.is_installed('badgebook') else 0

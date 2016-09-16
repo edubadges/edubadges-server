@@ -6,13 +6,12 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 
-from allauth.account.models import EmailAddress
 from rest_framework import status, authentication, permissions
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 import badgrlog
-
+from badgeuser.models import CachedEmailAddress
 from .models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from .serializers import (IssuerSerializer, BadgeClassSerializer,
                           BadgeInstanceSerializer, IssuerRoleActionSerializer,
@@ -305,9 +304,9 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
                 user_to_modify = get_user_model().objects.get(username=user_id)
             else:
                 user_id = serializer.validated_data.get('email')
-                user_to_modify = EmailAddress.objects.get(
+                user_to_modify = CachedEmailAddress.objects.get(
                     email=user_id).user
-        except (get_user_model().DoesNotExist, EmailAddress.DoesNotExist,):
+        except (get_user_model().DoesNotExist, CachedEmailAddress.DoesNotExist,):
             error_text = "User {} not found. Cannot modify Issuer permissions.".format(user_id)
             if user_id is None:
                 error_text = 'User not found. Neither email address or username was provided.'

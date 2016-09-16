@@ -6,15 +6,16 @@ from django.core.files.base import ContentFile
 from allauth.account.models import EmailAddress
 from rest_framework.exceptions import ValidationError
 
+from badgeuser.models import CachedEmailAddress
 from bakery import bake, unbake
 
 
 def find_recipient_user(recipient_id):
     try:
-        confirmed_email = EmailAddress.objects.get(
+        confirmed_email = CachedEmailAddress.objects.get(
             email=recipient_id, verified=True
         )
-    except EmailAddress.DoesNotExist:
+    except CachedEmailAddress.DoesNotExist:
         return None
     else:
         return confirmed_email.user

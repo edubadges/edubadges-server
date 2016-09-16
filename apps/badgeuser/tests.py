@@ -4,6 +4,7 @@ import re
 
 import time
 from django.contrib.auth import SESSION_KEY
+from django.core.exceptions import ValidationError
 
 from django.core import mail
 from django.core.cache.backends.filebased import FileBasedCache
@@ -16,6 +17,8 @@ from rest_framework.test import APIRequestFactory, APITestCase
 from badgeuser.models import BadgeUser
 from mainsite import TOP_DIR
 from mainsite.models import BadgrApp
+
+from badgeuser.models import EmailAddressVariant, CachedEmailAddress, ProxyEmailConfirmation
 
 factory = APIRequestFactory()
 
@@ -283,6 +286,60 @@ class UserEmailTests(APITestCase):
             })
             self.assertEqual(response.status_code, 200)
 
+    def test_lower_variant_autocreated_on_new_email(self):
+        first_email = CachedEmailAddress(
+            email="HelloAgain@world.com", user=BadgeUser.objects.first(), verified=True
+        )
+        first_email.save()
+        self.assertIsNotNone(first_email.pk)
+
+        variants = EmailAddressVariant.objects.filter(canonical_email=first_email)
+
+        self.assertEqual(len(variants), 1)
+        self.assertEqual(variants[0].email, 'helloagain@world.com')
+
+    def test_can_create_variants(self):
+        first_email = CachedEmailAddress.objects.get(email="test@example.com")
+        self.assertIsNotNone(first_email.pk)
+
+        first_variant_email = "TEST@example.com"
+        second_variant_email = "Test@example.com"
+
+        first_variant = EmailAddressVariant(email=first_variant_email, canonical_email=first_email)
+        first_variant.save()
+        self.assertEqual(first_variant.canonical_email, first_email)
+
+        second_variant = first_email.add_variant(second_variant_email)
+        self.assertEqual(second_variant.canonical_email, first_email)
+
+        self.assertEqual(len(first_email.emailaddressvariant_set.all()), 2)
+        self.assertEqual(len(first_email.user.cached_email_variants()), 2)
+
+    def test_cannot_create_variant_for_unconfirmed_email(self):
+        new_email_address = "new@unconfirmed.info"
+        new_email = CachedEmailAddress.objects.create(email=new_email_address, user=BadgeUser.objects.first())
+        new_variant = EmailAddressVariant(email=new_email_address.upper(), canonical_email=new_email)
+
+        try:
+            new_variant.save()
+        except ValidationError as e:
+            self.assertEqual(e.message, "EmailAddress must be verified before registering variants.")
+        else:
+            self.assertEqual(new_variant.pk, None)  # Save should not have been successful.
+
+    def cannot_link_variant_of_case_insensitive_nonmatch(self):
+        first_email = CachedEmailAddress.objects.get(email="test@example.com")
+        self.assertIsNotNone(first_email.pk)
+
+        variant_email = "NOMATCH@example.com"
+
+        variant = EmailAddressVariant(email=variant_email, canonical_email=first_email)
+        try:
+            variant.save()
+        except ValidationError as e:
+            self.assertEqual(e.message, "New EmailAddressVariant does not match stored email address.")
+        else:
+            raise self.fail("ValidationError expected on nonmatch.")
 
 
 @override_settings(

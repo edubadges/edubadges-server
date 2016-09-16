@@ -15,8 +15,12 @@ from rest_framework.authtoken.models import Token
 
 from issuer.models import Issuer
 
+from .managers import CachedEmailAddressManager
+
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
+    objects = CachedEmailAddressManager()
+
     class Meta:
         proxy = True
         verbose_name = _("email address")
@@ -44,6 +48,22 @@ class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
             old_primary.save()
         return super(CachedEmailAddress, self).set_as_primary(conditional=conditional)
 
+    def save(self, *args, **kwargs):
+        super(CachedEmailAddress, self).save(*args, **kwargs)
+
+        if self.emailaddressvariant_set.count() == 0 and self.email != self.email.lower():
+            self.add_variant(self.email.lower())
+
+    def add_variant(self, email_variation):
+        existing_variants = EmailAddressVariant.objects.filter(
+            canonical_email=self, email=email_variation
+        )
+        if email_variation not in [e.email for e in existing_variants.all()]:
+            return EmailAddressVariant.objects.create(
+                canonical_email=self, email=email_variation
+            )
+        else:
+            raise ValidationError("Email variant {} already exists".format(email_variation))
 
 class ProxyEmailConfirmation(EmailConfirmation):
     class Meta:
@@ -61,7 +81,7 @@ class EmailAddressVariant(models.Model):
             raise ValidationError("EmailAddress must be verified before registering variants.")
 
         if not self.canonical_email.email.lower() == self.email.lower():
-            raise ValidationError("EmailAddressVariant converted to lowercase does not match stored email address.")
+            raise ValidationError("New EmailAddressVariant does not match stored email address.")
         super(EmailAddressVariant, self).save(*args, **kwargs)
         self.canonical_email.user.save()
 
@@ -107,7 +127,7 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_emails(self):
-        return EmailAddress.objects.filter(user=self)
+        return CachedEmailAddress.objects.filter(user=self)
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_email_variants(self):

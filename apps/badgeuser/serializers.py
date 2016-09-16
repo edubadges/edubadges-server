@@ -1,11 +1,7 @@
 from django.conf import settings
 
-from allauth.account.models import EmailConfirmation, EmailAddress
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
-
-#from earner.serializers import EarnerBadgeSerializer
-#from consumer.serializers import ConsumerBadgeDetailSerializer
 
 from .models import BadgeUser, CachedEmailAddress
 from .utils import notify_on_password_change
@@ -69,8 +65,8 @@ class BadgeUserProfileSerializer(serializers.Serializer):
         request = self.context.get('request')
 
         try:
-            email_address = EmailAddress.objects.get(email=validated_data['email'])
-        except EmailAddress.DoesNotExist:
+            email_address = CachedEmailAddress.objects.get(email=validated_data['email'])
+        except CachedEmailAddress.DoesNotExist:
             pass
         else:
             if email_address.verified is False:
@@ -93,7 +89,7 @@ class BadgeUserProfileSerializer(serializers.Serializer):
         user.set_password(validated_data['password'])
         user.save()
 
-        EmailAddress.objects.add_email(
+        CachedEmailAddress.objects.add_email(
             request, user, validated_data['email'], confirm=True, signup=True
         )
 

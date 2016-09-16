@@ -9,10 +9,12 @@ class CoercedBooleanField(serializers.BooleanField):
     A BooleanField that coerces truthy values to True.
     """
     def to_internal_value(self, data):
-        if data in self.TRUE_VALUES or data:
+        if data in self.TRUE_VALUES:
             return True
         elif data in self.FALSE_VALUES:
             return False
+        elif data:
+            return True
         self.fail('invalid', input=data)
 
 
