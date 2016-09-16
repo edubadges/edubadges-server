@@ -1,8 +1,14 @@
+import os
+
+import StringIO
+import cairosvg
+from django.core.files.storage import DefaultStorage
 from django.http import Http404
 from django.shortcuts import redirect
 from django.views.generic import RedirectView
 
 from rest_framework import status, permissions
+from rest_framework.exceptions import ValidationError
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -45,7 +51,7 @@ class JSONComponentView(AbstractIssuerAPIEndpoint):
 
         if self.request.META.get('HTTP_ACCEPT') == '*/*' or \
                 len([agent for agent in HTTP_USER_AGENTS if agent in user_agent]):
-            return [self.get_html_renderer_class,]
+            return [self.get_html_renderer_class()(), ]
 
         return [renderer() for renderer in self.renderer_classes]
 
@@ -76,6 +82,46 @@ class ComponentPropertyDetailView(APIView):
         return redirect(p.url)
 
 
+class ImagePropertyDetailView(ComponentPropertyDetailView):
+    """
+    a subclass of ComponentPropertyDetailView, for image fields, if query_param type='png' re-encode if necessary
+    """
+    def get(self, request, slug):
+        try:
+            current_object = self.model.cached.get(slug=slug)
+        except self.model.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            self.log(current_object)
+
+        image_prop = getattr(current_object, self.prop)
+        if not bool(image_prop):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        image_type = request.query_params.get('type', 'original')
+        if image_type not in ['original', 'png']:
+            raise ValidationError(u"invalid image type: {}".format(image_type))
+
+        image_url = image_prop.url
+
+        if image_type == 'png' and not image_prop.file.name.endswith('.png'):
+
+            filename, ext = os.path.splitext(image_prop.name)
+            basename = os.path.basename(filename)
+            dirname = os.path.dirname(filename)
+            new_name = '{dirname}/converted/{basename}.png'.format(dirname=dirname, basename=basename)
+
+            storage = DefaultStorage()
+            if not storage.exists(new_name):
+                with storage.open(image_prop.name, 'rb') as input_svg:
+                    out_buf = StringIO.StringIO()
+                    cairosvg.svg2png(file_obj=input_svg, write_to=out_buf)
+                    storage.save(new_name, out_buf)
+            image_url = storage.url(new_name)
+
+        return redirect(image_url)
+
+
 class IssuerJson(JSONComponentView):
     """
     GET the actual OBI badge object for an issuer via the /public/issuers/ endpoint
@@ -95,7 +141,7 @@ class IssuerJson(JSONComponentView):
         return context
 
 
-class IssuerImage(ComponentPropertyDetailView):
+class IssuerImage(ImagePropertyDetailView):
     """
     GET an image that represents an Issuer
     """
@@ -125,7 +171,7 @@ class BadgeClassJson(JSONComponentView):
         logger.event(badgrlog.BadgeClassRetrievedEvent(obj, self.request))
 
 
-class BadgeClassImage(ComponentPropertyDetailView):
+class BadgeClassImage(ImagePropertyDetailView):
     """
     GET the unbaked badge image from a pretty url instead of media path
     """

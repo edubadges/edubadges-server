@@ -1,6 +1,7 @@
 import re
 
 from allauth.account.adapter import get_adapter
+from allauth.account.models import EmailConfirmation
 from allauth.account.utils import user_pk_to_url_str, url_str_to_user_pk
 from allauth.utils import build_absolute_uri
 from django.conf import settings
@@ -250,7 +251,17 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
         return Response(serialized, status=status.HTTP_200_OK)
 
 
-class BadgeUserForgotPassword(BadgeUserEmailView):
+class UserTokenMixin(object):
+    def _get_user(self, uidb36):
+        User = get_user_model()
+        try:
+            pk = url_str_to_user_pk(uidb36)
+            return User.objects.get(pk=pk)
+        except (ValueError, User.DoesNotExist):
+            return None
+
+
+class BadgeUserForgotPassword(UserTokenMixin, BadgeUserEmailView):
     permission_classes = ()
 
     def post(self, request):
@@ -322,12 +333,53 @@ class BadgeUserForgotPassword(BadgeUserEmailView):
         user.save()
         return Response(status=status.HTTP_200_OK)
 
-    def _get_user(self, uidb36):
-        User = get_user_model()
+
+class BadgeUserEmailConfirm(UserTokenMixin, BadgeUserEmailView):
+    permission_classes = ()
+
+    def get(self, request, **kwargs):
+        """
+        Confirm an email address with a token provided in an email
+        ---
+        parameters:
+            - name: token
+              type: string
+              paramType: form
+              description: The token received in the recovery email
+              required: true
+        """
+
+        token = request.query_params.get('token')
+
         try:
-            pk = url_str_to_user_pk(uidb36)
-            return User.objects.get(pk=pk)
-        except (ValueError, User.DoesNotExist):
-            return None
+            emailconfirmation = EmailConfirmation.objects.get(pk=kwargs.get('confirm_id'))
+        except EmailConfirmation.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
+        try:
+            email_address = CachedEmailAddress.cached.get(pk=emailconfirmation.email_address_id)
+        except CachedEmailAddress.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
+        matches = re.search(r'([0-9A-Za-z]+)-(.*)', token)
+        if not matches:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        uidb36 = matches.group(1)
+        key = matches.group(2)
+        if not (uidb36 and key):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        user = self._get_user(uidb36)
+        if user is None or not default_token_generator.check_token(user, key):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if email_address.user != user:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        email_address.verified = True
+        email_address.save()
+
+        # get badgr_app url redirect
+        redirect_url = get_adapter().get_email_confirmation_redirect_url(request)
+
+        return Response(status=status.HTTP_302_FOUND, headers={'Location': redirect_url})

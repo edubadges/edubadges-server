@@ -1,8 +1,10 @@
 import logging
 import urlparse
 
+from allauth.account.utils import user_pk_to_url_str
 from django.conf import settings
 from django.contrib.auth import logout
+from django.contrib.auth.tokens import default_token_generator
 from django.core.urlresolvers import resolve, Resolver404, reverse
 
 from allauth.account.adapter import DefaultAccountAdapter, get_adapter
@@ -38,12 +40,12 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
 
         try:
             resolverMatch = resolve(request.path)
-            confirmation = EmailConfirmation.objects.get(key=resolverMatch.kwargs.get('key'))
+            confirmation = EmailConfirmation.objects.get(pk=resolverMatch.kwargs.get('confirm_id'))
             # publish changes to cache
             email_address = CachedEmailAddress.objects.get(pk=confirmation.email_address_id)
             email_address.save()
 
-            if resolverMatch.url_name == 'legacy_confirm_email':
+            if resolverMatch.url_name == 'legacy_user_email_confirm':
                 return reverse('account_login')
 
             return u"{}{}?email={}".format(
@@ -56,6 +58,7 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
             return badgr_app.email_confirmation_redirect
 
     def get_email_confirmation_url(self, request, emailconfirmation):
+        url_name = "api_user_email_confirm"
         if request is not None:
             referer = request.META.get('HTTP_REFERER')
             if referer:
@@ -64,10 +67,18 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
                     badgr_app = BadgrApp.cached.get(cors=parsed.netloc)
                 except BadgrApp.DoesNotExist as e:
                     # we couldn't determine a BadgrApp from the referer, default to legacy frontend
-                    url = reverse("legacy_confirm_email", args=[emailconfirmation.key])
-                    ret = build_absolute_uri(request, url, protocol=app_settings.DEFAULT_HTTP_PROTOCOL)
-                    return ret
-        return super(BadgrAccountAdapter, self).get_email_confirmation_url(request, emailconfirmation)
+                    url_name = "legacy_user_email_confirm"
+
+        temp_key = default_token_generator.make_token(emailconfirmation.email_address.user)
+        token = "{uidb36}-{key}".format(uidb36=user_pk_to_url_str(emailconfirmation.email_address.user),
+                                        key=temp_key)
+        activate_url = build_absolute_uri(
+            request,
+            reverse(url_name, kwargs={'confirm_id': emailconfirmation.pk}),
+            protocol=app_settings.DEFAULT_HTTP_PROTOCOL
+        )
+        tokenized_activate_url = "{}?token={}".format(activate_url, token)
+        return tokenized_activate_url
 
     def send_confirmation_mail(self, request, emailconfirmation, signup):
         current_site = get_current_site(request)
