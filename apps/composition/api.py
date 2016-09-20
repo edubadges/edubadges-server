@@ -13,7 +13,7 @@ from mainsite.permissions import IsOwner
 from .serializers import (LocalBadgeInstanceUploadSerializer,
                           CollectionSerializer,
                           CollectionLocalBadgeInstanceSerializer)
-from .models import LocalBadgeInstance, Collection, LocalBadgeInstanceCollection
+from .models import LocalBadgeInstance, Collection, LocalBadgeInstanceCollection, LocalIssuer
 
 logger = badgrlog.BadgrLogger()
 
@@ -508,6 +508,9 @@ class LocalBadgeInstanceImage(ImagePropertyDetailView):
     model = LocalBadgeInstance
     prop = 'image'
 
-    def log(self, badge_instance):
-        return  # noop
+
+class LocalIssuerImage(ImagePropertyDetailView):
+    model = LocalIssuer
+    prop = 'image_preview'
+
 

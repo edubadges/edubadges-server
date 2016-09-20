@@ -92,7 +92,6 @@ class ImagePropertyDetailView(ComponentPropertyDetailView):
         try:
             current_object = self.model.cached.get(slug=slug)
         except self.model.DoesNotExist:
-            # return Response(status=status.HTTP_404_NOT_FOUND)
             return None
         else:
             self.log(current_object)

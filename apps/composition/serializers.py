@@ -39,6 +39,11 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
             "type": "image",
             "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('localbadgeinstance_image', kwargs={'slug': obj.slug}))
         }
+        if obj.issuer.image_preview :
+            representation['issuerImagePreview'] = {
+                "type": "image",
+                "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('localissuer_image', kwargs={'slug': obj.issuer.slug}))
+            }
         return representation
 
     def validate(self, data):
