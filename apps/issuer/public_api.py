@@ -2,6 +2,7 @@ import os
 
 import StringIO
 import cairosvg
+from PIL import Image
 from django.core.files.storage import DefaultStorage
 from django.http import Http404
 from django.shortcuts import redirect
@@ -103,19 +104,28 @@ class ImagePropertyDetailView(ComponentPropertyDetailView):
             raise ValidationError(u"invalid image type: {}".format(image_type))
 
         image_url = image_prop.url
+        filename, ext = os.path.splitext(image_prop.name)
+        basename = os.path.basename(filename)
+        dirname = os.path.dirname(filename)
+        new_name = '{dirname}/converted/{basename}.png'.format(dirname=dirname, basename=basename)
+        storage = DefaultStorage()
 
-        if image_type == 'png' and not image_prop.file.name.endswith('.png'):
-
-            filename, ext = os.path.splitext(image_prop.name)
-            basename = os.path.basename(filename)
-            dirname = os.path.dirname(filename)
-            new_name = '{dirname}/converted/{basename}.png'.format(dirname=dirname, basename=basename)
-
-            storage = DefaultStorage()
+        if image_type == 'original':
+            image_url = image_prop.url
+        elif image_type == 'png' and ext == '.svg':
             if not storage.exists(new_name):
                 with storage.open(image_prop.name, 'rb') as input_svg:
                     out_buf = StringIO.StringIO()
                     cairosvg.svg2png(file_obj=input_svg, write_to=out_buf)
+                    storage.save(new_name, out_buf)
+            image_url = storage.url(new_name)
+        else:
+            # attempt to use PIL to do desired image conversion
+            if not storage.exists(new_name):
+                with storage.open(image_prop.name, 'rb') as input_svg:
+                    out_buf = StringIO.StringIO()
+                    img = Image.open(input_svg)
+                    img.save(out_buf, format=image_type)
                     storage.save(new_name, out_buf)
             image_url = storage.url(new_name)
 
