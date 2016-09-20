@@ -17,6 +17,7 @@ from rest_framework.views import APIView
 
 from mainsite.models import BadgrApp
 from mainsite.permissions import IsRequestUser
+from mainsite.utils import OriginSetting
 from .models import BadgeUser, CachedEmailAddress
 from .serializers import BadgeUserProfileSerializer, ExistingEmailSerializer, NewEmailSerializer, \
     BadgeUserExistingProfileSerializer
@@ -264,6 +265,13 @@ class UserTokenMixin(object):
 class BadgeUserForgotPassword(UserTokenMixin, BadgeUserEmailView):
     permission_classes = ()
 
+    def get(self, request, *args, **kwargs):
+        badgr_app = BadgrApp.objects.get_current(request)
+        redirect_url = badgr_app.forgot_password_redirect
+        token = request.GET.get('token','')
+        tokenized_url = "{}{}".format(redirect_url, token)
+        return Response(status=status.HTTP_302_FOUND, headers={'Location': tokenized_url})
+
     def post(self, request):
         """
         Request an account recovery email.
@@ -286,8 +294,7 @@ class BadgeUserForgotPassword(UserTokenMixin, BadgeUserEmailView):
         temp_key = default_token_generator.make_token(email_address.user)
         token = "{uidb36}-{key}".format(uidb36=user_pk_to_url_str(email_address.user),
                                         key=temp_key)
-        badgr_app = BadgrApp.objects.get_current(request)
-        reset_url = badgr_app.forgot_password_redirect + token
+        reset_url = "{}{}?token={}".format(OriginSetting.HTTP, reverse('user_forgot_password'), token)
 
         email_context = {
             "site": get_current_site(request),
