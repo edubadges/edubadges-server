@@ -1,4 +1,4 @@
-import json
+import base64
 import os
 
 from django.core.cache import cache
@@ -146,6 +146,27 @@ class TestBadgeUploads(APITestCase):
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.post(
             '/v1/earner/badges', post_input
+        )
+        self.assertEqual(response.status_code, 201)
+        get_response = self.client.get('/v1/earner/badges')
+        self.assertEqual(get_response.status_code, 200)
+        self.assertEqual(
+            get_response.data[0].get('json', {}).get('id'),
+            'http://a.com/instance'
+        )
+
+    @responses.activate
+    def test_submit_basic_1_0_badge_image_datauri_png(self):
+        setup_basic_1_0()
+
+        image = open(os.path.join(dir, 'testfiles/baked_image.png'))
+        encoded = 'data:image/png;base64,' + base64.b64encode(image.read())
+        post_input = {
+            'image': encoded
+        }
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        response = self.client.post(
+            '/v1/earner/badges', post_input, format='json'
         )
         self.assertEqual(response.status_code, 201)
         get_response = self.client.get('/v1/earner/badges')
