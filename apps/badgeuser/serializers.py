@@ -128,6 +128,20 @@ class NewEmailSerializer(serializers.ModelSerializer):
         fields = ('id', 'email', 'verified', 'primary')
         read_only_fields = ('id', 'verified', 'primary')
 
+    def create(self, validated_data):
+        new_address = validated_data.get('email')
+        try:
+            email = CachedEmailAddress.objects.get(
+                email=new_address, user=self.context.get('request').user
+            )
+        except CachedEmailAddress.DoesNotExist:
+            return super(NewEmailSerializer, self).create(validated_data)
+
+        if new_address != email.email and new_address not in [v.email for v in email.cached_variants()]:
+            email.add_variant(new_address)
+
+        return email
+
 
 class ExistingEmailSerializer(serializers.ModelSerializer):
     class Meta:

@@ -51,8 +51,12 @@ class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
     def save(self, *args, **kwargs):
         super(CachedEmailAddress, self).save(*args, **kwargs)
 
-        if self.emailaddressvariant_set.count() == 0 and self.email != self.email.lower():
+        if not self.emailaddressvariant_set.exists() and self.email != self.email.lower():
             self.add_variant(self.email.lower())
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_variants(self):
+        return self.emailaddressvariant_set.all()
 
     def add_variant(self, email_variation):
         existing_variants = EmailAddressVariant.objects.filter(
@@ -83,7 +87,7 @@ class EmailAddressVariant(models.Model):
         if not self.canonical_email.email.lower() == self.email.lower():
             raise ValidationError("New EmailAddressVariant does not match stored email address.")
         super(EmailAddressVariant, self).save(*args, **kwargs)
-        self.canonical_email.user.save()
+        self.canonical_email.save()
 
     def __unicode__(self):
         return "{} | {}".format(self.email, self.canonical_email.email.lower())
@@ -129,9 +133,10 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
     def cached_emails(self):
         return CachedEmailAddress.objects.filter(user=self)
 
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_email_variants(self):
-        return EmailAddressVariant.objects.filter(canonical_email__user=self)
+    # TODO: Remove... not very useful.
+    # @cachemodel.cached_method(auto_publish=True)
+    # def cached_email_variants(self):
+    #     return chain.from_iterable(email.cached_variants() for email in self.cached_emails())
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):
