@@ -2,6 +2,7 @@ from django.core.urlresolvers import reverse
 from rest_framework import serializers
 
 import badgrlog
+from mainsite.drf_fields import Base64FileField
 from mainsite.utils import OriginSetting
 from verifier import ComponentsSerializer
 from verifier.badge_check import BadgeCheck
@@ -18,7 +19,7 @@ logger = badgrlog.BadgrLogger()
 
 class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
     # Form submission fields as populated by request.data in the API
-    image = serializers.FileField(required=False, write_only=True)
+    image = Base64FileField(required=False, write_only=True)
     url = serializers.URLField(required=False, write_only=True)
     assertion = serializers.CharField(required=False, write_only=True)
 

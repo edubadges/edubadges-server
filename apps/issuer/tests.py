@@ -820,7 +820,8 @@ class PublicAPITests(APITestCase):
     def setUp(self):
         cache.clear()
         # ensure records are published to cache
-        Issuer.cached.get(slug='test-issuer')
+        issuer = Issuer.cached.get(slug='test-issuer')
+        issuer.cached_badgeclasses()
         Issuer.cached.get(pk=2)
         BadgeClass.cached.get(slug='badge-of-testing')
         BadgeClass.cached.get(pk=1)
