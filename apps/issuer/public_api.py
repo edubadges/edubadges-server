@@ -87,13 +87,21 @@ class ImagePropertyDetailView(ComponentPropertyDetailView):
     """
     a subclass of ComponentPropertyDetailView, for image fields, if query_param type='png' re-encode if necessary
     """
-    def get(self, request, slug):
+
+    def get_object(self, slug):
         try:
             current_object = self.model.cached.get(slug=slug)
         except self.model.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            # return Response(status=status.HTTP_404_NOT_FOUND)
+            return None
         else:
             self.log(current_object)
+            return current_object
+
+    def get(self, request, slug):
+        current_object = self.get_object(slug)
+        if current_object is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
         image_prop = getattr(current_object, self.prop)
         if not bool(image_prop):
@@ -240,22 +248,16 @@ class BadgeInstanceJson(JSONComponentView):
                 return Response(revocation_info, status=status.HTTP_410_GONE)
 
 
-class BadgeInstanceImage(ComponentPropertyDetailView):
+class BadgeInstanceImage(ImagePropertyDetailView):
     model = BadgeInstance
     prop = 'image'
 
     def log(self, badge_instance):
         logger.event(badgrlog.BadgeInstanceDownloadedEvent(badge_instance, self.request))
 
-    def get(self, request, slug):
-        try:
-            current_object = self.model.cached.get(slug=slug)
-        except self.model.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        else:
-            if current_object.revoked:
-                return Response(status=status.HTTP_404_NOT_FOUND)
-
-            self.log(current_object)
-            return redirect(getattr(current_object, self.prop).url)
+    def get_object(self, slug):
+        obj = super(BadgeInstanceImage, self).get_object(slug)
+        if obj and obj.revoked:
+            return None
+        return obj
 
