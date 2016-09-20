@@ -1,22 +1,21 @@
-from django.db import models
+import cachemodel
+from autoslug import AutoSlugField
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.urlresolvers import reverse
-
-from autoslug import AutoSlugField
-import cachemodel
+from django.db import models
 
 from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
-                             AbstractBadgeInstance)
+                             AbstractBadgeInstance, AbstractRemoteImagePreviewMixin)
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
-class LocalIssuer(AbstractIssuer):
+class LocalIssuer(AbstractRemoteImagePreviewMixin, AbstractIssuer):
     pass
 
 
-class LocalBadgeClass(AbstractBadgeClass):
+class LocalBadgeClass(AbstractRemoteImagePreviewMixin, AbstractBadgeClass):
     issuer = models.ForeignKey(LocalIssuer, blank=False, null=False,
                                on_delete=models.PROTECT,
                                related_name="badgeclasses")
