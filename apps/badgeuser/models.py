@@ -133,10 +133,8 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
     def cached_emails(self):
         return CachedEmailAddress.objects.filter(user=self)
 
-    # TODO: Remove... not very useful.
-    # @cachemodel.cached_method(auto_publish=True)
-    # def cached_email_variants(self):
-    #     return chain.from_iterable(email.cached_variants() for email in self.cached_emails())
+    def cached_email_variants(self):
+        return chain.from_iterable(email.cached_variants() for email in self.cached_emails())
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):

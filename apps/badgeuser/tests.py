@@ -313,7 +313,7 @@ class UserEmailTests(APITestCase):
         self.assertEqual(second_variant.canonical_email, first_email)
 
         self.assertEqual(len(first_email.emailaddressvariant_set.all()), 2)
-        self.assertEqual(len(first_email.user.cached_email_variants()), 2)
+        self.assertEqual(len(first_email.cached_variants()), 2)
 
     def test_cannot_create_variant_for_unconfirmed_email(self):
         new_email_address = "new@unconfirmed.info"
