@@ -15,6 +15,7 @@ Prerequisites:
 * grunt, grunt-cli
 * sass (requires ruby)
 * mysql
+* [cairo](https://www.cairographics.org/download/) (SVG utility)
   
 #### Optional extras:
 
