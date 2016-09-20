@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 import badgrlog
+from issuer.public_api import ImagePropertyDetailView
 from mainsite.permissions import IsOwner
 
 from .serializers import (LocalBadgeInstanceUploadSerializer,
@@ -501,3 +502,12 @@ class CollectionGenerateShare(APIView):
         collection.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class LocalBadgeInstanceImage(ImagePropertyDetailView):
+    model = LocalBadgeInstance
+    prop = 'image'
+
+    def log(self, badge_instance):
+        return  # noop
+

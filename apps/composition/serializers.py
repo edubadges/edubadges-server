@@ -1,6 +1,8 @@
+from django.core.urlresolvers import reverse
 from rest_framework import serializers
 
 import badgrlog
+from mainsite.utils import OriginSetting
 from verifier import ComponentsSerializer
 from verifier.badge_check import BadgeCheck
 from verifier.utils import find_and_get_badge_class, find_and_get_issuer
@@ -32,8 +34,12 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
         """
         if self.context.get('format', 'v1') == 'plain':
             self.fields.json = serializers.DictField(read_only=True)
-        return super(LocalBadgeInstanceUploadSerializer, self) \
-            .to_representation(obj)
+        representation = super(LocalBadgeInstanceUploadSerializer, self).to_representation(obj)
+        representation['imagePreview'] = {
+            "type": "image",
+            "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('localbadgeinstance_image', kwargs={'slug': obj.slug}))
+        }
+        return representation
 
     def validate(self, data):
         """

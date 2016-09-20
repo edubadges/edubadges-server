@@ -3,12 +3,13 @@ from django.conf.urls import patterns, url
 from .api import (LocalBadgeInstanceList, LocalBadgeInstanceDetail,
                   CollectionList, CollectionDetail, CollectionGenerateShare,
                   CollectionLocalBadgeInstanceList,
-                  CollectionLocalBadgeInstanceDetail)
+                  CollectionLocalBadgeInstanceDetail, LocalBadgeInstanceImage)
 
 urlpatterns = patterns(
     'issuer.api_views',
     url(r'^/badges$', LocalBadgeInstanceList.as_view(), name='localbadgeinstance_list'),
     url(r'^/badges/(?P<badge_id>[\d]+)$', LocalBadgeInstanceDetail.as_view(), name='localbadgeinstance_detail'),
+    url(r'^/badges/(?P<slug>[^/]+)/image$', LocalBadgeInstanceImage.as_view(), name='localbadgeinstance_image'),
     url(r'^/collections$', CollectionList.as_view(), name='collection_list'),
     url(r'^/collections/(?P<slug>[-\w]+)$', CollectionDetail.as_view(), name='collection_detail'),
     url(r'^/collections/(?P<slug>[-\w]+)/badges$', CollectionLocalBadgeInstanceList.as_view(), name='collection_badges'),
