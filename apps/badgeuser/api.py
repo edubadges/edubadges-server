@@ -291,14 +291,22 @@ class BadgeUserForgotPassword(UserTokenMixin, BadgeUserEmailView):
             return Response(status=status.HTTP_200_OK)
 
         # taken from allauth.account.forms.ResetPasswordForm
-        temp_key = default_token_generator.make_token(email_address.user)
-        token = "{uidb36}-{key}".format(uidb36=user_pk_to_url_str(email_address.user),
+
+        # fetch user from database directly to avoid cache
+        UserCls = get_user_model()
+        try:
+            user = UserCls.objects.get(pk=email_address.user_id)
+        except UserCls.DoesNotExist:
+            return Response(status=status.HTTP_200_OK)
+
+        temp_key = default_token_generator.make_token(user)
+        token = "{uidb36}-{key}".format(uidb36=user_pk_to_url_str(user),
                                         key=temp_key)
         reset_url = "{}{}?token={}".format(OriginSetting.HTTP, reverse('user_forgot_password'), token)
 
         email_context = {
             "site": get_current_site(request),
-            "user": email_address.user,
+            "user": user,
             "password_reset_url": reset_url,
         }
         get_adapter().send_mail('account/email/password_reset_key', email, email_context)
