@@ -123,10 +123,12 @@ class BadgeUserExistingProfileSerializer(serializers.ModelSerializer):
 
 
 class NewEmailSerializer(serializers.ModelSerializer):
+    variants = serializers.EmailField(source='cached_variants')
+
     class Meta:
         model = CachedEmailAddress
-        fields = ('id', 'email', 'verified', 'primary')
-        read_only_fields = ('id', 'verified', 'primary')
+        fields = ('id', 'email', 'verified', 'primary', 'variants')
+        read_only_fields = ('id', 'verified', 'primary', 'variants')
 
     def create(self, validated_data):
         new_address = validated_data.get('email')
@@ -144,7 +146,9 @@ class NewEmailSerializer(serializers.ModelSerializer):
 
 
 class ExistingEmailSerializer(serializers.ModelSerializer):
+    variants = serializers.EmailField(source='cached_variants')
+
     class Meta:
         model = CachedEmailAddress
-        fields = ('id', 'email', 'verified', 'primary')
-        read_only_fields = ('id', 'email', 'verified')
+        fields = ('id', 'email', 'verified', 'primary', 'variants')
+        read_only_fields = ('id', 'email', 'verified', 'variants')
