@@ -10,7 +10,7 @@ import utils
 from badgeuser.serializers import UserProfileField
 from composition.format import V1InstanceSerializer
 from mainsite.drf_fields import Base64FileField
-from mainsite.serializers import WritableJSONField
+from mainsite.serializers import WritableJSONField, HumanReadableBooleanField
 from mainsite.utils import installed_apps_list, OriginSetting
 from pathway.tasks import award_badges_for_pathway_completion
 from issuer.models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceManager
@@ -190,10 +190,10 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
     recipient_identifier = serializers.EmailField(max_length=1024, required=False)
     evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
 
-    revoked = serializers.BooleanField(read_only=True)
+    revoked = HumanReadableBooleanField(read_only=True)
     revocation_reason = serializers.CharField(read_only=True)
 
-    create_notification = serializers.BooleanField(write_only=True, required=False, default=False)
+    create_notification = HumanReadableBooleanField(write_only=True, required=False, default=False)
 
     def validate(self, data):
         if data.get('email') and not data.get('recipient_identifier'):
