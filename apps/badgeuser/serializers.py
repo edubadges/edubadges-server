@@ -127,11 +127,23 @@ class BadgeUserExistingProfileSerializer(serializers.ModelSerializer):
 
 
 class NewEmailSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True)
+
     class Meta:
         model = CachedEmailAddress
         fields = ('id', 'email', 'verified', 'primary')
         read_only_fields = ('id', 'verified', 'primary')
 
+    def create(self, validated_data):
+        try:
+            existing = CachedEmailAddress.objects.get(email=validated_data['email'])
+        except CachedEmailAddress.DoesNotExist:
+            pass
+        else:
+            if not existing.verified:
+                existing.delete()
+
+        return super(NewEmailSerializer, self).create(validated_data)
 
 class ExistingEmailSerializer(serializers.ModelSerializer):
     class Meta:

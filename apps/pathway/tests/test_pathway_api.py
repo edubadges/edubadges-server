@@ -12,7 +12,7 @@ from django.test import TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from badgeuser.models import BadgeUser
+from badgeuser.models import BadgeUser, CachedEmailAddress
 from issuer.models import BadgeClass, BadgeInstance
 from issuer.serializers import BadgeInstanceSerializer
 from mainsite import TOP_DIR
@@ -40,7 +40,7 @@ class PathwayApiTests(APITestCase, CachingTestCase):
         self.instructor = BadgeUser(username='instructor', email='instructor@local.test')
         self.instructor.set_password('secret')
         self.instructor.save()
-        EmailAddress(email='instructor@local.test', verified=True, primary=True, user=self.instructor).save()
+        CachedEmailAddress(email='instructor@local.test', verified=True, primary=True, user=self.instructor).save()
         self.assertTrue(self.client.login(username='instructor', password='secret'), "Instructor can log in")
 
         # issuer
