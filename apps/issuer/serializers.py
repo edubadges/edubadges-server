@@ -115,7 +115,7 @@ class BadgeClassSerializer(AbstractComponentSerializer):
     name = serializers.CharField(max_length=255)
     image = Base64FileField(allow_empty_file=False, use_url=True)
     slug = serializers.CharField(max_length=255, allow_blank=True, required=False)
-    criteria = serializers.CharField(allow_blank=True, required=False, write_only=True)
+    criteria = serializers.CharField(allow_blank=True, required=True, write_only=True)
     recipient_count = serializers.IntegerField(required=False, read_only=True)
 
     def to_representation(self, instance):
