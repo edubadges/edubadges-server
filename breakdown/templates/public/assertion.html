@@ -47,12 +47,17 @@
 				    {{ badge_class.json['description'] }}
 			    </p>
 
-		      <h3>Criteria</h3>
-			    <p>
-				    {{ badge_class.criteria_text }}
-			    </p>
+			     {% if badge_class.criteria_text %}
+				     <h3>Criteria</h3>
+				     <p>
+					     {{ badge_class.criteria_text }}
+				     </p>
+			     {% endif %}
 
 			    <div class="l-childrenhorizontal l-childrenhorizontal-small l-offsetleft">
+				    {% if not badge_class.criteria_text %}
+					    <a class="button button-primaryghost" href="{{ badge_class.json['criteria'] }}" target="_blank">View Criteria</a>
+				    {% endif %}
 				    {% if badge_instance.json['evidence'] %}
 				    <a class="button button-primaryghost" href="{{ badge_instance.json['evidence'] }}" target="_blank">View evidence</a>
 				    {% endif %}

@@ -79,6 +79,22 @@ class IssuerTests(APITestCase):
             response = self.client.get('/v1/issuer/issuers/{}'.format(slug))
             self.assertEqual(response.status_code, 200)
 
+    def test_create_issuer_authenticated_unconfirmed_email(self):
+        first_user_data = user_data = {
+            'first_name': 'NEW Test',
+            'last_name': 'User',
+            'email': 'unclaimed1@example.com',
+            'password': '123456'
+        }
+        response = self.client.post('/v1/user/profile', user_data)
+
+        first_user = get_user_model().objects.get(first_name='NEW Test')
+
+        self.client.force_authenticate(user=first_user)
+        response = self.client.post('/v1/issuer/issuers', example_issuer_props)
+
+        self.assertEqual(response.status_code, 403)
+
     def test_create_issuer_image_500x300_resizes_to_400x400(self):
         view = IssuerList.as_view()
 
