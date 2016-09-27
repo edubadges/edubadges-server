@@ -207,7 +207,7 @@ class CollectionLocalBadgeInstanceListSerializer(serializers.ListSerializer):
 
 class CollectionLocalBadgeInstanceSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True, source='instance.id')
-    description = serializers.CharField(required=False)
+    description = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     class Meta:
         list_serializer_class = CollectionLocalBadgeInstanceListSerializer
@@ -234,16 +234,52 @@ class CollectionLocalBadgeInstanceSerializer(serializers.Serializer):
         new_record.save()
         return new_record
 
+    def to_internal_value(self, data):
+        collection = self.context.get('collection')
+        request_user = self.context.get('request').user
+        description = data.get('description', "")
+
+        badge = LocalBadgeInstance.objects.get(
+            recipient_user=request_user,
+            id=data.get('id'),
+        )
+
+        entry = None
+        try:
+            entry = LocalBadgeInstanceCollection.objects.get(
+                instance=badge,
+                collection=collection
+            )
+        except LocalBadgeInstanceCollection.DoesNotExist:
+            pass
+
+        if not entry:
+            entry = LocalBadgeInstanceCollection(
+                instance=badge,
+                collection=collection
+            )
+
+        entry.description = description or ""
+
+        return entry
+
+    def update(self, instance, validated_data):
+        instance.id = validated_data.get('id', instance.id)
+        instance.description = validated_data.get('description', instance.description) or ""
+
+        instance.save()
+        return instance
+
 
 class CollectionSerializer(serializers.Serializer):
     name = serializers.CharField(required=True, max_length=128)
     slug = serializers.CharField(required=False, max_length=128)
-    description = serializers.CharField(required=False, max_length=255)
-    share_hash = serializers.CharField(required=False, max_length=255)
+    description = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=255)
+    share_hash = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=255)
     share_url = serializers.CharField(read_only=True, max_length=1024)
-    badges = serializers.ListField(
-        required=False, child=CollectionLocalBadgeInstanceSerializer(),
-        source='localbadgeinstancecollection_set.all')
+    badges = CollectionLocalBadgeInstanceSerializer(
+        read_only=False, many=True, required=False, source='localbadgeinstancecollection_set.all'
+    )
 
     def create(self, validated_data):
         user = self.context.get('request').user
@@ -260,3 +296,24 @@ class CollectionSerializer(serializers.Serializer):
 
         new_collection.save()
         return new_collection
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.description = validated_data.get('description', instance.description)
+
+        if 'localbadgeinstancecollection_set' in validated_data\
+                and validated_data['localbadgeinstancecollection_set'] is not None:
+
+            existing_entries = instance.localbadgeinstancecollection_set.all()
+            updated_ids = set()
+
+            for entry in validated_data.get('localbadgeinstancecollection_set')['all']:
+                updated_ids.add(entry.instance.id)
+                entry.save()
+
+            for old_entry in existing_entries:
+                if not old_entry.instance.id in updated_ids:
+                    old_entry.delete()
+
+        instance.save()
+        return instance

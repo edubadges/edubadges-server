@@ -346,7 +346,7 @@ class CollectionDetail(APIView):
 
     def put(self, request, slug):
         """
-        Update the description of a badge collection.
+        Update a badge collection's metadata and/or badge list.
         ---
         serializer: CollectionSerializer
         parameters:
@@ -366,14 +366,6 @@ class CollectionDetail(APIView):
                 type: string
               }
         """
-        name = request.data.get('name')
-        description = request.data.get('description')
-        try:
-            name = str(name)
-            description = str(description)
-        except TypeError:
-            return serializers.ValidationError(
-                "Server could not understand PUT fields. Expected strings.")
 
         try:
             collection = self.queryset.get(
@@ -383,14 +375,14 @@ class CollectionDetail(APIView):
         except Collection.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        if name:
-            collection.name = name
-        if description:
-            collection.description = description
+        serializer = CollectionSerializer(collection, data=request.data, context={
+            'request': request,
+            'collection': collection
+        })
 
-        collection.save()
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-        serializer = CollectionSerializer(collection)
         return Response(serializer.data)
 
     def delete(self, request, slug):
