@@ -447,8 +447,13 @@ class CollectionList(APIView):
                 type: string
               }
         """
-        serializer = CollectionSerializer(data=request.data,
-                                          context={'request': request})
+        serializer = CollectionSerializer(
+            data=request.data,
+            context={
+                'request': request,
+                'user': request.user
+            }
+        )
 
         serializer.is_valid(raise_exception=True)
         try:
