@@ -80,16 +80,21 @@ class BadgeUserProfileSerializer(serializers.Serializer):
                     'Account could not be created. An account with this email address may already exist.'
                 )
 
-        if BadgeUser.objects.filter(email=validated_data['email']).exists():
-            raise serializers.ValidationError(
-                'Account could not be created. An account with this email address may already exist.'
+        existing_user = BadgeUser.objects.filter(email=validated_data['email']).first()
+        if existing_user:
+            # if existing_user.password is NOT set, this user was auto-created and needs to be claimed
+            if existing_user.password:
+                raise serializers.ValidationError(
+                    'Account could not be created. An account with this email address may already exist.'
+                )
+            user = existing_user
+        else:
+            user = BadgeUser(
+                email=validated_data['email']
             )
 
-        user = BadgeUser(
-            email=validated_data['email'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name']
-        )
+        user.first_name = validated_data['first_name']
+        user.last_name = validated_data['last_name']
         user.set_password(validated_data['password'])
         user.save()
 
