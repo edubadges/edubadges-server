@@ -280,7 +280,7 @@ class CollectionSerializer(serializers.Serializer):
     badges = CollectionLocalBadgeInstanceSerializer(
         read_only=False, many=True, required=False, source='localbadgeinstancecollection_set.all'
     )
-    published = serializers.BooleanField(write_only=True, required=False)
+    published = serializers.BooleanField(required=False)
 
     def create(self, validated_data):
         user = self.context.get('user')
