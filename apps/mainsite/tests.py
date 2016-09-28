@@ -2,6 +2,8 @@ import os
 import warnings
 
 import time
+
+import re
 from django.core import mail
 from django.core.cache import cache, CacheKeyWarning
 from django.core.cache.backends.filebased import FileBasedCache
@@ -67,16 +69,17 @@ class TestSignup(APITestCase):
         self.client.post('/v1/user/profile', post_data)
 
         self.assertEqual(len(mail.outbox), 1)
+        url_match = re.search(r'http://testserver(/v1/user/confirmemail.*)', mail.outbox[0].body)
+        self.assertIsNotNone(url_match)
+        confirm_url = url_match.group(1)
 
         confirmation = EmailConfirmation.objects.first()
 
         with self.settings(ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL='http://frontend.ui/login/',
                            BADGR_APP_ID=badgr_app.id):
-            response = self.client.get(
-                reverse('account_confirm_email', kwargs={ 'key': confirmation.key }),
-                follow=False
-            )
-            self.assertRedirects(response, 'http://testserver/login/Tester?email={}'.format(post_data['email']), fetch_redirect_response=False)
+            response = self.client.get(confirm_url, follow=False)
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(response.get('location'), 'http://testserver/login/Tester?email={}'.format(post_data['email']))
 
 
 @override_settings(

@@ -12,7 +12,7 @@ from django.test import TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from badgeuser.models import BadgeUser
+from badgeuser.models import BadgeUser, CachedEmailAddress
 from issuer.models import BadgeClass, BadgeInstance
 from issuer.serializers import BadgeInstanceSerializer
 from mainsite import TOP_DIR
@@ -22,6 +22,13 @@ from pathway.completionspec import CompletionRequirementSpecFactory
 from pathway.models import Pathway, PathwayElement
 from pathway.serializers import PathwaySerializer, PathwayElementSerializer
 from recipient.models import RecipientProfile, RecipientGroupMembership, RecipientGroup
+
+CACHE_OVERRIDE = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
+    }
+}
 
 
 class PathwayApiTests(APITestCase, CachingTestCase):
@@ -33,7 +40,7 @@ class PathwayApiTests(APITestCase, CachingTestCase):
         self.instructor = BadgeUser(username='instructor', email='instructor@local.test')
         self.instructor.set_password('secret')
         self.instructor.save()
-        EmailAddress(email='instructor@local.test', verified=True, primary=True, user=self.instructor).save()
+        CachedEmailAddress(email='instructor@local.test', verified=True, primary=True, user=self.instructor).save()
         self.assertTrue(self.client.login(username='instructor', password='secret'), "Instructor can log in")
 
         # issuer
@@ -356,17 +363,7 @@ class PathwayCompletionTests(APITestCase, CachingTestCase):
         recipient = 'testrecipient2@example.com'
         profile, _ = RecipientProfile.cached.get_or_create(recipient_identifier=recipient)
         badgeclass = BadgeClass.objects.get(slug='badge-of-edited-testing')
-        serializer = BadgeInstanceSerializer(data={
-            'create_notification': False,
-            'recipient_identifier': recipient
-        })
-        serializer.is_valid(raise_exception=True)
-        serializer.save(
-            issuer=badgeclass.issuer,
-            badgeclass=badgeclass,
-            created_by=editor
-        )
-        badge_instance = serializer.instance
+        badge_instance = badgeclass.issue(recipient, created_by=editor)
 
         response = self.client.get(reverse('pathway_completion_detail', kwargs={
             'issuer_slug': badge_instance.issuer.slug,
@@ -395,17 +392,7 @@ class PathwayCompletionTests(APITestCase, CachingTestCase):
 
         # award badge to recipient, should complete pathway and get a completion badge
         badgeclass = BadgeClass.objects.get(slug='badge-of-edited-testing')
-        serializer = BadgeInstanceSerializer(data={
-            'create_notification': False,
-            'recipient_identifier': recipient
-        })
-        serializer.is_valid(raise_exception=True)
-        serializer.save(
-            issuer=badgeclass.issuer,
-            badgeclass=badgeclass,
-            created_by=editor
-        )
-        badge_instance = serializer.instance
+        badge_instance = badgeclass.issue(recipient, created_by=editor)
 
         # get completion detail to force badge awarding
         with self.assertNumQueries(0):

@@ -7,7 +7,7 @@ from django.views.generic.base import RedirectView, TemplateView
 
 from rest_framework.authtoken.views import obtain_auth_token
 
-from .views import SitemapView, info_view, email_unsubscribe
+from .views import SitemapView, info_view, email_unsubscribe, AppleAppSiteAssociation
 
 from mainsite.admin import badgr_admin
 badgr_admin.autodiscover()
@@ -57,6 +57,9 @@ urlpatterns = patterns('',
 
     # Service health endpoint
     url(r'^health', include('health.urls')),
+
+    # Apple app universal URL endpoint
+    url(r'^apple-app-site-association', AppleAppSiteAssociation.as_view(), name="apple-app-site-association"),
 
     # JSON-LD Context
     url(r'^json-ld/', include('badgrlog.urls')),

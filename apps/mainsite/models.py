@@ -1,15 +1,18 @@
 import abc
 import base64
-from urlparse import urlparse
+import os
+import urlparse
 
 import basic_models
 from datetime import datetime, timedelta
-from hashlib import sha1
+from hashlib import sha1, md5
 import hmac
 import uuid
 
+import requests
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.core.files.storage import DefaultStorage
 from django.core.urlresolvers import reverse
 from django.db import models
 
@@ -61,6 +64,35 @@ class AbstractComponent(cachemodel.CacheModel):
     @property
     def owner(self):
         return self.created_by
+
+
+class AbstractRemoteImagePreviewMixin(models.Model):
+    image_preview_status = models.IntegerField(default=None, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+    @property
+    def image_preview(self):
+        remote_url = self.json.get('image', None)
+        if remote_url and self.image_preview_status is None and not self.image:
+            # attempt to cache a local copy if we haven't tried before
+            if remote_url is not None:
+                store = DefaultStorage()
+                r = requests.get(remote_url, stream=True)
+                self.image_preview_status = r.status_code  # save the status code of our attempt
+                if r.status_code == 200:
+                    name, ext = os.path.splitext(urlparse.urlparse(r.url).path)
+                    storage_name = '{upload_to}/cached/{filename}{ext}'.format(
+                        upload_to=self.image.field.upload_to,
+                        filename=md5(remote_url).hexdigest(),
+                        ext=ext)
+                    if not store.exists(storage_name):
+                        r.raw.decode_content = True
+                        store.save(storage_name, r.raw)
+                        self.image = storage_name
+                self.save()
+        return self.image
 
 
 class AbstractIssuer(ResizeUploadedImage, AbstractComponent):
@@ -229,7 +261,7 @@ class BadgrAppManager(basic_models.ActiveModelManager):
     def get_current(self, request):
         origin = request.META.get('HTTP_ORIGIN')
         if origin:
-            url = urlparse(origin)
+            url = urlparse.urlparse(origin)
             try:
                 return self.get(cors=url.netloc)
             except self.model.DoesNotExist:

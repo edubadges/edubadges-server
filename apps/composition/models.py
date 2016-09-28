@@ -1,22 +1,23 @@
-from django.db import models
+import os
+
+import cachemodel
+from autoslug import AutoSlugField
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.urlresolvers import reverse
-
-from autoslug import AutoSlugField
-import cachemodel
+from django.db import models
 
 from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
-                             AbstractBadgeInstance)
+                             AbstractBadgeInstance, AbstractRemoteImagePreviewMixin)
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
-class LocalIssuer(AbstractIssuer):
+class LocalIssuer(AbstractRemoteImagePreviewMixin, AbstractIssuer):
     pass
 
 
-class LocalBadgeClass(AbstractBadgeClass):
+class LocalBadgeClass(AbstractRemoteImagePreviewMixin, AbstractBadgeClass):
     issuer = models.ForeignKey(LocalIssuer, blank=False, null=False,
                                on_delete=models.PROTECT,
                                related_name="badgeclasses")
@@ -59,6 +60,18 @@ class Collection(cachemodel.CacheModel):
 
     class Meta:
         unique_together = ('owner', 'slug')
+
+    # Convenience methods for toggling published state
+    @property
+    def published(self):
+        return bool(self.share_hash)
+
+    @published.setter
+    def published(self, value):
+        if value and not self.share_hash:
+            self.share_hash = os.urandom(16).encode('hex')
+        elif not value and self.share_hash:
+            self.share_hash = ''
 
     @property
     def share_url(self):

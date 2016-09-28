@@ -13,6 +13,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 import badgrlog
 
+from mainsite.permissions import AuthenticatedWithVerifiedEmail
+
 from .models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from .serializers import (IssuerSerializer, BadgeClassSerializer,
                           BadgeInstanceSerializer, IssuerRoleActionSerializer,
@@ -30,7 +32,7 @@ class AbstractIssuerAPIEndpoint(APIView):
         authentication.SessionAuthentication,
         authentication.BasicAuthentication,
     )
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
 
     def get_object(self, slug, queryset=None):
         """ Ensure user has permissions on Issuer """
@@ -154,7 +156,7 @@ class IssuerDetail(AbstractIssuerAPIEndpoint):
     queryset = Issuer.objects.all()
     model = Issuer
     serializer_class = IssuerSerializer
-    permission_classes = (permissions.IsAuthenticated, IsStaff,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsStaff,)
 
     def get(self, request, slug):
         """
@@ -225,7 +227,7 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
     role = 'staff'
     queryset = Issuer.objects.all()
     model = Issuer
-    permission_classes = (permissions.IsAuthenticated, IsOwnerOrStaff,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsOwnerOrStaff,)
 
     def get(self, request, slug):
         """
@@ -348,7 +350,7 @@ class AllBadgeClassesList(AbstractIssuerAPIEndpoint):
     """
     queryset = Issuer.objects.all()
     model = Issuer
-    permission_classes = (permissions.IsAuthenticated, IsEditor,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor,)
 
     def get(self, request):
         """
@@ -373,7 +375,7 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
     """
     queryset = Issuer.objects.all()
     model = Issuer
-    permission_classes = (permissions.IsAuthenticated, IsEditor,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor,)
 
     def get(self, request, issuerSlug):
         """
@@ -464,7 +466,7 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
     """
     queryset = BadgeClass.objects.all()
     model = BadgeClass
-    permission_classes = (permissions.IsAuthenticated, MayEditBadgeClass,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayEditBadgeClass,)
 
     def get(self, request, issuerSlug, badgeSlug):
         """
@@ -521,7 +523,7 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
     queryset = BadgeClass.objects.all()
     model = BadgeClass
     serializer_class = BadgeInstanceSerializer
-    permission_classes = (permissions.IsAuthenticated, MayIssueBadgeClass,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass,)
 
     def post(self, request, issuerSlug, badgeSlug):
         """
@@ -534,36 +536,20 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
 
         if current_badgeclass is None:
             return Response(
-                "Issuer not found or current user lacks permission to issue badges.",
+                "Issuer not found or current user lacks permission to issue this badge.",
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        data = {}
-        if request.data.get('recipient_identifier') is not None:
-            data['recipient_identifier'] = \
-                request.data.get('recipient_identifier')
-        elif request.data.get('recipient_id') is not None:
-            data['recipient_identifier'] = request.data.get('recipient_id')
-        elif request.data.get('email') is not None:
-            data['recipient_identifier'] = request.data.get('email')
-        if request.data.get('evidence') is not None:
-            data['evidence'] = request.data.get('evidence')
-        if request.data.get('create_notification') is not None:
-            data['create_notification'] = True
-
-        serializer = BadgeInstanceSerializer(data=data, context={'request': request})
+        serializer = BadgeInstanceSerializer(
+            data=request.data,
+            context={'request': request, 'badgeclass': current_badgeclass}
+        )
         serializer.is_valid(raise_exception=True)
 
-        serializer.save(
-            issuer=current_badgeclass.issuer,
-            badgeclass=current_badgeclass,
-            created_by=request.user
-        )
-        badge_instance = serializer.data
+        serializer.save()
 
-
-        logger.event(badgrlog.BadgeInstanceCreatedEvent(badge_instance, request.user))
-        return Response(badge_instance, status=status.HTTP_201_CREATED)
+        logger.event(badgrlog.BadgeInstanceCreatedEvent(serializer.data, request.user))
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get(self, request, issuerSlug, badgeSlug):
         """
@@ -598,7 +584,7 @@ class IssuerBadgeInstanceList(AbstractIssuerAPIEndpoint):
     """
     queryset = Issuer.objects.all().select_related('badgeinstances')
     model = Issuer
-    permission_classes = (permissions.IsAuthenticated, IsStaff,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsStaff,)
 
     def get(self, request, issuerSlug):
         """
@@ -642,7 +628,7 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
     """
     queryset = BadgeInstance.objects.all()
     model = BadgeInstance
-    permission_classes = (permissions.IsAuthenticated, MayEditBadgeClass,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayEditBadgeClass,)
 
     def get(self, request, issuerSlug, badgeSlug, assertionSlug):
         """

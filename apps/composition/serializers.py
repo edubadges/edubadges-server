@@ -1,6 +1,9 @@
+from django.core.urlresolvers import reverse
 from rest_framework import serializers
 
 import badgrlog
+from mainsite.drf_fields import Base64FileField
+from mainsite.utils import OriginSetting
 from verifier import ComponentsSerializer
 from verifier.badge_check import BadgeCheck
 from verifier.utils import find_and_get_badge_class, find_and_get_issuer
@@ -16,7 +19,7 @@ logger = badgrlog.BadgrLogger()
 
 class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
     # Form submission fields as populated by request.data in the API
-    image = serializers.FileField(required=False, write_only=True)
+    image = Base64FileField(required=False, write_only=True)
     url = serializers.URLField(required=False, write_only=True)
     assertion = serializers.CharField(required=False, write_only=True)
 
@@ -32,8 +35,17 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
         """
         if self.context.get('format', 'v1') == 'plain':
             self.fields.json = serializers.DictField(read_only=True)
-        return super(LocalBadgeInstanceUploadSerializer, self) \
-            .to_representation(obj)
+        representation = super(LocalBadgeInstanceUploadSerializer, self).to_representation(obj)
+        representation['imagePreview'] = {
+            "type": "image",
+            "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('localbadgeinstance_image', kwargs={'slug': obj.slug}))
+        }
+        if obj.issuer.image_preview:
+            representation['issuerImagePreview'] = {
+                "type": "image",
+                "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('localissuer_image', kwargs={'slug': obj.issuer.slug}))
+            }
+        return representation
 
     def validate(self, data):
         """
@@ -195,7 +207,7 @@ class CollectionLocalBadgeInstanceListSerializer(serializers.ListSerializer):
 
 class CollectionLocalBadgeInstanceSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True, source='instance.id')
-    description = serializers.CharField(required=False)
+    description = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     class Meta:
         list_serializer_class = CollectionLocalBadgeInstanceListSerializer
@@ -222,19 +234,56 @@ class CollectionLocalBadgeInstanceSerializer(serializers.Serializer):
         new_record.save()
         return new_record
 
+    def to_internal_value(self, data):
+        collection = self.context.get('collection')
+        request_user = self.context.get('request').user
+        description = data.get('description', "")
+
+        badge = LocalBadgeInstance.objects.get(
+            recipient_user=request_user,
+            id=data.get('id'),
+        )
+
+        entry = None
+        try:
+            entry = LocalBadgeInstanceCollection.objects.get(
+                instance=badge,
+                collection=collection
+            )
+        except LocalBadgeInstanceCollection.DoesNotExist:
+            pass
+
+        if not entry:
+            entry = LocalBadgeInstanceCollection(
+                instance=badge,
+                collection=collection
+            )
+
+        entry.description = description or ""
+
+        return entry
+
+    def update(self, instance, validated_data):
+        instance.id = validated_data.get('id', instance.id)
+        instance.description = validated_data.get('description', instance.description) or ""
+
+        instance.save()
+        return instance
+
 
 class CollectionSerializer(serializers.Serializer):
     name = serializers.CharField(required=True, max_length=128)
     slug = serializers.CharField(required=False, max_length=128)
-    description = serializers.CharField(required=False, max_length=255)
-    share_hash = serializers.CharField(required=False, max_length=255)
+    description = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=255)
+    share_hash = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=255)
     share_url = serializers.CharField(read_only=True, max_length=1024)
-    badges = serializers.ListField(
-        required=False, child=CollectionLocalBadgeInstanceSerializer(),
-        source='localbadgeinstancecollection_set.all')
+    badges = CollectionLocalBadgeInstanceSerializer(
+        read_only=False, many=True, required=False, source='localbadgeinstancecollection_set.all'
+    )
+    published = serializers.BooleanField(required=False)
 
     def create(self, validated_data):
-        user = self.context.get('request').user
+        user = self.context.get('user')
 
         new_collection = Collection(
             name=validated_data.get('name'),
@@ -248,3 +297,25 @@ class CollectionSerializer(serializers.Serializer):
 
         new_collection.save()
         return new_collection
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.description = validated_data.get('description', instance.description)
+        instance.published = validated_data.get('published', instance.published)
+
+        if 'localbadgeinstancecollection_set' in validated_data\
+                and validated_data['localbadgeinstancecollection_set'] is not None:
+
+            existing_entries = instance.localbadgeinstancecollection_set.all()
+            updated_ids = set()
+
+            for entry in validated_data.get('localbadgeinstancecollection_set')['all']:
+                updated_ids.add(entry.instance.id)
+                entry.save()
+
+            for old_entry in existing_entries:
+                if not old_entry.instance.id in updated_ids:
+                    old_entry.delete()
+
+        instance.save()
+        return instance

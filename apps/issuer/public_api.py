@@ -1,8 +1,15 @@
+import os
+
+import StringIO
+import cairosvg
+from PIL import Image
+from django.core.files.storage import DefaultStorage
 from django.http import Http404
 from django.shortcuts import redirect
 from django.views.generic import RedirectView
 
 from rest_framework import status, permissions
+from rest_framework.exceptions import ValidationError
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -76,6 +83,62 @@ class ComponentPropertyDetailView(APIView):
         return redirect(p.url)
 
 
+class ImagePropertyDetailView(ComponentPropertyDetailView):
+    """
+    a subclass of ComponentPropertyDetailView, for image fields, if query_param type='png' re-encode if necessary
+    """
+
+    def get_object(self, slug):
+        try:
+            current_object = self.model.cached.get(slug=slug)
+        except self.model.DoesNotExist:
+            return None
+        else:
+            self.log(current_object)
+            return current_object
+
+    def get(self, request, slug):
+        current_object = self.get_object(slug)
+        if current_object is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        image_prop = getattr(current_object, self.prop)
+        if not bool(image_prop):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        image_type = request.query_params.get('type', 'original')
+        if image_type not in ['original', 'png']:
+            raise ValidationError(u"invalid image type: {}".format(image_type))
+
+        image_url = image_prop.url
+        filename, ext = os.path.splitext(image_prop.name)
+        basename = os.path.basename(filename)
+        dirname = os.path.dirname(filename)
+        new_name = '{dirname}/converted/{basename}.png'.format(dirname=dirname, basename=basename)
+        storage = DefaultStorage()
+
+        if image_type == 'original':
+            image_url = image_prop.url
+        elif image_type == 'png' and ext == '.svg':
+            if not storage.exists(new_name):
+                with storage.open(image_prop.name, 'rb') as input_svg:
+                    out_buf = StringIO.StringIO()
+                    cairosvg.svg2png(file_obj=input_svg, write_to=out_buf)
+                    storage.save(new_name, out_buf)
+            image_url = storage.url(new_name)
+        else:
+            # attempt to use PIL to do desired image conversion
+            if not storage.exists(new_name):
+                with storage.open(image_prop.name, 'rb') as input_svg:
+                    out_buf = StringIO.StringIO()
+                    img = Image.open(input_svg)
+                    img.save(out_buf, format=image_type)
+                    storage.save(new_name, out_buf)
+            image_url = storage.url(new_name)
+
+        return redirect(image_url)
+
+
 class IssuerJson(JSONComponentView):
     """
     GET the actual OBI badge object for an issuer via the /public/issuers/ endpoint
@@ -95,7 +158,7 @@ class IssuerJson(JSONComponentView):
         return context
 
 
-class IssuerImage(ComponentPropertyDetailView):
+class IssuerImage(ImagePropertyDetailView):
     """
     GET an image that represents an Issuer
     """
@@ -125,7 +188,7 @@ class BadgeClassJson(JSONComponentView):
         logger.event(badgrlog.BadgeClassRetrievedEvent(obj, self.request))
 
 
-class BadgeClassImage(ComponentPropertyDetailView):
+class BadgeClassImage(ImagePropertyDetailView):
     """
     GET the unbaked badge image from a pretty url instead of media path
     """
@@ -184,22 +247,16 @@ class BadgeInstanceJson(JSONComponentView):
                 return Response(revocation_info, status=status.HTTP_410_GONE)
 
 
-class BadgeInstanceImage(ComponentPropertyDetailView):
+class BadgeInstanceImage(ImagePropertyDetailView):
     model = BadgeInstance
     prop = 'image'
 
     def log(self, badge_instance):
         logger.event(badgrlog.BadgeInstanceDownloadedEvent(badge_instance, self.request))
 
-    def get(self, request, slug):
-        try:
-            current_object = self.model.cached.get(slug=slug)
-        except self.model.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        else:
-            if current_object.revoked:
-                return Response(status=status.HTTP_404_NOT_FOUND)
-
-            self.log(current_object)
-            return redirect(getattr(current_object, self.prop).url)
+    def get_object(self, slug):
+        obj = super(BadgeInstanceImage, self).get_object(slug)
+        if obj and obj.revoked:
+            return None
+        return obj
 

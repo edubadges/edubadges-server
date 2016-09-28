@@ -1,5 +1,6 @@
 from hashlib import md5
 from itertools import chain
+import random, string
 
 import cachemodel
 from allauth.account.models import EmailAddress, EmailConfirmation
@@ -88,7 +89,7 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_emails(self):
-        return EmailAddress.objects.filter(user=self)
+        return CachedEmailAddress.objects.filter(user=self)
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):
@@ -113,7 +114,7 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
     def save(self, *args, **kwargs):
         if not self.username:
             # md5 hash the email and then encode as base64 to take up only 25 characters
-            hashed = md5(self.email).digest().encode('base64')[:-1]  # strip last character because its a newline
+            hashed = md5(self.email + ''.join(random.choice(string.lowercase) for i in range(64))).digest().encode('base64')[:-1]  # strip last character because its a newline
             self.username = "badgr{}".format(hashed[:25])
 
         if getattr(settings, 'BADGEUSER_SKIP_LAST_LOGIN_TIME', True):

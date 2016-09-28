@@ -10,10 +10,10 @@ import utils
 from badgeuser.serializers import UserProfileField
 from composition.format import V1InstanceSerializer
 from mainsite.drf_fields import Base64FileField
-from mainsite.serializers import WritableJSONField
+from mainsite.serializers import WritableJSONField, HumanReadableBooleanField
 from mainsite.utils import installed_apps_list, OriginSetting
 from pathway.tasks import award_badges_for_pathway_completion
-from issuer.models import Issuer, BadgeClass, BadgeInstance
+from issuer.models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceManager
 
 
 class AbstractComponentSerializer(serializers.Serializer):
@@ -115,7 +115,7 @@ class BadgeClassSerializer(AbstractComponentSerializer):
     name = serializers.CharField(max_length=255)
     image = Base64FileField(allow_empty_file=False, use_url=True)
     slug = serializers.CharField(max_length=255, allow_blank=True, required=False)
-    criteria = serializers.CharField(allow_blank=True, required=False, write_only=True)
+    criteria = serializers.CharField(allow_blank=True, required=True, write_only=True)
     recipient_count = serializers.IntegerField(required=False, read_only=True)
 
     def to_representation(self, instance):
@@ -186,13 +186,20 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
     #badgeclass = serializers.HyperlinkedRelatedField(view_name='badgeclass_json', read_only=True, lookup_field='slug')
     slug = serializers.CharField(max_length=255, read_only=True)
     image = serializers.FileField(read_only=True)  # use_url=True, might be necessary
-    recipient_identifier = serializers.EmailField(max_length=1024)
+    email = serializers.EmailField(max_length=1024, required=False, write_only=True)
+    recipient_identifier = serializers.EmailField(max_length=1024, required=False)
     evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
 
-    revoked = serializers.BooleanField(read_only=True)
+    revoked = HumanReadableBooleanField(read_only=True)
     revocation_reason = serializers.CharField(read_only=True)
 
-    create_notification = serializers.BooleanField(write_only=True, required=False)
+    create_notification = HumanReadableBooleanField(write_only=True, required=False, default=False)
+
+    def validate(self, data):
+        if data.get('email') and not data.get('recipient_identifier'):
+            data['recipient_identifier'] = data.get('email')
+
+        return data
 
     def to_representation(self, instance):
         if self.context.get('extended_json'):
@@ -225,59 +232,17 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
 
         return representation
 
-    def create(self, validated_data, **kwargs):
-        check_completions = validated_data.pop('check_completions', True)
-        # Assemble Badge Object
-        validated_data['json'] = {
-            # 'id': TO BE ADDED IN SAVE
-            '@context': utils.CURRENT_OBI_CONTEXT_IRI,
-            'type': 'Assertion',
-            'recipient': {
-                'type': 'email',
-                'hashed': True
-                # 'email': TO BE ADDED IN SAVE
-            },
-            'badge': validated_data.get('badgeclass').get_full_url(),
-            'verify': {
-                'type': 'hosted'
-                # 'url': TO BE ADDED IN SAVE
-            }
-        }
-        try:
-            create_notification = validated_data.pop('create_notification')
-        except KeyError:
-            create_notification = False
-
-        try:
-            evidence = validated_data.pop('evidence')
-        except KeyError:
-            pass
-        else:
-            validated_data['json']['evidence'] = evidence
-
-        new_assertion = BadgeInstance(**validated_data)
-        new_assertion.slug = new_assertion.get_new_slug()
-
-        # Augment json with id
-        full_url = new_assertion.get_full_url()  # this sets the slug
-        new_assertion.json['id'] = full_url
-        new_assertion.json['uid'] = new_assertion.slug
-        new_assertion.json['verify']['url'] = full_url
-        new_assertion.json['image'] = full_url + '/image'
-
-        # Use AutoSlugField's pre_save to provide slug if empty, else auto-unique
-        new_assertion.slug = \
-            BadgeInstance._meta.get_field('slug').pre_save(new_assertion, add=True)
-
-        new_assertion.save()
-
-        if check_completions:
-            award_badges_for_pathway_completion.delay(new_assertion.slug)
-
-        if create_notification is True:
-            new_assertion.notify_earner()
-
-        return new_assertion
+    def create(self, validated_data):
+        """
+        Requires self.context to include request (with authenticated request.user)
+        and badgeclass: issuer.models.BadgeClass.
+        """
+        return self.context.get('badgeclass').issue(
+            recipient_id=validated_data.get('recipient_identifier'),
+            evidence_url=validated_data.get('evidence'),
+            notify=validated_data.get('create_notification'),
+            created_by=self.context.get('request').user
+        )
 
 
 class IssuerPortalSerializer(serializers.Serializer):

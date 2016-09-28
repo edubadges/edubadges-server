@@ -7,12 +7,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 import badgrlog
+from issuer.public_api import ImagePropertyDetailView
 from mainsite.permissions import IsOwner
 
 from .serializers import (LocalBadgeInstanceUploadSerializer,
                           CollectionSerializer,
                           CollectionLocalBadgeInstanceSerializer)
-from .models import LocalBadgeInstance, Collection, LocalBadgeInstanceCollection
+from .models import LocalBadgeInstance, Collection, LocalBadgeInstanceCollection, LocalIssuer
 
 logger = badgrlog.BadgrLogger()
 
@@ -163,7 +164,7 @@ class CollectionLocalBadgeInstanceList(APIView):
         add_many = isinstance(request.data, list)
         serializer = CollectionLocalBadgeInstanceSerializer(
             data=request.data, many=add_many,
-            context={'collection': collection, 'request': request})
+            context={'collection': collection, 'request': request, 'user': request.user})
         serializer.is_valid(raise_exception=True)
 
         new_records = serializer.save()
@@ -345,7 +346,7 @@ class CollectionDetail(APIView):
 
     def put(self, request, slug):
         """
-        Update the description of a badge collection.
+        Update a badge collection's metadata and/or badge list.
         ---
         serializer: CollectionSerializer
         parameters:
@@ -365,14 +366,6 @@ class CollectionDetail(APIView):
                 type: string
               }
         """
-        name = request.data.get('name')
-        description = request.data.get('description')
-        try:
-            name = str(name)
-            description = str(description)
-        except TypeError:
-            return serializers.ValidationError(
-                "Server could not understand PUT fields. Expected strings.")
 
         try:
             collection = self.queryset.get(
@@ -382,14 +375,14 @@ class CollectionDetail(APIView):
         except Collection.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        if name:
-            collection.name = name
-        if description:
-            collection.description = description
+        serializer = CollectionSerializer(collection, data=request.data, context={
+            'request': request, 'user': request.user,
+            'collection': collection
+        })
 
-        collection.save()
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-        serializer = CollectionSerializer(collection)
         return Response(serializer.data)
 
     def delete(self, request, slug):
@@ -438,7 +431,7 @@ class CollectionList(APIView):
         user_collections = self.queryset.filter(owner=request.user)
 
         serializer = CollectionSerializer(user_collections, many=True,
-                                          context={'request': request})
+                                          context={'request': request, 'user': request.user})
 
         return Response(serializer.data)
 
@@ -454,8 +447,13 @@ class CollectionList(APIView):
                 type: string
               }
         """
-        serializer = CollectionSerializer(data=request.data,
-                                          context={'request': request})
+        serializer = CollectionSerializer(
+            data=request.data,
+            context={
+                'request': request,
+                'user': request.user
+            }
+        )
 
         serializer.is_valid(raise_exception=True)
         try:
@@ -482,10 +480,8 @@ class CollectionGenerateShare(APIView):
         except Collection.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        if not collection.share_hash:
-            share_hash = os.urandom(16).encode('hex')
-            collection.share_hash = share_hash
-            collection.save()
+        collection.published = True
+        collection.save()
 
         return Response(collection.share_url)
 
@@ -501,3 +497,15 @@ class CollectionGenerateShare(APIView):
         collection.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class LocalBadgeInstanceImage(ImagePropertyDetailView):
+    model = LocalBadgeInstance
+    prop = 'image'
+
+
+class LocalIssuerImage(ImagePropertyDetailView):
+    model = LocalIssuer
+    prop = 'image_preview'
+
+

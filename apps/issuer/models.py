@@ -18,8 +18,9 @@ from openbadges_bakery import bake
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
                              AbstractBadgeInstance, EmailBlacklist)
+from pathway.tasks import award_badges_for_pathway_completion
 
-from .utils import generate_sha256_hashstring, badgr_import_url
+from .utils import generate_sha256_hashstring, badgr_import_url, CURRENT_OBI_CONTEXT_IRI
 
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
@@ -113,12 +114,77 @@ class BadgeClass(AbstractBadgeClass):
     def cached_pathway_elements(self):
         return [peb.element for peb in self.pathwayelementbadge_set.all()]
 
+    def issue(self, recipient_id=None, evidence_url=None, notify=False, created_by=None):
+        return BadgeInstance.objects.create_badgeinstance(
+            badgeclass=self, recipient_id=recipient_id, evidence_url=evidence_url,
+            notify=notify, created_by=created_by
+        )
+
+
+class BadgeInstanceManager(models.Manager):
+    def create_badgeinstance(
+            self, badgeclass, recipient_id, evidence_url=None,
+            notify=False, check_completions=True, created_by=None
+    ):
+        """
+        Convenience method to award a badge to a recipient_id
+        :type badgeclass: BadgeClass
+        :type recipient_id: str
+        :type issuer: Issuer
+        :type evidence_url: str
+        :type notify: bool
+        :type check_completions: bool
+        """
+        new_instance = BadgeInstance(
+            badgeclass=badgeclass, issuer=badgeclass.issuer, recipient_identifier=recipient_id,
+        )
+
+        new_instance.json = {
+            # 'id': TO BE ADDED IN SAVE
+            '@context': CURRENT_OBI_CONTEXT_IRI,
+            'type': 'Assertion',
+            'recipient': {
+                'type': 'email',
+                'hashed': True
+                # 'identity': TO BE ADDED IN SAVE
+            },
+            'badge': badgeclass.get_full_url(),
+            'verify': {
+                'type': 'hosted'
+                # 'url': TO BE ADDED IN SAVE
+            }
+        }
+
+        if evidence_url:
+            new_instance.json['evidence'] = evidence_url
+
+        new_instance.slug = new_instance.get_new_slug()
+
+        # Augment json with id
+        full_url = new_instance.get_full_url()
+        new_instance.json['id'] = full_url
+        new_instance.json['uid'] = new_instance.slug
+        new_instance.json['verify']['url'] = full_url
+        new_instance.json['image'] = full_url + '/image'
+
+        new_instance.save()
+
+        if check_completions:
+            award_badges_for_pathway_completion.delay(new_instance.slug)
+
+        if notify:
+            new_instance.notify_earner()
+
+        return new_instance
+
 
 class BadgeInstance(AbstractBadgeInstance):
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False,
                                    on_delete=models.CASCADE,
                                    related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
+
+    objects = BadgeInstanceManager()
 
     @property
     def extended_json(self):
@@ -142,7 +208,8 @@ class BadgeInstance(AbstractBadgeInstance):
     def get_absolute_url(self):
         return reverse('badgeinstance_json', kwargs={'slug': self.slug})
 
-    def get_new_slug(self):
+    @staticmethod
+    def get_new_slug():
         return str(uuid.uuid4())
 
     def save(self, *args, **kwargs):
@@ -162,7 +229,6 @@ class BadgeInstance(AbstractBadgeInstance):
         if self.revoked is False:
             self.revocation_reason = None
 
-        # TODO: If we don't want AutoSlugField to ensure uniqueness, configure it
         super(BadgeInstance, self).save(*args, **kwargs)
 
     def publish(self):

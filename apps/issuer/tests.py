@@ -79,6 +79,22 @@ class IssuerTests(APITestCase):
             response = self.client.get('/v1/issuer/issuers/{}'.format(slug))
             self.assertEqual(response.status_code, 200)
 
+    def test_create_issuer_authenticated_unconfirmed_email(self):
+        first_user_data = user_data = {
+            'first_name': 'NEW Test',
+            'last_name': 'User',
+            'email': 'unclaimed1@example.com',
+            'password': '123456'
+        }
+        response = self.client.post('/v1/user/profile', user_data)
+
+        first_user = get_user_model().objects.get(first_name='NEW Test')
+
+        self.client.force_authenticate(user=first_user)
+        response = self.client.post('/v1/issuer/issuers', example_issuer_props)
+
+        self.assertEqual(response.status_code, 403)
+
     def test_create_issuer_image_500x300_resizes_to_400x400(self):
         view = IssuerList.as_view()
 
@@ -615,11 +631,15 @@ class AssertionTests(APITestCase):
 
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         assertion = {
-            "email": "test@example.com"
+            "email": "test@example.com",
+            "create_notification": False
         }
         response = self.client.post('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions', assertion)
 
         self.assertEqual(response.status_code, 201)
+
+        # Assert mail not sent if "create_notification" param included but set to false
+        self.assertEqual(len(mail.outbox),0)
 
         # assert that the BadgeInstance was published to and fetched from cache
         query_count = 1 if apps.is_installed('badgebook') else 0
@@ -669,6 +689,9 @@ class AssertionTests(APITestCase):
 
         self.assertTrue(image_data_present and badge_data_present)
 
+        # Assert notification not sent if "create_notification" param not included
+        self.assertEqual(len(mail.outbox), 0)
+
     def test_authenticated_editor_can_issue_badge(self):
         # load test image into media files if it doesn't exist
         self.ensure_image_exists(BadgeClass.objects.get(slug='badge-of-testing'))
@@ -678,10 +701,13 @@ class AssertionTests(APITestCase):
         self.client.force_authenticate(user=the_editor)
         response = self.client.post(
             '/v1/issuer/issuers/edited-test-issuer/badges/badge-of-edited-testing/assertions',
-            {"email": "test@example.com"}
+            {"email": "test@example.com", "create_notification": True}
         )
 
         self.assertEqual(response.status_code, 201)
+
+        # Assert that mail is sent if "create_notification" is included and set to True.
+        self.assertEqual(len(mail.outbox), 1)
 
     def test_authenticated_nonowner_user_cant_issue(self):
         self.client.force_authenticate(user=get_user_model().objects.get(pk=2))
@@ -810,7 +836,8 @@ class PublicAPITests(APITestCase):
     def setUp(self):
         cache.clear()
         # ensure records are published to cache
-        Issuer.cached.get(slug='test-issuer')
+        issuer = Issuer.cached.get(slug='test-issuer')
+        issuer.cached_badgeclasses()
         Issuer.cached.get(pk=2)
         BadgeClass.cached.get(slug='badge-of-testing')
         BadgeClass.cached.get(pk=1)
