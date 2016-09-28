@@ -164,7 +164,7 @@ class CollectionLocalBadgeInstanceList(APIView):
         add_many = isinstance(request.data, list)
         serializer = CollectionLocalBadgeInstanceSerializer(
             data=request.data, many=add_many,
-            context={'collection': collection, 'request': request})
+            context={'collection': collection, 'request': request, 'user': request.user})
         serializer.is_valid(raise_exception=True)
 
         new_records = serializer.save()
@@ -376,7 +376,7 @@ class CollectionDetail(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         serializer = CollectionSerializer(collection, data=request.data, context={
-            'request': request,
+            'request': request, 'user': request.user,
             'collection': collection
         })
 
@@ -431,7 +431,7 @@ class CollectionList(APIView):
         user_collections = self.queryset.filter(owner=request.user)
 
         serializer = CollectionSerializer(user_collections, many=True,
-                                          context={'request': request})
+                                          context={'request': request, 'user': request.user})
 
         return Response(serializer.data)
 
@@ -475,10 +475,8 @@ class CollectionGenerateShare(APIView):
         except Collection.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        if not collection.share_hash:
-            share_hash = os.urandom(16).encode('hex')
-            collection.share_hash = share_hash
-            collection.save()
+        collection.published = True
+        collection.save()
 
         return Response(collection.share_url)
 

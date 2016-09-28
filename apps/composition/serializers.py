@@ -280,9 +280,10 @@ class CollectionSerializer(serializers.Serializer):
     badges = CollectionLocalBadgeInstanceSerializer(
         read_only=False, many=True, required=False, source='localbadgeinstancecollection_set.all'
     )
+    published = serializers.BooleanField(write_only=True, required=False)
 
     def create(self, validated_data):
-        user = self.context.get('request').user
+        user = self.context.get('user')
 
         new_collection = Collection(
             name=validated_data.get('name'),
@@ -300,6 +301,7 @@ class CollectionSerializer(serializers.Serializer):
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
         instance.description = validated_data.get('description', instance.description)
+        instance.published = validated_data.get('published', instance.published)
 
         if 'localbadgeinstancecollection_set' in validated_data\
                 and validated_data['localbadgeinstancecollection_set'] is not None:

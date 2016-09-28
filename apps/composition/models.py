@@ -1,3 +1,5 @@
+import os
+
 import cachemodel
 from autoslug import AutoSlugField
 from django.conf import settings
@@ -58,6 +60,18 @@ class Collection(cachemodel.CacheModel):
 
     class Meta:
         unique_together = ('owner', 'slug')
+
+    # Convenience methods for toggling published state
+    @property
+    def published(self):
+        return bool(self.share_hash)
+
+    @published.setter
+    def published(self, value):
+        if value and not self.share_hash:
+            self.share_hash = os.urandom(16).encode('hex')
+        elif not value and self.share_hash:
+            self.share_hash = ''
 
     @property
     def share_url(self):

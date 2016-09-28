@@ -7,7 +7,11 @@ from django.contrib.auth import get_user_model
 import responses
 from rest_framework.test import APITestCase
 
-from composition.models import LocalBadgeClass, LocalIssuer, LocalBadgeInstance
+from composition.models import (LocalBadgeClass, LocalIssuer, LocalBadgeInstance,
+                                Collection, LocalBadgeInstanceCollection,)
+from composition.serializers import (CollectionSerializer,
+                          CollectionLocalBadgeInstanceListSerializer,
+                          CollectionLocalBadgeInstanceSerializer,)
 
 dir = os.path.dirname(__file__)
 
@@ -380,4 +384,100 @@ class TestBadgeUploads(APITestCase):
 
 
 class TestCollectionOperations(APITestCase):
-    pass
+    fixtures = ['0001_initial_superuser', 'initial_collections', 'initial_my_badges']
+
+    def setUp(self):
+        self.user = get_user_model().objects.get(pk=1)
+
+    def test_can_define_collection(self):
+        """
+        Authorized user can create a new collection via API.
+        """
+        pass
+
+    def test_can_define_collection_serializer(self):
+        """
+        A new collection may be created directly via serializer.
+        """
+        data = {
+            'name': 'Fruity Collection',
+            'description': 'Apples and Oranges'
+        }
+
+        serializer = CollectionSerializer(data=data, context={'user': self.user})
+        serializer.is_valid(raise_exception=True)
+        collection = serializer.save()
+
+        self.assertIsNotNone(collection.pk)
+        self.assertEqual(collection.name, data['name'])
+
+    def test_can_delete_collection(self):
+        """
+        Authorized user may delete one of their defined collections.
+        """
+        pass
+
+    def test_can_publish_unpublish_collection_serializer(self):
+        """
+        The CollectionSerializer should be able to update/delete a collection's share hash
+        via update method.
+        """
+        collection = Collection.objects.first()
+        self.assertEqual(collection.share_url, '')
+
+        serializer = CollectionSerializer(
+            collection,
+            data={'published': True}, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        self.assertNotEqual(collection.share_url, '')
+        self.assertTrue(collection.published)
+
+        serializer = CollectionSerializer(
+            collection,
+            data={'published': False}, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        self.assertFalse(collection.published)
+        self.assertEqual(collection.share_url, '')
+
+
+    def test_can_publish_unpublish_collection_api_share_method(self):
+        """
+        The CollectionSerializer should be able to update/delete a collection's share hash
+        via the CollectionGenerateShare GET/DELETE methods.
+        """
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(
+            '/v1/earner/collections/fresh-badges/share'
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data.startswith('http'))
+
+        collection = Collection.objects.get(pk=1)
+        self.assertTrue(collection.published)
+
+        response = self.client.delete('/v1/earner/collections/fresh-badges/share')
+        self.assertEqual(response.status_code, 204)
+        self.assertIsNone(response.data)
+
+        collection = Collection.objects.get(pk=1)
+        self.assertFalse(collection.published)
+
+
+    def test_can_add_remove_collection_badge_via_serializer(self):
+        """
+        The CollectionSerializer should be able to update an existing collection's badge list
+        """
+        pass
+
+    def test_can_add_remove_collection_badge_via_api(self):
+        """
+        A PUT request to the CollectionDetail view should be able to update the list of badges
+        in a collection.
+        """
+        pass
