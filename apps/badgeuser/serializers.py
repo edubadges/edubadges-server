@@ -123,7 +123,8 @@ class BadgeUserExistingProfileSerializer(serializers.ModelSerializer):
 
 
 class NewEmailSerializer(serializers.ModelSerializer):
-    variants = serializers.EmailField(source='cached_variants')
+    variants = serializers.ListField(serializers.EmailField(), required=False, source='cached_variants')
+    email = serializers.EmailField(required=True)
 
     class Meta:
         model = CachedEmailAddress
@@ -133,14 +134,24 @@ class NewEmailSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         new_address = validated_data.get('email')
         try:
-            email = CachedEmailAddress.objects.get(
-                email=new_address, user=self.context.get('request').user
-            )
+            email = CachedEmailAddress.objects.get(email=new_address)
         except CachedEmailAddress.DoesNotExist:
-            return super(NewEmailSerializer, self).create(validated_data)
+            email = super(NewEmailSerializer, self).create(validated_data)
+        else:
+            if not email.verified:
+                # Clear out a previous attempt and let the current user try
+                email.delete()
+                email = super(NewEmailSerializer, self).create(validated_data)
 
         if new_address != email.email and new_address not in [v.email for v in email.cached_variants()]:
             email.add_variant(new_address)
+
+        if validated_data.get('variants'):
+            for variant in validated_data.get('variants'):
+                try:
+                    email.add_variant(variant)
+                except serializers.ValidationError:
+                    pass
 
         return email
 

@@ -11,8 +11,7 @@ from issuer.public_api import ImagePropertyDetailView
 from mainsite.permissions import IsOwner
 
 from .serializers import (LocalBadgeInstanceUploadSerializer,
-                          CollectionSerializer,
-                          CollectionLocalBadgeInstanceSerializer)
+                          CollectionSerializer, CollectionBadgeSerializer)
 from .models import LocalBadgeInstance, Collection, LocalBadgeInstanceCollection, LocalIssuer
 
 logger = badgrlog.BadgrLogger()
@@ -146,8 +145,9 @@ class CollectionLocalBadgeInstanceList(APIView):
             collection__slug=slug,
             instance__recipient_user=request.user)
 
-        serializer = CollectionLocalBadgeInstanceSerializer(collection_badges,
-                                                            many=True)
+        serializer = CollectionBadgeSerializer(
+            collection_badges, many=True)
+
         return Response(serializer.data)
 
     def post(self, request, slug):
@@ -162,9 +162,14 @@ class CollectionLocalBadgeInstanceList(APIView):
                             status=status.HTTP_404_NOT_FOUND)
 
         add_many = isinstance(request.data, list)
-        serializer = CollectionLocalBadgeInstanceSerializer(
+        serializer = CollectionBadgeSerializer(
             data=request.data, many=add_many,
-            context={'collection': collection, 'request': request})
+            context={
+                'collection': collection,
+                'request': request, 'user': request.user,
+                'add_only': True
+            }
+        )
         serializer.is_valid(raise_exception=True)
 
         new_records = serializer.save()
@@ -206,26 +211,12 @@ class CollectionLocalBadgeInstanceList(APIView):
         except Collection.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        serializer = CollectionLocalBadgeInstanceSerializer(
-            data=badges, many=isinstance(badges, list),
-            context={'collection': collection, 'request': request}
-        )
+        serializer = CollectionBadgeSerializer(
+            data=badges, many=True, context={'collection': collection})
+
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        badge_ids = [
-            item.get('id') for item in badges
-        ]
-
-        badges_to_remove = LocalBadgeInstanceCollection.objects.filter(
-            collection=collection
-        ).exclude(instance__id__in=badge_ids)
-        for badge in badges_to_remove:
-            badge.delete()
-
-        serializer = CollectionLocalBadgeInstanceSerializer(
-            collection.localbadgeinstancecollection_set.all(), many=True
-        )
         return Response(serializer.data)
 
 
@@ -246,7 +237,7 @@ class CollectionLocalBadgeInstanceDetail(APIView):
         except LocalBadgeInstanceCollection.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        serializer = CollectionLocalBadgeInstanceSerializer(item)
+        serializer = CollectionBadgeSerializer(item)
         return Response(serializer.data)
 
     def put(self, request, collection_slug, badge_id):
@@ -288,7 +279,7 @@ class CollectionLocalBadgeInstanceDetail(APIView):
         item.description = description
         item.save()
 
-        serializer = CollectionLocalBadgeInstanceSerializer(item)
+        serializer = CollectionBadgeSerializer(item)
         return Response(serializer.data)
 
     def delete(self, request, collection_slug, badge_id):
@@ -346,7 +337,7 @@ class CollectionDetail(APIView):
 
     def put(self, request, slug):
         """
-        Update the description of a badge collection.
+        Update a badge collection's metadata and/or badge list.
         ---
         serializer: CollectionSerializer
         parameters:
@@ -366,14 +357,6 @@ class CollectionDetail(APIView):
                 type: string
               }
         """
-        name = request.data.get('name')
-        description = request.data.get('description')
-        try:
-            name = str(name)
-            description = str(description)
-        except TypeError:
-            return serializers.ValidationError(
-                "Server could not understand PUT fields. Expected strings.")
 
         try:
             collection = self.queryset.get(
@@ -383,14 +366,14 @@ class CollectionDetail(APIView):
         except Collection.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        if name:
-            collection.name = name
-        if description:
-            collection.description = description
+        serializer = CollectionSerializer(collection, data=request.data, context={
+            'request': request, 'user': request.user,
+            'collection': collection
+        }, partial=True)
 
-        collection.save()
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-        serializer = CollectionSerializer(collection)
         return Response(serializer.data)
 
     def delete(self, request, slug):
@@ -439,7 +422,7 @@ class CollectionList(APIView):
         user_collections = self.queryset.filter(owner=request.user)
 
         serializer = CollectionSerializer(user_collections, many=True,
-                                          context={'request': request})
+                                          context={'request': request, 'user': request.user})
 
         return Response(serializer.data)
 
@@ -455,8 +438,13 @@ class CollectionList(APIView):
                 type: string
               }
         """
-        serializer = CollectionSerializer(data=request.data,
-                                          context={'request': request})
+        serializer = CollectionSerializer(
+            data=request.data,
+            context={
+                'request': request,
+                'user': request.user
+            }
+        )
 
         serializer.is_valid(raise_exception=True)
         try:
@@ -483,10 +471,8 @@ class CollectionGenerateShare(APIView):
         except Collection.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        if not collection.share_hash:
-            share_hash = os.urandom(16).encode('hex')
-            collection.share_hash = share_hash
-            collection.save()
+        collection.published = True
+        collection.save()
 
         return Response(collection.share_url)
 

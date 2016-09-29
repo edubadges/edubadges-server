@@ -66,16 +66,21 @@ class AbstractComponent(cachemodel.CacheModel):
         return self.created_by
 
 
-class AbstractRemoteImagePreviewMixin(object):
+class AbstractRemoteImagePreviewMixin(models.Model):
+    image_preview_status = models.IntegerField(default=None, null=True, blank=True)
+
+    class Meta:
+        abstract = True
 
     @property
     def image_preview(self):
-        if not self.image:
-            # cache a local copy
-            remote_url = self.json.get('image', None)
+        remote_url = self.json.get('image', None)
+        if remote_url and self.image_preview_status is None and not self.image:
+            # attempt to cache a local copy if we haven't tried before
             if remote_url is not None:
                 store = DefaultStorage()
                 r = requests.get(remote_url, stream=True)
+                self.image_preview_status = r.status_code  # save the status code of our attempt
                 if r.status_code == 200:
                     name, ext = os.path.splitext(urlparse.urlparse(r.url).path)
                     storage_name = '{upload_to}/cached/{filename}{ext}'.format(
@@ -86,7 +91,7 @@ class AbstractRemoteImagePreviewMixin(object):
                         r.raw.decode_content = True
                         store.save(storage_name, r.raw)
                         self.image = storage_name
-                        self.save()
+                self.save()
         return self.image
 
 

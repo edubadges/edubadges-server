@@ -9,11 +9,15 @@ from rest_framework import serializers
 import utils
 from badgeuser.serializers import UserProfileField
 from composition.format import V1InstanceSerializer
-from mainsite.drf_fields import Base64FileField
-from mainsite.serializers import CoercedBooleanField, WritableJSONField
-from mainsite.utils import installed_apps_list, OriginSetting
-from pathway.tasks import award_badges_for_pathway_completion
+
 from issuer.models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceManager
+
+from mainsite.drf_fields import Base64FileField
+from mainsite.serializers import WritableJSONField, HumanReadableBooleanField
+from mainsite.utils import installed_apps_list, OriginSetting
+
+from pathway.tasks import award_badges_for_pathway_completion
+
 
 
 class AbstractComponentSerializer(serializers.Serializer):
@@ -115,7 +119,7 @@ class BadgeClassSerializer(AbstractComponentSerializer):
     name = serializers.CharField(max_length=255)
     image = Base64FileField(allow_empty_file=False, use_url=True)
     slug = serializers.CharField(max_length=255, allow_blank=True, required=False)
-    criteria = serializers.CharField(allow_blank=True, required=False, write_only=True)
+    criteria = serializers.CharField(allow_blank=True, required=True, write_only=True)
     recipient_count = serializers.IntegerField(required=False, read_only=True)
 
     def to_representation(self, instance):
@@ -190,10 +194,10 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
     recipient_identifier = serializers.EmailField(max_length=1024, required=False)
     evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
 
-    revoked = serializers.BooleanField(read_only=True)
+    revoked = HumanReadableBooleanField(read_only=True)
     revocation_reason = serializers.CharField(read_only=True)
 
-    create_notification = CoercedBooleanField(write_only=True, required=False, default=False)
+    create_notification = HumanReadableBooleanField(write_only=True, required=False, default=False)
 
     def validate(self, data):
         if data.get('email') and not data.get('recipient_identifier'):

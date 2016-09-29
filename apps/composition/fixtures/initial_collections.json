@@ -1,0 +1,35 @@
+[
+  {
+    "fields": {
+      "owner": 1,
+      "description": "The Freshest Ones",
+      "name": "Fresh Badges",
+      "share_hash": "",
+      "slug": "fresh-badges"
+    },
+    "model": "composition.collection",
+    "pk": 1
+  },
+  {
+    "fields": {
+      "owner": 1,
+      "description": "It's even fresher.",
+      "name": "Cool New Collection",
+      "share_hash": "",
+      "slug": "cool-new-collection"
+    },
+    "model": "composition.collection",
+    "pk": 2
+  },
+  {
+    "fields": {
+      "owner": 1,
+      "description": "Newest!",
+      "name": "New Collection",
+      "share_hash": "",
+      "slug": "new-collection"
+    },
+    "model": "composition.collection",
+    "pk": 3
+  }
+]

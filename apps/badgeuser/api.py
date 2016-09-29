@@ -291,14 +291,22 @@ class BadgeUserForgotPassword(UserTokenMixin, BadgeUserEmailView):
             return Response(status=status.HTTP_200_OK)
 
         # taken from allauth.account.forms.ResetPasswordForm
-        temp_key = default_token_generator.make_token(email_address.user)
-        token = "{uidb36}-{key}".format(uidb36=user_pk_to_url_str(email_address.user),
+
+        # fetch user from database directly to avoid cache
+        UserCls = get_user_model()
+        try:
+            user = UserCls.objects.get(pk=email_address.user_id)
+        except UserCls.DoesNotExist:
+            return Response(status=status.HTTP_200_OK)
+
+        temp_key = default_token_generator.make_token(user)
+        token = "{uidb36}-{key}".format(uidb36=user_pk_to_url_str(user),
                                         key=temp_key)
         reset_url = "{}{}?token={}".format(OriginSetting.HTTP, reverse('user_forgot_password'), token)
 
         email_context = {
             "site": get_current_site(request),
-            "user": email_address.user,
+            "user": user,
             "password_reset_url": reset_url,
         }
         get_adapter().send_mail('account/email/password_reset_key', email, email_context)
@@ -326,15 +334,18 @@ class BadgeUserForgotPassword(UserTokenMixin, BadgeUserEmailView):
 
         matches = re.search(r'([0-9A-Za-z]+)-(.*)', token)
         if not matches:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': "Invalid Token"}, status=status.HTTP_404_NOT_FOUND)
         uidb36 = matches.group(1)
         key = matches.group(2)
         if not (uidb36 and key):
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': "Invalid Token"}, status=status.HTTP_404_NOT_FOUND)
 
         user = self._get_user(uidb36)
-        if user is None or not default_token_generator.check_token(user, key):
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        if user is None:
+            return Response({'error': "Invalid token"}, status=status.HTTP_404_NOT_FOUND)
+
+        if not default_token_generator.check_token(user, key):
+            return Response({'error': "invalid token"}, status=status.HTTP_404_NOT_FOUND)
 
         user.set_password(password)
         user.save()

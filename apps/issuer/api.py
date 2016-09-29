@@ -12,6 +12,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 import badgrlog
 from badgeuser.models import CachedEmailAddress
+
+from mainsite.permissions import AuthenticatedWithVerifiedEmail
+
 from .models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from .serializers import (IssuerSerializer, BadgeClassSerializer,
                           BadgeInstanceSerializer, IssuerRoleActionSerializer,
@@ -29,7 +32,7 @@ class AbstractIssuerAPIEndpoint(APIView):
         authentication.SessionAuthentication,
         authentication.BasicAuthentication,
     )
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
 
     def get_object(self, slug, queryset=None):
         """ Ensure user has permissions on Issuer """
@@ -153,7 +156,7 @@ class IssuerDetail(AbstractIssuerAPIEndpoint):
     queryset = Issuer.objects.all()
     model = Issuer
     serializer_class = IssuerSerializer
-    permission_classes = (permissions.IsAuthenticated, IsStaff,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsStaff,)
 
     def get(self, request, slug):
         """
@@ -224,7 +227,7 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
     role = 'staff'
     queryset = Issuer.objects.all()
     model = Issuer
-    permission_classes = (permissions.IsAuthenticated, IsOwnerOrStaff,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsOwnerOrStaff,)
 
     def get(self, request, slug):
         """
@@ -347,7 +350,7 @@ class AllBadgeClassesList(AbstractIssuerAPIEndpoint):
     """
     queryset = Issuer.objects.all()
     model = Issuer
-    permission_classes = (permissions.IsAuthenticated, IsEditor,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor,)
 
     def get(self, request):
         """
@@ -372,7 +375,7 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
     """
     queryset = Issuer.objects.all()
     model = Issuer
-    permission_classes = (permissions.IsAuthenticated, IsEditor,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor,)
 
     def get(self, request, issuerSlug):
         """
@@ -463,7 +466,7 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
     """
     queryset = BadgeClass.objects.all()
     model = BadgeClass
-    permission_classes = (permissions.IsAuthenticated, MayEditBadgeClass,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayEditBadgeClass,)
 
     def get(self, request, issuerSlug, badgeSlug):
         """
@@ -520,7 +523,7 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
     queryset = BadgeClass.objects.all()
     model = BadgeClass
     serializer_class = BadgeInstanceSerializer
-    permission_classes = (permissions.IsAuthenticated, MayIssueBadgeClass,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass,)
 
     def post(self, request, issuerSlug, badgeSlug):
         """
@@ -581,7 +584,7 @@ class IssuerBadgeInstanceList(AbstractIssuerAPIEndpoint):
     """
     queryset = Issuer.objects.all().select_related('badgeinstances')
     model = Issuer
-    permission_classes = (permissions.IsAuthenticated, IsStaff,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsStaff,)
 
     def get(self, request, issuerSlug):
         """
@@ -625,7 +628,7 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
     """
     queryset = BadgeInstance.objects.all()
     model = BadgeInstance
-    permission_classes = (permissions.IsAuthenticated, MayEditBadgeClass,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayEditBadgeClass,)
 
     def get(self, request, issuerSlug, badgeSlug, assertionSlug):
         """

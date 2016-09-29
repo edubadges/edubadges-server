@@ -4,18 +4,9 @@ from collections import OrderedDict
 from django.conf import settings
 from rest_framework import serializers
 
-class CoercedBooleanField(serializers.BooleanField):
-    """
-    A BooleanField that coerces truthy values to True.
-    """
-    def to_internal_value(self, data):
-        if data in self.TRUE_VALUES:
-            return True
-        elif data in self.FALSE_VALUES:
-            return False
-        elif data:
-            return True
-        self.fail('invalid', input=data)
+class HumanReadableBooleanField(serializers.BooleanField):
+    TRUE_VALUES = serializers.BooleanField.TRUE_VALUES | set(('on', 'On', 'ON'))
+    FALSE_VALUES = serializers.BooleanField.FALSE_VALUES | set(('off', 'Off', 'OFF'))
 
 
 class ReadOnlyJSONField(serializers.CharField):

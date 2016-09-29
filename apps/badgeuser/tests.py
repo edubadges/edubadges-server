@@ -10,11 +10,12 @@ from django.core import mail
 from django.core.cache.backends.filebased import FileBasedCache
 from django.test import TestCase, override_settings
 from django.core.cache import cache
+from django.core.urlresolvers import reverse
 
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIRequestFactory, APITestCase
 
-from badgeuser.models import BadgeUser
+from badgeuser.models import BadgeUser, CachedEmailAddress
 from mainsite import TOP_DIR
 from mainsite.models import BadgrApp
 
@@ -92,16 +93,88 @@ class UserCreateTests(APITestCase):
 
     def test_can_create_user_with_preexisting_unconfirmed_email(self):
         user_data = {
-            'first_name': 'Test',
+            'first_name': 'NEW Test',
             'last_name': 'User',
             'email': 'unclaimed1@example.com',
             'password': '123456'
         }
 
+        existing_email = CachedEmailAddress.objects.get(email="unclaimed1@example.com")
+        existing_user = existing_email.user
+        existing_user.save()
+        self.assertFalse(existing_email.verified)
+        self.assertTrue(existing_email in existing_user.cached_emails())
+
         response = self.client.post('/v1/user/profile', user_data)
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(len(mail.outbox), 1)
+
+        new_user = BadgeUser.objects.get(first_name='NEW Test')
+        self.assertEqual(new_user.email, 'unclaimed1@example.com')
+
+        existing_email = CachedEmailAddress.objects.get(email="unclaimed1@example.com")
+        self.assertEqual(existing_email.user, new_user)
+        self.assertTrue(existing_email not in existing_user.cached_emails())
+
+    def test_user_can_add_secondary_email_of_preexisting_unclaimed_email(self):
+        first_user=BadgeUser.objects.get(pk=3)
+
+        new_email = CachedEmailAddress(user=first_user, email="unclaimed2@example.com", primary=False, verified=False).save()
+
+        second_user=BadgeUser.objects.get(pk=1)
+        self.client.force_authenticate(user=second_user)
+        response = self.client.post('/v1/user/emails', {
+            'email': 'unclaimed2@example.com',
+        })
+        self.assertEqual(response.status_code, 201)
+
+
+    def test_can_create_account_with_same_email_since_deleted(self):
+        first_user_data = user_data = {
+            'first_name': 'NEW Test',
+            'last_name': 'User',
+            'email': 'unclaimed1@example.com',
+            'password': '123456'
+        }
+        response = self.client.post('/v1/user/profile', user_data)
+
+        first_user = BadgeUser.objects.get(first_name='NEW Test')
+        first_email = CachedEmailAddress.objects.get(email='unclaimed1@example.com')
+        first_email.verified = True
+        first_email.save()
+
+        second_email = CachedEmailAddress(email='newjunkeremail@junk.net', user=first_user, verified=True)
+        second_email.save()
+
+        self.assertEqual(len(first_user.cached_emails()), 2)
+
+        self.client.force_authenticate(user=first_user)
+        response = self.client.put(
+            reverse('api_user_email_detail', args=[second_email.pk]),
+            {'primary': True}
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Reload user and emails
+        first_user = BadgeUser.objects.get(first_name='NEW Test')
+        first_email = CachedEmailAddress.objects.get(email='unclaimed1@example.com')
+        second_email = CachedEmailAddress.objects.get(email='newjunkeremail@junk.net')
+
+        self.assertEqual(first_user.email, 'newjunkeremail@junk.net')
+        self.assertTrue(second_email.primary)
+        self.assertFalse(first_email.primary)
+
+        self.assertTrue('unclaimed1@example.com' in [e.email for e in first_user.cached_emails()])
+        first_email.delete()
+        self.assertFalse('unclaimed1@example.com' in [e.email for e in first_user.cached_emails()])
+
+        user_data['name'] = 'NEWEST Test'
+        self.client.force_authenticate(user=None)
+        response = self.client.post('/v1/user/profile', user_data)
+
+        self.assertEqual(response.status_code, 201)
+
 
     def test_shouldnt_error_when_user_exists_with_email(self):
         email = 'existing3@example.test'
