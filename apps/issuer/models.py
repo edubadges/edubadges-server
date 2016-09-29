@@ -70,6 +70,10 @@ class Issuer(AbstractIssuer):
     def cached_recipient_groups(self):
         return self.recipientgroup_set.all()
 
+    @property
+    def image_preview(self):
+        return self.image
+
 
 class IssuerStaff(models.Model):
     issuer = models.ForeignKey(Issuer)

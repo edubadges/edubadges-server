@@ -4,13 +4,14 @@ from django.core.urlresolvers import reverse
 from rest_framework import serializers
 
 import badgrlog
+from issuer.models import BadgeInstance
 from mainsite.drf_fields import Base64FileField
 from mainsite.utils import OriginSetting
 from verifier import ComponentsSerializer
 from verifier.badge_check import BadgeCheck
 from verifier.utils import find_and_get_badge_class, find_and_get_issuer
 
-from .format import V1InstanceSerializer
+from .format import V1InstanceSerializer, V1BadgeInstanceSerializer
 from .models import (LocalBadgeInstance, LocalBadgeClass, LocalIssuer,
                      Collection, LocalBadgeInstanceCollection)
 from .utils import (get_verified_badge_instance_from_form,
@@ -27,7 +28,7 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
 
     # Reinstantiation using fields from badge instance when returned by .create
     id = serializers.IntegerField(read_only=True)
-    json = V1InstanceSerializer(read_only=True)
+    # json = V1InstanceSerializer(read_only=True)
 
     def to_representation(self, obj):
         """
@@ -38,6 +39,12 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
         if self.context.get('format', 'v1') == 'plain':
             self.fields.json = serializers.DictField(read_only=True)
         representation = super(LocalBadgeInstanceUploadSerializer, self).to_representation(obj)
+
+        if isinstance(obj, LocalBadgeInstance):
+            representation['json'] = V1InstanceSerializer(obj.json).data
+        elif isinstance(obj, BadgeInstance):
+            representation['json'] = V1BadgeInstanceSerializer(obj).data
+
         representation['imagePreview'] = {
             "type": "image",
             "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('localbadgeinstance_image', kwargs={'slug': obj.slug}))

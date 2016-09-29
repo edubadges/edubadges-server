@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 import badgrlog
+from issuer.models import BadgeInstance
 from issuer.public_api import ImagePropertyDetailView
 from mainsite.permissions import IsOwner
 
@@ -22,7 +23,6 @@ class LocalBadgeInstanceList(APIView):
     Retrieve a list of the logged-in user's locally imported badges or post a
     new badge.
     """
-    queryset = LocalBadgeInstance.objects.all()
     permission_classes = (permissions.IsAuthenticated, IsOwner,)
 
     def get(self, request):
@@ -31,7 +31,11 @@ class LocalBadgeInstanceList(APIView):
         ---
         serializer: LocalBadgeInstanceUploadSerializer
         """
-        user_badges = self.queryset.filter(recipient_user=request.user)
+
+        imported_badges = LocalBadgeInstance.objects.filter(recipient_user=request.user)
+        local_badges = BadgeInstance.objects.filter(recipient_identifier__in=request.user.all_recipient_identifiers)
+        user_badges = list(imported_badges) + list(local_badges)
+
         serializer = LocalBadgeInstanceUploadSerializer(
             user_badges, many=True, context={
                 'request': request,

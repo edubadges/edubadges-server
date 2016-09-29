@@ -7,6 +7,7 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import DetailView, TemplateView
 
 from badgeuser.serializers import UserProfileField
+from issuer.models import BadgeInstance
 from mainsite.utils import installed_apps_list
 
 from .models import Collection, LocalBadgeInstance
@@ -27,9 +28,11 @@ class EarnerPortal(TemplateView):
             Collection.objects.filter(owner=self.request.user),
             many=True).data
 
-        user_badges = LocalBadgeInstanceUploadSerializer(
-            LocalBadgeInstance.objects.filter(recipient_user=self.request.user),
-            many=True).data
+        imported_badges = LocalBadgeInstance.objects.filter(recipient_user=self.request.user)
+        local_badges = BadgeInstance.objects.filter(recipient_identifier__in=self.request.user.all_recipient_identifiers)
+        all_badges = list(imported_badges) + list(local_badges)
+
+        user_badges = LocalBadgeInstanceUploadSerializer(all_badges, many=True).data
 
         context.update({
             'initial_data': json.dumps({
