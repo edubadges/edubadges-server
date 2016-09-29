@@ -83,7 +83,7 @@ class Collection(cachemodel.CacheModel):
 
 class LocalBadgeInstanceCollection(models.Model):
     instance = models.ForeignKey(LocalBadgeInstance, null=False)
-    collection = models.ForeignKey(Collection, null=False)
+    collection = models.ForeignKey(Collection, null=False, related_name='badges')
 
     description = models.TextField(blank=True)
 

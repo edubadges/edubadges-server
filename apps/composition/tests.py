@@ -9,9 +9,7 @@ from rest_framework.test import APITestCase
 
 from composition.models import (LocalBadgeClass, LocalIssuer, LocalBadgeInstance,
                                 Collection, LocalBadgeInstanceCollection,)
-from composition.serializers import (CollectionSerializer,
-                          CollectionLocalBadgeInstanceListSerializer,
-                          CollectionLocalBadgeInstanceSerializer,)
+from composition.serializers import (CollectionSerializer, CollectionBadgeSerializer,)
 
 dir = os.path.dirname(__file__)
 
@@ -389,11 +387,37 @@ class TestCollectionOperations(APITestCase):
     def setUp(self):
         self.user = get_user_model().objects.get(pk=1)
 
+    def test_can_get_collection_list(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get('/v1/earner/collections')
+
+        self.assertEqual(len(response.data), 3)
+        self.assertEqual(response.data[0]['badges'], [])
+
+    def test_can_get_collection_detail(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get('/v1/earner/collections/fresh-badges')
+
+        self.assertEqual(response.data['badges'], [])
+
     def test_can_define_collection(self):
         """
         Authorized user can create a new collection via API.
         """
-        pass
+        data = {
+            'name': 'Fruity Collection',
+            'description': 'Apples and Oranges',
+            'published': True,
+            'badges': [{'id': 1}, {'id': 2, 'description': 'A cool badge'}]
+        }
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post('/v1/earner/collections', data, format='json')
+
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(response.data.get('published'))
+
+        self.assertEqual([i['id'] for i in response.data.get('badges')], [1, 2])
+        self.assertEqual(response.data.get('badges')[1]['description'], 'A cool badge')
 
     def test_can_define_collection_serializer(self):
         """
@@ -401,7 +425,8 @@ class TestCollectionOperations(APITestCase):
         """
         data = {
             'name': 'Fruity Collection',
-            'description': 'Apples and Oranges'
+            'description': 'Apples and Oranges',
+            'badges': [{'id': 1}, {'id': 2, 'description': 'A cool badge'}]
         }
 
         serializer = CollectionSerializer(data=data, context={'user': self.user})
@@ -410,12 +435,19 @@ class TestCollectionOperations(APITestCase):
 
         self.assertIsNotNone(collection.pk)
         self.assertEqual(collection.name, data['name'])
+        self.assertEqual(collection.badges.count(), 2)
+        self.assertEqual(collection.badges.filter(instance_id=2).first().description, 'A cool badge')
 
     def test_can_delete_collection(self):
         """
         Authorized user may delete one of their defined collections.
         """
-        pass
+        collection = Collection.objects.first()
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.delete('/v1/earner/collections/{}'.format(collection.slug))
+
+        self.assertEqual(response.status_code, 204)
 
     def test_can_publish_unpublish_collection_serializer(self):
         """
@@ -469,15 +501,175 @@ class TestCollectionOperations(APITestCase):
         self.assertFalse(collection.published)
 
 
-    def test_can_add_remove_collection_badge_via_serializer(self):
+    def test_can_add_remove_collection_badges_via_serializer(self):
         """
         The CollectionSerializer should be able to update an existing collection's badge list
         """
-        pass
+        collection = Collection.objects.first()
+        self.assertEqual(collection.badges.count(), 0)
 
-    def test_can_add_remove_collection_badge_via_api(self):
+        serializer = CollectionSerializer(
+            collection,
+            data={'badges': [{'id': 1}, {'id': 2}]},
+            partial=True
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        self.assertEqual(collection.badges.count(), 2)
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [1, 2])
+
+        serializer = CollectionSerializer(
+            collection,
+            data={'badges': [{'id': 2}, {'id': 3}]},
+            partial=True
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        self.assertEqual(collection.badges.count(), 2)
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [2, 3])
+
+
+    def test_can_add_remove_collection_badges_via_collection_detail_api(self):
         """
         A PUT request to the CollectionDetail view should be able to update the list of badges
         in a collection.
         """
-        pass
+        collection = Collection.objects.first()
+        self.assertEqual(collection.badges.count(), 0)
+
+        data = {
+            'badges': [{'id': 1}, {'id': 2}],
+            'name': collection.name,
+            'description': collection.description
+        }
+        self.client.force_authenticate(user=self.user)
+        response = self.client.put(
+            '/v1/earner/collections/{}'.format(collection.slug), data=data,
+            format='json')
+
+        self.assertEqual(response.status_code, 200)
+        collection = Collection.objects.first()  # reload
+        self.assertEqual(collection.badges.count(), 2)
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [1, 2])
+
+        data = {'badges': [{'id': 2}, {'id': 3}]}
+        response = self.client.put(
+            '/v1/earner/collections/{}'.format(collection.slug),
+            data=data, format='json')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([i['id'] for i in response.data.get('badges')], [2, 3])
+        collection = Collection.objects.first()  # reload
+        self.assertEqual(collection.badges.count(), 2)
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [2, 3])
+
+    def test_can_add_remove_badges_via_collection_badge_detail_api(self):
+        collection = Collection.objects.first()
+        self.assertEqual(collection.badges.count(), 0)
+
+        data = [{'id': 1}, {'id': 2}]
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            '/v1/earner/collections/{}/badges'.format(collection.slug), data=data,
+            format='json')
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual([i['id'] for i in response.data], [1, 2])
+
+        collection = Collection.objects.first()  # reload
+        self.assertEqual(collection.badges.count(), 2)
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [1, 2])
+
+        response = self.client.get('/v1/earner/collections/{}/badges'.format(collection.slug))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+        response = self.client.delete(
+            '/v1/earner/collections/{}/badges/{}'.format(collection.slug, data[0]['id']),
+            data=data, format='json')
+
+        self.assertEqual(response.status_code, 204)
+        self.assertIsNone(response.data)
+        collection = Collection.objects.first()  # reload
+        self.assertEqual(collection.badges.count(), 1)
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [2])
+
+    def test_api_handles_null_description_and_adds_badge(self):
+        collection = Collection.objects.first()
+        self.assertEqual(collection.badges.count(), 0)
+
+        data = {'badges': [{'id': 1, 'description': None}]}
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.put(
+            '/v1/earner/collections/{}'.format(collection.slug), data=data,
+            format='json')
+        self.assertEqual(response.status_code, 200)
+
+        collection = Collection.objects.first()
+        entry = collection.badges.first()
+        self.assertEqual(entry.description, '')
+        self.assertEqual(entry.instance_id, 1)
+
+    def test_can_add_remove_collection_badges_collection_badgelist_api(self):
+        """
+        A PUT request to the Collection BadgeList endpoint should update the list of badges
+        n a collection
+        """
+        collection = Collection.objects.first()
+        self.assertEqual(collection.badges.count(), 0)
+
+        data = [{'id': 1}, {'id': 2}]
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.put(
+            '/v1/earner/collections/{}/badges'.format(collection.slug), data=data,
+            format='json')
+
+        self.assertEqual(response.status_code, 200)
+        collection = Collection.objects.first()  # reload
+        self.assertEqual(collection.badges.count(), 2)
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [1, 2])
+
+        data = [{'id': 2}, {'id': 3}]
+        response = self.client.put(
+            '/v1/earner/collections/{}/badges'.format(collection.slug),
+            data=data, format='json')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([i['id'] for i in response.data], [2, 3])
+        collection = Collection.objects.first()  # reload
+        self.assertEqual(collection.badges.count(), 2)
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [2, 3])
+
+    def test_can_update_badge_description_in_collection_via_detail_api(self):
+        collection = Collection.objects.first()
+        self.assertEqual(collection.badges.count(), 0)
+
+        serializer = CollectionSerializer(
+            collection,
+            data={'badges': [{'id': 1}, {'id': 2}]},
+            partial=True
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        self.assertEqual(collection.badges.count(), 2)
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.put(
+            '/v1/earner/collections/{}/badges/{}'.format(collection.slug, 1),
+            data={'id': 1, 'description': 'A cool badge.'}, format='json'
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, {'id': 1, 'description': 'A cool badge.'})
+
+        obj = LocalBadgeInstanceCollection.objects.get(collection=collection, instance_id=1)
+        self.assertEqual(obj.description, 'A cool badge.')
