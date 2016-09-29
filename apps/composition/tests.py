@@ -554,7 +554,35 @@ class TestCollectionOperations(APITestCase):
         self.assertEqual(collection.badges.count(), 2)
         self.assertEqual([i.instance.pk for i in collection.badges.all()], [2, 3])
 
-    def test_can_add_remove_collection_badges_collection_badgelist_api(self):
+    def test_can_add_remove_badges_via_collection_badge_detail_api(self):
+        collection = Collection.objects.first()
+        self.assertEqual(collection.badges.count(), 0)
+
+        data = [{'id': 1}, {'id': 2}]
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            '/v1/earner/collections/{}/badges'.format(collection.slug), data=data,
+            format='json')
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual([i['id'] for i in response.data], [1, 2])
+
+        collection = Collection.objects.first()  # reload
+        self.assertEqual(collection.badges.count(), 2)
+        self.assertEqual([i.pk for i in collection.badges.all()], [1, 2])
+
+        response = self.client.delete(
+            '/v1/earner/collections/{}/badges/{}'.format(collection.slug, data[0]['id']),
+            data=data, format='json')
+
+        self.assertEqual(response.status_code, 204)
+        self.assertIsNone(response.data)
+        collection = Collection.objects.first()  # reload
+        self.assertEqual(collection.badges.count(), 1)
+        self.assertEqual([i.pk for i in collection.badges.all()], [2])
+
+    def not_test_can_add_remove_collection_badges_collection_badgelist_api(self):
         """
         A PUT request to the Collection BadgeList endpoint should update the list of badges
         n a collection
