@@ -207,6 +207,8 @@ class CollectionBadgeSerializer(serializers.ModelSerializer):
         return []
 
     def to_internal_value(self, data):
+        description = data.get('description', '') or ''
+
         # populate collection from various methods
         collection = data.get('collection')
         if not collection:
@@ -217,20 +219,20 @@ class CollectionBadgeSerializer(serializers.ModelSerializer):
             collection = self.parent.instance
         if not collection:
             return LocalBadgeInstanceCollection(
-                instance_id=data.get('id'), description=data.get('description', ''))
+                instance_id=data.get('id'), description=description)
 
         try:
             instance = LocalBadgeInstanceCollection.objects.get(
                 instance_id=data.get('id'), collection=collection)
 
-            if data.get('description', '') != instance.description:
-                instance.description = data.get('description', '')
+            if description != instance.description:
+                instance.description = description
                 instance._dirty = True  # record if instance needs to be updated in list serializer
 
         except LocalBadgeInstanceCollection.DoesNotExist:
             instance = LocalBadgeInstanceCollection(
                 instance_id=data.get('id'), collection=collection,
-                description=data.get('description', ''))
+                description=description)
 
             if instance.collection.owner != instance.instance.recipient_user:
                 raise serializers.ValidationError(

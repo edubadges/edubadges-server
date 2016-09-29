@@ -583,7 +583,7 @@ class TestCollectionOperations(APITestCase):
 
         collection = Collection.objects.first()  # reload
         self.assertEqual(collection.badges.count(), 2)
-        self.assertEqual([i.pk for i in collection.badges.all()], [1, 2])
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [1, 2])
 
         response = self.client.get('/v1/earner/collections/{}/badges'.format(collection.slug))
         self.assertEqual(response.status_code, 200)
@@ -597,7 +597,24 @@ class TestCollectionOperations(APITestCase):
         self.assertIsNone(response.data)
         collection = Collection.objects.first()  # reload
         self.assertEqual(collection.badges.count(), 1)
-        self.assertEqual([i.pk for i in collection.badges.all()], [2])
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [2])
+
+    def test_api_handles_null_description_and_adds_badge(self):
+        collection = Collection.objects.first()
+        self.assertEqual(collection.badges.count(), 0)
+
+        data = {'badges': [{'id': 1, 'description': None}]}
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.put(
+            '/v1/earner/collections/{}'.format(collection.slug), data=data,
+            format='json')
+        self.assertEqual(response.status_code, 200)
+
+        collection = Collection.objects.first()
+        entry = collection.badges.first()
+        self.assertEqual(entry.description, '')
+        self.assertEqual(entry.instance_id, 1)
 
     def test_can_add_remove_collection_badges_collection_badgelist_api(self):
         """
