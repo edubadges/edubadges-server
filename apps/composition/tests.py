@@ -387,6 +387,19 @@ class TestCollectionOperations(APITestCase):
     def setUp(self):
         self.user = get_user_model().objects.get(pk=1)
 
+    def test_can_get_collection_list(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get('/v1/earner/collections')
+
+        self.assertEqual(len(response.data), 3)
+        self.assertEqual(response.data[0]['badges'], [])
+
+    def test_can_get_collection_detail(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get('/v1/earner/collections/fresh-badges')
+
+        self.assertEqual(response.data['badges'], [])
+
     def test_can_define_collection(self):
         """
         Authorized user can create a new collection via API.
@@ -572,6 +585,10 @@ class TestCollectionOperations(APITestCase):
         self.assertEqual(collection.badges.count(), 2)
         self.assertEqual([i.pk for i in collection.badges.all()], [1, 2])
 
+        response = self.client.get('/v1/earner/collections/{}/badges'.format(collection.slug))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
         response = self.client.delete(
             '/v1/earner/collections/{}/badges/{}'.format(collection.slug, data[0]['id']),
             data=data, format='json')
@@ -582,7 +599,7 @@ class TestCollectionOperations(APITestCase):
         self.assertEqual(collection.badges.count(), 1)
         self.assertEqual([i.pk for i in collection.badges.all()], [2])
 
-    def not_test_can_add_remove_collection_badges_collection_badgelist_api(self):
+    def test_can_add_remove_collection_badges_collection_badgelist_api(self):
         """
         A PUT request to the Collection BadgeList endpoint should update the list of badges
         n a collection
@@ -600,7 +617,7 @@ class TestCollectionOperations(APITestCase):
         self.assertEqual(response.status_code, 200)
         collection = Collection.objects.first()  # reload
         self.assertEqual(collection.badges.count(), 2)
-        self.assertEqual([i.pk for i in collection.badges.all()], [1, 2])
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [1, 2])
 
         data = [{'id': 2}, {'id': 3}]
         response = self.client.put(
@@ -612,3 +629,30 @@ class TestCollectionOperations(APITestCase):
         collection = Collection.objects.first()  # reload
         self.assertEqual(collection.badges.count(), 2)
         self.assertEqual([i.pk for i in collection.badges.all()], [2, 3])
+
+    def test_can_update_badge_description_in_collection_via_detail_api(self):
+        collection = Collection.objects.first()
+        self.assertEqual(collection.badges.count(), 0)
+
+        serializer = CollectionSerializer(
+            collection,
+            data={'badges': [{'id': 1}, {'id': 2}]},
+            partial=True
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        self.assertEqual(collection.badges.count(), 2)
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.put(
+            '/v1/earner/collections/{}/badges/{}'.format(collection.slug, 1),
+            data={'id': 1, 'description': 'A cool badge.'}, format='json'
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, {'id': 1, 'description': 'A cool badge.'})
+
+        obj = LocalBadgeInstanceCollection.objects.get(collection=collection, instance_id=1)
+        self.assertEqual(obj.description, 'A cool badge.')
