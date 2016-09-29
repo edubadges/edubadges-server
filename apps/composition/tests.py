@@ -628,7 +628,7 @@ class TestCollectionOperations(APITestCase):
         self.assertEqual([i['id'] for i in response.data], [2, 3])
         collection = Collection.objects.first()  # reload
         self.assertEqual(collection.badges.count(), 2)
-        self.assertEqual([i.pk for i in collection.badges.all()], [2, 3])
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [2, 3])
 
     def test_can_update_badge_description_in_collection_via_detail_api(self):
         collection = Collection.objects.first()
