@@ -41,10 +41,10 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
         representation = super(LocalBadgeInstanceUploadSerializer, self).to_representation(obj)
 
         if isinstance(obj, LocalBadgeInstance):
-            representation['json'] = V1InstanceSerializer(obj.json).data
+            representation['json'] = V1InstanceSerializer(obj.json, context=self.context).data
         elif isinstance(obj, BadgeInstance):
             representation['id'] = obj.slug
-            representation['json'] = V1BadgeInstanceSerializer(obj).data
+            representation['json'] = V1BadgeInstanceSerializer(obj, context=self.context).data
 
         representation['imagePreview'] = {
             "type": "image",
