@@ -34,7 +34,7 @@ class LocalBadgeInstanceList(APIView):
         """
 
         imported_badges = LocalBadgeInstance.objects.filter(recipient_user=request.user)
-        local_badges = BadgeInstance.objects.filter(recipient_identifier__in=request.user.all_recipient_identifiers)
+        local_badges = BadgeInstance.objects.filter(recipient_identifier__in=request.user.all_recipient_identifiers).exclude(acceptance=BadgeInstance.ACCEPTANCE_REJECTED)
         user_badges = list(imported_badges) + list(local_badges)
 
         serializer = LocalBadgeInstanceUploadSerializer(

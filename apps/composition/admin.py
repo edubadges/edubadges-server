@@ -77,6 +77,7 @@ badgr_admin.register(LocalBadgeInstance, LocalBadgeInstanceAdmin)
 class CollectionInstanceInline(TabularInline):
     model = Collection.instances.through
     extra = 0
+    raw_id_fields = ('instance','issuer_instance',)
 
 
 class CollectionSharedInline(TabularInline):
@@ -87,6 +88,7 @@ class CollectionSharedInline(TabularInline):
 class CollectionAdmin(ModelAdmin):
     list_display = ('name', 'slug', 'owner',)
     search_fields = ('owner__email', 'name', 'slug')
+    raw_id_fields = ('owner',)
     fieldsets = (
         (None, {'fields': ('name', 'slug', 'description', 'owner', 'share_hash')}),
     )
