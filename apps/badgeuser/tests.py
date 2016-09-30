@@ -389,6 +389,19 @@ class UserEmailTests(APITestCase):
         self.assertEqual(len(first_email.emailaddressvariant_set.all()), 2)
         self.assertEqual(len(first_email.cached_variants()), 2)
 
+    def test_user_can_create_variant_method(self):
+        user = BadgeUser.objects.first()
+        first_email = CachedEmailAddress(
+            email="howdy@world.com", user=user, verified=True
+        )
+        first_email.save()
+        first_email.add_variant("HOWDY@world.com")
+
+        self.assertTrue(user.can_add_variant("Howdy@world.com"))
+        self.assertFalse(user.can_add_variant("HOWDY@world.com"))  # already exists
+        self.assertFalse(user.can_add_variant("howdy@world.com"))  # is the original
+        self.assertFalse(user.can_add_variant("howdyfeller@world.com"))  # not a match of original
+
     def test_cannot_create_variant_for_unconfirmed_email(self):
         new_email_address = "new@unconfirmed.info"
         new_email = CachedEmailAddress.objects.create(email=new_email_address, user=BadgeUser.objects.first())

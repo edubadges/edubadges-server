@@ -157,9 +157,14 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
         return chain.from_iterable(email.cached_variants() for email in self.cached_emails())
 
     def can_add_variant(self, email):
-        canonical_email = CachedEmailAddress.objects.get(email=email, user=self, verified=True)
-        if email not in canonical_email.cached_variants() and EmailAddressVariant(
-                email=email, canonical_email=canonical_email).is_valid():
+        try:
+            canonical_email = CachedEmailAddress.objects.get(email=email, user=self, verified=True)
+        except CachedEmailAddress.DoesNotExist:
+            return False
+
+        if email != canonical_email.email \
+                and email not in [e.email for e in canonical_email.cached_variants()] \
+                and EmailAddressVariant(email=email, canonical_email=canonical_email).is_valid():
             return True
         return False
 

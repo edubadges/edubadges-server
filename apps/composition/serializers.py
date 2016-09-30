@@ -51,6 +51,16 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
             }
         return representation
 
+    def validate_recipient_id(self, data):
+        user = self.context.get('request').user
+        current_emails = [e.email for e in user.cached_emails()] + [e.email for e in user.cached_email_variants()]
+
+        if data in current_emails:
+            return None
+        if user.can_add_variant(data):
+            return data
+        raise serializers.ValidationError("Requested recipient ID {} is not one of your verified email addresses.")
+
     def validate(self, data):
         """
         Ensure only one assertion input field given.
@@ -97,7 +107,7 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
         verified_emails = [e.email for e in request_user.emailaddress_set.filter(verified=True)] \
                           + [e.email for e in request_user.cached_email_variants()]
         new_variant = None
-        if validated_data.get('recipient_id') and request_user.can_add_variant(validated_data.get('recipient_id')):
+        if validated_data.get('recipient_id') and validated_data.get('recipient_id') not in verified_emails:
             new_variant = EmailAddressVariant(email=validated_data['recipient_id'])
             verified_emails.append(new_variant.email)
 
