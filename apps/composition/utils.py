@@ -144,7 +144,7 @@ def get_badge_by_identifier(badge_id, user=None):
             return ret
 
     try:
-        ret = LocalBadgeInstance.cached.get(pk=badge_id)
+        ret = LocalBadgeInstance.cached.get(slug=badge_id)
     except LocalBadgeInstance.DoesNotExist:
         pass
     else:
@@ -152,8 +152,8 @@ def get_badge_by_identifier(badge_id, user=None):
             return ret
 
     try:
-        ret = LocalBadgeInstance.cached.get(slug=badge_id)
-    except BadgeInstance.DoesNotExist:
+        ret = LocalBadgeInstance.cached.get(pk=badge_id)
+    except (LocalBadgeInstance.DoesNotExist, ValueError):
         pass
     else:
         if user is None or ret.recipient_user_id == user.pk:

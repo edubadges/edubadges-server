@@ -43,6 +43,14 @@ class LocalBadgeInstance(AbstractBadgeInstance):
         else:
             return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
 
+    @property
+    def cached_issuer(self):
+        return LocalIssuer.cached.get(pk=self.issuer_id)
+
+    @property
+    def cached_badgeclass(self):
+        return LocalBadgeClass.cached.get(pk=self.badgeclass_id)
+
 
 class Collection(cachemodel.CacheModel):
     name = models.CharField(max_length=128)
