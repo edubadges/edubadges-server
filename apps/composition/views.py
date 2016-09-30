@@ -1,10 +1,12 @@
 import json
 from django.conf import settings
+from django.core.urlresolvers import reverse
 
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import DetailView, TemplateView
+from django.views.generic import RedirectView
 
 from badgeuser.serializers import UserProfileField
 from issuer.models import BadgeInstance
@@ -50,6 +52,8 @@ class EarnerPortal(TemplateView):
 class CollectionDetailView(DetailView):
     model = Collection
     context_object_name = 'collection'
+    slug_url_kwarg = 'share_hash'
+    slug_field = 'share_hash'
 
     @method_decorator(xframe_options_exempt)
     def get(self, request, *args, **kwargs):
@@ -77,3 +81,11 @@ class CollectionDetailEmbedView(CollectionDetailView):
     @method_decorator(xframe_options_exempt)
     def get(self, request, *args, **kwargs):
         return super(CollectionDetailEmbedView, self).get(request, *args, **kwargs)
+
+
+class LegacyCollectionShareRedirectView(RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        new_pattern_name = self.request.resolver_match.url_name.replace('legacy_','')
+        kwargs.pop('pk')
+        url = reverse(new_pattern_name, args=args, kwargs=kwargs)
+        return url

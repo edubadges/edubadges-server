@@ -83,6 +83,7 @@ if apps.is_installed('composition'):
     urlpatterns += patterns('',
         url(r'^v1/earner', include('composition.api_urls')),
         url(r'^earner', include('composition.urls')),
+        url(r'^share', include('composition.share_urls')),
     )
 
 if apps.is_installed('badgebook'):
