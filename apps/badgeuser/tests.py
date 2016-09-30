@@ -117,6 +117,7 @@ class UserCreateTests(APITestCase):
         self.assertEqual(existing_email.user, new_user)
         self.assertTrue(existing_email not in existing_user.cached_emails())
 
+
     def test_user_can_add_secondary_email_of_preexisting_unclaimed_email(self):
         first_user=BadgeUser.objects.get(pk=3)
 

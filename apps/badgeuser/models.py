@@ -82,16 +82,35 @@ class EmailAddressVariant(models.Model):
     canonical_email = models.ForeignKey(CachedEmailAddress, blank=False)
 
     def save(self, *args, **kwargs):
-        if not self.canonical_email.verified:
-            raise ValidationError("EmailAddress must be verified before registering variants.")
+        self.is_valid(raise_exception=True)
 
-        if not self.canonical_email.email.lower() == self.email.lower():
-            raise ValidationError("New EmailAddressVariant does not match stored email address.")
         super(EmailAddressVariant, self).save(*args, **kwargs)
         self.canonical_email.save()
 
     def __unicode__(self):
-        return "{} | {}".format(self.email, self.canonical_email.email.lower())
+        return self.email
+
+    def is_valid(self, raise_exception=False):
+        def fail(message):
+            if raise_exception:
+                raise ValidationError(message)
+            else:
+                self.error = message
+                return False
+
+        if not self.canonical_email_id:
+            try:
+                self.canonical_email = CachedEmailAddress.cached.get(email=self.email)
+            except CachedEmailAddress.DoesNotExist:
+                fail("Canonical Email Address not found")
+
+        if not self.canonical_email.verified:
+            fail("EmailAddress must be verified before registering variants.")
+
+        if not self.canonical_email.email.lower() == self.email.lower():
+            fail("New EmailAddressVariant does not match stored email address.")
+
+        return True
 
 
 class BadgeUser(AbstractUser, cachemodel.CacheModel):
@@ -136,6 +155,13 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
 
     def cached_email_variants(self):
         return chain.from_iterable(email.cached_variants() for email in self.cached_emails())
+
+    def can_add_variant(self, email):
+        canonical_email = CachedEmailAddress.objects.get(email=email, user=self, verified=True)
+        if email not in canonical_email.cached_variants() and EmailAddressVariant(
+                email=email, canonical_email=canonical_email).is_valid():
+            return True
+        return False
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):

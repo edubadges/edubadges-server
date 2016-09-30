@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 from rest_framework import serializers
 
 import badgrlog
+from badgeuser.models import EmailAddressVariant
 from mainsite.drf_fields import Base64FileField
 from mainsite.utils import OriginSetting
 from verifier import ComponentsSerializer
@@ -24,6 +25,7 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
     image = Base64FileField(required=False, write_only=True)
     url = serializers.URLField(required=False, write_only=True)
     assertion = serializers.CharField(required=False, write_only=True)
+    recipient_id = serializers.CharField(required=False, write_only=True)
 
     # Reinstantiation using fields from badge instance when returned by .create
     id = serializers.IntegerField(read_only=True)
@@ -94,6 +96,11 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
         # Check non-structural business logic checks and constraints
         verified_emails = [e.email for e in request_user.emailaddress_set.filter(verified=True)] \
                           + [e.email for e in request_user.cached_email_variants()]
+        new_variant = None
+        if validated_data.get('recipient_id') and request_user.can_add_variant(validated_data.get('recipient_id')):
+            new_variant = EmailAddressVariant(email=validated_data['recipient_id'])
+            verified_emails.append(new_variant.email)
+
         badge_check = BadgeCheck(
             components.badge_instance, components.badge_class,
             components.issuer, verified_emails, badge_instance_url)
@@ -116,6 +123,9 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
 badge was valid, but cannot be saved."
             logger.event(badgrlog.InvalidBadgeUploaded(components, error, request_user))
             raise serializers.ValidationError(error)
+
+        if new_variant and badge_check.recipient_id == new_variant.email:
+            new_variant.save()
 
         # Create local component instance `json` fields
         badge_instance_json = \

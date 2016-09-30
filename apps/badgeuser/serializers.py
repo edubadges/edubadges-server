@@ -3,7 +3,7 @@ from django.conf import settings
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
-from .models import BadgeUser, CachedEmailAddress
+from .models import BadgeUser, CachedEmailAddress, EmailAddressVariant
 from .utils import notify_on_password_change
 
 
@@ -145,6 +145,7 @@ class NewEmailSerializer(serializers.ModelSerializer):
 
         if new_address != email.email and new_address not in [v.email for v in email.cached_variants()]:
             email.add_variant(new_address)
+            raise serializers.ValidationError("Matching address already exists. New case variant registered.")
 
         if validated_data.get('variants'):
             for variant in validated_data.get('variants'):
