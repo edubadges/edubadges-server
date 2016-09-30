@@ -93,7 +93,7 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
 
     @property
     def all_recipient_identifiers(self):
-        return [e.email for e in self.cached_emails()]
+        return [e.email for e in self.cached_emails() if e.verified]
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):

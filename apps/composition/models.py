@@ -82,22 +82,37 @@ class Collection(cachemodel.CacheModel):
 
 
 class LocalBadgeInstanceCollection(models.Model):
-    instance = models.ForeignKey(LocalBadgeInstance, null=False)
+    instance = models.ForeignKey(LocalBadgeInstance, null=True)
+    issuer_instance = models.ForeignKey("issuer.BadgeInstance", null=True)
     collection = models.ForeignKey(Collection, null=False, related_name='badges')
 
     description = models.TextField(blank=True)
 
     class Meta:
-        unique_together = ('instance', 'collection')
+        unique_together = ('instance', 'issuer_instance', 'collection')
         verbose_name = "BadgeInstance in a Collection"
         verbose_name_plural = "BadgeInstances in Collections"
 
     def __unicode__(self):
         return u'{} in {}\'s {}'.format(
-            self.instance.badgeclass.name,
-            self.instance.recipient_user.username,
+            self.badge_instance.badgeclass.name,
+            self.badge_instance.recipient_identifier,
             self.collection.name
         )
+
+    @property
+    def badge_instance(self):
+        if self.instance_id:
+            return self.instance
+        elif self.issuer_instance_id:
+            return self.issuer_instance
+
+    @property
+    def badge_id(self):
+        if self.instance_id:
+            return self.instance_id
+        elif self.issuer_instance_id:
+            return self.issuer_instance.slug
 
 
 class CollectionPermission(models.Model):

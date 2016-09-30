@@ -188,6 +188,16 @@ class BadgeInstance(AbstractBadgeInstance):
                                    related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
 
+    ACCEPTANCE_UNACCEPTED = 'Unaccepted'
+    ACCEPTANCE_ACCEPTED = 'Accepted'
+    ACCEPTANCE_REJECTED = 'Rejected'
+    ACCEPTANCE_CHOICES = (
+        (ACCEPTANCE_UNACCEPTED, 'Unaccepted'),
+        (ACCEPTANCE_ACCEPTED, 'Accepted'),
+        (ACCEPTANCE_REJECTED, 'Rejected'),
+    )
+    acceptance = models.CharField(max_length=254, choices=ACCEPTANCE_CHOICES, default=ACCEPTANCE_ACCEPTED)
+
     objects = BadgeInstanceManager()
 
     @property
@@ -319,3 +329,14 @@ class BadgeInstance(AbstractBadgeInstance):
             return RecipientProfile.cached.get(recipient_identifier=self.recipient_identifier)
         except RecipientProfile.DoesNotExist:
             return None
+
+    @property
+    def recipient_user(self):
+        from badgeuser.models import CachedEmailAddress
+        try:
+            email_address = CachedEmailAddress.cached.get(email=self.recipient_identifier)
+            if email_address.verified:
+                return email_address.user
+        except CachedEmailAddress.DoesNotExist:
+            pass
+        return None

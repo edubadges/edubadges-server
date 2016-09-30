@@ -11,6 +11,8 @@ from openbadges_bakery import bake, unbake
 import requests
 from rest_framework.serializers import ValidationError
 
+from composition.models import LocalBadgeInstance
+from issuer.models import BadgeInstance
 from verifier.utils import (get_badge_instance_from_baked_image,
                             get_badge_instance_from_json,
                             get_badge_component_from_url)
@@ -125,3 +127,37 @@ def bake_badge_instance(badge_instance, badge_class_image_url):
             "Error retrieving image {}: {}".format(
                 badge_class_image_url, e.message))
     return baked_image
+
+
+def get_badge_by_identifier(badge_id, user=None):
+    """
+    Lookup either a BadgeInstance or a LocalBadgeInstance by its unique identifier
+    :param badge_id: can either be a LocalBadgeInstance.pk, LocalBadgeInstance.slug or BadgeInstance.slug
+    :return:
+    """
+    try:
+        ret = BadgeInstance.cached.get(slug=badge_id)
+    except BadgeInstance.DoesNotExist:
+        pass
+    else:
+        if user is None or ret.recipient_identifier in user.all_recipient_identifiers:
+            return ret
+
+    try:
+        ret = LocalBadgeInstance.cached.get(pk=badge_id)
+    except LocalBadgeInstance.DoesNotExist:
+        pass
+    else:
+        if user is None or ret.recipient_user_id == user.pk:
+            return ret
+
+    try:
+        ret = LocalBadgeInstance.cached.get(slug=badge_id)
+    except BadgeInstance.DoesNotExist:
+        pass
+    else:
+        if user is None or ret.recipient_user_id == user.pk:
+            return ret
+
+    # nothing found
+    return None

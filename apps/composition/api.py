@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 import badgrlog
+from composition.utils import get_badge_by_identifier
 from issuer.models import BadgeInstance
 from issuer.public_api import ImagePropertyDetailView
 from mainsite.permissions import IsOwner
@@ -99,10 +100,8 @@ class LocalBadgeInstanceDetail(APIView):
               type: integer
               paramType: path
         """
-        try:
-            user_badge = self.queryset.get(recipient_user=request.user,
-                                           id=badge_id)
-        except LocalBadgeInstance.DoesNotExist:
+        user_badge = get_badge_by_identifier(badge_id, user=request.user)
+        if user_badge is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         serializer = LocalBadgeInstanceUploadSerializer(user_badge, context={
@@ -123,12 +122,15 @@ class LocalBadgeInstanceDetail(APIView):
               type: integer
               paramType: path
         """
-        try:
-            self.queryset.get(
-                recipient_user=request.user, id=badge_id
-            ).delete()
-        except LocalBadgeInstance.DoesNotExist:
+        user_badge = get_badge_by_identifier(badge_id, user=request.user)
+        if user_badge is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if isinstance(user_badge, LocalBadgeInstance):
+            user_badge.delete()
+        elif isinstance(user_badge, BadgeInstance):
+            user_badge.acceptance = BadgeInstance.ACCEPTANCE_REJECTED
+            user_badge.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
