@@ -51,6 +51,12 @@ class OriginSettingsObject(object):
     DefaultOrigin = "http://localhost:8000"
 
     @property
+    def http_protocol(self):
+        if self.HTTP.startswith('https'):
+            return 'https'
+        return 'http'
+
+    @property
     def HTTP(self):
         return getattr(settings, 'HTTP_ORIGIN', OriginSettingsObject.DefaultOrigin)
 

@@ -5,17 +5,18 @@ from rest_framework import serializers
 
 import badgrlog
 from badgeuser.models import EmailAddressVariant
+from issuer.models import BadgeInstance
 from mainsite.drf_fields import Base64FileField
 from mainsite.utils import OriginSetting
 from verifier import ComponentsSerializer
 from verifier.badge_check import BadgeCheck
 from verifier.utils import find_and_get_badge_class, find_and_get_issuer
 
-from .format import V1InstanceSerializer
+from .format import V1InstanceSerializer, V1BadgeInstanceSerializer
 from .models import (LocalBadgeInstance, LocalBadgeClass, LocalIssuer,
                      Collection, LocalBadgeInstanceCollection)
 from .utils import (get_verified_badge_instance_from_form,
-                    use_or_bake_badge_instance_image)
+                    use_or_bake_badge_instance_image, get_badge_by_identifier)
 
 logger = badgrlog.BadgrLogger()
 
@@ -29,7 +30,7 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
 
     # Reinstantiation using fields from badge instance when returned by .create
     id = serializers.IntegerField(read_only=True)
-    json = V1InstanceSerializer(read_only=True)
+    # json = V1InstanceSerializer(read_only=True)
 
     def to_representation(self, obj):
         """
@@ -40,6 +41,15 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
         if self.context.get('format', 'v1') == 'plain':
             self.fields.json = serializers.DictField(read_only=True)
         representation = super(LocalBadgeInstanceUploadSerializer, self).to_representation(obj)
+
+        if isinstance(obj, LocalBadgeInstance):
+            representation['json'] = V1InstanceSerializer(obj.json, context=self.context).data
+        elif isinstance(obj, BadgeInstance):
+            representation['id'] = obj.slug
+            representation['json'] = V1BadgeInstanceSerializer(obj, context=self.context).data
+
+        representation['shareUrl'] = OriginSetting.HTTP+reverse('shared_badge', kwargs={'badge_id': obj.slug})
+
         representation['imagePreview'] = {
             "type": "image",
             "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('localbadgeinstance_image', kwargs={'slug': obj.slug}))
@@ -241,9 +251,19 @@ class CollectionBadgeSerializer(serializers.ModelSerializer):
             return LocalBadgeInstanceCollection(
                 instance_id=data.get('id'), description=description)
 
+        badge = get_badge_by_identifier(data.get('id'))
+        get_kwargs = {
+            'collection': collection
+        }
+        if isinstance(badge, LocalBadgeInstance):
+            get_kwargs['issuer_instance__isnull'] = True
+            get_kwargs['instance_id'] = badge.pk
+        elif isinstance(badge, BadgeInstance):
+            get_kwargs['issuer_instance_id'] = badge.pk
+            get_kwargs['instance__isnull'] = True
+
         try:
-            instance = LocalBadgeInstanceCollection.objects.get(
-                instance_id=data.get('id'), collection=collection)
+            instance = LocalBadgeInstanceCollection.objects.get(**get_kwargs)
 
             if description != instance.description:
                 instance.description = description
@@ -251,10 +271,15 @@ class CollectionBadgeSerializer(serializers.ModelSerializer):
 
         except LocalBadgeInstanceCollection.DoesNotExist:
             instance = LocalBadgeInstanceCollection(
-                instance_id=data.get('id'), collection=collection,
-                description=description)
+                collection=collection,
+                description=description
+            )
+            if isinstance(badge, LocalBadgeInstance):
+                instance.instance_id = badge.pk
+            elif isinstance(badge, BadgeInstance):
+                instance.issuer_instance_id = badge.pk
 
-            if instance.collection.owner != instance.instance.recipient_user:
+            if instance.collection.owner != instance.badge_instance.recipient_user:
                 raise serializers.ValidationError(
                     "Cannot add badge to a collection created by a different recipient.")
 
@@ -262,7 +287,7 @@ class CollectionBadgeSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = OrderedDict()
-        ret['id'] = instance.instance.id
+        ret['id'] = instance.badge_id
         ret['description'] = instance.description
         return ret
 

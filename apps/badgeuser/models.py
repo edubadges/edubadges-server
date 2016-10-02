@@ -168,6 +168,10 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
             return True
         return False
 
+    @property
+    def all_recipient_identifiers(self):
+        return [e.email for e in self.cached_emails() if e.verified] + [e.email for e in self.cached_email_variants()]
+
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):
         return Issuer.objects.filter( Q(owner__id=self.id) | Q(staff__id=self.id) ).distinct()

@@ -182,6 +182,8 @@ class UserCreateTests(APITestCase):
 
         old_user = BadgeUser(email=email)
         old_user.save()
+        old_user_email = CachedEmailAddress(email=email, user=old_user, verified=True)
+        old_user_email.save()
 
         response = self.client.post('/v1/user/profile', {
             'first_name': 'existing',

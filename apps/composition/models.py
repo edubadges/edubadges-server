@@ -43,6 +43,14 @@ class LocalBadgeInstance(AbstractBadgeInstance):
         else:
             return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
 
+    @property
+    def cached_issuer(self):
+        return LocalIssuer.cached.get(pk=self.issuer_id)
+
+    @property
+    def cached_badgeclass(self):
+        return LocalBadgeClass.cached.get(pk=self.badgeclass_id)
+
 
 class Collection(cachemodel.CacheModel):
     name = models.CharField(max_length=128)
@@ -77,27 +85,42 @@ class Collection(cachemodel.CacheModel):
     def share_url(self):
         if self.share_hash != '':
             return getattr(settings, 'HTTP_ORIGIN') + reverse(
-                'shared_collection', args=[self.pk, self.share_hash])
+                'shared_collection', kwargs={'share_hash': self.share_hash})
         return ''
 
 
 class LocalBadgeInstanceCollection(models.Model):
-    instance = models.ForeignKey(LocalBadgeInstance, null=False)
+    instance = models.ForeignKey(LocalBadgeInstance, null=True)
+    issuer_instance = models.ForeignKey("issuer.BadgeInstance", null=True)
     collection = models.ForeignKey(Collection, null=False, related_name='badges')
 
     description = models.TextField(blank=True)
 
     class Meta:
-        unique_together = ('instance', 'collection')
+        unique_together = ('instance', 'issuer_instance', 'collection')
         verbose_name = "BadgeInstance in a Collection"
         verbose_name_plural = "BadgeInstances in Collections"
 
     def __unicode__(self):
         return u'{} in {}\'s {}'.format(
-            self.instance.badgeclass.name,
-            self.instance.recipient_user.username,
+            self.badge_instance.badgeclass.name,
+            self.badge_instance.recipient_identifier,
             self.collection.name
         )
+
+    @property
+    def badge_instance(self):
+        if self.instance_id:
+            return self.instance
+        elif self.issuer_instance_id:
+            return self.issuer_instance
+
+    @property
+    def badge_id(self):
+        if self.instance_id:
+            return self.instance_id
+        elif self.issuer_instance_id:
+            return self.issuer_instance.slug
 
 
 class CollectionPermission(models.Model):

@@ -55,7 +55,7 @@ class BadgeInstanceAdmin(ModelAdmin):
     list_filter = ('created_at',)
     search_fields = ('slug', 'badgeclass__name', 'issuer__name')
     fieldsets = (
-        ('Metadata', {'fields': ('created_by', 'created_at',), 'classes': ("collapse",)}),
+        ('Metadata', {'fields': ('created_by', 'created_at','acceptance'), 'classes': ("collapse",)}),
         (None, {'fields': ('image', 'slug', 'recipient_identifier', 'badgeclass', 'issuer')}),
         ('Revocation', {'fields': ('revoked', 'revocation_reason')}),
         ('JSON', {'fields': ('json',)}),

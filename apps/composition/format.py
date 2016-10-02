@@ -97,3 +97,16 @@ class V1InstanceSerializer(serializers.Serializer):
     expires = BadgeDateTimeField(required=False)
     image = BadgeImageURLField(required=False)
     evidence = BadgeURLField(required=False)
+
+
+class V1BadgeInstanceSerializer(V1InstanceSerializer):
+    """
+    used to serialize a issuer.BadgeInstance like a composition.LocalBadgeInstance
+    """
+    def to_representation(self, instance):
+        localbadgeinstance_json = instance.json
+        localbadgeinstance_json['badge'] = instance.cached_badgeclass.json
+        localbadgeinstance_json['badge']['criteria'] = instance.cached_badgeclass.get_full_url()
+        localbadgeinstance_json['badge']['issuer'] = instance.cached_issuer.json
+        return super(V1BadgeInstanceSerializer, self).to_representation(localbadgeinstance_json)
+

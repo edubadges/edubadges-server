@@ -1,4 +1,5 @@
 import logging
+import urllib
 import urlparse
 
 from allauth.account.utils import user_pk_to_url_str
@@ -50,8 +51,8 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
 
             return u"{}{}?email={}".format(
                 badgr_app.email_confirmation_redirect,
-                email_address.user.first_name,
-                email_address.email
+                urllib.quote(email_address.user.first_name),
+                urllib.quote(email_address.email)
             )
 
         except Resolver404, EmailConfirmation.DoesNotExist:

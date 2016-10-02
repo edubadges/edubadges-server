@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 import badgrlog
+from composition.utils import get_badge_by_identifier
+from issuer.models import BadgeInstance
 from issuer.public_api import ImagePropertyDetailView
 from mainsite.permissions import IsOwner
 
@@ -22,7 +24,6 @@ class LocalBadgeInstanceList(APIView):
     Retrieve a list of the logged-in user's locally imported badges or post a
     new badge.
     """
-    queryset = LocalBadgeInstance.objects.all()
     permission_classes = (permissions.IsAuthenticated, IsOwner,)
 
     def get(self, request):
@@ -31,7 +32,11 @@ class LocalBadgeInstanceList(APIView):
         ---
         serializer: LocalBadgeInstanceUploadSerializer
         """
-        user_badges = self.queryset.filter(recipient_user=request.user)
+
+        imported_badges = LocalBadgeInstance.objects.filter(recipient_user=request.user)
+        local_badges = BadgeInstance.objects.filter(recipient_identifier__in=request.user.all_recipient_identifiers).exclude(acceptance=BadgeInstance.ACCEPTANCE_REJECTED)
+        user_badges = list(imported_badges) + list(local_badges)
+
         serializer = LocalBadgeInstanceUploadSerializer(
             user_badges, many=True, context={
                 'request': request,
@@ -95,10 +100,8 @@ class LocalBadgeInstanceDetail(APIView):
               type: integer
               paramType: path
         """
-        try:
-            user_badge = self.queryset.get(recipient_user=request.user,
-                                           id=badge_id)
-        except LocalBadgeInstance.DoesNotExist:
+        user_badge = get_badge_by_identifier(badge_id, user=request.user)
+        if user_badge is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         serializer = LocalBadgeInstanceUploadSerializer(user_badge, context={
@@ -119,12 +122,15 @@ class LocalBadgeInstanceDetail(APIView):
               type: integer
               paramType: path
         """
-        try:
-            self.queryset.get(
-                recipient_user=request.user, id=badge_id
-            ).delete()
-        except LocalBadgeInstance.DoesNotExist:
+        user_badge = get_badge_by_identifier(badge_id, user=request.user)
+        if user_badge is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+        if isinstance(user_badge, LocalBadgeInstance):
+            user_badge.delete()
+        elif isinstance(user_badge, BadgeInstance):
+            user_badge.acceptance = BadgeInstance.ACCEPTANCE_REJECTED
+            user_badge.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
