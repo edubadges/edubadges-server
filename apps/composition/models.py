@@ -149,7 +149,7 @@ class BaseSharedModel(cachemodel.CacheModel, basic_models.TimestampedModel):
         abstract = True
 
     def get_share_url(self, provider, **kwargs):
-        return SharingManager.share_url(provider, self, **kwargs)
+        raise NotImplementedError()
 
 
 class LocalBadgeInstanceShare(BaseSharedModel):
@@ -178,3 +178,5 @@ class LocalBadgeInstanceShare(BaseSharedModel):
 class CollectionShare(BaseSharedModel):
     collection = models.ForeignKey(Collection, null=False)
 
+    def get_share_url(self, provider, **kwargs):
+        return SharingManager.share_url(provider, self.collection, **kwargs)

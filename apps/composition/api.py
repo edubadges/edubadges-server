@@ -14,7 +14,8 @@ from mainsite.permissions import IsOwner
 
 from .serializers import (LocalBadgeInstanceUploadSerializer,
                           CollectionSerializer, CollectionBadgeSerializer)
-from .models import LocalBadgeInstance, Collection, LocalBadgeInstanceCollection, LocalIssuer, LocalBadgeInstanceShare
+from .models import LocalBadgeInstance, Collection, LocalBadgeInstanceCollection, LocalIssuer, LocalBadgeInstanceShare, \
+    CollectionShare
 
 logger = badgrlog.BadgrLogger()
 
@@ -563,5 +564,15 @@ class ShareCollection(APIView):
         """
         provider = request.query_params.get('provider')
 
-        share_url = ""
-        return Response(status=status.HTTP_302_FOUND, headers={'Location': share_url})
+        collection = Collection.cached.get(slug=collection_slug)
+        if collection.owner != request.user:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        share = CollectionShare(provider=provider, collection=collection)
+        share_url = share.get_share_url(provider, title=collection.name, summary=collection.description)
+        if not share_url:
+            return Response({'error': "invalid share provider"}, status=status.HTTP_400_BAD_REQUEST)
+
+        share.save()
+        headers = {'Location': share_url}
+        return Response(status=status.HTTP_302_FOUND, headers=headers)

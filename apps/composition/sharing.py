@@ -14,7 +14,7 @@ class FacebookShareProvider(ShareProvider):
     provider_code = 'facebook'
     provider_name = 'Facebook'
 
-    def share_url(self, badge_instance):
+    def share_url(self, badge_instance, **kwargs):
         return "https://www.facebook.com/sharer/sharer.php?u={url}".format(
             url=urllib.quote(badge_instance.share_url)
         )
@@ -25,7 +25,10 @@ class LinkedinShareProvider(ShareProvider):
     provider_name = 'LinkedIn'
 
     def share_url(self, instance, **kwargs):
-        url = self.certification_share_url(instance, **kwargs)
+        url = None
+        if hasattr(instance, 'cached_badgeclass'):
+            url = self.certification_share_url(instance, **kwargs)
+
         if not url:
             url = self.feed_share_url(instance, **kwargs)
         return url
