@@ -14,7 +14,7 @@ from mainsite.permissions import IsOwner
 
 from .serializers import (LocalBadgeInstanceUploadSerializer,
                           CollectionSerializer, CollectionBadgeSerializer)
-from .models import LocalBadgeInstance, Collection, LocalBadgeInstanceCollection, LocalIssuer
+from .models import LocalBadgeInstance, Collection, LocalBadgeInstanceCollection, LocalIssuer, LocalBadgeInstanceShare
 
 logger = badgrlog.BadgrLogger()
 
@@ -506,3 +506,62 @@ class LocalIssuerImage(ImagePropertyDetailView):
     prop = 'image_preview'
 
 
+class ShareBadge(APIView):
+    permission_classes = (permissions.IsAuthenticated, IsOwner,)
+
+    def get(self, request, badge_id):
+        """
+        Share a single badge to a support share provider
+        ---
+        parameters:
+            - name: badge_id
+              description: The identifier of a badge returned from /v1/earner/badges
+              required: true
+              type: string
+              paramType: path
+            - name: provider
+              description: The identifier of the provider to use. Supports 'facebook', 'linkedin'
+              required: true
+              type: string
+              paramType: query
+        """
+        provider = request.query_params.get('provider')
+
+        badge = get_badge_by_identifier(badge_id, request.user)
+        if badge is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        share = LocalBadgeInstanceShare()
+        share.set_badge(badge)
+        share_url = share.get_share_url(provider)
+        if not share_url:
+            return Response({'error': "invalid share provider"}, status=status.HTTP_400_BAD_REQUEST)
+
+        share.save()
+        headers = {'Location': share_url}
+        return Response(status=status.HTTP_302_FOUND, headers=headers)
+
+
+class ShareCollection(APIView):
+    permission_classes = (permissions.IsAuthenticated, IsOwner,)
+
+    def get(self, request, collection_slug):
+        """
+        Share a collection to a supported share provider
+        ---
+        parameters:
+            - name: collection_slug
+              description: The identifier of a collection
+              required: true
+              type: string
+              paramType: path
+            - name: provider
+              description: The identifier of the provider to use. Supports 'facebook', 'linkedin'
+              required: true
+              type: string
+              paramType: query
+        """
+        provider = request.query_params.get('provider')
+
+        share_url = ""
+        return Response(status=status.HTTP_302_FOUND, headers={'Location': share_url})
