@@ -531,7 +531,7 @@ class ShareBadge(APIView):
         if badge is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        share = LocalBadgeInstanceShare()
+        share = LocalBadgeInstanceShare(provider=provider)
         share.set_badge(badge)
         share_url = share.get_share_url(provider)
         if not share_url:

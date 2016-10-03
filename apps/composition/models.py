@@ -12,6 +12,7 @@ from django.db import models
 from issuer.models import BadgeInstance
 from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
                              AbstractBadgeInstance, AbstractRemoteImagePreviewMixin)
+from mainsite.utils import OriginSetting
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
@@ -45,6 +46,10 @@ class LocalBadgeInstance(AbstractBadgeInstance):
             return default_storage.url(self.image.name)
         else:
             return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
+
+    @property
+    def share_url(self):
+        return OriginSetting.HTTP+reverse('shared_badge', kwargs={'badge_id': self.pk})
 
     @property
     def cached_issuer(self):

@@ -18,6 +18,7 @@ from openbadges_bakery import bake
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
                              AbstractBadgeInstance, EmailBlacklist)
+from mainsite.utils import OriginSetting
 from pathway.tasks import award_badges_for_pathway_completion
 
 from .utils import generate_sha256_hashstring, badgr_import_url, CURRENT_OBI_CONTEXT_IRI
@@ -207,6 +208,10 @@ class BadgeInstance(AbstractBadgeInstance):
         extended_json['badge']['issuer'] = self.issuer.json
 
         return extended_json
+
+    @property
+    def share_url(self):
+        return OriginSetting.HTTP+reverse('shared_badge', kwargs={'badge_id': self.slug})
 
     @property
     def cached_issuer(self):
