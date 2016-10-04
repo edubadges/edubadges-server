@@ -132,10 +132,18 @@ class LocalBadgeInstanceDetail(APIView):
         if isinstance(user_badge, LocalBadgeInstance):
             user_badge.delete()
         elif isinstance(user_badge, BadgeInstance):
+            def _find_local_badge_duplicate(issuer_badge_instance, user):
+                for lbi in LocalBadgeInstance.objects.filter(recipient_user=user):
+                    if lbi.json.get('uid') == issuer_badge_instance.slug:
+                        return lbi
+            lbi = _find_local_badge_duplicate(user_badge, request.user)
+            if lbi:
+                lbi.delete()
             user_badge.acceptance = BadgeInstance.ACCEPTANCE_REJECTED
             user_badge.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 
 class CollectionLocalBadgeInstanceList(APIView):
