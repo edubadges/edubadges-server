@@ -160,6 +160,16 @@ badge was valid, but cannot be saved."
         else:  # 0.5 badges
             new_issuer, new_badge_class = None, None
 
+        existing_instance = BadgeInstance.objects.filter(slug=badge_instance_json.get('uid')).first()
+        if existing_instance:
+            if existing_instance.acceptance == BadgeInstance.ACCEPTANCE_REJECTED:
+                existing_instance.acceptance = BadgeInstance.ACCEPTANCE_ACCEPTED
+                existing_instance.save()
+                logger.event(badgrlog.BadgeUploaded(badge_instance_json, badge_check, request_user))
+                return existing_instance
+            else:
+                raise serializers.ValidationError("This badge has already been uploaded.")
+
         new_instance, instance_created = LocalBadgeInstance.objects.get_or_create({
             'recipient_user': request_user,
             'json': badge_instance_json,
