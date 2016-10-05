@@ -15,6 +15,7 @@ from allauth.utils import get_current_site, build_absolute_uri
 
 from badgeuser.models import CachedEmailAddress
 from mainsite.models import BadgrApp
+from mainsite.utils import OriginSetting
 
 
 class BadgrAccountAdapter(DefaultAccountAdapter):
@@ -76,7 +77,7 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
         activate_url = build_absolute_uri(
             request,
             reverse(url_name, kwargs={'confirm_id': emailconfirmation.pk}),
-            protocol=app_settings.DEFAULT_HTTP_PROTOCOL
+            protocol=OriginSetting.DEFAULT_HTTP_PROTOCOL
         )
         tokenized_activate_url = "{}?token={}".format(activate_url, token)
         return tokenized_activate_url

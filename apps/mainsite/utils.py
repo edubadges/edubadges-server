@@ -2,6 +2,7 @@
 Utility functions and constants that might be used across the project.
 """
 import hashlib
+import urlparse
 
 from django.apps import apps
 from django.conf import settings
@@ -49,6 +50,11 @@ def client_ip_from_request(request):
 
 class OriginSettingsObject(object):
     DefaultOrigin = "http://localhost:8000"
+
+    @property
+    def DEFAULT_HTTP_PROTOCOL(self):
+        parsed = urlparse.urlparse(self.HTTP)
+        return parsed.scheme
 
     @property
     def HTTP(self):
