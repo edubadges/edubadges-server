@@ -172,11 +172,10 @@ class UserCreateTests(APITestCase):
 
         self.assertEqual(response.status_code, 201)
 
-
     def test_shouldnt_error_when_user_exists_with_email(self):
         email = 'existing3@example.test'
 
-        old_user = BadgeUser(email=email)
+        old_user = BadgeUser(email=email, password='secret2')  # password is set because its an existing user
         old_user.save()
 
         response = self.client.post('/v1/user/profile', {
@@ -187,6 +186,21 @@ class UserCreateTests(APITestCase):
         })
         self.assertEqual(response.status_code, 400)
         self.assertEqual(len(mail.outbox), 0)
+
+    def test_autocreated_user_can_signup(self):
+        email = 'existing4@example.test'
+
+        old_user = BadgeUser(email=email)  # no password set
+        old_user.save()
+
+        response = self.client.post('/v1/user/profile', {
+            'first_name': 'existing',
+            'last_name': 'user',
+            'password': 'secret',
+            'email': email
+        })
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(len(mail.outbox), 1)
 
     def test_should_signup_with_email_with_plus(self):
         response = self.client.post('/v1/user/profile', {
