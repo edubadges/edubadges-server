@@ -2,18 +2,16 @@ import os
 import uuid
 
 from django.apps import apps
-from django.conf import settings
 from django.core.urlresolvers import reverse
 from rest_framework import serializers
 
 import utils
 from badgeuser.serializers import UserProfileField
 from composition.format import V1InstanceSerializer
+from issuer.models import Issuer, BadgeClass
 from mainsite.drf_fields import Base64FileField
 from mainsite.serializers import WritableJSONField, HumanReadableBooleanField
-from mainsite.utils import installed_apps_list, OriginSetting
-from pathway.tasks import award_badges_for_pathway_completion
-from issuer.models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceManager
+from mainsite.utils import installed_apps_list, OriginSetting, verify_svg
 
 
 class AbstractComponentSerializer(serializers.Serializer):
@@ -48,6 +46,17 @@ class IssuerSerializer(AbstractComponentSerializer):
         # TODO: Make sure it's a PNG (square if possible), and remove any baked-in badge assertion that exists.
         # Doing: add a random string to filename
         img_name, img_ext = os.path.splitext(image.name)
+
+        try:
+            from PIL import Image
+            img = Image.open(image)
+            img.verify()
+        except Exception as e:
+            if not verify_svg(image):
+                raise serializers.ValidationError('Invalid image.')
+        else:
+            if img.format != "PNG":
+                raise serializers.ValidationError('Invalid PNG')
 
         image.name = 'issuer_logo_' + str(uuid.uuid4()) + img_ext
         return image
@@ -127,6 +136,17 @@ class BadgeClassSerializer(AbstractComponentSerializer):
         # TODO: Make sure it's a PNG (square if possible), and remove any baked-in badge assertion that exists.
         # Doing: add a random string to filename
         img_name, img_ext = os.path.splitext(image.name)
+
+        try:
+            from PIL import Image
+            img = Image.open(image)
+            img.verify()
+        except Exception as e:
+            if not verify_svg(image):
+                raise serializers.ValidationError('Invalid image.')
+        else:
+            if img.format != "PNG":
+                raise serializers.ValidationError('Invalid PNG')
 
         image.name = 'issuer_badgeclass_' + str(uuid.uuid4()) + img_ext
         return image
