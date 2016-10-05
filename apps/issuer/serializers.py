@@ -94,6 +94,11 @@ class IssuerSerializer(AbstractComponentSerializer):
         if self.context.get('embed_badgeclasses', False):
             representation['badgeclasses'] = BadgeClassSerializer(obj.badgeclasses.all(), many=True, context=self.context).data
 
+        representation['badgeClassCount'] = len(obj.cached_badgeclasses())
+        representation['recipientGroupCount'] = len(obj.cached_recipient_groups())
+        representation['recipientCount'] = sum(b.recipient_count() for b in obj.cached_badgeclasses())
+        representation['pathwayCount'] = len(obj.cached_pathways())
+
         return representation
 
 
