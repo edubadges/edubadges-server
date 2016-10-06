@@ -65,7 +65,7 @@ class Issuer(AbstractIssuer):
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_pathways(self):
-        return self.pathway_set.all()
+        return self.pathway_set.filter(is_active=True)
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_recipient_groups(self):

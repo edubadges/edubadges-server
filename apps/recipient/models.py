@@ -104,7 +104,7 @@ class RecipientGroup(basic_models.DefaultModel):
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_pathways(self):
-        return self.pathways.all()
+        return self.pathways.filter(is_active=True)
 
     @property
     def jsonld_id(self):

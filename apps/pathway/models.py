@@ -16,7 +16,7 @@ from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.utils import OriginSetting
 
 
-class Pathway(cachemodel.CacheModel):
+class Pathway(basic_models.ActiveModel):
     issuer = models.ForeignKey('issuer.Issuer')
     slug = AutoSlugField(max_length=254, populate_from='populate_slug', unique=True, blank=False)
     root_element = models.OneToOneField('pathway.PathwayElement', related_name='toplevel_pathway', null=True)
@@ -68,7 +68,7 @@ class Pathway(cachemodel.CacheModel):
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_elements(self):
-        return self.pathwayelement_set.all()
+        return self.pathwayelement_set.filter(is_active=True)
 
     @property
     def groups(self):

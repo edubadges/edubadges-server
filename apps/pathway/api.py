@@ -83,6 +83,8 @@ class PathwayAPIEndpoint(AbstractIssuerAPIEndpoint):
 
         try:
             pathway = Pathway.cached.get(slug=pathway_slug)
+            if not pathway.is_active:
+                return issuer, None
         except Pathway.DoesNotExist:
             return issuer, None
         if pathway.issuer != issuer:
@@ -92,6 +94,21 @@ class PathwayAPIEndpoint(AbstractIssuerAPIEndpoint):
 
 
 class PathwayDetail(PathwayAPIEndpoint):
+
+    def delete(self, request, issuer_slug, pathway_slug):
+        """
+        DELETE a pathway and its PathwayElements
+        ---
+        """
+        issuer, pathway = self._get_issuer_and_pathway(issuer_slug, pathway_slug)
+        if issuer is None or pathway is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if pathway.issuer != issuer:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        pathway.is_active = False
+        pathway.save()
+        return Response(status=status.HTTP_200_OK)
 
     def get(self, request, issuer_slug, pathway_slug):
         """
@@ -137,6 +154,7 @@ class PathwayDetail(PathwayAPIEndpoint):
         serializer.save()
 
         return Response(serializer.data)
+
 
 class PathwayElementList(PathwayAPIEndpoint):
     def get(self, request, issuer_slug, pathway_slug):
@@ -230,6 +248,8 @@ class PathwayElementAPIEndpoint(PathwayAPIEndpoint):
 
         try:
             element = PathwayElement.cached.get(slug=element_slug)
+            if not element.is_active:
+                return issuer, pathway, None
         except PathwayElement.DoesNotExist:
             return issuer, pathway, None
         if element.pathway != pathway:
@@ -300,7 +320,8 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
         if issuer is None or pathway is None or element is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        element.delete()
+        element.is_active = False
+        element.save()
         return Response(status=status.HTTP_200_OK)
 
 
