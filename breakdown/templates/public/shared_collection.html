@@ -1,5 +1,8 @@
-
+{% if embedded %}
+{% extends "public/base_embed.html" %}
+{% else %}
 {% extends "public/base.html" %}
+{% endif %}
 
 {% block content %}
 
