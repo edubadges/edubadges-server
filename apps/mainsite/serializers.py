@@ -2,6 +2,7 @@ import json
 from collections import OrderedDict
 
 from django.conf import settings
+from django.utils.html import strip_tags
 from rest_framework import serializers
 
 
@@ -104,3 +105,14 @@ class JSONDictField(serializers.DictField):
             pass
 
         return super(JSONDictField, self).to_internal_value(data)
+
+
+class StripTagsCharField(serializers.CharField):
+    def __init__(self, *args, **kwargs):
+        self.strip_tags = kwargs.pop('strip_tags', True)
+        super(StripTagsCharField, self).__init__(*args, **kwargs)
+
+    def to_internal_value(self, data):
+        value = super(StripTagsCharField, self).to_internal_value(data)
+        if self.strip_tags:
+            return strip_tags(value)
