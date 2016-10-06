@@ -288,7 +288,7 @@ SPHINX_API_VERSION = 0x116  # Sphinx 0.9.9
 #
 # Testing
 ##
-TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+TEST_RUNNER = 'mainsite.testrunner.BadgrRunner'
 
 ##
 #
