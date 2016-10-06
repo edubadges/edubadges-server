@@ -1,9 +1,0 @@
-.state_ {
-  font-weight: 600;
-}
-
-@each $state, $color in $states {
-  .state_-#{$state} {
-    color: $color;
-  }
-}
