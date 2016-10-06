@@ -3,7 +3,6 @@ import json
 import os
 import time
 
-from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.cache.backends.filebased import FileBasedCache

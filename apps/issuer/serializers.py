@@ -5,13 +5,14 @@ from django.apps import apps
 from django.core.urlresolvers import reverse
 from rest_framework import serializers
 
-import utils
 from badgeuser.serializers import UserProfileField
 from composition.format import V1InstanceSerializer
-from issuer.models import Issuer, BadgeClass
 from mainsite.drf_fields import Base64FileField
 from mainsite.serializers import WritableJSONField, HumanReadableBooleanField, StripTagsCharField
 from mainsite.utils import installed_apps_list, OriginSetting, verify_svg
+
+from .models import Issuer, BadgeClass
+import utils
 
 
 class AbstractComponentSerializer(serializers.Serializer):

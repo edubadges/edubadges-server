@@ -1,10 +1,9 @@
 import os
+import re
+import time
 import urllib
 import warnings
 
-import time
-
-import re
 from django.core import mail
 from django.core.cache import cache, CacheKeyWarning
 from django.core.cache.backends.filebased import FileBasedCache

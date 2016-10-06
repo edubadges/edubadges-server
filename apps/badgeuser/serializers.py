@@ -1,11 +1,6 @@
 from django.conf import settings
-
-from allauth.account.models import EmailConfirmation, EmailAddress
 from rest_framework import serializers
-from rest_framework.authtoken.models import Token
 
-#from earner.serializers import EarnerBadgeSerializer
-#from consumer.serializers import ConsumerBadgeDetailSerializer
 from mainsite.serializers import StripTagsCharField
 from .models import BadgeUser, CachedEmailAddress
 from .utils import notify_on_password_change
@@ -69,8 +64,8 @@ class BadgeUserProfileSerializer(serializers.Serializer):
         request = self.context.get('request')
 
         try:
-            email_address = EmailAddress.objects.get(email=validated_data['email'])
-        except EmailAddress.DoesNotExist:
+            email_address = CachedEmailAddress.objects.get(email=validated_data['email'])
+        except CachedEmailAddress.DoesNotExist:
             pass
         else:
             if email_address.verified is False:
@@ -98,7 +93,7 @@ class BadgeUserProfileSerializer(serializers.Serializer):
         user.set_password(validated_data['password'])
         user.save()
 
-        EmailAddress.objects.add_email(
+        CachedEmailAddress.objects.add_email(
             request, user, validated_data['email'], confirm=True, signup=True
         )
 
@@ -132,26 +127,44 @@ class BadgeUserExistingProfileSerializer(serializers.ModelSerializer):
 
 
 class NewEmailSerializer(serializers.ModelSerializer):
+    variants = serializers.ListField(serializers.EmailField(), required=False, source='cached_variants')
     email = serializers.EmailField(required=True)
 
     class Meta:
         model = CachedEmailAddress
-        fields = ('id', 'email', 'verified', 'primary')
-        read_only_fields = ('id', 'verified', 'primary')
+        fields = ('id', 'email', 'verified', 'primary', 'variants')
+        read_only_fields = ('id', 'verified', 'primary', 'variants')
 
     def create(self, validated_data):
+        new_address = validated_data.get('email')
         try:
-            existing = CachedEmailAddress.objects.get(email=validated_data['email'])
+            email = CachedEmailAddress.objects.get(email=new_address)
         except CachedEmailAddress.DoesNotExist:
-            pass
+            email = super(NewEmailSerializer, self).create(validated_data)
         else:
-            if not existing.verified:
-                existing.delete()
+            if not email.verified:
+                # Clear out a previous attempt and let the current user try
+                email.delete()
+                email = super(NewEmailSerializer, self).create(validated_data)
 
-        return super(NewEmailSerializer, self).create(validated_data)
+        if new_address != email.email and new_address not in [v.email for v in email.cached_variants()]:
+            email.add_variant(new_address)
+            raise serializers.ValidationError("Matching address already exists. New case variant registered.")
+
+        if validated_data.get('variants'):
+            for variant in validated_data.get('variants'):
+                try:
+                    email.add_variant(variant)
+                except serializers.ValidationError:
+                    pass
+
+        return email
+
 
 class ExistingEmailSerializer(serializers.ModelSerializer):
+    variants = serializers.EmailField(source='cached_variants')
+
     class Meta:
         model = CachedEmailAddress
-        fields = ('id', 'email', 'verified', 'primary')
-        read_only_fields = ('id', 'email', 'verified')
+        fields = ('id', 'email', 'verified', 'primary', 'variants')
+        read_only_fields = ('id', 'email', 'verified', 'variants')

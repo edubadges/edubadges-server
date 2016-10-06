@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model
 import responses
 from rest_framework.test import APITestCase
 
+from badgeuser.models import CachedEmailAddress
 from composition.models import (LocalBadgeClass, LocalIssuer, LocalBadgeInstance,
                                 Collection, LocalBadgeInstanceCollection,)
 from composition.serializers import (CollectionSerializer, CollectionBadgeSerializer,)
@@ -15,23 +16,25 @@ dir = os.path.dirname(__file__)
 
 
 def setup_basic_1_0(**kwargs):
-    responses.add(
-        responses.GET, 'http://a.com/instance',
-        body=open(os.path.join(dir, 'testfiles/1_0_basic_instance.json')).read(),
-        status=200, content_type='application/json'
-    )
-    responses.add(
-        responses.GET, 'http://a.com/badgeclass',
-        body=open(os.path.join(dir, 'testfiles/1_0_basic_badgeclass.json')).read(),
-        status=200, content_type='application/json'
-    )
-    if not kwargs or not 'http://a.com/issuer' in kwargs.get('exclude'):
+    if not kwargs or not 'http://a.com/instance' in kwargs.get('exclude', []):
+        responses.add(
+            responses.GET, 'http://a.com/instance',
+            body=open(os.path.join(dir, 'testfiles/1_0_basic_instance.json')).read(),
+            status=200, content_type='application/json'
+        )
+    if not kwargs or not 'http://a.com/badgeclass' in kwargs.get('exclude', []):
+        responses.add(
+            responses.GET, 'http://a.com/badgeclass',
+            body=open(os.path.join(dir, 'testfiles/1_0_basic_badgeclass.json')).read(),
+            status=200, content_type='application/json'
+        )
+    if not kwargs or not 'http://a.com/issuer' in kwargs.get('exclude', []):
         responses.add(
             responses.GET, 'http://a.com/issuer',
             body=open(os.path.join(dir, 'testfiles/1_0_basic_issuer.json')).read(),
             status=200, content_type='application/json'
         )
-    if not kwargs or not 'http://a.com/badgeclass_image' in kwargs.get('exclude'):
+    if not kwargs or not 'http://a.com/badgeclass_image' in kwargs.get('exclude', []):
         responses.add(
             responses.GET, 'http://a.com/badgeclass_image',
             body=open(os.path.join(dir, 'testfiles/unbaked_image.png')).read(),
@@ -198,8 +201,37 @@ class TestBadgeUploads(APITestCase):
         )
 
     @responses.activate
+    def test_submit_basic_1_0_badge_url_variant_email(self):
+        setup_basic_1_0(**{'exclude': 'http://a.com/instance'})
+        setup_resources([
+            {'url': 'http://a.com/instance3', 'filename': '1_0_basic_instance3.json'}
+        ])
+
+        post_input = {
+            'url': 'http://a.com/instance3',
+            'recipient_identifier': "TEST@example.com"
+        }
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        response = self.client.post(
+            '/v1/earner/badges', post_input
+        )
+        self.assertEqual(response.status_code, 201)
+        get_response = self.client.get('/v1/earner/badges')
+        self.assertEqual(get_response.status_code, 200)
+        self.assertEqual(
+            get_response.data[0].get('json', {}).get('id'),
+            'http://a.com/instance3'
+        )
+        self.assertEqual(
+            get_response.data[0].get('json', {}).get('recipient', {}).get('@value', {}).get('recipient'), 'TEST@example.com'
+        )
+
+        email = CachedEmailAddress.objects.get(email='test@example.com')
+        self.assertTrue('TEST@example.com' in [e.email for e in email.cached_variants()])
+
+    @responses.activate
     def test_submit_basic_1_0_badge_with_inaccessible_badge_image(self):
-        setup_basic_1_0(**{'exclude': 'http://a.com/badgeclass_image'})
+        setup_basic_1_0(**{'exclude': ['http://a.com/badgeclass_image']})
 
         post_input = {
             'url': 'http://a.com/instance'
@@ -213,7 +245,7 @@ class TestBadgeUploads(APITestCase):
 
     @responses.activate
     def test_submit_basic_1_0_badge_missing_issuer(self):
-        setup_basic_1_0(**{'exclude': 'http://a.com/issuer'})
+        setup_basic_1_0(**{'exclude': ['http://a.com/issuer']})
 
         post_input = {
             'url': 'http://a.com/instance'

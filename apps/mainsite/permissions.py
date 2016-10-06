@@ -24,6 +24,7 @@ class AuthenticatedWithVerifiedEmail(permissions.BasePermission):
     """
     Allows access only to authenticated users who have verified email addresses.
     """
+    message = "This function only available to authenticated users with confirmed email addresses."
 
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated() and \

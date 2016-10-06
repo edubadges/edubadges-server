@@ -5,7 +5,6 @@ from django.conf import settings
 from django.utils.html import strip_tags
 from rest_framework import serializers
 
-
 class HumanReadableBooleanField(serializers.BooleanField):
     TRUE_VALUES = serializers.BooleanField.TRUE_VALUES | set(('on', 'On', 'ON'))
     FALSE_VALUES = serializers.BooleanField.FALSE_VALUES | set(('off', 'Off', 'OFF'))

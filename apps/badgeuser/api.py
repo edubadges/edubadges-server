@@ -141,7 +141,7 @@ class BadgeUserEmailList(APIView):
               type: string
               paramType: form
         """
-        serializer = NewEmailSerializer(data=request.data, context={'request: request'})
+        serializer = NewEmailSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
         email_address = serializer.save(user=request.user)
