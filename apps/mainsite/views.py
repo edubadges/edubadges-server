@@ -24,7 +24,7 @@ from .models import EmailBlacklist
 @xframe_options_exempt
 def error404(request):
     try:
-        template = loader.get_template('404.html')
+        template = loader.get_template('error/404.html')
     except TemplateDoesNotExist:
         return HttpResponseServerError('<h1>Page not found (404)</h1>', content_type='text/html')
     return HttpResponseNotFound(template.render(Context({
@@ -35,7 +35,7 @@ def error404(request):
 @xframe_options_exempt
 def error500(request):
     try:
-        template = loader.get_template('500.html')
+        template = loader.get_template('error/500.html')
     except TemplateDoesNotExist:
         return HttpResponseServerError('<h1>Server Error (500)</h1>', content_type='text/html')
     return HttpResponseServerError(template.render(Context({
