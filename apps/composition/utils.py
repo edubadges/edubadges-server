@@ -81,7 +81,7 @@ def badge_email_matches_emails(badge_instance, verified_addresses):
 
         # TODO: Ensure hash is one of two possibilities or return False
 
-        for email in verified_addresses:
+        for email in generate_common_case_variants(verified_addresses):
             algorithm_func = hashlib.new(hash_algorithm)
             algorithm_func.update(email)
             algorithm_func.update(salt)
@@ -89,6 +89,22 @@ def badge_email_matches_emails(badge_instance, verified_addresses):
                 return email
 
     return False
+
+
+def generate_common_case_variants(email_addresses):
+    def _common_case_variants(s):
+        return set([
+            s,
+            s.lower(),
+            s.upper(),
+            s.title(),
+            s.capitalize()
+        ])
+    for email in email_addresses:
+        user, domain = email.split('@')
+        for u in _common_case_variants(user):
+            for d in _common_case_variants(domain):
+                yield '{}@{}'.format(u, d)
 
 
 def use_or_bake_badge_instance_image(uploaded_image, badge_instance,
