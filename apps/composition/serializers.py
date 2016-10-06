@@ -26,7 +26,7 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
     image = Base64FileField(required=False, write_only=True)
     url = serializers.URLField(required=False, write_only=True)
     assertion = serializers.CharField(required=False, write_only=True)
-    recipient_id = serializers.CharField(required=False, write_only=True)
+    recipient_identifier = serializers.CharField(required=False, write_only=True)
 
     # Reinstantiation using fields from badge instance when returned by .create
     id = serializers.IntegerField(read_only=True)
@@ -61,7 +61,7 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
             }
         return representation
 
-    def validate_recipient_id(self, data):
+    def validate_recipient_identifier(self, data):
         user = self.context.get('request').user
         current_emails = [e.email for e in user.cached_emails()] + [e.email for e in user.cached_email_variants()]
 
@@ -117,8 +117,8 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
         verified_emails = [e.email for e in request_user.emailaddress_set.filter(verified=True)] \
                           + [e.email for e in request_user.cached_email_variants()]
         new_variant = None
-        if validated_data.get('recipient_id') and validated_data.get('recipient_id') not in verified_emails:
-            new_variant = EmailAddressVariant(email=validated_data['recipient_id'])
+        if validated_data.get('recipient_identifier') and validated_data.get('recipient_identifier') not in verified_emails:
+            new_variant = EmailAddressVariant(email=validated_data['recipient_identifier'])
             verified_emails.append(new_variant.email)
 
         badge_check = BadgeCheck(
@@ -144,14 +144,14 @@ badge was valid, but cannot be saved."
             logger.event(badgrlog.InvalidBadgeUploaded(components, error, request_user))
             raise serializers.ValidationError(error)
 
-        if new_variant and badge_check.recipient_id == new_variant.email:
+        if new_variant and badge_check.recipient_identifier == new_variant.email:
             new_variant.save()
 
         # Create local component instance `json` fields
         badge_instance_json = \
             components.badge_instance.serializer(badge_instance, context={
                 'instance_url': badge_instance_url,  # To populate BI id
-                'recipient_id': badge_check.recipient_id,  # For 0.5 badges
+                'recipient_id': badge_check.recipient_identifier,  # For 0.5 badges
                 # A BadgeInstanceSerializer will recursively instantiate
                 # serializers of the other components to nest a representation
                 # of their .data for BI['badge'] and BI['badge']['issuer']
@@ -195,7 +195,7 @@ badge was valid, but cannot be saved."
             'json': badge_instance_json,
             'badgeclass': new_badge_class,
             'issuer': new_issuer,
-            'recipient_identifier': badge_check.recipient_id,
+            'recipient_identifier': badge_check.recipient_identifier,
             'image': use_or_bake_badge_instance_image(
                 validated_data.get('image'), badge_instance, badge_class)
         }, identifier=badge_instance_url, recipient_user=request_user)

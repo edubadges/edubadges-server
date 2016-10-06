@@ -65,6 +65,10 @@ class BadgeCheck(BadgeCheckBase):
         self.recipient_id = None
         super(BadgeCheck, self).__init__(*args, **kwargs)
 
+    @property
+    def recipient_identifier(self):
+        return self.recipient_id
+
     def validate(self):
         self.recipient_id = None
         super(BadgeCheck, self).validate()

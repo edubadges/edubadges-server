@@ -209,7 +209,7 @@ class TestBadgeUploads(APITestCase):
 
         post_input = {
             'url': 'http://a.com/instance3',
-            'recipient_id': "TEST@example.com"
+            'recipient_identifier': "TEST@example.com"
         }
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.post(
