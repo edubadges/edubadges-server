@@ -123,7 +123,7 @@ class PathwayElementSerializer(LinkedDataEntitySerializer):
     slug = StripTagsCharField(required=False)
     description = StripTagsCharField()
     parent = serializers.CharField(required=False)
-    alignmentUrl = StripTagsCharField(required=False, allow_null=True)
+    alignmentUrl = StripTagsCharField(required=False, allow_null=True, allow_blank=True)
     ordering = serializers.IntegerField(required=False, default=99)
     completionBadge = LinkedDataReferenceField(
         keys=['slug'],
@@ -239,7 +239,7 @@ class PathwayElementSerializer(LinkedDataEntitySerializer):
         element.completion_badgeclass = validated_data.get('completion_badgeclass')
         element.name = validated_data.get('name')
         element.description = validated_data.get('description')
-        element.alignment_url = validated_data.get('alignmentUrl')
+        element.alignment_url = validated_data.get('alignmentUrl') if validated_data.get('alignmentUrl') else None
         element.ordering = validated_data.get('ordering', 99)
         element.completion_requirements = completion_requirements
         element.save()
