@@ -3,6 +3,7 @@ import json
 import re
 import uuid
 import cachemodel
+from allauth.account.adapter import get_adapter
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -305,27 +306,8 @@ class BadgeInstance(AbstractBadgeInstance):
             # A property isn't stored right in json
             raise e
 
-        text_template = get_template('issuer/notify_earner_email.txt')
-        html_template = get_template('issuer/notify_earner_email.html')
-        text_output_message = text_template.render(email_context)
-        html_output_message = html_template.render(email_context)
-        mail_meta = {
-            'subject': 'Congratulations, you earned a badge!',
-            'from_address': '"' + email_context['issuer_name'] + '" <' + getattr(settings, 'DEFAULT_FROM_EMAIL') + '>',
-            'to_addresses': [self.recipient_identifier]
-        }
-
-        try:
-            send_mail(
-                mail_meta['subject'],
-                text_output_message,
-                mail_meta['from_address'],
-                mail_meta['to_addresses'],
-                fail_silently=False,
-                html_message=html_output_message
-            )
-        except Exception as e:
-            raise e
+        adapter = get_adapter()
+        adapter.send_mail('issuer/email/notify_earner', self.recipient_identifier, context=email_context)
 
     @property
     def cached_recipient_profile(self):

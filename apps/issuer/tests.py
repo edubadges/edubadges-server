@@ -412,7 +412,7 @@ class BadgeClassTests(APITestCase):
 
     def test_create_badgeclass_with_svg(self):
         with open(
-                os.path.join(TOP_DIR, 'breakdown', 'static', 'badgestudio', 'shapes', 'heart.svg'), 'r'
+                os.path.join(TOP_DIR, 'apps', 'issuer', 'testfiles', 'test_badgeclass.svg'), 'r'
         ) as badge_image:
 
             example_badgeclass_props = {
