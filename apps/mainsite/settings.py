@@ -29,15 +29,6 @@ INSTALLED_APPS = [
     'allauth.account',
     'corsheaders',
 
-    # 'skycms.structure',
-    'reversion',
-    'jingo',
-    # 'djangosphinx',
-    # 'sky_thumbnails',
-    # 'ckeditor',
-    # 'sky_redirects',
-    # 'emailtemplates',
-    # 'sky_visitor',
 
     'rest_framework',
     'rest_framework.authtoken',
@@ -82,7 +73,6 @@ ALLOWED_HOSTS = ['*', ]
 ##
 
 TEMPLATE_LOADERS = [
-    'jingo.Loader',
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
 ]
@@ -103,18 +93,6 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'mainsite.context_processors.extra_settings'
 ]
 
-JINGO_EXCLUDE_APPS = (
-    'admin',
-    'registration',
-    'debug_toolbar',
-    'ckeditor',
-    'reversion',
-    'rest_framework',
-    'allauth',
-    'account',
-    'rest_framework_swagger',
-    'django_object_actions'
-)
 
 
 ##

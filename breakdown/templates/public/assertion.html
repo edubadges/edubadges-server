@@ -7,7 +7,7 @@
         <meta property="og:type"               content="website" />
         <meta property="og:url"                content="{{ badge_instance_public_url }}" />
         <meta property="og:title"              content="{{ badge_class.name }}" />
-        <meta property="og:description"        content="{{ badge_class.json['description'] }}" />
+        <meta property="og:description"        content="{{ badge_class.json.description }}" />
 
         <meta property="og:image"              content="{{ badge_instance_image_url }}" />
         <meta property="og:image:secure_url"   content="{{ badge_instance_image_url }}" />
@@ -17,7 +17,7 @@
 {% endblock %}
 
 {% block content %}
-	{% if not (badge_instance and badge_class and issuer) %}
+	{% if not badge_instance or not badge_class or not issuer %}
 		<div class="wrap wrap-light l-containerhorizontal l-heading">
 			<img srcset="{{ STATIC_URL }}images/500-badgr-2x.png 2x, {{ STATIC_URL }}images/500-badgr.png" src="{{ STATIC_URL }}images/500-badgr.png" alt="Badgr is sorry :(" width="312" height="317">
 			<p>The Badge you are looking for could not be found.</p>
@@ -40,11 +40,11 @@
 			    </h1>
 
 			    <p class="heading-x-meta">
-				    Issued {{ badge_instance.created_at.strftime('%B %d, %Y') }} to {{ obscured_recipient }}
+				    Issued {{ badge_instance.created_at|date:'F d, Y' }} to {{ obscured_recipient }}
 			    </p>
 
 			    <p>
-				    {{ badge_class.json['description'] }}
+				    {{ badge_class.json.description }}
 			    </p>
 
 			     {% if badge_class.criteria_text %}
@@ -56,10 +56,10 @@
 
 			    <div class="l-childrenhorizontal l-childrenhorizontal-small l-offsetleft">
 				    {% if not badge_class.criteria_text %}
-					    <a class="button button-primaryghost" href="{{ badge_class.json['criteria'] }}" target="_blank">View Criteria</a>
+					    <a class="button button-primaryghost" href="{{ badge_class.json.criteria }}" target="_blank">View Criteria</a>
 				    {% endif %}
-				    {% if badge_instance.json['evidence'] %}
-				    <a class="button button-primaryghost" href="{{ badge_instance.json['evidence'] }}" target="_blank">View evidence</a>
+				    {% if badge_instance.json.evidence %}
+				    <a class="button button-primaryghost" href="{{ badge_instance.json.evidence }}" target="_blank">View evidence</a>
 				    {% endif %}
 			      {% if badge_instance_public_url %}
 				    <a class="button button-primaryghost" href="{{ badge_instance_public_url }}.json" target="_blank">View JSON</a>
@@ -68,14 +68,14 @@
 
 			    <h2 class="titledivider">Issuer</h2>
 
-			    <a class="stack" target="_blank" href="{{ issuer.json['url'] }}">
+			    <a class="stack" target="_blank" href="{{ issuer.json.url }}">
 				    <div class="stack-x-image">
-					    <img src="{% if issuer.json['image'] %}{{ issuer.json['image'] }}{% else %}{{STATIC_URL}}public/images/issuer-placeholder.png{% endif %}"
+					    <img src="{% if issuer.json.image %}{{ issuer.json.image }}{% else %}{{STATIC_URL}}public/images/issuer-placeholder.png{% endif %}"
 					         width="40"
-					         alt="{{ issuer.json['name'] }}" />
+					         alt="{{ issuer.json.name }}" />
 				    </div>
 				    <div class="stack-x-text">
-					    <h2>{{ issuer.json['name'] }}</h2>
+					    <h2>{{ issuer.json.name }}</h2>
 				    </div>
 			    </a>
 
