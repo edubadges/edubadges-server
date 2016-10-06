@@ -209,7 +209,7 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
             return Response({'error': "Can not remove only email address"}, status=status.HTTP_400_BAD_REQUEST)
 
         email_address.delete()
-        return Response("Email '{}' has been deleted.".format(email_address.email), status.HTTP_200_OK)
+        return Response(status.HTTP_200_OK)
 
     def put(self, request, id):
         """
