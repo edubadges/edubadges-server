@@ -75,6 +75,7 @@ class SharedBadgeView(DetailView):
 
 
 class CollectionDetailView(DetailView):
+    template_name = 'public/shared_collection.html'
     model = Collection
     context_object_name = 'collection'
     slug_url_kwarg = 'share_hash'

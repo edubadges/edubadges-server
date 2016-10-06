@@ -1,0 +1,49 @@
+
+{% extends "public/base.html" %}
+
+{% block content %}
+
+	<header class="wrap wrap-light l-containerhorizontal l-heading ">
+		<div class="heading">
+			<div class="heading-x-text">
+				<h1>{{collection.name}}</h1>
+				<p>{{collection.description}}</p>
+			</div>
+		</div>
+	</header>
+
+
+	<div class="wrap l-containerhorizontal l-headeredsection">
+		<header class="l-childrenhorizontal l-childrenhorizontal-spacebetween l-childrenhorizontal-spacebetween">
+			<h2 class="title title-is-smallmobile">{{ collection.badges.all().count() }} Badges</h2>
+		</header>
+
+		<div class="l-overflowhorizontal">
+			<table class="table">
+				<thead>
+					<tr>
+						<th scope="col">Badge</th>
+						<th scope="col">Issuer</th>
+						<th scope="col">Issued</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for entry in collection.badges.all() %}
+					<tr>
+						<th>
+							<div class="l-childrenhorizontal l-childrenhorizontal-small">
+								<div class="badge badge-flat">
+									<img alt="{{ entry.badge_instance.cached_badgeclass.name }} Badge" src="{{ entry.badge_instance.image_url() }}" width="40">
+								</div>
+								<a href="{{ entry.badge_instance.shareUrl }}">{{ entry.badge_instance.cached_badgeclass.name }}</a>
+							</div>
+						</th>
+						<td><a target="_blank" href="{{ entry.badge_instance.cached_issuer.json.get('url') }}">{{ entry.badge_instance.cached_issuer.name }}</a></td>
+						<td>{{ entry.badge_instance.json.get('issuedOn') }}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+{% endblock %}

@@ -1,13 +1,11 @@
 import base64
-import mimetypes
 import binascii
+import mimetypes
 import uuid
 
 from django.core.files.base import ContentFile
-from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.files.uploadedfile import UploadedFile
 from django.utils.translation import ugettext as _
-
-from rest_framework import serializers
 from rest_framework.fields import FileField
 
 
@@ -21,7 +19,7 @@ class Base64FileField(FileField):
     _ERROR_MESSAGE = _('Base64 string is incorrect')
 
     def to_internal_value(self, data):
-        if isinstance(data, InMemoryUploadedFile):
+        if isinstance(data, UploadedFile):
             return super(Base64FileField, self).to_internal_value(data)
 
         try:

@@ -2,6 +2,7 @@
 Utility functions and constants that might be used across the project.
 """
 import hashlib
+import urlparse
 
 from django.apps import apps
 from django.conf import settings
@@ -51,10 +52,9 @@ class OriginSettingsObject(object):
     DefaultOrigin = "http://localhost:8000"
 
     @property
-    def http_protocol(self):
-        if self.HTTP.startswith('https'):
-            return 'https'
-        return 'http'
+    def DEFAULT_HTTP_PROTOCOL(self):
+        parsed = urlparse.urlparse(self.HTTP)
+        return parsed.scheme
 
     @property
     def HTTP(self):
@@ -74,3 +74,21 @@ def filter_cache_key(key, key_prefix, version):
     if len(generated_key) > 250:
         return hashlib.md5(generated_key).hexdigest()
     return generated_key
+
+
+def verify_svg(fileobj):
+    """
+    Check if provided file is svg
+    from: https://gist.github.com/ambivalentno/9bc42b9a417677d96a21
+    """
+    import xml.etree.cElementTree as et
+    fileobj.seek(0)
+    tag = None
+    try:
+        for event, el in et.iterparse(fileobj, ('start',)):
+            tag = el.tag
+            break
+    except et.ParseError:
+        pass
+    return tag == '{http://www.w3.org/2000/svg}svg'
+

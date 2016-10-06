@@ -1,14 +1,18 @@
 import os
 
+import basic_models
 import cachemodel
 from autoslug import AutoSlugField
+from composition.sharing import SharingManager
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.urlresolvers import reverse
 from django.db import models
 
+from issuer.models import BadgeInstance
 from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
                              AbstractBadgeInstance, AbstractRemoteImagePreviewMixin)
+from mainsite.utils import OriginSetting
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
@@ -42,6 +46,10 @@ class LocalBadgeInstance(AbstractBadgeInstance):
             return default_storage.url(self.image.name)
         else:
             return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
+
+    @property
+    def share_url(self):
+        return OriginSetting.HTTP+reverse('shared_badge', kwargs={'badge_id': self.pk})
 
     @property
     def cached_issuer(self):
@@ -131,3 +139,44 @@ class CollectionPermission(models.Model):
 
     class Meta:
         unique_together = ('user', 'collection')
+
+
+class BaseSharedModel(cachemodel.CacheModel, basic_models.TimestampedModel):
+    SHARE_PROVIDERS = [(p.provider_code, p.provider_name) for code,p in SharingManager.ManagerProviders.items()]
+    provider = models.CharField(max_length=254, choices=SHARE_PROVIDERS)
+
+    class Meta:
+        abstract = True
+
+    def get_share_url(self, provider, **kwargs):
+        raise NotImplementedError()
+
+
+class LocalBadgeInstanceShare(BaseSharedModel):
+    instance = models.ForeignKey("composition.LocalBadgeInstance", null=True)
+    issuer_instance = models.ForeignKey("issuer.BadgeInstance", null=True)
+
+    def set_badge(self, badge):
+        if isinstance(badge, LocalBadgeInstance):
+            self.instance = badge
+        elif isinstance(badge, BadgeInstance):
+            self.issuer_instance = badge
+        else:
+            raise ValueError("unknown badge type")
+
+    @property
+    def badge(self):
+        if self.instance_id:
+            return self.instance
+        elif self.issuer_instance_id:
+            return self.issuer_instance
+
+    def get_share_url(self, provider, **kwargs):
+        return SharingManager.share_url(provider, self.badge, **kwargs)
+
+
+class CollectionShare(BaseSharedModel):
+    collection = models.ForeignKey(Collection, null=False)
+
+    def get_share_url(self, provider, **kwargs):
+        return SharingManager.share_url(provider, self.collection, **kwargs)

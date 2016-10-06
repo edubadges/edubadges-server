@@ -14,7 +14,8 @@ from mainsite.permissions import IsOwner
 
 from .serializers import (LocalBadgeInstanceUploadSerializer,
                           CollectionSerializer, CollectionBadgeSerializer)
-from .models import LocalBadgeInstance, Collection, LocalBadgeInstanceCollection, LocalIssuer
+from .models import LocalBadgeInstance, Collection, LocalBadgeInstanceCollection, LocalIssuer, LocalBadgeInstanceShare, \
+    CollectionShare
 
 logger = badgrlog.BadgrLogger()
 
@@ -35,7 +36,9 @@ class LocalBadgeInstanceList(APIView):
 
         imported_badges = LocalBadgeInstance.objects.filter(recipient_user=request.user)
         local_badges = BadgeInstance.objects.filter(recipient_identifier__in=request.user.all_recipient_identifiers).exclude(acceptance=BadgeInstance.ACCEPTANCE_REJECTED)
-        user_badges = list(imported_badges) + list(local_badges)
+        local_badge_slugs = [lb.json.get('uid') for lb in local_badges]
+        filtered_imported_badges = filter(lambda lbi: lbi.json.get('uid') not in local_badge_slugs, imported_badges)
+        user_badges = list(filtered_imported_badges) + list(local_badges)
 
         serializer = LocalBadgeInstanceUploadSerializer(
             user_badges, many=True, context={
@@ -129,10 +132,18 @@ class LocalBadgeInstanceDetail(APIView):
         if isinstance(user_badge, LocalBadgeInstance):
             user_badge.delete()
         elif isinstance(user_badge, BadgeInstance):
+            def _find_local_badge_duplicate(issuer_badge_instance, user):
+                for lbi in LocalBadgeInstance.objects.filter(recipient_user=user):
+                    if lbi.json.get('uid') == issuer_badge_instance.slug:
+                        return lbi
+            lbi = _find_local_badge_duplicate(user_badge, request.user)
+            if lbi:
+                lbi.delete()
             user_badge.acceptance = BadgeInstance.ACCEPTANCE_REJECTED
             user_badge.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 
 class CollectionLocalBadgeInstanceList(APIView):
@@ -506,3 +517,72 @@ class LocalIssuerImage(ImagePropertyDetailView):
     prop = 'image_preview'
 
 
+class ShareBadge(APIView):
+    permission_classes = (permissions.IsAuthenticated, IsOwner,)
+
+    def get(self, request, badge_id):
+        """
+        Share a single badge to a support share provider
+        ---
+        parameters:
+            - name: badge_id
+              description: The identifier of a badge returned from /v1/earner/badges
+              required: true
+              type: string
+              paramType: path
+            - name: provider
+              description: The identifier of the provider to use. Supports 'facebook', 'linkedin'
+              required: true
+              type: string
+              paramType: query
+        """
+        provider = request.query_params.get('provider')
+
+        badge = get_badge_by_identifier(badge_id, request.user)
+        if badge is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        share = LocalBadgeInstanceShare(provider=provider)
+        share.set_badge(badge)
+        share_url = share.get_share_url(provider)
+        if not share_url:
+            return Response({'error': "invalid share provider"}, status=status.HTTP_400_BAD_REQUEST)
+
+        share.save()
+        headers = {'Location': share_url}
+        return Response(status=status.HTTP_302_FOUND, headers=headers)
+
+
+class ShareCollection(APIView):
+    permission_classes = (permissions.IsAuthenticated, IsOwner,)
+
+    def get(self, request, collection_slug):
+        """
+        Share a collection to a supported share provider
+        ---
+        parameters:
+            - name: collection_slug
+              description: The identifier of a collection
+              required: true
+              type: string
+              paramType: path
+            - name: provider
+              description: The identifier of the provider to use. Supports 'facebook', 'linkedin'
+              required: true
+              type: string
+              paramType: query
+        """
+        provider = request.query_params.get('provider')
+
+        collection = Collection.cached.get(slug=collection_slug)
+        if collection.owner != request.user:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        share = CollectionShare(provider=provider, collection=collection)
+        share_url = share.get_share_url(provider, title=collection.name, summary=collection.description)
+        if not share_url:
+            return Response({'error': "invalid share provider"}, status=status.HTTP_400_BAD_REQUEST)
+
+        share.save()
+        headers = {'Location': share_url}
+        return Response(status=status.HTTP_302_FOUND, headers=headers)

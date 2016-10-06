@@ -1,10 +1,9 @@
 import os
 import re
 import time
-import urllib2
+import urllib
 import warnings
 
-import re
 from django.core import mail
 from django.core.cache import cache, CacheKeyWarning
 from django.core.cache.backends.filebased import FileBasedCache
@@ -80,7 +79,7 @@ class TestSignup(APITestCase):
                            BADGR_APP_ID=badgr_app.id):
             response = self.client.get(confirm_url, follow=False)
             self.assertEqual(response.status_code, 302)
-            self.assertEqual(response.get('location'), 'http://testserver/login/Tester?email={}'.format(urllib2.quote(post_data['email'])))
+            self.assertEqual(response.get('location'), 'http://testserver/login/Tester?email={}'.format(urllib.quote(post_data['email'])))
 
 
 @override_settings(
