@@ -7,6 +7,7 @@ import badgrlog
 from badgeuser.models import EmailAddressVariant
 from issuer.models import BadgeInstance
 from mainsite.drf_fields import Base64FileField
+from mainsite.serializers import StripTagsCharField
 from mainsite.utils import OriginSetting
 from verifier import ComponentsSerializer
 from verifier.badge_check import BadgeCheck
@@ -303,9 +304,9 @@ class CollectionBadgeSerializer(serializers.ModelSerializer):
 
 
 class CollectionSerializer(serializers.Serializer):
-    name = serializers.CharField(required=True, max_length=128)
-    slug = serializers.CharField(required=False, max_length=128)
-    description = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=255)
+    name = StripTagsCharField(required=True, max_length=128)
+    slug = StripTagsCharField(required=False, max_length=128)
+    description = StripTagsCharField(required=False, allow_blank=True, allow_null=True, max_length=255)
     share_hash = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=255)
     share_url = serializers.CharField(read_only=True, max_length=1024)
     badges = CollectionBadgeSerializer(

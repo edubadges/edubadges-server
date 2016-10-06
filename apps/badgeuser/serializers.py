@@ -1,9 +1,8 @@
 from django.conf import settings
-
 from rest_framework import serializers
-from rest_framework.authtoken.models import Token
 
-from .models import BadgeUser, CachedEmailAddress, EmailAddressVariant
+from mainsite.serializers import StripTagsCharField
+from .models import BadgeUser, CachedEmailAddress
 from .utils import notify_on_password_change
 
 
@@ -56,8 +55,8 @@ class UserProfileField(serializers.Serializer):
 
 class BadgeUserProfileSerializer(serializers.Serializer):
 
-    first_name = serializers.CharField(max_length=30, allow_blank=True)
-    last_name = serializers.CharField(max_length=30, allow_blank=True)
+    first_name = StripTagsCharField(max_length=30, allow_blank=True)
+    last_name = StripTagsCharField(max_length=30, allow_blank=True)
     email = serializers.EmailField()
     password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
 

@@ -9,6 +9,7 @@ from integrity_verifier import RemoteBadgeInstance, AnalyzedBadgeInstance
 from integrity_verifier.utils import get_instance_url_from_image, get_instance_url_from_assertion
 from credential_store.models import StoredBadgeInstance
 from credential_store.format import V1InstanceSerializer
+from mainsite.serializers import StripTagsCharField
 from mainsite.utils import installed_apps_list
 
 from .models import Collection, StoredBadgeInstanceCollection
@@ -168,9 +169,9 @@ class EarnerBadgeReferenceSerializer(serializers.Serializer):
 
 
 class CollectionSerializer(serializers.Serializer):
-    name = serializers.CharField(required=True, max_length=128)
-    slug = serializers.CharField(required=False, max_length=128)
-    description = serializers.CharField(required=False, max_length=255)
+    name = StripTagsCharField(required=True, max_length=128)
+    slug = StripTagsCharField(required=False, max_length=128)
+    description = StripTagsCharField(required=False, max_length=255)
     share_hash = serializers.CharField(required=False, max_length=255)
     share_url = serializers.CharField(read_only=True, max_length=1024)
     badges = serializers.ListField(

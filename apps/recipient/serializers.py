@@ -7,7 +7,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from issuer.models import Issuer
-from mainsite.serializers import LinkedDataReferenceField, LinkedDataEntitySerializer, LinkedDataReferenceList
+from mainsite.serializers import LinkedDataReferenceField, LinkedDataEntitySerializer, LinkedDataReferenceList, \
+    StripTagsCharField
 from mainsite.utils import OriginSetting
 from recipient.models import RecipientGroup, RecipientGroupMembership, RecipientProfile
 from pathway.models import Pathway
@@ -31,8 +32,8 @@ class RecipientGroupMembershipSerializer(LinkedDataEntitySerializer):
     jsonld_type = "RecipientGroupMembership"
 
     email = serializers.EmailField(write_only=True, source='recipient_identifier')
-    name = serializers.CharField(source='membership_name')
-    slug = serializers.CharField(source='recipient_profile.slug', read_only=True)
+    name = StripTagsCharField(source='membership_name')
+    slug = StripTagsCharField(source='recipient_profile.slug', read_only=True)
 
     def to_representation(self, instance):
         json = super(RecipientGroupMembershipSerializer, self).to_representation(instance)
@@ -101,9 +102,9 @@ class RecipientGroupMembershipListSerializer(serializers.Serializer):
 class RecipientGroupSerializer(LinkedDataEntitySerializer):
     jsonld_type = "RecipientGroup"
 
-    name = serializers.CharField(required=False)
-    description = serializers.CharField(required=False)
-    slug = serializers.CharField(read_only=True)
+    name = StripTagsCharField(required=False)
+    description = StripTagsCharField(required=False)
+    slug = StripTagsCharField(read_only=True)
     active = serializers.BooleanField(source='is_active', default=True)
     issuer = LinkedDataReferenceField(keys=['slug'], model=Issuer)
     member_count = serializers.IntegerField(read_only=True)

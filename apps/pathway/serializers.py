@@ -8,7 +8,7 @@ from rest_framework.exceptions import ValidationError
 
 from issuer.models import Issuer, BadgeClass
 from mainsite.serializers import JSONDictField, LinkedDataReferenceField, LinkedDataEntitySerializer, \
-    LinkedDataReferenceList
+    LinkedDataReferenceList, StripTagsCharField
 from mainsite.utils import ObjectView, OriginSetting
 from pathway.completionspec import CompletionRequirementSpecFactory
 from pathway.models import Pathway, PathwayElement
@@ -27,10 +27,10 @@ class PathwayListSerializer(serializers.Serializer):
 
 
 class PathwaySerializer(serializers.Serializer):
-    slug = serializers.CharField(read_only=True)
-    name = serializers.CharField(max_length=254, required=False)
-    description = serializers.CharField(required=False)
-    alignmentUrl = serializers.CharField(required=False, allow_null=True)
+    slug = StripTagsCharField(read_only=True)
+    name = StripTagsCharField(max_length=254, required=False)
+    description = StripTagsCharField(required=False)
+    alignmentUrl = StripTagsCharField(required=False, allow_null=True)
     issuer = LinkedDataReferenceField(keys=['slug'], model=Issuer, many=False, read_only=True)
     groups = LinkedDataReferenceList(
         required=False, read_only=False,
@@ -119,11 +119,11 @@ class PathwaySerializer(serializers.Serializer):
 
 
 class PathwayElementSerializer(LinkedDataEntitySerializer):
-    name = serializers.CharField()
-    slug = serializers.CharField(required=False)
-    description = serializers.CharField()
+    name = StripTagsCharField()
+    slug = StripTagsCharField(required=False)
+    description = StripTagsCharField()
     parent = serializers.CharField(required=False)
-    alignmentUrl = serializers.CharField(required=False, allow_null=True)
+    alignmentUrl = StripTagsCharField(required=False, allow_null=True)
     ordering = serializers.IntegerField(required=False, default=99)
     completionBadge = LinkedDataReferenceField(
         keys=['slug'],

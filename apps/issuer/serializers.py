@@ -8,7 +8,7 @@ from rest_framework import serializers
 from badgeuser.serializers import UserProfileField
 from composition.format import V1InstanceSerializer
 from mainsite.drf_fields import Base64FileField
-from mainsite.serializers import WritableJSONField, HumanReadableBooleanField
+from mainsite.serializers import WritableJSONField, HumanReadableBooleanField, StripTagsCharField
 from mainsite.utils import installed_apps_list, OriginSetting, verify_svg
 
 from .models import Issuer, BadgeClass
@@ -27,11 +27,11 @@ class AbstractComponentSerializer(serializers.Serializer):
 
 class IssuerSerializer(AbstractComponentSerializer):
     json = WritableJSONField(max_length=16384, read_only=True, required=False)
-    name = serializers.CharField(max_length=1024)
-    slug = serializers.CharField(max_length=255, allow_blank=True, required=False)
+    name = StripTagsCharField(max_length=1024)
+    slug = StripTagsCharField(max_length=255, allow_blank=True, required=False)
     image = Base64FileField(allow_empty_file=False, use_url=True, required=False)
     email = serializers.EmailField(max_length=255, required=True, write_only=True)
-    description = serializers.CharField(max_length=1024, required=True, write_only=True)
+    description = StripTagsCharField(max_length=1024, required=True, write_only=True)
     url = serializers.URLField(max_length=1024, required=True, write_only=True)
     # HyperlinkedRelatedField refuses to not hit the database, so this is done manually in to_representation
     # owner = serializers.HyperlinkedRelatedField(view_name='user_detail', lookup_field='username', read_only=True)
