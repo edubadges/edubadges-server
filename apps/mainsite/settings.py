@@ -50,10 +50,6 @@ INSTALLED_APPS = [
     'verifier',
     'pathway',
     'recipient',
-
-    # deprecated packages to remove in v1.2
-    'composer',
-    'credential_store',
 ]
 
 MIDDLEWARE_CLASSES = [
