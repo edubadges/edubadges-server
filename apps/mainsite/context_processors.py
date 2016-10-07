@@ -6,5 +6,6 @@ def extra_settings(request):
         'HELP_EMAIL': getattr(settings, 'HELP_EMAIL', 'help@badgr.io'),
         'PINGDOM_MONITORING_ID': getattr(settings, 'PINGDOM_MONITORING_ID', None),
         'GOOGLE_ANALYTICS_ID': getattr(settings, 'GOOGLE_ANALYTICS_ID', None),
-        'ARTIFACT_VERSION': getattr(settings, 'ARTIFACT_VERSION', 'noversionfound')
+        'ARTIFACT_VERSION': getattr(settings, 'ARTIFACT_VERSION', 'noversionfound'),
+        'PUBLIC_ASSET_URL': getattr(settings, 'PUBLIC_ASSET_URL', 'https://badgr.io/')
     }
