@@ -208,6 +208,8 @@ class BadgeClassImage(ImagePropertyDetailView):
 
 
 class BadgeClassCriteria(RedirectView):
+    permanent = False
+
     def get_redirect_url(self, *args, **kwargs):
         try:
             badge_class = BadgeClass.cached.get(slug=kwargs.get('slug'))

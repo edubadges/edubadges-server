@@ -1,10 +1,9 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from rest_framework.urlpatterns import format_suffix_patterns
 
 from .public_api import (IssuerJson, IssuerImage, BadgeClassJson,
                          BadgeClassImage, BadgeClassCriteria, BadgeInstanceJson,
                          BadgeInstanceImage)
-
 
 json_patterns = [
     url(r'^/issuers/(?P<slug>[-\w]+)$', IssuerJson.as_view(), name='issuer_json'),

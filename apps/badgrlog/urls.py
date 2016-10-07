@@ -1,7 +1,7 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 
 from .views import BadgrLogContextView
 
-urlpatterns = patterns('badgrlog.views',
+urlpatterns = [
     url(r'^v1$', BadgrLogContextView.as_view(), name='badgr_log_context'),
-)
+]

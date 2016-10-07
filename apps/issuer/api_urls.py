@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.views.generic.base import RedirectView
 
 from .api import (IssuerList, IssuerDetail, IssuerStaffList,
@@ -6,9 +6,7 @@ from .api import (IssuerList, IssuerDetail, IssuerStaffList,
                   BadgeInstanceDetail, FindBadgeClassDetail, IssuerBadgeInstanceList,
                   AllBadgeClassesList, BatchAssertions)
 
-
-urlpatterns = patterns(
-    'issuer.api_views',
+urlpatterns = [
     url(r'^$', RedirectView.as_view(url='/v1/issuer/issuers', permanent=False)),
     url(r'^/all-badges$', AllBadgeClassesList.as_view(), name='issuer_all_badges_list'),
     url(r'^/all-badges/find$', FindBadgeClassDetail.as_view(), name='find_badgeclass_by_identifier'),
@@ -25,4 +23,4 @@ urlpatterns = patterns(
 
     url(r'^/issuers/(?P<issuerSlug>[-\w]+)/badges/(?P<badgeSlug>[-\w]+)/assertions$', BadgeInstanceList.as_view(), name='badgeinstance_list'),
     url(r'^/issuers/(?P<issuerSlug>[-\w]+)/badges/(?P<badgeSlug>[-\w]+)/assertions/(?P<assertionSlug>[-\w]+)$', BadgeInstanceDetail.as_view(), name='badgeinstance_detail'),
-)
+]

@@ -1,7 +1,7 @@
 # Django stuff
-Django==1.7.1
-semver==2.2.1
-pytz==2014.7
+Django==1.8.15
+semver==2.6.0
+pytz==2016.7
 # PIL support
 Pillow>=2.6.1,<3
 
@@ -23,9 +23,9 @@ git+https://github.com/concentricsky/django-ismigrated.git@v0.1.7
 
 django-object-actions==0.8.2
 
-python-memcached==1.53
+python-memcached==1.58
 
-djangorestframework==3.1.1
+djangorestframework==3.4.7
 django-rest-swagger==0.3.5
 
 # Django Allauth
@@ -60,8 +60,8 @@ git+https://github.com/concentricsky/python-randomnames@v1.0.3
 # Badgr related utilities
 openbadges-bakery==0.4
 
-celery==3.1.18
-django-celery==3.1.16
+celery==3.1.24
+django-celery==3.1.17
 python-json-logger==0.1.2
 
 # SSL Support
