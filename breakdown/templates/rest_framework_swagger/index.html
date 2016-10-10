@@ -1,17 +1,16 @@
 {% extends "rest_framework_swagger/base.html" %}
 
 {% block style %}
-	<link href="{{ STATIC_URL }}public/css/reset.css" media="screen" rel="stylesheet" type="text/css" >
 	{{ block.super }}
-	<link href="{{ STATIC_URL }}public/css/screen.css" media="screen" rel="stylesheet" type="text/css" >
+	<link href="{{ PUBLIC_ASSET_URL }}styles.9c2b9739d2ba72513bfb.css" rel="stylesheet"></head>
 {% endblock %}
 
 {% block header %}
 	<header class="header l-containerhorizontal">
-		<a href="https://badgr.io/">
+		<a href="{{ PUBLIC_ASSET_URL }}">
 			<picture>
-				<source media="(min-width: 640px)" srcset="{{ STATIC_URL }}public/images/logo-desktop.svg">
-				<img src="{{ STATIC_URL }}public/images/logo.svg" alt="Badgr logo">
+				<source media="(min-width: 640px)" srcset="{{ PUBLIC_ASSET_URL }}assets/logo-desktop-e55954f3168b409add64d59c5d819af8.svg">
+				<img alt="Badgr logo" src="{{ PUBLIC_ASSET_URL }}assets/logo-744102c31adbbf042736c4fdfdcb2778.svg">
 			</picture>
 		</a>
 		<a class="header-x-menu" href="javascript:void(0)" onclick="document.getElementById('menu').scrollIntoView(false)">Main Navigation</a>
@@ -22,6 +21,7 @@
 {% endblock %}
 
 {% block body %}
+<app>
 	{{ block.super }}
 
 	<nav class="menu" id="menu">
@@ -34,5 +34,5 @@
 			{% endif %}
 		</ul>
 	</nav>
-
+</app>
 {% endblock %}

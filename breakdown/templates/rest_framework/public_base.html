@@ -14,7 +14,6 @@
 		<title>{% block title %}Badgr REST framework{% endblock %}</title>
 
 		{% block style %}
-			<link href="{{ STATIC_URL }}public/css/reset.css" media="screen" rel="stylesheet" type="text/css" >
 
 			{% block bootstrap_theme %}
 				<link rel="stylesheet" type="text/css" href="{% static "rest_framework/css/bootstrap.min.css" %}"/>
@@ -23,10 +22,13 @@
 			<link rel="stylesheet" type="text/css" href="{% static "rest_framework/css/prettify.css" %}"/>
 			<link rel="stylesheet" type="text/css" href="{% static "rest_framework/css/default.css" %}"/>
 
-			<link href="{{ STATIC_URL }}public/css/screen.css" media="screen" rel="stylesheet" type="text/css" >
+			<link href="{{ PUBLIC_ASSET_URL }}styles.9c2b9739d2ba72513bfb.css" rel="stylesheet"></head>
 			<style>
 			ul.breadcrumb {
-				margin:0;
+				margin:0 0 1em 0;
+			}
+			.request-info {
+				padding: 1em 0 1em 0;
 			}
 			</style>
 		{% endblock %}
@@ -36,39 +38,22 @@
 
 {% block body %}
 <body class="{% block bodyclass %}{% endblock %}">
+<app>
 
 
 {% block navbar %}
 	<header class="header l-containerhorizontal">
-		<a href="https://badgr.io/">
+		<a href="{{ PUBLIC_ASSET_URL }}">
 			<picture>
-				<source media="(min-width: 640px)" srcset="{{ STATIC_URL }}public/images/logo-desktop.svg">
-				<img src="{{ STATIC_URL }}public/images/logo.svg" alt="Badgr logo">
+				<source media="(min-width: 640px)" srcset="{{ PUBLIC_ASSET_URL }}assets/logo-desktop-e55954f3168b409add64d59c5d819af8.svg">
+				<img alt="Badgr logo" src="{{ PUBLIC_ASSET_URL }}assets/logo-744102c31adbbf042736c4fdfdcb2778.svg">
 			</picture>
 		</a>
 		<a class="header-x-menu" href="javascript:void(0)" onclick="document.getElementById('menu').scrollIntoView(false)">Main Navigation</a>
 	</header>
-{#	<div class="navbar navbar-static-top {% block bootstrap_navbar_variant %}navbar-inverse{% endblock %}">#}
-{#		<div class="container">#}
-{#                        <span>#}
-{#                            {% block branding %}#}
-{#	                            <a class='navbar-brand' rel="nofollow" href='http://www.django-rest-framework.org'>#}
-{#                                    Django REST framework <span class="version">{{ version }}</span>#}
-{#                                </a>#}
-{#                            {% endblock %}#}
-{#                        </span>#}
-{#			<ul class="nav navbar-nav pull-right">#}
-{#				{% block userlinks %}#}
-{#					{% if user.is_authenticated %}#}
-{#						{% optional_logout request user %}#}
-{#					{% else %}#}
-{#						{% optional_login request %}#}
-{#					{% endif %}#}
-{#				{% endblock %}#}
-{#			</ul>#}
-{#		</div>#}
-{#	</div>#}
 {% endblock %}
+
+<main>
 
 <div class="container">
 	{% block breadcrumbs %}
@@ -264,6 +249,9 @@
 	<!-- END Content -->
 </div><!-- /.container -->
 
+</main>
+
+
 <nav class="menu" id="menu">
 	<h1 class="visuallyhidden">Main Navigation</h1>
 	<ul>
@@ -281,6 +269,7 @@
 	<script src="{% static "rest_framework/js/prettify-min.js" %}"></script>
 	<script src="{% static "rest_framework/js/default.js" %}"></script>
 {% endblock %}
+</app>
 </body>
 {% endblock %}
 </html>
