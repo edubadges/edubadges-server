@@ -1,59 +1,59 @@
 <!doctype html>
 <html prefix="og: http://ogp.me/ns#">
-<head>
-	<meta charset="utf-8">
-	<meta http-equiv="x-ua-compatible" content="ie=edge">
-	<title>{% block page_title %}{% endblock %} - Badgr</title>
-	<meta name="description" content="">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="x-ua-compatible" content="ie=edge">
+		<title>{% block page_title %}{% endblock %} - Badgr</title>
+		<meta name="description" content="">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 
-	<link rel="apple-touch-icon" href="apple-touch-icon.png">
-	<!-- Place favicon.ico in the root directory -->
+		<link rel="icon" type="image/png" sizes="32x32" href="{{ PUBLIC_ASSET_URL }}assets/icon/icon_favicon.png">
+		<link rel="shortcut icon" href="{{ PUBLIC_ASSET_URL }}assets/icon/favicon.ico">
+		<link rel="apple-touch-icon" href="{{ PUBLIC_ASSET_URL }}assets/icon/icon_apple_touch.png">
 
-	<link href="{{ STATIC_URL }}public/css/dialog-polyfill.css" media="screen" rel="stylesheet" type="text/css" >
-	<link href="{{ STATIC_URL }}public/css/reset.css" media="screen" rel="stylesheet" type="text/css" >
-	<link href="{{ STATIC_URL }}public/css/screen.css" media="screen" rel="stylesheet" type="text/css" >
+		<link href="{{ PUBLIC_ASSET_URL }}styles.9c2b9739d2ba72513bfb.css" rel="stylesheet"></head>
 
-	{% block extra_head %}
-	{% endblock %}
-</head>
-<body>
-
-	<header class="header l-containerhorizontal">
-		<a href="https://badgr.io/">
-			<picture>
-				<source media="(min-width: 640px)" srcset="{{ STATIC_URL }}public/images/logo-desktop.svg">
-				<img src="{{ STATIC_URL }}public/images/logo.svg" alt="Badgr logo">
-			</picture>
-		</a>
-		<a class="header-x-menu" href="javascript:void(0)" onclick="document.getElementById('menu').scrollIntoView(false)">Main Navigation</a>
-	</header>
-
-	<main>
-
-		{% block content %}
+		{% block extra_head %}
 		{% endblock %}
+	</head>
 
-	</main>
+	<body>
 
-	<footer class="wrap l-containerhorizontal">
-		<div class="footer">
-			<ul>
-				<li>Copyright &copy; {{ copyrightYear }} <a href="https://concentricsky.com" target="_blank">Concentric Sky, Inc.</a></li>
-				<li>Powered by <a href="https://github.com/concentricsky/badgr-server" target="_blank">Badgr</a></li>
-			</ul>
-			<a href="https://badgr.io/docs/" target="_blank">API documentation</a>
-		</div>
-	</footer>
+		<header class="header l-containerhorizontal">
+			<a href="{{ PUBLIC_ASSET_URL }}">
+				<picture>
+					<source media="(min-width: 640px)" srcset="{{ PUBLIC_ASSET_URL }}assets/logo-desktop-e55954f3168b409add64d59c5d819af8.svg">
+					<img alt="Badgr logo" src="{{ PUBLIC_ASSET_URL }}assets/logo-744102c31adbbf042736c4fdfdcb2778.svg">
+				</picture>
+			</a>
+			<a class="header-x-menu" href="javascript:void(0)" onclick="document.getElementById('menu').scrollIntoView(false)">Main Navigation</a>
+		</header>
 
-	<nav class="menu" id="menu">
-		<h1 class="visuallyhidden">Main Navigation</h1>
-		<ul>
-			{% block navigation_items_ui %}
-			<li class="menuitem" ><a href="https://badgr.io/login">Sign In</a></li>
-			<li class="menuitem" ><a href="https://badgr.io/signup">Sign Up</a></li>
+		<main>
+			{% block content %}
 			{% endblock %}
-		</ul>
-	</nav>
+		</main>
 
-</body>
+		<footer class="wrap l-containerhorizontal">
+			<div class="footer">
+				<ul>
+					<li>Copyright &copy; {{ copyrightYear }} <a href="https://concentricsky.com" target="_blank">Concentric Sky, Inc.</a></li>
+					<li>Powered by <a href="https://github.com/concentricsky/badgr-server" target="_blank">Badgr</a></li>
+				</ul>
+				<a href="https://badgr.io/docs/" target="_blank">API documentation</a>
+			</div>
+		</footer>
+
+		<nav class="menu" id="menu">
+			<h1 class="visuallyhidden">Main Navigation</h1>
+			<ul>
+				{% block navigation_items_ui %}
+				<li class="menuitem" ><a href="https://badgr.io/login">Sign In</a></li>
+				<li class="menuitem" ><a href="https://badgr.io/signup">Sign Up</a></li>
+				{% endblock %}
+			</ul>
+		</nav>
+
+	</body>
+
+</html>
