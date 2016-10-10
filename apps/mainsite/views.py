@@ -1,26 +1,19 @@
 import base64
 import time
 
-from django.db import IntegrityError
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseServerError, HttpResponseNotFound
-from django.shortcuts import redirect, render_to_response
+from django.shortcuts import redirect
 from django.template import loader, TemplateDoesNotExist, Context
-from django.template.response import SimpleTemplateResponse
 from django.views.decorators.clickjacking import xframe_options_exempt
-from django.views.generic import TemplateView
 from rest_framework.permissions import AllowAny
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.views import APIView
 
 from .models import EmailBlacklist
-
-
-class SitemapView(TemplateView):
-    template_name = 'sitemap.html'
 
 
 ##
@@ -31,7 +24,7 @@ class SitemapView(TemplateView):
 @xframe_options_exempt
 def error404(request):
     try:
-        template = loader.get_template('404.html')
+        template = loader.get_template('error/404.html')
     except TemplateDoesNotExist:
         return HttpResponseServerError('<h1>Page not found (404)</h1>', content_type='text/html')
     return HttpResponseNotFound(template.render(Context({
@@ -42,7 +35,7 @@ def error404(request):
 @xframe_options_exempt
 def error500(request):
     try:
-        template = loader.get_template('500.html')
+        template = loader.get_template('error/500.html')
     except TemplateDoesNotExist:
         return HttpResponseServerError('<h1>Server Error (500)</h1>', content_type='text/html')
     return HttpResponseServerError(template.render(Context({

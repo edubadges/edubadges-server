@@ -30,8 +30,3 @@ class Command(BaseCommand):
             ret = call(['grunt', '--gruntfile', gruntfile_path, 'dist'], cwd=badgebook_dir)
             if ret != 0:
                 raise CommandError("badgebook grunt dist failed")
-
-        ret = call(['grunt', 'dist'])
-        if ret != 0:
-            raise CommandError("grunt dist failed")
-        #management.call_command('test', verbosity=1)

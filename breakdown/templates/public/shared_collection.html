@@ -1,4 +1,3 @@
-
 {% extends "public/base.html" %}
 
 {% block content %}
@@ -15,7 +14,7 @@
 
 	<div class="wrap l-containerhorizontal l-headeredsection">
 		<header class="l-childrenhorizontal l-childrenhorizontal-spacebetween l-childrenhorizontal-spacebetween">
-			<h2 class="title title-is-smallmobile">{{ collection.badges.all().count() }} Badges</h2>
+			<h2 class="title title-is-smallmobile">{{ collection.badges.all|length }} Badges</h2>
 		</header>
 
 		<div class="l-overflowhorizontal">
@@ -28,18 +27,18 @@
 					</tr>
 				</thead>
 				<tbody>
-					{% for entry in collection.badges.all() %}
+					{% for entry in collection.badges.all %}
 					<tr>
 						<th>
 							<div class="l-childrenhorizontal l-childrenhorizontal-small">
 								<div class="badge badge-flat">
-									<img alt="{{ entry.badge_instance.cached_badgeclass.name }} Badge" src="{{ entry.badge_instance.image_url() }}" width="40">
+									<img alt="{{ entry.badge_instance.cached_badgeclass.name }} Badge" src="{{ entry.badge_instance.image_url }}" width="40">
 								</div>
 								<a href="{{ entry.badge_instance.shareUrl }}">{{ entry.badge_instance.cached_badgeclass.name }}</a>
 							</div>
 						</th>
-						<td><a target="_blank" href="{{ entry.badge_instance.cached_issuer.json.get('url') }}">{{ entry.badge_instance.cached_issuer.name }}</a></td>
-						<td>{{ entry.badge_instance.json.get('issuedOn') }}</td>
+						<td><a target="_blank" href="{{ entry.badge_instance.cached_issuer.json.url }}">{{ entry.badge_instance.cached_issuer.name }}</a></td>
+						<td>{{ entry.badge_instance.json.issuedOn }}</td>
 					</tr>
 					{% endfor %}
 				</tbody>

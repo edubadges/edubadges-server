@@ -29,16 +29,6 @@ INSTALLED_APPS = [
     'allauth.account',
     'corsheaders',
 
-    # 'skycms.structure',
-    'reversion',
-    'jingo',
-    # 'djangosphinx',
-    # 'sky_thumbnails',
-    # 'ckeditor',
-    # 'sky_redirects',
-    # 'emailtemplates',
-    # 'sky_visitor',
-
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',
@@ -50,10 +40,6 @@ INSTALLED_APPS = [
     'verifier',
     'pathway',
     'recipient',
-
-    # deprecated packages to remove in v1.2
-    'composer',
-    'credential_store',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -86,7 +72,6 @@ ALLOWED_HOSTS = ['*', ]
 ##
 
 TEMPLATE_LOADERS = [
-    'jingo.Loader',
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
 ]
@@ -107,18 +92,6 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'mainsite.context_processors.extra_settings'
 ]
 
-JINGO_EXCLUDE_APPS = (
-    'admin',
-    'registration',
-    'debug_toolbar',
-    'ckeditor',
-    'reversion',
-    'rest_framework',
-    'allauth',
-    'account',
-    'rest_framework_swagger',
-    'django_object_actions'
-)
 
 
 ##
@@ -146,7 +119,7 @@ STATICFILES_DIRS = [
 
 AUTH_USER_MODEL = 'badgeuser.BadgeUser'
 LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/earner'
+LOGIN_REDIRECT_URL = '/docs'
 
 AUTHENTICATION_BACKENDS = [
     # Object permissions for issuing badges

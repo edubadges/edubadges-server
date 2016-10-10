@@ -20,7 +20,7 @@
 <body>
 
 	<header class="header l-containerhorizontal">
-		<a href="/">
+		<a href="https://badgr.io/">
 			<picture>
 				<source media="(min-width: 640px)" srcset="{{ STATIC_URL }}public/images/logo-desktop.svg">
 				<img src="{{ STATIC_URL }}public/images/logo.svg" alt="Badgr logo">
@@ -49,8 +49,10 @@
 	<nav class="menu" id="menu">
 		<h1 class="visuallyhidden">Main Navigation</h1>
 		<ul>
+			{% block navigation_items_ui %}
 			<li class="menuitem" ><a href="https://badgr.io/login">Sign In</a></li>
 			<li class="menuitem" ><a href="https://badgr.io/signup">Sign Up</a></li>
+			{% endblock %}
 		</ul>
 	</nav>
 

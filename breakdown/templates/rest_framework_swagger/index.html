@@ -1,80 +1,38 @@
-{% load staticfiles %}
-{% spaceless %}
-<!DOCTYPE html>
-<html>
-<head>
-  <meta name="viewport" content="width=device-width initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-  <title>
-    Swagger UI
-  </title>
-  <link href='//fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'/>
-  <link href='{% static "rest_framework_swagger/css/highlight.default.css" %}' media='screen' rel='stylesheet' type='text/css'/>
-  <link href='{% static "rest_framework_swagger/css/atelier-dune.light.css" %}' media='screen' rel='stylesheet' type='text/css'/>
-  <link href='{% static "rest_framework_swagger/css/rest_framework_swagger.css" %}' media='screen' rel='stylesheet' type='text/css'/>
-  <link href='{% static "rest_framework_swagger/css/screen.css" %}' media='screen' rel='stylesheet' type='text/css'/>
-</head>
+{% extends "rest_framework_swagger/base.html" %}
 
-<body>
-  <header>
-  <h1>Badgr Server API</h1>
-  </header>
+{% block style %}
+	<link href="{{ STATIC_URL }}public/css/reset.css" media="screen" rel="stylesheet" type="text/css" >
+	{{ block.super }}
+	<link href="{{ STATIC_URL }}public/css/screen.css" media="screen" rel="stylesheet" type="text/css" >
+{% endblock %}
 
-  <div id="message-bar" class="swagger-ui-wrap">
-    &nbsp;
-  </div>
-  <div id="swagger-ui-container" class="swagger-ui-wrap">
+{% block header %}
+	<header class="header l-containerhorizontal">
+		<a href="https://badgr.io/">
+			<picture>
+				<source media="(min-width: 640px)" srcset="{{ STATIC_URL }}public/images/logo-desktop.svg">
+				<img src="{{ STATIC_URL }}public/images/logo.svg" alt="Badgr logo">
+			</picture>
+		</a>
+		<a class="header-x-menu" href="javascript:void(0)" onclick="document.getElementById('menu').scrollIntoView(false)">Main Navigation</a>
+	</header>
+{% endblock %}
 
-  </div>
+{% block django_rest_swagger %}
+{% endblock %}
 
-  <script>
-    window.static_url = '{{STATIC_URL}}';
-  </script>
-  <script src="{% static 'rest_framework_swagger/lib/shred.bundle.js' %}" type="text/javascript"></script>
-  <script src='{% static "rest_framework_swagger/lib/jquery-1.8.0.min.js" %}' type='text/javascript'></script>
-  <script src='{% static "rest_framework_swagger/lib/jquery.slideto.min.js" %}' type='text/javascript'></script>
-  <script src='{% static "rest_framework_swagger/lib/jquery.wiggle.min.js" %}' type='text/javascript'></script>
-  <script src='{% static "rest_framework_swagger/lib/jquery.ba-bbq.min.js" %}' type='text/javascript'></script>
-  <script src='{% static "rest_framework_swagger/lib/jquery.cookie.js" %}' type='text/javascript'></script>
-  <script src='{% static "rest_framework_swagger/lib/handlebars-1.0.0.js" %}' type='text/javascript'></script>
-  <script src='{% static "rest_framework_swagger/lib/underscore-min.js" %}' type='text/javascript'></script>
-  <script src='{% static "rest_framework_swagger/lib/backbone-min.js" %}' type='text/javascript'></script>
-  <script src='{% static "rest_framework_swagger/lib/swagger.js" %}' type='text/javascript'></script>
-  <script src='{% static "rest_framework_swagger/swagger-ui.min.js" %}' type='text/javascript'></script>
-  <script src='{% static "rest_framework_swagger/lib/highlight.8.0.pack.js" %}' type='text/javascript'></script>
-  <script type="text/javascript">
-    $(function () {
-      window.swaggerUi = new SwaggerUi({
-      url: "{{ swagger_settings.discovery_url }}",
-      apiKey: "{{ swagger_settings.api_key }}",
-      dom_id: "swagger-ui-container",
-      supportedSubmitMethods: {{ swagger_settings.enabled_methods }},
-      onComplete: function(swaggerApi, swaggerUi){
-        log("Loaded SwaggerUI")
-        $('pre code').each(function(i, e) {hljs.highlightBlock(e)});
-      },
-      onFailure: function(data) {
-        log("Unable to Load SwaggerUI");
-      },
-      docExpansion: "{{ swagger_settings.doc_expansion }}",
-    });
+{% block body %}
+	{{ block.super }}
 
-    $('#input_apiKey').change(function() {
-      var key = $('#input_apiKey')[0].value;
-      log("key: " + key);
-      if(key && key.trim() != "") {
-        console.log("added key " + key);
-        window.authorizations.add("key", new ApiKeyAuthorization("Authorization", "{{ swagger_settings.token_type }} " + key, "header"));
-      }
-    })
-    {% if swagger_settings.api_key %}
-      window.authorizations.add("key", new ApiKeyAuthorization("Authorization", "{{ swagger_settings.token_type }} " + "{{ swagger_settings.api_key }}", "header"));
-    {% endif %}
-    window.swaggerUi.load();
-  });
+	<nav class="menu" id="menu">
+		<h1 class="visuallyhidden">Main Navigation</h1>
+		<ul>
+			{% if user.is_authenticated %}
+				<li class="menuitem" ><a href="{% url "logout"%}">{{ user.email }}</a></li>
+			{% else %}
+				<li class="menuitem" ><a href="{% url "login"%}?next={{ request.path }}">Sign In</a></li>
+			{% endif %}
+		</ul>
+	</nav>
 
-  </script>
-
-</body>
-
-</html>
-{% endspaceless %}
+{% endblock %}

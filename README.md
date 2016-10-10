@@ -3,7 +3,7 @@
 
 Badgr Server is a web application for issuing [Open Badges](http://openbadges.org). In addition to a powerful Issuer API and browser-based user interface for issuing, Badgr offers integrated badge management and sharing for badge earners. Free accounts are hosted by Concentric Sky at [Badgr.io](http://info.badgr.io), but for complete control over your own issuing environment, Badgr Server is available open source as a Python/Django application.
 
-*Version: 1.1.2*
+*Version: 1.3.x*
 
 ## How to get started on your local development environment.
 Prerequisites:
@@ -11,9 +11,6 @@ Prerequisites:
 * git
 * python 2.7.x
 * virtualenv
-* npm
-* grunt, grunt-cli
-* sass (requires ruby)
 * mysql
 * [cairo](https://www.cairographics.org/download/) (SVG utility)
   
@@ -56,7 +53,6 @@ badgr
 *from within code directory* 
 
 * `pip install -r requirements-dev.txt`
-* `npm install`
 
 ### Customize local settings to your environment
 * `cp apps/mainsite/settings_local.py.example apps/mainsite/settings_local.py`
@@ -64,7 +60,6 @@ badgr
 
 ### Migrate databases, build front-end components
 * `./manage.py migrate`
-* `grunt dist` *or `grunt watch` for local development
 * `./manage.py createsuperuser` *follow prompts to create your first admin user account*
 
 ### Run a server locally for development
