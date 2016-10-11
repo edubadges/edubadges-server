@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from rest_framework import serializers
 
@@ -49,7 +50,7 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
             representation['id'] = obj.slug
             representation['json'] = V1BadgeInstanceSerializer(obj, context=self.context).data
             if obj.image:
-                representation['image'] = obj.image.url
+                representation['image'] = getattr(settings, 'MEDIA_URL') + obj.image.name
 
         representation['shareUrl'] = OriginSetting.HTTP+reverse('shared_badge', kwargs={'badge_id': obj.slug})
 
