@@ -48,6 +48,8 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
         elif isinstance(obj, BadgeInstance):
             representation['id'] = obj.slug
             representation['json'] = V1BadgeInstanceSerializer(obj, context=self.context).data
+            if obj.image:
+                representation['image'] = obj.image.url
 
         representation['shareUrl'] = OriginSetting.HTTP+reverse('shared_badge', kwargs={'badge_id': obj.slug})
 
