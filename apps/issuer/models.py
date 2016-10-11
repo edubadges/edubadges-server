@@ -210,6 +210,12 @@ class BadgeInstance(AbstractBadgeInstance):
 
         return extended_json
 
+    def image_url(self):
+        if getattr(settings, 'MEDIA_URL').startswith('http'):
+            return default_storage.url(self.image.name)
+        else:
+            return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
+
     @property
     def share_url(self):
         return OriginSetting.HTTP+reverse('shared_badge', kwargs={'badge_id': self.slug})
