@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="80px" height="80px" viewBox="0 0 80 80" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.8.3 (29802) - http://www.bohemiancoding.com/sketch -->
+    <title>placeholderavatar</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <rect id="path-1" x="0" y="2.08166817e-17" width="80" height="79.9985451" rx="6"></rect>
+        <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="80" height="79.9985451" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <polygon id="path-3" points="8.90369957 0.121018182 0.0111271951 0.121018182 0.0111271951 9.1351408 8.90369957 9.1351408 8.90369957 0.121018182"></polygon>
+    </defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Placeholder-/-Badge">
+            <g id="image">
+                <use id="bounds" stroke="#E1E0E5" mask="url(#mask-2)" stroke-width="4" xlink:href="#path-1"></use>
+                <g id="icon" opacity="0.299999982" transform="translate(16.000000, 24.000000)">
+                    <polygon id="Fill-1" fill="#CCCCCC" points="20.0239535 25.7224903 13.0616611 15.683177 -8.54295176e-05 32.3525115 26.1234077 32.3525115 26.091158 32.306399 47.7753061 32.306399 30.8660275 10.0886299"></polygon>
+                    <g id="Group-4" transform="translate(8.542952, 0.095472)">
+                        <mask id="mask-4" fill="white">
+                            <use xlink:href="#path-3"></use>
+                        </mask>
+                        <g id="Clip-3"></g>
+                        <path d="M8.90369957,4.62802537 C8.90369957,7.11723298 6.91297817,9.1351408 4.4573066,9.1351408 C2.0018486,9.1351408 0.0111271951,7.11723298 0.0111271951,4.62802537 C0.0111271951,2.13881776 2.0018486,0.120909937 4.4573066,0.120909937 C6.91297817,0.120909937 8.90369957,2.13881776 8.90369957,4.62802537" id="Fill-2" fill="#CCCCCC" mask="url(#mask-4)"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

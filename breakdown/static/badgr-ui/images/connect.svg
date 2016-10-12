@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="40px" height="40px" viewBox="0 0 40 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 40.1 (33804) - http://www.bohemiancoding.com/sketch -->
+    <title>Add Completion Badge Icons</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M36,12 C24.96,12 16,20.96 16,32 C16,43.04 24.96,52 36,52 C47.04,52 56,43.04 56,32 C56,20.96 47.04,12 36,12 L36,12 Z M46,34 L38,34 L38,42 L34,42 L34,34 L26,34 L26,30 L34,30 L34,22 L38,22 L38,30 L46,30 L46,34 L46,34 Z" id="path-1"></path>
+        <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="40" height="40" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+    </defs>
+    <g id="Issuer:-Pathways" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" fill-opacity="0.12">
+        <g id="HD---Pathway-Detail---Move-1" transform="translate(-919.000000, -391.000000)" stroke-width="2" stroke="#C30A28" fill="#C30A28">
+            <g id="header">
+                <g id="sidebar" transform="translate(903.000000, 180.000000)">
+                    <g id="Subscribed-Groups---Filled" transform="translate(0.000000, 168.000000)">
+                        <g id="group" transform="translate(0.000000, 31.000000)">
+                            <use id="Add-Completion-Badge-Icons" mask="url(#mask-2)" xlink:href="#path-1"></use>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

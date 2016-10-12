@@ -1,0 +1,7708 @@
+/*!
+ *  Font Awesome 4.6.3 by @davegandy - http://fontawesome.io - @fontawesome
+ *  License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License)
+ */
+/* FONT PATH
+ * -------------------------- */
+@font-face {
+  font-family: 'FontAwesome';
+  src: url(assets/fontawesome-webfont-25a32416abee198dd821b0b17a198a8f.eot);
+  src: url(assets/fontawesome-webfont-25a32416abee198dd821b0b17a198a8f.eot?#iefix&v=4.6.3) format('embedded-opentype'), url(assets/fontawesome-webfont-e6cf7c6ec7c2d6f670ae9d762604cb0b.woff2) format('woff2'), url(assets/fontawesome-webfont-c8ddf1e5e5bf3682bc7bebf30f394148.woff) format('woff'), url(assets/fontawesome-webfont-1dc35d25e61d819a9c357074014867ab.ttf) format('truetype'), url(assets/fontawesome-webfont-46661d6d65debc63884004fed6e37e5c.svg#fontawesomeregular) format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+.fa {
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+/* makes the font 33% larger relative to the icon container */
+.fa-lg {
+  font-size: 1.33333333em;
+  line-height: 0.75em;
+  vertical-align: -15%;
+}
+.fa-2x {
+  font-size: 2em;
+}
+.fa-3x {
+  font-size: 3em;
+}
+.fa-4x {
+  font-size: 4em;
+}
+.fa-5x {
+  font-size: 5em;
+}
+.fa-fw {
+  width: 1.28571429em;
+  text-align: center;
+}
+.fa-ul {
+  padding-left: 0;
+  margin-left: 2.14285714em;
+  list-style-type: none;
+}
+.fa-ul > li {
+  position: relative;
+}
+.fa-li {
+  position: absolute;
+  left: -2.14285714em;
+  width: 2.14285714em;
+  top: 0.14285714em;
+  text-align: center;
+}
+.fa-li.fa-lg {
+  left: -1.85714286em;
+}
+.fa-border {
+  padding: .2em .25em .15em;
+  border: solid 0.08em #eeeeee;
+  border-radius: .1em;
+}
+.fa-pull-left {
+  float: left;
+}
+.fa-pull-right {
+  float: right;
+}
+.fa.fa-pull-left {
+  margin-right: .3em;
+}
+.fa.fa-pull-right {
+  margin-left: .3em;
+}
+/* Deprecated as of 4.4.0 */
+.pull-right {
+  float: right;
+}
+.pull-left {
+  float: left;
+}
+.fa.pull-left {
+  margin-right: .3em;
+}
+.fa.pull-right {
+  margin-left: .3em;
+}
+.fa-spin {
+  -webkit-animation: fa-spin 2s infinite linear;
+  animation: fa-spin 2s infinite linear;
+}
+.fa-pulse {
+  -webkit-animation: fa-spin 1s infinite steps(8);
+  animation: fa-spin 1s infinite steps(8);
+}
+@-webkit-keyframes fa-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+@keyframes fa-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+.fa-rotate-90 {
+  -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=1)";
+  -webkit-transform: rotate(90deg);
+  transform: rotate(90deg);
+}
+.fa-rotate-180 {
+  -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=2)";
+  -webkit-transform: rotate(180deg);
+  transform: rotate(180deg);
+}
+.fa-rotate-270 {
+  -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=3)";
+  -webkit-transform: rotate(270deg);
+  transform: rotate(270deg);
+}
+.fa-flip-horizontal {
+  -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=0, mirror=1)";
+  -webkit-transform: scale(-1, 1);
+  transform: scale(-1, 1);
+}
+.fa-flip-vertical {
+  -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=2, mirror=1)";
+  -webkit-transform: scale(1, -1);
+  transform: scale(1, -1);
+}
+:root .fa-rotate-90,
+:root .fa-rotate-180,
+:root .fa-rotate-270,
+:root .fa-flip-horizontal,
+:root .fa-flip-vertical {
+  -webkit-filter: none;
+          filter: none;
+}
+.fa-stack {
+  position: relative;
+  display: inline-block;
+  width: 2em;
+  height: 2em;
+  line-height: 2em;
+  vertical-align: middle;
+}
+.fa-stack-1x,
+.fa-stack-2x {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  text-align: center;
+}
+.fa-stack-1x {
+  line-height: inherit;
+}
+.fa-stack-2x {
+  font-size: 2em;
+}
+.fa-inverse {
+  color: #ffffff;
+}
+/* Font Awesome uses the Unicode Private Use Area (PUA) to ensure screen
+   readers do not read off random characters that represent icons */
+.fa-glass:before {
+  content: "\F000";
+}
+.fa-music:before {
+  content: "\F001";
+}
+.fa-search:before {
+  content: "\F002";
+}
+.fa-envelope-o:before {
+  content: "\F003";
+}
+.fa-heart:before {
+  content: "\F004";
+}
+.fa-star:before {
+  content: "\F005";
+}
+.fa-star-o:before {
+  content: "\F006";
+}
+.fa-user:before {
+  content: "\F007";
+}
+.fa-film:before {
+  content: "\F008";
+}
+.fa-th-large:before {
+  content: "\F009";
+}
+.fa-th:before {
+  content: "\F00A";
+}
+.fa-th-list:before {
+  content: "\F00B";
+}
+.fa-check:before {
+  content: "\F00C";
+}
+.fa-remove:before,
+.fa-close:before,
+.fa-times:before {
+  content: "\F00D";
+}
+.fa-search-plus:before {
+  content: "\F00E";
+}
+.fa-search-minus:before {
+  content: "\F010";
+}
+.fa-power-off:before {
+  content: "\F011";
+}
+.fa-signal:before {
+  content: "\F012";
+}
+.fa-gear:before,
+.fa-cog:before {
+  content: "\F013";
+}
+.fa-trash-o:before {
+  content: "\F014";
+}
+.fa-home:before {
+  content: "\F015";
+}
+.fa-file-o:before {
+  content: "\F016";
+}
+.fa-clock-o:before {
+  content: "\F017";
+}
+.fa-road:before {
+  content: "\F018";
+}
+.fa-download:before {
+  content: "\F019";
+}
+.fa-arrow-circle-o-down:before {
+  content: "\F01A";
+}
+.fa-arrow-circle-o-up:before {
+  content: "\F01B";
+}
+.fa-inbox:before {
+  content: "\F01C";
+}
+.fa-play-circle-o:before {
+  content: "\F01D";
+}
+.fa-rotate-right:before,
+.fa-repeat:before {
+  content: "\F01E";
+}
+.fa-refresh:before {
+  content: "\F021";
+}
+.fa-list-alt:before {
+  content: "\F022";
+}
+.fa-lock:before {
+  content: "\F023";
+}
+.fa-flag:before {
+  content: "\F024";
+}
+.fa-headphones:before {
+  content: "\F025";
+}
+.fa-volume-off:before {
+  content: "\F026";
+}
+.fa-volume-down:before {
+  content: "\F027";
+}
+.fa-volume-up:before {
+  content: "\F028";
+}
+.fa-qrcode:before {
+  content: "\F029";
+}
+.fa-barcode:before {
+  content: "\F02A";
+}
+.fa-tag:before {
+  content: "\F02B";
+}
+.fa-tags:before {
+  content: "\F02C";
+}
+.fa-book:before {
+  content: "\F02D";
+}
+.fa-bookmark:before {
+  content: "\F02E";
+}
+.fa-print:before {
+  content: "\F02F";
+}
+.fa-camera:before {
+  content: "\F030";
+}
+.fa-font:before {
+  content: "\F031";
+}
+.fa-bold:before {
+  content: "\F032";
+}
+.fa-italic:before {
+  content: "\F033";
+}
+.fa-text-height:before {
+  content: "\F034";
+}
+.fa-text-width:before {
+  content: "\F035";
+}
+.fa-align-left:before {
+  content: "\F036";
+}
+.fa-align-center:before {
+  content: "\F037";
+}
+.fa-align-right:before {
+  content: "\F038";
+}
+.fa-align-justify:before {
+  content: "\F039";
+}
+.fa-list:before {
+  content: "\F03A";
+}
+.fa-dedent:before,
+.fa-outdent:before {
+  content: "\F03B";
+}
+.fa-indent:before {
+  content: "\F03C";
+}
+.fa-video-camera:before {
+  content: "\F03D";
+}
+.fa-photo:before,
+.fa-image:before,
+.fa-picture-o:before {
+  content: "\F03E";
+}
+.fa-pencil:before {
+  content: "\F040";
+}
+.fa-map-marker:before {
+  content: "\F041";
+}
+.fa-adjust:before {
+  content: "\F042";
+}
+.fa-tint:before {
+  content: "\F043";
+}
+.fa-edit:before,
+.fa-pencil-square-o:before {
+  content: "\F044";
+}
+.fa-share-square-o:before {
+  content: "\F045";
+}
+.fa-check-square-o:before {
+  content: "\F046";
+}
+.fa-arrows:before {
+  content: "\F047";
+}
+.fa-step-backward:before {
+  content: "\F048";
+}
+.fa-fast-backward:before {
+  content: "\F049";
+}
+.fa-backward:before {
+  content: "\F04A";
+}
+.fa-play:before {
+  content: "\F04B";
+}
+.fa-pause:before {
+  content: "\F04C";
+}
+.fa-stop:before {
+  content: "\F04D";
+}
+.fa-forward:before {
+  content: "\F04E";
+}
+.fa-fast-forward:before {
+  content: "\F050";
+}
+.fa-step-forward:before {
+  content: "\F051";
+}
+.fa-eject:before {
+  content: "\F052";
+}
+.fa-chevron-left:before {
+  content: "\F053";
+}
+.fa-chevron-right:before {
+  content: "\F054";
+}
+.fa-plus-circle:before {
+  content: "\F055";
+}
+.fa-minus-circle:before {
+  content: "\F056";
+}
+.fa-times-circle:before {
+  content: "\F057";
+}
+.fa-check-circle:before {
+  content: "\F058";
+}
+.fa-question-circle:before {
+  content: "\F059";
+}
+.fa-info-circle:before {
+  content: "\F05A";
+}
+.fa-crosshairs:before {
+  content: "\F05B";
+}
+.fa-times-circle-o:before {
+  content: "\F05C";
+}
+.fa-check-circle-o:before {
+  content: "\F05D";
+}
+.fa-ban:before {
+  content: "\F05E";
+}
+.fa-arrow-left:before {
+  content: "\F060";
+}
+.fa-arrow-right:before {
+  content: "\F061";
+}
+.fa-arrow-up:before {
+  content: "\F062";
+}
+.fa-arrow-down:before {
+  content: "\F063";
+}
+.fa-mail-forward:before,
+.fa-share:before {
+  content: "\F064";
+}
+.fa-expand:before {
+  content: "\F065";
+}
+.fa-compress:before {
+  content: "\F066";
+}
+.fa-plus:before {
+  content: "\F067";
+}
+.fa-minus:before {
+  content: "\F068";
+}
+.fa-asterisk:before {
+  content: "\F069";
+}
+.fa-exclamation-circle:before {
+  content: "\F06A";
+}
+.fa-gift:before {
+  content: "\F06B";
+}
+.fa-leaf:before {
+  content: "\F06C";
+}
+.fa-fire:before {
+  content: "\F06D";
+}
+.fa-eye:before {
+  content: "\F06E";
+}
+.fa-eye-slash:before {
+  content: "\F070";
+}
+.fa-warning:before,
+.fa-exclamation-triangle:before {
+  content: "\F071";
+}
+.fa-plane:before {
+  content: "\F072";
+}
+.fa-calendar:before {
+  content: "\F073";
+}
+.fa-random:before {
+  content: "\F074";
+}
+.fa-comment:before {
+  content: "\F075";
+}
+.fa-magnet:before {
+  content: "\F076";
+}
+.fa-chevron-up:before {
+  content: "\F077";
+}
+.fa-chevron-down:before {
+  content: "\F078";
+}
+.fa-retweet:before {
+  content: "\F079";
+}
+.fa-shopping-cart:before {
+  content: "\F07A";
+}
+.fa-folder:before {
+  content: "\F07B";
+}
+.fa-folder-open:before {
+  content: "\F07C";
+}
+.fa-arrows-v:before {
+  content: "\F07D";
+}
+.fa-arrows-h:before {
+  content: "\F07E";
+}
+.fa-bar-chart-o:before,
+.fa-bar-chart:before {
+  content: "\F080";
+}
+.fa-twitter-square:before {
+  content: "\F081";
+}
+.fa-facebook-square:before {
+  content: "\F082";
+}
+.fa-camera-retro:before {
+  content: "\F083";
+}
+.fa-key:before {
+  content: "\F084";
+}
+.fa-gears:before,
+.fa-cogs:before {
+  content: "\F085";
+}
+.fa-comments:before {
+  content: "\F086";
+}
+.fa-thumbs-o-up:before {
+  content: "\F087";
+}
+.fa-thumbs-o-down:before {
+  content: "\F088";
+}
+.fa-star-half:before {
+  content: "\F089";
+}
+.fa-heart-o:before {
+  content: "\F08A";
+}
+.fa-sign-out:before {
+  content: "\F08B";
+}
+.fa-linkedin-square:before {
+  content: "\F08C";
+}
+.fa-thumb-tack:before {
+  content: "\F08D";
+}
+.fa-external-link:before {
+  content: "\F08E";
+}
+.fa-sign-in:before {
+  content: "\F090";
+}
+.fa-trophy:before {
+  content: "\F091";
+}
+.fa-github-square:before {
+  content: "\F092";
+}
+.fa-upload:before {
+  content: "\F093";
+}
+.fa-lemon-o:before {
+  content: "\F094";
+}
+.fa-phone:before {
+  content: "\F095";
+}
+.fa-square-o:before {
+  content: "\F096";
+}
+.fa-bookmark-o:before {
+  content: "\F097";
+}
+.fa-phone-square:before {
+  content: "\F098";
+}
+.fa-twitter:before {
+  content: "\F099";
+}
+.fa-facebook-f:before,
+.fa-facebook:before {
+  content: "\F09A";
+}
+.fa-github:before {
+  content: "\F09B";
+}
+.fa-unlock:before {
+  content: "\F09C";
+}
+.fa-credit-card:before {
+  content: "\F09D";
+}
+.fa-feed:before,
+.fa-rss:before {
+  content: "\F09E";
+}
+.fa-hdd-o:before {
+  content: "\F0A0";
+}
+.fa-bullhorn:before {
+  content: "\F0A1";
+}
+.fa-bell:before {
+  content: "\F0F3";
+}
+.fa-certificate:before {
+  content: "\F0A3";
+}
+.fa-hand-o-right:before {
+  content: "\F0A4";
+}
+.fa-hand-o-left:before {
+  content: "\F0A5";
+}
+.fa-hand-o-up:before {
+  content: "\F0A6";
+}
+.fa-hand-o-down:before {
+  content: "\F0A7";
+}
+.fa-arrow-circle-left:before {
+  content: "\F0A8";
+}
+.fa-arrow-circle-right:before {
+  content: "\F0A9";
+}
+.fa-arrow-circle-up:before {
+  content: "\F0AA";
+}
+.fa-arrow-circle-down:before {
+  content: "\F0AB";
+}
+.fa-globe:before {
+  content: "\F0AC";
+}
+.fa-wrench:before {
+  content: "\F0AD";
+}
+.fa-tasks:before {
+  content: "\F0AE";
+}
+.fa-filter:before {
+  content: "\F0B0";
+}
+.fa-briefcase:before {
+  content: "\F0B1";
+}
+.fa-arrows-alt:before {
+  content: "\F0B2";
+}
+.fa-group:before,
+.fa-users:before {
+  content: "\F0C0";
+}
+.fa-chain:before,
+.fa-link:before {
+  content: "\F0C1";
+}
+.fa-cloud:before {
+  content: "\F0C2";
+}
+.fa-flask:before {
+  content: "\F0C3";
+}
+.fa-cut:before,
+.fa-scissors:before {
+  content: "\F0C4";
+}
+.fa-copy:before,
+.fa-files-o:before {
+  content: "\F0C5";
+}
+.fa-paperclip:before {
+  content: "\F0C6";
+}
+.fa-save:before,
+.fa-floppy-o:before {
+  content: "\F0C7";
+}
+.fa-square:before {
+  content: "\F0C8";
+}
+.fa-navicon:before,
+.fa-reorder:before,
+.fa-bars:before {
+  content: "\F0C9";
+}
+.fa-list-ul:before {
+  content: "\F0CA";
+}
+.fa-list-ol:before {
+  content: "\F0CB";
+}
+.fa-strikethrough:before {
+  content: "\F0CC";
+}
+.fa-underline:before {
+  content: "\F0CD";
+}
+.fa-table:before {
+  content: "\F0CE";
+}
+.fa-magic:before {
+  content: "\F0D0";
+}
+.fa-truck:before {
+  content: "\F0D1";
+}
+.fa-pinterest:before {
+  content: "\F0D2";
+}
+.fa-pinterest-square:before {
+  content: "\F0D3";
+}
+.fa-google-plus-square:before {
+  content: "\F0D4";
+}
+.fa-google-plus:before {
+  content: "\F0D5";
+}
+.fa-money:before {
+  content: "\F0D6";
+}
+.fa-caret-down:before {
+  content: "\F0D7";
+}
+.fa-caret-up:before {
+  content: "\F0D8";
+}
+.fa-caret-left:before {
+  content: "\F0D9";
+}
+.fa-caret-right:before {
+  content: "\F0DA";
+}
+.fa-columns:before {
+  content: "\F0DB";
+}
+.fa-unsorted:before,
+.fa-sort:before {
+  content: "\F0DC";
+}
+.fa-sort-down:before,
+.fa-sort-desc:before {
+  content: "\F0DD";
+}
+.fa-sort-up:before,
+.fa-sort-asc:before {
+  content: "\F0DE";
+}
+.fa-envelope:before {
+  content: "\F0E0";
+}
+.fa-linkedin:before {
+  content: "\F0E1";
+}
+.fa-rotate-left:before,
+.fa-undo:before {
+  content: "\F0E2";
+}
+.fa-legal:before,
+.fa-gavel:before {
+  content: "\F0E3";
+}
+.fa-dashboard:before,
+.fa-tachometer:before {
+  content: "\F0E4";
+}
+.fa-comment-o:before {
+  content: "\F0E5";
+}
+.fa-comments-o:before {
+  content: "\F0E6";
+}
+.fa-flash:before,
+.fa-bolt:before {
+  content: "\F0E7";
+}
+.fa-sitemap:before {
+  content: "\F0E8";
+}
+.fa-umbrella:before {
+  content: "\F0E9";
+}
+.fa-paste:before,
+.fa-clipboard:before {
+  content: "\F0EA";
+}
+.fa-lightbulb-o:before {
+  content: "\F0EB";
+}
+.fa-exchange:before {
+  content: "\F0EC";
+}
+.fa-cloud-download:before {
+  content: "\F0ED";
+}
+.fa-cloud-upload:before {
+  content: "\F0EE";
+}
+.fa-user-md:before {
+  content: "\F0F0";
+}
+.fa-stethoscope:before {
+  content: "\F0F1";
+}
+.fa-suitcase:before {
+  content: "\F0F2";
+}
+.fa-bell-o:before {
+  content: "\F0A2";
+}
+.fa-coffee:before {
+  content: "\F0F4";
+}
+.fa-cutlery:before {
+  content: "\F0F5";
+}
+.fa-file-text-o:before {
+  content: "\F0F6";
+}
+.fa-building-o:before {
+  content: "\F0F7";
+}
+.fa-hospital-o:before {
+  content: "\F0F8";
+}
+.fa-ambulance:before {
+  content: "\F0F9";
+}
+.fa-medkit:before {
+  content: "\F0FA";
+}
+.fa-fighter-jet:before {
+  content: "\F0FB";
+}
+.fa-beer:before {
+  content: "\F0FC";
+}
+.fa-h-square:before {
+  content: "\F0FD";
+}
+.fa-plus-square:before {
+  content: "\F0FE";
+}
+.fa-angle-double-left:before {
+  content: "\F100";
+}
+.fa-angle-double-right:before {
+  content: "\F101";
+}
+.fa-angle-double-up:before {
+  content: "\F102";
+}
+.fa-angle-double-down:before {
+  content: "\F103";
+}
+.fa-angle-left:before {
+  content: "\F104";
+}
+.fa-angle-right:before {
+  content: "\F105";
+}
+.fa-angle-up:before {
+  content: "\F106";
+}
+.fa-angle-down:before {
+  content: "\F107";
+}
+.fa-desktop:before {
+  content: "\F108";
+}
+.fa-laptop:before {
+  content: "\F109";
+}
+.fa-tablet:before {
+  content: "\F10A";
+}
+.fa-mobile-phone:before,
+.fa-mobile:before {
+  content: "\F10B";
+}
+.fa-circle-o:before {
+  content: "\F10C";
+}
+.fa-quote-left:before {
+  content: "\F10D";
+}
+.fa-quote-right:before {
+  content: "\F10E";
+}
+.fa-spinner:before {
+  content: "\F110";
+}
+.fa-circle:before {
+  content: "\F111";
+}
+.fa-mail-reply:before,
+.fa-reply:before {
+  content: "\F112";
+}
+.fa-github-alt:before {
+  content: "\F113";
+}
+.fa-folder-o:before {
+  content: "\F114";
+}
+.fa-folder-open-o:before {
+  content: "\F115";
+}
+.fa-smile-o:before {
+  content: "\F118";
+}
+.fa-frown-o:before {
+  content: "\F119";
+}
+.fa-meh-o:before {
+  content: "\F11A";
+}
+.fa-gamepad:before {
+  content: "\F11B";
+}
+.fa-keyboard-o:before {
+  content: "\F11C";
+}
+.fa-flag-o:before {
+  content: "\F11D";
+}
+.fa-flag-checkered:before {
+  content: "\F11E";
+}
+.fa-terminal:before {
+  content: "\F120";
+}
+.fa-code:before {
+  content: "\F121";
+}
+.fa-mail-reply-all:before,
+.fa-reply-all:before {
+  content: "\F122";
+}
+.fa-star-half-empty:before,
+.fa-star-half-full:before,
+.fa-star-half-o:before {
+  content: "\F123";
+}
+.fa-location-arrow:before {
+  content: "\F124";
+}
+.fa-crop:before {
+  content: "\F125";
+}
+.fa-code-fork:before {
+  content: "\F126";
+}
+.fa-unlink:before,
+.fa-chain-broken:before {
+  content: "\F127";
+}
+.fa-question:before {
+  content: "\F128";
+}
+.fa-info:before {
+  content: "\F129";
+}
+.fa-exclamation:before {
+  content: "\F12A";
+}
+.fa-superscript:before {
+  content: "\F12B";
+}
+.fa-subscript:before {
+  content: "\F12C";
+}
+.fa-eraser:before {
+  content: "\F12D";
+}
+.fa-puzzle-piece:before {
+  content: "\F12E";
+}
+.fa-microphone:before {
+  content: "\F130";
+}
+.fa-microphone-slash:before {
+  content: "\F131";
+}
+.fa-shield:before {
+  content: "\F132";
+}
+.fa-calendar-o:before {
+  content: "\F133";
+}
+.fa-fire-extinguisher:before {
+  content: "\F134";
+}
+.fa-rocket:before {
+  content: "\F135";
+}
+.fa-maxcdn:before {
+  content: "\F136";
+}
+.fa-chevron-circle-left:before {
+  content: "\F137";
+}
+.fa-chevron-circle-right:before {
+  content: "\F138";
+}
+.fa-chevron-circle-up:before {
+  content: "\F139";
+}
+.fa-chevron-circle-down:before {
+  content: "\F13A";
+}
+.fa-html5:before {
+  content: "\F13B";
+}
+.fa-css3:before {
+  content: "\F13C";
+}
+.fa-anchor:before {
+  content: "\F13D";
+}
+.fa-unlock-alt:before {
+  content: "\F13E";
+}
+.fa-bullseye:before {
+  content: "\F140";
+}
+.fa-ellipsis-h:before {
+  content: "\F141";
+}
+.fa-ellipsis-v:before {
+  content: "\F142";
+}
+.fa-rss-square:before {
+  content: "\F143";
+}
+.fa-play-circle:before {
+  content: "\F144";
+}
+.fa-ticket:before {
+  content: "\F145";
+}
+.fa-minus-square:before {
+  content: "\F146";
+}
+.fa-minus-square-o:before {
+  content: "\F147";
+}
+.fa-level-up:before {
+  content: "\F148";
+}
+.fa-level-down:before {
+  content: "\F149";
+}
+.fa-check-square:before {
+  content: "\F14A";
+}
+.fa-pencil-square:before {
+  content: "\F14B";
+}
+.fa-external-link-square:before {
+  content: "\F14C";
+}
+.fa-share-square:before {
+  content: "\F14D";
+}
+.fa-compass:before {
+  content: "\F14E";
+}
+.fa-toggle-down:before,
+.fa-caret-square-o-down:before {
+  content: "\F150";
+}
+.fa-toggle-up:before,
+.fa-caret-square-o-up:before {
+  content: "\F151";
+}
+.fa-toggle-right:before,
+.fa-caret-square-o-right:before {
+  content: "\F152";
+}
+.fa-euro:before,
+.fa-eur:before {
+  content: "\F153";
+}
+.fa-gbp:before {
+  content: "\F154";
+}
+.fa-dollar:before,
+.fa-usd:before {
+  content: "\F155";
+}
+.fa-rupee:before,
+.fa-inr:before {
+  content: "\F156";
+}
+.fa-cny:before,
+.fa-rmb:before,
+.fa-yen:before,
+.fa-jpy:before {
+  content: "\F157";
+}
+.fa-ruble:before,
+.fa-rouble:before,
+.fa-rub:before {
+  content: "\F158";
+}
+.fa-won:before,
+.fa-krw:before {
+  content: "\F159";
+}
+.fa-bitcoin:before,
+.fa-btc:before {
+  content: "\F15A";
+}
+.fa-file:before {
+  content: "\F15B";
+}
+.fa-file-text:before {
+  content: "\F15C";
+}
+.fa-sort-alpha-asc:before {
+  content: "\F15D";
+}
+.fa-sort-alpha-desc:before {
+  content: "\F15E";
+}
+.fa-sort-amount-asc:before {
+  content: "\F160";
+}
+.fa-sort-amount-desc:before {
+  content: "\F161";
+}
+.fa-sort-numeric-asc:before {
+  content: "\F162";
+}
+.fa-sort-numeric-desc:before {
+  content: "\F163";
+}
+.fa-thumbs-up:before {
+  content: "\F164";
+}
+.fa-thumbs-down:before {
+  content: "\F165";
+}
+.fa-youtube-square:before {
+  content: "\F166";
+}
+.fa-youtube:before {
+  content: "\F167";
+}
+.fa-xing:before {
+  content: "\F168";
+}
+.fa-xing-square:before {
+  content: "\F169";
+}
+.fa-youtube-play:before {
+  content: "\F16A";
+}
+.fa-dropbox:before {
+  content: "\F16B";
+}
+.fa-stack-overflow:before {
+  content: "\F16C";
+}
+.fa-instagram:before {
+  content: "\F16D";
+}
+.fa-flickr:before {
+  content: "\F16E";
+}
+.fa-adn:before {
+  content: "\F170";
+}
+.fa-bitbucket:before {
+  content: "\F171";
+}
+.fa-bitbucket-square:before {
+  content: "\F172";
+}
+.fa-tumblr:before {
+  content: "\F173";
+}
+.fa-tumblr-square:before {
+  content: "\F174";
+}
+.fa-long-arrow-down:before {
+  content: "\F175";
+}
+.fa-long-arrow-up:before {
+  content: "\F176";
+}
+.fa-long-arrow-left:before {
+  content: "\F177";
+}
+.fa-long-arrow-right:before {
+  content: "\F178";
+}
+.fa-apple:before {
+  content: "\F179";
+}
+.fa-windows:before {
+  content: "\F17A";
+}
+.fa-android:before {
+  content: "\F17B";
+}
+.fa-linux:before {
+  content: "\F17C";
+}
+.fa-dribbble:before {
+  content: "\F17D";
+}
+.fa-skype:before {
+  content: "\F17E";
+}
+.fa-foursquare:before {
+  content: "\F180";
+}
+.fa-trello:before {
+  content: "\F181";
+}
+.fa-female:before {
+  content: "\F182";
+}
+.fa-male:before {
+  content: "\F183";
+}
+.fa-gittip:before,
+.fa-gratipay:before {
+  content: "\F184";
+}
+.fa-sun-o:before {
+  content: "\F185";
+}
+.fa-moon-o:before {
+  content: "\F186";
+}
+.fa-archive:before {
+  content: "\F187";
+}
+.fa-bug:before {
+  content: "\F188";
+}
+.fa-vk:before {
+  content: "\F189";
+}
+.fa-weibo:before {
+  content: "\F18A";
+}
+.fa-renren:before {
+  content: "\F18B";
+}
+.fa-pagelines:before {
+  content: "\F18C";
+}
+.fa-stack-exchange:before {
+  content: "\F18D";
+}
+.fa-arrow-circle-o-right:before {
+  content: "\F18E";
+}
+.fa-arrow-circle-o-left:before {
+  content: "\F190";
+}
+.fa-toggle-left:before,
+.fa-caret-square-o-left:before {
+  content: "\F191";
+}
+.fa-dot-circle-o:before {
+  content: "\F192";
+}
+.fa-wheelchair:before {
+  content: "\F193";
+}
+.fa-vimeo-square:before {
+  content: "\F194";
+}
+.fa-turkish-lira:before,
+.fa-try:before {
+  content: "\F195";
+}
+.fa-plus-square-o:before {
+  content: "\F196";
+}
+.fa-space-shuttle:before {
+  content: "\F197";
+}
+.fa-slack:before {
+  content: "\F198";
+}
+.fa-envelope-square:before {
+  content: "\F199";
+}
+.fa-wordpress:before {
+  content: "\F19A";
+}
+.fa-openid:before {
+  content: "\F19B";
+}
+.fa-institution:before,
+.fa-bank:before,
+.fa-university:before {
+  content: "\F19C";
+}
+.fa-mortar-board:before,
+.fa-graduation-cap:before {
+  content: "\F19D";
+}
+.fa-yahoo:before {
+  content: "\F19E";
+}
+.fa-google:before {
+  content: "\F1A0";
+}
+.fa-reddit:before {
+  content: "\F1A1";
+}
+.fa-reddit-square:before {
+  content: "\F1A2";
+}
+.fa-stumbleupon-circle:before {
+  content: "\F1A3";
+}
+.fa-stumbleupon:before {
+  content: "\F1A4";
+}
+.fa-delicious:before {
+  content: "\F1A5";
+}
+.fa-digg:before {
+  content: "\F1A6";
+}
+.fa-pied-piper-pp:before {
+  content: "\F1A7";
+}
+.fa-pied-piper-alt:before {
+  content: "\F1A8";
+}
+.fa-drupal:before {
+  content: "\F1A9";
+}
+.fa-joomla:before {
+  content: "\F1AA";
+}
+.fa-language:before {
+  content: "\F1AB";
+}
+.fa-fax:before {
+  content: "\F1AC";
+}
+.fa-building:before {
+  content: "\F1AD";
+}
+.fa-child:before {
+  content: "\F1AE";
+}
+.fa-paw:before {
+  content: "\F1B0";
+}
+.fa-spoon:before {
+  content: "\F1B1";
+}
+.fa-cube:before {
+  content: "\F1B2";
+}
+.fa-cubes:before {
+  content: "\F1B3";
+}
+.fa-behance:before {
+  content: "\F1B4";
+}
+.fa-behance-square:before {
+  content: "\F1B5";
+}
+.fa-steam:before {
+  content: "\F1B6";
+}
+.fa-steam-square:before {
+  content: "\F1B7";
+}
+.fa-recycle:before {
+  content: "\F1B8";
+}
+.fa-automobile:before,
+.fa-car:before {
+  content: "\F1B9";
+}
+.fa-cab:before,
+.fa-taxi:before {
+  content: "\F1BA";
+}
+.fa-tree:before {
+  content: "\F1BB";
+}
+.fa-spotify:before {
+  content: "\F1BC";
+}
+.fa-deviantart:before {
+  content: "\F1BD";
+}
+.fa-soundcloud:before {
+  content: "\F1BE";
+}
+.fa-database:before {
+  content: "\F1C0";
+}
+.fa-file-pdf-o:before {
+  content: "\F1C1";
+}
+.fa-file-word-o:before {
+  content: "\F1C2";
+}
+.fa-file-excel-o:before {
+  content: "\F1C3";
+}
+.fa-file-powerpoint-o:before {
+  content: "\F1C4";
+}
+.fa-file-photo-o:before,
+.fa-file-picture-o:before,
+.fa-file-image-o:before {
+  content: "\F1C5";
+}
+.fa-file-zip-o:before,
+.fa-file-archive-o:before {
+  content: "\F1C6";
+}
+.fa-file-sound-o:before,
+.fa-file-audio-o:before {
+  content: "\F1C7";
+}
+.fa-file-movie-o:before,
+.fa-file-video-o:before {
+  content: "\F1C8";
+}
+.fa-file-code-o:before {
+  content: "\F1C9";
+}
+.fa-vine:before {
+  content: "\F1CA";
+}
+.fa-codepen:before {
+  content: "\F1CB";
+}
+.fa-jsfiddle:before {
+  content: "\F1CC";
+}
+.fa-life-bouy:before,
+.fa-life-buoy:before,
+.fa-life-saver:before,
+.fa-support:before,
+.fa-life-ring:before {
+  content: "\F1CD";
+}
+.fa-circle-o-notch:before {
+  content: "\F1CE";
+}
+.fa-ra:before,
+.fa-resistance:before,
+.fa-rebel:before {
+  content: "\F1D0";
+}
+.fa-ge:before,
+.fa-empire:before {
+  content: "\F1D1";
+}
+.fa-git-square:before {
+  content: "\F1D2";
+}
+.fa-git:before {
+  content: "\F1D3";
+}
+.fa-y-combinator-square:before,
+.fa-yc-square:before,
+.fa-hacker-news:before {
+  content: "\F1D4";
+}
+.fa-tencent-weibo:before {
+  content: "\F1D5";
+}
+.fa-qq:before {
+  content: "\F1D6";
+}
+.fa-wechat:before,
+.fa-weixin:before {
+  content: "\F1D7";
+}
+.fa-send:before,
+.fa-paper-plane:before {
+  content: "\F1D8";
+}
+.fa-send-o:before,
+.fa-paper-plane-o:before {
+  content: "\F1D9";
+}
+.fa-history:before {
+  content: "\F1DA";
+}
+.fa-circle-thin:before {
+  content: "\F1DB";
+}
+.fa-header:before {
+  content: "\F1DC";
+}
+.fa-paragraph:before {
+  content: "\F1DD";
+}
+.fa-sliders:before {
+  content: "\F1DE";
+}
+.fa-share-alt:before {
+  content: "\F1E0";
+}
+.fa-share-alt-square:before {
+  content: "\F1E1";
+}
+.fa-bomb:before {
+  content: "\F1E2";
+}
+.fa-soccer-ball-o:before,
+.fa-futbol-o:before {
+  content: "\F1E3";
+}
+.fa-tty:before {
+  content: "\F1E4";
+}
+.fa-binoculars:before {
+  content: "\F1E5";
+}
+.fa-plug:before {
+  content: "\F1E6";
+}
+.fa-slideshare:before {
+  content: "\F1E7";
+}
+.fa-twitch:before {
+  content: "\F1E8";
+}
+.fa-yelp:before {
+  content: "\F1E9";
+}
+.fa-newspaper-o:before {
+  content: "\F1EA";
+}
+.fa-wifi:before {
+  content: "\F1EB";
+}
+.fa-calculator:before {
+  content: "\F1EC";
+}
+.fa-paypal:before {
+  content: "\F1ED";
+}
+.fa-google-wallet:before {
+  content: "\F1EE";
+}
+.fa-cc-visa:before {
+  content: "\F1F0";
+}
+.fa-cc-mastercard:before {
+  content: "\F1F1";
+}
+.fa-cc-discover:before {
+  content: "\F1F2";
+}
+.fa-cc-amex:before {
+  content: "\F1F3";
+}
+.fa-cc-paypal:before {
+  content: "\F1F4";
+}
+.fa-cc-stripe:before {
+  content: "\F1F5";
+}
+.fa-bell-slash:before {
+  content: "\F1F6";
+}
+.fa-bell-slash-o:before {
+  content: "\F1F7";
+}
+.fa-trash:before {
+  content: "\F1F8";
+}
+.fa-copyright:before {
+  content: "\F1F9";
+}
+.fa-at:before {
+  content: "\F1FA";
+}
+.fa-eyedropper:before {
+  content: "\F1FB";
+}
+.fa-paint-brush:before {
+  content: "\F1FC";
+}
+.fa-birthday-cake:before {
+  content: "\F1FD";
+}
+.fa-area-chart:before {
+  content: "\F1FE";
+}
+.fa-pie-chart:before {
+  content: "\F200";
+}
+.fa-line-chart:before {
+  content: "\F201";
+}
+.fa-lastfm:before {
+  content: "\F202";
+}
+.fa-lastfm-square:before {
+  content: "\F203";
+}
+.fa-toggle-off:before {
+  content: "\F204";
+}
+.fa-toggle-on:before {
+  content: "\F205";
+}
+.fa-bicycle:before {
+  content: "\F206";
+}
+.fa-bus:before {
+  content: "\F207";
+}
+.fa-ioxhost:before {
+  content: "\F208";
+}
+.fa-angellist:before {
+  content: "\F209";
+}
+.fa-cc:before {
+  content: "\F20A";
+}
+.fa-shekel:before,
+.fa-sheqel:before,
+.fa-ils:before {
+  content: "\F20B";
+}
+.fa-meanpath:before {
+  content: "\F20C";
+}
+.fa-buysellads:before {
+  content: "\F20D";
+}
+.fa-connectdevelop:before {
+  content: "\F20E";
+}
+.fa-dashcube:before {
+  content: "\F210";
+}
+.fa-forumbee:before {
+  content: "\F211";
+}
+.fa-leanpub:before {
+  content: "\F212";
+}
+.fa-sellsy:before {
+  content: "\F213";
+}
+.fa-shirtsinbulk:before {
+  content: "\F214";
+}
+.fa-simplybuilt:before {
+  content: "\F215";
+}
+.fa-skyatlas:before {
+  content: "\F216";
+}
+.fa-cart-plus:before {
+  content: "\F217";
+}
+.fa-cart-arrow-down:before {
+  content: "\F218";
+}
+.fa-diamond:before {
+  content: "\F219";
+}
+.fa-ship:before {
+  content: "\F21A";
+}
+.fa-user-secret:before {
+  content: "\F21B";
+}
+.fa-motorcycle:before {
+  content: "\F21C";
+}
+.fa-street-view:before {
+  content: "\F21D";
+}
+.fa-heartbeat:before {
+  content: "\F21E";
+}
+.fa-venus:before {
+  content: "\F221";
+}
+.fa-mars:before {
+  content: "\F222";
+}
+.fa-mercury:before {
+  content: "\F223";
+}
+.fa-intersex:before,
+.fa-transgender:before {
+  content: "\F224";
+}
+.fa-transgender-alt:before {
+  content: "\F225";
+}
+.fa-venus-double:before {
+  content: "\F226";
+}
+.fa-mars-double:before {
+  content: "\F227";
+}
+.fa-venus-mars:before {
+  content: "\F228";
+}
+.fa-mars-stroke:before {
+  content: "\F229";
+}
+.fa-mars-stroke-v:before {
+  content: "\F22A";
+}
+.fa-mars-stroke-h:before {
+  content: "\F22B";
+}
+.fa-neuter:before {
+  content: "\F22C";
+}
+.fa-genderless:before {
+  content: "\F22D";
+}
+.fa-facebook-official:before {
+  content: "\F230";
+}
+.fa-pinterest-p:before {
+  content: "\F231";
+}
+.fa-whatsapp:before {
+  content: "\F232";
+}
+.fa-server:before {
+  content: "\F233";
+}
+.fa-user-plus:before {
+  content: "\F234";
+}
+.fa-user-times:before {
+  content: "\F235";
+}
+.fa-hotel:before,
+.fa-bed:before {
+  content: "\F236";
+}
+.fa-viacoin:before {
+  content: "\F237";
+}
+.fa-train:before {
+  content: "\F238";
+}
+.fa-subway:before {
+  content: "\F239";
+}
+.fa-medium:before {
+  content: "\F23A";
+}
+.fa-yc:before,
+.fa-y-combinator:before {
+  content: "\F23B";
+}
+.fa-optin-monster:before {
+  content: "\F23C";
+}
+.fa-opencart:before {
+  content: "\F23D";
+}
+.fa-expeditedssl:before {
+  content: "\F23E";
+}
+.fa-battery-4:before,
+.fa-battery-full:before {
+  content: "\F240";
+}
+.fa-battery-3:before,
+.fa-battery-three-quarters:before {
+  content: "\F241";
+}
+.fa-battery-2:before,
+.fa-battery-half:before {
+  content: "\F242";
+}
+.fa-battery-1:before,
+.fa-battery-quarter:before {
+  content: "\F243";
+}
+.fa-battery-0:before,
+.fa-battery-empty:before {
+  content: "\F244";
+}
+.fa-mouse-pointer:before {
+  content: "\F245";
+}
+.fa-i-cursor:before {
+  content: "\F246";
+}
+.fa-object-group:before {
+  content: "\F247";
+}
+.fa-object-ungroup:before {
+  content: "\F248";
+}
+.fa-sticky-note:before {
+  content: "\F249";
+}
+.fa-sticky-note-o:before {
+  content: "\F24A";
+}
+.fa-cc-jcb:before {
+  content: "\F24B";
+}
+.fa-cc-diners-club:before {
+  content: "\F24C";
+}
+.fa-clone:before {
+  content: "\F24D";
+}
+.fa-balance-scale:before {
+  content: "\F24E";
+}
+.fa-hourglass-o:before {
+  content: "\F250";
+}
+.fa-hourglass-1:before,
+.fa-hourglass-start:before {
+  content: "\F251";
+}
+.fa-hourglass-2:before,
+.fa-hourglass-half:before {
+  content: "\F252";
+}
+.fa-hourglass-3:before,
+.fa-hourglass-end:before {
+  content: "\F253";
+}
+.fa-hourglass:before {
+  content: "\F254";
+}
+.fa-hand-grab-o:before,
+.fa-hand-rock-o:before {
+  content: "\F255";
+}
+.fa-hand-stop-o:before,
+.fa-hand-paper-o:before {
+  content: "\F256";
+}
+.fa-hand-scissors-o:before {
+  content: "\F257";
+}
+.fa-hand-lizard-o:before {
+  content: "\F258";
+}
+.fa-hand-spock-o:before {
+  content: "\F259";
+}
+.fa-hand-pointer-o:before {
+  content: "\F25A";
+}
+.fa-hand-peace-o:before {
+  content: "\F25B";
+}
+.fa-trademark:before {
+  content: "\F25C";
+}
+.fa-registered:before {
+  content: "\F25D";
+}
+.fa-creative-commons:before {
+  content: "\F25E";
+}
+.fa-gg:before {
+  content: "\F260";
+}
+.fa-gg-circle:before {
+  content: "\F261";
+}
+.fa-tripadvisor:before {
+  content: "\F262";
+}
+.fa-odnoklassniki:before {
+  content: "\F263";
+}
+.fa-odnoklassniki-square:before {
+  content: "\F264";
+}
+.fa-get-pocket:before {
+  content: "\F265";
+}
+.fa-wikipedia-w:before {
+  content: "\F266";
+}
+.fa-safari:before {
+  content: "\F267";
+}
+.fa-chrome:before {
+  content: "\F268";
+}
+.fa-firefox:before {
+  content: "\F269";
+}
+.fa-opera:before {
+  content: "\F26A";
+}
+.fa-internet-explorer:before {
+  content: "\F26B";
+}
+.fa-tv:before,
+.fa-television:before {
+  content: "\F26C";
+}
+.fa-contao:before {
+  content: "\F26D";
+}
+.fa-500px:before {
+  content: "\F26E";
+}
+.fa-amazon:before {
+  content: "\F270";
+}
+.fa-calendar-plus-o:before {
+  content: "\F271";
+}
+.fa-calendar-minus-o:before {
+  content: "\F272";
+}
+.fa-calendar-times-o:before {
+  content: "\F273";
+}
+.fa-calendar-check-o:before {
+  content: "\F274";
+}
+.fa-industry:before {
+  content: "\F275";
+}
+.fa-map-pin:before {
+  content: "\F276";
+}
+.fa-map-signs:before {
+  content: "\F277";
+}
+.fa-map-o:before {
+  content: "\F278";
+}
+.fa-map:before {
+  content: "\F279";
+}
+.fa-commenting:before {
+  content: "\F27A";
+}
+.fa-commenting-o:before {
+  content: "\F27B";
+}
+.fa-houzz:before {
+  content: "\F27C";
+}
+.fa-vimeo:before {
+  content: "\F27D";
+}
+.fa-black-tie:before {
+  content: "\F27E";
+}
+.fa-fonticons:before {
+  content: "\F280";
+}
+.fa-reddit-alien:before {
+  content: "\F281";
+}
+.fa-edge:before {
+  content: "\F282";
+}
+.fa-credit-card-alt:before {
+  content: "\F283";
+}
+.fa-codiepie:before {
+  content: "\F284";
+}
+.fa-modx:before {
+  content: "\F285";
+}
+.fa-fort-awesome:before {
+  content: "\F286";
+}
+.fa-usb:before {
+  content: "\F287";
+}
+.fa-product-hunt:before {
+  content: "\F288";
+}
+.fa-mixcloud:before {
+  content: "\F289";
+}
+.fa-scribd:before {
+  content: "\F28A";
+}
+.fa-pause-circle:before {
+  content: "\F28B";
+}
+.fa-pause-circle-o:before {
+  content: "\F28C";
+}
+.fa-stop-circle:before {
+  content: "\F28D";
+}
+.fa-stop-circle-o:before {
+  content: "\F28E";
+}
+.fa-shopping-bag:before {
+  content: "\F290";
+}
+.fa-shopping-basket:before {
+  content: "\F291";
+}
+.fa-hashtag:before {
+  content: "\F292";
+}
+.fa-bluetooth:before {
+  content: "\F293";
+}
+.fa-bluetooth-b:before {
+  content: "\F294";
+}
+.fa-percent:before {
+  content: "\F295";
+}
+.fa-gitlab:before {
+  content: "\F296";
+}
+.fa-wpbeginner:before {
+  content: "\F297";
+}
+.fa-wpforms:before {
+  content: "\F298";
+}
+.fa-envira:before {
+  content: "\F299";
+}
+.fa-universal-access:before {
+  content: "\F29A";
+}
+.fa-wheelchair-alt:before {
+  content: "\F29B";
+}
+.fa-question-circle-o:before {
+  content: "\F29C";
+}
+.fa-blind:before {
+  content: "\F29D";
+}
+.fa-audio-description:before {
+  content: "\F29E";
+}
+.fa-volume-control-phone:before {
+  content: "\F2A0";
+}
+.fa-braille:before {
+  content: "\F2A1";
+}
+.fa-assistive-listening-systems:before {
+  content: "\F2A2";
+}
+.fa-asl-interpreting:before,
+.fa-american-sign-language-interpreting:before {
+  content: "\F2A3";
+}
+.fa-deafness:before,
+.fa-hard-of-hearing:before,
+.fa-deaf:before {
+  content: "\F2A4";
+}
+.fa-glide:before {
+  content: "\F2A5";
+}
+.fa-glide-g:before {
+  content: "\F2A6";
+}
+.fa-signing:before,
+.fa-sign-language:before {
+  content: "\F2A7";
+}
+.fa-low-vision:before {
+  content: "\F2A8";
+}
+.fa-viadeo:before {
+  content: "\F2A9";
+}
+.fa-viadeo-square:before {
+  content: "\F2AA";
+}
+.fa-snapchat:before {
+  content: "\F2AB";
+}
+.fa-snapchat-ghost:before {
+  content: "\F2AC";
+}
+.fa-snapchat-square:before {
+  content: "\F2AD";
+}
+.fa-pied-piper:before {
+  content: "\F2AE";
+}
+.fa-first-order:before {
+  content: "\F2B0";
+}
+.fa-yoast:before {
+  content: "\F2B1";
+}
+.fa-themeisle:before {
+  content: "\F2B2";
+}
+.fa-google-plus-circle:before,
+.fa-google-plus-official:before {
+  content: "\F2B3";
+}
+.fa-fa:before,
+.fa-font-awesome:before {
+  content: "\F2B4";
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+.sr-only-focusable:active,
+.sr-only-focusable:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+}
+/* http://meyerweb.com/eric/tools/css/reset/
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+body {
+  line-height: 1;
+}
+ol, ul {
+  list-style: none;
+}
+blockquote, q {
+  quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+@charset "UTF-8";
+/*
+Base Rules
+
+Styleguide 1.0
+*/
+/*
+Colors
+
+#c30a28 - $color-primary
+#f7e1e5 - $color-primary-light
+#05012c - $color-secondary
+#ffb500 - $color-tertiary
+#93ab23 - $color-quaternary
+#fff - $color-fill-light-1
+#fcfcfc - $color-fill-light-2
+#f7f7f7 - $color-fill-light-3
+#252247 - $color-fill-dark-1
+#78768d - $color-fill-dark-2
+#a09eaf - $color-fill-dark-3
+#e1e0e5 - $color-fill-dark-4
+
+Markup:
+<div style="background: {$modifiers};" class="styleguide-color">{$modifiers}</div>
+
+Styleguide 1.1
+*/
+/*
+Colors (States)
+
+#f01f31 - error
+#ffb500 - pending
+#93ab23 - success
+
+Markup:
+<div style="background: {$modifiers};" class="styleguide-color">{$modifiers}</div>
+
+Styleguide 1.1.2
+*/
+/*
+Font Size
+
+10px - $font-size-small-2x
+12px - $font-size-small-2x
+14px - $font-size-small
+16px - $font-size
+20px - $font-size-large
+24px - $font-size-large
+28px - $font-size-large
+34px - $font-size-large
+40px - $font-size-large-2x
+
+Markup:
+<p style="font-size: {$modifiers};">{$modifiers}</p>
+
+Styleguide 1.2
+*/
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: bold;
+  src: url(assets/opensans-bold-webfont-ede8ea500af80f5a7d366996867db55e.woff2) format("woff2"), url(assets/opensans-bold-webfont-807fb710ea9d091607b008279bd51c7c.woff) format("woff"); }
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-weight: bold;
+  src: url(assets/opensans-bolditalic-webfont-250429d8c789d62a5a812f536f0ddbba.woff2) format("woff2"), url(assets/opensans-bolditalic-webfont-f81c0afa6de8a02209d164005b18a420.woff) format("woff"); }
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-weight: normal;
+  src: url(assets/opensans-italic-webfont-b45e429cf0a49cc6f8e3423cfe41fd8f.woff2) format("woff2"), url(assets/opensans-italic-webfont-5749a854701e460b41eec819f92542da.woff) format("woff"); }
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 300;
+  src: url(assets/opensans-light-webfont-452ab3cd93af794b809b6d419f25300a.woff2) format("woff2"), url(assets/opensans-light-webfont-f4914c948b1278b1cfd9cd5c4a124645.woff) format("woff"); }
+
+@font-face {
+  font-family: 'open_sanslight_italic';
+  font-style: italic;
+  font-weight: 300;
+  src: url(assets/opensans-lightitalic-webfont-ec0439bcd8b12913fd96438c4889d601.woff2) format("woff2"), url(assets/opensans-lightitalic-webfont-ee477e30e9af2614a40b38d023ab41b0.woff) format("woff"); }
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: normal;
+  src: url(assets/opensans-regular-webfont-767e40c5df37597511f23d2197246b61.woff2) format("woff2"), url(assets/opensans-regular-webfont-57066ebb4e3a3ceef4d0b01027512906.woff) format("woff"); }
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url(assets/opensans-semibold-webfont-71d78f31d4c2b28c95740d7f5ddf432e.woff2) format("woff2"), url(assets/opensans-semibold-webfont-7d7173579fa056b59b3636ce9230ba46.woff) format("woff");
+  font-weight: 600;
+  font-style: normal; }
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-weight: 600;
+  src: url(assets/opensans-semibolditalic-webfont-2084726e8fc0e045baa783889a9811bc.woff2) format("woff2"), url(assets/opensans-semibolditalic-webfont-7573ced0ac546ed38cde940dd96ac4cd.woff) format("woff"); }
+
+@-webkit-keyframes rotate {
+  from {
+    -webkit-transform: rotate(0);
+            transform: rotate(0); }
+  to {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg); } }
+
+@keyframes rotate {
+  from {
+    -webkit-transform: rotate(0);
+            transform: rotate(0); }
+  to {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg); } }
+
+body {
+  background: #fcfcfc;
+  color: #252247;
+  font-family: "Open Sans", sans-serif;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden; }
+
+button {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  background: none;
+  border: 0;
+  color: #252247;
+  cursor: pointer;
+  font-family: "Open Sans", sans-serif;
+  font-size: 16px;
+  line-height: 1;
+  margin: 0;
+  outline: none;
+  padding: 0; }
+
+input,
+label,
+textarea,
+select {
+  color: #252247;
+  font-family: "Open Sans", sans-serif;
+  font-size: 16px; }
+
+a {
+  color: #c30a28;
+  text-decoration: none; }
+
+strong {
+  font-weight: 600; }
+
+/*
+Layout Rules
+
+Styleguide 2.0
+*/
+app {
+  display: block; }
+  app > header {
+    position: relative;
+    z-index: 4; }
+  @media (min-width: 768px) {
+    app {
+      padding-top: 78px; }
+      app > header {
+        left: 0;
+        position: fixed;
+        top: 0; }
+      app > nav {
+        position: fixed;
+        right: 0;
+        top: 0;
+        z-index: 5; } }
+
+main {
+  display: block;
+  position: relative; }
+  main .formmessage {
+    left: 0;
+    position: absolute;
+    top: 0; }
+  @media (min-width: 768px) {
+    main .formmessage {
+      position: fixed;
+      top: 78px; } }
+
+/*
+Article
+
+Used for pathway details views. Has a main content section and a sidebar which stack on mobile views.
+
+Markup:
+<div class="l-article">
+  <div>Main Content</div>
+  <div>Aside Content</div>
+</div>
+
+Styleguide 2.3
+*/
+.l-article > :first-child {
+  margin-bottom: 32px; }
+
+.l-article > :last-child > * {
+  margin-bottom: 24px; }
+
+.l-article > :last-child > h1 {
+  margin-bottom: 8px; }
+
+@media (min-width: 1024px) {
+  .l-article {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between; }
+    .l-article > :first-child {
+      -ms-flex-preferred-size: 67%;
+          flex-basis: 67%;
+      margin-bottom: 0;
+      min-width: 0; }
+    .l-article > :last-child {
+      -ms-flex-preferred-size: 30%;
+          flex-basis: 30%;
+      min-width: 0;
+      padding-top: 16px; } }
+
+/*
+Children Horizontal
+
+Used to lay out elements horizontally with space between each child
+
+Default - Left aligned, first children have spacing
+.l-childrenhorizontal-small - Left aligned, first children have less spacing
+.l-childrenhorizontal-right - Right aligned
+.l-childrenhorizontal-spacebetween - Children pushed to either side
+.l-childrenhorizontal-stackmobile -  On mobile children stack
+
+Markup:
+<div class="l-childrenhorizontal {$modifiers}">
+  <div>
+    <div>Content</div>
+    <div>Content</div>
+  </div>
+  <div>
+    <div>Content</div>
+    <div>Content</div>
+  </div>
+</div>
+
+Styleguide 2.2
+*/
+.l-childrenhorizontal {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap; }
+  .l-childrenhorizontal > *:not(:last-child) {
+    margin-right: 16px; }
+  .l-childrenhorizontal .l-childrenhorizontal-x-offset {
+    margin-right: 24px; }
+
+.l-childrenhorizontal-small > *:not(:last-child) {
+  margin-right: 8px; }
+
+.l-childrenhorizontal-small .l-childrenhorizontal-x-offset {
+  margin-right: 16px; }
+
+.l-childrenhorizontal-right {
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end; }
+
+.l-childrenhorizontal-spacebetween {
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between; }
+
+@media (max-width: 1023px) {
+  .l-childrenhorizontal-stackmobile {
+    -webkit-box-align: start;
+        -ms-flex-align: start;
+                -ms-grid-row-align: flex-start;
+            align-items: flex-start;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-pack: start;
+        -ms-flex-pack: start;
+            justify-content: flex-start; }
+    .l-childrenhorizontal-stackmobile > *:not(:last-child) {
+      margin-bottom: 8px;
+      margin-right: 0; }
+    .l-childrenhorizontal-stackmobile .l-childrenhorizontal-x-offset {
+      margin-bottom: 16px;
+      margin-right: 0; } }
+
+/*
+Children Vertical
+
+Default - Consistent vertical spacing, which gets larger on desktop.
+.l-childrenvertical-is-smalldesktop - Doesn't increase spacing on desktop
+
+Markup:
+<div class="l-childrenvertical {$modifiers}">
+  <div>Content</div>
+  <div class="l-childrenvertical-x-offset">Content</div>
+  <div>Content</div>
+  <div>Content</div>
+<div>
+
+Styleguide 2.1
+*/
+.l-childrenvertical > *:not(:last-child) {
+  margin-bottom: 14px; }
+  .l-childrenvertical > *:not(:last-child).l-childrenvertical-x-offset {
+    margin-bottom: 28px; }
+
+@media (min-width: 768px) {
+  .l-childrenvertical > *:not(:last-child) {
+    margin-bottom: 24px; }
+  .l-childrenvertical.l-childrenvertical-is-smalldesktop > *:not(:last-child) {
+    margin-bottom: 16px; }
+    .l-childrenvertical.l-childrenvertical-is-smalldesktop > *:not(:last-child).l-childrenvertical-x-offset {
+      margin-bottom: 28px; } }
+
+/*
+Container
+
+Adds equal horizontal and vertical padding
+
+Styleguide 2.21
+*/
+.l-container {
+  padding: 16px; }
+
+/*
+Container Horizontal
+
+Sets left and right padding on any container.
+
+Markup:
+<div class="l-containerhorizontal">
+  <div>Content</div>
+  <div>Content</div>
+  <div>Content</div>
+</div>
+
+Styleguide 2.4
+*/
+.l-containerhorizontal {
+  box-sizing: border-box;
+  display: block;
+  padding-left: 16px;
+  padding-right: 16px; }
+  @media (min-width: 768px) {
+    .l-containerhorizontal {
+      padding-left: 32px;
+      padding-right: 32px; } }
+  @media (min-width: 1088px) {
+    .l-containerhorizontal {
+      padding-left: calc(50vw - 512px);
+      padding-right: calc(50vw - 512px); } }
+
+/*
+Container Vertical
+
+Sets top and bottom padding on any container.
+
+Default - Standard vertical spacing
+.l-containervertical-small - Smaller
+
+Markup:
+<div class="l-containervertical {$modifiers}">
+  <div>Content</div>
+  <div>Content</div>
+  <div>Content</div>
+</div>
+
+Styleguide 2.5
+*/
+.l-containervertical {
+  box-sizing: border-box;
+  display: block;
+  padding-bottom: 16px;
+  padding-top: 16px;
+  position: relative;
+  z-index: 1; }
+  @media (min-width: 768px) {
+    .l-containervertical {
+      padding-bottom: 48px;
+      padding-top: 48px; } }
+
+.l-containervertical-small {
+  min-height: auto;
+  padding-bottom: 16px;
+  padding-top: 16px; }
+  @media (min-width: 768px) {
+    .l-containervertical-small {
+      padding-bottom: 16px;
+      padding-top: 16px; } }
+
+/*
+Controls
+
+Control wraps a series of inputs at the top of the view.
+
+Markup:
+<div class="l-controls bordered bordered-bottom">
+    <div>
+      <input type="text" class="search" placeholder="Search Badges">
+    </div>
+    <div>
+      <label class="formcheckbox" for="remember-me">
+        <input name="remember-me" id="remember-me" type="checkbox">
+        <span class="formcheckbox-x-text">Remember me</span>
+      </label>
+      <div class="radiobuttons">
+        <input type="radio" name="radiobutton" id="radiobutton1" value="grid" checked="checked">
+        <label class="radiobuttons-x-grid" for="radiobutton1">Grid</label>
+        <input type="radio" name="radiobutton" id="radiobutton2" value="list">
+        <label class="radiobuttons-x-list" for="radiobutton2">List</label>
+      </div>
+    </div>
+</div>
+
+Styleguide 2.18
+*/
+.l-controls {
+  padding-bottom: 16px;
+  padding-top: 16px; }
+  .l-controls > :first-child {
+    margin-bottom: 16px; }
+  .l-controls > :last-child {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between; }
+  @media (min-width: 768px) {
+    .l-controls {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex; }
+      .l-controls > :first-child {
+        -webkit-box-flex: 0;
+            -ms-flex: 0 1 auto;
+                flex: 0 1 auto;
+        margin-bottom: 0;
+        margin-right: 24px; }
+      .l-controls > :last-child {
+        -webkit-box-flex: 1;
+            -ms-flex: 1 0 0;
+                flex: 1 0 0; } }
+
+/*
+Form
+
+Lays out form elements
+
+Default - Standard form
+.l-form-span - Extends to 100% width
+
+Markup:
+<form class="l-form {$modifiers}" action="">
+    <fieldset>
+        <sg-insert>3.25-1</sg-insert>
+        <sg-insert>3.25-2</sg-insert>
+        <sg-insert>3.26-1</sg-insert>
+        <sg-insert>3.25-3</sg-insert>
+    </fieldset>
+    <sg-insert>3.30-1</sg-insert>
+</form>
+
+
+Styleguide 2.6
+*/
+.l-form fieldset > * {
+  margin-bottom: 16px; }
+
+.l-form .l-form-x-offset {
+  padding-top: 16px; }
+
+@media (min-width: 768px) {
+  .l-form {
+    max-width: 460px; } }
+
+@media (min-width: 768px) {
+  .l-form-span {
+    max-width: 100%; } }
+
+/*
+Grid Three
+
+Open the example in a new tab to see correct behavior. Use `<div>` wrappers if direct styling of children causes issues with other modules.
+
+Markup:
+<div class="l-gridthree">
+  <div><sg-insert>3.6.1-1</sg-insert></div>
+  <div><sg-insert>3.6.1-1</sg-insert></div>
+  <div><sg-insert>3.6.1-1</sg-insert></div>
+  <div><sg-insert>3.6.1-1</sg-insert></div>
+  <div><sg-insert>3.6.1-1</sg-insert></div>
+</div>
+
+Styleguide 2.8
+*/
+.l-gridthree > * {
+  margin-bottom: 16px; }
+
+@media (min-width: 768px) {
+  .l-gridthree {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+    margin-left: -8px; }
+    .l-gridthree > * {
+      -webkit-box-align: stretch;
+          -ms-flex-align: stretch;
+              align-items: stretch;
+      box-sizing: border-box;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-flex: 0;
+          -ms-flex: 0 0 50%;
+              flex: 0 0 50%;
+      padding-left: 8px;
+      padding-right: 8px; }
+      .l-gridthree > * > * {
+        width: 100%; } }
+
+@media (min-width: 1024px) {
+  .l-gridthree > * {
+    -ms-flex-preferred-size: 33.33%;
+        flex-basis: 33.33%; } }
+
+/*
+Grid Two
+
+Open the example in a new tab to see correct behavior. Use `<div>` wrappers if direct styling of children causes issues with other modules.
+
+Markup:
+<div class="l-gridtwo">
+  <div><sg-insert>3.6.1-1</sg-insert></div>
+  <div><sg-insert>3.6.1-1</sg-insert></div>
+  <div><sg-insert>3.6.1-1</sg-insert></div>
+  <div><sg-insert>3.6.1-1</sg-insert></div>
+  <div><sg-insert>3.6.1-1</sg-insert></div>
+</div>
+
+Styleguide 2.7
+*/
+.l-gridtwo {
+  margin-bottom: -8px; }
+  .l-gridtwo > * {
+    margin-bottom: 8px; }
+  @media (min-width: 768px) {
+    .l-gridtwo {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap;
+      -webkit-box-pack: justify;
+          -ms-flex-pack: justify;
+              justify-content: space-between;
+      margin-bottom: -16px; }
+      .l-gridtwo > * {
+        -webkit-box-align: stretch;
+            -ms-flex-align: stretch;
+                align-items: stretch;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        margin-bottom: 16px;
+        min-width: 0;
+        width: 49%; }
+        .l-gridtwo > * > * {
+          -webkit-box-flex: 1;
+              -ms-flex: 1;
+                  flex: 1; } }
+
+/*
+Heading
+
+This wraps a heading/breadcrumbs combination with some slight variations on the standard l-containervertical and l-childrenvertical patterns.
+
+Markup:
+<heading class="l-heading">
+  <nav>
+    <h1 class="visuallyhidden">Breadcrumbs</h1>
+    <sg-insert>3.19-1</sg-insert>
+  </nav>
+  <sg-insert>3.5-1</sg-insert>
+</heading>
+
+Styleguide 2.16
+*/
+.l-heading {
+  padding-bottom: 24px;
+  padding-top: 24px; }
+  .l-heading > nav {
+    display: none; }
+  @media (min-width: 768px) {
+    .l-heading {
+      padding-bottom: 32px;
+      padding-top: 1px; }
+      .l-heading > nav {
+        display: block;
+        margin-top: 24px; }
+      .l-heading > :last-child {
+        margin-top: 32px; } }
+
+/*
+Headered Section
+
+This is a container/child hybrid wrapper that sets vertical container padding and then spaces children with less bottom margins for headers.
+
+Markup:
+<div class="l-headeredsection">
+  <div>Content</div>
+  <header>Header</header>
+  <div>Content</div>
+  <div>Content</div>
+  <header>Header</header>
+  <div>Content</div>
+</div>
+
+Styleguide 2.17
+*/
+.l-headeredsection {
+  padding-bottom: 80px;
+  padding-top: 32px; }
+  .l-headeredsection > *:not(:last-child) {
+    margin-bottom: 32px; }
+  .l-headeredsection > header:not(:last-child) {
+    margin-bottom: 16px; }
+  @media (min-width: 768px) {
+    .l-headeredsection {
+      padding-top: 40px; }
+      .l-headeredsection > *:not(:last-child) {
+        margin-bottom: 40px; } }
+  @media (min-width: 1024px) {
+    .l-headeredsection {
+      padding-bottom: 104px; }
+      .l-headeredsection > *:not(:last-child) {
+        margin-bottom: 48px; } }
+
+/*
+Integrations
+
+Wraps a set of links and an article description for the integrations detail view.
+
+Markup:
+<div class="l-integrations">
+  <div>
+    <sg-insert>3.25.4-1</sg-insert>
+    <sg-insert>3.25.4-1</sg-insert>
+    <sg-insert>3.25.4-1</sg-insert>
+  </div>
+  <sg-insert>3.53-1</sg-insert>
+</div>
+
+Styleguide 2.20
+*/
+.l-integrations > * {
+  box-sizing: border-box; }
+
+.l-integrations > :first-child {
+  margin-bottom: 48px;
+  max-width: 420px; }
+  .l-integrations > :first-child > *:not(:last-child) {
+    margin-bottom: 16px; }
+
+@media (min-width: 1024px) {
+  .l-integrations {
+    -webkit-box-align: start;
+        -ms-flex-align: start;
+            align-items: flex-start;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex; }
+    .l-integrations > :first-child {
+      -webkit-box-flex: 0;
+          -ms-flex: 0 0 32%;
+              flex: 0 0 32%;
+      margin-top: 48px;
+      -webkit-box-ordinal-group: 3;
+          -ms-flex-order: 2;
+              order: 2;
+      padding: 8px 0 24px 48px; }
+    .l-integrations > :last-child {
+      -webkit-box-flex: 0;
+          -ms-flex: 0 0 68%;
+              flex: 0 0 68%;
+      -webkit-box-ordinal-group: 2;
+          -ms-flex-order: 1;
+              order: 1;
+      padding-right: 48px; } }
+
+/*
+Offset Bottom
+
+Gives negative bottom margin - used when ghost buttons abut to their containers
+
+Markup:
+<div class="l-offsetbottom">Offset</div>
+
+Styleguide 2.12 
+*/
+.l-offsetbottom {
+  margin-bottom: -8px; }
+
+/*
+Offset Bottom
+
+Gives negative left margin - used when ghost buttons abut to their containers
+
+Markup:
+<div class="l-offsetleft">Offset</div>
+
+Styleguide 2.13
+*/
+.l-offsetleft {
+  margin-left: -8px; }
+
+/*
+Offset Bottom
+
+Gives negative right margin - used when ghost buttons abut to their containers
+
+Markup:
+<div class="l-offsetright">Offset</div>
+
+Styleguide 2.14
+*/
+.l-offsetright {
+  margin-right: -8px; }
+
+/*
+Offset Bottom
+
+Gives negative top margin - used when ghost buttons abut to their containers
+
+Markup:
+<div class="l-offsettop">Offset</div>
+
+Styleguide 2.15
+*/
+.l-offsetright {
+  margin-top: -8px; }
+
+/*
+Overflow Horizontal
+
+Contains children that extend 100% width of their container (tables) and offer an overflow scroll.
+
+Markup:
+<div class="l-overflowhorizontal">
+  <sg-insert>3.16-1</sg-insert>
+</div>
+
+Styleguide 2.10
+*/
+.l-overflowhorizontal {
+  max-width: 100%;
+  overflow-x: auto; }
+
+/*
+Overflow List
+
+Used for connection dialogs in pathway and group views.
+
+Markup:
+<section class="l-overflowlist">
+  <header class="l-childrenvertical l-childrenvertical-is-smalldesktop bordered bordered-dark bordered-bottom">
+  	<h1 class="title">Select Completion Badge</h1>
+  	<div class="l-childrenhorizontal l-childrenhorizontal-stackmobile">
+  		<input class="search l-childrenhorizontal-x-offset" placeholder="Filter your badges by name or issuer" type="text">
+  		<sg-insert>3.38-1</sg-insert>
+  	</div>
+  </header>
+  <div class="l-overflowlist-x-list">
+  	<div>
+  		<div>
+  				<h2 class="bordered bordered-dark bordered-bottom title title-small">Pacific Science Center</h2>
+          <sg-insert>3.10-1</sg-insert>
+          <sg-insert>3.10-1</sg-insert>
+          <sg-insert>3.10-1</sg-insert>
+          <sg-insert>3.10-1</sg-insert>
+          <sg-insert>3.10-1</sg-insert>
+  		</div>
+  	</div>
+  </div>
+  <footer>
+  	<div class="bordered bordered-dark bordered-top l-childrenhorizontal l-childrenhorizontal-right">
+  		<button class="button button-secondary">Cancel</button>
+  		<button class="button">Apply</button>
+  	</div>
+  </footer>
+</section>
+
+Styleguide 2.19
+*/
+.l-overflowlist {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  height: 100vh; }
+  .l-overflowlist > header {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 0 auto;
+            flex: 1 0 auto;
+    padding: 16px; }
+  .l-overflowlist > footer {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 0 auto;
+            flex: 1 0 auto; }
+    .l-overflowlist > footer > div:last-of-type {
+      padding: 16px; }
+  .l-overflowlist .l-overflowlist-x-list {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+    overflow-y: auto; }
+  .l-overflowlist .l-overflowlist-x-selected {
+    padding: 16px 16px 0; }
+    .l-overflowlist .l-overflowlist-x-selected > *:not(:last-child) {
+      margin-bottom: 16px; }
+    .l-overflowlist .l-overflowlist-x-selected > div {
+      -webkit-box-align: center;
+          -ms-flex-align: center;
+              align-items: center;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap; }
+      .l-overflowlist .l-overflowlist-x-selected > div > * {
+        margin: 0 16px 16px 0; }
+  @media (min-width: 768px) {
+    .l-overflowlist {
+      height: auto; }
+      .l-overflowlist .l-overflowlist-x-list {
+        max-height: 312px; } }
+
+/*
+Scroll Pinned
+
+Pins the first child of the element to the top of a scrolling parent.
+
+Implemented by scroll-pin.component.ts
+
+Styleguide 2.11
+*/
+.l-scrollpin {
+  z-index: 3;
+  position: relative;
+  -webkit-transition: top linear .25s;
+  transition: top linear .25s; }
+
+/*
+Module Rules
+
+Styleguide 3.0
+*/
+/*
+Article
+
+Styles general-purpose blocks of text.
+
+Markup:
+<article class="article">
+  <h1>Heading 1</h1>
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam augue nisi, blandit sed ante ut, tincidunt ultrices elit. Praesent ullamcorper consectetur elit, a tincidunt dui hendrerit non. Morbi tempus arcu sit amet turpis tempor, ut bibendum ex pulvinar. Donec rutrum egestas eros eu cursus. Nullam ut iaculis est. Etiam egestas nulla eu elit pulvinar faucibus. Maecenas mattis purus massa, in faucibus neque tristique at. Quisque quis sapien in risus blandit ultrices. Nullam vel diam libero.</p>
+  <img src="http://placehold.it/680x340" alt="Example image">
+  <sg-insert>3.16-1</sg-insert>
+</article>
+
+Styleguide 3.15
+*/
+.article > * {
+  margin-bottom: 24px; }
+
+.article > h1 {
+  color: #05012c;
+  font-size: 24px;
+  font-weight: 600; }
+
+.article > p {
+  line-height: 1.5;
+  white-space: pre-wrap; }
+
+.article > img {
+  height: auto;
+  max-width: 100%; }
+
+.article > table {
+  max-width: 785px; }
+
+/*
+Badge
+
+The most abstract representation of a badge, just the image. The size of the badge module is determined by the size of the image.
+
+Default - Standard thumbnail
+.badge-is-active - Sets a border on the badge to indicate that it's active/selected
+.badge-flat - Removes the base padding
+
+Markup:
+<div class="badge {$modifiers}">
+  <img src="http://placehold.it/68x68" width="68" height="68" alt="Badge Description">
+</div>
+
+Styleguide 3.14
+*/
+.badge {
+  box-sizing: border-box;
+  display: inline-block;
+  padding: 4px;
+  position: relative;
+  -webkit-transition: background-color 0.25s ease-out, box-shadow 0.25s ease-out;
+  transition: background-color 0.25s ease-out, box-shadow 0.25s ease-out; }
+  .badge img {
+    display: block; }
+  .badge.badge-is-active {
+    background-color: #fff;
+    box-shadow: 0 0 0 1px #a09eaf; }
+
+:checked + label .badge {
+  background: #fff;
+  box-shadow: 0 0 0 1px #a09eaf; }
+
+.badge-flat {
+  padding: 0; }
+
+/*
+Bordered
+
+Assists in creating borders around custom layouts and containers. Sub modules can be mixed and matched (`.bordered.bordered-light.bordered-top` would put a lighter border on top for example.)
+
+Default - Borders on all sides, default color
+.bordered-light - A lighter border
+.bordered-dark - A darker border
+.bordered-top - Top border
+.bordered-right - Right border
+.bordered-bottom - Bottom border
+.bordered-left - Left border
+
+Markup:
+<div class="bordered {$modifiers}">Bordered</div>
+
+Styleguide 3.18
+*/
+.bordered {
+  border: 1px solid #e1e0e5; }
+  @media (max-width: 1023px) {
+    .bordered.bordered-is-desktoponly {
+      border: 0; } }
+
+.bordered-light {
+  border-color: #e1e0e5; }
+
+.bordered-dark {
+  border-color: #a09eaf; }
+
+.bordered-top {
+  border-bottom: 0;
+  border-left: 0;
+  border-right: 0; }
+
+.bordered-right {
+  border-bottom: 0;
+  border-left: 0;
+  border-top: 0; }
+
+.bordered-bottom {
+  border-left: 0;
+  border-right: 0;
+  border-top: 0; }
+
+.bordered-left {
+  border-bottom: 0;
+  border-right: 0;
+  border-top: 0; }
+
+/*
+Breadcrumb
+
+Markup:
+<ul class="breadcrumb">
+    <li><a href="">Top Level</a></li>
+    <li><a href="">Child Level</a></li>
+    <li><a href="" class="breadcrumb-x-current">Child Level</a></li>
+</ul>
+
+Styleguide 3.19
+*/
+.breadcrumb {
+  border-bottom: 1px solid #e1e0e5;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 14px;
+  padding-bottom: 24px;
+  width: 100%; }
+  .breadcrumb li {
+    color: #a09eaf;
+    padding-right: 24px;
+    position: relative;
+    text-transform: uppercase; }
+    .breadcrumb li:not(:last-child)::after {
+      background-color: #a09eaf;
+      content: '';
+      display: block;
+      height: 100%;
+      position: absolute;
+      right: 10px;
+      top: 0;
+      width: 1px; }
+    .breadcrumb li:last-child a {
+      font-weight: bold; }
+  .breadcrumb a {
+    color: #a09eaf;
+    font-weight: bold;
+    line-height: 1;
+    text-decoration: none;
+    -webkit-transition: color 0.25s ease-out;
+    transition: color 0.25s ease-out; }
+    .breadcrumb a:hover {
+      color: #c30a28; }
+    .breadcrumb a:active {
+      color: #c30a28; }
+  .breadcrumb .breadcrumb-x-current {
+    font-weight: normal;
+    padding-right: 0; }
+
+/*
+Button
+
+Buttons can be either `<button>` or `<a>` elements.
+
+Default - Primary actions
+.button-is-disabled - Disabled button
+.button-primaryghost - Less of a button-looking button, until you hover
+.button-primaryghost.button-is-disabled - Disabled primary ghost button
+.button-secondaryghost - Less of a button-looking button, non-primary color
+.button-secondaryghost.button-is-disabled - Disabled primary ghost secondary button
+.button-major - For something really important, usually in headers
+.button-major.button-is-disabled - This major button is disabled
+.button-large - A larger version of any button
+
+Markup:
+<button class="button {$modifiers}">Button</button>
+
+Styleguide 3.20
+*/
+.button {
+  background-color: #fff;
+  border: 1px solid #c30a28;
+  border-radius: 4px;
+  box-sizing: border-box;
+  color: #c30a28;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 12px 16px;
+  position: relative;
+  text-align: center;
+  text-transform: uppercase;
+  -webkit-transition: background 0.125s ease-out, border-color 0.125s ease-out, color 0.125s ease-out, box-shadow 0.125s ease-out, -webkit-transform 0.125s ease-out;
+  transition: background 0.125s ease-out, border-color 0.125s ease-out, color 0.125s ease-out, box-shadow 0.125s ease-out, -webkit-transform 0.125s ease-out;
+  transition: background 0.125s ease-out, border-color 0.125s ease-out, color 0.125s ease-out, box-shadow 0.125s ease-out, transform 0.125s ease-out;
+  transition: background 0.125s ease-out, border-color 0.125s ease-out, color 0.125s ease-out, box-shadow 0.125s ease-out, transform 0.125s ease-out, -webkit-transform 0.125s ease-out;
+  white-space: nowrap; }
+  .button:not(.button-is-disabled):hover {
+    background-color: #c30a28;
+    box-shadow: 0 0 2px 0 #e1e0e5, 0 2px 2px 0 #a09eaf;
+    color: #fff;
+    text-decoration: none;
+    -webkit-transform: translate3d(0, -2px, 0);
+            transform: translate3d(0, -2px, 0); }
+    .button:not(.button-is-disabled):hover::after {
+      content: '';
+      display: block;
+      height: 2px;
+      left: 0;
+      position: absolute;
+      top: 100%;
+      width: 100%; }
+  .button:not(.button-is-disabled):active {
+    background-color: #f7e1e5;
+    border-color: transparent;
+    box-shadow: none;
+    color: #c30a28;
+    -webkit-transform: none;
+            transform: none; }
+    .button:not(.button-is-disabled):active::after {
+      display: none; }
+  .button.button-is-disabled {
+    cursor: default;
+    opacity: .2; }
+
+.button-primaryghost {
+  background-color: transparent;
+  border-color: transparent;
+  padding-left: 8px;
+  padding-right: 8px; }
+  .button-primaryghost:not(.button-is-disabled):hover {
+    background-color: transparent;
+    border-color: #c30a28;
+    box-shadow: none;
+    color: #c30a28;
+    -webkit-transform: none;
+            transform: none; }
+    .button-primaryghost:not(.button-is-disabled):hover::after {
+      display: none; }
+  .button-primaryghost:not(.button-is-disabled):active {
+    background-color: #f7e1e5;
+    border-color: transparent; }
+
+.button-secondaryghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: #a09eaf;
+  padding-left: 8px;
+  padding-right: 8px; }
+  .button-secondaryghost:not(.button-is-disabled):hover {
+    background-color: #fff;
+    border-color: #a09eaf;
+    box-shadow: none;
+    color: #a09eaf;
+    -webkit-transform: none;
+            transform: none; }
+    .button-secondaryghost:not(.button-is-disabled):hover::after {
+      display: none; }
+  .button-secondaryghost:not(.button-is-disabled):active {
+    background-color: #e1e0e5;
+    border-color: transparent;
+    color: #a09eaf; }
+
+.button-large {
+  font-size: 16px;
+  padding-bottom: 16px;
+  padding-top: 16px; }
+
+.button-major {
+  background-color: #c30a28;
+  color: #fff; }
+
+/*
+Card
+
+Cards wrap lists of badges, pathways, and groups with a consistent "card" appearance.
+
+Default - Used to wrap badges, pathways, and groups
+.card-placeholder - Placeholder for where a new card may go
+
+Markup:
+<div class="card {$modifiers}">
+  <a class="card-x-main" href="">
+    <div class="card-x-image">
+      <sg-insert>3.14-3</sg-insert>
+    </div>
+    <div class="card-x-text">
+      <h1>DCA Training</h1>
+      <small>Pacific Science Center</small>
+      <p>This badge is awarded to students who have completed the Discovery Corps</p>
+    </div>
+  </a>
+  <div class="card-x-actions">
+    <time datetime="2016-05-11">May 11, 2016</time>
+    <button class="button button-secondaryghost l-offsetright l-offsetbottom">Share</button>
+  </div>
+</div>
+
+Styleguide 3.45
+*/
+.card {
+  -webkit-box-align: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
+  background-color: #fff;
+  border: 1px solid #e1e0e5;
+  border-radius: 4px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  font-size: 12px;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  min-height: 128px;
+  -webkit-transition: box-shadow 0.25s ease-out;
+  transition: box-shadow 0.25s ease-out; }
+  .card .card-x-main {
+    color: #252247;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-flex: 1;
+        -ms-flex: 1 0 auto;
+            flex: 1 0 auto;
+    padding: 16px; }
+    .card .card-x-main h1 {
+      color: #c30a28;
+      font-size: 16px; }
+    .card .card-x-main small {
+      color: #78768d; }
+    .card .card-x-main p,
+    .card .card-x-main ul,
+    .card .card-x-main ol {
+      margin-top: 8px; }
+    .card .card-x-main:hover {
+      text-decoration: none; }
+  .card .card-x-image {
+    -webkit-box-flex: 0;
+        -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
+    margin-right: 16px;
+    width: 40px; }
+  .card .card-x-text {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 0;
+            flex: 1 1 0;
+    line-height: 1.5; }
+    .card .card-x-text p {
+      white-space: pre-wrap; }
+    .card .card-x-text ul {
+      -webkit-box-align: start;
+          -ms-flex-align: start;
+              align-items: flex-start;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap;
+      margin-bottom: -8px; }
+    .card .card-x-text li {
+      margin-bottom: 8px;
+      width: 16.666666667%; }
+  .card .card-x-more {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    background-color: #e1e0e5;
+    border-radius: 100%;
+    color: #78768d;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    font-size: 12px;
+    font-weight: bold;
+    height: 40px;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    line-height: 1;
+    text-align: center;
+    width: 40px; }
+    .card .card-x-more span {
+      display: block;
+      font-size: 8px;
+      text-transform: uppercase; }
+  .card .card-x-actions {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    padding: 16px; }
+    .card .card-x-actions time,
+    .card .card-x-actions small {
+      color: #78768d; }
+  .card .card-x-add {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    box-sizing: border-box;
+    color: #c30a28;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    font-size: 14px;
+    font-weight: bold;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    line-height: 1.3;
+    padding: 16px;
+    text-align: center;
+    text-transform: uppercase;
+    width: 100%; }
+    .card .card-x-add:hover {
+      text-decoration: none; }
+    .card .card-x-add::before {
+      background: url(assets/card-placeholder-f4f9805cdfb15d3b510a9ee9061b22c7.svg) no-repeat;
+      background-size: contain;
+      content: '';
+      display: block;
+      height: 46px;
+      margin-bottom: 16px;
+      width: 46px; }
+  .card:hover {
+    box-shadow: 0 4px 4px 0 #e1e0e5, 0 0 2px 0 #e1e0e5; }
+
+.card-placeholder {
+  border-style: dashed; }
+  .card-placeholder:hover {
+    border-style: solid; }
+
+.card-largeimage .card-x-image {
+  width: 80px; }
+
+.card-actionsright .card-x-actions {
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end; }
+
+/*
+Card Large
+
+Markup:
+<div class="card card-large">
+  <a class="card-x-main" href="">
+      <div class="card-x-image">
+        <div class="badge">
+          <img src="http://placehold.it/80x80" alt="Image description" width="80" height="80">
+        </div>
+      </div>
+      <div class="card-x-text">
+        <h1>Galatic Empire</h1>
+        <p>Finest producer of local-to-this-galaxy Deathstars and Super Star Destroyers. Largest employer in the galaxy.</p>
+        <sg-insert>3.52-1</sg-insert>
+      </div>
+  </a>
+  <div class="card-x-actions">
+    <h2 class="titledivider">Top Badges</h2>
+    <sg-insert>3.48-2</sg-insert>
+    <sg-insert>3.48-2</sg-insert>
+    <sg-insert>3.48-2</sg-insert>
+  </div>
+</div>
+
+Styleguide 3.45.1
+*/
+.card-large {
+  padding: 16px 16px 24px; }
+  .card-large .card-x-main {
+    padding: 0; }
+    .card-large .card-x-main h1 {
+      color: #05012c; }
+  .card-large .card-x-image {
+    width: 40px; }
+  .card-large .card-x-actions {
+    display: none;
+    padding: 0; }
+  @media (min-width: 768px) {
+    .card-large {
+      padding: 24px 24px 32px; }
+      .card-large .card-x-main h1 {
+        color: #c30a28;
+        font-size: 24px; }
+      .card-large .card-x-main p {
+        font-size: 14px;
+        margin-top: 16px; }
+      .card-large .card-x-main ol,
+      .card-large .card-x-main ul {
+        margin-top: 24px; }
+      .card-large .card-x-image {
+        margin-right: 24px;
+        width: 80px; }
+      .card-large .card-x-text {
+        -ms-flex-preferred-size: 432px;
+            flex-basis: 432px;
+        -webkit-box-flex: 0;
+            -ms-flex-positive: 0;
+                flex-grow: 0; } }
+  @media (min-width: 1024px) {
+    .card-large {
+      -webkit-box-align: end;
+          -ms-flex-align: end;
+                  -ms-grid-row-align: flex-end;
+              align-items: flex-end;
+      -webkit-box-orient: horizontal;
+      -webkit-box-direction: normal;
+          -ms-flex-direction: row;
+              flex-direction: row; }
+      .card-large .card-x-main {
+        -ms-flex-negative: 1;
+            flex-shrink: 1; }
+      .card-large .card-x-actions {
+        display: block;
+        -webkit-box-flex: 1;
+            -ms-flex: 1 0 312px;
+                flex: 1 0 312px; }
+        .card-large .card-x-actions > div:not(:last-child) {
+          margin-bottom: 8px; }
+        .card-large .card-x-actions > h2 {
+          margin-bottom: 16px; } }
+
+/*
+Card Action
+
+A smaller center-aligned card which performs an action with a simple count for that action. Used on pathway detail.
+
+Markup:
+<div class="card card-action">
+  <div class="card-x-main">
+    <div class="card-x-image">
+      <img src="http://placehold.it/40x40" width="40" height="40" alt="Badge Description">
+    </div>
+    <div class="card-x-text">
+      <h1>0 Groups</h1>
+      <small>0 Total Members</small>
+    </div>
+  </div>
+</div>
+
+Styleguide 3.45.2
+*/
+.card-action {
+  min-height: auto; }
+  .card-action .card-x-main {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+                -ms-grid-row-align: center;
+            align-items: center;
+    cursor: pointer;
+    padding-bottom: 12px;
+    padding-top: 12px; }
+
+.card-pathway {
+  border-radius: 0; }
+  .card-pathway .card-x-text {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 0 52%;
+            flex: 1 0 52%; }
+  .card-pathway .card-x-aside {
+    -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+            align-items: stretch;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 36%;
+            flex: 1 1 36%;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column; }
+
+/*
+Card with Collection (Demo)
+
+Markup:
+<div class="card card-collection">
+  <a class="card-x-main" href="">
+    <span class="card-x-text">
+      <h1>DCA Training</h1>
+      <small>Pacific Science Center</small>
+      <ul>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <div class="badge badge-flat">
+            <img src="http://placehold.it/40x40">
+          </div>
+        </li>
+        <li>
+          <span class="card-x-more">12<span> More</span></span>
+        </li>
+      </ul>
+    </span>
+  </a>
+  <div class="card-x-actions">
+    <sg-insert>3.55-1</sg-insert>
+    <button class="button button-secondaryghost l-offsetright l-offsetbottom">Share</button>
+  </div>
+</div>
+
+Styleguide 3.45.3
+*/
+/*
+Checklist
+
+Default - Expects a checkbox input
+.checklist-radio - Expects a radio input (demo works as a checkbox)
+
+Markup:
+<input class="checklist {$modifiers}" type="checkbox" id="checklist{$modifiers}">
+<label for="checklist{$modifiers}">
+	<span class="checklist-x-badge">
+    <sg-insert>3.14-1</sg-insert>
+  </span>
+  <span class="checklist-x-title">
+    <span>Discovery Corps Skill Tree</span>
+    <span>Discovery Corps is a youth development program that puts young people on the front line of Pacific Science Center’s mission to inspire a lifelong interest…</span>
+  </span>
+  <span class="checklist-x-meta">Band members</span>
+</label>
+
+Styleguide 3.10
+*/
+.checklist {
+  display: none; }
+  .checklist + label {
+    border-radius: 4px;
+    box-shadow: 0 0 0 1px #e1e0e5 inset;
+    color: transparent;
+    content: '';
+    display: block;
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
+    height: 16px;
+    overflow: hidden;
+    -webkit-transition: background-color 0.25s ease-out, box-shadow 0.25s ease-out;
+    transition: background-color 0.25s ease-out, box-shadow 0.25s ease-out;
+    width: 16px; }
+  .checklist:checked + label {
+    background: url(assets/checklist-20f1287694dd09adcf7c97df3b80fcb9.svg) center center no-repeat #05012c;
+    box-shadow: 0 0 0 0 #05012c; }
+
+.checklist-radio + label {
+  border-radius: 22px; }
+
+.checklist-radio:checked + label {
+  background-image: url(assets/checklist-radio-f73fd314eee91022aa3470f197844cc3.svg); }
+
+/*
+Confirm Switch
+
+Default - The state before user input
+.confirmswitch-is-active - When the user is prompted to confirm
+
+Markup:
+<div class="confirmswitch {$modifiers}">
+  <div class="l-childrenhorizontal l-childrenhorizontal-stackmobile">
+      <button type="button" class="button button-tertiaryghost">Re-send Verification</button>
+      <button type="button" class="confirmswitch-x-toggle button button-tertiaryghost" onclick="event.target.parentNode.parentNode.classList.toggle('confirmswitch-is-active')">Remove</button>
+      <button type="button" class="button button-tertiaryghost">Make Primary</button>
+  </div>
+  <div class="l-childrenhorizontal l-childrenhorizontal-right l-childrenhorizontal-stackmobile">
+    <p class="l-childrenhorizontal-x-offset"><strong>Are you sure?</strong></p>
+    <button type="button" class="button">Confirm Remove</button>
+    <button type="button" class="confirmswitch-x-toggle button button-tertiaryghost" onclick="event.target.parentNode.parentNode.classList.toggle('confirmswitch-is-active')">Cancel</button>
+  </div>
+</div>
+
+Styleguide 3.21
+*/
+.confirmswitch {
+  position: relative; }
+  .confirmswitch > * {
+    -webkit-transition: opacity 0.25s ease-out;
+    transition: opacity 0.25s ease-out; }
+  .confirmswitch > :first-child {
+    z-index: 2; }
+  .confirmswitch > :last-child {
+    height: 100%;
+    left: 0;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    visibility: hidden;
+    width: 100%;
+    z-index: 1; }
+  .confirmswitch.confirmswitch-is-active > :first-child {
+    height: 100%;
+    left: 0;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    visibility: hidden;
+    width: 100%;
+    z-index: 1; }
+  .confirmswitch.confirmswitch-is-active > :last-child {
+    left: auto;
+    opacity: 1;
+    position: relative;
+    top: auto;
+    visibility: visible;
+    z-index: 2; }
+
+/*
+Connected Badge
+
+Markup:
+<a class="connectedbadge {$modifiers}" href="">
+  <sg-insert>3.14-1</sg-insert>
+  <div>
+    <h1>Touch a Brain</h1>
+    <p>This badge is awarded to students who have demonstrated their ability to handle the sheep brain, allowing visitors to touch it using plastic bags while asking them to compare its size, shape, and color to a model of the human brain.	</p>
+  </div>
+</a>
+
+Styleguide 3.13
+*/
+.connectedbadge {
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  border: 1px solid #e1e0e5;
+  border-radius: 4px;
+  box-sizing: border-box;
+  color: #252247;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 14px;
+  min-height: 130px;
+  padding: 24px;
+  position: relative; }
+  .connectedbadge h1 {
+    color: #252247;
+    font-weight: 600;
+    margin-bottom: 8px; }
+  .connectedbadge p {
+    line-height: 1.35; }
+  .connectedbadge > div:first-of-type {
+    margin-right: 16px; }
+  .connectedbadge > div:last-of-type {
+    margin-top: 4px; }
+  .connectedbadge:hover {
+    color: #252247; }
+
+/*
+Connected Card
+
+Accepts a module and assumes a dismiss button.
+
+Markup:
+<div class="connectedcard {$modifiers}">
+  <button type="button">Remove</button>
+  <sg-insert>3.7-1</sg-insert>
+</div>
+
+Styleguide 3.6
+*/
+.connectedcard {
+  -webkit-box-align: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative; }
+  .connectedcard::after {
+    content: '';
+    display: block;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    -webkit-transition: box-shadow 0.25s ease-out, opacity 0.25s ease-out;
+    transition: box-shadow 0.25s ease-out, opacity 0.25s ease-out;
+    width: 100%;
+    z-index: 1; }
+  .connectedcard > button {
+    background-image: url(assets/connectedcard-remove-ab55aafc6307b2b694485aaa75a824fa.svg);
+    color: transparent;
+    height: 24px;
+    overflow: hidden;
+    position: absolute;
+    right: 16px;
+    top: 22px;
+    width: 24px;
+    z-index: 3; }
+    .connectedcard > button:hover + * {
+      opacity: .5; }
+  .connectedcard > :last-child {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+    min-width: 0;
+    position: relative;
+    -webkit-transition: opacity 0.25s ease-out;
+    transition: opacity 0.25s ease-out;
+    z-index: 2; }
+  .connectedcard:hover::after {
+    box-shadow: 0 1px 4px 0 rgba(37, 34, 71, 0.3); }
+
+/*
+Connected Card Light
+
+Accepts a module (with a light background) and assumes a dismiss button.
+
+Markup:
+<div class="connectedcard connectedcard-light">
+  <button type="button">Remove</button>
+  <sg-insert>3.13-1</sg-insert>
+</div>
+
+Styleguide 3.6.1
+*/
+.connectedcard-light > button {
+  background-image: url(assets/connectedcard-remove-light-aed19df88143d8fa36401f7324a1d16d.svg); }
+
+/*
+Connected Item
+
+Used to represent connected groups and connected pathways.
+
+Markup:
+<a class="connecteditem" href="">
+  <h1>Blue Group</h1>
+  <p>(19 Members)</p>
+</a>
+
+Styleguide 3.7
+*/
+.connecteditem {
+  background: #c30a28;
+  color: #fff;
+  display: block;
+  padding: 16px 56px 16px 16px; }
+  .connecteditem h1 {
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1.2;
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap; }
+  .connecteditem p {
+    font-size: 14px; }
+  .connecteditem:hover {
+    color: #fff; }
+
+/*
+Connection Add
+
+A button for adding connection items to a list.
+
+Markup:
+<button class="connectionadd {$modifiers}">Add to collection</button>
+
+Stlyeguide 3.62
+*/
+.connectionadd {
+  color: rgba(5, 1, 44, 0.38);
+  display: block;
+  font-size: 14px;
+  height: 24px;
+  line-height: 24px;
+  padding-right: 40px;
+  position: relative; }
+  .connectionadd::after {
+    background: url(assets/connectionadd-cfafdd81c12ed7aaa554b0f6908b76c4.svg) center center no-repeat;
+    border: 1px dashed #05012c;
+    border-radius: 4px;
+    box-sizing: border-box;
+    content: '';
+    display: block;
+    height: 24px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 24px; }
+  .connectionadd.connectionadd-is-added {
+    color: transparent;
+    overflow: hidden;
+    padding-right: 24px;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+    width: 0; }
+
+/*
+Connection Item
+
+An item in a connected list of collections.
+
+Markup:
+<p class="connectionitem">Science Skills <button type="button">Remove</button></p>
+
+Stlyeguide 3.61
+*/
+.connectionitem {
+  background-color: #78768d;
+  border-radius: 4px;
+  color: #fff;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 12px;
+  font-weight: bold;
+  height: 24px;
+  line-height: 24px;
+  padding-left: 8px; }
+  .connectionitem button {
+    background: url(assets/connectionitem-3604d96f7d78153179dd35b05c83dc68.svg) center center no-repeat;
+    color: transparent;
+    overflow: hidden;
+    padding: 8px 10px;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+    width: 8px; }
+
+/*
+Detail
+
+Used to present a list of details about an item.
+
+Markup:
+<div class="detail">
+  <article>
+    <h1>Website</h1>
+    <p><a href="http://www.w3.org">www.w3.org</a></p>
+  </article>
+  <article>
+    <h1>Contact Email</h1>
+    <p><a href="mailto:azimalonglastname@wc3.com">azimalonglastname@wc3.com</a></p>
+  </article>
+</div>
+
+Styleguide 3.22
+*/
+.detail article {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap; }
+  .detail article h1 {
+    margin: 0 10px 8px 0; }
+  .detail article:not(:last-child) {
+    margin-bottom: 8px; }
+
+@media (min-width: 1024px) {
+  .detail {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap; }
+    .detail article {
+      margin-right: 48px; }
+      .detail article h1 {
+        margin-bottom: 0; }
+      .detail article:not(:last-child) {
+        margin-bottom: 0; } }
+
+/*
+Dialog
+
+Default - Standard size
+.dialog-large - Large dialog
+
+Markup:
+<button class="button" aria-controls="dialog{$modifiers}">Open Dialog</button>
+<dialog class="dialog {$modifiers}" id="dialog{$modifiers}">
+        <button class="dialog-x-close" aria-controls="dialog{$modifiers}"><span class="icon icon-notext icon-close">Close</span></button>
+        <div class="dialog-x-content">
+            <h1 class="title">Add Badge</h1>
+            <p>Add a badge you've already received by utilizing one of the options below.</p>
+            <div class="formfield">
+              <p class="formfield-x-label">Upload Badge Image</p>
+              <div class="l-childrenhorizontal l-childrenhorizontal-small">
+                <button class="button">Choose File</button>
+                <p class="small">No file choosen</p>
+              </div>
+            </div>
+            <sg-insert>3.51-1</sg-insert>
+            <div class="formfield">
+              <label>Paste Badge URL</label>
+              <input type="text" placeholder="Enter URL">
+            </div>
+            <button class="button button-secondaryghost l-offsetleft" type="button">Show Advanced</button>
+            <div class="formfield">
+              <label>Paste Badge JSON</label>
+              <textarea></textarea>
+            </div>
+            <div class="l-childrenhorizontal l-childrenhorizontal-small l-childrenhorizontal-right">
+              <button class="button button-primaryghost" type="button">Cancel</button>
+              <button class="button">Add Badge</button>
+            </div>
+        </div>
+</dialog>
+
+Styleguide 3.23
+*/
+.dialog {
+  background: #fff;
+  border: 0;
+  color: #252247;
+  height: 100vh;
+  left: 50%;
+  margin: 0;
+  min-height: 32px;
+  opacity: 0;
+  overflow-y: auto;
+  padding: 0;
+  position: fixed;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%) scale3d(0.75, 0.75, 0.75);
+          transform: translate(-50%, -50%) scale3d(0.75, 0.75, 0.75);
+  -webkit-transition: opacity 0.25s ease-out, box-shadow 0.25s ease-out, -webkit-transform 0.25s ease-out;
+  transition: opacity 0.25s ease-out, box-shadow 0.25s ease-out, -webkit-transform 0.25s ease-out;
+  transition: opacity 0.25s ease-out, transform 0.25s ease-out, box-shadow 0.25s ease-out;
+  transition: opacity 0.25s ease-out, transform 0.25s ease-out, box-shadow 0.25s ease-out, -webkit-transform 0.25s ease-out;
+  width: 100vw; }
+  .dialog + .backdrop {
+    background: rgba(5, 1, 44, 0.12);
+    opacity: 0;
+    -webkit-transition: opacity 0.25s ease-out;
+    transition: opacity 0.25s ease-out; }
+  .dialog::-webkit-backdrop {
+    background: rgba(5, 1, 44, 0.12);
+    opacity: 0;
+    -webkit-transition: opacity 0.25s ease-out;
+    transition: opacity 0.25s ease-out; }
+  .dialog::backdrop {
+    background: rgba(5, 1, 44, 0.12);
+    opacity: 0;
+    -webkit-transition: opacity 0.25s ease-out;
+    transition: opacity 0.25s ease-out; }
+  .dialog .dialog-x-close {
+    background: url(assets/dialog-close-563b736ec235520bbdd44c858934965a.svg);
+    border: 0;
+    cursor: pointer;
+    display: block;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    right: 24px;
+    text-indent: -9999px;
+    top: 24px;
+    width: 24px;
+    z-index: 3; }
+  .dialog .dialog-x-content {
+    padding: 20px 16px 16px; }
+    .dialog .dialog-x-content p {
+      line-height: 1.35; }
+    .dialog .dialog-x-content > *:not(:last-child) {
+      margin-bottom: 16px; }
+  .dialog .dialog-x-footer {
+    padding: 16px 24px; }
+  .dialog[open] {
+    box-shadow: 0 4px 4px 0 rgba(5, 1, 44, 0.12), 0 0 2px 0 rgba(5, 1, 44, 0.12);
+    opacity: 1;
+    -webkit-transform: scale3d(1, 1, 1) translate(-50%, -50%);
+            transform: scale3d(1, 1, 1) translate(-50%, -50%); }
+    .dialog[open] + .backdrop {
+      opacity: 1; }
+    .dialog[open]::-webkit-backdrop {
+      opacity: 1; }
+    .dialog[open]::backdrop {
+      opacity: 1; }
+  @media (min-width: 768px) {
+    .dialog {
+      border-radius: 4px;
+      height: auto;
+      max-height: calc(100vh - 48px);
+      top: 32px;
+      -webkit-transform: translateX(-50%);
+              transform: translateX(-50%);
+      width: 512px; }
+      .dialog[open] {
+        top: 32px;
+        -webkit-transform: translateX(-50%);
+                transform: translateX(-50%); } }
+
+/*
+Dialog Titled
+
+Markup:
+<button class="button" aria-controls="dialog-titled">Open Dialog</button>
+<dialog class="dialog dialog-titled" id="dialog-titled">
+  <header class="dialog-x-titlebar">
+    <h1>Share Badge</h1>
+    <button class="dialog-x-close" aria-controls="dialog{$modifiers}"><span class="icon icon-notext icon-close">Close</span></button>
+  </header>
+  <div class="dialog-x-content">
+  <sg-insert>3.25.3-1</sg-insert>
+  <div class="l-childrenhorizontal l-childrenhorizontal-spacebetween">
+    <div class="l-childrenhorizontal l-childrenhorizontal-small">
+      <a class="social social-facebook" href="">Facebook</a>
+      <a class="social social-linkedin" href="">LinkedIn</a>
+    </div>
+    <button class="small">Open link in a new window</button>
+  </div>
+  </div>
+</dialog>
+
+Styleguide 3.23.1
+*/
+.dialog-titled .dialog-x-titlebar {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  background: #05012c;
+  color: #fff;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 12px;
+  font-weight: bold;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  padding: 16px;
+  text-transform: uppercase; }
+
+.dialog-titled .dialog-x-close {
+  background: url(assets/dialog-titled-close-ecf4cc4d5782e5e9700126acede2c7b3.svg);
+  position: relative;
+  right: auto;
+  top: auto; }
+
+/*
+Dropzone
+
+Default - A large dropzone, usually as the last item of a list
+.dropzone-inline - For use in smaller "inline" lists
+
+Markup:
+<button class="dropzone {$modifiers}">Dropzone</button>
+
+Styleguide 3.8
+*/
+.dropzone {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  border: 2px dashed #e1e0e5;
+  box-sizing: border-box;
+  cursor: pointer;
+  color: #252247;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  font-size: 14px;
+  font-weight: bold;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  line-height: 1.3;
+  min-height: 230px;
+  padding: 16px;
+  text-align: center;
+  text-transform: uppercase;
+  -webkit-transition: border-color 0.25s ease-out;
+  transition: border-color 0.25s ease-out;
+  width: 100%; }
+  .dropzone::before {
+    background: url(assets/dropzone-add-40a10ee2b63f52eddfd6fc29104727cc.svg) no-repeat;
+    background-size: contain;
+    content: '';
+    display: block;
+    height: 58px;
+    margin-bottom: 16px;
+    width: 58px; }
+  .dropzone:hover, .dropzone:focus, .dropzone.is-active {
+    border-color: #f7e1e5;
+    box-shadow: none;
+    color: #252247; }
+
+.dropzone-inline {
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  min-height: 0; }
+  .dropzone-inline::before {
+    height: 24px;
+    margin-bottom: 0;
+    margin-right: 16px;
+    width: 24px; }
+
+/*
+Empty
+
+Used to indicate an empty state of a list.
+
+Default - Has an avatar image, left aligned
+
+Markup:
+<h1 class="empty {$modifiers}">No Entries</h1>
+
+Styleguide 3.11
+*/
+.empty {
+  border-top: 1px solid #e1e0e5;
+  color: rgba(5, 1, 44, 0.38);
+  font-size: 14px;
+  line-height: 24px;
+  padding-top: 16px; }
+  @media (min-width: 768px) {
+    .empty {
+      color: #05012c;
+      font-size: 16px; } }
+
+/*
+Empty Illustration
+
+Markup:
+<article class="emptyillustration">
+  <h1>You have no badges</h1>
+  <img src="http://placehold.it/736x314" alt="Illustration description">
+</article>
+
+Styleguide 3.56
+*/
+@-webkit-keyframes emptyillustration {
+  0% {
+    opacity: 0;
+    -webkit-transform: scale3d(0.75, 0.75, 0.75);
+            transform: scale3d(0.75, 0.75, 0.75); }
+  100% {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none; } }
+@keyframes emptyillustration {
+  0% {
+    opacity: 0;
+    -webkit-transform: scale3d(0.75, 0.75, 0.75);
+            transform: scale3d(0.75, 0.75, 0.75); }
+  100% {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none; } }
+
+.emptyillustration {
+  color: #05012c;
+  font-size: 24px;
+  font-weight: bold;
+  padding-bottom: 160px;
+  text-align: center; }
+  .emptyillustration h1 {
+    margin-bottom: 24px; }
+  .emptyillustration img {
+    -webkit-animation: emptyillustration 0.25s ease-out forwards;
+            animation: emptyillustration 0.25s ease-out forwards;
+    display: block;
+    height: auto;
+    margin: 0 auto;
+    max-width: 100%; }
+  @media (min-width: 768px) {
+    .emptyillustration {
+      padding-bottom: 200px; }
+      .emptyillustration img {
+        max-width: 736px; } }
+
+/*
+Footer
+
+Appears at the bottom of the document
+
+Markup:
+<div class="footer">
+  <ul>
+    <li>Copyright &copy; 2016 <a href="http://concentricsky.com" target="_blank">Concentric Sky, Inc.</a></li>
+    <li>Powered by <a href="" target="_blank">Badgr</a></li>
+  </ul>
+  <a href="" target="_blank">API documentation</a>
+</div>
+
+Styleguide 3.24
+*/
+.footer {
+  border-top: 1px solid #e1e0e5;
+  color: #78768d;
+  font-size: 14px;
+  line-height: 1.5;
+  padding-bottom: 24px;
+  padding-top: 24px;
+  text-align: center; }
+  .footer > *:not(last-child) {
+    margin-bottom: 16px; }
+  .footer a {
+    color: #78768d;
+    -webkit-transition: color 0.25s ease-out;
+    transition: color 0.25s ease-out; }
+    .footer a:hover, .footer a:active {
+      color: #c30a28; }
+  .footer ul a {
+    text-decoration: underline; }
+  .footer > a {
+    color: #a09eaf;
+    font-weight: bold;
+    text-transform: uppercase; }
+  @media (min-width: 768px) {
+    .footer {
+      -webkit-box-align: center;
+          -ms-flex-align: center;
+              align-items: center;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: justify;
+          -ms-flex-pack: justify;
+              justify-content: space-between;
+      padding-bottom: 32px;
+      padding-top: 32px;
+      text-align: left; }
+      .footer ul {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        line-height: 1; }
+        .footer ul > *:not(:last-child) {
+          margin-right: 8px;
+          padding-right: 8px;
+          position: relative; }
+          .footer ul > *:not(:last-child)::after {
+            background-color: #a09eaf;
+            content: '';
+            display: block;
+            height: 100%;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 1px; } }
+
+/*
+Form Checkbox
+
+Default - Standard checkbox with label text
+.formcheckbox-notext - Checkbox only
+
+Markup:
+<label class="formcheckbox {$modifiers}" for="remember-me">
+  <input name="remember-me" id="remember-me" type="checkbox">
+  <span class="formcheckbox-x-text">Remember me</span>
+</label>
+
+Styleguide 3.26
+*/
+.formcheckbox {
+  display: block;
+  overflow: hidden;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none; }
+  .formcheckbox input {
+    left: -9999px;
+    position: absolute; }
+  .formcheckbox .formcheckbox-x-text {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    color: #05012c;
+    cursor: pointer;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    font-size: 12px;
+    -webkit-transition: color 0.25s ease-out;
+    transition: color 0.25s ease-out; }
+    .formcheckbox .formcheckbox-x-text::before {
+      background: center center no-repeat;
+      border: 1px solid #e1e0e5;
+      border-radius: 4px;
+      content: '';
+      display: block;
+      height: 16px;
+      margin-right: 8px;
+      -webkit-transition: border-color 0.25s ease-out, background 0.25s ease-out;
+      transition: border-color 0.25s ease-out, background 0.25s ease-out;
+      width: 16px; }
+    .formcheckbox .formcheckbox-x-text:hover::before {
+      border-color: #05012c; }
+  .formcheckbox input:focus + .formcheckbox-x-text::before {
+    border-color: #05012c; }
+  .formcheckbox input:checked + .formcheckbox-x-text::before {
+    background-color: #05012c;
+    background-image: url(assets/formcheckbox-checked-6a30b57ee0cbd95307b46d213c10c971.svg);
+    border-color: #05012c; }
+  .formcheckbox.formcheckbox-is-disabled {
+    opacity: .3;
+    pointer-events: none; }
+
+.formcheckbox-notext .formcheckbox-x-text {
+  color: transparent;
+  display: block;
+  height: 18px;
+  overflow: hidden;
+  width: 18px; }
+  .formcheckbox-notext .formcheckbox-x-text::before {
+    margin-right: 0; }
+
+/*
+Form Field
+
+Formfield is a container on form inputs themselves, which can accept its own states.
+
+Default - Basic static version
+.formfield-locked - Displays a lock icon
+
+Markup:
+<div class="formfield {$modifiers}">
+  <label for="formfield">Label <span>(Required)</span></label>
+  <input id="formfield" type="text" placeholder="Placeholder">
+</div>
+
+Styleguide 3.25
+*/
+/*
+Form Field
+
+Formfield is a container on form inputs themselves, which can accept its own states.
+
+Markup:
+<div class="formfield formfield-is-error">
+  <label for="formfield">Label <span>(Required)</span></label>
+  <input id="formfield" type="text" placeholder="Placeholder">
+  <p class="formfield-x-error">Here is some error text.</p>
+</div>
+
+Styleguide 3.25.1
+*/
+/*
+Form Field (with Select)
+
+Default - Basic static version
+.formfield-is-error - When something has gone wrong
+
+Markup:
+<div class="formfield {$modifiers}">
+  <label for="formfield">Label <span>(Required)</span></label>
+  <select id="formfield">
+    <option value="option1">Option 1</option>
+    <option value="option2">Option 2</option>
+  </select>
+</div>
+
+Styleguide 3.25.2
+*/
+/*
+Form Field (with Textarea)
+
+Default - Basic static version
+.formfield-is-error - When something has gone wrong
+
+Markup:
+<div class="formfield {$modifiers}">
+  <label for="formfield">Label <span>(Required)</span></label>
+  <textarea id="formfield"></textarea>
+</div>
+
+Styleguide 3.25.3
+*/
+/*
+Form Field (with action)
+
+Default - Basic static version
+.formfield-is-error - When something has gone wrong
+
+Markup:
+<div class="formfield {$modifiers}">
+  <label for="formfield">Label <span>(Required)</span></label>
+  <div class="formfield-x-action">
+    <input id="formfield" type="text" value="http://mylink.biz" disabled>
+    <button class="button button-major" type="button">Copy</button>
+  </div>
+</div>
+
+Styleguide 3.25.4
+*/
+.formfield {
+  display: block; }
+  .formfield label,
+  .formfield .formfield-x-label {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    color: #252247;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    font-size: 12px;
+    font-weight: bold;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    margin-bottom: 8px;
+    text-transform: uppercase; }
+    .formfield label span,
+    .formfield .formfield-x-label span {
+      color: #78768d; }
+    .formfield label a,
+    .formfield .formfield-x-label a {
+      font-size: 14px;
+      font-weight: normal;
+      text-transform: none; }
+    .formfield label button,
+    .formfield .formfield-x-label button {
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase; }
+  .formfield input:not([type='checkbox']),
+  .formfield select,
+  .formfield textarea {
+    background: #fff;
+    border: 1px solid rgba(5, 1, 44, 0.38);
+    border-radius: 4px;
+    box-sizing: border-box;
+    display: block;
+    font-size: 14px;
+    line-height: 1.7;
+    min-width: 150px;
+    outline: none;
+    padding: 8px 16px;
+    -webkit-transition: border-color 0.25s ease-out;
+    transition: border-color 0.25s ease-out;
+    width: 100%; }
+    .formfield input:not([type='checkbox'])::-webkit-input-placeholder, .formfield input:not([type='checkbox'])::-webkit-input-placeholder, .formfield input:not([type='checkbox'])::-moz-placeholder, .formfield input:not([type='checkbox']):-ms-input-placeholder,
+    .formfield select::-webkit-input-placeholder,
+    .formfield select::-webkit-input-placeholder,
+    .formfield select::-moz-placeholder,
+    .formfield select:-ms-input-placeholder,
+    .formfield textarea::-webkit-input-placeholder,
+    .formfield textarea::-webkit-input-placeholder,
+    .formfield textarea::-moz-placeholder,
+    .formfield textarea:-ms-input-placeholder {
+      color: #a09eaf; }
+    .formfield input:not([type='checkbox'])::placeholder, .formfield input:not([type='checkbox'])::-webkit-input-placeholder, .formfield input:not([type='checkbox'])::-moz-placeholder, .formfield input:not([type='checkbox']):-ms-input-placeholder,
+    .formfield select::placeholder,
+    .formfield select::-webkit-input-placeholder,
+    .formfield select::-moz-placeholder,
+    .formfield select:-ms-input-placeholder,
+    .formfield textarea::placeholder,
+    .formfield textarea::-webkit-input-placeholder,
+    .formfield textarea::-moz-placeholder,
+    .formfield textarea:-ms-input-placeholder {
+      color: #a09eaf; }
+    .formfield input:not([type='checkbox'])[disabled], .formfield input:not([type='checkbox'])[readonly],
+    .formfield select[disabled],
+    .formfield select[readonly],
+    .formfield textarea[disabled],
+    .formfield textarea[readonly] {
+      color: #a09eaf; }
+    .formfield input:not([type='checkbox']):hover:not([readonly]):not([disabled]),
+    .formfield select:hover:not([readonly]):not([disabled]),
+    .formfield textarea:hover:not([readonly]):not([disabled]) {
+      border-color: #05012c; }
+    .formfield input:not([type='checkbox']):focus:not([readonly]):not([disabled]),
+    .formfield select:focus:not([readonly]):not([disabled]),
+    .formfield textarea:focus:not([readonly]):not([disabled]) {
+      border-color: #78768d; }
+  .formfield select {
+    -webkit-appearance: none;
+       -moz-appearance: none;
+            appearance: none;
+    background-image: url(assets/form-dropdown-5cd0bec3461efcec39fb9738b346782b.svg);
+    background-position: calc(100% - 16px) center;
+    background-repeat: no-repeat;
+    padding-right: 32px; }
+    .formfield select::-ms-expand {
+      display: none; }
+  .formfield textarea {
+    resize: vertical; }
+  .formfield .formfield-x-action {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex; }
+    .formfield .formfield-x-action input:not([type='checkbox']),
+    .formfield .formfield-x-action select,
+    .formfield .formfield-x-action textarea {
+      border-bottom-right-radius: 0;
+      border-top-right-radius: 0; }
+    .formfield .formfield-x-action a,
+    .formfield .formfield-x-action button {
+      border-bottom-left-radius: 0;
+      border-top-left-radius: 0; }
+  .formfield .formfield-x-description {
+    font-size: 12px;
+    margin-bottom: 8px; }
+  .formfield .formfield-x-error {
+    color: #f01f31;
+    font-size: 12px;
+    margin-top: 8px;
+    display: none;
+    -webkit-transition: opacity 0.125s ease-out;
+    transition: opacity 0.125s ease-out; }
+  .formfield.formfield-is-error input,
+  .formfield.formfield-is-error select,
+  .formfield.formfield-is-error textarea {
+    border-color: #f01f31; }
+    .formfield.formfield-is-error input:hover:not([readonly]):not([disabled]), .formfield.formfield-is-error input:focus:not([readonly]):not([disabled]),
+    .formfield.formfield-is-error select:hover:not([readonly]):not([disabled]),
+    .formfield.formfield-is-error select:focus:not([readonly]):not([disabled]),
+    .formfield.formfield-is-error textarea:hover:not([readonly]):not([disabled]),
+    .formfield.formfield-is-error textarea:focus:not([readonly]):not([disabled]) {
+      border-color: #f01f31; }
+  .formfield.formfield-is-error .formfield-x-error {
+    display: block; }
+
+.formfield-locked input:not([type='checkbox']),
+.formfield-locked select,
+.formfield-locked textarea {
+  background: #fff url(assets/formfield-locked-de4125fd1b4acfb72f50a432f53e31c8.svg) 16px center no-repeat;
+  padding-left: 40px; }
+
+/*
+Form Image
+
+Markup:
+<div class="formimage">
+  <p>Issuer Image</p>
+  <input type="file" accept="image/*" name="issuer_image" id="issuer_image">
+  <label for="issuer_image">
+    <span class="formimage-x-image">
+      <img src="/images/placeholderavatar.svg" alt="Placeholder image" width="80" height="80">
+    </span>
+    <span class="formimage-x-text">
+      <span class="formimage-x-label">Drop image or <span>browse</span>.</span>
+      <span class="formimage-x-button button button-primaryghost l-offsetleft l-offsetbottom">Change</span>
+    </span>
+  </label>
+</div>
+
+
+Styleguide 3.27
+*/
+.formimage {
+  display: block; }
+  .formimage .formimage-x-title {
+    color: #252247;
+    font-size: 12px;
+    font-weight: bold;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    margin-bottom: 8px;
+    text-transform: uppercase; }
+  .formimage input {
+    display: none; }
+  .formimage label {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    border: 1px dashed #a09eaf;
+    border-radius: 4px;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    padding: 16px;
+    -webkit-transition: border-color 0.25s ease-out, border-style 0.25s ease-out;
+    transition: border-color 0.25s ease-out, border-style 0.25s ease-out; }
+    .formimage label:hover, .formimage label:focus {
+      border-color: #05012c;
+      border-style: solid; }
+  .formimage.formimage-is-error label {
+    border-color: #f01f31;
+    border-style: solid; }
+  .formimage.formimage-is-dragging label {
+    border-color: #05012c;
+    border-style: solid; }
+  .formimage .formimage-x-image {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    margin-right: 16px;
+    width: 80px;
+    height: 80px; }
+    .formimage .formimage-x-image img {
+      display: block;
+      max-width: 80px;
+      max-height: 80px; }
+  .formimage .formimage-x-text {
+    -webkit-box-align: start;
+        -ms-flex-align: start;
+            align-items: flex-start;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column; }
+  .formimage .formimage-x-error {
+    color: #f01f31;
+    font-size: 12px;
+    margin-top: 8px; }
+  .formimage .formimage-x-label {
+    color: #78768d;
+    font-size: 14px; }
+    .formimage .formimage-x-label span {
+      color: #c30a28; }
+  .formimage .formimage-x-button {
+    margin-top: 8px; }
+
+/*
+Form Inline
+
+Markup:
+<form action="" class="forminline">
+  <div class="formfield">
+    <label for="id" class="visuallyhidden">Email</label>
+    <input type="text" name="name" id="id">
+  </div>
+  <button type="submit" class="button">Add Email</button>
+</form>
+
+Styleguide 3.28
+*/
+.forminline {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex; }
+  .forminline > :first-child {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 0 auto;
+            flex: 1 0 auto; }
+  .forminline > :last-child {
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 auto;
+            flex: 0 0 auto; }
+  @media (max-width: 768px) {
+    .forminline > :first-child input {
+      border-bottom-right-radius: 0;
+      border-right: 0;
+      border-top-right-radius: 0; }
+    .forminline > :last-child {
+      border-bottom-left-radius: 0;
+      border-top-left-radius: 0; } }
+  @media (min-width: 768px) {
+    .forminline > :first-child {
+      margin-right: 16px; } }
+  @media (min-width: 1024px) {
+    .forminline > :first-child {
+      -webkit-box-flex: 0;
+          -ms-flex: 0 0 320px;
+              flex: 0 0 320px; } }
+
+/*
+Form Message
+
+Positioning is controlled by main under layouts
+
+Default - Hidden by default
+.formmessage-is-active - Activates/shows the form message
+.formmessage-is-active.formmessage-is-error - Error
+.formmessage-is-active.formmessage-is-pending - Pending
+.formmessage-is-active.formmessage-is-success - Success
+
+Markup:
+<div class="formmessage {$modifiers}">
+  <p>Message</p>
+  <button class="icon icon-close-light icon-right" type="button" onclick="event.target.parentNode.classList.remove('formmessage-is-active')">Dismiss</button>
+</div>
+
+Styleguide 3.29
+*/
+.formmessage {
+  background-color: #c30a28;
+  box-sizing: border-box;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0;
+  padding: 16px;
+  position: relative;
+  text-align: center;
+  -webkit-transform: translate3d(0, -100%, 0);
+          transform: translate3d(0, -100%, 0);
+  width: 100%;
+  z-index: 2; }
+  .formmessage button {
+    background: url(assets/formmessage-close-66ace26d8e33bb093a03d2e78e213666.svg) right center no-repeat;
+    color: #fff;
+    font-size: 14px;
+    padding-right: 24px;
+    position: absolute;
+    right: 16px;
+    text-indent: -9999px;
+    top: calc(50% - 8px); }
+  .formmessage p {
+    line-height: 1.5;
+    padding-left: 48px;
+    padding-right: 48px; }
+  .formmessage.formmessage-is-active {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none;
+    -webkit-transition: opacity 0.25s ease-out, -webkit-transform 0.25s ease-out;
+    transition: opacity 0.25s ease-out, -webkit-transform 0.25s ease-out;
+    transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+    transition: transform 0.25s ease-out, opacity 0.25s ease-out, -webkit-transform 0.25s ease-out; }
+  .formmessage.formmessage-is-inactive {
+    opacity: 0;
+    -webkit-transform: translate3d(0, -100%, 0);
+            transform: translate3d(0, -100%, 0);
+    -webkit-transition: opacity 0.25s ease-out, -webkit-transform 0.25s ease-out;
+    transition: opacity 0.25s ease-out, -webkit-transform 0.25s ease-out;
+    transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+    transition: transform 0.25s ease-out, opacity 0.25s ease-out, -webkit-transform 0.25s ease-out; }
+  .formmessage.formmessage-is-error {
+    background-color: #f01f31; }
+  .formmessage.formmessage-is-pending {
+    background-color: #ffb500; }
+  .formmessage.formmessage-is-success {
+    background-color: #93ab23; }
+  @media (min-width: 768px) {
+    .formmessage button {
+      text-indent: 0; }
+    .formmessage p {
+      padding-left: 80px;
+      padding-right: 80px; } }
+
+/*
+Form Submit
+
+Markup:
+<div class="formsubmit">
+  <sg-insert>3.26-1</sg-insert>
+  <div>
+    <sg-insert>3.20-1</sg-insert>
+    <a href="">Forgot Password?</a>
+  </div>
+</div>
+
+Styleguide 3.30
+*/
+.formsubmit {
+  padding-top: 8px; }
+  .formsubmit > *:not(:last-child) {
+    margin-bottom: 16px; }
+  .formsubmit button {
+    width: 100%; }
+  .formsubmit div {
+    text-align: center; }
+    .formsubmit div a,
+    .formsubmit div button {
+      display: block; }
+    .formsubmit div > *:not(:last-child) {
+      margin-bottom: 16px; }
+  @media (min-width: 768px) {
+    .formsubmit {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: justify;
+          -ms-flex-pack: justify;
+              justify-content: space-between; }
+      .formsubmit button {
+        width: auto; }
+      .formsubmit div {
+        -webkit-box-align: end;
+            -ms-flex-align: end;
+                align-items: flex-end;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-flex: 1;
+            -ms-flex: 1 0 auto;
+                flex: 1 0 auto;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+            -ms-flex-direction: column;
+                flex-direction: column;
+        -webkit-box-pack: end;
+            -ms-flex-pack: end;
+                justify-content: flex-end;
+        text-align: left; } }
+
+/*
+Heading
+
+Default - Stanard heading
+.heading-small - Smaller version
+
+Markup:
+<header class="heading {$modifiers}">
+    <div class="heading-x-image">
+      <img srcset="http://placehold.it/140x80 2x" src="http://placehold.it/70x40" alt="Web Design and Programming logo">
+    </div>
+    <div class="heading-x-text">
+        <h1>Web Design and Programming <span>12 of Something</span> <button class="heading-x-edit" type="button">Edit</button></h1>
+        <p>World Wide Web Consortium</p>
+    </div>
+    <div class="heading-x-actions">
+        <a href class="button">Create Badge</a>
+    </div>
+</header>
+
+Styleguide 3.5
+*/
+.heading {
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  box-sizing: border-box;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column; }
+  .heading .heading-x-image {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    -ms-flex-item-align: start;
+        align-self: flex-start;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 40px;
+            flex: 0 0 40px;
+    height: 40px;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    margin-bottom: 16px;
+    margin-right: 16px;
+    max-width: 40px;
+    width: 40px; }
+    .heading .heading-x-image a {
+      display: block;
+      width: 100%; }
+    .heading .heading-x-image img {
+      display: block;
+      max-height: 100%;
+      max-width: 100%; }
+  .heading .heading-x-text {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto; }
+    .heading .heading-x-text > h1,
+    .heading .heading-x-text > p {
+      margin-bottom: 8px; }
+    .heading .heading-x-text > h2,
+    .heading .heading-x-text > div,
+    .heading .heading-x-text > a {
+      margin-bottom: 16px; }
+    .heading .heading-x-text > p {
+      white-space: pre-line; }
+    .heading .heading-x-text a:not(.button) {
+      color: #05012c; }
+    .heading .heading-x-text small {
+      color: #78768d;
+      font-size: 14px; }
+    .heading .heading-x-text > h1 {
+      color: #05012c;
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 1.35; }
+      .heading .heading-x-text > h1 span {
+        color: #78768d;
+        font-size: 14px;
+        font-weight: normal; }
+      .heading .heading-x-text > h1:only-child {
+        margin-bottom: 0; }
+    .heading .heading-x-text > h2 {
+      -webkit-box-align: center;
+          -ms-flex-align: center;
+              align-items: center;
+      color: #78768d;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      font-size: 12px;
+      max-width: 560px; }
+      .heading .heading-x-text > h2::after {
+        background-color: #e1e0e5;
+        content: '';
+        display: block;
+        -webkit-box-flex: 1;
+            -ms-flex: 1 1 0;
+                flex: 1 1 0;
+        height: 1px;
+        margin-left: 8px; }
+    .heading .heading-x-text > p,
+    .heading .heading-x-text > ul,
+    .heading .heading-x-text > ol {
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 560px; }
+  .heading .heading-x-edit {
+    background: url(assets/heading-edit-ae7c8b2f7b5d03c2887234e65f3a007a.svg) left center no-repeat;
+    color: rgba(5, 1, 44, 0.38);
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    padding-left: 24px;
+    text-transform: uppercase; }
+  .heading .heading-x-actions {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    margin-top: 16px; }
+    .heading .heading-x-actions > *:not(:last-child) {
+      margin-bottom: 8px; }
+  .heading .heading-x-meta {
+    color: rgba(5, 1, 44, 0.38); }
+  @media (min-width: 768px) {
+    .heading .heading-x-text h1 {
+      font-size: 42px;
+      font-weight: bold;
+      line-height: 64px; }
+      .heading .heading-x-text h1 span {
+        font-size: 16px; } }
+  @media (min-width: 1024px) {
+    .heading {
+      -webkit-box-orient: horizontal;
+      -webkit-box-direction: normal;
+          -ms-flex-direction: row;
+              flex-direction: row;
+      -webkit-box-pack: justify;
+          -ms-flex-pack: justify;
+              justify-content: space-between; }
+      .heading .heading-x-image {
+        -webkit-box-flex: 0;
+            -ms-flex: 0 0 70px;
+                flex: 0 0 70px;
+        height: 70px;
+        margin-right: 24px;
+        max-width: 70px;
+        width: 70px; }
+      .heading .heading-x-text {
+        -webkit-box-flex: 1;
+            -ms-flex: 1 1 60%;
+                flex: 1 1 60%; }
+      .heading .heading-x-actions {
+        -webkit-box-flex: 1;
+            -ms-flex: 1 1 0;
+                flex: 1 1 0;
+        margin-top: 0; } }
+
+.heading-small {
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+              -ms-grid-row-align: flex-start;
+          align-items: flex-start; }
+  .heading-small .heading-x-text {
+    margin-bottom: 16px; }
+    .heading-small .heading-x-text h1,
+    .heading-small .heading-x-text p {
+      font-size: 14px; }
+  @media (min-width: 768px) {
+    .heading-small .heading-x-image {
+      -ms-flex-item-align: start;
+          align-self: flex-start; }
+    .heading-small .heading-x-text {
+      margin-bottom: 0; } }
+  @media (min-width: 1024px) {
+    .heading-small .heading-x-text h1 {
+      font-size: 24px;
+      line-height: 32px; }
+    .heading-small .heading-x-text p {
+      font-size: 16px; } }
+
+/*
+Header
+
+`<header.header>`'s position is on the page is controlled under the base layout rules. `<header.header>` contains `.menuitem` modules.
+
+Markup:
+<header class="header">
+	<a href="/">
+		<picture>
+			<source media="(min-width: 640px)" srcset="images/logo-desktop.svg">
+			<img src="images/logo.svg" alt="Badgr logo">
+		</picture>
+	</a>
+	<a class="header-x-menu" href="#navigation">Main Navigation</a>
+</header>
+
+Styleguide 3.1
+*/
+.header {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  background-color: #fff;
+  border-bottom: 1px solid #e1e0e5;
+  box-shadow: 0 2px 0 0 #e1e0e5;
+  box-sizing: border-box;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  height: 78px;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  width: 100%;
+  z-index: 3; }
+  .header .header-x-menu {
+    background: url(assets/header-menu-5089df54ba6710b5d143afcef2117acb.svg) center center no-repeat;
+    color: transparent;
+    display: block;
+    height: 24px;
+    overflow: hidden;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+    width: 24px; }
+  @media (min-width: 768px) {
+    .header .header-x-menu {
+      display: none; } }
+
+/*
+Hidden
+
+This module hides any element with this class, optionally each state can show the element for certain breakpoints.
+
+Default - Nothing happens
+.hidden-is-tablet - Only shows for tablets and up
+.hidden-is-desktop - Only shows for desktops and up
+
+Markup:
+<div class="hidden {$modifiers}">Hidden</div>
+
+Styleguide 3.46
+*/
+@media (max-width: 767px) {
+  .hidden.hidden-is-tablet {
+    display: none !important; } }
+
+@media (max-width: 1023px) {
+  .hidden.hidden-is-desktop {
+    display: none !important; } }
+
+/*
+Inactive
+
+When you need to isolate a single item on the page, apply this to all other siblings.
+
+Markup:
+<p>Active</p>
+<p class="inactive">Inactive</p>
+
+Styleguide 3.9
+*/
+@-webkit-keyframes inactive {
+  0% {
+    opacity: 1; }
+  100% {
+    opacity: .1; } }
+@keyframes inactive {
+  0% {
+    opacity: 1; }
+  100% {
+    opacity: .1; } }
+
+.inactive {
+  -webkit-animation: inactive 0.25s ease-out forwards;
+          animation: inactive 0.25s ease-out forwards;
+  pointer-events: none; }
+
+/*
+Integration
+
+Markup:
+<article class="integration">
+  <h1>Integrating Badgr into Canvas</h1>
+  <ol>
+    <li>Make sure your Badgr account has the <a href="">email address confirmed</a> that you log into Canvas with.</li>
+    <li>In Canvas: <strong>a)</strong> Go to Settings, <strong>b)</strong> select Apps, and <strong>c)</strong> click the Add App button.
+      <ol>
+        <li>
+          <a class="integrationthumb" href="#integration-1-1" data-index="0">
+            <span>A<span> (Open Thumnail)</span></span>
+            <img srcset="http://placehold.it/396x288 2x" src="http://placehold.it/198x154" alt="thumbnail description">
+          </a>
+        </li>
+        <li>
+          <a class="integrationthumb" href="#integration-1-2" data-index="1">
+            <span>B<span> (Open Thumnail)</span></span>
+            <img srcset="http://placehold.it/396x288 2x" src="http://placehold.it/198x154" alt="thumbnail description">
+          </a>
+        </li>
+        <li>
+          <a class="integrationthumb" href="#integration-1-3" data-index="2">
+            <span>C<span> (Open Thumnail)</span></span>
+            <img srcset="http://placehold.it/396x288 2x" src="http://placehold.it/198x154" alt="thumbnail description">
+          </a>
+        </li>
+      </ol>
+    </li>
+    <li>Select the Add URL method, and fill out the form using the Consumer Key, Shared Secret and Confif URL, shown below.
+      <ol>
+        <li>
+          <a class="integrationthumb" href="#integration-1-3" data-index="2">
+            <span><span> (Open Thumnail)</span></span>
+            <img srcset="http://placehold.it/396x288 2x" src="http://placehold.it/198x154" alt="thumbnail description">
+          </a>
+        </li>
+      </ol>
+    </li>
+</article>
+
+Styleguide 3.53
+*/
+.integration h1 {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3; }
+
+.integration > ol > li {
+  font-size: 14px;
+  line-height: 1.7;
+  list-style: decimal outside;
+  margin-bottom: 24px;
+  margin-left: 1em;
+  padding-left: 8px; }
+
+.integration > ol ol {
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  margin-top: 8px; }
+  .integration > ol ol li:not(:last-child) {
+    margin-bottom: 16px; }
+
+.integration > *:not(:last-child) {
+  margin-bottom: 16px; }
+
+@media (min-width: 768px) {
+  .integration > ol ol {
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: row;
+            flex-direction: row;
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+    margin-bottom: -16px; }
+    .integration > ol ol li {
+      margin-bottom: 16px; }
+      .integration > ol ol li:not(:last-child) {
+        margin-right: 16px; } }
+
+/*
+Integration Thumbnail
+
+Markup:
+<a class="integrationthumb" href="#integration-1-1" data-index="0">
+  <span>A<span> (Open Thumnail)</span></span>
+  <img srcset="http://placehold.it/396x288 2x" src="http://placehold.it/198x154" alt="thumbnail description">
+</a>
+
+Styleguide 3.54
+*/
+.integrationthumb {
+  border: 1px solid rgba(5, 1, 44, 0.12);
+  border-radius: 4px;
+  display: block;
+  overflow: hidden;
+  position: relative; }
+  .integrationthumb > span {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    background-color: #05012c;
+    bottom: 0;
+    box-sizing: border-box;
+    color: #fff;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    font-weight: bold;
+    height: 30px;
+    left: 0;
+    padding-left: 8px;
+    padding-right: 8px;
+    position: absolute;
+    text-transform: lowercase;
+    width: 100%; }
+    .integrationthumb > span span {
+      background: url(assets/integrationthumb-f38b8fd0333d44ad4b7adb33211a75c4.svg) center center no-repeat;
+      color: transparent;
+      height: 20px;
+      position: absolute;
+      right: 8px;
+      top: calc(50% - 10px);
+      -webkit-user-select: none;
+         -moz-user-select: none;
+          -ms-user-select: none;
+              user-select: none;
+      width: 20px; }
+  .integrationthumb img {
+    display: block; }
+
+/*
+Issuer
+
+Markup:
+<article class="issuer">
+  <header class="heading heading-small">
+    <div class="heading-x-image">
+      <img srcset="http://placehold.it/800x800 2x" src="http://placehold.it/400x400" alt="Web Design and Programming logo">
+    </div>
+    <div class="heading-x-text">
+      <h1>Web Design and Programming</h1>
+      <p>World Wide Web Consortium</p>
+    </div>
+    <div class="heading-x-actions">
+      <a href="" class="button button-tertiaryghost">View Issuer</a>
+    </div>
+  </header>
+  <section>
+    <h1>Most Recently Issued Badges <strong>22 Badges Total</strong></h1>
+    <div class="issuer-x-badges">
+      <article>
+        <div>
+          <img srcset="http://placehold.it/160x160 2x" src="http://placehold.it/80x80" alt="Badge description">
+        </div>
+        <div>
+          <h1><a href="">HTML/CSS</a></h1>
+          <p><strong>5 Earners</strong></p>
+          <p>Fundamentals of HTML and Building a website.</p>
+        </div>
+      </article>
+      <article>
+        <div>
+          <img srcset="http://placehold.it/160x160 2x" src="http://placehold.it/80x80" alt="Badge description">
+        </div>
+        <div>
+          <h1><a href="">HTML/CSS</a></h1>
+          <p><strong>5 Earners</strong></p>
+          <p>Fundamentals of HTML and Building a website.</p>
+        </div>
+      </article>
+      <article>
+        <div>
+          <img srcset="http://placehold.it/160x160 2x" src="http://placehold.it/80x80" alt="Badge description">
+        </div>
+        <div>
+          <h1><a href="">HTML/CSS</a></h1>
+          <p><strong>5 Earners</strong></p>
+          <p>Fundamentals of HTML and Building a website.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+</article>
+
+Styleguide 3.31
+*/
+.issuer {
+  border: 2px solid #e1e0e5;
+  border-radius: 4px; }
+  .issuer a {
+    color: #05012c; }
+  .issuer header {
+    padding: 16px; }
+  .issuer > section > h1 {
+    border-top: 1px solid #e1e0e5;
+    box-sizing: border-box;
+    display: none;
+    padding: 16px;
+    width: 100%; }
+  .issuer h1 strong {
+    padding-left: 24px; }
+  .issuer strong {
+    color: #93ab23;
+    font-weight: bold; }
+  .issuer article {
+    border-top: 1px solid #e1e0e5;
+    box-sizing: border-box;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    padding: 16px; }
+    .issuer article h1,
+    .issuer article p {
+      line-height: 1.35;
+      margin-bottom: 8px; }
+    .issuer article p:last-child {
+      padding-top: 8px; }
+    .issuer article img {
+      display: block;
+      height: auto;
+      width: 100%; }
+    .issuer article h1 {
+      font-weight: 600; }
+    .issuer article > :first-child {
+      -webkit-box-flex: 0;
+          -ms-flex: 0 0 40px;
+              flex: 0 0 40px;
+      margin-right: 16px; }
+  @media (min-width: 768px) {
+    .issuer > section > h1 {
+      display: block; }
+    .issuer article p:last-child {
+      padding-top: 0; }
+    .issuer article > :first-child {
+      -ms-flex-preferred-size: 90px;
+          flex-basis: 90px; } }
+  @media (min-width: 1024px) {
+    .issuer .issuer-x-badges {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex; }
+    .issuer article {
+      -webkit-box-flex: 1;
+          -ms-flex: 1;
+              flex: 1; }
+      .issuer article > :first-child {
+        -ms-flex-preferred-size: 70px;
+            flex-basis: 70px; }
+      .issuer article:not(:last-child) {
+        border-right: 1px solid #e1e0e5; } }
+  @media (min-width: 1440px) {
+    .issuer article {
+      padding: 32px; }
+      .issuer article > :first-child {
+        -ms-flex-preferred-size: 85px;
+            flex-basis: 85px;
+        margin-right: 32px; }
+    .issuer header {
+      margin: 32px; }
+    .issuer > section > h1 {
+      padding-left: 32px;
+      padding-right: 32px; } }
+
+/*
+Link List
+
+Displays a list of links associated with an item.
+
+Markup:
+<ul class="linklist">
+  <li><a href=""><img src="http://placehold.it/48x48" alt="text" width="24" height="24">Text</a></li>
+  <li><a href="">Text</a></li>
+</ul>
+
+Styleguide 3.32
+*/
+.linklist li {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex; }
+  .linklist li:not(:last-child) {
+    margin-bottom: 8px; }
+  .linklist li > *:not(:last-child) {
+    margin-right: 12px; }
+
+.linklist a {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex; }
+
+.linklist button {
+  color: #c30a28; }
+
+.linklist img {
+  display: block;
+  height: 24px;
+  margin-right: 12px;
+  width: 24px; }
+
+@media (min-width: 768px) {
+  .linklist {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex; }
+    .linklist li:not(:first-child) {
+      padding-left: 16px; }
+    .linklist li:not(:last-child) {
+      border-right: 2px solid #e1e0e5;
+      margin-bottom: 0;
+      padding-right: 16px; } }
+
+/*
+Loading
+
+Large message displayed when the app/view is loading.
+
+Markup:
+<div class="loading">
+  <p>Loading&hellip;</p>
+</div>
+
+Styleguide 3.33
+*/
+.loading {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  height: 100%;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%; }
+  .loading p {
+    color: #78768d;
+    display: inline-block;
+    font-size: 24px;
+    padding-left: 44px;
+    position: relative; }
+    .loading p::after {
+      content: '';
+      display: block;
+      -webkit-animation: rotate .75s ease-in-out infinite forwards;
+              animation: rotate .75s ease-in-out infinite forwards;
+      border: 4px solid #93ab23;
+      border-radius: 50%;
+      border-right-color: transparent;
+      box-sizing: border-box;
+      height: 36px;
+      left: 0;
+      position: absolute;
+      top: calc(50% - 18px);
+      width: 36px; }
+
+.dots {
+  font-size: 10px;
+  position: relative;
+  width: 4em;
+  height: 1em;
+  margin: 100px auto; }
+  .dots.inline {
+    position: absolute;
+    top: 0.5em;
+    margin: 0 auto; }
+  .dots .dot {
+    width: 1em;
+    height: 1em;
+    border-radius: 0.5em;
+    background: #262929;
+    position: absolute;
+    -webkit-animation: fade 2s ease infinite;
+            animation: fade 2s ease infinite;
+    opacity: 0; }
+    .dots .dot:nth-child(1) {
+      left: 0; }
+    .dots .dot:nth-child(2) {
+      left: 1.5em;
+      -webkit-animation-delay: 0.2s;
+              animation-delay: 0.2s; }
+    .dots .dot:nth-child(3) {
+      left: 3em;
+      -webkit-animation-delay: 0.5s;
+              animation-delay: 0.5s; }
+
+@-webkit-keyframes fade {
+  0% {
+    opacity: 0; }
+  50% {
+    opacity: 1; }
+  100% {
+    opacity: 0; } }
+
+@keyframes fade {
+  0% {
+    opacity: 0; }
+  50% {
+    opacity: 1; }
+  100% {
+    opacity: 0; } }
+
+/*
+Loading Error
+
+Markup:
+<div class="loadingerror {$modifiers}">
+  <p>Message</p>
+  <button class="icon icon-close-light icon-right" type="button" onclick="event.target.parentNode.classList.remove('formmessage-is-active')">Dismiss</button>
+</div>
+
+Styleguide 3.49
+*/
+.loadingerror {
+  display: block;
+  text-align: center;
+  padding: 48px; }
+  .loadingerror p {
+    display: inline-block;
+    border: 1px solid #c30a28;
+    box-sizing: border-box;
+    color: #c30a28;
+    font-size: 24px;
+    font-weight: 600;
+    position: relative;
+    text-align: center;
+    z-index: 2;
+    margin: auto;
+    line-height: 1.5;
+    padding: 48px; }
+
+.menu {
+  background-color: #05012c;
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding-top: 32px; }
+  @media (min-width: 768px) {
+    .menu {
+      background-color: transparent;
+      min-height: 0;
+      padding-right: 40px;
+      padding-top: 0; }
+      .menu > ul {
+        -webkit-box-align: center;
+            -ms-flex-align: center;
+                align-items: center;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        height: 78px; }
+        .menu > ul > li {
+          margin-left: 8px; } }
+  @media (min-width: 1088px) {
+    .menu {
+      padding-right: calc(50vw - 512px); } }
+
+/*
+Menu Item
+
+Menu items are the individual targets within the `<header.header>` module.
+
+Default - Default state
+.menuitem-is-active - Sets the menu item as the currently active page
+.menuitem-is-open - Opens the nested set of menu items
+
+Markup:
+<div class="menuitem {$modifiers}">
+  <button type="button">Profile</button>
+  <ul>
+    <li class="menuitem-secondary"><a href="#">Profile</a></li>
+    <li class="menuitem-secondary"><a href="#">LTI Info</a></li>
+    <li class="menuitem-secondary"><a href="#">Log Out</a></li>
+  </ul>
+</div>
+
+Styleguide 3.2
+*/
+.menuitem {
+  position: relative; }
+  .menuitem a,
+  .menuitem button {
+    -webkit-appearance: none;
+       -moz-appearance: none;
+            appearance: none;
+    box-sizing: border-box;
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    text-transform: uppercase;
+    -webkit-transition: background-color 0.125s ease-out, border-color 0.125s ease-out, color 0.125s ease-out;
+    transition: background-color 0.125s ease-out, border-color 0.125s ease-out, color 0.125s ease-out; }
+  .menuitem ul {
+    display: none;
+    z-index: 3; }
+  .menuitem.menuitem-is-open ul {
+    display: block; }
+  @media (max-width: 767px) {
+    .menuitem a,
+    .menuitem button {
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      padding: 16px;
+      text-align: left;
+      width: 100%; }
+    .menuitem button {
+      background-image: url(assets/menuitem-06415d2da1b71acd2e7f84e5a0647909.svg);
+      background-position: calc(100% - 16px) center;
+      background-repeat: no-repeat;
+      cursor: pointer;
+      padding-right: 44px;
+      position: relative; }
+      .menuitem button:hover {
+        background-image: url(assets/menuitem-hover-78ba0ce5657b3d3de4756abc181f2071.svg); }
+    .menuitem:hover > a,
+    .menuitem:hover > button, .menuitem.menuitem-is-active > a,
+    .menuitem.menuitem-is-active > button, .menuitem.menuitem-is-open > a,
+    .menuitem.menuitem-is-open > button {
+      background-color: #fff;
+      border-top: 1px solid #e1e0e5;
+      color: #c30a28; }
+    .menuitem:hover button, .menuitem.menuitem-is-active button, .menuitem.menuitem-is-open button {
+      background-image: url(assets/menuitem-hover-78ba0ce5657b3d3de4756abc181f2071.svg); } }
+  @media (min-width: 768px) {
+    .menuitem a,
+    .menuitem button {
+      color: #c30a28;
+      padding: 12px 8px; }
+      .menuitem a:hover,
+      .menuitem button:hover {
+        border-color: #c30a28; }
+      .menuitem a:active,
+      .menuitem button:active {
+        background-color: #f7e1e5;
+        border-color: transparent; }
+    .menuitem > a,
+    .menuitem > button {
+      border: 1px solid transparent;
+      border-radius: 4px; }
+    .menuitem > button {
+      background-image: url(assets/menuitem-desktop-aba1afa3e1e2489ec163aa216d499818.svg);
+      background-position: calc(100% - 8px) center;
+      background-repeat: no-repeat;
+      padding-right: 24px; }
+    .menuitem ul {
+      background-color: #fff;
+      border-radius: 4px;
+      box-shadow: 0 4px 5px 0 rgba(5, 1, 44, 0.12), 0 0 4px 0 rgba(5, 1, 44, 0.12);
+      position: absolute;
+      top: calc(100% + 16px);
+      width: 160px;
+      right: 0; }
+      .menuitem ul::before {
+        background-color: #fff;
+        box-shadow: 0.5px 0.5px 1px 0 #e1e0e5;
+        content: '';
+        height: 16px;
+        position: absolute;
+        right: 16px;
+        top: -8px;
+        -webkit-transform: rotate(-135deg);
+                transform: rotate(-135deg);
+        width: 16px;
+        z-index: 1; }
+    .menuitem.menuitem-is-active > a,
+    .menuitem.menuitem-is-active > button, .menuitem.menu-item-is-open > a,
+    .menuitem.menu-item-is-open > button {
+      background-color: #f7e1e5;
+      border-color: transparent; } }
+
+.menuitem-secondary {
+  position: relative;
+  z-index: 2; }
+  @media (max-width: 767px) {
+    .menuitem-secondary > a {
+      background-color: #f7f7f7;
+      border-top: 1px solid #e1e0e5;
+      color: #c30a28; }
+      .menuitem-secondary > a:hover {
+        background-color: #c30a28;
+        color: #fff; }
+      .menuitem-secondary > a:active {
+        background-color: #f7e1e5;
+        color: #c30a28; } }
+  @media (min-width: 768px) {
+    .menuitem-secondary > a {
+      border: 0;
+      border-radius: 0; }
+      .menuitem-secondary > a:hover {
+        background-color: #c30a28;
+        border-top-color: transparent;
+        color: #fff; }
+      .menuitem-secondary > a:active {
+        background-color: #f7e1e5;
+        color: #c30a28; }
+    .menuitem-secondary:first-of-type > a {
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px; }
+    .menuitem-secondary:last-of-type > a {
+      border-bottom-left-radius: 4px;
+      border-bottom-right-radius: 4px; }
+    .menuitem-secondary:not(:first-of-type) > a {
+      border-top: 1px solid #e1e0e5; } }
+
+/*
+Menu More
+
+This is not to be confused with the main navigation dropdown menu - which has a separate mobile appearance.
+
+Default - Closed state
+.menumore-is-active - Open state
+
+Markup:
+<div class="menumore {$modifiers}">
+	<button aria-controls="menumore1" type="button">
+		Toggle Menu
+	</button>
+	<ul aria-hidden="true">
+		<li><sg-insert>3.35-1</sg-insert></li>
+		<li><sg-insert>3.35-1</sg-insert></li>
+		<li><sg-insert>3.35-1</sg-insert></li>
+	</ul>
+</div>
+
+Styleguide 3.34
+*/
+.menumore {
+  position: relative; }
+  .menumore > button {
+    background: url(assets/menumore-bfd946fa3bf7a0381973af117dce69e3.svg) center center no-repeat;
+    border-radius: 4px;
+    color: transparent;
+    display: block;
+    height: 28px;
+    overflow: hidden;
+    -webkit-transition: box-shadow 0.25s ease-out;
+    transition: box-shadow 0.25s ease-out;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+    width: 29px; }
+    .menumore > button:hover {
+      box-shadow: 0 0 0 1px #e1e0e5 inset; }
+    .menumore > button[disabled] {
+      opacity: .3;
+      pointer-events: none; }
+  .menumore ul {
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 4px 5px 0 rgba(5, 1, 44, 0.12), 0 0 4px 0 rgba(5, 1, 44, 0.12);
+    position: absolute;
+    top: calc(100% + 16px);
+    width: 160px;
+    right: -10px;
+    z-index: 3; }
+    .menumore ul::before {
+      background-color: #fff;
+      box-shadow: 0.5px 0.5px 1px 0 #e1e0e5;
+      content: '';
+      height: 16px;
+      position: absolute;
+      right: 16px;
+      top: -8px;
+      -webkit-transform: rotate(-135deg);
+              transform: rotate(-135deg);
+      width: 16px;
+      z-index: 1; }
+    .menumore ul[aria-hidden="true"] {
+      display: none; }
+  .menumore.menumore-is-active ul {
+    opacity: 1; }
+
+/*
+Menu More Item
+
+Markup:
+<li class="menumoreitem">
+  <button class="menumoreitem" type="button">Menu More Item</button>
+</li>
+
+Styleguide 3.35
+*/
+.menumoreitem {
+  position: relative;
+  z-index: 2; }
+  .menumoreitem:not(:last-child) {
+    border-bottom: 1px solid #e1e0e5; }
+  .menumoreitem a,
+  .menumoreitem button {
+    box-sizing: border-box;
+    color: #c30a28;
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1.42;
+    padding: 8px;
+    text-align: left;
+    text-transform: uppercase;
+    -webkit-transition: background-color 0.25s ease-out, color 0.25s ease-out;
+    transition: background-color 0.25s ease-out, color 0.25s ease-out;
+    width: 100%; }
+  .menumoreitem:hover a,
+  .menumoreitem:hover button {
+    background-color: #c30a28;
+    color: #fff; }
+  .menumoreitem[disabled] a,
+  .menumoreitem[disabled] button, .menumoreitem.menumoreitem-is-disabled a,
+  .menumoreitem.menumoreitem-is-disabled button {
+    opacity: .5;
+    pointer-events: none; }
+  .menumoreitem:first-of-type a,
+  .menumoreitem:first-of-type button {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px; }
+  .menumoreitem:last-of-type a,
+  .menumoreitem:last-of-type button {
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px; }
+
+/*
+Pathway
+
+Default - Standard pathway state
+.pathway-is-activemove - Pathway is  currently being moved
+.pathway-is-inactivemove - Pathway is currently not being moved
+
+Markup:
+<div class="pathway {$modifiers}">
+  <sg-insert>3.4-1</sg-insert>
+</div>
+
+Styleguide 3.3
+*/
+.pathway {
+  background-color: #f7f7f7;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px #e1e0e5 inset;
+  display: block;
+  position: relative; }
+  .pathway .pathway-x-move {
+    background-color: #fff;
+    border: 1px dashed #c30a28;
+    box-shadow: 0 0 24px 0 rgba(195, 10, 40, 0.2);
+    box-sizing: border-box;
+    color: #c30a28;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 16px;
+    text-transform: uppercase;
+    width: 100%; }
+  .pathway > .pathway-x-content {
+    border-radius: 4px; }
+    .pathway > .pathway-x-content:not(:only-child) {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0; }
+  .pathway > .pathway {
+    border-radius: 0;
+    display: none;
+    margin-left: 56px;
+    margin-top: -1px; }
+    .pathway > .pathway:nth-child(2)::after {
+      background-image: url(assets/pathway-nested-57741cec3d27289b8acf9d5e235fdaf8.svg);
+      content: '';
+      display: block;
+      height: 24px;
+      position: absolute;
+      right: calc(100% + 16px);
+      top: 16px;
+      width: 24px; }
+    .pathway > .pathway > .pathway-x-content {
+      border-radius: 0; }
+    .pathway > .pathway.pathway-is-dropzone, .pathway > .pathway.pathway-is-addchild {
+      box-shadow: 0 1px 0 0 #e1e0e5 inset, 0 -1px 0 0 #e1e0e5 inset, -1px 0 0 0 #e1e0e5 inset;
+      padding-bottom: 8px;
+      padding-top: 8px; }
+  .pathway.pathway-is-activemove {
+    background: #f7e1e5;
+    border: 1px dashed #c30a28; }
+    .pathway.pathway-is-activemove > .pathway-x-content,
+    .pathway.pathway-is-activemove > .pathway {
+      -webkit-transform: translateX(16px) translateY(-16px);
+              transform: translateX(16px) translateY(-16px); }
+    .pathway.pathway-is-activemove .pathway,
+    .pathway.pathway-is-activemove .pathwaydetail {
+      box-shadow: 0 0 0 1px #c30a28 inset; }
+    .pathway.pathway-is-activemove > .pathwaydetail:first-of-type {
+      border-bottom-left-radius: 4px;
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px; }
+    .pathway.pathway-is-activemove > .pathway:last-child {
+      border-bottom-left-radius: 4px; }
+      .pathway.pathway-is-activemove > .pathway:last-child > .pathwaydetail {
+        border-bottom-left-radius: 4px; }
+    .pathway.pathway-is-activemove > .pathwaydetail:only-child {
+      border-bottom-right-radius: 4px; }
+    .pathway.pathway-is-activemove .pathway-is-inactivemove .pathwaydetail {
+      background-color: #fff; }
+  .pathway.pathway-is-inactivemove {
+    cursor: not-allowed;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none; }
+    .pathway.pathway-is-inactivemove > .pathwaydetail {
+      background-color: transparent; }
+  @media (min-width: 1024px) {
+    .pathway > .pathway {
+      display: block; } }
+
+.pathway-root > .pathway > .pathway:last-child {
+  border-bottom-right-radius: 4px; }
+  .pathway-root > .pathway > .pathway:last-child > .pathway:last-child {
+    border-bottom-right-radius: 4px; }
+    .pathway-root > .pathway > .pathway:last-child > .pathway:last-child > .pathway-x-content:last-child {
+      border-bottom-right-radius: 4px; }
+
+/*
+Pathway Detail
+
+**Note:** `.pathway-x-content` is not required for this module. This is to allow embedding into `.pathway`.
+
+Markup:
+<section class="pathway-x-content pathwaydetail">
+  <header>
+    <h1>Discovery Corps Assistant (DCA)</h1>
+    <div class="pathwaydetail-x-controls">
+      <a class="button button-solid button-flat" href="">View Details</a>
+      <div class="menumore">
+        <button type="button" aria-controls="menumore1">Toggle Menu</button>
+        <ul id="menumore1" aria-hidden="true">
+          <li><button class="menumoreitem" type="button">Move</button></li>
+          <li><a class="menumoreitem menumoreitem-is-disabled" href="">Edit</a></li>
+          <li><button class="menumoreitem" disabled>Delete</button></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+  <div class="l-childrenvertical">
+    <div class="article">
+      <p>The first level of the Discovery Corps program. This level is a primary welcome to Pacific Science Center level and focuses of helping students gain the basics of science interpretation.</p>
+    </div>
+    <footer class="l-childrenhorizontal l-childrenhorizontal-spacebetween">
+      <label class="formcheckbox">
+        <input name="remember-me" id="remember-me" type="checkbox">
+        <span class="formcheckbox-x-text">Required for Completion</span>
+      </label>
+      <div class="l-childrenhorizontal">
+        <div class="l-childrenhorizontal">
+          <a class="badge badge-flat" href=""><img src="http://placehold.it/100x100" width="40" height="40" alt="Badge description"></a>
+          <a class="badge badge-flat" href=""><img src="http://placehold.it/100x100" width="40" height="40" alt="Badge description"></a>
+        </div>
+        <button class="button">Connect Badge</button>
+      </div>
+    </footer>
+  </div>
+</section>
+
+Styleguide 3.4
+*/
+.pathwaydetail {
+  background-color: #fff;
+  box-shadow: 0 0 0 1px #e1e0e5 inset;
+  padding: 16px;
+  position: relative; }
+  .pathwaydetail form {
+    max-width: 420px; }
+  .pathwaydetail .pathwaydetail-x-inactive {
+    cursor: not-allowed;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none; }
+    .pathwaydetail .pathwaydetail-x-inactive > * {
+      pointer-events: none; }
+  .pathwaydetail .pathwaydetail-x-body,
+  .pathwaydetail .pathwaydetail-x-main {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex; }
+  .pathwaydetail .pathwaydetail-x-body {
+    -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+                -ms-grid-row-align: stretch;
+            align-items: stretch;
+    margin-bottom: 32px; }
+  .pathwaydetail .pathwaydetail-x-main {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column; }
+  .pathwaydetail .pathwaydetail-x-image,
+  .pathwaydetail .pathwaydetail-x-text {
+    display: block; }
+  .pathwaydetail .pathwaydetail-x-image {
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 40px;
+            flex: 0 0 40px;
+    padding-right: 16px; }
+    .pathwaydetail .pathwaydetail-x-image img {
+      display: block;
+      height: auto;
+      width: 100%; }
+  .pathwaydetail .pathwaydetail-x-text {
+    max-width: 456px; }
+    .pathwaydetail .pathwaydetail-x-text h1 {
+      font-size: 16px;
+      line-height: 24px;
+      margin-bottom: 8px;
+      padding-right: 45px; }
+    .pathwaydetail .pathwaydetail-x-text p {
+      color: #05012c;
+      font-size: 12px;
+      line-height: 1.35; }
+    .pathwaydetail .pathwaydetail-x-text .pathwaydetail-x-children {
+      background: url(assets/pathwaydetail-children-03e2251c5dd49db2400ec2c58ff12a89.svg) left center no-repeat;
+      color: #a09eaf;
+      font-size: 14px;
+      height: 24px;
+      line-height: 24px;
+      margin-top: 16px;
+      padding-left: 34px; }
+  .pathwaydetail .pathwaydetail-x-menu {
+    position: absolute;
+    right: 16px;
+    top: 16px; }
+  .pathwaydetail .pathwaydetail-x-badges {
+    margin-bottom: -16px;
+    margin-top: 32px;
+    max-width: 312px; }
+    .pathwaydetail .pathwaydetail-x-badges h2 {
+      margin-bottom: 16px; }
+    .pathwaydetail .pathwaydetail-x-badges > div {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap; }
+      .pathwaydetail .pathwaydetail-x-badges > div > * {
+        margin-bottom: 16px;
+        margin-right: 24px; }
+  .pathwaydetail .pathwaydetail-x-footer > *:not(:last-child) {
+    margin-bottom: 16px; }
+  .pathwaydetail .pathwaydetail-x-action {
+    margin-left: -8px; }
+  .pathwaydetail .pathwaydetail-x-or {
+    color: #a09eaf;
+    font-size: 14px; }
+  @media (min-width: 768px) {
+    .pathwaydetail .pathwaydetail-x-image {
+      -ms-flex-preferred-size: 64px;
+          flex-basis: 64px; }
+    .pathwaydetail .pathwaydetail-x-text p {
+      font-size: 14px;
+      line-height: 24px;
+      white-space: pre-wrap; }
+    .pathwaydetail .pathwaydetail-x-footer {
+      -webkit-box-align: center;
+          -ms-flex-align: center;
+              align-items: center;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: justify;
+          -ms-flex-pack: justify;
+              justify-content: space-between; }
+      .pathwaydetail .pathwaydetail-x-footer > *:not(:last-child) {
+        margin-bottom: 0; }
+    .pathwaydetail .pathwaydetail-x-action {
+      margin-left: 0; } }
+  @media (min-width: 1024px) {
+    .pathwaydetail .pathwaydetail-x-main {
+      -webkit-box-flex: 1;
+          -ms-flex: 1 0 0;
+              flex: 1 0 0;
+      -webkit-box-orient: horizontal;
+      -webkit-box-direction: normal;
+          -ms-flex-direction: row;
+              flex-direction: row; }
+    .pathwaydetail .pathwaydetail-x-text {
+      -webkit-box-flex: 1;
+          -ms-flex: 1 0 456px;
+              flex: 1 0 456px; }
+    .pathwaydetail .pathwaydetail-x-badges {
+      -webkit-box-flex: 1;
+          -ms-flex: 1 1 0;
+              flex: 1 1 0;
+      margin-left: 80px;
+      margin-top: 36px; } }
+
+/*
+Progress
+
+Used within tooltips to indicate which step of a tour the user is on.
+
+Markup:
+<div class="progress">
+  <h3>Step 1 <span class="visuallyhidden">(Current)</span></h3>
+  <ul>
+    <li class="progress-x-complete">Step 1 (Complete)</li>
+    <li>Step 2</li>
+    <li>Step 3</li>
+  </ul>
+</div>
+
+Styleguide 3.60
+*/
+.progress {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex; }
+  .progress h1,
+  .progress h2,
+  .progress h3,
+  .progress h4,
+  .progress h5,
+  .progress h6 {
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1.35;
+    margin-right: 16px; }
+  .progress ul {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    color: transparent;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none; }
+  .progress li {
+    background-color: #e1e0e5;
+    border-radius: 100%;
+    height: 9px;
+    position: relative;
+    width: 9px; }
+    .progress li:not(:first-child) {
+      margin-left: 16px; }
+      .progress li:not(:first-child)::after {
+        background-color: #e1e0e5;
+        content: '';
+        display: block;
+        height: 1px;
+        position: absolute;
+        right: 100%;
+        top: 50%;
+        width: 16px; }
+  .progress .progress-x-complete {
+    background-color: #c30a28; }
+    .progress .progress-x-complete:not(:first-child)::after {
+      background-color: #c30a28; }
+
+/*
+Radio Buttons
+
+Styles a default radio input and label pair.
+
+Markup:
+<div class="radiobuttons">
+  <input type="radio" name="radiobutton" id="radiobutton1" value="grid" checked="checked">
+  <label class="radiobuttons-x-grid" for="radiobutton1">Grid</label>
+  <input type="radio" name="radiobutton" id="radiobutton2" value="list">
+  <label class="radiobuttons-x-list" for="radiobutton2">List</label>
+</div>
+
+Styleguide 3.47
+*/
+.radiobuttons {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative;
+  z-index: 1; }
+  .radiobuttons input {
+    position: absolute;
+    visibility: hidden;
+    z-index: 1; }
+  .radiobuttons label {
+    background: center center no-repeat;
+    border: 1px solid #e1e0e5;
+    color: transparent;
+    cursor: pointer;
+    display: block;
+    height: 40px;
+    -webkit-transition: background 0.25s ease-out, border-color 0.25s ease-out;
+    transition: background 0.25s ease-out, border-color 0.25s ease-out;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+    width: 40px;
+    z-index: 2; }
+    .radiobuttons label:hover {
+      border-color: #05012c; }
+    .radiobuttons label:first-of-type {
+      border-bottom-left-radius: 4px;
+      border-top-left-radius: 4px; }
+    .radiobuttons label:last-of-type {
+      border-bottom-right-radius: 4px;
+      border-top-right-radius: 4px; }
+    .radiobuttons label:not(:first-of-type) {
+      margin-left: -1px; }
+  .radiobuttons .radiobuttons-x-grid {
+    background-image: url(assets/radiobuttons-grid-42bfc471beae891572dcd8c5f56041eb.svg); }
+  .radiobuttons .radiobuttons-x-list {
+    background-image: url(assets/radiobuttons-list-542595cbb908e378859d7dbc22c54858.svg); }
+  .radiobuttons input:focus + label {
+    border-color: #05012c; }
+  .radiobuttons input:checked + label {
+    background-color: #05012c;
+    border-color: #05012c;
+    z-index: 3; }
+    .radiobuttons input:checked + label.radiobuttons-x-grid {
+      background-image: url(assets/radiobuttons-grid-checked-4493f194d95d35c60fb79bab2c80cb90.svg); }
+    .radiobuttons input:checked + label.radiobuttons-x-list {
+      background-image: url(assets/radiobuttons-list-checked-1409246d06fb5662ba4126f677651d80.svg); }
+
+/*
+Rule
+
+Creates a semantic (and visual) separation between content horizontally.
+
+Markup:
+<hr class="rule">
+
+Styleguide 3.36
+*/
+.rule {
+  border: 0;
+  display: block;
+  height: 1px;
+  margin: 0;
+  position: relative;
+  width: 100%; }
+  .rule::after {
+    content: '';
+    display: block;
+    background: #e1e0e5;
+    height: 1px;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%; }
+
+/*
+Search
+
+Standalone form input for searching.
+
+Markup:
+<input type="text" class="search" placeholder="Filter your badges by name or issuer">
+
+Styleguide 3.37
+*/
+.search {
+  background: #fff url(assets/search-c21442870c0ecd7976d2a4476dd28606.svg) calc(100% - 8px) center no-repeat;
+  border: 1px solid #e1e0e5;
+  border-radius: 4px;
+  box-sizing: border-box;
+  display: block;
+  font-size: 14px;
+  min-width: 264px;
+  outline: none;
+  padding: 8px 40px 8px 16px;
+  -webkit-transition: border-color 0.25s ease-out, background 0.25s ease-out;
+  transition: border-color 0.25s ease-out, background 0.25s ease-out;
+  width: 100%; }
+  .search:hover {
+    border-color: #05012c; }
+  .search:focus {
+    background-image: url(assets/search-focus-2ee6da07fb1a9f65ebb8b33d3cb766eb.svg);
+    border-color: #05012c; }
+  @media (min-width: 768px) {
+    .search {
+      width: auto; } }
+
+/*
+Select
+
+Standalone select input.
+
+Default - Default
+.select-inputonly - Hides the label
+.select-secondary - Alternative styling, used on pathways
+
+Markup:
+<label class="select {$modifiers}">
+  <span>Sort by</span>
+  <select>
+    <option value="name">Badge Name</option>
+    <option value="newest-first">Newest First</option>
+    <option value="oldest-first">Oldest First</option>
+  </select>
+</label>
+
+Styleguide 3.38
+*/
+.select {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  color: #78768d;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex; }
+  .select span {
+    cursor: pointer; }
+  .select select {
+    -webkit-appearance: none;
+       -moz-appearance: none;
+            appearance: none;
+    background: url(assets/select-9001a08c1c54053419f4f0be410698d0.svg) calc(100% - 8px) center no-repeat;
+    border: 1px solid #e1e0e5;
+    border-radius: 4px;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: block;
+    font-size: 16px;
+    margin-left: 16px;
+    outline: none;
+    padding: 16px 33px 16px 16px; }
+
+.select-inputonly {
+  color: transparent;
+  overflow: hidden;
+  position: relative; }
+  .select-inputonly span {
+    color: transparent;
+    position: absolute;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none; }
+  .select-inputonly select {
+    margin-left: 0; }
+
+.select-secondary {
+  color: #a09eaf;
+  font-size: 14px; }
+  .select-secondary select {
+    background: url(assets/select-secondary-29f4a308828b9a3d68d8d31af8b9c2e5.svg) right center no-repeat;
+    border: 0;
+    color: #a09eaf;
+    font-size: 14px;
+    padding-left: 0;
+    padding-right: 18px; }
+
+/*
+Selected Item
+
+Wraps text (or a module) with a border and a dismissable button
+
+Default - Static state
+.selecteditem-is-removed - Animates out when the close button is clicked
+
+Markup:
+<div class="selecteditem {$modifiers}">
+  <button type="button">Remove</button>
+  Career Ladder
+</div>
+
+Styleguide 3.44
+*/
+.selecteditem {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  box-sizing: border-box;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 12px;
+  line-height: 1.35;
+  text-transform: uppercase;
+  -webkit-transition: opacity 0.25s ease-out, -webkit-transform 0.25s ease-out;
+  transition: opacity 0.25s ease-out, -webkit-transform 0.25s ease-out;
+  transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+  transition: transform 0.25s ease-out, opacity 0.25s ease-out, -webkit-transform 0.25s ease-out; }
+  .selecteditem button {
+    background: url(assets/selecteditem-remove-5cb9ff860de3c06b4ec7b7d413ceb69a.svg) #78768d center center no-repeat;
+    border-radius: 100%;
+    color: transparent;
+    height: 14px;
+    margin-left: 4px;
+    overflow: hidden;
+    width: 14px;
+    z-index: 2; }
+  .selecteditem.selecteditem-is-removed {
+    opacity: 0;
+    -webkit-transform: scale3d(0, 0, 0);
+            transform: scale3d(0, 0, 0); }
+
+/*
+Selected Item Badge
+
+Has less padding when containing a badge.
+
+Markup:
+<div class="selecteditem selecteditem-badge">
+  <button type="button">Remove</button>
+  <sg-insert>3.14-3</sg-insert>
+</div>
+
+Styleguide 3.44.1
+*/
+.selecteditem-badge {
+  position: relative; }
+  .selecteditem-badge button {
+    position: absolute;
+    right: -7px;
+    top: -7px; }
+
+.social {
+  background: #05012c center center no-repeat;
+  border-radius: 4px;
+  color: transparent;
+  height: 24px;
+  overflow: hidden;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  width: 24px; }
+
+.social-facebook {
+  background-image: url(assets/social-facebook-0c72eb9e1c41ee16e629d175cef5799a.svg); }
+
+.social-linkedin {
+  background-image: url(assets/social-linkedin-f79b433e43ae10b78940ef15af9fd23f.svg); }
+
+/*
+Small
+
+Sets the font-size to the smallest font size used. Used as a quick override, such as a tiny string of text.
+
+Markup:
+<a class="small" href="">Open link in a new tab</a>
+
+Styleguide 3.50
+*/
+.small {
+  font-size: 12px; }
+
+/*
+Stack
+
+Very compressed view of issuers.
+
+Default - Used in headings
+.stack-small - Used in cards
+
+Markup:
+<div class="stack {$modifiers}">
+  <div class="stack-x-image">
+    <img src="http://placehold.it/40x40" alt="">
+  </div>
+  <div class="stack-x-text">
+    <h2>Issuer Name</h2>
+    <small>52 Badges</small>
+  </div>
+</div>
+
+Styleguide 3.48
+*/
+.stack {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  text-align: left; }
+  .stack img {
+    display: block;
+    height: auto;
+    width: 100%; }
+  .stack h1,
+  .stack h2,
+  .stack h3,
+  .stack h4,
+  .stack h5,
+  .stack h6,
+  .stack .stack-x-title {
+    color: #05012c;
+    font-size: 14px;
+    line-height: 24px; }
+  .stack small {
+    color: #78768d;
+    display: block;
+    font-size: 12px;
+    line-height: 1.35; }
+  .stack .stack-x-image {
+    margin-right: 16px;
+    width: 40px; }
+
+.stack-small h1,
+.stack-small h2,
+.stack-small h3,
+.stack-small h4,
+.stack-small h5,
+.stack-small h6 {
+  color: #05012c;
+  font-size: 12px;
+  line-height: 1.35; }
+
+.stack-list h1,
+.stack-list h2,
+.stack-list h3,
+.stack-list h4,
+.stack-list h5,
+.stack-list h6 {
+  color: #c30a28; }
+
+/*
+State
+
+Default - Not used
+.state-is-error - Error
+.state-is-pending - Pending
+.state-is-success - Success
+.state-pill - Alternate styling
+.state-pill.state-is-error - Error
+.state-pill.state-is-pending - Pending
+.state-pill.state-is-success - Success
+
+Markup:
+<span class="state {$modifiers}">Verified</span>
+
+Styleguide 3.39
+*/
+.state {
+  font-weight: 600; }
+  .state.state-is-error {
+    color: #f01f31; }
+  .state.state-is-pending {
+    color: #ffb500; }
+  .state.state-is-success {
+    color: #93ab23; }
+
+.state-pill {
+  border-radius: 4px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1;
+  padding: 5px;
+  text-transform: uppercase; }
+  .state-pill.state-is-error {
+    background-color: #f01f31;
+    color: #fff; }
+  .state-pill.state-is-pending {
+    background-color: #ffb500;
+    color: #fff; }
+  .state-pill.state-is-success {
+    background-color: #93ab23;
+    color: #fff; }
+
+/*
+Stat List
+
+Markup:
+<ul class="statlist">
+  <li class="statlist-x-badge"><strong>25</strong> Badges</li>
+  <li class="statlist-x-earner"><strong>25</strong> Earners</li>
+  <li class="statlist-x-group"><strong>25</strong> Groups</li>
+  <li class="statlist-x-pathway"><strong>25</strong> Pathways</li>
+</ul>
+
+Styleguide 3.52
+*/
+.statlist {
+  color: #a09eaf;
+  font-size: 14px; }
+  .statlist li {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex; }
+    .statlist li strong {
+      margin-right: .3em; }
+    .statlist li::before {
+      background: center center no-repeat;
+      content: '';
+      display: block;
+      height: 24px;
+      margin-right: 8px;
+      width: 24px; }
+    .statlist li:not(:last-child) {
+      margin-bottom: 8px; }
+  .statlist .statlist-x-badge::before {
+    background-image: url(assets/statlist-badge-26ceb3bbe69776e29c7380eeef9ce991.svg); }
+  .statlist .statlist-x-earner::before {
+    background-image: url(assets/statlist-earner-c7f0b4fc7f06a1c058c8fbb47b6d37d2.svg); }
+  .statlist .statlist-x-group::before {
+    background-image: url(assets/statlist-group-f8f18f41b3b35c27225ba16b694b1da4.svg); }
+  .statlist .statlist-x-pathway::before {
+    background-image: url(assets/statlist-pathway-683e3fafc18e93bf93a23821af4b7b5f.svg); }
+  @media (min-width: 768px) {
+    .statlist {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap; }
+      .statlist li {
+        -webkit-box-flex: 1;
+            -ms-flex: 1 1 50%;
+                flex: 1 1 50%; }
+        .statlist li:nth-last-child(2) {
+          margin-bottom: 0; } }
+
+/*
+Status Select
+
+A styled select menu which has a status indicator.
+
+Default - Text only, for use in tables
+.statusselect-is-active - Active states
+.statusselect-is-inactive - Inactive State
+.statusselect-bordered - A button-like appearance, for use in headers
+.statusselect-bordered.statusselect-is-active - Bordered active
+.statusselect-bordered.statusselect-is-inactive - Bordered inactive
+
+Markup:
+<div class="statusselect {$modifiers}">
+  <label class="visuallyhidden" for="statusselect{$modifiers}">Status</label>
+  <select id="statusselect{$modifiers}">
+    <option value="null">Status</option>
+    <option value="active">Active</option>
+    <option value="inactive">Inactive</option>
+  </select>
+</div>
+
+Styleguide 3.12
+*/
+.statusselect {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  box-sizing: border-box;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  padding-left: 16px; }
+  .statusselect::before {
+    border-radius: 8px;
+    content: '';
+    display: none;
+    height: 8px;
+    margin-right: 8px;
+    width: 8px; }
+  .statusselect select {
+    -webkit-appearance: none;
+       -moz-appearance: none;
+            appearance: none;
+    background: url(assets/statusselect-cd603a018270cc8a22266458491d17bf.svg) right center transparent no-repeat;
+    border: 0;
+    box-sizing: border-box;
+    -webkit-box-flex: 1;
+        -ms-flex: 1;
+            flex: 1;
+    padding-right: 26px; }
+    .statusselect select::-ms-expand {
+      display: none; }
+  .statusselect.statusselect-is-active::before {
+    background-color: #c30a28;
+    display: block; }
+  .statusselect.statusselect-is-inactive::before {
+    background-color: #e1e0e5;
+    display: block; }
+
+.statusselect-bordered {
+  border: 1px solid #c30a28;
+  border-radius: 4px;
+  padding: 8px 16px; }
+  .statusselect-bordered select {
+    background-image: url(assets/statusselect-bordered-4269ccabb8519f6e0867d75f9a493309.svg);
+    color: #c30a28; }
+
+/*
+Switch
+
+Default - When there's just a single set of toggle text
+.switch-bold - Bolds the switch value
+
+Markup:
+<input class="switch {$modifiers}" type="checkbox" id="switch{$modifiers}" name="switch{$modifiers}" value="private">
+<label for="switch{$modifiers}">
+  <span class="switch-x-text">Your collection is </span>
+  <span class="switch-x-toggletext">
+    <span class="switch-x-unchecked"><span class="switch-x-hiddenlabel">Unchecked: </span>Private</span>
+    <span class="switch-x-checked"><span class="switch-x-hiddenlabel">Checked: </span>Public</span>
+  </span>
+</label>
+
+Styleguide 3.55
+*/
+.switch {
+  display: none; }
+  .switch + label {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    color: #78768d;
+    cursor: pointer;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    font-size: 12px;
+    line-height: 15px;
+    position: relative;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none; }
+    .switch + label::before, .switch + label::after {
+      content: '';
+      display: block; }
+    .switch + label::before {
+      background-color: #05012c;
+      border-radius: 500px;
+      height: 15px;
+      margin-right: 8px;
+      -webkit-transition: background-color 0.125s ease-out;
+      transition: background-color 0.125s ease-out;
+      width: 25px; }
+    .switch + label::after {
+      background-color: #fff;
+      border-radius: 13px;
+      box-shadow: 0 3px 1px 0 rgba(37, 34, 71, 0.05), 0 2px 2px 0 rgba(37, 34, 71, 0.1), 0 3px 3px 0 rgba(37, 34, 71, 0.05);
+      height: 13px;
+      left: 1px;
+      position: absolute;
+      top: 1px;
+      -webkit-transition: -webkit-transform 0.125s ease-out;
+      transition: -webkit-transform 0.125s ease-out;
+      transition: transform 0.125s ease-out;
+      transition: transform 0.125s ease-out, -webkit-transform 0.125s ease-out;
+      width: 13px; }
+    .switch + label .switch-x-text {
+      display: block;
+      margin-right: .3em; }
+    .switch + label .switch-x-toggletext {
+      display: block;
+      height: 15px;
+      overflow: hidden;
+      position: relative;
+      width: 45px; }
+    .switch + label .switch-x-unchecked,
+    .switch + label .switch-x-checked {
+      left: 0;
+      position: absolute;
+      top: 0;
+      -webkit-transition: opacity 0.125s ease-out, -webkit-transform 0.125s ease-out;
+      transition: opacity 0.125s ease-out, -webkit-transform 0.125s ease-out;
+      transition: transform 0.125s ease-out, opacity 0.125s ease-out;
+      transition: transform 0.125s ease-out, opacity 0.125s ease-out, -webkit-transform 0.125s ease-out; }
+    .switch + label .switch-x-unchecked {
+      opacity: 1;
+      -webkit-transform: none;
+              transform: none; }
+    .switch + label .switch-x-checked {
+      opacity: 0;
+      -webkit-transform: translate3d(0, 100%, 0);
+              transform: translate3d(0, 100%, 0); }
+    .switch + label .switch-x-hiddenlabel {
+      position: absolute;
+      visibility: hidden; }
+  .switch:checked + label::before {
+    background-color: #ffb500; }
+  .switch:checked + label::after {
+    -webkit-transform: translate3d(10px, 0, 0);
+            transform: translate3d(10px, 0, 0); }
+  .switch:checked + label .switch-x-unchecked {
+    opacity: 0;
+    -webkit-transform: translate3d(0, -100%, 0);
+            transform: translate3d(0, -100%, 0); }
+  .switch:checked + label .switch-x-checked {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none; }
+
+.switch-bold + label .switch-x-toggletext {
+  font-weight: bold; }
+
+/*
+Table
+
+General-purpose table. `.table-x-actions` should be used on the containing cell for any interactive elements that may arbitrarily change the table dimensions.
+
+Default - Standard table for lists
+.table-dialog - Table nested within dialogs, used for selecting lists of items
+.table-aligntop - Aligns cell content to the top
+
+Markup:
+<table class="table {$modifers}">
+  <thead>
+    <tr>
+      <th scope="col">Member Name</th>
+      <th scope="col">Email Address</th>
+      <th class="hidden hidden-is-tablet" scope="col">Actions</th>
+      <th class="hidden hidden-is-desktop table-x-hidetext" scope="col">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">
+        Member Name
+      </th>
+      <td>
+        member@members.com
+      </td>
+      <td class="hidden hidden-is-tablet">
+        Actions
+      </td>
+      <td class="table-x-actions hidden hidden-is-desktop">
+        <div class="l-childrenhorizontal l-childrenhorizontal-right">
+          <sg-insert>3.20-3</sg-insert>
+          <sg-insert>3.20-3</sg-insert>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <th scope="row">
+        Member Name
+      </th>
+      <td>
+        member@members.com
+      </td>
+      <td class="hidden hidden-is-tablet">
+        Actions
+      </td>
+      <td class="table-x-actions hidden hidden-is-desktop">
+        <div class="l-childrenhorizontal l-childrenhorizontal-right">
+          <sg-insert>3.20-3</sg-insert>
+          <sg-insert>3.20-3</sg-insert>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+Styleguide 3.16
+*/
+/*
+Table (Faked)
+
+You can use the table module to build a fake table as well, assuming the DOM structure is consistent and the proper x-selectors are included.
+
+Markup:
+<div class="table">
+  <div class="table-x-thead">
+    <div class="table-x-tr">
+      <div class="table-x-th">Member Name</div>
+      <div class="table-x-th">Email Address</div>
+      <div class="table-x-th hidden hidden-is-tablet">Actions</div>
+      <div class="table-x-th hidden hidden-is-desktop table-x-hidetext">Actions</div>
+    </div>
+  </div>
+  <div class="table-x-tbody">
+    <div class="table-x-tr">
+      <div class="table-x-th">
+        Member Name
+      </div>
+      <div class="table-x-td">
+        member@members.com
+      </div>
+      <div class="table-x-td  hidden hidden-is-tablet">
+        Actions
+      </div>
+      <div class="table-x-td table-x-actions  hidden hidden-is-desktop">
+        <div class="l-childrenhorizontal l-childrenhorizontal-right">
+          <sg-insert>3.20-3</sg-insert>
+          <sg-insert>3.20-3</sg-insert>
+        </div>
+      </div>
+    </div>
+    <div class="table-x-tr">
+      <div class="table-x-th">
+        Member Name
+      </div>
+      <div class="table-x-td">
+        member@members.com
+      </div>
+      <div class="table-x-td hidden hidden-is-tablet">
+        Actions
+      </div>
+      <div class="table-x-td table-x-actions hidden hidden-is-desktop">
+        <div class="l-childrenhorizontal l-childrenhorizontal-right">
+          <sg-insert>3.20-3</sg-insert>
+          <sg-insert>3.20-3</sg-insert>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+Styleguide 3.16.1
+*/
+.table {
+  border-collapse: collapse;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px #e1e0e5 inset;
+  display: table;
+  overflow: hidden;
+  text-align: left;
+  white-space: nowrap;
+  width: 100%; }
+  .table a:not(.button):hover {
+    text-decoration: underline; }
+  .table td,
+  .table .table-x-td,
+  .table th,
+  .table .table-x-th {
+    display: table-cell;
+    vertical-align: middle; }
+  .table thead,
+  .table .table-x-thead {
+    display: table-header-group; }
+    .table thead th,
+    .table thead .table-x-th,
+    .table .table-x-thead th,
+    .table .table-x-thead .table-x-th {
+      background-color: #05012c;
+      box-sizing: border-box;
+      font-size: 12px;
+      font-weight: bold;
+      height: 48px;
+      padding: 16px;
+      text-transform: uppercase;
+      white-space: nowrap; }
+    .table thead th:not(.table-x-hidetext),
+    .table thead .table-x-th:not(.table-x-hidetext),
+    .table .table-x-thead th:not(.table-x-hidetext),
+    .table .table-x-thead .table-x-th:not(.table-x-hidetext) {
+      color: #fff; }
+  .table tbody,
+  .table .table-x-tbody {
+    display: table-row-group; }
+    .table tbody td,
+    .table tbody .table-x-td,
+    .table tbody th,
+    .table tbody .table-x-th,
+    .table .table-x-tbody td,
+    .table .table-x-tbody .table-x-td,
+    .table .table-x-tbody th,
+    .table .table-x-tbody .table-x-th {
+      border-top: 1px solid #e1e0e5;
+      box-sizing: border-box;
+      height: 65px;
+      padding: 8px 16px; }
+    .table tbody th,
+    .table tbody .table-x-th,
+    .table .table-x-tbody th,
+    .table .table-x-tbody .table-x-th {
+      width: 100%; }
+    .table tbody td,
+    .table tbody .table-x-td,
+    .table .table-x-tbody td,
+    .table .table-x-tbody .table-x-td {
+      font-size: 14px; }
+    .table tbody tr:first-child td,
+    .table tbody tr:first-child .table-x-td,
+    .table tbody tr:first-child th,
+    .table tbody tr:first-child .table-x-th,
+    .table tbody .table-x-tr:first-child td,
+    .table tbody .table-x-tr:first-child .table-x-td,
+    .table tbody .table-x-tr:first-child th,
+    .table tbody .table-x-tr:first-child .table-x-th,
+    .table .table-x-tbody tr:first-child td,
+    .table .table-x-tbody tr:first-child .table-x-td,
+    .table .table-x-tbody tr:first-child th,
+    .table .table-x-tbody tr:first-child .table-x-th,
+    .table .table-x-tbody .table-x-tr:first-child td,
+    .table .table-x-tbody .table-x-tr:first-child .table-x-td,
+    .table .table-x-tbody .table-x-tr:first-child th,
+    .table .table-x-tbody .table-x-tr:first-child .table-x-th {
+      border-top: 0; }
+  .table .table-x-tr {
+    display: table-row; }
+  .table .table-x-actions {
+    min-width: 400px; }
+  .table .table-x-hidetext {
+    color: transparent;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none; }
+  .table .table-x-date {
+    font-size: 12px;
+    white-space: nowrap; }
+  .table .table-x-inlineheader {
+    background-color: #e1e0e5;
+    border: 0;
+    color: #05012c;
+    font-size: 16px;
+    height: auto;
+    line-height: 24px;
+    padding-bottom: 8px;
+    padding-top: 8px; }
+  .table .table-x-active th,
+  .table .table-x-active .table-x-th,
+  .table .table-x-active td,
+  .table .table-x-active .table-x-td {
+    background-color: #e1e0e5;
+    box-shadow: rgba(5, 1, 44, 0.12) 0 -1px 0 0 inset; }
+    .table .table-x-active th:first-child,
+    .table .table-x-active .table-x-th:first-child,
+    .table .table-x-active td:first-child,
+    .table .table-x-active .table-x-td:first-child {
+      box-shadow: rgba(5, 1, 44, 0.12) 1px -1px 0 0 inset; }
+    .table .table-x-active th:last-child,
+    .table .table-x-active .table-x-th:last-child,
+    .table .table-x-active td:last-child,
+    .table .table-x-active .table-x-td:last-child {
+      box-shadow: rgba(5, 1, 44, 0.12) -1px -1px 0 0 inset; }
+
+.table-dialog {
+  border-radius: 0;
+  box-shadow: none;
+  white-space: normal; }
+  .table-dialog tbody tr *,
+  .table-dialog tbody .table-x-tr *,
+  .table-dialog .table-x-tbody tr *,
+  .table-dialog .table-x-tbody .table-x-tr * {
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none; }
+  .table-dialog tbody td,
+  .table-dialog tbody .table-x-td,
+  .table-dialog .table-x-tbody td,
+  .table-dialog .table-x-tbody .table-x-td {
+    padding: 0; }
+  .table-dialog .table-x-badge,
+  .table-dialog .table-x-input,
+  .table-dialog .table-x-padded,
+  .table-dialog .table-x-title {
+    padding: 8px 16px; }
+  .table-dialog .table-x-badge,
+  .table-dialog .table-x-input,
+  .table-dialog .table-x-title,
+  .table-dialog .table-x-stack {
+    cursor: pointer; }
+  .table-dialog .table-x-badge {
+    display: block;
+    padding-right: 8px;
+    width: 40px; }
+  .table-dialog .table-x-input {
+    padding-right: 0;
+    width: 16px; }
+    .table-dialog .table-x-input * {
+      cursor: pointer; }
+  .table-dialog .table-x-title {
+    display: block;
+    padding-left: 0; }
+
+.table-aligntop td,
+.table-aligntop .table-x-td,
+.table-aligntop th,
+.table-aligntop .table-x-th {
+  vertical-align: top; }
+
+.table-aligntop .table-x-input {
+  padding-top: 16px; }
+
+/*
+Title
+
+This likely should replace subheading...generic standalone title
+
+Default - Standard sizing
+.title-is-smallmobile - Smaller size on mobile only
+.title-small - Smaller
+.title-small-2x - Even smaller
+.title-margin-bottom-2x - Adds 2x gridspacing to bottom margin
+
+Markup:
+<h1 class="title {$modifiers}">Title<h1>
+
+Styleguide 3.40
+*/
+.title {
+  color: #05012c;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1; }
+  .title span {
+    color: #78768d;
+    font-size: 14px;
+    font-weight: normal; }
+  @media (max-width: 767px) {
+    .title.title-is-smallmobile {
+      font-size: 24px; } }
+
+.title-small {
+  font-size: 16px; }
+
+.title-small-2x {
+  color: #78768d;
+  font-size: 14px;
+  font-weight: 600; }
+
+.title-small-3x {
+  color: #05012c;
+  font-size: 12px;
+  text-transform: uppercase; }
+
+.title-margin-bottom-2x {
+  margin-bottom: 16px; }
+
+/*
+Title Divider
+
+This acts a secondary title which inserts a horizontal alongside the text. Used in forms.
+
+Markup:
+<h2 class="titledivider">Or</h2>
+
+Styleguide 3.51
+*/
+.titledivider {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  color: rgba(5, 1, 44, 0.38);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  font-size: 12px; }
+  .titledivider::after {
+    background-color: rgba(5, 1, 44, 0.12);
+    content: '';
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+    height: 1px;
+    margin-left: 8px; }
+
+/*
+Truncate
+
+Adds an ellipses at the end of a pre-truncated string of text.
+
+Markup:
+<p class="truncate">This text has been trun</p>
+
+Styleguide 3.57
+*/
+.truncate::after {
+  content: '\2026'; }
+
+/*
+Tooltip
+
+Meant to be positioned via a script next to Tooltip Trigger elements.
+
+Default - The default state which is hidden with no pointer events
+.tooltip-is-active - Reveals the tooltip
+
+Markup:
+<div class="tooltip {$modifiers}">
+  <span class="tooltip-x-arrow"></span>
+  <div class="tooltip-x-content">
+    <button type="button">Close</button>
+    <header>
+      <h1>Completion Badges</h1>
+      <h2>Tool Tip</h2>
+    </header>
+    <p>Badgr can report on users' completion of learning pathways based on the badges they've earned and other elements completed.</p>
+    <footer>
+      <sg-insert>3.60-1</sg-insert>
+      <div>
+        <button type="button" class="button">Next</button>
+      </div>
+    </footer>
+  </div>
+</div>
+
+Styleguide 3.58
+*/
+.tooltip {
+  opacity: 0;
+  padding-top: 15px;
+  pointer-events: none;
+  position: relative;
+  -webkit-transition: opacity 0.25s ease-out;
+  transition: opacity 0.25s ease-out;
+  width: 320px;
+  will-change: opacity;
+  z-index: 3; }
+  .tooltip .tooltip-x-content {
+    background-color: #fff;
+    border-radius: 6px;
+    box-shadow: 0 0 6px 0 rgba(37, 34, 71, 0.5);
+    box-sizing: border-box;
+    padding: 16px;
+    position: relative; }
+    .tooltip .tooltip-x-content > button {
+      background: url(assets/tooltip-close-b3b261120268146cbac56725e34d6ed1.svg) center center no-repeat;
+      color: transparent;
+      height: 24px;
+      overflow: hidden;
+      position: absolute;
+      right: 16px;
+      top: 16px;
+      -webkit-user-select: none;
+         -moz-user-select: none;
+          -ms-user-select: none;
+              user-select: none;
+      width: 24px; }
+  .tooltip header {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    margin-bottom: 8px;
+    padding-right: 24px; }
+  .tooltip h1 {
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1.35;
+    -webkit-box-ordinal-group: 3;
+        -ms-flex-order: 2;
+            order: 2; }
+  .tooltip h2 {
+    font-size: 12px;
+    margin-bottom: 4px;
+    -webkit-box-ordinal-group: 2;
+        -ms-flex-order: 1;
+            order: 1; }
+  .tooltip p {
+    font-size: 14px;
+    line-height: 24px;
+    margin-bottom: 16px; }
+  .tooltip footer {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between; }
+  .tooltip .tooltip-x-arrow {
+    display: block;
+    height: 15px;
+    left: 50%;
+    overflow: hidden;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    -webkit-transform: translateX(-50%);
+            transform: translateX(-50%);
+    width: 24px;
+    z-index: 3; }
+    .tooltip .tooltip-x-arrow::after {
+      background-color: #fff;
+      box-shadow: 0 0 6px 0 rgba(37, 34, 71, 0.5);
+      content: '';
+      display: block;
+      height: 24px;
+      left: 50%;
+      position: absolute;
+      top: 3px;
+      -webkit-transform: rotate(45deg);
+              transform: rotate(45deg);
+      -webkit-transform-origin: top left;
+              transform-origin: top left;
+      width: 24px; }
+  .tooltip.tooltip-is-active {
+    opacity: 1;
+    pointer-events: auto; }
+
+/*
+Tooltip Trigger
+
+Used as an anchor for tooltip elements.
+
+Markup:
+<a href="" class="tooltiptrigger"><span>Tooltip Trigger</span></a>
+
+Styleguide 3.59
+*/
+.tooltiptrigger {
+  display: inline-block;
+  height: 15px;
+  line-height: 15px;
+  position: relative;
+  width: 15px; }
+  .tooltiptrigger span {
+    background-image: url(assets/tooltiptrigger-3969dcbf872520be498fc73f09a3768f.svg);
+    color: transparent;
+    display: inline-block;
+    height: 15px;
+    overflow: hidden;
+    position: relative;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+    width: 15px; }
+
+/*
+Video Watch
+
+A trigger that starts a video.
+
+Markup:
+<button class="videowatch">Watch Pathways Tutorial Video</button>
+
+Styleguide 3.41
+*/
+.videowatch {
+  background: url(assets/videowatch-ecaaa29798a0aa33c1e97c0ebd8e0914.svg) left center no-repeat;
+  color: #c30a28;
+  font-size: 14px;
+  height: 27px;
+  line-height: 27px;
+  padding-left: 43px;
+  text-transform: uppercase;
+  white-space: nowrap; }
+
+/*
+Visually Hidden
+
+Hides any element, while keeping it in the DOM.
+
+Markup:
+<p class="visuallyhidden">I'm hidden</p>
+
+Styleguide 3.42
+*/
+.visuallyhidden {
+  border: 0 !important;
+  clip: rect(0 0 0 0) !important;
+  height: 1px !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  position: absolute !important;
+  width: 1px !important; }
+
+/*
+Wrap
+
+Sets the background on any container element.
+
+Default - Sets body background
+.wrap-light - Lighter background color
+
+Markup:
+<div class="wrap {$modifiers}">Wrap</div>
+
+Styleguide 3.43
+*/
+.wrap {
+  background-color: #fcfcfc;
+  z-index: 1; }
+
+.wrap-light {
+  background-color: #f7f7f7; }
+
+.o-canvas {
+  background-color: #fff; }
+
+/*# sourceMappingURL=styles.324cc0ca8cb17b74035b.css.map*/
