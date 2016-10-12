@@ -1,19 +1,20 @@
 {% extends "public/base.html" %}
+{% load staticfiles %}
 
 {% block page_title %}{% if issuer %}{{ issuer.name }} Issuer{% else %}Issuer not found{% endif %}{% endblock %}
 
 {% block content %}
 	{% if not issuer %}
-		<div class="wrap wrap-light l-containerhorizontal l-heading">
-			<img srcset="{{ STATIC_URL }}images/500-badgr-2x.png 2x, {{ STATIC_URL }}images/500-badgr.png" src="{{ STATIC_URL }}images/500-badgr.png" alt="Badgr is sorry :(" width="312" height="317">
+		<article class="emptyillustration" *ngIf="! issuers.length">
+			<img srcset="{% static 'badgr-ui/images/500-badgr-2x.png' %} 2x, {% static 'badgr-ui/images/500-badgr.png' %}"src="{% static 'badgr-ui/images/500-badgr.png' %}"alt="Badgr is sorry :(" width="312" height="317">
 			<p>The Issuer you are looking for could not be found.</p>
-		</div>
+		</article>
 	{% else %}
 	<header class="wrap wrap-light l-containerhorizontal l-heading ">
 
 		<div class="heading">
 			<div class="heading-x-image">
-				<img src="{% if issuer.image %}{{issuer.image.url}}{% else %}{{ STATIC_URL }}public/images/issuer-placeholder-2x.png{% endif %}" alt="{{issuer.name}} logo " />
+				<img src="{% if issuer.image %}{{issuer.image.url}}{% else %}{% static 'badgr-ui/images/issuer-placeholder-2x.png' %}{% endif %}" alt="{{issuer.name}} logo " />
 			</div>
 			<div class="heading-x-text">
 				<h1>{{issuer.json.name}}</h1>
@@ -45,7 +46,7 @@
 						<tr>
 							<th scope="row">
 								<div class="l-childrenhorizontal l-childrenhorizontal-small">
-									<img class="l-childrenhorizontal-x-offset" src="{{badge_class.json.image}}" alt="{{badge_class.json.name}}" width="40">
+									<img class="l-childrenhorizontal-x-offset" src="{{ MEDIA_URL }}{{badge_class.image}}" alt="{{badge_class.json.name}}" width="40">
 									<a href="{{ badge_class.json.id }}">{{badge_class.json.name}}</a>
 								</div>
 							</th>

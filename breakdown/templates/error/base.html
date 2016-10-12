@@ -1,11 +1,13 @@
 {% extends "public/base.html" %}
+{% load staticfiles %}
 
 {% block content %}
 
 	<article class="emptyillustration" *ngIf="! issuers.length">
-		<img srcset="{{ STATIC_URL }}public/images/500-badgr-2x.png 2x, {{ STATIC_URL }}public/images/500-badgr.png" src="{{ STATIC_URL }}public/images/500-badgr.png" alt="Badgr is sorry :(" width="312" height="317">
+		<img srcset="{% static 'badgr-ui/images/500-badgr-2x.png' %} 2x, {% static 'badgr-ui/images/500-badgr.png' %}"src="{% static 'badgr-ui/images/500-badgr.png' %}"alt="Badgr is sorry :(" width="312" height="317">
 		{% block error_content %}
 			<p>We're sorry, an error has occurred.<p>
 		{% endblock %}
 	</article>
+
 {% endblock %}

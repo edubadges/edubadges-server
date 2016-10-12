@@ -1,19 +1,20 @@
 {% extends "public/base.html" %}
+{% load staticfiles %}
 
 {% block page_title %}{% if badge_class %}{{ badge_class.name }} Badge{% else %}BadgeClass not found{% endif %}{% endblock %}
 
 {% block content %}
 	{% if not badge_class %}
-		<div class="wrap wrap-light l-containerhorizontal l-heading">
-			<img srcset="{{ STATIC_URL }}images/500-badgr-2x.png 2x, {{ STATIC_URL }}images/500-badgr.png" src="{{ STATIC_URL }}images/500-badgr.png" alt="Badgr is sorry :(" width="312" height="317">
+		<article class="emptyillustration" *ngIf="! issuers.length">
+			<img srcset="{% static 'badgr-ui/images/500-badgr-2x.png' %} 2x, {% static 'badgr-ui/images/500-badgr.png' %}"src="{% static 'badgr-ui/images/500-badgr.png' %}"alt="Badgr is sorry :(" width="312" height="317">
 			<p>The BadgeClass you are looking for could not be found.</p>
-		</div>
+		</article>
 	{% else %}
     <header class="wrap wrap-light l-containerhorizontal l-heading">
 
 	    <div class="heading">
 		    <div class="heading-x-image">
-			    <img src="{{badge_class.json.image}}" alt="{{badge_class.name}} image">
+			    <img src="{{ MEDIA_URL }}{{badge_class.image}}" alt="{{badge_class.name}} image">
 		    </div>
 		    <div class="heading-x-text">
 
@@ -47,7 +48,7 @@
 
 			    <a class="stack" target="_blank" href="{{ issuer.json.url }}">
 				    <div class="stack-x-image">
-					    <img src="{% if issuer.json.image %}{{ issuer.json.image }}{% else %}{{STATIC_URL}}public/images/issuer-placeholder.png{% endif %}"
+					    <img src="{% if issuer.json.image %}{{ issuer.json.image }}{% else %}{% static 'badgr-ui/images/issuer-placeholder.png' %}{% endif %}"
 					         width="40"
 					         alt="{{ issuer.json.name }}" />
 				    </div>

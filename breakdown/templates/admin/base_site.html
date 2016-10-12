@@ -1,4 +1,5 @@
 {% extends "admin/base.html" %}
+{% load staticfiles %}
 
 {% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
 
@@ -36,7 +37,7 @@ body.login #header {
 {% block branding %}
     <header>
         <a href="{% url 'admin:index' %}" style="padding-left: 16px">
-            <img src="{{STATIC_URL}}images/header-logo-small.svg" width="153" height="75" />
+            <img src="{% static 'badgr-ui/images/logo.svg' %}" style="height: 40px; margin: 8px"/>
         </a>
     </header>
 {% endblock %}
