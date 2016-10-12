@@ -100,13 +100,15 @@ TEMPLATE_CONTEXT_PROCESSORS = [
 #
 ##
 
+HTTP_ORIGIN = "http://localhost:8000"
+
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
 
 STATIC_ROOT = os.path.join(TOP_DIR, 'staticfiles')
-STATIC_URL = '/static/'
+STATIC_URL = HTTP_ORIGIN+'/static/'
 STATICFILES_DIRS = [
     os.path.join(TOP_DIR, 'breakdown', 'static'),
 ]
