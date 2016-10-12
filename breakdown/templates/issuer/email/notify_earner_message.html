@@ -1,3 +1,5 @@
+{% load staticfiles %}
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -176,14 +178,14 @@
                                           padding-left: 8px;
                                           padding-top: 4px;
                                         ">
-                                          <a href=""><img srcset="{{ HTTP_ORIGIN }}{{ STATIC_URL }}images/emailfacebook-2x.png 2x" src="{{ HTTP_ORIGIN }}{{ STATIC_URL }}images/emailfacebook.png" alt=""></a>
+                                          <a href=""><img srcset="{% static 'images/emailfacebook-2x.png' %} 2x" src="{% static 'images/emailfacebook.png' %}" alt=""></a>
                                         </td>
                                         <td style="
                                           padding-bottom: 16px;
                                           padding-left: 8px;
                                           padding-top: 4px;
                                         ">
-                                          <a href=""><img srcset="{{ HTTP_ORIGIN }}{{ STATIC_URL }}images/emaillinkedin2x.png" src="{{ HTTP_ORIGIN }}{{ STATIC_URL }}images/emaillinkedin.png" alt=""></a>
+                                          <a href=""><img srcset="{% static 'images/emaillinkedin2x.png' %}" src="{% static 'images/emaillinkedin.png' %}" alt=""></a>
                                         </td>
                                       </tr>
                                     </table>
