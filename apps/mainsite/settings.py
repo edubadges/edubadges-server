@@ -265,56 +265,6 @@ SPHINX_API_VERSION = 0x116  # Sphinx 0.9.9
 ##
 TEST_RUNNER = 'mainsite.testrunner.BadgrRunner'
 
-##
-#
-#  CKEditor
-#
-##
-
-# https://github.com/concentricsky/django-sky-ckeditor
-CKEDITOR_CONFIGS = {
-    'default': {
-        'toolbar': [
-            [      'Undo', 'Redo',
-              '-', 'Format',
-              '-', 'Bold', 'Italic', 'Underline',
-              '-', 'Link', 'Unlink',
-              '-', 'BulletedList', 'NumberedList',
-            ],
-            [      'SpellChecker', 'Scayt',
-            ],
-            [      'Image',
-              '-', 'PasteText','PasteFromWord',
-              '-', 'Source',
-            ]
-        ],
-        'contentsCss': STATIC_URL+'css/ckeditor.css',
-        'format_tags': 'p;h3;h4',
-        'width': 655,
-        'height': 250,
-        'toolbarCanCollapse': False,
-        'debug': True,
-        'linkShowTargetTab': False,
-        'linkShowAdvancedTab': False,
-    },
-    'basic': {
-        'toolbar': [
-            [      'Bold', 'Italic',
-              '-', 'Link', 'Unlink',
-            ]
-        ]
-        , 'width': 600
-        , 'height': 250
-        , 'toolbarCanCollapse': False
-        , 'toolbarLocation': 'bottom'
-        , 'resize_enabled': False
-        , 'removePlugins': 'elementspath'
-        , 'forcePasteAsPlainText': True
-    }
-}
-
-CKEDITOR_EMBED_CONTENT = ['structure.page', 'structure.fileupload']
-
 
 ##
 #
