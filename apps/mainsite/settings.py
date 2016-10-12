@@ -161,7 +161,7 @@ MEDIA_ROOT = os.path.join(TOP_DIR, 'mediafiles')
 MEDIA_URL = '/media/'
 ADMIN_MEDIA_PREFIX = STATIC_URL+'admin/'
 
-PUBLIC_ASSET_URL = 'https://badgr.io/'
+BADGR_UI_URL = 'https://badgr.io/'
 
 
 ##

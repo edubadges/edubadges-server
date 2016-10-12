@@ -7,5 +7,5 @@ def extra_settings(request):
         'PINGDOM_MONITORING_ID': getattr(settings, 'PINGDOM_MONITORING_ID', None),
         'GOOGLE_ANALYTICS_ID': getattr(settings, 'GOOGLE_ANALYTICS_ID', None),
         'ARTIFACT_VERSION': getattr(settings, 'ARTIFACT_VERSION', 'noversionfound'),
-        'PUBLIC_ASSET_URL': getattr(settings, 'PUBLIC_ASSET_URL', 'https://badgr.io/')
+        'BADGR_UI_URL': getattr(settings, 'BADGR_UI_URL', 'https://badgr.io/')
     }
