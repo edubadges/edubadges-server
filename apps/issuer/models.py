@@ -242,7 +242,7 @@ class BadgeInstance(AbstractBadgeInstance):
         if self.pk is None:
             self.json['recipient']['salt'] = salt = self.get_new_slug()
             self.json['recipient']['identity'] = \
-                generate_sha256_hashstring(self.recipient_identifier, salt)
+                generate_sha256_hashstring(self.recipient_identifier.lower(), salt)
 
             self.created_at = datetime.datetime.now()
             self.json['issuedOn'] = self.created_at.isoformat()
