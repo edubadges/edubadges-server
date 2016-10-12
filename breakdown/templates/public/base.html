@@ -1,3 +1,5 @@
+{% load staticfiles %}
+
 <!doctype html>
 <html prefix="og: http://ogp.me/ns#">
 	<head>
@@ -7,11 +9,10 @@
 		<meta name="description" content="">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
-		<link rel="icon" type="image/png" sizes="32x32" href="{{ PUBLIC_ASSET_URL }}assets/icon/icon_favicon.png">
-		<link rel="shortcut icon" href="{{ PUBLIC_ASSET_URL }}assets/icon/favicon.ico">
-		<link rel="apple-touch-icon" href="{{ PUBLIC_ASSET_URL }}assets/icon/icon_apple_touch.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="{% static 'badgr-ui/images/icon_favicon.png' %}">
+		<link rel="shortcut icon" href="{% static 'badgr-ui/images/icon_favicon.ico' %}">
 
-		<link href="{{ PUBLIC_ASSET_URL }}styles.9c2b9739d2ba72513bfb.css" rel="stylesheet"></head>
+		<link href="{% static 'badgr-ui/badgr-ui.css' %}" rel="stylesheet">
 
 		{% block extra_head %}
 		{% endblock %}
@@ -22,8 +23,8 @@
 		<header class="header l-containerhorizontal">
 			<a href="{{ PUBLIC_ASSET_URL }}">
 				<picture>
-					<source media="(min-width: 640px)" srcset="{{ PUBLIC_ASSET_URL }}assets/logo-desktop-e55954f3168b409add64d59c5d819af8.svg">
-					<img alt="Badgr logo" src="{{ PUBLIC_ASSET_URL }}assets/logo-744102c31adbbf042736c4fdfdcb2778.svg">
+					<source media="(min-width: 640px)" srcset="{% static 'badgr-ui/images/logo-desktop.svg' %}">
+					<img alt="Badgr logo" src="{% static 'badgr-ui/images/logo.svg' %}">
 				</picture>
 			</a>
 			<a class="header-x-menu" href="javascript:void(0)" onclick="document.getElementById('menu').scrollIntoView(false)">Main Navigation</a>

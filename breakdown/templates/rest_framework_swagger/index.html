@@ -1,16 +1,17 @@
 {% extends "rest_framework_swagger/base.html" %}
+{% load staticfiles %}
 
 {% block style %}
 	{{ block.super }}
-	<link href="{{ PUBLIC_ASSET_URL }}styles.9c2b9739d2ba72513bfb.css" rel="stylesheet"></head>
+	<link href="{% static 'badgr-ui/badgr-ui.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block header %}
 	<header class="header l-containerhorizontal">
 		<a href="{{ PUBLIC_ASSET_URL }}">
 			<picture>
-				<source media="(min-width: 640px)" srcset="{{ PUBLIC_ASSET_URL }}assets/logo-desktop-e55954f3168b409add64d59c5d819af8.svg">
-				<img alt="Badgr logo" src="{{ PUBLIC_ASSET_URL }}assets/logo-744102c31adbbf042736c4fdfdcb2778.svg">
+				<source media="(min-width: 640px)" srcset="{% static 'badgr-ui/images/logo-desktop.svg' %}">
+				<img alt="Badgr logo" src="{% static 'badgr-ui/images/logo.svg' %}">
 			</picture>
 		</a>
 		<a class="header-x-menu" href="javascript:void(0)" onclick="document.getElementById('menu').scrollIntoView(false)">Main Navigation</a>
