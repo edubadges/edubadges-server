@@ -47,9 +47,6 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
             email_address = CachedEmailAddress.objects.get(pk=confirmation.email_address_id)
             email_address.save()
 
-            if resolverMatch.url_name == 'legacy_user_email_confirm':
-                return reverse('account_login')
-
             return u"{}{}?email={}".format(
                 badgr_app.email_confirmation_redirect,
                 urllib.quote(email_address.user.first_name),
@@ -61,16 +58,6 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
 
     def get_email_confirmation_url(self, request, emailconfirmation):
         url_name = "api_user_email_confirm"
-        if request is not None:
-            referer = request.META.get('HTTP_REFERER')
-            if referer:
-                parsed = urlparse.urlparse(referer)
-                try:
-                    badgr_app = BadgrApp.cached.get(cors=parsed.netloc)
-                except BadgrApp.DoesNotExist as e:
-                    # we couldn't determine a BadgrApp from the referer, default to legacy frontend
-                    url_name = "legacy_user_email_confirm"
-
         temp_key = default_token_generator.make_token(emailconfirmation.email_address.user)
         token = "{uidb36}-{key}".format(uidb36=user_pk_to_url_str(emailconfirmation.email_address.user),
                                         key=temp_key)
