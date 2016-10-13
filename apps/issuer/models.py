@@ -299,6 +299,7 @@ class BadgeInstance(AbstractBadgeInstance):
 
             email_context = {
                 'badge_name': self.badgeclass.name,
+                'badge_id': self.slug,
                 'badge_description': self.badgeclass.prop('description'),
                 'issuer_name': re.sub(r'[^\w\s]+', '', self.issuer.name, 0, re.I),
                 'issuer_url': self.issuer.prop('url'),
