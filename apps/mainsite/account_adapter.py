@@ -61,11 +61,7 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
         temp_key = default_token_generator.make_token(emailconfirmation.email_address.user)
         token = "{uidb36}-{key}".format(uidb36=user_pk_to_url_str(emailconfirmation.email_address.user),
                                         key=temp_key)
-        activate_url = build_absolute_uri(
-            request,
-            reverse(url_name, kwargs={'confirm_id': emailconfirmation.pk}),
-            protocol=OriginSetting.DEFAULT_HTTP_PROTOCOL
-        )
+        activate_url = OriginSetting.HTTP + reverse(url_name, kwargs={'confirm_id': emailconfirmation.pk})
         tokenized_activate_url = "{}?token={}".format(activate_url, token)
         return tokenized_activate_url
 

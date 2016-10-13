@@ -8,11 +8,13 @@ from django.http import HttpResponse, HttpResponseServerError, HttpResponseNotFo
 from django.shortcuts import redirect
 from django.template import loader, TemplateDoesNotExist, Context
 from django.views.decorators.clickjacking import xframe_options_exempt
+from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import AllowAny
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from mainsite.serializers import VerifiedAuthTokenSerializer
 from .models import EmailBlacklist
 
 
@@ -92,3 +94,7 @@ class AppleAppSiteAssociation(APIView):
             data['applinks']['details'].append(app_id)
 
         return Response(data=data)
+
+
+class LoginAndObtainAuthToken(ObtainAuthToken):
+    serializer_class = VerifiedAuthTokenSerializer

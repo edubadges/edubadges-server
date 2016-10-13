@@ -4,6 +4,9 @@ from collections import OrderedDict
 from django.conf import settings
 from django.utils.html import strip_tags
 from rest_framework import serializers
+from rest_framework.authtoken.serializers import AuthTokenSerializer
+from rest_framework.exceptions import ValidationError
+
 
 class HumanReadableBooleanField(serializers.BooleanField):
     TRUE_VALUES = serializers.BooleanField.TRUE_VALUES | set(('on', 'On', 'ON'))
@@ -115,3 +118,19 @@ class StripTagsCharField(serializers.CharField):
         value = super(StripTagsCharField, self).to_internal_value(data)
         if self.strip_tags:
             return strip_tags(value)
+
+
+class VerifiedAuthTokenSerializer(AuthTokenSerializer):
+    def validate(self, attrs):
+        attrs = super(VerifiedAuthTokenSerializer, self).validate(attrs)
+        user = attrs.get('user')
+        if not user.verified:
+            try:
+                email = user.cached_emails()[0]
+                email.send_confirmation()
+            except IndexError as e:
+                pass
+            raise ValidationError('You must verify your primary email address before you can sign in.')
+        return attrs
+
+

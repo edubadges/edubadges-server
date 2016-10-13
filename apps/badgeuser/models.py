@@ -172,7 +172,7 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
     def primary_email(self):
         primaries = filter(lambda e: e.primary, self.cached_emails())
         if len(primaries) > 0:
-            return primaries[0]
+            return primaries[0].email
         return self.email
 
     @property

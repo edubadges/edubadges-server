@@ -8,11 +8,10 @@ badgr_admin.autodiscover()
 # make sure that any view/model/form imports occur AFTER admin.autodiscover
 
 from django.views.generic.base import RedirectView, TemplateView
-from rest_framework.authtoken.views import obtain_auth_token
 
 from badgeuser.api import BadgeUserDetail
 from composition.views import LegacyCollectionShareRedirectView
-from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation
+from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation, LoginAndObtainAuthToken
 
 urlpatterns = [
     # Backup URLs in case the server isn't serving these directly
@@ -48,7 +47,7 @@ urlpatterns = [
     url(r'^earner/collections/(?P<pk>[^/]+)/(?P<share_hash>[^/]+)/embed$', LegacyCollectionShareRedirectView.as_view(), name='legacy_shared_collection_embed'),
 
     # REST Framework
-    url(r'^api-auth/token$', obtain_auth_token),
+    url(r'^api-auth/token$', LoginAndObtainAuthToken.as_view()),
     url(r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'public/login.html'}, name='login'),
     url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {'next_page': 'login'}, name='logout'),
 
