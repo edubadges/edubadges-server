@@ -238,7 +238,7 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'KEY_PREFIX': 'badgr_',
-        'VERSION': 7,
+        'VERSION': 8,
         'TIMEOUT': None,
     }
 }
