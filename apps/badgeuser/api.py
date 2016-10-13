@@ -394,6 +394,9 @@ class BadgeUserEmailConfirm(UserTokenMixin, BadgeUserEmailView):
         if email_address.user != user:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
+        old_primary = CachedEmailAddress.objects.get_primary(user)
+        if old_primary is None:
+            email_address.primary = True
         email_address.verified = True
         email_address.save()
 
