@@ -27,5 +27,4 @@ class AuthenticatedWithVerifiedEmail(permissions.BasePermission):
     message = "This function only available to authenticated users with confirmed email addresses."
 
     def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated() and \
-               [e for e in request.user.cached_emails() if e.verified and e.primary]
+        return request.user and request.user.is_authenticated() and request.user.verified

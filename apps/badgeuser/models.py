@@ -139,7 +139,7 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
         """
         Sends an email to this User.
         """
-        send_mail(subject, message, from_email, [self.email], **kwargs)
+        send_mail(subject, message, from_email, [self.primary_email], **kwargs)
 
     def publish(self):
         super(BadgeUser, self).publish()
@@ -166,6 +166,27 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
                 and email not in [e.email for e in canonical_email.cached_variants()] \
                 and EmailAddressVariant(email=email, canonical_email=canonical_email).is_valid():
             return True
+        return False
+
+    @property
+    def primary_email(self):
+        primaries = filter(lambda e: e.primary, self.cached_emails())
+        if len(primaries) > 0:
+            return primaries[0]
+        return self.email
+
+    @property
+    def verified_emails(self):
+        return filter(lambda e: e.verified, self.cached_emails())
+
+    @property
+    def verified(self):
+        if self.is_superuser:
+            return True
+
+        if len(self.verified_emails) > 0:
+            return True
+
         return False
 
     @property

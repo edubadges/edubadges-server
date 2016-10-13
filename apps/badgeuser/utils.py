@@ -20,4 +20,4 @@ def notify_on_password_change(user, request=None):
     }
 
     email_context = Context(base_context)
-    get_adapter().send_mail('account/email/password_reset_confirmation', user.email, base_context)
+    get_adapter().send_mail('account/email/password_reset_confirmation', user.primary_email, base_context)
