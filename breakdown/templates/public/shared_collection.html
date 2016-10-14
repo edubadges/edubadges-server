@@ -5,7 +5,8 @@
 	<header class="wrap wrap-light l-containerhorizontal l-heading ">
 		<div class="heading">
 			<div class="heading-x-text">
-				<h1>{{collection.name}}</h1>
+				<h1>{{collection.name}} <span>{number} Badges</span></h1>
+				<p><small>Badges earned by {email}</small></p>
 				<p>{{collection.description}}</p>
 			</div>
 		</div>
@@ -13,36 +14,27 @@
 
 
 	<div class="wrap l-containerhorizontal l-headeredsection">
-		<header class="l-childrenhorizontal l-childrenhorizontal-spacebetween l-childrenhorizontal-spacebetween">
-			<h2 class="title title-is-smallmobile">{{ collection.badges.all|length }} Badges</h2>
-		</header>
 
-		<div class="l-overflowhorizontal">
-			<table class="table">
-				<thead>
-					<tr>
-						<th scope="col">Badge</th>
-						<th scope="col">Issuer</th>
-						<th scope="col">Issued</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for entry in collection.badges.all %}
-					<tr>
-						<th>
-							<div class="l-childrenhorizontal l-childrenhorizontal-small">
-								<div class="badge badge-flat">
-									<img alt="{{ entry.badge_instance.cached_badgeclass.name }} Badge" src="{{ entry.badge_instance.image_url }}" width="40">
-								</div>
-								<a href="{{ entry.badge_instance.shareUrl }}">{{ entry.badge_instance.cached_badgeclass.name }}</a>
+		<div class="l-gridthree">
+			{% for entry in collection.badges.all %}
+			<div>
+				<article class="card card-largeimage">
+					<a class="card-x-main" target="_blank" href="{{ entry.badge_instance.cached_issuer.json.url }}">
+						<div class="card-x-image">
+							<div class="badge badge-flat">
+								<img alt="{{ entry.badge_instance.cached_badgeclass.name }} Badge" src="{{ entry.badge_instance.image_url }}" width="80">
 							</div>
-						</th>
-						<td><a target="_blank" href="{{ entry.badge_instance.cached_issuer.json.url }}">{{ entry.badge_instance.cached_issuer.name }}</a></td>
-						<td>{{ entry.badge_instance.json.issuedOn }}</td>
-					</tr>
-					{% endfor %}
-				</tbody>
-			</table>
+						</div>
+						<div class="card-x-text">
+							<h1>{{ entry.badge_instance.cached_badgeclass.name }}</h1>
+							<small>{{ entry.badge_instance.cached_issuer.name }}</small>
+							<p>{truncated badge criteria}</p>
+						</div>
+					</a>
+				</article>
+			</div>
+			{% endfor %}
 		</div>
+
 	</div>
 {% endblock %}
