@@ -20,40 +20,46 @@
 
 	<body>
 
-		<header class="header l-containerhorizontal">
-			<a href="{{ BADGR_UI_URL }}">
-				<picture>
-					<source media="(min-width: 640px)" srcset="{% static 'badgr-ui/images/logo-desktop.svg' %}">
-					<img alt="Badgr logo" src="{% static 'badgr-ui/images/logo.svg' %}">
-				</picture>
-			</a>
-			<a class="header-x-menu" href="javascript:void(0)" onclick="document.getElementById('menu').scrollIntoView(false)">Main Navigation</a>
-		</header>
+		<!-- Since this uses the same stylesheet as Badgr UI content must be wrapped in an app tag -->
 
-		<main>
-			{% block content %}
-			{% endblock %}
-		</main>
+		<app>
 
-		<footer class="wrap l-containerhorizontal">
-			<div class="footer">
-				<ul>
-					<li>Copyright &copy; {{ copyrightYear }} <a href="https://concentricsky.com" target="_blank">Concentric Sky, Inc.</a></li>
-					<li>Powered by <a href="https://github.com/concentricsky/badgr-server" target="_blank">Badgr</a></li>
-				</ul>
-				<a href="https://badgr.io/docs/" target="_blank">API documentation</a>
-			</div>
-		</footer>
+			<header class="header l-containerhorizontal">
+				<a href="{{ BADGR_UI_URL }}">
+					<picture>
+						<source media="(min-width: 640px)" srcset="{% static 'badgr-ui/images/logo-desktop.svg' %}">
+						<img alt="Badgr logo" src="{% static 'badgr-ui/images/logo.svg' %}">
+					</picture>
+				</a>
+				<a class="header-x-menu" href="javascript:void(0)" onclick="document.getElementById('menu').scrollIntoView(false)">Main Navigation</a>
+			</header>
 
-		<nav class="menu" id="menu">
-			<h1 class="visuallyhidden">Main Navigation</h1>
-			<ul>
-				{% block navigation_items_ui %}
-				<li class="menuitem" ><a href="https://badgr.io/login">Sign In</a></li>
-				<li class="menuitem" ><a href="https://badgr.io/signup">Sign Up</a></li>
+			<main>
+				{% block content %}
 				{% endblock %}
-			</ul>
-		</nav>
+			</main>
+
+			<footer class="wrap l-containerhorizontal">
+				<div class="footer">
+					<ul>
+						<li>Copyright &copy; {{ copyrightYear }} <a href="https://concentricsky.com" target="_blank">Concentric Sky, Inc.</a></li>
+						<li>Powered by <a href="https://github.com/concentricsky/badgr-server" target="_blank">Badgr</a></li>
+					</ul>
+					<a href="https://badgr.io/docs/" target="_blank">API documentation</a>
+				</div>
+			</footer>
+
+			<nav class="menu" id="menu">
+				<h1 class="visuallyhidden">Main Navigation</h1>
+				<ul>
+					{% block navigation_items_ui %}
+					<li class="menuitem" ><a href="https://badgr.io/login">Sign In</a></li>
+					<li class="menuitem" ><a href="https://badgr.io/signup">Sign Up</a></li>
+					{% endblock %}
+				</ul>
+			</nav>
+
+	</app>
 
 	</body>
 
