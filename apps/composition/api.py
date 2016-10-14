@@ -539,7 +539,7 @@ class LocalIssuerImage(ImagePropertyDetailView):
 
 
 class ShareBadge(APIView):
-    permission_classes = (permissions.IsAuthenticated, IsOwner,)
+    permission_classes = (permissions.AllowAny,)
 
     def get(self, request, badge_id):
         """
@@ -575,7 +575,7 @@ class ShareBadge(APIView):
 
 
 class ShareCollection(APIView):
-    permission_classes = (permissions.IsAuthenticated, IsOwner,)
+    permission_classes = (permissions.AllowAny,)
 
     def get(self, request, collection_slug):
         """
