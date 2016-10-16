@@ -53,6 +53,7 @@ class TestCacheSettings(TestCase):
                 self.assertEqual(retrieved, "hello cached world")
 
 
+@override_settings(HTTP_ORIGIN='http://testserver')
 class TestSignup(APITestCase):
     def test_user_signup_email_confirmation_redirect(self):
         badgr_app = BadgrApp(cors='testserver',

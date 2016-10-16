@@ -59,6 +59,10 @@ class LocalBadgeInstance(AbstractBadgeInstance):
     def cached_badgeclass(self):
         return LocalBadgeClass.cached.get(pk=self.badgeclass_id)
 
+    @property
+    def acceptance(self):
+        return 'Accepted'
+
 
 class Collection(cachemodel.CacheModel):
     name = models.CharField(max_length=128)

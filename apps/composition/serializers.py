@@ -28,7 +28,8 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
     image = Base64FileField(required=False, write_only=True)
     url = serializers.URLField(required=False, write_only=True)
     assertion = serializers.CharField(required=False, write_only=True)
-    recipient_identifier = serializers.CharField(required=False, write_only=True)
+    recipient_identifier = serializers.CharField(required=False)
+    acceptance = serializers.CharField(default='Accepted')
 
     # Reinstantiation using fields from badge instance when returned by .create
     id = serializers.IntegerField(read_only=True)
@@ -214,6 +215,16 @@ badge was valid, but cannot be saved."
         logger.event(badgrlog.BadgeUploaded(badge_instance_json, badge_check, request_user))
 
         return new_instance
+
+    def update(self, instance, validated_data):
+        """ Only updating acceptance status (to 'Accepted') is permitted for now. """
+        # Only locally issued badges will ever have an acceptance status other than 'Accepted'
+        if instance.acceptance == 'Unaccepted' and validated_data.get('acceptance') == 'Accepted':
+            instance.acceptance = 'Accepted'
+
+            instance.save()
+
+        return instance
 
 
 class CollectionBadgesSerializer(serializers.ListSerializer):

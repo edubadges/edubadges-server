@@ -198,7 +198,7 @@ class BadgeInstance(AbstractBadgeInstance):
         (ACCEPTANCE_ACCEPTED, 'Accepted'),
         (ACCEPTANCE_REJECTED, 'Rejected'),
     )
-    acceptance = models.CharField(max_length=254, choices=ACCEPTANCE_CHOICES, default=ACCEPTANCE_ACCEPTED)
+    acceptance = models.CharField(max_length=254, choices=ACCEPTANCE_CHOICES, default=ACCEPTANCE_UNACCEPTED)
 
     objects = BadgeInstanceManager()
 
