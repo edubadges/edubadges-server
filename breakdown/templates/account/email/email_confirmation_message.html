@@ -15,10 +15,9 @@
       line-height: 32px;
       margin: 0;
       text-align: center;
-      word-break: break-all;
     ">
     Please verify your email address on Badgr, <br>
-    {{ email.email }}
+    <span style="word-break: all;">{{ email.email }}</span>
     </h1>
   </td>
 </tr>
@@ -33,7 +32,6 @@
       font-size: 14px;
       line-height: 24px;
       margin: 0;
-      word-break: break-all;
     ">
     A Badgr user has requested to add this email to their account. Please click the link below to verify this operation, and then you may upload badges that have been issued to this address to your account. If you didn't make this request, you can safely ignore this email, and no action will be taken on your behalf.
     </p>
@@ -56,9 +54,8 @@
       font-size: 12px;
       line-height: 16px;
       margin: 0;
-      word-break: break-all;
     ">
-      Or, you can copy/paste this link into your browser: <a href="{{ activate_url }}" style="color: #C30A28;">{{ activate_url }}</a>
+      Or, you can copy/paste this link into your browser: <a href="{{ activate_url }}" style="color: #C30A28; word-break: break-all;">{{ activate_url }}</a>
     </p>
   </td>
 </tr>
