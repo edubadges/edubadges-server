@@ -2,147 +2,300 @@
 {% load staticfiles %}
 {% load i18n %}
 
-<html style="">
+<!DOCTYPE html>
+<html>
   <head>
-     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!--[if !mso]><!-- -->
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700' rel='stylesheet' type='text/css'>
-    <!--<![endif]-->
+    <meta charset="utf-8">
+    <title>Badgr</title>
     <style type="text/css">
-      @media (max-width: 640px) {
-        .title {
-          padding: 20px 0 !important;
+
+      @import 'https://fonts.googleapis.com/css?family=Open+Sans:400,600,700';
+
+      @media (max-width: 560px) {
+
+        .maincontent {
+          width: 100% !important;
         }
+
+        .wrapper {
+          padding-left: 24px !important;
+          padding-right: 24px !important;
+        }
+
+        .badge {
+          height: 160px !important;
+          width: 160px !important;
+        }
+
       }
-      @media (max-width: 320px) {
-        .header {
-          padding: 20px 0 20px 0 !important;
-        }
-        .logo {
-          width: 79px !important;
-        }
-        .bodycontainer {
-          padding: 0 25px !important;
-        }
-        .bodytext {
-          font-size: 14px !important;
-          padding: 20px 20px 20px 20px !important;
-        }
-        .footer {
-          font-size: 14px !important;
-          padding: 20px 20px 20px 20px !important;
-        }
+
+    </style>
+
+    <!--[if mso]>
+    <style type=”text/css”>
+      .mstext {
+        font-family: Trebuchet, sans-serif !important;
       }
     </style>
+    <![endif]-->
+
   </head>
-  <body style="padding: 0; margin: 0;">
-    <table cellspacing="0" cellpadding="0" style="
+  <body style="
+    height: 100%;
+    font-family: Trebuchet, sans-serif;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  ">
+    <table cellpadding="0" cellspacing="0" style="
+      background-color: #E1E0E5;
+      border-collapse: collapse;
       width: 100%;
     ">
-      <tr>
-        <td class="header" style="
-          background-color: #31383E;
-          padding: 68px 0;
-          text-align: center;
-        ">
-          <img class="logo" src="{% static 'images/emaillogo.png' %}" alt="Badgr Logo">
-        </td>
-      </tr>
-      <tr>
-        <td class="bodycontainer" style="
-          background-color: #FDFDFD;
-          padding: 0 30px;
-        ">
-          <table cellspacing="0" cellpadding="0" style="
-            margin: 0 auto;
-            max-width: 720px;
+      <tbody>
+        <tr>
+          <!-- Begin Centering Container -->
+          <td align="center">
+            <!-- Begin Main Content -->
+            <table class="maincontent" cellpadding="0" cellspacing="0" style="
+              border-collapse: collapse;
+              background-color: #ffffff;
+              width: 560px;
             ">
-            <tr>
-              <td class="title" style="
-              color: #3D1719;
-              font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-              font-size: 18px;
-              font-weight: bold;
-              line-height: 1.5;
-              padding: 35px 35px 35px 35px;
-              text-align: center;
-              word-break: break-word;
-              ">
-                {% block action_callout %}{% endblock %}
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <table cellspacing="0" cellpadding="0" style="
-                  border: 1px solid #DDDDDD;
-                  border-radius: 7px;
-                  width: 100%;
-                ">
-                  <tr>
-                    <td class="bodytext" style="
-                      color: #31383E;
-                      font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-                      font-size: 18px;
-                      line-height: 1.5;
-                      padding: 35px 35px 35px 35px;
-                      text-align: center;
+              <tbody>
+                <tr>
+                  <td>
+                    <table cellpadding="0" cellspacing="0" style="
+                      border-collapse: collapse;
+                      width: 100%;
                     ">
-                        {% block message_body %}{% endblock %}
-                    </td>
-                  </tr>
-                  {% block action_button_override %}
-                  <tr>
-                    <td style="
-                      padding: 0 0 35px 0;
-                      text-align: center;
-                    ">
-                      <table  cellspacing="0" cellpadding="0" style="
-                        margin: 0 auto;
-                      ">
+                      <tbody>
+                        <!-- Begin Badge Section -->
                         <tr>
-                          <td valign="middle" style="
-                            background-color: #672F33;
-                            border-radius: 3px;
-                            padding: 8px 16px 8px 16px;
+                          <td class="wrapper" style="
+                            border-bottom: 1px solid #E1E0E5;
+                            padding-bottom: 24px;
+                            padding-left: 48px;
+                            padding-right: 48px;
+                            padding-top: 32px;
                           ">
-                          {% block action_button %}{% endblock %}
+                            <table cellpadding="0" cellspacing="0" style="
+                              border-collapse: collapse;
+                              width: 100%;
+                            ">
+                              <tbody>
+                                {% block main %}
+                                {% block beforelogo %}{% endblock %}
+                                <!-- Begin Logo Row -->
+                                <tr>
+                                  <td align="center" style="
+                                    padding-bottom: 16px;
+                                  ">
+                                    <a href="{{ badge_instance_url }}" style="
+                                      text-decoration: none;
+                                    ">
+                                      <img class="badge" src="http://placehold.it/188x200" alt="Badge" style="max-width: 75%; height: auto;" />
+                                    </a>
+                                  </td>
+                                </tr>
+                                {% block afterlogo %}{% endblock %}
+                                {% block button %}
+                                <!-- Begin Buttons Row -->
+                                <tr>
+                                  <td align="center">
+                                    <table cellpadding="0" cellspacing="0" style="
+                                      border-collapse: collapse;
+                                    ">
+                                      <tr>
+                                        <td style="
+                                          padding-bottom: 16px;
+                                          padding-left: 8px;
+                                          padding-right: 8px;
+                                        ">
+                                          <table cellpadding="0" cellspacing="0" style="
+                                            border-collapse: collapse;
+                                          ">
+                                            <tbody>
+                                              <tr>
+                                                <td bgcolor="#FFFFFF" style="
+                                                  border-radius: 4px;
+                                                ">
+                                                  <a class="mstext" href="{% block button_url %}{% endblock %}" style="
+                                                    border: 1px solid #C30A28;
+                                                    border-radius: 4px;
+                                                    color: #C30A28;
+                                                    display: inline-block;
+                                                    font-family: 'Open Sans', Trebuchet, sans-serif;
+                                                    font-size: 14px;
+                                                    font-weight: bold;
+                                                    padding-bottom: 8px;
+                                                    padding-left: 16px;
+                                                    padding-right: 16px;
+                                                    padding-top: 8px;
+                                                    text-decoration: none;
+                                                    text-transform: uppercase;
+                                                  ">
+                                                    {% block button_text %}{% endblock %}
+                                                  </a>
+                                                </td>
+                                              </tr>
+                                            </tbody>
+                                          </table>
+                                        </td>
+                                      </tr>
+                                    </table>
+                                  </td>
+                                </tr>
+                                {% endblock button %}
+                                {% block afterbutton %}{% endblock %}
+                                {% endblock main %}
+                              </tbody>
+                            </table>
                           </td>
                         </tr>
-                      </table>
-                    </td>
-                  </tr>
-                  {% endblock %}
-                </table>
-              </td>
-            </tr>
-            <tr>
-              <td class="footer" style="
-                color: #5B6C79;
-                font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-                font-size: 16px;
-                line-height: 1.5;
-                padding: 35px 35px 35px 35px;
-                text-align: center;
-                word-break: break-word;
-              ">
-              {% block alternate_action %}{% endblock %}
-              </td>
-            </tr>
-            <tr>
-              <td class="footer" style="
-                color: #5B6C79;
-                font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-                font-size: 16px;
-                line-height: 1.5;
-                padding: 0 35px 35px 35px;
-                text-align: center;
-              ">
-                {% block footer %}{% endblock %}
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
+                        <!-- End Badge Section -->
+                        <!-- Begin Description Section -->
+                        <tr>
+                          <td class="wrapper" style="
+                            padding-bottom: 24px;
+                            padding-left: 48px;
+                            padding-right: 48px;
+                            padding-top: 24px;
+                          ">
+                            <table>
+                              <tbody cellpadding="0" cellspacing="0" style="
+                                border-collapse: collapse;
+                              ">
+                                {% block beforeabout %}{% endblock %}
+                                <!-- Begin Open Badges Row -->
+                                <tr>
+                                  <td style="
+                                    padding-bottom: 8px;
+                                  ">
+                                    <h2 class="mstext" style="
+                                      color: #05012C;
+                                      font-family: 'Open Sans', Trebuchet, sans-serif;
+                                      font-weight: normal;
+                                      font-size: 24px;
+                                      font-weight: 600;
+                                      line-height: 32px;
+                                      margin: 0;
+                                    ">
+                                      Open Badges
+                                    </h2>
+                                    <h3 class="mstext" style="
+                                      color: #05012C;
+                                      font-family: 'Open Sans', Trebuchet, sans-serif;
+                                      font-weight: normal;
+                                      font-size: 16px;
+                                      font-weight: normal;
+                                      line-height: 24px;
+                                      margin: 0;
+                                    ">
+                                      Portable digital credentials
+                                    </h3>
+                                  </td>
+                                </tr>
+                                <!-- Begin Open Badges Body Row -->
+                                <tr>
+                                  <td style="
+                                    padding-bottom: 16px;
+                                  ">
+                                    <p class="mstext" style="
+                                      color: #05012C;
+                                      font-family: 'Open Sans', Trebuchet, sans-serif;
+                                      font-size: 14px;
+                                      line-height: 24px;
+                                      margin: 0;
+                                    ">
+                                      Open digital badges let you take your credentials from the many places you learn,
+                                      and combine them to tell a cohesive story about your learning.
+                                    </p>
+                                  </td>
+                                </tr>
+                                <!-- Begin Learn More Link Row -->
+                                <tr>
+                                  <td>
+                                    <table cellpadding="0" cellspacing="0" style="
+                                      border-collapse: collapse;
+                                    ">
+                                      <tbody>
+                                        <tr>
+                                          <td style="
+                                            padding-bottom: 32px;
+                                          ">
+                                            <table cellpadding="0" cellspacing="0" style="
+                                              border-collapse: collapse;
+                                            ">
+                                              <tbody>
+                                                <tr>
+                                                  <td bgcolor="#FFFFFF" style="
+                                                    border-radius: 4px;
+                                                  ">
+                                                    <a class="mstext" href="https://openbadges.org" style="
+                                                      border: 1px solid #C30A28;
+                                                      border-radius: 4px;
+                                                      color: #C30A28;
+                                                      display: inline-block;
+                                                      font-family: 'Open Sans', Trebuchet, sans-serif;
+                                                      font-size: 14px;
+                                                      font-weight: bold;
+                                                      padding-bottom: 8px;
+                                                      padding-left: 16px;
+                                                      padding-right: 16px;
+                                                      padding-top: 8px;
+                                                      text-decoration: none;
+                                                      text-transform: uppercase;
+                                                    ">
+                                                      Learn More
+                                                    </a>
+                                                  </td>
+                                                </tr>
+                                              </tbody>
+                                            </table>
+                                          </td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </td>
+                                </tr>
+                                {% block unsubscribe %}
+                                <!-- Begin Unsubscribe Row -->
+                                <tr>
+                                  <td align="center" style="
+                                    border-top: 1px solid #E1E0E5;
+                                    padding-top: 28px;
+                                  ">
+                                    <a class="mstext" href="{{ unsubscribe_url }}" style="
+                                      color: #E1E0E5;
+                                      font-family: 'Open Sans', Trebuchet, sans-serif;
+                                      font-weight: bold;
+                                      font-size: 14px;
+                                      text-align: center;
+                                      text-decoration: none;
+                                      text-transform: uppercase;
+                                    ">
+                                      Unsubscribe
+                                    </a>
+                                  </td>
+                                </tr>
+                                {% endblock %}
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                        <!-- End Description Section -->
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <!-- End Main Content -->
+          </td>
+          <!-- End Centering Container -->
+        </tr>
+      </tbody>
     </table>
   </body>
 </html>
