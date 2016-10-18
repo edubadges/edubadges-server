@@ -124,7 +124,7 @@ class LocalBadgeInstanceDetail(APIView):
         if user_badge is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        key_set = set(request.data.keys()) - set('image')
+        key_set = set(request.data.keys()) - set(['image'])
         data = {key: request.data.get(key) for key in key_set}
 
         serializer = LocalBadgeInstanceUploadSerializer(
