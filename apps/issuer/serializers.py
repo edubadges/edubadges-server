@@ -3,6 +3,7 @@ import uuid
 
 from django.apps import apps
 from django.core.urlresolvers import reverse
+from django.utils.html import strip_tags
 from rest_framework import serializers
 
 from badgeuser.serializers import UserProfileField
@@ -179,7 +180,7 @@ class BadgeClassSerializer(AbstractComponentSerializer):
             '@context': utils.CURRENT_OBI_CONTEXT_IRI,
             'type': 'BadgeClass',
             'name': validated_data.get('name'),
-            'description': validated_data.pop('description'),
+            'description': strip_tags(validated_data.pop('description')),
             'issuer': validated_data.get('issuer').get_full_url()
         }
 
