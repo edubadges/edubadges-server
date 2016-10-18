@@ -1,12 +1,45 @@
-{% extends "account/email/email_confirmation_message.html" %}
+{% extends "email/base.html" %}
 
-{% block action_callout %}
+{% block afterlogo %}
+<!-- Begin Title Row -->
+<tr>
+  <td style="
+    padding-bottom: 16px;
+  ">
+    <h1 class="mstext" style="
+      color: #05012C;
+      font-family: 'Open Sans', Trebuchet, sans-serif;
+      font-weight: normal;
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 32px;
+      margin: 0;
+      text-align: center;
+    ">
     Please verify your Badgr account, <br>
-    {{ email.email }}
-{% endblock %}
-
-{% block message_body %}
+    <span style="word-break: break-all;">{{ email.email }}</span>
+    </h1>
+  </td>
+</tr>
+<!-- Begin Description Row -->
+<tr>
+  <td style="
+    padding-bottom: 8px;
+  ">
+    <p class="mstext" style="
+      color: #05012C;
+      font-family: 'Open Sans', Trebuchet, sans-serif;
+      font-size: 14px;
+      line-height: 24px;
+      margin: 0;
+      word-break: break-all;
+    ">
     Confirm your email address to activate your Badgr account.
     <br>It's easy &ndash; just click the button below.
+    </p>
+  </td>
+</tr>
 {% endblock %}
 
+{% block button_url %}{{ activate_url }}{% endblock %}
+{% block button_text %}Confirm Now{% endblock %}

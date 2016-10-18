@@ -562,7 +562,7 @@ class ShareBadge(APIView):
         """
         provider = request.query_params.get('provider')
 
-        badge = get_badge_by_identifier(badge_id, request.user)
+        badge = get_badge_by_identifier(badge_id)
         if badge is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 

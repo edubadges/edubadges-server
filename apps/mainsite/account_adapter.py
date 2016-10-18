@@ -14,7 +14,7 @@ from allauth.account.models import EmailConfirmation
 from allauth.utils import get_current_site, build_absolute_uri
 
 from badgeuser.models import CachedEmailAddress
-from mainsite.models import BadgrApp
+from mainsite.models import BadgrApp, EmailBlacklist
 from mainsite.utils import OriginSetting
 
 
@@ -23,6 +23,7 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
     def send_mail(self, template_prefix, email, context):
         context['STATIC_URL'] = getattr(settings, 'STATIC_URL')
         context['HTTP_ORIGIN'] = getattr(settings, 'HTTP_ORIGIN')
+        context['unsubscribe_url'] = getattr(settings, 'HTTP_ORIGIN') + EmailBlacklist.generate_email_signature(email)
 
         msg = self.render_mail(template_prefix, email, context)
         msg.send()
