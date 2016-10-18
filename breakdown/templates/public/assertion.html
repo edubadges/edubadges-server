@@ -36,23 +36,15 @@
 		    </div>
 		    <div class="heading-x-text">
 
-			    <h1>
-				    {{ badge_class.name }}
-			    </h1>
+			    <h1>{{ badge_class.name }}</h1>
 
-			    <p class="heading-x-meta">
-				    Issued {{ badge_instance.created_at|date:'F d, Y' }} to {{ obscured_recipient }}
-			    </p>
+			    <p class="heading-x-meta">Issued {{ badge_instance.created_at|date:'F d, Y' }} to {{ obscured_recipient }}</p>
 
-			    <p>
-				    {{ badge_class.json.description }}
-			    </p>
+			    <p>{{ badge_class.json.description }}</p>
 
 			     {% if badge_class.criteria_text %}
-				     <h3>Criteria</h3>
-				     <p>
-					     {{ badge_class.criteria_text }}
-				     </p>
+				     <h3 class="title title-small">Criteria</h3>
+				     <p>{{ badge_class.criteria_text }}</p>
 			     {% endif %}
 
 			    <div class="l-childrenhorizontal l-childrenhorizontal-small l-offsetleft">
@@ -69,7 +61,7 @@
 
 			    <h2 class="titledivider">Issuer</h2>
 
-			    <a class="stack" target="_blank" href="{{ issuer.json.url }}">
+			    <a class="stack" target="_blank" href="{% url 'issuer_json' slug=issuer.slug %}">
 				    <div class="stack-x-image">
 					    <img src="{% if issuer.json.image %}{{ issuer.json.image }}{% else %}{% static 'badgr-ui/images/issuer-placeholder.png' %}{% endif %}"
 					         width="40"
@@ -91,6 +83,9 @@
 	    </div>
 
     </header>
+
+		<div div class="wrap l-containerhorizontal l-headeredsection">
+		</div>
 	{% endif %}
 
 {% endblock %}
