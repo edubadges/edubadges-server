@@ -229,6 +229,11 @@ badge was valid, but cannot be saved."
 
 class CollectionBadgesSerializer(serializers.ListSerializer):
 
+    def to_representation(self, data):
+        filtered_data = data.exclude(issuer_instance__acceptance=BadgeInstance.ACCEPTANCE_REJECTED).exclude(issuer_instance__revoked=True)
+        representation = super(CollectionBadgesSerializer, self).to_representation(filtered_data)
+        return representation
+
     def save(self, **kwargs):
         collection = self.context.get('collection')
         updated_ids = set()
