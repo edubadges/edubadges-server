@@ -21,6 +21,11 @@ class BadgeInstanceHTMLRenderer(BrowsableAPIRenderer):
             context['badge_instance_public_url'] = OriginSetting.HTTP+reverse('badgeinstance_json', kwargs={
                 'slug': renderer_context['badge_instance'].slug})
 
+            context['badgeclass_image_png'] = "{}{}?type=png".format(
+                OriginSetting.HTTP,
+                reverse('badgeclass_image', kwargs={'slug': renderer_context['badge_class'].slug})
+            )
+
             recipient_email = renderer_context['badge_instance'].recipient_identifier
             context['obscured_recipient'] = utils.obscure_email_address(recipient_email)
         except KeyError as e:
