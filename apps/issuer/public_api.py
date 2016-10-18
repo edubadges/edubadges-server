@@ -3,6 +3,7 @@ import os
 import StringIO
 import cairosvg
 from PIL import Image
+from django.conf import settings
 from django.core.files.storage import DefaultStorage
 from django.http import Http404
 from django.shortcuts import redirect
@@ -114,7 +115,8 @@ class ImagePropertyDetailView(ComponentPropertyDetailView):
         filename, ext = os.path.splitext(image_prop.name)
         basename = os.path.basename(filename)
         dirname = os.path.dirname(filename)
-        new_name = '{dirname}/converted/{basename}.png'.format(dirname=dirname, basename=basename)
+        version_suffix = getattr(settings, 'CAIROSVG_VERSION_SUFFIX', '1')
+        new_name = '{dirname}/converted{version}/{basename}.png'.format(dirname=dirname, basename=basename, version=version_suffix)
         storage = DefaultStorage()
 
         if image_type == 'original':
