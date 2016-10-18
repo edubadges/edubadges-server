@@ -76,4 +76,5 @@ six==1.9.0
 
 #svg 2 png support
 CairoSVG==1.0.22
-
+cssselect==0.9.2
+tinycss==0.4
