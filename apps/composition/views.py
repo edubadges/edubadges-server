@@ -56,6 +56,7 @@ class CollectionDetailView(DetailView):
         context = super(CollectionDetailView, self).get_context_data(*args, **kwargs)
 
         context.update({
+            'badges': self.object.badges.all()
         })
         return context
 
