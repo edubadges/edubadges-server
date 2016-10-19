@@ -94,7 +94,7 @@ class LocalBadgeInstanceDetail(APIView):
     queryset = LocalBadgeInstance.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
     """
-    View or delete a locally imported badge earned by the logged-in user.
+    View, accept, or delete a badge earned by the logged-in user.
     """
     def get(self, request, badge_id):
         """

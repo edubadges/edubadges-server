@@ -206,6 +206,10 @@ class AbstractBadgeInstance(AbstractComponent):
     def populate_slug(self):
         return str(uuid.uuid4())
 
+    @property
+    def owner(self):
+        return self.issuer.owner
+
     #  def image_url(self):
     #      if getattr(settings, 'MEDIA_URL').startswith('http'):
     #          return getattr(settings, 'MEDIA_URL') \

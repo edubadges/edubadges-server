@@ -472,8 +472,9 @@ class UserProfileTests(APITestCase):
         new_password = 'new-password'
         username = 'testinguser'
         original_password = 'password'
+        email = 'testinguser@testing.info'
 
-        user = BadgeUser(username=username, is_active=True)
+        user = BadgeUser(username=username, is_active=True, email=email)
         user.set_password(original_password)
         user.save()
         self.client.login(username=username, password=original_password)
@@ -497,4 +498,4 @@ class UserProfileTests(APITestCase):
         self.assertIn(SESSION_KEY, self.client.session)
         if user_pk is not None:
             self.assertEqual(self.client.session[SESSION_KEY], user_pk)
-            
+
