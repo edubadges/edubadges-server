@@ -128,7 +128,7 @@ class ImagePropertyDetailView(ComponentPropertyDetailView):
                     cairosvg.svg2png(file_obj=input_svg, write_to=out_buf)
                     storage.save(new_name, out_buf)
             image_url = storage.url(new_name)
-        else:
+        elif ext != '.png':
             # attempt to use PIL to do desired image conversion
             if not storage.exists(new_name):
                 with storage.open(image_prop.name, 'rb') as input_svg:

@@ -1,3 +1,4 @@
+import StringIO
 import abc
 import base64
 import os
@@ -89,7 +90,8 @@ class AbstractRemoteImagePreviewMixin(models.Model):
                         ext=ext)
                     if not store.exists(storage_name):
                         r.raw.decode_content = True
-                        store.save(storage_name, r.raw)
+                        buf = StringIO.StringIO(r.raw.read())
+                        store.save(storage_name, buf)
                         self.image = storage_name
                 self.save()
         return self.image
