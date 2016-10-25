@@ -9,6 +9,7 @@ from django.views.generic import RedirectView
 from composition.models import Collection
 from composition.utils import get_badge_by_identifier
 from issuer.utils import obscure_email_address
+from mainsite.utils import OriginSetting
 
 
 class SharedBadgeView(DetailView):
@@ -28,7 +29,9 @@ class SharedBadgeView(DetailView):
             'badge_class': self.object.cached_badgeclass,
             'issuer': self.object.cached_issuer,
             'badge_instance_image_url': self.object.image.url if self.object.image else None,
-            'obscured_recipient': obscure_email_address(self.object.recipient_identifier)
+            'obscured_recipient': obscure_email_address(self.object.recipient_identifier),
+            'badge_instance_public_url': OriginSetting.HTTP+reverse('shared_badge', kwargs={'badge_id': self.kwargs.get('badge_id')}),
+            'badgeclass_image_png': "{}{}?type=png".format(OriginSetting.HTTP,reverse('badgeclass_image', kwargs={'slug': self.object.cached_badgeclass.slug}))
         })
         return context
 
