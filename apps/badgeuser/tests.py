@@ -218,6 +218,16 @@ class UserCreateTests(APITestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(len(mail.outbox), 1)
 
+    def test_should_signup_with_email_with_uc_email(self):
+        response = self.client.post('/v1/user/profile', {
+            'first_name': 'existing',
+            'last_name': 'user',
+            'password': 'secret',
+            'email': 'VERYNONEXISTENT@test.nonexistent'
+        })
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(len(mail.outbox), 1)
+
 
 class UserUnitTests(TestCase):
     def test_user_can_have_unicode_characters_in_name(self):
@@ -418,17 +428,19 @@ class UserEmailTests(APITestCase):
         self.assertFalse(user.can_add_variant("howdy@world.com"))  # is the original
         self.assertFalse(user.can_add_variant("howdyfeller@world.com"))  # not a match of original
 
-    def test_cannot_create_variant_for_unconfirmed_email(self):
+    def test_can_create_variant_for_unconfirmed_email(self):
+        user = BadgeUser.objects.first()
         new_email_address = "new@unconfirmed.info"
-        new_email = CachedEmailAddress.objects.create(email=new_email_address, user=BadgeUser.objects.first())
+        new_email = CachedEmailAddress.objects.create(email=new_email_address, user=user)
         new_variant = EmailAddressVariant(email=new_email_address.upper(), canonical_email=new_email)
 
-        try:
-            new_variant.save()
-        except ValidationError as e:
-            self.assertEqual(e.message, "EmailAddress must be verified before registering variants.")
-        else:
-            self.assertEqual(new_variant.pk, None)  # Save should not have been successful.
+        new_variant.save()
+        self.assertFalse(new_variant.verified)
+
+        verified_emails = [e.email for e in user.emailaddress_set.filter(verified=True)] \
+                          + [e.email for e in user.cached_email_variants() if e.verified]
+
+        self.assertTrue(new_variant not in verified_emails)
 
     def cannot_link_variant_of_case_insensitive_nonmatch(self):
         first_email = CachedEmailAddress.objects.get(email="test@example.com")
