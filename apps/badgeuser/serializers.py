@@ -127,7 +127,10 @@ class BadgeUserExistingProfileSerializer(serializers.ModelSerializer):
 
 
 class NewEmailSerializer(serializers.ModelSerializer):
-    variants = serializers.ListField(serializers.EmailField(), required=False, source='cached_variants')
+    variants = serializers.ListField(
+        child=serializers.EmailField(required=False),
+        required=False, source='cached_variants', allow_null=True, read_only=True
+    )
     email = serializers.EmailField(required=True)
 
     class Meta:
@@ -162,7 +165,10 @@ class NewEmailSerializer(serializers.ModelSerializer):
 
 
 class ExistingEmailSerializer(serializers.ModelSerializer):
-    variants = serializers.EmailField(source='cached_variants')
+    variants = serializers.ListField(
+        child=serializers.EmailField(required=False),
+        required=False, source='cached_variants', allow_null=True, read_only=True
+    )
 
     class Meta:
         model = CachedEmailAddress
