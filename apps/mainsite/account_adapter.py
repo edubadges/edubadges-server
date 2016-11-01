@@ -50,8 +50,8 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
 
             return u"{}{}?email={}".format(
                 badgr_app.email_confirmation_redirect,
-                urllib.quote(email_address.user.first_name),
-                urllib.quote(email_address.email)
+                urllib.quote(email_address.user.first_name.encode('utf8')),
+                urllib.quote(email_address.email.encode('utf8'))
             )
 
         except Resolver404, EmailConfirmation.DoesNotExist:
