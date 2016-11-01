@@ -108,5 +108,11 @@ class V1BadgeInstanceSerializer(V1InstanceSerializer):
         localbadgeinstance_json['badge'] = instance.cached_badgeclass.json
         localbadgeinstance_json['badge']['criteria'] = instance.cached_badgeclass.get_full_url()
         localbadgeinstance_json['badge']['issuer'] = instance.cached_issuer.json
+
+        # clean up recipient to match V1InstanceSerializer
+        localbadgeinstance_json['recipient'] = {
+            "type": "email",
+            "recipient": instance.recipient_identifier,
+        }
         return super(V1BadgeInstanceSerializer, self).to_representation(localbadgeinstance_json)
 

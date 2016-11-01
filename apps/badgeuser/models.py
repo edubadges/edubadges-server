@@ -90,6 +90,10 @@ class EmailAddressVariant(models.Model):
     def __unicode__(self):
         return self.email
 
+    @property
+    def verified(self):
+        return self.canonical_email.verified
+
     def is_valid(self, raise_exception=False):
         def fail(message):
             if raise_exception:
@@ -103,9 +107,6 @@ class EmailAddressVariant(models.Model):
                 self.canonical_email = CachedEmailAddress.cached.get(email=self.email)
             except CachedEmailAddress.DoesNotExist:
                 fail("Canonical Email Address not found")
-
-        if not self.canonical_email.verified:
-            fail("EmailAddress must be verified before registering variants.")
 
         if not self.canonical_email.email.lower() == self.email.lower():
             fail("New EmailAddressVariant does not match stored email address.")

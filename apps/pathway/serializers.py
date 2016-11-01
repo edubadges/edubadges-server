@@ -110,9 +110,12 @@ class PathwaySerializer(serializers.Serializer):
 
             for g in groups_to_delete:
                 instance.recipient_groups.remove(g)
+                g.publish()
 
             for g in groups_to_add:
                 instance.recipient_groups.add(g)
+                g.publish()
+
 
         instance.save()  # update caches, sloppily
         return instance

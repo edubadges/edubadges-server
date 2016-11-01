@@ -120,7 +120,7 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
 
         # Check non-structural business logic checks and constraints
         verified_emails = [e.email for e in request_user.emailaddress_set.filter(verified=True)] \
-                          + [e.email for e in request_user.cached_email_variants()]
+                          + [e.email for e in request_user.cached_email_variants() if e.verified]
         new_variant = None
         if validated_data.get('recipient_identifier') and validated_data.get('recipient_identifier') not in verified_emails:
             new_variant = EmailAddressVariant(email=validated_data['recipient_identifier'])

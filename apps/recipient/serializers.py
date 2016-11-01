@@ -158,9 +158,11 @@ class RecipientGroupSerializer(LinkedDataEntitySerializer):
 
             for p in pathways_to_delete:
                 instance.pathways.remove(p)
+                p.publish()
 
             for p in pathways_to_add:
                 instance.pathways.add(p)
+                p.publish()
 
         if 'cached_members' in validated_data:
             existing_members = set(instance.cached_members())
