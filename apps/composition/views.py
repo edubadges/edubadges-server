@@ -6,8 +6,9 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import DetailView
 from django.views.generic import RedirectView
 
-from composition.models import Collection
+from composition.models import Collection, LocalBadgeInstance
 from composition.utils import get_badge_by_identifier
+from issuer.models import BadgeInstance
 from issuer.utils import obscure_email_address
 from mainsite.utils import OriginSetting
 
@@ -24,6 +25,10 @@ class SharedBadgeView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(SharedBadgeView, self).get_context_data(**kwargs)
+        if isinstance(self.object, LocalBadgeInstance):
+            context['badgeclass_image_png'] = "{}{}?type=png".format(OriginSetting.HTTP,reverse('localbadgeinstance_image', kwargs={'slug': self.object.slug}))
+        elif isinstance(self.object, BadgeInstance):
+            context['badgeclass_image_png'] = "{}{}?type=png".format(OriginSetting.HTTP,reverse('badgeclass_image', kwargs={'slug': self.object.cached_badgeclass.slug}))
         context.update({
             'badge_instance': self.object,
             'badge_class': self.object.cached_badgeclass,
@@ -31,7 +36,6 @@ class SharedBadgeView(DetailView):
             'badge_instance_image_url': self.object.image.url if self.object.image else None,
             'obscured_recipient': obscure_email_address(self.object.recipient_identifier),
             'badge_instance_public_url': OriginSetting.HTTP+reverse('shared_badge', kwargs={'badge_id': self.kwargs.get('badge_id')}),
-            'badgeclass_image_png': "{}{}?type=png".format(OriginSetting.HTTP,reverse('badgeclass_image', kwargs={'slug': self.object.cached_badgeclass.slug}))
         })
         return context
 
