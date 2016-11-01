@@ -47,23 +47,33 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
 
         if isinstance(obj, LocalBadgeInstance):
             representation['json'] = V1InstanceSerializer(obj.json, context=self.context).data
+            representation['imagePreview'] = {
+                "type": "image",
+                "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('localbadgeinstance_image', kwargs={'slug': obj.slug}))
+            }
+            if obj.issuer.image_preview:
+                representation['issuerImagePreview'] = {
+                    "type": "image",
+                    "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('localissuer_image', kwargs={'slug': obj.issuer.slug}))
+                }
         elif isinstance(obj, BadgeInstance):
             representation['id'] = obj.slug
             representation['json'] = V1BadgeInstanceSerializer(obj, context=self.context).data
+            representation['imagePreview'] = {
+                "type": "image",
+                "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('badgeclass_image', kwargs={'slug': obj.cached_badgeclass.slug}))
+            }
+            if obj.cached_issuer.image:
+                representation['issuerImagePreview'] = {
+                    "type": "image",
+                    "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('issuer_image', kwargs={'slug': obj.cached_issuer.slug}))
+                }
+
         if obj.image:
             representation['image'] = obj.image_url()
 
         representation['shareUrl'] = OriginSetting.HTTP+reverse('shared_badge', kwargs={'badge_id': obj.slug})
 
-        representation['imagePreview'] = {
-            "type": "image",
-            "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('localbadgeinstance_image', kwargs={'slug': obj.slug}))
-        }
-        if obj.issuer.image_preview:
-            representation['issuerImagePreview'] = {
-                "type": "image",
-                "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('localissuer_image', kwargs={'slug': obj.issuer.slug}))
-            }
         return representation
 
     def validate_recipient_identifier(self, data):
