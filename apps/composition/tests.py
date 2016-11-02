@@ -11,6 +11,7 @@ from badgeuser.models import CachedEmailAddress
 from composition.models import (LocalBadgeClass, LocalIssuer, LocalBadgeInstance,
                                 Collection, LocalBadgeInstanceCollection,)
 from composition.serializers import (CollectionSerializer, CollectionBadgeSerializer,)
+from issuer.models import BadgeInstance, BadgeClass
 
 dir = os.path.dirname(__file__)
 
@@ -414,7 +415,7 @@ class TestBadgeUploads(APITestCase):
 
 
 class TestCollectionOperations(APITestCase):
-    fixtures = ['0001_initial_superuser', 'initial_collections', 'initial_my_badges']
+    fixtures = ['0001_initial_superuser', 'initial_collections', 'initial_my_badges', 'test_badge_objects']
 
     def setUp(self):
         self.user = get_user_model().objects.get(pk=1)
@@ -630,6 +631,24 @@ class TestCollectionOperations(APITestCase):
         collection = Collection.objects.first()  # reload
         self.assertEqual(collection.badges.count(), 1)
         self.assertEqual([i.instance.pk for i in collection.badges.all()], [2])
+
+    def test_can_add_issuer_badges_via_post(self):
+        collection = Collection.objects.first()
+        self.assertEqual(collection.badges.count(), 0)
+
+        data = [{'id': 1}, {'id': '92219015-18a6-4538-8b6d-2b228e47b8aa'}]
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            '/v1/earner/collections/{}/badges'.format(collection.slug), data=data,
+            format='json')
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual([i['id'] for i in response.data], [1, 2])
+
+        collection = Collection.objects.first()  # reload
+        self.assertEqual(collection.badges.count(), 2)
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [1, 2])
 
     def test_api_handles_null_description_and_adds_badge(self):
         collection = Collection.objects.first()
