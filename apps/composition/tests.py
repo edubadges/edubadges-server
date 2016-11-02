@@ -644,11 +644,11 @@ class TestCollectionOperations(APITestCase):
             format='json')
 
         self.assertEqual(response.status_code, 201)
-        self.assertEqual([i['id'] for i in response.data], [1, 2])
+        self.assertEqual([i['id'] for i in response.data], [1, '92219015-18a6-4538-8b6d-2b228e47b8aa'])
 
         collection = Collection.objects.first()  # reload
         self.assertEqual(collection.badges.count(), 2)
-        self.assertEqual([i.instance.pk for i in collection.badges.all()], [1, 2])
+        self.assertEqual([i.badge_instance.pk for i in collection.badges.all()], [1, 1])
 
     def test_api_handles_null_description_and_adds_badge(self):
         collection = Collection.objects.first()

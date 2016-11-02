@@ -240,11 +240,11 @@ badge was valid, but cannot be saved."
 class CollectionBadgesSerializer(serializers.ListSerializer):
 
     def to_representation(self, data):
-        # TODO: These badges should be removed from these collections upon rejection or revocation
+        # TODO: These badges should be removed from these collections upon rejection or revocation not just filtered.
         try:
             filtered_data = data.exclude(issuer_instance__acceptance=BadgeInstance.ACCEPTANCE_REJECTED).exclude(issuer_instance__revoked=True)
         except AttributeError:
-            filtered_data = [c for c in data if c.instance.acceptance is not BadgeInstance.ACCEPTANCE_REJECTED and c.instance.revoked is False]
+            filtered_data = [c for c in data if c.badge_instance.acceptance is not BadgeInstance.ACCEPTANCE_REJECTED and c.badge_instance.revoked is False]
 
         representation = super(CollectionBadgesSerializer, self).to_representation(filtered_data)
         return representation
