@@ -101,12 +101,47 @@ class Collection(cachemodel.CacheModel):
         return ''
 
 
+class LocalBadgeInstanceCollectionManager(models.Manager):
+    def find(self, recipient_user, collection_slug, badge_id, queryset=None):
+        if queryset:
+            base_queryset = queryset
+        else:
+            base_queryset = self.all()
+
+        try:
+            return base_queryset.get(
+                instance__recipient_user=recipient_user,
+                collection__slug=collection_slug,
+                instance__id=int(badge_id)
+            )
+        except LocalBadgeInstanceCollection.DoesNotExist:
+            pass
+        except ValueError:
+            # when badge_id is not an int, it's a issuer_instance slug
+            try:
+                item = base_queryset.get(
+                    collection__slug=collection_slug,
+                    issuer_instance__slug=badge_id
+                )
+                assert(item.badge_instance.recipient_identifier
+                       in recipient_user.all_recipient_identifiers)
+                return item
+            except (LocalBadgeInstanceCollection.DoesNotExist, AssertionError,):
+                pass
+
+    def find_many(self, recipient_user, collection_slug):
+        collection = Collection.objects.get(owner=recipient_user, slug=collection_slug)
+        return collection.badges.all()
+
+
 class LocalBadgeInstanceCollection(models.Model):
     instance = models.ForeignKey(LocalBadgeInstance, null=True)
     issuer_instance = models.ForeignKey("issuer.BadgeInstance", null=True)
     collection = models.ForeignKey(Collection, null=False, related_name='badges')
 
     description = models.TextField(blank=True)
+
+    objects = LocalBadgeInstanceCollectionManager()
 
     class Meta:
         unique_together = ('instance', 'issuer_instance', 'collection')

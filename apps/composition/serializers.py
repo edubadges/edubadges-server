@@ -246,6 +246,8 @@ class CollectionBadgesSerializer(serializers.ListSerializer):
         except AttributeError:
             filtered_data = [c for c in data if c.badge_instance.acceptance is not BadgeInstance.ACCEPTANCE_REJECTED and c.badge_instance.revoked is False]
 
+        filtered_data = [c for c in filtered_data if c.badge_instance.recipient_identifier in c.collection.owner.all_recipient_identifiers]
+
         representation = super(CollectionBadgesSerializer, self).to_representation(filtered_data)
         return representation
 

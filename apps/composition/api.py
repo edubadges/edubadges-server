@@ -34,7 +34,11 @@ class LocalBadgeInstanceList(APIView):
         serializer: LocalBadgeInstanceUploadSerializer
         """
 
-        imported_badges = LocalBadgeInstance.objects.filter(recipient_user=request.user)
+        imported_badges = LocalBadgeInstance.objects.filter(
+            recipient_user=request.user,
+            recipient_identifier__in=request.user.all_recipient_identifiers
+        )
+
         local_badges = BadgeInstance.objects.filter(
             recipient_identifier__in=request.user.all_recipient_identifiers
         ).exclude(
@@ -182,9 +186,10 @@ class CollectionLocalBadgeInstanceList(APIView):
         """
         GET the badges in a single Collection
         """
-        collection_badges = self.queryset.filter(
-            collection__slug=slug,
-            instance__recipient_user=request.user)
+        try:
+            collection_badges = LocalBadgeInstanceCollection.objects.find_many(request.user, slug)
+        except Collection.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
         serializer = CollectionBadgeSerializer(
             collection_badges, many=True)
@@ -270,12 +275,9 @@ class CollectionLocalBadgeInstanceDetail(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, collection_slug, badge_id):
-        try:
-            item = self.queryset.get(
-                instance__recipient_user=request.user,
-                collection__slug=collection_slug,
-                instance__id=int(badge_id))
-        except LocalBadgeInstanceCollection.DoesNotExist:
+        item = LocalBadgeInstanceCollection.objects.find(request.user, collection_slug, badge_id)
+
+        if item is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         serializer = CollectionBadgeSerializer(item)
@@ -309,12 +311,9 @@ class CollectionLocalBadgeInstanceDetail(APIView):
         except TypeError:
             return serializers.ValidationError(
                 "Server could not understand description")
-        try:
-            item = self.queryset.get(
-                instance__recipient_user=request.user,
-                collection__slug=collection_slug,
-                instance__id=int(badge_id))
-        except LocalBadgeInstanceCollection.DoesNotExist:
+
+        item = LocalBadgeInstanceCollection.objects.find(request.user, collection_slug, badge_id)
+        if item is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         item.description = description
@@ -340,15 +339,12 @@ class CollectionLocalBadgeInstanceDetail(APIView):
               type: integer
               paramType: path
         """
-        try:
-            self.queryset.get(
-                instance__recipient_user=request.user,
-                collection__slug=collection_slug,
-                instance__id=int(badge_id)
-            ).delete()
-        except LocalBadgeInstanceCollection.DoesNotExist:
+        item = LocalBadgeInstanceCollection.objects.find(request.user, collection_slug, badge_id)
+
+        if item is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
+        item.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
