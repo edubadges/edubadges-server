@@ -265,7 +265,8 @@ class UserEmailTests(APITestCase):
                                   forgot_password_redirect='http://testserver/reset-password/')
         self.badgr_app.save()
 
-        self.client.force_authenticate(user=BadgeUser.objects.get(pk=1))
+        self.first_user = BadgeUser.objects.get(pk=1)
+        self.client.force_authenticate(user=self.first_user)
         response = self.client.get('/v1/user/auth-token')
         self.assertEqual(response.status_code, 200)
 
@@ -282,6 +283,23 @@ class UserEmailTests(APITestCase):
         response = self.client.get('/v1/user/emails')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(starting_count+1, len(response.data))
+
+    def test_user_cant_register_new_email_verified_by_other(self):
+        existing_mail = CachedEmailAddress.objects.create(
+            user=self.first_user, email='new+email@newemail.com', verified=True)
+
+        response = self.client.get('/v1/user/emails')
+        self.assertEqual(response.status_code, 200)
+        starting_count = len(response.data)
+
+        response = self.client.post('/v1/user/emails', {
+            'email': 'new+email@newemail.com',
+        })
+        self.assertEqual(response.status_code, 400)
+
+        response = self.client.get('/v1/user/emails')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(starting_count, len(response.data))
 
     def test_user_can_remove_email(self):
         response = self.client.get('/v1/user/emails')
