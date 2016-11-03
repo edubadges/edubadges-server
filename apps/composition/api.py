@@ -182,9 +182,10 @@ class CollectionLocalBadgeInstanceList(APIView):
         """
         GET the badges in a single Collection
         """
-        collection_badges = self.queryset.filter(
-            collection__slug=slug,
-            instance__recipient_user=request.user)
+        try:
+            collection_badges = LocalBadgeInstanceCollection.objects.find_many(request.user, slug)
+        except Collection.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
         serializer = CollectionBadgeSerializer(
             collection_badges, many=True)

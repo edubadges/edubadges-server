@@ -129,6 +129,10 @@ class LocalBadgeInstanceCollectionManager(models.Manager):
             except (LocalBadgeInstanceCollection.DoesNotExist, AssertionError,):
                 pass
 
+    def find_many(self, recipient_user, collection_slug):
+        collection = Collection.objects.get(owner=recipient_user, slug=collection_slug)
+        return collection.badges.all()
+
 
 class LocalBadgeInstanceCollection(models.Model):
     instance = models.ForeignKey(LocalBadgeInstance, null=True)
