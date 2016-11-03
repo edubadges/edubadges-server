@@ -34,7 +34,11 @@ class LocalBadgeInstanceList(APIView):
         serializer: LocalBadgeInstanceUploadSerializer
         """
 
-        imported_badges = LocalBadgeInstance.objects.filter(recipient_user=request.user)
+        imported_badges = LocalBadgeInstance.objects.filter(
+            recipient_user=request.user,
+            recipient_identifier__in=request.user.all_recipient_identifiers
+        )
+
         local_badges = BadgeInstance.objects.filter(
             recipient_identifier__in=request.user.all_recipient_identifiers
         ).exclude(

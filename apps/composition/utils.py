@@ -164,7 +164,7 @@ def get_badge_by_identifier(badge_id, user=None):
     except LocalBadgeInstance.DoesNotExist:
         pass
     else:
-        if user is None or ret.recipient_user_id == user.pk:
+        if user is None or ret.recipient_identifier in user.all_recipient_identifiers:
             return ret
 
     try:
@@ -172,7 +172,7 @@ def get_badge_by_identifier(badge_id, user=None):
     except (LocalBadgeInstance.DoesNotExist, ValueError):
         pass
     else:
-        if user is None or ret.recipient_user_id == user.pk:
+        if user is None or ret.recipient_identifier in user.all_recipient_identifiers:
             return ret
 
     # nothing found
