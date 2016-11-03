@@ -149,6 +149,8 @@ class NewEmailSerializer(serializers.ModelSerializer):
                 # Clear out a previous attempt and let the current user try
                 email.delete()
                 email = super(NewEmailSerializer, self).create(validated_data)
+            elif email.user is not self.context.get('request').user:
+                raise serializers.ValidationError("Could not register email address.")
 
         if new_address != email.email and new_address not in [v.email for v in email.cached_variants()]:
             email.add_variant(new_address)
