@@ -632,11 +632,13 @@ class TestCollectionOperations(APITestCase):
         self.assertEqual(collection.badges.count(), 1)
         self.assertEqual([i.instance.pk for i in collection.badges.all()], [2])
 
-    def test_can_add_issuer_badges_via_post(self):
+    def test_can_add_remove_issuer_badges_via_api(self):
         collection = Collection.objects.first()
+        instance_slug = '92219015-18a6-4538-8b6d-2b228e47b8aa'
+
         self.assertEqual(collection.badges.count(), 0)
 
-        data = [{'id': 1}, {'id': '92219015-18a6-4538-8b6d-2b228e47b8aa'}]
+        data = [{'id': 1}, {'id': instance_slug}]
 
         self.client.force_authenticate(user=self.user)
         response = self.client.post(
@@ -644,11 +646,21 @@ class TestCollectionOperations(APITestCase):
             format='json')
 
         self.assertEqual(response.status_code, 201)
-        self.assertEqual([i['id'] for i in response.data], [1, '92219015-18a6-4538-8b6d-2b228e47b8aa'])
+        self.assertEqual([i['id'] for i in response.data], [1, instance_slug])
 
         collection = Collection.objects.first()  # reload
         self.assertEqual(collection.badges.count(), 2)
         self.assertEqual([i.badge_instance.pk for i in collection.badges.all()], [1, 1])
+
+        response = self.client.get(
+            '/v1/earner/collections/{}/badges/{}'.format(collection.slug, instance_slug)
+        )
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.delete(
+            '/v1/earner/collections/{}/badges/{}'.format(collection.slug, instance_slug)
+        )
+        self.assertEqual(response.status_code, 204)
 
     def test_api_handles_null_description_and_adds_badge(self):
         collection = Collection.objects.first()
