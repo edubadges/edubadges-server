@@ -8,3 +8,11 @@ class JSONLDRenderer(renderers.JSONRenderer):
     """
     media_type = 'application/ld+json'
     format = 'ld+json'
+
+
+class CSVRenderer(renderers.BaseRenderer):
+    media_type = 'text/csv'
+    format = 'csv'
+
+    def render(self, data, media_type=None, renderer_context=None):
+        return data.encode(self.charset)
