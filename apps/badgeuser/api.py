@@ -15,6 +15,7 @@ from rest_framework.exceptions import NotAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from composition.tasks import process_email_verification
 from mainsite.models import BadgrApp
 from mainsite.permissions import IsRequestUser
 from mainsite.utils import OriginSetting
@@ -399,6 +400,8 @@ class BadgeUserEmailConfirm(UserTokenMixin, BadgeUserEmailView):
             email_address.primary = True
         email_address.verified = True
         email_address.save()
+
+        process_email_verification.delay(email_address)
 
         # get badgr_app url redirect
         redirect_url = get_adapter().get_email_confirmation_redirect_url(request)

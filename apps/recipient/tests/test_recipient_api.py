@@ -142,4 +142,18 @@ class RecipientApiTests(APITestCase, CachingTestCase):
         self.assertEqual(response.data['pathways'][0]['slug'], instance.pathways.first().slug)
 
     def test_list_group_pathway_subscriptions(self):
-        pass
+        group = self.create_group()
+
+
+        pathway_response = self.create_pathway()
+
+        data = {
+            'pathways': [pathway_response.data.get('@id')]
+        }
+        response = self.client.put('/v2/issuers/edited-test-issuer/recipient-groups/group-of-testing', data)
+
+        self.assertEqual(response.status_code, 200)
+        instance = RecipientGroup.objects.first()
+        self.assertEqual(instance.pathways.count(), 1)
+        self.assertEqual(response.data['pathways'][0]['@id'], instance.pathways.first().jsonld_id)
+        self.assertEqual(response.data['pathways'][0]['slug'], instance.pathways.first().slug)

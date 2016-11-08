@@ -19,6 +19,8 @@ from badgeuser.models import BadgeUser, CachedEmailAddress
 from mainsite import TOP_DIR
 from mainsite.models import BadgrApp
 
+from issuer.models import BadgeClass, BadgeInstance
+
 from badgeuser.models import EmailAddressVariant, CachedEmailAddress, ProxyEmailConfirmation
 
 factory = APIRequestFactory()
@@ -246,7 +248,7 @@ class UserUnitTests(TestCase):
             'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
             'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
         }
-    },
+    }
 )
 class UserEmailTests(APITestCase):
     fixtures = ['0001_initial_superuser']
@@ -284,10 +286,19 @@ class UserEmailTests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(starting_count+1, len(response.data))
 
-    def test_user_cant_register_new_email_verified_by_other(self):
-        existing_mail = CachedEmailAddress.objects.create(
-            user=self.first_user, email='new+email@newemail.com', verified=True)
+        # Mark email as verified
+        email = CachedEmailAddress.cached.get(email='new+email@newemail.com')
+        email.verified = True
+        email.save()
 
+        # Can not add the same email twice
+        response = self.client.post('/v1/user/emails', {
+            'email': 'new+email@newemail.com',
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertTrue("Could not register email address." in response.data)
+
+    def test_user_can_verify_new_email(self):
         response = self.client.get('/v1/user/emails')
         self.assertEqual(response.status_code, 200)
         starting_count = len(response.data)
@@ -295,8 +306,41 @@ class UserEmailTests(APITestCase):
         response = self.client.post('/v1/user/emails', {
             'email': 'new+email@newemail.com',
         })
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.get('/v1/user/emails')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(starting_count+1, len(response.data))
+
+        with self.settings(BADGR_APP_ID=self.badgr_app.id):
+            # Mark email as verified
+            email = CachedEmailAddress.cached.get(email='new+email@newemail.com')
+            self.assertEqual(len(mail.outbox), 1)
+            verify_url = re.search("(?P<url>/v1/[^\s]+)", mail.outbox[0].body).group("url")
+            response = self.client.get(verify_url)
+            self.assertEqual(response.status_code, 302)
+
+        email = CachedEmailAddress.cached.get(email='new+email@newemail.com')
+        self.assertTrue(email.verified)
+
+    def test_user_cant_register_new_email_verified_by_other(self):
+        second_user = BadgeUser.objects.get(pk=2)
+        existing_mail = CachedEmailAddress.objects.create(
+            user=self.first_user, email='new+email@newemail.com', verified=True)
+
+        response = self.client.get('/v1/user/emails')
+
+        self.assertEqual(response.status_code, 200)
+        starting_count = len(response.data)
+
+        # Another user tries to add this email
+        self.client.force_authenticate(user=second_user)
+        response = self.client.post('/v1/user/emails', {
+            'email': 'new+email@newemail.com',
+        })
         self.assertEqual(response.status_code, 400)
 
+        self.client.force_authenticate(user=self.first_user)
         response = self.client.get('/v1/user/emails')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(starting_count, len(response.data))
@@ -416,6 +460,24 @@ class UserEmailTests(APITestCase):
         self.assertEqual(len(variants), 1)
         self.assertEqual(variants[0].email, 'helloagain@world.com')
 
+    def test_can_create_new_variant_api(self):
+        user = BadgeUser.objects.first()
+        first_email = CachedEmailAddress(
+            email="helloagain@world.com", user=user, verified=True
+        )
+        first_email.save()
+        self.assertIsNotNone(first_email.pk)
+
+        self.client.force_authenticate(user=user)
+        response = self.client.post('/v1/user/emails', {'email': 'HelloAgain@world.com'})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertTrue('Matching address already exists. New case variant registered.' in response.data)
+
+        variants = first_email.cached_variants()
+        self.assertEqual(len(variants), 1)
+        self.assertEqual(variants[0].email, 'HelloAgain@world.com')
+
     def test_can_create_variants(self):
         first_email = CachedEmailAddress.objects.get(email="test@example.com")
         self.assertIsNotNone(first_email.pk)
@@ -473,6 +535,61 @@ class UserEmailTests(APITestCase):
             self.assertEqual(e.message, "New EmailAddressVariant does not match stored email address.")
         else:
             raise self.fail("ValidationError expected on nonmatch.")
+
+@override_settings(
+    SESSION_ENGINE='django.contrib.sessions.backends.cache',
+    CACHES={
+        'default': {
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
+        }
+    },
+)
+class UserBadgeTests(APITestCase):
+    fixtures = ['0001_initial_superuser', 'initial_my_badges', 'initial_collections', 'test_badge_objects']
+
+    def setUp(self):
+        # scramble the cache key each time
+        cache.key_prefix = "test{}".format(str(time.time()))
+
+        self.badgr_app = BadgrApp(cors='testserver',
+                                  email_confirmation_redirect='http://testserver/login/',
+                                  forgot_password_redirect='http://testserver/reset-password/')
+        self.badgr_app.save()
+
+    def test_badge_awards_transferred_on_email_verification(self):
+        first_user = BadgeUser.objects.get(pk=1)
+        self.client.force_authenticate(user=first_user)
+
+        response = self.client.get('/v1/user/emails')
+        self.assertEqual(response.status_code, 200)
+        starting_count = len(response.data)
+
+        badgeclass = BadgeClass.objects.first()
+        badgeclass.issue(recipient_id='New+email@newemail.com')
+
+        response = self.client.post('/v1/user/emails', {
+            'email': 'new+email@newemail.com',
+        })
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.get('/v1/user/emails')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(starting_count+1, len(response.data))
+
+        with self.settings(BADGR_APP_ID=self.badgr_app.id):
+            # Mark email as verified
+            email = CachedEmailAddress.cached.get(email='new+email@newemail.com')
+            self.assertEqual(len(mail.outbox), 1)
+            verify_url = re.search("(?P<url>/v1/[^\s]+)", mail.outbox[0].body).group("url")
+            response = self.client.get(verify_url)
+            self.assertEqual(response.status_code, 302)
+
+        email = CachedEmailAddress.cached.get(email='new+email@newemail.com')
+        self.assertTrue(email.verified)
+
+        self.assertTrue('New+email@newemail.com' in [e.email for e in email.cached_variants()])
+        self.assertTrue('New+Email@newemail.com' in [e.email for e in email.cached_variants()])
 
 
 @override_settings(

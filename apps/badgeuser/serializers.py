@@ -140,16 +140,19 @@ class NewEmailSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         new_address = validated_data.get('email')
+        created = False
         try:
             email = CachedEmailAddress.objects.get(email=new_address)
         except CachedEmailAddress.DoesNotExist:
             email = super(NewEmailSerializer, self).create(validated_data)
+            created = True
         else:
             if not email.verified:
                 # Clear out a previous attempt and let the current user try
                 email.delete()
                 email = super(NewEmailSerializer, self).create(validated_data)
-            elif email.user is not self.context.get('request').user:
+                created = True
+            elif email.user != self.context.get('request').user:
                 raise serializers.ValidationError("Could not register email address.")
 
         if new_address != email.email and new_address not in [v.email for v in email.cached_variants()]:
@@ -162,8 +165,10 @@ class NewEmailSerializer(serializers.ModelSerializer):
                     email.add_variant(variant)
                 except serializers.ValidationError:
                     pass
+        if created:
+            return email
 
-        return email
+        raise serializers.ValidationError("Could not register email address.")
 
 
 class ExistingEmailSerializer(serializers.ModelSerializer):

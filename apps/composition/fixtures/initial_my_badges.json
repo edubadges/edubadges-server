@@ -109,6 +109,24 @@
   },
   {
     "fields": {
+      "recipient_user": 1,
+      "recipient_identifier": "New+Email@newemail.com",
+      "badgeclass": 6,
+      "issuer": 5,
+      "created_at": "2016-09-01T23:33:46Z",
+      "created_by": null,
+      "slug": "17513bf6-3632-4ea9-9396-e05ff0ae286e",
+      "json": "{\"issuedOn\":\"2016-09-01T16:32:35.710161\",\"uid\":\"93db7087-c7a0-425a-9d01-27975ab727f8\",\"type\":\"Assertion\",\"image\":\"http://localhost:8000/media/uploads/badges/local_badgeinstance_601e9ae6-e988-4fc7-9edf-4af914fcc89a.png\",\"badge\":{\"description\":\"So fresh, so tested\",\"image\":\"http://localhost:8000/public/badges/fresh-badge-of-testing/image\",\"criteria\":\"http://wheresyourmother.com\",\"issuer\":{\"description\":\"Fresh Tests for all\",\"url\":\"http://testbadges.net\",\"image\":\"http://localhost:8000/public/issuers/new-issuer-of-testing/image\",\"id\":\"http://localhost:8000/public/issuers/new-issuer-of-testing\",\"type\":\"Issuer\",\"email\":\"help@testbadges.net\",\"name\":\"New Issuer of Testing\"},\"type\":\"BadgeClass\",\"id\":\"http://localhost:8000/public/badges/fresh-badge-of-testing\",\"name\":\"Fresh Badge of Testing\"},\"@context\":\"https://w3id.org/openbadges/v1\",\"recipient\":{\"type\":\"email\",\"recipient\":\"New+email@newemail.com\"},\"id\":\"http://localhost:8000/public/assertions/93db7087-c7a0-425a-9d01-27975ab427f8\"}",
+      "revocation_reason": null,
+      "identifier": "http://localhost:8000/public/assertions/93db7087-c7a0-425a-9d01-27975ab427f8",
+      "image": "uploads/badges/local_badgeinstance_601e9ae6-e988-4fc7-9edf-4af914fcc89a.png",
+      "revoked": false
+    },
+    "model": "composition.localbadgeinstance",
+    "pk": 7
+  },
+  {
+    "fields": {
       "name": "MozFest Reveler",
       "created_at": "2015-12-15T15:55:51Z",
       "created_by": null,
