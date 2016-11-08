@@ -252,6 +252,15 @@ class BadgeInstance(AbstractBadgeInstance):
 
             self.image.open()
 
+            try:
+                from badgeuser.models import CachedEmailAddress
+                existing_email = CachedEmailAddress.cached.get(email=self.recipient_identifier)
+                if self.recipient_identifier != existing_email.email and \
+                        self.recipient_identifier not in [e.email for e in existing_email.cached_variants()]:
+                    existing_email.add_variant(self.recipient_identifier)
+            except CachedEmailAddress.DoesNotExist:
+                pass
+
         if self.revoked is False:
             self.revocation_reason = None
 
