@@ -70,6 +70,7 @@ class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
         else:
             raise ValidationError("Email variant {} already exists".format(email_variation))
 
+
 class ProxyEmailConfirmation(EmailConfirmation):
     class Meta:
         proxy = True

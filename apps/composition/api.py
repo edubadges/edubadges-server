@@ -45,6 +45,8 @@ class LocalBadgeInstanceList(APIView):
             acceptance=BadgeInstance.ACCEPTANCE_REJECTED
         ).exclude(revoked=True)
 
+        local_badges = [b for b in local_badges if b.recipient_identifier in request.user.all_recipient_identifiers]
+
         local_badge_slugs = [lb.json.get('uid') for lb in local_badges]
         filtered_imported_badges = filter(lambda lbi: lbi.json.get('uid') not in local_badge_slugs, imported_badges)
         user_badges = list(filtered_imported_badges) + list(local_badges)
