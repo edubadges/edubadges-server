@@ -37,6 +37,11 @@ def get_verified_badge_instance_from_form(validated_data):
                 validated_data['url'],
                 **{'preloaded_response': url_response}
             )
+        except requests.ConnectionError as e:
+            raise ValidationError(
+                "Unable to get baked image or valid json response from {}"
+                .format(validated_data['url'])
+            )
         except simplejson.JSONDecodeError:
             try:
                 return get_badge_instance_from_baked_image(
