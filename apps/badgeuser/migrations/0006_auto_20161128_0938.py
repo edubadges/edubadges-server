@@ -5,7 +5,7 @@ from django.db import models, migrations, IntegrityError, transaction
 from allauth.account.adapter import get_adapter
 from allauth.account.models import EmailConfirmation
 
-from badgeuser.models import CachedEmailAddress, BadgeUser
+from badgeuser.models import CachedEmailAddress, BadgeUser, EmailConfirmation
 
 
 def send_missing_confirmation_requests(apps, schema_editor):
@@ -31,8 +31,11 @@ def send_missing_confirmation_requests(apps, schema_editor):
             elif len([e for e in emails if e.primary is True]) == 0:
                 new_primary = emails.first()
                 new_primary.set_as_primary(conditional=True)
-                if new_primary.verified is False:
-                    new_primary.send_confirmation()
+
+                prior_confirmations = EmailConfirmation.objects.filter(email_address=new_primary)
+
+                if new_primary.verified is False and not prior_confirmations.exists():
+                    new_primary.send_confirmation(signup="canvas")
 
 
 class Migration(migrations.Migration):

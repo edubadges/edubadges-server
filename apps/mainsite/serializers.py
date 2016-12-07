@@ -63,13 +63,7 @@ class LinkedDataReferenceField(serializers.Serializer):
         output['@id'] = obj.jsonld_id
 
         for key in self.included_keys:
-            try:
-                output[key] = getattr(obj, key)
-            except AttributeError:
-                try:
-                    output[key] = obj[key]
-                except KeyError:
-                    output[key] = None
+            output[key] = getattr(obj, key, None)
 
         return output
 
