@@ -215,6 +215,7 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
     image = serializers.FileField(read_only=True)  # use_url=True, might be necessary
     email = serializers.EmailField(max_length=1024, required=False, write_only=True)
     recipient_identifier = serializers.EmailField(max_length=1024, required=False)
+    allow_uppercase = serializers.BooleanField(default=False, required=False, write_only=True)
     evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
 
     revoked = HumanReadableBooleanField(read_only=True)
@@ -268,7 +269,8 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
             recipient_id=validated_data.get('recipient_identifier'),
             evidence_url=validated_data.get('evidence'),
             notify=validated_data.get('create_notification'),
-            created_by=self.context.get('request').user
+            created_by=self.context.get('request').user,
+            allow_uppercase=validated_data.get('allow_uppercase')
         )
 
 

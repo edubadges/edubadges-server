@@ -566,7 +566,7 @@ class UserBadgeTests(APITestCase):
         starting_count = len(response.data)
 
         badgeclass = BadgeClass.objects.first()
-        badgeclass.issue(recipient_id='New+email@newemail.com')
+        badgeclass.issue(recipient_id='New+email@newemail.com', allow_uppercase=True)
 
         response = self.client.post('/v1/user/emails', {
             'email': 'new+email@newemail.com',

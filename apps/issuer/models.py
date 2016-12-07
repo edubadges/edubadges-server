@@ -120,20 +120,22 @@ class BadgeClass(AbstractBadgeClass):
     def cached_pathway_elements(self):
         return [peb.element for peb in self.pathwayelementbadge_set.all()]
 
-    def issue(self, recipient_id=None, evidence_url=None, notify=False, created_by=None):
+    def issue(self, recipient_id=None, evidence_url=None, notify=False, created_by=None, allow_uppercase=False):
         return BadgeInstance.objects.create_badgeinstance(
             badgeclass=self, recipient_id=recipient_id, evidence_url=evidence_url,
-            notify=notify, created_by=created_by
+            notify=notify, created_by=created_by, allow_uppercase=allow_uppercase
         )
 
 
 class BadgeInstanceManager(models.Manager):
     def create_badgeinstance(
             self, badgeclass, recipient_id, evidence_url=None,
-            notify=False, check_completions=True, created_by=None
+            notify=False, check_completions=True, created_by=None,
+            allow_uppercase=False
     ):
         """
         Convenience method to award a badge to a recipient_id
+        :param allow_uppercase: bool
         :type badgeclass: BadgeClass
         :type recipient_id: str
         :type issuer: Issuer
@@ -141,8 +143,11 @@ class BadgeInstanceManager(models.Manager):
         :type notify: bool
         :type check_completions: bool
         """
+        recipient_identifier = recipient_id if allow_uppercase else recipient_id.lower()
+
         new_instance = BadgeInstance(
-            badgeclass=badgeclass, issuer=badgeclass.issuer, recipient_identifier=recipient_id,
+            badgeclass=badgeclass, issuer=badgeclass.issuer,
+            recipient_identifier=recipient_identifier,
         )
 
         new_instance.json = {
