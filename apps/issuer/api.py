@@ -514,6 +514,54 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
                 return Response("Badge class could not be deleted. It has already been issued at least once.", status=status.HTTP_400_BAD_REQUEST)
 
 
+class BatchAssertions(AbstractIssuerAPIEndpoint):
+    queryset = BadgeClass.objects.all()
+    model = BadgeClass
+    serializer_class = BadgeInstanceSerializer
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass,)
+
+    def post(self, request, issuerSlug, badgeSlug):
+        """
+        POST to issue multiple copies of the same badge to multiple recipients
+        ---
+        parameters:
+            - name: assertions
+              required: true
+              type: array
+              items: {
+                serializer: BadgeInstanceSerializer
+              }
+              paramType: form
+              description: a list of assertions to issue
+        """
+
+        badgeclass_queryset = self.queryset.filter(issuer__slug=issuerSlug)
+        current_badgeclass = self.get_object(badgeSlug, queryset=badgeclass_queryset)
+
+        if current_badgeclass is None:
+            return Response(
+                "Issuer not found or current user lacks permission to issue this badge.",
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        create_notification = request.data.get('create_notification', False)
+        def _include_create_notification(a):
+            a['create_notification'] = create_notification
+            return a
+        assertions = map(_include_create_notification, request.data.get('assertions'))
+
+        serializer = BadgeInstanceSerializer(
+            data=assertions,
+            many=True,
+            context={'request': request, 'badgeclass': current_badgeclass}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        for data in serializer.data:
+            logger.event(badgrlog.BadgeInstanceCreatedEvent(data, request.user))
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 class BadgeInstanceList(AbstractIssuerAPIEndpoint):
     """

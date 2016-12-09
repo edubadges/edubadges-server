@@ -4,7 +4,7 @@ from django.views.generic.base import RedirectView
 from .api import (IssuerList, IssuerDetail, IssuerStaffList,
                   BadgeClassList, BadgeClassDetail, BadgeInstanceList,
                   BadgeInstanceDetail, IssuerBadgeInstanceList,
-                  AllBadgeClassesList)
+                  AllBadgeClassesList, BatchAssertions)
 
 
 urlpatterns = patterns(
@@ -18,6 +18,8 @@ urlpatterns = patterns(
 
     url(r'^/issuers/(?P<issuerSlug>[-\w]+)/badges$', BadgeClassList.as_view(), name='badgeclass_list'),
     url(r'^/issuers/(?P<issuerSlug>[-\w]+)/badges/(?P<badgeSlug>[-\w]+)$', BadgeClassDetail.as_view(), name='badgeclass_detail'),
+
+    url(r'^/issuers/(?P<issuerSlug>[-\w]+)/badges/(?P<badgeSlug>[-\w]+)/batchAssertions$', BatchAssertions.as_view(), name='badgeclass_batchissue'),
 
     url(r'^/issuers/(?P<issuerSlug>[-\w]+)/badges/(?P<badgeSlug>[-\w]+)/assertions$', BadgeInstanceList.as_view(), name='badgeinstance_list'),
     url(r'^/issuers/(?P<issuerSlug>[-\w]+)/badges/(?P<badgeSlug>[-\w]+)/assertions/(?P<assertionSlug>[-\w]+)$', BadgeInstanceDetail.as_view(), name='badgeinstance_detail'),
