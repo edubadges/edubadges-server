@@ -39,7 +39,10 @@ urlpatterns = [
 
     # unversioned public endpoints
     url(r'^unsubscribe/(?P<email_encoded>[^/]+)/(?P<expiration>[^/]+)/(?P<signature>[^/]+)', email_unsubscribe, name='unsubscribe'),
+
     url(r'^public', include('issuer.public_api_urls')),
+    url(r'^public', include('pathway.public_api_urls')),
+
     url(r'^user/(?P<user_id>[^/]+)$', BadgeUserDetail.as_view(), name='user_detail'),
     url(r'^share', include('composition.share_urls')),
     # legacy share redirects

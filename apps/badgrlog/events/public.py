@@ -45,3 +45,15 @@ class IssuerRetrievedEvent(BaseBadgeAssertionEvent):
 
 class IssuerImageRetrievedEvent(BaseBadgeAssertionEvent):
     pass
+
+
+class PathwayElementRetrievedEvent(BaseBadgrEvent):
+    def __init__(self, pathway_element, request):
+        self.request = request
+        self.pathway_element = pathway_element
+
+    def to_representation(self):
+        return {
+            'ipAddress': client_ip_from_request(self.request),
+            'pathwayElement': self.pathway_element
+        }

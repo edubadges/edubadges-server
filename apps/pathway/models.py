@@ -208,6 +208,27 @@ class PathwayElement(basic_models.DefaultModel):
                 element_slug=self.slug)
         return self._jsonld_id
 
+    @property
+    def junction_config(self):
+        if self.completion_requirements:
+            junctionConfig = self.completion_requirements.get('junctionConfig')
+            if junctionConfig:
+                config = junctionConfig.copy()
+                config['type'] = config.pop('@type')
+                return config
+
+    @property
+    def completion_requirement_type(self):
+        if self.completion_requirements:
+            return self.completion_requirements.get('@type')
+
+    @property
+    def required_by_parent(self):
+        if self.parent_element:
+            cr = self.parent_element.completion_requirements
+            if cr and cr.get('@type') == 'ElementJunction':
+                return self.jsonld_id in cr.get('elements')
+
     def recipient_completion(self, recipient_profile, badge_instances):
         """
         Checks if element is completed by the expected recipient, given a set of
@@ -218,10 +239,16 @@ class PathwayElement(basic_models.DefaultModel):
         :return: boolean
         """
 
+    def get_absolute_url(self):
+        return reverse('pathway_element_json', kwargs={
+            'pathway_slug': self.cached_pathway.slug,
+            'element_slug': self.slug,
+        })
+
     def get_alignment_url(self):
         if self.alignment_url:
             return self.alignment_url
-        return self.jsonld_id
+        return OriginSetting.HTTP + self.get_absolute_url()
 
     def _update_badges_from_completion_requirements(self):
         if self.completion_requirements and self.completion_requirements.get('badges'):
