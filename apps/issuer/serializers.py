@@ -129,10 +129,11 @@ class BadgeClassSerializer(AbstractComponentSerializer):
     # issuer = serializers.HyperlinkedRelatedField(view_name='issuer_json', read_only=True, lookup_field='slug')
     json = WritableJSONField(max_length=16384, read_only=True, required=False)
     name = StripTagsCharField(max_length=255)
-    image = Base64FileField(allow_empty_file=False, use_url=True)
+    image = Base64FileField(allow_empty_file=False, use_url=True, required=False)
     slug = StripTagsCharField(max_length=255, allow_blank=True, required=False)
-    criteria = StripTagsCharField(allow_blank=True, required=True, write_only=True)
+    criteria = StripTagsCharField(allow_blank=True, required=False, write_only=True)
     recipient_count = serializers.IntegerField(required=False, read_only=True)
+    description = StripTagsCharField(max_length=16384, required=False)
 
     def to_representation(self, instance):
         representation = super(BadgeClassSerializer, self).to_representation(instance)
@@ -158,20 +159,51 @@ class BadgeClassSerializer(AbstractComponentSerializer):
         image.name = 'issuer_badgeclass_' + str(uuid.uuid4()) + img_ext
         return image
 
+    def update(self, instance, validated_data):
+
+        new_name = validated_data.get('name')
+        if new_name:
+            new_name = strip_tags(new_name)
+            instance.name = new_name
+            instance.json['name'] = new_name
+
+        new_description = validated_data.get('description')
+        if new_description:
+            instance.json['description'] = strip_tags(new_description)
+
+        if 'criteria_text' in validated_data:
+            instance.criteria_text = validated_data.get('criteria_text')
+            instance.json['criteria'] = "%s/criteria" % (instance.get_full_url(),)
+        if 'criteria_url' in validated_data:
+            instance.json['criteria'] = validated_data.get('criteria_url')
+
+        if 'image' in validated_data:
+            instance.image = validated_data.get('image')
+
+        instance.save()
+        return instance
+
     def validate(self, data):
 
-        if utils.is_probable_url(data.get('criteria')):
-            data['criteria_url'] = data.pop('criteria')
-        elif not isinstance(data.get('criteria'), (str, unicode)):
-            raise serializers.ValidationError(
-                "Provided criteria text could not be properly processed as URL or plain text."
-            )
-        else:
-            data['criteria_text'] = data.pop('criteria')
+        if 'criteria' in data:
+            if utils.is_probable_url(data.get('criteria')):
+                data['criteria_url'] = data.pop('criteria')
+            elif not isinstance(data.get('criteria'), (str, unicode)):
+                raise serializers.ValidationError(
+                    "Provided criteria text could not be properly processed as URL or plain text."
+                )
+            else:
+                data['criteria_text'] = data.pop('criteria')
 
         return data
 
     def create(self, validated_data, **kwargs):
+        description = validated_data.pop('description')
+        if not description:
+            raise serializers.ValidationError({"description": ["This field is required"]})
+
+        if 'image' not in validated_data:
+            raise serializers.ValidationError({"image": ["This field is required"]})
 
         # TODO: except KeyError on pops for invalid keys? or just ensure they're there with validate()
         # "gets" data that must be in both model and model.json,
@@ -180,7 +212,7 @@ class BadgeClassSerializer(AbstractComponentSerializer):
             '@context': utils.CURRENT_OBI_CONTEXT_IRI,
             'type': 'BadgeClass',
             'name': validated_data.get('name'),
-            'description': strip_tags(validated_data.pop('description')),
+            'description': description,
             'issuer': validated_data.get('issuer').get_full_url()
         }
 

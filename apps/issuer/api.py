@@ -513,6 +513,31 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
             else:
                 return Response("Badge class could not be deleted. It has already been issued at least once.", status=status.HTTP_400_BAD_REQUEST)
 
+    def put(self, request, issuerSlug, badgeSlug):
+        """
+        Update an existing badge class. Existing BadgeInstances will NOT be updated.
+        ---
+        serializer: BadgeClassSerializer
+        """
+        try:
+            current_badgeclass = BadgeClass.cached.get(slug=badgeSlug)
+            self.check_object_permissions(self.request, current_badgeclass)
+        except (BadgeClass.DoesNotExist, PermissionDenied):
+            return Response(
+                "BadgeClass %s could not be found, or inadequate permissions." % badgeSlug,
+                status=status.HTTP_404_NOT_FOUND
+            )
+        else:
+            new_image = request.data.get('image')
+            if new_image == current_badgeclass.image.url:
+                # image is unchanged, remove from request
+                request.data.pop('image')
+
+            serializer = BadgeClassSerializer(current_badgeclass, data=request.data, context={'request': request})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+
 
 class BatchAssertions(AbstractIssuerAPIEndpoint):
     queryset = BadgeClass.objects.all()
