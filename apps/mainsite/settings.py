@@ -309,6 +309,8 @@ LINKED_DATA_DOCUMENT_FETCHER = 'badgeanalysis.utils.custom_docloader'
 #
 ##
 
+LTI_STORE_IN_SESSION = False
+
 CAIROSVG_VERSION_SUFFIX = "2"
 
 SITE_ID = 1
