@@ -124,8 +124,12 @@ class ImagePropertyDetailView(ComponentPropertyDetailView):
         elif image_type == 'png' and ext == '.svg':
             if not storage.exists(new_name):
                 with storage.open(image_prop.name, 'rb') as input_svg:
+                    svg_buf = StringIO.StringIO()
                     out_buf = StringIO.StringIO()
-                    cairosvg.svg2png(file_obj=input_svg, write_to=out_buf)
+                    cairosvg.svg2png(file_obj=input_svg, write_to=svg_buf)
+                    img = Image.open(svg_buf)
+                    img.thumbnail((400, 400))
+                    img.save(out_buf, format=image_type)
                     storage.save(new_name, out_buf)
             image_url = storage.url(new_name)
         elif ext != '.png':
