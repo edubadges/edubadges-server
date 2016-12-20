@@ -62,20 +62,25 @@ class BadgeUserProfileSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         request = self.context.get('request')
+        existing_user = None
 
+        # Fetch existing email address if it is verified, delete unverified email address records.
         try:
             email_address = CachedEmailAddress.objects.get(email=validated_data['email'])
         except CachedEmailAddress.DoesNotExist:
-            pass
+            email_address = None
         else:
             if email_address.verified is False:
                 email_address.delete()
-            else:
-                raise serializers.ValidationError(
-                    'Account could not be created. An account with this email address may already exist.'
-                )
+                email_address = None
 
-        existing_user = BadgeUser.objects.filter(email=validated_data['email']).first()
+        # Identify the user account if it is already partially initialized
+        if email_address and not existing_user:
+            existing_user = email_address.user
+        else:
+            # TODO: change this after deprecating the email database column for the BadgeUser model.
+            existing_user = BadgeUser.objects.filter(email=validated_data['email']).first()
+
         if existing_user:
             # if existing_user.password is NOT set, this user was auto-created and needs to be claimed
             if existing_user.password:
@@ -93,9 +98,12 @@ class BadgeUserProfileSerializer(serializers.Serializer):
         user.set_password(validated_data['password'])
         user.save()
 
-        CachedEmailAddress.objects.add_email(
-            request, user, validated_data['email'], confirm=True, signup=True
-        )
+        if not email_address:
+            CachedEmailAddress.objects.add_email(
+                request, user, validated_data['email'], confirm=True, signup=True
+            )
+        else:
+            email_address.send_confirmation(request, signup=True)
 
         return user
 
