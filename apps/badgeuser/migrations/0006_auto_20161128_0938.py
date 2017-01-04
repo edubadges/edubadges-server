@@ -15,27 +15,29 @@ def send_missing_confirmation_requests(apps, schema_editor):
     3. send verification email for that address.
     """
     for user in BadgeUser.objects.all():
-        with transaction.atomic():
-            emails = CachedEmailAddress.objects.filter(user=user)
-            # record users who don't have EmailAddress records
-            if emails.count() < 1:
-                try:
+        try:
+            with transaction.atomic():
+                emails = CachedEmailAddress.objects.filter(user=user)
+                # record users who don't have EmailAddress records
+                if emails.count() < 1:
                     new_primary = CachedEmailAddress(
                         user=user, email=user.email, verified=False, primary=True
                     )
                     new_primary.save()
                     emails = CachedEmailAddress.objects.filter(user=user)
-                except IntegrityError:
-                    continue
 
-            elif len([e for e in emails if e.primary is True]) == 0:
-                new_primary = emails.first()
-                new_primary.set_as_primary(conditional=True)
+                elif len([e for e in emails if e.primary is True]) == 0:
+                    new_primary = emails.first()
+                    new_primary.set_as_primary(conditional=True)
 
-                prior_confirmations = EmailConfirmation.objects.filter(email_address=new_primary)
+                    prior_confirmations = EmailConfirmation.objects.filter(email_address=new_primary)
 
-                if new_primary.verified is False and not prior_confirmations.exists():
-                    new_primary.send_confirmation(signup="canvas")
+                    if new_primary.verified is False and not prior_confirmations.exists():
+                        new_primary.send_confirmation(signup="canvas")
+        except IntegrityError as e:
+            continue
+        except Exception as e:
+            continue
 
 
 class Migration(migrations.Migration):
