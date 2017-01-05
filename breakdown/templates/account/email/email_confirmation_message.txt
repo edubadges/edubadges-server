@@ -1,11 +1,11 @@
-Please verify your email address on Badgr,
+Please confirm your email address on Badgr,
 {{ email.email }}
 
-A Badgr user has requested to add this email to their account or verify it for
-use in a connected application. Please click the link below to verify this
-operation, and then you may upload badges that have been issued to this address
-to your account or use features of Badgr within connected applications.
+A Badgr user has requested to add this email to their account or use it in a connected application.
+Once confirmed, you may upload badges to your Badgr account that have been issued to this address
+or use features within connected applications.
 
 {{ activate_url }}
 
-If you didn't make this request, you can safely ignore this email, and no action will be taken on your behalf.
+If you didn't make this request, you can safely ignore this email, and
+no action will be taken on your behalf.

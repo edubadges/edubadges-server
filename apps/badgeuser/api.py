@@ -401,7 +401,7 @@ class BadgeUserEmailConfirm(UserTokenMixin, BadgeUserEmailView):
         email_address.verified = True
         email_address.save()
 
-        process_email_verification.delay(email_address)
+        process_email_verification.delay(email_address.pk)
 
         # get badgr_app url redirect
         redirect_url = get_adapter().get_email_confirmation_redirect_url(request)

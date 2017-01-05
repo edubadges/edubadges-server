@@ -7,14 +7,17 @@ import warnings
 from django.core import mail
 from django.core.cache import cache, CacheKeyWarning
 from django.core.cache.backends.filebased import FileBasedCache
-from django.core.urlresolvers import reverse
+from django.core.management import call_command
 from django.test import TestCase, override_settings
+from django.utils.six import StringIO
 
 from allauth.account.models import EmailConfirmation
 from rest_framework.test import APITestCase
 
 from mainsite.models import BadgrApp
 from mainsite.settings import TOP_DIR
+
+from badgeuser.models import BadgeUser, CachedEmailAddress
 
 
 class TestCacheSettings(TestCase):
@@ -100,3 +103,44 @@ class CachingTestCase(TestCase):
     def setUp(self):
         # scramble the cache key each time
         cache.key_prefix = "test{}".format(str(time.time()))
+
+
+class TestEmailCleanupCommand(TestCase):
+    def test_email_added_for_user_missing_one(self):
+        user = BadgeUser(email="newtest@example.com", first_name="Test", last_name="User")
+        user.save()
+        self.assertFalse(CachedEmailAddress.objects.filter(user=user).exists())
+
+        user2 = BadgeUser(email="newtest2@example.com", first_name="Test2", last_name="User")
+        user2.save()
+        email2 = CachedEmailAddress(user=user2, email="newtest2@example.com", verified=False, primary=True)
+        email2.save()
+
+        call_command('clean_email_records')
+
+        email_record = CachedEmailAddress.objects.get(user=user)
+        self.assertFalse(email_record.verified)
+        self.assertTrue(email_record.emailconfirmation_set.exists())
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_unverified_unprimary_email_sends_confirmation(self):
+        """
+        If there is only one email, and it's not primary, set it as primary.
+        If it's not verified, send a verification.
+        """
+        user = BadgeUser(email="newtest@example.com", first_name="Test", last_name="User")
+        user.save()
+        email = CachedEmailAddress(email=user.email, user=user, verified=False, primary=False)
+        email.save()
+
+        user2 = BadgeUser(email="newtest@example.com", first_name="Error", last_name="User")
+        user2.save()
+
+        self.assertEqual(BadgeUser.objects.count(), 2)
+
+        call_command('clean_email_records')
+
+        email_record = CachedEmailAddress.objects.get(user=user)
+        self.assertTrue(email_record.primary)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(BadgeUser.objects.count(), 1)

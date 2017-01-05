@@ -1,0 +1,5 @@
+{% load i18n %}
+{% autoescape off %}
+{% blocktrans %}Confirm Your Email for Badgr in Canvas{% endblocktrans %}
+{% endautoescape %}
+w
