@@ -8,36 +8,11 @@ from allauth.account.models import EmailConfirmation
 from badgeuser.models import CachedEmailAddress, BadgeUser, EmailConfirmation
 
 
-def send_missing_confirmation_requests(apps, schema_editor):
+def do_nothing(apps, schema_editor):
     """
-    1. Detect all users who do do not have a Primary Email Address
-    2. Find first email address, set is as primary.
-    3. send verification email for that address.
+    Replaced with a management task.
     """
-    for user in BadgeUser.objects.all():
-        try:
-            with transaction.atomic():
-                emails = CachedEmailAddress.objects.filter(user=user)
-                # record users who don't have EmailAddress records
-                if emails.count() < 1:
-                    new_primary = CachedEmailAddress(
-                        user=user, email=user.email, verified=False, primary=True
-                    )
-                    new_primary.save()
-                    emails = CachedEmailAddress.objects.filter(user=user)
-
-                elif len([e for e in emails if e.primary is True]) == 0:
-                    new_primary = emails.first()
-                    new_primary.set_as_primary(conditional=True)
-
-                    prior_confirmations = EmailConfirmation.objects.filter(email_address=new_primary)
-
-                    if new_primary.verified is False and not prior_confirmations.exists():
-                        new_primary.send_confirmation(signup="canvas")
-        except IntegrityError as e:
-            continue
-        except Exception as e:
-            continue
+    pass
 
 
 class Migration(migrations.Migration):
@@ -47,5 +22,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(send_missing_confirmation_requests)
+        migrations.RunPython(do_nothing)
     ]
