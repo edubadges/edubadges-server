@@ -129,6 +129,7 @@ class BadgeClassSerializer(AbstractComponentSerializer):
     # issuer = serializers.HyperlinkedRelatedField(view_name='issuer_json', read_only=True, lookup_field='slug')
     json = WritableJSONField(max_length=16384, read_only=True, required=False)
     name = StripTagsCharField(max_length=255)
+    description = serializers.CharField(write_only=True, required=True)
     image = Base64FileField(allow_empty_file=False, use_url=True)
     slug = StripTagsCharField(max_length=255, allow_blank=True, required=False)
     criteria = StripTagsCharField(allow_blank=True, required=True, write_only=True)
