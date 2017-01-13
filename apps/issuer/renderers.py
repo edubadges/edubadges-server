@@ -14,17 +14,15 @@ class BadgeInstanceHTMLRenderer(BrowsableAPIRenderer):
             data, accepted_media_type, renderer_context)
 
         try:
-            context['badge_instance'] = renderer_context['badge_instance']
-            context['badge_class'] = renderer_context['badge_class']
-            context['issuer'] = renderer_context['issuer']
-            context['badge_instance_image_url'] = renderer_context['badge_instance'].image.url if renderer_context['badge_instance'].image else None
-            context['badge_instance_public_url'] = OriginSetting.HTTP+reverse('badgeinstance_json', kwargs={
-                'slug': renderer_context['badge_instance'].slug})
-
             context['badgeclass_image_png'] = "{}{}?type=png".format(
                 OriginSetting.HTTP,
                 reverse('badgeclass_image', kwargs={'slug': renderer_context['badge_class'].slug})
             )
+
+            context.update(renderer_context)
+            context['issuer_url'] = context['issuer'].jsonld_id
+            context['badge_instance_image_url'] = renderer_context['badge_instance'].image.url if renderer_context['badge_instance'].image else None
+            context['badge_instance_public_url'] = renderer_context['badge_instance'].jsonld_id
 
             recipient_email = renderer_context['badge_instance'].recipient_identifier
             context['obscured_recipient'] = utils.obscure_email_address(recipient_email)

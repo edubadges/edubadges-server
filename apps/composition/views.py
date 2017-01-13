@@ -6,38 +6,59 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import DetailView
 from django.views.generic import RedirectView
 
+from rest_framework import status
+from rest_framework.renderers import JSONRenderer
+from rest_framework.response import Response
+
 from composition.models import Collection, LocalBadgeInstance
 from composition.utils import get_badge_by_identifier
 from issuer.models import BadgeInstance
-from issuer.utils import obscure_email_address
+from issuer.public_api import JSONComponentView
+from issuer.renderers import BadgeInstanceHTMLRenderer
+from issuer.utils import obscure_email_address, CURRENT_OBI_CONTEXT_IRI
+from mainsite.models import AbstractBadgeInstance
 from mainsite.utils import OriginSetting
 
 
-class SharedBadgeView(DetailView):
-    template_name = 'public/shared_badge.html'
-    context_object_name = 'badge'
+class SharedBadgeView(JSONComponentView):
+    renderer_classes = (JSONRenderer, BadgeInstanceHTMLRenderer,)
+    html_renderer_class = BadgeInstanceHTMLRenderer
 
     def get_object(self, queryset=None):
         badge = get_badge_by_identifier(self.kwargs.get('badge_id'))
         if badge is None:
-            raise Http404
+            raise BadgeInstance.DoesNotExist("No badge matching the specified sharing identifier")
         return badge
 
-    def get_context_data(self, **kwargs):
-        context = super(SharedBadgeView, self).get_context_data(**kwargs)
-        if isinstance(self.object, LocalBadgeInstance):
-            context['badgeclass_image_png'] = "{}{}?type=png".format(OriginSetting.HTTP,reverse('localbadgeinstance_image', kwargs={'slug': self.object.slug}))
-        elif isinstance(self.object, BadgeInstance):
-            context['badgeclass_image_png'] = "{}{}?type=png".format(OriginSetting.HTTP,reverse('badgeclass_image', kwargs={'slug': self.object.cached_badgeclass.slug}))
+    def get_renderer_context(self, **kwargs):
+        context = super(SharedBadgeView, self).get_renderer_context(**kwargs)
+        if isinstance(self.badge, LocalBadgeInstance):
+            context['badgeclass_image_png'] = "{}{}?type=png".format(OriginSetting.HTTP,reverse('localbadgeinstance_image', kwargs={'slug': self.badge.slug}))
+        elif isinstance(self.badge, BadgeInstance):
+            context['badgeclass_image_png'] = "{}{}?type=png".format(OriginSetting.HTTP,reverse('badgeclass_image', kwargs={'slug': self.badge.cached_badgeclass.slug}))
         context.update({
-            'badge_instance': self.object,
-            'badge_class': self.object.cached_badgeclass,
-            'issuer': self.object.cached_issuer,
-            'badge_instance_image_url': self.object.image.url if self.object.image else None,
-            'obscured_recipient': obscure_email_address(self.object.recipient_identifier),
-            'badge_instance_public_url': OriginSetting.HTTP+reverse('shared_badge', kwargs={'badge_id': self.kwargs.get('badge_id')}),
+            'badge_instance': self.badge,
+            'badge_class': self.badge.cached_badgeclass,
+            'issuer': self.badge.cached_issuer,
         })
         return context
+
+    def get(self, request, badge_id, format='html'):
+        try:
+            self.badge = self.get_object(badge_id)
+        except BadgeInstance.DoesNotExist as e:
+            return Response(e.message, status=status.HTTP_404_NOT_FOUND)
+
+        if self.badge.revoked:
+            revocation_info = {
+                '@context': CURRENT_OBI_CONTEXT_IRI,
+                'id': self.badge.jsonld_id,
+                'revoked': True,
+                'revocationReason': self.badge.revocation_reason
+            }
+            return Response(revocation_info, status=status.HTTP_410_GONE)
+
+        return Response(self.badge.json)
 
 
 class CollectionDetailView(DetailView):

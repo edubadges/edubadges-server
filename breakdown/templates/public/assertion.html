@@ -61,7 +61,7 @@
 
 			    <h2 class="titledivider">Issuer</h2>
 
-			    <a class="stack" target="_blank" href="{% url 'issuer_json' slug=issuer.slug %}">
+			    <a class="stack" target="_blank" href="{{ issuer_url }}">
 				    <div class="stack-x-image">
 					    <img src="{% if issuer.json.image %}{{ issuer.json.image }}{% else %}{% static 'badgr-ui/images/issuer-placeholder.png' %}{% endif %}"
 					         width="40"

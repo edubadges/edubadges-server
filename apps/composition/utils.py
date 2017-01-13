@@ -98,13 +98,7 @@ def badge_email_matches_emails(badge_instance, verified_addresses):
 
 def generate_common_case_variants(email_addresses):
     def _common_case_variants(s):
-        return set([
-            s,
-            s.lower(),
-            s.upper(),
-            s.title(),
-            s.capitalize()
-        ])
+        return {s, s.lower(), s.upper(), s.title(), s.capitalize()}
     for email in email_addresses:
         user, domain = email.split('@')
         for u in _common_case_variants(user):

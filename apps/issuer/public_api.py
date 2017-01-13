@@ -25,7 +25,7 @@ import badgrlog
 logger = badgrlog.BadgrLogger()
 
 
-class JSONComponentView(AbstractIssuerAPIEndpoint):
+class JSONComponentView(APIView):
     """
     Abstract Component Class
     """

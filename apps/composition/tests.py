@@ -736,3 +736,29 @@ class TestCollectionOperations(APITestCase):
 
         obj = LocalBadgeInstanceCollection.objects.get(collection=collection, instance_id=1)
         self.assertEqual(obj.description, 'A cool badge.')
+
+
+class TestPublicBadgeShare(APITestCase):
+    fixtures = ['0001_initial_superuser', 'initial_collections', 'initial_my_badges', 'test_badge_objects']
+
+    def test_badge_share_json(self):
+        """
+        Badge Share page returns JSON by default
+        """
+        first_badge = LocalBadgeInstance.objects.first()
+        response = self.client.get('/share/badge/{}'.format(first_badge.id))
+
+        self.assertEqual(response.data.get('uid'), u'dc8959d7639e64178ec24fb222f11d050528df74')
+
+    def test_badge_share_html(self):
+        """
+        Badge Share page returns HTML if requested
+        """
+        first_badge = LocalBadgeInstance.objects.first()
+        response = self.client.get(
+            '/share/badge/{}'.format(first_badge.id),
+            **{'HTTP_ACCEPT': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'}
+        )
+
+        self.assertContains(response, "<h1>MozFest Reveler</h1>", html=True)
+        self.assertContains(response, 'href="http://badger.openbadges.org/badge/assertion/dc8959d7639e64178ec24fb222f11d050528df74.json"', html=True)
