@@ -505,13 +505,16 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
         except (BadgeClass.DoesNotExist, PermissionDenied):
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
-            if current_badgeclass.recipient_count() < 1:
+            if current_badgeclass.recipient_count() > 0:
+                return Response("Badge class could not be deleted. It has already been issued at least once.", status=status.HTTP_400_BAD_REQUEST)
+            elif current_badgeclass.pathway_element_count() > 0:
+                return Response("Badge class could not be deleted. It is been issued at least once.", status=status.HTTP_400_BAD_REQUEST)
+            else:
                 old_badgeclass = current_badgeclass.json
                 current_badgeclass.delete()
                 logger.event(badgrlog.BadgeClassDeletedEvent(old_badgeclass, request.user))
                 return Response("Badge " + badgeSlug + " has been deleted.", status.HTTP_200_OK)
-            else:
-                return Response("Badge class could not be deleted. It has already been issued at least once.", status=status.HTTP_400_BAD_REQUEST)
+
 
     def put(self, request, issuerSlug, badgeSlug):
         """

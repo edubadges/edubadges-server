@@ -133,6 +133,7 @@ class BadgeClassSerializer(AbstractComponentSerializer):
     slug = StripTagsCharField(max_length=255, allow_blank=True, required=False)
     criteria = StripTagsCharField(allow_blank=True, required=False, write_only=True)
     recipient_count = serializers.IntegerField(required=False, read_only=True)
+    pathway_element_count = serializers.IntegerField(required=False, read_only=True)
     description = StripTagsCharField(max_length=16384, required=False)
 
     def to_representation(self, instance):

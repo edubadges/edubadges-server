@@ -100,6 +100,9 @@ class BadgeClass(AbstractBadgeClass):
         if self.recipient_count() > 0:
             raise ProtectedError("BadgeClass may only be deleted if all BadgeInstances have been revoked.")
 
+        if self.pathway_element_count() > 0:
+            raise ProtectedError("BadgeClass may only be deleted if all PathwayElementBadge have been removed.")
+
         issuer = self.issuer
         super(BadgeClass, self).delete(*args, **kwargs)
         issuer.publish()
@@ -111,6 +114,9 @@ class BadgeClass(AbstractBadgeClass):
     @cachemodel.cached_method(auto_publish=True)
     def recipient_count(self):
         return self.badgeinstances.filter(revoked=False).count()
+
+    def pathway_element_count(self):
+        return len(self.cached_pathway_elements())
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeinstances(self):
