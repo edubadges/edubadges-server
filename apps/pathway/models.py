@@ -184,7 +184,7 @@ class PathwayElement(basic_models.DefaultModel):
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_children(self):
-        return self.pathwayelement_set.all()
+        return self.pathwayelement_set.filter(is_active=True)
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badges(self):
