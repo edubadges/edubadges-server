@@ -264,9 +264,9 @@ class EmailBlacklist(models.Model):
 
 
 class BadgrAppManager(basic_models.ActiveModelManager):
-    def get_current(self, request):
-        origin = request.META.get('HTTP_ORIGIN')
-        if origin:
+    def get_current(self, request=None):
+        if request and request.META.get('HTTP_ORIGIN'):
+            origin = request.META.get('HTTP_ORIGIN')
             url = urlparse.urlparse(origin)
             try:
                 return self.get(cors=url.netloc)
@@ -279,8 +279,10 @@ class BadgrAppManager(basic_models.ActiveModelManager):
 
 
 class BadgrApp(basic_models.DefaultModel):
+    name = models.CharField(max_length=254)
     cors = models.CharField(max_length=254, unique=True)
     email_confirmation_redirect = models.URLField()
+    signup_redirect = models.URLField()
     forgot_password_redirect = models.URLField()
     objects = BadgrAppManager()
 

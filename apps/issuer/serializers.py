@@ -9,6 +9,7 @@ from rest_framework import serializers
 from badgeuser.serializers import UserProfileField
 from composition.format import V1InstanceSerializer
 from mainsite.drf_fields import Base64FileField
+from mainsite.models import BadgrApp
 from mainsite.serializers import WritableJSONField, HumanReadableBooleanField, StripTagsCharField
 from mainsite.utils import installed_apps_list, OriginSetting, verify_svg
 
@@ -303,7 +304,8 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
             evidence_url=validated_data.get('evidence'),
             notify=validated_data.get('create_notification'),
             created_by=self.context.get('request').user,
-            allow_uppercase=validated_data.get('allow_uppercase')
+            allow_uppercase=validated_data.get('allow_uppercase'),
+            badgr_app=BadgrApp.objects.get_current(self.context.get('request'))
         )
 
 

@@ -7,6 +7,7 @@ from allauth.account.adapter import get_adapter
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.sites.shortcuts import get_current_site
 from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
@@ -18,7 +19,7 @@ from openbadges_bakery import bake
 
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
-                             AbstractBadgeInstance, EmailBlacklist)
+                             AbstractBadgeInstance, BadgrApp, EmailBlacklist)
 from mainsite.utils import OriginSetting
 from pathway.tasks import award_badges_for_pathway_completion
 
@@ -126,10 +127,11 @@ class BadgeClass(AbstractBadgeClass):
     def cached_pathway_elements(self):
         return [peb.element for peb in self.pathwayelementbadge_set.all()]
 
-    def issue(self, recipient_id=None, evidence_url=None, notify=False, created_by=None, allow_uppercase=False):
+    def issue(self, recipient_id=None, evidence_url=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None):
         return BadgeInstance.objects.create_badgeinstance(
             badgeclass=self, recipient_id=recipient_id, evidence_url=evidence_url,
-            notify=notify, created_by=created_by, allow_uppercase=allow_uppercase
+            notify=notify, created_by=created_by, allow_uppercase=allow_uppercase,
+            badgr_app=badgr_app
         )
 
 
@@ -137,7 +139,7 @@ class BadgeInstanceManager(models.Manager):
     def create_badgeinstance(
             self, badgeclass, recipient_id, evidence_url=None,
             notify=False, check_completions=True, created_by=None,
-            allow_uppercase=False
+            allow_uppercase=False, badgr_app=None
     ):
         """
         Convenience method to award a badge to a recipient_id
@@ -190,7 +192,7 @@ class BadgeInstanceManager(models.Manager):
             award_badges_for_pathway_completion.delay(new_instance.slug)
 
         if notify:
-            new_instance.notify_earner()
+            new_instance.notify_earner(badgr_app=badgr_app)
 
         return new_instance
 
@@ -293,7 +295,7 @@ class BadgeInstance(AbstractBadgeInstance):
             recipient_profile.publish()
         self.publish_delete('slug')
 
-    def notify_earner(self):
+    def notify_earner(self, badgr_app=None):
         """
         Sends an email notification to the badge earner.
         This process involves creating a badgeanalysis.models.OpenBadge
@@ -311,6 +313,9 @@ class BadgeInstance(AbstractBadgeInstance):
             return
             # TODO: Report email non-delivery somewhere.
 
+        if badgr_app is None:
+            badgr_app = BadgrApp.objects.get_current(None)
+
         try:
             if self.issuer.image:
                 issuer_image_url = self.issuer.get_full_url() + '/image'
@@ -323,18 +328,32 @@ class BadgeInstance(AbstractBadgeInstance):
                 'badge_description': self.badgeclass.prop('description'),
                 'issuer_name': re.sub(r'[^\w\s]+', '', self.issuer.name, 0, re.I),
                 'issuer_url': self.issuer.prop('url'),
+                'issuer_detail': self.issuer.get_full_url(),
                 'issuer_image_url': issuer_image_url,
                 'badge_instance_url': self.get_full_url(),
                 'image_url': self.get_full_url() + '/image',
-                'badgr_import_url': badgr_import_url(self),
-                'unsubscribe_url': getattr(settings, 'HTTP_ORIGIN') + EmailBlacklist.generate_email_signature(self.recipient_identifier)
+                'unsubscribe_url': getattr(settings, 'HTTP_ORIGIN') + EmailBlacklist.generate_email_signature(
+                    self.recipient_identifier),
+                'site_name': badgr_app.name,
+                'site_url': badgr_app.signup_redirect,
             }
+            if badgr_app.cors == 'badgr.io':
+                email_context['promote_mobile'] = True
         except KeyError as e:
             # A property isn't stored right in json
             raise e
 
+        template_name = 'issuer/email/notify_earner'
+        try:
+            from badgeuser.models import CachedEmailAddress
+            CachedEmailAddress.objects.get(email=self.recipient_identifier, verified=True)
+            template_name = 'issuer/email/notify_account_holder'
+            email_context['site_url'] = badgr_app.email_confirmation_redirect
+        except CachedEmailAddress.DoesNotExist:
+            pass
+
         adapter = get_adapter()
-        adapter.send_mail('issuer/email/notify_earner', self.recipient_identifier, context=email_context)
+        adapter.send_mail(template_name, self.recipient_identifier, context=email_context)
 
     @property
     def cached_recipient_profile(self):

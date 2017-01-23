@@ -760,5 +760,5 @@ class TestPublicBadgeShare(APITestCase):
             **{'HTTP_ACCEPT': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'}
         )
 
-        self.assertContains(response, "<h1>MozFest Reveler</h1>", html=True)
-        self.assertContains(response, 'href="http://badger.openbadges.org/badge/assertion/dc8959d7639e64178ec24fb222f11d050528df74.json"', html=True)
+        self.assertContains(response, "<h1>MozFest Reveler</h1>")
+        self.assertContains(response, 'href="http://badger.openbadges.org/badge/assertion/dc8959d7639e64178ec24fb222f11d050528df74.json"')

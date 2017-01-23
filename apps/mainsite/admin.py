@@ -30,8 +30,9 @@ class BadgrAppAdmin(basic_models.DefaultModelAdmin):
     fieldsets = (
         ('Meta', {'fields': ('is_active', 'created_at', 'created_by', 'updated_at', 'updated_by'),
                   'classes': ('collapse',)}),
-        (None, {'fields': ('cors', 'email_confirmation_redirect', 'forgot_password_redirect')})
+        (None, {'fields': ('name', 'cors', 'signup_redirect', 'email_confirmation_redirect', 'forgot_password_redirect')})
     )
+    list_display = ('name', 'cors',)
 badgr_admin.register(BadgrApp, BadgrAppAdmin)
 
 
