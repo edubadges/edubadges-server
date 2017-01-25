@@ -152,3 +152,13 @@ def _get_reference_type(component_reference):
 
     if component_reference.count('.') == 2:
         return "jwt"
+
+
+def normalize_error_message(error):
+    """
+    Some ValidationErrors have a message that is an array. This will ensure there is not a double-nested array.
+    :return str
+    """
+    if isinstance(error, list):
+        return "; ".join(error)
+    return error

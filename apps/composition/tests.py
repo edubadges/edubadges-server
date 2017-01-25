@@ -116,6 +116,23 @@ class TestBadgeUploads(APITestCase):
         )
 
     @responses.activate
+    def test_submit_basic_1_0_badge_via_url_bad_email(self):
+        setup_basic_1_0()
+
+        post_input = {
+            'url': 'http://a.com/instance'
+        }
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=2))
+        response = self.client.post(
+            '/v1/earner/badges', post_input
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.data[0],
+            'The badge you are trying to import does not belong to one of your verified e-mail addresses.'
+        )
+
+    @responses.activate
     def test_submit_basic_1_0_badge_from_image_url_baked_w_assertion(self):
         setup_basic_1_0()
 

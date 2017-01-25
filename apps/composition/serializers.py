@@ -12,7 +12,7 @@ from mainsite.serializers import StripTagsCharField
 from mainsite.utils import OriginSetting
 from verifier import ComponentsSerializer
 from verifier.badge_check import BadgeCheck
-from verifier.utils import find_and_get_badge_class, find_and_get_issuer
+from verifier.utils import find_and_get_badge_class, find_and_get_issuer, normalize_error_message
 
 from .format import V1InstanceSerializer, V1BadgeInstanceSerializer
 from .models import (LocalBadgeInstance, LocalBadgeClass, LocalIssuer,
@@ -142,13 +142,8 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
         badge_check.validate()
 
         if not badge_check.is_valid():
-            error = {
-                'message':
-                "The uploaded badge did not pass verification constraints.",
-                'detail':
-                [error['message'] for error in badge_check.results
-                 if error['type'] is 'error' and not error['success']]
-            }
+            error = [normalize_error_message(error['message']) for error in badge_check.results
+                if error['type'] is 'error' and not error['success']]
             logger.event(badgrlog.InvalidBadgeUploaded(components, error, request_user))
             raise serializers.ValidationError(error)
 
