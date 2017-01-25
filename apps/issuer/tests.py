@@ -463,6 +463,27 @@ class BadgeClassTests(APITestCase):
                 r'badge-of-awesome/criteria$'
             )
 
+    def test_create_criteriatext_badgeclass_description_required(self):
+        """
+        Ensure that the API properly rejects badgeclass creation requests that do not include a description.
+        """
+        with open(
+            os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
+        ) as badge_image:
+
+            badgeclass_props = {
+                'name': 'Badge of Awesome',
+                'image': badge_image,
+                'criteria': 'The earner of this badge must be truly, truly awesome.',
+            }
+
+            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            response = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                badgeclass_props
+            )
+            self.assertEqual(response.status_code, 400)
+
     def test_create_badgeclass_for_issuer_unauthenticated(self):
         response = self.client.post('/v1/issuer/issuers/test-issuer/badges', {})
         self.assertEqual(response.status_code, 401)
