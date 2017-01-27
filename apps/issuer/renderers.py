@@ -23,6 +23,7 @@ class BadgeInstanceHTMLRenderer(BrowsableAPIRenderer):
             context['issuer_url'] = context['issuer'].jsonld_id
             context['badge_instance_image_url'] = renderer_context['badge_instance'].image.url if renderer_context['badge_instance'].image else None
             context['badge_instance_public_url'] = renderer_context['badge_instance'].jsonld_id
+            context['badgeclass_count'] = renderer_context['badgeclass_count']
 
             recipient_email = renderer_context['badge_instance'].recipient_identifier
             context['obscured_recipient'] = utils.obscure_email_address(recipient_email)
@@ -43,6 +44,7 @@ class BadgeClassHTMLRenderer(BrowsableAPIRenderer):
         try:
             context['badge_class'] = renderer_context['badge_class']
             context['issuer'] = renderer_context['issuer']
+            context['badgeclass_count'] = renderer_context['badgeclass_count']
         except KeyError:
             pass
 

@@ -161,6 +161,7 @@ class IssuerJson(JSONComponentView):
         if getattr(self, 'current_object', None):
             context['issuer'] = self.current_object
             context['badge_classes'] = self.current_object.cached_badgeclasses()
+            context['badgeclass_count'] = len(self.current_object.cached_badgeclasses())
         return context
 
 
@@ -188,6 +189,7 @@ class BadgeClassJson(JSONComponentView):
         if getattr(self, 'current_object', None):
             context['badge_class'] = self.current_object
             context['issuer'] = self.current_object.cached_issuer
+            context['badgeclass_count'] = len(context['issuer'].cached_badgeclasses())
         return context
 
     def log(self, obj):
@@ -225,6 +227,7 @@ class BadgeInstanceJson(JSONComponentView):
             context['badge_instance'] = self.current_object
             context['badge_class'] = self.current_object.cached_badgeclass
             context['issuer'] = self.current_object.cached_issuer
+            context['badgeclass_count'] = len(context['issuer'].cached_badgeclasses())
 
         return context
 

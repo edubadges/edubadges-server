@@ -1,3 +1,51 @@
+/* http://meyerweb.com/eric/tools/css/reset/
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+body {
+  line-height: 1;
+}
+ol, ul {
+  list-style: none;
+}
+blockquote, q {
+  quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
 /*!
  *  Font Awesome 4.6.3 by @davegandy - http://fontawesome.io - @fontawesome
  *  License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License)
@@ -2193,60 +2241,8 @@
   overflow: visible;
   clip: auto;
 }
-/* http://meyerweb.com/eric/tools/css/reset/
-   v2.0 | 20110126
-   License: none (public domain)
-*/
 
-html, body, div, span, applet, object, iframe,
-h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-a, abbr, acronym, address, big, cite, code,
-del, dfn, em, img, ins, kbd, q, s, samp,
-small, strike, strong, sub, sup, tt, var,
-b, u, i, center,
-dl, dt, dd, ol, ul, li,
-fieldset, form, label, legend,
-table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed,
-figure, figcaption, footer, header, hgroup,
-menu, nav, output, ruby, section, summary,
-time, mark, audio, video {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  font-size: 100%;
-  font: inherit;
-  vertical-align: baseline;
-}
-/* HTML5 display-role reset for older browsers */
-article, aside, details, figcaption, figure,
-footer, header, hgroup, menu, nav, section {
-  display: block;
-}
-body {
-  line-height: 1;
-}
-ol, ul {
-  list-style: none;
-}
-blockquote, q {
-  quotes: none;
-}
-blockquote:before, blockquote:after,
-q:before, q:after {
-  content: '';
-  content: none;
-}
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-}
-@charset "UTF-8";
-/*
-Base Rules
-
-Styleguide 1.0
-*/
+/*# sourceMappingURL=agnostic-styles.61cec8f1a73417dc53f6.css.map*/@charset "UTF-8";
 /*
 Colors
 
@@ -2347,21 +2343,54 @@ Styleguide 1.2
   src: url(assets/opensans-semibolditalic-webfont-2084726e8fc0e045baa783889a9811bc.woff2) format("woff2"), url(assets/opensans-semibolditalic-webfont-7573ced0ac546ed38cde940dd96ac4cd.woff) format("woff"); }
 
 @-webkit-keyframes rotate {
-  from {
+  0% {
     -webkit-transform: rotate(0);
             transform: rotate(0); }
-  to {
+  100% {
     -webkit-transform: rotate(360deg);
             transform: rotate(360deg); } }
 
 @keyframes rotate {
-  from {
+  0% {
     -webkit-transform: rotate(0);
             transform: rotate(0); }
-  to {
+  100% {
     -webkit-transform: rotate(360deg);
             transform: rotate(360deg); } }
 
+@-webkit-keyframes fade {
+  0% {
+    opacity: .4; }
+  50% {
+    opacity: 1; }
+  100% {
+    opacity: .4; } }
+
+@keyframes fade {
+  0% {
+    opacity: .4; }
+  50% {
+    opacity: 1; }
+  100% {
+    opacity: .4; } }
+
+@-webkit-keyframes fadein {
+  0% {
+    opacity: 0; }
+  100% {
+    opacity: 1; } }
+
+@keyframes fadein {
+  0% {
+    opacity: 0; }
+  100% {
+    opacity: 1; } }
+
+/*
+Base Rules
+
+Styleguide 1.0
+*/
 body {
   background: #fcfcfc;
   color: #252247;
@@ -2422,18 +2451,6 @@ app {
         right: 0;
         top: 0;
         z-index: 5; } }
-
-main {
-  display: block;
-  position: relative; }
-  main .formmessage {
-    left: 0;
-    position: absolute;
-    top: 0; }
-  @media (min-width: 768px) {
-    main .formmessage {
-      position: fixed;
-      top: 78px; } }
 
 /*
 Article
@@ -2540,10 +2557,7 @@ Styleguide 2.2
     -webkit-box-orient: vertical;
     -webkit-box-direction: normal;
         -ms-flex-direction: column;
-            flex-direction: column;
-    -webkit-box-pack: start;
-        -ms-flex-pack: start;
-            justify-content: flex-start; }
+            flex-direction: column; }
     .l-childrenhorizontal-stackmobile > *:not(:last-child) {
       margin-bottom: 8px;
       margin-right: 0; }
@@ -2710,8 +2724,23 @@ Styleguide 2.18
         margin-right: 24px; }
       .l-controls > :last-child {
         -webkit-box-flex: 1;
-            -ms-flex: 1 0 0;
-                flex: 1 0 0; } }
+            -ms-flex: 1 0 auto;
+                flex: 1 0 auto; } }
+
+/*
+Display
+
+Sets the display attribute to a specific value.
+
+Markup:
+<div class="dispaly {$modifiers}">Content</button>
+
+Styleguide 2.25
+*/
+.l-display-flex {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex; }
 
 /*
 Form
@@ -2750,6 +2779,27 @@ Styleguide 2.6
     max-width: 100%; } }
 
 /*
+Form Message
+
+Positions formmessage module
+
+Styleguide 2.22
+*/
+.l-formmessage {
+  bottom: 16px;
+  left: 16px;
+  position: fixed;
+  width: calc(100% - 32px);
+  z-index: 3; }
+  @media (min-width: 1088px) {
+    .l-formmessage {
+      bottom: 64px;
+      left: 50%;
+      -webkit-transform: translateX(-50%);
+              transform: translateX(-50%);
+      width: 1056px; } }
+
+/*
 Grid Three
 
 Open the example in a new tab to see correct behavior. Use `<div>` wrappers if direct styling of children causes issues with other modules.
@@ -2775,7 +2825,8 @@ Styleguide 2.8
     display: flex;
     -ms-flex-wrap: wrap;
         flex-wrap: wrap;
-    margin-left: -8px; }
+    margin-left: -8px;
+    width: calc(100% + 16px); }
     .l-gridthree > * {
       -webkit-box-align: stretch;
           -ms-flex-align: stretch;
@@ -2787,6 +2838,7 @@ Styleguide 2.8
       -webkit-box-flex: 0;
           -ms-flex: 0 0 50%;
               flex: 0 0 50%;
+      max-width: 50%;
       padding-left: 8px;
       padding-right: 8px; }
       .l-gridthree > * > * {
@@ -2795,7 +2847,8 @@ Styleguide 2.8
 @media (min-width: 1024px) {
   .l-gridthree > * {
     -ms-flex-preferred-size: 33.33%;
-        flex-basis: 33.33%; } }
+        flex-basis: 33.33%;
+    max-width: 33.33%; } }
 
 /*
 Grid Two
@@ -2962,6 +3015,54 @@ Styleguide 2.20
       padding-right: 48px; } }
 
 /*
+Margin Bottom
+
+Adds a margin of gridspace to an element.
+
+Markup:
+<div class="l-marginBottom">Offset</div>
+
+Styleguide 2.24
+*/
+.l-marginBottom {
+  margin-bottom: 8px; }
+
+/*
+Margin Left
+
+Adds a margin of gridspace to an element.
+
+Markup:
+<div class="l-marginLeft">Offset</div>
+
+Styleguide 2.26
+*/
+.l-marginLeft {
+  margin-left: 8px; }
+
+/*
+Margin Top
+
+Adds top margin
+
+Markup:
+<div class="l-marginTop">Content</button>
+
+Styleguide 2.27
+*/
+.l-marginTop {
+  margin-top: 8px; }
+
+.l-marginTop-2x {
+  margin-top: 16px; }
+
+.l-marginTop-3x {
+  margin-top: 24px; }
+
+.l-marginTop-4x {
+  margin-top: 32px; }
+
+/*
 Offset Bottom
 
 Gives negative bottom margin - used when ghost buttons abut to their containers
@@ -3092,8 +3193,10 @@ Styleguide 2.19
     overflow-y: auto; }
   .l-overflowlist .l-overflowlist-x-selected {
     padding: 16px 16px 0; }
-    .l-overflowlist .l-overflowlist-x-selected > *:not(:last-child) {
-      margin-bottom: 16px; }
+    .l-overflowlist .l-overflowlist-x-selected > h1 {
+      margin-bottom: 8px; }
+    .l-overflowlist .l-overflowlist-x-selected > p {
+      padding-top: 8px; }
     .l-overflowlist .l-overflowlist-x-selected > div {
       -webkit-box-align: center;
           -ms-flex-align: center;
@@ -3102,7 +3205,11 @@ Styleguide 2.19
       display: -ms-flexbox;
       display: flex;
       -ms-flex-wrap: wrap;
-          flex-wrap: wrap; }
+          flex-wrap: wrap;
+      margin-bottom: 16px;
+      max-height: 112px;
+      overflow-y: auto;
+      padding-top: 8px; }
       .l-overflowlist .l-overflowlist-x-selected > div > * {
         margin: 0 16px 16px 0; }
   @media (min-width: 768px) {
@@ -3125,6 +3232,43 @@ Styleguide 2.11
   position: relative;
   -webkit-transition: top linear .25s;
   transition: top linear .25s; }
+
+/*
+uploadBadgeButtons
+
+layout container that wraps the badgeButtons.
+
+Markup:
+<div class="l-uploadBadgeButtons">
+  <sg-insert>3.64</sg-insert>
+</div>
+
+Styleguide 2.23
+*/
+.l-uploadBadgeButtons button:not(:last-of-type) {
+  margin-bottom: 12px; }
+
+@media (min-width: 768px) {
+  .l-uploadBadgeButtons {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    margin: 0; } }
+
+/*
+Dialog Open
+
+Applied to the body when a dialog is open.
+
+*/
+.l-dialogopen,
+.l-dialogopen body {
+  height: 100vh;
+  overflow: hidden;
+  width: 100vw; }
 
 /*
 Module Rules
@@ -3200,6 +3344,59 @@ Styleguide 3.14
 
 .badge-flat {
   padding: 0; }
+
+/*
+BadgeButton
+
+Markup:
+<button class="badgeButton badgeButton-icon-pasteJson" type="button">Paste Badge JSON</button>
+<button class="badgeButton badgeButton-icon-pasteUrl badgeButton-is-selected" type="button">Paste Badge URL</button>
+<button class="badgeButton badgeButton-icon-badgeUpload" type="button">Upload Badge Image</button>
+
+Styleguide 3.64
+*/
+.badgeButton {
+  background-color: #fff;
+  border: 1px solid #e1e0e5;
+  border-radius: 0px;
+  color: black;
+  display: block;
+  font-weight: normal;
+  padding-left: 81px;
+  position: relative;
+  height: 56px;
+  text-align: left;
+  text-transform: none;
+  width: 100%; }
+  .badgeButton::before {
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    content: '';
+    display: block;
+    height: 32px;
+    left: 12px;
+    position: absolute;
+    top: 10px;
+    width: 45px; }
+  .badgeButton.badgeButton-icon-pasteJson::before {
+    background-image: url(assets/badgeButton-paste-json-icon-b92946b24116c1aa87e0ab4137a79e1e.svg); }
+  .badgeButton.badgeButton-icon-pasteJson.badgeButton-is-selected::before {
+    background-image: url(assets/badgeButton-paste-json-icon-selected-c30fe6d4eb6e490f7b382f3f31925584.svg); }
+  .badgeButton.badgeButton-icon-pasteUrl::before {
+    background-image: url(assets/badgeButton-paste-url-icon-f5c592f416fe11ec4bef430baf006241.svg); }
+  .badgeButton.badgeButton-icon-pasteUrl.badgeButton-is-selected::before {
+    background-image: url(assets/badgeButton-paste-url-icon-selected-a49b3c7a85ad02d8b6fd051b38462bf9.svg); }
+  .badgeButton.badgeButton-icon-badgeUpload::before {
+    background-image: url(assets/badgeButton-upload-icon-b3aa06969e14d95141d4fb33037858fa.svg); }
+  .badgeButton.badgeButton-is-selected {
+    background-color: #F5DFE3;
+    color: #c30a28; }
+  @media (min-width: 768px) {
+    .badgeButton {
+      display: inline-block;
+      padding-left: 64px;
+      width: 234px; } }
 
 /*
 Bordered
@@ -3316,6 +3513,7 @@ Default - Primary actions
 .button-major - For something really important, usually in headers
 .button-major.button-is-disabled - This major button is disabled
 .button-large - A larger version of any button
+.button-badge - upload badge button
 
 Markup:
 <button class="button {$modifiers}">Button</button>
@@ -3341,6 +3539,39 @@ Styleguide 3.20
   transition: background 0.125s ease-out, border-color 0.125s ease-out, color 0.125s ease-out, box-shadow 0.125s ease-out, transform 0.125s ease-out;
   transition: background 0.125s ease-out, border-color 0.125s ease-out, color 0.125s ease-out, box-shadow 0.125s ease-out, transform 0.125s ease-out, -webkit-transform 0.125s ease-out;
   white-space: nowrap; }
+  .button::after {
+    content: '';
+    display: block;
+    height: 2px;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%; }
+  .button .button-x-loading {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    opacity: 0;
+    position: relative;
+    -webkit-transition: opacity 0.25s ease-out;
+    transition: opacity 0.25s ease-out; }
+    .button .button-x-loading::after {
+      content: '';
+      display: block;
+      -webkit-animation: rotate .75s linear infinite forwards;
+              animation: rotate .75s linear infinite forwards;
+      border: 1px solid #93ab23;
+      border-radius: 50%;
+      border-right-color: transparent;
+      box-sizing: border-box;
+      border-color: #c30a28;
+      border-right-color: transparent;
+      height: 16px;
+      margin-left: 8px;
+      width: 16px; }
   .button:not(.button-is-disabled):hover {
     background-color: #c30a28;
     box-shadow: 0 0 2px 0 #e1e0e5, 0 2px 2px 0 #a09eaf;
@@ -3349,13 +3580,7 @@ Styleguide 3.20
     -webkit-transform: translate3d(0, -2px, 0);
             transform: translate3d(0, -2px, 0); }
     .button:not(.button-is-disabled):hover::after {
-      content: '';
-      display: block;
-      height: 2px;
-      left: 0;
-      position: absolute;
-      top: 100%;
-      width: 100%; }
+      top: 100%; }
   .button:not(.button-is-disabled):active {
     background-color: #f7e1e5;
     border-color: transparent;
@@ -3364,10 +3589,12 @@ Styleguide 3.20
     -webkit-transform: none;
             transform: none; }
     .button:not(.button-is-disabled):active::after {
-      display: none; }
+      top: 0; }
   .button.button-is-disabled {
     cursor: default;
-    opacity: .2; }
+    opacity: .5; }
+  .button.button-is-loading .button-x-loading {
+    opacity: 1; }
 
 .button-primaryghost {
   background-color: transparent;
@@ -3382,7 +3609,7 @@ Styleguide 3.20
     -webkit-transform: none;
             transform: none; }
     .button-primaryghost:not(.button-is-disabled):hover::after {
-      display: none; }
+      top: 0; }
   .button-primaryghost:not(.button-is-disabled):active {
     background-color: #f7e1e5;
     border-color: transparent; }
@@ -3401,7 +3628,7 @@ Styleguide 3.20
     -webkit-transform: none;
             transform: none; }
     .button-secondaryghost:not(.button-is-disabled):hover::after {
-      display: none; }
+      top: 0; }
   .button-secondaryghost:not(.button-is-disabled):active {
     background-color: #e1e0e5;
     border-color: transparent;
@@ -3427,6 +3654,7 @@ Default - Used to wrap badges, pathways, and groups
 Markup:
 <div class="card {$modifiers}">
   <a class="card-x-main" href="">
+    <p class="card-x-label">New</p>
     <div class="card-x-image">
       <sg-insert>3.14-3</sg-insert>
     </div>
@@ -3463,8 +3691,25 @@ Styleguide 3.45
       -ms-flex-pack: justify;
           justify-content: space-between;
   min-height: 128px;
+  position: relative;
   -webkit-transition: box-shadow 0.25s ease-out;
-  transition: box-shadow 0.25s ease-out; }
+  transition: box-shadow 0.25s ease-out;
+  word-break: break-word; }
+  .card .card-x-label {
+    background-color: #ffb500;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+    padding: 5px 10px;
+    text-transform: uppercase;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+    bottom: 56px;
+    left: 0;
+    position: absolute;
+    z-index: 2; }
   .card .card-x-main {
     color: #252247;
     display: -webkit-box;
@@ -3476,7 +3721,9 @@ Styleguide 3.45
     padding: 16px; }
     .card .card-x-main h1 {
       color: #c30a28;
-      font-size: 16px; }
+      font-size: 16px;
+      overflow: hidden;
+      text-overflow: ellipsis; }
     .card .card-x-main small {
       color: #78768d; }
     .card .card-x-main p,
@@ -3487,18 +3734,23 @@ Styleguide 3.45
       text-decoration: none; }
   .card .card-x-image {
     -webkit-box-flex: 0;
-        -ms-flex: 0 1 auto;
-            flex: 0 1 auto;
+        -ms-flex: 0 0 40px;
+            flex: 0 0 40px;
     margin-right: 16px;
     width: 40px; }
+    .card .card-x-image img {
+      display: block;
+      height: auto;
+      width: 100%; }
   .card .card-x-text {
     -webkit-box-flex: 1;
-        -ms-flex: 1 1 0;
-            flex: 1 1 0;
-    line-height: 1.5; }
+        -ms-flex: 1 1 100%;
+            flex: 1 1 100%;
+    line-height: 1.5;
+    min-width: 0; }
     .card .card-x-text p {
       white-space: pre-wrap; }
-    .card .card-x-text ul {
+    .card .card-x-text ul:not(.statlist) {
       -webkit-box-align: start;
           -ms-flex-align: start;
               align-items: flex-start;
@@ -3508,9 +3760,9 @@ Styleguide 3.45
       -ms-flex-wrap: wrap;
           flex-wrap: wrap;
       margin-bottom: -8px; }
-    .card .card-x-text li {
-      margin-bottom: 8px;
-      width: 16.666666667%; }
+      .card .card-x-text ul:not(.statlist) li {
+        margin-bottom: 8px;
+        width: 16.666666667%; }
   .card .card-x-more {
     -webkit-box-align: center;
         -ms-flex-align: center;
@@ -3597,6 +3849,8 @@ Styleguide 3.45
     border-style: solid; }
 
 .card-largeimage .card-x-image {
+  -ms-flex-preferred-size: 80px;
+      flex-basis: 80px;
   width: 80px; }
 
 .card-actionsright .card-x-actions {
@@ -3635,8 +3889,8 @@ Styleguide 3.45.1
   padding: 16px 16px 24px; }
   .card-large .card-x-main {
     padding: 0; }
-    .card-large .card-x-main h1 {
-      color: #05012c; }
+    .card-large .card-x-main ul {
+      margin-top: 16px; }
   .card-large .card-x-image {
     width: 40px; }
   .card-large .card-x-actions {
@@ -3665,10 +3919,6 @@ Styleguide 3.45.1
                 flex-grow: 0; } }
   @media (min-width: 1024px) {
     .card-large {
-      -webkit-box-align: end;
-          -ms-flex-align: end;
-                  -ms-grid-row-align: flex-end;
-              align-items: flex-end;
       -webkit-box-orient: horizontal;
       -webkit-box-direction: normal;
           -ms-flex-direction: row;
@@ -3677,10 +3927,12 @@ Styleguide 3.45.1
         -ms-flex-negative: 1;
             flex-shrink: 1; }
       .card-large .card-x-actions {
+        -ms-flex-item-align: end;
+            align-self: flex-end;
         display: block;
-        -webkit-box-flex: 1;
-            -ms-flex: 1 0 312px;
-                flex: 1 0 312px; }
+        -webkit-box-flex: 0;
+            -ms-flex: 0 0 312px;
+                flex: 0 0 312px; }
         .card-large .card-x-actions > div:not(:last-child) {
           margin-bottom: 8px; }
         .card-large .card-x-actions > h2 {
@@ -4075,7 +4327,7 @@ Markup:
 Stlyeguide 3.62
 */
 .connectionadd {
-  color: rgba(5, 1, 44, 0.38);
+  color: #c30a28;
   display: block;
   font-size: 14px;
   height: 24px;
@@ -4083,9 +4335,9 @@ Stlyeguide 3.62
   padding-right: 40px;
   position: relative; }
   .connectionadd::after {
-    background: url(assets/connectionadd-cfafdd81c12ed7aaa554b0f6908b76c4.svg) center center no-repeat;
-    border: 1px dashed #05012c;
+    background: url(assets/connectionadd-78f093d6452dda96217aa3f62adc1a96.svg) center center no-repeat;
     border-radius: 4px;
+    box-shadow: 0 0 0 1px #c30a28 inset;
     box-sizing: border-box;
     content: '';
     display: block;
@@ -4110,14 +4362,16 @@ Connection Item
 An item in a connected list of collections.
 
 Markup:
-<p class="connectionitem">Science Skills <button type="button">Remove</button></p>
+<p class="connectionitem">
+  <a href="#">Science Skills</a>
+  <button type="button">Remove</button>
+</p>
 
 Stlyeguide 3.61
 */
 .connectionitem {
-  background-color: #78768d;
+  background-color: #c30a28;
   border-radius: 4px;
-  color: #fff;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -4126,6 +4380,9 @@ Stlyeguide 3.61
   height: 24px;
   line-height: 24px;
   padding-left: 8px; }
+  .connectionitem a {
+    color: #fff;
+    display: block; }
   .connectionitem button {
     background: url(assets/connectionitem-3604d96f7d78153179dd35b05c83dc68.svg) center center no-repeat;
     color: transparent;
@@ -4184,6 +4441,11 @@ Styleguide 3.22
 /*
 Dialog
 
+Dialogs are generated using the standard HTML dialog element with a polyfill for browsers that do not yet support it. Animations only occur when the dialog is opened, this is the case for two reasons:
+
+1. The backdrop element is created and destroyed when the dialog is opened and closed.
+2. Because the backdrop can only animate in, we only animate the open state for the dialog element.
+
 Default - Standard size
 .dialog-large - Large dialog
 
@@ -4223,38 +4485,55 @@ Styleguide 3.23
 .dialog {
   background: #fff;
   border: 0;
+  box-shadow: 0 4px 4px 0 rgba(5, 1, 44, 0.12), 0 0 2px 0 rgba(5, 1, 44, 0.12);
   color: #252247;
   height: 100vh;
-  left: 50%;
+  left: 0;
   margin: 0;
-  min-height: 32px;
+  max-width: 100%;
   opacity: 0;
   overflow-y: auto;
   padding: 0;
+  pointer-events: none;
   position: fixed;
-  top: 50%;
-  -webkit-transform: translate(-50%, -50%) scale3d(0.75, 0.75, 0.75);
-          transform: translate(-50%, -50%) scale3d(0.75, 0.75, 0.75);
-  -webkit-transition: opacity 0.25s ease-out, box-shadow 0.25s ease-out, -webkit-transform 0.25s ease-out;
-  transition: opacity 0.25s ease-out, box-shadow 0.25s ease-out, -webkit-transform 0.25s ease-out;
-  transition: opacity 0.25s ease-out, transform 0.25s ease-out, box-shadow 0.25s ease-out;
-  transition: opacity 0.25s ease-out, transform 0.25s ease-out, box-shadow 0.25s ease-out, -webkit-transform 0.25s ease-out;
+  top: 0;
   width: 100vw; }
   .dialog + .backdrop {
+    -webkit-animation: fadein 0.25s ease-out forwards;
+            animation: fadein 0.25s ease-out forwards;
     background: rgba(5, 1, 44, 0.12);
+    height: 100vh;
+    left: 0;
     opacity: 0;
+    position: fixed;
+    top: 0;
     -webkit-transition: opacity 0.25s ease-out;
-    transition: opacity 0.25s ease-out; }
+    transition: opacity 0.25s ease-out;
+    width: 100vw; }
   .dialog::-webkit-backdrop {
+    -webkit-animation: fadein 0.25s ease-out forwards;
+            animation: fadein 0.25s ease-out forwards;
     background: rgba(5, 1, 44, 0.12);
+    height: 100vh;
+    left: 0;
     opacity: 0;
+    position: fixed;
+    top: 0;
     -webkit-transition: opacity 0.25s ease-out;
-    transition: opacity 0.25s ease-out; }
+    transition: opacity 0.25s ease-out;
+    width: 100vw; }
   .dialog::backdrop {
+    -webkit-animation: fadein 0.25s ease-out forwards;
+            animation: fadein 0.25s ease-out forwards;
     background: rgba(5, 1, 44, 0.12);
+    height: 100vh;
+    left: 0;
     opacity: 0;
+    position: fixed;
+    top: 0;
     -webkit-transition: opacity 0.25s ease-out;
-    transition: opacity 0.25s ease-out; }
+    transition: opacity 0.25s ease-out;
+    width: 100vw; }
   .dialog .dialog-x-close {
     background: url(assets/dialog-close-563b736ec235520bbdd44c858934965a.svg);
     border: 0;
@@ -4272,16 +4551,16 @@ Styleguide 3.23
   .dialog .dialog-x-content {
     padding: 20px 16px 16px; }
     .dialog .dialog-x-content p {
+      color: #78768d;
       line-height: 1.35; }
     .dialog .dialog-x-content > *:not(:last-child) {
       margin-bottom: 16px; }
   .dialog .dialog-x-footer {
     padding: 16px 24px; }
   .dialog[open] {
-    box-shadow: 0 4px 4px 0 rgba(5, 1, 44, 0.12), 0 0 2px 0 rgba(5, 1, 44, 0.12);
-    opacity: 1;
-    -webkit-transform: scale3d(1, 1, 1) translate(-50%, -50%);
-            transform: scale3d(1, 1, 1) translate(-50%, -50%); }
+    -webkit-animation: fadein 0.25s ease-out forwards;
+            animation: fadein 0.25s ease-out forwards;
+    pointer-events: auto; }
     .dialog[open] + .backdrop {
       opacity: 1; }
     .dialog[open]::-webkit-backdrop {
@@ -4292,15 +4571,15 @@ Styleguide 3.23
     .dialog {
       border-radius: 4px;
       height: auto;
+      left: 50%;
       max-height: calc(100vh - 48px);
       top: 32px;
       -webkit-transform: translateX(-50%);
               transform: translateX(-50%);
-      width: 512px; }
-      .dialog[open] {
-        top: 32px;
-        -webkit-transform: translateX(-50%);
-                transform: translateX(-50%); } }
+      width: 512px; } }
+
+.dialog-large {
+  width: 766px; }
 
 /*
 Dialog Titled
@@ -4445,6 +4724,10 @@ Empty Illustration
 Markup:
 <article class="emptyillustration">
   <h1>You have no badges</h1>
+  <div>
+    sample text: Collect and share digital badges you've earned from Badgr or any Open Badges issuer.
+    <a href="openbadges.org" target="_blank">Learn more</a> about Open Badges
+  </div>
   <img src="http://placehold.it/736x314" alt="Illustration description">
 </article>
 
@@ -4476,7 +4759,13 @@ Styleguide 3.56
   padding-bottom: 160px;
   text-align: center; }
   .emptyillustration h1 {
-    margin-bottom: 24px; }
+    margin-bottom: 16px; }
+  .emptyillustration div {
+    font-size: 16px;
+    font-weight: normal;
+    line-height: 24px;
+    margin-bottom: 24px;
+    max-width: 725px; }
   .emptyillustration img {
     -webkit-animation: emptyillustration 0.25s ease-out forwards;
             animation: emptyillustration 0.25s ease-out forwards;
@@ -4486,6 +4775,19 @@ Styleguide 3.56
     max-width: 100%; }
   @media (min-width: 768px) {
     .emptyillustration {
+      -webkit-box-align: center;
+          -ms-flex-align: center;
+              align-items: center;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-orient: vertical;
+      -webkit-box-direction: normal;
+          -ms-flex-direction: column;
+              flex-direction: column;
+      -webkit-box-pack: justify;
+          -ms-flex-pack: justify;
+              justify-content: space-between;
       padding-bottom: 200px; }
       .emptyillustration img {
         max-width: 736px; } }
@@ -4707,6 +5009,25 @@ Markup:
 
 Styleguide 3.25.4
 */
+/*
+Form Field (with Background Image)
+
+
+Default - Basic static version
+.formfield-is-error - When something has gone wrong
+
+Markup:
+<div class="formfield formfield-image {$modifiers}">
+  <label for="formfield">
+    <div>
+      <img src="/images/placeholderavatar.svg" alt="Placeholder image" width="80" height="80">
+    </div>
+  </label>
+  <input id="formfield" type="text" placeholder="Placeholder">
+</div>
+
+Styleguide 3.25.5
+*/
 .formfield {
   display: block; }
   .formfield label,
@@ -4735,9 +5056,8 @@ Styleguide 3.25.4
       text-transform: none; }
     .formfield label button,
     .formfield .formfield-x-label button {
-      font-size: 12px;
-      font-weight: bold;
-      text-transform: uppercase; }
+      color: #78768d;
+      font-size: 14px; }
   .formfield input:not([type='checkbox']),
   .formfield select,
   .formfield textarea {
@@ -4746,11 +5066,11 @@ Styleguide 3.25.4
     border-radius: 4px;
     box-sizing: border-box;
     display: block;
-    font-size: 14px;
-    line-height: 1.7;
+    font-size: 16px;
+    line-height: 1.35;
     min-width: 150px;
     outline: none;
-    padding: 8px 16px;
+    padding: 8px;
     -webkit-transition: border-color 0.25s ease-out;
     transition: border-color 0.25s ease-out;
     width: 100%; }
@@ -4799,6 +5119,7 @@ Styleguide 3.25.4
     .formfield select::-ms-expand {
       display: none; }
   .formfield textarea {
+    min-height: 144px;
     resize: vertical; }
   .formfield .formfield-x-action {
     display: -webkit-box;
@@ -4818,11 +5139,13 @@ Styleguide 3.25.4
     margin-bottom: 8px; }
   .formfield .formfield-x-error {
     color: #f01f31;
+    display: none;
     font-size: 12px;
     margin-top: 8px;
-    display: none;
     -webkit-transition: opacity 0.125s ease-out;
     transition: opacity 0.125s ease-out; }
+  .formfield.formfield-x-badgePasteJson-text-height textarea {
+    min-height: 209px; }
   .formfield.formfield-is-error input,
   .formfield.formfield-is-error select,
   .formfield.formfield-is-error textarea {
@@ -4842,11 +5165,29 @@ Styleguide 3.25.4
   background: #fff url(assets/formfield-locked-de4125fd1b4acfb72f50a432f53e31c8.svg) 16px center no-repeat;
   padding-left: 40px; }
 
+.formfield-image {
+  border: 1px solid #e1e0e5;
+  border-radius: 4px;
+  padding: 16px; }
+  .formfield-image label {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    margin-bottom: 16px; }
+
 /*
 Form Image
 
+A styled `<input type="file">` element.
+
+Default - Basic input field styled for Badgr
+.formimage-badgeUpload - input styled for badge upload
+
 Markup:
-<div class="formimage">
+<div class="formimage {$modifiers}">
   <p>Issuer Image</p>
   <input type="file" accept="image/*" name="issuer_image" id="issuer_image">
   <label for="issuer_image">
@@ -4874,6 +5215,15 @@ Styleguide 3.27
             justify-content: space-between;
     margin-bottom: 8px;
     text-transform: uppercase; }
+    .formimage .formimage-x-title span {
+      color: #78768d; }
+    .formimage .formimage-x-title a {
+      font-size: 14px;
+      font-weight: normal;
+      text-transform: none; }
+    .formimage .formimage-x-title button {
+      color: #78768d;
+      font-size: 14px; }
   .formimage input {
     display: none; }
   .formimage label {
@@ -4932,12 +5282,37 @@ Styleguide 3.27
     font-size: 12px;
     margin-top: 8px; }
   .formimage .formimage-x-label {
-    color: #78768d;
     font-size: 14px; }
     .formimage .formimage-x-label span {
-      color: #c30a28; }
+      color: #c30a28;
+      font-weight: bold; }
   .formimage .formimage-x-button {
     margin-top: 8px; }
+
+.formimage-badgeUpload label {
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  padding: 0; }
+
+.formimage-badgeUpload .formimage-x-image {
+  display: inline-block;
+  height: 110px;
+  margin: 0;
+  padding-bottom: 26px;
+  padding-top: 40px;
+  width: 133px; }
+  .formimage-badgeUpload .formimage-x-image img {
+    max-height: 110px;
+    max-width: 133px; }
+
+.formimage-badgeUpload .formimage-x-text {
+  display: inline-block; }
+
+.formimage-badgeUpload .formimage-x-label {
+  display: inline-block;
+  padding-bottom: 16px; }
 
 /*
 Form Inline
@@ -4985,7 +5360,7 @@ Styleguide 3.28
 /*
 Form Message
 
-Positioning is controlled by main under layouts
+Positioning is controlled by l-formmessage
 
 Default - Hidden by default
 .formmessage-is-active - Activates/shows the form message
@@ -5002,60 +5377,39 @@ Markup:
 Styleguide 3.29
 */
 .formmessage {
-  background-color: #c30a28;
+  background-color: #05012c;
+  border-radius: 4px;
+  box-shadow: 0 4px 5px 0 rgba(5, 1, 44, 0.12), 0 0 4px 0 rgba(5, 1, 44, 0.12);
   box-sizing: border-box;
   color: #fff;
-  font-size: 14px;
-  font-weight: 600;
   opacity: 0;
-  padding: 16px;
-  position: relative;
-  text-align: center;
-  -webkit-transform: translate3d(0, -100%, 0);
-          transform: translate3d(0, -100%, 0);
-  width: 100%;
-  z-index: 2; }
+  pointer-events: none;
+  padding: 12px 54px 12px 16px;
+  -webkit-transition: opacity 0.25s ease-out;
+  transition: opacity 0.25s ease-out; }
   .formmessage button {
-    background: url(assets/formmessage-close-66ace26d8e33bb093a03d2e78e213666.svg) right center no-repeat;
-    color: #fff;
-    font-size: 14px;
-    padding-right: 24px;
+    background: url(assets/formmessage-close-ecf4cc4d5782e5e9700126acede2c7b3.svg) center center no-repeat;
+    color: transparent;
+    height: 24px;
+    overflow: hidden;
     position: absolute;
     right: 16px;
-    text-indent: -9999px;
-    top: calc(50% - 8px); }
+    top: 12px;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+    width: 24px; }
   .formmessage p {
-    line-height: 1.5;
-    padding-left: 48px;
-    padding-right: 48px; }
+    line-height: 24px; }
   .formmessage.formmessage-is-active {
     opacity: 1;
-    -webkit-transform: none;
-            transform: none;
-    -webkit-transition: opacity 0.25s ease-out, -webkit-transform 0.25s ease-out;
-    transition: opacity 0.25s ease-out, -webkit-transform 0.25s ease-out;
-    transition: transform 0.25s ease-out, opacity 0.25s ease-out;
-    transition: transform 0.25s ease-out, opacity 0.25s ease-out, -webkit-transform 0.25s ease-out; }
+    pointer-events: auto; }
   .formmessage.formmessage-is-inactive {
     opacity: 0;
-    -webkit-transform: translate3d(0, -100%, 0);
-            transform: translate3d(0, -100%, 0);
-    -webkit-transition: opacity 0.25s ease-out, -webkit-transform 0.25s ease-out;
-    transition: opacity 0.25s ease-out, -webkit-transform 0.25s ease-out;
-    transition: transform 0.25s ease-out, opacity 0.25s ease-out;
-    transition: transform 0.25s ease-out, opacity 0.25s ease-out, -webkit-transform 0.25s ease-out; }
+    pointer-events: none; }
   .formmessage.formmessage-is-error {
     background-color: #f01f31; }
-  .formmessage.formmessage-is-pending {
-    background-color: #ffb500; }
-  .formmessage.formmessage-is-success {
-    background-color: #93ab23; }
-  @media (min-width: 768px) {
-    .formmessage button {
-      text-indent: 0; }
-    .formmessage p {
-      padding-left: 80px;
-      padding-right: 80px; } }
 
 /*
 Form Submit
@@ -5135,6 +5489,25 @@ Markup:
 
 Styleguide 3.5
 */
+/*
+Heading - Large image
+
+Markup:
+<header class="heading">
+    <div class="heading-x-imageLarge">
+      <img srcset="http://placehold.it/200x200 2x" src="http://placehold.it/70x40" alt="Web Design and Programming logo">
+    </div>
+    <div class="heading-x-text">
+        <h1>Web Design and Programming <span>12 of Something</span> <button class="heading-x-edit" type="button">Edit</button></h1>
+        <p>World Wide Web Consortium</p>
+    </div>
+    <div class="heading-x-actions">
+        <a href class="button">Create Badge</a>
+    </div>
+</header>
+
+Styleguide 3.5.1
+*/
 .heading {
   -webkit-box-align: start;
       -ms-flex-align: start;
@@ -5172,9 +5545,42 @@ Styleguide 3.5
       width: 100%; }
     .heading .heading-x-image img {
       display: block;
+      height: auto;
       max-height: 100%;
-      max-width: 100%; }
+      max-width: 100%;
+      width: 100%; }
+  .heading .heading-x-imageLarge {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    -ms-flex-item-align: start;
+        align-self: flex-start;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 200px;
+            flex: 0 0 200px;
+    height: 200px;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    margin-bottom: 16px;
+    margin-right: 32px;
+    max-width: 200px;
+    width: 200px; }
+    .heading .heading-x-imageLarge a {
+      display: block;
+      width: 100%; }
+    .heading .heading-x-imageLarge img {
+      display: block;
+      height: auto;
+      max-height: 100%;
+      max-width: 100%;
+      width: 100%; }
   .heading .heading-x-text {
+    -ms-flex-item-align: stretch;
+        align-self: stretch;
     -webkit-box-flex: 1;
         -ms-flex: 1 1 auto;
             flex: 1 1 auto; }
@@ -5184,11 +5590,11 @@ Styleguide 3.5
     .heading .heading-x-text > h2,
     .heading .heading-x-text > div,
     .heading .heading-x-text > a {
-      margin-bottom: 16px; }
+      margin-bottom: 32px; }
     .heading .heading-x-text > p {
       white-space: pre-line; }
-    .heading .heading-x-text a:not(.button) {
-      color: #05012c; }
+      .heading .heading-x-text > p a {
+        color: #c30a28; }
     .heading .heading-x-text small {
       color: #78768d;
       font-size: 14px; }
@@ -5222,6 +5628,17 @@ Styleguide 3.5
                 flex: 1 1 0;
         height: 1px;
         margin-left: 8px; }
+    .heading .heading-x-text > h3 {
+      -webkit-box-align: center;
+          -ms-flex-align: center;
+              align-items: center;
+      color: #78768d;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      font-size: 14px;
+      line-height: 24px;
+      max-width: 560px; }
     .heading .heading-x-text > p,
     .heading .heading-x-text > ul,
     .heading .heading-x-text > ol {
@@ -5275,15 +5692,24 @@ Styleguide 3.5
         height: 70px;
         margin-right: 24px;
         max-width: 70px;
+        padding-top: 16px;
         width: 70px; }
       .heading .heading-x-text {
         -webkit-box-flex: 1;
             -ms-flex: 1 1 60%;
                 flex: 1 1 60%; }
       .heading .heading-x-actions {
+        -webkit-box-align: end;
+            -ms-flex-align: end;
+                    -ms-grid-row-align: flex-end;
+                align-items: flex-end;
         -webkit-box-flex: 1;
             -ms-flex: 1 1 0;
                 flex: 1 1 0;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+            -ms-flex-direction: column;
+                flex-direction: column;
         margin-top: 0; } }
 
 .heading-small {
@@ -5531,7 +5957,6 @@ Styleguide 3.54
     padding-left: 8px;
     padding-right: 8px;
     position: absolute;
-    text-transform: lowercase;
     width: 100%; }
     .integrationthumb > span span {
       background: url(assets/integrationthumb-f38b8fd0333d44ad4b7adb33211a75c4.svg) center center no-repeat;
@@ -5546,7 +5971,8 @@ Styleguide 3.54
               user-select: none;
       width: 20px; }
   .integrationthumb img {
-    display: block; }
+    display: block;
+    width: 300px; }
 
 /*
 Issuer
@@ -5736,6 +6162,49 @@ Styleguide 3.32
       padding-right: 16px; } }
 
 /*
+Logo
+
+The logo can receive a loading indicator.
+
+Default - No loading indicator
+.logo-is-loading - Displays indicator
+
+<a class="logo {$modifiers}" href="#">
+	<img alt="Badgr logo" src="http://placehold.it/122x48">
+</a>
+
+Styleguide 3.63
+*/
+.logo {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  position: relative; }
+  .logo picture img {
+    max-height: 48px; }
+  .logo::after {
+    opacity: 0;
+    -webkit-transition: opacity 0.25s ease-out;
+    transition: opacity 0.25s ease-out; }
+  .logo.logo-is-loading::after {
+    content: '';
+    display: block;
+    -webkit-animation: rotate .75s linear infinite forwards;
+            animation: rotate .75s linear infinite forwards;
+    border: 1px solid #93ab23;
+    border-radius: 50%;
+    border-right-color: transparent;
+    box-sizing: border-box;
+    height: 24px;
+    margin-left: 16px;
+    margin-top: 5px;
+    opacity: 1;
+    width: 24px; }
+
+/*
 Loading
 
 Large message displayed when the app/view is loading.
@@ -5762,72 +6231,33 @@ Styleguide 3.33
   position: absolute;
   top: 0;
   width: 100%; }
-  .loading p {
-    color: #78768d;
-    display: inline-block;
-    font-size: 24px;
-    padding-left: 44px;
-    position: relative; }
-    .loading p::after {
-      content: '';
-      display: block;
-      -webkit-animation: rotate .75s ease-in-out infinite forwards;
-              animation: rotate .75s ease-in-out infinite forwards;
-      border: 4px solid #93ab23;
-      border-radius: 50%;
-      border-right-color: transparent;
-      box-sizing: border-box;
-      height: 36px;
-      left: 0;
-      position: absolute;
-      top: calc(50% - 18px);
-      width: 36px; }
+  .loading .loading-x-image {
+    -webkit-animation: fade 1.25s ease-out infinite;
+            animation: fade 1.25s ease-out infinite; }
 
 .dots {
-  font-size: 10px;
+  height: 36px;
+  margin: 100px auto;
   position: relative;
-  width: 4em;
-  height: 1em;
-  margin: 100px auto; }
+  width: 36px; }
+  .dots::after {
+    content: '';
+    display: block;
+    -webkit-animation: rotate .75s linear infinite forwards;
+            animation: rotate .75s linear infinite forwards;
+    border: 1px solid #93ab23;
+    border-radius: 50%;
+    border-right-color: transparent;
+    box-sizing: border-box;
+    height: 36px;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 36px; }
   .dots.inline {
+    margin: 0 auto;
     position: absolute;
-    top: 0.5em;
-    margin: 0 auto; }
-  .dots .dot {
-    width: 1em;
-    height: 1em;
-    border-radius: 0.5em;
-    background: #262929;
-    position: absolute;
-    -webkit-animation: fade 2s ease infinite;
-            animation: fade 2s ease infinite;
-    opacity: 0; }
-    .dots .dot:nth-child(1) {
-      left: 0; }
-    .dots .dot:nth-child(2) {
-      left: 1.5em;
-      -webkit-animation-delay: 0.2s;
-              animation-delay: 0.2s; }
-    .dots .dot:nth-child(3) {
-      left: 3em;
-      -webkit-animation-delay: 0.5s;
-              animation-delay: 0.5s; }
-
-@-webkit-keyframes fade {
-  0% {
-    opacity: 0; }
-  50% {
-    opacity: 1; }
-  100% {
-    opacity: 0; } }
-
-@keyframes fade {
-  0% {
-    opacity: 0; }
-  50% {
-    opacity: 1; }
-  100% {
-    opacity: 0; } }
+    top: .5em; }
 
 /*
 Loading Error
@@ -6148,6 +6578,63 @@ Styleguide 3.35
     border-bottom-right-radius: 4px; }
 
 /*
+import heading
+
+Import Heading
+
+Styleguide 3.66
+*/
+/*
+import heading - instructions
+
+Used in "Import Members - Instructions" view.
+
+Markup:
+<article class="importHeading">
+  <h1 class=title>Instructions</h1>
+  <p>
+    You may import new or existing members to your group. Your file must meet the following requirements:
+  </p>
+  <ul>
+    <li>Contains name and email address</li>
+    <li>CSV or TXT format only.</li>
+  </ul>
+  <p>Use this <a href>Sample Template</a> to create a CSV or TXT file for importing members.</p>
+</article>
+
+Styleguide 3.66.1
+*/
+/*
+import heading - categories / issues
+
+Used in "Import Members - Categories" view.
+
+Markup:
+<article class="importHeading">
+  <h1 class=title>Map Data Fields</h1>
+  <p>
+    Below is a preview of the first {x} of {y} rows in your dataset.
+  </p>
+</article>
+
+Styleguide 3.66.2
+*/
+.importHeading {
+  padding-bottom: 16px; }
+  .importHeading h1,
+  .importHeading p {
+    max-width: 560px; }
+  .importHeading h1 {
+    line-height: 1.35;
+    margin-bottom: 8px; }
+  .importHeading ul {
+    list-style: disc;
+    padding: 8px 20px; }
+  .importHeading p {
+    font-size: 14px;
+    line-height: 24px; }
+
+/*
 Pathway
 
 Default - Standard pathway state
@@ -6161,13 +6648,25 @@ Markup:
 
 Styleguide 3.3
 */
+@-webkit-keyframes pathway-x-move {
+  0% {
+    opacity: 0; }
+  100% {
+    opacity: 1; } }
+@keyframes pathway-x-move {
+  0% {
+    opacity: 0; }
+  100% {
+    opacity: 1; } }
+
 .pathway {
   background-color: #f7f7f7;
-  border-radius: 4px;
   box-shadow: 0 0 0 1px #e1e0e5 inset;
   display: block;
   position: relative; }
   .pathway .pathway-x-move {
+    -webkit-animation: pathway-x-move 0.25s ease-out forwards;
+            animation: pathway-x-move 0.25s ease-out forwards;
     background-color: #fff;
     border: 1px dashed #c30a28;
     box-shadow: 0 0 24px 0 rgba(195, 10, 40, 0.2);
@@ -6178,14 +6677,16 @@ Styleguide 3.3
     padding: 16px;
     text-transform: uppercase;
     width: 100%; }
-  .pathway > .pathway-x-content {
-    border-radius: 4px; }
-    .pathway > .pathway-x-content:not(:only-child) {
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0; }
+  .pathway .pathwaydetail-x-action,
   .pathway > .pathway {
-    border-radius: 0;
-    display: none;
+    display: none; }
+  .pathway > .pathway-x-content,
+  .pathway > .pathway {
+    -webkit-transition: -webkit-transform 0.25s ease-out;
+    transition: -webkit-transform 0.25s ease-out;
+    transition: transform 0.25s ease-out;
+    transition: transform 0.25s ease-out, -webkit-transform 0.25s ease-out; }
+  .pathway > .pathway {
     margin-left: 56px;
     margin-top: -1px; }
     .pathway > .pathway:nth-child(2)::after {
@@ -6197,8 +6698,6 @@ Styleguide 3.3
       right: calc(100% + 16px);
       top: 16px;
       width: 24px; }
-    .pathway > .pathway > .pathway-x-content {
-      border-radius: 0; }
     .pathway > .pathway.pathway-is-dropzone, .pathway > .pathway.pathway-is-addchild {
       box-shadow: 0 1px 0 0 #e1e0e5 inset, 0 -1px 0 0 #e1e0e5 inset, -1px 0 0 0 #e1e0e5 inset;
       padding-bottom: 8px;
@@ -6206,6 +6705,8 @@ Styleguide 3.3
   .pathway.pathway-is-activemove {
     background: #f7e1e5;
     border: 1px dashed #c30a28; }
+    .pathway.pathway-is-activemove .pathwaydetail-x-action {
+      display: block; }
     .pathway.pathway-is-activemove > .pathway-x-content,
     .pathway.pathway-is-activemove > .pathway {
       -webkit-transform: translateX(16px) translateY(-16px);
@@ -6213,16 +6714,6 @@ Styleguide 3.3
     .pathway.pathway-is-activemove .pathway,
     .pathway.pathway-is-activemove .pathwaydetail {
       box-shadow: 0 0 0 1px #c30a28 inset; }
-    .pathway.pathway-is-activemove > .pathwaydetail:first-of-type {
-      border-bottom-left-radius: 4px;
-      border-top-left-radius: 4px;
-      border-top-right-radius: 4px; }
-    .pathway.pathway-is-activemove > .pathway:last-child {
-      border-bottom-left-radius: 4px; }
-      .pathway.pathway-is-activemove > .pathway:last-child > .pathwaydetail {
-        border-bottom-left-radius: 4px; }
-    .pathway.pathway-is-activemove > .pathwaydetail:only-child {
-      border-bottom-right-radius: 4px; }
     .pathway.pathway-is-activemove .pathway-is-inactivemove .pathwaydetail {
       background-color: #fff; }
   .pathway.pathway-is-inactivemove {
@@ -6234,15 +6725,16 @@ Styleguide 3.3
     .pathway.pathway-is-inactivemove > .pathwaydetail {
       background-color: transparent; }
   @media (min-width: 1024px) {
+    .pathway .pathwaydetail-x-action,
     .pathway > .pathway {
       display: block; } }
 
-.pathway-root > .pathway > .pathway:last-child {
-  border-bottom-right-radius: 4px; }
-  .pathway-root > .pathway > .pathway:last-child > .pathway:last-child {
-    border-bottom-right-radius: 4px; }
-    .pathway-root > .pathway > .pathway:last-child > .pathway:last-child > .pathway-x-content:last-child {
-      border-bottom-right-radius: 4px; }
+.pathway-root > .pathway {
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative; }
+  .pathway-root > .pathway.pathway-is-activemove {
+    overflow: visible; }
 
 /*
 Pathway Detail
@@ -6330,25 +6822,25 @@ Styleguide 3.4
       display: block;
       height: auto;
       width: 100%; }
-  .pathwaydetail .pathwaydetail-x-text {
+  .pathwaydetail .pathwaydetail-x-text h1,
+  .pathwaydetail .pathwaydetail-x-text p {
     max-width: 456px; }
-    .pathwaydetail .pathwaydetail-x-text h1 {
-      font-size: 16px;
-      line-height: 24px;
-      margin-bottom: 8px;
-      padding-right: 45px; }
-    .pathwaydetail .pathwaydetail-x-text p {
-      color: #05012c;
-      font-size: 12px;
-      line-height: 1.35; }
-    .pathwaydetail .pathwaydetail-x-text .pathwaydetail-x-children {
-      background: url(assets/pathwaydetail-children-03e2251c5dd49db2400ec2c58ff12a89.svg) left center no-repeat;
-      color: #a09eaf;
-      font-size: 14px;
-      height: 24px;
-      line-height: 24px;
-      margin-top: 16px;
-      padding-left: 34px; }
+  .pathwaydetail .pathwaydetail-x-text h1 {
+    font-size: 16px;
+    line-height: 24px;
+    margin-bottom: 8px;
+    padding-right: 45px; }
+  .pathwaydetail .pathwaydetail-x-text p {
+    color: #05012c;
+    font-size: 12px;
+    line-height: 1.35;
+    margin-bottom: 16px; }
+  .pathwaydetail .pathwaydetail-x-text .pathwaydetail-x-children {
+    color: #a09eaf;
+    font-size: 14px;
+    height: 24px;
+    line-height: 24px;
+    margin-top: 16px; }
   .pathwaydetail .pathwaydetail-x-menu {
     position: absolute;
     right: 16px;
@@ -6407,15 +6899,54 @@ Styleguide 3.4
           -ms-flex-direction: row;
               flex-direction: row; }
     .pathwaydetail .pathwaydetail-x-text {
+      box-sizing: border-box;
       -webkit-box-flex: 1;
-          -ms-flex: 1 0 456px;
-              flex: 1 0 456px; }
+          -ms-flex: 1 0 0;
+              flex: 1 0 0;
+      padding-right: 80px; }
     .pathwaydetail .pathwaydetail-x-badges {
-      -webkit-box-flex: 1;
-          -ms-flex: 1 1 0;
-              flex: 1 1 0;
-      margin-left: 80px;
+      -webkit-box-flex: 0;
+          -ms-flex: 0 0 312px;
+              flex: 0 0 312px;
       margin-top: 36px; } }
+
+/*
+Pathwawy Heading
+
+Used on the pathway detail as a heading element with various controls and actions.
+
+Markup:
+<article class="pathwayheading">
+	<h1 class="title">Completion Requirements</h1>
+	<p>The completion of an element can be based on connected badges or children. Each child can have it’s own unique completion requirements.</p>
+	<div class="l-childrenhorizontal l-childrenhorizontal-small pathwayheading-x-actions">
+		<button class="button">Connect Badge</button>
+		<span class="pathwayheading-x-or">or</span>
+		<button class="button">Add Child</button>
+	</div>
+</article>
+
+Styleguide 3.61
+*/
+.pathwayheading h1,
+.pathwayheading p {
+  max-width: 560px; }
+
+.pathwayheading h1 {
+  line-height: 1.35;
+  margin-bottom: 8px; }
+
+.pathwayheading p {
+  font-size: 14px;
+  line-height: 24px; }
+
+.pathwayheading .pathwayheading-x-actions {
+  margin-top: 24px; }
+
+.pathwayheading .pathwayheading-x-or {
+  color: #a09eaf;
+  font-size: 14px;
+  line-height: 1; }
 
 /*
 Progress
@@ -6593,7 +7124,6 @@ Styleguide 3.37
   border-radius: 4px;
   box-sizing: border-box;
   display: block;
-  font-size: 14px;
   min-width: 264px;
   outline: none;
   padding: 8px 40px 8px 16px;
@@ -6617,6 +7147,7 @@ Standalone select input.
 Default - Default
 .select-inputonly - Hides the label
 .select-secondary - Alternative styling, used on pathways
+.select-import - Styling used in import table.
 
 Markup:
 <label class="select {$modifiers}">
@@ -6654,6 +7185,8 @@ Styleguide 3.38
     margin-left: 16px;
     outline: none;
     padding: 16px 33px 16px 16px; }
+    .select select::-ms-expand {
+      display: none; }
 
 .select-inputonly {
   color: transparent;
@@ -6675,10 +7208,22 @@ Styleguide 3.38
   .select-secondary select {
     background: url(assets/select-secondary-29f4a308828b9a3d68d8d31af8b9c2e5.svg) right center no-repeat;
     border: 0;
-    color: #a09eaf;
+    color: rgba(5, 1, 44, 0.54);
     font-size: 14px;
     padding-left: 0;
     padding-right: 18px; }
+
+.select-import select {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  background: url(assets/select-import-4a27b30e1d635c3f4a00d3ca8425a2da.svg) calc(100% - 10px) center no-repeat;
+  background-color: white;
+  color: #c30a28;
+  font-weight: bold;
+  padding: 8px;
+  min-width: 115px;
+  width: 100%; }
 
 /*
 Selected Item
@@ -6779,16 +7324,18 @@ Styleguide 3.50
 /*
 Stack
 
-Very compressed view of issuers.
+For use when an image (badge or issuer avatar) appear side by side, with optional secondary text.
 
 Default - Used in headings
 .stack-small - Used in cards
+.stack-list - Used when stack patterns appear in a list of link-able items
 
 Markup:
 <div class="stack {$modifiers}">
   <div class="stack-x-image">
     <img src="http://placehold.it/40x40" alt="">
   </div>
+  <div class="stack-x-new">New</div>
   <div class="stack-x-text">
     <h2>Issuer Name</h2>
     <small>52 Badges</small>
@@ -6804,6 +7351,7 @@ Styleguide 3.48
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  max-width: 550px;
   text-align: left; }
   .stack img {
     display: block;
@@ -6817,23 +7365,46 @@ Styleguide 3.48
   .stack h6,
   .stack .stack-x-title {
     color: #05012c;
-    font-size: 14px;
-    line-height: 24px; }
+    display: block;
+    line-height: 24px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-transition: color 0.25s ease-out;
+    transition: color 0.25s ease-out; }
   .stack small {
     color: #78768d;
     display: block;
     font-size: 12px;
     line-height: 1.35; }
+  .stack .stack-x-text {
+    -webkit-box-flex: 1;
+        -ms-flex: 1 1 100%;
+            flex: 1 1 100%;
+    min-width: 0; }
   .stack .stack-x-image {
-    margin-right: 16px;
-    width: 40px; }
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 40px;
+            flex: 0 0 40px;
+    margin-right: 16px; }
+  .stack .stack-x-new {
+    background-color: #ffb500;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+    padding: 5px 10px;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-right: 8px; }
 
 .stack-small h1,
 .stack-small h2,
 .stack-small h3,
 .stack-small h4,
 .stack-small h5,
-.stack-small h6 {
+.stack-small h6,
+.stack-small .stack-x-title {
   color: #05012c;
   font-size: 12px;
   line-height: 1.35; }
@@ -6843,7 +7414,8 @@ Styleguide 3.48
 .stack-list h3,
 .stack-list h4,
 .stack-list h5,
-.stack-list h6 {
+.stack-list h6,
+.stack-list .stack-x-title {
   color: #c30a28; }
 
 /*
@@ -6919,6 +7491,9 @@ Styleguide 3.52
       background: center center no-repeat;
       content: '';
       display: block;
+      -webkit-box-flex: 0;
+          -ms-flex: 0 0 24px;
+              flex: 0 0 24px;
       height: 24px;
       margin-right: 8px;
       width: 24px; }
@@ -7128,6 +7703,7 @@ General-purpose table. `.table-x-actions` should be used on the containing cell 
 Default - Standard table for lists
 .table-dialog - Table nested within dialogs, used for selecting lists of items
 .table-aligntop - Aligns cell content to the top
+.table-import - Table used for importing csv
 
 Markup:
 <table class="table {$modifers}">
@@ -7234,6 +7810,140 @@ Markup:
 
 Styleguide 3.16.1
 */
+/*
+Table-Import
+
+Table used for importing csv
+
+Markup:
+<table class="table table-import">
+  <thead>
+    <tr>
+      <th scope="col">
+        <label class="select select-inputonly select-import">
+          <span>Sort by</span>
+          <select>
+            <option value="fName">First Name</option>
+            <option value="lName">Last Name</option>
+            <option value="na">N/A</option>
+            <option value="email">email</option>
+            <option value="group">group</option>
+          </select>
+        </label>
+      </th>
+      <th scope="col">
+        <label class="select select-inputonly select-import">
+          <span>Sort by</span>
+          <select>
+            <option value="fName">First Name</option>
+            <option value="lName">Last Name</option>
+            <option value="na">N/A</option>
+            <option value="email">email</option>
+            <option value="group">group</option>
+          </select>
+        </label>
+      </th>
+         <th scope="col">
+        <label class="select select-inputonly select-import">
+          <span>Sort by</span>
+          <select>
+            <option value="fName">First Name</option>
+            <option value="lName">Last Name</option>
+            <option value="na">N/A</option>
+            <option value="email">email</option>
+            <option value="group">group</option>
+          </select>
+        </label>
+      </th>
+            <th scope="col">
+        <label class="select select-inputonly select-import">
+          <span>Sort by</span>
+          <select>
+            <option value="fName">First Name</option>
+            <option value="lName">Last Name</option>
+            <option value="na">N/A</option>
+            <option value="email">email</option>
+            <option value="group">group</option>
+          </select>
+        </label>
+      </th>
+            <th scope="col">
+        <label class="select select-inputonly select-import">
+          <span>Sort by</span>
+          <select>
+            <option value="fName">First Name</option>
+            <option value="lName">Last Name</option>
+            <option value="na">N/A</option>
+            <option value="email">email</option>
+            <option value="group">group</option>
+          </select>
+        </label>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>First Name</td>
+      <td>Last Name</td>
+      <td>id</td>
+      <td>email</td>
+      <td>group</td>
+    </tr>
+    <tr>
+      <td>mae</td>
+      <td>Quinn</td>
+      <td>422334</td>
+      <td>MaeQuinn@gmail.com</td>
+      <td>group</td>
+    </tr>
+  </tbody>
+</table>
+
+Styleguide 3.16.2
+*/
+/*
+Table-Import
+
+Table used to display import issues for the csv import
+
+markup:
+<table class="table table-issues">
+  <thead>
+    <tr>
+      <th scope="col">
+        name
+      </th>
+      <th scope="col">
+        email
+      </th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <div class="formfield">
+          <label for="formfield"></label>
+          <input id="formfield" type="text" value="Mae Quinn">
+          <p class="formfield-x-error"></p>
+        </div>
+      </td>
+      <td>
+        <div class="formfield formfield-is-error">
+          <label for="formfield"></label>
+          <input id="formfield" type="text" placeholder="Placeholder">
+          <p class="formfield-x-error">Here is some error text.</p>
+        </div>
+      </td>
+      <td>
+        <a href="#">REMOVE</a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+Styleguide 3.16.3
+*/
 .table {
   border-collapse: collapse;
   border-radius: 4px;
@@ -7241,10 +7951,7 @@ Styleguide 3.16.1
   display: table;
   overflow: hidden;
   text-align: left;
-  white-space: nowrap;
   width: 100%; }
-  .table a:not(.button):hover {
-    text-decoration: underline; }
   .table td,
   .table .table-x-td,
   .table th,
@@ -7295,7 +8002,8 @@ Styleguide 3.16.1
     .table tbody .table-x-td,
     .table .table-x-tbody td,
     .table .table-x-tbody .table-x-td {
-      font-size: 14px; }
+      font-size: 14px;
+      white-space: nowrap; }
     .table tbody tr:first-child td,
     .table tbody tr:first-child .table-x-td,
     .table tbody tr:first-child th,
@@ -7352,6 +8060,41 @@ Styleguide 3.16.1
     .table .table-x-active .table-x-td:last-child {
       box-shadow: rgba(5, 1, 44, 0.12) -1px -1px 0 0 inset; }
 
+.table-import {
+  color: #78768d;
+  max-width: 1024px;
+  min-width: 736px; }
+  .table-import tbody tr:first-of-type {
+    background: #e1e0e5; }
+    .table-import tbody tr:first-of-type td {
+      color: black;
+      font-size: 12px;
+      font-weight: bold;
+      height: 50px;
+      line-height: 16px;
+      max-width: 175px;
+      text-transform: uppercase; }
+
+.table-issues {
+  color: #78768d;
+  max-width: 1024px;
+  min-width: 736px; }
+  .table-issues tbody tr td {
+    color: black;
+    font-size: 12px;
+    font-weight: bold;
+    height: 50px;
+    line-height: 16px;
+    min-width: 300px;
+    padding-right: 0;
+    vertical-align: top; }
+  .table-issues tbody tr td:last-of-type {
+    max-width: 100px;
+    padding-bottom: 20px;
+    padding-right: 16px;
+    text-align: right;
+    vertical-align: middle; }
+
 .table-dialog {
   border-radius: 0;
   box-shadow: none;
@@ -7372,13 +8115,16 @@ Styleguide 3.16.1
   .table-dialog .table-x-badge,
   .table-dialog .table-x-input,
   .table-dialog .table-x-padded,
-  .table-dialog .table-x-title {
+  .table-dialog .table-x-title,
+  .table-dialog .table-x-inlineheader {
     padding: 8px 16px; }
   .table-dialog .table-x-badge,
   .table-dialog .table-x-input,
   .table-dialog .table-x-title,
   .table-dialog .table-x-stack {
     cursor: pointer; }
+  .table-dialog .table-x-span {
+    width: 100%; }
   .table-dialog .table-x-badge {
     display: block;
     padding-right: 8px;
@@ -7400,6 +8146,20 @@ Styleguide 3.16.1
 
 .table-aligntop .table-x-input {
   padding-top: 16px; }
+
+/*
+Text
+
+default text with line spacing
+
+Markup:
+<p class="text">Add a badge you’ve already received by utilizing one of the options below.</p>
+
+Styleguide 3.65
+*/
+.text {
+  font-size: 16px;
+  line-height: 24px !important; }
 
 /*
 Title
@@ -7702,7 +8462,109 @@ Styleguide 3.43
 .wrap-light {
   background-color: #f7f7f7; }
 
+/*
+Demo Rules
+
+Styleguide 4.0
+*/
+/*
+Import Members - Instructions
+
+Combined patterns to demonstrate "Import Members - Instructions" view.
+
+Markup:
+<main>
+  <header class="wrap wrap-light l-containerhorizontal l-heading">
+    <nav>
+      <!-- breadCrumb-->
+      <sg-insert>3.19</sg-insert>
+    </nav>
+      <div class="heading">
+        <div class="heading-x-text">
+          <h1>Import Members</h1>
+        </div>
+      </div>
+  </header>
+  <div class="wrap l-containerhorizontal l-containervertical">
+    <!-- import heading-->
+    <sg-insert>3.66.1</sg-insert>
+    <!-- formfield - image TODO: make it my file version-->
+    <sg-insert>3.27</sg-insert>
+  </div>
+</main>
+
+Styleguide 4.1
+*/
+/*
+Import Members - Categories
+
+Combined patterns to demonstrate "Import Members - Categories" view.
+
+Markup:
+<main>
+  <header class="wrap wrap-light l-containerhorizontal l-heading">
+    <nav>
+        <!-- breadCrumb-->
+        <sg-insert>3.19</sg-insert>
+    </nav>
+      <div class="heading">
+        <div class="heading-x-text">
+          <h1>Import Members</h1>
+        </div>
+      </div>
+  </header>
+  <div class="wrap l-containerhorizontal l-containervertical">
+    <!-- import heading-->
+    <sg-insert>3.66.2</sg-insert>
+    <!-- importTable-->
+    <sg-insert>3.16.2</sg-insert>
+    <div class="l-display-flex l-marginTop l-marginTop-4x l-childrenhorizontal-right">
+      <button class="button l-marginLeft">CANCEL</button>
+      <button class="button l-marginLeft">CONTINUE</button>
+    </div>
+  </div>
+</main>
+
+Styleguide 4.2
+*/
+/*
+Import Members - Issues
+
+Combined patterns to demonstrate "Import Members - Categories" view.
+
+Markup:
+<main>
+  <header class="wrap wrap-light l-containerhorizontal l-heading">
+    <nav>
+        <!-- breadCrumb-->
+        <sg-insert>3.19</sg-insert>
+    </nav>
+      <div class="heading">
+        <div class="heading-x-text">
+          <h1>Import Members</h1>
+        </div>
+      </div>
+  </header>
+  <div class="wrap l-containerhorizontal l-containervertical">
+    <!-- importHeading 3.66-->
+    <article class="importHeading">
+      <h1 class=title>Invalid Entries Found</h1>
+      <p>
+        53 rows will be imported. The following 4 contain errors. Please fix the errors below or select REMOVE
+      </p>
+    </article>
+    <!-- importTable-->
+    <sg-insert>3.16.3</sg-insert>
+    <div class="l-display-flex l-marginTop l-marginTop-4x l-childrenhorizontal-right">
+      <button class="button l-marginLeft">CANCEL</button>
+      <button class="button l-marginLeft">CONTINUE</button>
+    </div>
+  </div>
+</main>
+
+Styleguide 4.3
+*/
 .o-canvas {
   background-color: #fff; }
 
-/*# sourceMappingURL=styles.324cc0ca8cb17b74035b.css.map*/
+/*# sourceMappingURL=theme-default.61cec8f1a73417dc53f6.css.map*/

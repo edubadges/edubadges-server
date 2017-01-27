@@ -13,13 +13,23 @@
     <header class="wrap wrap-light l-containerhorizontal l-heading">
 
 	    <div class="heading">
-		    <div class="heading-x-image">
+		    <div class="heading-x-imageLarge">
 			    <img src="{{ MEDIA_URL }}{{badge_class.image}}" alt="{{badge_class.name}} image">
 		    </div>
 		    <div class="heading-x-text">
-
 			    <h1>{{ badge_class.name }}</h1>
 
+				  <a class="stack" href="{% url 'issuer_json' slug=issuer.slug %}">
+				    <div class="stack-x-image">
+					    <img src="{% if issuer.json.image %}{{ issuer.json.image }}{% else %}{% static 'badgr-ui/images/issuer-placeholder.png' %}{% endif %}"
+					         width="40"
+					         alt="{{ issuer.json.name }}" />
+				    </div>
+				    <div class="stack-x-text">
+					    <h2>{{ issuer.json.name }}</h2>
+                        <small>{{ badgeclass_count }} {% if badgeclass_count > 1 %}Badges{% else %}Badge{% endif %}</small>
+				    </div>
+			    </a>
 			    <p class="heading-x-meta">Created {{ badge_class.created_at|date:'F d, Y' }}</p>
 
 			    <p>{{ badge_class.json.description }}</p>
@@ -35,19 +45,6 @@
 				    {% endif %}
 				    <a class="button button-primaryghost" href="{{ badge_class.get_absolute_url }}.json" target="_blank">View JSON</a>
 			    </div>
-
-			    <h2 class="titledivider">Issuer</h2>
-
-				  <a class="stack" target="_blank" href="{% url 'issuer_json' slug=issuer.slug %}">
-				    <div class="stack-x-image">
-					    <img src="{% if issuer.json.image %}{{ issuer.json.image }}{% else %}{% static 'badgr-ui/images/issuer-placeholder.png' %}{% endif %}"
-					         width="40"
-					         alt="{{ issuer.json.name }}" />
-				    </div>
-				    <div class="stack-x-text">
-					    <h2>{{ issuer.json.name }}</h2>
-				    </div>
-			    </a>
 
 		    </div>
 
