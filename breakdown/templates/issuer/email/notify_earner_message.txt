@@ -8,6 +8,7 @@ Congratulations, you earned a badge!
 
 {{ badge_description }}
 
+---------
 Issuer
 ---------
 
@@ -28,11 +29,10 @@ Badge Storage and Access
 Wherever you take your badge, portable information about your achievement will
 be locked inside. You can use any Open Badges backpack service, but if you choose
 to create a {{ site_name }} ( {{ site_url }} ) account, your badges awarded from this issuer will
-be automatically added.
+be automatically added.{% if promote_mobile %}
 
-{% if promote_mobile %}You can also download our mobile app to take your badges on the go!
-http://info.badgr.io/#mobile
-{% endif %}
+You can also download our mobile app to take your badges on the go!
+http://info.badgr.io/#mobile{% endif %}
 
 -----------
 Open Badges: Portable Digital Credentials
