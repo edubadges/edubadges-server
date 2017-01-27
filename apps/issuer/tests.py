@@ -897,6 +897,9 @@ class PublicAPITests(APITestCase):
             self.assertEqual(response.status_code, 302)
 
     def test_get_assertion_json_explicit(self):
+        assertion = BadgeInstance.objects.get(slug='92219015-18a6-4538-8b6d-2b228e47b8aa')
+        assertion.issuer.cached_badgeclasses()
+        
         with self.assertNumQueries(0):
             response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa',
                                        **{'HTTP_ACCEPT': 'application/json'})
@@ -908,7 +911,11 @@ class PublicAPITests(APITestCase):
             self.assertEqual(content['type'], 'Assertion')
 
     def test_get_assertion_json_implicit(self):
-        # Make sure we serve JSON by default if there is a missing Accept header.
+        """ Make sure we serve JSON by default if there is a missing Accept header. """
+
+        assertion = BadgeInstance.objects.get(slug='92219015-18a6-4538-8b6d-2b228e47b8aa')
+        assertion.issuer.cached_badgeclasses()
+
         with self.assertNumQueries(0):
             response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa')
             self.assertEqual(response.status_code, 200)
@@ -919,6 +926,10 @@ class PublicAPITests(APITestCase):
             self.assertEqual(content['type'], 'Assertion')
 
     def test_get_assertion_html(self):
+        """ Ensure hosted Assertion page returns HTML if */* is requested and that it has OpenGraph metadata properties. """
+        assertion = BadgeInstance.objects.get(slug='92219015-18a6-4538-8b6d-2b228e47b8aa')
+        assertion.issuer.cached_badgeclasses()
+
         with self.assertNumQueries(0):
             response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa', **{'HTTP_ACCEPT': '*/*'})
             self.assertEqual(response.status_code, 200)
@@ -926,6 +937,9 @@ class PublicAPITests(APITestCase):
             self.assertContains(response, '<meta property="og:url"')
 
     def test_get_assertion_html_linkedin(self):
+        assertion = BadgeInstance.objects.get(slug='92219015-18a6-4538-8b6d-2b228e47b8aa')
+        assertion.issuer.cached_badgeclasses()
+
         with self.assertNumQueries(0):
             response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa',
                                        **{'HTTP_USER_AGENT': 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'})
