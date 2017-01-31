@@ -12,6 +12,7 @@ class BaseBadgeAssertionEvent(BaseBadgrEvent):
         return {
             'ipAddress': client_ip_from_request(self.request),
             'badgeInstance': self.badge_instance.json,
+            'referer': self.request.META.get('HTTP_REFERER')
         }
 
 
