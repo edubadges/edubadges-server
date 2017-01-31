@@ -30,6 +30,10 @@ class LocalBadgeClass(AbstractRemoteImagePreviewMixin, AbstractBadgeClass):
         verbose_name = 'local badge class'
         verbose_name_plural = 'local badge classes'
 
+    @property
+    def cached_issuer(self):
+        return LocalIssuer.cached.get(pk=self.issuer_id)
+
 
 class LocalBadgeInstance(AbstractBadgeInstance):
     # 0.5 BadgeInstances have no notion of a BadgeClass

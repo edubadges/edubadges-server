@@ -37,7 +37,7 @@ class AbstractComponent(cachemodel.CacheModel):
     created_by = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True,
                                    related_name="+")
     identifier = models.CharField(max_length=1024, null=False,
-                                  default='get_full_url')
+                                  default='get_full_url')  # TODO: This places the string 'get_full_url' as this value in DB.
     json = JSONField()
 
     class Meta:

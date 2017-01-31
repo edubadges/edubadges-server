@@ -7,12 +7,13 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 
 from rest_framework import status, authentication, permissions
-from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.exceptions import ValidationError, PermissionDenied, NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
 import badgrlog
 from badgeuser.models import CachedEmailAddress
-
+from composition.models import LocalBadgeClass
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 
 from .models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
@@ -365,6 +366,53 @@ class AllBadgeClassesList(AbstractIssuerAPIEndpoint):
         serializer = BadgeClassSerializer(
             user_badgeclasses, many=True, context={'request': request}
         )
+        return Response(serializer.data)
+
+
+class FindBadgeClassDetail(AbstractIssuerAPIEndpoint):
+    """
+    GET a list of badgeclasses within one issuer context or
+    POST to create a new badgeclass within the issuer context
+    """
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+
+    def get(self, request, badge_id='', slug=''):
+        """
+        GET a specific BadgeClass by query parameter
+        Allowable query params: id, slug
+        ---
+        serializer: BadgeClassSerializer
+        parameters:
+            - name: id
+              required: false
+              type: string
+              paramType: path
+            - name: slug
+              required: false
+              type: string
+              paramType: path
+        """
+        query_args = {}
+        if badge_id:
+            query_args['identifier'] = badge_id
+            arg = 'identifier'
+        elif slug:
+            query_args['slug'] = slug
+            arg = 'slug'
+        else:
+            raise ValidationError("You must provide a slug or id in the request to locate a badge.")
+
+        try:
+            badge = BadgeClass.objects.get(**query_args)
+        except BadgeClass.DoesNotExist:
+            try:
+                badge = LocalBadgeClass.objects.get(**query_args)
+            except LocalBadgeClass.DoesNotExist:
+                raise NotFound("BadgeClass with provided {} {} not found.".format(arg, query_args[arg]))
+        except BadgeClass.MultipleObjectsReturned:
+            raise NotFound("Error: Multiple objects returned with {} {}".format(arg, query_args[arg]))
+
+        serializer = BadgeClassSerializer(badge)
         return Response(serializer.data)
 
 
