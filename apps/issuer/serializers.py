@@ -99,7 +99,7 @@ class IssuerSerializer(AbstractComponentSerializer):
 
         representation['badgeClassCount'] = len(obj.cached_badgeclasses())
         representation['recipientGroupCount'] = len(obj.cached_recipient_groups())
-        representation['recipientCount'] = sum(b.recipient_count() for b in obj.cached_badgeclasses())
+        representation['recipientCount'] = sum(g.member_count() for g in obj.cached_recipient_groups())
         representation['pathwayCount'] = len(obj.cached_pathways())
 
         return representation
