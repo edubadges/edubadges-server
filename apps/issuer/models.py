@@ -332,6 +332,7 @@ class BadgeInstance(AbstractBadgeInstance):
                 'issuer_image_url': issuer_image_url,
                 'badge_instance_url': self.get_full_url(),
                 'image_url': self.get_full_url() + '/image',
+                'download_url': self.get_full_url() + "?action=download",
                 'unsubscribe_url': getattr(settings, 'HTTP_ORIGIN') + EmailBlacklist.generate_email_signature(
                     self.recipient_identifier),
                 'site_name': badgr_app.name,

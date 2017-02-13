@@ -75,9 +75,11 @@
 		    </div>
 
         <div class="heading-x-actions">
-	        {% if badge_instance_public_url %}
+	    {% if action == 'download' %}
+          <a id="ImageDownloadButton" class="button button-major button-large" target="_blank" href="{{ badge_instance_image_url }}" download>Download</a>
+        {% elif badge_instance_public_url %}
           <a class="button button-major button-large" target="_blank" href="https://badgecheck.io/?url={{ badge_instance_public_url }}">Verify Badge</a>
-		      {% endif %}
+		{% endif %}
         </div>
 
 	    </div>
@@ -88,4 +90,15 @@
 		</div>
 	{% endif %}
 
+{% endblock %}
+
+{% block footer_extra_scripts %}
+    {% if action == 'download' %}
+        <script type="text/javascript">
+            setTimeout(function(){
+                var downloadButton = document.getElementById("ImageDownloadButton");
+                downloadButton.click();
+            }, 2000);
+        </script>
+    {% endif %}
 {% endblock %}
