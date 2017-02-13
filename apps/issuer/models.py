@@ -35,6 +35,10 @@ class Issuer(AbstractIssuer):
     staff = models.ManyToManyField(AUTH_USER_MODEL, through='IssuerStaff')
     cached = SlugOrJsonIdCacheModelManager()
 
+    description = models.TextField(blank=True, null=True, default=None)
+    url = models.CharField(max_length=254, blank=True, null=True, default=None)
+    email = models.CharField(max_length=254, blank=True, null=True, default=None)
+
     def publish(self, *args, **kwargs):
         super(Issuer, self).publish(*args, **kwargs)
         self.owner.publish()
@@ -92,6 +96,9 @@ class BadgeClass(AbstractBadgeClass):
                                on_delete=models.CASCADE,
                                related_name="badgeclasses")
     cached = SlugOrJsonIdCacheModelManager()
+
+    criteria_url = models.CharField(max_length=254, blank=True, null=True, default=None)
+    description = models.TextField(blank=True, null=True, default=None)
 
     def publish(self):
         super(BadgeClass, self).publish()

@@ -15,10 +15,18 @@ class IssuerAdmin(DjangoObjectActions, ModelAdmin):
     list_display_links = ('img', 'name')
     list_filter = ('created_at',)
     search_fields = ('name', 'slug')
+    raw_id_fields = ('owner',)
     fieldsets = (
-        ('Metadata', {'fields': ('created_by', 'created_at', 'owner'), 'classes': ("collapse",)}),
-        (None, {'fields': ('image', 'name', 'slug')}),
-        ('JSON', {'fields': ('json',)}),
+        ('Metadata', {
+            'fields': ('created_by', 'created_at', 'owner', 'slug'),
+            'classes': ("collapse",)
+        }),
+        (None, {
+            'fields': ('image', 'name', 'url', 'email', 'description')
+        }),
+        ('JSON', {
+            'fields': ('json',)
+        }),
     )
     change_actions = ['redirect_badgeclasses']
 
@@ -46,16 +54,24 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
     list_display_links = ('badge_image', 'name',)
     list_filter = ('created_at',)
     search_fields = ('name', 'slug', 'issuer__name',)
+    raw_id_fields = ('issuer',)
     fieldsets = (
-        ('Metadata', {'fields': ('created_by', 'created_at',), 'classes': ("collapse",)}),
-        (None, {'fields': ('image', 'name', 'slug', 'issuer')}),
-        ('Criteria', {'fields': ('criteria_text',)}),
+        ('Metadata', {
+            'fields': ('created_by', 'created_at', 'slug'),
+            'classes': ("collapse",)
+        }),
+        (None, {
+            'fields': ('issuer', 'image', 'name', 'description')
+        }),
+        ('Criteria', {
+            'fields': ('criteria_url', 'criteria_text',)
+        }),
         ('JSON', {'fields': ('json',)}),
     )
     change_actions = ['redirect_issuer', 'redirect_instances']
 
     def badge_image(self, obj):
-        return u'<img src="{}" width="32"/>'.format(obj.image.url)
+        return u'<img src="{}" width="32"/>'.format(obj.image.url) if obj.image else ''
     badge_image.short_description = 'Badge'
     badge_image.allow_tags = True
 
@@ -86,11 +102,21 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
     list_display_links = ('badge_image', 'recipient_identifier', )
     list_filter = ('created_at',)
     search_fields = ('recipient_identifier', 'slug', 'badgeclass__name', 'issuer__name')
+    raw_id_fields = ('badgeclass', 'issuer')
     fieldsets = (
-        ('Metadata', {'fields': ('created_by', 'created_at','acceptance'), 'classes': ("collapse",)}),
-        (None, {'fields': ('image', 'slug', 'recipient_identifier', 'badgeclass', 'issuer')}),
-        ('Revocation', {'fields': ('revoked', 'revocation_reason')}),
-        ('JSON', {'fields': ('json',)}),
+        ('Metadata', {
+            'fields': ('created_by', 'created_at', 'slug', 'badgeclass', 'issuer'),
+            'classes': ("collapse",)
+        }),
+        (None, {
+            'fields': ('acceptance', 'recipient_identifier', 'image')
+        }),
+        ('Revocation', {
+            'fields': ('revoked', 'revocation_reason')
+        }),
+        ('JSON', {
+            'fields': ('json',)
+        }),
     )
     change_actions = ['redirect_issuer', 'redirect_badgeclass']
 
