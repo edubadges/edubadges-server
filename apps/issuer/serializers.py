@@ -62,7 +62,7 @@ class IssuerSerializer(serializers.Serializer):
     def to_representation(self, obj):
         representation = super(IssuerSerializer, self).to_representation(obj)
         representation['json'] = obj.get_json()
-        representation['created_by'] = (OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': instance.created_by_id})) if instance.created_by_id is not None else None
+        representation['created_by'] = (OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': obj.created_by_id})) if obj.created_by_id is not None else None
         representation['owner'] = (OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': obj.created_by_id})) if obj.created_by_id is not None else None
         representation['editors'] = [OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': u.pk}) for u in obj.cached_editors()]
         representation['staff'] = [OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': u.pk}) for u in obj.cached_staff()]

@@ -10,7 +10,7 @@ from .models import Issuer, BadgeClass, BadgeInstance
 
 
 class IssuerAdmin(DjangoObjectActions, ModelAdmin):
-    readonly_fields = ('created_at', 'created_by')
+    readonly_fields = ('created_at', 'created_by', 'old_json')
     list_display = ('img', 'name', 'slug', 'created_by', 'created_at')
     list_display_links = ('img', 'name')
     list_filter = ('created_at',)
@@ -24,9 +24,9 @@ class IssuerAdmin(DjangoObjectActions, ModelAdmin):
         (None, {
             'fields': ('image', 'name', 'url', 'email', 'description')
         }),
-        ('JSON', {
-            'fields': ('json',)
-        }),
+        # ('JSON', {
+        #     'fields': ('old_json',)
+        # }),
     )
     change_actions = ['redirect_badgeclasses']
 
@@ -49,7 +49,7 @@ badgr_admin.register(Issuer, IssuerAdmin)
 
 
 class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
-    readonly_fields = ('created_at', 'created_by')
+    readonly_fields = ('created_at', 'created_by', 'old_json')
     list_display = ('badge_image', 'name', 'slug', 'issuer_link', 'recipient_count')
     list_display_links = ('badge_image', 'name',)
     list_filter = ('created_at',)
@@ -66,7 +66,9 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
         ('Criteria', {
             'fields': ('criteria_url', 'criteria_text',)
         }),
-        ('JSON', {'fields': ('json',)}),
+        # ('JSON', {
+        #     'fields': ('old_json',)
+        # }),
     )
     change_actions = ['redirect_issuer', 'redirect_instances']
 
@@ -97,7 +99,7 @@ badgr_admin.register(BadgeClass, BadgeClassAdmin)
 
 
 class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
-    readonly_fields = ('created_at', 'created_by', 'image', 'slug')
+    readonly_fields = ('created_at', 'created_by', 'image', 'slug', 'old_json')
     list_display = ('badge_image', 'recipient_identifier', 'slug', 'badgeclass', 'issuer')
     list_display_links = ('badge_image', 'recipient_identifier', )
     list_filter = ('created_at',)
@@ -114,9 +116,9 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
         ('Revocation', {
             'fields': ('revoked', 'revocation_reason')
         }),
-        ('JSON', {
-            'fields': ('json',)
-        }),
+        # ('JSON', {
+        #     'fields': ('old_json',)
+        # }),
     )
     change_actions = ['redirect_issuer', 'redirect_badgeclass']
 
