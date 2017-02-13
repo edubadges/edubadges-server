@@ -105,11 +105,11 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
     raw_id_fields = ('badgeclass', 'issuer')
     fieldsets = (
         ('Metadata', {
-            'fields': ('created_by', 'created_at', 'slug', 'badgeclass', 'issuer'),
+            'fields': ('created_by', 'created_at', 'slug', 'salt', 'badgeclass', 'issuer'),
             'classes': ("collapse",)
         }),
         (None, {
-            'fields': ('acceptance', 'recipient_identifier', 'image')
+            'fields': ('acceptance', 'recipient_identifier', 'image', 'evidence_url')
         }),
         ('Revocation', {
             'fields': ('revoked', 'revocation_reason')

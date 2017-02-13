@@ -205,9 +205,7 @@ class BadgeInstanceManager(models.Manager):
 
 
 class BadgeInstance(AbstractBadgeInstance):
-    badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False,
-                                   on_delete=models.CASCADE,
-                                   related_name='badgeinstances')
+    badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.CASCADE, related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
 
     ACCEPTANCE_UNACCEPTED = 'Unaccepted'
@@ -219,6 +217,9 @@ class BadgeInstance(AbstractBadgeInstance):
         (ACCEPTANCE_REJECTED, 'Rejected'),
     )
     acceptance = models.CharField(max_length=254, choices=ACCEPTANCE_CHOICES, default=ACCEPTANCE_UNACCEPTED)
+
+    salt = models.CharField(max_length=254, blank=True, null=True, default=None)
+    evidence_url = models.CharField(max_length=254, blank=True, null=True, default=None)
 
     objects = BadgeInstanceManager()
 
