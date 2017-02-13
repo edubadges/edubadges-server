@@ -17,28 +17,14 @@ from .models import Issuer, BadgeClass
 import utils
 
 
-class AbstractComponentSerializer(serializers.Serializer):
+class IssuerSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
-    # created_by = serializers.HyperlinkedRelatedField(view_name='user_detail', lookup_field='username', read_only=True)
-
-    def to_representation(self, instance):
-        representation = super(AbstractComponentSerializer, self).to_representation(instance)
-        representation['created_by'] = (OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': instance.created_by_id})) if instance.created_by_id is not None else None
-        return representation
-
-
-class IssuerSerializer(AbstractComponentSerializer):
-    json = WritableJSONField(max_length=16384, read_only=True, required=False)
     name = StripTagsCharField(max_length=1024)
     slug = StripTagsCharField(max_length=255, allow_blank=True, required=False)
     image = Base64FileField(allow_empty_file=False, use_url=True, required=False)
     email = serializers.EmailField(max_length=255, required=True, write_only=True)
     description = StripTagsCharField(max_length=1024, required=True, write_only=True)
     url = serializers.URLField(max_length=1024, required=True, write_only=True)
-    # HyperlinkedRelatedField refuses to not hit the database, so this is done manually in to_representation
-    # owner = serializers.HyperlinkedRelatedField(view_name='user_detail', lookup_field='username', read_only=True)
-    # editors = serializers.HyperlinkedRelatedField(many=True, view_name='user_detail', lookup_field='username', read_only=True, source='cached_editors')
-    # staff = serializers.HyperlinkedRelatedField(many=True, view_name='user_detail', lookup_field='username', read_only=True, source='cached_staff')
 
     def validate(self, data):
         # TODO: ensure email is a confirmed email in owner/creator's account
@@ -65,32 +51,18 @@ class IssuerSerializer(AbstractComponentSerializer):
         return image
 
     def create(self, validated_data, **kwargs):
-        validated_data['json'] = {
-            '@context': utils.CURRENT_OBI_CONTEXT_IRI,
-            'type': 'Issuer',
-            'name': validated_data.get('name'),
-            'url': validated_data.pop('url'),
-            'email': validated_data.pop('email'),
-            'description': validated_data.pop('description')
-        }
-
         new_issuer = Issuer(**validated_data)
 
         # Use AutoSlugField's pre_save to provide slug if empty, else auto-unique
-        new_issuer.slug = \
-            Issuer._meta.get_field('slug').pre_save(new_issuer, add=True)
-
-        full_url = new_issuer.get_full_url()
-        new_issuer.json['id'] = full_url
-        if validated_data.get('image') is not None:
-            new_issuer.json['image'] = "%s/image" % (full_url,)
+        new_issuer.slug = Issuer._meta.get_field('slug').pre_save(new_issuer, add=True)
 
         new_issuer.save()
         return new_issuer
 
     def to_representation(self, obj):
         representation = super(IssuerSerializer, self).to_representation(obj)
-        representation['description'] = obj.json.get('description', '')
+        representation['json'] = obj.get_json()
+        representation['created_by'] = (OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': instance.created_by_id})) if instance.created_by_id is not None else None
         representation['owner'] = (OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': obj.created_by_id})) if obj.created_by_id is not None else None
         representation['editors'] = [OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': u.pk}) for u in obj.cached_editors()]
         representation['staff'] = [OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': u.pk}) for u in obj.cached_staff()]
@@ -125,22 +97,22 @@ class IssuerStaffSerializer(serializers.Serializer):
     editor = serializers.BooleanField()
 
 
-class BadgeClassSerializer(AbstractComponentSerializer):
+class BadgeClassSerializer(serializers.Serializer):
+    created_at = serializers.DateTimeField(read_only=True)
     id = serializers.IntegerField(required=False, read_only=True)
-    # issuer = serializers.HyperlinkedRelatedField(view_name='issuer_json', read_only=True, lookup_field='slug')
-    json = WritableJSONField(max_length=16384, read_only=True, required=False)
     name = StripTagsCharField(max_length=255)
     image = Base64FileField(allow_empty_file=False, use_url=True, required=False)
-    description = serializers.CharField(write_only=True, required=True)
     slug = StripTagsCharField(max_length=255, allow_blank=True, required=False)
     criteria = StripTagsCharField(allow_blank=True, required=False, write_only=True)
     recipient_count = serializers.IntegerField(required=False, read_only=True)
     pathway_element_count = serializers.IntegerField(required=False, read_only=True)
-    description = StripTagsCharField(max_length=16384, required=False)
+    description = StripTagsCharField(max_length=16384, required=True)
 
     def to_representation(self, instance):
         representation = super(BadgeClassSerializer, self).to_representation(instance)
         representation['issuer'] = OriginSetting.JSON+reverse('issuer_json', kwargs={'slug': instance.cached_issuer.slug})
+        representation['created_by'] = (OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': instance.created_by_id})) if instance.created_by_id is not None else None
+        representation['json'] = instance.get_json()
         return representation
 
     def validate_image(self, image):
@@ -168,17 +140,15 @@ class BadgeClassSerializer(AbstractComponentSerializer):
         if new_name:
             new_name = strip_tags(new_name)
             instance.name = new_name
-            instance.json['name'] = new_name
 
         new_description = validated_data.get('description')
         if new_description:
-            instance.json['description'] = strip_tags(new_description)
+            instance.description = strip_tags(new_description)
 
         if 'criteria_text' in validated_data:
             instance.criteria_text = validated_data.get('criteria_text')
-            instance.json['criteria'] = "%s/criteria" % (instance.get_full_url(),)
         if 'criteria_url' in validated_data:
-            instance.json['criteria'] = validated_data.get('criteria_url')
+            instance.criteria_url = validated_data.get('criteria_url')
 
         if 'image' in validated_data:
             instance.image = validated_data.get('image')
@@ -208,44 +178,17 @@ class BadgeClassSerializer(AbstractComponentSerializer):
         if 'image' not in validated_data:
             raise serializers.ValidationError({"image": ["This field is required"]})
 
-        # TODO: except KeyError on pops for invalid keys? or just ensure they're there with validate()
-        # "gets" data that must be in both model and model.json,
-        # "pops" data that shouldn't be sent to model init
-        validated_data['json'] = {
-            '@context': utils.CURRENT_OBI_CONTEXT_IRI,
-            'type': 'BadgeClass',
-            'name': validated_data.get('name'),
-            'description': description,
-            'issuer': validated_data.get('issuer').get_full_url()
-        }
-
-        try:
-            criteria_url = validated_data.pop('criteria_url')
-            validated_data['json']['criteria'] = criteria_url
-        except KeyError:
-            pass
-
         new_badgeclass = BadgeClass(**validated_data)
 
         # Use AutoSlugField's pre_save to provide slug if empty, else auto-unique
-        new_badgeclass.slug = \
-            BadgeClass._meta.get_field('slug').pre_save(new_badgeclass, add=True)
-
-        full_url = new_badgeclass.get_full_url()
-        new_badgeclass.json['id'] = full_url
-        new_badgeclass.json['image'] = "%s/image" % (full_url,)
-        if new_badgeclass.criteria_text:
-            validated_data['json']['criteria'] = "%s/criteria" % (full_url,)
+        new_badgeclass.slug = BadgeClass._meta.get_field('slug').pre_save(new_badgeclass, add=True)
 
         new_badgeclass.save()
         return new_badgeclass
 
 
-class BadgeInstanceSerializer(AbstractComponentSerializer):
-    json = WritableJSONField(max_length=16384, read_only=True, required=False)
-    # HyperlinkedRelatedField refuses to not hit the database, so this is done manually in to_representation
-    #issuer = serializers.HyperlinkedRelatedField(view_name='issuer_json', read_only=True,  lookup_field='slug')
-    #badgeclass = serializers.HyperlinkedRelatedField(view_name='badgeclass_json', read_only=True, lookup_field='slug')
+class BadgeInstanceSerializer(serializers.Serializer):
+    created_at = serializers.DateTimeField(read_only=True)
     slug = serializers.CharField(max_length=255, read_only=True)
     image = serializers.FileField(read_only=True)  # use_url=True, might be necessary
     email = serializers.EmailField(max_length=1024, required=False, write_only=True)
@@ -265,10 +208,11 @@ class BadgeInstanceSerializer(AbstractComponentSerializer):
         return data
 
     def to_representation(self, instance):
-        if self.context.get('extended_json'):
-            self.fields['json'] = V1InstanceSerializer(source='extended_json')
+        # if self.context.get('extended_json'):
+        #     self.fields['json'] = V1InstanceSerializer(source='extended_json')
 
         representation = super(BadgeInstanceSerializer, self).to_representation(instance)
+        representation['created_by'] = (OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': instance.created_by_id})) if instance.created_by_id is not None else None
         if self.context.get('include_issuer', False):
             representation['issuer'] = IssuerSerializer(instance.cached_badgeclass.cached_issuer).data
         else:
