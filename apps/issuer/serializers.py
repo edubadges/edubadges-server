@@ -225,6 +225,7 @@ class BadgeInstanceSerializer(serializers.Serializer):
 
         representation = super(BadgeInstanceSerializer, self).to_representation(instance)
         representation['created_by'] = (OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': instance.created_by_id})) if instance.created_by_id is not None else None
+        representation['json'] = instance.get_json()
         if self.context.get('include_issuer', False):
             representation['issuer'] = IssuerSerializer(instance.cached_badgeclass.cached_issuer).data
         else:
