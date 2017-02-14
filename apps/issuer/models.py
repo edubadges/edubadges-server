@@ -30,10 +30,12 @@ AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
 class Issuer(ResizeUploadedImage, cachemodel.CacheModel):
+    source = models.CharField(max_length=254, default='local')
+    source_url = models.CharField(max_length=254, blank=True, null=True, default=None)
+
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True, related_name="+")
 
-    owner = models.ForeignKey(AUTH_USER_MODEL, related_name='issuers', on_delete=models.PROTECT, null=False)
     staff = models.ManyToManyField(AUTH_USER_MODEL, through='IssuerStaff')
 
     slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
@@ -50,7 +52,6 @@ class Issuer(ResizeUploadedImage, cachemodel.CacheModel):
     def publish(self, *args, **kwargs):
         super(Issuer, self).publish(*args, **kwargs)
         self.publish_by('slug')
-        self.owner.publish()
         for member in self.cached_staff():
             member.publish()
 
@@ -59,12 +60,10 @@ class Issuer(ResizeUploadedImage, cachemodel.CacheModel):
             raise ProtectedError("Issuer may only be deleted after all its defined BadgeClasses have been deleted.")
 
         staff = self.cached_staff()
-        owner = self.owner
         super(Issuer, self).delete(*args, **kwargs)
-        owner.publish()
+        self.publish_delete("slug")
         for member in staff:
             member.publish()
-        self.publish_delete("slug")
 
     def get_absolute_url(self):
         return reverse('issuer_json', kwargs={'slug': self.slug})
@@ -79,7 +78,11 @@ class Issuer(ResizeUploadedImage, cachemodel.CacheModel):
 
     @property
     def editors(self):
-        return self.staff.filter(issuerstaff__editor=True)
+        return self.staff.filter(issuerstaff__role__in=(IssuerStaff.ROLE_EDITOR, IssuerStaff.ROLE_OWNER))
+
+    @property
+    def owners(self):
+        return self.staff.filter(issuerstaff__role=IssuerStaff.ROLE_OWNER)
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_staff(self):
@@ -88,7 +91,7 @@ class Issuer(ResizeUploadedImage, cachemodel.CacheModel):
     @cachemodel.cached_method(auto_publish=True)
     def cached_editors(self):
         UserModel = get_user_model()
-        return UserModel.objects.filter(issuerstaff__issuer=self, issuerstaff__editor=True)
+        return UserModel.objects.filter(issuerstaff__issuer=self, issuerstaff__role=IssuerStaff.ROLE_EDITOR)
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeclasses(self):
@@ -126,15 +129,25 @@ class Issuer(ResizeUploadedImage, cachemodel.CacheModel):
 
 
 class IssuerStaff(models.Model):
+    ROLE_OWNER = 'owner'
+    ROLE_EDITOR = 'editor'
+    ROLE_STAFF = 'staff'
+    ROLE_CHOICES = (
+        (ROLE_OWNER, 'Owner'),
+        (ROLE_EDITOR, 'Editor'),
+        (ROLE_STAFF, 'Staff'),
+    )
     issuer = models.ForeignKey(Issuer)
     user = models.ForeignKey(AUTH_USER_MODEL)
-    editor = models.BooleanField(default=False)
+    role = models.CharField(max_length=254, choices=ROLE_CHOICES, default=ROLE_STAFF)
 
     class Meta:
         unique_together = ('issuer', 'user')
 
 
 class BadgeClass(ResizeUploadedImage, cachemodel.CacheModel):
+    source = models.CharField(max_length=254, default='local')
+    source_url = models.CharField(max_length=254, blank=True, null=True, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True, related_name="+")
     issuer = models.ForeignKey(Issuer, blank=False, null=False, on_delete=models.CASCADE, related_name="badgeclasses")
@@ -188,8 +201,8 @@ class BadgeClass(ResizeUploadedImage, cachemodel.CacheModel):
         return OriginSetting.HTTP+reverse('badgeclass_criteria', kwargs={'slug': self.slug})
 
     @property
-    def owner(self):
-        return self.issuer.owner
+    def owners(self):
+        return self.issuer.owners
 
     @property
     def cached_issuer(self):
@@ -307,8 +320,8 @@ class BadgeInstance(ResizeUploadedImage, cachemodel.CacheModel):
         return OriginSetting.HTTP+self.get_absolute_url()
 
     @property
-    def owner(self):
-        return self.issuer.owner
+    def owners(self):
+        return self.issuer.owners
 
     @staticmethod
     def get_new_slug():
@@ -440,7 +453,7 @@ class BadgeInstance(ResizeUploadedImage, cachemodel.CacheModel):
             '@context': CURRENT_OBI_CONTEXT_IRI,
             'type': 'Assertion',
             'id': self.jsonld_id,
-            "issuedOn": self.created_at.astimezone(get_current_timezone()).replace(tzinfo=None).isoformat(),
+            # "issuedOn": self.created_at.astimezone(get_current_timezone()).replace(tzinfo=None).isoformat(),
             "uid": self.slug,
             "image": OriginSetting.HTTP + reverse('badgeinstance_image', kwargs={'slug': self.slug}),
             "badge": self.cached_badgeclass.jsonld_id,

@@ -1,7 +1,6 @@
 """
 Utility functions and constants that might be used across the project.
 """
-from __future__ import unicode_literals
 import hashlib
 import urlparse
 

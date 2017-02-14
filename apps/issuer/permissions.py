@@ -5,8 +5,8 @@ SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
 
 
 @rules.predicate
-def is_owner(user, component):
-    return user == component.owner
+def is_owner(user, issuer):
+    return issuer.owners.filter(pk=user.pk).exists()
 
 
 @rules.predicate

@@ -10,15 +10,14 @@ from .models import Issuer, BadgeClass, BadgeInstance
 
 
 class IssuerAdmin(DjangoObjectActions, ModelAdmin):
-    readonly_fields = ('created_at', 'created_by', 'old_json')
+    readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url')
     list_display = ('img', 'name', 'slug', 'created_by', 'created_at')
     list_display_links = ('img', 'name')
     list_filter = ('created_at',)
     search_fields = ('name', 'slug')
-    raw_id_fields = ('owner',)
     fieldsets = (
         ('Metadata', {
-            'fields': ('created_by', 'created_at', 'owner', 'slug'),
+            'fields': ('created_by', 'created_at', 'source', 'source_url', 'slug'),
             'classes': ("collapse",)
         }),
         (None, {
@@ -49,7 +48,7 @@ badgr_admin.register(Issuer, IssuerAdmin)
 
 
 class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
-    readonly_fields = ('created_at', 'created_by', 'old_json')
+    readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url')
     list_display = ('badge_image', 'name', 'slug', 'issuer_link', 'recipient_count')
     list_display_links = ('badge_image', 'name',)
     list_filter = ('created_at',)
@@ -57,7 +56,7 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
     raw_id_fields = ('issuer',)
     fieldsets = (
         ('Metadata', {
-            'fields': ('created_by', 'created_at', 'slug'),
+            'fields': ('created_by', 'created_at', 'source', 'source_url', 'slug'),
             'classes': ("collapse",)
         }),
         (None, {

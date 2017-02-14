@@ -17,7 +17,7 @@ from openbadges_bakery import unbake
 from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
 
 from issuer.api import IssuerList
-from issuer.models import Issuer, BadgeClass, BadgeInstance
+from issuer.models import Issuer, BadgeClass, BadgeInstance, IssuerStaff
 from issuer.serializers import BadgeInstanceSerializer
 from mainsite import TOP_DIR
 
@@ -286,7 +286,7 @@ class IssuerTests(APITestCase):
 
     def test_add_remove_user_with_issuer_staff_set(self):
         test_issuer = Issuer.objects.get(slug='test-issuer')
-        self.assertEqual(len(test_issuer.staff.all()), 0)
+        self.assertEqual(len(test_issuer.staff.all()), 1)
 
         self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         post_response = self.client.post(
@@ -295,7 +295,7 @@ class IssuerTests(APITestCase):
         )
 
         self.assertEqual(post_response.status_code, 200)
-        self.assertEqual(len(test_issuer.staff.all()), 1)
+        self.assertEqual(len(test_issuer.staff.all()), 2)
 
         second_response = self.client.post(
             '/v1/issuer/issuers/test-issuer/staff',
@@ -303,13 +303,14 @@ class IssuerTests(APITestCase):
         )
 
         self.assertEqual(second_response.status_code, 200)
-        self.assertEqual(len(test_issuer.staff.all()), 0)
+        self.assertEqual(len(test_issuer.staff.all()), 1)
 
     def test_delete_issuer_successfully(self):
         user = get_user_model().objects.get(pk=1)
         self.client.force_authenticate(user=user)
-        test_issuer = Issuer(name='issuer who can be deleted', slug='issuer-deletable', owner=user)
+        test_issuer = Issuer(name='issuer who can be deleted', slug='issuer-deletable')
         test_issuer.save()
+        IssuerStaff(issuer=test_issuer, user=user, role=IssuerStaff.ROLE_OWNER).save()
 
         response = self.client.delete('/v1/issuer/issuers/issuer-deletable', {})
         self.assertEqual(response.status_code, 200)
@@ -317,9 +318,10 @@ class IssuerTests(APITestCase):
     def test_delete_issuer_with_unissued_badgeclass_successfully(self):
         user = get_user_model().objects.get(pk=1)
         self.client.force_authenticate(user=user)
-        test_issuer = Issuer(name='issuer who can be deleted', slug="issuer-deletable", owner=user)
+        test_issuer = Issuer(name='issuer who can be deleted', slug="issuer-deletable")
         test_issuer.save()
-        test_badgeclass = BadgeClass(name="Deletable Badge", owner=user, issuer=test_issuer)
+        IssuerStaff(issuer=test_issuer, user=user, role=IssuerStaff.ROLE_OWNER).save()
+        test_badgeclass = BadgeClass(name="Deletable Badge", issuer=test_issuer)
         test_badgeclass.save()
 
         response = self.client.delete('/v1/issuer/issuers/issuer-deletable', {})

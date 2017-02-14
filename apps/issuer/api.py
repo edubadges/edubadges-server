@@ -87,10 +87,7 @@ class IssuerList(AbstractIssuerAPIEndpoint):
         serializer: IssuerSerializer
         """
         # Get the Issuers this user owns, edits, or staffs:
-        user_issuers = self.get_list(queryset=self.queryset.filter(
-            Q(owner__id=request.user.id) |
-            Q(staff__id=request.user.id)).distinct()
-        )
+        user_issuers = self.get_list(queryset=self.queryset.filter(staff__id=request.user.id).distinct())
         if not user_issuers.exists():
             return Response([])
 
@@ -141,7 +138,6 @@ class IssuerList(AbstractIssuerAPIEndpoint):
         # Pass in user values where we have a real user object instead of a url
         # and non-model-field data to go into json
         serializer.save(
-            owner=request.user,
             created_by=request.user
         )
         issuer = serializer.data
@@ -325,7 +321,9 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
             staff_instance, created = IssuerStaff.objects.get_or_create(
                 user=user_to_modify,
                 issuer=current_issuer,
-                defaults={'editor': editor_privilege}
+                defaults={
+                    'role': IssuerStaff.ROLE_EDITOR if editor_privilege else IssuerStaff.ROLE_STAFF
+                }
             )
 
             if created is False and staff_instance.editor != editor_privilege:

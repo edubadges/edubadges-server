@@ -6,10 +6,18 @@
             "created_by": 1,
             "old_json": "{\"description\":\"Issuer of Experimental Credentials\",\"url\":\"http://example.org\",\"image\":\"http://localhost:8000/public/issuers/test-issuer/image\",\"id\":\"http://localhost:8000/public/issuers/test-issuer\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"email\":\"exampleIssuer@example.org\",\"name\":\"Test Issuer\"}",
             "image": "uploads/issuers/guinea_pig_testing_badge.png",
-            "owner": 1,
             "slug": "test-issuer"
         },
         "model": "issuer.issuer",
+        "pk": 1
+    },
+    {
+        "fields": {
+            "issuer": 1,
+            "user": 1,
+            "role": "owner"
+        },
+        "model": "issuer.issuerstaff",
         "pk": 1
     },
     {
@@ -19,10 +27,18 @@
             "created_by": 1,
             "old_json": "{\"description\":\"Issuer of Experimental Credentials\",\"url\":\"http://example.org\",\"image\":\"http://localhost:8000/public/issuers/test-issuer/image\",\"id\":\"http://localhost:8000/public/issuers/testing-badge\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"email\":\"exampleIssuer@example.org\",\"name\":\"Test Issuer\"}",
             "image": "uploads/issuers/guinea_pig_testing_badge_dlQWRUl.png",
-            "owner": 1,
             "slug": "test-issuer-2"
         },
         "model": "issuer.issuer",
+        "pk": 2
+    },
+    {
+        "fields": {
+            "issuer": 2,
+            "user": 1,
+            "role": "owner"
+        },
+        "model": "issuer.issuerstaff",
         "pk": 2
     },
     {
@@ -32,10 +48,18 @@
             "created_by": 1,
             "old_json": "{\"description\":\"Edited Test Issuer\",\"url\":\"http://example.org\",\"image\":\"http://localhost:8000/public/issuers/test-issuer/image\",\"id\":\"http://localhost:8000/public/issuers/testing-badge\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"email\":\"exampleIssuer@example.org\",\"name\":\"Test Issuer\"}",
             "image": "uploads/issuers/guinea_pig_testing_badge_dlQWRUl.png",
-            "owner": 1,
             "slug": "edited-test-issuer"
         },
         "model": "issuer.issuer",
+        "pk": 3
+    },
+    {
+        "fields": {
+            "issuer": 3,
+            "user": 1,
+            "role": "owner"
+        },
+        "model": "issuer.issuerstaff",
         "pk": 3
     },
     {
@@ -112,10 +136,10 @@
         "fields": {
             "user": 2,
             "issuer": 3,
-            "editor": true
+            "role": "editor"
         },
         "model": "issuer.issuerstaff",
-        "pk": 1
+        "pk": 4
     },
     {
         "fields": {

@@ -13,7 +13,7 @@ from mainsite.models import BadgrApp
 from mainsite.serializers import WritableJSONField, HumanReadableBooleanField, StripTagsCharField
 from mainsite.utils import installed_apps_list, OriginSetting, verify_svg
 
-from .models import Issuer, BadgeClass
+from .models import Issuer, BadgeClass, IssuerStaff
 import utils
 
 
@@ -53,10 +53,14 @@ class IssuerSerializer(serializers.Serializer):
     def create(self, validated_data, **kwargs):
         new_issuer = Issuer(**validated_data)
 
+        # TODO: Is this needed anymore? [Wiggins Feb 2017]
         # Use AutoSlugField's pre_save to provide slug if empty, else auto-unique
         new_issuer.slug = Issuer._meta.get_field('slug').pre_save(new_issuer, add=True)
 
         new_issuer.save()
+
+        staff = IssuerStaff(issuer=new_issuer, user=new_issuer.created_by, role=IssuerStaff.ROLE_OWNER)
+        staff.save()
         return new_issuer
 
     def to_representation(self, obj):
@@ -94,7 +98,15 @@ class IssuerRoleActionSerializer(serializers.Serializer):
 class IssuerStaffSerializer(serializers.Serializer):
     """ A read_only serializer for staff roles """
     user = UserProfileField()
-    editor = serializers.BooleanField()
+    # editor = serializers.BooleanField()
+    role = serializers.CharField()
+
+    def validate_role(self, role):
+        valid_roles = dict(IssuerStaff.ROLE_CHOICES).keys()
+        role = role.lower()
+        if role not in valid_roles:
+            raise serializers.ValidationError("Invalid role. Available roles: {}".format(valid_roles))
+        return role
 
 
 class BadgeClassSerializer(serializers.Serializer):

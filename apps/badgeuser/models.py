@@ -197,7 +197,7 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):
-        return Issuer.objects.filter( Q(owner__id=self.id) | Q(staff__id=self.id) ).distinct()
+        return Issuer.objects.filter(staff__id=self.id).distinct()
 
     def cached_badgeclasses(self):
         return chain.from_iterable(issuer.cached_badgeclasses() for issuer in self.cached_issuers())
