@@ -300,6 +300,25 @@ class PathwayCompletionTests(APITestCase, CachingTestCase):
         pathway.root_element.save()
         return pathway
 
+    def build_single_element_pathway(self, creator):
+        pathway = self.create_pathway(creator=creator)
+
+        root_requirements = {
+            "junctionConfig": {
+                "requiredNumber": 1,
+                "@type": "Disjunction"
+            },
+            "@type": "BadgeJunction",
+            "badges": [
+                OriginSetting.JSON+"/public/badges/badge-of-edited-testing"
+            ]
+        }
+
+        pathway.root_element.completion_requirements = \
+            CompletionRequirementSpecFactory.parse_obj(root_requirements).serialize()
+        pathway.root_element.save()
+        return pathway
+
     def xit_test_tree_built_properly(self):
         editor = get_user_model().objects.get(pk=3)
         pathway = self.build_pathway(creator=editor)
@@ -376,6 +395,20 @@ class PathwayCompletionTests(APITestCase, CachingTestCase):
         # all 4 elements should be complete
         self.assertEqual(len(completions), 4)
         self.assertNotIn(False, [c.get('completed', False) for c in completions])
+
+    def test_completion_check_profile_completions(self):
+        editor = get_user_model().objects.get(pk=3)
+        pathway = self.build_single_element_pathway(creator=editor)
+
+        recipient = 'testrecipient2@example.com'
+        profile, _ = RecipientProfile.cached.get_or_create(recipient_identifier=recipient)
+        badgeclass = BadgeClass.objects.get(slug='badge-of-edited-testing')
+        badge_instance = badgeclass.issue(recipient, created_by=editor)
+
+        completions = profile.cached_completions(pathway)
+
+        self.assertEqual(len(completions), 1)
+        self.assertTrue(completions[0]['completed'])
 
     def test_completion_badge_awarding(self):
         editor = get_user_model().objects.get(pk=3)
