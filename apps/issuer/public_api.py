@@ -229,6 +229,9 @@ class BadgeInstanceJson(JSONComponentView):
             context['issuer'] = self.current_object.cached_issuer
             context['badgeclass_count'] = len(context['issuer'].cached_badgeclasses())
 
+        if self.request.query_params.get('action', None) == 'download':
+            context['action'] = 'download'
+
         return context
 
     def get(self, request, slug, format='html'):

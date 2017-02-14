@@ -20,7 +20,7 @@ Download
 ----------
 
 Save this badge image for your records or to upload to any Open Badges-compatible service:
-{{ image_url }}
+{{ download_url }}
 
 ----------
 Badge Storage and Access

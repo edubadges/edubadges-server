@@ -52,7 +52,7 @@ class RecipientProfile(basic_models.DefaultModel):
             tree['element'].completion_requirements = completion_spec.serialize()
 
         if completion_spec.completion_type == CompletionRequirementSpecFactory.BADGE_JUNCTION:
-            return [completion_spec.check_completion(instances)]
+            return [completion_spec.check_completion(tree, instances)]
         elif completion_spec.completion_type == CompletionRequirementSpecFactory.ELEMENT_JUNCTION:
             return completion_spec.check_completions(tree, instances)
         else:

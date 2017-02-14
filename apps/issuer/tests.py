@@ -967,12 +967,13 @@ class FindBadgeClassTests(APITestCase):
         self.assertEqual(response.data['json'].get('name'), 'MozFest Reveler')
 
     def test_can_find_issuer_badge_by_id(self):
+        # TODO: BadgeClass.identifier is mis-populated in current DB. Watch out!
         user = get_user_model().objects.first()
         self.client.force_authenticate(user=user)
 
         badge = BadgeClass.objects.get(id=1)
 
-        url = reverse('find_badgeclass_by_id', kwargs={'badge_id': badge.identifier})
+        url = reverse('find_badgeclass_by_id', kwargs={'badge_id': badge.get_full_url()})
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
