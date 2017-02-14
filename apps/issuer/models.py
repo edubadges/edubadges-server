@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import datetime
 import json
 import re
@@ -12,6 +14,7 @@ from django.core.files.storage import default_storage
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import ProtectedError
+from django.utils.timezone import get_current_timezone
 from jsonfield import JSONField
 from openbadges_bakery import bake
 
@@ -113,6 +116,8 @@ class Issuer(ResizeUploadedImage, cachemodel.CacheModel):
             'email': self.email,
             'description': self.description,
         }
+        if self.image:
+            json['image'] = OriginSetting.HTTP + reverse('issuer_image', kwargs={'slug': self.slug})
         return json
 
     @property
@@ -221,8 +226,9 @@ class BadgeClass(ResizeUploadedImage, cachemodel.CacheModel):
             'description': self.description,
             'issuer': self.cached_issuer.jsonld_id,
             "criteria": self.get_criteria_url(),
-            "image": self.image.url if self.image else None,
         }
+        if self.image:
+            json['image'] = OriginSetting.HTTP + reverse('badgeclass_image', kwargs={'slug': self.slug})
         return json
 
     @property
@@ -434,11 +440,27 @@ class BadgeInstance(ResizeUploadedImage, cachemodel.CacheModel):
             '@context': CURRENT_OBI_CONTEXT_IRI,
             'type': 'Assertion',
             'id': self.jsonld_id,
-            "issuedOn": self.created_at.isoformat(),
+            "issuedOn": self.created_at.astimezone(get_current_timezone()).replace(tzinfo=None).isoformat(),
             "uid": self.slug,
             "image": OriginSetting.HTTP + reverse('badgeinstance_image', kwargs={'slug': self.slug}),
             "badge": self.cached_badgeclass.jsonld_id,
+            "verify": {
+                "url": self.public_url,
+                "type": "hosted"
+            }
         }
+
+        if self.evidence_url:
+            json['evidence'] = self.evidence_url
+
+        # FIXME: this is a hack to deal with naive datetimes with microseconds that were serialized...
+        try:
+            self._meta.get_field_by_name('old_json')
+            if self.old_json and 'issuedOn' in self.old_json:
+                json['issuedOn'] = self.old_json['issuedOn']
+        except KeyError:
+            pass
+
         if self.salt:
             json['recipient'] = {
                 "type": "email",
