@@ -1,69 +1,63 @@
 
-<div class="pathwaydetail pathway-x-content">
-	<div class="pathwaydetail-x-body">
-		{% if element.completion_badgeclass %}
-		<a class="pathwaydetail-x-image" href="#">
-			<img width="64" src="{{ element.completion_badgeclass.image.url }}">
-		</a>
-		{% endif %}
-		<div class="pathwaydetail-x-main">
-			<div class="pathwaydetail-x-text">
-				<a href="{{ HTTP_ORIGIN }}{{ element.get_absolute_url }}">
-					<h1>{{ element.name }}</h1>
-					<p>{{ element.description }}</p>
-				</a>
-				<label class="formcheckbox">
-					<input type="checkbox" disabled="disabled" {% if element.required_by_parent %}checked="CHECKED"{% endif %}>
-					<span class="formcheckbox-x-text">Required for parent completion</span>
-				</label>
-				{% if element.completion_requirement_type == "ElementJunction" %}
-				<p class="pathwaydetail-x-children"><strong>{{element.cached_children|length}}</strong> Children</p>
-				{% endif %}
-			</div>
-			<!-- Connected Badges -->
-			{% if element.completion_requirement_type == "BadgeJunction" %}
-			<div class="pathwaydetail-x-badges">
-				<h2 class="titledivider">{{ element.cached_badges|length }} Connected Badge{% if element.cached_badges|length != 1 %}s{% endif %}</h2>
-				<div>
+<div class="pathway">
+    <div class="pathwaydetail pathway-x-content">
+        <div class="pathwaydetail-x-body">
+            {% if element.completion_badgeclass %}
+            <a class="pathwaydetail-x-image" href="#">
+                <img width="64" src="{{ element.completion_badgeclass.image.url }}">
+            </a>
+            {% endif %}
+            <div class="pathwaydetail-x-main">
+                <div class="pathwaydetail-x-text">
+                    <a href="{{ HTTP_ORIGIN }}{{ element.get_absolute_url }}">
+                        <h1>{{ element.name }}</h1>
+                        <p>{{ element.description }}</p>
+                    </a>
+                    {% if element.required_by_parent %}
+                      <p class="pathway-x-required">Required for parent completion.</p>
+                    {% endif %}
+                    {% if element.completion_requirement_type == "ElementJunction" %}
+                    <p class="pathwaydetail-x-children"><strong>{{element.cached_children|length}}</strong> Children</p>
+                    {% endif %}
+                </div>
+                <!-- Connected Badges -->
+                {% if element.completion_requirement_type == "BadgeJunction" %}
+                <div class="pathwaydetail-x-badges">
+                    <h2 class="titledivider">{{ element.cached_badges|length }} Connected Badge{% if element.cached_badges|length != 1 %}s{% endif %}</h2>
+                    <div>
 
-					{% for badge in element.cached_badges %}
-					<div class="selecteditem selecteditem-badge">
-						<a href="{{ HTTP_ORIGIN }}{{ badge.cached_badgeclass.get_absolute_url }}">
-							<img src="{{ badge.cached_badgeclass.image.url }}" width="40">
-						</a>
-					</div>
-					{% endfor %}
-				</div>
-			</div>
-			{% endif %}
-		</div>
-	</div>
+                        {% for badge in element.cached_badges %}
+                        <div class="selecteditem selecteditem-badge">
+                            <a href="{{ HTTP_ORIGIN }}{{ badge.cached_badgeclass.get_absolute_url }}">
+                                <img src="{{ badge.cached_badgeclass.image.url }}" width="40">
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
 
-	<div class="pathwaydetail-x-footer">
-		<div class="l-childrenhorizontal l-childrenhorizontal-small"
-		     [class.pathwaydetail-x-inactive]="isMoveInProgress"
-		>
-			<label class="select select-inputonly select-secondary">
-				<span>Badge completion criteria</span>
+        <div class="pathwaydetail-x-footer">
+            <div class="l-childrenhorizontal l-childrenhorizontal-small">
+                {% if element.completion_requirement_type == "ElementJunction" %}
+                    {% if element.junction_config.type == "Conjunction" %}
+                        <p>ALL checked children are required for completion</p>
+                    {% elif element.junction_config.type == "Disjunction" %}
+                        <p>At least ONE checked child is required for completion</p>
+                    {% endif %}
+                {% elif element.completion_requirement_type == "BadgeJunction" %}
+                    {% if element.junction_config.type == "Conjunction" %}
+                        <p>ALL badges are required for completion</p>
+                    {% elif element.junction_config.type == "Disjunction" %}
+                        <p>At least ONE badge is required for completion</p>
+                    {% endif %}
+                {% endif %}
+            </div>
 
-				{% if element.completion_requirement_type == "ElementJunction" %}
-					{% if element.junction_config.type == "Conjunction" %}
-						<p>ALL checked children are required for completion</p>
-					{% elif element.junction_config.type == "Disjunction" %}
-						<p>At least ONE checked child is required for completion</p>
-					{% endif %}
-				{% elif element.completion_requirement_type == "BadgeJunction" %}
-					{% if element.junction_config.type == "Conjunction" %}
-						<p>ALL badges are required for completion</p>
-					{% elif element.junction_config.type == "Disjunction" %}
-						<p>At least ONE badge is required for completion</p>
-					{% endif %}
-				{% endif %}
-			</label>
-		</div>
-
-	</div>
-
+        </div>
+    </div>
 	{% for child in element.cached_children %}
 		{% include "public/pathway_element_contents.html" with element=child %}
 	{% endfor %}

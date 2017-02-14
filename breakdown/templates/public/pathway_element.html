@@ -73,18 +73,18 @@
 
 		<article class="pathwayheading">
 			<h1 class="title">Completion Requirements</h1>
-		  {% if pathway_element.completion_requirement_type == "ElementJunction" %}
-			  <p>Completion of this element is based on completing the following child element(s).</p>
-
+		    {% if pathway_element.cached_children %}
+			  <p>Completion of this pathway is based on completing the following child element(s).</p>
 			  {% if pathway_element.junction_config.type == "Conjunction" %}
 				  <p>ALL checked children are required for completion</p>
 			  {% elif pathway_element.junction_config.type == "Disjunction" %}
 				  <p>At least ONE checked child is required for completion</p>
 			  {% endif %}
-
-			  {% for child in pathway_element.cached_children %}
-				  {% include "public/pathway_element_contents.html" with element=child %}
+              <div class="pathway-root l-childrenvertical">
+			  {% for element in pathway_element.cached_children %}
+				  {% include "public/pathway_element_contents.html" %}
 			  {% endfor %}
+              </div>
 			{% elif pathway_element.completion_requirement_type == "BadgeJunction" %}
 			  <p>Completion of this element is based the following badge(s).</p>
 

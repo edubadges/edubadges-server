@@ -2242,7 +2242,7 @@ table {
   clip: auto;
 }
 
-/*# sourceMappingURL=agnostic-styles.61cec8f1a73417dc53f6.css.map*/@charset "UTF-8";
+/*# sourceMappingURL=agnostic-styles.055d0d8ba512a1e3ed49.css.map*/@charset "UTF-8";
 /*
 Colors
 
@@ -3027,6 +3027,15 @@ Styleguide 2.24
 .l-marginBottom {
   margin-bottom: 8px; }
 
+.l-marginBottom-2x {
+  margin-bottom: 16px; }
+
+.l-marginBottom-3x {
+  margin-bottom: 24px; }
+
+.l-marginBottom-4x {
+  margin-bottom: 32px; }
+
 /*
 Margin Left
 
@@ -3039,6 +3048,9 @@ Styleguide 2.26
 */
 .l-marginLeft {
   margin-left: 8px; }
+
+.l-marginLeft-x2 {
+  margin-left: 16px; }
 
 /*
 Margin Top
@@ -3061,6 +3073,19 @@ Styleguide 2.27
 
 .l-marginTop-4x {
   margin-top: 32px; }
+
+/*
+Max Width
+
+Constrains the maximum width of an element.
+
+Markup:
+<div class="l-maxWidth">as never one to patiently pick up broken fragments and glue them together again and tell myself that the mending whole was good as new. What is broken is broken – and I’d rather remember it as it was at its best than mend it and see the broken places as long as I lived.</div>
+
+Styleguide 2.28
+*/
+.l-maxWidth {
+  max-width: 560px; }
 
 /*
 Offset Bottom
@@ -6626,7 +6651,8 @@ Styleguide 3.66.2
     max-width: 560px; }
   .importHeading h1 {
     line-height: 1.35;
-    margin-bottom: 8px; }
+    margin-bottom: 8px;
+    margin-top: 32px; }
   .importHeading ul {
     list-style: disc;
     padding: 8px 20px; }
@@ -6889,6 +6915,24 @@ Styleguide 3.4
         margin-bottom: 0; }
     .pathwaydetail .pathwaydetail-x-action {
       margin-left: 0; } }
+  .pathwaydetail .pathway-x-required {
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    color: #78768d;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex; }
+    .pathwaydetail .pathway-x-required::before {
+      background-image: url(assets/checkmark-afa93b32a3a92cd753072409762d0f5a.svg);
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-size: contain;
+      content: '';
+      display: inline-block;
+      height: 16px;
+      margin-right: 6px;
+      width: 16px; }
   @media (min-width: 1024px) {
     .pathwaydetail .pathwaydetail-x-main {
       -webkit-box-flex: 1;
@@ -7910,12 +7954,8 @@ markup:
 <table class="table table-issues">
   <thead>
     <tr>
-      <th scope="col">
-        name
-      </th>
-      <th scope="col">
-        email
-      </th>
+      <th scope="col">name</th>
+      <th scope="col">email</th>
       <th></th>
     </tr>
   </thead>
@@ -8094,6 +8134,9 @@ Styleguide 3.16.3
     padding-right: 16px;
     text-align: right;
     vertical-align: middle; }
+  .table-issues .table-issues-x-confirmationText {
+    color: #78768d;
+    font-weight: normal; }
 
 .table-dialog {
   border-radius: 0;
@@ -8567,4 +8610,4 @@ Styleguide 4.3
 .o-canvas {
   background-color: #fff; }
 
-/*# sourceMappingURL=theme-default.61cec8f1a73417dc53f6.css.map*/
+/*# sourceMappingURL=theme-default.055d0d8ba512a1e3ed49.css.map*/
