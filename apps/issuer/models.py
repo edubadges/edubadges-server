@@ -129,7 +129,7 @@ class BadgeClass(AbstractBadgeClass):
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_completion_elements(self):
-        return [pce.element for pce in self.completion_elements.all()]
+        return [pce for pce in self.completion_elements.all()]
 
     def issue(self, recipient_id=None, evidence_url=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None):
         return BadgeInstance.objects.create_badgeinstance(
