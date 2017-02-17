@@ -556,7 +556,9 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
             if current_badgeclass.recipient_count() > 0:
                 return Response("Badge class could not be deleted. It has already been issued at least once.", status=status.HTTP_400_BAD_REQUEST)
             elif current_badgeclass.pathway_element_count() > 0:
-                return Response("Badge class could not be deleted. It is been issued at least once.", status=status.HTTP_400_BAD_REQUEST)
+                return Response("Badge class could not be deleted. It is being used as a pathway completion requirement.", status=status.HTTP_400_BAD_REQUEST)
+            elif len(current_badgeclass.cached_completion_elements()) > 0:
+                return Response("Badge class could not be deleted. It is being used as a pathway completion badge.", status=status.HTTP_400_BAD_REQUEST)
             else:
                 old_badgeclass = current_badgeclass.json
                 current_badgeclass.delete()
