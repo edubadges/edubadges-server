@@ -4,6 +4,7 @@ import os
 import time
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
 from django.core.cache import cache
 from django.core.cache.backends.filebased import FileBasedCache
 from django.core.urlresolvers import reverse
@@ -39,6 +40,8 @@ class PathwayApiTests(APITestCase, CachingTestCase):
         self.instructor = BadgeUser(username='instructor', email='instructor@local.test')
         self.instructor.set_password('secret')
         self.instructor.save()
+        self.instructor.user_permissions.add(Permission.objects.get(codename="add_issuer"))
+
         CachedEmailAddress(email='instructor@local.test', verified=True, primary=True, user=self.instructor).save()
         self.assertTrue(self.client.login(username='instructor', password='secret'), "Instructor can log in")
 
