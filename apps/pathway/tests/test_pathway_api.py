@@ -4,6 +4,7 @@ import os
 import time
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
 from django.core.cache import cache
 from django.core.cache.backends.filebased import FileBasedCache
 from django.core.urlresolvers import reverse
@@ -39,6 +40,8 @@ class PathwayApiTests(APITestCase, CachingTestCase):
         self.instructor = BadgeUser(username='instructor', email='instructor@local.test')
         self.instructor.set_password('secret')
         self.instructor.save()
+        self.instructor.user_permissions.add(Permission.objects.get(codename="add_issuer"))
+
         CachedEmailAddress(email='instructor@local.test', verified=True, primary=True, user=self.instructor).save()
         self.assertTrue(self.client.login(username='instructor', password='secret'), "Instructor can log in")
 
@@ -443,4 +446,26 @@ class PathwayCompletionTests(APITestCase, CachingTestCase):
             )
         except BadgeInstance.DoesNotExist:
             self.fail("Completion Badge was not awarded")
+
+    def test_cannot_delete_required_badgeclass(self):
+        editor = get_user_model().objects.get(pk=3)
+        pathway = self.build_single_element_pathway(creator=editor)
+
+        recipient = 'testrecipient2@example.com'
+        profile, _ = RecipientProfile.cached.get_or_create(recipient_identifier=recipient)
+        badgeclass = BadgeClass.objects.get(slug='badge-of-edited-testing')
+
+        self.client.force_authenticate(user=badgeclass.issuer.created_by)
+        response = self.client.delete('/v1/issuer/issuers/{}/badges/{}'.format(badgeclass.issuer.slug, badgeclass.slug))
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data, 'Badge could not be deleted. It is being used as a pathway completion requirement.')
+
+        second_badgeclass = BadgeClass.objects.get(pk=4)
+        pathway.root_element.completion_badgeclass = second_badgeclass
+        pathway.root_element.save()
+        second_badgeclass.save()
+
+        response = self.client.delete('/v1/issuer/issuers/{}/badges/{}'.format(second_badgeclass.issuer.slug, second_badgeclass.slug))
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data, 'Badge could not be deleted. It is being used as a pathway completion badge.')
 

@@ -1,9 +1,11 @@
 from itertools import chain
 import logging
-from django.apps import apps
+import urlparse
 
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import UploadedFile
 from django.db.models import Q
 
 from rest_framework import status, authentication, permissions
@@ -552,9 +554,11 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
             if current_badgeclass.recipient_count() > 0:
-                return Response("Badge class could not be deleted. It has already been issued at least once.", status=status.HTTP_400_BAD_REQUEST)
+                return Response("Badge could not be deleted. It has already been issued at least once.", status=status.HTTP_400_BAD_REQUEST)
             elif current_badgeclass.pathway_element_count() > 0:
-                return Response("Badge class could not be deleted. It is been issued at least once.", status=status.HTTP_400_BAD_REQUEST)
+                return Response("Badge could not be deleted. It is being used as a pathway completion requirement.", status=status.HTTP_400_BAD_REQUEST)
+            elif len(current_badgeclass.cached_completion_elements()) > 0:
+                return Response("Badge could not be deleted. It is being used as a pathway completion badge.", status=status.HTTP_400_BAD_REQUEST)
             else:
                 old_badgeclass = current_badgeclass.json
                 current_badgeclass.delete()
@@ -577,9 +581,10 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
                 status=status.HTTP_404_NOT_FOUND
             )
         else:
+            # If image is neither an UploadedFile nor a data uri, ignore it.
+            # Likely to occur if client sends back the image attribute (as a url), unmodified from a GET request
             new_image = request.data.get('image')
-            if new_image == current_badgeclass.image.url:
-                # image is unchanged, remove from request
+            if not isinstance(new_image, UploadedFile) and urlparse.urlparse(new_image).scheme != 'data':
                 request.data.pop('image')
 
             serializer = BadgeClassSerializer(current_badgeclass, data=request.data, context={'request': request})

@@ -150,7 +150,7 @@ class PathwayElement(basic_models.DefaultModel):
     ordering = models.IntegerField(default=99)
     description = models.TextField()
     alignment_url = models.URLField(blank=True, null=True)
-    completion_badgeclass = models.ForeignKey('issuer.BadgeClass', blank=True, null=True)
+    completion_badgeclass = models.ForeignKey('issuer.BadgeClass', blank=True, null=True, related_name='completion_elements')
     completion_requirements = JSONField(blank=True, null=True)
     cached = SlugOrJsonIdCacheModelManager('element_slug')
 
