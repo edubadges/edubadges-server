@@ -1,9 +1,11 @@
 from itertools import chain
 import logging
-from django.apps import apps
+import urlparse
 
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import UploadedFile
 from django.db.models import Q
 
 from rest_framework import status, authentication, permissions
@@ -581,9 +583,10 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
                 status=status.HTTP_404_NOT_FOUND
             )
         else:
+            # If image is neither an UploadedFile nor a data uri, ignore it.
+            # Likely to occur if client sends back the image attribute (as a url), unmodified from a GET request
             new_image = request.data.get('image')
-            if new_image == current_badgeclass.image.url:
-                # image is unchanged, remove from request
+            if not isinstance(new_image, UploadedFile) and urlparse.urlparse(new_image).scheme != 'data':
                 request.data.pop('image')
 
             serializer = BadgeClassSerializer(current_badgeclass, data=request.data, context={'request': request})
