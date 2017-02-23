@@ -80,7 +80,8 @@ class IssuerTests(APITestCase):
         self.assertIsNotNone(badge_object.get('@context'))
 
         # assert that the issuer was published to and fetched from the cache
-        with self.assertNumQueries(0):
+        # we expect to generate one query where the object permissions are checked in IssuerDetail.get
+        with self.assertNumQueries(1):
             slug = response.data.get('slug')
             response = self.client.get('/v1/issuer/issuers/{}'.format(slug))
             self.assertEqual(response.status_code, 200)
@@ -409,7 +410,8 @@ class BadgeClassTests(APITestCase):
             self.assertEqual(response.status_code, 201)
 
             # assert that the BadgeClass was published to and fetched from the cache
-            with self.assertNumQueries(0):
+            # we expect to generate one query where the object permissions are checked in BadgeClassDetail.get
+            with self.assertNumQueries(1):
                 slug = response.data.get('slug')
                 response = self.client.get('/v1/issuer/issuers/test-issuer/badges/{}'.format(slug))
                 self.assertEqual(response.status_code, 200)
@@ -434,7 +436,8 @@ class BadgeClassTests(APITestCase):
             self.assertEqual(response.status_code, 201)
 
             # assert that the BadgeClass was published to and fetched from the cache
-            with self.assertNumQueries(0):
+            # we expect to generate one query where the object permissions are checked in BadgeClassDetail.get
+            with self.assertNumQueries(1):
                 slug = response.data.get('slug')
                 response = self.client.get('/v1/issuer/issuers/test-issuer/badges/{}'.format(slug))
                 self.assertEqual(response.status_code, 200)
@@ -1109,7 +1112,7 @@ class FindBadgeClassTests(APITestCase):
 
         badge = BadgeClass.objects.get(id=1)
 
-        url = reverse('find_badgeclass_by_id', kwargs={'badge_id': badge.get_full_url()})
+        url = reverse('find_badgeclass_by_id', kwargs={'badge_id': badge.get_absolute_url()})
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
