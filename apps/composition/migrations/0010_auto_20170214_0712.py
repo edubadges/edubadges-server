@@ -18,7 +18,7 @@ def import_localissuers_to_issuer(apps, schema_editor):
         if local_issuer.image:
             image = local_issuer.image
         elif remote_image_url and local_issuer.image_preview_status is None:
-            image = fetch_remote_file_to_storage(remote_image_url, upload_to=local_issuer.image.field.upload_to)
+            status_code, image = fetch_remote_file_to_storage(remote_image_url, upload_to=local_issuer.image.field.upload_to)
         else:
             image = None
 
@@ -29,7 +29,8 @@ def import_localissuers_to_issuer(apps, schema_editor):
                 'created_at': local_issuer.created_at,
                 'created_by': local_issuer.created_by,
                 'name': local_issuer.name,
-                'image': image
+                'image': image,
+                'original_json': local_issuer.json,
             }
         )
         new_issuer.save()
@@ -46,7 +47,7 @@ def import_localbadgeclass_to_issuer(apps, schema_editor):
         if local_badgeclass.image:
             image = local_badgeclass.image
         elif remote_image_url and local_badgeclass.image_preview_status is None:
-            image = fetch_remote_file_to_storage(remote_image_url, upload_to=local_badgeclass.image.field.upload_to)
+            status_code, image = fetch_remote_file_to_storage(remote_image_url, upload_to=local_badgeclass.image.field.upload_to)
         else:
             image = None
 
@@ -60,15 +61,17 @@ def import_localbadgeclass_to_issuer(apps, schema_editor):
                 'image': image,
                 'criteria_text': local_badgeclass.criteria_text,
                 'issuer': issuer,
+                'original_json': local_badgeclass.json,
             }
         )
         new_badgeclass.save()
+
 
 class Migration(migrations.Migration):
 
     dependencies = [
         ('composition', '0009_auto_20161007_1358'),
-        ('issuer', '0016_auto_20170214_0749'),
+        ('issuer', '0017_auto_20170227_1334'),
     ]
 
     operations = [
