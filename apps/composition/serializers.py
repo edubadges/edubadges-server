@@ -1,22 +1,20 @@
 from collections import OrderedDict
 
-from django.conf import settings
+import requests
 from django.core.urlresolvers import reverse
 from rest_framework import serializers
 
 import badgrlog
 from badgeuser.models import EmailAddressVariant
-from issuer.models import BadgeInstance
+from issuer.models import BadgeInstance, Issuer, BadgeClass
 from mainsite.drf_fields import Base64FileField
 from mainsite.serializers import StripTagsCharField
-from mainsite.utils import OriginSetting
+from mainsite.utils import OriginSetting, fetch_remote_file_to_storage
 from verifier import ComponentsSerializer
 from verifier.badge_check import BadgeCheck
 from verifier.utils import find_and_get_badge_class, find_and_get_issuer, normalize_error_message
-
 from .format import V1InstanceSerializer, V1BadgeInstanceSerializer
-from .models import (LocalBadgeInstance, LocalBadgeClass, LocalIssuer,
-                     Collection, LocalBadgeInstanceCollection)
+from .models import (LocalBadgeInstance, Collection, LocalBadgeInstanceCollection)
 from .utils import (get_verified_badge_instance_from_form,
                     use_or_bake_badge_instance_image, get_badge_by_identifier)
 
@@ -51,11 +49,6 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
                 "type": "image",
                 "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('localbadgeinstance_image', kwargs={'slug': obj.slug}))
             }
-            if obj.issuer.image_preview:
-                representation['issuerImagePreview'] = {
-                    "type": "image",
-                    "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('localissuer_image', kwargs={'slug': obj.issuer.slug}))
-                }
         elif isinstance(obj, BadgeInstance):
             representation['id'] = obj.slug
             representation['json'] = V1BadgeInstanceSerializer(obj, context=self.context).data
@@ -63,11 +56,11 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
                 "type": "image",
                 "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('badgeclass_image', kwargs={'slug': obj.cached_badgeclass.slug}))
             }
-            if obj.cached_issuer.image:
-                representation['issuerImagePreview'] = {
-                    "type": "image",
-                    "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('issuer_image', kwargs={'slug': obj.cached_issuer.slug}))
-                }
+        if obj.cached_issuer.image:
+            representation['issuerImagePreview'] = {
+                "type": "image",
+                "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('issuer_image', kwargs={'slug': obj.cached_issuer.slug}))
+            }
 
         if obj.image:
             representation['image'] = obj.image_url()
@@ -170,25 +163,41 @@ badge was valid, but cannot be saved."
 
         # Create local component instances
         if issuer_url and badge_class_url:
-            non_embedded_issuer_json = components.issuer.serializer(
-                issuer, context={'issuer_id': issuer_url}).data
-            new_issuer, _ = LocalIssuer.objects.get_or_create({
+            non_embedded_issuer_json = components.issuer.serializer(issuer, context={'issuer_id': issuer_url}).data
+            new_issuer, created = Issuer.objects.get_or_create(source_url=issuer_url, defaults={
+                'source': 'LocalBadgeInstanceUploadSerializer',
                 'name': issuer['name'],
-                'json': non_embedded_issuer_json
-            }, identifier=issuer_url)
+                'original_json': non_embedded_issuer_json
+            })
 
             non_embedded_badge_class_json = \
                 components.badge_class.serializer(
                     badge_class, context={'badge_class_id': badge_class_url,
                                           'issuer': issuer,
                                           'issuer_id': issuer_url}).data
-            new_badge_class, _ = LocalBadgeClass.objects.get_or_create({
-                'name': badge_class['name'],
-                'json': non_embedded_badge_class_json,
-                'issuer': new_issuer,
-            }, identifier=badge_class_url)
+            try:
+                new_badgeclass = BadgeClass.objects.get(source_url=badge_class_url)
+            except BadgeClass.DoesNotExist:
+                badge_class_image_url = badge_class.get('image', None)
+                if badge_class_image_url:
+                    try:
+                        status_code, badgeclass_image = fetch_remote_file_to_storage(badge_class_image_url, upload_to='uploads/badges')
+                    except requests.ConnectionError as e:
+                        raise serializers.ValidationError("Error retrieving image")
+                else:
+                    badgeclass_image = None
+
+                new_badgeclass = BadgeClass(
+                    source_url=badge_class_url,
+                    source='LocalBadgeInstanceUploadSerializer',
+                    original_json=non_embedded_badge_class_json,
+                    name=badge_class['name'],
+                    image=badgeclass_image,
+                    issuer=new_issuer,
+                )
+                new_badgeclass.save()
         else:  # 0.5 badges
-            new_issuer, new_badge_class = None, None
+            new_issuer, new_badgeclass = None, None
 
         existing_instance = BadgeInstance.objects.filter(slug=badge_instance_json.get('uid')).first()
         if existing_instance:
@@ -203,8 +212,7 @@ badge was valid, but cannot be saved."
         new_instance, instance_created = LocalBadgeInstance.objects.get_or_create({
             'recipient_user': request_user,
             'json': badge_instance_json,
-            'badgeclass': new_badge_class,
-            'issuer': new_issuer,
+            'issuer_badgeclass': new_badgeclass,
             'recipient_identifier': badge_check.recipient_identifier,
             'image': use_or_bake_badge_instance_image(
                 validated_data.get('image'), badge_instance, badge_class)

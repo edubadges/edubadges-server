@@ -534,9 +534,9 @@ class LocalBadgeInstanceImage(ImagePropertyDetailView):
     prop = 'image'
 
 
-class LocalIssuerImage(ImagePropertyDetailView):
-    model = LocalIssuer
-    prop = 'image_preview'
+# class LocalIssuerImage(ImagePropertyDetailView):
+#     model = LocalIssuer
+#     prop = 'image_preview'
 
 
 class ShareBadge(APIView):
