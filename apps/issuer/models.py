@@ -46,7 +46,7 @@ class Issuer(ResizeUploadedImage, cachemodel.CacheModel):
     email = models.CharField(max_length=254, blank=True, null=True, default=None)
 
     old_json = JSONField()
-    original_json = JSONField(blank=True, null=True)
+    original_json = models.TextField(blank=True, null=True, default=None)
 
     cached = SlugOrJsonIdCacheModelManager()
 
@@ -162,7 +162,7 @@ class BadgeClass(ResizeUploadedImage, cachemodel.CacheModel):
     criteria_text = models.TextField(blank=True, null=True)
 
     old_json = JSONField()
-    original_json = JSONField(blank=True, null=True)
+    original_json = models.TextField(blank=True, null=True, default=None)
 
     cached = SlugOrJsonIdCacheModelManager()
 

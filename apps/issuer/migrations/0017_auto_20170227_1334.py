@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-import jsonfield.fields
 
 
 class Migration(migrations.Migration):
@@ -15,13 +14,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='badgeclass',
             name='original_json',
-            field=jsonfield.fields.JSONField(null=True, blank=True),
+            field=models.TextField(default=None, null=True, blank=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='issuer',
             name='original_json',
-            field=jsonfield.fields.JSONField(null=True, blank=True),
+            field=models.TextField(default=None, null=True, blank=True),
             preserve_default=True,
         ),
     ]
