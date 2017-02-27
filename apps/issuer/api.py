@@ -482,6 +482,11 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
               required: true
               paramType: form
               description: Either a URL of a remotely hosted criteria page or a text string describing the criteria.
+            - name: description
+              type: string
+              required: true
+              paramType: form
+              description: The description of the Badge Class.
         """
 
         # Step 1: Locate the issuer
@@ -500,7 +505,6 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
         serializer.save(
             issuer=current_issuer,
             created_by=request.user,
-            description=request.data.get('description')
         )
         badge_class = serializer.data
 
@@ -564,7 +568,6 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
                 current_badgeclass.delete()
                 logger.event(badgrlog.BadgeClassDeletedEvent(old_badgeclass, request.user))
                 return Response("Badge " + badgeSlug + " has been deleted.", status.HTTP_200_OK)
-
 
     def put(self, request, issuerSlug, badgeSlug):
         """

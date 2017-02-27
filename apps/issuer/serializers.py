@@ -183,9 +183,6 @@ class BadgeClassSerializer(serializers.Serializer):
         return data
 
     def create(self, validated_data, **kwargs):
-        description = validated_data.pop('description')
-        if not description:
-            raise serializers.ValidationError({"description": ["This field is required"]})
 
         if 'image' not in validated_data:
             raise serializers.ValidationError({"image": ["This field is required"]})
