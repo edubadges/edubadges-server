@@ -107,8 +107,7 @@ def fetch_remote_file_to_storage(remote_url, upload_to=''):
             filename=hashlib.md5(remote_url).hexdigest(),
             ext=ext)
         if not store.exists(storage_name):
-            r.raw.decode_content = True
-            buf = StringIO.StringIO(r.raw.read())
+            buf = StringIO.StringIO(r.content)
             store.save(storage_name, buf)
             return r.status_code, storage_name
     return r.status_code, None

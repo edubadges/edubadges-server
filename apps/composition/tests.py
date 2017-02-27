@@ -11,7 +11,7 @@ from badgeuser.models import CachedEmailAddress
 from composition.models import (LocalBadgeClass, LocalIssuer, LocalBadgeInstance,
                                 Collection, LocalBadgeInstanceCollection,)
 from composition.serializers import (CollectionSerializer, CollectionBadgeSerializer,)
-from issuer.models import BadgeInstance, BadgeClass
+from issuer.models import BadgeInstance, BadgeClass, Issuer
 
 dir = os.path.dirname(__file__)
 
@@ -355,8 +355,8 @@ class TestBadgeUploads(APITestCase):
         )
         self.assertEqual(response2.status_code, 201)
 
-        self.assertEqual(LocalBadgeClass.objects.all().count(), 1)
-        self.assertEqual(LocalIssuer.objects.all().count(), 1)
+        self.assertEqual(BadgeClass.objects.all().count(), 1)
+        self.assertEqual(Issuer.objects.all().count(), 1)
 
     def test_shouldnt_access_already_stored_badgeclass_for_validation(self):
         """

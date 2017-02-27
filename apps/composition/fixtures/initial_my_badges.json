@@ -3,8 +3,7 @@
     "fields": {
       "recipient_user": 1,
       "recipient_identifier": "test@example.com",
-      "badgeclass": 1,
-      "issuer": 1,
+      "issuer_badgeclass": 1,
       "created_at": "2015-12-15T15:55:51Z",
       "created_by": null,
       "slug": "3949c957-11e2-464d-b1c0-0d4fa645e93a",
@@ -21,8 +20,7 @@
     "fields": {
       "recipient_user": 1,
       "recipient_identifier": "test@example.com",
-      "badgeclass": 2,
-      "issuer": 1,
+      "issuer_badgeclass": 2,
       "created_at": "2015-12-21T20:41:16Z",
       "created_by": null,
       "slug": "32f81606-4430-40df-a9fc-382a2d1f1574",
@@ -39,8 +37,7 @@
     "fields": {
       "recipient_user": 1,
       "recipient_identifier": "test@example.com",
-      "badgeclass": 3,
-      "issuer": 2,
+      "issuer_badgeclass": 3,
       "created_at": "2015-12-28T15:54:50Z",
       "created_by": null,
       "slug": "c36110d9-938a-4052-9a13-ed8424454ed5",
@@ -57,8 +54,7 @@
     "fields": {
       "recipient_user": 1,
       "recipient_identifier": "test@example.com",
-      "badgeclass": 4,
-      "issuer": 3,
+      "issuer_badgeclass": 4,
       "created_at": "2016-09-01T23:07:25Z",
       "created_by": null,
       "slug": "255aa4a3-bb5d-44ad-9845-4df2fc8268d5",
@@ -75,8 +71,7 @@
     "fields": {
       "recipient_user": 1,
       "recipient_identifier": "test@example.com",
-      "badgeclass": 5,
-      "issuer": 4,
+      "issuer_badgeclass": 5,
       "created_at": "2016-09-01T23:08:11Z",
       "created_by": null,
       "slug": "95dc9b99-fead-4549-8bb9-018f075ccd8a",
@@ -93,8 +88,7 @@
     "fields": {
       "recipient_user": 1,
       "recipient_identifier": "test@example.com",
-      "badgeclass": 6,
-      "issuer": 5,
+      "issuer_badgeclass": 6,
       "created_at": "2016-09-01T23:33:46Z",
       "created_by": null,
       "slug": "17513bfe-3632-4ea9-9396-e05ff0ae286e",
@@ -111,8 +105,7 @@
     "fields": {
       "recipient_user": 1,
       "recipient_identifier": "New+Email@newemail.com",
-      "badgeclass": 6,
-      "issuer": 5,
+      "issuer_badgeclass": 6,
       "created_at": "2016-09-01T23:33:46Z",
       "created_by": null,
       "slug": "17513bf6-3632-4ea9-9396-e05ff0ae286e",
@@ -131,13 +124,14 @@
       "created_at": "2015-12-15T15:55:51Z",
       "created_by": null,
       "slug": "mozfest-reveler",
-      "json": "{\"description\":\"The MozFest 2013 Reveler Badge is special edition badge acknowledging a personal commitment to forging the future of the web during MozFest: working with peers to imagine and build an open future of learning, making, journalism, data, science, privacy, and mobile.\",\"tags\":[],\"image\":\"http://badger.openbadges.org/badge/image/mozfest-reveler.png\",\"criteria\":\"http://badger.openbadges.org/badge/criteria/mozfest-reveler\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":{\"url\":\"http://openbadges.org\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"id\":\"http://badger.openbadges.org/program/meta/bda68a0b505bc0c7cf21bc7900280ee74845f693\",\"name\":\"Open Badges\"},\"type\":\"BadgeClass\",\"id\":\"http://badger.openbadges.org/badge/meta/mozfest-reveler\",\"name\":\"MozFest Reveler\"}",
+      "old_json": "{\"description\":\"The MozFest 2013 Reveler Badge is special edition badge acknowledging a personal commitment to forging the future of the web during MozFest: working with peers to imagine and build an open future of learning, making, journalism, data, science, privacy, and mobile.\",\"tags\":[],\"image\":\"http://badger.openbadges.org/badge/image/mozfest-reveler.png\",\"criteria\":\"http://badger.openbadges.org/badge/criteria/mozfest-reveler\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":{\"url\":\"http://openbadges.org\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"id\":\"http://badger.openbadges.org/program/meta/bda68a0b505bc0c7cf21bc7900280ee74845f693\",\"name\":\"Open Badges\"},\"type\":\"BadgeClass\",\"id\":\"http://badger.openbadges.org/badge/meta/mozfest-reveler\",\"name\":\"MozFest Reveler\"}",
       "criteria_text": null,
-      "identifier": "http://badger.openbadges.org/badge/meta/mozfest-reveler",
+      "source_url": "http://badger.openbadges.org/badge/meta/mozfest-reveler",
+      "source": "test-fixture",
       "image": "",
       "issuer": 1
     },
-    "model": "composition.localbadgeclass",
+    "model": "issuer.badgeclass",
     "pk": 1
   },
   {
@@ -146,13 +140,14 @@
       "created_at": "2015-12-21T20:41:16Z",
       "created_by": null,
       "slug": "mozfest-session-leader",
-      "json": "{\"description\":\"The MozFest 2013 Session Leader badge acknowledging personal commitment to sharing ideas about openness at the Mozilla Festival.\",\"tags\":[],\"image\":\"http://badger.openbadges.org/badge/image/mozfest-session-leader.png\",\"criteria\":\"http://badger.openbadges.org/badge/criteria/mozfest-session-leader\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":{\"url\":\"http://openbadges.org\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"id\":\"http://badger.openbadges.org/program/meta/bda68a0b505bc0c7cf21bc7900280ee74845f693\",\"name\":\"Open Badges\"},\"type\":\"BadgeClass\",\"id\":\"http://badger.openbadges.org/badge/meta/mozfest-session-leader\",\"name\":\"MozFest Session Leader\"}",
+      "old_json": "{\"description\":\"The MozFest 2013 Session Leader badge acknowledging personal commitment to sharing ideas about openness at the Mozilla Festival.\",\"tags\":[],\"image\":\"http://badger.openbadges.org/badge/image/mozfest-session-leader.png\",\"criteria\":\"http://badger.openbadges.org/badge/criteria/mozfest-session-leader\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":{\"url\":\"http://openbadges.org\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"id\":\"http://badger.openbadges.org/program/meta/bda68a0b505bc0c7cf21bc7900280ee74845f693\",\"name\":\"Open Badges\"},\"type\":\"BadgeClass\",\"id\":\"http://badger.openbadges.org/badge/meta/mozfest-session-leader\",\"name\":\"MozFest Session Leader\"}",
       "criteria_text": null,
-      "identifier": "http://badger.openbadges.org/badge/meta/mozfest-session-leader",
+      "source_url": "http://badger.openbadges.org/badge/meta/mozfest-session-leader",
+      "source": "test-fixture",
       "image": "",
       "issuer": 1
     },
-    "model": "composition.localbadgeclass",
+    "model": "issuer.badgeclass",
     "pk": 2
   },
   {
@@ -161,13 +156,14 @@
       "created_at": "2015-12-28T15:54:50Z",
       "created_by": null,
       "slug": "dpd-project-contributor",
-      "json": "{\"description\":\"Awarded for team members on the DPD project that studied badge system design from 2012-2014.\",\"tags\":[\"Higher Education\",\"Writing\"],\"image\":\"https://images.achievery.com/badgeImages/DPDContributorBadge_1716_1.png\",\"criteria\":\"https://app.achievery.com/badge/1716\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":{\"name\":\"Design Principles Documentation Project\",\"url\":\"https://app.achievery.com/passport/id/2515\",\"image\":\"https://images.achievery.com/organization/badger-icon-transparent.png\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"id\":\"https://app.achievery.com/issuer/2515\"},\"type\":\"BadgeClass\",\"id\":\"https://app.achievery.com/badge-class/1716\",\"name\":\"DPD Project Contributor\"}",
+      "old_json": "{\"description\":\"Awarded for team members on the DPD project that studied badge system design from 2012-2014.\",\"tags\":[\"Higher Education\",\"Writing\"],\"image\":\"https://images.achievery.com/badgeImages/DPDContributorBadge_1716_1.png\",\"criteria\":\"https://app.achievery.com/badge/1716\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":{\"name\":\"Design Principles Documentation Project\",\"url\":\"https://app.achievery.com/passport/id/2515\",\"image\":\"https://images.achievery.com/organization/badger-icon-transparent.png\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"id\":\"https://app.achievery.com/issuer/2515\"},\"type\":\"BadgeClass\",\"id\":\"https://app.achievery.com/badge-class/1716\",\"name\":\"DPD Project Contributor\"}",
       "criteria_text": null,
-      "identifier": "https://app.achievery.com/badge-class/1716",
+      "source_url": "https://app.achievery.com/badge-class/1716",
+      "source": "test-fixture",
       "image": "",
       "issuer": 2
     },
-    "model": "composition.localbadgeclass",
+    "model": "issuer.badgeclass",
     "pk": 3
   },
   {
@@ -176,13 +172,14 @@
       "created_at": "2016-09-01T23:07:25Z",
       "created_by": null,
       "slug": "reconnect-learning-summiteer-2014",
-      "json": "{\"description\":\"The Reconnect Learning Summiteer badge acknowledges attendance and participation at the Reconnect Learning Summit 2014 in Redwood City, California.\",\"tags\":[\"reconnect learning\",\"participation\",\"attendance\",\"event\"],\"image\":\"http://badger.openbadges.org/badge/image/reconnect-learning-summiteer-2014.png\",\"criteria\":\"http://badger.openbadges.org/badge/criteria/reconnect-learning-summiteer-2014\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":{\"url\":\"http://www.reconnectlearning.org/summit/\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"id\":\"http://badger.openbadges.org/program/meta/bf4cb89f6373703238ad904cfe82dfdd2ee75765\",\"name\":\"Reconnect Learning\"},\"type\":\"BadgeClass\",\"id\":\"http://badger.openbadges.org/badge/meta/reconnect-learning-summiteer-2014\",\"name\":\"Reconnect Learning Summiteer 2014\"}",
+      "old_json": "{\"description\":\"The Reconnect Learning Summiteer badge acknowledges attendance and participation at the Reconnect Learning Summit 2014 in Redwood City, California.\",\"tags\":[\"reconnect learning\",\"participation\",\"attendance\",\"event\"],\"image\":\"http://badger.openbadges.org/badge/image/reconnect-learning-summiteer-2014.png\",\"criteria\":\"http://badger.openbadges.org/badge/criteria/reconnect-learning-summiteer-2014\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":{\"url\":\"http://www.reconnectlearning.org/summit/\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"id\":\"http://badger.openbadges.org/program/meta/bf4cb89f6373703238ad904cfe82dfdd2ee75765\",\"name\":\"Reconnect Learning\"},\"type\":\"BadgeClass\",\"id\":\"http://badger.openbadges.org/badge/meta/reconnect-learning-summiteer-2014\",\"name\":\"Reconnect Learning Summiteer 2014\"}",
       "criteria_text": null,
-      "identifier": "http://badger.openbadges.org/badge/meta/reconnect-learning-summiteer-2014",
+      "source_url": "http://badger.openbadges.org/badge/meta/reconnect-learning-summiteer-2014",
+      "source": "test-fixture",
       "image": "",
       "issuer": 3
     },
-    "model": "composition.localbadgeclass",
+    "model": "issuer.badgeclass",
     "pk": 4
   },
   {
@@ -191,13 +188,14 @@
       "created_at": "2016-09-01T23:08:11Z",
       "created_by": null,
       "slug": "mozilla-summiteer-2013-santa-clara",
-      "json": "{\"description\":\"The Mozilla Summiteer badge acknowledges attendance and participation at the Mozilla Summit 2013 in Santa Clara, California.\",\"tags\":[\"attendance\"],\"image\":\"http://badger.openbadges.org/badge/image/mozilla-summiteer-2013-santa-clara.png\",\"criteria\":\"http://badger.openbadges.org/badge/criteria/mozilla-summiteer-2013-santa-clara\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":{\"url\":\"http://openbadges.org\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"id\":\"http://badger.openbadges.org/program/meta/1e4f3689c245070f39febe7f39ad4ede40e44c0e\",\"name\":\"Open Badges\"},\"type\":\"BadgeClass\",\"id\":\"http://badger.openbadges.org/badge/meta/mozilla-summiteer-2013-santa-clara\",\"name\":\"Mozilla Summiteer 2013: Santa Clara\"}",
+      "old_json": "{\"description\":\"The Mozilla Summiteer badge acknowledges attendance and participation at the Mozilla Summit 2013 in Santa Clara, California.\",\"tags\":[\"attendance\"],\"image\":\"http://badger.openbadges.org/badge/image/mozilla-summiteer-2013-santa-clara.png\",\"criteria\":\"http://badger.openbadges.org/badge/criteria/mozilla-summiteer-2013-santa-clara\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":{\"url\":\"http://openbadges.org\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"id\":\"http://badger.openbadges.org/program/meta/1e4f3689c245070f39febe7f39ad4ede40e44c0e\",\"name\":\"Open Badges\"},\"type\":\"BadgeClass\",\"id\":\"http://badger.openbadges.org/badge/meta/mozilla-summiteer-2013-santa-clara\",\"name\":\"Mozilla Summiteer 2013: Santa Clara\"}",
       "criteria_text": null,
-      "identifier": "http://badger.openbadges.org/badge/meta/mozilla-summiteer-2013-santa-clara",
+      "source_url": "http://badger.openbadges.org/badge/meta/mozilla-summiteer-2013-santa-clara",
+      "source": "test-fixture",
       "image": "",
       "issuer": 4
     },
-    "model": "composition.localbadgeclass",
+    "model": "issuer.badgeclass",
     "pk": 5
   },
   {
@@ -206,13 +204,14 @@
       "created_at": "2016-09-01T23:33:46Z",
       "created_by": null,
       "slug": "fresh-badge-of-testing",
-      "json": "{\"description\":\"So fresh, so tested\",\"image\":\"http://localhost:8000/public/badges/fresh-badge-of-testing/image\",\"criteria\":\"http://wheresyourmother.com\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":{\"description\":\"Fresh Tests for all\",\"url\":\"http://testbadges.net\",\"image\":\"http://localhost:8000/public/issuers/new-issuer-of-testing/image\",\"email\":\"help@testbadges.net\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"id\":\"http://localhost:8000/public/issuers/new-issuer-of-testing\",\"name\":\"New Issuer of Testing\"},\"type\":\"BadgeClass\",\"id\":\"http://localhost:8000/public/badges/fresh-badge-of-testing\",\"name\":\"Fresh Badge of Testing\"}",
+      "old_json": "{\"description\":\"So fresh, so tested\",\"image\":\"http://localhost:8000/public/badges/fresh-badge-of-testing/image\",\"criteria\":\"http://wheresyourmother.com\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":{\"description\":\"Fresh Tests for all\",\"url\":\"http://testbadges.net\",\"image\":\"http://localhost:8000/public/issuers/new-issuer-of-testing/image\",\"email\":\"help@testbadges.net\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"id\":\"http://localhost:8000/public/issuers/new-issuer-of-testing\",\"name\":\"New Issuer of Testing\"},\"type\":\"BadgeClass\",\"id\":\"http://localhost:8000/public/badges/fresh-badge-of-testing\",\"name\":\"Fresh Badge of Testing\"}",
       "criteria_text": null,
-      "identifier": "http://localhost:8000/public/badges/fresh-badge-of-testing",
+      "source_url": "http://localhost:8000/public/badges/fresh-badge-of-testing",
+      "source": "test-fixture",
       "image": "",
       "issuer": 5
     },
-    "model": "composition.localbadgeclass",
+    "model": "issuer.badgeclass",
     "pk": 6
   },
   {
@@ -221,11 +220,12 @@
       "created_at": "2015-12-15T15:55:51Z",
       "created_by": null,
       "slug": "open-badges",
-      "json": "{\"url\":\"http://openbadges.org\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"id\":\"http://badger.openbadges.org/program/meta/bda68a0b505bc0c7cf21bc7900280ee74845f693\",\"name\":\"Open Badges\"}",
-      "identifier": "http://badger.openbadges.org/program/meta/bda68a0b505bc0c7cf21bc7900280ee74845f693",
+      "old_json": "{\"url\":\"http://openbadges.org\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"id\":\"http://badger.openbadges.org/program/meta/bda68a0b505bc0c7cf21bc7900280ee74845f693\",\"name\":\"Open Badges\"}",
+      "source_url": "http://badger.openbadges.org/program/meta/bda68a0b505bc0c7cf21bc7900280ee74845f693",
+      "source": "test-fixture",
       "image": ""
     },
-    "model": "composition.localissuer",
+    "model": "issuer.issuer",
     "pk": 1
   },
   {
@@ -234,11 +234,12 @@
       "created_at": "2015-12-28T15:54:50Z",
       "created_by": null,
       "slug": "design-principles-documentation-project",
-      "json": "{\"name\":\"Design Principles Documentation Project\",\"url\":\"https://app.achievery.com/passport/id/2515\",\"image\":\"https://images.achievery.com/organization/badger-icon-transparent.png\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"id\":\"https://app.achievery.com/issuer/2515\"}",
-      "identifier": "https://app.achievery.com/issuer/2515",
+      "old_json": "{\"name\":\"Design Principles Documentation Project\",\"url\":\"https://app.achievery.com/passport/id/2515\",\"image\":\"https://images.achievery.com/organization/badger-icon-transparent.png\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"id\":\"https://app.achievery.com/issuer/2515\"}",
+      "source_url": "https://app.achievery.com/issuer/2515",
+      "source": "test-fixture",
       "image": "uploads/issuers/cached/37bbdf6178af3f3c8681cb276356610f.png"
     },
-    "model": "composition.localissuer",
+    "model": "issuer.issuer",
     "pk": 2
   },
   {
@@ -247,11 +248,12 @@
       "created_at": "2016-09-01T23:07:25Z",
       "created_by": null,
       "slug": "reconnect-learning",
-      "json": "{\"url\":\"http://www.reconnectlearning.org/summit/\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"id\":\"http://badger.openbadges.org/program/meta/bf4cb89f6373703238ad904cfe82dfdd2ee75765\",\"name\":\"Reconnect Learning\"}",
-      "identifier": "http://badger.openbadges.org/program/meta/bf4cb89f6373703238ad904cfe82dfdd2ee75765",
+      "old_json": "{\"url\":\"http://www.reconnectlearning.org/summit/\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"id\":\"http://badger.openbadges.org/program/meta/bf4cb89f6373703238ad904cfe82dfdd2ee75765\",\"name\":\"Reconnect Learning\"}",
+      "source_url": "http://badger.openbadges.org/program/meta/bf4cb89f6373703238ad904cfe82dfdd2ee75765",
+      "source": "test-fixture",
       "image": ""
     },
-    "model": "composition.localissuer",
+    "model": "issuer.issuer",
     "pk": 3
   },
   {
@@ -260,11 +262,12 @@
       "created_at": "2016-09-01T23:08:11Z",
       "created_by": null,
       "slug": "open-badges-2",
-      "json": "{\"url\":\"http://openbadges.org\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"id\":\"http://badger.openbadges.org/program/meta/1e4f3689c245070f39febe7f39ad4ede40e44c0e\",\"name\":\"Open Badges\"}",
-      "identifier": "http://badger.openbadges.org/program/meta/1e4f3689c245070f39febe7f39ad4ede40e44c0e",
+      "old_json": "{\"url\":\"http://openbadges.org\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"id\":\"http://badger.openbadges.org/program/meta/1e4f3689c245070f39febe7f39ad4ede40e44c0e\",\"name\":\"Open Badges\"}",
+      "source_url": "http://badger.openbadges.org/program/meta/1e4f3689c245070f39febe7f39ad4ede40e44c0e",
+      "source": "test-fixture",
       "image": ""
     },
-    "model": "composition.localissuer",
+    "model": "issuer.issuer",
     "pk": 4
   },
   {
@@ -273,11 +276,12 @@
       "created_at": "2016-09-01T23:33:46Z",
       "created_by": null,
       "slug": "new-issuer-of-testing",
-      "json": "{\"description\":\"Fresh Tests for all\",\"url\":\"http://testbadges.net\",\"image\":\"http://localhost:8000/public/issuers/new-issuer-of-testing/image\",\"id\":\"http://localhost:8000/public/issuers/new-issuer-of-testing\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"email\":\"help@testbadges.net\",\"name\":\"New Issuer of Testing\"}",
-      "identifier": "http://localhost:8000/public/issuers/new-issuer-of-testing",
+      "old_json": "{\"description\":\"Fresh Tests for all\",\"url\":\"http://testbadges.net\",\"image\":\"http://localhost:8000/public/issuers/new-issuer-of-testing/image\",\"id\":\"http://localhost:8000/public/issuers/new-issuer-of-testing\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"email\":\"help@testbadges.net\",\"name\":\"New Issuer of Testing\"}",
+      "source_url": "http://localhost:8000/public/issuers/new-issuer-of-testing",
+      "source": "test-fixture",
       "image": "uploads/issuers/cached/9b031f30a7fe4b30be40cef9e3dbbb17.png"
     },
-    "model": "composition.localissuer",
+    "model": "issuer.issuer",
     "pk": 5
   }
 ]
