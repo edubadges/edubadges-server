@@ -11,7 +11,7 @@ from django.db import models
 from jsonfield import JSONField
 
 from composition.sharing import SharingManager
-from issuer.models import BadgeInstance
+from issuer.models import BadgeInstance, BadgeClass
 from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
                              AbstractRemoteImagePreviewMixin)
 from mainsite.utils import OriginSetting
@@ -39,11 +39,10 @@ class LocalBadgeClass(AbstractRemoteImagePreviewMixin, AbstractBadgeClass):
 
 class LocalBadgeInstance(cachemodel.CacheModel):
     # 0.5 BadgeInstances have no notion of a BadgeClass
-    badgeclass = models.ForeignKey(LocalBadgeClass, blank=False, null=True,
-                                   on_delete=models.PROTECT,
-                                   related_name='badgeinstances')
-    # 0.5 BadgeInstances have no notion of a BadgeClass
-    issuer = models.ForeignKey(LocalIssuer, blank=False, null=True)
+    local_badgeclass = models.ForeignKey(LocalBadgeClass, blank=False, null=True, on_delete=models.PROTECT, related_name='badgeinstances') # 0.5 BadgeInstances have no notion of a BadgeClass
+    local_issuer = models.ForeignKey(LocalIssuer, blank=False, null=True)
+
+    issuer_badgeclass = models.ForeignKey("issuer.BadgeClass", blank=True, null=True)
 
     recipient_user = models.ForeignKey(AUTH_USER_MODEL)
 
@@ -91,11 +90,11 @@ class LocalBadgeInstance(cachemodel.CacheModel):
 
     @property
     def cached_issuer(self):
-        return LocalIssuer.cached.get(pk=self.issuer_id)
+        return self.cached_badgeclass.cached_issuer
 
     @property
     def cached_badgeclass(self):
-        return LocalBadgeClass.cached.get(pk=self.badgeclass_id)
+        return BadgeClass.cached.get(pk=self.issuer_badgeclass_id)
 
     @property
     def acceptance(self):
@@ -103,7 +102,7 @@ class LocalBadgeInstance(cachemodel.CacheModel):
 
     @property
     def owner(self):
-        return self.issuer.owner
+        return self.recipient_user
 
     def get_full_url(self):
         try:
@@ -205,7 +204,7 @@ class LocalBadgeInstanceCollection(models.Model):
 
     def __unicode__(self):
         return u'{} in {}\'s {}'.format(
-            self.badge_instance.badgeclass.name,
+            self.badge_instance.issuer_badgeclass.name,
             self.badge_instance.recipient_identifier,
             self.collection.name
         )
