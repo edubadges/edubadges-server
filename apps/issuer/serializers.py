@@ -15,10 +15,18 @@ from mainsite.utils import installed_apps_list, OriginSetting, verify_svg
 from .models import Issuer, BadgeClass, IssuerStaff
 
 
+class CachedListSerializer(serializers.ListSerializer):
+    def to_representation(self, data):
+        return [self.child.to_representation(item) for item in data]
+
+
 class IssuerStaffSerializer(serializers.Serializer):
     """ A read_only serializer for staff roles """
-    user = BadgeUserProfileSerializer()
+    user = BadgeUserProfileSerializer(source='cached_user')
     role = serializers.CharField()
+
+    class Meta:
+        list_serializer_class = CachedListSerializer
 
     def validate_role(self, role):
         valid_roles = dict(IssuerStaff.ROLE_CHOICES).keys()

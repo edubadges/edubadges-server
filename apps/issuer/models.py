@@ -158,6 +158,15 @@ class IssuerStaff(cachemodel.CacheModel):
         super(IssuerStaff, self).delete()
         issuer.publish()
 
+    @property
+    def cached_user(self):
+        from badgeuser.models import BadgeUser
+        return BadgeUser.cached.get(pk=self.user_id)
+
+    @property
+    def cached_issuer(self):
+        return Issuer.cached.get(pk=self.issuer_id)
+
 
 class BadgeClass(ResizeUploadedImage, cachemodel.CacheModel):
     source = models.CharField(max_length=254, default='local')
@@ -217,7 +226,7 @@ class BadgeClass(ResizeUploadedImage, cachemodel.CacheModel):
 
     @property
     def owners(self):
-        return self.issuer.owners
+        return self.cached_issuer.owners
 
     @property
     def cached_issuer(self):
