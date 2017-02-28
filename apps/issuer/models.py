@@ -473,13 +473,7 @@ class BadgeInstance(ResizeUploadedImage, cachemodel.CacheModel):
         if self.evidence_url:
             json['evidence'] = self.evidence_url
 
-        # FIXME: this is a hack to deal with naive datetimes with microseconds that were serialized...
-        try:
-            self._meta.get_field_by_name('old_json')
-            if self.old_json and 'issuedOn' in self.old_json:
-                json['issuedOn'] = self.old_json['issuedOn']
-        except KeyError:
-            pass
+        json['issuedOn'] = self.created_at.isoformat()
 
         if self.salt:
             json['recipient'] = {
