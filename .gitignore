@@ -28,3 +28,9 @@ breakdown/static/css/*.map
 build/badgebook/
 
 test.cache/
+
+.coverage
+.tox/
+*.egg-info/
+build/
+htmlcov/
