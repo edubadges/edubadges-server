@@ -37,7 +37,7 @@ class IssuerSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=255, required=True, write_only=True)
     description = StripTagsCharField(max_length=1024, required=True, write_only=True)
     url = serializers.URLField(max_length=1024, required=True, write_only=True)
-    staff = IssuerStaffSerializer(read_only=True, source='cached_staff', many=True)
+    staff = IssuerStaffSerializer(read_only=True, source='cached_staff_records', many=True)
 
     def validate(self, data):
         # TODO: ensure email is a confirmed email in owner/creator's account
