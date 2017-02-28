@@ -45,7 +45,7 @@ class BadgeClassDeletedEvent(BaseBadgrEvent):
 
     def to_representation(self):
         return {
-            'user': OriginSetting.JSON + self.user.get_absolute_url(),
+            'user': self.user.primary_email,
             'badgeClass': self.badge_class_json
         }
 
@@ -57,7 +57,7 @@ class BadgeInstanceCreatedEvent(BaseBadgrEvent):
 
     def to_representation(self):
         return {
-            'creator': OriginSetting.JSON + self.user.get_absolute_url(),
+            'creator': self.user.primary_email,
             'issuer': self.badge_instance.get('issuer'),
             'recipient': self.badge_instance.get('recipient_identifier'),
             'badgeClass': self.badge_instance.get('badgeclass'),
@@ -72,7 +72,7 @@ class BadgeAssertionRevokedEvent(BaseBadgrEvent):
 
     def to_representation(self):
         return {
-            'user': OriginSetting.JSON + self.user.get_absolute_url(),
+            'user': self.user.primary_email,
             'badgeInstance': self.badge_instance.json
         }
 

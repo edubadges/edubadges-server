@@ -129,10 +129,7 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
         db_table = 'users'
 
     def __unicode__(self):
-        return self.email
-
-    def get_absolute_url(self):
-        return reverse('user_detail', kwargs={'user_id': self.pk})
+        return "{} <{}>".format(self.get_full_name(), self.email)
 
     def get_full_name(self):
         return u"%s %s" % (self.first_name, self.last_name)

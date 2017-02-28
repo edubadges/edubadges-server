@@ -14,50 +14,10 @@ class VerifiedEmailsField(serializers.Field):
         return addresses
 
 
-class UserProfileField(serializers.Serializer):
-    """
-    Receives the entire BadgeUser instance and returns a dict
-    with profile information
-    """
-    def to_representation(self, obj):
-        addresses = []
-        if hasattr(obj, 'cached_email'):
-            # BadgeUser
-            for emailaddress in obj.cached_emails():
-                addresses.append(emailaddress.email)
-        elif hasattr(obj, 'email'):
-            # AnonymousLtiUser
-            addresses = [obj.email]
-        elif obj.id is None:
-            # AnonymousUser
-            return {
-                'name': "anonymous",
-                'username': "",
-                'earnerIds': [],
-            }
-
-        profile = {
-            'name': obj.get_full_name(),
-            'username': obj.username,
-            'earnerIds': addresses
-        }
-
-        if self.context.get('include_token', False):
-            profile['token'] = obj.cached_token()
-
-        if getattr(settings, 'BADGR_APPROVED_ISSUERS_ONLY', False):
-            profile['approvedIssuer'] = obj.has_perm('issuer.add_issuer')
-        else:
-            profile['approvedIssuer'] = True
-
-        return profile
-
-
 class BadgeUserProfileSerializer(serializers.Serializer):
-
     first_name = StripTagsCharField(max_length=30, allow_blank=True)
     last_name = StripTagsCharField(max_length=30, allow_blank=True)
-    email = serializers.EmailField()
+    email = serializers.EmailField(source='primary_email', )
     password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
 
     def create(self, validated_data):
@@ -66,7 +26,7 @@ class BadgeUserProfileSerializer(serializers.Serializer):
 
         # Fetch existing email address if it is verified, delete unverified email address records.
         try:
-            email_address = CachedEmailAddress.objects.get(email=validated_data['email'])
+            email_address = CachedEmailAddress.objects.get(email=validated_data['primary_email'])
         except CachedEmailAddress.DoesNotExist:
             email_address = None
         else:
@@ -79,7 +39,7 @@ class BadgeUserProfileSerializer(serializers.Serializer):
             existing_user = email_address.user
         else:
             # TODO: change this after deprecating the email database column for the BadgeUser model.
-            existing_user = BadgeUser.objects.filter(email=validated_data['email']).first()
+            existing_user = BadgeUser.objects.filter(email=validated_data['primary_email']).first()
 
         if existing_user:
             # if existing_user.password is NOT set, this user was auto-created and needs to be claimed
@@ -90,7 +50,7 @@ class BadgeUserProfileSerializer(serializers.Serializer):
             user = existing_user
         else:
             user = BadgeUser(
-                email=validated_data['email']
+                email=validated_data['primary_email']
             )
 
         user.first_name = validated_data['first_name']
@@ -100,22 +60,12 @@ class BadgeUserProfileSerializer(serializers.Serializer):
 
         if not email_address:
             CachedEmailAddress.objects.add_email(
-                request, user, validated_data['email'], confirm=True, signup=True
+                request, user, validated_data['primary_email'], confirm=True, signup=True
             )
         else:
             email_address.send_confirmation(request, signup=True)
 
         return user
-
-
-class BadgeUserExistingProfileSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False)
-
-    class Meta:
-        model = BadgeUser
-        fields = ('id', 'first_name', 'email', 'last_name', 'password')
-        write_only_fields = ('password',)
-        read_only_fields = ('id', 'email',)
 
     def update(self, user, validated_data):
         first_name = validated_data.get('first_name')
@@ -133,8 +83,16 @@ class BadgeUserExistingProfileSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+    def to_representation(self, instance):
+        representation = super(BadgeUserProfileSerializer, self).to_representation(instance)
 
-class NewEmailSerializer(serializers.ModelSerializer):
+        if self.context.get('include_token', False):
+            representation['token'] = instance.cached_token()
+
+        return representation
+
+
+class EmailSerializer(serializers.ModelSerializer):
     variants = serializers.ListField(
         child=serializers.EmailField(required=False),
         required=False, source='cached_variants', allow_null=True, read_only=True
@@ -152,13 +110,13 @@ class NewEmailSerializer(serializers.ModelSerializer):
         try:
             email = CachedEmailAddress.objects.get(email=new_address)
         except CachedEmailAddress.DoesNotExist:
-            email = super(NewEmailSerializer, self).create(validated_data)
+            email = super(EmailSerializer, self).create(validated_data)
             created = True
         else:
             if not email.verified:
                 # Clear out a previous attempt and let the current user try
                 email.delete()
-                email = super(NewEmailSerializer, self).create(validated_data)
+                email = super(EmailSerializer, self).create(validated_data)
                 created = True
             elif email.user != self.context.get('request').user:
                 raise serializers.ValidationError("Could not register email address.")
@@ -177,15 +135,3 @@ class NewEmailSerializer(serializers.ModelSerializer):
             return email
 
         raise serializers.ValidationError("Could not register email address.")
-
-
-class ExistingEmailSerializer(serializers.ModelSerializer):
-    variants = serializers.ListField(
-        child=serializers.EmailField(required=False),
-        required=False, source='cached_variants', allow_null=True, read_only=True
-    )
-
-    class Meta:
-        model = CachedEmailAddress
-        fields = ('id', 'email', 'verified', 'primary', 'variants')
-        read_only_fields = ('id', 'email', 'verified', 'variants')
