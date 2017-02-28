@@ -6,15 +6,26 @@ from django.core.urlresolvers import reverse
 from django.utils.html import strip_tags
 from rest_framework import serializers
 
-from badgeuser.serializers import UserProfileField
-from composition.format import V1InstanceSerializer
+import utils
+from badgeuser.serializers import BadgeUserProfileSerializer
 from mainsite.drf_fields import Base64FileField
 from mainsite.models import BadgrApp
-from mainsite.serializers import WritableJSONField, HumanReadableBooleanField, StripTagsCharField
+from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField
 from mainsite.utils import installed_apps_list, OriginSetting, verify_svg
-
 from .models import Issuer, BadgeClass, IssuerStaff
-import utils
+
+
+class IssuerStaffSerializer(serializers.Serializer):
+    """ A read_only serializer for staff roles """
+    user = BadgeUserProfileSerializer()
+    role = serializers.CharField()
+
+    def validate_role(self, role):
+        valid_roles = dict(IssuerStaff.ROLE_CHOICES).keys()
+        role = role.lower()
+        if role not in valid_roles:
+            raise serializers.ValidationError("Invalid role. Available roles: {}".format(valid_roles))
+        return role
 
 
 class IssuerSerializer(serializers.Serializer):
@@ -25,6 +36,7 @@ class IssuerSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=255, required=True, write_only=True)
     description = StripTagsCharField(max_length=1024, required=True, write_only=True)
     url = serializers.URLField(max_length=1024, required=True, write_only=True)
+    staff = IssuerStaffSerializer(read_only=True, source='cached_staff', many=True)
 
     def validate(self, data):
         # TODO: ensure email is a confirmed email in owner/creator's account
@@ -67,9 +79,6 @@ class IssuerSerializer(serializers.Serializer):
         representation = super(IssuerSerializer, self).to_representation(obj)
         representation['json'] = obj.get_json()
         representation['created_by'] = (OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': obj.created_by_id})) if obj.created_by_id is not None else None
-        representation['owner'] = (OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': obj.created_by_id})) if obj.created_by_id is not None else None
-        representation['editors'] = [OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': u.pk}) for u in obj.cached_editors()]
-        representation['staff'] = [OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': u.pk}) for u in obj.cached_staff()]
         if self.context.get('embed_badgeclasses', False):
             representation['badgeclasses'] = BadgeClassSerializer(obj.badgeclasses.all(), many=True, context=self.context).data
 
@@ -95,18 +104,7 @@ class IssuerRoleActionSerializer(serializers.Serializer):
         return attrs
 
 
-class IssuerStaffSerializer(serializers.Serializer):
-    """ A read_only serializer for staff roles """
-    user = UserProfileField()
-    # editor = serializers.BooleanField()
-    role = serializers.CharField()
 
-    def validate_role(self, role):
-        valid_roles = dict(IssuerStaff.ROLE_CHOICES).keys()
-        role = role.lower()
-        if role not in valid_roles:
-            raise serializers.ValidationError("Invalid role. Available roles: {}".format(valid_roles))
-        return role
 
 
 class BadgeClassSerializer(serializers.Serializer):
