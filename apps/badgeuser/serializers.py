@@ -135,3 +135,18 @@ class EmailSerializer(serializers.ModelSerializer):
             return email
 
         raise serializers.ValidationError("Could not register email address.")
+
+
+class BadgeUserIdentifierField(serializers.CharField):
+    def __init__(self, *args, **kwargs):
+        if 'source' not in kwargs:
+            kwargs['source'] = 'created_by_id'
+        if 'read_only' not in kwargs:
+            kwargs['read_only'] = True
+        super(BadgeUserIdentifierField, self).__init__(*args, **kwargs)
+
+    def to_representation(self, value):
+        try:
+            return BadgeUser.cached.get(pk=value).primary_email
+        except BadgeUser.DoesNotExist:
+            return None

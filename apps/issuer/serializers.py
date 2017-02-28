@@ -7,7 +7,7 @@ from django.utils.html import strip_tags
 from rest_framework import serializers
 
 import utils
-from badgeuser.serializers import BadgeUserProfileSerializer
+from badgeuser.serializers import BadgeUserProfileSerializer, BadgeUserIdentifierField
 from mainsite.drf_fields import Base64FileField
 from mainsite.models import BadgrApp
 from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField
@@ -30,6 +30,7 @@ class IssuerStaffSerializer(serializers.Serializer):
 
 class IssuerSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
+    created_by = BadgeUserIdentifierField()
     name = StripTagsCharField(max_length=1024)
     slug = StripTagsCharField(max_length=255, allow_blank=True, required=False)
     image = Base64FileField(allow_empty_file=False, use_url=True, required=False)
@@ -78,7 +79,7 @@ class IssuerSerializer(serializers.Serializer):
     def to_representation(self, obj):
         representation = super(IssuerSerializer, self).to_representation(obj)
         representation['json'] = obj.get_json()
-        representation['created_by'] = (OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': obj.created_by_id})) if obj.created_by_id is not None else None
+
         if self.context.get('embed_badgeclasses', False):
             representation['badgeclasses'] = BadgeClassSerializer(obj.badgeclasses.all(), many=True, context=self.context).data
 
@@ -104,11 +105,9 @@ class IssuerRoleActionSerializer(serializers.Serializer):
         return attrs
 
 
-
-
-
 class BadgeClassSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
+    created_by = BadgeUserIdentifierField()
     id = serializers.IntegerField(required=False, read_only=True)
     name = StripTagsCharField(max_length=255)
     image = Base64FileField(allow_empty_file=False, use_url=True, required=False)
@@ -121,7 +120,6 @@ class BadgeClassSerializer(serializers.Serializer):
     def to_representation(self, instance):
         representation = super(BadgeClassSerializer, self).to_representation(instance)
         representation['issuer'] = OriginSetting.JSON+reverse('issuer_json', kwargs={'slug': instance.cached_issuer.slug})
-        representation['created_by'] = (OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': instance.created_by_id})) if instance.created_by_id is not None else None
         representation['json'] = instance.get_json()
         return representation
 
@@ -196,6 +194,7 @@ class BadgeClassSerializer(serializers.Serializer):
 
 class BadgeInstanceSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
+    created_by = BadgeUserIdentifierField()
     slug = serializers.CharField(max_length=255, read_only=True)
     image = serializers.FileField(read_only=True)  # use_url=True, might be necessary
     email = serializers.EmailField(max_length=1024, required=False, write_only=True)
@@ -219,7 +218,6 @@ class BadgeInstanceSerializer(serializers.Serializer):
         #     self.fields['json'] = V1InstanceSerializer(source='extended_json')
 
         representation = super(BadgeInstanceSerializer, self).to_representation(instance)
-        representation['created_by'] = (OriginSetting.JSON+reverse('user_detail', kwargs={'user_id': instance.created_by_id})) if instance.created_by_id is not None else None
         representation['json'] = instance.get_json()
         if self.context.get('include_issuer', False):
             representation['issuer'] = IssuerSerializer(instance.cached_badgeclass.cached_issuer).data
