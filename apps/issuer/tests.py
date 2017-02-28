@@ -80,8 +80,7 @@ class IssuerTests(APITestCase):
         self.assertIsNotNone(badge_object.get('@context'))
 
         # assert that the issuer was published to and fetched from the cache
-        # we expect to generate one query where the object permissions are checked in IssuerDetail.get
-        with self.assertNumQueries(1):
+        with self.assertNumQueries(0):
             slug = response.data.get('slug')
             response = self.client.get('/v1/issuer/issuers/{}'.format(slug))
             self.assertEqual(response.status_code, 200)

@@ -90,6 +90,10 @@ class Issuer(ResizeUploadedImage, cachemodel.CacheModel):
         return self.staff.all()
 
     @cachemodel.cached_method(auto_publish=True)
+    def cached_staff_records(self):
+        return IssuerStaff.objects.filter(issuer=self)
+
+    @cachemodel.cached_method(auto_publish=True)
     def cached_editors(self):
         UserModel = get_user_model()
         return UserModel.objects.filter(issuerstaff__issuer=self, issuerstaff__role=IssuerStaff.ROLE_EDITOR)
@@ -129,7 +133,7 @@ class Issuer(ResizeUploadedImage, cachemodel.CacheModel):
         return self.get_json()
 
 
-class IssuerStaff(models.Model):
+class IssuerStaff(cachemodel.CacheModel):
     ROLE_OWNER = 'owner'
     ROLE_EDITOR = 'editor'
     ROLE_STAFF = 'staff'
@@ -144,6 +148,24 @@ class IssuerStaff(models.Model):
 
     class Meta:
         unique_together = ('issuer', 'user')
+
+    def publish(self):
+        super(IssuerStaff, self).publish()
+        self.issuer.publish()
+
+    def delete(self, *args, **kwargs):
+        issuer = self.issuer
+        super(IssuerStaff, self).delete()
+        issuer.publish()
+
+    @property
+    def cached_user(self):
+        from badgeuser.models import BadgeUser
+        return BadgeUser.cached.get(pk=self.user_id)
+
+    @property
+    def cached_issuer(self):
+        return Issuer.cached.get(pk=self.issuer_id)
 
 
 class BadgeClass(ResizeUploadedImage, cachemodel.CacheModel):
@@ -204,7 +226,7 @@ class BadgeClass(ResizeUploadedImage, cachemodel.CacheModel):
 
     @property
     def owners(self):
-        return self.issuer.owners
+        return self.cached_issuer.owners
 
     @property
     def cached_issuer(self):

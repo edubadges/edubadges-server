@@ -9,7 +9,6 @@ badgr_admin.autodiscover()
 
 from django.views.generic.base import RedirectView, TemplateView
 
-from badgeuser.api import BadgeUserDetail
 from composition.views import LegacyCollectionShareRedirectView
 from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation, LoginAndObtainAuthToken
 
@@ -43,7 +42,6 @@ urlpatterns = [
     url(r'^public', include('issuer.public_api_urls')),
     url(r'^public', include('pathway.public_api_urls')),
 
-    url(r'^user/(?P<user_id>[^/]+)$', BadgeUserDetail.as_view(), name='user_detail'),
     url(r'^share', include('composition.share_urls')),
     # legacy share redirects
     url(r'^earner/collections/(?P<pk>[^/]+)/(?P<share_hash>[^/]+)$', LegacyCollectionShareRedirectView.as_view(), name='legacy_shared_collection'),

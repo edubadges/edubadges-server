@@ -83,6 +83,6 @@ class InstructorAccountCreatedEvent(BaseBadgrLtiEvent):
     def to_representation(self):
         data = super(InstructorAccountCreatedEvent, self).to_representation()
         data.update({
-            'user': OriginSetting.JSON + self.user.get_absolute_url(),
+            'user': self.user.primary_email,
         })
         return data
