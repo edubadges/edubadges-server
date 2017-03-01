@@ -277,7 +277,7 @@ class BadgeClass(ResizeUploadedImage, cachemodel.CacheModel):
         return self.get_json()
 
 
-class BadgeInstance(ResizeUploadedImage, cachemodel.CacheModel):
+class BadgeInstance(cachemodel.CacheModel):
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.CASCADE, related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
     created_at = models.DateTimeField(auto_now_add=True)
