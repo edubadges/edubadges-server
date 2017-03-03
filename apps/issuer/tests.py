@@ -1093,36 +1093,43 @@ class PublicAPITests(APITestCase):
 class FindBadgeClassTests(APITestCase):
     fixtures = fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json', 'initial_my_badges']
 
-
     def test_can_find_imported_badge_by_id(self):
         user = get_user_model().objects.first()
         self.client.force_authenticate(user=user)
 
-        url = reverse('find_badgeclass_by_id', kwargs={'badge_id': 'http://badger.openbadges.org/badge/meta/mozfest-reveler'})
+        url = "{url}?identifier={id}".format(
+            url=reverse('find_badgeclass_by_identifier'),
+            id='http://badger.openbadges.org/badge/meta/mozfest-reveler'
+        )
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['json'].get('name'), 'MozFest Reveler')
 
     def test_can_find_issuer_badge_by_id(self):
-        # TODO: BadgeClass.identifier is mis-populated in current DB. Watch out!
         user = get_user_model().objects.first()
         self.client.force_authenticate(user=user)
 
         badge = BadgeClass.objects.get(id=1)
 
-        url = reverse('find_badgeclass_by_id', kwargs={'badge_id': badge.get_absolute_url()})
+        url = "{url}?identifier={id}".format(
+            url=reverse('find_badgeclass_by_identifier'),
+            id=badge.jsonld_id
+        )
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['json'].get('name'), 'Badge of Testing')
+        self.assertEqual(response.data['json'].get('name'), badge.name)
 
     def test_can_find_issuer_badge_by_slug(self):
         user = get_user_model().objects.first()
         self.client.force_authenticate(user=user)
 
-        url = reverse('find_badgeclass_by_slug', kwargs={'slug': 'badge-of-testing'})
+        url = "{url}?identifier={slug}".format(
+            url=reverse('find_badgeclass_by_identifier'),
+            slug='fresh-badge-of-testing'
+        )
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['json'].get('name'), 'Badge of Awesome')
+        self.assertEqual(response.data['json'].get('name'), 'Fresh Badge of Testing')
