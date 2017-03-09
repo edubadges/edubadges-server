@@ -1,43 +1,14 @@
 from django.contrib.admin import ModelAdmin, TabularInline
-from mainsite.admin import badgr_admin
-from issuer.admin import IssuerAdmin, BadgeClassAdmin
 
-from .models import (Collection, LocalBadgeInstanceCollection,
-                     LocalBadgeInstance, LocalBadgeClass, LocalIssuer,)
+from mainsite.admin import badgr_admin
+from composition.models import (Collection, LocalBadgeInstance, )
+
 
 ###
 #
 # Local Issuer/Badges
 #
 ###
-
-
-class LocalIssuerAdmin(IssuerAdmin):
-    readonly_fields = ('created_at',)
-    list_display = ('img', 'name', 'slug', 'created_by', 'created_at')
-    fieldsets = (
-        ('Metadata', {'fields': ('created_at',), 'classes': ("collapse",)}),
-        (None, {'fields': ('image', 'name', 'slug', 'created_by')}),
-        ('JSON', {'fields': ('json',)}),
-    )
-
-    def img(self, obj):
-        return u'<img src="{}" width="32"/>'.format(obj.image_preview.url) if obj.image_preview else ''
-    img.short_description = 'Image'
-    img.allow_tags = True
-badgr_admin.register(LocalIssuer, LocalIssuerAdmin)
-
-
-class LocalBadgeClassAdmin(BadgeClassAdmin):
-    readonly_fields = ('created_at',)
-    list_display = ('img', 'name', 'slug', 'issuer')
-    list_display_links = ('img', 'name')
-
-    def img(self, obj):
-        return u'<img src="{}" width="32"/>'.format(obj.image_preview.url) if obj.image_preview else ''
-    img.short_description = 'Image'
-    img.allow_tags = True
-badgr_admin.register(LocalBadgeClass, LocalBadgeClassAdmin)
 
 
 class LocalBadgeInstanceAdmin(ModelAdmin):
@@ -66,13 +37,12 @@ class LocalBadgeInstanceAdmin(ModelAdmin):
 badgr_admin.register(LocalBadgeInstance, LocalBadgeInstanceAdmin)
 
 
-
-
 ###
 #
 # Collection
 #
 ###
+
 
 class CollectionInstanceInline(TabularInline):
     model = Collection.instances.through
@@ -98,6 +68,4 @@ class CollectionAdmin(ModelAdmin):
     ]
     pass
 badgr_admin.register(Collection, CollectionAdmin)
-
-
 

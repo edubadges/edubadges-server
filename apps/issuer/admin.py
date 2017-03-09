@@ -10,15 +10,22 @@ from .models import Issuer, BadgeClass, BadgeInstance
 
 
 class IssuerAdmin(DjangoObjectActions, ModelAdmin):
-    readonly_fields = ('created_at', 'created_by')
+    readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url')
     list_display = ('img', 'name', 'slug', 'created_by', 'created_at')
     list_display_links = ('img', 'name')
     list_filter = ('created_at',)
     search_fields = ('name', 'slug')
     fieldsets = (
-        ('Metadata', {'fields': ('created_by', 'created_at', 'owner'), 'classes': ("collapse",)}),
-        (None, {'fields': ('image', 'name', 'slug')}),
-        ('JSON', {'fields': ('json',)}),
+        ('Metadata', {
+            'fields': ('created_by', 'created_at', 'source', 'source_url', 'slug'),
+            'classes': ("collapse",)
+        }),
+        (None, {
+            'fields': ('image', 'name', 'url', 'email', 'description')
+        }),
+        # ('JSON', {
+        #     'fields': ('old_json',)
+        # }),
     )
     change_actions = ['redirect_badgeclasses']
 
@@ -41,21 +48,31 @@ badgr_admin.register(Issuer, IssuerAdmin)
 
 
 class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
-    readonly_fields = ('created_at', 'created_by')
+    readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url')
     list_display = ('badge_image', 'name', 'slug', 'issuer_link', 'recipient_count')
     list_display_links = ('badge_image', 'name',)
     list_filter = ('created_at',)
     search_fields = ('name', 'slug', 'issuer__name',)
+    raw_id_fields = ('issuer',)
     fieldsets = (
-        ('Metadata', {'fields': ('created_by', 'created_at',), 'classes': ("collapse",)}),
-        (None, {'fields': ('image', 'name', 'slug', 'issuer')}),
-        ('Criteria', {'fields': ('criteria_text',)}),
-        ('JSON', {'fields': ('json',)}),
+        ('Metadata', {
+            'fields': ('created_by', 'created_at', 'source', 'source_url', 'slug'),
+            'classes': ("collapse",)
+        }),
+        (None, {
+            'fields': ('issuer', 'image', 'name', 'description')
+        }),
+        ('Criteria', {
+            'fields': ('criteria_url', 'criteria_text',)
+        }),
+        # ('JSON', {
+        #     'fields': ('old_json',)
+        # }),
     )
     change_actions = ['redirect_issuer', 'redirect_instances']
 
     def badge_image(self, obj):
-        return u'<img src="{}" width="32"/>'.format(obj.image.url)
+        return u'<img src="{}" width="32"/>'.format(obj.image.url) if obj.image else ''
     badge_image.short_description = 'Badge'
     badge_image.allow_tags = True
 
@@ -81,16 +98,26 @@ badgr_admin.register(BadgeClass, BadgeClassAdmin)
 
 
 class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
-    readonly_fields = ('created_at', 'created_by', 'image', 'slug')
+    readonly_fields = ('created_at', 'created_by', 'image', 'slug', 'old_json')
     list_display = ('badge_image', 'recipient_identifier', 'slug', 'badgeclass', 'issuer')
     list_display_links = ('badge_image', 'recipient_identifier', )
     list_filter = ('created_at',)
     search_fields = ('recipient_identifier', 'slug', 'badgeclass__name', 'issuer__name')
+    raw_id_fields = ('badgeclass', 'issuer')
     fieldsets = (
-        ('Metadata', {'fields': ('created_by', 'created_at','acceptance'), 'classes': ("collapse",)}),
-        (None, {'fields': ('image', 'slug', 'recipient_identifier', 'badgeclass', 'issuer')}),
-        ('Revocation', {'fields': ('revoked', 'revocation_reason')}),
-        ('JSON', {'fields': ('json',)}),
+        ('Metadata', {
+            'fields': ('created_by', 'created_at', 'slug', 'salt', 'badgeclass', 'issuer'),
+            'classes': ("collapse",)
+        }),
+        (None, {
+            'fields': ('acceptance', 'recipient_identifier', 'image', 'evidence_url')
+        }),
+        ('Revocation', {
+            'fields': ('revoked', 'revocation_reason')
+        }),
+        # ('JSON', {
+        #     'fields': ('old_json',)
+        # }),
     )
     change_actions = ['redirect_issuer', 'redirect_badgeclass']
 

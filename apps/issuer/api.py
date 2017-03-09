@@ -16,6 +16,7 @@ from rest_framework.views import APIView
 import badgrlog
 from badgeuser.models import CachedEmailAddress
 from composition.models import LocalBadgeClass
+from issuer.utils import get_badgeclass_by_identifier
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 
 from .models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
@@ -89,10 +90,7 @@ class IssuerList(AbstractIssuerAPIEndpoint):
         serializer: IssuerSerializer
         """
         # Get the Issuers this user owns, edits, or staffs:
-        user_issuers = self.get_list(queryset=self.queryset.filter(
-            Q(owner__id=request.user.id) |
-            Q(staff__id=request.user.id)).distinct()
-        )
+        user_issuers = self.get_list(queryset=self.queryset.filter(staff__id=request.user.id).distinct())
         if not user_issuers.exists():
             return Response([])
 
@@ -143,7 +141,6 @@ class IssuerList(AbstractIssuerAPIEndpoint):
         # Pass in user values where we have a real user object instead of a url
         # and non-model-field data to go into json
         serializer.save(
-            owner=request.user,
             created_by=request.user
         )
         issuer = serializer.data
@@ -327,7 +324,9 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
             staff_instance, created = IssuerStaff.objects.get_or_create(
                 user=user_to_modify,
                 issuer=current_issuer,
-                defaults={'editor': editor_privilege}
+                defaults={
+                    'role': IssuerStaff.ROLE_EDITOR if editor_privilege else IssuerStaff.ROLE_STAFF
+                }
             )
 
             if created is False and staff_instance.editor != editor_privilege:
@@ -373,46 +372,26 @@ class AllBadgeClassesList(AbstractIssuerAPIEndpoint):
 
 class FindBadgeClassDetail(AbstractIssuerAPIEndpoint):
     """
-    GET a list of badgeclasses within one issuer context or
-    POST to create a new badgeclass within the issuer context
+    GET a specific BadgeClass by searching by identifier
     """
     permission_classes = (AuthenticatedWithVerifiedEmail,)
 
-    def get(self, request, badge_id='', slug=''):
+    def get(self, request):
         """
-        GET a specific BadgeClass by query parameter
-        Allowable query params: id, slug
+        GET a specific BadgeClass by searching by identifier
         ---
         serializer: BadgeClassSerializer
         parameters:
-            - name: id
-              required: false
+            - name: identifier
+              required: true
               type: string
-              paramType: path
-            - name: slug
-              required: false
-              type: string
-              paramType: path
+              paramType: form
+              description: The identifier of the badge possible values: JSONld identifier, BadgeClass.id, or BadgeClass.slug
         """
-        query_args = {}
-        if badge_id:
-            query_args['identifier'] = badge_id
-            arg = 'identifier'
-        elif slug:
-            query_args['slug'] = slug
-            arg = 'slug'
-        else:
-            raise ValidationError("You must provide a slug or id in the request to locate a badge.")
-
-        try:
-            badge = BadgeClass.objects.get(**query_args)
-        except BadgeClass.DoesNotExist:
-            try:
-                badge = LocalBadgeClass.objects.get(**query_args)
-            except LocalBadgeClass.DoesNotExist:
-                raise NotFound("BadgeClass with provided {} {} not found.".format(arg, query_args[arg]))
-        except BadgeClass.MultipleObjectsReturned:
-            raise NotFound("Error: Multiple objects returned with {} {}".format(arg, query_args[arg]))
+        identifier = request.query_params.get('identifier')
+        badge = get_badgeclass_by_identifier(identifier)
+        if badge is None:
+            raise NotFound("No BadgeClass found by identifier: {}".format(identifier))
 
         serializer = BadgeClassSerializer(badge)
         return Response(serializer.data)
@@ -484,6 +463,11 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
               required: true
               paramType: form
               description: Either a URL of a remotely hosted criteria page or a text string describing the criteria.
+            - name: description
+              type: string
+              required: true
+              paramType: form
+              description: The description of the Badge Class.
         """
 
         # Step 1: Locate the issuer
@@ -502,7 +486,6 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
         serializer.save(
             issuer=current_issuer,
             created_by=request.user,
-            description=request.data.get('description')
         )
         badge_class = serializer.data
 
@@ -566,7 +549,6 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
                 current_badgeclass.delete()
                 logger.event(badgrlog.BadgeClassDeletedEvent(old_badgeclass, request.user))
                 return Response("Badge " + badgeSlug + " has been deleted.", status.HTTP_200_OK)
-
 
     def put(self, request, issuerSlug, badgeSlug):
         """

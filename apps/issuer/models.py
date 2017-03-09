@@ -1,43 +1,58 @@
+from __future__ import unicode_literals
+
 import datetime
 import json
 import re
 import uuid
+
 import cachemodel
 from allauth.account.adapter import get_adapter
-
+from autoslug import AutoSlugField
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.sites.shortcuts import get_current_site
 from django.core.files.storage import default_storage
-from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import ProtectedError
-from django.template.loader import get_template
-
+from django.utils.timezone import get_current_timezone
+from jsonfield import JSONField
 from openbadges_bakery import bake
 
+from issuer.managers import BadgeInstanceManager
 from mainsite.managers import SlugOrJsonIdCacheModelManager
+from mainsite.mixins import ResizeUploadedImage
 from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
                              AbstractBadgeInstance, BadgrApp, EmailBlacklist)
 from mainsite.utils import OriginSetting
-from pathway.tasks import award_badges_for_pathway_completion
-
-from .utils import generate_sha256_hashstring, badgr_import_url, CURRENT_OBI_CONTEXT_IRI
-
+from .utils import generate_sha256_hashstring, CURRENT_OBI_CONTEXT_IRI
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
-class Issuer(AbstractIssuer):
-    owner = models.ForeignKey(AUTH_USER_MODEL, related_name='issuers',
-                              on_delete=models.PROTECT, null=False)
+class Issuer(ResizeUploadedImage, cachemodel.CacheModel):
+    source = models.CharField(max_length=254, default='local')
+    source_url = models.CharField(max_length=254, blank=True, null=True, default=None)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True, related_name="+")
+
     staff = models.ManyToManyField(AUTH_USER_MODEL, through='IssuerStaff')
+
+    slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
+    name = models.CharField(max_length=1024)
+    image = models.FileField(upload_to='uploads/issuers', blank=True, null=True)
+    description = models.TextField(blank=True, null=True, default=None)
+    url = models.CharField(max_length=254, blank=True, null=True, default=None)
+    email = models.CharField(max_length=254, blank=True, null=True, default=None)
+
+    old_json = JSONField()
+    original_json = models.TextField(blank=True, null=True, default=None)
+
     cached = SlugOrJsonIdCacheModelManager()
 
     def publish(self, *args, **kwargs):
         super(Issuer, self).publish(*args, **kwargs)
-        self.owner.publish()
+        self.publish_by('slug')
         for member in self.cached_staff():
             member.publish()
 
@@ -46,20 +61,42 @@ class Issuer(AbstractIssuer):
             raise ProtectedError("Issuer may only be deleted after all its defined BadgeClasses have been deleted.")
 
         staff = self.cached_staff()
-        owner = self.owner
         super(Issuer, self).delete(*args, **kwargs)
-        owner.publish()
+        self.publish_delete("slug")
         for member in staff:
             member.publish()
+
+    def get_absolute_url(self):
+        return reverse('issuer_json', kwargs={'slug': self.slug})
+
+    @property
+    def public_url(self):
+        return OriginSetting.HTTP+self.get_absolute_url()
+
+    @property
+    def jsonld_id(self):
+        return OriginSetting.JSON + self.get_absolute_url()
+
+    @property
+    def editors(self):
+        return self.staff.filter(issuerstaff__role__in=(IssuerStaff.ROLE_EDITOR, IssuerStaff.ROLE_OWNER))
+
+    @property
+    def owners(self):
+        return self.staff.filter(issuerstaff__role=IssuerStaff.ROLE_OWNER)
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_staff(self):
         return self.staff.all()
 
     @cachemodel.cached_method(auto_publish=True)
+    def cached_staff_records(self):
+        return IssuerStaff.objects.filter(issuer=self)
+
+    @cachemodel.cached_method(auto_publish=True)
     def cached_editors(self):
         UserModel = get_user_model()
-        return UserModel.objects.filter(issuerstaff__issuer=self, issuerstaff__editor=True)
+        return UserModel.objects.filter(issuerstaff__issuer=self, issuerstaff__role=IssuerStaff.ROLE_EDITOR)
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeclasses(self):
@@ -77,25 +114,87 @@ class Issuer(AbstractIssuer):
     def image_preview(self):
         return self.image
 
+    def get_json(self):
+        json = {
+            '@context': CURRENT_OBI_CONTEXT_IRI,
+            'type': 'Issuer',
+            'id': self.jsonld_id,
+            'name': self.name,
+            'url': self.url,
+            'email': self.email,
+            'description': self.description,
+        }
+        if self.image:
+            json['image'] = OriginSetting.HTTP + reverse('issuer_image', kwargs={'slug': self.slug})
+        return json
 
-class IssuerStaff(models.Model):
+    @property
+    def json(self):
+        return self.get_json()
+
+
+class IssuerStaff(cachemodel.CacheModel):
+    ROLE_OWNER = 'owner'
+    ROLE_EDITOR = 'editor'
+    ROLE_STAFF = 'staff'
+    ROLE_CHOICES = (
+        (ROLE_OWNER, 'Owner'),
+        (ROLE_EDITOR, 'Editor'),
+        (ROLE_STAFF, 'Staff'),
+    )
     issuer = models.ForeignKey(Issuer)
     user = models.ForeignKey(AUTH_USER_MODEL)
-    editor = models.BooleanField(default=False)
+    role = models.CharField(max_length=254, choices=ROLE_CHOICES, default=ROLE_STAFF)
 
     class Meta:
         unique_together = ('issuer', 'user')
 
+    def publish(self):
+        super(IssuerStaff, self).publish()
+        self.issuer.publish()
 
-class BadgeClass(AbstractBadgeClass):
-    issuer = models.ForeignKey(Issuer, blank=False, null=False,
-                               on_delete=models.CASCADE,
-                               related_name="badgeclasses")
+    def delete(self, *args, **kwargs):
+        issuer = self.issuer
+        super(IssuerStaff, self).delete()
+        issuer.publish()
+
+    @property
+    def cached_user(self):
+        from badgeuser.models import BadgeUser
+        return BadgeUser.cached.get(pk=self.user_id)
+
+    @property
+    def cached_issuer(self):
+        return Issuer.cached.get(pk=self.issuer_id)
+
+
+class BadgeClass(ResizeUploadedImage, cachemodel.CacheModel):
+    source = models.CharField(max_length=254, default='local')
+    source_url = models.CharField(max_length=254, blank=True, null=True, default=None)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True, related_name="+")
+    issuer = models.ForeignKey(Issuer, blank=False, null=False, on_delete=models.CASCADE, related_name="badgeclasses")
+
+    slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
+    name = models.CharField(max_length=255)
+    image = models.FileField(upload_to='uploads/badges', blank=True)
+    description = models.TextField(blank=True, null=True, default=None)
+
+    criteria_url = models.CharField(max_length=254, blank=True, null=True, default=None)
+    criteria_text = models.TextField(blank=True, null=True)
+
+    old_json = JSONField()
+    original_json = models.TextField(blank=True, null=True, default=None)
+
     cached = SlugOrJsonIdCacheModelManager()
+
+    class Meta:
+        verbose_name_plural = "Badge classes"
 
     def publish(self):
         super(BadgeClass, self).publish()
         self.issuer.publish()
+        self.publish_by('slug')
 
     def delete(self, *args, **kwargs):
         if self.recipient_count() > 0:
@@ -106,7 +205,28 @@ class BadgeClass(AbstractBadgeClass):
 
         issuer = self.issuer
         super(BadgeClass, self).delete(*args, **kwargs)
+        self.publish_delete('slug')
         issuer.publish()
+
+    def get_absolute_url(self):
+        return reverse('badgeclass_json', kwargs={'slug': self.slug})
+
+    @property
+    def public_url(self):
+        return OriginSetting.HTTP+self.get_absolute_url()
+
+    @property
+    def jsonld_id(self):
+        return OriginSetting.JSON + self.get_absolute_url()
+
+    def get_criteria_url(self):
+        if self.criteria_url:
+            return self.criteria_url
+        return OriginSetting.HTTP+reverse('badgeclass_criteria', kwargs={'slug': self.slug})
+
+    @property
+    def owners(self):
+        return self.cached_issuer.owners
 
     @property
     def cached_issuer(self):
@@ -138,74 +258,37 @@ class BadgeClass(AbstractBadgeClass):
             badgr_app=badgr_app
         )
 
-
-class BadgeInstanceManager(models.Manager):
-    def create_badgeinstance(
-            self, badgeclass, recipient_id, evidence_url=None,
-            notify=False, check_completions=True, created_by=None,
-            allow_uppercase=False, badgr_app=None
-    ):
-        """
-        Convenience method to award a badge to a recipient_id
-        :param allow_uppercase: bool
-        :type badgeclass: BadgeClass
-        :type recipient_id: str
-        :type issuer: Issuer
-        :type evidence_url: str
-        :type notify: bool
-        :type check_completions: bool
-        """
-        recipient_identifier = recipient_id if allow_uppercase else recipient_id.lower()
-
-        new_instance = BadgeInstance(
-            badgeclass=badgeclass, issuer=badgeclass.issuer,
-            recipient_identifier=recipient_identifier,
-        )
-
-        new_instance.json = {
-            # 'id': TO BE ADDED IN SAVE
+    def get_json(self):
+        json = {
             '@context': CURRENT_OBI_CONTEXT_IRI,
-            'type': 'Assertion',
-            'recipient': {
-                'type': 'email',
-                'hashed': True
-                # 'identity': TO BE ADDED IN SAVE
-            },
-            'badge': badgeclass.get_full_url(),
-            'verify': {
-                'type': 'hosted'
-                # 'url': TO BE ADDED IN SAVE
-            }
+            'type': 'BadgeClass',
+            'id': self.jsonld_id,
+            'name': self.name,
+            'description': self.description,
+            'issuer': self.cached_issuer.jsonld_id,
+            "criteria": self.get_criteria_url(),
         }
+        if self.image:
+            json['image'] = OriginSetting.HTTP + reverse('badgeclass_image', kwargs={'slug': self.slug})
+        return json
 
-        if evidence_url:
-            new_instance.json['evidence'] = evidence_url
-
-        new_instance.slug = new_instance.get_new_slug()
-
-        # Augment json with id
-        full_url = new_instance.get_full_url()
-        new_instance.json['id'] = full_url
-        new_instance.json['uid'] = new_instance.slug
-        new_instance.json['verify']['url'] = full_url
-        new_instance.json['image'] = full_url + '/image'
-
-        new_instance.save()
-
-        if check_completions:
-            award_badges_for_pathway_completion.delay(new_instance.slug)
-
-        if notify:
-            new_instance.notify_earner(badgr_app=badgr_app)
-
-        return new_instance
+    @property
+    def json(self):
+        return self.get_json()
 
 
-class BadgeInstance(AbstractBadgeInstance):
-    badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False,
-                                   on_delete=models.CASCADE,
-                                   related_name='badgeinstances')
+class BadgeInstance(cachemodel.CacheModel):
+    badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.CASCADE, related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True, related_name="+")
+
+    recipient_identifier = models.EmailField(max_length=1024, blank=False, null=False)
+    image = models.FileField(upload_to='uploads/badges', blank=True)
+    slug = AutoSlugField(max_length=255, populate_from='get_new_slug', unique=True, blank=False, editable=False)
+
+    revoked = models.BooleanField(default=False)
+    revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
 
     ACCEPTANCE_UNACCEPTED = 'Unaccepted'
     ACCEPTANCE_ACCEPTED = 'Accepted'
@@ -216,6 +299,11 @@ class BadgeInstance(AbstractBadgeInstance):
         (ACCEPTANCE_REJECTED, 'Rejected'),
     )
     acceptance = models.CharField(max_length=254, choices=ACCEPTANCE_CHOICES, default=ACCEPTANCE_UNACCEPTED)
+
+    salt = models.CharField(max_length=254, blank=True, null=True, default=None)
+    evidence_url = models.CharField(max_length=254, blank=True, null=True, default=None)
+
+    old_json = JSONField()
 
     objects = BadgeInstanceManager()
 
@@ -251,18 +339,26 @@ class BadgeInstance(AbstractBadgeInstance):
     def get_absolute_url(self):
         return reverse('badgeinstance_json', kwargs={'slug': self.slug})
 
+    @property
+    def jsonld_id(self):
+        return OriginSetting.JSON + self.get_absolute_url()
+
+    @property
+    def public_url(self):
+        return OriginSetting.HTTP+self.get_absolute_url()
+
+    @property
+    def owners(self):
+        return self.issuer.owners
+
     @staticmethod
     def get_new_slug():
         return str(uuid.uuid4())
 
     def save(self, *args, **kwargs):
         if self.pk is None:
-            self.json['recipient']['salt'] = salt = self.get_new_slug()
-            self.json['recipient']['identity'] = \
-                generate_sha256_hashstring(self.recipient_identifier.lower(), salt)
-
+            self.salt = salt = self.get_new_slug()
             self.created_at = datetime.datetime.now()
-            self.json['issuedOn'] = self.created_at.isoformat()
 
             imageFile = default_storage.open(self.badgeclass.image.file.name)
             self.image = bake(imageFile, json.dumps(self.json, indent=2))
@@ -289,6 +385,7 @@ class BadgeInstance(AbstractBadgeInstance):
         if self.cached_recipient_profile:
             self.cached_recipient_profile.publish()
         self.publish_by('slug')
+        self.publish_by('slug', 'revoked')
 
     def delete(self, *args, **kwargs):
         badgeclass = self.badgeclass
@@ -298,6 +395,7 @@ class BadgeInstance(AbstractBadgeInstance):
         if recipient_profile:
             recipient_profile.publish()
         self.publish_delete('slug')
+        self.publish_delete('slug', 'revoked')
 
     def notify_earner(self, badgr_app=None):
         """
@@ -322,21 +420,21 @@ class BadgeInstance(AbstractBadgeInstance):
 
         try:
             if self.issuer.image:
-                issuer_image_url = self.issuer.get_full_url() + '/image'
+                issuer_image_url = self.issuer.public_url + '/image'
             else:
                 issuer_image_url = None
 
             email_context = {
                 'badge_name': self.badgeclass.name,
                 'badge_id': self.slug,
-                'badge_description': self.badgeclass.prop('description'),
+                'badge_description': self.badgeclass.description,
                 'issuer_name': re.sub(r'[^\w\s]+', '', self.issuer.name, 0, re.I),
-                'issuer_url': self.issuer.prop('url'),
-                'issuer_detail': self.issuer.get_full_url(),
+                'issuer_url': self.issuer.url,
+                'issuer_detail': self.issuer.public_url,
                 'issuer_image_url': issuer_image_url,
-                'badge_instance_url': self.get_full_url(),
-                'image_url': self.get_full_url() + '/image',
-                'download_url': self.get_full_url() + "?action=download",
+                'badge_instance_url': self.public_url,
+                'image_url': self.public_url + '/image',
+                'download_url': self.public_url + "?action=download",
                 'unsubscribe_url': getattr(settings, 'HTTP_ORIGIN') + EmailBlacklist.generate_email_signature(
                     self.recipient_identifier),
                 'site_name': badgr_app.name,
@@ -378,3 +476,42 @@ class BadgeInstance(AbstractBadgeInstance):
         except CachedEmailAddress.DoesNotExist:
             pass
         return None
+
+    def get_json(self):
+        json = {
+            '@context': CURRENT_OBI_CONTEXT_IRI,
+            'type': 'Assertion',
+            'id': self.jsonld_id,
+            # "issuedOn": self.created_at.astimezone(get_current_timezone()).replace(tzinfo=None).isoformat(),
+            "uid": self.slug,
+            "image": OriginSetting.HTTP + reverse('badgeinstance_image', kwargs={'slug': self.slug}),
+            "badge": self.cached_badgeclass.jsonld_id,
+            "verify": {
+                "url": self.public_url,
+                "type": "hosted"
+            }
+        }
+
+        if self.evidence_url:
+            json['evidence'] = self.evidence_url
+
+        json['issuedOn'] = self.created_at.isoformat()
+
+        if self.salt:
+            json['recipient'] = {
+                "type": "email",
+                "salt": self.salt,
+                "hashed": True,
+                "identity": generate_sha256_hashstring(self.recipient_identifier.lower(), self.salt),
+            }
+        else:
+            json['recipient'] = {
+                "type": "email",
+                "hashed": False,
+                "identity": self.recipient_identifier
+            }
+        return json
+
+    @property
+    def json(self):
+        return self.get_json()

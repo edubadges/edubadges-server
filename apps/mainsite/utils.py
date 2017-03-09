@@ -1,11 +1,15 @@
 """
 Utility functions and constants that might be used across the project.
 """
+import StringIO
 import hashlib
+import os
 import urlparse
 
+import requests
 from django.apps import apps
 from django.conf import settings
+from django.core.files.storage import DefaultStorage
 from django.core.urlresolvers import get_callable
 
 
@@ -91,4 +95,20 @@ def verify_svg(fileobj):
     except et.ParseError:
         pass
     return tag == '{http://www.w3.org/2000/svg}svg'
+
+
+def fetch_remote_file_to_storage(remote_url, upload_to=''):
+    store = DefaultStorage()
+    r = requests.get(remote_url, stream=True)
+    if r.status_code == 200:
+        name, ext = os.path.splitext(urlparse.urlparse(r.url).path)
+        storage_name = '{upload_to}/cached/{filename}{ext}'.format(
+            upload_to=upload_to,
+            filename=hashlib.md5(remote_url).hexdigest(),
+            ext=ext)
+        if not store.exists(storage_name):
+            buf = StringIO.StringIO(r.content)
+            store.save(storage_name, buf)
+            return r.status_code, storage_name
+    return r.status_code, None
 

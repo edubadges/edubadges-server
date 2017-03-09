@@ -11,8 +11,7 @@ urlpatterns = patterns(
     'issuer.api_views',
     url(r'^$', RedirectView.as_view(url='/v1/issuer/issuers', permanent=False)),
     url(r'^/all-badges$', AllBadgeClassesList.as_view(), name='issuer_all_badges_list'),
-    url(r'^/all-badges/find/id/(?P<badge_id>.+)$', FindBadgeClassDetail.as_view(), name='find_badgeclass_by_id'),
-    url(r'^/all-badges/find/slug/(?P<slug>.+)$', FindBadgeClassDetail.as_view(), name='find_badgeclass_by_slug'),
+    url(r'^/all-badges/find$', FindBadgeClassDetail.as_view(), name='find_badgeclass_by_identifier'),
 
     url(r'^/issuers$', IssuerList.as_view(), name='issuer_list'),
     url(r'^/issuers/(?P<slug>[-\w]+)$', IssuerDetail.as_view(), name='issuer_detail'),

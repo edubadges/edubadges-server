@@ -19,7 +19,7 @@ from openbadges_bakery import unbake
 from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
 
 from issuer.api import IssuerList
-from issuer.models import Issuer, BadgeClass, BadgeInstance
+from issuer.models import Issuer, BadgeClass, BadgeInstance, IssuerStaff
 from issuer.serializers import BadgeInstanceSerializer
 from mainsite import TOP_DIR
 
@@ -290,7 +290,7 @@ class IssuerTests(APITestCase):
 
     def test_add_remove_user_with_issuer_staff_set(self):
         test_issuer = Issuer.objects.get(slug='test-issuer')
-        self.assertEqual(len(test_issuer.staff.all()), 0)
+        self.assertEqual(len(test_issuer.staff.all()), 1)
 
         self.client.force_authenticate(user=self.test_user)
         post_response = self.client.post(
@@ -299,7 +299,7 @@ class IssuerTests(APITestCase):
         )
 
         self.assertEqual(post_response.status_code, 200)
-        self.assertEqual(len(test_issuer.staff.all()), 1)
+        self.assertEqual(len(test_issuer.staff.all()), 2)
 
         second_response = self.client.post(
             '/v1/issuer/issuers/test-issuer/staff',
@@ -307,21 +307,24 @@ class IssuerTests(APITestCase):
         )
 
         self.assertEqual(second_response.status_code, 200)
-        self.assertEqual(len(test_issuer.staff.all()), 0)
+        self.assertEqual(len(test_issuer.staff.all()), 1)
 
     def test_delete_issuer_successfully(self):
         self.client.force_authenticate(user=self.test_user)
-        test_issuer = Issuer(name='issuer who can be deleted', slug='issuer-deletable', owner=self.test_user)
+        test_issuer = Issuer(name='issuer who can be deleted', slug='issuer-deletable')
         test_issuer.save()
+        IssuerStaff(issuer=test_issuer, user=self.test_user, role=IssuerStaff.ROLE_OWNER).save()
 
         response = self.client.delete('/v1/issuer/issuers/issuer-deletable', {})
         self.assertEqual(response.status_code, 200)
 
     def test_delete_issuer_with_unissued_badgeclass_successfully(self):
         self.client.force_authenticate(user=self.test_user)
-        test_issuer = Issuer(name='issuer who can be deleted', slug="issuer-deletable", owner=self.test_user)
+        test_issuer = Issuer(name='issuer who can be deleted', slug="issuer-deletable")
         test_issuer.save()
-        test_badgeclass = BadgeClass(name="Deletable Badge", owner=self.test_user, issuer=test_issuer)
+        IssuerStaff(issuer=test_issuer, user=self.test_user, role=IssuerStaff.ROLE_OWNER).save()
+        test_badgeclass = BadgeClass(name="Deletable Badge", issuer=test_issuer)
+
         test_badgeclass.save()
 
         response = self.client.delete('/v1/issuer/issuers/issuer-deletable', {})
@@ -406,7 +409,8 @@ class BadgeClassTests(APITestCase):
             self.assertEqual(response.status_code, 201)
 
             # assert that the BadgeClass was published to and fetched from the cache
-            with self.assertNumQueries(0):
+            # we expect to generate one query where the object permissions are checked in BadgeClassDetail.get
+            with self.assertNumQueries(1):
                 slug = response.data.get('slug')
                 response = self.client.get('/v1/issuer/issuers/test-issuer/badges/{}'.format(slug))
                 self.assertEqual(response.status_code, 200)
@@ -431,7 +435,8 @@ class BadgeClassTests(APITestCase):
             self.assertEqual(response.status_code, 201)
 
             # assert that the BadgeClass was published to and fetched from the cache
-            with self.assertNumQueries(0):
+            # we expect to generate one query where the object permissions are checked in BadgeClassDetail.get
+            with self.assertNumQueries(1):
                 slug = response.data.get('slug')
                 response = self.client.get('/v1/issuer/issuers/test-issuer/badges/{}'.format(slug))
                 self.assertEqual(response.status_code, 200)
@@ -1088,36 +1093,43 @@ class PublicAPITests(APITestCase):
 class FindBadgeClassTests(APITestCase):
     fixtures = fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json', 'initial_my_badges']
 
-
     def test_can_find_imported_badge_by_id(self):
         user = get_user_model().objects.first()
         self.client.force_authenticate(user=user)
 
-        url = reverse('find_badgeclass_by_id', kwargs={'badge_id': 'http://badger.openbadges.org/badge/meta/mozfest-reveler'})
+        url = "{url}?identifier={id}".format(
+            url=reverse('find_badgeclass_by_identifier'),
+            id='http://badger.openbadges.org/badge/meta/mozfest-reveler'
+        )
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['json'].get('name'), 'MozFest Reveler')
 
     def test_can_find_issuer_badge_by_id(self):
-        # TODO: BadgeClass.identifier is mis-populated in current DB. Watch out!
         user = get_user_model().objects.first()
         self.client.force_authenticate(user=user)
 
         badge = BadgeClass.objects.get(id=1)
 
-        url = reverse('find_badgeclass_by_id', kwargs={'badge_id': badge.get_full_url()})
+        url = "{url}?identifier={id}".format(
+            url=reverse('find_badgeclass_by_identifier'),
+            id=badge.jsonld_id
+        )
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['json'].get('name'), 'Badge of Testing')
+        self.assertEqual(response.data['json'].get('name'), badge.name)
 
     def test_can_find_issuer_badge_by_slug(self):
         user = get_user_model().objects.first()
         self.client.force_authenticate(user=user)
 
-        url = reverse('find_badgeclass_by_slug', kwargs={'slug': 'badge-of-testing'})
+        url = "{url}?identifier={slug}".format(
+            url=reverse('find_badgeclass_by_identifier'),
+            slug='fresh-badge-of-testing'
+        )
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['json'].get('name'), 'Badge of Awesome')
+        self.assertEqual(response.data['json'].get('name'), 'Fresh Badge of Testing')

@@ -129,10 +129,7 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
         db_table = 'users'
 
     def __unicode__(self):
-        return self.email
-
-    def get_absolute_url(self):
-        return reverse('user_detail', kwargs={'user_id': self.pk})
+        return "{} <{}>".format(self.get_full_name(), self.email)
 
     def get_full_name(self):
         return u"%s %s" % (self.first_name, self.last_name)
@@ -197,7 +194,7 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):
-        return Issuer.objects.filter( Q(owner__id=self.id) | Q(staff__id=self.id) ).distinct()
+        return Issuer.objects.filter(staff__id=self.id).distinct()
 
     def cached_badgeclasses(self):
         return chain.from_iterable(issuer.cached_badgeclasses() for issuer in self.cached_issuers())

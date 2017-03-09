@@ -1,17 +1,19 @@
 import os
+import uuid
 
 import basic_models
 import cachemodel
 from autoslug import AutoSlugField
-from composition.sharing import SharingManager
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.urlresolvers import reverse
 from django.db import models
+from jsonfield import JSONField
 
-from issuer.models import BadgeInstance
+from composition.sharing import SharingManager
+from issuer.models import BadgeInstance, BadgeClass
 from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
-                             AbstractBadgeInstance, AbstractRemoteImagePreviewMixin)
+                             AbstractRemoteImagePreviewMixin)
 from mainsite.utils import OriginSetting
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
@@ -35,15 +37,36 @@ class LocalBadgeClass(AbstractRemoteImagePreviewMixin, AbstractBadgeClass):
         return LocalIssuer.cached.get(pk=self.issuer_id)
 
 
-class LocalBadgeInstance(AbstractBadgeInstance):
+class LocalBadgeInstance(cachemodel.CacheModel):
     # 0.5 BadgeInstances have no notion of a BadgeClass
-    badgeclass = models.ForeignKey(LocalBadgeClass, blank=False, null=True,
-                                   on_delete=models.PROTECT,
-                                   related_name='badgeinstances')
-    # 0.5 BadgeInstances have no notion of a BadgeClass
-    issuer = models.ForeignKey(LocalIssuer, blank=False, null=True)
+    local_badgeclass = models.ForeignKey(LocalBadgeClass, blank=False, null=True, on_delete=models.PROTECT, related_name='badgeinstances') # 0.5 BadgeInstances have no notion of a BadgeClass
+    local_issuer = models.ForeignKey(LocalIssuer, blank=False, null=True)
+
+    issuer_badgeclass = models.ForeignKey("issuer.BadgeClass", blank=True, null=True)
 
     recipient_user = models.ForeignKey(AUTH_USER_MODEL)
+
+    # migrated from AbstractComponent
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True, related_name="+")
+    identifier = models.CharField(max_length=1024, null=False, default='get_full_url')
+    json = JSONField()
+
+    # migrated from AbstractBadgeInstance
+    recipient_identifier = models.EmailField(max_length=1024, blank=False, null=False)
+    image = models.FileField(upload_to='uploads/badges', blank=True)
+    slug = AutoSlugField(max_length=255, populate_from='populate_slug', unique=True, blank=False, editable=False)
+    revoked = models.BooleanField(default=False)
+    revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
+
+    def get_absolute_url(self):
+        return reverse('badgeinstance_json', kwargs={'slug': self.slug})
+
+    def get_public_url(self):
+        return OriginSetting.HTTP+self.get_absolute_url()
+
+    def populate_slug(self):
+        return str(uuid.uuid4())
 
     def image_url(self):
         if getattr(settings, 'MEDIA_URL').startswith('http'):
@@ -51,21 +74,48 @@ class LocalBadgeInstance(AbstractBadgeInstance):
         else:
             return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
 
+    def publish(self):
+        super(LocalBadgeInstance, self).publish()
+        self.publish_by('slug')
+        self.publish_by('slug', 'revoked')
+
+    def delete(self, *args, **kwargs):
+        super(LocalBadgeInstance, self).delete(*args, **kwargs)
+        self.publish_delete('slug')
+        self.publish_delete('slug', 'revoked')
+
     @property
     def share_url(self):
         return OriginSetting.HTTP+reverse('shared_badge', kwargs={'badge_id': self.pk})
 
     @property
     def cached_issuer(self):
-        return LocalIssuer.cached.get(pk=self.issuer_id)
+        return self.cached_badgeclass.cached_issuer
 
     @property
     def cached_badgeclass(self):
-        return LocalBadgeClass.cached.get(pk=self.badgeclass_id)
+        return BadgeClass.cached.get(pk=self.issuer_badgeclass_id)
 
     @property
     def acceptance(self):
         return 'Accepted'
+
+    @property
+    def owner(self):
+        return self.recipient_user
+
+    def get_full_url(self):
+        try:
+            return self.json['id']
+        except (KeyError, TypeError):
+            if self.get_absolute_url().startswith('/'):
+                return OriginSetting.JSON + self.get_absolute_url()
+            else:
+                return '_:null'
+
+    @property
+    def jsonld_id(self):
+        return self.get_full_url()
 
 
 class Collection(cachemodel.CacheModel):
@@ -154,7 +204,7 @@ class LocalBadgeInstanceCollection(models.Model):
 
     def __unicode__(self):
         return u'{} in {}\'s {}'.format(
-            self.badge_instance.badgeclass.name,
+            self.badge_instance.issuer_badgeclass.name,
             self.badge_instance.recipient_identifier,
             self.collection.name
         )

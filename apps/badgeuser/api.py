@@ -20,25 +20,7 @@ from mainsite.models import BadgrApp
 from mainsite.permissions import IsRequestUser
 from mainsite.utils import OriginSetting
 from .models import BadgeUser, CachedEmailAddress
-from .serializers import BadgeUserProfileSerializer, ExistingEmailSerializer, NewEmailSerializer, \
-    BadgeUserExistingProfileSerializer
-
-
-class BadgeUserDetail(generics.RetrieveAPIView):
-    """
-    View user's profile. Currently permissions only allow you to view your own profile.
-    """
-    serializer_class = BadgeUserExistingProfileSerializer
-    model = BadgeUser
-    permission_classes = (IsRequestUser,)
-
-    def get_object(self):
-        try:
-            obj = BadgeUser.cached.get(pk=self.kwargs.get('user_id'))
-            self.check_object_permissions(self.request, obj)
-            return obj
-        except (BadgeUser.DoesNotExist, ValueError) as e:
-            raise Http404()
+from .serializers import BadgeUserProfileSerializer, EmailSerializer
 
 
 class BadgeUserProfile(APIView):
@@ -69,7 +51,7 @@ class BadgeUserProfile(APIView):
         if request.user.is_anonymous():
             raise NotAuthenticated()
 
-        serializer = BadgeUserExistingProfileSerializer(request.user)
+        serializer = BadgeUserProfileSerializer(request.user)
         return Response(serializer.data)
 
     def put(self, request):
@@ -81,7 +63,7 @@ class BadgeUserProfile(APIView):
         if request.user.is_anonymous():
             raise NotAuthenticated()
 
-        serializer = BadgeUserExistingProfileSerializer(request.user, data=request.data)
+        serializer = BadgeUserProfileSerializer(request.user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         updated_user = serializer.save()
 
@@ -127,7 +109,7 @@ class BadgeUserEmailList(APIView):
         serializer: ExistingEmailSerializer
         """
         instances = request.user.cached_emails()
-        serializer = ExistingEmailSerializer(instances, many=True, context={'request': request})
+        serializer = EmailSerializer(instances, many=True, context={'request': request})
         return Response(serializer.data)
 
     def post(self, request):
@@ -142,7 +124,7 @@ class BadgeUserEmailList(APIView):
               type: string
               paramType: form
         """
-        serializer = NewEmailSerializer(data=request.data, context={'request': request})
+        serializer = EmailSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
         email_address = serializer.save(user=request.user)
@@ -183,7 +165,7 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
         if email_address.user_id != self.request.user.id:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        serializer = ExistingEmailSerializer(email_address, context={'request': request})
+        serializer = EmailSerializer(email_address, context={'request': request})
         return Response(serializer.data)
 
     def delete(self, request, id):
@@ -248,7 +230,7 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
             if request.data.get('resend'):
                 email_address.send_confirmation(request=request)
 
-        serializer = ExistingEmailSerializer(email_address, context={'request': request})
+        serializer = EmailSerializer(email_address, context={'request': request})
         serialized = serializer.data
         return Response(serialized, status=status.HTTP_200_OK)
 

@@ -1,22 +1,34 @@
 from rest_framework import permissions
 import rules
 
+from issuer.models import IssuerStaff
+
 SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
 
 
 @rules.predicate
-def is_owner(user, component):
-    return user == component.owner
+def is_owner(user, issuer):
+    for staff_record in issuer.cached_staff_records():
+        if staff_record.user_id == user.id and staff_record.role == IssuerStaff.ROLE_OWNER:
+            return True
+    return False
 
 
 @rules.predicate
 def is_editor(user, issuer):
-    return issuer.editors.filter(pk=user.pk).exists()
+    for staff_record in issuer.cached_staff_records():
+        if staff_record.user_id == user.id and staff_record.role in (IssuerStaff.ROLE_OWNER, IssuerStaff.ROLE_EDITOR):
+            return True
+    return False
 
 
 @rules.predicate
 def is_staff(user, issuer):
-    return issuer.staff.filter(pk=user.pk).exists()
+    for staff_record in issuer.cached_staff_records():
+        if staff_record.user_id == user.id:
+            return True
+    return False
+
 
 is_on_staff = is_owner | is_staff
 is_staff_editor = is_owner | is_editor
@@ -24,6 +36,11 @@ is_staff_editor = is_owner | is_editor
 rules.add_perm('issuer.is_owner', is_owner)
 rules.add_perm('issuer.is_editor', is_staff_editor)
 rules.add_perm('issuer.is_staff', is_on_staff)
+
+
+@rules.predicate
+def is_badgeclass_owner(user, badgeclass):
+    return badgeclass.issuer.owners.filter(pk=user.pk).exists()
 
 
 @rules.predicate
@@ -35,8 +52,8 @@ def is_badgeclass_editor(user, badgeclass):
 def is_badgeclass_staff(user, badgeclass):
     return badgeclass.issuer.staff.filter(pk=user.pk).exists()
 
-can_issue_badgeclass = is_owner | is_badgeclass_staff
-can_edit_badgeclass = is_owner | is_badgeclass_editor
+can_issue_badgeclass = is_badgeclass_owner | is_badgeclass_staff
+can_edit_badgeclass = is_badgeclass_owner | is_badgeclass_editor
 
 rules.add_perm('issuer.can_issue_badge', can_issue_badgeclass)
 rules.add_perm('issuer.can_edit_badgeclass', can_edit_badgeclass)

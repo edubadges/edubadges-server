@@ -129,9 +129,9 @@ class BadgeJunctionCompletionRequirementSpec(CompletionRequirementSpec):
         for i in instances:
             if i.cached_badgeclass.json['id'] in self.badges:
                 completion['completedBadges'].append({
-                    '@id': i.cached_badgeclass.json['id'],
+                    '@id': i.cached_badgeclass.jsonld_id,
                     'slug': i.cached_badgeclass.slug,
-                    'assertion': i.json['id'],
+                    'assertion': i.jsonld_id,
                 })
         completion['completedRequirementCount'] = len(completion['completedBadges'])
 

@@ -250,7 +250,7 @@ class BadgeInstanceJson(JSONComponentView):
                 # https://github.com/openbadges/openbadges-specification/issues/33
                 revocation_info = {
                     '@context': utils.CURRENT_OBI_CONTEXT_IRI,
-                    'id': current_object.get_full_url(),
+                    'id': current_object.jsonld_id,
                     'revoked': True,
                     'revocationReason': current_object.revocation_reason
                 }

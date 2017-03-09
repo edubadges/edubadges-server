@@ -21,7 +21,7 @@ from autoslug import AutoSlugField
 import cachemodel
 from jsonfield import JSONField
 
-from mainsite.utils import OriginSetting
+from mainsite.utils import OriginSetting, fetch_remote_file_to_storage
 from .mixins import ResizeUploadedImage
 
 
@@ -79,20 +79,10 @@ class AbstractRemoteImagePreviewMixin(models.Model):
         if remote_url and self.image_preview_status is None and not self.image:
             # attempt to cache a local copy if we haven't tried before
             if remote_url is not None:
-                store = DefaultStorage()
-                r = requests.get(remote_url, stream=True)
-                self.image_preview_status = r.status_code  # save the status code of our attempt
-                if r.status_code == 200:
-                    name, ext = os.path.splitext(urlparse.urlparse(r.url).path)
-                    storage_name = '{upload_to}/cached/{filename}{ext}'.format(
-                        upload_to=self.image.field.upload_to,
-                        filename=md5(remote_url).hexdigest(),
-                        ext=ext)
-                    if not store.exists(storage_name):
-                        r.raw.decode_content = True
-                        buf = StringIO.StringIO(r.raw.read())
-                        store.save(storage_name, buf)
-                        self.image = storage_name
+                status_code, storage_name = fetch_remote_file_to_storage(remote_url, upload_to=self.image.field.upload_to)
+                self.image_preview_status = status_code
+                if status_code == 200:
+                    self.image = storage_name
                 self.save()
         return self.image
 
