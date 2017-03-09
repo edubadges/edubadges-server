@@ -106,7 +106,7 @@ class V1BadgeInstanceSerializer(V1InstanceSerializer):
     def to_representation(self, instance):
         localbadgeinstance_json = instance.json
         localbadgeinstance_json['badge'] = instance.cached_badgeclass.json
-        localbadgeinstance_json['badge']['criteria'] = instance.cached_badgeclass.get_full_url()
+        localbadgeinstance_json['badge']['criteria'] = instance.cached_badgeclass.public_url
         localbadgeinstance_json['badge']['issuer'] = instance.cached_issuer.json
 
         # clean up recipient to match V1InstanceSerializer

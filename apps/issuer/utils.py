@@ -27,12 +27,6 @@ def is_probable_url(string):
     return earl.match(string)
 
 
-def badgr_import_url(instance):
-    if apps.is_installed('composition'):
-        return getattr(settings, 'HTTP_ORIGIN') \
-            + '/earner/badges/new?url=' + instance.get_full_url()
-
-
 def obscure_email_address(email):
     charlist = list(email)
 
