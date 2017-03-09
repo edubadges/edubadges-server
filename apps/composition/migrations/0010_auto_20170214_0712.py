@@ -18,7 +18,10 @@ def import_localissuers_to_issuer(apps, schema_editor):
         if local_issuer.image:
             image = local_issuer.image
         elif remote_image_url and local_issuer.image_preview_status is None:
-            status_code, image = fetch_remote_file_to_storage(remote_image_url, upload_to=local_issuer.image.field.upload_to)
+            try:
+                status_code, image = fetch_remote_file_to_storage(remote_image_url, upload_to=local_issuer.image.field.upload_to)
+            except IOError:
+                image = None
         else:
             image = None
 
@@ -47,7 +50,10 @@ def import_localbadgeclass_to_issuer(apps, schema_editor):
         if local_badgeclass.image:
             image = local_badgeclass.image
         elif remote_image_url and local_badgeclass.image_preview_status is None:
-            status_code, image = fetch_remote_file_to_storage(remote_image_url, upload_to=local_badgeclass.image.field.upload_to)
+            try:
+                status_code, image = fetch_remote_file_to_storage(remote_image_url, upload_to=local_badgeclass.image.field.upload_to)
+            except IOError:
+                image = None
         else:
             image = None
 
