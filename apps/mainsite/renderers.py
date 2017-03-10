@@ -1,4 +1,4 @@
-import csv
+from backports import csv
 import StringIO
 
 from rest_framework import renderers
