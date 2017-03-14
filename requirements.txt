@@ -81,3 +81,6 @@ tinycss==0.4
 
 # Backport of Python 3.0 CSV package with Unicode support
 backports.csv==1.0.4
+
+# EncryptedCursorPagination dependencies
+more-itertools==2.5.0
