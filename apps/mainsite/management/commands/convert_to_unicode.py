@@ -1,3 +1,5 @@
+import warnings
+
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import connection
@@ -9,7 +11,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         with connection.cursor() as cursor:
-            cursor.execute("DROP PROCEDURE IF EXISTS convert_to_unicode")
+
+            # Ignore "PROCEDURE convert_to_unicode does not exist" warning.
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore')
+                cursor.execute("DROP PROCEDURE IF EXISTS convert_to_unicode")
+
             cursor.execute("""
                 CREATE PROCEDURE convert_to_unicode
                 (IN dbname VARCHAR(64))
