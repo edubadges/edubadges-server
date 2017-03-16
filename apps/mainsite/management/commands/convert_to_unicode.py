@@ -30,7 +30,7 @@ class Command(BaseCommand):
                     read_loop: LOOP
                         FETCH all_tables INTO tname;
 
-                        set @sql = 'ALTER TABLE ?tname? CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci;';
+                        set @sql = 'ALTER TABLE ?tname? CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;';
                         set @sql = REPLACE(@sql, '?tname?', tname);
                         PREPARE stmt FROM @sql;
                         EXECUTE stmt;
