@@ -3,6 +3,7 @@ import more_itertools
 from cryptography.fernet import Fernet
 
 from django.conf import settings
+from django.db import transaction
 
 from rest_framework.compat import OrderedDict
 from rest_framework.pagination import BasePagination
@@ -122,7 +123,7 @@ class EncryptedCursorPagination(BasePagination):
     """
     cursor_query_param = 'cursor'
 
-    page_size = 10
+    page_size = 50
 
     # Model field to use for ordering.  Must be unique, not null, and monotonically increasing.
     #
@@ -186,22 +187,14 @@ class EncryptedCursorPagination(BasePagination):
             url = request.build_absolute_uri()
             return replace_query_param(url, self.cursor_query_param, cursor)
 
-    def _partition_padded_slice(self, padded_page, excluded_key=None):
+    def _partition_padded_page(self, padded_page):
         """
-        Partition padded page into (prev_element, page, next_element) for use when populating hasNext and hasPrevious.
-        padded_page must be reversed if partitioning a page with an upper limit.
+        Partition padded page into (page, next_element). padded_page must be reversed if partitioning a page with an
+        upper limit.
         """
-        assert len(padded_page) <= self.page_size + 2
+        assert len(padded_page) <= self.page_size + 1
 
-        iterator = more_itertools.peekable(padded_page)
-
-        excluded_elem = None
-        try:
-            if excluded_key is not None and self._get_elem_key(iterator.peek()) == excluded_key:
-                excluded_elem = iterator.next()
-        except StopIteration:
-            pass
-
+        iterator = iter(padded_page)
         page = more_itertools.take(self.page_size, iterator)
 
         extra_elem = None
@@ -210,7 +203,7 @@ class EncryptedCursorPagination(BasePagination):
         except StopIteration:
             pass
 
-        return excluded_elem, page, extra_elem
+        return page, extra_elem
 
     def paginate_queryset(self, queryset, request, view=None):
         """
@@ -225,22 +218,35 @@ class EncryptedCursorPagination(BasePagination):
 
         assert not (lower_limit and upper_limit), "Invalid state"
 
-        # Select up to page_size + 2 elements starting at the specified cursor (inclusive).  The two extra elements
-        # allow us to populate hasPrevious and hasNext in the response.
         if lower_limit is not None:
-            padded_page = queryset.filter(**{self.ordering + '__gte': lower_limit}) \
-                                  .order_by(self.ordering)[:self.page_size + 2]
+            with transaction.atomic():
+                # Select up page_size + 1 elements in forward order to populate page and hasNext
+                padded_page = queryset.filter(**{self.ordering + '__gt': lower_limit}) \
+                                      .order_by(self.ordering)[:self.page_size + 1]
+                # Select element for hasPrevious
+                prev_elem = queryset.filter(**{self.ordering + '__lte': lower_limit}) \
+                                    .order_by('-' + self.ordering) \
+                                    .first()
 
-            prev_elem, page, next_elem = self._partition_padded_slice(padded_page, lower_limit)
+            page, next_elem = self._partition_padded_page(padded_page)
         elif upper_limit is not None:
-            padded_page = queryset.filter(**{self.ordering + '__lte': upper_limit}) \
-                                  .order_by('-' + self.ordering)[:self.page_size + 2]
+            with transaction.atomic():
+                # Select up page_size + 1 elements in reverse order to populate page and hasPrevious
+                padded_page = queryset.filter(**{self.ordering + '__lt': upper_limit}) \
+                                      .order_by('-' + self.ordering)[:self.page_size + 1]
+                # Select element for hasNext
+                next_elem = queryset.filter(**{self.ordering + '__gte': upper_limit}) \
+                                    .order_by(self.ordering) \
+                                    .first()
 
-            next_elem, page, prev_elem = self._partition_padded_slice(padded_page, upper_limit)
+            page, prev_elem = self._partition_padded_page(padded_page)
             page = list(reversed(page))
         else:
+            # Select up page_size + 1 elements in forward order to populate page and hasNext
             padded_page = queryset.order_by(self.ordering)[:self.page_size + 1]
-            prev_elem, page, next_elem = self._partition_padded_slice(padded_page)
+            prev_elem = None  # Special case--hasPrevious is always False
+
+            page, next_elem = self._partition_padded_page(padded_page)
 
         prev_cursor, next_cursor = self._get_page_cursors(page)
 

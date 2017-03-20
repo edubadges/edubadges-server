@@ -140,6 +140,16 @@ class TestEncryptedCursorPagination(TestCase):
         for args in test_cases:
             self._do_paginate_queryset_asserts(*args)
 
+    def test_missing_cursor_key(self):
+        test_cases = [
+            # url           input        output    has_prev  prev_cursor  has_next  next_cursor
+            ####################################################################################
+            ('/?cursor=2:', [1,3,4,5],   [3,4,5],  True,     ':3',        False,        '5:'),
+            ('/?cursor=:4', [1,2,3,5],   [1,2,3],  False,    ':1',        True,         '3:')]
+
+        for args in test_cases:
+            self._do_paginate_queryset_asserts(*args)
+
     def test_get_paginated_response(self):
         self.paginator.next_link = 'aaa'
         self.paginator.has_next = 'bbb'
