@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 from django.db import models, migrations
 from mainsite.utils import fetch_remote_file_to_storage
 
+import json
+
 
 def noop(apps, schema_editor):
     pass
@@ -29,13 +31,16 @@ def import_localissuers_to_issuer(apps, schema_editor):
             source='legacy_local_issuer',
             source_url=local_issuer.identifier,
             defaults={
-                'created_at': local_issuer.created_at,
                 'created_by': local_issuer.created_by,
                 'name': local_issuer.name,
                 'image': image,
-                'original_json': local_issuer.json,
+                'original_json': json.dumps(local_issuer.json),
+                'url': local_issuer.json.get('url', None),
+                'email': local_issuer.json.get('email', None),
+                'description': local_issuer.json.get('description', None),
             }
         )
+        new_issuer.created_at = local_issuer.created_at  # Avoid auto-now behavior
         new_issuer.save()
 
 
@@ -61,15 +66,17 @@ def import_localbadgeclass_to_issuer(apps, schema_editor):
             source='legacy_local_badgeclass',
             source_url=local_badgeclass.identifier,
             defaults={
-                'created_at': local_badgeclass.created_at,
                 'created_by': local_badgeclass.created_by,
                 'name': local_badgeclass.name,
                 'image': image,
                 'criteria_text': local_badgeclass.criteria_text,
                 'issuer': issuer,
-                'original_json': local_badgeclass.json,
+                'original_json': json.dumps(local_badgeclass.json),
+                'criteria_url': local_badgeclass.json.get('criteria', None),
+                'description': local_badgeclass.json.get('description', None),
             }
         )
+        new_badgeclass.created_at = new_badgeclass.created_at  # Avoid auto-now behavior
         new_badgeclass.save()
 
 
