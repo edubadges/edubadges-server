@@ -23,7 +23,7 @@ class Command(BaseCommand):
                 BEGIN
                     DECLARE done INT DEFAULT FALSE;
                     DECLARE tname VARCHAR(64);
-                    DECLARE all_tables CURSOR FOR SELECT `table_name` FROM information_schema.tables WHERE table_schema=dbname;
+                    DECLARE all_tables CURSOR FOR SELECT `table_name` FROM information_schema.tables WHERE table_schema=dbname COLLATE utf8_unicode_ci;
                     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
                     OPEN all_tables;
 
