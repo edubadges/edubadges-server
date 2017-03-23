@@ -81,3 +81,5 @@ tinycss==0.4
 
 # Backport of Python 3.0 CSV package with Unicode support
 backports.csv==1.0.4
+
+git+https://github.com/concentricsky/django-automation-tools.git@v0.1.0
