@@ -84,3 +84,5 @@ backports.csv==1.0.4
 
 # EncryptedCursorPagination dependencies
 more-itertools==2.5.0
+
+git+ssh://git@github.com/concentricsky/django-automation-tools.git@v0.1.0

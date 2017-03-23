@@ -13,7 +13,7 @@ def migrate_localbadgeinstance_to_use_issuer(apps, schema_editor):
     BadgeClass = apps.get_model('issuer', 'BadgeClass')
     for local_badge_instance in LocalBadgeInstance.objects.all():
         try:
-            badgeclass = BadgeClass.objects.get(source='legacy_local_issuer',
+            badgeclass = BadgeClass.objects.get(source='legacy_local_badgeclass',
                                                 source_url=local_badge_instance.local_badgeclass.identifier)
             local_badge_instance.issuer_badgeclass = badgeclass
             local_badge_instance.save()
