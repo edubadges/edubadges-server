@@ -21,6 +21,7 @@ class Command(BaseCommand):
                 CREATE PROCEDURE convert_to_unicode
                 (IN dbname VARCHAR(64))
                 BEGIN
+
                     DECLARE done INT DEFAULT FALSE;
                     DECLARE tname VARCHAR(64);
                     DECLARE all_tables CURSOR FOR SELECT `table_name` FROM information_schema.tables WHERE table_schema=dbname COLLATE utf8_unicode_ci;
@@ -30,8 +31,8 @@ class Command(BaseCommand):
                     read_loop: LOOP
                         FETCH all_tables INTO tname;
 
-                        set @sql = 'ALTER TABLE ?tname? CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci;';
-                        set @sql = REPLACE(@sql, '?tname?', tname);
+                        set @sql = 'ALTER TABLE ?tname? CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci;' COLLATE utf8_unicode_ci;
+                        set @sql = REPLACE(@sql, '?tname?' COLLATE utf8_unicode_ci , tname);
                         PREPARE stmt FROM @sql;
                         EXECUTE stmt;
                         DEALLOCATE PREPARE stmt;
