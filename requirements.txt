@@ -38,7 +38,7 @@ rules==0.4
 
 # Some extras
 django-cors-headers==1.1.0
-django-autoslug==1.7.2
+django-autoslug==1.9.3
 wsgiref==0.1.2
 sqlparse==0.1.14
 netaddr
