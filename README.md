@@ -86,3 +86,5 @@ Set these values in your settings_local.py file to configure the application to 
   - In order to work with a development instance of the Canvas server that is not running on a secure (HTTPS/SSL) connection, override these security defaults to False.
 * OPEN_FOR_SIGNUP = True
   - This defaults to True, but allows you to turn off signup if you would like to use Badgr for only single-account use.
+* PAGINATION_SECRET_KEY:
+  - Key used for symmetrical encryption of pagination cursors.  If not defined, encryption is disabled.  Must be 32 byte, base64-encoded random string.  For example: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key())"

@@ -132,9 +132,14 @@ class EncryptedCursorPagination(BasePagination):
     # on those fields for efficient queries.
     ordering = 'pk'
 
-    crypto = Fernet(getattr(settings, 'PAGINATION_SECRET_KEY', None))
+    pagination_secret_key = getattr(settings, 'PAGINATION_SECRET_KEY', None)
 
-    encrypt = True
+    if pagination_secret_key is not None:
+        crypto = Fernet(pagination_secret_key)
+        encrypt = True
+    else:
+        crypto = None
+        encrypt = False
 
     def _get_cursor_limits(self, cursor):
         """
