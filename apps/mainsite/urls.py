@@ -10,7 +10,8 @@ badgr_admin.autodiscover()
 from django.views.generic.base import RedirectView, TemplateView
 
 from composition.views import LegacyCollectionShareRedirectView
-from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation, LoginAndObtainAuthToken
+from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation, LoginAndObtainAuthToken, \
+    ClearCacheView
 
 urlpatterns = [
     # Backup URLs in case the server isn't serving these directly
@@ -25,6 +26,7 @@ urlpatterns = [
     url(r'^$', info_view, name='index'),
 
     # Admin URLs
+    url(r'^staff/clear-cache$', ClearCacheView.as_view(), name='badgr_admin_clear_cache'),
     url(r'^staff/', include(badgr_admin.urls)),
 
     # Service health endpoint

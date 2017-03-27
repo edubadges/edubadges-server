@@ -43,3 +43,8 @@ body.login #header {
 {% endblock %}
 
 {% block nav-global %}{% endblock %}
+
+{% block userlinks %}
+	<a href="{% url 'badgr_admin_clear_cache' %}">Clear Cache</a> /
+	{{ block.super }}
+{% endblock %}

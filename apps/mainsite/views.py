@@ -2,12 +2,17 @@ import base64
 import time
 
 from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse_lazy
 from django.db import IntegrityError
+from django import forms
 from django.http import HttpResponse, HttpResponseServerError, HttpResponseNotFound
 from django.shortcuts import redirect
 from django.template import loader, TemplateDoesNotExist, Context
+from django.utils.decorators import method_decorator
 from django.views.decorators.clickjacking import xframe_options_exempt
+from django.views.generic import FormView
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import AllowAny
 from rest_framework.renderers import JSONRenderer
@@ -98,3 +103,23 @@ class AppleAppSiteAssociation(APIView):
 
 class LoginAndObtainAuthToken(ObtainAuthToken):
     serializer_class = VerifiedAuthTokenSerializer
+
+
+class ClearCacheForm(forms.Form):
+    confirmed = forms.BooleanField(required=True, label='Are you sure you want to clear the cache?')
+
+
+class ClearCacheView(FormView):
+    form_class = ClearCacheForm
+    template_name = 'admin/clear_cache.html'
+    success_url = reverse_lazy('admin:index')
+
+    @method_decorator(staff_member_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(ClearCacheView, self).dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        from django.core.cache import cache
+        cache.clear()
+        return super(ClearCacheView, self).form_valid(form)
+
