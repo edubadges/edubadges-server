@@ -58,7 +58,7 @@ class BadgeUserProfile(APIView):
         """
         Update the current user's profile
         ---
-        serializer: BadgeUserExistingProfileSerializer
+        serializer: BadgeUserProfileSerializer
         """
         if request.user.is_anonymous():
             raise NotAuthenticated()
@@ -106,7 +106,7 @@ class BadgeUserEmailList(APIView):
         """
         Get a list of user's registered emails.
         ---
-        serializer: ExistingEmailSerializer
+        serializer: EmailSerializer
         """
         instances = request.user.cached_emails()
         serializer = EmailSerializer(instances, many=True, context={'request': request})
@@ -116,7 +116,7 @@ class BadgeUserEmailList(APIView):
         """
         Register a new unverified email.
         ---
-        serializer: NewEmailSerializer
+        serializer: EmailSerializer
         parameters:
             - name: email
               description: The email to register
@@ -151,7 +151,7 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
         """
         Get detail for one registered email.
         ---
-        serializer: ExistingEmailSerializer
+        serializer: EmailSerializer
         parameters:
             - name: id
               type: string
@@ -197,7 +197,7 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
     def put(self, request, id):
         """
         Update a registered email for the current user.
-        serializer: ExistingEmailSerializer
+        serializer: EmailSerializer
         ---
         parameters:
             - name: id
