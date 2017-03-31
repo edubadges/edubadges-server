@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from hashlib import md5
 from itertools import chain
 import random, string
@@ -129,7 +130,7 @@ class BadgeUser(AbstractUser, cachemodel.CacheModel):
         db_table = 'users'
 
     def __unicode__(self):
-        return "{} <{}>".format(self.get_full_name(), self.email)
+        return u"{} <{}>".format(self.get_full_name(), self.email)
 
     def get_full_name(self):
         return u"%s %s" % (self.first_name, self.last_name)
