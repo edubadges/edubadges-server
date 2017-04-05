@@ -41,10 +41,10 @@ class IssuerSerializer(serializers.Serializer):
     created_by = BadgeUserIdentifierField()
     name = StripTagsCharField(max_length=1024)
     slug = StripTagsCharField(max_length=255, allow_blank=True, required=False)
-    image = Base64FileField(allow_empty_file=False, use_url=True, required=False)
-    email = serializers.EmailField(max_length=255, required=True, write_only=True)
-    description = StripTagsCharField(max_length=1024, required=True, write_only=True)
-    url = serializers.URLField(max_length=1024, required=True, write_only=True)
+    image = Base64FileField(allow_empty_file=False, use_url=True, required=False, allow_null=True)
+    email = serializers.EmailField(max_length=255, required=True)
+    description = StripTagsCharField(max_length=1024, required=True)
+    url = serializers.URLField(max_length=1024, required=True)
     staff = IssuerStaffSerializer(read_only=True, source='cached_staff_records', many=True)
 
     def validate(self, data):
@@ -55,6 +55,10 @@ class IssuerSerializer(serializers.Serializer):
     def validate_image(self, image):
         # TODO: Make sure it's a PNG (square if possible), and remove any baked-in badge assertion that exists.
         # Doing: add a random string to filename
+
+        if image is None:
+            return image
+
         img_name, img_ext = os.path.splitext(image.name)
 
         try:
@@ -83,6 +87,19 @@ class IssuerSerializer(serializers.Serializer):
         staff = IssuerStaff(issuer=new_issuer, user=new_issuer.created_by, role=IssuerStaff.ROLE_OWNER)
         staff.save()
         return new_issuer
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name')
+
+        if 'image' in validated_data:
+            instance.image = validated_data.get('image')
+
+        instance.email = validated_data.get('email')
+        instance.description = validated_data.get('description')
+        instance.url = validated_data.get('url')
+
+        instance.save()
+        return instance
 
     def to_representation(self, obj):
         representation = super(IssuerSerializer, self).to_representation(obj)

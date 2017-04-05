@@ -174,6 +174,32 @@ class IssuerDetail(AbstractIssuerAPIEndpoint):
             serializer = IssuerSerializer(current_issuer, context={'request': request})
             return Response(serializer.data)
 
+    def put(self, request, slug):
+        """
+        Update an existing Issuer.
+        ---
+        serializer: IssuerSerializer
+        """
+        try:
+            current_issuer = Issuer.cached.get(slug=slug)
+            self.check_object_permissions(self.request, current_issuer)
+        except (Issuer.DoesNotExist, PermissionDenied):
+            return Response(
+                "Issuer %s could not be found, or inadequate permissions." % slug,
+                status=status.HTTP_404_NOT_FOUND
+            )
+        else:
+            # If image is neither an UploadedFile nor a data uri, ignore it.
+            # Likely to occur if client sends back the image attribute (as a url), unmodified from a GET request
+            new_image = request.data.get('image')
+            if new_image is not None and not isinstance(new_image, UploadedFile) and urlparse.urlparse(new_image).scheme != 'data':
+                request.data.pop('image')
+
+            serializer = IssuerSerializer(current_issuer, data=request.data, context={'request': request})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+
     def delete(self, request, slug):
         """
         DELETE an issuer if it hasn't issued any badges yet.

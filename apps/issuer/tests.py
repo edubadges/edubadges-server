@@ -198,6 +198,34 @@ class IssuerTests(APITestCase):
                 self.assertEqual(image_width, 300)
                 self.assertEqual(image_height, 300)
 
+    def test_update_issuer(self):
+        self.client.force_authenticate(user=self.test_user)
+
+        original_issuer_props = {
+            'name': 'Test Issuer Name',
+            'description': 'Test issuer description',
+            'url': 'http://example.com/1',
+            'email': 'example1@example.org'
+        }
+
+        response = self.client.post('/v1/issuer/issuers', original_issuer_props)
+        response_slug = response.data.get('slug')
+
+        updated_issuer_props = {
+            'name': 'Test Issuer Name 2',
+            'description': 'Test issuer description 2',
+            'url': 'http://example.com/2',
+            'email': 'example2@example.org'
+        }
+
+        response = self.client.put('/v1/issuer/issuers/{}'.format(response_slug), updated_issuer_props)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(response.data['url'], updated_issuer_props['url'])
+        self.assertEqual(response.data['name'], updated_issuer_props['name'])
+        self.assertEqual(response.data['description'], updated_issuer_props['description'])
+        self.assertEqual(response.data['email'], updated_issuer_props['email'])
+
     def test_private_issuer_detail_get(self):
         # GET on single badge should work if user has privileges
         # Eventually, implement PUT for updates (if permitted)
