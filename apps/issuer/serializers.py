@@ -138,6 +138,8 @@ class BadgeClassSerializer(serializers.Serializer):
     image = Base64FileField(allow_empty_file=False, use_url=True, required=False)
     slug = StripTagsCharField(max_length=255, allow_blank=True, required=False)
     criteria = StripTagsCharField(allow_blank=True, required=False, write_only=True)
+    criteria_text = StripTagsCharField(required=False, read_only=True)
+    criteria_url = StripTagsCharField(required=False, read_only=True)
     recipient_count = serializers.IntegerField(required=False, read_only=True)
     pathway_element_count = serializers.IntegerField(required=False, read_only=True)
     description = StripTagsCharField(max_length=16384, required=True)
