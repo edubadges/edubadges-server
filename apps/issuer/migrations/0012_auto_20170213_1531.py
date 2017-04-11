@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.core.urlresolvers import reverse
-from django.db import migrations
+from django.db import migrations, models
 
 from mainsite.utils import OriginSetting
 
@@ -55,6 +55,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AlterField('BadgeInstance', 'evidence_url', models.CharField(max_length=2083, blank=True, null=True, default=None)),
         migrations.RunPython(deserialize_issuer_json, reverse_code=noop),
         migrations.RunPython(deserialize_badgeclass_json, reverse_code=noop),
         migrations.RunPython(deserialize_badgeinstance_json, reverse_code=noop)
