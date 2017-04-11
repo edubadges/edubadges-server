@@ -301,7 +301,7 @@ class BadgeInstance(cachemodel.CacheModel):
     acceptance = models.CharField(max_length=254, choices=ACCEPTANCE_CHOICES, default=ACCEPTANCE_UNACCEPTED)
 
     salt = models.CharField(max_length=254, blank=True, null=True, default=None)
-    evidence_url = models.CharField(max_length=254, blank=True, null=True, default=None)
+    evidence_url = models.CharField(max_length=2083, blank=True, null=True, default=None)
 
     old_json = JSONField()
 
