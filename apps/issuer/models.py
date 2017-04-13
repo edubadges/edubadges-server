@@ -7,7 +7,6 @@ import uuid
 
 import cachemodel
 from allauth.account.adapter import get_adapter
-from autoslug import AutoSlugField
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.storage import default_storage
@@ -19,6 +18,7 @@ from jsonfield import JSONField
 from openbadges_bakery import bake
 
 from issuer.managers import BadgeInstanceManager
+from mainsite.base import BaseEntity
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage
 from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
@@ -29,7 +29,7 @@ from .utils import generate_sha256_hashstring, CURRENT_OBI_CONTEXT_IRI
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
-class Issuer(ResizeUploadedImage, cachemodel.CacheModel):
+class Issuer(BaseEntity, ResizeUploadedImage):
     source = models.CharField(max_length=254, default='local')
     source_url = models.CharField(max_length=254, blank=True, null=True, default=None)
 
@@ -38,7 +38,10 @@ class Issuer(ResizeUploadedImage, cachemodel.CacheModel):
 
     staff = models.ManyToManyField(AUTH_USER_MODEL, through='IssuerStaff')
 
-    slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
+    # slug has been deprecated for now, but preserve existing values
+    slug = models.CharField(max_length=255, blank=True, null=True, default=None)
+    #slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
+
     name = models.CharField(max_length=1024)
     image = models.FileField(upload_to='uploads/issuers', blank=True, null=True)
     description = models.TextField(blank=True, null=True, default=None)
@@ -52,7 +55,6 @@ class Issuer(ResizeUploadedImage, cachemodel.CacheModel):
 
     def publish(self, *args, **kwargs):
         super(Issuer, self).publish(*args, **kwargs)
-        self.publish_by('slug')
         for member in self.cached_staff():
             member.publish()
 
@@ -62,12 +64,11 @@ class Issuer(ResizeUploadedImage, cachemodel.CacheModel):
 
         staff = self.cached_staff()
         super(Issuer, self).delete(*args, **kwargs)
-        self.publish_delete("slug")
         for member in staff:
             member.publish()
 
     def get_absolute_url(self):
-        return reverse('issuer_json', kwargs={'slug': self.slug})
+        return reverse('issuer_json', kwargs={'entity_id': self.entity_id})
 
     @property
     def public_url(self):
@@ -125,7 +126,7 @@ class Issuer(ResizeUploadedImage, cachemodel.CacheModel):
             'description': self.description,
         }
         if self.image:
-            json['image'] = OriginSetting.HTTP + reverse('issuer_image', kwargs={'slug': self.slug})
+            json['image'] = OriginSetting.HTTP + reverse('issuer_image', kwargs={'entity_id': self.entity_id})
         return json
 
     @property
@@ -168,14 +169,17 @@ class IssuerStaff(cachemodel.CacheModel):
         return Issuer.cached.get(pk=self.issuer_id)
 
 
-class BadgeClass(ResizeUploadedImage, cachemodel.CacheModel):
+class BadgeClass(BaseEntity, ResizeUploadedImage):
     source = models.CharField(max_length=254, default='local')
     source_url = models.CharField(max_length=254, blank=True, null=True, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True, related_name="+")
     issuer = models.ForeignKey(Issuer, blank=False, null=False, on_delete=models.CASCADE, related_name="badgeclasses")
 
-    slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
+    # slug has been deprecated for now, but preserve existing values
+    slug = models.CharField(max_length=255, blank=True, null=True, default=None)
+    #slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
+
     name = models.CharField(max_length=255)
     image = models.FileField(upload_to='uploads/badges', blank=True)
     description = models.TextField(blank=True, null=True, default=None)
@@ -194,7 +198,6 @@ class BadgeClass(ResizeUploadedImage, cachemodel.CacheModel):
     def publish(self):
         super(BadgeClass, self).publish()
         self.issuer.publish()
-        self.publish_by('slug')
 
     def delete(self, *args, **kwargs):
         if self.recipient_count() > 0:
@@ -205,11 +208,10 @@ class BadgeClass(ResizeUploadedImage, cachemodel.CacheModel):
 
         issuer = self.issuer
         super(BadgeClass, self).delete(*args, **kwargs)
-        self.publish_delete('slug')
         issuer.publish()
 
     def get_absolute_url(self):
-        return reverse('badgeclass_json', kwargs={'slug': self.slug})
+        return reverse('badgeclass_json', kwargs={'entity_id': self.entity_id})
 
     @property
     def public_url(self):
@@ -222,7 +224,7 @@ class BadgeClass(ResizeUploadedImage, cachemodel.CacheModel):
     def get_criteria_url(self):
         if self.criteria_url:
             return self.criteria_url
-        return OriginSetting.HTTP+reverse('badgeclass_criteria', kwargs={'slug': self.slug})
+        return OriginSetting.HTTP+reverse('badgeclass_criteria', kwargs={'entity_id': self.entity_id})
 
     @property
     def owners(self):
@@ -269,7 +271,7 @@ class BadgeClass(ResizeUploadedImage, cachemodel.CacheModel):
             "criteria": self.get_criteria_url(),
         }
         if self.image:
-            json['image'] = OriginSetting.HTTP + reverse('badgeclass_image', kwargs={'slug': self.slug})
+            json['image'] = OriginSetting.HTTP + reverse('badgeclass_image', kwargs={'entity_id': self.entity_id})
         return json
 
     @property
@@ -277,7 +279,9 @@ class BadgeClass(ResizeUploadedImage, cachemodel.CacheModel):
         return self.get_json()
 
 
-class BadgeInstance(cachemodel.CacheModel):
+class BadgeInstance(BaseEntity):
+    entity_class_name = 'Assertion'
+
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.CASCADE, related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -285,7 +289,10 @@ class BadgeInstance(cachemodel.CacheModel):
 
     recipient_identifier = models.EmailField(max_length=1024, blank=False, null=False)
     image = models.FileField(upload_to='uploads/badges', blank=True)
-    slug = AutoSlugField(max_length=255, populate_from='get_new_slug', unique=True, blank=False, editable=False)
+
+    # slug has been deprecated for now, but preserve existing values
+    slug = models.CharField(max_length=255, blank=True, null=True, default=None)
+    #slug = AutoSlugField(max_length=255, populate_from='get_new_slug', unique=True, blank=False, editable=False)
 
     revoked = models.BooleanField(default=False)
     revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
@@ -323,7 +330,7 @@ class BadgeInstance(cachemodel.CacheModel):
 
     @property
     def share_url(self):
-        return OriginSetting.HTTP+reverse('shared_badge', kwargs={'badge_id': self.slug})
+        return OriginSetting.HTTP+reverse('shared_badge', kwargs={'badge_id': self.entity_id})
 
     @property
     def cached_issuer(self):
@@ -337,7 +344,7 @@ class BadgeInstance(cachemodel.CacheModel):
         return self._cached_badgeclass
 
     def get_absolute_url(self):
-        return reverse('badgeinstance_json', kwargs={'slug': self.slug})
+        return reverse('badgeinstance_json', kwargs={'entity_id': self.entity_id})
 
     @property
     def jsonld_id(self):
@@ -351,13 +358,9 @@ class BadgeInstance(cachemodel.CacheModel):
     def owners(self):
         return self.issuer.owners
 
-    @staticmethod
-    def get_new_slug():
-        return str(uuid.uuid4())
-
     def save(self, *args, **kwargs):
         if self.pk is None:
-            self.salt = salt = self.get_new_slug()
+            self.salt = uuid.uuid4()
             self.created_at = datetime.datetime.now()
 
             imageFile = default_storage.open(self.badgeclass.image.file.name)
@@ -384,8 +387,7 @@ class BadgeInstance(cachemodel.CacheModel):
         self.badgeclass.publish()
         if self.cached_recipient_profile:
             self.cached_recipient_profile.publish()
-        self.publish_by('slug')
-        self.publish_by('slug', 'revoked')
+        self.publish_by('entity_id', 'revoked')
 
     def delete(self, *args, **kwargs):
         badgeclass = self.badgeclass
@@ -394,8 +396,7 @@ class BadgeInstance(cachemodel.CacheModel):
         badgeclass.publish()
         if recipient_profile:
             recipient_profile.publish()
-        self.publish_delete('slug')
-        self.publish_delete('slug', 'revoked')
+        self.publish_delete('entity_id', 'revoked')
 
     def notify_earner(self, badgr_app=None):
         """
@@ -426,7 +427,7 @@ class BadgeInstance(cachemodel.CacheModel):
 
             email_context = {
                 'badge_name': self.badgeclass.name,
-                'badge_id': self.slug,
+                'badge_id': self.entity_id,
                 'badge_description': self.badgeclass.description,
                 'issuer_name': re.sub(r'[^\w\s]+', '', self.issuer.name, 0, re.I),
                 'issuer_url': self.issuer.url,
@@ -483,8 +484,8 @@ class BadgeInstance(cachemodel.CacheModel):
             'type': 'Assertion',
             'id': self.jsonld_id,
             # "issuedOn": self.created_at.astimezone(get_current_timezone()).replace(tzinfo=None).isoformat(),
-            "uid": self.slug,
-            "image": OriginSetting.HTTP + reverse('badgeinstance_image', kwargs={'slug': self.slug}),
+            "uid": self.entity_id,
+            "image": OriginSetting.HTTP + reverse('badgeinstance_image', kwargs={'entity_id': self.entity_id}),
             "badge": self.cached_badgeclass.jsonld_id,
             "verify": {
                 "url": self.public_url,

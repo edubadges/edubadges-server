@@ -35,9 +35,9 @@ class JSONComponentView(APIView):
     def log(self, obj):
         pass
 
-    def get(self, request, slug, format='html'):
+    def get(self, request, entity_id, format='html'):
         try:
-            self.current_object = self.model.cached.get(slug=slug)
+            self.current_object = self.model.cached.get(entity_id=entity_id)
         except self.model.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
@@ -89,17 +89,17 @@ class ImagePropertyDetailView(ComponentPropertyDetailView):
     a subclass of ComponentPropertyDetailView, for image fields, if query_param type='png' re-encode if necessary
     """
 
-    def get_object(self, slug):
+    def get_object(self, entity_id):
         try:
-            current_object = self.model.cached.get(slug=slug)
+            current_object = self.model.cached.get(entity_id=entity_id)
         except self.model.DoesNotExist:
             return None
         else:
             self.log(current_object)
             return current_object
 
-    def get(self, request, slug):
-        current_object = self.get_object(slug)
+    def get(self, request, entity_id):
+        current_object = self.get_object(entity_id)
         if current_object is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 

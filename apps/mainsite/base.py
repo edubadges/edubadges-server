@@ -14,9 +14,14 @@ class BaseEntity(cachemodel.CacheModel):
     class Meta:
         abstract = True
 
+    def get_entity_class_name(self):
+        if self.entity_class_name:
+            return self.entity_class_name
+        return self.__class__.__name__
+
     def save(self, *args, **kwargs):
         if self.entity_id is None:
-            self.entity_id = generate_entity_uri(self.__class__.__name__)
+            self.entity_id = generate_entity_uri(self.get_entity_class_name())
 
         self.entity_version += 1
         return super(BaseEntity, self).save(*args, **kwargs)
