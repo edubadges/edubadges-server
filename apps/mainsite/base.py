@@ -28,9 +28,9 @@ class BaseVersionedEntity(cachemodel.CacheModel):
 
     def publish(self):
         super(BaseVersionedEntity, self).publish()
-        self.publish_by('entityId')
+        self.publish_by('entity_id')
 
     def delete(self, *args, **kwargs):
         return super(BaseVersionedEntity, self).delete(*args, **kwargs)
-        self.publish_delete('entityId')
+        self.publish_delete('entity_id')
 
