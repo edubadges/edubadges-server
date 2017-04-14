@@ -18,7 +18,7 @@ from jsonfield import JSONField
 from openbadges_bakery import bake
 
 from issuer.managers import BadgeInstanceManager
-from mainsite.base import BaseEntity
+from mainsite.base import BaseVersionedEntity
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage
 from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
@@ -29,7 +29,7 @@ from .utils import generate_sha256_hashstring, CURRENT_OBI_CONTEXT_IRI
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
-class Issuer(BaseEntity, ResizeUploadedImage):
+class Issuer(BaseVersionedEntity, ResizeUploadedImage):
     source = models.CharField(max_length=254, default='local')
     source_url = models.CharField(max_length=254, blank=True, null=True, default=None)
 
@@ -169,7 +169,7 @@ class IssuerStaff(cachemodel.CacheModel):
         return Issuer.cached.get(pk=self.issuer_id)
 
 
-class BadgeClass(BaseEntity, ResizeUploadedImage):
+class BadgeClass(BaseVersionedEntity, ResizeUploadedImage):
     source = models.CharField(max_length=254, default='local')
     source_url = models.CharField(max_length=254, blank=True, null=True, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -279,7 +279,7 @@ class BadgeClass(BaseEntity, ResizeUploadedImage):
         return self.get_json()
 
 
-class BadgeInstance(BaseEntity):
+class BadgeInstance(BaseVersionedEntity):
     entity_class_name = 'Assertion'
 
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.CASCADE, related_name='badgeinstances')
