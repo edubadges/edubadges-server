@@ -17,6 +17,7 @@ import badgrlog
 from badgeuser.models import CachedEmailAddress
 from composition.models import LocalBadgeClass
 from issuer.utils import get_badgeclass_by_identifier
+from mainsite.api import BaseEntityListView, BaseEntityDetailView
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 
 from .models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
@@ -75,58 +76,20 @@ class AbstractIssuerAPIEndpoint(APIView):
             return obj
 
 
-class IssuerList(AbstractIssuerAPIEndpoint):
+class IssuerList(BaseEntityListView):
     """
     Issuer List resource for the authenticated user
     """
-    queryset = Issuer.objects.all()
     model = Issuer
-    serializer_class = IssuerSerializer
+    v1_serializer_class = IssuerSerializer
+    v2_serializer_class = IssuerSerializerV2
 
-    def get(self, request):
-        """
-        GET a list of issuers owned, edited or staffed by the logged in user
-        ---
-        serializer: IssuerSerializer
-        """
-        # Get the Issuers this user owns, edits, or staffs:
-        user_issuers = self.get_list(queryset=self.queryset.filter(staff__id=request.user.id).distinct())
-        if not user_issuers.exists():
-            return Response([])
+    def get_objects(self, request, **kwargs):
+        return self.request.user.cached_issuers()
 
-        serializer = IssuerSerializer(user_issuers, many=True, context={'request': request})
-        return Response(serializer.data)
-
-    def post(self, request):
+    def post(self, request, **kwargs):
         """
         Define a new issuer to be owned by the logged in user
-        ---
-        parameters:
-            - name: name
-              description: The name of the Issuer
-              required: true
-              type: string
-              paramType: form
-            - name: description
-              description: A short text description of the new Issuer
-              required: true
-              type: string
-              paramType: form
-            - name: url
-              description: A fully-qualified URL of the Issuer's website or homepage
-              required: true
-              type: string
-              paramType: form
-            - name: email
-              description: A contact email for the Issuer
-              required: true
-              type: string
-              paramType: form
-            - name: image
-              description: An image file that represents the Issuer, such as a logo
-              required: false
-              type: file
-              paramType: form
         """
         if getattr(settings, 'BADGR_APPROVED_ISSUERS_ONLY', False) \
                 and not request.user.has_perm('issuer.add_issuer'):
@@ -135,117 +98,21 @@ class IssuerList(AbstractIssuerAPIEndpoint):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        serializer = IssuerSerializer(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
+        response = super(IssuerList, self).post(request, **kwargs)
 
-        # Pass in user values where we have a real user object instead of a url
-        # and non-model-field data to go into json
-        serializer.save(
-            created_by=request.user
-        )
-        issuer = serializer.data
-
-        logger.event(badgrlog.IssuerCreatedEvent(issuer))
-        return Response(issuer, status=status.HTTP_201_CREATED)
+        # TODO: BaseEntityView should probably have a mechanism for calling logger events
+        # logger.event(badgrlog.IssuerCreatedEvent(issuer))
+        return response
 
 
-class IssuerDetail(AbstractIssuerAPIEndpoint):
+class IssuerDetail(BaseEntityDetailView):
     """
     GET details on one issuer. PUT and DELETE should be highly restricted operations and are not implemented yet
     """
-    queryset = Issuer.objects.all()
     model = Issuer
-    serializer_class = IssuerSerializer
+    v1_serializer_class = IssuerSerializer
+    v2_serializer_class = IssuerSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, IsStaff,)
-
-    def get(self, request, slug):
-        """
-        Detail view for one issuer owned, edited, or staffed by the authenticated user
-        ---
-        serializer: IssuerSerializer
-        """
-        try:
-            current_issuer = Issuer.cached.get(slug=slug)
-            self.check_object_permissions(self.request, current_issuer)
-        except (Issuer.DoesNotExist, PermissionDenied) as e:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        else:
-            serializer = IssuerSerializer(current_issuer, context={'request': request})
-            return Response(serializer.data)
-
-    def put(self, request, slug):
-        """
-        Update an existing Issuer.
-        ---
-        serializer: IssuerSerializer
-        """
-        try:
-            current_issuer = Issuer.cached.get(slug=slug)
-            self.check_object_permissions(self.request, current_issuer)
-        except (Issuer.DoesNotExist, PermissionDenied):
-            return Response(
-                "Issuer %s could not be found, or inadequate permissions." % slug,
-                status=status.HTTP_404_NOT_FOUND
-            )
-        else:
-            # If image is neither an UploadedFile nor a data uri, ignore it.
-            # Likely to occur if client sends back the image attribute (as a url), unmodified from a GET request
-            new_image = request.data.get('image')
-            if new_image is not None and not isinstance(new_image, UploadedFile) and urlparse.urlparse(new_image).scheme != 'data':
-                request.data.pop('image')
-
-            serializer = IssuerSerializer(current_issuer, data=request.data, context={'request': request})
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
-
-    def delete(self, request, slug):
-        """
-        DELETE an issuer if it hasn't issued any badges yet.
-        ---
-        parameters:
-            - name: slug
-              type: string
-              paramType: path
-              description: The slug of the issuer to delete.
-              required: true
-        """
-        issuer = self.get_object(slug)
-        if issuer is None:
-            return Response(
-                "Issuer {} not found. Authenticated user must have owner, editor or staff rights on the issuer.".format(slug),
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        # determine if the issuer can be deleted
-        issued_count = sum(bc.recipient_count() for bc in issuer.cached_badgeclasses())
-        if issued_count > 0:
-            return Response(
-                "Issuer {} can not be removed since it has previously issued badges.".format(slug),
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # remove all badgeclasses owned by issuer
-        for bc in issuer.cached_badgeclasses():
-            bc.delete()
-
-        # remove issuer staff
-        IssuerStaff.objects.filter(issuer=issuer).delete()
-
-        if apps.is_installed('badgebook'):
-            try:
-                from badgebook.models import LmsCourseInfo
-                # update LmsCourseInfo's that were using this issuer as the default_issuer
-                for course_info in LmsCourseInfo.objects.filter(default_issuer=issuer):
-                    course_info.default_issuer = None
-                    course_info.save()
-            except ImportError:
-                pass
-
-        # delete the issuer
-        issuer.delete()
-        return Response("Issuer {} has been deleted.".format(slug), status.HTTP_200_OK)
 
 
 class IssuerStaffList(AbstractIssuerAPIEndpoint):
