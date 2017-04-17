@@ -77,7 +77,7 @@ class BaseEntityDetailView(BaseEntityView):
         if not self.has_object_permissions(request, obj):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        context = self.get_context_data()
+        context = self.get_context_data(**kwargs)
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(obj, context=context)
         return Response(serializer.data)
@@ -90,7 +90,7 @@ class BaseEntityDetailView(BaseEntityView):
         if not self.has_object_permissions(request, obj):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        context = self.get_context_data()
+        context = self.get_context_data(**kwargs)
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(obj, data=request.data, context=context)
         serializer.is_valid(raise_exception=True)
