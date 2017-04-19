@@ -13,13 +13,13 @@ from composition.models import (Collection, LocalBadgeInstance, )
 
 class LocalBadgeInstanceAdmin(ModelAdmin):
     readonly_fields = ('created_at', 'created_by', 'image', )
-    list_display = ('badge_image', 'recipient_identifier', 'badgeclass', 'issuer')
+    list_display = ('badge_image', 'recipient_identifier', 'issuer_badgeclass',)
     list_display_links = ('badge_image', 'recipient_identifier', )
     list_filter = ('created_at',)
-    search_fields = ('badgeclass__name', 'issuer__name')
+    search_fields = ('issuer_badgeclass__name',)
     fieldsets = (
         ('Metadata', {'fields': ('created_by', 'created_at',), 'classes': ()}),
-        (None, {'fields': ('image', 'recipient_identifier', 'badgeclass', 'issuer')}),
+        (None, {'fields': ('image', 'recipient_identifier', 'issuer_badgeclass', 'issuer')}),
         ('Revocation', {'fields': ('revoked', 'revocation_reason')}),
         ('JSON', {'fields': ('json',)}),
     )
