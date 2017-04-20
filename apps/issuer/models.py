@@ -299,6 +299,8 @@ class BadgeInstance(cachemodel.CacheModel):
     acceptance = models.CharField(max_length=254, choices=ACCEPTANCE_CHOICES, default=ACCEPTANCE_UNACCEPTED)
 
     salt = models.CharField(max_length=254, blank=True, null=True, default=None)
+
+    narrative = models.TextField(blank=True, null=True, default=None)
     evidence_url = models.CharField(max_length=2083, blank=True, null=True, default=None)
 
     old_json = JSONField()
@@ -513,3 +515,23 @@ class BadgeInstance(cachemodel.CacheModel):
     @property
     def json(self):
         return self.get_json()
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_evidence(self):
+        return self.badgeinstanceevidence_set.all()
+
+
+class BadgeInstanceEvidence(cachemodel.CacheModel):
+    badgeinstance = models.ForeignKey('issuer.BadgeInstance')
+    evidence_url = models.CharField(max_length=2083)
+    narrative = models.TextField(blank=True, null=True, default=None)
+
+    def publish(self):
+        super(BadgeInstanceEvidence, self).publish()
+        self.badgeinstance.publish()
+
+    def delete(self, *args, **kwargs):
+        badgeinstance = self.badgeinstance
+        ret = super(BadgeInstanceEvidence, self).delete(*args, **kwargs)
+        badgeinstance.publish()
+        return ret
