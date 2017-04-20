@@ -1114,6 +1114,10 @@ class PublicAPITests(APITestCase):
             self.assertEqual(response.status_code, 302)
 
     def test_get_assertion_image_with_redirect(self):
+        assertion = BadgeInstance.objects.get(slug='92219015-18a6-4538-8b6d-2b228e47b8aa')
+        assertion.issuer.cached_badgeclasses()
+        assertion.cached_evidence()
+
         with self.assertNumQueries(0):
             response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa/image', follow=False)
             self.assertEqual(response.status_code, 302)
@@ -1121,7 +1125,8 @@ class PublicAPITests(APITestCase):
     def test_get_assertion_json_explicit(self):
         assertion = BadgeInstance.objects.get(slug='92219015-18a6-4538-8b6d-2b228e47b8aa')
         assertion.issuer.cached_badgeclasses()
-        
+        assertion.cached_evidence()
+
         with self.assertNumQueries(0):
             response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa',
                                        **{'HTTP_ACCEPT': 'application/json'})
@@ -1137,6 +1142,7 @@ class PublicAPITests(APITestCase):
 
         assertion = BadgeInstance.objects.get(slug='92219015-18a6-4538-8b6d-2b228e47b8aa')
         assertion.issuer.cached_badgeclasses()
+        assertion.cached_evidence()
 
         with self.assertNumQueries(0):
             response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa')
@@ -1151,6 +1157,7 @@ class PublicAPITests(APITestCase):
         """ Ensure hosted Assertion page returns HTML if */* is requested and that it has OpenGraph metadata properties. """
         assertion = BadgeInstance.objects.get(slug='92219015-18a6-4538-8b6d-2b228e47b8aa')
         assertion.issuer.cached_badgeclasses()
+        assertion.cached_evidence()
 
         with self.assertNumQueries(0):
             response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa', **{'HTTP_ACCEPT': '*/*'})
@@ -1161,6 +1168,7 @@ class PublicAPITests(APITestCase):
     def test_get_assertion_html_linkedin(self):
         assertion = BadgeInstance.objects.get(slug='92219015-18a6-4538-8b6d-2b228e47b8aa')
         assertion.issuer.cached_badgeclasses()
+        assertion.cached_evidence()
 
         with self.assertNumQueries(0):
             response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa',

@@ -277,9 +277,13 @@ class BadgeInstanceSerializer(serializers.Serializer):
         Requires self.context to include request (with authenticated request.user)
         and badgeclass: issuer.models.BadgeClass.
         """
+        evidenceItems = []
+        evidence_url = validated_data.get('evidence')
+        if evidence_url:
+            evidenceItems.push({'url': evidence_url})
         return self.context.get('badgeclass').issue(
             recipient_id=validated_data.get('recipient_identifier'),
-            evidence_url=validated_data.get('evidence'),
+            evidence=evidenceItems,
             notify=validated_data.get('create_notification'),
             created_by=self.context.get('request').user,
             allow_uppercase=validated_data.get('allow_uppercase'),
