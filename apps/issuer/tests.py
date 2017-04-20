@@ -605,6 +605,53 @@ class BadgeClassTests(APITestCase):
             )
             self.assertEqual(response.status_code, 201)
 
+    def test_dont_create_badgeclass_with_invalid_markdown(self):
+        with open(
+                os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
+        ) as badge_image:
+
+            badgeclass_props = {
+                'name': 'Badge of Slugs',
+                'slug': 'badge_of_slugs_99',
+                'description': "Recognizes slimy learners with a penchant for lettuce",
+                'image': badge_image,
+            }
+
+            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+
+            # should not create badge that has images in markdown
+            badgeclass_props['criteria'] = 'This is invalid ![foo](image-url) markdown'
+            response = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                badgeclass_props
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_create_badgeclass_with_valid_markdown(self):
+        with open(
+                os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
+        ) as badge_image:
+
+            badgeclass_props = {
+                'name': 'Badge of Slugs',
+                'slug': 'badge_of_slugs_99',
+                'description': "Recognizes slimy learners with a penchant for lettuce",
+                'image': badge_image,
+            }
+
+            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+
+            # valid markdown should be saved but html tags stripped
+            badgeclass_props['criteria'] = 'This is *valid* markdown <p>mixed with raw</p> <script>document.write("and abusive html")</script>'
+            response = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                badgeclass_props
+            )
+            self.assertEqual(response.status_code, 201)
+            self.assertIsNotNone(response.data)
+            self.assertEqual(response.data.get('criteria_text', None), 'This is *valid* markdown mixed with raw document.write("and abusive html")')
+
+
     def test_new_badgeclass_updates_cached_issuer(self):
         user = get_user_model().objects.get(pk=1)
         number_of_badgeclasses = len(list(user.cached_badgeclasses()))

@@ -114,6 +114,16 @@ class StripTagsCharField(serializers.CharField):
             return strip_tags(value)
 
 
+class MarkdownCharFieldValidator(object):
+    def __call__(self, value):
+        if '![' in value:
+            raise ValidationError('Images not supported in markdown')
+
+
+class MarkdownCharField(StripTagsCharField):
+    default_validators = [MarkdownCharFieldValidator()]
+
+
 class VerifiedAuthTokenSerializer(AuthTokenSerializer):
     def validate(self, attrs):
         attrs = super(VerifiedAuthTokenSerializer, self).validate(attrs)

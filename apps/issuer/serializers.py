@@ -10,7 +10,7 @@ import utils
 from badgeuser.serializers import BadgeUserProfileSerializer, BadgeUserIdentifierField
 from mainsite.drf_fields import Base64FileField
 from mainsite.models import BadgrApp
-from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField
+from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField
 from mainsite.utils import installed_apps_list, OriginSetting, verify_svg
 from .models import Issuer, BadgeClass, IssuerStaff
 
@@ -137,8 +137,8 @@ class BadgeClassSerializer(serializers.Serializer):
     name = StripTagsCharField(max_length=255)
     image = Base64FileField(allow_empty_file=False, use_url=True, required=False)
     slug = StripTagsCharField(max_length=255, allow_blank=True, required=False)
-    criteria = StripTagsCharField(allow_blank=True, required=False, write_only=True)
-    criteria_text = StripTagsCharField(required=False, read_only=True)
+    criteria = MarkdownCharField(allow_blank=True, required=False, write_only=True)
+    criteria_text = MarkdownCharField(required=False, read_only=True)
     criteria_url = StripTagsCharField(required=False, read_only=True)
     recipient_count = serializers.IntegerField(required=False, read_only=True)
     pathway_element_count = serializers.IntegerField(required=False, read_only=True)
