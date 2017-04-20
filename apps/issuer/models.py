@@ -14,15 +14,13 @@ from django.core.files.storage import default_storage
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import ProtectedError
-from django.utils.timezone import get_current_timezone
 from jsonfield import JSONField
 from openbadges_bakery import bake
 
 from issuer.managers import BadgeInstanceManager
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage
-from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
-                             AbstractBadgeInstance, BadgrApp, EmailBlacklist)
+from mainsite.models import (BadgrApp, EmailBlacklist)
 from mainsite.utils import OriginSetting
 from .utils import generate_sha256_hashstring, CURRENT_OBI_CONTEXT_IRI
 

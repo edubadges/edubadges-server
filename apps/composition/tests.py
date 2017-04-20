@@ -1,17 +1,16 @@
 import base64
+
 import os
-
-from django.core.cache import cache
-from django.contrib.auth import get_user_model
-
 import responses
+from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from rest_framework.test import APITestCase
 
 from badgeuser.models import CachedEmailAddress
-from composition.models import (LocalBadgeClass, LocalIssuer, LocalBadgeInstance,
-                                Collection, LocalBadgeInstanceCollection,)
-from composition.serializers import (CollectionSerializer, CollectionBadgeSerializer,)
-from issuer.models import BadgeInstance, BadgeClass, Issuer
+from composition.models import (LocalBadgeInstance,
+                                Collection, LocalBadgeInstanceCollection, )
+from composition.serializers import (CollectionSerializer, )
+from issuer.models import BadgeClass, Issuer
 
 dir = os.path.dirname(__file__)
 
@@ -357,21 +356,6 @@ class TestBadgeUploads(APITestCase):
 
         self.assertEqual(BadgeClass.objects.all().count(), 1)
         self.assertEqual(Issuer.objects.all().count(), 1)
-
-    def test_shouldnt_access_already_stored_badgeclass_for_validation(self):
-        """
-        TODO: If we already have a LocalBadgeClass saved for a URL,
-        don't bother fetching again too soon.
-        """
-        pass
-
-    def test_should_recheck_stale_localbadgeclass_in_validation(self):
-        """
-        TODO: If it has been more than a month since we last examined a LocalBadgeClass,
-        maybe we should check
-        it again.
-        """
-        pass
 
     @responses.activate
     def test_submit_badge_assertion_with_bad_date(self):
