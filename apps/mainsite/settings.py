@@ -321,6 +321,29 @@ USE_TZ = True
 
 BADGR_APP_ID = 1
 
+
+##
+#
+# Markdownify
+#
+##
+
+MARKDOWNIFY_WHITELIST_TAGS = [
+    'a',
+    'abbr',
+    'acronym',
+    'b',
+    'blockquote',
+    'em',
+    'i',
+    'li',
+    'ol',
+    'p',
+    'strong',
+    'ul'
+]
+
+
 ##
 #
 #  artifact version
