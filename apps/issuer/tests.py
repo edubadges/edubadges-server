@@ -649,8 +649,13 @@ class BadgeClassTests(APITestCase):
             )
             self.assertEqual(response.status_code, 201)
             self.assertIsNotNone(response.data)
-            self.assertEqual(response.data.get('criteria_text', None), 'This is *valid* markdown mixed with raw document.write("and abusive html")')
+            new_badgeclass = response.data
+            self.assertEqual(new_badgeclass.get('criteria_text', None), 'This is *valid* markdown mixed with raw document.write("and abusive html")')
 
+            # verify that public page renders markdown as html
+            response = self.client.get('/public/badges/{}'.format(new_badgeclass.get('slug')), HTTP_ACCEPT='*/*')
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, "<p>This is <em>valid</em> markdown")
 
     def test_new_badgeclass_updates_cached_issuer(self):
         user = get_user_model().objects.get(pk=1)
