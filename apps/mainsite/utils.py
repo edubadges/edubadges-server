@@ -64,10 +64,6 @@ class OriginSettingsObject(object):
     def HTTP(self):
         return getattr(settings, 'HTTP_ORIGIN', OriginSettingsObject.DefaultOrigin)
 
-    @property
-    def JSON(self):
-        return getattr(settings, 'JSON_ORIGIN', self.HTTP)
-
 OriginSetting = OriginSettingsObject()
 
 """

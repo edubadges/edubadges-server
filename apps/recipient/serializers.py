@@ -94,7 +94,7 @@ class RecipientGroupMembershipListSerializer(serializers.Serializer):
         return OrderedDict([
             ("@context", OriginSetting.HTTP+"/public/context/pathways"),
             ("@type", "IssuerRecipientGroupMembershipList"),
-            ("recipientGroup", OriginSetting.JSON+reverse('recipient_group_detail', kwargs={'issuer_slug': issuer_slug, 'group_slug': recipient_group_slug})),
+            ("recipientGroup", OriginSetting.HTTP+reverse('recipient_group_detail', kwargs={'issuer_slug': issuer_slug, 'group_slug': recipient_group_slug})),
             ("memberships", members_serializer.data),
         ])
 
@@ -196,6 +196,6 @@ class RecipientGroupListSerializer(serializers.Serializer):
         return OrderedDict([
             ("@context", OriginSetting.HTTP+"/public/context/pathways"),
             ("@type", "IssuerRecipientGroupList"),
-            ("issuer", OriginSetting.JSON+reverse('issuer_json', kwargs={'slug': issuer_slug})),
+            ("issuer", OriginSetting.HTTP+reverse('issuer_json', kwargs={'slug': issuer_slug})),
             ("recipientGroups", groups_serializer.data)
         ])

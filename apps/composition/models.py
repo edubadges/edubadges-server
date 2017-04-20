@@ -85,7 +85,7 @@ class LocalBadgeInstance(cachemodel.CacheModel):
             return self.json['id']
         except (KeyError, TypeError):
             if self.get_absolute_url().startswith('/'):
-                return OriginSetting.JSON + self.get_absolute_url()
+                return OriginSetting.HTTP + self.get_absolute_url()
             else:
                 return '_:null'
 

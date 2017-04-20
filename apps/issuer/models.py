@@ -73,7 +73,7 @@ class Issuer(ResizeUploadedImage, cachemodel.CacheModel):
 
     @property
     def jsonld_id(self):
-        return OriginSetting.JSON + self.get_absolute_url()
+        return OriginSetting.HTTP + self.get_absolute_url()
 
     @property
     def editors(self):
@@ -215,7 +215,7 @@ class BadgeClass(ResizeUploadedImage, cachemodel.CacheModel):
 
     @property
     def jsonld_id(self):
-        return OriginSetting.JSON + self.get_absolute_url()
+        return OriginSetting.HTTP + self.get_absolute_url()
 
     def get_criteria_url(self):
         if self.criteria_url:
@@ -339,7 +339,7 @@ class BadgeInstance(cachemodel.CacheModel):
 
     @property
     def jsonld_id(self):
-        return OriginSetting.JSON + self.get_absolute_url()
+        return OriginSetting.HTTP + self.get_absolute_url()
 
     @property
     def public_url(self):
