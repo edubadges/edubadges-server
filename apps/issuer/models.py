@@ -30,6 +30,8 @@ AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
 class Issuer(BaseVersionedEntity, ResizeUploadedImage):
+    entity_class_name = 'Issuer'
+
     source = models.CharField(max_length=254, default='local')
     source_url = models.CharField(max_length=254, blank=True, null=True, default=None)
 
@@ -170,6 +172,8 @@ class IssuerStaff(cachemodel.CacheModel):
 
 
 class BadgeClass(BaseVersionedEntity, ResizeUploadedImage):
+    entity_class_name = 'BadgeClass'
+
     source = models.CharField(max_length=254, default='local')
     source_url = models.CharField(max_length=254, blank=True, null=True, default=None)
     created_at = models.DateTimeField(auto_now_add=True)

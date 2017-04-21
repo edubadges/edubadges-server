@@ -292,7 +292,8 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',
     'DEFAULT_VERSION': 'v1',
-    'ALLOWED_VERSIONS': ['v1','v2']
+    'ALLOWED_VERSIONS': ['v1','v2'],
+    'EXCEPTION_HANDLER': 'mainsite.base.exception_handler'
 }
 
 

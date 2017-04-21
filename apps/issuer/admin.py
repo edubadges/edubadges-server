@@ -17,7 +17,7 @@ class IssuerAdmin(DjangoObjectActions, ModelAdmin):
     search_fields = ('name', 'slug')
     fieldsets = (
         ('Metadata', {
-            'fields': ('created_by', 'created_at', 'source', 'source_url', 'slug'),
+            'fields': ('created_by', 'created_at', 'source', 'source_url', 'slug', 'entity_id'),
             'classes': ("collapse",)
         }),
         (None, {

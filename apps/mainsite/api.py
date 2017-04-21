@@ -8,7 +8,6 @@ from rest_framework.views import APIView
 
 
 class BaseEntityView(APIView):
-
     def get_context_data(self, **kwargs):
         return {
             'request': self.request,
@@ -68,6 +67,12 @@ class BaseEntityDetailView(BaseEntityView):
             raise Http404
         else:
             return self.object
+
+    def has_object_permissions(self, request, obj):
+        for permission in self.get_permissions():
+            if not permission.has_object_permission(request, self, obj):
+                return False
+            return True
 
     def get(self, request, **kwargs):
         """
