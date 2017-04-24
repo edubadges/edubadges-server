@@ -1,30 +1,24 @@
-from itertools import chain
-import logging
 import urlparse
 
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import UploadedFile
-from django.db.models import Q
-
-from rest_framework import status, authentication, permissions
+from rest_framework import status, authentication
 from rest_framework.exceptions import ValidationError, PermissionDenied, NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 import badgrlog
 from badgeuser.models import CachedEmailAddress
-from composition.models import LocalBadgeClass
 from issuer.utils import get_badgeclass_by_identifier
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
-
 from .models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
+from .permissions import (MayIssueBadgeClass, MayEditBadgeClass,
+                          IsEditor, IsStaff, IsOwnerOrStaff)
 from .serializers import (IssuerSerializer, BadgeClassSerializer,
                           BadgeInstanceSerializer, IssuerRoleActionSerializer,
                           IssuerStaffSerializer)
-from .permissions import (MayIssueBadgeClass, MayEditBadgeClass,
-                          IsEditor, IsStaff, IsOwnerOrStaff)
 
 
 logger = badgrlog.BadgrLogger()

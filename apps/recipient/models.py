@@ -108,7 +108,7 @@ class RecipientGroup(basic_models.DefaultModel):
 
     @property
     def jsonld_id(self):
-        return OriginSetting.JSON+reverse(
+        return OriginSetting.HTTP+reverse(
             'recipient_group_detail',
             kwargs={'issuer_slug': self.issuer.slug, 'group_slug': self.slug}
         )

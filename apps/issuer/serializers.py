@@ -146,7 +146,7 @@ class BadgeClassSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         representation = super(BadgeClassSerializer, self).to_representation(instance)
-        representation['issuer'] = OriginSetting.JSON+reverse('issuer_json', kwargs={'slug': instance.cached_issuer.slug})
+        representation['issuer'] = OriginSetting.HTTP+reverse('issuer_json', kwargs={'slug': instance.cached_issuer.slug})
         representation['json'] = instance.get_json()
         return representation
 
@@ -249,11 +249,11 @@ class BadgeInstanceSerializer(serializers.Serializer):
         if self.context.get('include_issuer', False):
             representation['issuer'] = IssuerSerializer(instance.cached_badgeclass.cached_issuer).data
         else:
-            representation['issuer'] = OriginSetting.JSON+reverse('issuer_json', kwargs={'slug': instance.cached_issuer.slug})
+            representation['issuer'] = OriginSetting.HTTP+reverse('issuer_json', kwargs={'slug': instance.cached_issuer.slug})
         if self.context.get('include_badge_class', False):
             representation['badge_class'] = BadgeClassSerializer(instance.cached_badgeclass, context=self.context).data
         else:
-            representation['badge_class'] = OriginSetting.JSON+reverse('badgeclass_json', kwargs={'slug': instance.cached_badgeclass.slug})
+            representation['badge_class'] = OriginSetting.HTTP+reverse('badgeclass_json', kwargs={'slug': instance.cached_badgeclass.slug})
 
         representation['public_url'] = OriginSetting.HTTP+reverse('badgeinstance_json', kwargs={'slug': instance.slug})
 

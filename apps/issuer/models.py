@@ -14,15 +14,13 @@ from django.core.files.storage import default_storage
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import ProtectedError
-from django.utils.timezone import get_current_timezone
 from jsonfield import JSONField
 from openbadges_bakery import bake
 
 from issuer.managers import BadgeInstanceManager
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage
-from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
-                             AbstractBadgeInstance, BadgrApp, EmailBlacklist)
+from mainsite.models import (BadgrApp, EmailBlacklist)
 from mainsite.utils import OriginSetting
 from .utils import generate_sha256_hashstring, CURRENT_OBI_CONTEXT_IRI
 
@@ -75,7 +73,7 @@ class Issuer(ResizeUploadedImage, cachemodel.CacheModel):
 
     @property
     def jsonld_id(self):
-        return OriginSetting.JSON + self.get_absolute_url()
+        return OriginSetting.HTTP + self.get_absolute_url()
 
     @property
     def editors(self):
@@ -217,7 +215,7 @@ class BadgeClass(ResizeUploadedImage, cachemodel.CacheModel):
 
     @property
     def jsonld_id(self):
-        return OriginSetting.JSON + self.get_absolute_url()
+        return OriginSetting.HTTP + self.get_absolute_url()
 
     def get_criteria_url(self):
         if self.criteria_url:
@@ -341,7 +339,7 @@ class BadgeInstance(cachemodel.CacheModel):
 
     @property
     def jsonld_id(self):
-        return OriginSetting.JSON + self.get_absolute_url()
+        return OriginSetting.HTTP + self.get_absolute_url()
 
     @property
     def public_url(self):
