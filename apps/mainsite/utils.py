@@ -118,18 +118,11 @@ def fetch_remote_file_to_storage(remote_url, upload_to=''):
     return r.status_code, None
 
 
-def generate_entity_uri(entity_type):
+def generate_entity_uri():
     """
-    Given a entity type (e.g.: Issuer, BadgeClass) return a unique url-safe identifier prefixed with the type
-
-    :param entity_type: string representation of the type to scope the uri to
-    :return: a unique url-safe unicode identifier
+    Generate a unique url-safe identifier
     """
-    sanitized_type = re.sub(r'\W', '', entity_type)
     entity_uuid = uuid.uuid4()
     b64_string = base64.urlsafe_b64encode(entity_uuid.bytes)
     b64_trimmed = re.sub(r'=+$', '', b64_string)
-    return "{type}:{uuid}".format(
-        type=sanitized_type,
-        uuid=b64_trimmed
-    )
+    return b64_trimmed
