@@ -219,6 +219,11 @@ class BadgeClassSerializer(serializers.Serializer):
         return new_badgeclass
 
 
+class EvidenceItemSerializer(serializers.Serializer):
+    evidence_url = serializers.URLField(max_length=1024, required=True)
+    narrative = serializers.CharField(required=False)
+
+
 class BadgeInstanceSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierField()
@@ -228,6 +233,8 @@ class BadgeInstanceSerializer(serializers.Serializer):
     recipient_identifier = serializers.EmailField(max_length=1024, required=False)
     allow_uppercase = serializers.BooleanField(default=False, required=False, write_only=True)
     evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
+    narrative = serializers.CharField(required=False)
+    evidenceItems = EvidenceItemSerializer(many=True, source='cached_evidence', readonly=True)
 
     revoked = HumanReadableBooleanField(read_only=True)
     revocation_reason = serializers.CharField(read_only=True)
