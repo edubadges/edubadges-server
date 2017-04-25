@@ -221,7 +221,7 @@ class BadgeClassSerializer(serializers.Serializer):
 
 class EvidenceItemSerializer(serializers.Serializer):
     evidence_url = serializers.URLField(max_length=1024, required=True)
-    narrative = serializers.CharField(required=False)
+    narrative = MarkdownCharField(required=False)
 
     def create(self, validated_data):
         return super(EvidenceItemSerializer, self).create(validated_data)
@@ -236,7 +236,7 @@ class BadgeInstanceSerializer(serializers.Serializer):
     recipient_identifier = serializers.EmailField(max_length=1024, required=False)
     allow_uppercase = serializers.BooleanField(default=False, required=False, write_only=True)
     evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
-    narrative = serializers.CharField(required=False)
+    narrative = MarkdownCharField(required=False)
     evidence_items = EvidenceItemSerializer(many=True, required=False)
 
     revoked = HumanReadableBooleanField(read_only=True)
