@@ -23,6 +23,7 @@ from issuer.models import Issuer, BadgeClass, BadgeInstance, IssuerStaff
 from issuer.serializers import BadgeInstanceSerializer
 from mainsite import TOP_DIR
 
+from mainsite.utils import OriginSetting
 
 factory = APIRequestFactory()
 
@@ -901,6 +902,70 @@ class AssertionTests(APITestCase):
             slug = response.data.get('slug')
             response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions/{}'.format(slug))
             self.assertEqual(response.status_code, 200)
+
+    def test_issue_badge_with_ob1_evidence(self):
+        self.ensure_image_exists(BadgeClass.objects.get(slug='badge-of-testing'))
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+
+        evidence_url = "http://fake.evidence.url.test"
+        assertion = {
+            "email": "test@example.com",
+            "create_notification": False,
+            "evidence": evidence_url
+        }
+        response = self.client.post('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions', assertion)
+        self.assertEqual(response.status_code, 201)
+
+        slug = response.data.get('slug')
+        response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions/{}'.format(slug))
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(response.data.get('json'))
+        self.assertEqual(response.data.get('json').get('evidence'), evidence_url)
+
+        # ob2.0 evidence_items also present
+        self.assertEqual(response.data.get('evidence_items'), [
+            {
+                'evidence_url': evidence_url,
+                'narrative': None,
+            }
+        ])
+
+    def test_issue_badge_with_ob2_multiple_evidence(self):
+        self.ensure_image_exists(BadgeClass.objects.get(slug='badge-of-testing'))
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+
+        evidence_items = [
+            {
+                'evidence_url': "http://fake.evidence.url.test",
+            },
+            {
+                'evidence_url': "http://second.evidence.url.test",
+                "narrative": "some description of how second evidence was collected"
+            }
+        ]
+        assertion_args = {
+            "email": "test@example.com",
+            "create_notification": False,
+            "evidence_items": evidence_items
+        }
+        response = self.client.post('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions', assertion_args, format='json')
+        self.assertEqual(response.status_code, 201)
+
+        slug = response.data.get('slug')
+        response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions/{}'.format(slug))
+        self.assertEqual(response.status_code, 200)
+        assertion = response.data
+
+        fetched_evidence_items = assertion.get('evidence_items')
+        self.assertEqual(len(fetched_evidence_items), len(evidence_items))
+        for i in range(0,len(evidence_items)):
+            self.assertEqual(fetched_evidence_items[i].get('url'), evidence_items[i].get('url'))
+            self.assertEqual(fetched_evidence_items[i].get('narrative'), evidence_items[i].get('narrative'))
+
+        # ob1.0 evidence url also present
+        self.assertIsNotNone(assertion.get('json'))
+        assertion_public_url = OriginSetting.HTTP+reverse('badgeinstance_json', kwargs={'slug': slug})
+        self.assertEqual(assertion.get('json').get('evidence'), assertion_public_url)
 
     def test_resized_png_image_baked_properly(self):
         current_user = get_user_model().objects.get(pk=1)

@@ -528,6 +528,11 @@ class BadgeInstance(cachemodel.CacheModel):
         if len(evidence_list) == 1:
             return evidence_list[0].evidence_url
 
+    @property
+    def evidence_items(self):
+        """exists to cajole EvidenceItemSerializer"""
+        return self.cached_evidence()
+
 
 class BadgeInstanceEvidence(cachemodel.CacheModel):
     badgeinstance = models.ForeignKey('issuer.BadgeInstance')

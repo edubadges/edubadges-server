@@ -37,7 +37,7 @@ class BadgeInstanceManager(models.Manager):
             if evidence is not None:
                 from issuer.models import BadgeInstanceEvidence
                 for evidence_obj in evidence:
-                    evidence_url = evidence_obj.get('url')
+                    evidence_url = evidence_obj.get('evidence_url')
                     narrative = evidence_obj.get('narrative')
                     new_evidence = BadgeInstanceEvidence(badgeinstance=new_instance, evidence_url=evidence_url)
                     if narrative:

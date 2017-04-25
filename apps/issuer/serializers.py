@@ -223,6 +223,9 @@ class EvidenceItemSerializer(serializers.Serializer):
     evidence_url = serializers.URLField(max_length=1024, required=True)
     narrative = serializers.CharField(required=False)
 
+    def create(self, validated_data):
+        return super(EvidenceItemSerializer, self).create(validated_data)
+
 
 class BadgeInstanceSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
@@ -234,7 +237,7 @@ class BadgeInstanceSerializer(serializers.Serializer):
     allow_uppercase = serializers.BooleanField(default=False, required=False, write_only=True)
     evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
     narrative = serializers.CharField(required=False)
-    evidenceItems = EvidenceItemSerializer(many=True, source='cached_evidence', readonly=True)
+    evidence_items = EvidenceItemSerializer(many=True, required=False)
 
     revoked = HumanReadableBooleanField(read_only=True)
     revocation_reason = serializers.CharField(read_only=True)
@@ -284,13 +287,21 @@ class BadgeInstanceSerializer(serializers.Serializer):
         Requires self.context to include request (with authenticated request.user)
         and badgeclass: issuer.models.BadgeClass.
         """
-        evidenceItems = []
+        evidence_items = []
+
+        # ob1 evidence url
         evidence_url = validated_data.get('evidence')
         if evidence_url:
-            evidenceItems.push({'url': evidence_url})
+            evidence_items.append({'evidence_url': evidence_url})
+
+        # ob2 evidence items
+        submitted_items = self.validated_data.get('evidence_items')
+        if submitted_items:
+            evidence_items.extend(submitted_items)
+
         return self.context.get('badgeclass').issue(
             recipient_id=validated_data.get('recipient_identifier'),
-            evidence=evidenceItems,
+            evidence=evidence_items,
             notify=validated_data.get('create_notification'),
             created_by=self.context.get('request').user,
             allow_uppercase=validated_data.get('allow_uppercase'),
