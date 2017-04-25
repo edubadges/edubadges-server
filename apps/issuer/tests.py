@@ -469,6 +469,25 @@ class BadgeClassTests(APITestCase):
                 response = self.client.get('/v1/issuer/issuers/test-issuer/badges/{}'.format(slug))
                 self.assertEqual(response.status_code, 200)
 
+    def test_create_badgeclass_scrubs_svg(self):
+        with open(
+            os.path.join(TOP_DIR, 'apps', 'issuer', 'testfiles', 'hacked-svg-with-embedded-script-tags.svg'), 'r'
+        ) as attack_badge_image:
+
+            badgeclass_props = {
+                'name': 'javascript SVG badge',
+                'description': 'badge whose svg source attempts to execute code',
+                'image': attack_badge_image,
+                'criteria': 'http://svgs.should.not.be.user.input'
+            }
+            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            response = self.client.post('/v1/issuer/issuers/test-issuer/badges', badgeclass_props)
+            self.assertEqual(response.status_code, 201)
+
+            # make sure code was stripped
+            bc = BadgeClass.objects.get(slug=response.data.get('slug'))
+            self.assertNotIn('onload', bc.image.file.readlines())
+
     def test_create_criteriatext_badgeclass_for_issuer_authenticated(self):
         """
         Ensure that when criteria text is submitted instead of a URL, the criteria address
