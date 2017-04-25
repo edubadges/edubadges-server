@@ -1,10 +1,12 @@
 import StringIO
 
+from PIL import Image
 from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile
-
-from PIL import Image
 from resizeimage.resizeimage import resize_contain
+from xml.etree import cElementTree as ET
+
+from mainsite.utils import verify_svg
 
 
 class ResizeUploadedImage(object):
@@ -37,3 +39,17 @@ class ResizeUploadedImage(object):
                                                   byte_string.len, None)
 
         return super(ResizeUploadedImage, self).save(*args, **kwargs)
+
+
+class ScrubUploadedSvgImage(object):
+    def save(self, *args, **kwargs):
+        if self.pk is None and self.image and verify_svg(self.image.file):
+            self.image.file.seek(0)
+            tree = ET.parse(self.image.file)
+            for el in tree.iter():
+                if 'onload' in el.attrib:
+                    del el.attrib['onload']
+            buf = StringIO.StringIO()
+            tree.write(buf)
+            self.image = InMemoryUploadedFile(buf, 'image', self.image.name, 'image/svg+xml', buf.len, 'utf8')
+        return super(ScrubUploadedSvgImage, self).save(*args, **kwargs)
