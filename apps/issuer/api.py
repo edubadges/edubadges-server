@@ -21,9 +21,10 @@ from mainsite.api import BaseEntityListView, BaseEntityDetailView
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 
 from .models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
-from .serializers import (IssuerSerializer, IssuerSerializerV2, BadgeClassSerializer,
+from .serializers import (IssuerSerializer, BadgeClassSerializer,
                           BadgeInstanceSerializer, IssuerRoleActionSerializer,
                           IssuerStaffSerializer)
+from .serializers_v2 import IssuerSerializerV2
 from .permissions import (MayIssueBadgeClass, MayEditBadgeClass,
                           IsEditor, IsStaff, IsOwnerOrStaff)
 

@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import cachemodel
 import six
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django import http
 
@@ -38,6 +39,23 @@ class BaseVersionedEntity(cachemodel.CacheModel):
     def delete(self, *args, **kwargs):
         return super(BaseVersionedEntity, self).delete(*args, **kwargs)
         self.publish_delete('entity_id')
+
+
+class EntityRelatedFieldV2(serializers.RelatedField):
+    def __init__(self, *args, **kwargs):
+        self.rel_source = kwargs.pop('rel_source', 'entity_id')
+        super(EntityRelatedFieldV2, self).__init__(*args, **kwargs)
+
+    def to_internal_value(self, data):
+        try:
+            return self.get_queryset().get(**{self.rel_source: data})
+        except ObjectDoesNotExist:
+            self.fail('Invalid {rel_source} "{rel_value}" - object does not exist.', rel_source=self.rel_source, rel_value=data)
+        except (TypeError, ValueError):
+            self.fail('Incorrect type. Expected {rel_source} value, received {data_type}.', rel_source=self.rel_source, data_type=type(data).__name__)
+
+    def to_representation(self, value):
+        return getattr(value, self.rel_source)
 
 
 class BaseSerializerV2(serializers.Serializer):
@@ -89,9 +107,12 @@ class BaseSerializerV2(serializers.Serializer):
 class ListSerializerV2(serializers.ListSerializer, BaseSerializerV2):
     def to_representation(self, instance):
         representation = super(ListSerializerV2, self).to_representation(instance)
-        return BaseSerializerV2.response_envelope(result=representation,
-                                                  success=self.success,
-                                                  description=self.description)
+        if self.parent is not None:
+            return representation
+        else:
+            return BaseSerializerV2.response_envelope(result=representation,
+                                                      success=self.success,
+                                                      description=self.description)
 
     @property
     def data(self):
@@ -99,7 +120,7 @@ class ListSerializerV2(serializers.ListSerializer, BaseSerializerV2):
 
 
 class DetailSerializerV2(BaseSerializerV2):
-    entity_id = serializers.CharField(max_length=254, read_only=True)
+    entityId = serializers.CharField(source='entity_id', max_length=254, read_only=True)
 
     def to_representation(self, instance):
         representation = super(DetailSerializerV2, self).to_representation(instance)
