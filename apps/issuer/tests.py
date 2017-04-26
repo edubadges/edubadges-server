@@ -23,6 +23,7 @@ from issuer.models import Issuer, BadgeClass, BadgeInstance, IssuerStaff
 from issuer.serializers import BadgeInstanceSerializer
 from mainsite import TOP_DIR
 
+from mainsite.utils import OriginSetting
 
 factory = APIRequestFactory()
 
@@ -605,6 +606,58 @@ class BadgeClassTests(APITestCase):
             )
             self.assertEqual(response.status_code, 201)
 
+    def test_dont_create_badgeclass_with_invalid_markdown(self):
+        with open(
+                os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
+        ) as badge_image:
+
+            badgeclass_props = {
+                'name': 'Badge of Slugs',
+                'slug': 'badge_of_slugs_99',
+                'description': "Recognizes slimy learners with a penchant for lettuce",
+                'image': badge_image,
+            }
+
+            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+
+            # should not create badge that has images in markdown
+            badgeclass_props['criteria'] = 'This is invalid ![foo](image-url) markdown'
+            response = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                badgeclass_props
+            )
+            self.assertEqual(response.status_code, 400)
+
+    def test_create_badgeclass_with_valid_markdown(self):
+        with open(
+                os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
+        ) as badge_image:
+
+            badgeclass_props = {
+                'name': 'Badge of Slugs',
+                'slug': 'badge_of_slugs_99',
+                'description': "Recognizes slimy learners with a penchant for lettuce",
+                'image': badge_image,
+            }
+
+            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+
+            # valid markdown should be saved but html tags stripped
+            badgeclass_props['criteria'] = 'This is *valid* markdown <p>mixed with raw</p> <script>document.write("and abusive html")</script>'
+            response = self.client.post(
+                '/v1/issuer/issuers/test-issuer/badges',
+                badgeclass_props
+            )
+            self.assertEqual(response.status_code, 201)
+            self.assertIsNotNone(response.data)
+            new_badgeclass = response.data
+            self.assertEqual(new_badgeclass.get('criteria_text', None), 'This is *valid* markdown mixed with raw document.write("and abusive html")')
+
+            # verify that public page renders markdown as html
+            response = self.client.get('/public/badges/{}'.format(new_badgeclass.get('slug')), HTTP_ACCEPT='*/*')
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, "<p>This is <em>valid</em> markdown")
+
     def test_new_badgeclass_updates_cached_issuer(self):
         user = get_user_model().objects.get(pk=1)
         number_of_badgeclasses = len(list(user.cached_badgeclasses()))
@@ -850,6 +903,70 @@ class AssertionTests(APITestCase):
             response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions/{}'.format(slug))
             self.assertEqual(response.status_code, 200)
 
+    def test_issue_badge_with_ob1_evidence(self):
+        self.ensure_image_exists(BadgeClass.objects.get(slug='badge-of-testing'))
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+
+        evidence_url = "http://fake.evidence.url.test"
+        assertion = {
+            "email": "test@example.com",
+            "create_notification": False,
+            "evidence": evidence_url
+        }
+        response = self.client.post('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions', assertion)
+        self.assertEqual(response.status_code, 201)
+
+        slug = response.data.get('slug')
+        response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions/{}'.format(slug))
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(response.data.get('json'))
+        self.assertEqual(response.data.get('json').get('evidence'), evidence_url)
+
+        # ob2.0 evidence_items also present
+        self.assertEqual(response.data.get('evidence_items'), [
+            {
+                'evidence_url': evidence_url,
+                'narrative': None,
+            }
+        ])
+
+    def test_issue_badge_with_ob2_multiple_evidence(self):
+        self.ensure_image_exists(BadgeClass.objects.get(slug='badge-of-testing'))
+        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+
+        evidence_items = [
+            {
+                'evidence_url': "http://fake.evidence.url.test",
+            },
+            {
+                'evidence_url': "http://second.evidence.url.test",
+                "narrative": "some description of how second evidence was collected"
+            }
+        ]
+        assertion_args = {
+            "email": "test@example.com",
+            "create_notification": False,
+            "evidence_items": evidence_items
+        }
+        response = self.client.post('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions', assertion_args, format='json')
+        self.assertEqual(response.status_code, 201)
+
+        slug = response.data.get('slug')
+        response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions/{}'.format(slug))
+        self.assertEqual(response.status_code, 200)
+        assertion = response.data
+
+        fetched_evidence_items = assertion.get('evidence_items')
+        self.assertEqual(len(fetched_evidence_items), len(evidence_items))
+        for i in range(0,len(evidence_items)):
+            self.assertEqual(fetched_evidence_items[i].get('url'), evidence_items[i].get('url'))
+            self.assertEqual(fetched_evidence_items[i].get('narrative'), evidence_items[i].get('narrative'))
+
+        # ob1.0 evidence url also present
+        self.assertIsNotNone(assertion.get('json'))
+        assertion_public_url = OriginSetting.HTTP+reverse('badgeinstance_json', kwargs={'slug': slug})
+        self.assertEqual(assertion.get('json').get('evidence'), assertion_public_url)
+
     def test_resized_png_image_baked_properly(self):
         current_user = get_user_model().objects.get(pk=1)
         with open(
@@ -1062,6 +1179,10 @@ class PublicAPITests(APITestCase):
             self.assertEqual(response.status_code, 302)
 
     def test_get_assertion_image_with_redirect(self):
+        assertion = BadgeInstance.objects.get(slug='92219015-18a6-4538-8b6d-2b228e47b8aa')
+        assertion.issuer.cached_badgeclasses()
+        assertion.cached_evidence()
+
         with self.assertNumQueries(0):
             response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa/image', follow=False)
             self.assertEqual(response.status_code, 302)
@@ -1069,7 +1190,8 @@ class PublicAPITests(APITestCase):
     def test_get_assertion_json_explicit(self):
         assertion = BadgeInstance.objects.get(slug='92219015-18a6-4538-8b6d-2b228e47b8aa')
         assertion.issuer.cached_badgeclasses()
-        
+        assertion.cached_evidence()
+
         with self.assertNumQueries(0):
             response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa',
                                        **{'HTTP_ACCEPT': 'application/json'})
@@ -1085,6 +1207,7 @@ class PublicAPITests(APITestCase):
 
         assertion = BadgeInstance.objects.get(slug='92219015-18a6-4538-8b6d-2b228e47b8aa')
         assertion.issuer.cached_badgeclasses()
+        assertion.cached_evidence()
 
         with self.assertNumQueries(0):
             response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa')
@@ -1099,6 +1222,7 @@ class PublicAPITests(APITestCase):
         """ Ensure hosted Assertion page returns HTML if */* is requested and that it has OpenGraph metadata properties. """
         assertion = BadgeInstance.objects.get(slug='92219015-18a6-4538-8b6d-2b228e47b8aa')
         assertion.issuer.cached_badgeclasses()
+        assertion.cached_evidence()
 
         with self.assertNumQueries(0):
             response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa', **{'HTTP_ACCEPT': '*/*'})
@@ -1109,6 +1233,7 @@ class PublicAPITests(APITestCase):
     def test_get_assertion_html_linkedin(self):
         assertion = BadgeInstance.objects.get(slug='92219015-18a6-4538-8b6d-2b228e47b8aa')
         assertion.issuer.cached_badgeclasses()
+        assertion.cached_evidence()
 
         with self.assertNumQueries(0):
             response = self.client.get('/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa',

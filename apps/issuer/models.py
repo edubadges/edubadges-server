@@ -249,9 +249,9 @@ class BadgeClass(ResizeUploadedImage, cachemodel.CacheModel):
     def cached_completion_elements(self):
         return [pce for pce in self.completion_elements.all()]
 
-    def issue(self, recipient_id=None, evidence_url=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None):
+    def issue(self, recipient_id=None, evidence=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None):
         return BadgeInstance.objects.create_badgeinstance(
-            badgeclass=self, recipient_id=recipient_id, evidence_url=evidence_url,
+            badgeclass=self, recipient_id=recipient_id, evidence=evidence,
             notify=notify, created_by=created_by, allow_uppercase=allow_uppercase,
             badgr_app=badgr_app
         )
@@ -299,7 +299,8 @@ class BadgeInstance(cachemodel.CacheModel):
     acceptance = models.CharField(max_length=254, choices=ACCEPTANCE_CHOICES, default=ACCEPTANCE_UNACCEPTED)
 
     salt = models.CharField(max_length=254, blank=True, null=True, default=None)
-    evidence_url = models.CharField(max_length=2083, blank=True, null=True, default=None)
+
+    narrative = models.TextField(blank=True, null=True, default=None)
 
     old_json = JSONField()
 
@@ -513,3 +514,37 @@ class BadgeInstance(cachemodel.CacheModel):
     @property
     def json(self):
         return self.get_json()
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_evidence(self):
+        return self.badgeinstanceevidence_set.all()
+
+    @property
+    def evidence_url(self):
+        """Exists for compliance with ob1.x badges"""
+        evidence_list = self.cached_evidence()
+        if len(evidence_list) > 1:
+            return self.public_url
+        if len(evidence_list) == 1:
+            return evidence_list[0].evidence_url
+
+    @property
+    def evidence_items(self):
+        """exists to cajole EvidenceItemSerializer"""
+        return self.cached_evidence()
+
+
+class BadgeInstanceEvidence(cachemodel.CacheModel):
+    badgeinstance = models.ForeignKey('issuer.BadgeInstance')
+    evidence_url = models.CharField(max_length=2083)
+    narrative = models.TextField(blank=True, null=True, default=None)
+
+    def publish(self):
+        super(BadgeInstanceEvidence, self).publish()
+        self.badgeinstance.publish()
+
+    def delete(self, *args, **kwargs):
+        badgeinstance = self.badgeinstance
+        ret = super(BadgeInstanceEvidence, self).delete(*args, **kwargs)
+        badgeinstance.publish()
+        return ret

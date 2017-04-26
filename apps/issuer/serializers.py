@@ -10,7 +10,7 @@ import utils
 from badgeuser.serializers import BadgeUserProfileSerializer, BadgeUserIdentifierField
 from mainsite.drf_fields import Base64FileField
 from mainsite.models import BadgrApp
-from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField
+from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField
 from mainsite.utils import installed_apps_list, OriginSetting, verify_svg
 from .models import Issuer, BadgeClass, IssuerStaff
 
@@ -137,8 +137,8 @@ class BadgeClassSerializer(serializers.Serializer):
     name = StripTagsCharField(max_length=255)
     image = Base64FileField(allow_empty_file=False, use_url=True, required=False)
     slug = StripTagsCharField(max_length=255, allow_blank=True, required=False)
-    criteria = StripTagsCharField(allow_blank=True, required=False, write_only=True)
-    criteria_text = StripTagsCharField(required=False, read_only=True)
+    criteria = MarkdownCharField(allow_blank=True, required=False, write_only=True)
+    criteria_text = MarkdownCharField(required=False, read_only=True)
     criteria_url = StripTagsCharField(required=False, read_only=True)
     recipient_count = serializers.IntegerField(required=False, read_only=True)
     pathway_element_count = serializers.IntegerField(required=False, read_only=True)
@@ -219,6 +219,14 @@ class BadgeClassSerializer(serializers.Serializer):
         return new_badgeclass
 
 
+class EvidenceItemSerializer(serializers.Serializer):
+    evidence_url = serializers.URLField(max_length=1024, required=True)
+    narrative = MarkdownCharField(required=False)
+
+    def create(self, validated_data):
+        return super(EvidenceItemSerializer, self).create(validated_data)
+
+
 class BadgeInstanceSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierField()
@@ -228,6 +236,8 @@ class BadgeInstanceSerializer(serializers.Serializer):
     recipient_identifier = serializers.EmailField(max_length=1024, required=False)
     allow_uppercase = serializers.BooleanField(default=False, required=False, write_only=True)
     evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
+    narrative = MarkdownCharField(required=False)
+    evidence_items = EvidenceItemSerializer(many=True, required=False)
 
     revoked = HumanReadableBooleanField(read_only=True)
     revocation_reason = serializers.CharField(read_only=True)
@@ -277,9 +287,21 @@ class BadgeInstanceSerializer(serializers.Serializer):
         Requires self.context to include request (with authenticated request.user)
         and badgeclass: issuer.models.BadgeClass.
         """
+        evidence_items = []
+
+        # ob1 evidence url
+        evidence_url = validated_data.get('evidence')
+        if evidence_url:
+            evidence_items.append({'evidence_url': evidence_url})
+
+        # ob2 evidence items
+        submitted_items = self.validated_data.get('evidence_items')
+        if submitted_items:
+            evidence_items.extend(submitted_items)
+
         return self.context.get('badgeclass').issue(
             recipient_id=validated_data.get('recipient_identifier'),
-            evidence_url=validated_data.get('evidence'),
+            evidence=evidence_items,
             notify=validated_data.get('create_notification'),
             created_by=self.context.get('request').user,
             allow_uppercase=validated_data.get('allow_uppercase'),

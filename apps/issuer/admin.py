@@ -1,4 +1,4 @@
-from django.contrib.admin import ModelAdmin
+from django.contrib.admin import ModelAdmin, TabularInline
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 
@@ -6,7 +6,7 @@ from django_object_actions import DjangoObjectActions
 
 from mainsite.admin import badgr_admin
 
-from .models import Issuer, BadgeClass, BadgeInstance
+from .models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceEvidence
 
 
 class IssuerAdmin(DjangoObjectActions, ModelAdmin):
@@ -97,6 +97,12 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
 badgr_admin.register(BadgeClass, BadgeClassAdmin)
 
 
+class BadgeEvidenceInline(TabularInline):
+    model = BadgeInstanceEvidence
+    fields = ('evidence_url','narrative',)
+    extra = 0
+
+
 class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
     readonly_fields = ('created_at', 'created_by', 'image', 'slug', 'old_json')
     list_display = ('badge_image', 'recipient_identifier', 'slug', 'badgeclass', 'issuer')
@@ -110,7 +116,7 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
             'classes': ("collapse",)
         }),
         (None, {
-            'fields': ('acceptance', 'recipient_identifier', 'image', 'evidence_url')
+            'fields': ('acceptance', 'recipient_identifier', 'image')
         }),
         ('Revocation', {
             'fields': ('revoked', 'revocation_reason')
@@ -120,6 +126,7 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
         # }),
     )
     change_actions = ['redirect_issuer', 'redirect_badgeclass']
+    inlines = (BadgeEvidenceInline,)
 
     def badge_image(self, obj):
         try:
