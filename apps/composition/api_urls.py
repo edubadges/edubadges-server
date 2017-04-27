@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 
 from .api import (LocalBadgeInstanceList, LocalBadgeInstanceDetail,
                   CollectionList, CollectionDetail, CollectionGenerateShare,
@@ -6,8 +6,6 @@ from .api import (LocalBadgeInstanceList, LocalBadgeInstanceDetail,
                   CollectionLocalBadgeInstanceDetail, LocalBadgeInstanceImage, ShareBadge,
                   ShareCollection)
 
-urlpatterns = patterns(
-    'issuer.api_views',
 urlpatterns = [
 
     url(r'^/badges$', LocalBadgeInstanceList.as_view(), name='localbadgeinstance_list'),
