@@ -15,7 +15,7 @@ from .models import Issuer, IssuerStaff
 
 
 class IssuerStaffSerializerV2(DetailSerializerV2):
-    user = EntityRelatedFieldV2(rel_source='id', read_only=True)
+    user = EntityRelatedFieldV2(source='cached_user', rel_source='id', queryset=BadgeUser.objects.all())
     role = serializers.CharField()
 
 
@@ -23,12 +23,11 @@ class IssuerSerializerV2(DetailSerializerV2):
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     createdBy = EntityRelatedFieldV2(queryset=BadgeUser.objects.all(), source='created_by', rel_source='id')
     name = StripTagsCharField(max_length=1024)
-    slug = StripTagsCharField(max_length=255, allow_blank=True, required=False)
     image = Base64FileField(allow_empty_file=False, use_url=True, required=False, allow_null=True)
     email = serializers.EmailField(max_length=255, required=True)
     description = StripTagsCharField(max_length=1024, required=True)
     url = serializers.URLField(max_length=1024, required=True)
-    staff = IssuerStaffSerializerV2(source='issuerstaff_set', read_only=True, many=True)
+    staff = IssuerStaffSerializerV2(source='cached_staff_records', many=True, required=False)
 
     def validate(self, data):
         # TODO: ensure email is a confirmed email in owner/creator's account
@@ -80,6 +79,24 @@ class IssuerSerializerV2(DetailSerializerV2):
         instance.email = validated_data.get('email')
         instance.description = validated_data.get('description')
         instance.url = validated_data.get('url')
+
+        # TODO: How do we set this name to something other than source?
+        new_issuer_staff_records = validated_data.get('cached_staff_records', None)
+        if new_issuer_staff_records is not None:
+
+            expected_issuer_staff = []
+
+            # Get or create all staff from request
+            for record in new_issuer_staff_records:
+                new_issuer_staff, created = IssuerStaff.objects.get_or_create(issuer=instance, user_id=record['cached_user'].id, role=record['role'])
+                if created:
+                    new_issuer_staff.save()
+                expected_issuer_staff.append(new_issuer_staff)
+
+            # Remove current staff not appearing in new staff list
+            for staff in instance.issuerstaff_set.all():
+                if staff not in expected_issuer_staff:
+                    staff.delete()
 
         instance.save()
         return instance

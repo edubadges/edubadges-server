@@ -46,18 +46,18 @@ class _AbstractVersionedEntity(cachemodel.CacheModel):
 
     def save(self, *args, **kwargs):
         if self.entity_id is None:
-            self.entity_id = generate_entity_uri(self.get_entity_class_name())
+            self.entity_id = generate_entity_uri()
 
         self.entity_version += 1
-        return super(BaseVersionedEntity, self).save(*args, **kwargs)
+        return super(_AbstractVersionedEntity, self).save(*args, **kwargs)
 
     def publish(self):
-        super(BaseVersionedEntity, self).publish()
+        super(_AbstractVersionedEntity, self).publish()
         self.publish_by('entity_id')
 
     def delete(self, *args, **kwargs):
-        return super(BaseVersionedEntity, self).delete(*args, **kwargs)
         self.publish_delete('entity_id')
+        return super(_AbstractVersionedEntity, self).delete(*args, **kwargs)
 
 
 class EntityRelatedFieldV2(serializers.RelatedField):
@@ -67,7 +67,8 @@ class EntityRelatedFieldV2(serializers.RelatedField):
 
     def to_internal_value(self, data):
         try:
-            return self.get_queryset().get(**{self.rel_source: data})
+            obj = self.get_queryset().get(**{self.rel_source: data})
+            return obj
         except ObjectDoesNotExist:
             self.fail('Invalid {rel_source} "{rel_value}" - object does not exist.', rel_source=self.rel_source, rel_value=data)
         except (TypeError, ValueError):
@@ -100,7 +101,7 @@ class _MigratingToBaseVersionedEntity(_AbstractVersionedEntity):
 
 
 class BaseVersionedEntity(_AbstractVersionedEntity):
-    entity_id = models.CharField(max_length=254, unique=True, default=None)  # default=None is required
+    entity_id = models.CharField(max_length=254, default=None)  # default=None is required
 
     class Meta:
         abstract = True
