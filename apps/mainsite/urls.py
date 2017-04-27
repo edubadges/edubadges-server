@@ -59,8 +59,8 @@ urlpatterns = [
 
     # v1 API endpoints
     url(r'^(?P<version>v1)/issuer/', include('issuer.v1_api_urls')),
-    url(r'^(?P<version>v1)/user', include('badgeuser.api_urls')),
-    url(r'^(?P<version>v1)/earner', include('composition.api_urls')),
+    url(r'^v1/user', include('badgeuser.api_urls')),
+    url(r'^v1/earner', include('composition.api_urls')),
 
     # v2 API endpoints
     url(r'^(?P<version>v2)/', include('issuer.v2_api_urls')),
