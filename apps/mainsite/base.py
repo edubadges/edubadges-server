@@ -45,18 +45,18 @@ class _AbstractVersionedEntity(cachemodel.CacheModel):
 
     def save(self, *args, **kwargs):
         if self.entity_id is None:
-            self.entity_id = generate_entity_uri(self.get_entity_class_name())
+            self.entity_id = generate_entity_uri()
 
         self.entity_version += 1
-        return super(BaseVersionedEntity, self).save(*args, **kwargs)
+        return super(_AbstractVersionedEntity, self).save(*args, **kwargs)
 
     def publish(self):
-        super(BaseVersionedEntity, self).publish()
+        super(_AbstractVersionedEntity, self).publish()
         self.publish_by('entity_id')
 
     def delete(self, *args, **kwargs):
-        return super(BaseVersionedEntity, self).delete(*args, **kwargs)
         self.publish_delete('entity_id')
+        return super(_AbstractVersionedEntity, self).delete(*args, **kwargs)
 
 
 class _MigratingToBaseVersionedEntity(_AbstractVersionedEntity):
