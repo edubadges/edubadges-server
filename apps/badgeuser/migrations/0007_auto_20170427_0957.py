@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='badgeuser',
             name='entity_id',
-            field=models.CharField(default=None, max_length=254),
+            field=models.CharField(default=None, null=True, max_length=254),
             preserve_default=True,
         ),
         migrations.AddField(

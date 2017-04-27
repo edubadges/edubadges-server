@@ -101,7 +101,7 @@ class _MigratingToBaseVersionedEntity(_AbstractVersionedEntity):
 
 
 class BaseVersionedEntity(_AbstractVersionedEntity):
-    entity_id = models.CharField(max_length=254, default=None)  # default=None is required
+    entity_id = models.CharField(max_length=254, unique=True, default=None)  # default=None is required
 
     class Meta:
         abstract = True
