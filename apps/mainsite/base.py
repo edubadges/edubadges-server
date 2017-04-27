@@ -3,17 +3,36 @@ from __future__ import unicode_literals
 
 import cachemodel
 import six
-from django.db import models
 from django import http
-
+from django.db import models
+from django.db.migrations import RunPython
 from rest_framework import serializers, views, exceptions, status
 from rest_framework.response import Response
 
 from mainsite.utils import generate_entity_uri
 
 
-class BaseVersionedEntity(cachemodel.CacheModel):
-    entity_id = models.CharField(max_length=254, blank=False, null=True, default=None)
+class PopulateEntityIdsMigration(RunPython):
+    def __init__(self, app_label, model_name, entity_class_name=None, **kwargs):
+        self.app_label = app_label
+        self.model_name = model_name
+        self.entity_class_name = entity_class_name if entity_class_name is not None else model_name
+        if 'reverse_code' not in kwargs:
+            kwargs['reverse_code'] = self.noop
+        super(PopulateEntityIdsMigration, self).__init__(self.generate_ids, **kwargs)
+
+    def noop(self, apps, schema_editor):
+        pass
+
+    def generate_ids(self, apps, schema_editor):
+        model_cls = apps.get_model(self.app_label, self.model_name)
+        for obj in model_cls.objects.all():
+            if obj.entity_id is None:
+                obj.entity_id = generate_entity_uri()
+                obj.save(force_update=True)
+
+
+class _AbstractVersionedEntity(cachemodel.CacheModel):
     entity_version = models.PositiveIntegerField(blank=False, null=False, default=1)
 
     class Meta:
@@ -26,18 +45,47 @@ class BaseVersionedEntity(cachemodel.CacheModel):
 
     def save(self, *args, **kwargs):
         if self.entity_id is None:
-            self.entity_id = generate_entity_uri(self.get_entity_class_name())
+            self.entity_id = generate_entity_uri()
 
         self.entity_version += 1
-        return super(BaseVersionedEntity, self).save(*args, **kwargs)
+        return super(_AbstractVersionedEntity, self).save(*args, **kwargs)
 
     def publish(self):
-        super(BaseVersionedEntity, self).publish()
+        super(_AbstractVersionedEntity, self).publish()
         self.publish_by('entity_id')
 
     def delete(self, *args, **kwargs):
-        return super(BaseVersionedEntity, self).delete(*args, **kwargs)
         self.publish_delete('entity_id')
+        return super(_AbstractVersionedEntity, self).delete(*args, **kwargs)
+
+
+class _MigratingToBaseVersionedEntity(_AbstractVersionedEntity):
+    """
+    A temporary abstract model that exists to provide a migration path for existing models to BaseVersionedEntity.
+
+    Usage:
+       1.) change ExistingModel to subclass from _MigratingToBaseVersionedEntity
+       2.) ./manage.py makemigrations existing_app  # existing_app.ExistingModel should get a migration that adds entity fields, default=None
+       3.) ./manage.py makemigrations existing_app --empty  # build a data migration that will populate the new fields:
+       example:
+            operations = [
+                mainsite.base.PopulateEntityIdsMigration('existing_app', 'ExistingModel'),
+            ]   
+       4.) change ExistingModel to subclass from BaseVersionedEntity instead of _MigratingToBaseVersionedEntity
+       5.) ./manage.py makemigrations existing_app  # make migration that sets unique=True 
+        
+    """
+    entity_id = models.CharField(max_length=254, blank=False, null=True, default=None)
+
+    class Meta:
+        abstract = True
+
+
+class BaseVersionedEntity(_AbstractVersionedEntity):
+    entity_id = models.CharField(max_length=254, unique=True, default=None)  # default=None is required
+
+    class Meta:
+        abstract = True
 
 
 class BaseSerializerV2(serializers.Serializer):
