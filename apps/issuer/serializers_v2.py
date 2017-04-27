@@ -15,13 +15,13 @@ from .models import Issuer, IssuerStaff
 
 
 class IssuerStaffSerializerV2(DetailSerializerV2):
-    user = EntityRelatedFieldV2(source='cached_user', rel_source='id', queryset=BadgeUser.objects.all())
+    user = EntityRelatedFieldV2(source='cached_user', rel_source='entity_id', queryset=BadgeUser.objects.all())
     role = serializers.CharField()
 
 
 class IssuerSerializerV2(DetailSerializerV2):
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
-    createdBy = EntityRelatedFieldV2(queryset=BadgeUser.objects.all(), source='created_by', rel_source='id')
+    createdBy = EntityRelatedFieldV2(queryset=BadgeUser.objects.all(), source='created_by', rel_source='entity_id')
     name = StripTagsCharField(max_length=1024)
     image = Base64FileField(allow_empty_file=False, use_url=True, required=False, allow_null=True)
     email = serializers.EmailField(max_length=255, required=True)
