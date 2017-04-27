@@ -1,6 +1,7 @@
 from django.apps import apps
 from django.conf import settings
 from django.conf.urls import include, url
+from rest_framework.authtoken.views import obtain_auth_token
 
 from mainsite.admin import badgr_admin
 
@@ -10,14 +11,16 @@ badgr_admin.autodiscover()
 from django.views.generic.base import RedirectView, TemplateView
 
 from composition.views import LegacyCollectionShareRedirectView
-from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation, LoginAndObtainAuthToken, \
-    ClearCacheView
+from mainsite.views import ClearCacheView
+from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation, error404, error500
+from django.contrib.auth import views as contrib_auth_views
+
 
 urlpatterns = [
     # Backup URLs in case the server isn't serving these directly
-    url(r'^favicon\.png[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL)),
-    url(r'^favicon\.ico[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL)),
-    url(r'^robots\.txt$', RedirectView.as_view(url='%srobots.txt' % settings.STATIC_URL)),
+    url(r'^favicon\.png[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL, permanent=True)),
+    url(r'^favicon\.ico[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL, permanent=True)),
+    url(r'^robots\.txt$', RedirectView.as_view(url='%srobots.txt' % settings.STATIC_URL, permanent=True)),
 
     # Apple app universal URL endpoint
     url(r'^apple-app-site-association', AppleAppSiteAssociation.as_view(), name="apple-app-site-association"),
@@ -50,9 +53,9 @@ urlpatterns = [
     url(r'^earner/collections/(?P<pk>[^/]+)/(?P<share_hash>[^/]+)/embed$', LegacyCollectionShareRedirectView.as_view(), name='legacy_shared_collection_embed'),
 
     # REST Framework
-    url(r'^api-auth/token$', LoginAndObtainAuthToken.as_view()),
-    url(r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'public/login.html'}, name='login'),
-    url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {'next_page': 'login'}, name='logout'),
+    url(r'^api-auth/token$', obtain_auth_token),
+    url(r'^accounts/login/$', contrib_auth_views.login, {'template_name': 'public/login.html'}, name='login'),
+    url(r'^accounts/logout/$', contrib_auth_views.logout, {'next_page': 'login'}, name='logout'),
 
     # v1 API endpoints
     url(r'^(?P<version>v1)/issuer/', include('issuer.v1_api_urls')),
@@ -77,24 +80,26 @@ if apps.is_installed('badgebook'):
 # Test URLs to allow you to see these pages while DEBUG is True
 if getattr(settings, 'DEBUG_ERRORS', False):
     urlpatterns = [
-        url(r'^error/404/$', 'mainsite.views.error404', name='404'),
-        url(r'^error/500/$', 'mainsite.views.error500', name='500'),
+        url(r'^error/404/$', error404, name='404'),
+        url(r'^error/500/$', error500, name='500'),
     ] + urlpatterns
 
 # If DEBUG_MEDIA is set, have django serve anything in MEDIA_ROOT at MEDIA_URL
 if getattr(settings, 'DEBUG_MEDIA', True):
+    from django.views.static import serve as static_serve
     media_url = getattr(settings, 'MEDIA_URL', '/media/').lstrip('/')
     urlpatterns = [
-        url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {
+        url(r'^media/(?P<path>.*)$', static_serve, {
             'document_root': settings.MEDIA_ROOT
         }),
     ] + urlpatterns
 
 # If DEBUG_STATIC is set, have django serve up static files even if DEBUG=False
 if getattr(settings, 'DEBUG_STATIC', True):
-    static_url = getattr(settings, 'STATIC_URL', '/static/').replace(getattr(settings, 'HTTP_ORIGIN', ''), '').lstrip('/')
+    from django.contrib.staticfiles.views import serve as staticfiles_serve
+    static_url = getattr(settings, 'STATIC_URL', '/static/').lstrip('/')
     urlpatterns = [
-        url(r'^%s(?P<path>.*)' % (static_url,), 'django.contrib.staticfiles.views.serve', kwargs={
+        url(r'^%s(?P<path>.*)' % (static_url,), staticfiles_serve, kwargs={
             'insecure': True,
         })
     ] + urlpatterns

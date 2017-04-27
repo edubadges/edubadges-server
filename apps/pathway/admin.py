@@ -12,12 +12,12 @@ class PathwayAdmin(ModelAdmin):
 badgr_admin.register(Pathway, PathwayAdmin)
 
 
-
 class PathwayElementBadgeInline(TabularInline):
     model = PathwayElementBadge
     extra = 0
     fields = ('element','badgeclass','ordering')
     raw_id_fields = ('badgeclass','element')
+
 
 class PathwayElementAdmin(basic_models.DefaultModelAdmin):
     list_display = ('name','slug', 'pathway_name', 'issuer','is_active','created_at')
@@ -26,10 +26,10 @@ class PathwayElementAdmin(basic_models.DefaultModelAdmin):
     readonly_fields = ('created_by','created_at','updated_by','updated_by',)
     raw_id_fields = ('completion_badgeclass','pathway','parent_element')
     fieldsets = (
-        ('Metadata', {
-            'fields': ('is_active','created_by','created_at','updated_by','updated_by',),
-            'classes': ('collapse',)
-        }),
+        # ('Metadata', {
+        #     'fields': ('is_active','created_by','created_at','updated_by','updated_by',),
+        #     'classes': ('collapse',)
+        # }),
         (None, {
             'fields': ('name', 'description', 'alignment_url')
         }),

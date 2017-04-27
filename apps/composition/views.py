@@ -103,6 +103,8 @@ class CollectionDetailEmbedView(CollectionDetailView):
 
 
 class LegacyCollectionShareRedirectView(RedirectView):
+    permanent = True
+
     def get_redirect_url(self, *args, **kwargs):
         new_pattern_name = self.request.resolver_match.url_name.replace('legacy_','')
         kwargs.pop('pk')

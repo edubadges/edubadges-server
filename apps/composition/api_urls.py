@@ -8,6 +8,7 @@ from .api import (LocalBadgeInstanceList, LocalBadgeInstanceDetail,
 
 urlpatterns = patterns(
     'issuer.api_views',
+urlpatterns = [
 
     url(r'^/badges$', LocalBadgeInstanceList.as_view(), name='localbadgeinstance_list'),
     url(r'^/badges/(?P<badge_id>[^/]+)$', LocalBadgeInstanceDetail.as_view(), name='localbadgeinstance_detail'),
@@ -21,4 +22,4 @@ urlpatterns = patterns(
 
     url(r'^/share/badge/(?P<badge_id>[^/]+)$', ShareBadge.as_view(), name='analytics_share_badge'),
     url(r'^/share/collection/(?P<collection_slug>[^/]+)$', ShareCollection.as_view(), name='analytics_share_collection'),
-)
+]
