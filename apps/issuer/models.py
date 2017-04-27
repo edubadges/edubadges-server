@@ -364,7 +364,7 @@ class BadgeInstance(BaseVersionedEntity):
 
     def save(self, *args, **kwargs):
         if self.pk is None:
-            self.salt = uuid.uuid4()
+            self.salt = uuid.uuid4().hex
             self.created_at = datetime.datetime.now()
 
             imageFile = default_storage.open(self.badgeclass.image.file.name)

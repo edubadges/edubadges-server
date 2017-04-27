@@ -32,7 +32,6 @@ class BadgeInstanceManager(models.Manager):
         if evidence_url:
             new_instance.evidence_url = evidence_url
 
-        new_instance.slug = new_instance.get_new_slug()
 
         new_instance.save()
 
