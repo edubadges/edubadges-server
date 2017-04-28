@@ -34,7 +34,7 @@ class IssuerSerializerV1(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierField()
     name = StripTagsCharField(max_length=1024)
-    slug = StripTagsCharField(max_length=255, allow_blank=True, required=False)
+    slug = StripTagsCharField(max_length=255, source='entity_id', read_only=True)
     image = ValidImageField(required=False)
     email = serializers.EmailField(max_length=255, required=True)
     description = StripTagsCharField(max_length=1024, required=True)
