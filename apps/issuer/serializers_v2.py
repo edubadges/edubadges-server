@@ -24,6 +24,7 @@ class IssuerSerializerV2(DetailSerializerV2):
     description = StripTagsCharField(max_length=1024, required=True)
     url = serializers.URLField(max_length=1024, required=True)
     staff = IssuerStaffSerializerV2(many=True, source='cached_staff', required=False)
+    openBadgeId = serializers.URLField(source='jsonld_id', read_only=True)
 
     class Meta:
         model = Issuer
