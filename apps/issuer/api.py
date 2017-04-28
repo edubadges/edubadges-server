@@ -78,6 +78,7 @@ class IssuerList(BaseEntityListView):
     model = Issuer
     v1_serializer_class = IssuerSerializerV1
     v2_serializer_class = IssuerSerializerV2
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor)
 
     def get_objects(self, request, **kwargs):
         return self.request.user.cached_issuers()
@@ -107,8 +108,7 @@ class IssuerDetail(BaseEntityDetailView):
     model = Issuer
     v1_serializer_class = IssuerSerializerV1
     v2_serializer_class = IssuerSerializerV2
-    permission_classes = (AuthenticatedWithVerifiedEmail, IsStaff,)
-
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor)
 
 
 class IssuerStaffList(AbstractIssuerAPIEndpoint):
