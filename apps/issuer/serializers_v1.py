@@ -21,7 +21,7 @@ class CachedListSerializer(serializers.ListSerializer):
         return [self.child.to_representation(item) for item in data]
 
 
-class IssuerStaffSerializer(serializers.Serializer):
+class IssuerStaffSerializerV1(serializers.Serializer):
     """ A read_only serializer for staff roles """
     user = BadgeUserProfileSerializer(source='cached_user')
     role = serializers.CharField(validators=[ChoicesValidator(dict(IssuerStaff.ROLE_CHOICES).keys())])
@@ -30,7 +30,7 @@ class IssuerStaffSerializer(serializers.Serializer):
         list_serializer_class = CachedListSerializer
 
 
-class IssuerSerializer(serializers.Serializer):
+class IssuerSerializerV1(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierField()
     name = StripTagsCharField(max_length=1024)
@@ -39,7 +39,7 @@ class IssuerSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=255, required=True)
     description = StripTagsCharField(max_length=1024, required=True)
     url = serializers.URLField(max_length=1024, required=True)
-    staff = IssuerStaffSerializer(read_only=True, source='cached_staff_records', many=True)
+    staff = IssuerStaffSerializerV1(read_only=True, source='cached_staff_records', many=True)
 
     def validate_image(self, image):
         if image is not None:
@@ -66,7 +66,7 @@ class IssuerSerializer(serializers.Serializer):
         return instance
 
     def to_representation(self, obj):
-        representation = super(IssuerSerializer, self).to_representation(obj)
+        representation = super(IssuerSerializerV1, self).to_representation(obj)
         representation['json'] = obj.get_json()
 
         if self.context.get('embed_badgeclasses', False):
@@ -80,7 +80,7 @@ class IssuerSerializer(serializers.Serializer):
         return representation
 
 
-class IssuerRoleActionSerializer(serializers.Serializer):
+class IssuerRoleActionSerializerV1(serializers.Serializer):
     """ A serializer used for validating user role change POSTS """
     action = serializers.ChoiceField(('add', 'modify', 'remove'), allow_blank=True)
     username = serializers.CharField(allow_blank=True, required=False)
@@ -211,7 +211,7 @@ class BadgeInstanceSerializer(serializers.Serializer):
         representation = super(BadgeInstanceSerializer, self).to_representation(instance)
         representation['json'] = instance.get_json()
         if self.context.get('include_issuer', False):
-            representation['issuer'] = IssuerSerializer(instance.cached_badgeclass.cached_issuer).data
+            representation['issuer'] = IssuerSerializerV1(instance.cached_badgeclass.cached_issuer).data
         else:
             representation['issuer'] = OriginSetting.JSON+reverse('issuer_json', kwargs={'slug': instance.cached_issuer.slug})
         if self.context.get('include_badge_class', False):
@@ -265,7 +265,7 @@ class IssuerPortalSerializer(serializers.Serializer):
         user_issuers = user.cached_issuers()
         user_issuer_badgeclasses = user.cached_badgeclasses()
 
-        issuer_data = IssuerSerializer(
+        issuer_data = IssuerSerializerV1(
             user_issuers,
             many=True,
             context=self.context

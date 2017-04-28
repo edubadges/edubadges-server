@@ -1,32 +1,26 @@
-from itertools import chain
-import logging
 import urlparse
 
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import UploadedFile
-from django.db.models import Q
-
-from rest_framework import status, authentication, permissions
+from rest_framework import status, authentication
 from rest_framework.exceptions import ValidationError, PermissionDenied, NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 import badgrlog
 from badgeuser.models import CachedEmailAddress
-from composition.models import LocalBadgeClass
+from issuer.models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
+from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
+                                IsEditor, IsStaff, IsOwnerOrStaff)
+from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializer,
+                                   BadgeInstanceSerializer, IssuerRoleActionSerializerV1,
+                                   IssuerStaffSerializerV1)
+from issuer.serializers_v2 import IssuerSerializerV2
 from issuer.utils import get_badgeclass_by_identifier
 from mainsite.api import BaseEntityListView, BaseEntityDetailView
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
-
-from .models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
-from .serializers import (IssuerSerializer, BadgeClassSerializer,
-                          BadgeInstanceSerializer, IssuerRoleActionSerializer,
-                          IssuerStaffSerializer)
-from .serializers_v2 import IssuerSerializerV2
-from .permissions import (MayIssueBadgeClass, MayEditBadgeClass,
-                          IsEditor, IsStaff, IsOwnerOrStaff)
 
 
 logger = badgrlog.BadgrLogger()
@@ -82,7 +76,7 @@ class IssuerList(BaseEntityListView):
     Issuer List resource for the authenticated user
     """
     model = Issuer
-    v1_serializer_class = IssuerSerializer
+    v1_serializer_class = IssuerSerializerV1
     v2_serializer_class = IssuerSerializerV2
 
     def get_objects(self, request, **kwargs):
@@ -111,7 +105,7 @@ class IssuerDetail(BaseEntityDetailView):
     GET details on one issuer. PUT and DELETE should be highly restricted operations and are not implemented yet
     """
     model = Issuer
-    v1_serializer_class = IssuerSerializer
+    v1_serializer_class = IssuerSerializerV1
     v2_serializer_class = IssuerSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, IsStaff,)
 
@@ -143,7 +137,7 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        serializer = IssuerStaffSerializer(
+        serializer = IssuerStaffSerializerV1(
             IssuerStaff.objects.filter(issuer=current_issuer),
             many=True
         )
@@ -185,7 +179,7 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
               required: false
         """
         # validate POST data
-        serializer = IssuerRoleActionSerializer(data=request.data)
+        serializer = IssuerRoleActionSerializerV1(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -237,7 +231,7 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
         # update cached issuers and badgeclasses for user
         user_to_modify.save()
 
-        return Response(IssuerStaffSerializer(staff_instance).data)
+        return Response(IssuerStaffSerializerV1(staff_instance).data)
 
 
 class AllBadgeClassesList(AbstractIssuerAPIEndpoint):
