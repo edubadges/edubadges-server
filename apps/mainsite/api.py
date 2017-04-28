@@ -50,23 +50,32 @@ class BaseEntityListView(BaseEntityView):
 
 
 class BaseEntityDetailView(BaseEntityView):
+
     def get_object(self, request, **kwargs):
         version = getattr(request, 'version', 'v1')
         if version == 'v1':
-            lookup_kwargs = {
-                'slug': kwargs.get('slug')
-            }
+            identifier = kwargs.get('slug')
         elif version == 'v2':
-            lookup_kwargs = {
-                'entity_id': kwargs.get('entity_id')
-            }
+            identifier = kwargs.get('entity_id')
 
         try:
-            self.object = self.model.cached.get(**lookup_kwargs)
+            self.object = self.model.cached.get(entity_id=identifier)
         except self.model.DoesNotExist:
-            raise Http404
+            pass
         else:
             return self.object
+
+        if version == 'v1':
+            # try a lookup by legacy slug if its v1
+            try:
+                self.object = self.model.cached.get(slug=identifier)
+            except self.model.DoesNotExist:
+                raise Http404
+            else:
+                return self.object
+
+        # nothing found
+        raise Http404
 
     def has_object_permissions(self, request, obj):
         for permission in self.get_permissions():

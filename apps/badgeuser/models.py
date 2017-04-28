@@ -15,9 +15,12 @@ from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.authtoken.models import Token
 
+from mainsite.base import BaseVersionedEntity
 from issuer.models import Issuer
 
 from .managers import CachedEmailAddressManager
+from django.contrib.auth.models import UserManager
+
 
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
@@ -116,13 +119,15 @@ class EmailAddressVariant(models.Model):
         return True
 
 
-class BadgeUser(AbstractUser, cachemodel.CacheModel):
+class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     """
     A full-featured user model that can be an Earner, Issuer, or Consumer of Open Badges
     """
+    entity_class_name = 'BadgeUser'
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
+    manager=UserManager()
 
     class Meta:
         verbose_name = _('badge user')

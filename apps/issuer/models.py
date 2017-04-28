@@ -13,7 +13,6 @@ from django.core.files.storage import default_storage
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import ProtectedError
-from django.utils.timezone import get_current_timezone
 from jsonfield import JSONField
 from openbadges_bakery import bake
 
@@ -21,22 +20,31 @@ from issuer.managers import BadgeInstanceManager
 from mainsite.base import BaseVersionedEntity
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage
-from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
-                             AbstractBadgeInstance, BadgrApp, EmailBlacklist)
+from mainsite.models import (BadgrApp, EmailBlacklist)
 from mainsite.utils import OriginSetting
 from .utils import generate_sha256_hashstring, CURRENT_OBI_CONTEXT_IRI
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
-class Issuer(BaseVersionedEntity, ResizeUploadedImage):
+class BaseAuditedModel(cachemodel.CacheModel):
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey('badgeuser.BadgeUser', blank=True, null=True, related_name="+")
+
+    class Meta:
+        abstract = True
+
+    @property
+    def cached_creator(self):
+        from badgeuser.models import BadgeUser
+        return BadgeUser.cached.get(id=self.created_by_id)
+
+
+class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage):
     entity_class_name = 'Issuer'
 
     source = models.CharField(max_length=254, default='local')
     source_url = models.CharField(max_length=254, blank=True, null=True, default=None)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True, related_name="+")
 
     staff = models.ManyToManyField(AUTH_USER_MODEL, through='IssuerStaff')
 
@@ -57,17 +65,26 @@ class Issuer(BaseVersionedEntity, ResizeUploadedImage):
 
     def publish(self, *args, **kwargs):
         super(Issuer, self).publish(*args, **kwargs)
-        for member in self.cached_staff():
-            member.publish()
+        for member in self.cached_staff:
+            member.cached_user.publish()
 
     def delete(self, *args, **kwargs):
         if len(self.cached_badgeclasses()) > 0:
             raise ProtectedError("Issuer may only be deleted after all its defined BadgeClasses have been deleted.")
 
-        staff = self.cached_staff()
+        staff = self.cached_staff
         super(Issuer, self).delete(*args, **kwargs)
         for member in staff:
-            member.publish()
+            member.cached_user.publish()
+
+    def save(self, *args, **kwargs):
+        ret = super(Issuer, self).save(*args, **kwargs)
+
+        # if no owner staff records exist, create one for created_by
+        if len(self.owners) < 1 and self.created_by_id:
+            IssuerStaff.objects.create(issuer=self, user=self.created_by, role=IssuerStaff.ROLE_OWNER)
+
+        return ret
 
     def get_absolute_url(self):
         return reverse('issuer_json', kwargs={'entity_id': self.entity_id})
@@ -89,12 +106,31 @@ class Issuer(BaseVersionedEntity, ResizeUploadedImage):
         return self.staff.filter(issuerstaff__role=IssuerStaff.ROLE_OWNER)
 
     @cachemodel.cached_method(auto_publish=True)
-    def cached_staff(self):
-        return self.staff.all()
-
-    @cachemodel.cached_method(auto_publish=True)
     def cached_staff_records(self):
         return IssuerStaff.objects.filter(issuer=self)
+
+    @property
+    def cached_staff(self):
+        return self.cached_staff_records()
+
+    @cached_staff.setter
+    def cached_staff(self, value):
+        """
+        Update this issuers IssuerStaff from a list of IssuerStaffSerializerV2 data
+        """
+        existing_staff_idx = {s.cached_user: s for s in self.cached_staff}
+        new_staff_idx = {s['cached_user']: s for s in value}
+
+        # add missing staff records
+        for staff_data in value:
+            if staff_data['cached_user'] not in existing_staff_idx:
+                IssuerStaff.objects.create(issuer=self, user=staff_data['cached_user'], role=staff_data['role'])
+
+        # remove old staff records -- but never remove the only OWNER role
+        for staff_record in self.cached_staff:
+            if staff_record.cached_user not in new_staff_idx:
+                if staff_record.role != IssuerStaff.ROLE_OWNER or len(self.owners) > 1:
+                    staff_record.delete()
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_editors(self):

@@ -1,6 +1,6 @@
-import os
 import uuid
 
+import os
 from django.apps import apps
 from django.core.urlresolvers import reverse
 from django.utils.html import strip_tags
@@ -8,11 +8,11 @@ from rest_framework import serializers
 
 import utils
 from badgeuser.serializers import BadgeUserProfileSerializer, BadgeUserIdentifierField
-from mainsite.base import DetailSerializerV2
-from mainsite.drf_fields import Base64FileField
+from mainsite.drf_fields import Base64FileField, ValidImageField
 from mainsite.models import BadgrApp
 from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField
 from mainsite.utils import installed_apps_list, OriginSetting, verify_svg
+from mainsite.validators import ChoicesValidator
 from .models import Issuer, BadgeClass, IssuerStaff
 
 
@@ -21,72 +21,35 @@ class CachedListSerializer(serializers.ListSerializer):
         return [self.child.to_representation(item) for item in data]
 
 
-class IssuerStaffSerializer(serializers.Serializer):
+class IssuerStaffSerializerV1(serializers.Serializer):
     """ A read_only serializer for staff roles """
     user = BadgeUserProfileSerializer(source='cached_user')
-    role = serializers.CharField()
+    role = serializers.CharField(validators=[ChoicesValidator(dict(IssuerStaff.ROLE_CHOICES).keys())])
 
     class Meta:
         list_serializer_class = CachedListSerializer
 
-    def validate_role(self, role):
-        valid_roles = dict(IssuerStaff.ROLE_CHOICES).keys()
-        role = role.lower()
-        if role not in valid_roles:
-            raise serializers.ValidationError("Invalid role. Available roles: {}".format(valid_roles))
-        return role
 
-
-class IssuerSerializer(serializers.Serializer):
+class IssuerSerializerV1(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierField()
     name = StripTagsCharField(max_length=1024)
-    slug = StripTagsCharField(max_length=255, allow_blank=True, required=False)
-    image = Base64FileField(allow_empty_file=False, use_url=True, required=False, allow_null=True)
+    slug = StripTagsCharField(max_length=255, source='entity_id', read_only=True)
+    image = ValidImageField(required=False)
     email = serializers.EmailField(max_length=255, required=True)
     description = StripTagsCharField(max_length=1024, required=True)
     url = serializers.URLField(max_length=1024, required=True)
-    staff = IssuerStaffSerializer(read_only=True, source='cached_staff_records', many=True)
-
-    def validate(self, data):
-        # TODO: ensure email is a confirmed email in owner/creator's account
-        # ^^^ that validation requires the request.user, which might be in self.context
-        return data
+    staff = IssuerStaffSerializerV1(read_only=True, source='cached_staff_records', many=True)
 
     def validate_image(self, image):
-        # TODO: Make sure it's a PNG (square if possible), and remove any baked-in badge assertion that exists.
-        # Doing: add a random string to filename
-
-        if image is None:
-            return image
-
-        img_name, img_ext = os.path.splitext(image.name)
-
-        try:
-            from PIL import Image
-            img = Image.open(image)
-            img.verify()
-        except Exception as e:
-            if not verify_svg(image):
-                raise serializers.ValidationError('Invalid image.')
-        else:
-            if img.format != "PNG":
-                raise serializers.ValidationError('Invalid PNG')
-
-        image.name = 'issuer_logo_' + str(uuid.uuid4()) + img_ext
+        if image is not None:
+            img_name, img_ext = os.path.splitext(image.name)
+            image.name = 'issuer_logo_' + str(uuid.uuid4()) + img_ext
         return image
 
     def create(self, validated_data, **kwargs):
         new_issuer = Issuer(**validated_data)
-
-        # TODO: Is this needed anymore? [Wiggins Feb 2017]
-        # Use AutoSlugField's pre_save to provide slug if empty, else auto-unique
-        new_issuer.slug = Issuer._meta.get_field('slug').pre_save(new_issuer, add=True)
-
         new_issuer.save()
-
-        staff = IssuerStaff(issuer=new_issuer, user=new_issuer.created_by, role=IssuerStaff.ROLE_OWNER)
-        staff.save()
         return new_issuer
 
     def update(self, instance, validated_data):
@@ -103,7 +66,7 @@ class IssuerSerializer(serializers.Serializer):
         return instance
 
     def to_representation(self, obj):
-        representation = super(IssuerSerializer, self).to_representation(obj)
+        representation = super(IssuerSerializerV1, self).to_representation(obj)
         representation['json'] = obj.get_json()
 
         if self.context.get('embed_badgeclasses', False):
@@ -116,74 +79,8 @@ class IssuerSerializer(serializers.Serializer):
 
         return representation
 
-# TODO: WIP V2 serializer
-class IssuerSerializerV2(DetailSerializerV2):
-    created_at = serializers.DateTimeField(read_only=True)
-    created_by = BadgeUserIdentifierField()
-    name = StripTagsCharField(max_length=1024)
-    slug = StripTagsCharField(max_length=255, allow_blank=True, required=False)
-    image = Base64FileField(allow_empty_file=False, use_url=True, required=False, allow_null=True)
-    email = serializers.EmailField(max_length=255, required=True)
-    description = StripTagsCharField(max_length=1024, required=True)
-    url = serializers.URLField(max_length=1024, required=True)
-    staff = IssuerStaffSerializer(read_only=True, source='cached_staff_records', many=True)
 
-    def validate(self, data):
-        # TODO: ensure email is a confirmed email in owner/creator's account
-        # ^^^ that validation requires the request.user, which might be in self.context
-        return data
-
-    def validate_image(self, image):
-        # TODO: Make sure it's a PNG (square if possible), and remove any baked-in badge assertion that exists.
-        # Doing: add a random string to filename
-
-        if image is None:
-            return image
-
-        img_name, img_ext = os.path.splitext(image.name)
-
-        try:
-            from PIL import Image
-            img = Image.open(image)
-            img.verify()
-        except Exception as e:
-            if not verify_svg(image):
-                raise serializers.ValidationError('Invalid image.')
-        else:
-            if img.format != "PNG":
-                raise serializers.ValidationError('Invalid PNG')
-
-        image.name = 'issuer_logo_' + str(uuid.uuid4()) + img_ext
-        return image
-
-    def create(self, validated_data, **kwargs):
-        new_issuer = Issuer(**validated_data)
-
-        # TODO: Is this needed anymore? [Wiggins Feb 2017]
-        # Use AutoSlugField's pre_save to provide slug if empty, else auto-unique
-        new_issuer.slug = Issuer._meta.get_field('slug').pre_save(new_issuer, add=True)
-
-        new_issuer.save()
-
-        staff = IssuerStaff(issuer=new_issuer, user=new_issuer.created_by, role=IssuerStaff.ROLE_OWNER)
-        staff.save()
-        return new_issuer
-
-    def update(self, instance, validated_data):
-        instance.name = validated_data.get('name')
-
-        if 'image' in validated_data:
-            instance.image = validated_data.get('image')
-
-        instance.email = validated_data.get('email')
-        instance.description = validated_data.get('description')
-        instance.url = validated_data.get('url')
-
-        instance.save()
-        return instance
-
-
-class IssuerRoleActionSerializer(serializers.Serializer):
+class IssuerRoleActionSerializerV1(serializers.Serializer):
     """ A serializer used for validating user role change POSTS """
     action = serializers.ChoiceField(('add', 'modify', 'remove'), allow_blank=True)
     username = serializers.CharField(allow_blank=True, required=False)
@@ -314,7 +211,7 @@ class BadgeInstanceSerializer(serializers.Serializer):
         representation = super(BadgeInstanceSerializer, self).to_representation(instance)
         representation['json'] = instance.get_json()
         if self.context.get('include_issuer', False):
-            representation['issuer'] = IssuerSerializer(instance.cached_badgeclass.cached_issuer).data
+            representation['issuer'] = IssuerSerializerV1(instance.cached_badgeclass.cached_issuer).data
         else:
             representation['issuer'] = OriginSetting.JSON+reverse('issuer_json', kwargs={'slug': instance.cached_issuer.slug})
         if self.context.get('include_badge_class', False):
@@ -368,7 +265,7 @@ class IssuerPortalSerializer(serializers.Serializer):
         user_issuers = user.cached_issuers()
         user_issuer_badgeclasses = user.cached_badgeclasses()
 
-        issuer_data = IssuerSerializer(
+        issuer_data = IssuerSerializerV1(
             user_issuers,
             many=True,
             context=self.context
