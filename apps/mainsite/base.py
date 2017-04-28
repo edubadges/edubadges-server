@@ -169,7 +169,11 @@ class ListSerializerV2(serializers.ListSerializer, BaseSerializerV2):
 
 
 class DetailSerializerV2(BaseSerializerV2):
+    entityType = serializers.CharField(source='get_entity_class_name', max_length=254, read_only=True)
     entityId = serializers.CharField(source='entity_id', max_length=254, read_only=True)
+
+    class Meta:
+        list_serializer_class = ListSerializerV2
 
     def to_representation(self, instance):
         representation = super(DetailSerializerV2, self).to_representation(instance)
@@ -180,8 +184,20 @@ class DetailSerializerV2(BaseSerializerV2):
                                                       success=self.success,
                                                       description=self.description)
 
-    class Meta:
-        list_serializer_class = ListSerializerV2
+    def get_model_class(self):
+        return getattr(self.Meta, 'model', None)
+
+    def create(self, validated_data):
+        model_cls = self.get_model_class()
+        if model_cls is not None:
+            new_instance = model_cls.objects.create(**validated_data)
+            return new_instance
+
+    def update(self, instance, validated_data):
+        for field_name, value in validated_data.items():
+            setattr(instance, field_name, value)
+        instance.save()
+        return instance
 
 
 class V2ErrorSerializer(BaseSerializerV2):
