@@ -13,7 +13,7 @@ import badgrlog
 from badgeuser.models import CachedEmailAddress
 from issuer.models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
-                                IsEditor, IsStaff, IsOwnerOrStaff)
+                                IsEditor, IsStaff, IsOwnerOrStaff, ApprovedIssuersOnly)
 from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializer,
                                    BadgeInstanceSerializer, IssuerRoleActionSerializerV1,
                                    IssuerStaffSerializerV1)
@@ -78,7 +78,7 @@ class IssuerList(BaseEntityListView):
     model = Issuer
     v1_serializer_class = IssuerSerializerV1
     v2_serializer_class = IssuerSerializerV2
-    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor)
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, ApprovedIssuersOnly)
 
     def get_objects(self, request, **kwargs):
         return self.request.user.cached_issuers()
@@ -87,13 +87,6 @@ class IssuerList(BaseEntityListView):
         """
         Define a new issuer to be owned by the logged in user
         """
-        if getattr(settings, 'BADGR_APPROVED_ISSUERS_ONLY', False) \
-                and not request.user.has_perm('issuer.add_issuer'):
-            return Response(
-                "User not in an approved issuers group",
-                status=status.HTTP_403_FORBIDDEN
-            )
-
         response = super(IssuerList, self).post(request, **kwargs)
 
         # TODO: BaseEntityView should probably have a mechanism for calling logger events

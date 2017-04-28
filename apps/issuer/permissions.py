@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import permissions
 import rules
 
@@ -123,3 +124,10 @@ class IsStaff(permissions.BasePermission):
     """
     def has_object_permission(self, request, view, issuer):
         return request.user.has_perm('issuer.is_staff', issuer)
+
+
+class ApprovedIssuersOnly(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method == 'POST' and getattr(settings, 'BADGR_APPROVED_ISSUERS_ONLY', False):
+            return request.user.has_perm('issuer.add_issuer')
+        return True
