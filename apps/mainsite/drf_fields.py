@@ -6,10 +6,9 @@ import uuid
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import UploadedFile
 from django.utils.translation import ugettext as _
-from rest_framework.exceptions import ValidationError
 from rest_framework.fields import FileField
 
-from mainsite.utils import verify_svg
+from mainsite.validators import ValidImageValidator
 
 
 class Base64FileField(FileField):
@@ -35,21 +34,6 @@ class Base64FileField(FileField):
             return super(Base64FileField, self).to_internal_value(data)
 
 
-class ValidImageValidator(object):
-    def __call__(self, image):
-        if image:
-            try:
-                from PIL import Image
-                img = Image.open(image)
-                img.verify()
-            except Exception as e:
-                if not verify_svg(image):
-                    raise ValidationError('Invalid image.')
-            else:
-                if img.format != "PNG":
-                    raise ValidationError('Invalid PNG')
-
-
 class ValidImageField(Base64FileField):
     default_validators = [ValidImageValidator()]
 
@@ -58,4 +42,6 @@ class ValidImageField(Base64FileField):
                                               use_url=use_url,
                                               allow_null=allow_null,
                                               **kwargs)
+
+
 

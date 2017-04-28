@@ -7,12 +7,13 @@ from badgeuser.models import BadgeUser
 from mainsite.base import DetailSerializerV2, EntityRelatedFieldV2
 from mainsite.drf_fields import ValidImageField
 from mainsite.serializers import StripTagsCharField
-from .models import Issuer
+from mainsite.validators import ChoicesValidator
+from .models import Issuer, IssuerStaff
 
 
 class IssuerStaffSerializerV2(DetailSerializerV2):
     user = EntityRelatedFieldV2(source='cached_user', queryset=BadgeUser.cached)
-    role = serializers.CharField()
+    role = serializers.CharField(validators=[ChoicesValidator(dict(IssuerStaff.ROLE_CHOICES).keys())])
 
 
 class IssuerSerializerV2(DetailSerializerV2):
