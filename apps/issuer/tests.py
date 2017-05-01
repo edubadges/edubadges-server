@@ -486,7 +486,9 @@ class BadgeClassTests(APITestCase):
 
             # make sure code was stripped
             bc = BadgeClass.objects.get(slug=response.data.get('slug'))
-            self.assertNotIn('onload', bc.image.file.readlines())
+            image_content = bc.image.file.readlines()
+            self.assertNotIn('onload', image_content)
+            self.assertNotIn('<script>', image_content)
 
     def test_create_criteriatext_badgeclass_for_issuer_authenticated(self):
         """

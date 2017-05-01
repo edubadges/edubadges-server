@@ -10,12 +10,14 @@
 	.st4{stroke:#FFFFFF;stroke-width:0.5;stroke-miterlimit:10;}
 	.st5{fill:none;stroke:#000000;stroke-miterlimit:10;}
 </style>
+<script>alert('script')</script>
 <g onload="javascript:alert('g.onload')"></g>
 <animation xlink:href="javascript:alert('animation.href')"/>
 <foreignObject xlink:href="javascript:alert('foreignObject.href')"/>
 <set attributeName="onmouseover" to="alert('set.mouseover')"/> 
 <handler xmlns:ev="http://www.w3.org/2001/xmlevents" ev:event="load">alert('handler.load')</handler>
 <g id="Layer_1" class="st0">
+	<script>alert('script')</script>
 </g>
 <g id="Layer_2">
 	<path class="st4" d="M70.5,64.3c-3.2,0.3-4.8,0.5-8,0.7c0.3-2.7,0.5-4.1,0.8-7c3.2-0.2,4.8-0.4,8-0.7C71,60.2,70.9,61.6,70.5,64.3z
