@@ -97,7 +97,9 @@ if getattr(settings, 'DEBUG_MEDIA', True):
 # If DEBUG_STATIC is set, have django serve up static files even if DEBUG=False
 if getattr(settings, 'DEBUG_STATIC', True):
     from django.contrib.staticfiles.views import serve as staticfiles_serve
-    static_url = getattr(settings, 'STATIC_URL', '/static/').lstrip('/')
+    static_url = getattr(settings, 'STATIC_URL', '/static/')
+    static_url = static_url.replace(getattr(settings, 'HTTP_ORIGIN', 'http://localhost:8000'), '')
+    static_url = static_url.lstrip('/')
     urlpatterns = [
         url(r'^%s(?P<path>.*)' % (static_url,), staticfiles_serve, kwargs={
             'insecure': True,
