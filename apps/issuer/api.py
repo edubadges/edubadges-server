@@ -80,18 +80,10 @@ class IssuerList(BaseEntityListView):
     v2_serializer_class = IssuerSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, ApprovedIssuersOnly)
 
+    create_event = badgrlog.IssuerCreatedEvent
+
     def get_objects(self, request, **kwargs):
         return self.request.user.cached_issuers()
-
-    def post(self, request, **kwargs):
-        """
-        Define a new issuer to be owned by the logged in user
-        """
-        response = super(IssuerList, self).post(request, **kwargs)
-
-        # TODO: BaseEntityView should probably have a mechanism for calling logger events
-        # logger.event(badgrlog.IssuerCreatedEvent(issuer))
-        return response
 
 
 class IssuerDetail(BaseEntityDetailView):
