@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 
 from django.core import mail
 from django.core.cache.backends.filebased import FileBasedCache
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
@@ -19,22 +20,25 @@ from badgeuser.models import BadgeUser, CachedEmailAddress
 from mainsite import TOP_DIR
 from mainsite.models import BadgrApp
 
-from issuer.models import BadgeClass, BadgeInstance
+from issuer.models import BadgeClass, BadgeInstance, Issuer
 
 from badgeuser.models import EmailAddressVariant, CachedEmailAddress, ProxyEmailConfirmation
+from mainsite.tests import CachingTestCase
 
 factory = APIRequestFactory()
 
 
-class AuthTokenTests(APITestCase):
-    fixtures = ['0001_initial_superuser']
+class AuthTokenTests(APITestCase, CachingTestCase):
 
     def test_create_user_auth_token(self):
         """
         Ensure that get can create a token for a user that doesn't have one
         and that it doesn't modify a token for a user that already has one.
         """
-        self.client.force_authenticate(user=BadgeUser.objects.get(pk=1))
+
+        user = BadgeUser.objects.create()
+        self.client.force_authenticate(user=user)
+
         response = self.client.get('/v1/user/auth-token')
         self.assertEqual(response.status_code, 200)
         token = response.data.get('token')
@@ -47,9 +51,10 @@ class AuthTokenTests(APITestCase):
         """
         Ensure that a PUT request updates a user token.
         """
-        user = BadgeUser.objects.get(pk=1)
+        user = BadgeUser.objects.create()
         # Create a token for the first time.
         self.client.force_authenticate(user)
+
         response = self.client.get('/v1/user/auth-token')
         self.assertEqual(response.status_code, 200)
         token = response.data.get('token')
@@ -64,8 +69,7 @@ class AuthTokenTests(APITestCase):
         self.assertEqual(Token.objects.get(user=user).key, user.cached_token())
 
 
-class UserCreateTests(APITestCase):
-    fixtures = ['0001_initial_superuser']
+class UserCreateTests(APITestCase, CachingTestCase):
 
     def test_create_user(self):
         user_data = {
@@ -81,12 +85,15 @@ class UserCreateTests(APITestCase):
         self.assertEqual(len(mail.outbox), 1)
 
     def test_create_user_with_already_claimed_email(self):
+        email = 'test2@example.com'
         user_data = {
             'first_name': 'Test',
             'last_name': 'User',
-            'email': 'test2@example.com',
+            'email': email,
             'password': '123456'
         }
+        existing_user = BadgeUser.objects.create(email=email, password='secret')
+        CachedEmailAddress.objects.create(user=existing_user, email=email, verified=True, primary=True)
 
         response = self.client.post('/v1/user/profile', user_data)
 
@@ -94,16 +101,16 @@ class UserCreateTests(APITestCase):
         self.assertEqual(len(mail.outbox), 0)
 
     def test_can_create_user_with_preexisting_unconfirmed_email(self):
+        email = 'unclaimed1@example.com'
         user_data = {
             'first_name': 'NEW Test',
             'last_name': 'User',
-            'email': 'unclaimed1@example.com',
+            'email': email,
             'password': '123456'
         }
 
-        existing_email = CachedEmailAddress.objects.get(email="unclaimed1@example.com")
-        existing_user = existing_email.user
-        existing_user.save()
+        existing_user = BadgeUser.objects.create()
+        existing_email = CachedEmailAddress.objects.create(email=email, verified=False, user=existing_user)
         self.assertFalse(existing_email.verified)
         self.assertTrue(existing_email in existing_user.cached_emails())
 
@@ -112,26 +119,22 @@ class UserCreateTests(APITestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(len(mail.outbox), 1)
 
-        new_user = BadgeUser.objects.get(first_name='NEW Test')
-        self.assertEqual(new_user.email, 'unclaimed1@example.com')
+        new_user = BadgeUser.objects.get(first_name=user_data.get('first_name'))
+        self.assertEqual(new_user.email, email)
 
-        existing_email = CachedEmailAddress.objects.get(email="unclaimed1@example.com")
+        existing_email = CachedEmailAddress.objects.get(email=email)
         self.assertEqual(existing_email.user, new_user)
         self.assertTrue(existing_email not in existing_user.cached_emails())
 
-
     def test_user_can_add_secondary_email_of_preexisting_unclaimed_email(self):
-        first_user=BadgeUser.objects.get(pk=3)
+        email = "unclaimed2@example.com"
+        first_user = BadgeUser.objects.create()
+        CachedEmailAddress.objects.create(user=first_user, email=email, primary=False, verified=False)
 
-        new_email = CachedEmailAddress(user=first_user, email="unclaimed2@example.com", primary=False, verified=False).save()
-
-        second_user=BadgeUser.objects.get(pk=1)
+        second_user = BadgeUser.objects.create()
         self.client.force_authenticate(user=second_user)
-        response = self.client.post('/v1/user/emails', {
-            'email': 'unclaimed2@example.com',
-        })
+        response = self.client.post('/v1/user/emails', {'email': email})
         self.assertEqual(response.status_code, 201)
-
 
     def test_can_create_account_with_same_email_since_deleted(self):
         first_user_data = user_data = {
@@ -245,31 +248,21 @@ class UserUnitTests(TestCase):
 @override_settings(
     CELERY_ALWAYS_EAGER=True,
     SESSION_ENGINE='django.contrib.sessions.backends.cache',
-    CACHES={
-        'default': {
-            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
-        }
-    }
 )
-class UserEmailTests(APITestCase):
-    fixtures = ['0001_initial_superuser']
-
-    @classmethod
-    def tearDownClass(cls):
-        c = FileBasedCache(os.path.join(TOP_DIR, 'test.cache'), {})
-        c.clear()
-
+class UserEmailTests(APITestCase, CachingTestCase):
     def setUp(self):
-        # scramble the cache key each time
-        cache.key_prefix = "test{}".format(str(time.time()))
+        super(UserEmailTests, self).setUp()
 
         self.badgr_app = BadgrApp(cors='testserver',
                                   email_confirmation_redirect='http://testserver/login/',
                                   forgot_password_redirect='http://testserver/reset-password/')
         self.badgr_app.save()
 
-        self.first_user = BadgeUser.objects.get(pk=1)
+        self.first_user_email = 'first.user@newemail.test'
+        self.first_user_email_secondary = 'first.user+2@newemail.test'
+        self.first_user = BadgeUser.objects.create(email=self.first_user_email)
+        CachedEmailAddress.objects.create(user=self.first_user, email=self.first_user_email, verified=True, primary=True)
+        CachedEmailAddress.objects.create(user=self.first_user, email=self.first_user_email_secondary, verified=True)
         self.client.force_authenticate(user=self.first_user)
         response = self.client.get('/v1/user/auth-token')
         self.assertEqual(response.status_code, 200)
@@ -326,7 +319,7 @@ class UserEmailTests(APITestCase):
         self.assertTrue(email.verified)
 
     def test_user_cant_register_new_email_verified_by_other(self):
-        second_user = BadgeUser.objects.get(pk=2)
+        second_user = BadgeUser.objects.create()
         existing_mail = CachedEmailAddress.objects.create(
             user=self.first_user, email='new+email@newemail.com', verified=True)
 
@@ -369,6 +362,8 @@ class UserEmailTests(APITestCase):
     def test_user_can_make_email_primary(self):
         response = self.client.get('/v1/user/emails')
         self.assertEqual(response.status_code, 200)
+
+        self.assertGreater(len(response.data), 0)
 
         not_primary = random.choice(filter(lambda e: e['verified'] and not e['primary'], response.data))
 
@@ -427,7 +422,7 @@ class UserEmailTests(APITestCase):
         with self.settings(BADGR_APP_ID=self.badgr_app.id):
             # successfully send recovery email
             response = self.client.post('/v1/user/forgot-password', {
-                'email': 'test2@example.com',
+                'email': self.first_user_email
             })
             self.assertEqual(response.status_code, 200)
             # received email with recovery url
@@ -445,7 +440,7 @@ class UserEmailTests(APITestCase):
             self.assertEqual(response.status_code, 200)
 
             response = self.client.post('/api-auth/token', {
-                'username': "test2",
+                'username': self.first_user.username,
                 'password': new_password,
             })
             self.assertEqual(response.status_code, 200)
@@ -481,7 +476,8 @@ class UserEmailTests(APITestCase):
         self.assertEqual(variants[0].email, 'HelloAgain@world.com')
 
     def test_can_create_variants(self):
-        first_email = CachedEmailAddress.objects.get(email="test@example.com")
+        user = BadgeUser.objects.create()
+        first_email = CachedEmailAddress.objects.create(email="test@example.com", verified=True, user=user)
         self.assertIsNotNone(first_email.pk)
 
         first_variant_email = "TEST@example.com"
@@ -540,35 +536,38 @@ class UserEmailTests(APITestCase):
 
 @override_settings(
     SESSION_ENGINE='django.contrib.sessions.backends.cache',
-    CACHES={
-        'default': {
-            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
-        }
-    },
 )
-class UserBadgeTests(APITestCase):
-    fixtures = ['0001_initial_superuser', 'initial_my_badges', 'initial_collections', 'test_badge_objects']
-
+class UserBadgeTests(APITestCase, CachingTestCase):
     def setUp(self):
-        # scramble the cache key each time
-        cache.key_prefix = "test{}".format(str(time.time()))
-
+        super(UserBadgeTests, self).setUp()
         self.badgr_app = BadgrApp(cors='testserver',
                                   email_confirmation_redirect='http://testserver/login/',
                                   forgot_password_redirect='http://testserver/reset-password/')
         self.badgr_app.save()
 
+    def create_badgeclass(self):
+        with open(os.path.join(TOP_DIR, 'apps', 'issuer', 'testfiles', 'guinea_pig_testing_badge.png'), 'r') as fh:
+            issuer = Issuer.objects.create(name='Issuer of Testing')
+            badgeclass = BadgeClass.objects.create(
+                issuer=issuer,
+                name="Badge of Testing",
+                image=SimpleUploadedFile(name='test_image.png', content=fh.read(), content_type='image/png')
+            )
+            return badgeclass
+
     def test_badge_awards_transferred_on_email_verification(self):
-        first_user = BadgeUser.objects.get(pk=1)
+        first_user_email = 'first+user@email.test'
+        first_user = BadgeUser.objects.create(email=first_user_email)
+        CachedEmailAddress.objects.create(user=first_user, email=first_user_email, verified=True, primary=True)
         self.client.force_authenticate(user=first_user)
 
         response = self.client.get('/v1/user/emails')
         self.assertEqual(response.status_code, 200)
         starting_count = len(response.data)
 
-        badgeclass = BadgeClass.objects.first()
+        badgeclass = self.create_badgeclass()
         badgeclass.issue(recipient_id='New+email@newemail.com', allow_uppercase=True)
+        badgeclass.issue(recipient_id='New+Email@newemail.com', allow_uppercase=True)
 
         response = self.client.post('/v1/user/emails', {
             'email': 'new+email@newemail.com',
@@ -596,24 +595,8 @@ class UserBadgeTests(APITestCase):
 
 @override_settings(
     SESSION_ENGINE='django.contrib.sessions.backends.cache',
-    CACHES={
-        'default': {
-            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
-        }
-    },
 )
-class UserProfileTests(APITestCase):
-    fixtures = ['0001_initial_superuser']
-
-    @classmethod
-    def tearDownClass(cls):
-        c = FileBasedCache(os.path.join(TOP_DIR, 'test.cache'), {})
-        c.clear()
-
-    def setUp(self):
-        # scramble the cache key each time
-        cache.key_prefix = "test{}".format(str(time.time()))
+class UserProfileTests(APITestCase, CachingTestCase):
 
     def test_user_can_change_profile(self):
         first = 'firsty'

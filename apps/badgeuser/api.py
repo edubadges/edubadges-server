@@ -3,11 +3,9 @@ import re
 from allauth.account.adapter import get_adapter
 from allauth.account.models import EmailConfirmation
 from allauth.account.utils import user_pk_to_url_str, url_str_to_user_pk
-from allauth.utils import build_absolute_uri
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.sites.models import get_current_site
+from django.contrib.sites.shortcuts import get_current_site
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from rest_framework import permissions, status, generics

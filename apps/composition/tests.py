@@ -7,11 +7,12 @@ from django.contrib.auth import get_user_model
 import responses
 from rest_framework.test import APITestCase
 
-from badgeuser.models import CachedEmailAddress
+from badgeuser.models import CachedEmailAddress, BadgeUser
 from composition.models import (LocalBadgeClass, LocalIssuer, LocalBadgeInstance,
                                 Collection, LocalBadgeInstanceCollection,)
 from composition.serializers import (CollectionSerializer, CollectionBadgeSerializer,)
 from issuer.models import BadgeInstance, BadgeClass, Issuer
+from mainsite.tests import CachingTestCase
 
 dir = os.path.dirname(__file__)
 
@@ -70,20 +71,23 @@ def setup_basic_0_5_0(**kwargs):
         )
 
 
-class TestBadgeUploads(APITestCase):
-    fixtures = ['0001_initial_superuser']
+class TestBadgeUploads(APITestCase, CachingTestCase):
 
-    def setUp(self):
-        cache.clear()
+    def setup_user(self, email='test@example.com', authenticate=True):
+        user = BadgeUser.objects.create(email=email)
+        CachedEmailAddress.objects.create(user=user, email=email, verified=True, primary=True)
+        if authenticate:
+            self.client.force_authenticate(user=user)
+        return user
 
     @responses.activate
     def test_submit_basic_1_0_badge_via_url(self):
         setup_basic_1_0()
+        self.setup_user()
 
         post_input = {
             'url': 'http://a.com/instance'
         }
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.post(
             '/v1/earner/badges', post_input
         )
@@ -101,11 +105,11 @@ class TestBadgeUploads(APITestCase):
     @responses.activate
     def test_submit_basic_1_0_badge_via_url_plain_json(self):
         setup_basic_1_0()
+        self.setup_user()
 
         post_input = {
             'url': 'http://a.com/instance'
         }
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.post(
             '/v1/earner/badges?json_format=plain', post_input
         )
@@ -118,11 +122,11 @@ class TestBadgeUploads(APITestCase):
     @responses.activate
     def test_submit_basic_1_0_badge_via_url_bad_email(self):
         setup_basic_1_0()
+        self.setup_user(email='not.test@email.example.com')
 
         post_input = {
             'url': 'http://a.com/instance'
         }
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=2))
         response = self.client.post(
             '/v1/earner/badges', post_input
         )
@@ -135,6 +139,7 @@ class TestBadgeUploads(APITestCase):
     @responses.activate
     def test_submit_basic_1_0_badge_from_image_url_baked_w_assertion(self):
         setup_basic_1_0()
+        self.setup_user()
 
         responses.add(
             responses.GET, 'http://a.com/baked_image',
@@ -145,7 +150,6 @@ class TestBadgeUploads(APITestCase):
         post_input = {
             'url': 'http://a.com/baked_image'
         }
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.post(
             '/v1/earner/badges', post_input
         )
@@ -161,12 +165,12 @@ class TestBadgeUploads(APITestCase):
     @responses.activate
     def test_submit_basic_1_0_badge_image_png(self):
         setup_basic_1_0()
+        self.setup_user()
 
         image = open(os.path.join(dir, 'testfiles/baked_image.png'))
         post_input = {
             'image': image
         }
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.post(
             '/v1/earner/badges', post_input
         )
@@ -181,13 +185,13 @@ class TestBadgeUploads(APITestCase):
     @responses.activate
     def test_submit_basic_1_0_badge_image_datauri_png(self):
         setup_basic_1_0()
+        self.setup_user()
 
         image = open(os.path.join(dir, 'testfiles/baked_image.png'))
         encoded = 'data:image/png;base64,' + base64.b64encode(image.read())
         post_input = {
             'image': encoded
         }
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.post(
             '/v1/earner/badges', post_input, format='json'
         )
@@ -202,11 +206,11 @@ class TestBadgeUploads(APITestCase):
     @responses.activate
     def test_submit_basic_1_0_badge_assertion(self):
         setup_basic_1_0()
+        self.setup_user()
 
         post_input = {
             'assertion': open(os.path.join(dir, 'testfiles/1_0_basic_instance.json')).read()
         }
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.post(
             '/v1/earner/badges', post_input
         )
@@ -224,12 +228,12 @@ class TestBadgeUploads(APITestCase):
         setup_resources([
             {'url': 'http://a.com/instance3', 'filename': '1_0_basic_instance3.json'}
         ])
+        self.setup_user()
 
         post_input = {
             'url': 'http://a.com/instance3',
             'recipient_identifier': "TEST@example.com"
         }
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.post(
             '/v1/earner/badges', post_input
         )
@@ -250,11 +254,11 @@ class TestBadgeUploads(APITestCase):
     @responses.activate
     def test_submit_basic_1_0_badge_with_inaccessible_badge_image(self):
         setup_basic_1_0(**{'exclude': ['http://a.com/badgeclass_image']})
+        self.setup_user()
 
         post_input = {
             'url': 'http://a.com/instance'
         }
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.post(
             '/v1/earner/badges', post_input
         )
@@ -264,11 +268,11 @@ class TestBadgeUploads(APITestCase):
     @responses.activate
     def test_submit_basic_1_0_badge_missing_issuer(self):
         setup_basic_1_0(**{'exclude': ['http://a.com/issuer']})
+        self.setup_user()
 
         post_input = {
             'url': 'http://a.com/instance'
         }
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.post(
             '/v1/earner/badges', post_input
         )
@@ -277,6 +281,8 @@ class TestBadgeUploads(APITestCase):
 
     @responses.activate
     def test_submit_basic_1_0_badge_missing_badge_prop(self):
+        self.setup_user()
+
         responses.add(
             responses.GET, 'http://a.com/instance',
             body=open(os.path.join(dir, 'testfiles/1_0_basic_instance_missing_badge_prop.json')).read(),
@@ -287,7 +293,6 @@ class TestBadgeUploads(APITestCase):
             'url': 'http://a.com/instance'
         }
 
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.post(
             '/v1/earner/badges', post_input
         )
@@ -298,11 +303,11 @@ class TestBadgeUploads(APITestCase):
     @responses.activate
     def test_submit_basic_0_5_0_badge_via_url(self):
         setup_basic_0_5_0()
+        self.setup_user()
 
         post_input = {
             'url': 'http://oldstyle.com/instance'
         }
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.post(
             '/v1/earner/badges', post_input
         )
@@ -321,11 +326,11 @@ class TestBadgeUploads(APITestCase):
     @responses.activate
     def test_submit_0_5_badge_upload_by_assertion(self):
         setup_basic_0_5_0()
+        self.setup_user()
 
         post_input = {
             'assertion': open(os.path.join(dir, 'testfiles', '0_5_basic_instance.json')).read()
         }
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.post(
             '/v1/earner/badges', post_input
         )
@@ -334,6 +339,7 @@ class TestBadgeUploads(APITestCase):
     @responses.activate
     def test_creating_no_duplicate_badgeclasses_and_issuers(self):
         setup_basic_1_0()
+        self.setup_user()
         setup_resources([
             {'url': 'http://a.com/instance2', 'filename': '1_0_basic_instance2.json'}
         ])
@@ -341,7 +347,6 @@ class TestBadgeUploads(APITestCase):
         post_input = {
             'url': 'http://a.com/instance'
         }
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.post(
             '/v1/earner/badges', post_input
         )
@@ -380,11 +385,11 @@ class TestBadgeUploads(APITestCase):
             {'url': 'http://a.com/instancebaddate',
              'filename': '1_0_basic_instance_with_bad_date.json'}
         ])
+        self.setup_user()
 
         post_input = {
             'url': 'http://a.com/instancebaddate'
         }
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.post(
             '/v1/earner/badges', post_input
         )
@@ -400,11 +405,11 @@ class TestBadgeUploads(APITestCase):
             {'url': 'http://a.com/issuer',
              'filename': '1_0_basic_issuer_invalid_json.json'}
         ])
+        self.setup_user()
 
         post_input = {
             'url': 'http://a.com/instance'
         }
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.post(
             '/v1/earner/badges', post_input
         )
@@ -418,11 +423,11 @@ class TestBadgeUploads(APITestCase):
             {'url': 'http://a.com/instance',
              'filename': '1_0_basic_issuer_invalid_json.json'}
         ])
+        self.setup_user()
 
         post_input = {
             'url': 'http://a.com/instance'
         }
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
         response = self.client.post(
             '/v1/earner/badges', post_input
         )
