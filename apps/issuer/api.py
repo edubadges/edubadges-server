@@ -96,7 +96,7 @@ class IssuerList(BaseEntityListView):
 
 class IssuerDetail(BaseEntityDetailView):
     """
-    GET details on one issuer. PUT and DELETE should be highly restricted operations and are not implemented yet
+    GET details on one issuer.
     """
     model = Issuer
     v1_serializer_class = IssuerSerializerV1

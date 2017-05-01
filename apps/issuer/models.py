@@ -69,13 +69,34 @@ class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUp
             member.cached_user.publish()
 
     def delete(self, *args, **kwargs):
-        if len(self.cached_badgeclasses()) > 0:
-            raise ProtectedError("Issuer may only be deleted after all its defined BadgeClasses have been deleted.")
+        if self.total_recipient_count > 0:
+            raise ProtectedError("Issuer can not be deleted because it has previously issued badges.")
+
+        # remove any unused badgeclasses owned by issuer
+        for bc in self.cached_badgeclasses():
+            bc.delete()
 
         staff = self.cached_staff
-        super(Issuer, self).delete(*args, **kwargs)
-        for member in staff:
-            member.cached_user.publish()
+        ret = super(Issuer, self).delete(*args, **kwargs)
+
+        # remove membership records and publish users
+        for membership in staff:
+            u = membership.cached_user
+            membership.delete()
+            u.publish()
+
+        # badgebook logic
+        try:
+            from badgebook.models import LmsCourseInfo
+            # update LmsCourseInfo's that were using this issuer as the default_issuer
+            for course_info in LmsCourseInfo.objects.filter(default_issuer=self):
+                course_info.default_issuer = None
+                course_info.save()
+        except ImportError:
+            pass
+
+        return ret
+
 
     def save(self, *args, **kwargs):
         ret = super(Issuer, self).save(*args, **kwargs)
@@ -148,6 +169,10 @@ class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUp
     @cachemodel.cached_method(auto_publish=True)
     def cached_recipient_groups(self):
         return self.recipientgroup_set.all()
+
+    @property
+    def recipient_count(self):
+        return sum(bc.recipient_count() for bc in self.cached_badgeclasses())
 
     @property
     def image_preview(self):
