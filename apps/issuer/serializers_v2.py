@@ -4,7 +4,7 @@ import os
 from rest_framework import serializers
 
 from badgeuser.models import BadgeUser
-from mainsite.base import DetailSerializerV2, EntityRelatedFieldV2
+from entity.serializers import DetailSerializerV2, EntityRelatedFieldV2
 from mainsite.drf_fields import ValidImageField
 from mainsite.serializers import StripTagsCharField
 from mainsite.validators import ChoicesValidator

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from mainsite.base import DetailSerializerV2
+from entity.serializers import DetailSerializerV2
 from mainsite.serializers import StripTagsCharField
 from .models import BadgeUser, CachedEmailAddress
 from .utils import notify_on_password_change

@@ -1,7 +1,6 @@
 import urlparse
 
 from django.apps import apps
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import UploadedFile
 from rest_framework import status, authentication
@@ -11,6 +10,7 @@ from rest_framework.views import APIView
 
 import badgrlog
 from badgeuser.models import CachedEmailAddress
+from entity.api import BaseEntityListView, BaseEntityDetailView
 from issuer.models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
                                 IsEditor, IsStaff, IsOwnerOrStaff, ApprovedIssuersOnly)
@@ -19,7 +19,6 @@ from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializer,
                                    IssuerStaffSerializerV1)
 from issuer.serializers_v2 import IssuerSerializerV2
 from issuer.utils import get_badgeclass_by_identifier
-from mainsite.api import BaseEntityListView, BaseEntityDetailView
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 
 

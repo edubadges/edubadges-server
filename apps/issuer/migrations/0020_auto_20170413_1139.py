@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations
 
-from mainsite.base import PopulateEntityIdsMigration
+from entity.db.migrations import PopulateEntityIdsMigration
 
 
 class Migration(migrations.Migration):

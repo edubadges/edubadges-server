@@ -17,7 +17,7 @@ from jsonfield import JSONField
 from openbadges_bakery import bake
 
 from issuer.managers import BadgeInstanceManager
-from mainsite.base import BaseVersionedEntity
+from entity.models import BaseVersionedEntity
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage
 from mainsite.models import (BadgrApp, EmailBlacklist)

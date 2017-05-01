@@ -15,7 +15,7 @@ from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.authtoken.models import Token
 
-from mainsite.base import BaseVersionedEntity
+from entity.models import BaseVersionedEntity
 from issuer.models import Issuer
 
 from .managers import CachedEmailAddressManager
