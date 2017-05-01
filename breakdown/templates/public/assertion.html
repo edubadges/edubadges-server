@@ -1,5 +1,6 @@
 {% extends "public/base.html" %}
 {% load staticfiles %}
+{% load markdownify %}
 
 {% block page_title %}Badge Assertion Detail{% endblock %}
 
@@ -57,7 +58,7 @@
 
 			     {% if badge_class.criteria_text %}
 				     <h3 class="title title-small">Criteria</h3>
-				     <p>{{ badge_class.criteria_text }}</p>
+				     <p>{{ badge_class.criteria_text|markdownify|safe }}</p>
 			     {% endif %}
 
 			    <div class="l-childrenhorizontal l-childrenhorizontal-small l-offsetleft">

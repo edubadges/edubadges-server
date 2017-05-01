@@ -1,11 +1,9 @@
 from django.core.urlresolvers import reverse
-from django.http import Http404
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import DetailView
 from django.views.generic import RedirectView
-
 from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
@@ -15,8 +13,7 @@ from composition.utils import get_badge_by_identifier
 from issuer.models import BadgeInstance
 from issuer.public_api import JSONComponentView
 from issuer.renderers import BadgeInstanceHTMLRenderer
-from issuer.utils import obscure_email_address, CURRENT_OBI_CONTEXT_IRI
-from mainsite.models import AbstractBadgeInstance
+from issuer.utils import CURRENT_OBI_CONTEXT_IRI
 from mainsite.utils import OriginSetting
 
 

@@ -224,7 +224,6 @@ class PathwayApiTests(APITestCase, CachingTestCase):
     CELERY_ALWAYS_EAGER=True,
     ISSUER_NOTIFY_DEFAULT=False,
     HTTP_ORIGIN="http://localhost:8000",
-    JSON_ORIGIN="http://localhost:8000",
 )
 class PathwayCompletionTests(APITestCase, CachingTestCase):
     fixtures = ['0001_initial_superuser', 'test_badge_objects.json']
@@ -278,7 +277,7 @@ class PathwayCompletionTests(APITestCase, CachingTestCase):
                 },
                 "@type": "BadgeJunction",
                 "badges": [
-                    OriginSetting.JSON+"/public/badges/badge-of-edited-testing"
+                    OriginSetting.HTTP+"/public/badges/badge-of-edited-testing"
                 ]
             }
 
@@ -313,7 +312,7 @@ class PathwayCompletionTests(APITestCase, CachingTestCase):
             },
             "@type": "BadgeJunction",
             "badges": [
-                OriginSetting.JSON+"/public/badges/badge-of-edited-testing"
+                OriginSetting.HTTP+"/public/badges/badge-of-edited-testing"
             ]
         }
 

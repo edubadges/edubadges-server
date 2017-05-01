@@ -1,8 +1,8 @@
-import os
 import uuid
 
 import basic_models
 import cachemodel
+import os
 from autoslug import AutoSlugField
 from django.conf import settings
 from django.core.files.storage import default_storage
@@ -12,36 +12,12 @@ from jsonfield import JSONField
 
 from composition.sharing import SharingManager
 from issuer.models import BadgeInstance, BadgeClass
-from mainsite.models import (AbstractIssuer, AbstractBadgeClass,
-                             AbstractRemoteImagePreviewMixin)
 from mainsite.utils import OriginSetting
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
-class LocalIssuer(AbstractRemoteImagePreviewMixin, AbstractIssuer):
-    pass
-
-
-class LocalBadgeClass(AbstractRemoteImagePreviewMixin, AbstractBadgeClass):
-    issuer = models.ForeignKey(LocalIssuer, blank=False, null=False,
-                               on_delete=models.PROTECT,
-                               related_name="badgeclasses")
-
-    class Meta:
-        verbose_name = 'local badge class'
-        verbose_name_plural = 'local badge classes'
-
-    @property
-    def cached_issuer(self):
-        return LocalIssuer.cached.get(pk=self.issuer_id)
-
-
 class LocalBadgeInstance(cachemodel.CacheModel):
-    # 0.5 BadgeInstances have no notion of a BadgeClass
-    local_badgeclass = models.ForeignKey(LocalBadgeClass, blank=False, null=True, on_delete=models.PROTECT, related_name='badgeinstances') # 0.5 BadgeInstances have no notion of a BadgeClass
-    local_issuer = models.ForeignKey(LocalIssuer, blank=False, null=True)
-
     issuer_badgeclass = models.ForeignKey("issuer.BadgeClass", blank=True, null=True)
 
     recipient_user = models.ForeignKey(AUTH_USER_MODEL)
@@ -109,7 +85,7 @@ class LocalBadgeInstance(cachemodel.CacheModel):
             return self.json['id']
         except (KeyError, TypeError):
             if self.get_absolute_url().startswith('/'):
-                return OriginSetting.JSON + self.get_absolute_url()
+                return OriginSetting.HTTP + self.get_absolute_url()
             else:
                 return '_:null'
 

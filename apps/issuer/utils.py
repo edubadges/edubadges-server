@@ -44,9 +44,9 @@ def get_badgeclass_by_identifier(identifier):
     from issuer.models import BadgeClass
 
     # attempt to resolve identifier as JSON-ld id
-    if identifier.startswith(OriginSetting.JSON):
+    if identifier.startswith(OriginSetting.HTTP):
         try:
-            resolver_match = resolve(identifier.replace(OriginSetting.JSON, ''))
+            resolver_match = resolve(identifier.replace(OriginSetting.HTTP, ''))
             if resolver_match:
                 badgeclass_slug = resolver_match.kwargs.get('slug', None)
                 if badgeclass_slug:

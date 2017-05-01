@@ -1,7 +1,4 @@
-import os
-
 from django.db import IntegrityError
-
 from rest_framework import permissions, status, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -11,11 +8,10 @@ from composition.utils import get_badge_by_identifier
 from issuer.models import BadgeInstance
 from issuer.public_api import ImagePropertyDetailView
 from mainsite.permissions import IsOwner
-
+from .models import LocalBadgeInstance, Collection, LocalBadgeInstanceCollection, LocalBadgeInstanceShare, \
+    CollectionShare
 from .serializers import (LocalBadgeInstanceUploadSerializer,
                           CollectionSerializer, CollectionBadgeSerializer)
-from .models import LocalBadgeInstance, Collection, LocalBadgeInstanceCollection, LocalIssuer, LocalBadgeInstanceShare, \
-    CollectionShare
 
 logger = badgrlog.BadgrLogger()
 
@@ -532,11 +528,6 @@ class CollectionGenerateShare(APIView):
 class LocalBadgeInstanceImage(ImagePropertyDetailView):
     model = LocalBadgeInstance
     prop = 'image'
-
-
-# class LocalIssuerImage(ImagePropertyDetailView):
-#     model = LocalIssuer
-#     prop = 'image_preview'
 
 
 class ShareBadge(APIView):

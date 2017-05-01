@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django_object_actions',
+    'markdownify',
 
     'badgeuser',
 
@@ -325,6 +326,29 @@ USE_L10N = False
 USE_TZ = True
 
 BADGR_APP_ID = 1
+
+
+##
+#
+# Markdownify
+#
+##
+
+MARKDOWNIFY_WHITELIST_TAGS = [
+    'a',
+    'abbr',
+    'acronym',
+    'b',
+    'blockquote',
+    'em',
+    'i',
+    'li',
+    'ol',
+    'p',
+    'strong',
+    'ul'
+]
+
 
 ##
 #

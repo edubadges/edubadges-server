@@ -15,8 +15,8 @@ class SlugOrJsonIdCacheModelManager(cachemodel.CacheModelManager):
         return self.slug_kwarg_name
 
     def get_by_slug_or_id(self, slug):
-        if slug.startswith(OriginSetting.JSON):
-            path = slug[len(OriginSetting.JSON):]
+        if slug.startswith(OriginSetting.HTTP):
+            path = slug[len(OriginSetting.HTTP):]
             try:
                 r = resolve(path)
                 slug = r.kwargs.get(self.get_slug_kwarg_name())

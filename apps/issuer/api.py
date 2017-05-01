@@ -450,10 +450,11 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
             # If image is neither an UploadedFile nor a data uri, ignore it.
             # Likely to occur if client sends back the image attribute (as a url), unmodified from a GET request
             new_image = request.data.get('image')
+            cleaned_data = request.data.copy()
             if not isinstance(new_image, UploadedFile) and urlparse.urlparse(new_image).scheme != 'data':
-                request.data.pop('image')
+                cleaned_data.pop('image')
 
-            serializer = BadgeClassSerializer(current_badgeclass, data=request.data, context={'request': request})
+            serializer = BadgeClassSerializer(current_badgeclass, data=cleaned_data, context={'request': request})
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)

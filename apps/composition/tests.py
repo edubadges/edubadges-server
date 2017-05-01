@@ -1,17 +1,15 @@
 import base64
+
 import os
-
-from django.core.cache import cache
-from django.contrib.auth import get_user_model
-
 import responses
+from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase
 
 from badgeuser.models import CachedEmailAddress, BadgeUser
-from composition.models import (LocalBadgeClass, LocalIssuer, LocalBadgeInstance,
-                                Collection, LocalBadgeInstanceCollection,)
-from composition.serializers import (CollectionSerializer, CollectionBadgeSerializer,)
-from issuer.models import BadgeInstance, BadgeClass, Issuer
+from composition.models import (LocalBadgeInstance,
+                                Collection, LocalBadgeInstanceCollection, )
+from composition.serializers import (CollectionSerializer, )
+from issuer.models import BadgeClass, Issuer
 from mainsite.tests import CachingTestCase
 
 dir = os.path.dirname(__file__)

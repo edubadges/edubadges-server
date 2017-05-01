@@ -53,6 +53,11 @@ pypng==0.0.17
 jsonfield==1.0.0
 PyJWT==1.4.0
 
+# markdown support
+Markdown==2.6.8
+django-markdownify==0.1.0
+bleach==2.0.0
+
 # LTI support
 git+https://github.com/concentricsky/django-auth-lti@v1.2.2-csky
 git+https://github.com/concentricsky/python-randomnames@v1.0.3
