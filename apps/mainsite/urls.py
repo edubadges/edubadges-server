@@ -111,3 +111,13 @@ if getattr(settings, 'DEBUG', True) or getattr(settings, 'SERVE_PATTERN_LIBRARY'
     urlpatterns = [
        url(r'^component-library$', TemplateView.as_view(template_name='component-library.html'), name='component-library')
     ] + urlpatterns
+
+# serve django debug toolbar if present
+if settings.DEBUG and apps.is_installed('debug_toolbar'):
+    try:
+        import debug_toolbar
+        urlpatterns = urlpatterns + [
+            url(r'^__debug__/', include(debug_toolbar.urls)),
+        ]
+    except ImportError:
+        pass
