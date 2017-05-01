@@ -36,6 +36,7 @@ INSTALLED_APPS = [
 
     'django-ismigrated',
     'mainsite',
+    'entity',
     'issuer',
     'composition',
     'verifier',
