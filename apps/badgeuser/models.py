@@ -1,7 +1,9 @@
 from __future__ import unicode_literals
+
+import random
+import string
 from hashlib import md5
 from itertools import chain
-import random, string
 
 import cachemodel
 from allauth.account.models import EmailAddress, EmailConfirmation
@@ -9,18 +11,13 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
-from django.core.urlresolvers import reverse
 from django.db import models
-from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.authtoken.models import Token
 
 from entity.models import BaseVersionedEntity
 from issuer.models import Issuer
-
-from .managers import CachedEmailAddressManager
-from django.contrib.auth.models import UserManager
-
+from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager
 
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
@@ -127,7 +124,8 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
-    manager=UserManager()
+
+    objects = BadgeUserManager()
 
     class Meta:
         verbose_name = _('badge user')
