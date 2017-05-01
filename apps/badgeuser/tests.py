@@ -157,7 +157,7 @@ class UserCreateTests(APITestCase, CachingTestCase):
 
         self.client.force_authenticate(user=first_user)
         response = self.client.put(
-            reverse('api_user_email_detail', args=[second_email.pk]),
+            reverse('v1_api_user_email_detail', args=[second_email.pk]),
             {'primary': True}
         )
         self.assertEqual(response.status_code, 200)

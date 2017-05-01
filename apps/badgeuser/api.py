@@ -283,7 +283,7 @@ class BadgeUserForgotPassword(UserTokenMixin, BadgeUserEmailView):
         temp_key = default_token_generator.make_token(user)
         token = "{uidb36}-{key}".format(uidb36=user_pk_to_url_str(user),
                                         key=temp_key)
-        reset_url = "{}{}?token={}".format(OriginSetting.HTTP, reverse('user_forgot_password'), token)
+        reset_url = "{}{}?token={}".format(OriginSetting.HTTP, reverse('v1_api_user_forgot_password'), token)
 
         email_context = {
             "site": get_current_site(request),
