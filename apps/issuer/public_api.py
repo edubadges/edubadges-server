@@ -1,26 +1,23 @@
-import os
-
 import StringIO
+
 import cairosvg
+import os
 from PIL import Image
 from django.conf import settings
 from django.core.files.storage import DefaultStorage
 from django.http import Http404
 from django.shortcuts import redirect
 from django.views.generic import RedirectView
-
 from rest_framework import status, permissions
 from rest_framework.exceptions import ValidationError
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .api import AbstractIssuerAPIEndpoint
+import badgrlog
+import utils
 from .models import Issuer, BadgeClass, BadgeInstance
 from .renderers import BadgeInstanceHTMLRenderer, BadgeClassHTMLRenderer, IssuerHTMLRenderer
-
-import utils
-import badgrlog
 
 logger = badgrlog.BadgrLogger()
 
@@ -208,6 +205,8 @@ class BadgeClassImage(ImagePropertyDetailView):
 
 
 class BadgeClassCriteria(RedirectView):
+    permanent = False
+
     def get_redirect_url(self, *args, **kwargs):
         try:
             badge_class = BadgeClass.cached.get(slug=kwargs.get('slug'))

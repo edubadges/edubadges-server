@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django_object_actions',
+    'markdownify',
 
     'badgeuser',
 
@@ -46,6 +47,7 @@ MIDDLEWARE_CLASSES = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_auth_lti.middleware.LTIAuthMiddleware',
@@ -131,7 +133,7 @@ AUTHENTICATION_BACKENDS = [
     "badgeuser.backends.CachedModelBackend",
 
     # `allauth` specific authentication methods, such as login by e-mail
-    "allauth.account.auth_backends.AuthenticationBackend",
+    "badgeuser.backends.CachedAuthenticationBackend"
 
 ]
 ACCOUNT_ADAPTER = 'mainsite.account_adapter.BadgrAccountAdapter'
@@ -324,6 +326,29 @@ USE_L10N = False
 USE_TZ = True
 
 BADGR_APP_ID = 1
+
+
+##
+#
+# Markdownify
+#
+##
+
+MARKDOWNIFY_WHITELIST_TAGS = [
+    'a',
+    'abbr',
+    'acronym',
+    'b',
+    'blockquote',
+    'em',
+    'i',
+    'li',
+    'ol',
+    'p',
+    'strong',
+    'ul'
+]
+
 
 ##
 #

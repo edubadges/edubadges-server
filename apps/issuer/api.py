@@ -80,23 +80,15 @@ class IssuerList(BaseEntityListView):
     v2_serializer_class = IssuerSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, ApprovedIssuersOnly)
 
+    create_event = badgrlog.IssuerCreatedEvent
+
     def get_objects(self, request, **kwargs):
         return self.request.user.cached_issuers()
-
-    def post(self, request, **kwargs):
-        """
-        Define a new issuer to be owned by the logged in user
-        """
-        response = super(IssuerList, self).post(request, **kwargs)
-
-        # TODO: BaseEntityView should probably have a mechanism for calling logger events
-        # logger.event(badgrlog.IssuerCreatedEvent(issuer))
-        return response
 
 
 class IssuerDetail(BaseEntityDetailView):
     """
-    GET details on one issuer. PUT and DELETE should be highly restricted operations and are not implemented yet
+    GET details on one issuer.
     """
     model = Issuer
     v1_serializer_class = IssuerSerializerV1
@@ -450,10 +442,11 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
             # If image is neither an UploadedFile nor a data uri, ignore it.
             # Likely to occur if client sends back the image attribute (as a url), unmodified from a GET request
             new_image = request.data.get('image')
+            cleaned_data = request.data.copy()
             if not isinstance(new_image, UploadedFile) and urlparse.urlparse(new_image).scheme != 'data':
-                request.data.pop('image')
+                cleaned_data.pop('image')
 
-            serializer = BadgeClassSerializer(current_badgeclass, data=request.data, context={'request': request})
+            serializer = BadgeClassSerializer(current_badgeclass, data=cleaned_data, context={'request': request})
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)

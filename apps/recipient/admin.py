@@ -18,13 +18,13 @@ class RecipientGroupAdmin(basic_models.DefaultModelAdmin):
     raw_id_fields = ('issuer',)
     filter_horizontal = ('pathways',)
     fieldsets = (
-        ('Metadata', {
-            'fields': ('is_active','created_by','created_at','updated_by','updated_by',),
-            'classes': ('collapse',)
-        }),
+        # ('Metadata', {
+        #     'fields': ('is_active','created_by','created_at','updated_by','updated_by',),
+        #     'classes': ('collapse',)
+        # }),
         (None, {
             'fields': ('name', 'description', 'issuer','pathways')
-        })
+        }),
     )
     inlines = [RecipientGroupMembershipInline]
 
@@ -37,13 +37,13 @@ class RecipientProfileAdmin(basic_models.DefaultModelAdmin):
     readonly_fields = ('created_by','created_at','updated_by','updated_by',)
     raw_id_fields = ('badge_user',)
     fieldsets = (
-        ('Metadata', {
-            'fields': ('is_active','created_by','created_at','updated_by','updated_by',),
-            'classes': ('collapse',)
-        }),
+        # ('Metadata', {
+        #     'fields': ('is_active','created_by','created_at','updated_by','updated_by',),
+        #     'classes': ('collapse',)
+        # }),
         (None, {
             'fields': ('public','recipient_identifier', 'display_name', 'badge_user')
-        })
+        }),
     )
     inlines = [RecipientGroupMembershipInline]
 

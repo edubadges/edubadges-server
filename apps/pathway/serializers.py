@@ -58,7 +58,7 @@ class PathwaySerializer(serializers.Serializer):
             })
             element_serializer = PathwayElementSerializer(instance.cached_elements(), many=True, context=self.context)
             representation.update([
-                ('rootElement', OriginSetting.JSON+reverse('pathway_element_detail', kwargs={
+                ('rootElement', OriginSetting.HTTP+reverse('pathway_element_detail', kwargs={
                     'issuer_slug': issuer_slug,
                     'pathway_slug': instance.slug,
                     'element_slug': instance.cached_root_element.slug})),
@@ -218,7 +218,7 @@ class PathwayElementSerializer(LinkedDataEntitySerializer):
         if child_ids:
             for element_id in child_ids:
                 try:
-                    r = resolve(element_id.replace(OriginSetting.JSON, ''))
+                    r = resolve(element_id.replace(OriginSetting.HTTP, ''))
                 except Resolver404:
                     raise ValidationError("Invalid child id: {}".format(element_id))
 

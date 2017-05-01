@@ -19,7 +19,7 @@ from openbadges_bakery import bake
 from issuer.managers import BadgeInstanceManager
 from mainsite.base import BaseVersionedEntity
 from mainsite.managers import SlugOrJsonIdCacheModelManager
-from mainsite.mixins import ResizeUploadedImage
+from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage
 from mainsite.models import (BadgrApp, EmailBlacklist)
 from mainsite.utils import OriginSetting
 from .utils import generate_sha256_hashstring, CURRENT_OBI_CONTEXT_IRI
@@ -40,7 +40,7 @@ class BaseAuditedModel(cachemodel.CacheModel):
         return BadgeUser.cached.get(id=self.created_by_id)
 
 
-class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage):
+class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUploadedSvgImage):
     entity_class_name = 'Issuer'
 
     source = models.CharField(max_length=254, default='local')
@@ -69,13 +69,34 @@ class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage):
             member.cached_user.publish()
 
     def delete(self, *args, **kwargs):
-        if len(self.cached_badgeclasses()) > 0:
-            raise ProtectedError("Issuer may only be deleted after all its defined BadgeClasses have been deleted.")
+        if self.total_recipient_count > 0:
+            raise ProtectedError("Issuer can not be deleted because it has previously issued badges.")
+
+        # remove any unused badgeclasses owned by issuer
+        for bc in self.cached_badgeclasses():
+            bc.delete()
 
         staff = self.cached_staff
-        super(Issuer, self).delete(*args, **kwargs)
-        for member in staff:
-            member.cached_user.publish()
+        ret = super(Issuer, self).delete(*args, **kwargs)
+
+        # remove membership records and publish users
+        for membership in staff:
+            u = membership.cached_user
+            membership.delete()
+            u.publish()
+
+        # badgebook logic
+        try:
+            from badgebook.models import LmsCourseInfo
+            # update LmsCourseInfo's that were using this issuer as the default_issuer
+            for course_info in LmsCourseInfo.objects.filter(default_issuer=self):
+                course_info.default_issuer = None
+                course_info.save()
+        except ImportError:
+            pass
+
+        return ret
+
 
     def save(self, *args, **kwargs):
         ret = super(Issuer, self).save(*args, **kwargs)
@@ -95,7 +116,7 @@ class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage):
 
     @property
     def jsonld_id(self):
-        return OriginSetting.JSON + self.get_absolute_url()
+        return OriginSetting.HTTP + self.get_absolute_url()
 
     @property
     def editors(self):
@@ -148,6 +169,10 @@ class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage):
     @cachemodel.cached_method(auto_publish=True)
     def cached_recipient_groups(self):
         return self.recipientgroup_set.all()
+
+    @property
+    def recipient_count(self):
+        return sum(bc.recipient_count() for bc in self.cached_badgeclasses())
 
     @property
     def image_preview(self):
@@ -207,7 +232,7 @@ class IssuerStaff(cachemodel.CacheModel):
         return Issuer.cached.get(pk=self.issuer_id)
 
 
-class BadgeClass(BaseVersionedEntity, ResizeUploadedImage):
+class BadgeClass(BaseVersionedEntity, ResizeUploadedImage, ScrubUploadedSvgImage):
     entity_class_name = 'BadgeClass'
 
     source = models.CharField(max_length=254, default='local')
@@ -259,7 +284,7 @@ class BadgeClass(BaseVersionedEntity, ResizeUploadedImage):
 
     @property
     def jsonld_id(self):
-        return OriginSetting.JSON + self.get_absolute_url()
+        return OriginSetting.HTTP + self.get_absolute_url()
 
     def get_criteria_url(self):
         if self.criteria_url:
@@ -293,9 +318,9 @@ class BadgeClass(BaseVersionedEntity, ResizeUploadedImage):
     def cached_completion_elements(self):
         return [pce for pce in self.completion_elements.all()]
 
-    def issue(self, recipient_id=None, evidence_url=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None):
+    def issue(self, recipient_id=None, evidence=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None):
         return BadgeInstance.objects.create_badgeinstance(
-            badgeclass=self, recipient_id=recipient_id, evidence_url=evidence_url,
+            badgeclass=self, recipient_id=recipient_id, evidence=evidence,
             notify=notify, created_by=created_by, allow_uppercase=allow_uppercase,
             badgr_app=badgr_app
         )
@@ -348,7 +373,8 @@ class BadgeInstance(BaseVersionedEntity):
     acceptance = models.CharField(max_length=254, choices=ACCEPTANCE_CHOICES, default=ACCEPTANCE_UNACCEPTED)
 
     salt = models.CharField(max_length=254, blank=True, null=True, default=None)
-    evidence_url = models.CharField(max_length=2083, blank=True, null=True, default=None)
+
+    narrative = models.TextField(blank=True, null=True, default=None)
 
     old_json = JSONField()
 
@@ -388,7 +414,7 @@ class BadgeInstance(BaseVersionedEntity):
 
     @property
     def jsonld_id(self):
-        return OriginSetting.JSON + self.get_absolute_url()
+        return OriginSetting.HTTP + self.get_absolute_url()
 
     @property
     def public_url(self):
@@ -400,7 +426,7 @@ class BadgeInstance(BaseVersionedEntity):
 
     def save(self, *args, **kwargs):
         if self.pk is None:
-            self.salt = uuid.uuid4()
+            self.salt = uuid.uuid4().hex
             self.created_at = datetime.datetime.now()
 
             imageFile = default_storage.open(self.badgeclass.image.file.name)
@@ -556,3 +582,37 @@ class BadgeInstance(BaseVersionedEntity):
     @property
     def json(self):
         return self.get_json()
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_evidence(self):
+        return self.badgeinstanceevidence_set.all()
+
+    @property
+    def evidence_url(self):
+        """Exists for compliance with ob1.x badges"""
+        evidence_list = self.cached_evidence()
+        if len(evidence_list) > 1:
+            return self.public_url
+        if len(evidence_list) == 1:
+            return evidence_list[0].evidence_url
+
+    @property
+    def evidence_items(self):
+        """exists to cajole EvidenceItemSerializer"""
+        return self.cached_evidence()
+
+
+class BadgeInstanceEvidence(cachemodel.CacheModel):
+    badgeinstance = models.ForeignKey('issuer.BadgeInstance')
+    evidence_url = models.CharField(max_length=2083)
+    narrative = models.TextField(blank=True, null=True, default=None)
+
+    def publish(self):
+        super(BadgeInstanceEvidence, self).publish()
+        self.badgeinstance.publish()
+
+    def delete(self, *args, **kwargs):
+        badgeinstance = self.badgeinstance
+        ret = super(BadgeInstanceEvidence, self).delete(*args, **kwargs)
+        badgeinstance.publish()
+        return ret

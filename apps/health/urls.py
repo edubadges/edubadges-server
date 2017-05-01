@@ -1,6 +1,7 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
+
 from views import health
 
-urlpatterns = patterns('contact.views',
+urlpatterns = [
     url(r'^$', health, name='server_health'),
-)
+]
