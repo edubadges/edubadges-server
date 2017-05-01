@@ -71,6 +71,15 @@ class BaseSerializerV2(serializers.Serializer):
 
         return envelope
 
+    def to_representation(self, instance):
+        representation = super(BaseSerializerV2, self).to_representation(instance)
+        if self.parent is not None:
+            return representation
+        else:
+            return self.response_envelope(result=[representation],
+                                          success=self.success,
+                                          description=self.description)
+
 
 class ListSerializerV2(serializers.ListSerializer, BaseSerializerV2):
     def to_representation(self, instance):
@@ -93,15 +102,6 @@ class DetailSerializerV2(BaseSerializerV2):
 
     class Meta:
         list_serializer_class = ListSerializerV2
-
-    def to_representation(self, instance):
-        representation = super(DetailSerializerV2, self).to_representation(instance)
-        if self.parent is not None:
-            return representation
-        else:
-            return BaseSerializerV2.response_envelope(result=[representation],
-                                                      success=self.success,
-                                                      description=self.description)
 
     def get_model_class(self):
         return getattr(self.Meta, 'model', None)

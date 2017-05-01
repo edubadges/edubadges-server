@@ -7,18 +7,19 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.urlresolvers import reverse
-from django.http import Http404
-from rest_framework import permissions, status, generics
+from rest_framework import permissions, status
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from badgeuser.permissions import BadgeUserIsAuthenticatedUser
+from badgeuser.serializers_v2 import BadgeUserTokenSerializerV2
 from composition.tasks import process_email_verification
+from entity.api import BaseEntityDetailView
 from mainsite.models import BadgrApp
-from mainsite.permissions import IsRequestUser
 from mainsite.utils import OriginSetting
 from .models import BadgeUser, CachedEmailAddress
-from .serializers import BadgeUserProfileSerializer, EmailSerializer
+from .serializers import BadgeUserProfileSerializer, EmailSerializer, BadgeUserTokenSerializerV1
 
 
 class BadgeUserProfile(APIView):
@@ -68,33 +69,28 @@ class BadgeUserProfile(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class BadgeUserToken(APIView):
+class BadgeUserToken(BaseEntityDetailView):
     model = BadgeUser
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (BadgeUserIsAuthenticatedUser,)
+    v1_serializer_class = BadgeUserTokenSerializerV1
+    v2_serializer_class = BadgeUserTokenSerializerV2
 
-    def get(self, request):
+    def get_object(self, request, **kwargs):
+        return request.user
+
+    def get(self, request, **kwargs):
         """
         Get the authenticated user's auth token.
         A new auth token will be created if none already exist for this user.
         """
-        token_input = {
-            'username': request.user.username,
-            'token': request.user.cached_token()
-        }
-        return Response(token_input, status=status.HTTP_200_OK)
+        return super(BadgeUserToken, self).get(request, **kwargs)
 
-    def put(self, request):
+    def put(self, request, **kwargs):
         """
         Invalidate the old token (if it exists) and create a new one.
         """
-        token_input = {
-            'username': request.user.username,
-            'token': request.user.replace_token(),
-            'replace': True
-        }
-        request.user.save()
-
-        return Response(token_input, status=status.HTTP_201_CREATED)
+        request.user.replace_token()  # generate new token first
+        return super(BadgeUserToken, self).put(request, **kwargs)
 
 
 class BadgeUserEmailList(APIView):

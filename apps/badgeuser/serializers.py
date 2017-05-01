@@ -6,6 +6,19 @@ from .models import BadgeUser, CachedEmailAddress
 from .utils import notify_on_password_change
 
 
+class BadgeUserTokenSerializerV1(serializers.Serializer):
+    def to_representation(self, instance):
+        representation = {
+            'username': instance.username,
+            'token': instance.cached_token()
+        }
+        return representation
+
+    def update(self, instance, validated_data):
+        # noop
+        return instance
+
+
 class VerifiedEmailsField(serializers.Field):
     def to_representation(self, obj):
         addresses = []

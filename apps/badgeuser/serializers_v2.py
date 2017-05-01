@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
-from entity.serializers import DetailSerializerV2
+from badgeuser.utils import notify_on_password_change
+from entity.serializers import DetailSerializerV2, BaseSerializerV2
 from mainsite.serializers import StripTagsCharField
-from .utils import notify_on_password_change
 
 
 class BadgeUserSerializerV2(DetailSerializerV2):
@@ -24,3 +24,10 @@ class BadgeUserSerializerV2(DetailSerializerV2):
         instance.save()
         return instance
 
+
+class BadgeUserTokenSerializerV2(BaseSerializerV2):
+    token = serializers.CharField(read_only=True, source='cached_token')
+
+    def update(self, instance, validated_data):
+        # noop
+        return instance
