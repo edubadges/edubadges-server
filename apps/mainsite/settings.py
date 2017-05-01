@@ -133,7 +133,7 @@ AUTHENTICATION_BACKENDS = [
     "badgeuser.backends.CachedModelBackend",
 
     # `allauth` specific authentication methods, such as login by e-mail
-    "allauth.account.auth_backends.AuthenticationBackend",
+    "badgeuser.backends.CachedAuthenticationBackend"
 
 ]
 ACCOUNT_ADAPTER = 'mainsite.account_adapter.BadgrAccountAdapter'
