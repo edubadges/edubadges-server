@@ -19,7 +19,7 @@ from openbadges_bakery import bake
 from issuer.managers import BadgeInstanceManager
 from mainsite.base import BaseVersionedEntity
 from mainsite.managers import SlugOrJsonIdCacheModelManager
-from mainsite.mixins import ResizeUploadedImage
+from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage
 from mainsite.models import (BadgrApp, EmailBlacklist)
 from mainsite.utils import OriginSetting
 from .utils import generate_sha256_hashstring, CURRENT_OBI_CONTEXT_IRI
@@ -40,7 +40,7 @@ class BaseAuditedModel(cachemodel.CacheModel):
         return BadgeUser.cached.get(id=self.created_by_id)
 
 
-class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage):
+class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUploadedSvgImage):
     entity_class_name = 'Issuer'
 
     source = models.CharField(max_length=254, default='local')
@@ -207,7 +207,7 @@ class IssuerStaff(cachemodel.CacheModel):
         return Issuer.cached.get(pk=self.issuer_id)
 
 
-class BadgeClass(BaseVersionedEntity, ResizeUploadedImage):
+class BadgeClass(BaseVersionedEntity, ResizeUploadedImage, ScrubUploadedSvgImage):
     entity_class_name = 'BadgeClass'
 
     source = models.CharField(max_length=254, default='local')
