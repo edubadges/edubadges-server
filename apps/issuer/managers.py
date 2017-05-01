@@ -29,10 +29,6 @@ class BadgeInstanceManager(models.Manager):
             recipient_identifier=recipient_identifier,
         )
 
-        if evidence_url:
-            new_instance.evidence_url = evidence_url
-
-
         with transaction.atomic():
             new_instance.save()
 
