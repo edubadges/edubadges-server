@@ -128,7 +128,13 @@ class BadgeUserToken(BaseEntityDetailView):
         Invalidate the old token (if it exists) and create a new one.
         """
         request.user.replace_token()  # generate new token first
+        self.token_replaced = True
         return super(BadgeUserToken, self).put(request, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(BadgeUserToken, self).get_context_data(**kwargs)
+        context['tokenReplaced'] = getattr(self, 'token_replaced', False)
+        return context
 
 
 class BaseUserRecoveryView(BaseEntityDetailView):
@@ -150,7 +156,7 @@ class BaseUserRecoveryView(BaseEntityDetailView):
 class BadgeUserForgotPassword(BaseUserRecoveryView):
     authentication_classes = ()
     permission_classes = (permissions.AllowAny,)
-    v1_serializer_class = BaseSerializer
+    v1_serializer_class = serializers.Serializer
     v2_serializer_class = BaseSerializerV2
 
     def get(self, request, *args, **kwargs):

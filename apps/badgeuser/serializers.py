@@ -12,6 +12,8 @@ class BadgeUserTokenSerializerV1(serializers.Serializer):
             'username': instance.username,
             'token': instance.cached_token()
         }
+        if self.context.get('tokenReplaced', False):
+            representation['replace'] = True
         return representation
 
     def update(self, instance, validated_data):
@@ -125,3 +127,4 @@ class BadgeUserIdentifierField(serializers.CharField):
             return BadgeUser.cached.get(pk=value).primary_email
         except BadgeUser.DoesNotExist:
             return None
+

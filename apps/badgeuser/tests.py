@@ -48,6 +48,7 @@ class SetupUserHelper(APITestCase):
             user.password = None
         else:
             user.set_password(password)
+            user.save()
         if create_email_address:
             email = user.cached_emails()[0]
             email.verified = verified
@@ -136,7 +137,7 @@ class UserCreateTests(SetupUserHelper, APITestCase, CachingTestCase):
             'password': '123456'
         }
 
-        existing_user = self.setup_user(email=email, authenticate=False)
+        existing_user = self.setup_user(email=email, authenticate=False, verified=False)
         self.assertIn(email, [e.email for e in existing_user.cached_emails()])
 
         response = self.client.post('/v1/user/profile', user_data)
