@@ -6,9 +6,11 @@ from allauth.account.utils import user_pk_to_url_str, url_str_to_user_pk
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.urlresolvers import reverse
 from django.http import Http404
-from rest_framework import permissions
+from rest_framework import permissions, serializers
+from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 from rest_framework.status import HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED
@@ -40,7 +42,10 @@ class BadgeUserDetail(BaseEntityDetailView):
                 data=request.data, context={'request': request}
             )
             serializer.is_valid(raise_exception=True)
-            new_user = serializer.save()
+            try:
+                new_user = serializer.save()
+            except DjangoValidationError as e:
+                raise RestframeworkValidationError(e.message)
             return Response(serializer.data, status=HTTP_201_CREATED)
 
         return Response(status=HTTP_404_NOT_FOUND)
