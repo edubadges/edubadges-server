@@ -1,84 +1,46 @@
 from rest_framework import serializers
 
-from mainsite.base import DetailSerializerV2
+from badgeuser.utils import notify_on_password_change
+from entity.serializers import DetailSerializerV2, BaseSerializerV2
 from mainsite.serializers import StripTagsCharField
-from .models import BadgeUser, CachedEmailAddress
-from .utils import notify_on_password_change
 
 
-class BadgeUserProfileSerializerV2(DetailSerializerV2):
+class BadgeUserEmailSerializerV2(DetailSerializerV2):
+    email = serializers.EmailField()
+    verified = serializers.BooleanField(read_only=True)
+    primary = serializers.BooleanField(required=False)
+
+
+class BadgeUserSerializerV2(DetailSerializerV2):
     firstName = StripTagsCharField(source='first_name', max_length=30, allow_blank=True)
     lastName = StripTagsCharField(source='last_name', max_length=30, allow_blank=True)
-    email = serializers.EmailField(source='primary_email', )
-    password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+    password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False)
+    emails = BadgeUserEmailSerializerV2(many=True, source='email_items', required=False)
 
-    def create(self, validated_data):
-        request = self.context.get('request')
-        existing_user = None
-
-        # Fetch existing email address if it is verified, delete unverified email address records.
-        try:
-            email_address = CachedEmailAddress.objects.get(email=validated_data['primary_email'])
-        except CachedEmailAddress.DoesNotExist:
-            email_address = None
-        else:
-            if email_address.verified is False:
-                email_address.delete()
-                email_address = None
-
-        # Identify the user account if it is already partially initialized
-        if email_address and not existing_user:
-            existing_user = email_address.user
-        else:
-            # TODO: change this after deprecating the email database column for the BadgeUser model.
-            existing_user = BadgeUser.objects.filter(email=validated_data['primary_email']).first()
-
-        if existing_user:
-            # if existing_user.password is NOT set, this user was auto-created and needs to be claimed
-            if existing_user.password:
-                raise serializers.ValidationError(
-                    'Account could not be created. An account with this email address may already exist.'
-                )
-            user = existing_user
-        else:
-            user = BadgeUser(
-                email=validated_data['primary_email']
-            )
-
-        user.first_name = validated_data['first_name']
-        user.last_name = validated_data['last_name']
-        user.set_password(validated_data['password'])
-        user.save()
-
-        if not email_address:
-            CachedEmailAddress.objects.add_email(
-                request, user, validated_data['primary_email'], confirm=True, signup=True
-            )
-        else:
-            email_address.send_confirmation(request, signup=True)
-
-        return user
-
-    def update(self, user, validated_data):
-        first_name = validated_data.get('first_name')
-        last_name = validated_data.get('last_name')
-        password = validated_data.get('password')
-        if first_name:
-            user.first_name = first_name
-        if last_name:
-            user.last_name = last_name
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password') if 'password' in validated_data else None
+        super(BadgeUserSerializerV2, self).update(instance, validated_data)
 
         if password:
-            user.set_password(password)
-            notify_on_password_change(user)
+            instance.set_password(password)
+            notify_on_password_change(instance)
 
-        user.save()
-        return user
+        instance.save()
+        return instance
 
     def to_representation(self, instance):
-        representation = super(BadgeUserProfileSerializerV2, self).to_representation(instance)
-
-        if self.context.get('include_token', False):
-            representation['token'] = instance.cached_token()
-
+        representation = super(BadgeUserSerializerV2, self).to_representation(instance)
+        if not self.context.get('isSelf'):
+            fields_shown_only_to_self = ['emails']
+            for f in fields_shown_only_to_self:
+                if f in representation['result'][0]:
+                    del representation['result'][0][f]
         return representation
+
+
+class BadgeUserTokenSerializerV2(BaseSerializerV2):
+    token = serializers.CharField(read_only=True, source='cached_token')
+
+    def update(self, instance, validated_data):
+        # noop
+        return instance

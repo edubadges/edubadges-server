@@ -2,8 +2,8 @@
 from __future__ import unicode_literals
 
 from django.http import Http404
-from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED
 from rest_framework.views import APIView
 
 import badgrlog
@@ -55,7 +55,7 @@ class BaseEntityListView(BaseEntityView):
         serializer.is_valid(raise_exception=True)
         new_instance = serializer.save(created_by=request.user)
         self.log_create(new_instance)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=HTTP_201_CREATED)
 
     def get_create_event(self):
         return getattr(self, 'create_event', None)
@@ -108,7 +108,7 @@ class BaseEntityDetailView(BaseEntityView):
         """
         obj = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, obj):
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(status=HTTP_404_NOT_FOUND)
 
         context = self.get_context_data(**kwargs)
         serializer_class = self.get_serializer_class()
@@ -121,7 +121,7 @@ class BaseEntityDetailView(BaseEntityView):
         """
         obj = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, obj):
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(status=HTTP_404_NOT_FOUND)
 
         context = self.get_context_data(**kwargs)
         serializer_class = self.get_serializer_class()
@@ -136,8 +136,8 @@ class BaseEntityDetailView(BaseEntityView):
         """
         obj = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, obj):
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(status=HTTP_404_NOT_FOUND)
         obj.delete()
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=HTTP_200_OK)
 
 
