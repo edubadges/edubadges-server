@@ -120,8 +120,7 @@ class BadgeUserToken(BaseEntityDetailView):
         return super(BadgeUserToken, self).put(request, **kwargs)
 
 
-
-class UserTokenMixin(object):
+class BaseUserRecoveryView(BaseEntityDetailView):
     def _get_user(self, uidb36):
         User = get_user_model()
         try:
@@ -130,18 +129,18 @@ class UserTokenMixin(object):
         except (ValueError, User.DoesNotExist):
             return None
 
-
-class BadgeUserForgotPassword(UserTokenMixin, BaseEntityDetailView):
-    authentication_classes = ()
-    permission_classes = (permissions.AllowAny,)
-    v1_serializer_class = BaseSerializer
-    v2_serializer_class = BaseSerializerV2
-
     def get_response(self, obj={}, status=HTTP_200_OK):
         context = self.get_context_data()
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(obj, context=context)
         return Response(serializer.data, status=status)
+
+
+class BadgeUserForgotPassword(BaseUserRecoveryView):
+    authentication_classes = ()
+    permission_classes = (permissions.AllowAny,)
+    v1_serializer_class = BaseSerializer
+    v2_serializer_class = BaseSerializerV2
 
     def get(self, request, *args, **kwargs):
         badgr_app = BadgrApp.objects.get_current(request)
@@ -237,8 +236,33 @@ class BadgeUserForgotPassword(UserTokenMixin, BaseEntityDetailView):
         return self.get_response()
 
 
-class BadgeUserEmailConfirm(UserTokenMixin, APIView):
+class BadgeUserEmailConfirm(BaseUserRecoveryView):
     permission_classes = (permissions.AllowAny,)
+    v1_serializer_class = BaseSerializer
+    v2_serializer_class = BaseSerializerV2
+
+    def post(self, request, **kwargs):
+        """
+        Request a confirmation email be resent to an existing unverified email address
+        ---
+        parameters:
+            - name: email
+              description: The email to confirm
+              required: true
+              type: string
+              paramType: form
+        """
+        email = request.data.get('email')
+        try:
+            email_address = CachedEmailAddress.cached.get(email=email)
+        except CachedEmailAddress.DoesNotExist:
+            # return 200 here because we don't want to expose information about which emails we know about
+            return self.get_response()
+
+        if not email_address.verified:
+            email_address.send_confirmation(request=request)
+
+        return self.get_response()
 
     def get(self, request, **kwargs):
         """
