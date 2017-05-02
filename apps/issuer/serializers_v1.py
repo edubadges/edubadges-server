@@ -7,7 +7,7 @@ from django.utils.html import strip_tags
 from rest_framework import serializers
 
 import utils
-from badgeuser.serializers import BadgeUserProfileSerializer, BadgeUserIdentifierField
+from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserIdentifierFieldV1
 from mainsite.drf_fields import Base64FileField, ValidImageField
 from mainsite.models import BadgrApp
 from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField
@@ -23,7 +23,7 @@ class CachedListSerializer(serializers.ListSerializer):
 
 class IssuerStaffSerializerV1(serializers.Serializer):
     """ A read_only serializer for staff roles """
-    user = BadgeUserProfileSerializer(source='cached_user')
+    user = BadgeUserProfileSerializerV1(source='cached_user')
     role = serializers.CharField(validators=[ChoicesValidator(dict(IssuerStaff.ROLE_CHOICES).keys())])
 
     class Meta:
@@ -32,7 +32,7 @@ class IssuerStaffSerializerV1(serializers.Serializer):
 
 class IssuerSerializerV1(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
-    created_by = BadgeUserIdentifierField()
+    created_by = BadgeUserIdentifierFieldV1()
     name = StripTagsCharField(max_length=1024)
     slug = StripTagsCharField(max_length=255, source='entity_id', read_only=True)
     image = ValidImageField(required=False)
@@ -96,7 +96,7 @@ class IssuerRoleActionSerializerV1(serializers.Serializer):
 
 class BadgeClassSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
-    created_by = BadgeUserIdentifierField()
+    created_by = BadgeUserIdentifierFieldV1()
     id = serializers.IntegerField(required=False, read_only=True)
     name = StripTagsCharField(max_length=255)
     image = Base64FileField(allow_empty_file=False, use_url=True, required=False)
@@ -193,7 +193,7 @@ class EvidenceItemSerializer(serializers.Serializer):
 
 class BadgeInstanceSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
-    created_by = BadgeUserIdentifierField()
+    created_by = BadgeUserIdentifierFieldV1()
     slug = serializers.CharField(max_length=255, read_only=True)
     image = serializers.FileField(read_only=True)  # use_url=True, might be necessary
     email = serializers.EmailField(max_length=1024, required=False, write_only=True)
