@@ -145,7 +145,15 @@ class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUp
         # add missing staff records
         for staff_data in value:
             if staff_data['cached_user'] not in existing_staff_idx:
-                IssuerStaff.objects.create(issuer=self, user=staff_data['cached_user'], role=staff_data['role'])
+                staff_record, created = IssuerStaff.cached.get_or_create(
+                    issuer=self,
+                    user=staff_data['cached_user'],
+                    defaults={
+                        'role': staff_data['role']
+                    })
+                if not created:
+                    staff_record.role = staff_data['role']
+                    staff_record.save()
 
         # remove old staff records -- but never remove the only OWNER role
         for staff_record in self.staff_items:
