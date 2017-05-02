@@ -496,19 +496,19 @@ class TestCollectionOperations(APITestCase, CachingTestCase):
             revoked=False
         )
 
-        # self.local_badge_instance_3, _ = LocalBadgeInstance.objects.get_or_create(
-        #     recipient_user=1,
-        #     recipient_identifier="test@example.com",
-        #     issuer_badgeclass=3,
-        #     created_at="2015-12-28T15:54:50Z",
-        #     created_by=None,
-        #     slug="c36110d9-938a-4052-9a13-ed8424454ed5",
-        #     json="{\"issuedOn\":\"2014-09-05T21:45:09+00:00\",\"uid\":\"4613\",\"type\":\"Assertion\",\"image\":\"http://localhost:8000/media/uploads/badges/local_badgeinstance_e63cdadc-7cad-46ee-a4d0-a75458678e04.png\",\"evidence\":\"https://app.achievery.com/earned/4613999\",\"badge\":{\"description\":\"Awarded for team members on the DPD project that studied badge system design from 2012-2014.\",\"tags\":[\"Higher Education\",\"Writing\"],\"image\":\"https://images.achievery.com/badgeImages/DPDContributorBadge_1716_1.png\",\"criteria\":\"https://app.achievery.com/badge/1716\",\"issuer\":{\"url\":\"https://app.achievery.com/passport/id/2515\",\"image\":\"https://images.achievery.com/organization/badger-icon-transparent.png\",\"type\":\"Issuer\",\"id\":\"https://app.achievery.com/issuer/2515\",\"name\":\"Design Principles Documentation Project\"},\"type\":\"BadgeClass\",\"id\":\"https://app.achievery.com/badge-class/1716\",\"name\":\"DPD Project Contributor\"},\"@context\":\"https://w3id.org/openbadges/v1\",\"recipient\":{\"type\":\"email\",\"recipient\":\"test@example.com\"},\"id\":\"https://app.achievery.com/badge-assertion/4613999\"}",
-        #     revocation_reason=None,
-        #     identifier="http://app.achievery.com/badge-assertion/4613999",
-        #     image="uploads/badges/local_badgeinstance_e63cdadc-7cad-46ee-a4d0-a75458678e04.png",
-        #     revoked=False
-        # )
+        self.local_badge_instance_3, _ = LocalBadgeInstance.objects.get_or_create(
+            recipient_user=self.user,
+            recipient_identifier="test@example.com",
+            issuer_badgeclass=self.badge_class,
+            created_at="2015-12-28T15:54:50Z",
+            created_by=None,
+            slug="c36110d9-938a-4052-9a13-ed8424454ed5",
+            json="{\"issuedOn\":\"2014-09-05T21:45:09+00:00\",\"uid\":\"4613\",\"type\":\"Assertion\",\"image\":\"http://localhost:8000/media/uploads/badges/local_badgeinstance_e63cdadc-7cad-46ee-a4d0-a75458678e04.png\",\"evidence\":\"https://app.achievery.com/earned/4613999\",\"badge\":{\"description\":\"Awarded for team members on the DPD project that studied badge system design from 2012-2014.\",\"tags\":[\"Higher Education\",\"Writing\"],\"image\":\"https://images.achievery.com/badgeImages/DPDContributorBadge_1716_1.png\",\"criteria\":\"https://app.achievery.com/badge/1716\",\"issuer\":{\"url\":\"https://app.achievery.com/passport/id/2515\",\"image\":\"https://images.achievery.com/organization/badger-icon-transparent.png\",\"type\":\"Issuer\",\"id\":\"https://app.achievery.com/issuer/2515\",\"name\":\"Design Principles Documentation Project\"},\"type\":\"BadgeClass\",\"id\":\"https://app.achievery.com/badge-class/1716\",\"name\":\"DPD Project Contributor\"},\"@context\":\"https://w3id.org/openbadges/v1\",\"recipient\":{\"type\":\"email\",\"recipient\":\"test@example.com\"},\"id\":\"https://app.achievery.com/badge-assertion/4613999\"}",
+            revocation_reason=None,
+            identifier="http://app.achievery.com/badge-assertion/4613999",
+            image="uploads/badges/local_badgeinstance_e63cdadc-7cad-46ee-a4d0-a75458678e04.png",
+            revoked=False
+        )
 
         self.collection, _ = Collection.objects.get_or_create(
             owner=self.user,
@@ -543,27 +543,27 @@ class TestCollectionOperations(APITestCase, CachingTestCase):
 
         self.assertEqual(response.data['badges'], [])
 
-    # def test_can_define_collection(self):
-    #     """
-    #     Authorized user can create a new collection via API.
-    #     """
-    #     data = {
-    #         'name': 'Fruity Collection',
-    #         'description': 'Apples and Oranges',
-    #         'published': True,
-    #         'badges': [
-    #             {'id': 1},
-    #             # {'id': 2, 'description': 'A cool badge'}
-    #         ]
-    #     }
-    #     self.client.force_authenticate(user=self.user)
-    #     response = self.client.post('/v1/earner/collections', data, format='json')
-    #
-    #     self.assertEqual(response.status_code, 201)
-    #     self.assertTrue(response.data.get('published'))
-    #
-    #     self.assertEqual([i['id'] for i in response.data.get('badges')], [1, 2])
-    #     self.assertEqual(response.data.get('badges')[1]['description'], 'A cool badge')
+    def test_can_define_collection(self):
+        """
+        Authorized user can create a new collection via API.
+        """
+        data = {
+            'name': 'Fruity Collection',
+            'description': 'Apples and Oranges',
+            'published': True,
+            'badges': [
+                {'id': self.local_badge_instance_1.pk},
+                {'id': self.local_badge_instance_2.pk, 'description': 'A cool badge'}
+            ]
+        }
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post('/v1/earner/collections', data, format='json')
+
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(response.data.get('published'))
+
+        self.assertEqual([i['id'] for i in response.data.get('badges')], [self.local_badge_instance_1.pk, self.local_badge_instance_2.pk])
+        self.assertEqual(response.data.get('badges')[1]['description'], 'A cool badge')
 
     def test_can_define_collection_serializer(self):
         """
@@ -624,26 +624,25 @@ class TestCollectionOperations(APITestCase, CachingTestCase):
         self.assertEqual(collection.share_url, '')
 
 
-    # def test_can_publish_unpublish_collection_api_share_method(self):
-    #     """
-    #     The CollectionSerializer should be able to update/delete a collection's share hash
-    #     via the CollectionGenerateShare GET/DELETE methods.
-    #     """
-    #     self.client.force_authenticate(user=self.user)
-    #     response = self.client.get(
-    #         '/v1/earner/collections/fresh-badges/share'
-    #     )
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertTrue(response.data.startswith('http'))
-    #
-    #     self.assertTrue(self.collection.published)
-    #
-    #     response = self.client.delete('/v1/earner/collections/fresh-badges/share')
-    #     self.assertEqual(response.status_code, 204)
-    #     self.assertIsNone(response.data)
-    #
-    #     self.assertFalse(self.collection.published)
+    def test_can_publish_unpublish_collection_api_share_method(self):
+        """
+        The CollectionSerializer should be able to update/delete a collection's share hash
+        via the CollectionGenerateShare GET/DELETE methods.
+        """
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(
+            '/v1/earner/collections/fresh-badges/share'
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data.startswith('http'))
 
+        self.assertTrue(self.collection.published)
+
+        response = self.client.delete('/v1/earner/collections/fresh-badges/share')
+        self.assertEqual(response.status_code, 204)
+        self.assertIsNone(response.data)
+
+        self.assertFalse(self.collection.published)
 
     def test_can_add_remove_collection_badges_via_serializer(self):
         """
@@ -666,7 +665,7 @@ class TestCollectionOperations(APITestCase, CachingTestCase):
 
         serializer = CollectionSerializer(
             collection,
-            data={'badges': [{'id': 2}, {'id': 3}]},
+            data={'badges': [{'id': self.local_badge_instance_2.pk}, {'id': self.local_badge_instance_3.pk}]},
             partial=True
         )
 
@@ -674,42 +673,42 @@ class TestCollectionOperations(APITestCase, CachingTestCase):
         serializer.save()
 
         self.assertEqual(collection.badges.count(), 2)
-        self.assertEqual([i.instance.pk for i in collection.badges.all()], [2, 3])
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [self.local_badge_instance_2.pk, self.local_badge_instance_3.pk])
 
 
-    # def test_can_add_remove_collection_badges_via_collection_detail_api(self):
-    #     """
-    #     A PUT request to the CollectionDetail view should be able to update the list of badges
-    #     in a collection.
-    #     """
-    #     collection = Collection.objects.first()
-    #     self.assertEqual(collection.badges.count(), 0)
-    #
-    #     data = {
-    #         'badges': [{'id': 1}, {'id': 2}],
-    #         'name': collection.name,
-    #         'description': collection.description
-    #     }
-    #     self.client.force_authenticate(user=self.user)
-    #     response = self.client.put(
-    #         '/v1/earner/collections/{}'.format(collection.slug), data=data,
-    #         format='json')
-    #
-    #     self.assertEqual(response.status_code, 200)
-    #     collection = Collection.objects.first()  # reload
-    #     self.assertEqual(collection.badges.count(), 2)
-    #     self.assertEqual([i.instance.pk for i in collection.badges.all()], [1, 2])
-    #
-    #     data = {'badges': [{'id': 2}, {'id': 3}]}
-    #     response = self.client.put(
-    #         '/v1/earner/collections/{}'.format(collection.slug),
-    #         data=data, format='json')
-    #
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual([i['id'] for i in response.data.get('badges')], [2, 3])
-    #     collection = Collection.objects.first()  # reload
-    #     self.assertEqual(collection.badges.count(), 2)
-    #     self.assertEqual([i.instance.pk for i in collection.badges.all()], [2, 3])
+    def test_can_add_remove_collection_badges_via_collection_detail_api(self):
+        """
+        A PUT request to the CollectionDetail view should be able to update the list of badges
+        in a collection.
+        """
+        collection = Collection.objects.first()
+        self.assertEqual(collection.badges.count(), 0)
+
+        data = {
+            'badges': [{'id': self.local_badge_instance_1.pk}, {'id': self.local_badge_instance_2.pk}],
+            'name': collection.name,
+            'description': collection.description
+        }
+        self.client.force_authenticate(user=self.user)
+        response = self.client.put(
+            '/v1/earner/collections/{}'.format(collection.slug), data=data,
+            format='json')
+
+        self.assertEqual(response.status_code, 200)
+        collection = Collection.objects.first()  # reload
+        self.assertEqual(collection.badges.count(), 2)
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [self.local_badge_instance_1.pk, self.local_badge_instance_2.pk])
+
+        data = {'badges': [{'id': self.local_badge_instance_2.pk}, {'id': self.local_badge_instance_3.pk}]}
+        response = self.client.put(
+            '/v1/earner/collections/{}'.format(collection.slug),
+            data=data, format='json')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([i['id'] for i in response.data.get('badges')], [self.local_badge_instance_2.pk, self.local_badge_instance_3.pk])
+        collection = Collection.objects.first()  # reload
+        self.assertEqual(collection.badges.count(), 2)
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [self.local_badge_instance_2.pk, self.local_badge_instance_3.pk])
 
     # def test_can_add_remove_badges_via_collection_badge_detail_api(self):
     #     self.assertEqual(self.collection.badges.count(), 0)
