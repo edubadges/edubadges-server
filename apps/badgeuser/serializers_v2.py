@@ -8,7 +8,7 @@ from mainsite.serializers import StripTagsCharField
 class BadgeUserEmailSerializerV2(DetailSerializerV2):
     email = serializers.EmailField()
     verified = serializers.BooleanField(read_only=True)
-    primary = serializers.BooleanField()
+    primary = serializers.BooleanField(required=False)
 
 
 class BadgeUserSerializerV2(DetailSerializerV2):
