@@ -30,7 +30,7 @@ class VerifiedEmailsField(serializers.Field):
 class BadgeUserProfileSerializer(serializers.Serializer):
     first_name = StripTagsCharField(max_length=30, allow_blank=True)
     last_name = StripTagsCharField(max_length=30, allow_blank=True)
-    email = serializers.EmailField(source='primary_email', )
+    email = serializers.EmailField(source='primary_email', required=False)
     password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
 
     def create(self, validated_data):

@@ -8,10 +8,11 @@ class BadgeUserManager(UserManager):
 
     def create(self,
                email,
-               first_name=None,
-               last_name=None,
+               first_name,
+               last_name,
                plaintext_password=None,
-               send_confirmation=True):
+               send_confirmation=True,
+               create_email_address=True):
         from badgeuser.models import CachedEmailAddress
 
         # If an unverified email record exists that matches this email address, remove it
@@ -46,7 +47,8 @@ class BadgeUserManager(UserManager):
         user.save()
 
         # create email address record as needed
-        CachedEmailAddress.objects.add_email(user, email, signup=True, confirm=send_confirmation)
+        if create_email_address:
+            CachedEmailAddress.objects.add_email(user, email, signup=True, confirm=send_confirmation)
         return user
 
 

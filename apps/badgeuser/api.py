@@ -8,13 +8,10 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.urlresolvers import reverse
 from django.http import Http404
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
-from rest_framework.status import HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND
-from rest_framework.views import APIView
+from rest_framework.status import HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED
 
 from badgeuser.models import BadgeUser, CachedEmailAddress
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
@@ -37,7 +34,16 @@ class BadgeUserDetail(BaseEntityDetailView):
         """
         Signup for a new account
         """
-        return super(BadgeUserDetail, self).post(request, **kwargs)
+        if request.version == 'v1':
+            serializer_cls = self.get_serializer_class()
+            serializer = serializer_cls(
+                data=request.data, context={'request': request}
+            )
+            serializer.is_valid(raise_exception=True)
+            new_user = serializer.save()
+            return Response(serializer.data, status=HTTP_201_CREATED)
+
+        return Response(status=HTTP_404_NOT_FOUND)
 
     def get(self, request, **kwargs):
         """

@@ -12,7 +12,7 @@ from .serializers import EmailSerializer
 class BadgeUserEmailList(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
-    def get(self, request):
+    def get(self, request, **kwargs):
         """
         Get a list of user's registered emails.
         ---
@@ -22,7 +22,7 @@ class BadgeUserEmailList(APIView):
         serializer = EmailSerializer(instances, many=True, context={'request': request})
         return Response(serializer.data)
 
-    def post(self, request):
+    def post(self, request, **kwargs):
         """
         Register a new unverified email.
         ---
@@ -57,7 +57,7 @@ class BadgeUserEmailView(APIView):
 class BadgeUserEmailDetail(BadgeUserEmailView):
     model = CachedEmailAddress
 
-    def get(self, request, id):
+    def get(self, request, id, **kwargs):
         """
         Get detail for one registered email.
         ---
@@ -78,7 +78,7 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
         serializer = EmailSerializer(email_address, context={'request': request})
         return Response(serializer.data)
 
-    def delete(self, request, id):
+    def delete(self, request, id, **kwargs):
         """
         Remove a registered email for the current user.
         ---
@@ -104,7 +104,7 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
         email_address.delete()
         return Response(status.HTTP_200_OK)
 
-    def put(self, request, id):
+    def put(self, request, id, **kwargs):
         """
         Update a registered email for the current user.
         serializer: EmailSerializer

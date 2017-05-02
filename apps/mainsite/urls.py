@@ -58,8 +58,8 @@ urlpatterns = [
     url(r'^accounts/logout/$', contrib_auth_views.logout, {'next_page': 'login'}, name='logout'),
 
     # v1 API endpoints
-    url(r'^(?P<version>v1)/issuer/', include('issuer.v1_api_urls')),
-    url(r'^(?P<version>v1)/user/', include('badgeuser.v1_api_urls')),
+    url(r'^v1/issuer/', include('issuer.v1_api_urls'), kwargs={'version': 'v1'}),
+    url(r'^v1/user/', include('badgeuser.v1_api_urls'), kwargs={'version': 'v1'}),
     url(r'^v1/earner', include('composition.api_urls')),
 
     # v2 API endpoints
