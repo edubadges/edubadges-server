@@ -213,7 +213,7 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         """
         a BadgeUser is a Peer of another BadgeUser if they appear in an IssuerStaff together
         """
-        return set(chain(*[[s.cached_user for s in i.cached_staff] for i in self.cached_issuers()]))
+        return set(chain(*[[s.cached_user for s in i.cached_issuerstaff()] for i in self.cached_issuers()]))
 
     def cached_badgeclasses(self):
         return chain.from_iterable(issuer.cached_badgeclasses() for issuer in self.cached_issuers())

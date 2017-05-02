@@ -24,7 +24,7 @@ class IssuerSerializerV2(DetailSerializerV2):
     email = serializers.EmailField(max_length=255, required=True)
     description = StripTagsCharField(max_length=1024, required=True)
     url = serializers.URLField(max_length=1024, required=True)
-    staff = IssuerStaffSerializerV2(many=True, source='cached_staff', required=False)
+    staff = IssuerStaffSerializerV2(many=True, source='staff_items', required=False)
     openBadgeId = serializers.URLField(source='jsonld_id', read_only=True)
 
     class Meta:
@@ -37,10 +37,10 @@ class IssuerSerializerV2(DetailSerializerV2):
         return image
 
     def create(self, validated_data):
-        staff = validated_data.pop('cached_staff')
+        staff = validated_data.pop('staff_items')
         new_issuer = super(IssuerSerializerV2, self).create(validated_data)
 
         # update staff after issuer is created
-        new_issuer.cached_staff = staff
+        new_issuer.staff_items = staff
 
         return new_issuer

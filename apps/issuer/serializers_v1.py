@@ -39,7 +39,7 @@ class IssuerSerializerV1(serializers.Serializer):
     email = serializers.EmailField(max_length=255, required=True)
     description = StripTagsCharField(max_length=1024, required=True)
     url = serializers.URLField(max_length=1024, required=True)
-    staff = IssuerStaffSerializerV1(read_only=True, source='cached_staff_records', many=True)
+    staff = IssuerStaffSerializerV1(read_only=True, source='cached_issuerstaff', many=True)
 
     def validate_image(self, image):
         if image is not None:
