@@ -18,12 +18,14 @@ from django.test import modify_settings, override_settings
 from openbadges_bakery import unbake
 from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
 
+from badgeuser.models import BadgeUser, CachedEmailAddress
 from issuer.api import IssuerList
 from issuer.models import Issuer, BadgeClass, BadgeInstance, IssuerStaff
-from issuer.serializers import BadgeInstanceSerializer
+from issuer.serializers_v1 import BadgeInstanceSerializer
 from mainsite import TOP_DIR
 
 from mainsite.utils import OriginSetting
+from mainsite.tests import CachingTestCase
 
 factory = APIRequestFactory()
 
@@ -35,6 +37,150 @@ example_issuer_props = {
 }
 
 
+class IssuerTestBase(APITestCase):
+    def setUp(self):
+        self.test_user, _ = BadgeUser.objects.get_or_create(email='test@example.com')
+        self.test_user.user_permissions.add(Permission.objects.get(codename="add_issuer"))
+        CachedEmailAddress.objects.get_or_create(user=self.test_user, email='test@example.com', verified=True, primary=True)
+
+        self.test_user_2, _ = BadgeUser.objects.get_or_create(email='test2@example.com')
+        CachedEmailAddress.objects.get_or_create(user=self.test_user_2, email='test2@example.com', verified=True, primary=True)
+
+        self.test_user_3, _ = BadgeUser.objects.get_or_create(email='test3@example.com')
+        CachedEmailAddress.objects.get_or_create(user=self.test_user_3, email='test3@example.com', verified=True, primary=True)
+
+        self.issuer_1, _ = Issuer.objects.get_or_create(
+            name="Test Issuer",
+            created_at="2015-04-08T15:08:58Z",
+            created_by=self.test_user,
+            old_json="{\"description\":\"Issuer of Experimental Credentials\",\"url\":\"http://example.org\",\"image\":\"http://localhost:8000/public/issuers/test-issuer/image\",\"id\":\"http://localhost:8000/public/issuers/test-issuer\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"email\":\"exampleIssuer@example.org\",\"name\":\"Test Issuer\"}",
+            image="uploads/issuers/guinea_pig_testing_badge.png",
+            slug="test-issuer"
+        )
+
+        IssuerStaff.objects.get_or_create(
+            issuer=self.issuer_1,
+            user=self.test_user,
+            role=IssuerStaff.ROLE_OWNER
+        )
+
+        self.issuer_2, _ = Issuer.objects.get_or_create(
+            name="Test Issuer 2",
+            created_at="2015-04-08T15:18:16Z",
+            created_by=self.test_user,
+            old_json="{\"description\":\"Issuer of Experimental Credentials\",\"url\":\"http://example.org\",\"image\":\"http://localhost:8000/public/issuers/test-issuer/image\",\"id\":\"http://localhost:8000/public/issuers/testing-badge\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"email\":\"exampleIssuer@example.org\",\"name\":\"Test Issuer\"}",
+            image="uploads/issuers/guinea_pig_testing_badge_dlQWRUl.png",
+            slug="test-issuer-2"
+        )
+
+        IssuerStaff.objects.get_or_create(
+            issuer=self.issuer_2,
+            user=self.test_user,
+            role=IssuerStaff.ROLE_OWNER
+        )
+
+        self.issuer_3, _ = Issuer.objects.get_or_create(
+            name="Edited Test Issuer",
+            created_at="2015-04-08T15:18:16Z",
+            created_by=self.test_user,
+            old_json="{\"description\":\"Edited Test Issuer\",\"url\":\"http://example.org\",\"image\":\"http://localhost:8000/public/issuers/test-issuer/image\",\"id\":\"http://localhost:8000/public/issuers/testing-badge\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"email\":\"exampleIssuer@example.org\",\"name\":\"Test Issuer\"}",
+            image="uploads/issuers/guinea_pig_testing_badge_dlQWRUl.png",
+            slug="edited-test-issuer"
+        )
+
+        IssuerStaff.objects.get_or_create(
+            issuer=self.issuer_3,
+            user=self.test_user,
+            role=IssuerStaff.ROLE_OWNER
+        )
+
+        IssuerStaff.objects.get_or_create(
+            issuer=self.issuer_3,
+            user=self.test_user_2,
+            role=IssuerStaff.ROLE_EDITOR
+        )
+
+        self.badgeclass_1, _ = BadgeClass.objects.get_or_create(
+            name="Badge of Testing",
+            created_at="2015-04-08T15:20:25Z",
+            created_by=self.test_user,
+            old_json="{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-testing/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-awesome/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"type\":\"BadgeClass\",\"id\":\"http://localhost:8000/public/badges/badge-of-testing\",\"name\":\"Badge of Awesome\"}",
+            image="uploads/badges/guinea_pig_testing_badge.png",
+            criteria_text="Be cool, dawg.",
+            slug="badge-of-testing",
+            issuer=self.issuer_2
+        )
+
+        self.badgeclass_2, _ = BadgeClass.objects.get_or_create(
+            name="Second Badge of Testing",
+            created_at="2015-04-08T15:20:25Z",
+            created_by=self.test_user,
+            old_json="{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-testing/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-awesome/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"type\":\"BadgeClass\",\"id\":\"http://localhost:8000/public/badges/badge-of-testing\",\"name\":\"Badge of Awesome\"}",
+            image="uploads/badges/guinea_pig_testing_badge.png",
+            criteria_text="Be cool, dawg.",
+            slug="second-badge-of-testing",
+            issuer=self.issuer_2
+        )
+
+        self.badgeclass_3, _ = BadgeClass.objects.get_or_create(
+            name="Badge of Edited Testing",
+            created_at="2015-04-08T15:20:25Z",
+            created_by=self.test_user,
+            old_json="{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-edited-testing/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-edited-testing/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/edited-test-issuer\",\"type\":\"BadgeClass\",\"id\":\"http://localhost:8000/public/badges/badge-of-edited-testing\",\"name\":\"Badge of Edited Testing\"}",
+            image="uploads/badges/guinea_pig_testing_badge.png",
+            criteria_text="Be cool, dawg.",
+            slug="badge-of-edited-testing",
+            issuer=self.issuer_3
+        )
+
+        self.badgeclass_4, _ = BadgeClass.objects.get_or_create(
+            name="Badge of Never Issued",
+            created_at="2015-04-08T15:20:25Z",
+            created_by=self.test_user,
+            old_json="{\"description\":\"An experimental badge that will never have any instances.\",\"image\":\"http://localhost:8000/public/badges/badge-of-edited-testing/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-never-issued/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"type\":\"BadgeClass\",\"id\":\"http://localhost:8000/public/badges/badge-of-never-issued\",\"name\":\"Badge of Awesome\"}",
+            image="uploads/badges/guinea_pig_testing_badge.png",
+            criteria_text="Be cool, dawg.",
+            slug="badge-of-never-issued",
+            issuer=self.issuer_3
+        )
+
+        self.badgeclass_5, _ = BadgeClass.objects.get_or_create(
+            name="Badge of SVG Testing",
+            created_at="2015-04-08T15:20:25Z",
+            created_by=self.test_user,
+            old_json="{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-svg-testing/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-svg-testing/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"type\":\"BadgeClass\",\"id\":\"http://localhost:8000/public/badges/badge-of-svg-testing\",\"name\":\"Badge of SVG Testing\"}",
+            image="uploads/badges/test_badgeclass.svg",
+            criteria_text="Be cool, dawg.",
+            slug="badge-of-svg-testing",
+            issuer=self.issuer_2
+        )
+
+        self.badgeinstance_1, _ = BadgeInstance.objects.get_or_create(
+            revocation_reason=None,
+            revoked=False,
+            created_at="2015-04-08T15:59:03Z",
+            created_by=self.test_user,
+            slug="92219015-18a6-4538-8b6d-2b228e47b8aa",
+            old_json="{\"issuedOn\":\"2015-04-08T08:59:03.679218\",\"verify\":{\"url\":\"http://localhost:8000/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa\",\"type\":\"hosted\"},\"image\":\"http://localhost:8000/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa/image\",\"recipient\":{\"type\":\"email\",\"salt\":\"9944f83b-c1df-420d-b2d9-5f2d8968ca1c\",\"hashed\":true,\"identity\":\"sha256$a44b0fc1b8fc717bd6a5222c0f5573163f8647a9cada578b821904012257ea2d\"},\"type\":\"Assertion\",\"@context\":\"https://w3id.org/openbadges/v1\",\"badge\":\"http://localhost:8000/public/badges/badge-of-awesome\",\"id\":\"http://localhost:8000/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa\"}",
+            badgeclass=self.badgeclass_1,
+            image="issued/badges/49213a69dc3213270e95c2ac3c1fbd01.png",
+            recipient_identifier="test@example.com",
+            issuer=self.issuer_2
+        )
+
+        self.badgeinstance_1, _ = BadgeInstance.objects.get_or_create(
+            revocation_reason=None,
+            revoked=False,
+            created_at="2015-04-08T16:59:03Z",
+            created_by=self.test_user,
+            slug="92219015-18a6-4538-8b6d-2b228e47b8ab",
+            old_json="{\"issuedOn\":\"2015-04-08T09:59:03.679218\",\"verify\":{\"url\":\"http://localhost:8000/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8ab\",\"type\":\"hosted\"},\"image\":\"http://localhost:8000/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8ab/image\",\"recipient\":{\"type\":\"email\",\"salt\":\"9944f83b-c1df-420d-b2d9-5f2d8968ca1c\",\"hashed\":true,\"identity\":\"sha256$f90bfa9a05bad084790a0276d3d3d58fe925378f92b8a94dfe72e6b3c9d53cdf\"},\"type\":\"Assertion\",\"@context\":\"https://w3id.org/openbadges/v1\",\"badge\":\"http://localhost:8000/public/badges/badge-of-awesome\",\"id\":\"http://localhost:8000/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa\"}",
+            badgeclass=self.badgeclass_1,
+            image="issued/badges/49213a69dc3213270e95c2ac3c1fbd01.png",
+            recipient_identifier="test2@example.com",
+            issuer=self.issuer_2
+        )
+
 @override_settings(
     CELERY_ALWAYS_EAGER=True,
     SESSION_ENGINE='django.contrib.sessions.backends.cache',
@@ -45,13 +191,9 @@ example_issuer_props = {
         }
     }
 )
-class IssuerTests(APITestCase):
-    fixtures = ['0001_initial_superuser', 'test_badge_objects.json']
-
+class IssuerTests(IssuerTestBase, CachingTestCase):
     def setUp(self):
-        cache.clear()
-        self.test_user = get_user_model().objects.get(pk=1)
-        self.test_user.user_permissions.add(Permission.objects.get(codename="add_issuer"))
+        super(IssuerTests, self).setUp()
 
     def test_create_issuer_unauthenticated(self):
         view = IssuerList.as_view()

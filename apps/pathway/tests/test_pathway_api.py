@@ -14,7 +14,7 @@ from rest_framework.test import APITestCase
 
 from badgeuser.models import BadgeUser, CachedEmailAddress
 from issuer.models import BadgeClass, BadgeInstance
-from issuer.serializers import BadgeInstanceSerializer
+from issuer.serializers_v1 import BadgeInstanceSerializer
 from mainsite import TOP_DIR
 from mainsite.tests import CachingTestCase
 from mainsite.utils import OriginSetting
