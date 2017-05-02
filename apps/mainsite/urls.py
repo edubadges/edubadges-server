@@ -63,8 +63,8 @@ urlpatterns = [
     url(r'^v1/earner', include('composition.api_urls')),
 
     # v2 API endpoints
-    url(r'^(?P<version>v2)/', include('issuer.v2_api_urls')),
-    url(r'^(?P<version>v2)/', include('badgeuser.v2_api_urls')),
+    url(r'^v2/', include('issuer.v2_api_urls'), kwargs={'version': 'v2'}),
+    url(r'^v2/', include('badgeuser.v2_api_urls'), kwargs={'version': 'v2'}),
 
 
     url(r'^v1/issuers/(?P<issuer_slug>[^/]+)/pathways', include('pathway.api_urls')),

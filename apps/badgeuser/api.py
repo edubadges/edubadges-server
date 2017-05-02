@@ -8,8 +8,12 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.urlresolvers import reverse
 from django.http import Http404
-from rest_framework import permissions, status
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework import permissions
 from rest_framework.response import Response
+from rest_framework.serializers import BaseSerializer
+from rest_framework.status import HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND
 from rest_framework.views import APIView
 
 from badgeuser.models import BadgeUser, CachedEmailAddress
@@ -18,6 +22,7 @@ from badgeuser.serializers import BadgeUserProfileSerializer, BadgeUserTokenSeri
 from badgeuser.serializers_v2 import BadgeUserTokenSerializerV2, BadgeUserSerializerV2
 from composition.tasks import process_email_verification
 from entity.api import BaseEntityDetailView
+from entity.serializers import BaseSerializerV2
 from mainsite.models import BadgrApp
 from mainsite.utils import OriginSetting
 
@@ -126,47 +131,63 @@ class UserTokenMixin(object):
             return None
 
 
-class BadgeUserForgotPassword(UserTokenMixin, APIView):
-    permission_classes = ()
+class BadgeUserForgotPassword(UserTokenMixin, BaseEntityDetailView):
+    authentication_classes = ()
+    permission_classes = (permissions.AllowAny,)
+    v1_serializer_class = BaseSerializer
+    v2_serializer_class = BaseSerializerV2
+
+    def get_response(self, obj={}, status=HTTP_200_OK):
+        context = self.get_context_data()
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(obj, context=context)
+        return Response(serializer.data, status=status)
 
     def get(self, request, *args, **kwargs):
         badgr_app = BadgrApp.objects.get_current(request)
         redirect_url = badgr_app.forgot_password_redirect
         token = request.GET.get('token','')
         tokenized_url = "{}{}".format(redirect_url, token)
-        return Response(status=status.HTTP_302_FOUND, headers={'Location': tokenized_url})
+        return Response(status=HTTP_302_FOUND, headers={'Location': tokenized_url})
 
-    def post(self, request):
+    def post(self, request, **kwargs):
         """
         Request an account recovery email.
         ---
         parameters:
             - name: email
               type: string
-              paramType: form
               description: The email address on file to send recovery email
               required: true
         """
 
         email = request.data.get('email')
-        email_address = self.get_email(email=email)
-        if email_address is None:
+        try:
+            email_address = CachedEmailAddress.cached.get(email=email)
+        except CachedEmailAddress.DoesNotExist:
             # return 200 here because we don't want to expose information about which emails we know about
-            return Response(status=status.HTTP_200_OK)
+            return self.get_response()
 
+        #
         # taken from allauth.account.forms.ResetPasswordForm
+        #
 
         # fetch user from database directly to avoid cache
         UserCls = get_user_model()
         try:
             user = UserCls.objects.get(pk=email_address.user_id)
         except UserCls.DoesNotExist:
-            return Response(status=status.HTTP_200_OK)
+            return self.get_response()
 
         temp_key = default_token_generator.make_token(user)
         token = "{uidb36}-{key}".format(uidb36=user_pk_to_url_str(user),
                                         key=temp_key)
-        reset_url = "{}{}?token={}".format(OriginSetting.HTTP, reverse('v1_api_user_forgot_password'), token)
+
+        api_path = reverse('{version}_api_auth_forgot_password'.format(version=request.version))
+        reset_url = "{origin}{path}?token={token}".format(
+            origin=OriginSetting.HTTP,
+            path=api_path,
+            token=token)
 
         email_context = {
             "site": get_current_site(request),
@@ -175,9 +196,9 @@ class BadgeUserForgotPassword(UserTokenMixin, APIView):
         }
         get_adapter().send_mail('account/email/password_reset_key', email, email_context)
 
-        return Response(status=status.HTTP_200_OK)
+        return self.get_response()
 
-    def put(self, request):
+    def put(self, request, **kwargs):
         """
         Recover an account and set a new password.
         ---
@@ -198,26 +219,26 @@ class BadgeUserForgotPassword(UserTokenMixin, APIView):
 
         matches = re.search(r'([0-9A-Za-z]+)-(.*)', token)
         if not matches:
-            return Response({'error': "Invalid Token"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(status=HTTP_404_NOT_FOUND)
         uidb36 = matches.group(1)
         key = matches.group(2)
         if not (uidb36 and key):
-            return Response({'error': "Invalid Token"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(status=HTTP_404_NOT_FOUND)
 
         user = self._get_user(uidb36)
         if user is None:
-            return Response({'error': "Invalid token"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(status=HTTP_404_NOT_FOUND)
 
         if not default_token_generator.check_token(user, key):
-            return Response({'error': "invalid token"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(status=HTTP_404_NOT_FOUND)
 
         user.set_password(password)
         user.save()
-        return Response(status=status.HTTP_200_OK)
+        return self.get_response()
 
 
 class BadgeUserEmailConfirm(UserTokenMixin, APIView):
-    permission_classes = ()
+    permission_classes = (permissions.AllowAny,)
 
     def get(self, request, **kwargs):
         """
@@ -236,27 +257,27 @@ class BadgeUserEmailConfirm(UserTokenMixin, APIView):
         try:
             emailconfirmation = EmailConfirmation.objects.get(pk=kwargs.get('confirm_id'))
         except EmailConfirmation.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(status=HTTP_404_NOT_FOUND)
 
         try:
             email_address = CachedEmailAddress.cached.get(pk=emailconfirmation.email_address_id)
         except CachedEmailAddress.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(status=HTTP_404_NOT_FOUND)
 
         matches = re.search(r'([0-9A-Za-z]+)-(.*)', token)
         if not matches:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(status=HTTP_404_NOT_FOUND)
         uidb36 = matches.group(1)
         key = matches.group(2)
         if not (uidb36 and key):
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(status=HTTP_404_NOT_FOUND)
 
         user = self._get_user(uidb36)
         if user is None or not default_token_generator.check_token(user, key):
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(status=HTTP_404_NOT_FOUND)
 
         if email_address.user != user:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(status=HTTP_404_NOT_FOUND)
 
         old_primary = CachedEmailAddress.objects.get_primary(user)
         if old_primary is None:
@@ -269,4 +290,4 @@ class BadgeUserEmailConfirm(UserTokenMixin, APIView):
         # get badgr_app url redirect
         redirect_url = get_adapter().get_email_confirmation_redirect_url(request)
 
-        return Response(status=status.HTTP_302_FOUND, headers={'Location': redirect_url})
+        return Response(status=HTTP_302_FOUND, headers={'Location': redirect_url})
