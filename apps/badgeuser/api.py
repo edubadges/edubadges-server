@@ -7,13 +7,14 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.urlresolvers import reverse
+from django.http import Http404
 from rest_framework import permissions, status
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
-from badgeuser.serializers_v2 import BadgeUserTokenSerializerV2
+from badgeuser.serializers_v2 import BadgeUserTokenSerializerV2, BadgeUserSerializerV2
 from composition.tasks import process_email_verification
 from entity.api import BaseEntityDetailView
 from mainsite.models import BadgrApp
@@ -22,51 +23,73 @@ from .models import BadgeUser, CachedEmailAddress
 from .serializers import BadgeUserProfileSerializer, EmailSerializer, BadgeUserTokenSerializerV1
 
 
-class BadgeUserProfile(APIView):
-    serializer_class = BadgeUserProfileSerializer
+class BadgeUserDetail(BaseEntityDetailView):
+    model = BadgeUser
+    v1_serializer_class = BadgeUserProfileSerializer
+    v2_serializer_class = BadgeUserSerializerV2
     permission_classes = (permissions.AllowAny,)
 
-    def post(self, request):
+    def post(self, request, **kwargs):
         """
         Signup for a new account
-        ---
-        serializer: BadgeUserProfileSerializer
         """
-        serializer = self.serializer_class(
-            data=request.data, context={'request': request}
-        )
-        serializer.is_valid(raise_exception=True)
+        return super(BadgeUserDetail, self).post(request, **kwargs)
 
-        new_user = serializer.save()
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def get(self, request):
+    def get(self, request, **kwargs):
         """
         Get the current user's profile
-        ---
-        serializer: BadgeUserProfileSerializer
         """
-        if request.user.is_anonymous():
-            raise NotAuthenticated()
+        return super(BadgeUserDetail, self).get(request, **kwargs)
 
-        serializer = BadgeUserProfileSerializer(request.user)
-        return Response(serializer.data)
-
-    def put(self, request):
+    def put(self, request, **kwargs):
         """
         Update the current user's profile
-        ---
-        serializer: BadgeUserProfileSerializer
         """
-        if request.user.is_anonymous():
-            raise NotAuthenticated()
+        return super(BadgeUserDetail, self).put(request, **kwargs)
 
-        serializer = BadgeUserProfileSerializer(request.user, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        updated_user = serializer.save()
+    def get_object(self, request, **kwargs):
+        version = getattr(request, 'version', 'v1')
+        if version == 'v2':
+            entity_id = kwargs.get('entity_id')
+            if entity_id == 'self':
+                self.object = request.user
+                return self.object
+            try:
+                self.object = BadgeUser.cached.get(entity_id=entity_id)
+            except BadgeUser.DoesNotExist:
+                pass
+            else:
+                return self.object
+        elif version == 'v1':
+            if request.user.is_authenticated():
+                self.object = request.user
+                return self.object
+        raise Http404
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def has_object_permissions(self, request, obj):
+        method = request.method.lower()
+        if method == 'post':
+            return True
+
+        if isinstance(obj, BadgeUser):
+
+            if method == 'get':
+                if request.user.id == obj.id:
+                    # always have access to your own user
+                    return True
+                if obj in request.user.peers:
+                    # you can see some info about users you know about
+                    return True
+
+            if method == 'put':
+                # only current user can update their own profile
+                return request.user.id == obj.id
+        return False
+
+    def get_context_data(self, **kwargs):
+        context = super(BadgeUserDetail, self).get_context_data(**kwargs)
+        context['isSelf'] = (self.object.id == self.request.user.id)
+        return context
 
 
 class BadgeUserToken(BaseEntityDetailView):

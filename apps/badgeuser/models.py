@@ -156,6 +156,14 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     def cached_emails(self):
         return CachedEmailAddress.objects.filter(user=self)
 
+    @property
+    def email_items(self):
+        return self.cached_emails()
+
+    @email_items.setter
+    def email_items(self, emails):
+        pass
+
     def cached_email_variants(self):
         return chain.from_iterable(email.cached_variants() for email in self.cached_emails())
 
@@ -199,6 +207,13 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):
         return Issuer.objects.filter(staff__id=self.id).distinct()
+
+    @property
+    def peers(self):
+        """
+        a BadgeUser is a Peer of another BadgeUser if they appear in an IssuerStaff together
+        """
+        return set(chain(*[[s.cached_user for s in i.cached_staff] for i in self.cached_issuers()]))
 
     def cached_badgeclasses(self):
         return chain.from_iterable(issuer.cached_badgeclasses() for issuer in self.cached_issuers())
