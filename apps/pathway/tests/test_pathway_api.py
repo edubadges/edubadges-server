@@ -13,7 +13,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from badgeuser.models import BadgeUser, CachedEmailAddress
-from issuer.models import BadgeClass, BadgeInstance
+from issuer.models import BadgeClass, BadgeInstance, Issuer
 from issuer.serializers_v1 import BadgeInstanceSerializer
 from mainsite import TOP_DIR
 from mainsite.tests import CachingTestCase
@@ -226,18 +226,28 @@ class PathwayApiTests(APITestCase, CachingTestCase):
     HTTP_ORIGIN="http://localhost:8000",
 )
 class PathwayCompletionTests(APITestCase, CachingTestCase):
-    fixtures = ['0001_initial_superuser', 'test_badge_objects.json']
+    def setUp(self):
+        self.test_user, _ = BadgeUser.objects.get_or_create(email='test@example.com')
+        self.test_user.user_permissions.add(Permission.objects.get(codename="add_issuer"))
+        CachedEmailAddress.objects.get_or_create(user=self.test_user, email='test@example.com', verified=True, primary=True)
+        
+        self.test_issuer, _ = Issuer.objects.get_or_create(
+            name="Test Issuer",
+            created_at="2015-04-08T15:18:16Z",
+            created_by=self.test_user,
+            slug="test-issuer"
+        )
 
     def create_group(self):
         # Authenticate as an editor of the issuer in question
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=3))
+        self.client.force_authenticate(user=self.test_user)
         data = {'name': 'Group of Testing', 'description': 'A group used for testing.'}
         return self.client.post('/v2/issuers/edited-test-issuer/recipient-groups', data)
 
     def create_pathway(self, creator):
         pathway_info = {'name': 'New Path', 'description': 'A new path through learning'}
         serializer = PathwaySerializer(data=pathway_info, context={
-            'issuer_slug': 'edited-test-issuer'
+            'issuer_slug': self.test_issuer.slug
         })
         serializer.is_valid(raise_exception=True)
         serializer.save(created_by=creator)
@@ -322,8 +332,7 @@ class PathwayCompletionTests(APITestCase, CachingTestCase):
         return pathway
 
     def xit_test_tree_built_properly(self):
-        editor = get_user_model().objects.get(pk=3)
-        pathway = self.build_pathway(creator=editor)
+        pathway = self.build_pathway(creator=self.test_user)
 
         self.assertIsNotNone(pathway.root_element.completion_requirements)
 
@@ -347,7 +356,7 @@ class PathwayCompletionTests(APITestCase, CachingTestCase):
         serializer.save(
             issuer=current_badgeclass.issuer,
             badgeclass=current_badgeclass,
-            created_by=editor
+            created_by=self.test_user
         )
         badge_instance = serializer.instance
 
@@ -371,8 +380,7 @@ class PathwayCompletionTests(APITestCase, CachingTestCase):
         self.assertEqual(len(completion_response.data.get('recipients')), 1)
 
     def test_completion_check_when_root_requirements_null(self):
-        editor = get_user_model().objects.get(pk=3)
-        pathway = self.build_pathway(creator=editor)
+        pathway = self.build_pathway(creator=self.test_user)
 
         # null root element completion requirements
         pathway.root_element.completion_requirements = None
@@ -383,7 +391,7 @@ class PathwayCompletionTests(APITestCase, CachingTestCase):
         recipient = 'testrecipient2@example.com'
         profile, _ = RecipientProfile.cached.get_or_create(recipient_identifier=recipient)
         badgeclass = BadgeClass.objects.get(slug='badge-of-edited-testing')
-        badge_instance = badgeclass.issue(recipient, created_by=editor)
+        badge_instance = badgeclass.issue(recipient, created_by=self.test_user)
 
         response = self.client.get(reverse('pathway_completion_detail', kwargs={
             'issuer_slug': badge_instance.issuer.slug,
@@ -399,13 +407,12 @@ class PathwayCompletionTests(APITestCase, CachingTestCase):
         self.assertNotIn(False, [c.get('completed', False) for c in completions])
 
     def test_completion_check_profile_completions(self):
-        editor = get_user_model().objects.get(pk=3)
-        pathway = self.build_single_element_pathway(creator=editor)
+        pathway = self.build_single_element_pathway(creator=self.test_user)
 
         recipient = 'testrecipient2@example.com'
         profile, _ = RecipientProfile.cached.get_or_create(recipient_identifier=recipient)
         badgeclass = BadgeClass.objects.get(slug='badge-of-edited-testing')
-        badge_instance = badgeclass.issue(recipient, created_by=editor)
+        badge_instance = badgeclass.issue(recipient, created_by=self.test_user)
 
         completions = profile.cached_completions(pathway)
 
@@ -413,8 +420,7 @@ class PathwayCompletionTests(APITestCase, CachingTestCase):
         self.assertTrue(completions[0]['completed'])
 
     def test_completion_badge_awarding(self):
-        editor = get_user_model().objects.get(pk=3)
-        pathway = self.build_pathway(creator=editor)
+        pathway = self.build_pathway(creator=self.test_user)
         completed_badgeclass = BadgeClass.objects.get(slug='second-badge-of-testing')
         pathway.root_element.completion_badgeclass = completed_badgeclass
         pathway.root_element.save()
@@ -426,7 +432,7 @@ class PathwayCompletionTests(APITestCase, CachingTestCase):
 
         # award badge to recipient, should complete pathway and get a completion badge
         badgeclass = BadgeClass.objects.get(slug='badge-of-edited-testing')
-        badge_instance = badgeclass.issue(recipient, created_by=editor)
+        badge_instance = badgeclass.issue(recipient, created_by=self.test_user)
 
         # get completion detail to force badge awarding
         with self.assertNumQueries(0):
@@ -447,8 +453,7 @@ class PathwayCompletionTests(APITestCase, CachingTestCase):
             self.fail("Completion Badge was not awarded")
 
     def test_cannot_delete_required_badgeclass(self):
-        editor = get_user_model().objects.get(pk=3)
-        pathway = self.build_single_element_pathway(creator=editor)
+        pathway = self.build_single_element_pathway(creator=self.test_user)
 
         recipient = 'testrecipient2@example.com'
         profile, _ = RecipientProfile.cached.get_or_create(recipient_identifier=recipient)
