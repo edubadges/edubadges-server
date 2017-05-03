@@ -1,10 +1,8 @@
 from django.conf.urls import url
 
-from .api import (IssuerList, IssuerDetail, IssuerStaffList,
-                  BadgeClassList, BadgeClassDetail, BadgeInstanceList,
-                  BadgeInstanceDetail, FindBadgeClassDetail, IssuerBadgeInstanceList,
-                  AllBadgeClassesList, BatchAssertions)
-
+from issuer.api import (IssuerList, IssuerDetail, BadgeClassList, BadgeClassDetail, BadgeInstanceList,
+                        BadgeInstanceDetail, IssuerBadgeInstanceList, AllBadgeClassesList, BatchAssertions)
+from issuer.api_v1 import FindBadgeClassDetail, IssuerStaffList
 
 urlpatterns = [
     # url(r'^$', RedirectView.as_view(url='/v1/issuer/issuers', permanent=False)),
