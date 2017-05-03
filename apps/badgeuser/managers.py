@@ -15,30 +15,30 @@ class BadgeUserManager(UserManager):
                create_email_address=True):
         from badgeuser.models import CachedEmailAddress
 
-        # If an unverified email record exists that matches this email address, remove it
+        user = None
+
+        # Do we know about this email address yet?
         try:
             existing_email = CachedEmailAddress.cached.get(email=email)
         except CachedEmailAddress.DoesNotExist:
+            # nope
             pass
         else:
-            if existing_email.verified:
+            if not existing_email.user.password:
+                # yes, its owned by an auto-created user trying to set a password
+                user = existing_email.user
+            elif existing_email.verified:
                 raise ValidationError(self.duplicate_email_error)
             else:
+                # yes, its an unverified email address owned by a claimed user
+                # remove the email
                 existing_email.delete()
+                # if the user no longer has any emails, remove it
+                if len(existing_email.user.cached_emails()) == 0:
+                    existing_email.user.delete()
 
-        # does this email belong to an existing user?
-        try:
-            existing_user = self.get(email=email)
-        except self.model.DoesNotExist:
-            # no, create a new user record
+        if user is None:
             user = self.model(email=email)
-        else:
-            if existing_user.password:
-                # yes, you can't have it
-                raise ValidationError(self.duplicate_email_error)
-            else:
-                # user is claiming an auto-created account
-                user = existing_user
 
         user.first_name = first_name
         user.last_name = last_name

@@ -48,6 +48,7 @@ class SetupUserHelper(APITestCase):
             user.password = None
         else:
             user.set_password(password)
+            user.save()
         if create_email_address:
             email = user.cached_emails()[0]
             email.verified = verified
@@ -136,20 +137,31 @@ class UserCreateTests(SetupUserHelper, APITestCase, CachingTestCase):
             'password': '123456'
         }
 
-        existing_user = self.setup_user(email=email, authenticate=False, verified=False)
-        self.assertIn(email, [e.email for e in existing_user.cached_emails()])
+        # create an existing user that owns email -- but unverified
+        existing_user = self.setup_user(email=email, password='secret', authenticate=False, verified=False)
+        existing_user_pk = existing_user.pk
+        existing_email = existing_user.cached_emails()[0]
+        self.assertEqual(existing_email.email, email)
+        self.assertFalse(existing_email.verified)
 
+        # attempt to signup with the same email
         response = self.client.post('/v1/user/profile', user_data)
 
+        # should work successfully and a confirmation email  sent
         self.assertEqual(response.status_code, 201)
         self.assertEqual(len(mail.outbox), 1)
 
+        # the user with this email should be the new signup
         new_user = BadgeUser.objects.get(email=email)
         self.assertEqual(new_user.email, email)
-
+        self.assertEqual(new_user.first_name, user_data.get('first_name'))
+        self.assertEqual(new_user.last_name, user_data.get('last_name'))
         existing_email = CachedEmailAddress.objects.get(email=email)
         self.assertEqual(existing_email.user, new_user)
-        self.assertTrue(existing_email not in existing_user.cached_emails())
+
+        # the old user should no longer exist
+        with self.assertRaises(BadgeUser.DoesNotExist):
+            old_user = BadgeUser.objects.get(pk=existing_user_pk)
 
     def test_user_can_add_secondary_email_of_preexisting_unclaimed_email(self):
         email = "unclaimed2@example.com"

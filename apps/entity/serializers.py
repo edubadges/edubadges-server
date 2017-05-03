@@ -4,7 +4,9 @@ from __future__ import unicode_literals
 import six
 from django import http
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers, views, exceptions, status
+from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 from rest_framework.response import Response
 
 
@@ -109,7 +111,11 @@ class DetailSerializerV2(BaseSerializerV2):
     def create(self, validated_data):
         model_cls = self.get_model_class()
         if model_cls is not None:
-            new_instance = model_cls.objects.create(**validated_data)
+            try:
+                new_instance = model_cls.objects.create(**validated_data)
+            except DjangoValidationError as e:
+                raise RestframeworkValidationError(e.message)
+
             return new_instance
 
     def update(self, instance, validated_data):

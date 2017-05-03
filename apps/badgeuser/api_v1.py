@@ -5,8 +5,8 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import CachedEmailAddress
-from .serializers import EmailSerializer
+from badgeuser.models import CachedEmailAddress
+from badgeuser.serializers_v1 import EmailSerializerV1
 
 
 class BadgeUserEmailList(APIView):
@@ -16,17 +16,17 @@ class BadgeUserEmailList(APIView):
         """
         Get a list of user's registered emails.
         ---
-        serializer: EmailSerializer
+        serializer: EmailSerializerV1
         """
         instances = request.user.cached_emails()
-        serializer = EmailSerializer(instances, many=True, context={'request': request})
+        serializer = EmailSerializerV1(instances, many=True, context={'request': request})
         return Response(serializer.data)
 
     def post(self, request, **kwargs):
         """
         Register a new unverified email.
         ---
-        serializer: EmailSerializer
+        serializer: EmailSerializerV1
         parameters:
             - name: email
               description: The email to register
@@ -34,7 +34,7 @@ class BadgeUserEmailList(APIView):
               type: string
               paramType: form
         """
-        serializer = EmailSerializer(data=request.data, context={'request': request})
+        serializer = EmailSerializerV1(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
         email_address = serializer.save(user=request.user)
@@ -61,7 +61,7 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
         """
         Get detail for one registered email.
         ---
-        serializer: EmailSerializer
+        serializer: EmailSerializerV1
         parameters:
             - name: id
               type: string
@@ -75,7 +75,7 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
         if email_address.user_id != self.request.user.id:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        serializer = EmailSerializer(email_address, context={'request': request})
+        serializer = EmailSerializerV1(email_address, context={'request': request})
         return Response(serializer.data)
 
     def delete(self, request, id, **kwargs):
@@ -107,7 +107,7 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
     def put(self, request, id, **kwargs):
         """
         Update a registered email for the current user.
-        serializer: EmailSerializer
+        serializer: EmailSerializerV1
         ---
         parameters:
             - name: id
@@ -140,6 +140,6 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
             if request.data.get('resend'):
                 email_address.send_confirmation(request=request)
 
-        serializer = EmailSerializer(email_address, context={'request': request})
+        serializer = EmailSerializerV1(email_address, context={'request': request})
         serialized = serializer.data
         return Response(serialized, status=status.HTTP_200_OK)

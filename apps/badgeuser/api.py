@@ -6,16 +6,18 @@ from allauth.account.utils import user_pk_to_url_str, url_str_to_user_pk
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.urlresolvers import reverse
 from django.http import Http404
-from rest_framework import permissions
+from rest_framework import permissions, serializers
+from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 from rest_framework.status import HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED
 
 from badgeuser.models import BadgeUser, CachedEmailAddress
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
-from badgeuser.serializers import BadgeUserProfileSerializer, BadgeUserTokenSerializerV1
+from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserTokenSerializerV1
 from badgeuser.serializers_v2 import BadgeUserTokenSerializerV2, BadgeUserSerializerV2
 from composition.tasks import process_email_verification
 from entity.api import BaseEntityDetailView
@@ -26,7 +28,7 @@ from mainsite.utils import OriginSetting
 
 class BadgeUserDetail(BaseEntityDetailView):
     model = BadgeUser
-    v1_serializer_class = BadgeUserProfileSerializer
+    v1_serializer_class = BadgeUserProfileSerializerV1
     v2_serializer_class = BadgeUserSerializerV2
     permission_classes = (permissions.AllowAny,)
 
@@ -40,7 +42,10 @@ class BadgeUserDetail(BaseEntityDetailView):
                 data=request.data, context={'request': request}
             )
             serializer.is_valid(raise_exception=True)
-            new_user = serializer.save()
+            try:
+                new_user = serializer.save()
+            except DjangoValidationError as e:
+                raise RestframeworkValidationError(e.message)
             return Response(serializer.data, status=HTTP_201_CREATED)
 
         return Response(status=HTTP_404_NOT_FOUND)
@@ -123,7 +128,13 @@ class BadgeUserToken(BaseEntityDetailView):
         Invalidate the old token (if it exists) and create a new one.
         """
         request.user.replace_token()  # generate new token first
+        self.token_replaced = True
         return super(BadgeUserToken, self).put(request, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(BadgeUserToken, self).get_context_data(**kwargs)
+        context['tokenReplaced'] = getattr(self, 'token_replaced', False)
+        return context
 
 
 class BaseUserRecoveryView(BaseEntityDetailView):
@@ -145,7 +156,7 @@ class BaseUserRecoveryView(BaseEntityDetailView):
 class BadgeUserForgotPassword(BaseUserRecoveryView):
     authentication_classes = ()
     permission_classes = (permissions.AllowAny,)
-    v1_serializer_class = BaseSerializer
+    v1_serializer_class = serializers.Serializer
     v2_serializer_class = BaseSerializerV2
 
     def get(self, request, *args, **kwargs):

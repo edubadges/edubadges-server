@@ -12,6 +12,8 @@ class BadgeUserTokenSerializerV1(serializers.Serializer):
             'username': instance.username,
             'token': instance.cached_token()
         }
+        if self.context.get('tokenReplaced', False):
+            representation['replace'] = True
         return representation
 
     def update(self, instance, validated_data):
@@ -27,7 +29,7 @@ class VerifiedEmailsField(serializers.Field):
         return addresses
 
 
-class BadgeUserProfileSerializer(serializers.Serializer):
+class BadgeUserProfileSerializerV1(serializers.Serializer):
     first_name = StripTagsCharField(max_length=30, allow_blank=True)
     last_name = StripTagsCharField(max_length=30, allow_blank=True)
     email = serializers.EmailField(source='primary_email', required=False)
@@ -59,7 +61,7 @@ class BadgeUserProfileSerializer(serializers.Serializer):
         return user
 
     def to_representation(self, instance):
-        representation = super(BadgeUserProfileSerializer, self).to_representation(instance)
+        representation = super(BadgeUserProfileSerializerV1, self).to_representation(instance)
 
         if self.context.get('include_token', False):
             representation['token'] = instance.cached_token()
@@ -67,7 +69,7 @@ class BadgeUserProfileSerializer(serializers.Serializer):
         return representation
 
 
-class EmailSerializer(serializers.ModelSerializer):
+class EmailSerializerV1(serializers.ModelSerializer):
     variants = serializers.ListField(
         child=serializers.EmailField(required=False),
         required=False, source='cached_variants', allow_null=True, read_only=True
@@ -85,13 +87,13 @@ class EmailSerializer(serializers.ModelSerializer):
         try:
             email = CachedEmailAddress.objects.get(email=new_address)
         except CachedEmailAddress.DoesNotExist:
-            email = super(EmailSerializer, self).create(validated_data)
+            email = super(EmailSerializerV1, self).create(validated_data)
             created = True
         else:
             if not email.verified:
                 # Clear out a previous attempt and let the current user try
                 email.delete()
-                email = super(EmailSerializer, self).create(validated_data)
+                email = super(EmailSerializerV1, self).create(validated_data)
                 created = True
             elif email.user != self.context.get('request').user:
                 raise serializers.ValidationError("Could not register email address.")
@@ -112,16 +114,17 @@ class EmailSerializer(serializers.ModelSerializer):
         raise serializers.ValidationError("Could not register email address.")
 
 
-class BadgeUserIdentifierField(serializers.CharField):
+class BadgeUserIdentifierFieldV1(serializers.CharField):
     def __init__(self, *args, **kwargs):
         if 'source' not in kwargs:
             kwargs['source'] = 'created_by_id'
         if 'read_only' not in kwargs:
             kwargs['read_only'] = True
-        super(BadgeUserIdentifierField, self).__init__(*args, **kwargs)
+        super(BadgeUserIdentifierFieldV1, self).__init__(*args, **kwargs)
 
     def to_representation(self, value):
         try:
             return BadgeUser.cached.get(pk=value).primary_email
         except BadgeUser.DoesNotExist:
             return None
+
