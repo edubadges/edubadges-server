@@ -3,14 +3,16 @@ import urlparse
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import UploadedFile
+from django.http import Http404
 from rest_framework import status, authentication
 from rest_framework.exceptions import ValidationError, PermissionDenied, NotFound
 from rest_framework.response import Response
+from rest_framework.status import HTTP_404_NOT_FOUND
 from rest_framework.views import APIView
 
 import badgrlog
 from badgeuser.models import CachedEmailAddress
-from entity.api import BaseEntityListView, BaseEntityDetailView
+from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
 from issuer.api_v1 import AbstractIssuerAPIEndpoint
 from issuer.models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
@@ -71,100 +73,44 @@ class AllBadgeClassesList(BaseEntityListView):
         return super(AllBadgeClassesList, self).get(request, **kwargs)
 
 
-class BadgeClassList(AbstractIssuerAPIEndpoint):
+class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
     """
     GET a list of badgeclasses within one issuer context or
     POST to create a new badgeclass within the issuer context
     """
-    queryset = Issuer.objects.all()
-    model = Issuer
-    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor,)
+    model = Issuer  # used by get_object()
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor)
+    v1_serializer_class = BadgeClassSerializerV1
+    v2_serializer_class = BadgeClassSerializerV2
 
-    def get(self, request, issuerSlug):
+    def get_objects(self, request, **kwargs):
+        issuer = self.get_object(request, **kwargs)
+        return issuer.cached_badgeclasses()
+
+    def get_context_data(self, **kwargs):
+        context = super(IssuerBadgeClassList, self).get_context_data(**kwargs)
+        context['issuer'] = self.get_object(self.request, **kwargs)
+        return context
+
+    def get(self, request, **kwargs):
         """
         GET a list of badgeclasses within one Issuer context.
         Authenticated user must have owner, editor, or staff status on Issuer
-        ---
-        serializer: BadgeClassSerializer
         """
-        # Ensure current user has permissions on current issuer
-        current_issuer = self.get_list(issuerSlug)
+        obj = self.get_object(request, **kwargs)
+        if not self.has_object_permissions(request, obj):
+            return Response(status=HTTP_404_NOT_FOUND)
 
-        if not current_issuer.exists():
-            return Response(
-                "Issuer %s not found or inadequate permissions." % issuerSlug,
-                status=status.HTTP_404_NOT_FOUND
-            )
+        return super(IssuerBadgeClassList, self).get(request, **kwargs)
 
-        issuer_badge_classes = current_issuer[0].badgeclasses.all()
-
-        if not issuer_badge_classes.exists():
-            return Response([], status=status.HTTP_200_OK)
-
-        serializer = BadgeClassSerializerV1(issuer_badge_classes, many=True, context={'request': request})
-        return Response(serializer.data)
-
-    def post(self, request, issuerSlug):
+    def post(self, request, **kwargs):
         """
         Define a new BadgeClass to be owned by a particular Issuer.
         Authenticated user must have owner or editor status on Issuer
-        ('staff' status is inadequate)
-        ---
-        serializer: BadgeClassSerializer
-        parameters:
-            - name: issuerSlug
-              required: true
-              type: string
-              paramType: path
-              description: slug of the Issuer to be owner of the new BadgeClass
-            - name: name
-              required: true
-              type: string
-              paramType: form
-              description: A short name for the new BadgeClass
-            - name: slug
-              required: false
-              type: string
-              paramType: form
-              description: Optionally customizable slug. Otherwise generated from name
-            - name: image
-              type: file
-              required: true
-              paramType: form
-              description: An image to represent the BadgeClass. Must be a square PNG with no existing OBI assertion data baked into it.
-            - name: criteria
-              type: string
-              required: true
-              paramType: form
-              description: Either a URL of a remotely hosted criteria page or a text string describing the criteria.
-            - name: description
-              type: string
-              required: true
-              paramType: form
-              description: The description of the Badge Class.
         """
-
-        # Step 1: Locate the issuer
-        current_issuer = self.get_object(issuerSlug)
-
-        if current_issuer is None:
-            return Response(
-                "Issuer %s not found or inadequate permissions." % issuerSlug,
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        # Step 2: validate, create new Badge Class
-        serializer = BadgeClassSerializerV1(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-
-        serializer.save(
-            issuer=current_issuer,
-            created_by=request.user,
-        )
-        badge_class = serializer.data
-
-        logger.event(badgrlog.BadgeClassCreatedEvent(badge_class, request.data.get('image')))
-        return Response(badge_class, status=status.HTTP_201_CREATED)
+        return super(IssuerBadgeClassList, self).post(request, **kwargs)
+        #logger.event(badgrlog.BadgeClassCreatedEvent(badge_class, request.data.get('image')))
+        # return Response(badge_class, status=status.HTTP_201_CREATED)
 
 
 class BadgeClassDetail(AbstractIssuerAPIEndpoint):

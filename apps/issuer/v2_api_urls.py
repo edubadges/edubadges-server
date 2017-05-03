@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from issuer.api import (IssuerList, IssuerDetail, BadgeClassList, BadgeClassDetail, BadgeInstanceList,
+from issuer.api import (IssuerList, IssuerDetail, IssuerBadgeClassList, BadgeClassDetail, BadgeInstanceList,
                         BadgeInstanceDetail, IssuerBadgeInstanceList, AllBadgeClassesList, BatchAssertions)
 
 urlpatterns = [
@@ -9,7 +9,7 @@ urlpatterns = [
     url(r'^issuers/(?P<entity_id>[^/]+)$', IssuerDetail.as_view(), name='v2_api_issuer_detail'),
 
     url(r'^issuers/(?P<entity_id>[^/]+)/assertions$', IssuerBadgeInstanceList.as_view(), name='v2_api_issuer_assertion_list'),
-    url(r'^issuers/(?P<entity_id>[^/]+)/badgeclasses$', BadgeClassList.as_view(), name='v2_api_issuer_badgeclass_list'),
+    url(r'^issuers/(?P<entity_id>[^/]+)/badgeclasses$', IssuerBadgeClassList.as_view(), name='v2_api_issuer_badgeclass_list'),
 
     url(r'^badgeclasses$', AllBadgeClassesList.as_view(), name='v2_api_badgeclass_list'),
     url(r'^badgeclasses/(?P<entity_id>[^/]+)$', BadgeClassDetail.as_view(), name='v2_api_badgeclass_detail'),

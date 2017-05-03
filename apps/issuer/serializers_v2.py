@@ -9,7 +9,7 @@ from entity.serializers import DetailSerializerV2, EntityRelatedFieldV2
 from mainsite.drf_fields import ValidImageField
 from mainsite.serializers import StripTagsCharField, MarkdownCharField
 from mainsite.validators import ChoicesValidator
-from issuer.models import Issuer, IssuerStaff
+from issuer.models import Issuer, IssuerStaff, BadgeClass
 
 
 class IssuerStaffSerializerV2(DetailSerializerV2):
@@ -51,7 +51,7 @@ class BadgeClassSerializerV2(DetailSerializerV2):
     openBadgeId = serializers.URLField(source='jsonld_id', read_only=True)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     createdBy = EntityRelatedFieldV2(source='cached_creator', read_only=True)
-    issuer = EntityRelatedFieldV2(source='cached_issuer', read_only=True)
+    issuer = EntityRelatedFieldV2(source='cached_issuer', required=False)
 
     name = StripTagsCharField(max_length=1024)
     image = ValidImageField(required=False)
@@ -61,4 +61,12 @@ class BadgeClassSerializerV2(DetailSerializerV2):
     criteriaNarrative = MarkdownCharField(source='criteria_text', required=False)
 
     class Meta:
-        model = Issuer
+        model = BadgeClass
+
+    def update(self, instance, validated_data):
+        if 'cached_issuer' in validated_data:
+            validated_data.pop('cached_issuer')  # issuer is not updatable
+        return super(BadgeClassSerializerV2, self).update(instance, validated_data)
+
+    def create(self, validated_data):
+        return super(BadgeClassSerializerV2, self).create(validated_data)

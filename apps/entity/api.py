@@ -68,7 +68,12 @@ class BaseEntityListView(BaseEntityView):
                 logger.event(event_cls(instance))
 
 
-class BaseEntityDetailView(BaseEntityView):
+class VersionedObjectMixin(object):
+    def has_object_permissions(self, request, obj):
+        for permission in self.get_permissions():
+            if not permission.has_object_permission(request, self, obj):
+                return False
+            return True
 
     def get_object(self, request, **kwargs):
         version = getattr(request, 'version', 'v1')
@@ -96,11 +101,8 @@ class BaseEntityDetailView(BaseEntityView):
         # nothing found
         raise Http404
 
-    def has_object_permissions(self, request, obj):
-        for permission in self.get_permissions():
-            if not permission.has_object_permission(request, self, obj):
-                return False
-            return True
+
+class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
 
     def get(self, request, **kwargs):
         """
