@@ -70,7 +70,7 @@ class IssuerSerializerV1(serializers.Serializer):
         representation['json'] = obj.get_json()
 
         if self.context.get('embed_badgeclasses', False):
-            representation['badgeclasses'] = BadgeClassSerializer(obj.badgeclasses.all(), many=True, context=self.context).data
+            representation['badgeclasses'] = BadgeClassSerializerV1(obj.badgeclasses.all(), many=True, context=self.context).data
 
         representation['badgeClassCount'] = len(obj.cached_badgeclasses())
         representation['recipientGroupCount'] = len(obj.cached_recipient_groups())
@@ -94,12 +94,12 @@ class IssuerRoleActionSerializerV1(serializers.Serializer):
         return attrs
 
 
-class BadgeClassSerializer(serializers.Serializer):
+class BadgeClassSerializerV1(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1()
     id = serializers.IntegerField(required=False, read_only=True)
     name = StripTagsCharField(max_length=255)
-    image = Base64FileField(allow_empty_file=False, use_url=True, required=False)
+    image = ValidImageField(required=False)
     slug = StripTagsCharField(max_length=255, allow_blank=True, required=False)
     criteria = MarkdownCharField(allow_blank=True, required=False, write_only=True)
     criteria_text = MarkdownCharField(required=False, read_only=True)
@@ -109,28 +109,15 @@ class BadgeClassSerializer(serializers.Serializer):
     description = StripTagsCharField(max_length=16384, required=True)
 
     def to_representation(self, instance):
-        representation = super(BadgeClassSerializer, self).to_representation(instance)
-        representation['issuer'] = OriginSetting.HTTP+reverse('issuer_json', kwargs={'slug': instance.cached_issuer.slug})
+        representation = super(BadgeClassSerializerV1, self).to_representation(instance)
+        representation['issuer'] = OriginSetting.HTTP+reverse('issuer_json', kwargs={'entity_id': instance.cached_issuer.entity_id})
         representation['json'] = instance.get_json()
         return representation
 
     def validate_image(self, image):
-        # TODO: Make sure it's a PNG (square if possible), and remove any baked-in badge assertion that exists.
-        # Doing: add a random string to filename
-        img_name, img_ext = os.path.splitext(image.name)
-
-        try:
-            from PIL import Image
-            img = Image.open(image)
-            img.verify()
-        except Exception as e:
-            if not verify_svg(image):
-                raise serializers.ValidationError('Invalid image.')
-        else:
-            if img.format != "PNG":
-                raise serializers.ValidationError('Invalid PNG')
-
-        image.name = 'issuer_badgeclass_' + str(uuid.uuid4()) + img_ext
+        if image is not None:
+            img_name, img_ext = os.path.splitext(image.name)
+            image.name = 'issuer_badgeclass_' + str(uuid.uuid4()) + img_ext
         return image
 
     def update(self, instance, validated_data):
@@ -225,7 +212,7 @@ class BadgeInstanceSerializer(serializers.Serializer):
         else:
             representation['issuer'] = OriginSetting.HTTP+reverse('issuer_json', kwargs={'slug': instance.cached_issuer.slug})
         if self.context.get('include_badge_class', False):
-            representation['badge_class'] = BadgeClassSerializer(instance.cached_badgeclass, context=self.context).data
+            representation['badge_class'] = BadgeClassSerializerV1(instance.cached_badgeclass, context=self.context).data
         else:
             representation['badge_class'] = OriginSetting.HTTP+reverse('badgeclass_json', kwargs={'slug': instance.cached_badgeclass.slug})
 
@@ -292,7 +279,7 @@ class IssuerPortalSerializer(serializers.Serializer):
             many=True,
             context=self.context
         )
-        badgeclass_data = BadgeClassSerializer(
+        badgeclass_data = BadgeClassSerializerV1(
             user_issuer_badgeclasses,
             many=True,
             context=self.context

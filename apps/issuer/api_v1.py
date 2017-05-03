@@ -16,7 +16,7 @@ from entity.api import BaseEntityListView, BaseEntityDetailView
 from issuer.models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
                                 IsEditor, IsStaff, IsOwnerOrStaff, ApprovedIssuersOnly)
-from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializer,
+from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    BadgeInstanceSerializer, IssuerRoleActionSerializerV1,
                                    IssuerStaffSerializerV1)
 from issuer.serializers_v2 import IssuerSerializerV2
@@ -218,6 +218,6 @@ class FindBadgeClassDetail(AbstractIssuerAPIEndpoint):
         if badge is None:
             raise NotFound("No BadgeClass found by identifier: {}".format(identifier))
 
-        serializer = BadgeClassSerializer(badge)
+        serializer = BadgeClassSerializerV1(badge)
         return Response(serializer.data)
 

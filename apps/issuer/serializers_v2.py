@@ -1,14 +1,15 @@
 import uuid
 
 import os
+from django.core.validators import URLValidator
 from rest_framework import serializers
 
 from badgeuser.models import BadgeUser
 from entity.serializers import DetailSerializerV2, EntityRelatedFieldV2
 from mainsite.drf_fields import ValidImageField
-from mainsite.serializers import StripTagsCharField
+from mainsite.serializers import StripTagsCharField, MarkdownCharField
 from mainsite.validators import ChoicesValidator
-from .models import Issuer, IssuerStaff
+from issuer.models import Issuer, IssuerStaff
 
 
 class IssuerStaffSerializerV2(DetailSerializerV2):
@@ -17,6 +18,7 @@ class IssuerStaffSerializerV2(DetailSerializerV2):
 
 
 class IssuerSerializerV2(DetailSerializerV2):
+    openBadgeId = serializers.URLField(source='jsonld_id', read_only=True)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     createdBy = EntityRelatedFieldV2(source='cached_creator', read_only=True)
     name = StripTagsCharField(max_length=1024)
@@ -25,7 +27,6 @@ class IssuerSerializerV2(DetailSerializerV2):
     description = StripTagsCharField(max_length=1024, required=True)
     url = serializers.URLField(max_length=1024, required=True)
     staff = IssuerStaffSerializerV2(many=True, source='staff_items', required=False)
-    openBadgeId = serializers.URLField(source='jsonld_id', read_only=True)
 
     class Meta:
         model = Issuer
@@ -44,3 +45,20 @@ class IssuerSerializerV2(DetailSerializerV2):
         new_issuer.staff_items = staff
 
         return new_issuer
+
+
+class BadgeClassSerializerV2(DetailSerializerV2):
+    openBadgeId = serializers.URLField(source='jsonld_id', read_only=True)
+    createdAt = serializers.DateTimeField(source='created_at', read_only=True)
+    createdBy = EntityRelatedFieldV2(source='cached_creator', read_only=True)
+    issuer = EntityRelatedFieldV2(source='cached_issuer', read_only=True)
+
+    name = StripTagsCharField(max_length=1024)
+    image = ValidImageField(required=False)
+    description = StripTagsCharField(max_length=1024, required=True)
+
+    criteriaUrl = StripTagsCharField(source='criteria_url', required=False, validators=[URLValidator()])
+    criteriaNarrative = MarkdownCharField(source='criteria_text', required=False)
+
+    class Meta:
+        model = Issuer

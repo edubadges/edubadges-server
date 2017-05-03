@@ -15,10 +15,10 @@ from issuer.api_v1 import AbstractIssuerAPIEndpoint
 from issuer.models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
                                 IsEditor, IsStaff, IsOwnerOrStaff, ApprovedIssuersOnly)
-from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializer,
+from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    BadgeInstanceSerializer, IssuerRoleActionSerializerV1,
                                    IssuerStaffSerializerV1)
-from issuer.serializers_v2 import IssuerSerializerV2
+from issuer.serializers_v2 import IssuerSerializerV2, BadgeClassSerializerV2
 from issuer.utils import get_badgeclass_by_identifier
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 
@@ -28,7 +28,7 @@ logger = badgrlog.BadgrLogger()
 
 class IssuerList(BaseEntityListView):
     """
-    Issuer List resource for the authenticated user
+    Issuer list resource for the authenticated user
     """
     model = Issuer
     v1_serializer_class = IssuerSerializerV1
@@ -51,29 +51,24 @@ class IssuerDetail(BaseEntityDetailView):
     permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor)
 
 
-class AllBadgeClassesList(AbstractIssuerAPIEndpoint):
+class AllBadgeClassesList(BaseEntityListView):
     """
     GET a list of badgeclasses within one issuer context or
     POST to create a new badgeclass within the issuer context
     """
-    queryset = Issuer.objects.all()
-    model = Issuer
-    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor,)
+    model = BadgeClass
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    v1_serializer_class = BadgeClassSerializerV1
+    v2_serializer_class = BadgeClassSerializerV2
 
-    def get(self, request):
-        """
-        GET a list of badgeclasses within one Issuer context.
-        Authenticated user must have owner, editor, or staff status on Issuer
-        ---
-        serializer: BadgeClassSerializer
-        """
-        # Ensure current user has permissions on current issuer
-        user_badgeclasses = request.user.cached_badgeclasses()
+    def get_objects(self, request, **kwargs):
+        return request.user.cached_badgeclasses()
 
-        serializer = BadgeClassSerializer(
-            user_badgeclasses, many=True, context={'request': request}
-        )
-        return Response(serializer.data)
+    def get(self, request, **kwargs):
+        """
+        GET a list of badgeclasses the user has access to
+        """
+        return super(AllBadgeClassesList, self).get(request, **kwargs)
 
 
 class BadgeClassList(AbstractIssuerAPIEndpoint):
@@ -106,7 +101,7 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
         if not issuer_badge_classes.exists():
             return Response([], status=status.HTTP_200_OK)
 
-        serializer = BadgeClassSerializer(issuer_badge_classes, many=True, context={'request': request})
+        serializer = BadgeClassSerializerV1(issuer_badge_classes, many=True, context={'request': request})
         return Response(serializer.data)
 
     def post(self, request, issuerSlug):
@@ -159,7 +154,7 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
             )
 
         # Step 2: validate, create new Badge Class
-        serializer = BadgeClassSerializer(data=request.data, context={'request': request})
+        serializer = BadgeClassSerializerV1(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
         serializer.save(
@@ -196,7 +191,7 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
                 status=status.HTTP_404_NOT_FOUND
             )
         else:
-            serializer = BadgeClassSerializer(current_badgeclass, context={'request': request})
+            serializer = BadgeClassSerializerV1(current_badgeclass, context={'request': request})
             return Response(serializer.data)
 
     def delete(self, request, issuerSlug, badgeSlug):
@@ -251,7 +246,7 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
             if not isinstance(new_image, UploadedFile) and urlparse.urlparse(new_image).scheme != 'data':
                 cleaned_data.pop('image')
 
-            serializer = BadgeClassSerializer(current_badgeclass, data=cleaned_data, context={'request': request})
+            serializer = BadgeClassSerializerV1(current_badgeclass, data=cleaned_data, context={'request': request})
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
