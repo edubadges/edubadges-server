@@ -17,7 +17,7 @@ from jsonfield import JSONField
 from openbadges_bakery import bake
 
 from issuer.managers import BadgeInstanceManager
-from mainsite.base import BaseVersionedEntity
+from entity.models import BaseVersionedEntity
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage
 from mainsite.models import (BadgrApp, EmailBlacklist)
@@ -65,7 +65,7 @@ class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUp
 
     def publish(self, *args, **kwargs):
         super(Issuer, self).publish(*args, **kwargs)
-        for member in self.cached_staff:
+        for member in self.cached_issuerstaff():
             member.cached_user.publish()
 
     def delete(self, *args, **kwargs):
@@ -76,7 +76,7 @@ class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUp
         for bc in self.cached_badgeclasses():
             bc.delete()
 
-        staff = self.cached_staff
+        staff = self.cached_issuerstaff()
         ret = super(Issuer, self).delete(*args, **kwargs)
 
         # remove membership records and publish users
@@ -127,28 +127,36 @@ class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUp
         return self.staff.filter(issuerstaff__role=IssuerStaff.ROLE_OWNER)
 
     @cachemodel.cached_method(auto_publish=True)
-    def cached_staff_records(self):
+    def cached_issuerstaff(self):
         return IssuerStaff.objects.filter(issuer=self)
 
     @property
-    def cached_staff(self):
-        return self.cached_staff_records()
+    def staff_items(self):
+        return self.cached_issuerstaff()
 
-    @cached_staff.setter
-    def cached_staff(self, value):
+    @staff_items.setter
+    def staff_items(self, value):
         """
         Update this issuers IssuerStaff from a list of IssuerStaffSerializerV2 data
         """
-        existing_staff_idx = {s.cached_user: s for s in self.cached_staff}
+        existing_staff_idx = {s.cached_user: s for s in self.staff_items}
         new_staff_idx = {s['cached_user']: s for s in value}
 
         # add missing staff records
         for staff_data in value:
             if staff_data['cached_user'] not in existing_staff_idx:
-                IssuerStaff.objects.create(issuer=self, user=staff_data['cached_user'], role=staff_data['role'])
+                staff_record, created = IssuerStaff.cached.get_or_create(
+                    issuer=self,
+                    user=staff_data['cached_user'],
+                    defaults={
+                        'role': staff_data['role']
+                    })
+                if not created:
+                    staff_record.role = staff_data['role']
+                    staff_record.save()
 
         # remove old staff records -- but never remove the only OWNER role
-        for staff_record in self.cached_staff:
+        for staff_record in self.staff_items:
             if staff_record.cached_user not in new_staff_idx:
                 if staff_record.role != IssuerStaff.ROLE_OWNER or len(self.owners) > 1:
                     staff_record.delete()

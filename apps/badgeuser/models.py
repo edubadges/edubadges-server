@@ -1,7 +1,9 @@
 from __future__ import unicode_literals
+
+import random
+import string
 from hashlib import md5
 from itertools import chain
-import random, string
 
 import cachemodel
 from allauth.account.models import EmailAddress, EmailConfirmation
@@ -9,18 +11,13 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
-from django.core.urlresolvers import reverse
-from django.db import models
-from django.db.models import Q
+from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.authtoken.models import Token
 
-from mainsite.base import BaseVersionedEntity
+from entity.models import BaseVersionedEntity
 from issuer.models import Issuer
-
-from .managers import CachedEmailAddressManager
-from django.contrib.auth.models import UserManager
-
+from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager
 
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
@@ -127,7 +124,8 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
-    manager=UserManager()
+
+    objects = BadgeUserManager()
 
     class Meta:
         verbose_name = _('badge user')
@@ -157,6 +155,59 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     @cachemodel.cached_method(auto_publish=True)
     def cached_emails(self):
         return CachedEmailAddress.objects.filter(user=self)
+
+    @property
+    def email_items(self):
+        return self.cached_emails()
+
+    @email_items.setter
+    def email_items(self, value):
+        """
+        Update this users EmailAddress from a list of BadgeUserEmailSerializerV2 data
+        :param value: list(BadgeUserEmailSerializerV2) 
+        :return: None
+        """
+        if len(value) < 1:
+            raise ValidationError("Must have at least 1 email")
+
+        new_email_idx = {d['email']: d for d in value}
+
+        primary_count = sum(1 if d.get('primary', False) else 0 for d in value)
+        if primary_count != 1:
+            raise ValidationError("Must have exactly 1 primary email")
+
+        with transaction.atomic():
+            # add or update existing items
+            for email_data in value:
+                primary = email_data.get('primary', False)
+                emailaddress, created = CachedEmailAddress.cached.get_or_create(
+                    email=email_data['email'],
+                    defaults={
+                        'user': self,
+                        'primary': primary
+                    })
+                if created:
+                    # new email address send a confirmation
+                    emailaddress.send_confirmation()
+                else:
+                    if emailaddress.user_id == self.id:
+                        # existing email address owned by user
+                        emailaddress.primary = primary
+                        emailaddress.save()
+                    elif not emailaddress.verified:
+                        # existing unverified email address, handover to this user
+                        emailaddress.user = self
+                        emailaddress.primary = primary
+                        emailaddress.save()
+                        emailaddress.send_confirmation()
+                    else:
+                        # existing email address used by someone else
+                        raise ValidationError("Email '{}' may already be in use".format(email_data.get('email')))
+
+            # remove old items
+            for emailaddress in self.email_items:
+                if emailaddress.email not in new_email_idx:
+                    emailaddress.delete()
 
     def cached_email_variants(self):
         return chain.from_iterable(email.cached_variants() for email in self.cached_emails())
@@ -201,6 +252,13 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):
         return Issuer.objects.filter(staff__id=self.id).distinct()
+
+    @property
+    def peers(self):
+        """
+        a BadgeUser is a Peer of another BadgeUser if they appear in an IssuerStaff together
+        """
+        return set(chain(*[[s.cached_user for s in i.cached_issuerstaff()] for i in self.cached_issuers()]))
 
     def cached_badgeclasses(self):
         return chain.from_iterable(issuer.cached_badgeclasses() for issuer in self.cached_issuers())
