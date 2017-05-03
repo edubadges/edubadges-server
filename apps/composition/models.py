@@ -36,7 +36,7 @@ class LocalBadgeInstance(cachemodel.CacheModel):
     revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
 
     def get_absolute_url(self):
-        return reverse('badgeinstance_json', kwargs={'slug': self.slug})
+        return reverse('badgeinstance_json', kwargs={'entity_id': self.slug})
 
     def get_public_url(self):
         return OriginSetting.HTTP+self.get_absolute_url()
