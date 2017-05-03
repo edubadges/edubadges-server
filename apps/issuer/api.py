@@ -102,7 +102,7 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
     model = Issuer
     permission_classes = (AuthenticatedWithVerifiedEmail, IsOwnerOrStaff,)
 
-    def get(self, request, slug):
+    def get(self, request, slug, version=None):
         """
         Get a list of users associated with a role on an Issuer
         ---
@@ -130,7 +130,7 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
             return Response([], status=status.HTTP_200_OK)
         return Response(serializer.data)
 
-    def post(self, request, slug):
+    def post(self, request, slug, version=None):
         """
         Add or remove a user from a role on an issuer. Limited to Owner users only.
         ---
@@ -227,7 +227,7 @@ class AllBadgeClassesList(AbstractIssuerAPIEndpoint):
     model = Issuer
     permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor,)
 
-    def get(self, request):
+    def get(self, request, version=None):
         """
         GET a list of badgeclasses within one Issuer context.
         Authenticated user must have owner, editor, or staff status on Issuer
@@ -249,7 +249,7 @@ class FindBadgeClassDetail(AbstractIssuerAPIEndpoint):
     """
     permission_classes = (AuthenticatedWithVerifiedEmail,)
 
-    def get(self, request):
+    def get(self, request, version=None):
         """
         GET a specific BadgeClass by searching by identifier
         ---
@@ -279,7 +279,7 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
     model = Issuer
     permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor,)
 
-    def get(self, request, issuerSlug):
+    def get(self, request, issuerSlug, version=None):
         """
         GET a list of badgeclasses within one Issuer context.
         Authenticated user must have owner, editor, or staff status on Issuer
@@ -303,7 +303,7 @@ class BadgeClassList(AbstractIssuerAPIEndpoint):
         serializer = BadgeClassSerializer(issuer_badge_classes, many=True, context={'request': request})
         return Response(serializer.data)
 
-    def post(self, request, issuerSlug):
+    def post(self, request, issuerSlug, version=None):
         """
         Define a new BadgeClass to be owned by a particular Issuer.
         Authenticated user must have owner or editor status on Issuer
@@ -374,7 +374,7 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
     model = BadgeClass
     permission_classes = (AuthenticatedWithVerifiedEmail, MayEditBadgeClass,)
 
-    def get(self, request, issuerSlug, badgeSlug):
+    def get(self, request, issuerSlug, badgeSlug, version=None):
         """
         GET single BadgeClass representation
         ---
@@ -393,7 +393,7 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
             serializer = BadgeClassSerializer(current_badgeclass, context={'request': request})
             return Response(serializer.data)
 
-    def delete(self, request, issuerSlug, badgeSlug):
+    def delete(self, request, issuerSlug, badgeSlug, version=None):
         """
         DELETE a badge class that has never been issued. This will fail if any assertions exist for the BadgeClass.
         Restricted to owners or editors (not staff) of the corresponding Issuer.
@@ -423,7 +423,7 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
                 logger.event(badgrlog.BadgeClassDeletedEvent(old_badgeclass, request.user))
                 return Response("Badge " + badgeSlug + " has been deleted.", status.HTTP_200_OK)
 
-    def put(self, request, issuerSlug, badgeSlug):
+    def put(self, request, issuerSlug, badgeSlug, version=None):
         """
         Update an existing badge class. Existing BadgeInstances will NOT be updated.
         ---
@@ -457,7 +457,7 @@ class BatchAssertions(AbstractIssuerAPIEndpoint):
     serializer_class = BadgeInstanceSerializer
     permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass,)
 
-    def post(self, request, issuerSlug, badgeSlug):
+    def post(self, request, issuerSlug, badgeSlug, version=None):
         """
         POST to issue multiple copies of the same badge to multiple recipients
         ---
@@ -510,7 +510,7 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
     serializer_class = BadgeInstanceSerializer
     permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass,)
 
-    def post(self, request, issuerSlug, badgeSlug):
+    def post(self, request, issuerSlug, badgeSlug, version=None):
         """
         Issue a badge to a single recipient.
         ---
@@ -536,7 +536,7 @@ class BadgeInstanceList(AbstractIssuerAPIEndpoint):
         logger.event(badgrlog.BadgeInstanceCreatedEvent(serializer.data, request.user))
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def get(self, request, issuerSlug, badgeSlug):
+    def get(self, request, issuerSlug, badgeSlug, version=None):
         """
         Get a list of all issued assertions for a single BadgeClass.
         ---
@@ -571,7 +571,7 @@ class IssuerBadgeInstanceList(AbstractIssuerAPIEndpoint):
     model = Issuer
     permission_classes = (AuthenticatedWithVerifiedEmail, IsStaff,)
 
-    def get(self, request, issuerSlug):
+    def get(self, request, issuerSlug, version=None):
         """
         Get a list of assertions issued to one recpient by one issuer.
         ---
@@ -615,7 +615,7 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
     model = BadgeInstance
     permission_classes = (AuthenticatedWithVerifiedEmail, MayEditBadgeClass,)
 
-    def get(self, request, issuerSlug, badgeSlug, assertionSlug):
+    def get(self, request, issuerSlug, badgeSlug, assertionSlug, version=None):
         """
         GET a single assertion's details.
         The assertionSlug URL prameter is the only one that varies the request,
@@ -632,7 +632,7 @@ class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
             serializer = BadgeInstanceSerializer(current_assertion, context={'request': request})
             return Response(serializer.data)
 
-    def delete(self, request, issuerSlug, badgeSlug, assertionSlug):
+    def delete(self, request, issuerSlug, badgeSlug, assertionSlug, version=None):
         """
         Revoke an issued badge assertion.
         Limited to Issuer owner and editors (not staff)

@@ -10,6 +10,10 @@ import badgrlog
 
 
 class BaseEntityView(APIView):
+    def __init__(self):
+        super(BaseEntityView, self).__init__()
+        self._logger = None
+
     def get_context_data(self, **kwargs):
         return {
             'request': self.request,
@@ -24,9 +28,8 @@ class BaseEntityView(APIView):
         return getattr(self, 'serializer_class', None)
 
     def get_logger(self):
-        if self._logger:
-            return self._logger
-        self._logger = badgrlog.BadgrLogger()
+        if self._logger is None:
+            self._logger = badgrlog.BadgrLogger()
         return self._logger
 
 

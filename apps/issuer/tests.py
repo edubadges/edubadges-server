@@ -26,6 +26,7 @@ from mainsite import TOP_DIR
 
 from mainsite.utils import OriginSetting
 from mainsite.tests import CachingTestCase
+from mainsite.models import BadgrApp
 
 factory = APIRequestFactory()
 
@@ -48,6 +49,17 @@ class IssuerTestBase(APITestCase, CachingTestCase):
 
         self.test_user_3, _ = BadgeUser.objects.get_or_create(email='test3@example.com')
         CachedEmailAddress.objects.get_or_create(user=self.test_user_3, email='test3@example.com', verified=True, primary=True)
+        
+        self.badgr_app, _ = BadgrApp.objects.get_or_create(
+            email_confirmation_redirect="http://localhost:3001/login/",
+            # updated_by=[ "root" ],
+            created_at="2016-02-10T17:25:58Z",
+            is_active=True,
+            updated_at="2016-02-10T17:25:58Z",
+            # created_by=["root"],
+            cors="localhost:3001",
+            forgot_password_redirect="http://localhost:3001/change-password/"
+        )
 
         self.issuer_1, _ = Issuer.objects.get_or_create(
             name="Test Issuer",
@@ -263,9 +275,9 @@ class IssuerTests(IssuerTestBase):
                 response = view(request)
                 self.assertEqual(response.status_code, 201)
 
-                badge_object = response.data.get('json')
-                derived_slug = badge_object['id'].split('/')[-1]
-                new_issuer = Issuer.objects.get(slug=derived_slug)
+                issuer_object = response.data.get('json')
+                entity_id = issuer_object['id'].split('/')[-1]
+                new_issuer = Issuer.objects.get(entity_id=entity_id)
 
                 image_width, image_height = \
                     get_image_dimensions(new_issuer.image.file)
@@ -296,9 +308,9 @@ class IssuerTests(IssuerTestBase):
                 response = view(request)
                 self.assertEqual(response.status_code, 201)
 
-                badge_object = response.data.get('json')
-                derived_slug = badge_object['id'].split('/')[-1]
-                new_issuer = Issuer.objects.get(slug=derived_slug)
+                issuer_object = response.data.get('json')
+                entity_id = issuer_object['id'].split('/')[-1]
+                new_issuer = Issuer.objects.get(entity_id=entity_id)
 
                 image_width, image_height = \
                     get_image_dimensions(new_issuer.image.file)
@@ -324,14 +336,13 @@ class IssuerTests(IssuerTestBase):
                                        issuer_fields_with_image,
                                        format='multipart')
 
-                force_authenticate(request,
-                                   user=self.test_user)
+                force_authenticate(request, user=self.test_user)
                 response = view(request)
                 self.assertEqual(response.status_code, 201)
 
-                badge_object = response.data.get('json')
-                derived_slug = badge_object['id'].split('/')[-1]
-                new_issuer = Issuer.objects.get(slug=derived_slug)
+                issuer_object = response.data.get('json')
+                entity_id = issuer_object['id'].split('/')[-1]
+                new_issuer = Issuer.objects.get(entity_id=entity_id)
 
                 image_width, image_height = \
                     get_image_dimensions(new_issuer.image.file)
@@ -383,7 +394,7 @@ class IssuerTests(IssuerTestBase):
 
         post_response = self.client.post(
             '/v1/issuer/issuers/test-issuer/staff',
-            {'action': 'add', 'username': 'test3', 'editor': True}
+            {'action': 'add', 'username': self.test_user_3.username, 'editor': True}
         )
 
         self.assertEqual(post_response.status_code, 200)
@@ -463,7 +474,7 @@ class IssuerTests(IssuerTestBase):
         self.client.force_authenticate(user=self.test_user)
         post_response = self.client.post(
             '/v1/issuer/issuers/test-issuer/staff',
-            {'action': 'add', 'username': 'test2'}
+            {'action': 'add', 'username': self.test_user_2.username}
         )
 
         self.assertEqual(post_response.status_code, 200)
@@ -471,7 +482,7 @@ class IssuerTests(IssuerTestBase):
 
         second_response = self.client.post(
             '/v1/issuer/issuers/test-issuer/staff',
-            {'action': 'remove', 'username': 'test2'}
+            {'action': 'remove', 'username': self.test_user_2.username}
         )
 
         self.assertEqual(second_response.status_code, 200)
@@ -834,7 +845,7 @@ class BadgeClassTests(IssuerTestBase):
             )
             self.assertEqual(response.status_code, 201)
 
-            self.assertEqual(len(list(user.cached_badgeclasses())), number_of_badgeclasses + 1)
+            self.assertEqual(len(list(self.test_user.cached_badgeclasses())), number_of_badgeclasses + 1)
 
 
     def test_new_badgeclass_updates_cached_user_badgeclasses(self):

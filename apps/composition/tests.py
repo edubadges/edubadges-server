@@ -72,7 +72,7 @@ def setup_basic_0_5_0(**kwargs):
 class TestBadgeUploads(APITestCase, CachingTestCase):
 
     def setup_user(self, email='test@example.com', authenticate=True):
-        user = BadgeUser.objects.create(email=email)
+        user, _ = BadgeUser.objects.get_or_create(email=email)
         CachedEmailAddress.objects.create(user=user, email=email, verified=True, primary=True)
         if authenticate:
             self.client.force_authenticate(user=user)
