@@ -39,12 +39,12 @@ class RecipientApiTests(APITestCase, CachingTestCase):
         # Authenticate as an editor of the issuer in question
         self.client.force_authenticate(user=self.test_user)
         data = {'name': 'Group of Testing', 'description': 'A group used for testing.'}
-        return self.client.post('/v2/issuers/{}/recipient-groups'.format(self.test_issuer.entity_id), data)
+        return self.client.post('/v1/issuers/{}/recipient-groups'.format(self.test_issuer.slug), data)
 
     def create_pathway(self):
         self.client.force_authenticate(user=self.test_user)
         data = {'name': 'Pathway of Testing', 'description': 'A pathway used for testing.'}
-        return self.client.post('/v2/issuers/{}/pathways'.format(self.test_issuer.entity_id), data)
+        return self.client.post('/v1/issuers/{}/pathways'.format(self.test_issuer.slug), data)
 
     def test_can_create_group(self):
         response = self.create_group()
@@ -55,10 +55,10 @@ class RecipientApiTests(APITestCase, CachingTestCase):
     def test_can_delete_group(self):
         _ = self.create_group()
 
-        response = self.client.delete('/v2/issuers/{}/recipient-groups/group-of-testing'.format(self.test_issuer.entity_id))
+        response = self.client.delete('/v1/issuers/{}/recipient-groups/group-of-testing'.format(self.test_issuer.slug))
         self.assertEqual(response.status_code, 200)
 
-        get_response = self.client.get('/v2/issuers/{}/recipient-groups/group-of-testing'.format(self.test_issuer.entity_id))
+        get_response = self.client.get('/v1/issuers/{}/recipient-groups/group-of-testing'.format(self.test_issuer.slug))
         self.assertEqual(get_response.status_code, 404)
 
     def test_can_add_member_to_group(self):
@@ -67,13 +67,13 @@ class RecipientApiTests(APITestCase, CachingTestCase):
         member_data = {'name': 'Test Member', 'recipient': 'testmemberuno@example.com'}
         self.client.force_authenticate(user=self.test_user)
         response = self.client.post(
-            '/v2/issuers/{}/recipient-groups/group-of-testing/members'.format(self.test_issuer.entity_id),
+            '/v1/issuers/{}/recipient-groups/group-of-testing/members'.format(self.test_issuer.slug),
             member_data
         )
 
         self.assertEqual(response.status_code, 201)
 
-        get_response = self.client.get('/v2/issuers/{}/recipient-groups/group-of-testing/members'.format(self.test_issuer.entity_id))
+        get_response = self.client.get('/v1/issuers/{}/recipient-groups/group-of-testing/members'.format(self.test_issuer.slug))
         self.assertEqual(get_response.status_code, 200)
         self.assertEqual(len(get_response.data['memberships']), 1)
 
@@ -91,7 +91,7 @@ class RecipientApiTests(APITestCase, CachingTestCase):
         }"""
 
         response = self.client.put(
-            '/v2/issuers/{}/recipient-groups/{}?embedRecipients=true'.format(group.issuer.slug, group.slug),
+            '/v1/issuers/{}/recipient-groups/{}?embedRecipients=true'.format(group.issuer.slug, group.slug),
             data, content_type='application/json'
         )
 
@@ -106,7 +106,7 @@ class RecipientApiTests(APITestCase, CachingTestCase):
         }"""
 
         response = self.client.put(
-            '/v2/issuers/{}/recipient-groups/{}?embedRecipients=true'.format(group.issuer.slug, group.slug),
+            '/v1/issuers/{}/recipient-groups/{}?embedRecipients=true'.format(group.issuer.slug, group.slug),
             data, content_type='application/json'
         )
         sammi = RecipientProfile.objects.get(recipient_identifier='testersammi@example.com')
@@ -123,7 +123,7 @@ class RecipientApiTests(APITestCase, CachingTestCase):
         }"""
 
         response = self.client.put(
-            '/v2/issuers/{}/recipient-groups/{}?embedRecipients=true'.format(group.issuer.slug, group.slug),
+            '/v1/issuers/{}/recipient-groups/{}?embedRecipients=true'.format(group.issuer.slug, group.slug),
             data, content_type='application/json'
         )
 
@@ -141,7 +141,7 @@ class RecipientApiTests(APITestCase, CachingTestCase):
         data = {
             'pathways': [pathway_response.data.get('@id')]
         }
-        response = self.client.put('/v2/issuers/{}/recipient-groups/group-of-testing'.format(self.test_issuer.entity_id), data)
+        response = self.client.put('/v1/issuers/{}/recipient-groups/group-of-testing'.format(self.test_issuer.slug), data)
 
         self.assertEqual(response.status_code, 200)
         instance = RecipientGroup.objects.first()
@@ -157,7 +157,7 @@ class RecipientApiTests(APITestCase, CachingTestCase):
         data = {
             'pathways': [pathway_response.data.get('@id')]
         }
-        response = self.client.put('/v2/issuers/{}/recipient-groups/group-of-testing'.format(self.test_issuer.entity_id), data)
+        response = self.client.put('/v1/issuers/{}/recipient-groups/group-of-testing'.format(self.test_issuer.slug), data)
 
         self.assertEqual(response.status_code, 200)
         instance = RecipientGroup.objects.first()
