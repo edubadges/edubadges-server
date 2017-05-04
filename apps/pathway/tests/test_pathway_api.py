@@ -52,7 +52,7 @@ class PathwayApiTests(APITestCase, CachingTestCase):
             'url': "http://example.test",
             'email': "unittest@example.test",
         }
-        response = self.client.post(reverse('issuer_list'), issuer_data, format='json')
+        response = self.client.post(reverse('v1_api_issuer_list'), issuer_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, "Created an issuer")
         self.assertTrue(response.data['slug'], "Received an issuer with a slug")
         self.issuer = response.data
