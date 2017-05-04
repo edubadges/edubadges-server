@@ -69,4 +69,15 @@ class BadgeClassSerializerV2(DetailSerializerV2):
         return super(BadgeClassSerializerV2, self).update(instance, validated_data)
 
     def create(self, validated_data):
+        if 'cached_issuer' in validated_data:
+            # included issuer reference
+            validated_data['issuer'] = validated_data.pop('cached_issuer')
+        elif 'issuer' in self.context:
+            # issuer was passed in context
+            validated_data['issuer'] = self.context.get('issuer')
+        else:
+            # issuer is required on create
+            raise serializers.ValidationError({"issuer": "This field is required"})
+
         return super(BadgeClassSerializerV2, self).create(validated_data)
+
