@@ -57,8 +57,8 @@ class BadgeClassSerializerV2(DetailSerializerV2):
     image = ValidImageField(required=False)
     description = StripTagsCharField(max_length=1024, required=True)
 
-    criteriaUrl = StripTagsCharField(source='criteria_url', required=False, validators=[URLValidator()])
-    criteriaNarrative = MarkdownCharField(source='criteria_text', required=False)
+    criteriaUrl = StripTagsCharField(source='criteria_url', required=False, allow_null=True, validators=[URLValidator()])
+    criteriaNarrative = MarkdownCharField(source='criteria_text', required=False, allow_null=True)
 
     class Meta:
         model = BadgeClass

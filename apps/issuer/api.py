@@ -113,34 +113,22 @@ class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
         # return Response(badge_class, status=status.HTTP_201_CREATED)
 
 
-class BadgeClassDetail(AbstractIssuerAPIEndpoint):
+class BadgeClassDetail(BaseEntityDetailView):
     """
     GET details on one BadgeClass. PUT and DELETE should be restricted to BadgeClasses that haven't been issued yet.
     """
-    queryset = BadgeClass.objects.all()
     model = BadgeClass
     permission_classes = (AuthenticatedWithVerifiedEmail, MayEditBadgeClass,)
+    v1_serializer_class = BadgeClassSerializerV1
+    v2_serializer_class = BadgeClassSerializerV2
 
-    def get(self, request, issuerSlug, badgeSlug):
+    def get(self, request, **kwargs):
         """
         GET single BadgeClass representation
-        ---
-        serializer: BadgeClassSerializer
         """
+        return super(BadgeClassDetail, self).get(request, **kwargs)
 
-        try:
-            current_badgeclass = BadgeClass.cached.get(slug=badgeSlug)
-            self.check_object_permissions(self.request, current_badgeclass)
-        except (BadgeClass.DoesNotExist, PermissionDenied):
-            return Response(
-                "BadgeClass %s could not be found, or inadequate permissions." % badgeSlug,
-                status=status.HTTP_404_NOT_FOUND
-            )
-        else:
-            serializer = BadgeClassSerializerV1(current_badgeclass, context={'request': request})
-            return Response(serializer.data)
-
-    def delete(self, request, issuerSlug, badgeSlug):
+    def delete(self, request, **kwargs):
         """
         DELETE a badge class that has never been issued. This will fail if any assertions exist for the BadgeClass.
         Restricted to owners or editors (not staff) of the corresponding Issuer.
@@ -152,50 +140,15 @@ class BadgeClassDetail(AbstractIssuerAPIEndpoint):
               message: Badge has been deleted.
         """
 
-        try:
-            current_badgeclass = BadgeClass.cached.get(slug=badgeSlug)
-            self.check_object_permissions(self.request, current_badgeclass)
-        except (BadgeClass.DoesNotExist, PermissionDenied):
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        else:
-            if current_badgeclass.recipient_count() > 0:
-                return Response("Badge could not be deleted. It has already been issued at least once.", status=status.HTTP_400_BAD_REQUEST)
-            elif current_badgeclass.pathway_element_count() > 0:
-                return Response("Badge could not be deleted. It is being used as a pathway completion requirement.", status=status.HTTP_400_BAD_REQUEST)
-            elif len(current_badgeclass.cached_completion_elements()) > 0:
-                return Response("Badge could not be deleted. It is being used as a pathway completion badge.", status=status.HTTP_400_BAD_REQUEST)
-            else:
-                old_badgeclass = current_badgeclass.json
-                current_badgeclass.delete()
-                logger.event(badgrlog.BadgeClassDeletedEvent(old_badgeclass, request.user))
-                return Response("Badge " + badgeSlug + " has been deleted.", status.HTTP_200_OK)
+        # TODO: log delete methods
+        # logger.event(badgrlog.BadgeClassDeletedEvent(old_badgeclass, request.user))
+        return super(BadgeClassDetail, self).delete(request, **kwargs)
 
-    def put(self, request, issuerSlug, badgeSlug):
+    def put(self, request, **kwargs):
         """
         Update an existing badge class. Existing BadgeInstances will NOT be updated.
-        ---
-        serializer: BadgeClassSerializer
         """
-        try:
-            current_badgeclass = BadgeClass.cached.get(slug=badgeSlug)
-            self.check_object_permissions(self.request, current_badgeclass)
-        except (BadgeClass.DoesNotExist, PermissionDenied):
-            return Response(
-                "BadgeClass %s could not be found, or inadequate permissions." % badgeSlug,
-                status=status.HTTP_404_NOT_FOUND
-            )
-        else:
-            # If image is neither an UploadedFile nor a data uri, ignore it.
-            # Likely to occur if client sends back the image attribute (as a url), unmodified from a GET request
-            new_image = request.data.get('image')
-            cleaned_data = request.data.copy()
-            if not isinstance(new_image, UploadedFile) and urlparse.urlparse(new_image).scheme != 'data':
-                cleaned_data.pop('image')
-
-            serializer = BadgeClassSerializerV1(current_badgeclass, data=cleaned_data, context={'request': request})
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
+        return super(BadgeClassDetail, self).put(request, **kwargs)
 
 
 class BatchAssertions(AbstractIssuerAPIEndpoint):

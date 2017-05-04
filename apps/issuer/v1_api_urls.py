@@ -16,7 +16,7 @@ urlpatterns = [
     url(r'^issuers/(?P<issuerSlug>[^/]+)/assertions$', IssuerBadgeInstanceList.as_view(), name='v1_api_issuer_instance_list'),
 
     url(r'^issuers/(?P<slug>[^/]+)/badges$', IssuerBadgeClassList.as_view(), name='v1_api_badgeclass_list'),
-    url(r'^issuers/(?P<issuerSlug>[^/]+)/badges/(?P<badgeSlug>[^/]+)$', BadgeClassDetail.as_view(), name='v1_api_badgeclass_detail'),
+    url(r'^issuers/(?P<issuerSlug>[^/]+)/badges/(?P<slug>[^/]+)$', BadgeClassDetail.as_view(), name='v1_api_badgeclass_detail'),
 
     url(r'^issuers/(?P<issuerSlug>[^/]+)/badges/(?P<badgeSlug>[^/]+)/batchAssertions$', BatchAssertions.as_view(), name='v1_api_badgeclass_batchissue'),
 
