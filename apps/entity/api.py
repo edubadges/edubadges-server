@@ -10,6 +10,9 @@ import badgrlog
 
 
 class BaseEntityView(APIView):
+    create_event = None
+    logger = None
+
     def get_context_data(self, **kwargs):
         return {
             'request': self.request,
@@ -24,14 +27,23 @@ class BaseEntityView(APIView):
         return getattr(self, 'serializer_class', None)
 
     def get_logger(self):
-        if self._logger:
-            return self._logger
-        self._logger = badgrlog.BadgrLogger()
-        return self._logger
+        if self.logger:
+            return self.logger
+        self.logger = badgrlog.BadgrLogger()
+        return self.logger
+
+    def get_create_event(self):
+        return getattr(self, 'create_event', None)
+
+    def log_create(self, instance):
+        event_cls = self.get_create_event()
+        if event_cls is not None:
+            logger = self.get_logger()
+            if logger is not None:
+                logger.event(event_cls(instance))
 
 
 class BaseEntityListView(BaseEntityView):
-    create_event = None
 
     def get_objects(self, request, **kwargs):
         raise NotImplementedError
@@ -58,16 +70,6 @@ class BaseEntityListView(BaseEntityView):
         new_instance = serializer.save(created_by=request.user)
         self.log_create(new_instance)
         return Response(serializer.data, status=HTTP_201_CREATED)
-
-    def get_create_event(self):
-        return getattr(self, 'create_event', None)
-
-    def log_create(self, instance):
-        event_cls = self.get_create_event()
-        if event_cls is not None:
-            logger = self.get_logger()
-            if logger is not None:
-                logger.event(event_cls(instance))
 
 
 class VersionedObjectMixin(object):

@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK
 
 import badgrlog
-from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
+from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
 from issuer.api_v1 import AbstractIssuerAPIEndpoint
 from issuer.models import Issuer, BadgeClass, BadgeInstance
 from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
@@ -147,13 +147,18 @@ class BadgeClassDetail(BaseEntityDetailView):
         return super(BadgeClassDetail, self).put(request, **kwargs)
 
 
-class BatchAssertions(AbstractIssuerAPIEndpoint):
-    queryset = BadgeClass.objects.all()
-    model = BadgeClass
-    serializer_class = BadgeInstanceSerializerV1
+class BatchAssertions(VersionedObjectMixin, BaseEntityView):
+    model = BadgeClass  # used by .get_object()
     permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass,)
+    v1_serializer_class = BadgeInstanceSerializerV1
+    v2_serializer_class = BadgeInstanceSerializerV2
 
-    def post(self, request, issuerSlug, badgeSlug):
+    def get_context_data(self, **kwargs):
+        context = super(BatchAssertions, self).get_context_data(**kwargs)
+        context['badgeclass'] = self.get_object(self.request, **kwargs)
+        return context
+
+    def post(self, request, **kwargs):
         """
         POST to issue multiple copies of the same badge to multiple recipients
         ---
@@ -168,31 +173,27 @@ class BatchAssertions(AbstractIssuerAPIEndpoint):
               description: a list of assertions to issue
         """
 
-        badgeclass_queryset = self.queryset.filter(issuer__slug=issuerSlug)
-        current_badgeclass = self.get_object(badgeSlug, queryset=badgeclass_queryset)
-
-        if current_badgeclass is None:
-            return Response(
-                "Issuer not found or current user lacks permission to issue this badge.",
-                status=status.HTTP_404_NOT_FOUND
-            )
+        # verify the user has permission to the badgeclass
+        badgeclass = self.get_object(request, **kwargs)
+        if not self.has_object_permissions(request, badgeclass):
+            return Response(status=HTTP_404_NOT_FOUND)
 
         create_notification = request.data.get('create_notification', False)
         def _include_create_notification(a):
             a['create_notification'] = create_notification
             return a
+        # update passed in assertions to include create_notification
         assertions = map(_include_create_notification, request.data.get('assertions'))
 
-        serializer = BadgeInstanceSerializerV1(
-            data=assertions,
-            many=True,
-            context={'request': request, 'badgeclass': current_badgeclass}
-        )
+        # save serializers
+        context = self.get_context_data(**kwargs)
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(many=True, data=assertions, context=context)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        new_instances = serializer.save(created_by=request.user)
+        for new_instance in new_instances:
+            self.log_create(new_instance)
 
-        for data in serializer.data:
-            logger.event(badgrlog.BadgeInstanceCreatedEvent(data, request.user))
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
