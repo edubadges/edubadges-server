@@ -229,10 +229,12 @@ class PathwayElementSerializer(LinkedDataEntitySerializer):
                 except PathwayElement.DoesNotExist:
                     raise ValidationError("Invalid child id: {}".format(element_id))
                 else:
+                    old_child_parent = child.parent_element
                     child.parent_element = element
                     child.ordering = order
                     order += 1
                     child.save()
+                    old_child_parent.publish()
 
         old_parent = None
         if parent_element:
