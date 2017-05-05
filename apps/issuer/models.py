@@ -4,6 +4,7 @@ import datetime
 import json
 import re
 import uuid
+from itertools import chain
 
 import cachemodel
 from allauth.account.adapter import get_adapter
@@ -13,7 +14,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, transaction
 from django.db.models import ProtectedError
 from jsonfield import JSONField
 from openbadges_bakery import bake
@@ -144,24 +145,25 @@ class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUp
         existing_staff_idx = {s.cached_user: s for s in self.staff_items}
         new_staff_idx = {s['cached_user']: s for s in value}
 
-        # add missing staff records
-        for staff_data in value:
-            if staff_data['cached_user'] not in existing_staff_idx:
-                staff_record, created = IssuerStaff.cached.get_or_create(
-                    issuer=self,
-                    user=staff_data['cached_user'],
-                    defaults={
-                        'role': staff_data['role']
-                    })
-                if not created:
-                    staff_record.role = staff_data['role']
-                    staff_record.save()
+        with transaction.atomic():
+            # add missing staff records
+            for staff_data in value:
+                if staff_data['cached_user'] not in existing_staff_idx:
+                    staff_record, created = IssuerStaff.cached.get_or_create(
+                        issuer=self,
+                        user=staff_data['cached_user'],
+                        defaults={
+                            'role': staff_data['role']
+                        })
+                    if not created:
+                        staff_record.role = staff_data['role']
+                        staff_record.save()
 
-        # remove old staff records -- but never remove the only OWNER role
-        for staff_record in self.staff_items:
-            if staff_record.cached_user not in new_staff_idx:
-                if staff_record.role != IssuerStaff.ROLE_OWNER or len(self.owners) > 1:
-                    staff_record.delete()
+            # remove old staff records -- but never remove the only OWNER role
+            for staff_record in self.staff_items:
+                if staff_record.cached_user not in new_staff_idx:
+                    if staff_record.role != IssuerStaff.ROLE_OWNER or len(self.owners) > 1:
+                        staff_record.delete()
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_editors(self):
@@ -171,6 +173,9 @@ class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUp
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeclasses(self):
         return self.badgeclasses.all()
+
+    def cached_badgeinstances(self):
+        return chain(*[bc.cached_badgeinstances() for bc in self.cached_badgeclasses()])
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_pathways(self):
@@ -355,13 +360,11 @@ class BadgeClass(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, Scr
         return self.get_json()
 
 
-class BadgeInstance(BaseVersionedEntity):
+class BadgeInstance(BaseAuditedModel, BaseVersionedEntity):
     entity_class_name = 'Assertion'
 
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.CASCADE, related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True, related_name="+")
 
     recipient_identifier = models.EmailField(max_length=1024, blank=False, null=False)
     image = models.FileField(upload_to='uploads/badges', blank=True)
@@ -622,6 +625,19 @@ class BadgeInstance(BaseVersionedEntity):
     @cachemodel.cached_method(auto_publish=True)
     def cached_evidence(self):
         return self.badgeinstanceevidence_set.all()
+
+    @property
+    def evidence(self):
+        if hasattr(self, '_evidence_items'):
+            return getattr(self, '_evidence_items', [])
+        return self.cached_evidence()
+
+    @evidence.setter
+    def evidence(self, value):
+        """
+        Set this assertions badgeinstanceevidence from a list of EvidenceItemSerializerV2 data
+        """
+        self._evidence_items = value
 
     @property
     def evidence_url(self):

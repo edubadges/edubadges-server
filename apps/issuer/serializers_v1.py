@@ -210,13 +210,13 @@ class BadgeInstanceSerializerV1(serializers.Serializer):
         if self.context.get('include_issuer', False):
             representation['issuer'] = IssuerSerializerV1(instance.cached_badgeclass.cached_issuer).data
         else:
-            representation['issuer'] = OriginSetting.HTTP+reverse('issuer_json', kwargs={'slug': instance.cached_issuer.slug})
+            representation['issuer'] = OriginSetting.HTTP+reverse('issuer_json', kwargs={'entity_id': instance.cached_issuer.entity_id})
         if self.context.get('include_badge_class', False):
             representation['badge_class'] = BadgeClassSerializerV1(instance.cached_badgeclass, context=self.context).data
         else:
-            representation['badge_class'] = OriginSetting.HTTP+reverse('badgeclass_json', kwargs={'slug': instance.cached_badgeclass.slug})
+            representation['badge_class'] = OriginSetting.HTTP+reverse('badgeclass_json', kwargs={'entity_id': instance.cached_badgeclass.entity_id})
 
-        representation['public_url'] = OriginSetting.HTTP+reverse('badgeinstance_json', kwargs={'slug': instance.slug})
+        representation['public_url'] = OriginSetting.HTTP+reverse('badgeinstance_json', kwargs={'entity_id': instance.entity_id})
 
         if apps.is_installed('badgebook'):
             try:

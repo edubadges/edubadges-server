@@ -5,7 +5,7 @@ from django.core.validators import URLValidator
 from rest_framework import serializers
 
 from badgeuser.models import BadgeUser
-from entity.serializers import DetailSerializerV2, EntityRelatedFieldV2
+from entity.serializers import DetailSerializerV2, EntityRelatedFieldV2, BaseSerializerV2
 from mainsite.drf_fields import ValidImageField
 from mainsite.serializers import StripTagsCharField, MarkdownCharField, HumanReadableBooleanField
 from mainsite.validators import ChoicesValidator
@@ -82,6 +82,20 @@ class BadgeClassSerializerV2(DetailSerializerV2):
         return super(BadgeClassSerializerV2, self).create(validated_data)
 
 
+class BadgeRecipientSerializerV2(BaseSerializerV2):
+    identity = serializers.CharField(source='recipient_identifier')
+    type = serializers.CharField(default='email', required=False)
+
+
+class EvidenceItemSerializerV2(BaseSerializerV2):
+    url = serializers.URLField(source='evidence_url', max_length=1024, required=False)
+    narrative = MarkdownCharField(required=False)
+
+    def validate(self, attrs):
+        if not (attrs.get('url', None) or attrs.get('narrative', None)):
+            raise serializers.ValidationError("Either url or narrative is required")
+
+
 class BadgeInstanceSerializerV2(DetailSerializerV2):
     openBadgeId = serializers.URLField(source='jsonld_id', read_only=True)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
@@ -89,7 +103,7 @@ class BadgeInstanceSerializerV2(DetailSerializerV2):
     badgeclass = EntityRelatedFieldV2(source='cached_badgeclass', required=False, queryset=BadgeClass.cached)
 
     image = serializers.FileField(read_only=True)
-    recipient = BadgeRecipientSerializerV2()
+    recipient = BadgeRecipientSerializerV2(source='*')
 
     issuedOn = serializers.DateTimeField(source='created_at', read_only=True)
     narrative = MarkdownCharField(required=False)
@@ -115,5 +129,5 @@ class BadgeInstanceSerializerV2(DetailSerializerV2):
         else:
             # badgeclass is required on create
             raise serializers.ValidationError({"badgeclass": "This field is required"})
-        
+
         return super(BadgeInstanceSerializerV2, self).create(validated_data)
