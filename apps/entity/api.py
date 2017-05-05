@@ -31,6 +31,8 @@ class BaseEntityView(APIView):
 
 
 class BaseEntityListView(BaseEntityView):
+    create_event = None
+
     def get_objects(self, request, **kwargs):
         raise NotImplementedError
 

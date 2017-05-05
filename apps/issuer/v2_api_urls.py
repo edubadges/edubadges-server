@@ -7,7 +7,6 @@ urlpatterns = [
 
     url(r'^issuers$', IssuerList.as_view(), name='v2_api_issuer_list'),
     url(r'^issuers/(?P<entity_id>[^/]+)$', IssuerDetail.as_view(), name='v2_api_issuer_detail'),
-
     url(r'^issuers/(?P<entity_id>[^/]+)/assertions$', IssuerBadgeInstanceList.as_view(), name='v2_api_issuer_assertion_list'),
     url(r'^issuers/(?P<entity_id>[^/]+)/badgeclasses$', IssuerBadgeClassList.as_view(), name='v2_api_issuer_badgeclass_list'),
 

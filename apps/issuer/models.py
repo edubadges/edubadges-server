@@ -7,8 +7,10 @@ import uuid
 
 import cachemodel
 from allauth.account.adapter import get_adapter
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -472,6 +474,31 @@ class BadgeInstance(BaseVersionedEntity):
         if recipient_profile:
             recipient_profile.publish()
         self.publish_delete('entity_id', 'revoked')
+
+    def revoke(self, revocation_reason):
+        if self.revoked:
+            raise ValidationError("Assertion is already revoked")
+
+        if not revocation_reason:
+            raise ValidationError("revocation_reason is required")
+
+        self.revoked = True
+        self.revocation_reason = revocation_reason
+        self.image.delete()
+        self.save()
+
+        # remove BadgeObjectiveAwards from badgebook if needed
+        if apps.is_installed('badgebook'):
+            try:
+                from badgebook.models import BadgeObjectiveAward, LmsCourseInfo
+                try:
+                    award = BadgeObjectiveAward.cached.get(badge_instance_id=assertion.id)
+                except BadgeObjectiveAward.DoesNotExist:
+                    pass
+                else:
+                    award.delete()
+            except ImportError:
+                pass
 
     def notify_earner(self, badgr_app=None):
         """

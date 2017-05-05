@@ -100,7 +100,7 @@ class BadgeClassSerializerV1(serializers.Serializer):
     id = serializers.IntegerField(required=False, read_only=True)
     name = StripTagsCharField(max_length=255)
     image = ValidImageField(required=False)
-    slug = StripTagsCharField(max_length=255, allow_blank=True, required=False)
+    slug = StripTagsCharField(max_length=255, allow_blank=True, required=False, source='entity_id')
     criteria = MarkdownCharField(allow_blank=True, required=False, write_only=True)
     criteria_text = MarkdownCharField(required=False, read_only=True)
     criteria_url = StripTagsCharField(required=False, read_only=True)
@@ -178,10 +178,10 @@ class EvidenceItemSerializer(serializers.Serializer):
         return super(EvidenceItemSerializer, self).create(validated_data)
 
 
-class BadgeInstanceSerializer(serializers.Serializer):
+class BadgeInstanceSerializerV1(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1()
-    slug = serializers.CharField(max_length=255, read_only=True)
+    slug = serializers.CharField(max_length=255, read_only=True, source='entity_id')
     image = serializers.FileField(read_only=True)  # use_url=True, might be necessary
     email = serializers.EmailField(max_length=1024, required=False, write_only=True)
     recipient_identifier = serializers.EmailField(max_length=1024, required=False)
@@ -205,7 +205,7 @@ class BadgeInstanceSerializer(serializers.Serializer):
         # if self.context.get('extended_json'):
         #     self.fields['json'] = V1InstanceSerializer(source='extended_json')
 
-        representation = super(BadgeInstanceSerializer, self).to_representation(instance)
+        representation = super(BadgeInstanceSerializerV1, self).to_representation(instance)
         representation['json'] = instance.get_json()
         if self.context.get('include_issuer', False):
             representation['issuer'] = IssuerSerializerV1(instance.cached_badgeclass.cached_issuer).data
@@ -258,35 +258,3 @@ class BadgeInstanceSerializer(serializers.Serializer):
             allow_uppercase=validated_data.get('allow_uppercase'),
             badgr_app=BadgrApp.objects.get_current(self.context.get('request'))
         )
-
-
-class IssuerPortalSerializer(serializers.Serializer):
-    """
-    A serializer used to pass initial data to a view template so that the React.js
-    front end can render.
-    It should detect which of the core Badgr applications are installed and return
-    appropriate contextual information.
-    """
-
-    def to_representation(self, user):
-        view_data = {}
-
-        user_issuers = user.cached_issuers()
-        user_issuer_badgeclasses = user.cached_badgeclasses()
-
-        issuer_data = IssuerSerializerV1(
-            user_issuers,
-            many=True,
-            context=self.context
-        )
-        badgeclass_data = BadgeClassSerializerV1(
-            user_issuer_badgeclasses,
-            many=True,
-            context=self.context
-        )
-
-        view_data['issuer_issuers'] = issuer_data.data
-        view_data['issuer_badgeclasses'] = badgeclass_data.data
-        view_data['installed_apps'] = installed_apps_list()
-
-        return view_data

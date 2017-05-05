@@ -17,7 +17,7 @@ from issuer.models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
                                 IsEditor, IsStaff, IsOwnerOrStaff, ApprovedIssuersOnly)
 from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
-                                   BadgeInstanceSerializer, IssuerRoleActionSerializerV1,
+                                   BadgeInstanceSerializerV1, IssuerRoleActionSerializerV1,
                                    IssuerStaffSerializerV1)
 from issuer.serializers_v2 import IssuerSerializerV2
 from issuer.utils import get_badgeclass_by_identifier
