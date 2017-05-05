@@ -6,14 +6,14 @@ from .base import BaseBadgrEvent
 
 
 class IssuerCreatedEvent(BaseBadgrEvent):
-    def __init__(self, serialized_issuer):
-        self.issuer = serialized_issuer
+    def __init__(self, issuer):
+        self.issuer = issuer
 
     def to_representation(self):
         return {
-            'creator': self.issuer.get('created_by'),
-            'issuer': self.issuer.get('json'),
-            'image': self.issuer.get('image'),
+            'creator': self.issuer.created_by,
+            'issuer': self.issuer.json,
+            'image': self.issuer.image,
         }
 
 

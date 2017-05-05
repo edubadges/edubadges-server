@@ -110,7 +110,7 @@ class BadgeClassSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         representation = super(BadgeClassSerializer, self).to_representation(instance)
-        representation['issuer'] = OriginSetting.HTTP+reverse('issuer_json', kwargs={'slug': instance.cached_issuer.slug})
+        representation['issuer'] = OriginSetting.HTTP+reverse('issuer_json', kwargs={'entity_id': instance.cached_issuer.entity_id})
         representation['json'] = instance.get_json()
         return representation
 

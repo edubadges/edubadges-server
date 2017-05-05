@@ -3,6 +3,7 @@ import os
 import time
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
 from django.core.cache import cache
 from django.core.cache.backends.filebased import FileBasedCache
 from django.core.urlresolvers import reverse
@@ -10,7 +11,8 @@ from django.test import TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from badgeuser.models import BadgeUser
+from badgeuser.models import BadgeUser, CachedEmailAddress
+from issuer.models import Issuer
 from mainsite import TOP_DIR
 from mainsite.tests import CachingTestCase
 
@@ -18,24 +20,31 @@ from pathway.models import Pathway, PathwayElement, PathwayElementBadge
 from recipient.models import RecipientGroup, RecipientGroupMembership, RecipientProfile
 
 
-
-
 class RecipientApiTests(APITestCase, CachingTestCase):
-    fixtures = ['0001_initial_superuser', 'test_badge_objects.json']
-
     def setUp(self):
+        self.test_user, _ = BadgeUser.objects.get_or_create(email='test@example.com')
+        self.test_user.user_permissions.add(Permission.objects.get(codename="add_issuer"))
+        CachedEmailAddress.objects.get_or_create(user=self.test_user, email='test@example.com', verified=True, primary=True)
+
+        self.test_issuer, _ = Issuer.objects.get_or_create(
+            name="Test Issuer",
+            created_at="2015-04-08T15:18:16Z",
+            created_by=self.test_user,
+            slug="test-issuer"
+        )
+
         super(RecipientApiTests, self).setUp()
 
     def create_group(self):
         # Authenticate as an editor of the issuer in question
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=3))
+        self.client.force_authenticate(user=self.test_user)
         data = {'name': 'Group of Testing', 'description': 'A group used for testing.'}
-        return self.client.post('/v2/issuers/edited-test-issuer/recipient-groups', data)
+        return self.client.post('/v1/issuers/{}/recipient-groups'.format(self.test_issuer.slug), data)
 
     def create_pathway(self):
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=3))
+        self.client.force_authenticate(user=self.test_user)
         data = {'name': 'Pathway of Testing', 'description': 'A pathway used for testing.'}
-        return self.client.post('/v2/issuers/edited-test-issuer/pathways', data)
+        return self.client.post('/v1/issuers/{}/pathways'.format(self.test_issuer.slug), data)
 
     def test_can_create_group(self):
         response = self.create_group()
@@ -46,28 +55,27 @@ class RecipientApiTests(APITestCase, CachingTestCase):
     def test_can_delete_group(self):
         _ = self.create_group()
 
-        response = self.client.delete('/v2/issuers/edited-test-issuer/recipient-groups/group-of-testing')
+        response = self.client.delete('/v1/issuers/{}/recipient-groups/group-of-testing'.format(self.test_issuer.slug))
         self.assertEqual(response.status_code, 200)
 
-        get_response = self.client.get('/v2/issuers/edited-test-issuer/recipient-groups/group-of-testing')
+        get_response = self.client.get('/v1/issuers/{}/recipient-groups/group-of-testing'.format(self.test_issuer.slug))
         self.assertEqual(get_response.status_code, 404)
 
     def test_can_add_member_to_group(self):
         self.create_group()
 
         member_data = {'name': 'Test Member', 'recipient': 'testmemberuno@example.com'}
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=3))
+        self.client.force_authenticate(user=self.test_user)
         response = self.client.post(
-            '/v2/issuers/edited-test-issuer/recipient-groups/group-of-testing/members',
+            '/v1/issuers/{}/recipient-groups/group-of-testing/members'.format(self.test_issuer.slug),
             member_data
         )
 
         self.assertEqual(response.status_code, 201)
 
-        get_response = self.client.get('/v2/issuers/edited-test-issuer/recipient-groups/group-of-testing/members')
+        get_response = self.client.get('/v1/issuers/{}/recipient-groups/group-of-testing/members'.format(self.test_issuer.slug))
         self.assertEqual(get_response.status_code, 200)
         self.assertEqual(len(get_response.data['memberships']), 1)
-
 
     def test_can_add_multiple_members_to_group(self):
         _ = self.create_group()
@@ -83,7 +91,7 @@ class RecipientApiTests(APITestCase, CachingTestCase):
         }"""
 
         response = self.client.put(
-            '/v2/issuers/{}/recipient-groups/{}?embedRecipients=true'.format(group.issuer.slug, group.slug),
+            '/v1/issuers/{}/recipient-groups/{}?embedRecipients=true'.format(group.issuer.slug, group.slug),
             data, content_type='application/json'
         )
 
@@ -98,7 +106,7 @@ class RecipientApiTests(APITestCase, CachingTestCase):
         }"""
 
         response = self.client.put(
-            '/v2/issuers/{}/recipient-groups/{}?embedRecipients=true'.format(group.issuer.slug, group.slug),
+            '/v1/issuers/{}/recipient-groups/{}?embedRecipients=true'.format(group.issuer.slug, group.slug),
             data, content_type='application/json'
         )
         sammi = RecipientProfile.objects.get(recipient_identifier='testersammi@example.com')
@@ -115,7 +123,7 @@ class RecipientApiTests(APITestCase, CachingTestCase):
         }"""
 
         response = self.client.put(
-            '/v2/issuers/{}/recipient-groups/{}?embedRecipients=true'.format(group.issuer.slug, group.slug),
+            '/v1/issuers/{}/recipient-groups/{}?embedRecipients=true'.format(group.issuer.slug, group.slug),
             data, content_type='application/json'
         )
 
@@ -133,7 +141,7 @@ class RecipientApiTests(APITestCase, CachingTestCase):
         data = {
             'pathways': [pathway_response.data.get('@id')]
         }
-        response = self.client.put('/v2/issuers/edited-test-issuer/recipient-groups/group-of-testing', data)
+        response = self.client.put('/v1/issuers/{}/recipient-groups/group-of-testing'.format(self.test_issuer.slug), data)
 
         self.assertEqual(response.status_code, 200)
         instance = RecipientGroup.objects.first()
@@ -144,13 +152,12 @@ class RecipientApiTests(APITestCase, CachingTestCase):
     def test_list_group_pathway_subscriptions(self):
         group = self.create_group()
 
-
         pathway_response = self.create_pathway()
 
         data = {
             'pathways': [pathway_response.data.get('@id')]
         }
-        response = self.client.put('/v2/issuers/edited-test-issuer/recipient-groups/group-of-testing', data)
+        response = self.client.put('/v1/issuers/{}/recipient-groups/group-of-testing'.format(self.test_issuer.slug), data)
 
         self.assertEqual(response.status_code, 200)
         instance = RecipientGroup.objects.first()

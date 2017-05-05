@@ -69,16 +69,14 @@ class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUp
             member.cached_user.publish()
 
     def delete(self, *args, **kwargs):
-        if self.total_recipient_count > 0:
-            raise ProtectedError("Issuer can not be deleted because it has previously issued badges.")
+        if self.recipient_count > 0:
+            raise ProtectedError("Issuer can not be deleted because it has previously issued badges.", self)
 
         # remove any unused badgeclasses owned by issuer
         for bc in self.cached_badgeclasses():
             bc.delete()
 
         staff = self.cached_issuerstaff()
-        ret = super(Issuer, self).delete(*args, **kwargs)
-
         # remove membership records and publish users
         for membership in staff:
             u = membership.cached_user
@@ -95,8 +93,7 @@ class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUp
         except ImportError:
             pass
 
-        return ret
-
+        return super(Issuer, self).delete(*args, **kwargs)
 
     def save(self, *args, **kwargs):
         ret = super(Issuer, self).save(*args, **kwargs)
