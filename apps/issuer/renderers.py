@@ -16,7 +16,7 @@ class BadgeInstanceHTMLRenderer(BrowsableAPIRenderer):
         try:
             context['badgeclass_image_png'] = "{}{}?type=png".format(
                 OriginSetting.HTTP,
-                reverse('badgeclass_image', kwargs={'slug': renderer_context['badge_class'].slug})
+                reverse('badgeclass_image', kwargs={'entity_id': renderer_context['badge_class'].entity_id})
             )
 
             context.update(renderer_context)

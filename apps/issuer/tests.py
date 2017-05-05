@@ -18,12 +18,15 @@ from django.test import modify_settings, override_settings
 from openbadges_bakery import unbake
 from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
 
+from badgeuser.models import BadgeUser, CachedEmailAddress
 from issuer.api import IssuerList
 from issuer.models import Issuer, BadgeClass, BadgeInstance, IssuerStaff
-from issuer.serializers import BadgeInstanceSerializer
+from issuer.serializers_v1 import BadgeInstanceSerializer
 from mainsite import TOP_DIR
 
 from mainsite.utils import OriginSetting
+from mainsite.tests import CachingTestCase
+from mainsite.models import BadgrApp
 
 factory = APIRequestFactory()
 
@@ -35,6 +38,161 @@ example_issuer_props = {
 }
 
 
+class IssuerTestBase(APITestCase, CachingTestCase):
+    def setUp(self):
+        self.test_user, _ = BadgeUser.objects.get_or_create(email='test@example.com')
+        self.test_user.user_permissions.add(Permission.objects.get(codename="add_issuer"))
+        CachedEmailAddress.objects.get_or_create(user=self.test_user, email='test@example.com', verified=True, primary=True)
+
+        self.test_user_2, _ = BadgeUser.objects.get_or_create(email='test2@example.com')
+        CachedEmailAddress.objects.get_or_create(user=self.test_user_2, email='test2@example.com', verified=True, primary=True)
+
+        self.test_user_3, _ = BadgeUser.objects.get_or_create(email='test3@example.com')
+        CachedEmailAddress.objects.get_or_create(user=self.test_user_3, email='test3@example.com', verified=True, primary=True)
+        
+        self.badgr_app, _ = BadgrApp.objects.get_or_create(
+            email_confirmation_redirect="http://localhost:3001/login/",
+            # updated_by=[ "root" ],
+            created_at="2016-02-10T17:25:58Z",
+            is_active=True,
+            updated_at="2016-02-10T17:25:58Z",
+            # created_by=["root"],
+            cors="localhost:3001",
+            forgot_password_redirect="http://localhost:3001/change-password/"
+        )
+
+        self.issuer_1, _ = Issuer.objects.get_or_create(
+            name="Test Issuer",
+            created_at="2015-04-08T15:08:58Z",
+            created_by=self.test_user,
+            old_json="{\"description\":\"Issuer of Experimental Credentials\",\"url\":\"http://example.org\",\"image\":\"http://localhost:8000/public/issuers/test-issuer/image\",\"id\":\"http://localhost:8000/public/issuers/test-issuer\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"email\":\"exampleIssuer@example.org\",\"name\":\"Test Issuer\"}",
+            image="uploads/issuers/guinea_pig_testing_badge.png",
+            slug="test-issuer"
+        )
+
+        IssuerStaff.objects.get_or_create(
+            issuer=self.issuer_1,
+            user=self.test_user,
+            role=IssuerStaff.ROLE_OWNER
+        )
+
+        self.issuer_2, _ = Issuer.objects.get_or_create(
+            name="Test Issuer 2",
+            created_at="2015-04-08T15:18:16Z",
+            created_by=self.test_user,
+            old_json="{\"description\":\"Issuer of Experimental Credentials\",\"url\":\"http://example.org\",\"image\":\"http://localhost:8000/public/issuers/test-issuer/image\",\"id\":\"http://localhost:8000/public/issuers/testing-badge\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"email\":\"exampleIssuer@example.org\",\"name\":\"Test Issuer\"}",
+            image="uploads/issuers/guinea_pig_testing_badge_dlQWRUl.png",
+            slug="test-issuer-2"
+        )
+
+        IssuerStaff.objects.get_or_create(
+            issuer=self.issuer_2,
+            user=self.test_user,
+            role=IssuerStaff.ROLE_OWNER
+        )
+
+        self.issuer_3, _ = Issuer.objects.get_or_create(
+            name="Edited Test Issuer",
+            created_at="2015-04-08T15:18:16Z",
+            created_by=self.test_user,
+            old_json="{\"description\":\"Edited Test Issuer\",\"url\":\"http://example.org\",\"image\":\"http://localhost:8000/public/issuers/test-issuer/image\",\"id\":\"http://localhost:8000/public/issuers/testing-badge\",\"@context\":\"https://w3id.org/openbadges/v1\",\"type\":\"Issuer\",\"email\":\"exampleIssuer@example.org\",\"name\":\"Test Issuer\"}",
+            image="uploads/issuers/guinea_pig_testing_badge_dlQWRUl.png",
+            slug="edited-test-issuer"
+        )
+
+        IssuerStaff.objects.get_or_create(
+            issuer=self.issuer_3,
+            user=self.test_user,
+            role=IssuerStaff.ROLE_OWNER
+        )
+
+        IssuerStaff.objects.get_or_create(
+            issuer=self.issuer_3,
+            user=self.test_user_2,
+            role=IssuerStaff.ROLE_EDITOR
+        )
+
+        self.badgeclass_1, _ = BadgeClass.objects.get_or_create(
+            name="Badge of Testing",
+            created_at="2015-04-08T15:20:25Z",
+            created_by=self.test_user,
+            old_json="{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-testing/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-awesome/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"type\":\"BadgeClass\",\"id\":\"http://localhost:8000/public/badges/badge-of-testing\",\"name\":\"Badge of Awesome\"}",
+            image="uploads/badges/guinea_pig_testing_badge.png",
+            criteria_text="Be cool, dawg.",
+            slug="badge-of-testing",
+            issuer=self.issuer_2
+        )
+
+        self.badgeclass_2, _ = BadgeClass.objects.get_or_create(
+            name="Second Badge of Testing",
+            created_at="2015-04-08T15:20:25Z",
+            created_by=self.test_user,
+            old_json="{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-testing/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-awesome/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"type\":\"BadgeClass\",\"id\":\"http://localhost:8000/public/badges/badge-of-testing\",\"name\":\"Badge of Awesome\"}",
+            image="uploads/badges/guinea_pig_testing_badge.png",
+            criteria_text="Be cool, dawg.",
+            slug="second-badge-of-testing",
+            issuer=self.issuer_2
+        )
+
+        self.badgeclass_3, _ = BadgeClass.objects.get_or_create(
+            name="Badge of Edited Testing",
+            created_at="2015-04-08T15:20:25Z",
+            created_by=self.test_user,
+            old_json="{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-edited-testing/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-edited-testing/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/edited-test-issuer\",\"type\":\"BadgeClass\",\"id\":\"http://localhost:8000/public/badges/badge-of-edited-testing\",\"name\":\"Badge of Edited Testing\"}",
+            image="uploads/badges/guinea_pig_testing_badge.png",
+            criteria_text="Be cool, dawg.",
+            slug="badge-of-edited-testing",
+            issuer=self.issuer_3
+        )
+
+        self.badgeclass_4, _ = BadgeClass.objects.get_or_create(
+            name="Badge of Never Issued",
+            created_at="2015-04-08T15:20:25Z",
+            created_by=self.test_user,
+            old_json="{\"description\":\"An experimental badge that will never have any instances.\",\"image\":\"http://localhost:8000/public/badges/badge-of-edited-testing/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-never-issued/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"type\":\"BadgeClass\",\"id\":\"http://localhost:8000/public/badges/badge-of-never-issued\",\"name\":\"Badge of Awesome\"}",
+            image="uploads/badges/guinea_pig_testing_badge.png",
+            criteria_text="Be cool, dawg.",
+            slug="badge-of-never-issued",
+            issuer=self.issuer_3
+        )
+
+        self.badgeclass_5, _ = BadgeClass.objects.get_or_create(
+            name="Badge of SVG Testing",
+            created_at="2015-04-08T15:20:25Z",
+            created_by=self.test_user,
+            old_json="{\"description\":\"An experimental badge only awarded to brave people and non-existent test entities.\",\"image\":\"http://localhost:8000/public/badges/badge-of-svg-testing/image\",\"criteria\":\"http://localhost:8000/public/badges/badge-of-svg-testing/criteria\",\"@context\":\"https://w3id.org/openbadges/v1\",\"issuer\":\"http://localhost:8000/public/issuers/test-issuer\",\"type\":\"BadgeClass\",\"id\":\"http://localhost:8000/public/badges/badge-of-svg-testing\",\"name\":\"Badge of SVG Testing\"}",
+            image="uploads/badges/test_badgeclass.svg",
+            criteria_text="Be cool, dawg.",
+            slug="badge-of-svg-testing",
+            issuer=self.issuer_2
+        )
+
+        self.badgeinstance_1, _ = BadgeInstance.objects.get_or_create(
+            revocation_reason=None,
+            revoked=False,
+            created_at="2015-04-08T15:59:03Z",
+            created_by=self.test_user,
+            slug="92219015-18a6-4538-8b6d-2b228e47b8aa",
+            old_json="{\"issuedOn\":\"2015-04-08T08:59:03.679218\",\"verify\":{\"url\":\"http://localhost:8000/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa\",\"type\":\"hosted\"},\"image\":\"http://localhost:8000/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa/image\",\"recipient\":{\"type\":\"email\",\"salt\":\"9944f83b-c1df-420d-b2d9-5f2d8968ca1c\",\"hashed\":true,\"identity\":\"sha256$a44b0fc1b8fc717bd6a5222c0f5573163f8647a9cada578b821904012257ea2d\"},\"type\":\"Assertion\",\"@context\":\"https://w3id.org/openbadges/v1\",\"badge\":\"http://localhost:8000/public/badges/badge-of-awesome\",\"id\":\"http://localhost:8000/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa\"}",
+            badgeclass=self.badgeclass_1,
+            image="issued/badges/49213a69dc3213270e95c2ac3c1fbd01.png",
+            recipient_identifier="test@example.com",
+            issuer=self.issuer_2
+        )
+
+        self.badgeinstance_1, _ = BadgeInstance.objects.get_or_create(
+            revocation_reason=None,
+            revoked=False,
+            created_at="2015-04-08T16:59:03Z",
+            created_by=self.test_user,
+            slug="92219015-18a6-4538-8b6d-2b228e47b8ab",
+            old_json="{\"issuedOn\":\"2015-04-08T09:59:03.679218\",\"verify\":{\"url\":\"http://localhost:8000/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8ab\",\"type\":\"hosted\"},\"image\":\"http://localhost:8000/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8ab/image\",\"recipient\":{\"type\":\"email\",\"salt\":\"9944f83b-c1df-420d-b2d9-5f2d8968ca1c\",\"hashed\":true,\"identity\":\"sha256$f90bfa9a05bad084790a0276d3d3d58fe925378f92b8a94dfe72e6b3c9d53cdf\"},\"type\":\"Assertion\",\"@context\":\"https://w3id.org/openbadges/v1\",\"badge\":\"http://localhost:8000/public/badges/badge-of-awesome\",\"id\":\"http://localhost:8000/public/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa\"}",
+            badgeclass=self.badgeclass_1,
+            image="issued/badges/49213a69dc3213270e95c2ac3c1fbd01.png",
+            recipient_identifier="test2@example.com",
+            issuer=self.issuer_2
+        )
+
 @override_settings(
     CELERY_ALWAYS_EAGER=True,
     SESSION_ENGINE='django.contrib.sessions.backends.cache',
@@ -45,14 +203,7 @@ example_issuer_props = {
         }
     }
 )
-class IssuerTests(APITestCase):
-    fixtures = ['0001_initial_superuser', 'test_badge_objects.json']
-
-    def setUp(self):
-        cache.clear()
-        self.test_user = get_user_model().objects.get(pk=1)
-        self.test_user.user_permissions.add(Permission.objects.get(codename="add_issuer"))
-
+class IssuerTests(IssuerTestBase):
     def test_create_issuer_unauthenticated(self):
         view = IssuerList.as_view()
 
@@ -124,9 +275,9 @@ class IssuerTests(APITestCase):
                 response = view(request)
                 self.assertEqual(response.status_code, 201)
 
-                badge_object = response.data.get('json')
-                derived_slug = badge_object['id'].split('/')[-1]
-                new_issuer = Issuer.objects.get(slug=derived_slug)
+                issuer_object = response.data.get('json')
+                entity_id = issuer_object['id'].split('/')[-1]
+                new_issuer = Issuer.objects.get(entity_id=entity_id)
 
                 image_width, image_height = \
                     get_image_dimensions(new_issuer.image.file)
@@ -157,9 +308,9 @@ class IssuerTests(APITestCase):
                 response = view(request)
                 self.assertEqual(response.status_code, 201)
 
-                badge_object = response.data.get('json')
-                derived_slug = badge_object['id'].split('/')[-1]
-                new_issuer = Issuer.objects.get(slug=derived_slug)
+                issuer_object = response.data.get('json')
+                entity_id = issuer_object['id'].split('/')[-1]
+                new_issuer = Issuer.objects.get(entity_id=entity_id)
 
                 image_width, image_height = \
                     get_image_dimensions(new_issuer.image.file)
@@ -185,14 +336,13 @@ class IssuerTests(APITestCase):
                                        issuer_fields_with_image,
                                        format='multipart')
 
-                force_authenticate(request,
-                                   user=self.test_user)
+                force_authenticate(request, user=self.test_user)
                 response = view(request)
                 self.assertEqual(response.status_code, 201)
 
-                badge_object = response.data.get('json')
-                derived_slug = badge_object['id'].split('/')[-1]
-                new_issuer = Issuer.objects.get(slug=derived_slug)
+                issuer_object = response.data.get('json')
+                entity_id = issuer_object['id'].split('/')[-1]
+                new_issuer = Issuer.objects.get(entity_id=entity_id)
 
                 image_width, image_height = \
                     get_image_dimensions(new_issuer.image.file)
@@ -244,7 +394,7 @@ class IssuerTests(APITestCase):
 
         post_response = self.client.post(
             '/v1/issuer/issuers/test-issuer/staff',
-            {'action': 'add', 'username': 'test3', 'editor': True}
+            {'action': 'add', 'username': self.test_user_3.username, 'editor': True}
         )
 
         self.assertEqual(post_response.status_code, 200)
@@ -324,7 +474,7 @@ class IssuerTests(APITestCase):
         self.client.force_authenticate(user=self.test_user)
         post_response = self.client.post(
             '/v1/issuer/issuers/test-issuer/staff',
-            {'action': 'add', 'username': 'test2'}
+            {'action': 'add', 'username': self.test_user_2.username}
         )
 
         self.assertEqual(post_response.status_code, 200)
@@ -332,7 +482,7 @@ class IssuerTests(APITestCase):
 
         second_response = self.client.post(
             '/v1/issuer/issuers/test-issuer/staff',
-            {'action': 'remove', 'username': 'test2'}
+            {'action': 'remove', 'username': self.test_user_2.username}
         )
 
         self.assertEqual(second_response.status_code, 200)
@@ -412,12 +562,7 @@ class IssuerTests(APITestCase):
         }
     }
 )
-class BadgeClassTests(APITestCase):
-    fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
-
-    def setUp(self):
-        cache.clear()
-
+class BadgeClassTests(IssuerTestBase):
     def test_create_badgeclass_for_issuer_authenticated(self):
         with open(
             os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
@@ -430,7 +575,7 @@ class BadgeClassTests(APITestCase):
                 'criteria': 'http://wikipedia.org/Awesome',
             }
 
-            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            self.client.force_authenticate(user=self.test_user)
             response = self.client.post(
                 '/v1/issuer/issuers/test-issuer/badges',
                 example_badgeclass_props
@@ -456,7 +601,7 @@ class BadgeClassTests(APITestCase):
                 'criteria': 'http://wikipedia.org/Awesome',
             }
 
-            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            self.client.force_authenticate(user=self.test_user)
             response = self.client.post(
                 '/v1/issuer/issuers/test-issuer/badges',
                 example_badgeclass_props
@@ -481,7 +626,7 @@ class BadgeClassTests(APITestCase):
                 'image': attack_badge_image,
                 'criteria': 'http://svgs.should.not.be.user.input'
             }
-            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            self.client.force_authenticate(user=self.test_user)
             response = self.client.post('/v1/issuer/issuers/test-issuer/badges', badgeclass_props)
             self.assertEqual(response.status_code, 201)
 
@@ -508,7 +653,7 @@ class BadgeClassTests(APITestCase):
                 'criteria': 'The earner of this badge must be truly, truly awesome.',
             }
 
-            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            self.client.force_authenticate(user=self.test_user)
             response = self.client.post(
                 '/v1/issuer/issuers/test-issuer/badges',
                 badgeclass_props
@@ -533,7 +678,7 @@ class BadgeClassTests(APITestCase):
                 'criteria': 'The earner of this badge must be truly, truly awesome.',
             }
 
-            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            self.client.force_authenticate(user=self.test_user)
             response = self.client.post(
                 '/v1/issuer/issuers/test-issuer/badges',
                 badgeclass_props
@@ -548,7 +693,7 @@ class BadgeClassTests(APITestCase):
         """
         Ensure that a logged-in user can get a list of their BadgeClasses
         """
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        self.client.force_authenticate(user=self.test_user)
         response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges')
 
         self.assertEqual(response.status_code, 200)
@@ -564,7 +709,7 @@ class BadgeClassTests(APITestCase):
 
     def test_delete_unissued_badgeclass(self):
         self.assertTrue(BadgeClass.objects.filter(slug='badge-of-never-issued').exists())
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        self.client.force_authenticate(user=self.test_user)
         response = self.client.delete('/v1/issuer/issuers/test-issuer/badges/badge-of-never-issued')
         self.assertEqual(response.status_code, 200)
 
@@ -574,7 +719,7 @@ class BadgeClassTests(APITestCase):
         """
         A user should not be able to delete a badge class if it has been test_delete_already_issued_badgeclass
         """
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        self.client.force_authenticate(user=self.test_user)
         response = self.client.delete('/v1/issuer/issuers/test-issuer/badges/badge-of-testing')
         self.assertEqual(response.status_code, 400)
 
@@ -597,7 +742,7 @@ class BadgeClassTests(APITestCase):
                 'criteria': 'The earner of this badge must slither through a garden and return home before morning.',
             }
 
-            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            self.client.force_authenticate(user=self.test_user)
             response = self.client.post(
                 '/v1/issuer/issuers/test-issuer/badges',
                 badgeclass_props
@@ -620,7 +765,7 @@ class BadgeClassTests(APITestCase):
                 'criteria': 'http://wikipedia.org/Awesome',
             }
 
-            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            self.client.force_authenticate(user=self.test_user)
             response = self.client.post(
                 '/v1/issuer/issuers/test-issuer/badges',
                 example_badgeclass_props
@@ -639,7 +784,7 @@ class BadgeClassTests(APITestCase):
                 'image': badge_image,
             }
 
-            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            self.client.force_authenticate(user=self.test_user)
 
             # should not create badge that has images in markdown
             badgeclass_props['criteria'] = 'This is invalid ![foo](image-url) markdown'
@@ -661,7 +806,7 @@ class BadgeClassTests(APITestCase):
                 'image': badge_image,
             }
 
-            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            self.client.force_authenticate(user=self.test_user)
 
             # valid markdown should be saved but html tags stripped
             badgeclass_props['criteria'] = 'This is *valid* markdown <p>mixed with raw</p> <script>document.write("and abusive html")</script>'
@@ -680,8 +825,7 @@ class BadgeClassTests(APITestCase):
             self.assertContains(response, "<p>This is <em>valid</em> markdown")
 
     def test_new_badgeclass_updates_cached_issuer(self):
-        user = get_user_model().objects.get(pk=1)
-        number_of_badgeclasses = len(list(user.cached_badgeclasses()))
+        number_of_badgeclasses = len(list(self.test_user.cached_badgeclasses()))
 
         with open(
             os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
@@ -694,19 +838,18 @@ class BadgeClassTests(APITestCase):
                 'criteria': 'http://wikipedia.org/Freshness',
             }
 
-            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            self.client.force_authenticate(user=self.test_user)
             response = self.client.post(
                 '/v1/issuer/issuers/test-issuer/badges',
                 example_badgeclass_props
             )
             self.assertEqual(response.status_code, 201)
 
-            self.assertEqual(len(list(user.cached_badgeclasses())), number_of_badgeclasses + 1)
+            self.assertEqual(len(list(self.test_user.cached_badgeclasses())), number_of_badgeclasses + 1)
 
 
     def test_new_badgeclass_updates_cached_user_badgeclasses(self):
-        user = get_user_model().objects.get(pk=1)
-        self.client.force_authenticate(user=user)
+        self.client.force_authenticate(user=self.test_user)
         badgelist = self.client.get('/v1/issuer/all-badges')
 
         with open(
@@ -735,7 +878,7 @@ class BadgeClassTests(APITestCase):
         return "data:{};base64,{}".format(mime, encoded)
 
     def test_badgeclass_put_image_data_uri(self):
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        self.client.force_authenticate(user=self.test_user)
 
         badgeclass_props = {
             'name': 'Badge of Awesome',
@@ -770,7 +913,7 @@ class BadgeClassTests(APITestCase):
             self.assertEqual(image_height, 450)
 
     def test_badgeclass_put_image_non_data_uri(self):
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        self.client.force_authenticate(user=self.test_user)
 
         badgeclass_props = {
             'name': 'Badge of Awesome',
@@ -802,7 +945,7 @@ class BadgeClassTests(APITestCase):
         self.assertEqual(image_height, 300)
 
     def test_badgeclass_put_image_multipart(self):
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        self.client.force_authenticate(user=self.test_user)
 
         badgeclass_props = {
             'name': 'Badge of Awesome',
@@ -850,7 +993,7 @@ class BadgeClassTests(APITestCase):
                 'criteria': 'http://wikipedia.org/Awesome',
             }
 
-            self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+            self.client.force_authenticate(user=self.test_user)
             post_response = self.client.post(
                 '/v1/issuer/issuers/test-issuer/badges',
                 example_badgeclass_props,
@@ -877,12 +1020,7 @@ class BadgeClassTests(APITestCase):
         }
     }
 )
-class AssertionTests(APITestCase):
-    fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
-
-    def setUp(self):
-        cache.clear()
-
+class AssertionTests(IssuerTestBase):
     def ensure_image_exists(self, badge_object, image_filename='guinea_pig_testing_badge.png'):
         if not os.path.exists(badge_object.image.path):
             shutil.copy2(
@@ -905,7 +1043,7 @@ class AssertionTests(APITestCase):
         # load test image into media files if it doesn't exist
         self.ensure_image_exists(BadgeClass.objects.get(slug='badge-of-testing'))
 
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        self.client.force_authenticate(user=self.test_user)
         assertion = {
             "email": "test@example.com",
             "create_notification": False
@@ -926,7 +1064,7 @@ class AssertionTests(APITestCase):
 
     def test_issue_badge_with_ob1_evidence(self):
         self.ensure_image_exists(BadgeClass.objects.get(slug='badge-of-testing'))
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        self.client.force_authenticate(user=self.test_user)
 
         evidence_url = "http://fake.evidence.url.test"
         assertion = {
@@ -953,7 +1091,7 @@ class AssertionTests(APITestCase):
 
     def test_issue_badge_with_ob2_multiple_evidence(self):
         self.ensure_image_exists(BadgeClass.objects.get(slug='badge-of-testing'))
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        self.client.force_authenticate(user=self.test_user)
 
         evidence_items = [
             {
@@ -989,7 +1127,6 @@ class AssertionTests(APITestCase):
         self.assertEqual(assertion.get('json').get('evidence'), assertion_public_url)
 
     def test_resized_png_image_baked_properly(self):
-        current_user = get_user_model().objects.get(pk=1)
         with open(
             os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
         ) as badge_image:
@@ -1001,7 +1138,7 @@ class AssertionTests(APITestCase):
                 'criteria': 'The earner of this badge must be truly, truly awesome.',
             }
 
-            self.client.force_authenticate(user=current_user)
+            self.client.force_authenticate(user=self.test_user)
             response_bc = self.client.post(
                 '/v1/issuer/issuers/test-issuer/badges',
                 badgeclass_props
@@ -1050,7 +1187,7 @@ class AssertionTests(APITestCase):
         self.assertEqual(len(mail.outbox), 1)
 
     def test_authenticated_nonowner_user_cant_issue(self):
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=2))
+        self.client.force_authenticate(user=self.test_user_2)
         assertion = {
             "email": "test2@example.com"
         }
@@ -1064,7 +1201,7 @@ class AssertionTests(APITestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_issue_assertion_with_notify(self):
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        self.client.force_authenticate(user=self.test_user)
         assertion = {
             "email": "ottonomy@gmail.com",
             'create_notification': True
@@ -1075,7 +1212,7 @@ class AssertionTests(APITestCase):
         self.assertEqual(len(mail.outbox), 1)
 
     def test_authenticated_owner_list_assertions(self):
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        self.client.force_authenticate(user=self.test_user)
         response = self.client.get('/v1/issuer/issuers/test-issuer-2/badges/badge-of-testing/assertions')
 
         self.assertEqual(response.status_code, 200)
@@ -1083,7 +1220,7 @@ class AssertionTests(APITestCase):
 
     def test_issuer_instance_list_assertions(self):
 
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        self.client.force_authenticate(user=self.test_user)
         response = self.client.get('/v1/issuer/issuers/test-issuer-2/assertions')
 
         self.assertEqual(response.status_code, 200)
@@ -1091,7 +1228,7 @@ class AssertionTests(APITestCase):
 
     def test_issuer_instance_list_assertions_with_id(self):
 
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        self.client.force_authenticate(user=self.test_user)
         response = self.client.get('/v1/issuer/issuers/test-issuer-2/assertions?recipient=test@example.com')
 
         self.assertEqual(response.status_code, 200)
@@ -1099,7 +1236,7 @@ class AssertionTests(APITestCase):
 
     def test_revoke_assertion(self):
 
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        self.client.force_authenticate(user=self.test_user)
         response = self.client.delete(
             '/v1/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa',
             {'revocation_reason': 'Earner kind of sucked, after all.'}
@@ -1110,7 +1247,7 @@ class AssertionTests(APITestCase):
         self.assertEqual(response.status_code, 410)
 
     def test_revoke_assertion_missing_reason(self):
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        self.client.force_authenticate(user=self.test_user)
         response = self.client.delete(
             '/v1/issuer/issuers/test-issuer/badges/badge-of-testing/assertions/92219015-18a6-4538-8b6d-2b228e47b8aa',
             {}
@@ -1122,7 +1259,7 @@ class AssertionTests(APITestCase):
         # load test image into media files if it doesn't exist
         self.ensure_image_exists(BadgeClass.objects.get(slug='badge-of-svg-testing'), 'test_badgeclass.svg')
 
-        self.client.force_authenticate(user=get_user_model().objects.get(pk=1))
+        self.client.force_authenticate(user=self.test_user)
         assertion = {
             "email": "test@example.com"
         }
@@ -1135,10 +1272,7 @@ class AssertionTests(APITestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_new_assertion_updates_cached_user_badgeclasses(self):
-
-        user = get_user_model().objects.get(pk=1)
-
-        self.client.force_authenticate(user=user)
+        self.client.force_authenticate(user=self.test_user)
         badgelist = self.client.get('/v1/issuer/all-badges')
         badge_data = badgelist.data[0]
         number_of_assertions = badge_data['recipient_count']
@@ -1168,19 +1302,19 @@ class AssertionTests(APITestCase):
         }
     }
 )
-class PublicAPITests(APITestCase):
-    fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
+class PublicAPITests(IssuerTestBase):
     """
     Tests the ability of an anonymous user to GET one public badge object
     """
     def setUp(self):
-        cache.clear()
+        super(PublicAPITests, self).setUp()
+
         # ensure records are published to cache
         issuer = Issuer.cached.get(slug='test-issuer')
         issuer.cached_badgeclasses()
-        Issuer.cached.get(pk=2)
+        Issuer.cached.get(pk=self.issuer_2.pk)
         BadgeClass.cached.get(slug='badge-of-testing')
-        BadgeClass.cached.get(pk=1)
+        BadgeClass.cached.get(pk=self.badgeclass_1.pk)
         BadgeInstance.cached.get(slug='92219015-18a6-4538-8b6d-2b228e47b8aa')
         pass
 
@@ -1264,12 +1398,9 @@ class PublicAPITests(APITestCase):
             self.assertContains(response, '<meta property="og:url"')
 
 
-class FindBadgeClassTests(APITestCase):
-    fixtures = fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json', 'initial_my_badges']
-
+class FindBadgeClassTests(IssuerTestBase):
     def test_can_find_imported_badge_by_id(self):
-        user = get_user_model().objects.first()
-        self.client.force_authenticate(user=user)
+        self.client.force_authenticate(user=self.test_user)
 
         url = "{url}?identifier={id}".format(
             url=reverse('find_badgeclass_by_identifier'),
@@ -1281,23 +1412,19 @@ class FindBadgeClassTests(APITestCase):
         self.assertEqual(response.data['json'].get('name'), 'MozFest Reveler')
 
     def test_can_find_issuer_badge_by_id(self):
-        user = get_user_model().objects.first()
-        self.client.force_authenticate(user=user)
-
-        badge = BadgeClass.objects.get(id=1)
+        self.client.force_authenticate(user=self.test_user)
 
         url = "{url}?identifier={id}".format(
             url=reverse('find_badgeclass_by_identifier'),
-            id=badge.jsonld_id
+            id=self.badgeinstance_1.jsonld_id
         )
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['json'].get('name'), badge.name)
+        self.assertEqual(response.data['json'].get('name'), self.badgeinstance_1.name)
 
     def test_can_find_issuer_badge_by_slug(self):
-        user = get_user_model().objects.first()
-        self.client.force_authenticate(user=user)
+        self.client.force_authenticate(user=self.test_user)
 
         url = "{url}?identifier={slug}".format(
             url=reverse('find_badgeclass_by_identifier'),

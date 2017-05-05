@@ -72,7 +72,7 @@ def setup_basic_0_5_0(**kwargs):
 class TestBadgeUploads(APITestCase, CachingTestCase):
 
     def setup_user(self, email='test@example.com', authenticate=True):
-        user = BadgeUser.objects.create(email=email)
+        user, _ = BadgeUser.objects.get_or_create(email=email)
         CachedEmailAddress.objects.create(user=user, email=email, verified=True, primary=True)
         if authenticate:
             self.client.force_authenticate(user=user)
@@ -434,16 +434,99 @@ class TestBadgeUploads(APITestCase, CachingTestCase):
         self.assertTrue(response.data[0].startswith('Unable to get valid baked image or valid json response from'))
 
 
-class TestCollectionOperations(APITestCase):
-    fixtures = ['0001_initial_superuser', 'initial_collections', 'initial_my_badges', 'test_badge_objects']
-
+class TestCollections(APITestCase, CachingTestCase):
     def setUp(self):
-        self.user = get_user_model().objects.get(pk=1)
+        super(TestCollections, self).setUp()
+        self.user, _ = BadgeUser.objects.get_or_create(email='test@example.com')
+
+        self.cached_email, _ = CachedEmailAddress.objects.get_or_create(user=self.user, email='test@example.com', verified=True, primary=True)
+
+        self.issuer, _ = Issuer.objects.get_or_create(
+            name="Open Badges",
+            created_at="2015-12-15T15:55:51Z",
+            created_by=None,
+            slug="open-badges",
+            source_url="http://badger.openbadges.org/program/meta/bda68a0b505bc0c7cf21bc7900280ee74845f693",
+            source="test-fixture",
+            image=""
+        )
+
+        self.badge_class, _ = BadgeClass.objects.get_or_create(
+            name="MozFest Reveler",
+            created_at="2015-12-15T15:55:51Z",
+            created_by=None,
+            slug="mozfest-reveler",
+            criteria_text=None,
+            source_url="http://badger.openbadges.org/badge/meta/mozfest-reveler",
+            source="test-fixture",
+            image="",
+            issuer=self.issuer
+        )
+
+        self.local_badge_instance_1, _ = LocalBadgeInstance.objects.get_or_create(
+            recipient_user=self.user,
+            recipient_identifier="test@example.com",
+            issuer_badgeclass=self.badge_class,
+            created_at="2015-12-15T15:55:51Z",
+            created_by=None,
+            slug="3949c957-11e2-464d-b1c0-0d4fa645e93a",
+            json="{\"issuedOn\":\"2013-10-25T12:55:31\",\"uid\":\"dc8959d7639e64178ec24fb222f11d050528df74\",\"type\":\"Assertion\",\"image\":\"http://localhost:8000/media/uploads/badges/local_badgeinstance_174e70bf-b7a8-4b71-8125-c34d1a994a7c.png\",\"badge\":{\"description\":\"The MozFest 2013 Reveler Badge is special edition badge acknowledging a personal commitment to forging the future of the web during MozFest: working with peers to imagine and build an open future of learning, making, journalism, data, science, privacy, and mobile.\",\"tags\":[],\"image\":\"http://badger.openbadges.org/badge/image/mozfest-reveler.png\",\"criteria\":\"http://badger.openbadges.org/badge/criteria/mozfest-reveler\",\"issuer\":{\"url\":\"http://openbadges.org\",\"type\":\"Issuer\",\"id\":\"http://badger.openbadges.org/program/meta/bda68a0b505bc0c7cf21bc7900280ee74845f693\",\"name\":\"Open Badges\"},\"type\":\"BadgeClass\",\"id\":\"http://badger.openbadges.org/badge/meta/mozfest-reveler\",\"name\":\"MozFest Reveler\"},\"@context\":\"https://w3id.org/openbadges/v1\",\"recipient\":{\"type\":\"email\",\"recipient\":\"test@example.com\"},\"id\":\"http://badger.openbadges.org/badge/assertion/dc8959d7639e64178ec24fb222f11d050528df74\"}",
+            revocation_reason=None,
+            identifier="http://badger.openbadges.org/badge/assertion/dc8959d7639e64178ec24fb222f11d050528df74",
+            image="uploads/badges/local_badgeinstance_174e70bf-b7a8-4b71-8125-c34d1a994a7c.png",
+            revoked=False
+        )
+
+        self.local_badge_instance_2, _ = LocalBadgeInstance.objects.get_or_create(
+            recipient_user=self.user,
+            recipient_identifier="test@example.com",
+            issuer_badgeclass=self.badge_class,
+            created_at="2015-12-21T20:41:16Z",
+            created_by=None,
+            slug="32f81606-4430-40df-a9fc-382a2d1f1574",
+            revocation_reason=None,
+            identifier="http://badger.openbadges.org/badge/assertion/c14a16d06481ba99fdf82b0b4b12d275c03c76cd",
+            image="uploads/badges/local_badgeinstance_bf562e3a-9f26-493e-840f-0ecb31d7bebc.png",
+            revoked=False
+        )
+
+        self.local_badge_instance_3, _ = LocalBadgeInstance.objects.get_or_create(
+            recipient_user=self.user,
+            recipient_identifier="test@example.com",
+            issuer_badgeclass=self.badge_class,
+            created_at="2015-12-28T15:54:50Z",
+            created_by=None,
+            slug="c36110d9-938a-4052-9a13-ed8424454ed5",
+            revocation_reason=None,
+            identifier="http://app.achievery.com/badge-assertion/4613999",
+            image="uploads/badges/local_badgeinstance_e63cdadc-7cad-46ee-a4d0-a75458678e04.png",
+            revoked=False
+        )
+
+        self.collection, _ = Collection.objects.get_or_create(
+            owner=self.user,
+            description='The Freshest Ones',
+            name='Fresh Badges',
+            slug='fresh-badges'
+        )
+
+        Collection.objects.create(
+            owner=self.user,
+            description='It\'s even fresher.',
+            name='Cool New Collection',
+            slug='cool-new-collection'
+        )
+        Collection.objects.create(
+            owner=self.user,
+            description='Newest!',
+            name='New collection',
+            slug='new-collection'
+        )
 
     def test_can_get_collection_list(self):
         self.client.force_authenticate(user=self.user)
-        response = self.client.get('/v1/earner/collections')
 
+        response = self.client.get('/v1/earner/collections')
         self.assertEqual(len(response.data), 3)
         self.assertEqual(response.data[0]['badges'], [])
 
@@ -461,7 +544,10 @@ class TestCollectionOperations(APITestCase):
             'name': 'Fruity Collection',
             'description': 'Apples and Oranges',
             'published': True,
-            'badges': [{'id': 1}, {'id': 2, 'description': 'A cool badge'}]
+            'badges': [
+                {'id': self.local_badge_instance_1.pk},
+                {'id': self.local_badge_instance_2.pk, 'description': 'A cool badge'}
+            ]
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post('/v1/earner/collections', data, format='json')
@@ -469,7 +555,7 @@ class TestCollectionOperations(APITestCase):
         self.assertEqual(response.status_code, 201)
         self.assertTrue(response.data.get('published'))
 
-        self.assertEqual([i['id'] for i in response.data.get('badges')], [1, 2])
+        self.assertEqual([i['id'] for i in response.data.get('badges')], [self.local_badge_instance_1.pk, self.local_badge_instance_2.pk])
         self.assertEqual(response.data.get('badges')[1]['description'], 'A cool badge')
 
     def test_can_define_collection_serializer(self):
@@ -479,7 +565,7 @@ class TestCollectionOperations(APITestCase):
         data = {
             'name': 'Fruity Collection',
             'description': 'Apples and Oranges',
-            'badges': [{'id': 1}, {'id': 2, 'description': 'A cool badge'}]
+            'badges': [{'id': self.local_badge_instance_1.pk}, {'id': self.local_badge_instance_2.pk, 'description': 'A cool badge'}]
         }
 
         serializer = CollectionSerializer(data=data, context={'user': self.user})
@@ -489,7 +575,7 @@ class TestCollectionOperations(APITestCase):
         self.assertIsNotNone(collection.pk)
         self.assertEqual(collection.name, data['name'])
         self.assertEqual(collection.badges.count(), 2)
-        self.assertEqual(collection.badges.filter(instance_id=2).first().description, 'A cool badge')
+        self.assertEqual(collection.badges.filter(instance_id=self.local_badge_instance_2.pk).first().description, 'A cool badge')
 
     def test_can_delete_collection(self):
         """
@@ -530,7 +616,6 @@ class TestCollectionOperations(APITestCase):
         self.assertFalse(collection.published)
         self.assertEqual(collection.share_url, '')
 
-
     def test_can_publish_unpublish_collection_api_share_method(self):
         """
         The CollectionSerializer should be able to update/delete a collection's share hash
@@ -543,16 +628,15 @@ class TestCollectionOperations(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.data.startswith('http'))
 
-        collection = Collection.objects.get(pk=1)
+        collection = Collection.objects.get(pk=self.collection.pk)
+
         self.assertTrue(collection.published)
 
         response = self.client.delete('/v1/earner/collections/fresh-badges/share')
         self.assertEqual(response.status_code, 204)
         self.assertIsNone(response.data)
 
-        collection = Collection.objects.get(pk=1)
-        self.assertFalse(collection.published)
-
+        self.assertFalse(self.collection.published)
 
     def test_can_add_remove_collection_badges_via_serializer(self):
         """
@@ -563,7 +647,7 @@ class TestCollectionOperations(APITestCase):
 
         serializer = CollectionSerializer(
             collection,
-            data={'badges': [{'id': 1}, {'id': 2}]},
+            data={'badges': [{'id': self.local_badge_instance_1.pk}, {'id': self.local_badge_instance_2.pk}]},
             partial=True
         )
 
@@ -571,11 +655,11 @@ class TestCollectionOperations(APITestCase):
         serializer.save()
 
         self.assertEqual(collection.badges.count(), 2)
-        self.assertEqual([i.instance.pk for i in collection.badges.all()], [1, 2])
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [self.local_badge_instance_1.pk, self.local_badge_instance_2.pk])
 
         serializer = CollectionSerializer(
             collection,
-            data={'badges': [{'id': 2}, {'id': 3}]},
+            data={'badges': [{'id': self.local_badge_instance_2.pk}, {'id': self.local_badge_instance_3.pk}]},
             partial=True
         )
 
@@ -583,8 +667,7 @@ class TestCollectionOperations(APITestCase):
         serializer.save()
 
         self.assertEqual(collection.badges.count(), 2)
-        self.assertEqual([i.instance.pk for i in collection.badges.all()], [2, 3])
-
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [self.local_badge_instance_2.pk, self.local_badge_instance_3.pk])
 
     def test_can_add_remove_collection_badges_via_collection_detail_api(self):
         """
@@ -595,7 +678,7 @@ class TestCollectionOperations(APITestCase):
         self.assertEqual(collection.badges.count(), 0)
 
         data = {
-            'badges': [{'id': 1}, {'id': 2}],
+            'badges': [{'id': self.local_badge_instance_1.pk}, {'id': self.local_badge_instance_2.pk}],
             'name': collection.name,
             'description': collection.description
         }
@@ -607,36 +690,35 @@ class TestCollectionOperations(APITestCase):
         self.assertEqual(response.status_code, 200)
         collection = Collection.objects.first()  # reload
         self.assertEqual(collection.badges.count(), 2)
-        self.assertEqual([i.instance.pk for i in collection.badges.all()], [1, 2])
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [self.local_badge_instance_1.pk, self.local_badge_instance_2.pk])
 
-        data = {'badges': [{'id': 2}, {'id': 3}]}
+        data = {'badges': [{'id': self.local_badge_instance_2.pk}, {'id': self.local_badge_instance_3.pk}]}
         response = self.client.put(
             '/v1/earner/collections/{}'.format(collection.slug),
             data=data, format='json')
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual([i['id'] for i in response.data.get('badges')], [2, 3])
+        self.assertEqual([i['id'] for i in response.data.get('badges')], [self.local_badge_instance_2.pk, self.local_badge_instance_3.pk])
         collection = Collection.objects.first()  # reload
         self.assertEqual(collection.badges.count(), 2)
-        self.assertEqual([i.instance.pk for i in collection.badges.all()], [2, 3])
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [self.local_badge_instance_2.pk, self.local_badge_instance_3.pk])
 
     def test_can_add_remove_badges_via_collection_badge_detail_api(self):
-        collection = Collection.objects.first()
-        self.assertEqual(collection.badges.count(), 0)
+        self.assertEqual(self.collection.badges.count(), 0)
 
-        data = [{'id': 1}, {'id': 2}]
+        data = [{'id': self.local_badge_instance_1.pk}, {'id': self.local_badge_instance_2.pk}]
 
         self.client.force_authenticate(user=self.user)
         response = self.client.post(
-            '/v1/earner/collections/{}/badges'.format(collection.slug), data=data,
+            '/v1/earner/collections/{}/badges'.format(self.collection.slug), data=data,
             format='json')
 
         self.assertEqual(response.status_code, 201)
-        self.assertEqual([i['id'] for i in response.data], [1, 2])
+        self.assertEqual([i['id'] for i in response.data], [self.local_badge_instance_1.pk, self.local_badge_instance_2.pk])
 
         collection = Collection.objects.first()  # reload
         self.assertEqual(collection.badges.count(), 2)
-        self.assertEqual([i.instance.pk for i in collection.badges.all()], [1, 2])
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [self.local_badge_instance_1.pk, self.local_badge_instance_2.pk])
 
         response = self.client.get('/v1/earner/collections/{}/badges'.format(collection.slug))
         self.assertEqual(response.status_code, 200)
@@ -650,123 +732,114 @@ class TestCollectionOperations(APITestCase):
         self.assertIsNone(response.data)
         collection = Collection.objects.first()  # reload
         self.assertEqual(collection.badges.count(), 1)
-        self.assertEqual([i.instance.pk for i in collection.badges.all()], [2])
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [self.local_badge_instance_2.pk])
 
     def test_can_add_remove_issuer_badges_via_api(self):
-        collection = Collection.objects.first()
-        instance_slug = '92219015-18a6-4538-8b6d-2b228e47b8aa'
+        self.assertEqual(self.collection.badges.count(), 0)
 
-        self.assertEqual(collection.badges.count(), 0)
-
-        data = [{'id': 1}, {'id': instance_slug}]
+        data = [
+            {'id': self.local_badge_instance_1.pk},
+            {'id': self.local_badge_instance_2.slug}
+        ]
 
         self.client.force_authenticate(user=self.user)
         response = self.client.post(
-            '/v1/earner/collections/{}/badges'.format(collection.slug), data=data,
+            '/v1/earner/collections/{}/badges'.format(self.collection.slug), data=data,
             format='json')
 
         self.assertEqual(response.status_code, 201)
-        self.assertEqual([i['id'] for i in response.data], [1, instance_slug])
+        self.assertEqual([i['id'] for i in response.data], [self.local_badge_instance_1.pk, self.local_badge_instance_2.pk])
 
-        collection = Collection.objects.first()  # reload
-        self.assertEqual(collection.badges.count(), 2)
-        self.assertEqual([i.badge_instance.pk for i in collection.badges.all()], [1, 1])
+        self.assertEqual(self.collection.badges.count(), 2)
+        self.assertEqual([i.badge_instance.pk for i in self.collection.badges.all()], [self.local_badge_instance_1.pk, self.local_badge_instance_2.pk])
 
         response = self.client.get(
-            '/v1/earner/collections/{}/badges/{}'.format(collection.slug, instance_slug)
+            '/v1/earner/collections/{}/badges/{}'.format(self.collection.slug, self.local_badge_instance_2.pk)
         )
         self.assertEqual(response.status_code, 200)
 
         response = self.client.delete(
-            '/v1/earner/collections/{}/badges/{}'.format(collection.slug, instance_slug)
+            '/v1/earner/collections/{}/badges/{}'.format(self.collection.slug, self.local_badge_instance_2.pk)
         )
         self.assertEqual(response.status_code, 204)
 
     def test_api_handles_null_description_and_adds_badge(self):
-        collection = Collection.objects.first()
-        self.assertEqual(collection.badges.count(), 0)
+        self.assertEqual(self.collection.badges.count(), 0)
 
-        data = {'badges': [{'id': 1, 'description': None}]}
+        data = {'badges': [{'id': self.local_badge_instance_1.pk, 'description': None}]}
 
         self.client.force_authenticate(user=self.user)
         response = self.client.put(
-            '/v1/earner/collections/{}'.format(collection.slug), data=data,
+            '/v1/earner/collections/{}'.format(self.collection.slug), data=data,
             format='json')
         self.assertEqual(response.status_code, 200)
 
-        collection = Collection.objects.first()
-        entry = collection.badges.first()
+        entry = self.collection.badges.first()
         self.assertEqual(entry.description, '')
-        self.assertEqual(entry.instance_id, 1)
+        self.assertEqual(entry.instance_id, self.local_badge_instance_1.pk)
 
     def test_can_add_remove_collection_badges_collection_badgelist_api(self):
         """
         A PUT request to the Collection BadgeList endpoint should update the list of badges
         n a collection
         """
-        collection = Collection.objects.first()
-        self.assertEqual(collection.badges.count(), 0)
+        self.assertEqual(self.collection.badges.count(), 0)
 
-        data = [{'id': 1}, {'id': 2}]
+        data = [{'id': self.local_badge_instance_1.pk}, {'id': self.local_badge_instance_2.pk}]
 
         self.client.force_authenticate(user=self.user)
         response = self.client.put(
-            '/v1/earner/collections/{}/badges'.format(collection.slug), data=data,
+            '/v1/earner/collections/{}/badges'.format(self.collection.slug), data=data,
             format='json')
 
         self.assertEqual(response.status_code, 200)
         collection = Collection.objects.first()  # reload
         self.assertEqual(collection.badges.count(), 2)
-        self.assertEqual([i.instance.pk for i in collection.badges.all()], [1, 2])
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [self.local_badge_instance_1.pk, self.local_badge_instance_2.pk])
 
-        data = [{'id': 2}, {'id': 3}]
+        data = [{'id': self.local_badge_instance_2.pk}, {'id': self.local_badge_instance_3.pk}]
         response = self.client.put(
             '/v1/earner/collections/{}/badges'.format(collection.slug),
             data=data, format='json')
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual([i['id'] for i in response.data], [2, 3])
+        self.assertEqual([i['id'] for i in response.data], [self.local_badge_instance_2.pk, self.local_badge_instance_3.pk])
         collection = Collection.objects.first()  # reload
         self.assertEqual(collection.badges.count(), 2)
-        self.assertEqual([i.instance.pk for i in collection.badges.all()], [2, 3])
+        self.assertEqual([i.instance.pk for i in collection.badges.all()], [self.local_badge_instance_2.pk, self.local_badge_instance_3.pk])
 
     def test_can_update_badge_description_in_collection_via_detail_api(self):
-        collection = Collection.objects.first()
-        self.assertEqual(collection.badges.count(), 0)
+        self.assertEqual(self.collection.badges.count(), 0)
 
         serializer = CollectionSerializer(
-            collection,
-            data={'badges': [{'id': 1}, {'id': 2}]},
+            self.collection,
+            data={'badges': [{'id': self.local_badge_instance_1.pk},
+                             {'id': self.local_badge_instance_2.pk}]},
             partial=True
         )
 
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        self.assertEqual(collection.badges.count(), 2)
+        self.assertEqual(self.collection.badges.count(), 2)
 
         self.client.force_authenticate(user=self.user)
         response = self.client.put(
-            '/v1/earner/collections/{}/badges/{}'.format(collection.slug, 1),
+            '/v1/earner/collections/{}/badges/{}'.format(self.collection.slug, self.local_badge_instance_1.pk),
             data={'id': 1, 'description': 'A cool badge.'}, format='json'
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, {'id': 1, 'description': 'A cool badge.'})
+        self.assertEqual(response.data, {'id': self.local_badge_instance_1.pk, 'description': 'A cool badge.'})
 
-        obj = LocalBadgeInstanceCollection.objects.get(collection=collection, instance_id=1)
+        obj = LocalBadgeInstanceCollection.objects.get(collection=self.collection, instance_id=self.local_badge_instance_1.pk)
         self.assertEqual(obj.description, 'A cool badge.')
-
-
-class TestPublicBadgeShare(APITestCase):
-    fixtures = ['0001_initial_superuser', 'initial_collections', 'initial_my_badges', 'test_badge_objects']
 
     def test_badge_share_json(self):
         """
         Badge Share page returns JSON by default
         """
-        first_badge = LocalBadgeInstance.objects.first()
-        response = self.client.get('/share/badge/{}'.format(first_badge.id))
+        response = self.client.get('/share/badge/{}'.format(self.local_badge_instance_1.pk), content_type="application/json")
 
         self.assertEqual(response.data.get('uid'), u'dc8959d7639e64178ec24fb222f11d050528df74')
 
@@ -774,11 +847,10 @@ class TestPublicBadgeShare(APITestCase):
         """
         Badge Share page returns HTML if requested
         """
-        first_badge = LocalBadgeInstance.objects.first()
         response = self.client.get(
-            '/share/badge/{}'.format(first_badge.id),
+            '/share/badge/{}'.format(self.local_badge_instance_1.pk),
             **{'HTTP_ACCEPT': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'}
         )
 
-        self.assertContains(response, "<h1>{}</h1>".format(first_badge.cached_badgeclass.name))
+        self.assertContains(response, "<h1>{}</h1>".format(self.local_badge_instance_1.cached_badgeclass.name))
         self.assertContains(response, 'href="http://badger.openbadges.org/badge/assertion/dc8959d7639e64178ec24fb222f11d050528df74.json"')
