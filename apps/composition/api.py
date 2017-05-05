@@ -484,7 +484,7 @@ class CollectionList(APIView):
         serializer.is_valid(raise_exception=True)
         try:
             serializer.save()
-        except IntegrityError as e:
+        except IntegrityError:
             return Response("A collection with this name already exists",
                             status=status.HTTP_400_BAD_REQUEST)
 
