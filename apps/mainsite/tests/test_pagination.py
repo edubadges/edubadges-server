@@ -1,6 +1,6 @@
 import json
 
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 
 from django_mock_queries.query import MockSet, MockModel
 
@@ -20,7 +20,7 @@ class DecryptedCursorPagination(EncryptedCursorPagination):
     page_size = 3
 
 
-class TestEncryptedCursorPagination(TestCase):
+class TestEncryptedCursorPagination(TransactionTestCase):
     request_factory = APIRequestFactory()
 
     def setUp(self):

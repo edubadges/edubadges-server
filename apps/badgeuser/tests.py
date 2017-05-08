@@ -23,7 +23,8 @@ from mainsite.models import BadgrApp
 from issuer.models import BadgeClass, BadgeInstance, Issuer
 
 from badgeuser.models import EmailAddressVariant, CachedEmailAddress, ProxyEmailConfirmation
-from mainsite.tests import CachingTestCase
+
+from mainsite.tests.base import BadgrTestCase
 
 factory = APIRequestFactory()
 
@@ -59,7 +60,7 @@ class SetupUserHelper(APITestCase):
         return user
 
 
-class AuthTokenTests(SetupUserHelper, APITestCase, CachingTestCase):
+class AuthTokenTests(BadgrTestCase):
 
     def test_create_user_auth_token(self):
         """
@@ -98,7 +99,7 @@ class AuthTokenTests(SetupUserHelper, APITestCase, CachingTestCase):
         self.assertEqual(Token.objects.get(user=user).key, user.cached_token())
 
 
-class UserCreateTests(SetupUserHelper, APITestCase, CachingTestCase):
+class UserCreateTests(BadgrTestCase):
 
     def test_create_user(self):
         user_data = {
@@ -268,7 +269,7 @@ class UserCreateTests(SetupUserHelper, APITestCase, CachingTestCase):
         self.assertEqual(len(mail.outbox), 1)
 
 
-class UserUnitTests(TestCase):
+class UserUnitTests(BadgrTestCase):
     def test_user_can_have_unicode_characters_in_name(self):
         user = BadgeUser(
             username='abc', email='abc@example.com',
@@ -281,7 +282,7 @@ class UserUnitTests(TestCase):
     CELERY_ALWAYS_EAGER=True,
     SESSION_ENGINE='django.contrib.sessions.backends.cache',
 )
-class UserEmailTests(SetupUserHelper, APITestCase, CachingTestCase):
+class UserEmailTests(BadgrTestCase):
     def setUp(self):
         super(UserEmailTests, self).setUp()
 
@@ -567,7 +568,7 @@ class UserEmailTests(SetupUserHelper, APITestCase, CachingTestCase):
 @override_settings(
     SESSION_ENGINE='django.contrib.sessions.backends.cache',
 )
-class UserBadgeTests(SetupUserHelper, APITestCase, CachingTestCase):
+class UserBadgeTests(BadgrTestCase):
     def setUp(self):
         super(UserBadgeTests, self).setUp()
         self.badgr_app = BadgrApp(cors='testserver',
@@ -624,7 +625,7 @@ class UserBadgeTests(SetupUserHelper, APITestCase, CachingTestCase):
 @override_settings(
     SESSION_ENGINE='django.contrib.sessions.backends.cache',
 )
-class UserProfileTests(APITestCase, CachingTestCase):
+class UserProfileTests(BadgrTestCase):
 
     def test_user_can_change_profile(self):
         first = 'firsty'

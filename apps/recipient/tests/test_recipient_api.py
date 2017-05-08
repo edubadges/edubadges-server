@@ -1,26 +1,12 @@
-import json
-import os
-import time
-
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
-from django.core.cache import cache
-from django.core.cache.backends.filebased import FileBasedCache
-from django.core.urlresolvers import reverse
-from django.test import TestCase, override_settings
-from rest_framework import status
-from rest_framework.test import APITestCase
 
 from badgeuser.models import BadgeUser, CachedEmailAddress
 from issuer.models import Issuer
-from mainsite import TOP_DIR
-from mainsite.tests import CachingTestCase
-
-from pathway.models import Pathway, PathwayElement, PathwayElementBadge
-from recipient.models import RecipientGroup, RecipientGroupMembership, RecipientProfile
+from mainsite.tests.base import BadgrTestCase
+from recipient.models import RecipientGroup, RecipientProfile
 
 
-class RecipientApiTests(APITestCase, CachingTestCase):
+class RecipientApiTests(BadgrTestCase):
     def setUp(self):
         self.test_user, _ = BadgeUser.objects.get_or_create(email='test@example.com')
         self.test_user.user_permissions.add(Permission.objects.get(codename="add_issuer"))
