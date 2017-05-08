@@ -1,6 +1,7 @@
 # encoding: utf-8
 from __future__ import unicode_literals
 
+import random
 import time
 
 import os
@@ -15,7 +16,7 @@ from badgeuser.models import BadgeUser
 
 class SetupUserHelper(APITestCase):
     def setup_user(self,
-                   email='auth+token+tests@email.test',
+                   email=None,
                    first_name='firsty',
                    last_name='lastington',
                    password='secret',
@@ -24,6 +25,9 @@ class SetupUserHelper(APITestCase):
                    verified=True,
                    primary=True,
                    send_confirmation=False):
+
+        if email is None:
+            email = 'setup_user_{}@email.test'.format(random.random())
         user = BadgeUser.objects.create(email=email,
                                         first_name=first_name,
                                         last_name=last_name,

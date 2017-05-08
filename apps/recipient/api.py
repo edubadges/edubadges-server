@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.response import Response
 
-from issuer.api import AbstractIssuerAPIEndpoint
+from issuer.api_v1 import AbstractIssuerAPIEndpoint
 from issuer.models import Issuer
 from recipient.models import RecipientGroup, RecipientProfile, RecipientGroupMembership
 from recipient.serializers import RecipientGroupSerializer, RecipientGroupListSerializer, RecipientProfileSerializer, \

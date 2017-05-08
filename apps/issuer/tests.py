@@ -1,82 +1,58 @@
 import base64
 import json
-import os
 import os.path
-from django.apps import apps
-import png
 import shutil
-import urllib
 
+import os
+import png
+from django.apps import apps
+from django.contrib.auth import get_user_model
 from django.core import mail
 from django.core.cache import cache
 from django.core.files.images import get_image_dimensions
 from django.core.urlresolvers import reverse
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Permission
-from django.test import modify_settings, override_settings
-
-from openbadges_bakery import unbake
-from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
-
-from issuer.api import IssuerList
-from issuer.models import Issuer, BadgeClass, BadgeInstance, IssuerStaff
-from issuer.serializers import BadgeInstanceSerializer
+from django.test import override_settings
 from mainsite import TOP_DIR
+from openbadges_bakery import unbake
+from rest_framework.test import APITestCase
 
+from issuer.models import Issuer, BadgeClass, BadgeInstance, IssuerStaff
+from issuer.serializers_v1 import BadgeInstanceSerializerV1
+from mainsite.tests.base import BadgrTestCase
 from mainsite.utils import OriginSetting
 
-factory = APIRequestFactory()
 
-example_issuer_props = {
-    'name': 'Awesome Issuer',
-    'description': 'An issuer of awe-inspiring credentials',
-    'url': 'http://example.com',
-    'email': 'contact@example.org'
-}
-
-
-@override_settings(
-    CELERY_ALWAYS_EAGER=True,
-    SESSION_ENGINE='django.contrib.sessions.backends.cache',
-    CACHES={
-        'default': {
-            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
-        }
+class IssuerTests(BadgrTestCase):
+    example_issuer_props = {
+        'name': 'Awesome Issuer',
+        'description': 'An issuer of awe-inspiring credentials',
+        'url': 'http://example.com',
+        'email': 'contact@example.org'
     }
-)
-class IssuerTests(APITestCase):
-    fixtures = ['0001_initial_superuser', 'test_badge_objects.json']
 
-    def setUp(self):
-        cache.clear()
-        self.test_user = get_user_model().objects.get(pk=1)
-        self.test_user.user_permissions.add(Permission.objects.get(codename="add_issuer"))
+    def setup_issuer(self,
+                     name='Test Issuer',
+                     description='test case Issuer',
+                     owner=None):
+        issuer = Issuer.objects.create(name=name, description=description, created_by=owner)
+        return issuer
 
-    def test_create_issuer_unauthenticated(self):
-        view = IssuerList.as_view()
-
-        request = factory.post(
-            '/v1/issuer/issuers',
-            json.dumps(example_issuer_props),
-            content_type='application/json'
-        )
-
-        response = view(request)
+    def test_cant_create_issuer_if_unauthenticated(self):
+        response = self.client.post('/v1/issuer/issuers', self.example_issuer_props)
         self.assertEqual(response.status_code, 401)
 
-    def test_create_issuer_authenticated(self):
-        self.client.force_authenticate(user=self.test_user)
-        response = self.client.post('/v1/issuer/issuers', example_issuer_props)
+    def test_create_issuer_if_authenticated(self):
+        self.setup_user(authenticate=True)
 
+        response = self.client.post('/v1/issuer/issuers', self.example_issuer_props)
         self.assertEqual(response.status_code, 201)
 
         # assert that name, description, url, etc are set properly in response badge object
         badge_object = response.data.get('json')
-        self.assertEqual(badge_object['url'], example_issuer_props['url'])
-        self.assertEqual(badge_object['name'], example_issuer_props['name'])
-        self.assertEqual(badge_object['description'], example_issuer_props['description'])
-        self.assertEqual(badge_object['email'], example_issuer_props['email'])
+        self.assertEqual(badge_object['url'], self.example_issuer_props['url'])
+        self.assertEqual(badge_object['name'], self.example_issuer_props['name'])
+        self.assertEqual(badge_object['description'], self.example_issuer_props['description'])
+        self.assertEqual(badge_object['email'], self.example_issuer_props['email'])
         self.assertIsNotNone(badge_object.get('id'))
         self.assertIsNotNone(badge_object.get('@context'))
 
@@ -86,121 +62,44 @@ class IssuerTests(APITestCase):
             response = self.client.get('/v1/issuer/issuers/{}'.format(slug))
             self.assertEqual(response.status_code, 200)
 
-    def test_create_issuer_authenticated_unconfirmed_email(self):
-        first_user_data = user_data = {
-            'first_name': 'NEW Test',
-            'last_name': 'User',
-            'email': 'unclaimed1@example.com',
-            'password': '123456'
-        }
-        response = self.client.post('/v1/user/profile', user_data)
+    def test_cant_create_issuer_if_authenticated_with_unconfirmed_email(self):
+        self.setup_user(authenticate=True, verified=False)
 
-        first_user = get_user_model().objects.get(first_name='NEW Test')
-
-        self.client.force_authenticate(user=first_user)
-        response = self.client.post('/v1/issuer/issuers', example_issuer_props)
-
+        response = self.client.post('/v1/issuer/issuers', self.example_issuer_props)
         self.assertEqual(response.status_code, 403)
 
+    def _create_issuer_with_image_and_test_resizing(self, image_path, desired_width=400, desired_height=400):
+        self.setup_user(authenticate=True)
+
+        with open(image_path, 'r') as badge_image:
+            issuer_fields_with_image = self.example_issuer_props.copy()
+            issuer_fields_with_image['image'] = badge_image
+
+            response = self.client.post('/v1/issuer/issuers', issuer_fields_with_image, format='multipart')
+            self.assertEqual(response.status_code, 201)
+
+            self.assertIn('slug', response.data)
+            issuer_slug = response.data.get('slug')
+            new_issuer = Issuer.objects.get(entity_id=issuer_slug)
+
+            image_width, image_height = get_image_dimensions(new_issuer.image.file)
+            self.assertEqual(image_width, desired_width)
+            self.assertEqual(image_height, desired_height)
+
     def test_create_issuer_image_500x300_resizes_to_400x400(self):
-        view = IssuerList.as_view()
-
-        with open(os.path.join(os.path.dirname(__file__), 'testfiles',
-                               '500x300.png'), 'r') as badge_image:
-                issuer_fields_with_image = {
-                    'name': 'Awesome Issuer',
-                    'description': 'An issuer of awe-inspiring credentials',
-                    'url': 'http://example.com',
-                    'email': 'contact@example.org',
-                    'image': badge_image,
-                }
-
-                request = factory.post('/v1/issuer/issuers',
-                                       issuer_fields_with_image,
-                                       format='multipart')
-
-                force_authenticate(request,
-                                   user=self.test_user)
-                response = view(request)
-                self.assertEqual(response.status_code, 201)
-
-                badge_object = response.data.get('json')
-                derived_slug = badge_object['id'].split('/')[-1]
-                new_issuer = Issuer.objects.get(slug=derived_slug)
-
-                image_width, image_height = \
-                    get_image_dimensions(new_issuer.image.file)
-                self.assertEqual(image_width, 400)
-                self.assertEqual(image_height, 400)
+        image_path = os.path.join(os.path.dirname(__file__), 'testfiles', '500x300.png')
+        self._create_issuer_with_image_and_test_resizing(image_path)
 
     def test_create_issuer_image_450x450_resizes_to_400x400(self):
-        view = IssuerList.as_view()
-
-        with open(
-            os.path.join(os.path.dirname(__file__), 'testfiles', '450x450.png'),
-            'r') as badge_image:
-
-                issuer_fields_with_image = {
-                    'name': 'Awesome Issuer',
-                    'description': 'An issuer of awe-inspiring credentials',
-                    'url': 'http://example.com',
-                    'email': 'contact@example.org',
-                    'image': badge_image,
-                }
-
-                request = factory.post('/v1/issuer/issuers',
-                                       issuer_fields_with_image,
-                                       format='multipart')
-
-                force_authenticate(request,
-                                   user=self.test_user)
-                response = view(request)
-                self.assertEqual(response.status_code, 201)
-
-                badge_object = response.data.get('json')
-                derived_slug = badge_object['id'].split('/')[-1]
-                new_issuer = Issuer.objects.get(slug=derived_slug)
-
-                image_width, image_height = \
-                    get_image_dimensions(new_issuer.image.file)
-                self.assertEqual(image_width, 400)
-                self.assertEqual(image_height, 400)
+        image_path = os.path.join(os.path.dirname(__file__), 'testfiles', '450x450.png')
+        self._create_issuer_with_image_and_test_resizing(image_path)
 
     def test_create_issuer_image_300x300_stays_300x300(self):
-        view = IssuerList.as_view()
+        image_path = os.path.join(os.path.dirname(__file__), 'testfiles', '300x300.png')
+        self._create_issuer_with_image_and_test_resizing(image_path, 300, 300)
 
-        with open(
-            os.path.join(os.path.dirname(__file__), 'testfiles', '300x300.png'),
-            'r') as badge_image:
-
-                issuer_fields_with_image = {
-                    'name': 'Awesome Issuer',
-                    'description': 'An issuer of awe-inspiring credentials',
-                    'url': 'http://example.com',
-                    'email': 'contact@example.org',
-                    'image': badge_image,
-                }
-
-                request = factory.post('/v1/issuer/issuers',
-                                       issuer_fields_with_image,
-                                       format='multipart')
-
-                force_authenticate(request,
-                                   user=self.test_user)
-                response = view(request)
-                self.assertEqual(response.status_code, 201)
-
-                badge_object = response.data.get('json')
-                derived_slug = badge_object['id'].split('/')[-1]
-                new_issuer = Issuer.objects.get(slug=derived_slug)
-
-                image_width, image_height = \
-                    get_image_dimensions(new_issuer.image.file)
-                self.assertEqual(image_width, 300)
-                self.assertEqual(image_height, 300)
-
-    def test_update_issuer(self):
-        self.client.force_authenticate(user=self.test_user)
+    def test_can_update_issuer_if_authenticated(self):
+        self.setup_user(authenticate=True)
 
         original_issuer_props = {
             'name': 'Test Issuer Name',
@@ -227,141 +126,131 @@ class IssuerTests(APITestCase):
         self.assertEqual(response.data['description'], updated_issuer_props['description'])
         self.assertEqual(response.data['email'], updated_issuer_props['email'])
 
-    def test_private_issuer_detail_get(self):
-        # GET on single badge should work if user has privileges
-        # Eventually, implement PUT for updates (if permitted)
-        pass
-
     def test_get_empty_issuer_editors_set(self):
-        self.client.force_authenticate(user=self.test_user)
-        response = self.client.get('/v1/issuer/issuers/test-issuer/staff')
+        test_user = self.setup_user(authenticate=True)
+        issuer = self.setup_issuer(owner=test_user)
 
+        response = self.client.get('/v1/issuer/issuers/{slug}/staff'.format(slug=issuer.entity_id))
         self.assertEqual(response.status_code, 200)
-
-    def test_add_user_to_issuer_editors_set(self):
-        """ Authenticated user (pk=1) owns test-issuer. Add user (username=test3) as an editor. """
-        self.client.force_authenticate(user=self.test_user)
-
-        post_response = self.client.post(
-            '/v1/issuer/issuers/test-issuer/staff',
-            {'action': 'add', 'username': 'test3', 'editor': True}
-        )
-
-        self.assertEqual(post_response.status_code, 200)
-        self.assertEqual(len(post_response.data), 2)  # Assert that there is now one editor
+        self.assertEqual(len(response.data), 1)  # Assert that there is just a single owner
 
     def test_add_user_to_issuer_editors_set_by_email(self):
-        """ Authenticated user (pk=1) owns test-issuer. Add user (username=test3) as an editor. """
-        self.client.force_authenticate(user=self.test_user)
+        test_user = self.setup_user(authenticate=True)
+        issuer = self.setup_issuer(owner=test_user)
 
-        user_to_update = get_user_model().objects.get(email='test3@example.com')
-        user_issuers = user_to_update.cached_issuers()
+        other_user = self.setup_user(authenticate=False)
 
-        post_response = self.client.post(
-            '/v1/issuer/issuers/test-issuer/staff',
-            {'action': 'add', 'email': 'test3@example.com', 'editor': True}
-        )
-
-        self.assertEqual(post_response.status_code, 200)
-        self.assertEqual(len(post_response.data), 2)  # Assert that there is now one editor
-        self.assertTrue(len(user_issuers) < len(user_to_update.cached_issuers()))
+        response = self.client.post('/v1/issuer/issuers/{slug}/staff'.format(slug=issuer.entity_id), {
+            'action': 'add',
+            'email': other_user.primary_email,
+            'editor': True
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)  # Assert that there is now one editor
 
     def test_add_user_to_issuer_editors_set_too_many_methods(self):
-        """ Authenticated user (pk=1) owns test-issuer. Add user (username=test3) as an editor. """
-        self.client.force_authenticate(user=self.test_user)
+        test_user = self.setup_user(authenticate=True)
+        issuer = self.setup_issuer(owner=test_user)
 
-        post_response = self.client.post(
-            '/v1/issuer/issuers/test-issuer/staff',
-            {'action': 'add', 'email': 'test3@example.com', 'username': 'test3', 'editor': True}
-        )
-
-        self.assertEqual(post_response.status_code, 400)
+        response = self.client.post('/v1/issuer/issuers/{slug}/staff'.format(slug=issuer.entity_id), {
+            'action': 'add',
+            'email': 'test3@example.com',
+            'username': 'test3',
+            'editor': True
+        })
+        self.assertEqual(response.status_code, 400)
 
     def test_add_user_to_issuer_editors_set_missing_identifier(self):
-        """ Authenticated user (pk=1) owns test-issuer. Add user (username=test3) as an editor. """
-        self.client.force_authenticate(user=self.test_user)
+        test_user = self.setup_user(authenticate=True)
+        issuer = self.setup_issuer(owner=test_user)
 
-        post_response = self.client.post(
-            '/v1/issuer/issuers/test-issuer/staff',
-            {'action': 'add', 'editor': True}
-        )
-
-        self.assertEqual(post_response.status_code, 404)
-        self.assertEqual(post_response.data, 'User not found. Neither email address or username was provided.')
-
+        response = self.client.post('/v1/issuer/issuers/{slug}/staff'.format(slug=issuer.entity_id), {
+            'action': 'add',
+            'editor': True
+        })
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.data, 'User not found. Neither email address or username was provided.')
 
     def test_bad_action_issuer_editors_set(self):
-        self.client.force_authenticate(user=self.test_user)
-        post_response = self.client.post(
-            '/v1/issuer/issuers/test-issuer/staff',
-            {'action': 'DO THE HOKEY POKEY', 'username': 'test2', 'editor': True}
-        )
+        test_user = self.setup_user(authenticate=True)
+        issuer = self.setup_issuer(owner=test_user)
 
-        self.assertEqual(post_response.status_code, 400)
+        response = self.client.post('/v1/issuer/issuers/{slug}/staff'.format(slug=issuer.entity_id), {
+            'action': 'DO THE HOKEY POKEY',
+            'username': 'test2',
+            'editor': True
+        })
+        self.assertEqual(response.status_code, 400)
 
     def test_add_nonexistent_user_to_issuer_editors_set(self):
-        self.client.force_authenticate(user=self.test_user)
-        response = self.client.post(
-            '/v1/issuer/issuers/test-issuer/staff',
-            {'action': 'add', 'username': 'taylor_swift', 'editor': True}
-        )
+        test_user = self.setup_user(authenticate=True)
+        issuer = self.setup_issuer(owner=test_user)
 
-        self.assertContains(response, "User taylor_swift not found.", status_code=404)
+        erroneous_username = 'wronguser'
+        response = self.client.post('/v1/issuer/issuers/{slug}/staff'.format(slug=issuer.entity_id), {
+            'action': 'add',
+            'username': erroneous_username,
+            'editor': True
+        })
+        self.assertContains(response, "User {} not found.".format(erroneous_username), status_code=404)
 
     def test_add_user_to_nonexistent_issuer_editors_set(self):
-        self.client.force_authenticate(user=self.test_user)
+        test_user = self.setup_user(authenticate=True)
+        erroneous_issuer_slug = 'wrongissuer'
         response = self.client.post(
-            '/v1/issuer/issuers/test-nonexistent-issuer/staff',
+            '/v1/issuer/issuers/{slug}/staff'.format(slug=erroneous_issuer_slug),
             {'action': 'add', 'username': 'test2', 'editor': True}
         )
-
-        self.assertContains(response, "Issuer test-nonexistent-issuer not found", status_code=404)
+        self.assertEqual(response.status_code, 404)
 
     def test_add_remove_user_with_issuer_staff_set(self):
-        test_issuer = Issuer.objects.get(slug='test-issuer')
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+
+        other_user = self.setup_user(authenticate=False)
+
         self.assertEqual(len(test_issuer.staff.all()), 1)
 
-        self.client.force_authenticate(user=self.test_user)
-        post_response = self.client.post(
-            '/v1/issuer/issuers/test-issuer/staff',
-            {'action': 'add', 'username': 'test2'}
-        )
-
-        self.assertEqual(post_response.status_code, 200)
+        first_response = self.client.post('/v1/issuer/issuers/{slug}/staff'.format(slug=test_issuer.entity_id), {
+            'action': 'add',
+            'email': other_user.primary_email
+        })
+        self.assertEqual(first_response.status_code, 200)
         self.assertEqual(len(test_issuer.staff.all()), 2)
 
-        second_response = self.client.post(
-            '/v1/issuer/issuers/test-issuer/staff',
-            {'action': 'remove', 'username': 'test2'}
-        )
-
+        second_response = self.client.post('/v1/issuer/issuers/{slug}/staff'.format(slug=test_issuer.entity_id), {
+            'action': 'remove',
+            'email': other_user.primary_email
+        })
         self.assertEqual(second_response.status_code, 200)
         self.assertEqual(len(test_issuer.staff.all()), 1)
 
     def test_delete_issuer_successfully(self):
-        self.client.force_authenticate(user=self.test_user)
-        test_issuer = Issuer(name='issuer who can be deleted', slug='issuer-deletable')
-        test_issuer.save()
-        IssuerStaff(issuer=test_issuer, user=self.test_user, role=IssuerStaff.ROLE_OWNER).save()
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
 
-        response = self.client.delete('/v1/issuer/issuers/issuer-deletable', {})
+        response = self.client.delete('/v1/issuer/issuers/{slug}'.format(slug=test_issuer.entity_id), {})
         self.assertEqual(response.status_code, 200)
 
     def test_delete_issuer_with_unissued_badgeclass_successfully(self):
-        self.client.force_authenticate(user=self.test_user)
-        test_issuer = Issuer(name='issuer who can be deleted', slug="issuer-deletable")
-        test_issuer.save()
-        IssuerStaff(issuer=test_issuer, user=self.test_user, role=IssuerStaff.ROLE_OWNER).save()
-        test_badgeclass = BadgeClass(name="Deletable Badge", issuer=test_issuer)
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
 
+        test_badgeclass = BadgeClass(name="Deletable Badge", issuer=test_issuer)
         test_badgeclass.save()
 
-        response = self.client.delete('/v1/issuer/issuers/issuer-deletable', {})
+        response = self.client.delete('/v1/issuer/issuers/{slug}'.format(slug=test_issuer.entity_id), {})
         self.assertEqual(response.status_code, 200)
 
     def test_cant_delete_issuer_with_issued_badge(self):
-        self.client.force_authenticate(user=self.test_user)
-        response = self.client.delete('/v1/issuer/issuers/test-issuer-2', {})
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+
+        test_badgeclass = BadgeClass(name="Deletable Badge", issuer=test_issuer)
+        test_badgeclass.save()
+        test_badgeclass.issue(recipient_id='new-bage-recipient@email.test')
+
+        response = self.client.delete('/v1/issuer/issuers/{slug}'.format(slug=test_issuer.entity_id), {})
         self.assertEqual(response.status_code, 400)
 
     def test_new_issuer_updates_cached_user_issuers(self):
@@ -402,6 +291,7 @@ class IssuerTests(APITestCase):
 
         self.assertEqual(len(new_badgelist.data), len(badgelist.data) + 1)
 
+
 @override_settings(
     CELERY_ALWAYS_EAGER=True,
     SESSION_ENGINE='django.contrib.sessions.backends.cache',
@@ -413,7 +303,7 @@ class IssuerTests(APITestCase):
     }
 )
 class BadgeClassTests(APITestCase):
-    fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
+    # fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
 
     def setUp(self):
         cache.clear()
@@ -878,7 +768,7 @@ class BadgeClassTests(APITestCase):
     }
 )
 class AssertionTests(APITestCase):
-    fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
+    # fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
 
     def setUp(self):
         cache.clear()
@@ -896,7 +786,7 @@ class AssertionTests(APITestCase):
             "create_notification": False
         }
 
-        serializer = BadgeInstanceSerializer(data=data)
+        serializer = BadgeInstanceSerializerV1(data=data)
         serializer.is_valid(raise_exception=True)
 
         self.assertEqual(serializer.validated_data.get('create_notification'), data['create_notification'])
@@ -1169,7 +1059,7 @@ class AssertionTests(APITestCase):
     }
 )
 class PublicAPITests(APITestCase):
-    fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
+    # fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json']
     """
     Tests the ability of an anonymous user to GET one public badge object
     """
@@ -1265,7 +1155,7 @@ class PublicAPITests(APITestCase):
 
 
 class FindBadgeClassTests(APITestCase):
-    fixtures = fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json', 'initial_my_badges']
+    # fixtures = fixtures = ['0001_initial_superuser.json', 'test_badge_objects.json', 'initial_my_badges']
 
     def test_can_find_imported_badge_by_id(self):
         user = get_user_model().objects.first()

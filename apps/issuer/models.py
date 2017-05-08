@@ -43,7 +43,7 @@ class BaseAuditedModel(cachemodel.CacheModel):
         return BadgeUser.cached.get(id=self.created_by_id)
 
 
-class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUploadedSvgImage):
+class Issuer(ResizeUploadedImage, ScrubUploadedSvgImage, BaseAuditedModel, BaseVersionedEntity):
     entity_class_name = 'Issuer'
 
     source = models.CharField(max_length=254, default='local')
@@ -82,24 +82,22 @@ class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUp
         staff = self.cached_issuerstaff()
         ret = super(Issuer, self).delete(*args, **kwargs)
 
-        # remove membership records and publish users
+        # remove membership records
         for membership in staff:
-            u = membership.cached_user
-            membership.delete()
-            u.publish()
+            membership.delete(publish_issuer=False)
 
-        # badgebook logic
-        try:
-            from badgebook.models import LmsCourseInfo
-            # update LmsCourseInfo's that were using this issuer as the default_issuer
-            for course_info in LmsCourseInfo.objects.filter(default_issuer=self):
-                course_info.default_issuer = None
-                course_info.save()
-        except ImportError:
-            pass
+        if apps.is_installed('badgebook'):
+            # badgebook shim
+            try:
+                from badgebook.models import LmsCourseInfo
+                # update LmsCourseInfo's that were using this issuer as the default_issuer
+                for course_info in LmsCourseInfo.objects.filter(default_issuer=self):
+                    course_info.default_issuer = None
+                    course_info.save()
+            except ImportError:
+                pass
 
         return ret
-
 
     def save(self, *args, **kwargs):
         ret = super(Issuer, self).save(*args, **kwargs)
@@ -233,9 +231,11 @@ class IssuerStaff(cachemodel.CacheModel):
         self.issuer.publish()
 
     def delete(self, *args, **kwargs):
-        issuer = self.issuer
+        publish_issuer = kwargs.pop('publish_issuer', True)
         super(IssuerStaff, self).delete()
-        issuer.publish()
+        if publish_issuer:
+            self.issuer.publish()
+        self.user.publish()
 
     @property
     def cached_user(self):
@@ -247,7 +247,7 @@ class IssuerStaff(cachemodel.CacheModel):
         return Issuer.cached.get(pk=self.issuer_id)
 
 
-class BadgeClass(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUploadedSvgImage):
+class BadgeClass(ResizeUploadedImage, ScrubUploadedSvgImage, BaseAuditedModel, BaseVersionedEntity):
     entity_class_name = 'BadgeClass'
 
     source = models.CharField(max_length=254, default='local')
