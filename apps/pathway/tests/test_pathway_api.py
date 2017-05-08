@@ -1,37 +1,24 @@
 # Created by wiggins@concentricsky.com on 4/16/16.
 import json
-import os
-import time
 
-from django.contrib.auth import get_user_model
+import os
 from django.contrib.auth.models import Permission
-from django.core.cache import cache
-from django.core.cache.backends.filebased import FileBasedCache
 from django.core.urlresolvers import reverse
-from django.test import TestCase, override_settings
+from django.test import override_settings
+from mainsite import TOP_DIR
 from rest_framework import status
-from rest_framework.test import APITestCase
 
 from badgeuser.models import BadgeUser, CachedEmailAddress
 from issuer.models import BadgeClass, BadgeInstance, Issuer
-from issuer.serializers_v1 import BadgeInstanceSerializer
-from mainsite import TOP_DIR
-from mainsite.tests import CachingTestCase
+from issuer.serializers_v1 import BadgeInstanceSerializerV1
+from mainsite.tests.base import BadgrTestCase
 from mainsite.utils import OriginSetting
 from pathway.completionspec import CompletionRequirementSpecFactory
-from pathway.models import Pathway, PathwayElement
 from pathway.serializers import PathwaySerializer, PathwayElementSerializer
 from recipient.models import RecipientProfile, RecipientGroupMembership, RecipientGroup
 
-CACHE_OVERRIDE = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
-    }
-}
 
-
-class PathwayApiTests(APITestCase, CachingTestCase):
+class PathwayApiTests(BadgrTestCase):
 
     def setUp(self):
         super(PathwayApiTests, self).setUp()
@@ -220,12 +207,9 @@ class PathwayApiTests(APITestCase, CachingTestCase):
 
 
 @override_settings(
-    CACHES=CACHE_OVERRIDE,
-    CELERY_ALWAYS_EAGER=True,
     ISSUER_NOTIFY_DEFAULT=False,
-    HTTP_ORIGIN="http://localhost:8000",
 )
-class PathwayCompletionTests(APITestCase, CachingTestCase):
+class PathwayCompletionTests(BadgrTestCase):
     def setUp(self):
         self.test_user, _ = BadgeUser.objects.get_or_create(email='test@example.com')
         self.test_user.user_permissions.add(Permission.objects.get(codename="add_issuer"))
@@ -350,7 +334,7 @@ class PathwayCompletionTests(APITestCase, CachingTestCase):
         # Award a badge to recipient
         current_badgeclass = BadgeClass.objects.get(slug='badge-of-edited-testing')
         award_data = {'create_notification': False, 'recipient_identifier': member_data['recipient']}
-        serializer = BadgeInstanceSerializer(data=award_data)
+        serializer = BadgeInstanceSerializerV1(data=award_data)
         serializer.is_valid(raise_exception=True)
 
         serializer.save(

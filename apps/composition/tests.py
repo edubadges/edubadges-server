@@ -10,7 +10,7 @@ from composition.models import (LocalBadgeInstance,
                                 Collection, LocalBadgeInstanceCollection, )
 from composition.serializers import (CollectionSerializer, )
 from issuer.models import BadgeClass, Issuer
-from mainsite.tests import CachingTestCase
+from mainsite.tests.base import BadgrTestCase
 
 dir = os.path.dirname(__file__)
 
@@ -69,7 +69,7 @@ def setup_basic_0_5_0(**kwargs):
         )
 
 
-class TestBadgeUploads(APITestCase, CachingTestCase):
+class TestBadgeUploads(BadgrTestCase):
 
     def setup_user(self, email='test@example.com', authenticate=True):
         user, _ = BadgeUser.objects.get_or_create(email=email)
@@ -434,7 +434,7 @@ class TestBadgeUploads(APITestCase, CachingTestCase):
         self.assertTrue(response.data[0].startswith('Unable to get valid baked image or valid json response from'))
 
 
-class TestCollections(APITestCase, CachingTestCase):
+class TestCollections(BadgrTestCase):
     def setUp(self):
         super(TestCollections, self).setUp()
         self.user, _ = BadgeUser.objects.get_or_create(email='test@example.com')

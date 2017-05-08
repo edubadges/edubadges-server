@@ -1,1 +1,1 @@
-from test_misc import CachingTestCase
+from base import *
