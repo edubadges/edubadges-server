@@ -1,19 +1,18 @@
 # Created by wiggins@concentricsky.com on 3/31/16.
 import basic_models
-from autoslug import AutoSlugField
-from django.db import models
-from django.conf import settings
-from django.core.urlresolvers import reverse
 import cachemodel
+from django.core.urlresolvers import reverse
+from django.db import models
 
+from entity.models import BaseVersionedEntity
 from issuer.models import BadgeInstance
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.utils import OriginSetting
 from pathway.completionspec import CompletionRequirementSpecFactory, ElementJunctionCompletionRequirementSpec
-from pathway.models import Pathway
 
-class RecipientProfile(basic_models.DefaultModel):
-    slug = AutoSlugField(max_length=254, populate_from='recipient_identifier', unique=True, blank=False)
+
+class RecipientProfile(BaseVersionedEntity, basic_models.DefaultModel):
+    slug = models.CharField(max_length=254, blank=True, null=True, default=None)
     badge_user = models.ForeignKey('badgeuser.BadgeUser', null=True, blank=True)
     recipient_identifier = models.EmailField(max_length=1024)
     public = models.BooleanField(default=False)
@@ -68,12 +67,10 @@ class RecipientProfile(basic_models.DefaultModel):
         return BadgeInstance.objects.filter(revoked=False, recipient_identifier=self.recipient_identifier)
 
 
-
-
-class RecipientGroup(basic_models.DefaultModel):
+class RecipientGroup(BaseVersionedEntity, basic_models.DefaultModel):
     issuer = models.ForeignKey('issuer.Issuer')
     name = models.CharField(max_length=254)
-    slug = AutoSlugField(max_length=254, populate_from='name', unique=True, blank=False)
+    slug = models.CharField(max_length=254, blank=True, null=True, default=None)
     description = models.TextField(blank=True, null=True)
     members = models.ManyToManyField('RecipientProfile', through='recipient.RecipientGroupMembership')
     pathways = models.ManyToManyField('pathway.Pathway', related_name='recipient_groups')
@@ -114,8 +111,8 @@ class RecipientGroup(basic_models.DefaultModel):
         )
 
 
-class RecipientGroupMembership(cachemodel.CacheModel):
-    slug = AutoSlugField(max_length=254, unique=True, populate_from='populate_slug')
+class RecipientGroupMembership(BaseVersionedEntity):
+    slug = models.CharField(max_length=254, blank=True, null=True, default=None)
     recipient_profile = models.ForeignKey('recipient.RecipientProfile')
     recipient_group = models.ForeignKey('recipient.RecipientGroup')
     membership_name = models.CharField(max_length=254)
