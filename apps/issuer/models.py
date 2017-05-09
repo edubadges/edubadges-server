@@ -4,14 +4,17 @@ import datetime
 import json
 import re
 import uuid
+from itertools import chain
 
 import cachemodel
 from allauth.account.adapter import get_adapter
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, transaction
 from django.db.models import ProtectedError
 from jsonfield import JSONField
 from openbadges_bakery import bake
@@ -139,24 +142,25 @@ class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUp
         existing_staff_idx = {s.cached_user: s for s in self.staff_items}
         new_staff_idx = {s['cached_user']: s for s in value}
 
-        # add missing staff records
-        for staff_data in value:
-            if staff_data['cached_user'] not in existing_staff_idx:
-                staff_record, created = IssuerStaff.cached.get_or_create(
-                    issuer=self,
-                    user=staff_data['cached_user'],
-                    defaults={
-                        'role': staff_data['role']
-                    })
-                if not created:
-                    staff_record.role = staff_data['role']
-                    staff_record.save()
+        with transaction.atomic():
+            # add missing staff records
+            for staff_data in value:
+                if staff_data['cached_user'] not in existing_staff_idx:
+                    staff_record, created = IssuerStaff.cached.get_or_create(
+                        issuer=self,
+                        user=staff_data['cached_user'],
+                        defaults={
+                            'role': staff_data['role']
+                        })
+                    if not created:
+                        staff_record.role = staff_data['role']
+                        staff_record.save()
 
-        # remove old staff records -- but never remove the only OWNER role
-        for staff_record in self.staff_items:
-            if staff_record.cached_user not in new_staff_idx:
-                if staff_record.role != IssuerStaff.ROLE_OWNER or len(self.owners) > 1:
-                    staff_record.delete()
+            # remove old staff records -- but never remove the only OWNER role
+            for staff_record in self.staff_items:
+                if staff_record.cached_user not in new_staff_idx:
+                    if staff_record.role != IssuerStaff.ROLE_OWNER or len(self.owners) > 1:
+                        staff_record.delete()
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_editors(self):
@@ -166,6 +170,9 @@ class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUp
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeclasses(self):
         return self.badgeclasses.all()
+
+    def cached_badgeinstances(self):
+        return chain(*[bc.cached_badgeinstances() for bc in self.cached_badgeclasses()])
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_pathways(self):
@@ -237,13 +244,11 @@ class IssuerStaff(cachemodel.CacheModel):
         return Issuer.cached.get(pk=self.issuer_id)
 
 
-class BadgeClass(BaseVersionedEntity, ResizeUploadedImage, ScrubUploadedSvgImage):
+class BadgeClass(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUploadedSvgImage):
     entity_class_name = 'BadgeClass'
 
     source = models.CharField(max_length=254, default='local')
     source_url = models.CharField(max_length=254, blank=True, null=True, default=None)
-    created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True, related_name="+")
     issuer = models.ForeignKey(Issuer, blank=False, null=False, on_delete=models.CASCADE, related_name="badgeclasses")
 
     # slug has been deprecated for now, but preserve existing values
@@ -275,6 +280,9 @@ class BadgeClass(BaseVersionedEntity, ResizeUploadedImage, ScrubUploadedSvgImage
 
         if self.pathway_element_count() > 0:
             raise ProtectedError("BadgeClass may only be deleted if all PathwayElementBadge have been removed.")
+
+        if len(self.cached_completion_elements()) > 0:
+            return ProtectedError("Badge could not be deleted. It is being used as a pathway completion badge.")
 
         issuer = self.issuer
         super(BadgeClass, self).delete(*args, **kwargs)
@@ -349,13 +357,11 @@ class BadgeClass(BaseVersionedEntity, ResizeUploadedImage, ScrubUploadedSvgImage
         return self.get_json()
 
 
-class BadgeInstance(BaseVersionedEntity):
+class BadgeInstance(BaseAuditedModel, BaseVersionedEntity):
     entity_class_name = 'Assertion'
 
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.CASCADE, related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True, related_name="+")
 
     recipient_identifier = models.EmailField(max_length=1024, blank=False, null=False)
     image = models.FileField(upload_to='uploads/badges', blank=True)
@@ -468,6 +474,31 @@ class BadgeInstance(BaseVersionedEntity):
         if recipient_profile:
             recipient_profile.publish()
         self.publish_delete('entity_id', 'revoked')
+
+    def revoke(self, revocation_reason):
+        if self.revoked:
+            raise ValidationError("Assertion is already revoked")
+
+        if not revocation_reason:
+            raise ValidationError("revocation_reason is required")
+
+        self.revoked = True
+        self.revocation_reason = revocation_reason
+        self.image.delete()
+        self.save()
+
+        # remove BadgeObjectiveAwards from badgebook if needed
+        if apps.is_installed('badgebook'):
+            try:
+                from badgebook.models import BadgeObjectiveAward, LmsCourseInfo
+                try:
+                    award = BadgeObjectiveAward.cached.get(badge_instance_id=assertion.id)
+                except BadgeObjectiveAward.DoesNotExist:
+                    pass
+                else:
+                    award.delete()
+            except ImportError:
+                pass
 
     def notify_earner(self, badgr_app=None):
         """
@@ -591,6 +622,19 @@ class BadgeInstance(BaseVersionedEntity):
     @cachemodel.cached_method(auto_publish=True)
     def cached_evidence(self):
         return self.badgeinstanceevidence_set.all()
+
+    @property
+    def evidence(self):
+        if hasattr(self, '_evidence_items'):
+            return getattr(self, '_evidence_items', [])
+        return self.cached_evidence()
+
+    @evidence.setter
+    def evidence(self, value):
+        """
+        Set this assertions badgeinstanceevidence from a list of EvidenceItemSerializerV2 data
+        """
+        self._evidence_items = value
 
     @property
     def evidence_url(self):

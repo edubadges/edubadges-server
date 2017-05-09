@@ -10,9 +10,8 @@ import badgrlog
 
 
 class BaseEntityView(APIView):
-    def __init__(self):
-        super(BaseEntityView, self).__init__()
-        self._logger = None
+    create_event = None
+    logger = None
 
     def get_context_data(self, **kwargs):
         return {
@@ -28,12 +27,24 @@ class BaseEntityView(APIView):
         return getattr(self, 'serializer_class', None)
 
     def get_logger(self):
-        if self._logger is None:
-            self._logger = badgrlog.BadgrLogger()
-        return self._logger
+        if self.logger:
+            return self.logger
+        self.logger = badgrlog.BadgrLogger()
+        return self.logger
+
+    def get_create_event(self):
+        return getattr(self, 'create_event', None)
+
+    def log_create(self, instance):
+        event_cls = self.get_create_event()
+        if event_cls is not None:
+            logger = self.get_logger()
+            if logger is not None:
+                logger.event(event_cls(instance))
 
 
 class BaseEntityListView(BaseEntityView):
+
     def get_objects(self, request, **kwargs):
         raise NotImplementedError
 
@@ -60,18 +71,13 @@ class BaseEntityListView(BaseEntityView):
         self.log_create(new_instance)
         return Response(serializer.data, status=HTTP_201_CREATED)
 
-    def get_create_event(self):
-        return getattr(self, 'create_event', None)
 
-    def log_create(self, instance):
-        event_cls = self.get_create_event()
-        if event_cls is not None:
-            logger = self.get_logger()
-            if logger is not None:
-                logger.event(event_cls(instance))
-
-
-class BaseEntityDetailView(BaseEntityView):
+class VersionedObjectMixin(object):
+    def has_object_permissions(self, request, obj):
+        for permission in self.get_permissions():
+            if not permission.has_object_permission(request, self, obj):
+                return False
+            return True
 
     def get_object(self, request, **kwargs):
         version = getattr(request, 'version', 'v1')
@@ -99,11 +105,8 @@ class BaseEntityDetailView(BaseEntityView):
         # nothing found
         raise Http404
 
-    def has_object_permissions(self, request, obj):
-        for permission in self.get_permissions():
-            if not permission.has_object_permission(request, self, obj):
-                return False
-            return True
+
+class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
 
     def get(self, request, **kwargs):
         """

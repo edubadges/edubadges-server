@@ -70,7 +70,7 @@ class IssuerSerializerV1(serializers.Serializer):
         representation['json'] = obj.get_json()
 
         if self.context.get('embed_badgeclasses', False):
-            representation['badgeclasses'] = BadgeClassSerializer(obj.badgeclasses.all(), many=True, context=self.context).data
+            representation['badgeclasses'] = BadgeClassSerializerV1(obj.badgeclasses.all(), many=True, context=self.context).data
 
         representation['badgeClassCount'] = len(obj.cached_badgeclasses())
         representation['recipientGroupCount'] = len(obj.cached_recipient_groups())
@@ -94,13 +94,13 @@ class IssuerRoleActionSerializerV1(serializers.Serializer):
         return attrs
 
 
-class BadgeClassSerializer(serializers.Serializer):
+class BadgeClassSerializerV1(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1()
     id = serializers.IntegerField(required=False, read_only=True)
     name = StripTagsCharField(max_length=255)
-    image = Base64FileField(allow_empty_file=False, use_url=True, required=False)
-    slug = StripTagsCharField(max_length=255, allow_blank=True, required=False)
+    image = ValidImageField(required=False)
+    slug = StripTagsCharField(max_length=255, allow_blank=True, required=False, source='entity_id')
     criteria = MarkdownCharField(allow_blank=True, required=False, write_only=True)
     criteria_text = MarkdownCharField(required=False, read_only=True)
     criteria_url = StripTagsCharField(required=False, read_only=True)
@@ -109,28 +109,15 @@ class BadgeClassSerializer(serializers.Serializer):
     description = StripTagsCharField(max_length=16384, required=True)
 
     def to_representation(self, instance):
-        representation = super(BadgeClassSerializer, self).to_representation(instance)
+        representation = super(BadgeClassSerializerV1, self).to_representation(instance)
         representation['issuer'] = OriginSetting.HTTP+reverse('issuer_json', kwargs={'entity_id': instance.cached_issuer.entity_id})
         representation['json'] = instance.get_json()
         return representation
 
     def validate_image(self, image):
-        # TODO: Make sure it's a PNG (square if possible), and remove any baked-in badge assertion that exists.
-        # Doing: add a random string to filename
-        img_name, img_ext = os.path.splitext(image.name)
-
-        try:
-            from PIL import Image
-            img = Image.open(image)
-            img.verify()
-        except Exception as e:
-            if not verify_svg(image):
-                raise serializers.ValidationError('Invalid image.')
-        else:
-            if img.format != "PNG":
-                raise serializers.ValidationError('Invalid PNG')
-
-        image.name = 'issuer_badgeclass_' + str(uuid.uuid4()) + img_ext
+        if image is not None:
+            img_name, img_ext = os.path.splitext(image.name)
+            image.name = 'issuer_badgeclass_' + str(uuid.uuid4()) + img_ext
         return image
 
     def update(self, instance, validated_data):
@@ -191,10 +178,10 @@ class EvidenceItemSerializer(serializers.Serializer):
         return super(EvidenceItemSerializer, self).create(validated_data)
 
 
-class BadgeInstanceSerializer(serializers.Serializer):
+class BadgeInstanceSerializerV1(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1()
-    slug = serializers.CharField(max_length=255, read_only=True)
+    slug = serializers.CharField(max_length=255, read_only=True, source='entity_id')
     image = serializers.FileField(read_only=True)  # use_url=True, might be necessary
     email = serializers.EmailField(max_length=1024, required=False, write_only=True)
     recipient_identifier = serializers.EmailField(max_length=1024, required=False)
@@ -218,18 +205,18 @@ class BadgeInstanceSerializer(serializers.Serializer):
         # if self.context.get('extended_json'):
         #     self.fields['json'] = V1InstanceSerializer(source='extended_json')
 
-        representation = super(BadgeInstanceSerializer, self).to_representation(instance)
+        representation = super(BadgeInstanceSerializerV1, self).to_representation(instance)
         representation['json'] = instance.get_json()
         if self.context.get('include_issuer', False):
             representation['issuer'] = IssuerSerializerV1(instance.cached_badgeclass.cached_issuer).data
         else:
-            representation['issuer'] = OriginSetting.HTTP+reverse('issuer_json', kwargs={'slug': instance.cached_issuer.slug})
+            representation['issuer'] = OriginSetting.HTTP+reverse('issuer_json', kwargs={'entity_id': instance.cached_issuer.entity_id})
         if self.context.get('include_badge_class', False):
-            representation['badge_class'] = BadgeClassSerializer(instance.cached_badgeclass, context=self.context).data
+            representation['badge_class'] = BadgeClassSerializerV1(instance.cached_badgeclass, context=self.context).data
         else:
-            representation['badge_class'] = OriginSetting.HTTP+reverse('badgeclass_json', kwargs={'slug': instance.cached_badgeclass.slug})
+            representation['badge_class'] = OriginSetting.HTTP+reverse('badgeclass_json', kwargs={'entity_id': instance.cached_badgeclass.entity_id})
 
-        representation['public_url'] = OriginSetting.HTTP+reverse('badgeinstance_json', kwargs={'slug': instance.slug})
+        representation['public_url'] = OriginSetting.HTTP+reverse('badgeinstance_json', kwargs={'entity_id': instance.entity_id})
 
         if apps.is_installed('badgebook'):
             try:
@@ -271,35 +258,3 @@ class BadgeInstanceSerializer(serializers.Serializer):
             allow_uppercase=validated_data.get('allow_uppercase'),
             badgr_app=BadgrApp.objects.get_current(self.context.get('request'))
         )
-
-
-class IssuerPortalSerializer(serializers.Serializer):
-    """
-    A serializer used to pass initial data to a view template so that the React.js
-    front end can render.
-    It should detect which of the core Badgr applications are installed and return
-    appropriate contextual information.
-    """
-
-    def to_representation(self, user):
-        view_data = {}
-
-        user_issuers = user.cached_issuers()
-        user_issuer_badgeclasses = user.cached_badgeclasses()
-
-        issuer_data = IssuerSerializerV1(
-            user_issuers,
-            many=True,
-            context=self.context
-        )
-        badgeclass_data = BadgeClassSerializer(
-            user_issuer_badgeclasses,
-            many=True,
-            context=self.context
-        )
-
-        view_data['issuer_issuers'] = issuer_data.data
-        view_data['issuer_badgeclasses'] = badgeclass_data.data
-        view_data['installed_apps'] = installed_apps_list()
-
-        return view_data
