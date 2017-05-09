@@ -5,11 +5,10 @@ import json
 
 from mainsite.tests import BadgrTestCase, SetupIssuerHelper
 
-from badgeuser.tests import SetupUserHelper
 from issuer.models import Issuer
 
 
-class PublicAPITests(SetupIssuerHelper, SetupUserHelper, BadgrTestCase):
+class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
     """
     Tests the ability of an anonymous user to GET one public badge object
     """

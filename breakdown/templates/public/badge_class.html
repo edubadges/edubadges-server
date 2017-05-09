@@ -20,7 +20,7 @@
 		    <div class="heading-x-text">
 			    <h1>{{ badge_class.name }}</h1>
 
-				  <a class="stack" href="{% url 'issuer_json' slug=issuer.slug %}">
+				  <a class="stack" href="{% url 'issuer_json' entity_id=issuer.entity_id %}">
 				    <div class="stack-x-image">
 					    <img src="{% if issuer.json.image %}{{ issuer.json.image }}{% else %}{% static 'badgr-ui/images/issuer-placeholder.png' %}{% endif %}"
 					         width="40"
