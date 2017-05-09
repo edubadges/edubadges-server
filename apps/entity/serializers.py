@@ -1,13 +1,11 @@
 # encoding: utf-8
 from __future__ import unicode_literals
 
-import six
-from django import http
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ValidationError as DjangoValidationError
-from rest_framework import serializers, views, exceptions, status
+from rest_framework import serializers
+
 from rest_framework.exceptions import ValidationError as RestframeworkValidationError
-from rest_framework.response import Response
 
 
 class EntityRelatedFieldV2(serializers.RelatedField):
@@ -158,55 +156,5 @@ class V2ErrorSerializer(BaseSerializerV2):
                                                   validation_errors=self.validation_errors)
 
 
-def exception_handler(exc, context):
-    version = context.get('kwargs', None).get('version', 'v1')
-    if version == 'v1':
-        # Use the default exception-handling logic for v1
-        return views.exception_handler(exc, context)
-    elif version == 'v2':
-        description = 'miscellaneous error'
-        field_errors = {}
-        validation_errors = []
-        response_code = None
-        if isinstance(exc, exceptions.ParseError):
-            description = 'bad request'
-            validation_errors = [exc.detail]
-
-        elif isinstance(exc, exceptions.ValidationError):
-            description = 'bad request'
-
-            if isinstance(exc.detail, list):
-                validation_errors = exc.detail
-            elif isinstance(exc.detail, dict):
-                field_errors = exc.detail
-            elif isinstance(exc.detail, six.string_types):
-                validation_errors = [exc.detail]
-
-            response_code = status.HTTP_400_BAD_REQUEST
-
-        elif isinstance(exc, (exceptions.AuthenticationFailed, exceptions.NotAuthenticated)):
-            description = 'no valid auth token found'
-            response_code = status.HTTP_401_UNAUTHORIZED
-
-        elif isinstance(exc, (http.Http404, exceptions.PermissionDenied)):
-            description = 'entity not found or insufficient privileges'
-            response_code = status.HTTP_404_NOT_FOUND
-
-        elif isinstance(exc, exceptions.APIException):
-            field_errors = exc.detail
-            response_code = exc.status_code
-
-        else:
-            # Unrecognized exception, return 500 error
-            return None
-
-
-        serializer = V2ErrorSerializer(instance={},
-                                       success=False,
-                                       description=description,
-                                       field_errors=field_errors,
-                                       validation_errors=validation_errors)
-
-        return Response(serializer.data, status=response_code)
 
 
