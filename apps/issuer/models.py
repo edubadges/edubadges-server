@@ -279,13 +279,13 @@ class BadgeClass(ResizeUploadedImage, ScrubUploadedSvgImage, BaseAuditedModel, B
 
     def delete(self, *args, **kwargs):
         if self.recipient_count() > 0:
-            raise ProtectedError("BadgeClass may only be deleted if all BadgeInstances have been revoked.")
+            raise ProtectedError("BadgeClass may only be deleted if all BadgeInstances have been revoked.", self)
 
         if self.pathway_element_count() > 0:
-            raise ProtectedError("BadgeClass may only be deleted if all PathwayElementBadge have been removed.")
+            raise ProtectedError("BadgeClass may only be deleted if all PathwayElementBadge have been removed.", self)
 
         if len(self.cached_completion_elements()) > 0:
-            return ProtectedError("Badge could not be deleted. It is being used as a pathway completion badge.")
+            return ProtectedError("Badge could not be deleted. It is being used as a pathway completion badge.", self)
 
         issuer = self.issuer
         super(BadgeClass, self).delete(*args, **kwargs)

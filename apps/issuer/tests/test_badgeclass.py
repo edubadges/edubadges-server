@@ -32,25 +32,23 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
             )
             self.assertEqual(response.status_code, 201)
             self.assertIn('slug', response.data)
-            new_badgeclass_slug = response.data.get('slug)')
+            new_badgeclass_slug = response.data.get('slug')
 
             # assert that the BadgeClass was published to and fetched from the cache
-            # we expect to generate one query where the object permissions are checked in BadgeClassDetail.get
-            with self.assertNumQueries(1):
+            with self.assertNumQueries(0):
                 response = self.client.get('/v1/issuer/issuers/{issuer}/badges/{badgeclass}'.format(
                     issuer=test_issuer.entity_id,
                     badgeclass=new_badgeclass_slug))
                 self.assertEqual(response.status_code, 200)
 
     def test_can_create_badgeclass(self):
-        return self._create_badgeclass_for_issuer_authenticated(self.get_test_image_path())
+        self._create_badgeclass_for_issuer_authenticated(self.get_test_image_path())
 
     def test_can_create_badgeclass_with_svg(self):
-        return self._create_badgeclass_for_issuer_authenticated(self.get_test_svg_image_path())
+        self._create_badgeclass_for_issuer_authenticated(self.get_test_svg_image_path())
 
     def test_create_badgeclass_scrubs_svg(self):
-        image_path = os.path.join(self.get_test_image_path(), 'hacked-svg-with-embedded-script-tags.svg')
-        with open(image_path, 'r') as attack_badge_image:
+        with open(self.get_testfiles_path('hacked-svg-with-embedded-script-tags.svg'), 'r') as attack_badge_image:
 
             badgeclass_props = {
                 'name': 'javascript SVG badge',
@@ -65,7 +63,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
             self.assertIn('slug', response.data)
 
             # make sure code was stripped
-            bc = BadgeClass.objects.get(slug=response.data.get('slug'))
+            bc = BadgeClass.objects.get(entity_id=response.data.get('slug'))
             image_content = bc.image.file.readlines()
             self.assertNotIn('onload', image_content)
             self.assertNotIn('<script>', image_content)
@@ -146,7 +144,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_can_delete_unissued_badgeclass(self):
-        test_user = self.setup_user(authenticate=False)
+        test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
         test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
 
@@ -160,11 +158,14 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
 
     def test_cannot_delete_already_issued_badgeclass(self):
         """
-        A user should not be able to delete a badge class if it has been test_delete_already_issued_badgeclass
+        A user should not be able to delete a badge class if it has been issued
         """
-        test_user = self.setup_user(authenticate=False)
+        test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
         test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+
+        # issue badge to a recipient
+        test_badgeclass.issue(recipient_id='new.recipient@email.test')
 
         response = self.client.delete('/v1/issuer/issuers/{issuer}/badges/{badge}'.format(
             issuer=test_issuer.entity_id,
@@ -322,7 +323,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
             )
             self.assertEqual(put_response.status_code, 200)
 
-            new_badgeclass = BadgeClass.objects.get(slug=badgeclass_slug)
+            new_badgeclass = BadgeClass.objects.get(entity_id=badgeclass_slug)
             image_width, image_height = get_image_dimensions(new_badgeclass.image.file)
 
             # File should be changed to new 450x450 image
@@ -351,7 +352,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         )
         self.assertEqual(put_response.status_code, 200)
 
-        new_badgeclass = BadgeClass.objects.get(slug=slug)
+        new_badgeclass = BadgeClass.objects.get(entity_id=slug)
         image_width, image_height = get_image_dimensions(new_badgeclass.image.file)
 
         # File should be original 300x300 image
@@ -382,7 +383,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
             )
             self.assertEqual(put_response.status_code, 200)
 
-            new_badgeclass = BadgeClass.objects.get(slug=slug)
+            new_badgeclass = BadgeClass.objects.get(entity_id=slug)
             image_width, image_height = get_image_dimensions(new_badgeclass.image.file)
 
             # File should be changed to new 450x450 image
@@ -413,7 +414,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(get_response.status_code, 200)
 
         put_response = self.client.put('/v1/issuer/issuers/{issuer}/badges/{badge}'.format(issuer=test_issuer.entity_id, badge=slug),
-                                       get_response.data)
+                                       get_response.data, format='json')
         self.assertEqual(put_response.status_code, 200)
 
         self.assertEqual(get_response.data, put_response.data)
