@@ -9,12 +9,13 @@ from django.core.cache import cache
 from django.core.cache.backends.filebased import FileBasedCache
 from django.test import override_settings, TransactionTestCase
 from mainsite import TOP_DIR
-from rest_framework.test import APITestCase, APITransactionTestCase
+from rest_framework.test import APITransactionTestCase
 
 from badgeuser.models import BadgeUser
+from issuer.models import Issuer, BadgeClass
 
 
-class SetupUserHelper(APITestCase):
+class SetupUserHelper(object):
     def setup_user(self,
                    email=None,
                    first_name='firsty',
@@ -46,6 +47,42 @@ class SetupUserHelper(APITestCase):
         if authenticate:
             self.client.force_authenticate(user=user)
         return user
+
+
+class SetupIssuerHelper(object):
+    def setup_issuer(self,
+                     name='Test Issuer',
+                     description='test case Issuer',
+                     owner=None):
+        issuer = Issuer.objects.create(name=name, description=description, created_by=owner)
+        return issuer
+
+    def get_test_image_path(self):
+        return os.path.join(TOP_DIR, 'apps', 'issuer', 'testfiles', 'guinea_pig_testing_badge.png')
+
+    def setup_badgeclass(self,
+                         issuer,
+                         name=None,
+                         image=None,
+                         description='test case badgeclass',
+                         criteria_text='do something',
+                         criteria_url=None):
+
+        if name is None:
+            name = 'Test Badgeclass #{}'.format(random.random)
+
+        if image is None:
+            image = open(self.get_test_image_path(), 'r')
+
+        badgeclass = BadgeClass.objects.create(
+            issuer=issuer,
+            image=image,
+            name=name,
+            description=description,
+        )
+        return badgeclass
+
+
 
 
 @override_settings(

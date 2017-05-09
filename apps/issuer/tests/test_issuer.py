@@ -7,23 +7,16 @@ import os
 from django.core.files.images import get_image_dimensions
 
 from issuer.models import Issuer, BadgeClass
-from mainsite.tests.base import BadgrTestCase
+from mainsite.tests.base import BadgrTestCase, SetupIssuerHelper
 
 
-class IssuerTests(BadgrTestCase):
+class IssuerTests(SetupIssuerHelper, BadgrTestCase):
     example_issuer_props = {
         'name': 'Awesome Issuer',
         'description': 'An issuer of awe-inspiring credentials',
         'url': 'http://example.com',
         'email': 'contact@example.org'
     }
-
-    def setup_issuer(self,
-                     name='Test Issuer',
-                     description='test case Issuer',
-                     owner=None):
-        issuer = Issuer.objects.create(name=name, description=description, created_by=owner)
-        return issuer
 
     def test_cant_create_issuer_if_unauthenticated(self):
         response = self.client.post('/v1/issuer/issuers', self.example_issuer_props)
@@ -234,47 +227,40 @@ class IssuerTests(BadgrTestCase):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
 
-        test_badgeclass = BadgeClass(name="Deletable Badge", issuer=test_issuer)
-        test_badgeclass.save()
+        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
         test_badgeclass.issue(recipient_id='new-bage-recipient@email.test')
 
         response = self.client.delete('/v1/issuer/issuers/{slug}'.format(slug=test_issuer.entity_id), {})
         self.assertEqual(response.status_code, 400)
 
-    def test_new_issuer_updates_cached_user_issuers(self):
-        self.client.force_authenticate(user=self.test_user)
+    def test_creating_a_new_badgeclass_updates_all_badges(self):
+        test_user = self.setup_user(authenticate=True)
+
+        # get list of all badges
         badgelist = self.client.get('/v1/issuer/all-badges')
 
-        example_issuer_props = {
+        # create a new issuer
+        response = self.client.post('/v1/issuer/issuers', {
             'name': 'Fresh Issuer',
             'description': "Fresh Issuer",
             'url': 'http://freshissuer.com',
             'email': 'prince@freshissuer.com',
-        }
-
-        response = self.client.post(
-            '/v1/issuer/issuers',
-            example_issuer_props
-        )
+        })
         self.assertEqual(response.status_code, 201)
+        self.assertIn('slug', response.data)
+        new_issuer_slug = response.data.get('slug')
 
-        with open(
-                os.path.join(os.path.dirname(__file__), 'testfiles', 'guinea_pig_testing_badge.png'), 'r'
-        ) as badge_image:
-
-            example_badgeclass_props = {
+        # create a new badgeclass on new issuer
+        with open(self.get_test_image_path(), 'r') as badge_image:
+            response = self.client.post('/v1/issuer/issuers/{slug}/badges'.format(slug=new_issuer_slug), {
                 'name': 'Badge of Freshness',
                 'description': "Fresh Badge",
                 'image': badge_image,
                 'criteria': 'http://wikipedia.org/Freshness',
-            }
-
-            response = self.client.post(
-                '/v1/issuer/issuers/fresh-issuer/badges',
-                example_badgeclass_props
-            )
+            })
             self.assertEqual(response.status_code, 201)
 
+        # refetch list of badges
         new_badgelist = self.client.get('/v1/issuer/all-badges')
 
         self.assertEqual(len(new_badgelist.data), len(badgelist.data) + 1)

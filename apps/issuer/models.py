@@ -73,7 +73,7 @@ class Issuer(ResizeUploadedImage, ScrubUploadedSvgImage, BaseAuditedModel, BaseV
 
     def delete(self, *args, **kwargs):
         if self.recipient_count > 0:
-            raise ProtectedError("Issuer can not be deleted because it has previously issued badges.")
+            raise ProtectedError("Issuer can not be deleted because it has previously issued badges.", self)
 
         # remove any unused badgeclasses owned by issuer
         for bc in self.cached_badgeclasses():
