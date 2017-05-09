@@ -15,7 +15,7 @@ def exception_handler(exc, context):
         # Use the default exception-handling logic for v1
         if isinstance(exc, ProtectedError):
             description, protected_objects = exc.args
-            return Response(description, response_code=status.HTTP_400_BAD_REQUEST)
+            return Response(description, status=status.HTTP_400_BAD_REQUEST)
         return views.exception_handler(exc, context)
     elif version == 'v2':
         description = 'miscellaneous error'
