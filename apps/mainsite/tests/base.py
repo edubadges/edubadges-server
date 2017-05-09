@@ -13,6 +13,7 @@ from rest_framework.test import APITransactionTestCase
 
 from badgeuser.models import BadgeUser
 from issuer.models import Issuer, BadgeClass
+from mainsite.models import BadgrApp
 
 
 class SetupUserHelper(object):
@@ -118,6 +119,19 @@ class CachingTestCase(TransactionTestCase):
     CELERY_ALWAYS_EAGER=True,
     SESSION_ENGINE='django.contrib.sessions.backends.cache',
     HTTP_ORIGIN="http://localhost:8000",
+    BADGR_APP_ID=1,
 )
 class BadgrTestCase(SetupUserHelper, APITransactionTestCase, CachingTestCase):
-    pass
+    def setUp(self):
+        super(BadgrTestCase, self).setUp()
+
+        from django.conf import settings
+        badgr_app_id = getattr(settings, 'BADGR_APP_ID')
+        try:
+            self.badgr_app = BadgrApp.objects.get(pk=badgr_app_id)
+        except BadgrApp.DoesNotExist:
+            self.badgr_app = BadgrApp.objects.create(
+                name='test cors',
+                cors='localhost:8000')
+
+        self.assertEquals(self.badgr_app.pk, badgr_app_id)

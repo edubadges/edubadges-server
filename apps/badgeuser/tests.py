@@ -15,7 +15,7 @@ from badgeuser.models import BadgeUser
 from badgeuser.models import EmailAddressVariant, CachedEmailAddress
 from issuer.models import BadgeClass, Issuer
 from mainsite.models import BadgrApp
-from mainsite.tests.base import BadgrTestCase, SetupUserHelper
+from mainsite.tests.base import BadgrTestCase
 
 
 class AuthTokenTests(BadgrTestCase):
