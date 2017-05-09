@@ -57,8 +57,14 @@ class SetupIssuerHelper(object):
         issuer = Issuer.objects.create(name=name, description=description, created_by=owner)
         return issuer
 
+    def get_testfiles_path(self, *args):
+        return os.path.join(TOP_DIR, 'apps', 'issuer', 'testfiles', *args)
+
     def get_test_image_path(self):
-        return os.path.join(TOP_DIR, 'apps', 'issuer', 'testfiles', 'guinea_pig_testing_badge.png')
+        return os.path.join(self.get_testfiles_path(), 'guinea_pig_testing_badge.png')
+
+    def get_test_svg_image_path(self):
+        return os.path.join(self.get_testfiles_path(), 'test_badgeclass.svg')
 
     def setup_badgeclass(self,
                          issuer,
@@ -81,6 +87,10 @@ class SetupIssuerHelper(object):
             description=description,
         )
         return badgeclass
+
+    def setup_badgeclasses(self, how_many=3, **kwargs):
+        for i in range(0, how_many):
+            yield self.setup_badgeclass(**kwargs)
 
 
 

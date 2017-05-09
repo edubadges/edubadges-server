@@ -233,38 +233,3 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
         response = self.client.delete('/v1/issuer/issuers/{slug}'.format(slug=test_issuer.entity_id), {})
         self.assertEqual(response.status_code, 400)
 
-    def test_creating_a_new_badgeclass_updates_all_badges(self):
-        test_user = self.setup_user(authenticate=True)
-
-        # get list of all badges
-        badgelist = self.client.get('/v1/issuer/all-badges')
-
-        # create a new issuer
-        response = self.client.post('/v1/issuer/issuers', {
-            'name': 'Fresh Issuer',
-            'description': "Fresh Issuer",
-            'url': 'http://freshissuer.com',
-            'email': 'prince@freshissuer.com',
-        })
-        self.assertEqual(response.status_code, 201)
-        self.assertIn('slug', response.data)
-        new_issuer_slug = response.data.get('slug')
-
-        # create a new badgeclass on new issuer
-        with open(self.get_test_image_path(), 'r') as badge_image:
-            response = self.client.post('/v1/issuer/issuers/{slug}/badges'.format(slug=new_issuer_slug), {
-                'name': 'Badge of Freshness',
-                'description': "Fresh Badge",
-                'image': badge_image,
-                'criteria': 'http://wikipedia.org/Freshness',
-            })
-            self.assertEqual(response.status_code, 201)
-
-        # refetch list of badges
-        new_badgelist = self.client.get('/v1/issuer/all-badges')
-
-        self.assertEqual(len(new_badgelist.data), len(badgelist.data) + 1)
-
-
-
-

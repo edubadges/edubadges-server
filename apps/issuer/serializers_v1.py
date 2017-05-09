@@ -161,6 +161,9 @@ class BadgeClassSerializerV1(serializers.Serializer):
         if 'image' not in validated_data:
             raise serializers.ValidationError({"image": ["This field is required"]})
 
+        if 'issuer' in self.context:
+            validated_data['issuer'] = self.context.get('issuer')
+
         new_badgeclass = BadgeClass(**validated_data)
 
         # Use AutoSlugField's pre_save to provide slug if empty, else auto-unique
