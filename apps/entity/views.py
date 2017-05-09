@@ -1,6 +1,7 @@
 from django import http
 
 import six
+from django.db.models import ProtectedError
 from rest_framework import views, exceptions, status
 from rest_framework.response import Response
 
@@ -45,6 +46,10 @@ def exception_handler(exc, context):
         elif isinstance(exc, (http.Http404, exceptions.PermissionDenied)):
             description = 'entity not found or insufficient privileges'
             response_code = status.HTTP_404_NOT_FOUND
+
+        elif isinstance(exc, ProtectedError):
+            description, protected_objects = exc.args
+            response_code = status.HTTP_400_BAD_REQUEST
 
         elif isinstance(exc, exceptions.APIException):
             field_errors = exc.detail
