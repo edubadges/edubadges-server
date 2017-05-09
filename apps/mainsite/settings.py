@@ -290,13 +290,13 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        'entity.authentication.ExplicitCSRFSessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',
     'DEFAULT_VERSION': 'v1',
     'ALLOWED_VERSIONS': ['v1','v2'],
-    'EXCEPTION_HANDLER': 'entity.serializers.exception_handler'
+    'EXCEPTION_HANDLER': 'entity.views.exception_handler'
 }
 
 
