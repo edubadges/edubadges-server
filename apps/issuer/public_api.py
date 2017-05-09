@@ -16,13 +16,14 @@ from rest_framework.views import APIView
 
 import badgrlog
 import utils
+from entity.api import VersionedObjectMixin
 from .models import Issuer, BadgeClass, BadgeInstance
 from .renderers import BadgeInstanceHTMLRenderer, BadgeClassHTMLRenderer, IssuerHTMLRenderer
 
 logger = badgrlog.BadgrLogger()
 
 
-class JSONComponentView(APIView):
+class JSONComponentView(VersionedObjectMixin, APIView):
     """
     Abstract Component Class
     """
@@ -32,14 +33,10 @@ class JSONComponentView(APIView):
     def log(self, obj):
         pass
 
-    def get(self, request, entity_id, format='html'):
-        try:
-            self.current_object = self.model.cached.get(entity_id=entity_id)
-        except self.model.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        else:
-            self.log(self.current_object)
-            return Response(self.current_object.json)
+    def get(self, request, **kwargs):
+        self.current_object = self.get_object(request, **kwargs)
+        self.log(self.current_object)
+        return Response(self.current_object.json)
 
     def get_renderers(self):
         """
@@ -95,7 +92,8 @@ class ImagePropertyDetailView(ComponentPropertyDetailView):
             self.log(current_object)
             return current_object
 
-    def get(self, request, entity_id):
+    def get(self, request, **kwargs):
+        entity_id = kwargs.get('entity_id')
         current_object = self.get_object(entity_id)
         if current_object is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -233,29 +231,26 @@ class BadgeInstanceJson(JSONComponentView):
 
         return context
 
-    def get(self, request, slug, format='html'):
-        try:
-            current_object = self.model.cached.get(slug=slug)
-            self.current_object = current_object
-        except self.model.DoesNotExist:
-            return Response("Requested assertion not found.", status=status.HTTP_404_NOT_FOUND)
+    def get(self, request, **kwargs):
+        current_object = self.get_object(request, **kwargs)
+        self.current_object = current_object
+
+        if current_object.revoked is False:
+
+            logger.event(badgrlog.BadgeAssertionCheckedEvent(current_object, request))
+            return Response(current_object.json)
         else:
-            if current_object.revoked is False:
+            # TODO update terms based on final accepted terms in response to
+            # https://github.com/openbadges/openbadges-specification/issues/33
+            revocation_info = {
+                '@context': utils.CURRENT_OBI_CONTEXT_IRI,
+                'id': current_object.jsonld_id,
+                'revoked': True,
+                'revocationReason': current_object.revocation_reason
+            }
 
-                logger.event(badgrlog.BadgeAssertionCheckedEvent(current_object, request))
-                return Response(current_object.json)
-            else:
-                # TODO update terms based on final accepted terms in response to
-                # https://github.com/openbadges/openbadges-specification/issues/33
-                revocation_info = {
-                    '@context': utils.CURRENT_OBI_CONTEXT_IRI,
-                    'id': current_object.jsonld_id,
-                    'revoked': True,
-                    'revocationReason': current_object.revocation_reason
-                }
-
-                logger.event(badgrlog.RevokedBadgeAssertionCheckedEvent(current_object, request))
-                return Response(revocation_info, status=status.HTTP_410_GONE)
+            logger.event(badgrlog.RevokedBadgeAssertionCheckedEvent(current_object, request))
+            return Response(revocation_info, status=status.HTTP_410_GONE)
 
 
 class BadgeInstanceImage(ImagePropertyDetailView):
