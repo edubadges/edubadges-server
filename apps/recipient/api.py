@@ -1,18 +1,16 @@
 # Created by wiggins@concentricsky.com on 3/31/16.
 from rest_framework import status
-from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
-from rest_framework.status import HTTP_404_NOT_FOUND
 
-import badgrlog
 from entity.api import BaseEntityListView, VersionedObjectMixin, BaseEntityDetailView
-from issuer.api import AbstractIssuerAPIEndpoint
+from issuer.api_v1 import AbstractIssuerAPIEndpoint
 from issuer.models import Issuer
 from issuer.permissions import IsEditor
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from recipient.models import RecipientGroup, RecipientProfile, RecipientGroupMembership
-from recipient.serializers_v1 import RecipientGroupSerializerV1, RecipientGroupListSerializerV1, RecipientProfileSerializerV1, \
-    RecipientGroupMembershipListSerializerV1, RecipientGroupMembershipSerializerV1
+from recipient.serializers_v1 import RecipientGroupSerializerV1, RecipientGroupMembershipListSerializerV1, \
+    RecipientGroupMembershipSerializerV1
 from recipient.serializers_v2 import RecipientGroupSerializerV2
 
 _TRUE_VALUES = ['true','t','on','yes','y','1',1,1.0,True]

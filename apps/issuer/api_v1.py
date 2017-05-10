@@ -12,7 +12,7 @@ from rest_framework.views import APIView
 
 import badgrlog
 from badgeuser.models import CachedEmailAddress
-from entity.api import BaseEntityListView, BaseEntityDetailView
+from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
 from issuer.models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
                                 IsEditor, IsStaff, IsOwnerOrStaff, ApprovedIssuersOnly)
@@ -72,14 +72,14 @@ class AbstractIssuerAPIEndpoint(APIView):
             return obj
 
 
-class IssuerStaffList(AbstractIssuerAPIEndpoint):
+class IssuerStaffList(VersionedObjectMixin, APIView):
     """ View or modify an issuer's staff members and privileges """
     role = 'staff'
     queryset = Issuer.objects.all()
     model = Issuer
     permission_classes = (AuthenticatedWithVerifiedEmail, IsOwnerOrStaff,)
 
-    def get(self, request, slug):
+    def get(self, request, **kwargs):
         """
         Get a list of users associated with a role on an Issuer
         ---
@@ -90,9 +90,8 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
               description: The slug of the issuer whose roles to view.
               required: true
         """
-        current_issuer = self.get_object(slug)
-
-        if current_issuer is None:
+        current_issuer = self.get_object(request, **kwargs)
+        if not self.has_object_permissions(request, current_issuer):
             return Response(
                 "Issuer %s not found. Authenticated user must have owner, editor or staff rights on the issuer." % slug,
                 status=status.HTTP_404_NOT_FOUND
@@ -107,7 +106,7 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
             return Response([], status=status.HTTP_200_OK)
         return Response(serializer.data)
 
-    def post(self, request, slug):
+    def post(self, request, **kwargs):
         """
         Add or remove a user from a role on an issuer. Limited to Owner users only.
         ---
@@ -144,10 +143,10 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        current_issuer = self.get_object(slug)
-        if current_issuer is None:
+        current_issuer = self.get_object(request, **kwargs)
+        if not self.has_object_permissions(request, current_issuer):
             return Response(
-                "Issuer %s not found. Authenticated user must be Issuer's owner to modify user permissions." % slug,
+                "Issuer not found. Authenticated user must be Issuer's owner to modify user permissions.",
                 status=status.HTTP_404_NOT_FOUND
             )
 
@@ -195,13 +194,13 @@ class IssuerStaffList(AbstractIssuerAPIEndpoint):
         return Response(IssuerStaffSerializerV1(staff_instance).data)
 
 
-class FindBadgeClassDetail(AbstractIssuerAPIEndpoint):
+class FindBadgeClassDetail(APIView):
     """
     GET a specific BadgeClass by searching by identifier
     """
     permission_classes = (AuthenticatedWithVerifiedEmail,)
 
-    def get(self, request):
+    def get(self, request, **kwargs):
         """
         GET a specific BadgeClass by searching by identifier
         ---

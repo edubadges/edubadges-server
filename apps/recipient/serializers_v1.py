@@ -196,6 +196,6 @@ class RecipientGroupListSerializerV1(serializers.Serializer):
         return OrderedDict([
             ("@context", OriginSetting.HTTP+"/public/context/pathways"),
             ("@type", "IssuerRecipientGroupList"),
-            ("issuer", OriginSetting.HTTP+reverse('issuer_json', kwargs={'slug': issuer_slug})),
+            ("issuer", OriginSetting.HTTP+reverse('issuer_json', kwargs={'entity_id': issuer_slug})),
             ("recipientGroups", groups_serializer.data)
         ])

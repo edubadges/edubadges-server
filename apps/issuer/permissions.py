@@ -41,17 +41,17 @@ rules.add_perm('issuer.is_staff', is_on_staff)
 
 @rules.predicate
 def is_badgeclass_owner(user, badgeclass):
-    return badgeclass.issuer.owners.filter(pk=user.pk).exists()
+    return any(staff.role == IssuerStaff.ROLE_OWNER for staff in badgeclass.cached_issuer.cached_issuerstaff() if staff.user_id == user.id)
 
 
 @rules.predicate
 def is_badgeclass_editor(user, badgeclass):
-    return badgeclass.issuer.editors.filter(pk=user.pk).exists()
+    return any(staff.role in [IssuerStaff.ROLE_EDITOR, IssuerStaff.ROLE_OWNER] for staff in badgeclass.cached_issuer.cached_issuerstaff() if staff.user_id == user.id)
 
 
 @rules.predicate
 def is_badgeclass_staff(user, badgeclass):
-    return badgeclass.issuer.staff.filter(pk=user.pk).exists()
+    return any(staff.user_id == user.id for staff in badgeclass.cached_issuer.cached_issuerstaff())
 
 can_issue_badgeclass = is_badgeclass_owner | is_badgeclass_staff
 can_edit_badgeclass = is_badgeclass_owner | is_badgeclass_editor

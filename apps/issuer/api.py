@@ -5,7 +5,6 @@ from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK
 
 import badgrlog
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
-from issuer.api_v1 import AbstractIssuerAPIEndpoint
 from issuer.models import Issuer, BadgeClass, BadgeInstance
 from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
                                 IsEditor, IsStaff, ApprovedIssuersOnly)
