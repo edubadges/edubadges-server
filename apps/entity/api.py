@@ -91,7 +91,7 @@ class VersionedObjectMixin(object):
         except self.model.DoesNotExist:
             pass
         else:
-            if not self.has_object_permission(request, self.object):
+            if not self.has_object_permissions(request, self.object):
                 raise Http404
             return self.object
 
@@ -102,7 +102,7 @@ class VersionedObjectMixin(object):
             except self.model.DoesNotExist:
                 raise Http404
             else:
-                if not self.has_object_permission(request, self.object):
+                if not self.has_object_permissions(request, self.object):
                     raise Http404
                 return self.object
 

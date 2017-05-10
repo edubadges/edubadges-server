@@ -6,8 +6,8 @@ from recipient.api import IssuerRecipientGroupList, RecipientGroupDetail, Recipi
 
 urlpatterns = [
     url(r'^$', IssuerRecipientGroupList.as_view(), name='recipient_group_list'),
-    url(r'^(?P<group_slug>[^/]+)$', RecipientGroupDetail.as_view(), name='recipient_group_detail'),
-    url(r'^(?P<group_slug>[^/]+)/members$', RecipientGroupMembershipList.as_view(), name='recipient_group_membership_list'),
-    url(r'^(?P<group_slug>[^/]+)/members/(?P<membership_slug>[^/]+)$', RecipientGroupMembershipDetail.as_view(), name='recipient_group_membership_detail'),
+    url(r'^/(?P<group_slug>[^/]+)$', RecipientGroupDetail.as_view(), name='recipient_group_detail'),
+    url(r'^/(?P<group_slug>[^/]+)/members$', RecipientGroupMembershipList.as_view(), name='recipient_group_membership_list'),
+    url(r'^/(?P<group_slug>[^/]+)/members/(?P<membership_slug>[^/]+)$', RecipientGroupMembershipDetail.as_view(), name='recipient_group_membership_detail'),
 
 ]

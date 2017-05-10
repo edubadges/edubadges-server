@@ -60,7 +60,7 @@ urlpatterns = [
     # v1 API endpoints
     url(r'^v1/issuer/', include('issuer.v1_api_urls'), kwargs={'version': 'v1'}),
     url(r'^v1/issuers/(?P<slug>[^/]+)/pathways', include('pathway.api_urls'), kwargs={'version': 'v1'}),
-    url(r'^v1/issuers/(?P<slug>[^/]+)/recipient-groups/', include('recipient.v1_api_urls'), kwargs={'version': 'v1'}),
+    url(r'^v1/issuers/(?P<slug>[^/]+)/recipient-groups', include('recipient.v1_api_urls'), kwargs={'version': 'v1'}),
     url(r'^v1/user/', include('badgeuser.v1_api_urls'), kwargs={'version': 'v1'}),
     url(r'^v1/earner', include('composition.api_urls')),
 

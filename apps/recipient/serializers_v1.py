@@ -122,13 +122,9 @@ class RecipientGroupSerializerV1(LinkedDataEntitySerializer):
         return super(RecipientGroupSerializerV1, self).to_representation(instance)
 
     def create(self, validated_data):
-        issuer_slug = self.context.get('issuer_slug', None)
-        if not issuer_slug:
+        if 'issuer' not in self.context:
             raise ValidationError("No issuer")
-        try:
-            issuer = Issuer.cached.get(slug=issuer_slug)
-        except Issuer.DoesNotExist:
-            raise ValidationError("No issuer")
+        issuer = self.context.get('issuer')
 
         name = validated_data.get('name')
         description = validated_data.get('description', '')
