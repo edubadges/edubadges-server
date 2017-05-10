@@ -1,7 +1,6 @@
 # Created by wiggins@concentricsky.com on 3/31/16.
 from collections import OrderedDict
 
-from django.conf import settings
 from django.core.urlresolvers import reverse
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -10,14 +9,14 @@ from issuer.models import Issuer
 from mainsite.serializers import LinkedDataReferenceField, LinkedDataEntitySerializer, LinkedDataReferenceList, \
     StripTagsCharField
 from mainsite.utils import OriginSetting
-from recipient.models import RecipientGroup, RecipientGroupMembership, RecipientProfile
 from pathway.models import Pathway
+from recipient.models import RecipientGroup, RecipientGroupMembership, RecipientProfile
 
 
-class RecipientProfileSerializer(serializers.Serializer):
+class RecipientProfileSerializerV1(serializers.Serializer):
 
     def to_representation(self, instance):
-        representation = super(RecipientProfileSerializer, self).to_representation(instance)
+        representation = super(RecipientProfileSerializerV1, self).to_representation(instance)
         representation.update([
             ('@id', u"mailto:{}".format(instance.recipient_identifier)),
             ('@type', "RecipientProfile"),
@@ -28,15 +27,15 @@ class RecipientProfileSerializer(serializers.Serializer):
         return representation
 
 
-class RecipientGroupMembershipSerializer(LinkedDataEntitySerializer):
+class RecipientGroupMembershipSerializerV1(LinkedDataEntitySerializer):
     jsonld_type = "RecipientGroupMembership"
 
     email = serializers.EmailField(write_only=True, source='recipient_identifier')
     name = StripTagsCharField(source='membership_name')
-    slug = StripTagsCharField(source='recipient_profile.slug', read_only=True)
+    slug = StripTagsCharField(source='recipient_profile.entity_id', read_only=True)
 
     def to_representation(self, instance):
-        json = super(RecipientGroupMembershipSerializer, self).to_representation(instance)
+        json = super(RecipientGroupMembershipSerializerV1, self).to_representation(instance)
         json.update([('email', instance.recipient_identifier)])
 
         return json
@@ -81,7 +80,7 @@ class RecipientGroupMembershipSerializer(LinkedDataEntitySerializer):
         return membership
 
 
-class RecipientGroupMembershipListSerializer(serializers.Serializer):
+class RecipientGroupMembershipListSerializerV1(serializers.Serializer):
     def to_representation(self, memberships):
         issuer_slug = self.context.get('issuer_slug', None)
         if not issuer_slug:
@@ -90,25 +89,25 @@ class RecipientGroupMembershipListSerializer(serializers.Serializer):
         if not recipient_group_slug:
             raise ValidationError("Invalid recipient_group_slug")
 
-        members_serializer = RecipientGroupMembershipSerializer(memberships, many=True, context=self.context)
+        members_serializer = RecipientGroupMembershipSerializerV1(memberships, many=True, context=self.context)
         return OrderedDict([
             ("@context", OriginSetting.HTTP+"/public/context/pathways"),
             ("@type", "IssuerRecipientGroupMembershipList"),
-            ("recipientGroup", OriginSetting.HTTP+reverse('recipient_group_detail', kwargs={'issuer_slug': issuer_slug, 'group_slug': recipient_group_slug})),
+            ("recipientGroup", OriginSetting.HTTP+reverse('v1_api_recipient_group_detail', kwargs={'issuer_slug': issuer_slug, 'group_slug': recipient_group_slug})),
             ("memberships", members_serializer.data),
         ])
 
 
-class RecipientGroupSerializer(LinkedDataEntitySerializer):
+class RecipientGroupSerializerV1(LinkedDataEntitySerializer):
     jsonld_type = "RecipientGroup"
 
     name = StripTagsCharField(required=False)
     description = StripTagsCharField(required=False)
-    slug = StripTagsCharField(read_only=True)
+    slug = StripTagsCharField(read_only=True, source='entity_id')
     active = serializers.BooleanField(source='is_active', default=True)
     issuer = LinkedDataReferenceField(keys=['slug'], model=Issuer)
     member_count = serializers.IntegerField(read_only=True)
-    members = RecipientGroupMembershipSerializer(
+    members = RecipientGroupMembershipSerializerV1(
         read_only=False, many=True, required=False, source='cached_members'
     )
     pathways = LinkedDataReferenceList(
@@ -120,7 +119,7 @@ class RecipientGroupSerializer(LinkedDataEntitySerializer):
         if not self.context.get('embedRecipients', False) and 'members' in self.fields:
             self.fields.pop('members')
 
-        return super(RecipientGroupSerializer, self).to_representation(instance)
+        return super(RecipientGroupSerializerV1, self).to_representation(instance)
 
     def create(self, validated_data):
         issuer_slug = self.context.get('issuer_slug', None)
@@ -187,12 +186,13 @@ class RecipientGroupSerializer(LinkedDataEntitySerializer):
         instance.save() # update cache
         return instance
 
-class RecipientGroupListSerializer(serializers.Serializer):
+
+class RecipientGroupListSerializerV1(serializers.Serializer):
     def to_representation(self, recipient_groups):
         issuer_slug = self.context.get('issuer_slug', None)
         if not issuer_slug:
             raise ValidationError("Invalid issuer_slug")
-        groups_serializer = RecipientGroupSerializer(recipient_groups, many=True, context=self.context)
+        groups_serializer = RecipientGroupSerializerV1(recipient_groups, many=True, context=self.context)
         return OrderedDict([
             ("@context", OriginSetting.HTTP+"/public/context/pathways"),
             ("@type", "IssuerRecipientGroupList"),

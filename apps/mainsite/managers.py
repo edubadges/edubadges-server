@@ -22,7 +22,7 @@ class SlugOrJsonIdCacheModelManager(cachemodel.CacheModelManager):
                 slug = r.kwargs.get(self.get_slug_kwarg_name())
             except Resolver404 as e:
                 raise self.model.DoesNotExist
-        return self.get(slug=slug)
+        return self.get(entity_id=slug)
 
     def get_by_id(self, idstring):
         return self.get_by_slug_or_id(idstring)

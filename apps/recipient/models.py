@@ -2,32 +2,30 @@
 import basic_models
 import cachemodel
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, transaction
 
 from entity.models import BaseVersionedEntity
-from issuer.models import BadgeInstance
+from issuer.models import BadgeInstance, BaseAuditedModel
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.utils import OriginSetting
 from pathway.completionspec import CompletionRequirementSpecFactory, ElementJunctionCompletionRequirementSpec
 
 
 class RecipientProfile(BaseVersionedEntity, basic_models.DefaultModel):
-    slug = models.CharField(max_length=254, blank=True, null=True, default=None)
     badge_user = models.ForeignKey('badgeuser.BadgeUser', null=True, blank=True)
     recipient_identifier = models.EmailField(max_length=1024)
     public = models.BooleanField(default=False)
     display_name = models.CharField(max_length=254)
 
-    cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='slug')
+    # slug has been deprecated for now, but preserve existing values
+    slug = models.CharField(max_length=254, blank=True, null=True, default=None)
+
+    cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id')
 
     def __unicode__(self):
         if self.display_name:
             return self.display_name
         return self.recipient_identifier
-
-    def publish(self):
-        super(RecipientProfile, self).publish()
-        self.publish_by('slug')
 
     @property
     def jsonld_id(self):
@@ -67,13 +65,15 @@ class RecipientProfile(BaseVersionedEntity, basic_models.DefaultModel):
         return BadgeInstance.objects.filter(revoked=False, recipient_identifier=self.recipient_identifier)
 
 
-class RecipientGroup(BaseVersionedEntity, basic_models.DefaultModel):
+class RecipientGroup(BaseAuditedModel, BaseVersionedEntity, basic_models.ActiveModel):
     issuer = models.ForeignKey('issuer.Issuer')
     name = models.CharField(max_length=254)
-    slug = models.CharField(max_length=254, blank=True, null=True, default=None)
     description = models.TextField(blank=True, null=True)
     members = models.ManyToManyField('RecipientProfile', through='recipient.RecipientGroupMembership')
     pathways = models.ManyToManyField('pathway.Pathway', related_name='recipient_groups')
+
+    # slug has been deprecated for now, but preserve existing values
+    slug = models.CharField(max_length=254, blank=True, null=True, default=None)
 
     cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='group_slug')
 
@@ -82,19 +82,52 @@ class RecipientGroup(BaseVersionedEntity, basic_models.DefaultModel):
 
     def publish(self):
         super(RecipientGroup, self).publish()
-        self.publish_by('slug')
         self.issuer.publish()
 
     def delete(self, *args, **kwargs):
-        issuer = self.issuer
         ret = super(RecipientGroup, self).delete(*args, **kwargs)
-        issuer.publish()
-        self.publish_delete('slug')
+        self.issuer.publish()
         return ret
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_members(self):
         return RecipientGroupMembership.objects.filter(recipient_group=self)
+
+    @property
+    def membership_items(self):
+        return self.cached_members()
+
+    @membership_items.setter
+    def membership_items(self, value):
+        """
+        Update this groups RecipientGroupMembmership from a list of RecipientGroupMembershipSerializerV2 data
+        """
+        existing_members_idx = {s.recipient_identifier: s for s in self.membership_items}
+        new_members_idx = {s['recipient']['identifier']: s for s in value}
+
+        with transaction.atomic():
+            # add missing memberships
+            for membership_data in value:
+                recipient_identifer = membership_data['recipient']['identifier']
+                if recipient_identifer not in existing_members_idx:
+                    profile, profile_created = RecipientProfile.cached.get_or_create(
+                        recipient_identifier=recipient_identifer
+                    )
+                    membership, created = RecipientGroupMembership.cached.get_or_create(
+                        recipient_group=self,
+                        recipient_profile=profile,
+                        defaults={
+                            'membership_name': membership_data['name']
+                        }
+                    )
+                    if not created:
+                        membership.membershi_name = membership_data['name']
+                        membership.save()
+
+            # remove old memberships
+            for membership in self.membership_items:
+                if membership.recipient_identifier not in new_members_idx:
+                    membership.delete()
 
     def member_count(self):
         return len(self.cached_members())
@@ -105,38 +138,44 @@ class RecipientGroup(BaseVersionedEntity, basic_models.DefaultModel):
 
     @property
     def jsonld_id(self):
-        return OriginSetting.HTTP+reverse(
-            'recipient_group_detail',
-            kwargs={'issuer_slug': self.issuer.slug, 'group_slug': self.slug}
-        )
+        return OriginSetting.HTTP+reverse('v2_api_recipient_group_detail', kwargs={
+            'entity_id': self.entity_id
+        })
 
 
 class RecipientGroupMembership(BaseVersionedEntity):
-    slug = models.CharField(max_length=254, blank=True, null=True, default=None)
     recipient_profile = models.ForeignKey('recipient.RecipientProfile')
     recipient_group = models.ForeignKey('recipient.RecipientGroup')
     membership_name = models.CharField(max_length=254)
+
+    # slug has been deprecated for now, but preserve existing values
+    slug = models.CharField(max_length=254, blank=True, null=True, default=None)
 
     @property
     def jsonld_id(self):
         return u"mailto:{}".format(self.recipient_identifier)
 
     @property
+    def cached_recipient_profile(self):
+        return RecipientProfile.cached.get(id=self.recipient_profile_id)
+
+    @property
+    def cached_recipient_group(self):
+        return RecipientGroup.cached.get(id=self.recipient_group_id)
+
+    @property
     def recipient_identifier(self):
-        return self.recipient_profile.recipient_identifier
+        return self.cached_profile.recipient_identifier
 
     def publish(self):
         super(RecipientGroupMembership, self).publish()
-        self.publish_by('slug')
         self.recipient_group.publish()
         self.recipient_profile.publish()
 
     def delete(self, *args, **kwargs):
-        group = self.recipient_group
-        profile = self.recipient_profile
         ret = super(RecipientGroupMembership, self).delete(*args, **kwargs)
-        group.publish()
-        profile.publish()
+        self.recipient_group.publish()
+        self.recipient_profile.publish()
         return ret
 
     def populate_slug(self):
