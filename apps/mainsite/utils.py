@@ -6,16 +6,17 @@ from __future__ import unicode_literals
 import StringIO
 import base64
 import hashlib
-import os
 import re
 import urlparse
 import uuid
 
+import os
 import requests
 from django.apps import apps
 from django.conf import settings
 from django.core.files.storage import DefaultStorage
 from django.core.urlresolvers import get_callable
+from xml.etree import cElementTree as ET
 
 
 class ObjectView(object):
@@ -86,14 +87,13 @@ def verify_svg(fileobj):
     Check if provided file is svg
     from: https://gist.github.com/ambivalentno/9bc42b9a417677d96a21
     """
-    import xml.etree.cElementTree as et
     fileobj.seek(0)
     tag = None
     try:
-        for event, el in et.iterparse(fileobj, ('start',)):
+        for event, el in ET.iterparse(fileobj, events=(b'start',)):
             tag = el.tag
             break
-    except et.ParseError:
+    except ET.ParseError:
         pass
     return tag == '{http://www.w3.org/2000/svg}svg'
 

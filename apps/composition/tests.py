@@ -3,7 +3,6 @@ import base64
 import os
 import responses
 from django.contrib.auth import get_user_model
-from rest_framework.test import APITestCase
 
 from badgeuser.models import CachedEmailAddress, BadgeUser
 from composition.models import (LocalBadgeInstance,

@@ -100,7 +100,7 @@ class BadgeClassSerializerV1(serializers.Serializer):
     id = serializers.IntegerField(required=False, read_only=True)
     name = StripTagsCharField(max_length=255)
     image = ValidImageField(required=False)
-    slug = StripTagsCharField(max_length=255, allow_blank=True, required=False, source='entity_id')
+    slug = StripTagsCharField(max_length=255, read_only=True, source='entity_id')
     criteria = MarkdownCharField(allow_blank=True, required=False, write_only=True)
     criteria_text = MarkdownCharField(required=False, read_only=True)
     criteria_url = StripTagsCharField(required=False, read_only=True)
@@ -160,6 +160,9 @@ class BadgeClassSerializerV1(serializers.Serializer):
 
         if 'image' not in validated_data:
             raise serializers.ValidationError({"image": ["This field is required"]})
+
+        if 'issuer' in self.context:
+            validated_data['issuer'] = self.context.get('issuer')
 
         new_badgeclass = BadgeClass(**validated_data)
 

@@ -43,7 +43,7 @@ class BaseAuditedModel(cachemodel.CacheModel):
         return BadgeUser.cached.get(id=self.created_by_id)
 
 
-class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUploadedSvgImage):
+class Issuer(ResizeUploadedImage, ScrubUploadedSvgImage, BaseAuditedModel, BaseVersionedEntity):
     entity_class_name = 'Issuer'
 
     source = models.CharField(max_length=254, default='local')
@@ -80,23 +80,24 @@ class Issuer(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUp
             bc.delete()
 
         staff = self.cached_issuerstaff()
-        # remove membership records and publish users
+        ret = super(Issuer, self).delete(*args, **kwargs)
+
+        # remove membership records
         for membership in staff:
-            u = membership.cached_user
-            membership.delete()
-            u.publish()
+            membership.delete(publish_issuer=False)
 
-        # badgebook logic
-        try:
-            from badgebook.models import LmsCourseInfo
-            # update LmsCourseInfo's that were using this issuer as the default_issuer
-            for course_info in LmsCourseInfo.objects.filter(default_issuer=self):
-                course_info.default_issuer = None
-                course_info.save()
-        except ImportError:
-            pass
+        if apps.is_installed('badgebook'):
+            # badgebook shim
+            try:
+                from badgebook.models import LmsCourseInfo
+                # update LmsCourseInfo's that were using this issuer as the default_issuer
+                for course_info in LmsCourseInfo.objects.filter(default_issuer=self):
+                    course_info.default_issuer = None
+                    course_info.save()
+            except ImportError:
+                pass
 
-        return super(Issuer, self).delete(*args, **kwargs)
+        return ret
 
     def save(self, *args, **kwargs):
         ret = super(Issuer, self).save(*args, **kwargs)
@@ -230,9 +231,11 @@ class IssuerStaff(cachemodel.CacheModel):
         self.issuer.publish()
 
     def delete(self, *args, **kwargs):
-        issuer = self.issuer
+        publish_issuer = kwargs.pop('publish_issuer', True)
         super(IssuerStaff, self).delete()
-        issuer.publish()
+        if publish_issuer:
+            self.issuer.publish()
+        self.user.publish()
 
     @property
     def cached_user(self):
@@ -244,7 +247,7 @@ class IssuerStaff(cachemodel.CacheModel):
         return Issuer.cached.get(pk=self.issuer_id)
 
 
-class BadgeClass(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, ScrubUploadedSvgImage):
+class BadgeClass(ResizeUploadedImage, ScrubUploadedSvgImage, BaseAuditedModel, BaseVersionedEntity):
     entity_class_name = 'BadgeClass'
 
     source = models.CharField(max_length=254, default='local')
@@ -276,13 +279,13 @@ class BadgeClass(BaseAuditedModel, BaseVersionedEntity, ResizeUploadedImage, Scr
 
     def delete(self, *args, **kwargs):
         if self.recipient_count() > 0:
-            raise ProtectedError("BadgeClass may only be deleted if all BadgeInstances have been revoked.")
+            raise ProtectedError("BadgeClass may only be deleted if all BadgeInstances have been revoked.", self)
 
         if self.pathway_element_count() > 0:
-            raise ProtectedError("BadgeClass may only be deleted if all PathwayElementBadge have been removed.")
+            raise ProtectedError("BadgeClass may only be deleted if all PathwayElementBadge have been removed.", self)
 
         if len(self.cached_completion_elements()) > 0:
-            return ProtectedError("Badge could not be deleted. It is being used as a pathway completion badge.")
+            return ProtectedError("Badge could not be deleted. It is being used as a pathway completion badge.", self)
 
         issuer = self.issuer
         super(BadgeClass, self).delete(*args, **kwargs)
@@ -443,7 +446,6 @@ class BadgeInstance(BaseAuditedModel, BaseVersionedEntity):
             imageFile = default_storage.open(self.badgeclass.image.file.name)
             self.image = bake(imageFile, json.dumps(self.json, indent=2))
 
-            self.image.open()
 
             try:
                 from badgeuser.models import CachedEmailAddress

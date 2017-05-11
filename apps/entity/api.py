@@ -77,7 +77,7 @@ class VersionedObjectMixin(object):
         for permission in self.get_permissions():
             if not permission.has_object_permission(request, self, obj):
                 return False
-            return True
+        return True
 
     def get_object(self, request, **kwargs):
         version = getattr(request, 'version', 'v1')
