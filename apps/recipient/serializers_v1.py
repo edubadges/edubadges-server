@@ -20,7 +20,7 @@ class RecipientProfileSerializerV1(serializers.Serializer):
         representation.update([
             ('@id', u"mailto:{}".format(instance.recipient_identifier)),
             ('@type', "RecipientProfile"),
-            ('slug', instance.slug),
+            ('slug', instance.entity_id),
             ('name', instance.display_name),
             ('email', instance.recipient_identifier)
         ])
@@ -93,7 +93,7 @@ class RecipientGroupMembershipListSerializerV1(serializers.Serializer):
         return OrderedDict([
             ("@context", OriginSetting.HTTP+"/public/context/pathways"),
             ("@type", "IssuerRecipientGroupMembershipList"),
-            ("recipientGroup", OriginSetting.HTTP+reverse('v1_api_recipient_group_detail', kwargs={'issuer_slug': issuer_slug, 'group_slug': recipient_group_slug})),
+            ("recipientGroup", OriginSetting.HTTP+reverse('v1_api_recipient_group_detail', kwargs={'issuer_slug': issuer_slug, 'slug': recipient_group_slug})),
             ("memberships", members_serializer.data),
         ])
 
@@ -105,14 +105,14 @@ class RecipientGroupSerializerV1(LinkedDataEntitySerializer):
     description = StripTagsCharField(required=False)
     slug = StripTagsCharField(read_only=True, source='entity_id')
     active = serializers.BooleanField(source='is_active', default=True)
-    issuer = LinkedDataReferenceField(keys=['slug'], model=Issuer)
+    issuer = LinkedDataReferenceField(keys=['entity_id'], model=Issuer)
     member_count = serializers.IntegerField(read_only=True)
     members = RecipientGroupMembershipSerializerV1(
         read_only=False, many=True, required=False, source='cached_members'
     )
     pathways = LinkedDataReferenceList(
         read_only=False, required=False, source='cached_pathways',
-        child=LinkedDataReferenceField(read_only=False, keys=['slug'], model=Pathway)
+        child=LinkedDataReferenceField(read_only=False, keys=['entity_id'], model=Pathway)
     )
 
     def to_representation(self, instance):

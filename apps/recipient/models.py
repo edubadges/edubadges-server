@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django.db import models, transaction
 
 from entity.models import BaseVersionedEntity
-from issuer.models import BadgeInstance, BaseAuditedModel
+from issuer.models import BadgeInstance, BaseAuditedModel, Issuer
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.utils import OriginSetting
 from pathway.completionspec import CompletionRequirementSpecFactory, ElementJunctionCompletionRequirementSpec
@@ -89,6 +89,10 @@ class RecipientGroup(BaseAuditedModel, BaseVersionedEntity, basic_models.ActiveM
         self.issuer.publish()
         return ret
 
+    @property
+    def cached_issuer(self):
+        return Issuer.cached.get(pk=self.issuer_id)
+
     @cachemodel.cached_method(auto_publish=True)
     def cached_members(self):
         return RecipientGroupMembership.objects.filter(recipient_group=self)
@@ -165,7 +169,7 @@ class RecipientGroupMembership(BaseVersionedEntity):
 
     @property
     def recipient_identifier(self):
-        return self.cached_profile.recipient_identifier
+        return self.cached_recipient_profile.recipient_identifier
 
     def publish(self):
         super(RecipientGroupMembership, self).publish()

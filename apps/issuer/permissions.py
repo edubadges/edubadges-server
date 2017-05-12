@@ -131,3 +131,19 @@ class ApprovedIssuersOnly(permissions.BasePermission):
         if request.method == 'POST' and getattr(settings, 'BADGR_APPROVED_ISSUERS_ONLY', False):
             return request.user.has_perm('issuer.add_issuer')
         return True
+
+
+class IsIssuerEditor(IsEditor):
+    """
+    Used as a proxy permission for objects that have a .cached_issuer property and want to delegate permissions to issuer
+    """
+    def has_object_permission(self, request, view, recipient_group):
+        return super(IsIssuerEditor, self).has_object_permission(request, view, recipient_group.cached_issuer)
+
+
+class IsIssuerStaff(IsStaff):
+    """
+    Used as a proxy permission for objects that have a .cached_issuer property and want to delegate permissions to issuer
+    """
+    def has_object_permission(self, request, view, recipient_group):
+        return super(IsIssuerStaff, self).has_object_permission(request, view, recipient_group.cached_issuer)
