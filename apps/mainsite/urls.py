@@ -36,7 +36,7 @@ urlpatterns = [
     url(r'^health', include('health.urls')),
 
     # Swagger Docs
-    # url(r'^docs/', include('rest_framework_swagger.urls')),
+    url(r'^docs/', TemplateView.as_view(template_name="entity/swagger-docs.html")),
 
     # JSON-LD Context
     url(r'^json-ld/', include('badgrlog.urls')),
