@@ -11,10 +11,8 @@ def apispec_operation(*spec_args, **spec_kwargs):
         def wrapper(*args, **kwargs):
             return wrapped(*args, **kwargs)
         wrapper._apispec_wrapped = wrapped
-        wrapper._apispec_operation = {
-            'args': spec_args,
-            'kwargs': spec_kwargs,
-        }
+        wrapper._apispec_args = spec_args
+        wrapper._apispec_kwargs = spec_kwargs
         return wrapper
 
     return decorator

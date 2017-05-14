@@ -6,6 +6,7 @@ from rest_framework import serializers
 
 from badgeuser.models import BadgeUser
 from entity.serializers import DetailSerializerV2, EntityRelatedFieldV2, BaseSerializerV2
+from mainsite.decorators import apispec_operation
 from mainsite.drf_fields import ValidImageField
 from mainsite.serializers import StripTagsCharField, MarkdownCharField, HumanReadableBooleanField
 from mainsite.validators import ChoicesValidator
@@ -17,6 +18,16 @@ class IssuerStaffSerializerV2(DetailSerializerV2):
     role = serializers.CharField(validators=[ChoicesValidator(dict(IssuerStaff.ROLE_CHOICES).keys())])
 
 
+@apispec_operation('Issuer', properties={
+    'entity_id': {
+        'type': 'string',
+        'description': "Entity Id for the issuer"
+    },
+    'name': {
+        'type': 'string',
+        'description': "The name of the issuer"
+    }
+})
 class IssuerSerializerV2(DetailSerializerV2):
     openBadgeId = serializers.URLField(source='jsonld_id', read_only=True)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)

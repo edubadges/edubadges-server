@@ -54,7 +54,7 @@ class IssuerDetail(BaseEntityDetailView):
 
     @apispec_operation(
         summary="Update a single Issuer",
-        tags=["Issuer", "v1"],
+        tags=["Issuer"],
         responses={
             "200": {
                 'schema': {'$ref': '#/definitions/Issuer'},
