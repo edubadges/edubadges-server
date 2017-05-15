@@ -119,7 +119,7 @@ class Issuer(ScrubUploadedSvgImage, ResizeUploadedImage, cachemodel.CacheModel):
         json = OrderedDict({
             '@context': context_iri,
             'type': 'Issuer',
-            'id': self.jsonld_id,
+            'id': add_obi_version_ifneeded(self.jsonld_id, obi_version),
             'name': self.name,
             'url': self.url,
             'email': self.email,
@@ -264,7 +264,7 @@ class BadgeClass(ScrubUploadedSvgImage, ResizeUploadedImage, cachemodel.CacheMod
         json = OrderedDict({
             '@context': context_iri,
             'type': 'BadgeClass',
-            'id': self.jsonld_id,
+            'id': add_obi_version_ifneeded(self.jsonld_id, obi_version),
             'name': self.name,
             'description': self.description,
             'issuer': add_obi_version_ifneeded(self.cached_issuer.jsonld_id, obi_version),
@@ -486,8 +486,7 @@ class BadgeInstance(cachemodel.CacheModel):
         json = OrderedDict({
             '@context': context_iri,
             'type': 'Assertion',
-            'id': self.jsonld_id,
-            "uid": self.slug,
+            'id': add_obi_version_ifneeded(self.jsonld_id, obi_version),
             "image": OriginSetting.HTTP + reverse('badgeinstance_image', kwargs={'slug': self.slug}),
             "badge": add_obi_version_ifneeded(self.cached_badgeclass.jsonld_id, obi_version),
             "verify": {
@@ -496,6 +495,8 @@ class BadgeInstance(cachemodel.CacheModel):
             }
         })
 
+        if obi_version == '1_1':
+            json["uid"] = self.slug
         if self.evidence_url:
             if obi_version == '1_1':
                 # obi v1 single evidence url
