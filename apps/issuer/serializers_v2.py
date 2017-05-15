@@ -13,6 +13,7 @@ from mainsite.validators import ChoicesValidator
 from issuer.models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 
 
+@apispec_definition('IssuerStaff')
 class IssuerStaffSerializerV2(DetailSerializerV2):
     user = EntityRelatedFieldV2(source='cached_user', queryset=BadgeUser.cached)
     role = serializers.CharField(validators=[ChoicesValidator(dict(IssuerStaff.ROLE_CHOICES).keys())])
@@ -21,9 +22,15 @@ class IssuerStaffSerializerV2(DetailSerializerV2):
 @apispec_definition('Issuer', properties={
     'createdBy': {
         'type': 'string',
-        'format': 'BadgeuserRef',
-        'description': "entityId of the Badgeuser who created this issuer"
+        'format': 'entityId',
+        'description': "entityId of the BadgeUser who created this issuer",
     },
+    'staff': {
+        'type': "array",
+        'items': {
+            '$ref': "#/definitions/IssuerStaff"
+        }
+    }
 })
 class IssuerSerializerV2(DetailSerializerV2):
     openBadgeId = serializers.URLField(source='jsonld_id', read_only=True, help_text="The url to find the Open Badge")

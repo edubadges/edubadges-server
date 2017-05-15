@@ -8,6 +8,7 @@ from rest_framework import serializers
 
 import utils
 from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserIdentifierFieldV1
+from mainsite.decorators import apispec_definition
 from mainsite.drf_fields import Base64FileField, ValidImageField
 from mainsite.models import BadgrApp
 from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField
@@ -30,6 +31,7 @@ class IssuerStaffSerializerV1(serializers.Serializer):
         list_serializer_class = CachedListSerializer
 
 
+@apispec_definition('Issuer')
 class IssuerSerializerV1(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1()

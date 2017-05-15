@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import functools
+from collections import OrderedDict
 
 
 def apispec_operation(*spec_args, **spec_kwargs):
@@ -18,7 +19,6 @@ def apispec_operation(*spec_args, **spec_kwargs):
     return decorator
 
 
-
 def apispec_definition(*spec_args, **spec_kwargs):
 
     def decorator(wrapped):
@@ -27,7 +27,7 @@ def apispec_definition(*spec_args, **spec_kwargs):
             return wrapped(*args, **kwargs)
 
         # pull fields from wrapped serializer class
-        properties = {}
+        properties = OrderedDict()
         serializer = wrapped()
         for field_name, field in serializer.get_fields().items():
             help_text = getattr(field, 'help_text', None)
