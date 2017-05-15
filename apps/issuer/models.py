@@ -489,7 +489,10 @@ class BadgeInstance(cachemodel.CacheModel):
             'id': add_obi_version_ifneeded(self.jsonld_id, obi_version),
             "image": OriginSetting.HTTP + reverse('badgeinstance_image', kwargs={'slug': self.slug}),
             "badge": add_obi_version_ifneeded(self.cached_badgeclass.jsonld_id, obi_version),
+            "revoked": self.revoked,
         })
+        if self.revoked and self.revocation_reason:
+            self['revocationReason'] = self.revocation_reason
 
         if obi_version == '1_1':
             json["uid"] = self.slug
@@ -528,6 +531,7 @@ class BadgeInstance(cachemodel.CacheModel):
                 "hashed": False,
                 "identity": self.recipient_identifier
             }
+
         return json
 
     @property
