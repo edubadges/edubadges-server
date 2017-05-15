@@ -174,7 +174,7 @@ class BadgeClassSerializerV1(serializers.Serializer):
 
 
 class EvidenceItemSerializer(serializers.Serializer):
-    evidence_url = serializers.URLField(max_length=1024, required=True)
+    evidence_url = serializers.URLField(max_length=1024, required=False)
     narrative = MarkdownCharField(required=False)
 
     def validate(self, attrs):
