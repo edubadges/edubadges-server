@@ -489,14 +489,19 @@ class BadgeInstance(cachemodel.CacheModel):
             'id': add_obi_version_ifneeded(self.jsonld_id, obi_version),
             "image": OriginSetting.HTTP + reverse('badgeinstance_image', kwargs={'slug': self.slug}),
             "badge": add_obi_version_ifneeded(self.cached_badgeclass.jsonld_id, obi_version),
-            "verify": {
-                "url": add_obi_version_ifneeded(self.public_url, obi_version),
-                "type": "hosted"
-            }
         })
 
         if obi_version == '1_1':
             json["uid"] = self.slug
+            json["verify"] = {
+                "url": add_obi_version_ifneeded(self.public_url, obi_version),
+                "type": "hosted"
+            }
+        elif obi_version == '2_0':
+            json["verification"] = {
+                "type": "HostedBadge"
+            }
+
         if self.evidence_url:
             if obi_version == '1_1':
                 # obi v1 single evidence url
