@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import json
+from collections import OrderedDict
 
 from apispec import APISpec
 from django.apps import apps
@@ -19,21 +20,20 @@ class BadgrAPISpec(APISpec):
 
     def scrape_serializers(self):
         """
-        Iterate over installed apps looking for serializers decorated with @apispec_definition
+        Iterate over installed apps looking for serializers with Meta.apispec_definition
         """
         for app_config in apps.get_app_configs():
             module_name = '{app}.serializers_{version}'.format(app=app_config.name, version=self.version)
             try:
-                if module_name == 'issuer.serializers_v2':
-                    pass
                 app_serializer_module = import_module(module_name)
             except ImportError:
                 pass
             else:
-                for func_name in dir(app_serializer_module):
-                    func = getattr(app_serializer_module, func_name)
-                    if hasattr(func, '_apispec_wrapped'):
-                        self.serializer_definition(func)
+                for serializer_class_name in dir(app_serializer_module):
+                    serializer_class = getattr(app_serializer_module, serializer_class_name)
+                    if hasattr(serializer_class, 'Meta') and hasattr(serializer_class.Meta, 'apispec_definition'):
+                        definition_name, definition_kwargs = serializer_class.Meta.apispec_definition
+                        self.serializer_definition(serializer_class, definition_name, **definition_kwargs)
 
     def scrape_endpoints(self):
         """
@@ -59,14 +59,28 @@ class BadgrAPISpec(APISpec):
                     path_spec['operations'][http_method] = operation
             self.add_path(**path_spec)
 
-    def serializer_definition(self, serializer_class):
+    def serializer_definition(self, serializer_class, name, **kwargs):
         """
         Add a definition based on a serializer class decorated with @apispec_definition 
         """
-        if serializer_class is not None:
-            apispec_args = getattr(serializer_class, '_apispec_args', [])
-            apispec_kwargs = getattr(serializer_class, '_apispec_kwargs', {})
-            self.definition(*apispec_args, **apispec_kwargs)
+
+        # populate default properties from serializer fields
+        properties = OrderedDict()
+        serializer = serializer_class()
+        for field_name, field in serializer.get_fields().items():
+            help_text = getattr(field, 'help_text', None)
+            properties[field_name] = {
+                'type': "string",
+                'format': field.__class__.__name__,  # fixme
+            }
+            if help_text:
+                properties['description'] = help_text
+
+        #properties specified in kwargs override field defaults
+        properties.update( kwargs.get('properties', {}) )
+        kwargs['properties'] = properties
+
+        self.definition(name, **kwargs)
 
     def write_to(self, outfile):
         outfile.write(json.dumps(self.to_dict(), indent=4))

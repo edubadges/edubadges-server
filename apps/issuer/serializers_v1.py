@@ -8,11 +8,10 @@ from rest_framework import serializers
 
 import utils
 from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserIdentifierFieldV1
-from mainsite.decorators import apispec_definition
-from mainsite.drf_fields import Base64FileField, ValidImageField
+from mainsite.drf_fields import ValidImageField
 from mainsite.models import BadgrApp
 from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField
-from mainsite.utils import installed_apps_list, OriginSetting, verify_svg
+from mainsite.utils import OriginSetting
 from mainsite.validators import ChoicesValidator
 from .models import Issuer, BadgeClass, IssuerStaff
 
@@ -31,7 +30,6 @@ class IssuerStaffSerializerV1(serializers.Serializer):
         list_serializer_class = CachedListSerializer
 
 
-@apispec_definition('Issuer')
 class IssuerSerializerV1(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1()
@@ -42,6 +40,9 @@ class IssuerSerializerV1(serializers.Serializer):
     description = StripTagsCharField(max_length=1024, required=True)
     url = serializers.URLField(max_length=1024, required=True)
     staff = IssuerStaffSerializerV1(read_only=True, source='cached_issuerstaff', many=True)
+
+    class Meta:
+        apispec_definition = ('Issuer', {})
 
     def validate_image(self, image):
         if image is not None:

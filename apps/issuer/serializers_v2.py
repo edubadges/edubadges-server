@@ -6,32 +6,20 @@ from rest_framework import serializers
 
 from badgeuser.models import BadgeUser
 from entity.serializers import DetailSerializerV2, EntityRelatedFieldV2, BaseSerializerV2
-from mainsite.decorators import apispec_operation, apispec_definition
+from issuer.models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from mainsite.drf_fields import ValidImageField
 from mainsite.serializers import StripTagsCharField, MarkdownCharField, HumanReadableBooleanField
 from mainsite.validators import ChoicesValidator
-from issuer.models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 
 
-@apispec_definition('IssuerStaff')
 class IssuerStaffSerializerV2(DetailSerializerV2):
     user = EntityRelatedFieldV2(source='cached_user', queryset=BadgeUser.cached)
     role = serializers.CharField(validators=[ChoicesValidator(dict(IssuerStaff.ROLE_CHOICES).keys())])
 
+    class Meta:
+        apispec_definition = ('IssuerStaff', {})
 
-@apispec_definition('Issuer', properties={
-    'createdBy': {
-        'type': 'string',
-        'format': 'entityId',
-        'description': "entityId of the BadgeUser who created this issuer",
-    },
-    'staff': {
-        'type': "array",
-        'items': {
-            '$ref': "#/definitions/IssuerStaff"
-        }
-    }
-})
+
 class IssuerSerializerV2(DetailSerializerV2):
     openBadgeId = serializers.URLField(source='jsonld_id', read_only=True, help_text="The url to find the Open Badge")
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
@@ -43,8 +31,23 @@ class IssuerSerializerV2(DetailSerializerV2):
     url = serializers.URLField(max_length=1024, required=True)
     staff = IssuerStaffSerializerV2(many=True, source='staff_items', required=False)
 
-    class Meta:
+    class Meta(DetailSerializerV2.Meta):
         model = Issuer
+        apispec_definition = ('Issuer', {
+            'properties': {
+                'createdBy': {
+                    'type': 'string',
+                    'format': 'entityId',
+                    'description': "entityId of the BadgeUser who created this issuer",
+                },
+                'staff': {
+                    'type': "array",
+                    'items': {
+                        '$ref': "#/definitions/IssuerStaff"
+                    }
+                }
+            }
+        })
 
     def validate_image(self, image):
         if image is not None:
