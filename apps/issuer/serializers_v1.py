@@ -180,6 +180,7 @@ class EvidenceItemSerializer(serializers.Serializer):
     def validate(self, attrs):
         if not (attrs.get('evidence_url', None) or attrs.get('narrative', None)):
             raise serializers.ValidationError("Either url or narrative is required")
+        return attrs
 
 
 class BadgeInstanceSerializerV1(serializers.Serializer):
