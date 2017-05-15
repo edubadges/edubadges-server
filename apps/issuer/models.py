@@ -268,10 +268,20 @@ class BadgeClass(ScrubUploadedSvgImage, ResizeUploadedImage, cachemodel.CacheMod
             'name': self.name,
             'description': self.description,
             'issuer': add_obi_version_ifneeded(self.cached_issuer.jsonld_id, obi_version),
-            "criteria": self.get_criteria_url(),
         })
         if self.image:
             json['image'] = OriginSetting.HTTP + reverse('badgeclass_image', kwargs={'slug': self.slug})
+
+        # criteria
+        if obi_version == '1_1':
+            json["criteria"] = self.get_criteria_url()
+        elif obi_version == '2_0':
+            json["criteria"] = {}
+            if self.criteria_url:
+                json['criteria']['id'] = self.criteria_url
+            if self.criteria_text:
+                json['criteria']['narrative'] = self.criteria_text
+
         return json
 
     @property
