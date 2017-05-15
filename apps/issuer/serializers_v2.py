@@ -17,7 +17,15 @@ class IssuerStaffSerializerV2(DetailSerializerV2):
     role = serializers.CharField(validators=[ChoicesValidator(dict(IssuerStaff.ROLE_CHOICES).keys())])
 
     class Meta:
-        apispec_definition = ('IssuerStaff', {})
+        apispec_definition = ('IssuerStaff', {
+            'properties': {
+                'role': {
+                    'type': "string",
+                    'enum': ["staff", "editor", "owner"]
+
+                }
+            }
+        })
 
 
 class IssuerSerializerV2(DetailSerializerV2):
