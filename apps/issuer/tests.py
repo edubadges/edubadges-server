@@ -862,10 +862,11 @@ class BadgeClassTests(APITestCase):
         get_response = self.client.get('/v1/issuer/issuers/test-issuer/badges/{}'.format(slug))
         self.assertEqual(get_response.status_code, 200)
 
-        put_response = self.client.put('/v1/issuer/issuers/test-issuer/badges/{}'.format(slug), get_response.data)
+        put_response = self.client.put('/v1/issuer/issuers/test-issuer/badges/{}'.format(slug), get_response.data, format='json')
         self.assertEqual(put_response.status_code, 200)
 
-        self.assertEqual(get_response.data, put_response.data)
+        self.maxDiff = None
+        self.assertDictEqual(get_response.data, put_response.data)
 
 @override_settings(
     CELERY_ALWAYS_EAGER=True,
