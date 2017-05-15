@@ -17,12 +17,19 @@ OBI_VERSION_CONTEXT_IRIS = {
 CURRENT_OBI_VERSION = '1_1'
 CURRENT_OBI_CONTEXT_IRI = OBI_VERSION_CONTEXT_IRIS.get(CURRENT_OBI_VERSION)
 
+
 def get_obi_context(obi_version):
     context_iri = OBI_VERSION_CONTEXT_IRIS.get(obi_version, None)
     if context_iri is None:
         obi_version = CURRENT_OBI_VERSION
         context_iri = CURRENT_OBI_CONTEXT_IRI
     return (obi_version, context_iri)
+
+
+def add_obi_version_ifneeded(url, obi_version):
+    if obi_version == CURRENT_OBI_VERSION:
+        return url
+    return "{url}?v={obi_version}".format(url=url, obi_version=obi_version)
 
 
 def generate_sha256_hashstring(identifier, salt):

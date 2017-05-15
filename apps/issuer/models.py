@@ -23,8 +23,7 @@ from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage
 from mainsite.models import (BadgrApp, EmailBlacklist)
 from mainsite.utils import OriginSetting
-from .utils import generate_sha256_hashstring, CURRENT_OBI_VERSION, CURRENT_OBI_CONTEXT_IRI, \
-    get_obi_context
+from .utils import generate_sha256_hashstring, CURRENT_OBI_VERSION, get_obi_context, add_obi_version_ifneeded
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
@@ -268,7 +267,7 @@ class BadgeClass(ScrubUploadedSvgImage, ResizeUploadedImage, cachemodel.CacheMod
             'id': self.jsonld_id,
             'name': self.name,
             'description': self.description,
-            'issuer': self.cached_issuer.jsonld_id,
+            'issuer': add_obi_version_ifneeded(self.cached_issuer.jsonld_id, obi_version),
             "criteria": self.get_criteria_url(),
         })
         if self.image:
@@ -488,12 +487,11 @@ class BadgeInstance(cachemodel.CacheModel):
             '@context': context_iri,
             'type': 'Assertion',
             'id': self.jsonld_id,
-            # "issuedOn": self.created_at.astimezone(get_current_timezone()).replace(tzinfo=None).isoformat(),
             "uid": self.slug,
             "image": OriginSetting.HTTP + reverse('badgeinstance_image', kwargs={'slug': self.slug}),
-            "badge": self.cached_badgeclass.jsonld_id,
+            "badge": add_obi_version_ifneeded(self.cached_badgeclass.jsonld_id, obi_version),
             "verify": {
-                "url": self.public_url,
+                "url": add_obi_version_ifneeded(self.public_url, obi_version),
                 "type": "hosted"
             }
         })
