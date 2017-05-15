@@ -87,11 +87,6 @@ class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
         Authenticated user must have owner, editor, or staff status on Issuer
         """
 
-        # verify the user has permission to the issuer
-        issuer = self.get_object(request, **kwargs)
-        if not self.has_object_permissions(request, issuer):
-            return Response(status=HTTP_404_NOT_FOUND)
-
         return super(IssuerBadgeClassList, self).get(request, **kwargs)
 
     def post(self, request, **kwargs):
@@ -99,11 +94,6 @@ class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
         Define a new BadgeClass to be owned by a particular Issuer.
         Authenticated user must have owner or editor status on Issuer
         """
-
-        # verify the user has permission to the issuer
-        issuer = self.get_object(request, **kwargs)
-        if not self.has_object_permissions(request, issuer):
-            return Response(status=HTTP_404_NOT_FOUND)
 
         return super(IssuerBadgeClassList, self).post(request, **kwargs)
 
@@ -267,22 +257,12 @@ class IssuerBadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
         Get a list of assertions issued one issuer.
         """
 
-        # verify the user has permission to the issuer
-        issuer = self.get_object(request, **kwargs)
-        if not self.has_object_permissions(request, issuer):
-            return Response(status=HTTP_404_NOT_FOUND)
-
         return super(IssuerBadgeInstanceList, self).get(request, **kwargs)
 
     def post(self, request, **kwargs):
         """
         Issue a new Assertion to a recipient
         """
-
-        # verify the user has permission to the issuer
-        issuer = self.get_object(request, **kwargs)
-        if not self.has_object_permissions(request, issuer):
-            return Response(status=HTTP_404_NOT_FOUND)
 
         return super(IssuerBadgeInstanceList, self).post(request, **kwargs)
 

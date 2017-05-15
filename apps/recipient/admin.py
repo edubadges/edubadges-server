@@ -10,11 +10,11 @@ class RecipientGroupMembershipInline(TabularInline):
     extra = 0
 
 
-class RecipientGroupAdmin(basic_models.DefaultModelAdmin):
+class RecipientGroupAdmin(ModelAdmin):
     list_display = ('name','issuer','is_active', 'created_at')
     list_filter = ('is_active','created_at',)
     search_fields = ('name', 'issuer__name')
-    readonly_fields = ('created_by','created_at','updated_by','updated_by',)
+    # readonly_fields = ('created_by','created_at','updated_by','updated_by',)
     raw_id_fields = ('issuer',)
     filter_horizontal = ('pathways',)
     fieldsets = (
@@ -31,10 +31,10 @@ class RecipientGroupAdmin(basic_models.DefaultModelAdmin):
 badgr_admin.register(RecipientGroup, RecipientGroupAdmin)
 
 
-class RecipientProfileAdmin(basic_models.DefaultModelAdmin):
+class RecipientProfileAdmin(ModelAdmin):
     list_display = ('recipient_identifier','display_name','public')
     search_fields = ('recipient_identifier', 'display_name',)
-    readonly_fields = ('created_by','created_at','updated_by','updated_by',)
+    # readonly_fields = ('created_by','created_at','updated_by','updated_by',)
     raw_id_fields = ('badge_user',)
     fieldsets = (
         # ('Metadata', {

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from badgeuser.models import BadgeUser
 from badgeuser.utils import notify_on_password_change
 from entity.serializers import DetailSerializerV2, BaseSerializerV2
 from mainsite.serializers import StripTagsCharField
@@ -16,6 +17,9 @@ class BadgeUserSerializerV2(DetailSerializerV2):
     lastName = StripTagsCharField(source='last_name', max_length=30, allow_blank=True)
     password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False)
     emails = BadgeUserEmailSerializerV2(many=True, source='email_items', required=False)
+
+    class Meta(DetailSerializerV2.Meta):
+        model = BadgeUser
 
     def update(self, instance, validated_data):
         password = validated_data.pop('password') if 'password' in validated_data else None
