@@ -18,7 +18,7 @@ class BadgeUserSerializerV2(DetailSerializerV2):
     password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False)
     emails = BadgeUserEmailSerializerV2(many=True, source='email_items', required=False)
 
-    class Meta(DetailSerializerV2):
+    class Meta(DetailSerializerV2.Meta):
         model = BadgeUser
 
     def update(self, instance, validated_data):
