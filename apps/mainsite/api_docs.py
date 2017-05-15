@@ -7,7 +7,10 @@ from collections import OrderedDict
 from apispec import APISpec
 from django.apps import apps
 from importlib import import_module
+
+from rest_framework.relations import RelatedField
 from rest_framework.schemas import EndpointInspector
+from rest_framework.serializers import ListSerializer, SerializerMetaclass
 
 
 class BadgrAPISpec(APISpec):
@@ -29,17 +32,17 @@ class BadgrAPISpec(APISpec):
             except ImportError:
                 pass
             else:
-                for serializer_class_name in dir(app_serializer_module):
-                    serializer_class = getattr(app_serializer_module, serializer_class_name)
-                    if hasattr(serializer_class, 'Meta') and hasattr(serializer_class.Meta, 'apispec_definition'):
-                        definition_name, definition_kwargs = serializer_class.Meta.apispec_definition
-                        self.serializer_definition(serializer_class, definition_name, **definition_kwargs)
+                for cls_name in dir(app_serializer_module):
+                    cls = getattr(app_serializer_module, cls_name)
+
+                    if isinstance(cls, SerializerMetaclass) and self.has_apispec_definition(cls):
+                        definition_name, definition_kwargs = self.get_apispec_definition(cls)
+                        self.serializer_definition(cls, definition_name, **definition_kwargs)
 
     def scrape_endpoints(self):
         """
         Iterate over the registered API endpoints for this version and generate path specs
         """
-
         inspector = EndpointInspector()
         for path, http_method, func in inspector.get_api_endpoints():
             if not path.startswith("/{}/".format(self.version)):  # skip if it doesnt match version
@@ -61,26 +64,55 @@ class BadgrAPISpec(APISpec):
 
     def serializer_definition(self, serializer_class, name, **kwargs):
         """
-        Add a definition based on a serializer class decorated with @apispec_definition 
+        Add a definition based on a serializer class decorated with @apispec_definition
         """
 
         # populate default properties from serializer fields
         properties = OrderedDict()
         serializer = serializer_class()
         for field_name, field in serializer.get_fields().items():
+
+            if isinstance(field, ListSerializer):
+                field_properties = {
+                    'type': "array",
+                    'items': {
+                        '$ref': "#/definitions/{}".format(self.get_ref_name(field.child.__class__))
+                    }
+                }
+            elif isinstance(field, RelatedField):
+                pass
+            else:
+                field_properties = {
+                    'type': "string",  # TODO: Support numeric fields
+                    'format': self.get_ref_name(field.__class__)
+                }
+
             help_text = getattr(field, 'help_text', None)
-            properties[field_name] = {
-                'type': "string",
-                'format': field.__class__.__name__,  # fixme
-            }
             if help_text:
-                properties['description'] = help_text
+                field_properties['description'] = help_text
+
+            properties[field_name] = field_properties
 
         #properties specified in kwargs override field defaults
         properties.update( kwargs.get('properties', {}) )
         kwargs['properties'] = properties
 
         self.definition(name, **kwargs)
+
+    def has_apispec_definition(self, cls):
+        return hasattr(cls, 'Meta') and hasattr(cls.Meta, 'apispec_definition')
+
+    def get_apispec_definition(self, cls):
+        if self.has_apispec_definition(cls):
+            return cls.Meta.apispec_definition
+        return None, {}
+
+    def get_ref_name(self, cls):
+        if self.has_apispec_definition(cls):
+            definition_name, definition_kwargs = self.get_apispec_definition(cls)
+            return definition_name
+        else:
+            return cls.__name__
 
     def write_to(self, outfile):
         outfile.write(json.dumps(self.to_dict(), indent=4))

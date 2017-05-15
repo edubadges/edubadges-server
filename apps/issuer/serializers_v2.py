@@ -47,12 +47,6 @@ class IssuerSerializerV2(DetailSerializerV2):
                     'type': 'string',
                     'format': 'entityId',
                     'description': "entityId of the BadgeUser who created this issuer",
-                },
-                'staff': {
-                    'type': "array",
-                    'items': {
-                        '$ref': "#/definitions/IssuerStaff"
-                    }
                 }
             }
         })
