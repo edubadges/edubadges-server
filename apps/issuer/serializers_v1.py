@@ -29,6 +29,16 @@ class IssuerStaffSerializerV1(serializers.Serializer):
     class Meta:
         list_serializer_class = CachedListSerializer
 
+        apispec_definition = ('IssuerStaff', {
+            'properties': {
+                'role': {
+                    'type': "string",
+                    'enum': ["staff", "editor", "owner"]
+
+                }
+            }
+        })
+
 
 class IssuerSerializerV1(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
