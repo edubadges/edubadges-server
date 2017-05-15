@@ -1,11 +1,12 @@
 from __future__ import unicode_literals
 
-import datetime
 import json
 import re
 import uuid
+from collections import OrderedDict
 
 import cachemodel
+import datetime
 from allauth.account.adapter import get_adapter
 from autoslug import AutoSlugField
 from django.conf import settings
@@ -22,7 +23,8 @@ from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage
 from mainsite.models import (BadgrApp, EmailBlacklist)
 from mainsite.utils import OriginSetting
-from .utils import generate_sha256_hashstring, CURRENT_OBI_CONTEXT_IRI
+from .utils import generate_sha256_hashstring, CURRENT_OBI_VERSION, CURRENT_OBI_CONTEXT_IRI, \
+    get_obi_context
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
@@ -112,16 +114,18 @@ class Issuer(ScrubUploadedSvgImage, ResizeUploadedImage, cachemodel.CacheModel):
     def image_preview(self):
         return self.image
 
-    def get_json(self):
-        json = {
-            '@context': CURRENT_OBI_CONTEXT_IRI,
+    def get_json(self, obi_version=CURRENT_OBI_VERSION):
+        obi_version, context_iri = get_obi_context(obi_version)
+
+        json = OrderedDict({
+            '@context': context_iri,
             'type': 'Issuer',
             'id': self.jsonld_id,
             'name': self.name,
             'url': self.url,
             'email': self.email,
             'description': self.description,
-        }
+        })
         if self.image:
             json['image'] = OriginSetting.HTTP + reverse('issuer_image', kwargs={'slug': self.slug})
         return json
@@ -256,16 +260,17 @@ class BadgeClass(ScrubUploadedSvgImage, ResizeUploadedImage, cachemodel.CacheMod
             badgr_app=badgr_app
         )
 
-    def get_json(self):
-        json = {
-            '@context': CURRENT_OBI_CONTEXT_IRI,
+    def get_json(self, obi_version=CURRENT_OBI_VERSION):
+        obi_version, context_iri = get_obi_context(obi_version)
+        json = OrderedDict({
+            '@context': context_iri,
             'type': 'BadgeClass',
             'id': self.jsonld_id,
             'name': self.name,
             'description': self.description,
             'issuer': self.cached_issuer.jsonld_id,
             "criteria": self.get_criteria_url(),
-        }
+        })
         if self.image:
             json['image'] = OriginSetting.HTTP + reverse('badgeclass_image', kwargs={'slug': self.slug})
         return json
@@ -476,9 +481,11 @@ class BadgeInstance(cachemodel.CacheModel):
             pass
         return None
 
-    def get_json(self):
-        json = {
-            '@context': CURRENT_OBI_CONTEXT_IRI,
+    def get_json(self, obi_version=CURRENT_OBI_VERSION):
+        obi_version, context_iri = get_obi_context(obi_version)
+
+        json = OrderedDict({
+            '@context': context_iri,
             'type': 'Assertion',
             'id': self.jsonld_id,
             # "issuedOn": self.created_at.astimezone(get_current_timezone()).replace(tzinfo=None).isoformat(),
@@ -489,10 +496,18 @@ class BadgeInstance(cachemodel.CacheModel):
                 "url": self.public_url,
                 "type": "hosted"
             }
-        }
+        })
 
         if self.evidence_url:
-            json['evidence'] = self.evidence_url
+            if obi_version == '1_1':
+                # obi v1 single evidence url
+                json['evidence'] = self.evidence_url
+            elif obi_version == '2_0':
+                # obi v2 multiple evidence
+                json['evidence'] = [e.get_json(obi_version) for e in self.cached_evidence()]
+
+        if self.narrative and obi_version == '2_0':
+            json['narrative'] = self.narrative
 
         json['issuedOn'] = self.created_at.isoformat()
 
@@ -548,3 +563,16 @@ class BadgeInstanceEvidence(cachemodel.CacheModel):
         ret = super(BadgeInstanceEvidence, self).delete(*args, **kwargs)
         badgeinstance.publish()
         return ret
+
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_context=False):
+        json = OrderedDict({
+            'type': 'Evidence',
+        })
+        if include_context:
+            obi_version, context_iri = get_obi_context(obi_version)
+            json['@context'] = context_iri
+        if self.evidence_url:
+            json['id'] = self.evidence_url
+        if self.narrative:
+            json['narrative'] = self.narrative
+        return json

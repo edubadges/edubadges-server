@@ -33,13 +33,14 @@ class JSONComponentView(APIView):
         pass
 
     def get(self, request, slug, format='html'):
+        obi_version = request.query_params.get('v', utils.CURRENT_OBI_VERSION)
         try:
             self.current_object = self.model.cached.get(slug=slug)
         except self.model.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
             self.log(self.current_object)
-            return Response(self.current_object.json)
+            return Response(self.current_object.get_json(obi_version=obi_version))
 
     def get_renderers(self):
         """
@@ -240,8 +241,10 @@ class BadgeInstanceJson(JSONComponentView):
         else:
             if current_object.revoked is False:
 
+                obi_version = request.query_params.get('v', utils.CURRENT_OBI_VERSION)
+
                 logger.event(badgrlog.BadgeAssertionCheckedEvent(current_object, request))
-                return Response(current_object.json)
+                return Response(current_object.get_json(obi_version=obi_version))
             else:
                 # TODO update terms based on final accepted terms in response to
                 # https://github.com/openbadges/openbadges-specification/issues/33
