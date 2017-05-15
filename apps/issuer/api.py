@@ -31,6 +31,42 @@ class IssuerList(BaseEntityListView):
     def get_objects(self, request, **kwargs):
         return self.request.user.cached_issuers()
 
+    @apispec_operation(
+        summary="Get a list of Issuers for authenticated user",
+        tags=["Issuer"],
+        responses={
+            "200": {
+                'schema': {
+                    'type': 'array',
+                    'items': {'$ref': '#/definitions/Issuer'},
+                },
+            },
+        }
+    )
+    def get(self, request, **kwargs):
+        return super(IssuerList, self).get(request, **kwargs)
+
+    @apispec_operation(
+        summary="Create a new Issuer",
+        tags=["Issuer"],
+        paramters=[
+            {
+
+            }
+
+        ],
+        responses={
+            "200": {
+                'schema': {
+                    'type': 'array',
+                    'items': {'$ref': '#/definitions/Issuer'},
+                },
+            },
+        }
+    )
+    def post(self, request, **kwargs):
+        return super(IssuerList, self).post(request, **kwargs)
+
 
 class IssuerDetail(BaseEntityDetailView):
     model = Issuer
@@ -49,7 +85,6 @@ class IssuerDetail(BaseEntityDetailView):
         }
     )
     def get(self, request, **kwargs):
-        """Get detail of one issuer"""
         return super(IssuerDetail, self).get(request, **kwargs)
 
     @apispec_operation(
@@ -72,7 +107,6 @@ class IssuerDetail(BaseEntityDetailView):
         ]
     )
     def put(self, request, **kwargs):
-        """Update an issuer """
         return super(IssuerDetail, self).put(request, **kwargs)
 
     @apispec_operation(
@@ -88,7 +122,6 @@ class IssuerDetail(BaseEntityDetailView):
         }
     )
     def delete(self, request, **kwargs):
-        """Delete an issue"""
         return super(IssuerDetail, self).delete(request, **kwargs)
 
 
