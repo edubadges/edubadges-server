@@ -27,7 +27,7 @@ class RecipientGroupSerializerV2(DetailSerializerV2):
     members = RecipientGroupMembershipSerializerV2(many=True, source='membership_items', required=False)
     pathways = EntityRelatedFieldV2(many=True, source='pathway_items', required=False, queryset=Pathway.cached)
 
-    class Meta:
+    class Meta(DetailSerializerV2):
         model = RecipientGroup
 
     def update(self, instance, validated_data):
