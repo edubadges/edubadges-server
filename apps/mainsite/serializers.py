@@ -119,6 +119,7 @@ class StripTagsCharField(serializers.CharField):
         value = super(StripTagsCharField, self).to_internal_value(data)
         if self.strip_tags:
             return strip_tags(value)
+        return value
 
 
 class MarkdownCharFieldValidator(object):

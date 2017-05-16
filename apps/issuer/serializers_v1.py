@@ -5,6 +5,7 @@ from django.apps import apps
 from django.core.urlresolvers import reverse
 from django.utils.html import strip_tags
 from rest_framework import serializers
+from rest_framework.compat import URLValidator
 
 import utils
 from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserIdentifierFieldV1
@@ -115,8 +116,8 @@ class BadgeClassSerializerV1(serializers.Serializer):
     image = ValidImageField(required=False)
     slug = StripTagsCharField(max_length=255, read_only=True, source='entity_id')
     criteria = MarkdownCharField(allow_blank=True, required=False, write_only=True)
-    criteria_text = MarkdownCharField(required=False, read_only=True)
-    criteria_url = StripTagsCharField(required=False, read_only=True)
+    criteria_text = MarkdownCharField(required=False, allow_null=True)
+    criteria_url = StripTagsCharField(required=False, validators=[URLValidator()])
     recipient_count = serializers.IntegerField(required=False, read_only=True)
     pathway_element_count = serializers.IntegerField(required=False, read_only=True)
     description = StripTagsCharField(max_length=16384, required=True)

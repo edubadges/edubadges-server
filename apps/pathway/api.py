@@ -318,8 +318,14 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
         if issuer is None or pathway is None or element is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        element.is_active = False
-        element.save()
+        def deactivate_tree(elem):
+            elem.is_active = False
+            elem.save()
+
+            for child in elem.cached_children():
+                deactivate_tree(child)
+
+        deactivate_tree(element)
         return Response(status=status.HTTP_200_OK)
 
 
