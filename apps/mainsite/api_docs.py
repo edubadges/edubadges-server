@@ -84,12 +84,14 @@ class BadgrAPISpecBuilder(object):
 
 
 class BadgrAPISpec(APISpec, BadgrAPISpecBuilder):
-    def __init__(self, version, *args, **kwargs):
+    def __init__(self, version, preamble, *args, **kwargs):
         self.version = version
+        self.preamble = preamble
         title = kwargs.pop('title', 'Badgr {version} API'.format(version=version))
         super(BadgrAPISpec, self).__init__(title, version, *args, **kwargs)
         self.scrape_serializers()
         self.scrape_endpoints()
+        self.info.update({"description": preamble})
 
     def scrape_serializers(self):
         """
@@ -199,15 +201,6 @@ class BadgrAPISpec(APISpec, BadgrAPISpecBuilder):
         return {
             'parameters': self.get_path_parameter_list(path)
         }
-
-
-
-
-
-
-
-
-
 
     def write_to(self, outfile):
         outfile.write(json.dumps(self.to_dict(), indent=4))

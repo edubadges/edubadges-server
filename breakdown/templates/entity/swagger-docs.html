@@ -1,3 +1,4 @@
+{% load static %}
 <!-- HTML for static distribution bundle build -->
 <!DOCTYPE html>
 <html lang="en">
@@ -66,13 +67,13 @@
 
 <div id="swagger-ui"></div>
 
-<script src="/static/swagger-ui/swagger-ui-bundle.js"> </script>
-<script src="/static/swagger-ui/swagger-ui-standalone-preset.js"> </script>
+<script src="{% static "swagger-ui/swagger-ui-bundle.js" %}"> </script>
+<script src="{% static "swagger-ui/swagger-ui-standalone-preset.js" %}"> </script>
 <script>
     window.onload = function() {
         // Build a system
         const ui = SwaggerUIBundle({
-            url: "/static/swagger-ui/badgr_spec_{{ version }}.json",
+            url: "{% static "swagger-ui/" %}badgr_spec_{{ version }}.json",
             dom_id: '#swagger-ui',
             presets: [
                 SwaggerUIBundle.presets.apis,
