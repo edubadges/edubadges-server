@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from badgeuser.models import BadgeUser
 from badgeuser.utils import notify_on_password_change
 from entity.serializers import DetailSerializerV2, BaseSerializerV2
 from mainsite.serializers import StripTagsCharField
@@ -21,6 +22,7 @@ class BadgeUserSerializerV2(DetailSerializerV2):
     emails = BadgeUserEmailSerializerV2(many=True, source='email_items', required=False)
 
     class Meta(DetailSerializerV2.Meta):
+        model = BadgeUser
         apispec_definition = ('BadgeUser', {})
 
     def update(self, instance, validated_data):

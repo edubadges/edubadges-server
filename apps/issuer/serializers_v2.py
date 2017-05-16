@@ -80,7 +80,7 @@ class BadgeClassSerializerV2(DetailSerializerV2):
     criteriaUrl = StripTagsCharField(source='criteria_url', required=False, allow_null=True, validators=[URLValidator()])
     criteriaNarrative = MarkdownCharField(source='criteria_text', required=False, allow_null=True)
 
-    class Meta:
+    class Meta(DetailSerializerV2.Meta):
         model = BadgeClass
 
     def update(self, instance, validated_data):
@@ -132,7 +132,7 @@ class BadgeInstanceSerializerV2(DetailSerializerV2):
     revoked = HumanReadableBooleanField(read_only=True)
     revocationReason = serializers.CharField(source='revocation_reason', read_only=True)
     
-    class Meta:
+    class Meta(DetailSerializerV2.Meta):
         model = BadgeInstance
         
     def update(self, instance, validated_data):
