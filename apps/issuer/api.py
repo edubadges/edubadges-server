@@ -60,7 +60,7 @@ class IssuerDetail(BaseEntityDetailView):
     def get(self, request, **kwargs):
         return super(IssuerDetail, self).get(request, **kwargs)
 
-    @apispec_put_operation('Issuer',
+    @apispec_put_operation('Issuer', IssuerSerializerV2,
        summary="Update a single Issuer",
        tags=["Issuer"],
    )

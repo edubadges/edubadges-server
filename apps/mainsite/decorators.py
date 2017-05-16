@@ -42,7 +42,10 @@ def apispec_get_operation(entity_class_name, *spec_args, **spec_kwargs):
     return decorator
 
 
-def apispec_put_operation(entity_class_name, *spec_args, **spec_kwargs):
+def apispec_put_operation(entity_class_name, serializer_cls, *spec_args, **spec_kwargs):
+    serializer_spec = BadgrAPISpecBuilder.get_serializer_spec(serializer_cls,
+                                                              include_write_only=True,
+                                                              include_read_only=True)
     defaults = {
         'responses': {
             "200": {
@@ -54,7 +57,7 @@ def apispec_put_operation(entity_class_name, *spec_args, **spec_kwargs):
                 "in": "body",
                 "name": "body",
                 "required": True,
-                "schema": { "$ref": "#/definitions/{}".format(entity_class_name) }
+                "schema": serializer_spec,
             }
         ]
     }
@@ -109,9 +112,11 @@ def apispec_list_operation(entity_class_name, *spec_args, **spec_kwargs):
     return decorator
 
 
-def apispec_post_operation(entity_class_name, entity_cls, *spec_args, **spec_kwargs):
+def apispec_post_operation(entity_class_name, serializer_cls, *spec_args, **spec_kwargs):
 
-    serializer_spec = BadgrAPISpecBuilder.get_serializer_spec(entity_cls, include_read_only=False)
+    serializer_spec = BadgrAPISpecBuilder.get_serializer_spec(serializer_cls,
+                                                              include_write_only=True,
+                                                              include_read_only=False)
 
     defaults = {
         'responses': {
