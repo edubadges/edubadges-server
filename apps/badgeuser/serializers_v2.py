@@ -10,12 +10,18 @@ class BadgeUserEmailSerializerV2(DetailSerializerV2):
     verified = serializers.BooleanField(read_only=True)
     primary = serializers.BooleanField(required=False)
 
+    class Meta(DetailSerializerV2.Meta):
+        apispec_definition = ('Email', {})
+
 
 class BadgeUserSerializerV2(DetailSerializerV2):
     firstName = StripTagsCharField(source='first_name', max_length=30, allow_blank=True)
     lastName = StripTagsCharField(source='last_name', max_length=30, allow_blank=True)
     password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False)
     emails = BadgeUserEmailSerializerV2(many=True, source='email_items', required=False)
+
+    class Meta(DetailSerializerV2.Meta):
+        apispec_definition = ('BadgeUser', {})
 
     def update(self, instance, validated_data):
         password = validated_data.pop('password') if 'password' in validated_data else None

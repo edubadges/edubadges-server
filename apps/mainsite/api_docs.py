@@ -18,12 +18,14 @@ from rest_framework.serializers import ListSerializer, SerializerMetaclass, Base
 
 class BadgrAPISpecBuilder(object):
     @classmethod
-    def get_serializer_spec(cls, serializer_class, include_read_only=True):
+    def get_serializer_spec(cls, serializer_class, include_read_only=True, include_write_only=False):
         """
         Generate a definition based on a serializer class decorated with @apispec_definition
         """
         return {
-            'properties': cls.get_serializer_properties(serializer_class(), include_read_only=include_read_only),
+            'properties': cls.get_serializer_properties(serializer_class(),
+                                                        include_read_only=include_read_only,
+                                                        include_write_only=include_write_only),
             'required': cls.get_required_properties(serializer_class())
         }
 
@@ -32,13 +34,13 @@ class BadgrAPISpecBuilder(object):
         return [field_name for field_name, field in serializer.get_fields().items() if field.required]
 
     @classmethod
-    def get_serializer_properties(cls, serializer, include_read_only=True):
+    def get_serializer_properties(cls, serializer, include_read_only=True, include_write_only=True):
         assert isinstance(serializer, BaseSerializer)
 
         return {
             field_name: cls.get_field_property(field)
             for field_name, field in serializer.get_fields().items()
-            if not field.read_only or include_read_only
+            if (not field.read_only or include_read_only) and (not field.write_only or include_write_only)
         }
 
     @classmethod
