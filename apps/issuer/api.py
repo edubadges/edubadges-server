@@ -39,7 +39,7 @@ class IssuerList(BaseEntityListView):
     def get(self, request, **kwargs):
         return super(IssuerList, self).get(request, **kwargs)
 
-    @apispec_post_operation('Issuer',
+    @apispec_post_operation('Issuer', IssuerSerializerV2,
         summary="Create a new Issuer",
         tags=["Issuer"],
     )

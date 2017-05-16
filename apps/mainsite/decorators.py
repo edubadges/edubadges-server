@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import functools
 from collections import OrderedDict
 
-from mainsite.api_docs import BadgrAPISpec
+from mainsite.api_docs import BadgrAPISpec, BadgrAPISpecBuilder
 
 
 def _decorate_wrapper_with_apispec(wrapper, wrapped, *args, **kwargs):
@@ -109,7 +109,9 @@ def apispec_list_operation(entity_class_name, *spec_args, **spec_kwargs):
     return decorator
 
 
-def apispec_post_operation(entity_class_name, *spec_args, **spec_kwargs):
+def apispec_post_operation(entity_class_name, entity_cls, *spec_args, **spec_kwargs):
+
+    serializer_spec = BadgrAPISpecBuilder.get_serializer_spec(entity_cls, include_read_only=False)
 
     defaults = {
         'responses': {
@@ -122,7 +124,7 @@ def apispec_post_operation(entity_class_name, *spec_args, **spec_kwargs):
                 "in": "body",
                 "name": "body",
                 "required": True,
-                "schema": { "$ref": "#/definitions/{}".format(entity_class_name) }
+                "schema": serializer_spec,
             }
         ]
     }

@@ -16,7 +16,74 @@ from rest_framework.schemas import EndpointInspector
 from rest_framework.serializers import ListSerializer, SerializerMetaclass, BaseSerializer
 
 
-class BadgrAPISpec(APISpec):
+class BadgrAPISpecBuilder(object):
+    @classmethod
+    def get_serializer_spec(cls, serializer_class, include_read_only=True):
+        """
+        Generate a definition based on a serializer class decorated with @apispec_definition
+        """
+        return {
+            'properties': cls.get_serializer_properties(serializer_class(), include_read_only=include_read_only),
+            'required': cls.get_required_properties(serializer_class())
+        }
+
+    @classmethod
+    def get_required_properties(cls, serializer):
+        return [field_name for field_name, field in serializer.get_fields().items() if field.required]
+
+    @classmethod
+    def get_serializer_properties(cls, serializer, include_read_only=True):
+        assert isinstance(serializer, BaseSerializer)
+
+        return {
+            field_name: cls.get_field_property(field)
+            for field_name, field in serializer.get_fields().items()
+            if not field.read_only or include_read_only
+        }
+
+    @classmethod
+    def get_field_property(cls, field):
+        assert isinstance(field, Field)
+
+        if isinstance(field, ListSerializer):
+            field_properties = {
+                'type': "array",
+                'items': {
+                    '$ref': "#/definitions/{}".format(cls.get_ref_name(field.child.__class__))
+                }
+            }
+        else:
+            field_properties = {
+                'type': "string",  # TODO: Support numeric fields
+                'format': cls.get_ref_name(field.__class__)
+            }
+
+        help_text = getattr(field, 'help_text', None)
+        if help_text:
+            field_properties['description'] = help_text
+
+        return field_properties
+
+    @classmethod
+    def get_ref_name(cls, serializer_cls):
+        if cls.has_apispec_definition(serializer_cls):
+            definition_name, definition_kwargs = cls.get_apispec_definition(serializer_cls)
+            return definition_name
+        else:
+            return serializer_cls.__name__
+
+    @classmethod
+    def has_apispec_definition(cls, serializer_cls):
+        return hasattr(serializer_cls, 'Meta') and hasattr(serializer_cls.Meta, 'apispec_definition')
+
+    @classmethod
+    def get_apispec_definition(cls, serializer_cls):
+        if cls.has_apispec_definition(serializer_cls):
+            return serializer_cls.Meta.apispec_definition
+        return None, {}
+
+
+class BadgrAPISpec(APISpec, BadgrAPISpecBuilder):
     def __init__(self, version, *args, **kwargs):
         self.version = version
         title = kwargs.pop('title', 'Badgr {version} API'.format(version=version))
@@ -133,62 +200,14 @@ class BadgrAPISpec(APISpec):
             'parameters': self.get_path_parameter_list(path)
         }
 
-    def get_field_property(self, field):
-        assert isinstance(field, Field)
 
-        if isinstance(field, ListSerializer):
-            field_properties = {
-                'type': "array",
-                'items': {
-                    '$ref': "#/definitions/{}".format(self.get_ref_name(field.child.__class__))
-                }
-            }
-        else:
-            field_properties = {
-                'type': "string",  # TODO: Support numeric fields
-                'format': self.get_ref_name(field.__class__)
-            }
 
-        help_text = getattr(field, 'help_text', None)
-        if help_text:
-            field_properties['description'] = help_text
 
-        return field_properties
 
-    def get_required_properties(self, serializer):
-        return [field_name for field_name, field in serializer.get_fields().items() if field.required]
 
-    def get_serializer_properties(self, serializer):
-        assert isinstance(serializer, BaseSerializer)
 
-        return {
-            field_name: self.get_field_property(field)
-            for field_name, field in serializer.get_fields().items()
-        }
 
-    def get_serializer_spec(self, serializer_class):
-        """
-        Generate a definition based on a serializer class decorated with @apispec_definition
-        """
-        return {
-            'properties': self.get_serializer_properties(serializer_class()),
-            'required': self.get_required_properties(serializer_class())
-        }
 
-    def has_apispec_definition(self, cls):
-        return hasattr(cls, 'Meta') and hasattr(cls.Meta, 'apispec_definition')
-
-    def get_apispec_definition(self, cls):
-        if self.has_apispec_definition(cls):
-            return cls.Meta.apispec_definition
-        return None, {}
-
-    def get_ref_name(self, cls):
-        if self.has_apispec_definition(cls):
-            definition_name, definition_kwargs = self.get_apispec_definition(cls)
-            return definition_name
-        else:
-            return cls.__name__
 
     def write_to(self, outfile):
         outfile.write(json.dumps(self.to_dict(), indent=4))
