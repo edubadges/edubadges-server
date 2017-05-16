@@ -11,7 +11,8 @@ from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
 from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    BadgeInstanceSerializerV1)
 from issuer.serializers_v2 import IssuerSerializerV2, BadgeClassSerializerV2, BadgeInstanceSerializerV2
-from mainsite.decorators import apispec_operation
+from mainsite.decorators import apispec_operation, apispec_get_operation, apispec_put_operation, \
+    apispec_delete_operation
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 
 logger = badgrlog.BadgrLogger()
@@ -68,48 +69,24 @@ class IssuerDetail(BaseEntityDetailView):
     v2_serializer_class = IssuerSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor)
 
-    @apispec_operation(
+    @apispec_get_operation('Issuer',
         summary="Get a single Issuer",
         tags=["Issuer"],
-        responses={
-            "200": {
-                'schema': {'$ref': '#/definitions/Issuer'},
-                'description': 'Updated Issuer is returned'
-            },
-        }
     )
     def get(self, request, **kwargs):
         return super(IssuerDetail, self).get(request, **kwargs)
 
-    @apispec_operation(
-        summary="Update a single Issuer",
-        tags=["Issuer"],
-        responses={
-            "200": {
-                'schema': {'$ref': '#/definitions/Issuer'},
-                'description': 'Updated Issuer is returned'
-            },
-        },
-        parameters=[
-            {
-                "in": "body",
-                "name": "body",
-                "required": True,
-                "description": "Issuer object to update",
-                "schema": { "$ref": "#/definitions/Issuer" }
-            }
-        ]
-    )
+    @apispec_put_operation('Issuer',
+       summary="Update a single Issuer",
+       tags=["Issuer"],
+   )
     def put(self, request, **kwargs):
         return super(IssuerDetail, self).put(request, **kwargs)
 
-    @apispec_operation(
-        summary="Update a single Issuer",
+    @apispec_delete_operation('Issuer',
+        summary="Delete a single Issuer",
         tags=["Issuer"],
         responses={
-            "200": {
-                'description': 'Issuer was deleted successfully'
-            },
             "400": {
                 'description': "Unable to delete issuer"
             },
