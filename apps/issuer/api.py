@@ -12,7 +12,7 @@ from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    BadgeInstanceSerializerV1)
 from issuer.serializers_v2 import IssuerSerializerV2, BadgeClassSerializerV2, BadgeInstanceSerializerV2
 from mainsite.decorators import apispec_operation, apispec_get_operation, apispec_put_operation, \
-    apispec_delete_operation
+    apispec_delete_operation, apispec_list_operation, apispec_post_operation
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 
 logger = badgrlog.BadgrLogger()
@@ -32,32 +32,16 @@ class IssuerList(BaseEntityListView):
     def get_objects(self, request, **kwargs):
         return self.request.user.cached_issuers()
 
-    @apispec_operation(
+    @apispec_list_operation('Issuer',
         summary="Get a list of Issuers for authenticated user",
         tags=["Issuer"],
-        responses={
-            "200": {
-                'schema': {
-                    'type': 'array',
-                    'items': {'$ref': '#/definitions/Issuer'},
-                },
-            },
-        }
     )
     def get(self, request, **kwargs):
         return super(IssuerList, self).get(request, **kwargs)
 
-    @apispec_operation(
+    @apispec_post_operation('Issuer',
         summary="Create a new Issuer",
         tags=["Issuer"],
-        responses={
-            "200": {
-                'schema': {
-                    'type': 'array',
-                    'items': {'$ref': '#/definitions/Issuer'},
-                },
-            },
-        }
     )
     def post(self, request, **kwargs):
         return super(IssuerList, self).post(request, **kwargs)
