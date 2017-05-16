@@ -21,6 +21,9 @@ breakdown/static/js/lti-app.js
 breakdown/static/css/style.css
 breakdown/static/css/screen.css
 breakdown/static/css/*.map
+
+breakdown/static/swagger-ui/badgr_spec_*.json
+
 .ropeproject
 .idea/*
 *.iml
@@ -34,3 +37,4 @@ test.cache/
 *.egg-info/
 build/
 htmlcov/
+

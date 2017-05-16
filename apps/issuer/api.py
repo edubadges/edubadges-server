@@ -11,6 +11,8 @@ from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
 from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    BadgeInstanceSerializerV1)
 from issuer.serializers_v2 import IssuerSerializerV2, BadgeClassSerializerV2, BadgeInstanceSerializerV2
+from mainsite.decorators import apispec_operation, apispec_get_operation, apispec_put_operation, \
+    apispec_delete_operation, apispec_list_operation, apispec_post_operation
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 
 logger = badgrlog.BadgrLogger()
@@ -30,15 +32,52 @@ class IssuerList(BaseEntityListView):
     def get_objects(self, request, **kwargs):
         return self.request.user.cached_issuers()
 
+    @apispec_list_operation('Issuer',
+        summary="Get a list of Issuers for authenticated user",
+        tags=["Issuer"],
+    )
+    def get(self, request, **kwargs):
+        return super(IssuerList, self).get(request, **kwargs)
+
+    @apispec_post_operation('Issuer', IssuerSerializerV2,
+        summary="Create a new Issuer",
+        tags=["Issuer"],
+    )
+    def post(self, request, **kwargs):
+        return super(IssuerList, self).post(request, **kwargs)
+
 
 class IssuerDetail(BaseEntityDetailView):
-    """
-    GET details on one issuer.
-    """
     model = Issuer
     v1_serializer_class = IssuerSerializerV1
     v2_serializer_class = IssuerSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor)
+
+    @apispec_get_operation('Issuer',
+        summary="Get a single Issuer",
+        tags=["Issuer"],
+    )
+    def get(self, request, **kwargs):
+        return super(IssuerDetail, self).get(request, **kwargs)
+
+    @apispec_put_operation('Issuer', IssuerSerializerV2,
+       summary="Update a single Issuer",
+       tags=["Issuer"],
+   )
+    def put(self, request, **kwargs):
+        return super(IssuerDetail, self).put(request, **kwargs)
+
+    @apispec_delete_operation('Issuer',
+        summary="Delete a single Issuer",
+        tags=["Issuer"],
+        responses={
+            "400": {
+                'description': "Unable to delete issuer"
+            },
+        }
+    )
+    def delete(self, request, **kwargs):
+        return super(IssuerDetail, self).delete(request, **kwargs)
 
 
 class AllBadgeClassesList(BaseEntityListView):
