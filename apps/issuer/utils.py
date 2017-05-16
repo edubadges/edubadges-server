@@ -29,7 +29,11 @@ def get_obi_context(obi_version):
 def add_obi_version_ifneeded(url, obi_version):
     if obi_version == CURRENT_OBI_VERSION:
         return url
-    return "{url}?v={obi_version}".format(url=url, obi_version=obi_version)
+    return "{url}{sep}v={obi_version}".format(
+        url=url,
+        sep='&' if '?' in url else '?',
+        obi_version=obi_version)
+
 
 
 def generate_sha256_hashstring(identifier, salt):
