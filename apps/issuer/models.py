@@ -116,15 +116,14 @@ class Issuer(ScrubUploadedSvgImage, ResizeUploadedImage, cachemodel.CacheModel):
     def get_json(self, obi_version=CURRENT_OBI_VERSION):
         obi_version, context_iri = get_obi_context(obi_version)
 
-        json = OrderedDict({
-            '@context': context_iri,
-            'type': 'Issuer',
-            'id': add_obi_version_ifneeded(self.jsonld_id, obi_version),
-            'name': self.name,
-            'url': self.url,
-            'email': self.email,
-            'description': self.description,
-        })
+        json = OrderedDict({'@context': context_iri})
+        json.update(OrderedDict(
+            type='Issuer',
+            id=add_obi_version_ifneeded(self.jsonld_id, obi_version),
+            name=self.name,
+            url=self.url,
+            email=self.email,
+            description=self.description))
         if self.image:
             json['image'] = OriginSetting.HTTP + reverse('issuer_image', kwargs={'slug': self.slug})
         return json
@@ -261,14 +260,14 @@ class BadgeClass(ScrubUploadedSvgImage, ResizeUploadedImage, cachemodel.CacheMod
 
     def get_json(self, obi_version=CURRENT_OBI_VERSION):
         obi_version, context_iri = get_obi_context(obi_version)
-        json = OrderedDict({
-            '@context': context_iri,
-            'type': 'BadgeClass',
-            'id': add_obi_version_ifneeded(self.jsonld_id, obi_version),
-            'name': self.name,
-            'description': self.description,
-            'issuer': add_obi_version_ifneeded(self.cached_issuer.jsonld_id, obi_version),
-        })
+        json = OrderedDict({'@context': context_iri})
+        json.update(OrderedDict(
+            type='BadgeClass',
+            id=add_obi_version_ifneeded(self.jsonld_id, obi_version),
+            name=self.name,
+            description=self.description,
+            issuer=add_obi_version_ifneeded(self.cached_issuer.jsonld_id, obi_version),
+        ))
         if self.image:
             json['image'] = OriginSetting.HTTP + reverse('badgeclass_image', kwargs={'slug': self.slug})
 
@@ -493,14 +492,14 @@ class BadgeInstance(cachemodel.CacheModel):
     def get_json(self, obi_version=CURRENT_OBI_VERSION):
         obi_version, context_iri = get_obi_context(obi_version)
 
-        json = OrderedDict({
-            '@context': context_iri,
-            'type': 'Assertion',
-            'id': add_obi_version_ifneeded(self.jsonld_id, obi_version),
-            "image": OriginSetting.HTTP + reverse('badgeinstance_image', kwargs={'slug': self.slug}),
-            "badge": add_obi_version_ifneeded(self.cached_badgeclass.jsonld_id, obi_version),
-            "revoked": self.revoked,
-        })
+        json = OrderedDict({'@context': context_iri})
+        json.update(OrderedDict(
+            type='Assertion',
+            id=add_obi_version_ifneeded(self.jsonld_id, obi_version),
+            image=OriginSetting.HTTP + reverse('badgeinstance_image', kwargs={'slug': self.slug}),
+            badge=add_obi_version_ifneeded(self.cached_badgeclass.jsonld_id, obi_version),
+            revoked=self.revoked,
+        ))
         if self.revoked and self.revocation_reason:
             self['revocationReason'] = self.revocation_reason
 
@@ -583,12 +582,12 @@ class BadgeInstanceEvidence(cachemodel.CacheModel):
         return ret
 
     def get_json(self, obi_version=CURRENT_OBI_VERSION, include_context=False):
-        json = OrderedDict({
-            'type': 'Evidence',
-        })
+        json = OrderedDict()
         if include_context:
             obi_version, context_iri = get_obi_context(obi_version)
             json['@context'] = context_iri
+
+        json['type'] = 'Evidence'
         if self.evidence_url:
             json['id'] = self.evidence_url
         if self.narrative:
