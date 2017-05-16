@@ -18,4 +18,3 @@ def apispec_operation(*spec_args, **spec_kwargs):
 
     return decorator
 
-

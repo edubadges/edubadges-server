@@ -49,12 +49,6 @@ class IssuerList(BaseEntityListView):
     @apispec_operation(
         summary="Create a new Issuer",
         tags=["Issuer"],
-        paramters=[
-            {
-
-            }
-
-        ],
         responses={
             "200": {
                 'schema': {
