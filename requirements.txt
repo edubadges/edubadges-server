@@ -26,7 +26,6 @@ django-object-actions==0.8.2
 python-memcached==1.58
 
 djangorestframework==3.6.2
-django-rest-swagger==2.1.2
 
 # Django Allauth
 git+https://github.com/concentricsky/django-allauth.git@0.23.0-csky

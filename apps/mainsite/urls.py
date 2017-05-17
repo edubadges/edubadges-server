@@ -38,6 +38,7 @@ urlpatterns = [
     # Swagger Docs
     url(r'^docs/v1/', TemplateView.as_view(template_name="entity/swagger-docs.html"), kwargs={'version': 'v1'}),
     url(r'^docs/v2/', TemplateView.as_view(template_name="entity/swagger-docs.html"), kwargs={'version': 'v2'}),
+    url(r'^docs/?$', RedirectView.as_view(url='/docs/v2/', permanent=True)),
 
     # JSON-LD Context
     url(r'^json-ld/', include('badgrlog.urls')),
