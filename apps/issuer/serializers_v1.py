@@ -3,9 +3,9 @@ import uuid
 import os
 from django.apps import apps
 from django.core.urlresolvers import reverse
+from django.core.validators import URLValidator
 from django.utils.html import strip_tags
 from rest_framework import serializers
-from rest_framework.compat import URLValidator
 
 import utils
 from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserIdentifierFieldV1

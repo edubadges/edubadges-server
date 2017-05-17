@@ -7,7 +7,7 @@ from rest_framework import serializers
 import badgrlog
 from badgeuser.models import EmailAddressVariant
 from issuer.models import BadgeInstance, Issuer, BadgeClass
-from issuer.serializers import EvidenceItemSerializer
+from issuer.serializers_v1 import EvidenceItemSerializer
 from mainsite.drf_fields import Base64FileField
 from mainsite.serializers import StripTagsCharField, MarkdownCharField
 from mainsite.utils import OriginSetting, fetch_remote_file_to_storage
