@@ -7,8 +7,9 @@ from rest_framework import serializers
 import badgrlog
 from badgeuser.models import EmailAddressVariant
 from issuer.models import BadgeInstance, Issuer, BadgeClass
+from issuer.serializers import EvidenceItemSerializer
 from mainsite.drf_fields import Base64FileField
-from mainsite.serializers import StripTagsCharField
+from mainsite.serializers import StripTagsCharField, MarkdownCharField
 from mainsite.utils import OriginSetting, fetch_remote_file_to_storage
 from verifier import ComponentsSerializer
 from verifier.badge_check import BadgeCheck
@@ -28,6 +29,8 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
     assertion = serializers.CharField(required=False, write_only=True)
     recipient_identifier = serializers.CharField(required=False)
     acceptance = serializers.CharField(default='Accepted')
+    narrative = MarkdownCharField(required=False)
+    evidence_items = EvidenceItemSerializer(many=True, required=False)
 
     # Reinstantiation using fields from badge instance when returned by .create
     id = serializers.IntegerField(read_only=True)
