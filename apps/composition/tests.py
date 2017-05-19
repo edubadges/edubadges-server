@@ -852,4 +852,4 @@ class TestCollections(BadgrTestCase):
         )
 
         self.assertContains(response, "<h1>{}</h1>".format(self.local_badge_instance_1.cached_badgeclass.name))
-        self.assertContains(response, 'href="http://badger.openbadges.org/badge/assertion/dc8959d7639e64178ec24fb222f11d050528df74.json"')
+        self.assertContains(response, 'href="{}.json"'.format(self.local_badge_instance_1.get_public_url()))
