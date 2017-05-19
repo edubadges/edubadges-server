@@ -64,10 +64,15 @@ urlpatterns = [
     url(r'^v1/issuer/', include('issuer.v1_api_urls'), kwargs={'version': 'v1'}),
     url(r'^v1/earner', include('composition.api_urls')),
 
-    # pathways / recipients (needs to appear before /v2/)
+
+    # NOTE: pathway and recipient were written and deployed for beta testing at /v2/ before /v2/ was formalized
+    # they do not conform to new /v2/ conventions,  they need to appear before /v2/ to not collide
     url(r'^v2/issuers/(?P<issuer_slug>[^/]+)/pathways', include('pathway.api_urls'), kwargs={'version': 'v1'}),
-    url(r'^v1/', include('recipient.v1_api_urls'), kwargs={'version': 'v1'}),
-    url(r'^v2/', include('recipient.v2_api_urls'), kwargs={'version': 'v2'}),
+
+    # recipient was refactored to /v2/, but for now keep the old "v1" API registered at /v2/issuers/<issuer_slug/recipient-groups
+    url(r'^v2/', include('recipient.v1_api_urls'), kwargs={'version': 'v1'}),
+    # url(r'^v2/', include('recipient.v2_api_urls'), kwargs={'version': 'v2'}),
+
 
     # v2 API endpoints
     url(r'^v2/', include('issuer.v2_api_urls'), kwargs={'version': 'v2'}),

@@ -14,14 +14,14 @@ class RecipientApiTests(SetupIssuerHelper, BadgrTestCase):
         self.test_issuer = self.setup_issuer(owner=self.test_user)
 
     def create_group(self):
-        url = '/v1/issuers/{}/recipient-groups'.format(self.test_issuer.entity_id)
+        url = '/v2/issuers/{}/recipient-groups'.format(self.test_issuer.entity_id)
         return self.client.post(url, {
             'name': 'Group of Testing',
             'description': 'A group used for testing.'
         })
 
     def create_pathway(self):
-        return self.client.post('/v1/issuers/{}/pathways'.format(self.test_issuer.slug), {
+        return self.client.post('/v2/issuers/{}/pathways'.format(self.test_issuer.entity_id), {
             'name': 'Pathway of Testing',
             'description': 'A pathway used for testing.'
         })
@@ -36,12 +36,12 @@ class RecipientApiTests(SetupIssuerHelper, BadgrTestCase):
         self.assertIn('slug', response.data)
         group_slug = response.data.get('slug')
 
-        response = self.client.delete('/v1/issuers/{issuer}/recipient-groups/{group}'.format(
+        response = self.client.delete('/v2/issuers/{issuer}/recipient-groups/{group}'.format(
             issuer=self.test_issuer.entity_id,
             group=group_slug))
         self.assertEqual(response.status_code, 200)
 
-        get_response = self.client.get('/v1/issuers/{issuer}/recipient-groups/{group}'.format(
+        get_response = self.client.get('/v2/issuers/{issuer}/recipient-groups/{group}'.format(
             issuer=self.test_issuer.entity_id,
             group=group_slug))
         self.assertEqual(get_response.status_code, 404)
@@ -52,14 +52,14 @@ class RecipientApiTests(SetupIssuerHelper, BadgrTestCase):
         group_slug = response.data.get('slug')
 
         member_data = {'name': 'Test Member', 'recipient': 'testmemberuno@example.com'}
-        response = self.client.post('/v1/issuers/{issuer}/recipient-groups/{group}/members'.format(
+        response = self.client.post('/v2/issuers/{issuer}/recipient-groups/{group}/members'.format(
             issuer=self.test_issuer.entity_id,
             group=group_slug
         ), member_data)
 
         self.assertEqual(response.status_code, 201)
 
-        get_response = self.client.get('/v1/issuers/{issuer}/recipient-groups/{group}/members'.format(
+        get_response = self.client.get('/v2/issuers/{issuer}/recipient-groups/{group}/members'.format(
             issuer=self.test_issuer.entity_id,
             group=group_slug))
 
@@ -79,7 +79,7 @@ class RecipientApiTests(SetupIssuerHelper, BadgrTestCase):
                 {"name": "Tester Sammi", "email": "testersammi@example.com"}
             ]
         }"""
-        response = self.client.put('/v1/issuers/{issuer}/recipient-groups/{group}?embedRecipients=true'.format(
+        response = self.client.put('/v2/issuers/{issuer}/recipient-groups/{group}?embedRecipients=true'.format(
             issuer=self.test_issuer.entity_id,
             group=group_slug
         ), data, content_type='application/json')
@@ -92,7 +92,7 @@ class RecipientApiTests(SetupIssuerHelper, BadgrTestCase):
                 {"name": "Tester Sue", "email": "testersue@example.com"}
             ]
         }"""
-        response = self.client.put('/v1/issuers/{issuer}/recipient-groups/{group}?embedRecipients=true'.format(
+        response = self.client.put('/v2/issuers/{issuer}/recipient-groups/{group}?embedRecipients=true'.format(
             issuer=self.test_issuer.entity_id,
             group=group_slug
         ), data, content_type='application/json')
@@ -108,7 +108,7 @@ class RecipientApiTests(SetupIssuerHelper, BadgrTestCase):
                 {"name": "Tester Sammi", "email": "testersammi@example.com"}
             ]
         }"""
-        response = self.client.put('/v1/issuers/{issuer}/recipient-groups/{group}?embedRecipients=true'.format(
+        response = self.client.put('/v2/issuers/{issuer}/recipient-groups/{group}?embedRecipients=true'.format(
             issuer=self.test_issuer.entity_id,
             group=group_slug
         ), data, content_type='application/json')
@@ -117,17 +117,19 @@ class RecipientApiTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(len(group.cached_members()), 2)
         self.assertTrue(sammi in [m.recipient_profile for m in group.cached_members()])
 
-    def test_can_delete_member_from_group(self):
-        pass
-
     def test_subscribe_group_to_pathway(self):
-        _ = self.create_group()
+        group_response = self.create_group()
+        group_slug = group_response.data.get('slug')
         pathway_response = self.create_pathway()
 
         data = {
             'pathways': [pathway_response.data.get('@id')]
         }
-        response = self.client.put('/v1/issuers/{}/recipient-groups/group-of-testing'.format(self.test_issuer.slug), data)
+
+        response = self.client.put('/v2/issuers/{issuer}/recipient-groups/{group}'.format(
+            issuer=self.test_issuer.entity_id,
+            group=group_slug
+        ), data)
 
         self.assertEqual(response.status_code, 200)
         instance = RecipientGroup.objects.first()
@@ -135,18 +137,3 @@ class RecipientApiTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(response.data['pathways'][0]['@id'], instance.pathways.first().jsonld_id)
         self.assertEqual(response.data['pathways'][0]['slug'], instance.pathways.first().slug)
 
-    def test_list_group_pathway_subscriptions(self):
-        group = self.create_group()
-
-        pathway_response = self.create_pathway()
-
-        data = {
-            'pathways': [pathway_response.data.get('@id')]
-        }
-        response = self.client.put('/v1/issuers/{}/recipient-groups/group-of-testing'.format(self.test_issuer.slug), data)
-
-        self.assertEqual(response.status_code, 200)
-        instance = RecipientGroup.objects.first()
-        self.assertEqual(instance.pathways.count(), 1)
-        self.assertEqual(response.data['pathways'][0]['@id'], instance.pathways.first().jsonld_id)
-        self.assertEqual(response.data['pathways'][0]['slug'], instance.pathways.first().slug)

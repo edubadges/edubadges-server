@@ -195,7 +195,7 @@ class PathwayApiTests(SetupIssuerHelper, BadgrTestCase):
         def test_can_update_pathway_groups(self):
         """
         group_data = {'name': 'Group of Testing', 'description': 'A group used for testing.'}
-        response = self.client.post('/v1/issuers/{}/recipient-groups'.format(self.issuer.get('slug')), group_data)
+        response = self.client.post('/v2/issuers/{}/recipient-groups'.format(self.issuer.get('slug')), group_data)
 
         group_slug = response.data.get('slug')
         update_data = {
@@ -232,7 +232,7 @@ class PathwayCompletionTests(SetupIssuerHelper, BadgrTestCase):
         # Authenticate as an editor of the issuer in question
         self.client.force_authenticate(user=self.test_user)
         data = {'name': 'Group of Testing', 'description': 'A group used for testing.'}
-        return self.client.post('/v1/issuers/{issuer}/recipient-groups'.format(issuer=self.test_issuer.entity_id), data)
+        return self.client.post('/v2/issuers/{issuer}/recipient-groups'.format(issuer=self.test_issuer.entity_id), data)
 
     def create_pathway(self, creator):
         pathway_info = {'name': 'New Path', 'description': 'A new path through learning'}

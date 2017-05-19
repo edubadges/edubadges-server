@@ -142,8 +142,9 @@ class RecipientGroup(BaseAuditedModel, BaseVersionedEntity, basic_models.ActiveM
 
     @property
     def jsonld_id(self):
-        return OriginSetting.HTTP+reverse('v2_api_recipient_group_detail', kwargs={
-            'entity_id': self.entity_id
+        return OriginSetting.HTTP+reverse('v1_api_recipient_group_detail', kwargs={
+            'issuer_slug': self.cached_issuer.entity_id,
+            'slug': self.entity_id
         })
 
 

@@ -112,7 +112,7 @@ class RecipientGroupSerializerV1(LinkedDataEntitySerializer):
     )
     pathways = LinkedDataReferenceList(
         read_only=False, required=False, source='cached_pathways',
-        child=LinkedDataReferenceField(read_only=False, keys=['entity_id'], model=Pathway)
+        child=LinkedDataReferenceField(read_only=False, keys=['slug'], model=Pathway)
     )
 
     def to_representation(self, instance):
