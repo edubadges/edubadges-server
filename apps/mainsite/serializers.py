@@ -59,18 +59,22 @@ class LinkedDataReferenceField(serializers.Serializer):
     Includes their @id by default and any additional identifier keys that are the named
     properties on the instance.
     """
-    def __init__(self, keys=[], model=None, read_only=True, **kwargs):
+    def __init__(self, keys=[], model=None, read_only=True, field_names=None, **kwargs):
         kwargs.pop('many', None)
         super(LinkedDataReferenceField, self).__init__(read_only=read_only, **kwargs)
         self.included_keys = keys
         self.model = model
+        self.field_names = field_names
 
     def to_representation(self, obj):
         output = OrderedDict()
         output['@id'] = obj.jsonld_id
 
         for key in self.included_keys:
-            output[key] = getattr(obj, key, None)
+            field_name = key
+            if self.field_names is not None and key in self.field_names:
+                field_name = self.field_names.get(key)
+            output[key] = getattr(obj, field_name, None)
 
         return output
 

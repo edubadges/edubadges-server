@@ -31,12 +31,12 @@ class PathwaySerializer(serializers.Serializer):
     name = StripTagsCharField(max_length=254, required=False)
     description = StripTagsCharField(required=False)
     alignmentUrl = StripTagsCharField(required=False, allow_null=True)
-    issuer = LinkedDataReferenceField(keys=['slug'], model=Issuer, many=False, read_only=True)
+    issuer = LinkedDataReferenceField(keys=['slug'], model=Issuer, many=False, read_only=True, field_names={'slug': 'entity_id'})
     groups = LinkedDataReferenceList(
         required=False, read_only=False,
-        child=LinkedDataReferenceField(keys=['slug'], model=RecipientGroup, read_only=False)
+        child=LinkedDataReferenceField(keys=['slug'], model=RecipientGroup, read_only=False, field_names={'slug': 'entity_id'})
     )
-    completionBadge = LinkedDataReferenceField(['slug'], BadgeClass, read_only=True, required=False, allow_null=True, source='completion_badge')
+    completionBadge = LinkedDataReferenceField(['slug'], BadgeClass, read_only=True, required=False, allow_null=True, source='completion_badge', field_names={'slug': 'entity_id'})
     rootChildCount = serializers.IntegerField(read_only=True, source='cached_root_element.pathwayelement_set.count')
     elementCount = serializers.IntegerField(read_only=True, source='pathwayelement_set.count')
 
@@ -134,7 +134,8 @@ class PathwayElementSerializer(LinkedDataEntitySerializer):
         read_only=False,
         required=False,
         allow_null=True,
-        source='completion_badgeclass'
+        source='completion_badgeclass',
+        field_names={'slug': 'entity_id'}
     )
     requirements = JSONDictField(required=False, allow_null=True)
     children = serializers.ListField(required=False, allow_null=True, child=serializers.CharField(required=False, allow_null=False))
@@ -261,14 +262,14 @@ class PathwayElementCompletionSpecSerializer(serializers.Serializer):
 
 
 class RecipientCompletionSerializer(serializers.Serializer):
-    recipient = LinkedDataReferenceField(keys=['slug'], model=RecipientProfile)
+    recipient = LinkedDataReferenceField(keys=['slug'], model=RecipientProfile, field_names={'slug': 'entity_id'})
     completions = serializers.ListField(child=serializers.DictField())
 
 
 class PathwayElementCompletionSerializer(serializers.Serializer):
     pathway = LinkedDataReferenceField(keys=['slug'], model=Pathway, read_only=False)
-    recipients = LinkedDataReferenceField(keys=['slug'], model=RecipientProfile, many=True, read_only=False)
-    recipientGroups = LinkedDataReferenceField(keys=['slug'], model=RecipientGroup, many=True, read_only=False)
+    recipients = LinkedDataReferenceField(keys=['slug'], model=RecipientProfile, many=True, read_only=False, field_names={'slug': 'entity_id'})
+    recipientGroups = LinkedDataReferenceField(keys=['slug'], model=RecipientGroup, many=True, read_only=False, field_names={'slug': 'entity_id'})
     recipientCompletions = RecipientCompletionSerializer(many=True)
 
     def to_representation(self, data):

@@ -65,7 +65,7 @@ class Issuer(ResizeUploadedImage, ScrubUploadedSvgImage, BaseAuditedModel, BaseV
     old_json = JSONField()
     original_json = models.TextField(blank=True, null=True, default=None)
 
-    cached = SlugOrJsonIdCacheModelManager()
+    cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
 
     def publish(self, *args, **kwargs):
         super(Issuer, self).publish(*args, **kwargs)
@@ -270,7 +270,7 @@ class BadgeClass(ResizeUploadedImage, ScrubUploadedSvgImage, BaseAuditedModel, B
     old_json = JSONField()
     original_json = models.TextField(blank=True, null=True, default=None)
 
-    cached = SlugOrJsonIdCacheModelManager()
+    cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
 
     class Meta:
         verbose_name_plural = "Badge classes"
@@ -287,7 +287,7 @@ class BadgeClass(ResizeUploadedImage, ScrubUploadedSvgImage, BaseAuditedModel, B
             raise ProtectedError("BadgeClass may only be deleted if all PathwayElementBadge have been removed.", self)
 
         if len(self.cached_completion_elements()) > 0:
-            return ProtectedError("Badge could not be deleted. It is being used as a pathway completion badge.", self)
+            raise ProtectedError("Badge could not be deleted. It is being used as a pathway completion badge.", self)
 
         issuer = self.issuer
         super(BadgeClass, self).delete(*args, **kwargs)

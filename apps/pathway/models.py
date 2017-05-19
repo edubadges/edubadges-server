@@ -41,7 +41,7 @@ class Pathway(basic_models.ActiveModel):
     @property
     def jsonld_id(self):
         return OriginSetting.HTTP+reverse('pathway_detail', kwargs={
-            'issuer_slug': self.cached_issuer.slug,
+            'issuer_slug': self.cached_issuer.entity_id,
             'pathway_slug': self.slug
         })
 
@@ -203,7 +203,7 @@ class PathwayElement(basic_models.DefaultModel):
         # avoiding a call to django.urlresolvers.reverse() here to improve tree performance
         if not hasattr(self, '_jsonld_id'):
             self._jsonld_id = OriginSetting.HTTP+PathwayElement.PathwayElementUrl.format(
-                issuer_slug=self.cached_pathway.cached_issuer.slug,
+                issuer_slug=self.cached_pathway.cached_issuer.entity_id,
                 pathway_slug=self.cached_pathway.slug,
                 element_slug=self.slug)
         return self._jsonld_id
@@ -256,12 +256,7 @@ class PathwayElement(basic_models.DefaultModel):
             order = 1
             for badge_id in self.completion_requirements.get('badges'):
                 try:
-                    r = resolve(badge_id.replace(OriginSetting.HTTP,''))
-                except Resolver404:
-                    raise ValidationError("Invalid badge id: {}".format(badge_id))
-                badge_slug = r.kwargs.get('slug')
-                try:
-                    badgeclass = BadgeClass.cached.get(slug=badge_slug)
+                    badgeclass = BadgeClass.cached.get_by_slug_or_id(badge_id)
                 except BadgeClass.DoesNotExist:
                     raise ValidationError("Invalid badge id: {}".format(badge_id))
 

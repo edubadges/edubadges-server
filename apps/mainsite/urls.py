@@ -60,18 +60,18 @@ urlpatterns = [
     url(r'^accounts/logout/$', contrib_auth_views.logout, {'next_page': 'login'}, name='logout'),
 
     # v1 API endpoints
-    url(r'^v1/issuer/', include('issuer.v1_api_urls'), kwargs={'version': 'v1'}),
-
-    url(r'^v1/issuers/(?P<slug>[^/]+)/pathways', include('pathway.api_urls'), kwargs={'version': 'v1'}),
-    url(r'^v1/', include('recipient.v1_api_urls'), kwargs={'version': 'v1'}),
-
     url(r'^v1/user/', include('badgeuser.v1_api_urls'), kwargs={'version': 'v1'}),
+    url(r'^v1/issuer/', include('issuer.v1_api_urls'), kwargs={'version': 'v1'}),
     url(r'^v1/earner', include('composition.api_urls')),
+
+    # pathways / recipients (needs to appear before /v2/)
+    url(r'^v2/issuers/(?P<issuer_slug>[^/]+)/pathways', include('pathway.api_urls'), kwargs={'version': 'v1'}),
+    url(r'^v1/', include('recipient.v1_api_urls'), kwargs={'version': 'v1'}),
+    url(r'^v2/', include('recipient.v2_api_urls'), kwargs={'version': 'v2'}),
 
     # v2 API endpoints
     url(r'^v2/', include('issuer.v2_api_urls'), kwargs={'version': 'v2'}),
     url(r'^v2/', include('badgeuser.v2_api_urls'), kwargs={'version': 'v2'}),
-    url(r'^v2/', include('recipient.v2_api_urls'), kwargs={'version': 'v2'}),
 
 
 ]

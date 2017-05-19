@@ -20,7 +20,7 @@ class RecipientProfile(BaseVersionedEntity, basic_models.DefaultModel):
     # slug has been deprecated for now, but preserve existing values
     slug = models.CharField(max_length=254, blank=True, null=True, default=None)
 
-    cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id')
+    cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
 
     def __unicode__(self):
         if self.display_name:
