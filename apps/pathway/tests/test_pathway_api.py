@@ -410,8 +410,7 @@ class PathwayCompletionTests(SetupIssuerHelper, BadgrTestCase):
         self.assertTrue(completions[0]['completed'])
 
     def test_completion_badge_awarding(self):
-        # pathway = self.build_pathway(creator=self.test_user)
-        pathway = self.build_single_element_pathway(creator=self.test_user)
+        pathway = self.build_pathway(creator=self.test_user)
         completed_badgeclass = self.setup_badgeclass(issuer=self.test_issuer)
         pathway.root_element.completion_badgeclass = completed_badgeclass
         pathway.root_element.save()

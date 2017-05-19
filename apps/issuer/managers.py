@@ -43,7 +43,7 @@ class BadgeInstanceManager(models.Manager):
                     new_evidence.save()
 
         if check_completions:
-            award_badges_for_pathway_completion.delay(new_instance.slug)
+            award_badges_for_pathway_completion.delay(badgeinstance_pk=new_instance.pk)
 
         if notify:
             new_instance.notify_earner(badgr_app=badgr_app)
