@@ -501,7 +501,7 @@ class BadgeInstance(cachemodel.CacheModel):
             revoked=self.revoked,
         ))
         if self.revoked and self.revocation_reason:
-            self['revocationReason'] = self.revocation_reason
+            json['revocationReason'] = self.revocation_reason
 
         if obi_version == '1_1':
             json["uid"] = self.slug
