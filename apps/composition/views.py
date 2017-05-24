@@ -29,15 +29,16 @@ class SharedBadgeView(JSONComponentView):
 
     def get_renderer_context(self, **kwargs):
         context = super(SharedBadgeView, self).get_renderer_context(**kwargs)
-        if isinstance(self.badge, LocalBadgeInstance):
-            context['badgeclass_image_png'] = "{}{}?type=png".format(OriginSetting.HTTP,reverse('localbadgeinstance_image', kwargs={'slug': self.badge.slug}))
-        elif isinstance(self.badge, BadgeInstance):
-            context['badgeclass_image_png'] = "{}{}?type=png".format(OriginSetting.HTTP,reverse('badgeclass_image', kwargs={'slug': self.badge.cached_badgeclass.slug}))
-        context.update({
-            'badge_instance': self.badge,
-            'badge_class': self.badge.cached_badgeclass,
-            'issuer': self.badge.cached_issuer,
-        })
+        if hasattr(self, 'badge'):
+            if isinstance(self.badge, LocalBadgeInstance):
+                context['badgeclass_image_png'] = "{}{}?type=png".format(OriginSetting.HTTP,reverse('localbadgeinstance_image', kwargs={'slug': self.badge.slug}))
+            elif isinstance(self.badge, BadgeInstance):
+                context['badgeclass_image_png'] = "{}{}?type=png".format(OriginSetting.HTTP,reverse('badgeclass_image', kwargs={'slug': self.badge.cached_badgeclass.slug}))
+            context.update({
+                'badge_instance': self.badge,
+                'badge_class': self.badge.cached_badgeclass,
+                'issuer': self.badge.cached_issuer,
+            })
         return context
 
     def get(self, request, badge_id, format='html'):
