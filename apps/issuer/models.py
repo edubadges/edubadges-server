@@ -375,7 +375,6 @@ class BadgeInstance(cachemodel.CacheModel):
             imageFile = default_storage.open(self.badgeclass.image.file.name)
             self.image = bake(imageFile, json.dumps(self.json, indent=2))
 
-            self.image.open()
 
             try:
                 from badgeuser.models import CachedEmailAddress
