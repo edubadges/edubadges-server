@@ -147,3 +147,25 @@ class IsIssuerStaff(IsStaff):
     """
     def has_object_permission(self, request, view, recipient_group):
         return super(IsIssuerStaff, self).has_object_permission(request, view, recipient_group.cached_issuer)
+
+
+class AuditedModelOwner(permissions.BasePermission):
+    """
+    Request user matches .created_by
+    ---
+    model: BaseAuditedModel
+    """
+    def has_object_permission(self, request, view, obj):
+        created_by_id = getattr(obj, 'created_by_id', None)
+        return created_by_id and request.user.id == created_by_id
+
+
+class VerifiedEmailMatchesRecipientIdentifier(permissions.BasePermission):
+    """
+    one of request user's verified emails matches obj.recipient_identifier
+    ---
+    model: BadgeInstance
+    """
+    def has_object_permission(self, request, view, obj):
+        recipient_identifier = getattr(obj, 'recipient_identifier', None)
+        return recipient_identifier and recipient_identifier in request.user.all_recipient_identifiers

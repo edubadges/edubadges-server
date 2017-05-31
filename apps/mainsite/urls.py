@@ -77,6 +77,7 @@ urlpatterns = [
     # v2 API endpoints
     url(r'^v2/', include('issuer.v2_api_urls'), kwargs={'version': 'v2'}),
     url(r'^v2/', include('badgeuser.v2_api_urls'), kwargs={'version': 'v2'}),
+    url(r'^v2/backpack/', include('backpack.v2_api_urls'), kwargs={'version': 'v2'}),
 
 
 ]

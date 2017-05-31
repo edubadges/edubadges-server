@@ -16,7 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework.authtoken.models import Token
 
 from entity.models import BaseVersionedEntity
-from issuer.models import Issuer
+from issuer.models import Issuer, BadgeInstance
 from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager
 
 
@@ -262,6 +262,10 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
 
     def cached_badgeclasses(self):
         return chain.from_iterable(issuer.cached_badgeclasses() for issuer in self.cached_issuers())
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_badgeinstances(self):
+        return BadgeInstance.objects.filter(recipient_identifier__in=self.all_recipient_identifiers)
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_token(self):
