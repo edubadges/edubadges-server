@@ -243,8 +243,8 @@ class BadgeClassSerializer(serializers.Serializer):
 
 
 class EvidenceItemSerializer(serializers.Serializer):
-    evidence_url = serializers.URLField(max_length=1024, required=False)
-    narrative = MarkdownCharField(required=False)
+    evidence_url = serializers.URLField(max_length=1024, required=False, allow_blank=True)
+    narrative = MarkdownCharField(required=False, allow_blank=True)
 
     def validate(self, attrs):
         if not (attrs.get('evidence_url', None) or attrs.get('narrative', None)):
