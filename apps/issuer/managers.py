@@ -9,8 +9,8 @@ from pathway.tasks import award_badges_for_pathway_completion
 class BadgeInstanceManager(models.Manager):
     def create_badgeinstance(
             self, badgeclass, recipient_id, evidence=None,
-            notify=False, check_completions=True, created_by=None,
-            allow_uppercase=False, badgr_app=None,
+            notify=False, check_completions=True,
+            allow_uppercase=False, badgr_app=None, **kwargs
     ):
         """
         Convenience method to award a badge to a recipient_id
@@ -25,8 +25,10 @@ class BadgeInstanceManager(models.Manager):
         recipient_identifier = recipient_id if allow_uppercase else recipient_id.lower()
 
         new_instance = self.model(
-            badgeclass=badgeclass, issuer=badgeclass.issuer,
+            badgeclass=badgeclass,
+            issuer=badgeclass.issuer,
             recipient_identifier=recipient_identifier,
+            **kwargs
         )
 
         with transaction.atomic():

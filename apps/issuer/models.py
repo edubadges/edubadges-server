@@ -44,11 +44,21 @@ class BaseAuditedModel(cachemodel.CacheModel):
         return BadgeUser.cached.get(id=self.created_by_id)
 
 
-class Issuer(ResizeUploadedImage, ScrubUploadedSvgImage, BaseAuditedModel, BaseVersionedEntity):
-    entity_class_name = 'Issuer'
-
+class BaseOpenBadgeObjectModel(cachemodel.CacheModel):
     source = models.CharField(max_length=254, default='local')
     source_url = models.CharField(max_length=254, blank=True, null=True, default=None)
+
+    class Meta:
+        abstract = True
+
+
+class Issuer(ResizeUploadedImage,
+             ScrubUploadedSvgImage,
+             BaseAuditedModel,
+             BaseVersionedEntity,
+             BaseOpenBadgeObjectModel):
+    entity_class_name = 'Issuer'
+
 
     staff = models.ManyToManyField(AUTH_USER_MODEL, through='IssuerStaff')
 
@@ -249,11 +259,13 @@ class IssuerStaff(cachemodel.CacheModel):
         return Issuer.cached.get(pk=self.issuer_id)
 
 
-class BadgeClass(ResizeUploadedImage, ScrubUploadedSvgImage, BaseAuditedModel, BaseVersionedEntity):
+class BadgeClass(ResizeUploadedImage,
+                 ScrubUploadedSvgImage,
+                 BaseAuditedModel,
+                 BaseVersionedEntity,
+                 BaseOpenBadgeObjectModel):
     entity_class_name = 'BadgeClass'
 
-    source = models.CharField(max_length=254, default='local')
-    source_url = models.CharField(max_length=254, blank=True, null=True, default=None)
     issuer = models.ForeignKey(Issuer, blank=False, null=False, on_delete=models.CASCADE, related_name="badgeclasses")
 
     # slug has been deprecated for now, but preserve existing values
@@ -373,7 +385,9 @@ class BadgeClass(ResizeUploadedImage, ScrubUploadedSvgImage, BaseAuditedModel, B
         return self.get_json()
 
 
-class BadgeInstance(BaseAuditedModel, BaseVersionedEntity):
+class BadgeInstance(BaseAuditedModel,
+                    BaseVersionedEntity,
+                    BaseOpenBadgeObjectModel):
     entity_class_name = 'Assertion'
 
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.CASCADE, related_name='badgeinstances')
@@ -507,7 +521,7 @@ class BadgeInstance(BaseAuditedModel, BaseVersionedEntity):
             try:
                 from badgebook.models import BadgeObjectiveAward, LmsCourseInfo
                 try:
-                    award = BadgeObjectiveAward.cached.get(badge_instance_id=assertion.id)
+                    award = BadgeObjectiveAward.cached.get(badge_instance_id=self.id)
                 except BadgeObjectiveAward.DoesNotExist:
                     pass
                 else:

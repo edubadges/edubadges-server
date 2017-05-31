@@ -37,10 +37,13 @@ INSTALLED_APPS = [
     'mainsite',
     'entity',
     'issuer',
-    'composition',
-    'verifier',
+    'backpack',
     'pathway',
     'recipient',
+
+    # apps to be deprecated
+    'composition',
+    'verifier',
 ]
 
 MIDDLEWARE_CLASSES = [
