@@ -491,6 +491,10 @@ class BadgeClassTests(APITestCase):
             self.assertNotIn('onload', image_content)
             self.assertNotIn('<script>', image_content)
 
+            # make sure we can issue the badge
+            badgeinstance = bc.issue(recipient_id='fakerecipient@email.test')
+            self.assertIsNotNone(badgeinstance)
+
     def test_create_criteriatext_badgeclass_for_issuer_authenticated(self):
         """
         Ensure that when criteria text is submitted instead of a URL, the criteria address
