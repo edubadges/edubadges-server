@@ -116,8 +116,8 @@ class BadgeClassSerializerV1(serializers.Serializer):
     image = ValidImageField(required=False)
     slug = StripTagsCharField(max_length=255, read_only=True, source='entity_id')
     criteria = MarkdownCharField(allow_blank=True, required=False, write_only=True)
-    criteria_text = MarkdownCharField(required=False, allow_null=True)
-    criteria_url = StripTagsCharField(required=False, validators=[URLValidator()])
+    criteria_text = MarkdownCharField(required=False, allow_null=True, allow_blank=True)
+    criteria_url = StripTagsCharField(required=False, allow_blank=True, validators=[URLValidator()])
     recipient_count = serializers.IntegerField(required=False, read_only=True)
     pathway_element_count = serializers.IntegerField(required=False, read_only=True)
     description = StripTagsCharField(max_length=16384, required=True)
@@ -133,6 +133,18 @@ class BadgeClassSerializerV1(serializers.Serializer):
             img_name, img_ext = os.path.splitext(image.name)
             image.name = 'issuer_badgeclass_' + str(uuid.uuid4()) + img_ext
         return image
+
+    def validate_criteria_text(self, criteria_text):
+        if criteria_text is not None and criteria_text != '':
+            return criteria_text
+        else:
+            return None
+
+    def validate_criteria_url(self, criteria_url):
+        if criteria_url is not None and criteria_url != '':
+            return criteria_url
+        else:
+            return None
 
     def update(self, instance, validated_data):
 
@@ -157,8 +169,12 @@ class BadgeClassSerializerV1(serializers.Serializer):
         return instance
 
     def validate(self, data):
-
         if 'criteria' in data:
+            if 'criteria_url' in data or 'criteria_text' in data:
+                raise serializers.ValidationError(
+                    "The criteria field is mutually-exclusive with the criteria_url and criteria_text fields"
+                )
+
             if utils.is_probable_url(data.get('criteria')):
                 data['criteria_url'] = data.pop('criteria')
             elif not isinstance(data.get('criteria'), (str, unicode)):
@@ -167,6 +183,12 @@ class BadgeClassSerializerV1(serializers.Serializer):
                 )
             else:
                 data['criteria_text'] = data.pop('criteria')
+
+        else:
+            if data.get('criteria_text', None) is None and data.get('criteria_url', None) is None:
+                raise serializers.ValidationError(
+                    "One or both of the criteria_text and criteria_url fields must be provided"
+                )
 
         return data
 

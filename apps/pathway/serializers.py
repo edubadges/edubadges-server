@@ -37,8 +37,8 @@ class PathwaySerializer(serializers.Serializer):
         child=LinkedDataReferenceField(keys=['slug'], model=RecipientGroup, read_only=False, field_names={'slug': 'entity_id'})
     )
     completionBadge = LinkedDataReferenceField(['slug'], BadgeClass, read_only=True, required=False, allow_null=True, source='completion_badge', field_names={'slug': 'entity_id'})
-    rootChildCount = serializers.IntegerField(read_only=True, source='cached_root_element.pathwayelement_set.count')
-    elementCount = serializers.IntegerField(read_only=True, source='pathwayelement_set.count')
+    rootChildCount = serializers.IntegerField(read_only=True, source='cached_root_element.cached_children.count')
+    elementCount = serializers.IntegerField(read_only=True, source='cached_elements.count')
 
     def to_representation(self, instance):
         issuer_slug = instance.cached_issuer.slug
