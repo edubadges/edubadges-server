@@ -13,7 +13,7 @@ from composition.utils import get_badge_by_identifier
 from issuer.models import BadgeInstance
 from issuer.public_api import JSONComponentView
 from issuer.renderers import BadgeInstanceHTMLRenderer
-from issuer.utils import CURRENT_OBI_CONTEXT_IRI
+from issuer.utils import CURRENT_OBI_CONTEXT_IRI, CURRENT_OBI_VERSION
 from mainsite.utils import OriginSetting
 
 
@@ -39,6 +39,7 @@ class SharedBadgeView(JSONComponentView):
                 'badge_class': self.badge.cached_badgeclass,
                 'issuer': self.badge.cached_issuer,
             })
+        context['obi_version'] = self._get_request_obi_version(self.request)
         return context
 
     def get(self, request, badge_id, format='html'):
@@ -56,7 +57,11 @@ class SharedBadgeView(JSONComponentView):
             }
             return Response(revocation_info, status=status.HTTP_410_GONE)
 
-        return Response(self.badge.json)
+        return Response(self.badge.get_json(obi_version=self._get_request_obi_version(request)))
+
+    @staticmethod
+    def _get_request_obi_version(request):
+        return request.query_params.get('v', CURRENT_OBI_VERSION)
 
 
 class CollectionDetailView(DetailView):
