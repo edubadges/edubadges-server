@@ -32,9 +32,26 @@
     <header class="wrap wrap-light l-containerhorizontal l-heading">
 
 	    <div class="heading">
-		    <div class="heading-x-imageLarge">
-			    <img src="{{badge_instance_image_url}}" alt="{{badge_class.name}} image">
-		    </div>
+
+            <div>
+                <div class="heading-x-imageLarge">
+                    <img src="{{badge_instance_image_url}}" alt="{{badge_class.name}}">
+                </div>
+                <aside class="heading-x-aside">
+                    <div>
+                        <div class="new">NEW!</div> <strong>Versions</strong>
+                    </div>
+                    {%  if obi_version == "1_1" %}
+                        <p>
+                            Badgr is testing the new version of Open Badges.
+                        </p>
+                        <p>
+                            Badges accessed or downloaded in 2.0 format may not yet be accepted everywhere Open Badges are used.
+                        </p>
+                    {% endif %}
+                    <a href="{{alt_share_url}}"><strong>View {{alt_version_name}} Version</strong></a>
+                </aside>
+            </div>
 		    <div class="heading-x-text">
 
 			    <h1>{{ badge_class.name }}</h1>
@@ -69,7 +86,7 @@
 				    <a class="button button-primaryghost" href="{{ badge_instance.json.evidence }}" target="_blank">View evidence</a>
 				    {% endif %}
 			      {% if badge_instance_public_url %}
-				    <a class="button button-primaryghost" href="{{ badge_instance_public_url }}.json" target="_blank">View JSON</a>
+				    <a class="button button-primaryghost" href="{{ badge_instance_public_url }}" target="_blank">View JSON</a>
 				    {% endif %}
 			    </div>
 
