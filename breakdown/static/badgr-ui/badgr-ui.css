@@ -1,3 +1,51 @@
+/* http://meyerweb.com/eric/tools/css/reset/
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+body {
+  line-height: 1;
+}
+ol, ul {
+  list-style: none;
+}
+blockquote, q {
+  quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
 @charset "UTF-8";
 @font-face {
   font-family: 'Open Sans';
@@ -2864,6 +2912,7 @@ app {
   .markdowneditor .markdowneditor-x-editor textarea {
     min-height: 144px; }
   .markdowneditor .markdowneditor-x-preview {
+    padding: 8px;
     border: 1px solid rgba(5, 1, 44, 0.38);
     border-radius: 4px; }
   .markdowneditor .markdowneditor-x-tabbar {
@@ -4460,7 +4509,8 @@ Markup:
   display: -ms-flexbox;
   display: flex; }
   .select span {
-    cursor: pointer; }
+    cursor: pointer;
+    pointer-events: none; }
   .select select {
     -webkit-appearance: none;
        -moz-appearance: none;
@@ -5207,7 +5257,9 @@ Default - Not used
     -webkit-box-sizing: border-box;
             box-sizing: border-box;
     padding: 16px;
-    position: relative; }
+    position: relative;
+    font-size: 16px;
+    line-height: 1.35; }
     .tooltip .tooltip-x-content > button {
       background: url(b3b261120268146cbac56725e34d6ed1.svg) center center no-repeat;
       color: transparent;
@@ -5221,6 +5273,8 @@ Default - Not used
           -ms-user-select: none;
               user-select: none;
       width: 24px; }
+    .tooltip .tooltip-x-content li {
+      margin: 4px 0; }
   .tooltip header {
     display: -webkit-box;
     display: -ms-flexbox;
@@ -5286,26 +5340,37 @@ Default - Not used
   .tooltip.tooltip-is-active {
     opacity: 1;
     pointer-events: auto; }
+  .tooltip.tether-target-attached-bottom .tooltip-x-arrow {
+    top: 0;
+    left: 50%; }
   .tooltip.tether-target-attached-left .tooltip-x-arrow {
-    bottom: 0;
-    right: 0; }
-  .tooltip .tooltip-x-arrow, .tooltip.tether-target-attached-right .tooltip-x-arrow {
     bottom: 0px;
-    height: 24px;
-    left: -13px;
-    -webkit-transform: translateX(-50%);
-            transform: translateX(-50%);
-    width: 15px; }
-    .tooltip .tooltip-x-arrow::after, .tooltip.tether-target-attached-right .tooltip-x-arrow::after {
-      bottom: 3px;
+    height: 50px;
+    width: 32px;
+    right: -46px; }
+    .tooltip.tether-target-attached-left .tooltip-x-arrow::after {
+      top: 25px;
+      height: 25px;
+      width: 25px;
+      left: -50%;
+      -webkit-transform: rotate(-45deg);
+              transform: rotate(-45deg);
+      -webkit-transform-origin: top left;
+              transform-origin: top left; }
+  .tooltip.tether-target-attached-right .tooltip-x-arrow {
+    bottom: 0px;
+    height: 50px;
+    width: 30px;
+    left: -15px; }
+    .tooltip.tether-target-attached-right .tooltip-x-arrow::after {
+      top: 25px;
+      height: 25px;
+      width: 25px;
       left: 50%;
       -webkit-transform: rotate(-45deg);
               transform: rotate(-45deg);
       -webkit-transform-origin: top left;
               transform-origin: top left; }
-  .tooltip .tooltip-x-arrow, .tooltip.tether-target-attached-bottom .tooltip-x-arrow {
-    top: 0;
-    left: 50%; }
 
 .tooltiptrigger {
   display: inline-block;
@@ -5431,4 +5496,4 @@ Styleguide 4.0
 .o-canvas {
   background-color: #fff; }
 
-/*# sourceMappingURL=theme-default.a5908ddf49aa1f39eb14.css.map*/
+/*# sourceMappingURL=theme-default.4626a69e56d2d1b04a9c.css.map*/
