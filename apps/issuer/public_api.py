@@ -33,14 +33,13 @@ class JSONComponentView(APIView):
         pass
 
     def get(self, request, slug, format='html'):
-        obi_version = request.query_params.get('v', utils.CURRENT_OBI_VERSION)
         try:
             self.current_object = self.model.cached.get(slug=slug)
         except self.model.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         else:
             self.log(self.current_object)
-            return Response(self.current_object.get_json(obi_version=obi_version))
+            return Response(self.current_object.get_json(obi_version=self._get_request_obi_version(request)))
 
     def get_renderers(self):
         """
@@ -57,6 +56,10 @@ class JSONComponentView(APIView):
 
     def get_html_renderer_class(self):
         return self.html_renderer_class
+
+    @staticmethod
+    def _get_request_obi_version(request):
+        return request.query_params.get('v', utils.CURRENT_OBI_VERSION)
 
 
 class ComponentPropertyDetailView(APIView):
@@ -221,6 +224,8 @@ class BadgeInstanceJson(JSONComponentView):
 
     def get_renderer_context(self, **kwargs):
         context = super(BadgeInstanceJson, self).get_renderer_context()
+        context['obi_version'] = self._get_request_obi_version(self.request)
+
         if getattr(self, 'current_object', None):
             context['badge_instance'] = self.current_object
             context['badge_class'] = self.current_object.cached_badgeclass
@@ -240,11 +245,8 @@ class BadgeInstanceJson(JSONComponentView):
             return Response("Requested assertion not found.", status=status.HTTP_404_NOT_FOUND)
         else:
             if current_object.revoked is False:
-
-                obi_version = request.query_params.get('v', utils.CURRENT_OBI_VERSION)
-
                 logger.event(badgrlog.BadgeAssertionCheckedEvent(current_object, request))
-                return Response(current_object.get_json(obi_version=obi_version))
+                return Response(current_object.get_json(obi_version=self._get_request_obi_version(request)))
             else:
                 # TODO update terms based on final accepted terms in response to
                 # https://github.com/openbadges/openbadges-specification/issues/33
