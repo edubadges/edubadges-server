@@ -38,10 +38,10 @@ class BadgeInstanceHTMLRenderer(BrowsableAPIRenderer):
         context['obscured_recipient'] = utils.obscure_email_address(recipient_email)
 
         if obi_version == '1_1':
-            context['alt_share_url'] = '{}?{}'.format(context['request'].path, urllib.urlencode({'v': '2_0'}))
+            context['alt_url'] = '{}?{}'.format(context['request'].path, urllib.urlencode({'v': '2_0'}))
             context['alt_version_name'] = '2.0'
         elif obi_version == '2_0':
-            context['alt_share_url'] = context['request'].path
+            context['alt_url'] = context['request'].path
             context['alt_version_name'] = '1.1'
 
         return context
