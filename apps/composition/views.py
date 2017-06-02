@@ -59,10 +59,6 @@ class SharedBadgeView(JSONComponentView):
 
         return Response(self.badge.get_json(obi_version=self._get_request_obi_version(request)))
 
-    @staticmethod
-    def _get_request_obi_version(request):
-        return request.query_params.get('v', CURRENT_OBI_VERSION)
-
 
 class CollectionDetailView(DetailView):
     template_name = 'public/shared_collection.html'
