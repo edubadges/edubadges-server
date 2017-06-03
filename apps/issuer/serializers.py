@@ -261,7 +261,7 @@ class BadgeInstanceSerializer(serializers.Serializer):
     recipient_identifier = serializers.EmailField(max_length=1024, required=False)
     allow_uppercase = serializers.BooleanField(default=False, required=False, write_only=True)
     evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
-    narrative = MarkdownCharField(required=False)
+    narrative = MarkdownCharField(required=False, allow_blank=True)
     evidence_items = EvidenceItemSerializer(many=True, required=False)
 
     revoked = HumanReadableBooleanField(read_only=True)
@@ -274,6 +274,12 @@ class BadgeInstanceSerializer(serializers.Serializer):
             data['recipient_identifier'] = data.get('email')
 
         return data
+
+    def validate_narrative(self, data):
+        if data is None or data == "":
+            return None
+        else:
+            return data
 
     def to_representation(self, instance):
         # if self.context.get('extended_json'):
@@ -320,12 +326,13 @@ class BadgeInstanceSerializer(serializers.Serializer):
             evidence_items.append({'evidence_url': evidence_url})
 
         # ob2 evidence items
-        submitted_items = self.validated_data.get('evidence_items')
+        submitted_items = validated_data.get('evidence_items')
         if submitted_items:
             evidence_items.extend(submitted_items)
 
         return self.context.get('badgeclass').issue(
             recipient_id=validated_data.get('recipient_identifier'),
+            narrative=validated_data.get('narrative'),
             evidence=evidence_items,
             notify=validated_data.get('create_notification'),
             created_by=self.context.get('request').user,

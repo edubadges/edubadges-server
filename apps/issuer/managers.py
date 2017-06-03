@@ -8,7 +8,7 @@ from pathway.tasks import award_badges_for_pathway_completion
 
 class BadgeInstanceManager(models.Manager):
     def create_badgeinstance(
-            self, badgeclass, recipient_id, evidence=None,
+            self, badgeclass, recipient_id, narrative=None, evidence=None,
             notify=False, check_completions=True, created_by=None,
             allow_uppercase=False, badgr_app=None,
     ):
@@ -26,7 +26,7 @@ class BadgeInstanceManager(models.Manager):
 
         new_instance = self.model(
             badgeclass=badgeclass, issuer=badgeclass.issuer,
-            recipient_identifier=recipient_identifier,
+            recipient_identifier=recipient_identifier, narrative=narrative
         )
 
         new_instance.slug = new_instance.get_new_slug()
