@@ -27,10 +27,10 @@ class LocalBadgeInstanceUploadSerializer(serializers.Serializer):
     image = Base64FileField(required=False, write_only=True)
     url = serializers.URLField(required=False, write_only=True)
     assertion = serializers.CharField(required=False, write_only=True)
-    recipient_identifier = serializers.CharField(required=False)
+    recipient_identifier = serializers.CharField(required=False, read_only=True)
     acceptance = serializers.CharField(default='Accepted')
-    narrative = MarkdownCharField(required=False)
-    evidence_items = EvidenceItemSerializer(many=True, required=False)
+    narrative = MarkdownCharField(required=False, read_only=True)
+    evidence_items = EvidenceItemSerializer(many=True, required=False, read_only=True)
 
     # Reinstantiation using fields from badge instance when returned by .create
     id = serializers.IntegerField(read_only=True)
