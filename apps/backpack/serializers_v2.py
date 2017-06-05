@@ -33,7 +33,7 @@ class BackpackCollectionSerializerV2(DetailSerializerV2):
     description = MarkdownCharField(blank=True, required=False)
     share_url = serializers.URLField(source='public_url', read_only=True)
 
-    assertions = EntityRelatedFieldV2(many=True, source='cached_badgeinstances', required=False, queryset=BadgeInstance.cached)
+    assertions = EntityRelatedFieldV2(many=True, source='badge_items', required=False, queryset=BadgeInstance.cached)
 
     class Meta(DetailSerializerV2.Meta):
         model = BackpackCollection
