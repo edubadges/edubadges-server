@@ -53,6 +53,7 @@ class ScrubUploadedSvgImage(object):
     def save(self, *args, **kwargs):
         if self.pk is None and self.image and verify_svg(self.image.file):
             self.image.file.seek(0)
+            ET.register_namespace("", self.SVG_NAMESPACE)
             tree = ET.parse(self.image.file)
             root = tree.getroot()
 
