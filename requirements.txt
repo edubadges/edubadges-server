@@ -88,3 +88,6 @@ backports.csv==1.0.4
 
 # EncryptedCursorPagination dependencies
 more-itertools==2.5.0
+
+
+git+https://github.com/openbadges/badgecheck.git@8d154f6281031f9e426d080efcd407b83968d2ad

@@ -99,6 +99,10 @@ def verify_svg(fileobj):
 
 
 def fetch_remote_file_to_storage(remote_url, upload_to=''):
+    """
+    Fetches a remote url, and stores it in DefaultStorage
+    :return: (status_code, new_storage_name)
+    """
     store = DefaultStorage()
     r = requests.get(remote_url, stream=True)
     if r.status_code == 200:
@@ -110,7 +114,7 @@ def fetch_remote_file_to_storage(remote_url, upload_to=''):
         if not store.exists(storage_name):
             buf = StringIO.StringIO(r.content)
             store.save(storage_name, buf)
-            return r.status_code, storage_name
+        return r.status_code, storage_name
     return r.status_code, None
 
 

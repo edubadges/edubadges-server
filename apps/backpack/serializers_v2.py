@@ -1,12 +1,16 @@
 # encoding: utf-8
 from __future__ import unicode_literals
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 
 from backpack.models import BackpackCollection
 from entity.serializers import DetailSerializerV2, EntityRelatedFieldV2
+from issuer.helpers import BadgeCheckHelper
 from issuer.models import BadgeInstance, BadgeClass
 from issuer.serializers_v2 import BadgeRecipientSerializerV2, EvidenceItemSerializerV2
+from mainsite.drf_fields import ValidImageField
 from mainsite.serializers import MarkdownCharField, HumanReadableBooleanField
 
 
@@ -30,10 +34,30 @@ class BackpackAssertionSerializerV2(DetailSerializerV2):
 
 class BackpackCollectionSerializerV2(DetailSerializerV2):
     name = serializers.CharField()
-    description = MarkdownCharField(blank=True, required=False)
+    description = MarkdownCharField(required=False)
     share_url = serializers.URLField(source='public_url', read_only=True)
 
     assertions = EntityRelatedFieldV2(many=True, source='badge_items', required=False, queryset=BadgeInstance.cached)
 
     class Meta(DetailSerializerV2.Meta):
         model = BackpackCollection
+
+
+class BackpackImportSerializerV2(DetailSerializerV2):
+    url = serializers.URLField(required=False)
+    image = ValidImageField(required=False)
+    assertion = serializers.DictField(required=False)
+
+    def validate(self, attrs):
+        if sum(1 if v else 0 for v in attrs.values()) != 1:
+            raise serializers.ValidationError("Must provide only one of 'url', 'image' or 'assertion'.")
+        return attrs
+
+    def create(self, validated_data):
+        created_by = validated_data.pop('created_by', None)
+        try:
+            instance, created = BadgeCheckHelper.get_or_create_assertion(**validated_data)
+        except DjangoValidationError as e:
+            raise RestframeworkValidationError(e.messages)
+        return instance
+

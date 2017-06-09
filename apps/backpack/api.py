@@ -5,9 +5,10 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 
 from backpack.models import BackpackCollection
-from backpack.serializers_v2 import BackpackAssertionSerializerV2, BackpackCollectionSerializerV2
+from backpack.serializers_v2 import BackpackAssertionSerializerV2, BackpackCollectionSerializerV2, \
+    BackpackImportSerializerV2
 from composition.serializers import LocalBadgeInstanceUploadSerializer, CollectionSerializer
-from entity.api import BaseEntityListView, BaseEntityDetailView
+from entity.api import BaseEntityListView, BaseEntityDetailView, BaseEntityView
 from issuer.models import BadgeInstance
 from issuer.permissions import AuditedModelOwner, VerifiedEmailMatchesRecipientIdentifier
 from issuer.public_api import ImagePropertyDetailView
@@ -86,5 +87,11 @@ class BackpackCollectionDetail(BaseEntityDetailView):
         return super(BackpackCollectionDetail, self).delete(request, **kwargs)
 
 
+class BackpackImportBadge(BaseEntityListView):
+    v2_serializer_class = BackpackImportSerializerV2
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    http_method_names = ('post',)
 
+    def post(self, request, **kwargs):
+        return super(BackpackImportBadge, self).post(request, **kwargs)
 

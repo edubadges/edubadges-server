@@ -20,7 +20,7 @@ from django.db.models import ProtectedError
 from jsonfield import JSONField
 from openbadges_bakery import bake
 
-from issuer.managers import BadgeInstanceManager
+from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager, BadgeInstanceEvidenceManager
 from entity.models import BaseVersionedEntity
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage
@@ -75,6 +75,7 @@ class Issuer(ResizeUploadedImage,
     old_json = JSONField()
     original_json = models.TextField(blank=True, null=True, default=None)
 
+    objects = IssuerManager()
     cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
 
     def publish(self, *args, **kwargs):
@@ -282,6 +283,7 @@ class BadgeClass(ResizeUploadedImage,
     old_json = JSONField()
     original_json = models.TextField(blank=True, null=True, default=None)
 
+    objects = BadgeClassManager()
     cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
 
     class Meta:
@@ -418,6 +420,7 @@ class BadgeInstance(BaseAuditedModel,
     narrative = models.TextField(blank=True, null=True, default=None)
 
     old_json = JSONField()
+    original_json = models.TextField(blank=True, null=True, default=None)
 
     objects = BadgeInstanceManager()
 
@@ -470,9 +473,9 @@ class BadgeInstance(BaseAuditedModel,
             self.salt = uuid.uuid4().hex
             self.created_at = datetime.datetime.now()
 
-            imageFile = default_storage.open(self.badgeclass.image.file.name)
-            self.image = bake(imageFile, json.dumps(self.json, indent=2))
-
+            if not self.image:
+                imageFile = default_storage.open(self.badgeclass.image.file.name)
+                self.image = bake(imageFile, json.dumps(self.json, indent=2))
 
             try:
                 from badgeuser.models import CachedEmailAddress
@@ -703,6 +706,9 @@ class BadgeInstanceEvidence(cachemodel.CacheModel):
     badgeinstance = models.ForeignKey('issuer.BadgeInstance')
     evidence_url = models.CharField(max_length=2083)
     narrative = models.TextField(blank=True, null=True, default=None)
+    original_json = models.TextField(blank=True, null=True, default=None)
+
+    objects = BadgeInstanceEvidenceManager()
 
     def publish(self):
         super(BadgeInstanceEvidence, self).publish()

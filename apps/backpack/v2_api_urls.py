@@ -4,11 +4,11 @@ from __future__ import unicode_literals
 from django.conf.urls import url
 
 from backpack.api import BackpackAssertionList, BackpackAssertionDetail, BackpackCollectionList, \
-    BackpackCollectionDetail, BackpackAssertionDetailImage
+    BackpackCollectionDetail, BackpackAssertionDetailImage, BackpackImportBadge
 from badgeuser.api import BadgeUserToken, BadgeUserForgotPassword, BadgeUserEmailConfirm, BadgeUserDetail
 
 urlpatterns = [
-    # url(r'^import$', BackpackImportBadge.as_view(), name='v2_api_backpack_upload_badge'),
+    url(r'^import$', BackpackImportBadge.as_view(), name='v2_api_backpack_import_badge'),
 
     url(r'^assertions$', BackpackAssertionList.as_view(), name='v2_api_backpack_assertion_list'),
     url(r'^assertions/(?P<entity_id>[^/]+)$', BackpackAssertionDetail.as_view(), name='v2_api_backpack_assertion_detail'),
