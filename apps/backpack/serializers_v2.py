@@ -54,7 +54,6 @@ class BackpackImportSerializerV2(DetailSerializerV2):
         return attrs
 
     def create(self, validated_data):
-        created_by = validated_data.pop('created_by', None)
         try:
             instance, created = BadgeCheckHelper.get_or_create_assertion(**validated_data)
         except DjangoValidationError as e:
