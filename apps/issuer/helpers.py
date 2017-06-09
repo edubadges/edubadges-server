@@ -53,10 +53,12 @@ class BadgeCheckHelper(object):
         assertion_obo = obos.get('Assertion')
         original_json = response.get('input').get('original_json', {})
 
+        recipient_identifier = response.get('report', {}).get('recipientProfile', {}).get('email', None)
+
         with transaction.atomic():
             issuer, issuer_created = Issuer.objects.get_or_create_from_ob2(issuer_obo, original_json=original_json.get(issuer_obo.get('id')))
             badgeclass, badgeclass_created = BadgeClass.objects.get_or_create_from_ob2(issuer, badgeclass_obo, original_json=original_json.get(badgeclass_obo.get('id')))
-            return BadgeInstance.objects.get_or_create_from_ob2(badgeclass, assertion_obo, original_json=original_json.get(assertion_obo.get('id')))
+            return BadgeInstance.objects.get_or_create_from_ob2(badgeclass, assertion_obo, recipient_identifier=recipient_identifier, original_json=original_json.get(assertion_obo.get('id')))
 
 
 

@@ -82,7 +82,7 @@ def _fetch_image_and_get_file(url, upload_to=''):
 class BadgeInstanceManager(models.Manager):
 
     @transaction.atomic
-    def get_or_create_from_ob2(self, badgeclass, assertion_obo, source=None, original_json=None):
+    def get_or_create_from_ob2(self, badgeclass, assertion_obo, recipient_identifier, source=None, original_json=None):
         image_url = assertion_obo.get('image', None)
         image = None
         if image_url is None:
@@ -93,6 +93,7 @@ class BadgeInstanceManager(models.Manager):
         badgeinstance, created = self.get_or_create(
             source_url=assertion_obo.get('id'),
             defaults=dict(
+                recipient_identifier=recipient_identifier,
                 source=source if source is not None else 'local',
                 original_json=original_json,
                 badgeclass=badgeclass,
