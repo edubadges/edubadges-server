@@ -4,8 +4,9 @@ from __future__ import unicode_literals
 import uuid
 from collections import MutableMapping
 
-from django.core.cache import cache
+import badgecheck
 from django.conf import settings
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from requests_cache.backends import RedisCache, BaseCache
@@ -13,12 +14,7 @@ from requests_cache.backends import RedisCache, BaseCache
 from issuer.models import Issuer, BadgeClass, BadgeInstance
 
 
-# This import order matters, Don't change it! [Wiggins]
-import requests_cache
-requests_cache.install_cache()
-import badgecheck
-
-
+# TODO: Fix this class, its broken!
 class DjangoCacheDict(MutableMapping):
     _keymap_cache_key = "DjangoCacheDict_keys"
 
@@ -101,7 +97,8 @@ class BadgeCheckHelper(object):
     @classmethod
     def cache_instance(cls):
         if cls._cache_instance is None:
-            cls._cache_instance = DjangoCacheRequestsCacheBackend(namespace='badgr_requests_cache')
+            # cls._cache_instance = DjangoCacheRequestsCacheBackend(namespace='badgr_requests_cache')
+            cls._cache_instance = RedisCache(namespace='badgr_requests_cache')
         return cls._cache_instance
 
     @classmethod
