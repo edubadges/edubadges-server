@@ -36,6 +36,9 @@ def migrate_localbadgeinstance_badgeinstance(apps, schema_editor):
 
     # copy LocalBadgeInstances into BadgeInstance
     for localbadgeinstance in LocalBadgeInstance.objects.all():
+        if not localbadgeinstance.issuer_badgeclass_id:
+            continue
+
         assertion_source = 'composition.localbadgeinstance'
         assertion_original_url = localbadgeinstance.json.get('id')
         try:
