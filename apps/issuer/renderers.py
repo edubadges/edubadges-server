@@ -1,7 +1,10 @@
+import urllib
+
 from django.core.urlresolvers import reverse
 from rest_framework.renderers import BrowsableAPIRenderer
 
 import utils
+from issuer.models import BadgeInstance
 from mainsite.utils import OriginSetting
 
 
@@ -13,22 +16,33 @@ class BadgeInstanceHTMLRenderer(BrowsableAPIRenderer):
         context = super(BadgeInstanceHTMLRenderer, self).get_context(
             data, accepted_media_type, renderer_context)
 
-        try:
-            context['badgeclass_image_png'] = "{}{}?type=png".format(
-                OriginSetting.HTTP,
-                reverse('badgeclass_image', kwargs={'entity_id': renderer_context['badge_class'].entity_id})
-            )
+        obi_version = renderer_context.get('obi_version', utils.CURRENT_OBI_VERSION)
+        context['obi_version'] = obi_version
 
-            context.update(renderer_context)
-            context['issuer_url'] = context['issuer'].jsonld_id
-            context['badge_instance_image_url'] = renderer_context['badge_instance'].image.url if renderer_context['badge_instance'].image else None
-            context['badge_instance_public_url'] = renderer_context['badge_instance'].jsonld_id
-            context['badgeclass_count'] = renderer_context['badgeclass_count']
+        public_url = renderer_context['badge_instance'].jsonld_id + '.json'
+        if obi_version == utils.CURRENT_OBI_VERSION:
+            context['badge_instance_public_url'] = public_url
+        else:
+            context['badge_instance_public_url'] = '{}?{}'.format(public_url, urllib.urlencode({'v': obi_version}))
 
-            recipient_email = renderer_context['badge_instance'].recipient_identifier
-            context['obscured_recipient'] = utils.obscure_email_address(recipient_email)
-        except KeyError as e:
-            pass
+        context['badgeclass_image_png'] = "{}{}?type=png".format(
+            OriginSetting.HTTP,
+            reverse('badgeclass_image', kwargs={'entity_id': renderer_context['badge_class'].entity_id})
+        )
+
+        context.update(renderer_context)
+        context['issuer_url'] = context['issuer'].jsonld_id
+        context['badge_instance_image_url'] = renderer_context['badge_instance'].image.url if renderer_context['badge_instance'].image else None
+
+        recipient_email = renderer_context['badge_instance'].recipient_identifier
+        context['obscured_recipient'] = utils.obscure_email_address(recipient_email)
+
+        if obi_version == '1_1':
+            context['alt_url'] = '{}?{}'.format(context['request'].path, urllib.urlencode({'v': '2_0'}))
+            context['alt_version_name'] = '2.0'
+        elif obi_version == '2_0':
+            context['alt_url'] = context['request'].path
+            context['alt_version_name'] = '1.1'
 
         return context
 

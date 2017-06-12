@@ -89,6 +89,9 @@ class LocalBadgeInstance(cachemodel.CacheModel):
             else:
                 return '_:null'
 
+    def get_json(self, obi_version=None):
+        return self.json
+
     @property
     def jsonld_id(self):
         return self.get_full_url()

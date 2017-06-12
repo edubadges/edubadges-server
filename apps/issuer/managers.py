@@ -119,7 +119,7 @@ class BadgeInstanceManager(models.Manager):
         return badgeinstance, created
 
     def create_badgeinstance(
-            self, badgeclass, recipient_id, evidence=None,
+            self, badgeclass, recipient_id, narrative=None, evidence=None,
             notify=False, check_completions=True,
             allow_uppercase=False, badgr_app=None, **kwargs
     ):
@@ -137,9 +137,10 @@ class BadgeInstanceManager(models.Manager):
 
         new_instance = self.model(
             badgeclass=badgeclass,
-            issuer=badgeclass.issuer,
+			issuer=badgeclass.issuer,
             recipient_identifier=recipient_identifier,
-            **kwargs
+			narrative=narrative,
+			**kwargs
         )
 
         with transaction.atomic():

@@ -350,9 +350,9 @@ class BadgeClass(ResizeUploadedImage,
     def cached_completion_elements(self):
         return [pce for pce in self.completion_elements.all()]
 
-    def issue(self, recipient_id=None, evidence=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None):
+    def issue(self, recipient_id=None, evidence=None, narrative=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None):
         return BadgeInstance.objects.create_badgeinstance(
-            badgeclass=self, recipient_id=recipient_id, evidence=evidence,
+            badgeclass=self, recipient_id=recipient_id, narrative=narrative, evidence=evidence,
             notify=notify, created_by=created_by, allow_uppercase=allow_uppercase,
             badgr_app=badgr_app
         )
