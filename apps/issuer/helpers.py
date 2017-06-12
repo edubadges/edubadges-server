@@ -93,6 +93,32 @@ class DjangoCacheRequestsCacheBackend(BaseCache):
 
 class BadgeCheckHelper(object):
     _cache_instance = None
+    error_map = [
+        (['FETCH_HTTP_NODE'], {
+            'name': "FETCH_HTTP_NODE",
+            'description': "Unable to reach URL",
+        }),
+        (['VERIFY_RECIPIENT_IDENTIFIER'], {
+            'name': 'VERIFY_RECIPIENT_IDENTIFIER',
+            'description': "The recipient does not match any of your verified emails",
+        }),
+        (['VERIFY_JWS', 'VERIFY_KEY_OWNERSHIP'], {
+            'name': "VERIFY_SIGNATURE",
+            "description": "Could not verify signature",
+        }),
+        (['VERIFY_SIGNED_ASSERTION_NOT_REVOKED'], {
+            'name': "ASSERTION_REVOKED",
+            "description": "This assertion has been revoked",
+        }),
+    ]
+
+    @classmethod
+    def translate_errors(cls, badgecheck_messages):
+        for m in badgecheck_messages:
+            if m.get('messageLevel') == 'ERROR':
+                for errors, backpack_error in cls.error_map:
+                    if m.get('name') in errors:
+                        yield backpack_error
 
     @classmethod
     def cache_instance(cls):
@@ -127,7 +153,8 @@ class BadgeCheckHelper(object):
             badgecheck_recipient_profile = None
 
         response = badgecheck.verify(query, recipient_profile=badgecheck_recipient_profile, **cls.badgecheck_options())
-        is_valid = response.get('valid')
+        report = response.get('report', {})
+        is_valid = report.get('valid')
 
         # we expect to get 3 obos: Assertion, Issuer and BadgeClass
         obos = {n.get('type'): n for n in response.get('graph', [])}
@@ -135,9 +162,8 @@ class BadgeCheckHelper(object):
             is_valid = False
 
         if not is_valid:
-            errors = []
-            if response.get('errorCount', 0) > 0:
-                errors = filter(lambda m: m.get('messageLevel') == 'ERROR', response.get('messages'))
+            if report.get('errorCount', 0) > 0:
+                errors = cls.translate_errors(report.get('messages', []))
             else:
                 errors = [{'name': "UNABLE_TO_VERIFY", 'description': "Unable to verify the assertion"}]
             raise ValidationError(errors)
@@ -147,7 +173,7 @@ class BadgeCheckHelper(object):
         assertion_obo = obos.get('Assertion')
         original_json = response.get('input').get('original_json', {})
 
-        recipient_identifier = response.get('report', {}).get('recipientProfile', {}).get('email', None)
+        recipient_identifier = report.get('recipientProfile', {}).get('email', None)
 
         with transaction.atomic():
             issuer, issuer_created = Issuer.objects.get_or_create_from_ob2(issuer_obo, original_json=original_json.get(issuer_obo.get('id')))
