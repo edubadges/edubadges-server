@@ -96,11 +96,13 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
         return urlparse.urlunparse(url_parts)
 
     def get_login_redirect_url(self, request):
-        url = super(BadgrAccountAdapter, self).get_login_redirect_url(request)
-
+        """
+        If logged in, redirect to the front-end, including an authToken query parameter.
+        """
         if request.user.is_authenticated():
-            url = self._modify_url_query_params(url, token=request.user.auth_token)
-
-        return url
+            return self._modify_url_query_params(settings.SOCIALAUTH_LOGIN_REDIRECT_URL,
+                                                 authToken=request.user.auth_token)
+        else:
+            return '/'
 
 

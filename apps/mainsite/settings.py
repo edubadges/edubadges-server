@@ -168,7 +168,7 @@ MEDIA_URL = '/media/'
 ADMIN_MEDIA_PREFIX = STATIC_URL+'admin/'
 
 BADGR_UI_URL = 'https://badgr.io/'
-
+SOCIALAUTH_LOGIN_REDIRECT_URL = BADGR_UI_URL
 
 ##
 #
