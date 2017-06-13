@@ -45,10 +45,13 @@ badgr_admin.register(EmailBlacklist, EmailBlacklistAdmin)
 # 3rd party apps
 
 from allauth.account.admin import EmailAddressAdmin, EmailConfirmationAdmin
+from allauth.socialaccount.admin import SocialApp, SocialAppAdmin
 from django.contrib.auth.admin import GroupAdmin
 from django.contrib.auth.models import Group
 from django.contrib.sites.admin import SiteAdmin
 from django.contrib.sites.models import Site
+
+badgr_admin.register(SocialApp, SocialAppAdmin)
 
 badgr_admin.register(Site, SiteAdmin)
 badgr_admin.register(Group, GroupAdmin)

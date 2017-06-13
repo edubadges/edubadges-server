@@ -28,6 +28,9 @@ INSTALLED_APPS = [
 
     'allauth',
     'allauth.account',
+    'allauth.socialaccount',
+    # 'badgeuser.providers.kony',
+    'allauth.socialaccount.providers.google',
     'corsheaders',
 
     'rest_framework',
@@ -101,7 +104,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
 #
 ##
 
-HTTP_ORIGIN = "http://localhost:8000"
+HTTP_ORIGIN = " p"
 
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',

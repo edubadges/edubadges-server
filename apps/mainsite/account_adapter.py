@@ -87,3 +87,20 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
         get_adapter().send_mail(email_template,
                                 emailconfirmation.email_address.email,
                                 ctx)
+
+    def _modify_url_query_params(self, url, **kwargs):
+        url_parts = list(urlparse.urlparse(url))
+        query = dict(urlparse.parse_qsl(url_parts[4]))
+        query.update(kwargs)
+        url_parts[4] = urllib.urlencode(query)
+        return urlparse.urlunparse(url_parts)
+
+    def get_login_redirect_url(self, request):
+        url = super(BadgrAccountAdapter, self).get_login_redirect_url(request)
+
+        if request.user.is_authenticated():
+            url = self._modify_url_query_params(url, token=request.user.auth_token)
+
+        return url
+
+
