@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     # 'badgeuser.providers.kony',
-    'allauth.socialaccount.providers.google',
+    'badgrsocialauth.providers.google',
     'corsheaders',
 
     'rest_framework',

@@ -34,7 +34,7 @@ class BadgrSocialLogin(RedirectView):
             raise ValidationError('No {} provider found'.format(provider_name))
 
 
-class BadgrSocialAccountSignup(RedirectView):
+class BadgrSocialEmailExists(RedirectView):
     def get_redirect_url(self):
         badgr_app = get_session_badgr_app(self.request)
         if badgr_app is not None:
@@ -42,7 +42,7 @@ class BadgrSocialAccountSignup(RedirectView):
                                         authError='An account already exists with provided email address')
 
 
-class BadgrSocialAccountValidateEmail(RedirectView):
+class BadgrSocialAccountVerifyEmail(RedirectView):
     def get_redirect_url(self):
         badgr_app = get_session_badgr_app(self.request)
         if badgr_app is not None:
