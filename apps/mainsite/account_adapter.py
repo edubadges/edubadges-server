@@ -14,6 +14,7 @@ from allauth.account.models import EmailConfirmation
 from allauth.utils import get_current_site, build_absolute_uri
 
 from badgeuser.models import CachedEmailAddress
+from badgrsocialauth.utils import set_url_query_params
 from mainsite.models import BadgrApp, EmailBlacklist
 from mainsite.utils import OriginSetting
 
@@ -87,23 +88,22 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
                                 emailconfirmation.email_address.email,
                                 ctx)
 
-    def _set_url_query_params(self, url, **kwargs):
-        url_parts = list(urlparse.urlparse(url))
-        query = dict(urlparse.parse_qsl(url_parts[4]))
-        query.update(kwargs)
-        url_parts[4] = urllib.urlencode(query)
-        return urlparse.urlunparse(url_parts)
-
     def get_login_redirect_url(self, request):
         """
-        If succesfully logged in, redirect to the front-end, including an authToken query parameter.
+        If successfully logged in, redirect to the front-end, including an authToken query parameter.
         """
         if request.user.is_authenticated():
-            final_redirect_url = getattr(request, 'final_redirect_url', None)
+            final_redirect_url = request.session.get('final_redirect_url', None)
             if final_redirect_url is not None:
-                return self._set_url_query_params(final_redirect_url,
-                                                  authToken=request.user.auth_token)
+                return set_url_query_params(final_redirect_url,
+                                            authToken=request.user.auth_token)
         else:
             return '/'
+
+    def login(self, request, user):
+        final_redirect_url = request.session.get('final_redirect_url', None)
+        ret = super(BadgrAccountAdapter, self).login(request, user)
+        request.session['final_redirect_url'] = final_redirect_url
+        return ret
 
 
