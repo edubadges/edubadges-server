@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 from django.http import HttpResponseBadRequest
 from django.views.generic import RedirectView
 
-from badgrsocialauth.utils import set_url_query_params
+from badgrsocialauth.utils import set_url_query_params, set_session_badgr_app, get_session_badgr_app
 from mainsite.models import BadgrApp
 
 
@@ -17,15 +17,16 @@ class BadgrSocialLogin(RedirectView):
             return HttpResponseBadRequest(e.message)
 
     def get_redirect_url(self):
-        final_redirect_url = BadgrApp.objects.get_current().ui_login_redirect
-
-        if final_redirect_url is not None:
-            self.request.session['final_redirect_url'] = final_redirect_url
-
         provider_name = self.request.GET.get('provider', None)
 
         if provider_name is None:
             raise ValidationError('No provider specified')
+
+        badgr_app = BadgrApp.objects.get_current()
+        if badgr_app is not None:
+            set_session_badgr_app(self.request, badgr_app)
+        else:
+            pass
 
         try:
             return reverse('{}_login'.format(self.request.GET.get('provider')))
@@ -35,15 +36,15 @@ class BadgrSocialLogin(RedirectView):
 
 class BadgrSocialAccountSignup(RedirectView):
     def get_redirect_url(self):
-        final_redirect_url = self.request.session.get('final_redirect_url', None)
-        if final_redirect_url is not None:
-            return set_url_query_params(final_redirect_url, authError='An account already exists with provided email address')
-
-
+        badgr_app = get_session_badgr_app(self.request)
+        if badgr_app is not None:
+            return set_url_query_params(badgr_app.ui_login_redirect,
+                                        authError='An account already exists with provided email address')
 
 
 class BadgrSocialAccountValidateEmail(RedirectView):
     def get_redirect_url(self):
-        final_redirect_url = self.request.session.get('final_redirect_url', None)
-        if final_redirect_url is not None:
-            return set_url_query_params(final_redirect_url, authError='Please check your email address for a confirmation email')
+        badgr_app = get_session_badgr_app(self.request)
+        if badgr_app is not None:
+            return set_url_query_params(badgr_app.ui_signup_success_redirect,
+                                        authError='Please check your email address for a confirmation email')

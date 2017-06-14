@@ -1,6 +1,8 @@
 import urllib
 import urlparse
 
+from mainsite.models import BadgrApp
+
 
 def set_url_query_params(url, **kwargs):
     url_parts = list(urlparse.urlparse(url))
@@ -8,3 +10,14 @@ def set_url_query_params(url, **kwargs):
     query.update(kwargs)
     url_parts[4] = urllib.urlencode(query)
     return urlparse.urlunparse(url_parts)
+
+
+def get_session_badgr_app(request):
+    try:
+        return BadgrApp.objects.get(pk=request.session.get('badgr_app_pk', None))
+    except BadgrApp.DoesNotExist:
+        return None
+
+
+def set_session_badgr_app(request, badgr_app):
+    request.session['badgr_app_pk'] = badgr_app.pk
