@@ -80,7 +80,7 @@ class BadgrApp(basic_models.DefaultModel):
     email_confirmation_redirect = models.URLField()
     signup_redirect = models.URLField()
     forgot_password_redirect = models.URLField()
-    login_redirect = models.URLField()
+    ui_login_redirect = models.URLField()
     objects = BadgrAppManager()
 
     def __unicode__(self):

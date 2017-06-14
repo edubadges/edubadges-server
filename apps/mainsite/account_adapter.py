@@ -20,6 +20,7 @@ from mainsite.utils import OriginSetting
 
 
 class BadgrAccountAdapter(DefaultAccountAdapter):
+
     def send_mail(self, template_prefix, email, context):
         context['STATIC_URL'] = getattr(settings, 'STATIC_URL')
         context['HTTP_ORIGIN'] = getattr(settings, 'HTTP_ORIGIN')
@@ -105,5 +106,3 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
         ret = super(BadgrAccountAdapter, self).login(request, user)
         request.session['final_redirect_url'] = final_redirect_url
         return ret
-
-
