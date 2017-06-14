@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'verifier',
     'pathway',
     'recipient',
+    'django_extensions'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -104,7 +105,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
 #
 ##
 
-HTTP_ORIGIN = " p"
+HTTP_ORIGIN = "http://localhost:8000"
 
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -139,6 +140,7 @@ AUTHENTICATION_BACKENDS = [
 
 ]
 ACCOUNT_ADAPTER = 'mainsite.account_adapter.BadgrAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'badgrsocialauth.adapter.BadgrSocialAccountAdapter'
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
@@ -167,7 +169,7 @@ MEDIA_ROOT = os.path.join(TOP_DIR, 'mediafiles')
 MEDIA_URL = '/media/'
 ADMIN_MEDIA_PREFIX = STATIC_URL+'admin/'
 
-BADGR_UI_URL = 'https://badgr.io/'
+BADGR_UI_URL = 'http://localhost:4000'
 SOCIALAUTH_LOGIN_REDIRECT_URL = BADGR_UI_URL
 
 ##

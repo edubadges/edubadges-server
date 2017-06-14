@@ -19,7 +19,6 @@ from mainsite.utils import OriginSetting
 
 
 class BadgrAccountAdapter(DefaultAccountAdapter):
-
     def send_mail(self, template_prefix, email, context):
         context['STATIC_URL'] = getattr(settings, 'STATIC_URL')
         context['HTTP_ORIGIN'] = getattr(settings, 'HTTP_ORIGIN')
@@ -88,7 +87,7 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
                                 emailconfirmation.email_address.email,
                                 ctx)
 
-    def _modify_url_query_params(self, url, **kwargs):
+    def _set_url_query_params(self, url, **kwargs):
         url_parts = list(urlparse.urlparse(url))
         query = dict(urlparse.parse_qsl(url_parts[4]))
         query.update(kwargs)
@@ -97,11 +96,13 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
 
     def get_login_redirect_url(self, request):
         """
-        If logged in, redirect to the front-end, including an authToken query parameter.
+        If succesfully logged in, redirect to the front-end, including an authToken query parameter.
         """
         if request.user.is_authenticated():
-            return self._modify_url_query_params(settings.SOCIALAUTH_LOGIN_REDIRECT_URL,
-                                                 authToken=request.user.auth_token)
+            final_redirect_url = getattr(request, 'final_redirect_url', None)
+            if final_redirect_url is not None:
+                return self._set_url_query_params(final_redirect_url,
+                                                  authToken=request.user.auth_token)
         else:
             return '/'
 
