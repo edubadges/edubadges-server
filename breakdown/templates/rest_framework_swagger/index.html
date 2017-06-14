@@ -29,9 +29,9 @@
 		<h1 class="visuallyhidden">Main Navigation</h1>
 		<ul>
 			{% if user.is_authenticated %}
-				<li class="menuitem" ><a href="{% url "account_logout"%}">{{ user.email }}</a></li>
+				<li class="menuitem" ><a href="{% url "logout"%}">{{ user.email }}</a></li>
 			{% else %}
-				<li class="menuitem" ><a href="{% url "account_login"%}?next={{ request.path }}">Sign In</a></li>
+				<li class="menuitem" ><a href="{% url "login"%}?next={{ request.path }}">Sign In</a></li>
 			{% endif %}
 		</ul>
 	</nav>

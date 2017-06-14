@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     'verifier',
     'pathway',
     'recipient',
-    'django_extensions'
 ]
 
 MIDDLEWARE_CLASSES = [

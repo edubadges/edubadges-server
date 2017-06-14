@@ -53,10 +53,8 @@ urlpatterns = [
 
     # REST Framework
     url(r'^api-auth/token$', LoginAndObtainAuthToken.as_view()),
-    # url(r'^accounts/', include('allauth.urls')),
-    # url(r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'public/login.html'}, name='login'),
-    # url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {'next_page': 'login'}, name='logout'),
-
+    url(r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'public/login.html'}, name='login'),
+    url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {'next_page': 'login'}, name='logout'),
     url(r'^accounts/', include('badgrsocialauth.urls')),
 
     # v1 API endpoints

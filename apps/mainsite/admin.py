@@ -52,9 +52,9 @@ from django.contrib.auth.models import Group
 from django.contrib.sites.admin import SiteAdmin
 from django.contrib.sites.models import Site
 
-# badgr_admin .register(SocialApp, SocialAppAdmin)
-# badgr_admin.register(SocialToken, SocialTokenAdmin)
-# badgr_admin.register(SocialAccount, SocialAccountAdmin)
+badgr_admin.register(SocialApp, SocialAppAdmin)
+badgr_admin.register(SocialToken, SocialTokenAdmin)
+badgr_admin.register(SocialAccount, SocialAccountAdmin)
 
 badgr_admin.register(Site, SiteAdmin)
 badgr_admin.register(Group, GroupAdmin)
