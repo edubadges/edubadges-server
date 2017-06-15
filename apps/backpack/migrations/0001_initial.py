@@ -41,4 +41,30 @@ class Migration(migrations.Migration):
                 'abstract': False,
             },
         ),
+        migrations.CreateModel(
+            name='BackpackBadgeShare',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
+                ('provider', models.CharField(max_length=254, choices=[(b'facebook', b'Facebook'), (b'linkedin', b'LinkedIn')])),
+                ('badgeinstance', models.ForeignKey(to='issuer.BadgeInstance', null=True)),
+            ],
+            options={
+                'abstract': False,
+            },
+        ),
+        migrations.CreateModel(
+            name='BackpackCollectionShare',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
+                ('provider', models.CharField(max_length=254, choices=[(b'facebook', b'Facebook'), (b'linkedin', b'LinkedIn')])),
+                ('collection', models.ForeignKey(to='backpack.BackpackCollection')),
+            ],
+            options={
+                'abstract': False,
+            },
+        ),
     ]

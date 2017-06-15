@@ -1,11 +1,17 @@
 # encoding: utf-8
 from __future__ import unicode_literals
 
+import os
+
+import basic_models
 import cachemodel
+from django.core.urlresolvers import reverse
 from django.db import models, transaction
 
 from entity.models import BaseVersionedEntity
 from issuer.models import BaseAuditedModel, BadgeInstance
+from backpack.sharing import SharingManager
+from mainsite.utils import OriginSetting
 
 
 class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
@@ -21,6 +27,23 @@ class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeinstances(self):
         return self.assertions.all()
+
+    # Convenience methods for toggling published state
+    @property
+    def published(self):
+        return bool(self.share_hash)
+
+    @published.setter
+    def published(self, value):
+        if value and not self.share_hash:
+            self.share_hash = os.urandom(16).encode('hex')
+        elif not value and self.share_hash:
+            self.share_hash = ''
+
+    @property
+    def share_url(self):
+        if self.published:
+            return OriginSetting.HTTP+reverse('backpack_shared_collection', kwargs={'share_hash': self.share_hash})
 
     @property
     def badge_items(self):
@@ -67,3 +90,27 @@ class BackpackCollectionBadgeInstance(cachemodel.CacheModel):
         super(BackpackCollectionBadgeInstance, self).delete()
         self.collection.publish()
 
+
+class BaseSharedModel(cachemodel.CacheModel, basic_models.TimestampedModel):
+    SHARE_PROVIDERS = [(p.provider_code, p.provider_name) for code,p in SharingManager.ManagerProviders.items()]
+    provider = models.CharField(max_length=254, choices=SHARE_PROVIDERS)
+
+    class Meta:
+        abstract = True
+
+    def get_share_url(self, provider, **kwargs):
+        raise NotImplementedError()
+
+
+class BackpackBadgeShare(BaseSharedModel):
+    badgeinstance = models.ForeignKey("issuer.BadgeInstance", null=True)
+
+    def get_share_url(self, provider, **kwargs):
+        return SharingManager.share_url(provider, self.badge, **kwargs)
+
+
+class BackpackCollectionShare(BaseSharedModel):
+    collection = models.ForeignKey('backpack.BackpackCollection', null=False)
+
+    def get_share_url(self, provider, **kwargs):
+        return SharingManager.share_url(provider, self.collection, **kwargs)

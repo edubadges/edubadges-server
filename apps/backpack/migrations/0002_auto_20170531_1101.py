@@ -16,6 +16,8 @@ def migrate_localbadgeinstance_badgeinstance(apps, schema_editor):
     CompositionCollection = apps.get_model('composition', 'Collection')
     BackpackCollection = apps.get_model('backpack', 'BackpackCollection')
     BackpackCollectionBadgeInstance = apps.get_model('backpack', 'BackpackCollectionBadgeInstance')
+    BackpackBadgeShare = apps.get_model('backpack', 'BackpackBadgeShare')
+    BackpackCollectionShare = apps.get_model('backpack', 'BackpackCollectionShare')
 
     # index composition_collection.id -> backpack_collection
     _collection_idx = {}
@@ -33,6 +35,17 @@ def migrate_localbadgeinstance_badgeinstance(apps, schema_editor):
             )
         )
         _collection_idx[composition_collection.id] = backpack_collection
+
+        # copy any collection shares over
+        for composition_collection_share in composition_collection.collectionshare_set.all():
+            backpack_collection_share, created = BackpackCollectionShare.objects.get_or_create(
+                collection=backpack_collection,
+                provider=composition_collection_share.provider,
+                created_at=composition_collection_share.created_at,
+                defaults=dict(
+                    updated_at=composition_collection_share.updated_at,
+                )
+            )
 
     # copy LocalBadgeInstances into BadgeInstance
     for localbadgeinstance in LocalBadgeInstance.objects.all():
@@ -62,6 +75,7 @@ def migrate_localbadgeinstance_badgeinstance(apps, schema_editor):
                 revocation_reason=localbadgeinstance.revocation_reason
             )
 
+        # put this new instance in collections it belongs to
         for composition_collect in localbadgeinstance.localbadgeinstancecollection_set.all():
             backpack_collection = _collection_idx.get(composition_collect.collection_id, None)
             if backpack_collection is not None:
@@ -69,6 +83,17 @@ def migrate_localbadgeinstance_badgeinstance(apps, schema_editor):
                     collection=backpack_collection,
                     badgeinstance=badgeinstance
                 )
+
+        # copy any badge shares over
+        for localbadgeinstance_share in localbadgeinstance.localbadgeinstanceshare_set.all():
+            backpack_badge_share, created = BackpackBadgeShare.objects.get_or_create(
+                badgeinstance=badgeinstance,
+                provider=localbadgeinstance_share.provider,
+                created_at=localbadgeinstance_share.created_at,
+                defaults=dict(
+                    updated_at=localbadgeinstance_share.updated_at,
+                )
+            )
 
 
 class Migration(migrations.Migration):
