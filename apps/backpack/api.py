@@ -34,6 +34,11 @@ class BackpackAssertionList(BaseEntityListView):
     def post(self, request, **kwargs):
         raise NotImplementedError("use BackpackImportBadge.post instead")
 
+    def get_context_data(self, **kwargs):
+        context = super(BackpackAssertionList, self).get_context_data(**kwargs)
+        context['format'] = self.request.query_params.get('json_format', 'v1')  # for /v1/earner/badges compat
+        return context
+
 
 class BackpackAssertionDetail(BaseEntityDetailView):
     model = BadgeInstance

@@ -15,6 +15,7 @@ from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.authtoken.models import Token
 
+from backpack.models import BackpackCollection
 from entity.models import BaseVersionedEntity
 from issuer.models import Issuer, BadgeInstance
 from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager
@@ -155,6 +156,10 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     @cachemodel.cached_method(auto_publish=True)
     def cached_emails(self):
         return CachedEmailAddress.objects.filter(user=self)
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_backpackcollections(self):
+        return BackpackCollection.objects.filter(created_by=self)
 
     @property
     def email_items(self):

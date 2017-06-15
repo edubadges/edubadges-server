@@ -19,33 +19,8 @@ def migrate_localbadgeinstance_badgeinstance(apps, schema_editor):
     BackpackBadgeShare = apps.get_model('backpack', 'BackpackBadgeShare')
     BackpackCollectionShare = apps.get_model('backpack', 'BackpackCollectionShare')
 
-    # index composition_collection.id -> backpack_collection
-    _collection_idx = {}
-
-    # make new backpack collections
-    for composition_collection in CompositionCollection.objects.all():
-        backpack_collection, created = BackpackCollection.objects.get_or_create(
-            created_by=composition_collection.owner,
-            slug=composition_collection.slug,
-            defaults=dict(
-                entity_id=generate_entity_uri(),
-                name=composition_collection.name,
-                description=composition_collection.description,
-                share_hash=composition_collection.share_hash,
-            )
-        )
-        _collection_idx[composition_collection.id] = backpack_collection
-
-        # copy any collection shares over
-        for composition_collection_share in composition_collection.collectionshare_set.all():
-            backpack_collection_share, created = BackpackCollectionShare.objects.get_or_create(
-                collection=backpack_collection,
-                provider=composition_collection_share.provider,
-                created_at=composition_collection_share.created_at,
-                defaults=dict(
-                    updated_at=composition_collection_share.updated_at,
-                )
-            )
+    # index composition.localbageinstance.pk -> new issuer.badgeinstance
+    _localbadgeinstance_idx = {}
 
     # copy LocalBadgeInstances into BadgeInstance
     for localbadgeinstance in LocalBadgeInstance.objects.all():
@@ -74,15 +49,7 @@ def migrate_localbadgeinstance_badgeinstance(apps, schema_editor):
                 revoked=localbadgeinstance.revoked,
                 revocation_reason=localbadgeinstance.revocation_reason
             )
-
-        # put this new instance in collections it belongs to
-        for composition_collect in localbadgeinstance.localbadgeinstancecollection_set.all():
-            backpack_collection = _collection_idx.get(composition_collect.collection_id, None)
-            if backpack_collection is not None:
-                backpack_collect, created = BackpackCollectionBadgeInstance.objects.get_or_create(
-                    collection=backpack_collection,
-                    badgeinstance=badgeinstance
-                )
+        _localbadgeinstance_idx[localbadgeinstance.id] = badgeinstance
 
         # copy any badge shares over
         for localbadgeinstance_share in localbadgeinstance.localbadgeinstanceshare_set.all():
@@ -93,6 +60,42 @@ def migrate_localbadgeinstance_badgeinstance(apps, schema_editor):
                 defaults=dict(
                     updated_at=localbadgeinstance_share.updated_at,
                 )
+            )
+
+    # make new backpack collections
+    for composition_collection in CompositionCollection.objects.all():
+        backpack_collection, created = BackpackCollection.objects.get_or_create(
+            created_by=composition_collection.owner,
+            slug=composition_collection.slug,
+            defaults=dict(
+                entity_id=generate_entity_uri(),
+                name=composition_collection.name,
+                description=composition_collection.description,
+                share_hash=composition_collection.share_hash,
+            )
+        )
+
+        # copy any collection shares over
+        for composition_collection_share in composition_collection.collectionshare_set.all():
+            backpack_collection_share, created = BackpackCollectionShare.objects.get_or_create(
+                collection=backpack_collection,
+                provider=composition_collection_share.provider,
+                created_at=composition_collection_share.created_at,
+                defaults=dict(
+                    updated_at=composition_collection_share.updated_at,
+                )
+            )
+
+        # copy any badges in the collection over
+        for composition_collect in composition_collection.badges.all():
+            if composition_collect.issuer_instance:
+                badgeinstance = composition_collect.issuer_instance
+            else:
+                badgeinstance = _localbadgeinstance_idx[composition_collect.instance_id]
+
+            backpack_collect, created = BackpackCollectionBadgeInstance.objects.get_or_create(
+                collection=backpack_collection,
+                badgeinstance=badgeinstance
             )
 
 

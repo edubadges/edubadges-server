@@ -31,7 +31,7 @@ class Command(BaseCommand):
             'no_image_url': [],
             'json_error': []
         }
-        badgeclasses_missing_images = BadgeClass.objects.filter(image='')[:3]
+        badgeclasses_missing_images = BadgeClass.objects.filter(image='')
         report['total'] = len(badgeclasses_missing_images)
         self.stdout.write("Processing {} badgeclasses missing images...".format(report['total']))
         for badgeclass in badgeclasses_missing_images:

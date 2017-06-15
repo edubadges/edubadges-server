@@ -49,7 +49,8 @@ urlpatterns = [
     url(r'^public', include('issuer.public_api_urls'), kwargs={'version': 'v2'}),
     url(r'^public', include('pathway.public_api_urls'), kwargs={'version': 'v2'}),
 
-    url(r'^share', include('composition.share_urls')),
+    # public pages shared from backpack
+    url(r'^share', include('backpack.share_urls')),
     # legacy share redirects
     url(r'^earner/collections/(?P<pk>[^/]+)/(?P<share_hash>[^/]+)$', LegacyCollectionShareRedirectView.as_view(), name='legacy_shared_collection'),
     url(r'^earner/collections/(?P<pk>[^/]+)/(?P<share_hash>[^/]+)/embed$', LegacyCollectionShareRedirectView.as_view(), name='legacy_shared_collection_embed'),
