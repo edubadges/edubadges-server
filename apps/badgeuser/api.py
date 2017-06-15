@@ -19,7 +19,7 @@ from badgeuser.models import BadgeUser, CachedEmailAddress
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
 from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserTokenSerializerV1
 from badgeuser.serializers_v2 import BadgeUserTokenSerializerV2, BadgeUserSerializerV2
-from composition.tasks import process_email_verification
+from badgeuser.tasks import process_email_verification
 from entity.api import BaseEntityDetailView
 from entity.serializers import BaseSerializerV2
 from mainsite.models import BadgrApp
