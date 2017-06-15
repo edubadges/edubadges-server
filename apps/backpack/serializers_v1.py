@@ -1,13 +1,16 @@
 import datetime
 from collections import OrderedDict
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.urlresolvers import reverse
 from django.utils.dateparse import parse_datetime, parse_date
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 from rest_framework.fields import SkipField
 
 import badgrlog
 from backpack.models import BackpackCollection, BackpackCollectionBadgeInstance
+from issuer.helpers import BadgeCheckHelper
 from issuer.models import BadgeInstance
 from issuer.serializers_v1 import EvidenceItemSerializer
 from mainsite.drf_fields import Base64FileField
@@ -77,35 +80,45 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
     #         return data
     #     raise serializers.ValidationError("Requested recipient ID {} is not one of your verified email addresses.")
     #
-    # def validate(self, data):
-    #     """
-    #     Ensure only one assertion input field given.
-    #     """
-    #
-    #     fields_present = ['image' in data, 'url' in data,
-    #                       'assertion' in data and data.get('assertion')]
-    #     if (fields_present.count(True) > 1):
-    #         raise serializers.ValidationError(
-    #             "Only one instance input field allowed.")
-    #
-    #     return data
-    #
-    # def create(self, validated_data):
-    #     try:
-    #         instance, created = BadgeCheckHelper.get_or_create_assertion(**validated_data)
-    #     except DjangoValidationError as e:
-    #         raise RestframeworkValidationError(e.messages)
-    #     return instance
-    #
-    # def update(self, instance, validated_data):
-    #     """ Only updating acceptance status (to 'Accepted') is permitted for now. """
-    #     # Only locally issued badges will ever have an acceptance status other than 'Accepted'
-    #     if instance.acceptance == 'Unaccepted' and validated_data.get('acceptance') == 'Accepted':
-    #         instance.acceptance = 'Accepted'
-    #
-    #         instance.save()
-    #
-    #     return instance
+    def validate(self, data):
+        """
+        Ensure only one assertion input field given.
+        """
+
+        fields_present = ['image' in data, 'url' in data,
+                          'assertion' in data and data.get('assertion')]
+        if (fields_present.count(True) > 1):
+            raise serializers.ValidationError(
+                "Only one instance input field allowed.")
+
+        return data
+
+    def create(self, validated_data):
+        owner = validated_data.get('created_by')
+        try:
+            instance, created = BadgeCheckHelper.get_or_create_assertion(
+                url=validated_data.get('url', None),
+                imagefile=validated_data.get('image', None),
+                assertion=validated_data.get('assertion', None),
+                created_by=owner,
+            )
+            owner.publish()  # update BadgeUser.cached_badgeinstances()
+        except DjangoValidationError as e:
+            raise RestframeworkValidationError(e.messages)
+        return instance
+
+    def update(self, instance, validated_data):
+        """ Only updating acceptance status (to 'Accepted') is permitted for now. """
+        # Only locally issued badges will ever have an acceptance status other than 'Accepted'
+        if instance.acceptance == 'Unaccepted' and validated_data.get('acceptance') == 'Accepted':
+            instance.acceptance = 'Accepted'
+
+            instance.save()
+            owner = validated_data.get('created_by', None)
+            if owner:
+                owner.publish()
+
+        return instance
 
 
 class CollectionBadgesSerializerV1(serializers.ListSerializer):

@@ -22,7 +22,7 @@ class BackpackAssertionList(BaseEntityListView):
     v1_serializer_class = LocalBadgeInstanceUploadSerializerV1
     v2_serializer_class = BackpackAssertionSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, VerifiedEmailMatchesRecipientIdentifier)
-    http_method_names = ('get',)
+    http_method_names = ('get', 'post')
 
     def get_objects(self, request, **kwargs):
         return filter(lambda a: (not a.revoked) and a.acceptance != BadgeInstance.ACCEPTANCE_REJECTED,
@@ -32,6 +32,9 @@ class BackpackAssertionList(BaseEntityListView):
         return super(BackpackAssertionList, self).get(request, **kwargs)
 
     def post(self, request, **kwargs):
+        if kwargs.get('version', 'v1') == 'v1':
+            return super(BackpackAssertionList, self).post(request, **kwargs)
+            
         raise NotImplementedError("use BackpackImportBadge.post instead")
 
     def get_context_data(self, **kwargs):

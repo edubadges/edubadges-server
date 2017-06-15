@@ -163,7 +163,7 @@ class BadgeCheckHelper(object):
 
         if not is_valid:
             if report.get('errorCount', 0) > 0:
-                errors = cls.translate_errors(report.get('messages', []))
+                errors = list(cls.translate_errors(report.get('messages', [])))
             else:
                 errors = [{'name': "UNABLE_TO_VERIFY", 'description': "Unable to verify the assertion"}]
             raise ValidationError(errors)
