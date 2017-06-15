@@ -35,7 +35,8 @@ class BackpackAssertionSerializerV2(DetailSerializerV2):
 class BackpackCollectionSerializerV2(DetailSerializerV2):
     name = serializers.CharField()
     description = MarkdownCharField(required=False)
-    share_url = serializers.URLField(source='public_url', read_only=True)
+    share_url = serializers.URLField(read_only=True)
+    published = serializers.BooleanField(required=False)
 
     assertions = EntityRelatedFieldV2(many=True, source='badge_items', required=False, queryset=BadgeInstance.cached)
 

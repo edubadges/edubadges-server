@@ -1,14 +1,16 @@
 # encoding: utf-8
 from __future__ import unicode_literals
 
+from rest_framework import permissions
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK
+from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_302_FOUND
+from rest_framework.views import APIView
 
-from backpack.models import BackpackCollection
+from backpack.models import BackpackCollection, BackpackBadgeShare, BackpackCollectionShare
+from backpack.serializers_v1 import CollectionSerializerV1, LocalBadgeInstanceUploadSerializerV1
 from backpack.serializers_v2 import BackpackAssertionSerializerV2, BackpackCollectionSerializerV2, \
     BackpackImportSerializerV2
-from composition.serializers import LocalBadgeInstanceUploadSerializer, CollectionSerializer
-from entity.api import BaseEntityListView, BaseEntityDetailView, BaseEntityView
+from entity.api import BaseEntityListView, BaseEntityDetailView
 from issuer.models import BadgeInstance
 from issuer.permissions import AuditedModelOwner, VerifiedEmailMatchesRecipientIdentifier
 from issuer.public_api import ImagePropertyDetailView
@@ -17,13 +19,13 @@ from mainsite.permissions import AuthenticatedWithVerifiedEmail
 
 class BackpackAssertionList(BaseEntityListView):
     model = BadgeInstance
-    v1_serializer_class = LocalBadgeInstanceUploadSerializer
+    v1_serializer_class = LocalBadgeInstanceUploadSerializerV1
     v2_serializer_class = BackpackAssertionSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, VerifiedEmailMatchesRecipientIdentifier)
     http_method_names = ('get',)
 
     def get_objects(self, request, **kwargs):
-        return filter(lambda a: a.acceptance != BadgeInstance.ACCEPTANCE_REJECTED,
+        return filter(lambda a: (not a.revoked) and a.acceptance != BadgeInstance.ACCEPTANCE_REJECTED,
                       self.request.user.cached_badgeinstances())
 
     def get(self, request, **kwargs):
@@ -35,7 +37,7 @@ class BackpackAssertionList(BaseEntityListView):
 
 class BackpackAssertionDetail(BaseEntityDetailView):
     model = BadgeInstance
-    v1_serializer_class = LocalBadgeInstanceUploadSerializer
+    v1_serializer_class = LocalBadgeInstanceUploadSerializerV1
     v2_serializer_class = BackpackAssertionSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, VerifiedEmailMatchesRecipientIdentifier)
     http_method_names = ('get', 'delete')
@@ -57,7 +59,7 @@ class BackpackAssertionDetailImage(ImagePropertyDetailView):
 
 class BackpackCollectionList(BaseEntityListView):
     model = BackpackCollection
-    v1_serializer_class = CollectionSerializer
+    v1_serializer_class = CollectionSerializerV1
     v2_serializer_class = BackpackCollectionSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, AuditedModelOwner)
 
@@ -73,7 +75,7 @@ class BackpackCollectionList(BaseEntityListView):
 
 class BackpackCollectionDetail(BaseEntityDetailView):
     model = BackpackCollection
-    v1_serializer_class = CollectionSerializer
+    v1_serializer_class = CollectionSerializerV1
     v2_serializer_class = BackpackCollectionSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, AuditedModelOwner)
 
@@ -95,3 +97,67 @@ class BackpackImportBadge(BaseEntityListView):
     def post(self, request, **kwargs):
         return super(BackpackImportBadge, self).post(request, **kwargs)
 
+
+class ShareBackpackAssertion(BaseEntityDetailView):
+    model = BadgeInstance
+    permission_classes = (permissions.AllowAny,)  # this is AllowAny to support tracking sharing links in emails
+    http_method_names = ('get',)
+
+    def get(self, request, **kwargs):
+        """
+        Share a single badge to a support share provider
+        ---
+        parameters:
+            - name: provider
+              description: The identifier of the provider to use. Supports 'facebook', 'linkedin'
+              required: true
+              type: string
+              paramType: query
+        """
+        provider = request.query_params.get('provider')
+
+        badge = self.get_object(request, **kwargs)
+        if not badge:
+            return Response(status=HTTP_404_NOT_FOUND)
+
+        share = BackpackBadgeShare(provider=provider)
+        share.set_badge(badge)
+        share_url = share.get_share_url(provider)
+        if not share_url:
+            return Response({'error': "invalid share provider"}, status=HTTP_400_BAD_REQUEST)
+
+        share.save()
+        headers = {'Location': share_url}
+        return Response(status=HTTP_302_FOUND, headers=headers)
+
+
+class ShareBackpackCollection(BaseEntityDetailView):
+    model = BackpackCollection
+    permission_classes = (permissions.AllowAny,)  # this is AllowAny to support tracking sharing links in emails
+    http_method_names = ('get',)
+
+    def get(self, request, **kwargs):
+        """
+        Share a collection to a supported share provider
+        ---
+        parameters:
+            - name: provider
+              description: The identifier of the provider to use. Supports 'facebook', 'linkedin'
+              required: true
+              type: string
+              paramType: query
+        """
+        provider = request.query_params.get('provider')
+
+        collection = self.get_object(request, **kwargs)
+        if not collection:
+            return Response(status=HTTP_404_NOT_FOUND)
+
+        share = BackpackCollectionShare(provider=provider, collection=collection)
+        share_url = share.get_share_url(provider, title=collection.name, summary=collection.description)
+        if not share_url:
+            return Response({'error': "invalid share provider"}, status=HTTP_400_BAD_REQUEST)
+
+        share.save()
+        headers = {'Location': share_url}
+        return Response(status=HTTP_302_FOUND, headers=headers)

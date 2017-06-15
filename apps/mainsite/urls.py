@@ -62,7 +62,7 @@ urlpatterns = [
     # v1 API endpoints
     url(r'^v1/user/', include('badgeuser.v1_api_urls'), kwargs={'version': 'v1'}),
     url(r'^v1/issuer/', include('issuer.v1_api_urls'), kwargs={'version': 'v1'}),
-    url(r'^v1/earner', include('composition.api_urls')),
+    url(r'^v1/earner/', include('backpack.v1_api_urls'), kwargs={'version': 'v1'}),
 
 
     # NOTE: pathway and recipient were written and deployed for beta testing at /v2/ before /v2/ was formalized
