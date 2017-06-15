@@ -28,6 +28,15 @@ class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
     def cached_badgeinstances(self):
         return self.assertions.all()
 
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_collects(self):
+        return self.backpackcollectionbadgeinstance_set.all()
+
+    @property
+    def owner(self):
+        from badgeuser.models import BadgeUser
+        return BadgeUser.cached.get(id=self.created_by_id)
+
     # Convenience methods for toggling published state
     @property
     def published(self):
@@ -89,6 +98,14 @@ class BackpackCollectionBadgeInstance(cachemodel.CacheModel):
     def delete(self):
         super(BackpackCollectionBadgeInstance, self).delete()
         self.collection.publish()
+
+    @property
+    def cached_badgeinstance(self):
+        return BadgeInstance.cached.get(id=self.badgeinstance_id)
+
+    @property
+    def cached_collection(self):
+        return BackpackCollection.cached.get(id=self.collection_id)
 
 
 class BaseSharedModel(cachemodel.CacheModel, basic_models.TimestampedModel):

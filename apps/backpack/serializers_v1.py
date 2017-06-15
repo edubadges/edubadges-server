@@ -111,13 +111,8 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
 class CollectionBadgesSerializerV1(serializers.ListSerializer):
 
     def to_representation(self, data):
-        # TODO: These badges should be removed from these collections upon rejection or revocation not just filtered.
-        try:
-            filtered_data = data.exclude(issuer_instance__acceptance=BadgeInstance.ACCEPTANCE_REJECTED).exclude(issuer_instance__revoked=True)
-        except AttributeError:
-            filtered_data = [c for c in data if c.badge_instance.acceptance is not BadgeInstance.ACCEPTANCE_REJECTED and c.badge_instance.revoked is False]
-
-        filtered_data = [c for c in filtered_data if c.badge_instance.recipient_identifier in c.collection.owner.all_recipient_identifiers]
+        filtered_data = [b for b in data if b.cached_badgeinstance.acceptance is not BadgeInstance.ACCEPTANCE_REJECTED and b.cached_badgeinstance.revoked is False]
+        filtered_data = [c for c in filtered_data if c.cached_badgeinstance.recipient_identifier in c.cached_collection.owner.all_recipient_identifiers]
 
         representation = super(CollectionBadgesSerializerV1, self).to_representation(filtered_data)
         return representation
@@ -149,13 +144,13 @@ class CollectionBadgeSerializerV1(serializers.ModelSerializer):
     class Meta:
         model = BackpackCollectionBadgeInstance
         list_serializer_class = CollectionBadgesSerializerV1
-        fields = ('id', 'description', 'instance', 'collection')
+        fields = ('id', 'collection', 'badgeinstance')
 
     def get_validators(self):
         return []
 
     def to_internal_value(self, data):
-        description = data.get('description', '') or ''
+        # description = data.get('description', '') or ''
 
         # populate collection from various methods
         collection = data.get('collection')
@@ -205,19 +200,19 @@ class CollectionBadgeSerializerV1(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = OrderedDict()
-        ret['id'] = instance.badge_id
-        ret['description'] = instance.description
+        ret['id'] = instance.cached_badgeinstance.entity_id
+        ret['description'] = ""
         return ret
 
 
 class CollectionSerializerV1(serializers.Serializer):
     name = StripTagsCharField(required=True, max_length=128)
-    slug = StripTagsCharField(required=False, max_length=128)
+    slug = StripTagsCharField(required=False, max_length=128, source='entity_id')
     description = StripTagsCharField(required=False, allow_blank=True, allow_null=True, max_length=255)
     share_hash = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=255)
     share_url = serializers.CharField(read_only=True, max_length=1024)
     badges = CollectionBadgeSerializerV1(
-        read_only=False, many=True, required=False
+        read_only=False, many=True, required=False, source='cached_collects'
     )
     published = serializers.BooleanField(required=False)
 
