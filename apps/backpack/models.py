@@ -24,6 +24,10 @@ class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
 
     assertions = models.ManyToManyField('issuer.BadgeInstance', blank=True, through='backpack.BackpackCollectionBadgeInstance')
 
+    def publish(self):
+        super(BackpackCollection, self).publish()
+        self.created_by.publish()
+
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeinstances(self):
         return self.assertions.all()

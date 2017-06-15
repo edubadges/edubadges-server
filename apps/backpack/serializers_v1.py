@@ -150,8 +150,6 @@ class CollectionBadgeSerializerV1(serializers.ModelSerializer):
         return []
 
     def to_internal_value(self, data):
-        # description = data.get('description', '') or ''
-
         # populate collection from various methods
         collection = data.get('collection')
         if not collection:
@@ -160,43 +158,18 @@ class CollectionBadgeSerializerV1(serializers.ModelSerializer):
             collection = self.parent.parent.instance
         elif not collection and self.parent.instance:
             collection = self.parent.instance
-        if not collection:
-            return LocalBadgeInstanceCollection(
-                instance_id=data.get('id'), description=description)
+        # if not collection:
+            # return LocalBadgeInstanceCollection(
+            #     instance_id=data.get('id'), description=description)
 
-        badge = get_badge_by_identifier(data.get('id'))
-        get_kwargs = {
-            'collection': collection
-        }
-        if isinstance(badge, LocalBadgeInstance):
-            get_kwargs['issuer_instance__isnull'] = True
-            get_kwargs['instance_id'] = badge.pk
-        elif isinstance(badge, BadgeInstance):
-            get_kwargs['issuer_instance_id'] = badge.pk
-            get_kwargs['instance__isnull'] = True
+        badgeinstance = BadgeInstance.cached.get(entity_id=data.get('id'))
+        if badgeinstance.recipient_identifier not in collection.owner.all_recipient_identifiers:
+            raise serializers.ValidationError("Cannot add badge to a collection created by a different recipient.")
 
-        try:
-            instance = LocalBadgeInstanceCollection.objects.get(**get_kwargs)
-
-            if description != instance.description:
-                instance.description = description
-                instance._dirty = True  # record if instance needs to be updated in list serializer
-
-        except LocalBadgeInstanceCollection.DoesNotExist:
-            instance = LocalBadgeInstanceCollection(
-                collection=collection,
-                description=description
-            )
-            if isinstance(badge, LocalBadgeInstance):
-                instance.instance_id = badge.pk
-            elif isinstance(badge, BadgeInstance):
-                instance.issuer_instance_id = badge.pk
-
-            if instance.collection.owner != instance.badge_instance.recipient_user:
-                raise serializers.ValidationError(
-                    "Cannot add badge to a collection created by a different recipient.")
-
-        return instance
+        collect, created = BackpackCollectionBadgeInstance.objects.get_or_create(
+            collection=collection,
+            badgeinstance=badgeinstance)
+        return collect
 
     def to_representation(self, instance):
         ret = OrderedDict()
@@ -216,47 +189,45 @@ class CollectionSerializerV1(serializers.Serializer):
     )
     published = serializers.BooleanField(required=False)
 
-    # def create(self, validated_data):
-    #     user = self.context.get('user')
-    #
-    #     new_collection = Collection(
-    #         name=validated_data.get('name'),
-    #         slug=validated_data.get('slug', None),
-    #         description=validated_data.get('description', ''),
-    #         owner=user)
-    #
-    #     new_collection.published = validated_data.get('published', False)
-    #     new_collection.save()
-    #
-    #     if validated_data.get('badges') is not None:
-    #         for entry in validated_data['badges']:
-    #             entry.collection = new_collection
-    #             entry.save()
-    #
-    #     return new_collection
+    def create(self, validated_data):
+        new_collection = BackpackCollection.objects.create(
+            name=validated_data.get('name'),
+            description=validated_data.get('description', ''),
+            created_by=validated_data.get('created_by')
+        )
+        published = validated_data.get('published', False)
+        if published:
+            new_collection.published = published
+            new_collection.save()
 
-    # def update(self, instance, validated_data):
-    #     instance.name = validated_data.get('name', instance.name)
-    #     instance.description = validated_data.get('description', instance.description)
-    #     instance.published = validated_data.get('published', instance.published)
-    #
-    #     if 'badges' in validated_data\
-    #             and validated_data['badges'] is not None:
-    #
-    #         existing_entries = list(instance.badges.all())
-    #         updated_ids = set()
-    #
-    #         for entry in validated_data['badges']:
-    #             if not entry.pk:
-    #                 entry.save()
-    #             updated_ids.add(entry.pk)
-    #
-    #         for old_entry in existing_entries:
-    #             if old_entry.pk not in updated_ids:
-    #                 old_entry.delete()
-    #
-    #     instance.save()
-    #     return instance
+        if validated_data.get('badges') is not None:
+            for entry in validated_data['cached_collects']:
+                entry.collection = new_collection
+                entry.save()
+
+        return new_collection
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.published = validated_data.get('published', instance.published)
+
+        if 'cached_collects' in validated_data\
+                and validated_data['cached_collects'] is not None:
+
+            existing_entries = list(instance.cached_collects())
+            updated_ids = set()
+
+            for entry in validated_data['cached_collects']:
+                if not entry.pk:
+                    entry.save()
+                updated_ids.add(entry.pk)
+
+            for old_entry in existing_entries:
+                if old_entry.pk not in updated_ids:
+                    old_entry.delete()
+
+        instance.save()
+        return instance
 
 
 ##
