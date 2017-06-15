@@ -99,7 +99,9 @@ class IssuerRoleActionSerializerV1(serializers.Serializer):
     action = serializers.ChoiceField(('add', 'modify', 'remove'), allow_blank=True)
     username = serializers.CharField(allow_blank=True, required=False)
     email = serializers.EmailField(allow_blank=True, required=False)
-    editor = serializers.BooleanField(default=False)
+    role = serializers.CharField(
+        validators=[ChoicesValidator(dict(IssuerStaff.ROLE_CHOICES).keys())],
+        default=IssuerStaff.ROLE_STAFF)
 
     def validate(self, attrs):
         if attrs.get('username') and attrs.get('email'):

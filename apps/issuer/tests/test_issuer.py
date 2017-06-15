@@ -4,8 +4,10 @@ from __future__ import unicode_literals
 import os.path
 
 import os
+from django.contrib.auth import get_user_model
 from django.core.files.images import get_image_dimensions
 
+from badgeuser.models import CachedEmailAddress
 from issuer.models import Issuer, BadgeClass
 from mainsite.tests.base import BadgrTestCase, SetupIssuerHelper
 
@@ -124,12 +126,30 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
         response = self.client.post('/v1/issuer/issuers/{slug}/staff'.format(slug=issuer.entity_id), {
             'action': 'add',
             'email': other_user.primary_email,
-            'editor': True
+            'role': 'editor'
         })
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 2)  # Assert that there is now one editor
 
+    def test_cannot_add_user_by_unverified_email(self):
+        test_user = self.setup_user(authenticate=True)
+        self.client.force_authenticate(user=test_user)
+
+        user_to_update = self.setup_user()
+        new_email = CachedEmailAddress.objects.create(
+            user=user_to_update, verified=False, email='newemailsonew@example.com')
+
+        post_response = self.client.post(
+            '/v1/issuer/issuers/test-issuer/staff',
+            {'action': 'add', 'email': new_email.email, 'role': 'editor'}
+        )
+
+        self.assertEqual(post_response.status_code, 404)
+
     def test_add_user_to_issuer_editors_set_too_many_methods(self):
+        """
+        Enter a username or email. Both are not allowed. 
+        """
         test_user = self.setup_user(authenticate=True)
         issuer = self.setup_issuer(owner=test_user)
 
@@ -137,7 +157,7 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
             'action': 'add',
             'email': 'test3@example.com',
             'username': 'test3',
-            'editor': True
+            'role': 'editor'
         })
         self.assertEqual(response.status_code, 400)
 
@@ -147,7 +167,7 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
 
         response = self.client.post('/v1/issuer/issuers/{slug}/staff'.format(slug=issuer.entity_id), {
             'action': 'add',
-            'editor': True
+            'role': 'editor'
         })
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.data, 'User not found. Neither email address or username was provided.')
@@ -159,7 +179,7 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
         response = self.client.post('/v1/issuer/issuers/{slug}/staff'.format(slug=issuer.entity_id), {
             'action': 'DO THE HOKEY POKEY',
             'username': 'test2',
-            'editor': True
+            'role': 'editor'
         })
         self.assertEqual(response.status_code, 400)
 
@@ -171,16 +191,16 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
         response = self.client.post('/v1/issuer/issuers/{slug}/staff'.format(slug=issuer.entity_id), {
             'action': 'add',
             'username': erroneous_username,
-            'editor': True
+            'role': 'editor'
         })
-        self.assertContains(response, "User {} not found.".format(erroneous_username), status_code=404)
+        self.assertContains(response, "User not found.".format(erroneous_username), status_code=404)
 
     def test_add_user_to_nonexistent_issuer_editors_set(self):
         test_user = self.setup_user(authenticate=True)
         erroneous_issuer_slug = 'wrongissuer'
         response = self.client.post(
             '/v1/issuer/issuers/{slug}/staff'.format(slug=erroneous_issuer_slug),
-            {'action': 'add', 'username': 'test2', 'editor': True}
+            {'action': 'add', 'username': 'test2', 'role': 'editor'}
         )
         self.assertEqual(response.status_code, 404)
 
@@ -205,6 +225,26 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
         })
         self.assertEqual(second_response.status_code, 200)
         self.assertEqual(len(test_issuer.staff.all()), 1)
+
+    def test_cannot_modify_or_remove_self(self):
+        """
+        The authenticated issuer owner cannot modify their own role or remove themself from the list.
+        """
+        test_user = self.setup_user(authenticate=True)
+        self.client.force_authenticate(user=test_user)
+        post_response = self.client.post(
+            '/v1/issuer/issuers/test-issuer/staff',
+            {'action': 'remove', 'email': test_user.email}
+        )
+
+        self.assertEqual(post_response.status_code, 400)
+
+        post_response = self.client.post(
+            '/v1/issuer/issuers/test-issuer/staff',
+            {'action': 'modify', 'email': test_user.email, 'role': 'staff'}
+        )
+
+        self.assertEqual(post_response.status_code, 400)
 
     def test_delete_issuer_successfully(self):
         test_user = self.setup_user(authenticate=True)
