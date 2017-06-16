@@ -46,5 +46,4 @@ class BadgrSocialAccountVerifyEmail(RedirectView):
     def get_redirect_url(self):
         badgr_app = get_session_badgr_app(self.request)
         if badgr_app is not None:
-            return set_url_query_params(badgr_app.ui_signup_success_redirect,
-                                        authError='Please check your email address for a confirmation email')
+            return badgr_app.ui_signup_success_redirect

@@ -1,10 +1,5 @@
-from xml.etree import ElementTree
-from xml.parsers.expat import ExpatError
-
-from django.utils import six
-
-from allauth.socialaccount import providers
-from allauth.socialaccount.providers.oauth.client import OAuth, OAuthClient
+import json
+from allauth.socialaccount.providers.oauth.client import OAuth
 from allauth.socialaccount.providers.oauth.views import (OAuthAdapter,
                                                          OAuthLoginView,
                                                          OAuthCallbackView)
@@ -13,11 +8,12 @@ from .provider import KonyProvider
 
 
 class KonyAPI(OAuth):
-    url = ' https://api.qa-kony.com/api/v1_0/whoami'
+    url = 'https://api.dev-kony.com/api/v1_0/whoami'
 
     def get_user_info(self):
-        raw_xml = self.query(self.url)
-
+        raw_json = self.query(self.url, method="POST")
+        user_info = json.loads(raw_json)
+        return user_info
 
     def to_dict(self, xml):
         """
@@ -51,30 +47,6 @@ class KonyOAuthAdapter(OAuthAdapter):
         extra_data = client.get_user_info()
         return self.get_provider().sociallogin_from_response(request,
                                                              extra_data)
-
-class KonyOAuthClient(OAuthClient):
-    def __init__(self, *args, **kwargs):
-        super(KonyOAuthClient, self).__init__(*args, **kwargs)
-
-    def get_redirect(self, authorization_url, extra_params):
-        pass
-
-
-class KonyOAuthLoginView(OAuthLoginView):
-    def _get_client(self, request, callback_url):
-        provider = self.adapter.get_provider()
-        app = provider.get_app(request)
-        scope = ' '.join(provider.get_scope(request))
-        parameters = {}
-        if scope:
-            parameters['scope'] = scope
-        client = KonyOAuthClient(request, app.client_id, app.secret,
-                                 self.adapter.request_token_url,
-                                 self.adapter.access_token_url,
-                                 callback_url,
-                                 parameters=parameters, provider=provider)
-        return client
-
 
 oauth_login = OAuthLoginView.adapter_view(KonyOAuthAdapter)
 oauth_callback = OAuthCallbackView.adapter_view(KonyOAuthAdapter)
