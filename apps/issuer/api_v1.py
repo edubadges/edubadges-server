@@ -169,6 +169,10 @@ class IssuerStaffList(VersionedObjectMixin, APIView):
                 error_text, status=status.HTTP_404_NOT_FOUND
             )
 
+        if user_to_modify == request.user:
+            return Response("Cannot modify your own permissions on an issuer profile",
+                            status=status.HTTP_400_BAD_REQUEST)
+
         action = serializer.validated_data.get('action')
         if action == 'add':
             role = serializer.validated_data.get('role')

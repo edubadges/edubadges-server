@@ -231,16 +231,17 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
         The authenticated issuer owner cannot modify their own role or remove themself from the list.
         """
         test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
         self.client.force_authenticate(user=test_user)
         post_response = self.client.post(
-            '/v1/issuer/issuers/test-issuer/staff',
+            '/v1/issuer/issuers/{}/staff'.format(test_issuer.entity_id),
             {'action': 'remove', 'email': test_user.email}
         )
 
         self.assertEqual(post_response.status_code, 400)
 
         post_response = self.client.post(
-            '/v1/issuer/issuers/test-issuer/staff',
+            '/v1/issuer/issuers/{}/staff'.format(test_issuer.entity_id),
             {'action': 'modify', 'email': test_user.email, 'role': 'staff'}
         )
 
