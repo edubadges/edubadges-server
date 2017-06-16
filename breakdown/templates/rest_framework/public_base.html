@@ -251,18 +251,6 @@
 
 </main>
 
-
-<nav class="menu" id="menu">
-	<h1 class="visuallyhidden">Main Navigation</h1>
-	<ul>
-		{% if user.is_authenticated %}
-		<li class="menuitem" ><a href="{% url "logout"%}">{{ user.email }}</a></li>
-		{% else %}
-		<li class="menuitem" ><a href="{% url "login"%}?next={{ request.path }}">Sign In</a></li>
-		{% endif %}
-	</ul>
-</nav>
-
 {% block script %}
 	<script src="{% static "rest_framework/js/jquery-1.8.1-min.js" %}"></script>
 	<script src="{% static "rest_framework/js/bootstrap.min.js" %}"></script>
