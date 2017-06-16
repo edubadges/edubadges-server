@@ -1,6 +1,8 @@
+from allauth.socialaccount import providers
 from django.apps import apps
 from django.conf import settings
 from django.conf.urls import include, url
+from django.utils import importlib
 
 from mainsite.admin import badgr_admin
 
@@ -51,8 +53,7 @@ urlpatterns = [
 
     # REST Framework
     url(r'^api-auth/token$', LoginAndObtainAuthToken.as_view()),
-    url(r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'public/login.html'}, name='login'),
-    url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {'next_page': 'login'}, name='logout'),
+    url(r'^account/', include('badgrsocialauth.urls')),
 
     # v1 API endpoints
     url(r'^v1/user', include('badgeuser.api_urls')),
@@ -64,6 +65,7 @@ urlpatterns = [
     url(r'^v2/issuers/(?P<issuer_slug>[^/]+)/recipient-groups', include('recipient.api_urls')),
 
 ]
+
 
 if apps.is_installed('badgebook'):
     urlpatterns += [

@@ -28,8 +28,12 @@ INSTALLED_APPS = [
 
     'allauth',
     'allauth.account',
+    'allauth.socialaccount',
+    'badgrsocialauth.providers.kony',
+    'badgrsocialauth.providers.google',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.linkedin_oauth2',
     'corsheaders',
-
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',
@@ -148,6 +152,13 @@ ACCOUNT_FORMS = {
 }
 ACCOUNT_SIGNUP_FORM_CLASS = 'badgeuser.forms.BadgeUserCreationForm'
 
+
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+SOCIALACCOUNT_PROVIDERS = {
+    'kony': {
+        'environment': 'dev'
+    }
+}
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_URLS_REGEX = r'^.*$'
