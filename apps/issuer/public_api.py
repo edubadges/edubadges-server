@@ -221,6 +221,7 @@ class BadgeInstanceJson(JSONComponentView):
     model = BadgeInstance
     renderer_classes = (JSONRenderer, BadgeInstanceHTMLRenderer,)
     html_renderer_class = BadgeInstanceHTMLRenderer
+    permission_classes = (permissions.AllowAny,)
 
     def get_renderer_context(self, **kwargs):
         context = super(BadgeInstanceJson, self).get_renderer_context()

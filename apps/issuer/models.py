@@ -440,7 +440,8 @@ class BadgeInstance(BaseAuditedModel,
 
     @property
     def share_url(self):
-        return OriginSetting.HTTP+reverse('backpack_shared_assertion', kwargs={'share_hash': self.entity_id})
+        return self.public_url
+        # return OriginSetting.HTTP+reverse('backpack_shared_assertion', kwargs={'share_hash': self.entity_id})
 
     @property
     def cached_issuer(self):
