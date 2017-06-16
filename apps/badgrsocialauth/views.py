@@ -26,7 +26,7 @@ class BadgrSocialLogin(RedirectView):
         if badgr_app is not None:
             set_session_badgr_app(self.request, badgr_app)
         else:
-            pass
+            raise ValidationError('Unable to save BadgrApp in session')
 
         try:
             return reverse('{}_login'.format(self.request.GET.get('provider')))

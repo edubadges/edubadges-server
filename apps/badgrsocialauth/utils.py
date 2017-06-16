@@ -5,6 +5,10 @@ from mainsite.models import BadgrApp
 
 
 def set_url_query_params(url, **kwargs):
+    """
+    Given a url, possibly including query parameters, return a url with the given query parameters set, replaced on a
+    per-key basis.
+    """
     url_parts = list(urlparse.urlparse(url))
     query = dict(urlparse.parse_qsl(url_parts[4]))
     query.update(kwargs)
