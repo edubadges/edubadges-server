@@ -5,6 +5,7 @@ import re
 import uuid
 from collections import OrderedDict
 from itertools import chain
+from json import loads as json_loads
 
 import cachemodel
 import datetime
@@ -204,6 +205,9 @@ class Issuer(ResizeUploadedImage,
         return self.image
 
     def get_json(self, obi_version=CURRENT_OBI_VERSION):
+        if self.source_url:
+            return json_loads(self.original_json)
+        
         obi_version, context_iri = get_obi_context(obi_version)
 
         json = OrderedDict({'@context': context_iri})
@@ -358,6 +362,9 @@ class BadgeClass(ResizeUploadedImage,
         )
 
     def get_json(self, obi_version=CURRENT_OBI_VERSION):
+        if self.source_url:
+            return json_loads(self.original_json)
+
         obi_version, context_iri = get_obi_context(obi_version)
         json = OrderedDict({'@context': context_iri})
         json.update(OrderedDict(
@@ -614,6 +621,9 @@ class BadgeInstance(BaseAuditedModel,
         return None
 
     def get_json(self, obi_version=CURRENT_OBI_VERSION):
+        if self.source_url:
+            return json_loads(self.original_json)
+
         obi_version, context_iri = get_obi_context(obi_version)
 
         json = OrderedDict({'@context': context_iri})
