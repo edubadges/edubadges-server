@@ -45,6 +45,9 @@
 					  <a class="button button-primaryghost" href="{{ badge_class.json.criteria }}" target="_blank">View Criteria</a>
 				    {% endif %}
 				    <a class="button button-primaryghost" href="{{ badge_class.get_absolute_url }}.json" target="_blank">View JSON</a>
+				    {% if external_source_url %}
+					    <a class="button button-primaryghost" href="{{ external_source_url }}" target="_blank">View Original</a>
+				    {% endif %}
 			    </div>
 
 		    </div>
