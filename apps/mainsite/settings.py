@@ -28,8 +28,12 @@ INSTALLED_APPS = [
 
     'allauth',
     'allauth.account',
+    'allauth.socialaccount',
+    'badgrsocialauth.providers.kony',
+    'badgrsocialauth.providers.google',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.linkedin_oauth2',
     'corsheaders',
-
     'rest_framework',
     'rest_framework.authtoken',
 
@@ -138,6 +142,8 @@ AUTHENTICATION_BACKENDS = [
     "badgeuser.backends.CachedAuthenticationBackend"
 
 ]
+
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 ACCOUNT_ADAPTER = 'mainsite.account_adapter.BadgrAccountAdapter'
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
@@ -151,6 +157,13 @@ ACCOUNT_FORMS = {
 }
 ACCOUNT_SIGNUP_FORM_CLASS = 'badgeuser.forms.BadgeUserCreationForm'
 
+
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+SOCIALACCOUNT_PROVIDERS = {
+    'kony': {
+        'environment': 'dev'
+    }
+}
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_URLS_REGEX = r'^.*$'

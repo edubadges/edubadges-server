@@ -1,7 +1,8 @@
+from allauth.socialaccount import providers
 from django.apps import apps
 from django.conf import settings
 from django.conf.urls import include, url
-from rest_framework.authtoken.views import obtain_auth_token
+from django.utils import importlib
 
 from backpack.views import LegacyCollectionShareRedirectView
 from mainsite.admin import badgr_admin
@@ -56,9 +57,8 @@ urlpatterns = [
     url(r'^earner/collections/(?P<pk>[^/]+)/(?P<share_hash>[^/]+)/embed$', LegacyCollectionShareRedirectView.as_view(), name='legacy_shared_collection_embed'),
 
     # REST Framework
-    url(r'^api-auth/token$', obtain_auth_token),
-    url(r'^accounts/login/$', contrib_auth_views.login, {'template_name': 'public/login.html'}, name='login'),
-    url(r'^accounts/logout/$', contrib_auth_views.logout, {'next_page': 'login'}, name='logout'),
+    url(r'^api-auth/token$', LoginAndObtainAuthToken.as_view()),
+    url(r'^account/', include('badgrsocialauth.urls')),
 
     # v1 API endpoints
     url(r'^v1/user/', include('badgeuser.v1_api_urls'), kwargs={'version': 'v1'}),
@@ -82,6 +82,7 @@ urlpatterns = [
 
 
 ]
+
 
 if apps.is_installed('badgebook'):
     urlpatterns += [
