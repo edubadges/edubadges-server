@@ -1,16 +1,22 @@
 """
 Utility functions and constants that might be used across the project.
 """
-import StringIO
-import hashlib
-import os
-import urlparse
+from __future__ import unicode_literals
 
+import StringIO
+import base64
+import hashlib
+import re
+import urlparse
+import uuid
+
+import os
 import requests
 from django.apps import apps
 from django.conf import settings
 from django.core.files.storage import DefaultStorage
 from django.core.urlresolvers import get_callable
+from xml.etree import cElementTree as ET
 
 
 class ObjectView(object):
@@ -81,19 +87,22 @@ def verify_svg(fileobj):
     Check if provided file is svg
     from: https://gist.github.com/ambivalentno/9bc42b9a417677d96a21
     """
-    import xml.etree.cElementTree as et
     fileobj.seek(0)
     tag = None
     try:
-        for event, el in et.iterparse(fileobj, ('start',)):
+        for event, el in ET.iterparse(fileobj, events=(b'start',)):
             tag = el.tag
             break
-    except et.ParseError:
+    except ET.ParseError:
         pass
     return tag == '{http://www.w3.org/2000/svg}svg'
 
 
 def fetch_remote_file_to_storage(remote_url, upload_to=''):
+    """
+    Fetches a remote url, and stores it in DefaultStorage
+    :return: (status_code, new_storage_name)
+    """
     store = DefaultStorage()
     r = requests.get(remote_url, stream=True)
     if r.status_code == 200:
@@ -105,6 +114,15 @@ def fetch_remote_file_to_storage(remote_url, upload_to=''):
         if not store.exists(storage_name):
             buf = StringIO.StringIO(r.content)
             store.save(storage_name, buf)
-            return r.status_code, storage_name
+        return r.status_code, storage_name
     return r.status_code, None
 
+
+def generate_entity_uri():
+    """
+    Generate a unique url-safe identifier
+    """
+    entity_uuid = uuid.uuid4()
+    b64_string = base64.urlsafe_b64encode(entity_uuid.bytes)
+    b64_trimmed = re.sub(r'=+$', '', b64_string)
+    return b64_trimmed

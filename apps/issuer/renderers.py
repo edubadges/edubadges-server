@@ -16,10 +16,16 @@ class BadgeInstanceHTMLRenderer(BrowsableAPIRenderer):
         context = super(BadgeInstanceHTMLRenderer, self).get_context(
             data, accepted_media_type, renderer_context)
 
+        badge_instance = renderer_context.get('badge_instance')
+
         obi_version = renderer_context.get('obi_version', utils.CURRENT_OBI_VERSION)
         context['obi_version'] = obi_version
 
-        public_url = renderer_context['badge_instance'].jsonld_id + '.json'
+        if badge_instance.source_url:
+            context['external_source_url'] = badge_instance.source_url
+
+        public_url = badge_instance.jsonld_id + '.json'
+
         if obi_version == utils.CURRENT_OBI_VERSION:
             context['badge_instance_public_url'] = public_url
         else:
@@ -27,14 +33,14 @@ class BadgeInstanceHTMLRenderer(BrowsableAPIRenderer):
 
         context['badgeclass_image_png'] = "{}{}?type=png".format(
             OriginSetting.HTTP,
-            reverse('badgeclass_image', kwargs={'slug': renderer_context['badge_class'].slug})
+            reverse('badgeclass_image', kwargs={'entity_id': renderer_context['badge_class'].entity_id})
         )
 
         context.update(renderer_context)
         context['issuer_url'] = context['issuer'].jsonld_id
-        context['badge_instance_image_url'] = renderer_context['badge_instance'].image.url if renderer_context['badge_instance'].image else None
+        context['badge_instance_image_url'] = badge_instance.image.url if renderer_context['badge_instance'].image else None
 
-        recipient_email = renderer_context['badge_instance'].recipient_identifier
+        recipient_email = badge_instance.recipient_identifier
         context['obscured_recipient'] = utils.obscure_email_address(recipient_email)
 
         if obi_version == '1_1':
@@ -59,6 +65,8 @@ class BadgeClassHTMLRenderer(BrowsableAPIRenderer):
             context['badge_class'] = renderer_context['badge_class']
             context['issuer'] = renderer_context['issuer']
             context['badgeclass_count'] = renderer_context['badgeclass_count']
+            if renderer_context['badge_class'].source_url:
+                context['external_source_url'] = renderer_context['badge_class'].source_url
         except KeyError:
             pass
 
@@ -76,6 +84,8 @@ class IssuerHTMLRenderer(BrowsableAPIRenderer):
         try:
             context['issuer'] = renderer_context['issuer']
             context['badge_classes'] = renderer_context['badge_classes']
+            if renderer_context['issuer'].source_url:
+                context['external_source_url'] = renderer_context['issuer'].source_url
         except KeyError:
             pass
 

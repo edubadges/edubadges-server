@@ -1,1 +1,0 @@
-from .serializers_meta import ComponentsSerializer

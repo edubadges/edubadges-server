@@ -1,11 +1,18 @@
 import json
 from collections import OrderedDict
+import collections
 
+import rest_framework
 from django.conf import settings
+from django.http import Http404
 from django.utils.html import strip_tags
 from rest_framework import serializers
+from rest_framework import status, exceptions
 from rest_framework.authtoken.serializers import AuthTokenSerializer
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.response import Response
+from rest_framework.serializers import ListSerializer
+from six import string_types
 
 
 class HumanReadableBooleanField(serializers.BooleanField):
@@ -52,18 +59,22 @@ class LinkedDataReferenceField(serializers.Serializer):
     Includes their @id by default and any additional identifier keys that are the named
     properties on the instance.
     """
-    def __init__(self, keys=[], model=None, read_only=True, **kwargs):
+    def __init__(self, keys=[], model=None, read_only=True, field_names=None, **kwargs):
         kwargs.pop('many', None)
         super(LinkedDataReferenceField, self).__init__(read_only=read_only, **kwargs)
         self.included_keys = keys
         self.model = model
+        self.field_names = field_names
 
     def to_representation(self, obj):
         output = OrderedDict()
         output['@id'] = obj.jsonld_id
 
         for key in self.included_keys:
-            output[key] = getattr(obj, key, None)
+            field_name = key
+            if self.field_names is not None and key in self.field_names:
+                field_name = self.field_names.get(key)
+            output[key] = getattr(obj, field_name, None)
 
         return output
 

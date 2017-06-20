@@ -72,10 +72,10 @@ def get_badgeclass_by_identifier(identifier):
         try:
             resolver_match = resolve(identifier.replace(OriginSetting.HTTP, ''))
             if resolver_match:
-                badgeclass_slug = resolver_match.kwargs.get('slug', None)
-                if badgeclass_slug:
+                entity_id = resolver_match.kwargs.get('entity_id', None)
+                if entity_id:
                     try:
-                        return BadgeClass.cached.get(slug=badgeclass_slug)
+                        return BadgeClass.cached.get(entity_id=entity_id)
                     except BadgeClass.DoesNotExist:
                         pass
         except Resolver404:
@@ -87,9 +87,9 @@ def get_badgeclass_by_identifier(identifier):
     except BadgeClass.DoesNotExist:
         pass
 
-    # attempt to resolve as BadgeClass.id
+    # attempt to resolve as BadgeClass.entity_id
     try:
-        return BadgeClass.cached.get(pk=identifier)
+        return BadgeClass.cached.get(entity_id=identifier)
     except (BadgeClass.DoesNotExist, ValueError):
         pass
 

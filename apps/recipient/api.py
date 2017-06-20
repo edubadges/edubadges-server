@@ -1,13 +1,12 @@
 # Created by wiggins@concentricsky.com on 3/31/16.
-from rest_framework import status
-from rest_framework.exceptions import ValidationError, PermissionDenied
-from rest_framework.response import Response
 
-from issuer.api import AbstractIssuerAPIEndpoint
+from entity.api import BaseEntityListView, VersionedObjectMixin, BaseEntityDetailView
 from issuer.models import Issuer
-from recipient.models import RecipientGroup, RecipientProfile, RecipientGroupMembership
-from recipient.serializers import RecipientGroupSerializer, RecipientGroupListSerializer, RecipientProfileSerializer, \
-    RecipientGroupMembershipListSerializer, RecipientGroupMembershipSerializer
+from issuer.permissions import IsEditor, IsIssuerEditor
+from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from recipient.models import RecipientGroup
+from recipient.serializers_v1 import RecipientGroupSerializerV1
+from recipient.serializers_v2 import RecipientGroupSerializerV2
 
 _TRUE_VALUES = ['true','t','on','yes','y','1',1,1.0,True]
 _FALSE_VALUES = ['false','f','off','no','n','0',0,0.0,False]
@@ -21,13 +20,26 @@ def _scrub_boolean(boolean_str, default=None):
     return default
 
 
-class RecipientGroupList(AbstractIssuerAPIEndpoint):
+class IssuerRecipientGroupList(VersionedObjectMixin, BaseEntityListView):
+    model = Issuer  # used by get_object()
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor)
+    v1_serializer_class = RecipientGroupSerializerV1
+    v2_serializer_class = RecipientGroupSerializerV2
 
-    def get(self, request, issuer_slug):
+    def get_objects(self, request, **kwargs):
+        issuer = self.get_object(request, **kwargs)
+        return issuer.cached_recipient_groups()
+
+    def get_context_data(self, **kwargs):
+        context = super(IssuerRecipientGroupList, self).get_context_data(**kwargs)
+        context['issuer'] = self.get_object(self.request, **kwargs)
+        context['embed_recipients'] = _scrub_boolean(self.request.query_params.get('embedRecipients', False))
+        return context
+
+    def get(self, request, **kwargs):
         """
         GET a list of Recipient Groups owned by an Issuer
         ---
-        serializer: RecipientGroupSerializer
         parameters:
             - name: embedRecipients
               description: Whether or not to include Recipient Profiles information
@@ -36,92 +48,31 @@ class RecipientGroupList(AbstractIssuerAPIEndpoint):
               type: boolean
               paramType: query
         """
+        return super(IssuerRecipientGroupList, self).get(request, **kwargs)
 
-        try:
-            issuer = Issuer.cached.get(slug=issuer_slug)
-        except Issuer.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        try:
-            self.check_object_permissions(self.request, issuer)
-        except PermissionDenied:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        embed_recipients = _scrub_boolean(request.query_params.get('embedRecipients', False))
-
-        groups = issuer.cached_recipient_groups()
-        serializer = RecipientGroupListSerializer(groups, context={
-            'request': request,
-            'embedRecipients': embed_recipients,
-            'issuer_slug': issuer_slug,
-        })
-        return Response(serializer.data)
-
-    def post(self, request, issuer_slug):
+    def post(self, request, **kwargs):
         """
         Define a new Recipient Group
-        ---
-        serializer: RecipientGroupSerializer
-        parameters:
-            - name: name
-              description: The name of the new Recipient Group
-              required: true
-              type: string
-              paramType: form
-            - name: description
-              description: A short description of the new Recipient Group
-              required: false
-              type: string
-              paramType: form
-            - name: pathways
-              required: false
-              type: array
-              items: {
-                type: string
-              }
-              paramType: form
         """
-        serializer = RecipientGroupSerializer(data=request.data, context={
-            'request': request,
-            'embedRecipients': True,
-            'issuer_slug': issuer_slug,
-        })
-        serializer.is_valid(raise_exception=True)
-        serializer.save(created_by=request.user)
-        recipient_group = serializer.data
-
-        # TODO: logger.event(badgrlog.RecipientGroupCreatedEvent(recipient_group))
-        return Response(recipient_group, status=status.HTTP_201_CREATED)
+        return super(IssuerRecipientGroupList, self).post(request, **kwargs)
 
 
-class RecipientGroupAPIEndpoint(AbstractIssuerAPIEndpoint):
-    def _get_issuer_and_group(self, issuer_slug, group_slug):
-        try:
-            issuer = Issuer.cached.get(slug=issuer_slug)
-        except Issuer.DoesNotExist:
-            return None, None
-        try:
-            self.check_object_permissions(self.request, issuer)
-        except PermissionDenied:
-            return None, None
+class RecipientGroupDetail(BaseEntityDetailView):
+    model = RecipientGroup
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsIssuerEditor)
+    v1_serializer_class = RecipientGroupSerializerV1
+    v2_serializer_class = RecipientGroupSerializerV2
 
-        try:
-            recipient_group = RecipientGroup.cached.get(slug=group_slug)
-        except RecipientGroup.DoesNotExist:
-            return issuer, None
+    def get_context_data(self, **kwargs):
+        context = super(RecipientGroupDetail, self).get_context_data(**kwargs)
+        context['embed_recipients'] = _scrub_boolean(self.request.query_params.get('embedRecipients', False))
+        context['recipient_group'] = self.get_object(self.request, **kwargs)
+        return context
 
-        if recipient_group.issuer != issuer:
-            return issuer, None
-
-        return issuer, recipient_group
-
-
-class RecipientGroupDetail(RecipientGroupAPIEndpoint):
-
-    def get(self, request, issuer_slug, group_slug):
+    def get(self, request, **kwargs):
         """
         GET detailed information about a Recipient Group
         ---
-        serializer: RecipientGroupSerializer
         parameters:
             - name: embedRecipients
               description: Whether or not to include Recipient Profiles information
@@ -130,173 +81,19 @@ class RecipientGroupDetail(RecipientGroupAPIEndpoint):
               type: boolean
               paramType: query
         """
-        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_slug)
-        if issuer is None or recipient_group is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        return super(RecipientGroupDetail, self).get(request, **kwargs)
 
-        embed_recipients = _scrub_boolean(request.query_params.get('embedRecipients', False))
-
-        serializer = RecipientGroupSerializer(recipient_group, context={
-            'request': request,
-            'embedRecipients': embed_recipients,
-            'issuer_slug': issuer_slug
-        })
-        return Response(serializer.data)
-
-    def delete(self, request, issuer_slug, group_slug):
+    def delete(self, request, **kwargs):
         """
         DELETE a Recipient Group
-        ---
         """
-        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_slug)
-        if issuer is None or recipient_group is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        return super(RecipientGroupDetail, self).delete(request, **kwargs)
 
-        # logger.event(badgrlog.RecipientGroupDeletedEvent(recipient_group))
-        old_name = unicode(recipient_group)
-        recipient_group.delete()
-        return Response(u"Recipient Group '{}' was removed.".format(old_name), status=status.HTTP_200_OK)
-
-    def put(self, request, issuer_slug, group_slug):
+    def put(self, request, **kwargs):
         """
         Update an existing Recipient Group
-        ---
-        parameters:
-            - name: name
-              description: The name of the new Recipient Group
-              required: true
-              type: string
-              paramType: form
-            - name: description
-              description: A short description of the new Recipient Group
-              required: false
-              type: string
-              paramType: form
-            - name: is_active
-              required: false
-              type: boolean
-              paramType: form
         """
-
-        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_slug)
-        if issuer is None or recipient_group is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        serializer = RecipientGroupSerializer(recipient_group, data=request.data, context={
-            'request': request,
-            'embedRecipients': _scrub_boolean(request.query_params.get('embedRecipients', False)),
-            'issuer_slug': issuer_slug,
-            'recipient_group': recipient_group
-        })
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+        return super(RecipientGroupDetail, self).put(request, **kwargs)
 
 
-class RecipientGroupMembershipList(RecipientGroupAPIEndpoint):
-    def get(self, request, issuer_slug, group_slug):
-        """
-        GET the list of Recipients in a Recipient Group
-        ---
-        serializer: RecipientProfileSerializer
-        """
-        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_slug)
-        if issuer is None or recipient_group is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = RecipientGroupMembershipListSerializer(recipient_group.cached_members(), context={
-            'request': request,
-            'issuer_slug': issuer_slug,
-            'recipient_group_slug': group_slug,
-        })
-        return Response(serializer.data)
 
-    def post(self, request, issuer_slug, group_slug):
-        """
-        Add a recipient to a Recipient Group
-        ---
-        parameters:
-            - name: recipient
-              description: URL-encoded email address of the Recipient
-              type: string
-              required: true
-              paramType: form
-            - name: name
-              description: The displayable name of the Recipient
-              type: string
-              required: true
-              paramType: form
-        """
-        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_slug)
-        if issuer is None or recipient_group is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        recipient_identifier = request.data.get('recipient')
-        name = request.data.get('name')
-
-        profile, created = RecipientProfile.cached.get_or_create(recipient_identifier=recipient_identifier)
-        if created:
-            profile.display_name = name
-            profile.save()
-
-        membership, created = RecipientGroupMembership.cached.get_or_create(
-            recipient_group=recipient_group,
-            recipient_profile=profile,
-        )
-        membership.membership_name = name
-        membership.save()
-
-        serializer = RecipientGroupMembershipSerializer(membership, context={
-            'request': request,
-        })
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-class RecipientGroupMembershipDetail(RecipientGroupAPIEndpoint):
-    def put(self, request, issuer_slug, group_slug, membership_slug):
-        """
-        Update an existing Recipient Group Membership
-        ---
-        serializer: RecipientGroupMembershipSerializer
-        parameters:
-            - name: name
-              description: The displayable name of the Recipient
-              type: string
-              required: true
-              paramType: form
-        """
-        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_slug)
-        if issuer is None or recipient_group is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        try:
-            membership = RecipientGroupMembership.cached.get(slug=membership_slug)
-        except RecipientGroupMembership.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        if membership.recipient_group != recipient_group:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        membership.membership_name = request.data.get('name')
-        membership.save()
-        serializer = RecipientGroupMembershipSerializer(membership, context={
-            'request': request
-        })
-        return Response(serializer.data)
-
-    def delete(self, request, issuer_slug, group_slug, membership_slug):
-        """
-        Remove a Recipient from a Recipient Group
-        ---
-        """
-        issuer, recipient_group = self._get_issuer_and_group(issuer_slug, group_slug)
-        if issuer is None or recipient_group is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        try:
-            membership = RecipientGroupMembership.cached.get(slug=membership_slug)
-        except RecipientGroupMembership.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        if membership.recipient_group != recipient_group:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        membership.delete()
-        return Response(status=status.HTTP_200_OK)

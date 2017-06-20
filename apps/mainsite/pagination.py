@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import more_itertools
 
 from cryptography.fernet import Fernet
@@ -5,7 +7,6 @@ from cryptography.fernet import Fernet
 from django.conf import settings
 from django.db import transaction
 
-from rest_framework.compat import OrderedDict
 from rest_framework.pagination import BasePagination
 from rest_framework.response import Response
 from rest_framework.utils.urls import replace_query_param

@@ -12,10 +12,10 @@ badgrLogger = badgrlog.BadgrLogger()
 
 
 @app.task(bind=True)
-def award_badges_for_pathway_completion(self, badgeinstance_slug):
+def award_badges_for_pathway_completion(self, badgeinstance_pk):
     from issuer.models import BadgeInstance, BadgeClass
 
-    lock_key = "_task_lock_completion_trigger_{}".format(badgeinstance_slug)
+    lock_key = "_task_lock_completion_trigger_{}".format(badgeinstance_pk)
     awards = []
     completions = []
 
@@ -24,9 +24,9 @@ def award_badges_for_pathway_completion(self, badgeinstance_slug):
             # lock acquired
 
             try:
-                badgeinstance = BadgeInstance.cached.get(slug=badgeinstance_slug)
+                badgeinstance = BadgeInstance.cached.get(pk=badgeinstance_pk)
             except BadgeInstance.DoesNotExist:
-                return {'status': 'error', 'error': 'BadgeInstance {} not found'.format(badgeinstance_slug)}
+                return {'status': 'error', 'error': 'BadgeInstance {} not found'.format(badgeinstance_pk)}
 
             badgeclass = badgeinstance.cached_badgeclass
 
@@ -43,7 +43,7 @@ def award_badges_for_pathway_completion(self, badgeinstance_slug):
             for completion in completions:
                 if 'completionBadge' in completion:
                     try:
-                        completion_badgeclass = BadgeClass.cached.get(slug=completion.get('completionBadge').get('slug'))
+                        completion_badgeclass = BadgeClass.cached.get(entity_id=completion.get('completionBadge').get('slug'))
                         try:
                             awarded_badge = BadgeInstance.objects.get(
                                 recipient_identifier=recipient_profile.recipient_identifier,

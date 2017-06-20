@@ -1,26 +1,21 @@
-import os
 import re
-import time
 import urllib
 import warnings
 
+import os
+from allauth.account.models import EmailConfirmation
 from django.core import mail
 from django.core.cache import cache, CacheKeyWarning
-from django.core.cache.backends.filebased import FileBasedCache
 from django.core.management import call_command
-from django.test import TestCase, override_settings
-from django.utils.six import StringIO
-
-from allauth.account.models import EmailConfirmation
-from rest_framework.test import APITestCase
-
-from mainsite.models import BadgrApp
-from mainsite.settings import TOP_DIR
+from django.test import override_settings, TransactionTestCase
 
 from badgeuser.models import BadgeUser, CachedEmailAddress
+from mainsite.models import BadgrApp
+from mainsite.settings import TOP_DIR
+from mainsite.tests.base import BadgrTestCase
 
 
-class TestCacheSettings(TestCase):
+class TestCacheSettings(TransactionTestCase):
 
     def test_long_cache_keys_shortened(self):
         cache_settings = {
@@ -57,7 +52,10 @@ class TestCacheSettings(TestCase):
 
 
 @override_settings(HTTP_ORIGIN='http://testserver')
-class TestSignup(APITestCase):
+class TestSignup(BadgrTestCase):
+    def setUp(self):
+        pass  # avoid BadgrTestCase.setUp
+
     def test_user_signup_email_confirmation_redirect(self):
         badgr_app = BadgrApp(cors='testserver',
                              email_confirmation_redirect='http://testserver/login/',
@@ -86,26 +84,7 @@ class TestSignup(APITestCase):
             self.assertEqual(response.get('location'), 'http://testserver/login/Tester?email={}'.format(urllib.quote(post_data['email'])))
 
 
-@override_settings(
-    CACHES={
-        'default': {
-            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
-        }
-    },
-)
-class CachingTestCase(TestCase):
-    @classmethod
-    def tearDownClass(cls):
-        test_cache = FileBasedCache(os.path.join(TOP_DIR, 'test.cache'), {})
-        test_cache.clear()
-
-    def setUp(self):
-        # scramble the cache key each time
-        cache.key_prefix = "test{}".format(str(time.time()))
-
-
-class TestEmailCleanupCommand(TestCase):
+class TestEmailCleanupCommand(BadgrTestCase):
     def test_email_added_for_user_missing_one(self):
         user = BadgeUser(email="newtest@example.com", first_name="Test", last_name="User")
         user.save()

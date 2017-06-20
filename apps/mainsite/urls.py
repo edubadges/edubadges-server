@@ -4,6 +4,7 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.utils import importlib
 
+from backpack.views import LegacyCollectionShareRedirectView
 from mainsite.admin import badgr_admin
 
 badgr_admin.autodiscover()
@@ -11,15 +12,16 @@ badgr_admin.autodiscover()
 
 from django.views.generic.base import RedirectView, TemplateView
 
-from composition.views import LegacyCollectionShareRedirectView
-from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation, LoginAndObtainAuthToken, \
-    ClearCacheView
+from mainsite.views import ClearCacheView, LoginAndObtainAuthToken
+from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation, error404, error500
+from django.contrib.auth import views as contrib_auth_views
+
 
 urlpatterns = [
     # Backup URLs in case the server isn't serving these directly
-    url(r'^favicon\.png[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL)),
-    url(r'^favicon\.ico[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL)),
-    url(r'^robots\.txt$', RedirectView.as_view(url='%srobots.txt' % settings.STATIC_URL)),
+    url(r'^favicon\.png[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL, permanent=True)),
+    url(r'^favicon\.ico[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL, permanent=True)),
+    url(r'^robots\.txt$', RedirectView.as_view(url='%srobots.txt' % settings.STATIC_URL, permanent=True)),
 
     # Apple app universal URL endpoint
     url(r'^apple-app-site-association', AppleAppSiteAssociation.as_view(), name="apple-app-site-association"),
@@ -35,7 +37,9 @@ urlpatterns = [
     url(r'^health', include('health.urls')),
 
     # Swagger Docs
-    url(r'^docs/', include('rest_framework_swagger.urls')),
+    url(r'^docs/v1/', TemplateView.as_view(template_name="entity/swagger-docs.html"), kwargs={'version': 'v1'}),
+    url(r'^docs/v2/', TemplateView.as_view(template_name="entity/swagger-docs.html"), kwargs={'version': 'v2'}),
+    url(r'^docs/?$', RedirectView.as_view(url='/docs/v2/', permanent=True)),
 
     # JSON-LD Context
     url(r'^json-ld/', include('badgrlog.urls')),
@@ -43,10 +47,11 @@ urlpatterns = [
     # unversioned public endpoints
     url(r'^unsubscribe/(?P<email_encoded>[^/]+)/(?P<expiration>[^/]+)/(?P<signature>[^/]+)', email_unsubscribe, name='unsubscribe'),
 
-    url(r'^public', include('issuer.public_api_urls')),
-    url(r'^public', include('pathway.public_api_urls')),
+    url(r'^public', include('issuer.public_api_urls'), kwargs={'version': 'v2'}),
+    url(r'^public', include('pathway.public_api_urls'), kwargs={'version': 'v2'}),
 
-    url(r'^share', include('composition.share_urls')),
+    # public pages shared from backpack
+    url(r'^share', include('backpack.share_urls')),
     # legacy share redirects
     url(r'^earner/collections/(?P<pk>[^/]+)/(?P<share_hash>[^/]+)$', LegacyCollectionShareRedirectView.as_view(), name='legacy_shared_collection'),
     url(r'^earner/collections/(?P<pk>[^/]+)/(?P<share_hash>[^/]+)/embed$', LegacyCollectionShareRedirectView.as_view(), name='legacy_shared_collection_embed'),
@@ -56,13 +61,25 @@ urlpatterns = [
     url(r'^account/', include('badgrsocialauth.urls')),
 
     # v1 API endpoints
-    url(r'^v1/user', include('badgeuser.api_urls')),
-    url(r'^v1/issuer', include('issuer.api_urls')),
-    url(r'^v1/earner', include('composition.api_urls')),
+    url(r'^v1/user/', include('badgeuser.v1_api_urls'), kwargs={'version': 'v1'}),
+    url(r'^v1/issuer/', include('issuer.v1_api_urls'), kwargs={'version': 'v1'}),
+    url(r'^v1/earner/', include('backpack.v1_api_urls'), kwargs={'version': 'v1'}),
+
+
+    # NOTE: pathway and recipient were written and deployed for beta testing at /v2/ before /v2/ was formalized
+    # they do not conform to new /v2/ conventions,  they need to appear before /v2/ to not collide
+    url(r'^v2/issuers/(?P<issuer_slug>[^/]+)/pathways', include('pathway.api_urls'), kwargs={'version': 'v1'}),
+
+    # recipient was refactored to /v2/, but for now keep the old "v1" API registered at /v2/issuers/<issuer_slug/recipient-groups
+    url(r'^v2/', include('recipient.v1_api_urls'), kwargs={'version': 'v1'}),
+    # url(r'^v2/', include('recipient.v2_api_urls'), kwargs={'version': 'v2'}),
+
 
     # v2 API endpoints
-    url(r'^v2/issuers/(?P<issuer_slug>[^/]+)/pathways', include('pathway.api_urls')),
-    url(r'^v2/issuers/(?P<issuer_slug>[^/]+)/recipient-groups', include('recipient.api_urls')),
+    url(r'^v2/', include('issuer.v2_api_urls'), kwargs={'version': 'v2'}),
+    url(r'^v2/', include('badgeuser.v2_api_urls'), kwargs={'version': 'v2'}),
+    url(r'^v2/backpack/', include('backpack.v2_api_urls'), kwargs={'version': 'v2'}),
+
 
 ]
 
@@ -76,24 +93,28 @@ if apps.is_installed('badgebook'):
 # Test URLs to allow you to see these pages while DEBUG is True
 if getattr(settings, 'DEBUG_ERRORS', False):
     urlpatterns = [
-        url(r'^error/404/$', 'mainsite.views.error404', name='404'),
-        url(r'^error/500/$', 'mainsite.views.error500', name='500'),
+        url(r'^error/404/$', error404, name='404'),
+        url(r'^error/500/$', error500, name='500'),
     ] + urlpatterns
 
 # If DEBUG_MEDIA is set, have django serve anything in MEDIA_ROOT at MEDIA_URL
 if getattr(settings, 'DEBUG_MEDIA', True):
+    from django.views.static import serve as static_serve
     media_url = getattr(settings, 'MEDIA_URL', '/media/').lstrip('/')
     urlpatterns = [
-        url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {
+        url(r'^media/(?P<path>.*)$', static_serve, {
             'document_root': settings.MEDIA_ROOT
         }),
     ] + urlpatterns
 
 # If DEBUG_STATIC is set, have django serve up static files even if DEBUG=False
 if getattr(settings, 'DEBUG_STATIC', True):
-    static_url = getattr(settings, 'STATIC_URL', '/static/').replace(getattr(settings, 'HTTP_ORIGIN', ''), '').lstrip('/')
+    from django.contrib.staticfiles.views import serve as staticfiles_serve
+    static_url = getattr(settings, 'STATIC_URL', '/static/')
+    static_url = static_url.replace(getattr(settings, 'HTTP_ORIGIN', 'http://localhost:8000'), '')
+    static_url = static_url.lstrip('/')
     urlpatterns = [
-        url(r'^%s(?P<path>.*)' % (static_url,), 'django.contrib.staticfiles.views.serve', kwargs={
+        url(r'^%s(?P<path>.*)' % (static_url,), staticfiles_serve, kwargs={
             'insecure': True,
         })
     ] + urlpatterns
@@ -103,3 +124,13 @@ if getattr(settings, 'DEBUG', True) or getattr(settings, 'SERVE_PATTERN_LIBRARY'
     urlpatterns = [
        url(r'^component-library$', TemplateView.as_view(template_name='component-library.html'), name='component-library')
     ] + urlpatterns
+
+# serve django debug toolbar if present
+if settings.DEBUG and apps.is_installed('debug_toolbar'):
+    try:
+        import debug_toolbar
+        urlpatterns = urlpatterns + [
+            url(r'^__debug__/', include(debug_toolbar.urls)),
+        ]
+    except ImportError:
+        pass

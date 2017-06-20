@@ -36,21 +36,24 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_framework_swagger',
 
     'django-ismigrated',
     'mainsite',
+    'entity',
     'issuer',
-    'composition',
-    'verifier',
+    'backpack',
     'pathway',
     'recipient',
+
+    # deprecated
+    'composition',
 ]
 
 MIDDLEWARE_CLASSES = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_auth_lti.middleware.LTIAuthMiddleware',
@@ -136,7 +139,7 @@ AUTHENTICATION_BACKENDS = [
     "badgeuser.backends.CachedModelBackend",
 
     # `allauth` specific authentication methods, such as login by e-mail
-    "allauth.account.auth_backends.AuthenticationBackend",
+    "badgeuser.backends.CachedAuthenticationBackend"
 
 ]
 
@@ -301,9 +304,13 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        'entity.authentication.ExplicitCSRFSessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
-    )
+    ),
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',
+    'DEFAULT_VERSION': 'v1',
+    'ALLOWED_VERSIONS': ['v1','v2'],
+    'EXCEPTION_HANDLER': 'entity.views.exception_handler'
 }
 
 

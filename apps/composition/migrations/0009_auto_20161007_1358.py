@@ -3,11 +3,11 @@ from __future__ import unicode_literals
 
 from django.db import migrations
 
-from composition.models import LocalBadgeInstanceCollection
 from issuer.models import BadgeInstance
 
 
 def migrate_duplicate_collection_badges(apps, schema_editor):
+    LocalBadgeInstanceCollection = apps.get_model('composition.LocalBadgeInstanceCollection')
     for entry in LocalBadgeInstanceCollection.objects.all():
         if entry.instance_id:
             try:

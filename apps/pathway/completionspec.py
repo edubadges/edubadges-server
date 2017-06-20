@@ -76,7 +76,7 @@ class ElementJunctionCompletionRequirementSpec(CompletionRequirementSpec):
             if node['element'].completion_badgeclass:
                 completion['completionBadge'] = {
                     '@id': node['element'].completion_badgeclass.jsonld_id,
-                    'slug': node['element'].completion_badgeclass.slug,
+                    'slug': node['element'].completion_badgeclass.entity_id,
                 }
             return completion
 
@@ -130,7 +130,7 @@ class BadgeJunctionCompletionRequirementSpec(CompletionRequirementSpec):
             if i.cached_badgeclass.json['id'] in self.badges:
                 completion['completedBadges'].append({
                     '@id': i.cached_badgeclass.jsonld_id,
-                    'slug': i.cached_badgeclass.slug,
+                    'slug': i.cached_badgeclass.entity_id,
                     'assertion': i.jsonld_id,
                 })
         completion['completedRequirementCount'] = len(completion['completedBadges'])

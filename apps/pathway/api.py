@@ -1,23 +1,21 @@
 # Created by wiggins@concentricsky.com on 3/30/16.
-from django.conf import settings
-from django.core.urlresolvers import resolve, Resolver404
 from rest_framework import status
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED
 
-from issuer.api import AbstractIssuerAPIEndpoint
-from issuer.models import Issuer, BadgeClass
+from issuer.api_v1 import AbstractIssuerAPIEndpoint
+from issuer.models import Issuer
 from mainsite.utils import ObjectView
-from pathway.completionspec import CompletionRequirementSpecFactory
-from pathway.models import Pathway, PathwayElement, PathwayElementBadge
-from pathway.serializers import PathwaySerializer, PathwayListSerializer, PathwayElementSerializer, PathwayElementCompletionSerializer
+from pathway.models import Pathway, PathwayElement
+from pathway.serializers import PathwaySerializer, PathwayListSerializer, PathwayElementSerializer, \
+    PathwayElementCompletionSerializer
 from recipient.models import RecipientGroup, RecipientProfile
 
 
 class PathwayList(AbstractIssuerAPIEndpoint):
 
-    def get(self, request, issuer_slug):
+    def get(self, request, issuer_slug, **kwargs):
         """
         GET a list of learning pathways owned by an issuer
         ---
@@ -25,7 +23,7 @@ class PathwayList(AbstractIssuerAPIEndpoint):
         """
 
         try:
-            issuer = Issuer.cached.get(slug=issuer_slug)
+            issuer = Issuer.cached.get(entity_id=issuer_slug)
         except Issuer.DoesNotExist:
             return Response("Could not find issuer", status=status.HTTP_404_NOT_FOUND)
 
@@ -36,7 +34,7 @@ class PathwayList(AbstractIssuerAPIEndpoint):
         })
         return Response(serializer.data)
 
-    def post(self, request, issuer_slug):
+    def post(self, request, issuer_slug, **kwargs):
         """
         Define a new pathway to be owned by an issuer
         ---
@@ -73,7 +71,7 @@ class PathwayList(AbstractIssuerAPIEndpoint):
 class PathwayAPIEndpoint(AbstractIssuerAPIEndpoint):
     def _get_issuer_and_pathway(self, issuer_slug, pathway_slug):
         try:
-            issuer = Issuer.cached.get(slug=issuer_slug)
+            issuer = Issuer.cached.get(entity_id=issuer_slug)
         except Issuer.DoesNotExist:
             return None, None
         try:
@@ -95,7 +93,7 @@ class PathwayAPIEndpoint(AbstractIssuerAPIEndpoint):
 
 class PathwayDetail(PathwayAPIEndpoint):
 
-    def delete(self, request, issuer_slug, pathway_slug):
+    def delete(self, request, issuer_slug, pathway_slug, **kwargs):
         """
         DELETE a pathway and its PathwayElements
         ---
@@ -110,7 +108,7 @@ class PathwayDetail(PathwayAPIEndpoint):
         pathway.save()
         return Response(status=status.HTTP_200_OK)
 
-    def get(self, request, issuer_slug, pathway_slug):
+    def get(self, request, issuer_slug, pathway_slug, **kwargs):
         """
         GET detail on a pathway
         ---
@@ -130,7 +128,7 @@ class PathwayDetail(PathwayAPIEndpoint):
         })
         return Response(serializer.data)
 
-    def put(self, request, issuer_slug, pathway_slug):
+    def put(self, request, issuer_slug, pathway_slug, **kwargs):
         """
         PUT updates to pathway details and group memberships
         ---
@@ -157,7 +155,7 @@ class PathwayDetail(PathwayAPIEndpoint):
 
 
 class PathwayElementList(PathwayAPIEndpoint):
-    def get(self, request, issuer_slug, pathway_slug):
+    def get(self, request, issuer_slug, pathway_slug, **kwargs):
         """
         GET a flat list of Pathway Elements defined on a pathway
         ---
@@ -176,7 +174,7 @@ class PathwayElementList(PathwayAPIEndpoint):
         })
         return Response(serializer.data)
 
-    def post(self, request, issuer_slug, pathway_slug):
+    def post(self, request, issuer_slug, pathway_slug, **kwargs):
         """
         Add a new Pathway Element
         ---
@@ -259,7 +257,7 @@ class PathwayElementAPIEndpoint(PathwayAPIEndpoint):
 
 
 class PathwayElementDetail(PathwayElementAPIEndpoint):
-    def get(self, request, issuer_slug, pathway_slug, element_slug):
+    def get(self, request, issuer_slug, pathway_slug, element_slug, **kwargs):
         """
         GET detail on a pathway, starting at a particular Pathway Element
         ---
@@ -276,7 +274,7 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
         })
         return Response(serializer.data)
 
-    def put(self, request, issuer_slug, pathway_slug, element_slug):
+    def put(self, request, issuer_slug, pathway_slug, element_slug, **kwargs):
         """
         Update a Pathway Element
         ---
@@ -311,7 +309,7 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
 
         return Response(serializer.data)
 
-    def delete(self, request, issuer_slug, pathway_slug, element_slug):
+    def delete(self, request, issuer_slug, pathway_slug, element_slug, **kwargs):
         """
         Delete a Pathway Element
         ---
@@ -333,7 +331,7 @@ class PathwayElementDetail(PathwayElementAPIEndpoint):
 
 class PathwayCompletionDetail(PathwayElementAPIEndpoint):
 
-    def get(self, request, issuer_slug, pathway_slug, element_slug):
+    def get(self, request, issuer_slug, pathway_slug, element_slug, **kwargs):
         """
         Get detailed completion state for a set of Recipients or Recipient Groups
         ---
@@ -363,7 +361,7 @@ class PathwayCompletionDetail(PathwayElementAPIEndpoint):
         recipients = []
         for s in recipient_slugs:
             try:
-                recipients.append(RecipientProfile.cached.get(slug=s))
+                recipients.append(RecipientProfile.cached.get(entity_id=s))
             except RecipientProfile.DoesNotExist:
                 return Response(u"Invalid Recipient '{}'".format(s), status=status.HTTP_400_BAD_REQUEST)
 
@@ -371,7 +369,7 @@ class PathwayCompletionDetail(PathwayElementAPIEndpoint):
         groups = []
         for s in group_slugs:
             try:
-                groups.append(RecipientGroup.cached.get(slug=s))
+                groups.append(RecipientGroup.cached.get(entity_id=s))
             except RecipientGroup.DoesNotExist:
                 return Response(u"Invalid Recipient Group '{}'".format(s), status=status.HTTP_400_BAD_REQUEST)
 

@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import permissions
 import rules
 
@@ -8,7 +9,7 @@ SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
 
 @rules.predicate
 def is_owner(user, issuer):
-    for staff_record in issuer.cached_staff_records():
+    for staff_record in issuer.cached_issuerstaff():
         if staff_record.user_id == user.id and staff_record.role == IssuerStaff.ROLE_OWNER:
             return True
     return False
@@ -16,7 +17,7 @@ def is_owner(user, issuer):
 
 @rules.predicate
 def is_editor(user, issuer):
-    for staff_record in issuer.cached_staff_records():
+    for staff_record in issuer.cached_issuerstaff():
         if staff_record.user_id == user.id and staff_record.role in (IssuerStaff.ROLE_OWNER, IssuerStaff.ROLE_EDITOR):
             return True
     return False
@@ -24,7 +25,7 @@ def is_editor(user, issuer):
 
 @rules.predicate
 def is_staff(user, issuer):
-    for staff_record in issuer.cached_staff_records():
+    for staff_record in issuer.cached_issuerstaff():
         if staff_record.user_id == user.id:
             return True
     return False
@@ -40,17 +41,17 @@ rules.add_perm('issuer.is_staff', is_on_staff)
 
 @rules.predicate
 def is_badgeclass_owner(user, badgeclass):
-    return badgeclass.issuer.owners.filter(pk=user.pk).exists()
+    return any(staff.role == IssuerStaff.ROLE_OWNER for staff in badgeclass.cached_issuer.cached_issuerstaff() if staff.user_id == user.id)
 
 
 @rules.predicate
 def is_badgeclass_editor(user, badgeclass):
-    return badgeclass.issuer.editors.filter(pk=user.pk).exists()
+    return any(staff.role in [IssuerStaff.ROLE_EDITOR, IssuerStaff.ROLE_OWNER] for staff in badgeclass.cached_issuer.cached_issuerstaff() if staff.user_id == user.id)
 
 
 @rules.predicate
 def is_badgeclass_staff(user, badgeclass):
-    return badgeclass.issuer.staff.filter(pk=user.pk).exists()
+    return any(staff.user_id == user.id for staff in badgeclass.cached_issuer.cached_issuerstaff())
 
 can_issue_badgeclass = is_badgeclass_owner | is_badgeclass_staff
 can_edit_badgeclass = is_badgeclass_owner | is_badgeclass_editor
@@ -123,3 +124,48 @@ class IsStaff(permissions.BasePermission):
     """
     def has_object_permission(self, request, view, issuer):
         return request.user.has_perm('issuer.is_staff', issuer)
+
+
+class ApprovedIssuersOnly(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method == 'POST' and getattr(settings, 'BADGR_APPROVED_ISSUERS_ONLY', False):
+            return request.user.has_perm('issuer.add_issuer')
+        return True
+
+
+class IsIssuerEditor(IsEditor):
+    """
+    Used as a proxy permission for objects that have a .cached_issuer property and want to delegate permissions to issuer
+    """
+    def has_object_permission(self, request, view, recipient_group):
+        return super(IsIssuerEditor, self).has_object_permission(request, view, recipient_group.cached_issuer)
+
+
+class IsIssuerStaff(IsStaff):
+    """
+    Used as a proxy permission for objects that have a .cached_issuer property and want to delegate permissions to issuer
+    """
+    def has_object_permission(self, request, view, recipient_group):
+        return super(IsIssuerStaff, self).has_object_permission(request, view, recipient_group.cached_issuer)
+
+
+class AuditedModelOwner(permissions.BasePermission):
+    """
+    Request user matches .created_by
+    ---
+    model: BaseAuditedModel
+    """
+    def has_object_permission(self, request, view, obj):
+        created_by_id = getattr(obj, 'created_by_id', None)
+        return created_by_id and request.user.id == created_by_id
+
+
+class VerifiedEmailMatchesRecipientIdentifier(permissions.BasePermission):
+    """
+    one of request user's verified emails matches obj.recipient_identifier
+    ---
+    model: BadgeInstance
+    """
+    def has_object_permission(self, request, view, obj):
+        recipient_identifier = getattr(obj, 'recipient_identifier', None)
+        return recipient_identifier and recipient_identifier in request.user.all_recipient_identifiers

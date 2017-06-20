@@ -59,7 +59,7 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
             return badgr_app.email_confirmation_redirect
 
     def get_email_confirmation_url(self, request, emailconfirmation):
-        url_name = "api_user_email_confirm"
+        url_name = "v1_api_user_email_confirm"
         temp_key = default_token_generator.make_token(emailconfirmation.email_address.user)
         token = "{uidb36}-{key}".format(uidb36=user_pk_to_url_str(emailconfirmation.email_address.user),
                                         key=temp_key)

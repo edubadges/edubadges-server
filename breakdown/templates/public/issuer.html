@@ -23,6 +23,9 @@
 					<a class="button button-primaryghost l-offsetleft" href="{{issuer.json.url}}" target="_blank">Visit Website</a>
 					<a class="button button-primaryghost l-offsetleft" href="mailto:{{issuer.json.email}}">Contact Issuer</a>
                     <a class="button button-primaryghost" href="{{ issuer.public_url }}.json" target="_blank">View JSON</a>
+					{% if external_source_url %}
+						<a class="button button-primaryghost" href="{{ external_source_url }}" target="_blank">View Original</a>
+					{% endif %}
 
 				</div>
 			</div>
