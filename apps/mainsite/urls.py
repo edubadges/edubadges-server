@@ -3,6 +3,7 @@ from django.conf import settings
 from django.conf.urls import include, url
 from rest_framework.authtoken.views import obtain_auth_token
 
+from backpack.views import LegacyCollectionShareRedirectView
 from mainsite.admin import badgr_admin
 
 badgr_admin.autodiscover()
@@ -10,7 +11,6 @@ badgr_admin.autodiscover()
 
 from django.views.generic.base import RedirectView, TemplateView
 
-from composition.views import LegacyCollectionShareRedirectView
 from mainsite.views import ClearCacheView
 from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation, error404, error500
 from django.contrib.auth import views as contrib_auth_views

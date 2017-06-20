@@ -41,9 +41,8 @@ INSTALLED_APPS = [
     'pathway',
     'recipient',
 
-    # apps to be deprecated
+    # deprecated
     'composition',
-    'verifier',
 ]
 
 MIDDLEWARE_CLASSES = [
