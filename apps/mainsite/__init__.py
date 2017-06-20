@@ -8,7 +8,7 @@ import semver
 __all__ = ['APPS_DIR','TOP_DIR']
 
 
-VERSION = (1, 4, 13)
+VERSION = (2, 0, 0)
 __version__ = semver.format_version(*VERSION)
 
 

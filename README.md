@@ -3,7 +3,7 @@
 
 Badgr Server is a web application for issuing [Open Badges](http://openbadges.org). In addition to a powerful Issuer API and browser-based user interface for issuing, Badgr offers integrated badge management and sharing for badge earners. Free accounts are hosted by Concentric Sky at [Badgr.io](http://info.badgr.io), but for complete control over your own issuing environment, Badgr Server is available open source as a Python/Django application.
 
-*Version: 1.3.x*
+*Version: 2.0.x*
 
 ## How to get started on your local development environment.
 Prerequisites:
