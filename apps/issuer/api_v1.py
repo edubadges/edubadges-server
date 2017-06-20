@@ -131,11 +131,11 @@ class IssuerStaffList(VersionedObjectMixin, APIView):
               paramType: form
               description: A verified email address of the user to add or remove from this role.
               required: false
-            - name: editor
-              type: boolean
+            - name: role
+              type: string
               paramType: form
-              description: Should the user have editor privileges?
-              defaultValue: false
+              description: Role to set user as. One of 'owner', 'editor', or 'staff'
+              defaultValue: staff
               required: false
         """
         # validate POST data
@@ -150,6 +150,9 @@ class IssuerStaffList(VersionedObjectMixin, APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+        if request.user not in current_issuer.owners:
+            raise PermissionDenied("Must be an owner of an issuer profile to modify permissions")
+
         try:
             if serializer.validated_data.get('username'):
                 user_id = serializer.validated_data.get('username')
@@ -157,33 +160,48 @@ class IssuerStaffList(VersionedObjectMixin, APIView):
             else:
                 user_id = serializer.validated_data.get('email')
                 user_to_modify = CachedEmailAddress.objects.get(
-                    email=user_id).user
+                    email=user_id, verified=True).user
         except (get_user_model().DoesNotExist, CachedEmailAddress.DoesNotExist,):
-            error_text = "User {} not found. Cannot modify Issuer permissions.".format(user_id)
+            error_text = "User not found. Email must be verified and correspond to an existing user."
             if user_id is None:
                 error_text = 'User not found. Neither email address or username was provided.'
             return Response(
                 error_text, status=status.HTTP_404_NOT_FOUND
             )
 
-        action = serializer.validated_data.get('action')
-        if action in ('add', 'modify'):
+        if user_to_modify == request.user:
+            return Response("Cannot modify your own permissions on an issuer profile",
+                            status=status.HTTP_400_BAD_REQUEST)
 
-            editor_privilege = serializer.validated_data.get('editor')
+        action = serializer.validated_data.get('action')
+        if action == 'add':
+            role = serializer.validated_data.get('role')
             staff_instance, created = IssuerStaff.objects.get_or_create(
                 user=user_to_modify,
                 issuer=current_issuer,
                 defaults={
-                    'role': IssuerStaff.ROLE_EDITOR if editor_privilege else IssuerStaff.ROLE_STAFF
+                    'role': role
                 }
             )
 
-            if created is False and staff_instance.editor != editor_privilege:
-                staff_instance.editor = editor_privilege
-                staff_instance.save(update_fields=('editor',))
+            if created is False:
+                raise ValidationError("Could not add user to staff list. User already in staff list.")
+
+        elif action == 'modify':
+            role = serializer.validated_data.get('role')
+            try:
+                staff_instance, = IssuerStaff.objects.get(
+                    user=user_to_modify,
+                    issuer=current_issuer
+                )
+                staff_instance.role = role
+                staff_instance.save(update_fields=('role',))
+            except IssuerStaff.DoesNotExist:
+                raise ValidationError("Cannot modify staff record. Matching staff record does not exist.")
 
         elif action == 'remove':
             IssuerStaff.objects.filter(user=user_to_modify, issuer=current_issuer).delete()
+            current_issuer.publish()
             return Response(
                 "User %s has been removed from %s staff." % (user_to_modify.username, current_issuer.name),
                 status=status.HTTP_200_OK)
