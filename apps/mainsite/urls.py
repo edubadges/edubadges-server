@@ -12,7 +12,7 @@ badgr_admin.autodiscover()
 
 from django.views.generic.base import RedirectView, TemplateView
 
-from mainsite.views import ClearCacheView
+from mainsite.views import ClearCacheView, LoginAndObtainAuthToken
 from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation, error404, error500
 from django.contrib.auth import views as contrib_auth_views
 
