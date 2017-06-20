@@ -8,7 +8,8 @@ from badgeuser.models import BadgeUser
 from entity.serializers import DetailSerializerV2, EntityRelatedFieldV2, BaseSerializerV2
 from issuer.models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from mainsite.drf_fields import ValidImageField
-from mainsite.serializers import StripTagsCharField, MarkdownCharField, HumanReadableBooleanField
+from mainsite.serializers import StripTagsCharField, MarkdownCharField, HumanReadableBooleanField, \
+    OriginalJsonSerializerMixin
 from mainsite.validators import ChoicesValidator
 
 
@@ -28,7 +29,7 @@ class IssuerStaffSerializerV2(DetailSerializerV2):
         })
 
 
-class IssuerSerializerV2(DetailSerializerV2):
+class IssuerSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     openBadgeId = serializers.URLField(source='jsonld_id', read_only=True, help_text="The url to find the Open Badge")
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     createdBy = EntityRelatedFieldV2(source='cached_creator', read_only=True)
@@ -67,7 +68,7 @@ class IssuerSerializerV2(DetailSerializerV2):
         return new_issuer
 
 
-class BadgeClassSerializerV2(DetailSerializerV2):
+class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     openBadgeId = serializers.URLField(source='jsonld_id', read_only=True)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     createdBy = EntityRelatedFieldV2(source='cached_creator', read_only=True)
@@ -107,7 +108,7 @@ class BadgeRecipientSerializerV2(BaseSerializerV2):
     type = serializers.CharField(default='email', required=False)
 
 
-class EvidenceItemSerializerV2(BaseSerializerV2):
+class EvidenceItemSerializerV2(BaseSerializerV2, OriginalJsonSerializerMixin):
     url = serializers.URLField(source='evidence_url', max_length=1024, required=False)
     narrative = MarkdownCharField(required=False)
 
@@ -116,7 +117,7 @@ class EvidenceItemSerializerV2(BaseSerializerV2):
             raise serializers.ValidationError("Either url or narrative is required")
 
 
-class BadgeInstanceSerializerV2(DetailSerializerV2):
+class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     openBadgeId = serializers.URLField(source='jsonld_id', read_only=True)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     createdBy = EntityRelatedFieldV2(source='cached_creator', read_only=True)
