@@ -1,28 +1,31 @@
 from __future__ import unicode_literals
 
+import StringIO
+import datetime
 import json
 import re
 import uuid
 from collections import OrderedDict
 from itertools import chain
-from json import loads as json_loads
 
 import cachemodel
-import datetime
+import os
 from allauth.account.adapter import get_adapter
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
 from django.db.models import ProtectedError
+from json import loads as json_loads
 from jsonfield import JSONField
 from openbadges_bakery import bake
 
-from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager, BadgeInstanceEvidenceManager
 from entity.models import BaseVersionedEntity
+from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager, BadgeInstanceEvidenceManager
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage
 from mainsite.models import (BadgrApp, EmailBlacklist)
@@ -482,8 +485,14 @@ class BadgeInstance(BaseAuditedModel,
             self.created_at = datetime.datetime.now()
 
             if not self.image:
-                imageFile = default_storage.open(self.badgeclass.image.file.name)
-                self.image = bake(imageFile, json.dumps(self.json, indent=2))
+                badgeclass_name, ext = os.path.splitext(self.badgeclass.image.file.name)
+                new_image = StringIO.StringIO()
+                bake(image_file=self.cached_badgeclass.image.file,
+                     assertion_json_string=json.dumps(self.json, indent=2),
+                     output_file=new_image)
+                self.image.save(name='assertion-{id}.{ext}'.format(id=self.entity_id, ext=ext),
+                                content=ContentFile(new_image.read()),
+                                save=False)
 
             try:
                 from badgeuser.models import CachedEmailAddress
