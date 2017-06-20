@@ -91,3 +91,5 @@ more-itertools==2.5.0
 
 
 git+https://github.com/openbadges/badgecheck.git@fcaac068eb34c15e6bd265d00be05eec2e156e2d
+
+apispec==0.22.0
