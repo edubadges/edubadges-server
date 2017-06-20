@@ -48,7 +48,21 @@ class BaseAuditedModel(cachemodel.CacheModel):
         return BadgeUser.cached.get(id=self.created_by_id)
 
 
-class BaseOpenBadgeObjectModel(cachemodel.CacheModel):
+class OriginalJsonMixin(models.Model):
+    original_json = models.TextField(blank=True, null=True, default=None)
+
+    class Meta:
+        abstract = True
+
+    def get_original_json(self):
+        if self.original_json:
+            try:
+                return json_loads(self.original_json)
+            except (TypeError, ValueError) as e:
+                pass
+
+
+class BaseOpenBadgeObjectModel(OriginalJsonMixin, cachemodel.CacheModel):
     source = models.CharField(max_length=254, default='local')
     source_url = models.CharField(max_length=254, blank=True, null=True, default=None)
 
@@ -75,9 +89,7 @@ class Issuer(ResizeUploadedImage,
     description = models.TextField(blank=True, null=True, default=None)
     url = models.CharField(max_length=254, blank=True, null=True, default=None)
     email = models.CharField(max_length=254, blank=True, null=True, default=None)
-
     old_json = JSONField()
-    original_json = models.TextField(blank=True, null=True, default=None)
 
     objects = IssuerManager()
     cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
@@ -208,9 +220,6 @@ class Issuer(ResizeUploadedImage,
         return self.image
 
     def get_json(self, obi_version=CURRENT_OBI_VERSION):
-        if self.source_url:
-            return json_loads(self.original_json)
-        
         obi_version, context_iri = get_obi_context(obi_version)
 
         json = OrderedDict({'@context': context_iri})
@@ -288,7 +297,6 @@ class BadgeClass(ResizeUploadedImage,
     criteria_text = models.TextField(blank=True, null=True)
 
     old_json = JSONField()
-    original_json = models.TextField(blank=True, null=True, default=None)
 
     objects = BadgeClassManager()
     cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
@@ -365,9 +373,6 @@ class BadgeClass(ResizeUploadedImage,
         )
 
     def get_json(self, obi_version=CURRENT_OBI_VERSION):
-        if self.source_url and self.original_json:
-            return json_loads(self.original_json)
-
         obi_version, context_iri = get_obi_context(obi_version)
         json = OrderedDict({'@context': context_iri})
         json.update(OrderedDict(
@@ -430,7 +435,6 @@ class BadgeInstance(BaseAuditedModel,
     narrative = models.TextField(blank=True, null=True, default=None)
 
     old_json = JSONField()
-    original_json = models.TextField(blank=True, null=True, default=None)
 
     objects = BadgeInstanceManager()
 
@@ -629,10 +633,8 @@ class BadgeInstance(BaseAuditedModel,
             pass
         return None
 
-    def get_json(self, obi_version=CURRENT_OBI_VERSION):
-        if self.source_url:
-            return json_loads(self.original_json)
 
+    def get_json(self, obi_version=CURRENT_OBI_VERSION):
         obi_version, context_iri = get_obi_context(obi_version)
 
         json = OrderedDict({'@context': context_iri})
@@ -722,11 +724,10 @@ class BadgeInstance(BaseAuditedModel,
         return self.cached_evidence()
 
 
-class BadgeInstanceEvidence(cachemodel.CacheModel):
+class BadgeInstanceEvidence(OriginalJsonMixin, cachemodel.CacheModel):
     badgeinstance = models.ForeignKey('issuer.BadgeInstance')
     evidence_url = models.CharField(max_length=2083)
     narrative = models.TextField(blank=True, null=True, default=None)
-    original_json = models.TextField(blank=True, null=True, default=None)
 
     objects = BadgeInstanceEvidenceManager()
 

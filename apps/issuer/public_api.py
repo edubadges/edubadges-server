@@ -36,7 +36,11 @@ class JSONComponentView(VersionedObjectMixin, APIView):
     def get(self, request, **kwargs):
         self.current_object = self.get_object(request, **kwargs)
         self.log(self.current_object)
-        return Response(self.current_object.get_json(obi_version=self._get_request_obi_version(request)))
+        if self.current_object.source_url and self.current_object.original_json:
+            json = self.current_object.get_original_json()
+        else:
+            json = self.current_object.get_json(obi_version=self._get_request_obi_version(request))
+        return Response(json)
 
     def get_renderers(self):
         """
@@ -245,7 +249,11 @@ class BadgeInstanceJson(JSONComponentView):
         if current_object.revoked is False:
 
             logger.event(badgrlog.BadgeAssertionCheckedEvent(current_object, request))
-            return Response(current_object.get_json(obi_version=self._get_request_obi_version(request)))
+            if current_object.source_url and current_object.original_json:
+                json = current_object.get_original_json()
+            else:
+                json = current_object.get_json(obi_version=self._get_request_obi_version(request))
+            return Response(json)
         else:
             # TODO update terms based on final accepted terms in response to
             # https://github.com/openbadges/openbadges-specification/issues/33
