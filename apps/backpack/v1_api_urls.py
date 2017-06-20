@@ -19,6 +19,6 @@ urlpatterns = [
     url(r'^collections/(?P<collection_slug>[-\w]+)/badges/(?P<slug>[^/]+)$', CollectionLocalBadgeInstanceDetail.as_view(), name='v1_api_collection_localbadgeinstance_detail'),
     url(r'^collections/(?P<slug>[-\w]+)/share$', CollectionGenerateShare.as_view(), name='v1_api_collection_generate_share'),
 
-    url(r'^share/badge/(?P<slug>[^/]+)$', ShareBackpackAssertion.as_view(), name='v1_api_analytics_share_badge'),
-    url(r'^share/collection/(?P<slug>[^/]+)$', ShareBackpackCollection.as_view(), name='v1_api_analytics_share_collection'),
+    url(r'^share/badge/(?P<badge_id>[^/]+)$', ShareBackpackAssertion.as_view(), name='v1_api_analytics_share_badge'),
+    url(r'^share/collection/(?P<badge_id>[^/]+)$', ShareBackpackCollection.as_view(), name='v1_api_analytics_share_collection'),
 ]

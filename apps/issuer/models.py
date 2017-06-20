@@ -365,7 +365,7 @@ class BadgeClass(ResizeUploadedImage,
         )
 
     def get_json(self, obi_version=CURRENT_OBI_VERSION):
-        if self.source_url:
+        if self.source_url and self.original_json:
             return json_loads(self.original_json)
 
         obi_version, context_iri = get_obi_context(obi_version)
