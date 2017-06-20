@@ -61,6 +61,11 @@ class OriginalJsonMixin(models.Model):
             except (TypeError, ValueError) as e:
                 pass
 
+    def get_filtered_json(self, excluded_fields=()):
+        original = self.get_original_json()
+        if original is not None:
+            return {key: original[key] for key in filter(lambda k: k not in excluded_fields, original.keys())}
+
 
 class BaseOpenBadgeObjectModel(OriginalJsonMixin, cachemodel.CacheModel):
     source = models.CharField(max_length=254, default='local')
@@ -219,7 +224,7 @@ class Issuer(ResizeUploadedImage,
     def image_preview(self):
         return self.image
 
-    def get_json(self, obi_version=CURRENT_OBI_VERSION):
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True):
         obi_version, context_iri = get_obi_context(obi_version)
 
         json = OrderedDict({'@context': context_iri})
@@ -232,11 +237,22 @@ class Issuer(ResizeUploadedImage,
             description=self.description))
         if self.image:
             json['image'] = OriginSetting.HTTP + reverse('issuer_image', kwargs={'entity_id': self.entity_id})
+
+        if include_extra:
+            extra = self.get_filtered_json()
+            if extra is not None:
+                for k,v in extra.items():
+                    if k not in json:
+                        json[k] = v
+
         return json
 
     @property
     def json(self):
         return self.get_json()
+
+    def get_filtered_json(self, excluded_fields=('@context', 'id', 'type', 'name', 'url', 'description', 'image', 'email')):
+        return super(Issuer, self).get_filtered_json(excluded_fields=excluded_fields)
 
 
 class IssuerStaff(cachemodel.CacheModel):
@@ -372,7 +388,7 @@ class BadgeClass(ResizeUploadedImage,
             badgr_app=badgr_app
         )
 
-    def get_json(self, obi_version=CURRENT_OBI_VERSION):
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True):
         obi_version, context_iri = get_obi_context(obi_version)
         json = OrderedDict({'@context': context_iri})
         json.update(OrderedDict(
@@ -395,11 +411,21 @@ class BadgeClass(ResizeUploadedImage,
             if self.criteria_text:
                 json['criteria']['narrative'] = self.criteria_text
 
+        if include_extra:
+            extra = self.get_filtered_json()
+            if extra is not None:
+                for k,v in extra.items():
+                    if k not in json:
+                        json[k] = v
+
         return json
 
     @property
     def json(self):
         return self.get_json()
+
+    def get_filtered_json(self, excluded_fields=('@context', 'id', 'type', 'name', 'description', 'image', 'criteria', 'issuer')):
+        return super(BadgeClass, self).get_filtered_json(excluded_fields=excluded_fields)
 
 
 class BadgeInstance(BaseAuditedModel,
@@ -633,8 +659,7 @@ class BadgeInstance(BaseAuditedModel,
             pass
         return None
 
-
-    def get_json(self, obi_version=CURRENT_OBI_VERSION):
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True):
         obi_version, context_iri = get_obi_context(obi_version)
 
         json = OrderedDict({'@context': context_iri})
@@ -689,11 +714,21 @@ class BadgeInstance(BaseAuditedModel,
                 "identity": self.recipient_identifier
             }
 
+        if include_extra:
+            extra = self.get_filtered_json()
+            if extra is not None:
+                for k,v in extra.items():
+                    if k not in json:
+                        json[k] = v
+
         return json
 
     @property
     def json(self):
         return self.get_json()
+
+    def get_filtered_json(self, excluded_fields=('@context', 'id', 'type', 'uid', 'recipient', 'badge', 'issuedOn', 'image', 'evidence', 'narrative', 'revoked', 'revocationReason', 'verify', 'verification')):
+        return super(BadgeInstance, self).get_filtered_json(excluded_fields=excluded_fields)
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_evidence(self):

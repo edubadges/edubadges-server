@@ -11,7 +11,8 @@ import utils
 from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserIdentifierFieldV1
 from mainsite.drf_fields import ValidImageField
 from mainsite.models import BadgrApp
-from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField
+from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField, \
+    OriginalJsonSerializerMixin
 from mainsite.utils import OriginSetting
 from mainsite.validators import ChoicesValidator
 from .models import Issuer, BadgeClass, IssuerStaff
@@ -41,7 +42,7 @@ class IssuerStaffSerializerV1(serializers.Serializer):
         })
 
 
-class IssuerSerializerV1(serializers.Serializer):
+class IssuerSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1()
     name = StripTagsCharField(max_length=1024)
@@ -110,7 +111,7 @@ class IssuerRoleActionSerializerV1(serializers.Serializer):
         return attrs
 
 
-class BadgeClassSerializerV1(serializers.Serializer):
+class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1()
     id = serializers.IntegerField(required=False, read_only=True)
@@ -221,7 +222,7 @@ class EvidenceItemSerializer(serializers.Serializer):
         return attrs
 
 
-class BadgeInstanceSerializerV1(serializers.Serializer):
+class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1()
     slug = serializers.CharField(max_length=255, read_only=True, source='entity_id')
