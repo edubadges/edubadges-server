@@ -17,11 +17,11 @@
 				<img src="{% if issuer.image %}{{issuer.image.url}}{% else %}{% static 'badgr-ui/images/issuer-placeholder-2x.png' %}{% endif %}" alt="{{issuer.name}} logo " />
 			</div>
 			<div class="heading-x-text">
-				<h1>{{issuer.json.name}}</h1>
-				<p>{{issuer.json.description}}</p>
+				<h1>{{issuer.name}}</h1>
+				<p>{{issuer.description}}</p>
 				<div class="l-childrenhorizontal">
-					<a class="button button-primaryghost l-offsetleft" href="{{issuer.json.url}}" target="_blank">Visit Website</a>
-					<a class="button button-primaryghost l-offsetleft" href="mailto:{{issuer.json.email}}">Contact Issuer</a>
+					<a class="button button-primaryghost l-offsetleft" href="{{issuer.url}}" target="_blank">Visit Website</a>
+					<a class="button button-primaryghost l-offsetleft" href="mailto:{{issuer.email}}">Contact Issuer</a>
                     <a class="button button-primaryghost" href="{{ issuer.public_url }}.json" target="_blank">View JSON</a>
 					{% if external_source_url %}
 						<a class="button button-primaryghost" href="{{ external_source_url }}" target="_blank">View Original</a>
@@ -51,8 +51,8 @@
 						<tr>
 							<th scope="row">
 								<div class="l-childrenhorizontal l-childrenhorizontal-small">
-									<img class="l-childrenhorizontal-x-offset" src="{{ MEDIA_URL }}{{badge_class.image}}" alt="{{badge_class.json.name}}" width="40">
-									<a href="{{ badge_class.json.id }}">{{badge_class.json.name}}</a>
+									<img class="l-childrenhorizontal-x-offset" src="{{ MEDIA_URL }}{{badge_class.image}}" alt="{{badge_class.name}}" width="40">
+									<a href="{{ badge_class.public_url }}">{{badge_class.name}}</a>
 								</div>
 							</th>
 							<td class="hidden hidden-is-desktop">{{badge_class.created_at|date:"F d, Y"}}</td>
