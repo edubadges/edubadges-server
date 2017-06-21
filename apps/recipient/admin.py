@@ -16,6 +16,7 @@ class RecipientGroupAdmin(ModelAdmin):
     search_fields = ('name', 'issuer__name')
     # readonly_fields = ('created_by','created_at','updated_by','updated_by',)
     raw_id_fields = ('issuer',)
+    readonly_fields = ('entity_id',)
     filter_horizontal = ('pathways',)
     fieldsets = (
         # ('Metadata', {
@@ -36,6 +37,7 @@ class RecipientProfileAdmin(ModelAdmin):
     search_fields = ('recipient_identifier', 'display_name',)
     # readonly_fields = ('created_by','created_at','updated_by','updated_by',)
     raw_id_fields = ('badge_user',)
+    readonly_fields = ('entity_id',)
     fieldsets = (
         # ('Metadata', {
         #     'fields': ('is_active','created_by','created_at','updated_by','updated_by',),

@@ -23,7 +23,7 @@ class CollectionAdmin(ModelAdmin):
     fieldsets = (
         (None, {'fields': ('created_by', 'name', 'entity_id', 'description', 'share_hash')}),
     )
-    readonly_fields = ('created_by',)
+    readonly_fields = ('created_by', 'entity_id')
     inlines = [
         CollectionInstanceInline,
     ]

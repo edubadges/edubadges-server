@@ -23,6 +23,7 @@ class IssuerAdmin(DjangoObjectActions, ModelAdmin):
     list_display_links = ('img', 'name')
     list_filter = ('created_at',)
     search_fields = ('name', 'entity_id')
+    readonly_fields = ('entity_id',)
     fieldsets = (
         ('Metadata', {
             'fields': ('created_by', 'created_at', 'source', 'source_url', 'slug', 'entity_id'),
@@ -65,6 +66,7 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
     list_filter = ('created_at',)
     search_fields = ('name', 'entity_id', 'issuer__name',)
     raw_id_fields = ('issuer',)
+    readonly_fields = ('entity_id',)
     fieldsets = (
         ('Metadata', {
             'fields': ('created_by', 'created_at', 'source', 'source_url', 'entity_id', 'slug'),
@@ -121,6 +123,7 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
     list_filter = ('created_at',)
     search_fields = ('recipient_identifier', 'entity_id', 'badgeclass__name', 'issuer__name')
     raw_id_fields = ('badgeclass', 'issuer')
+    readonly_fields = ('entity_id',)
     fieldsets = (
         ('Metadata', {
             'fields': ('created_by', 'created_at', 'slug', 'entity_id', 'salt', 'badgeclass', 'issuer'),
