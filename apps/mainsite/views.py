@@ -1,26 +1,25 @@
 import base64
 import time
 
+from django import forms
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse_lazy
 from django.db import IntegrityError
-from django import forms
 from django.http import HttpResponse, HttpResponseServerError, HttpResponseNotFound
 from django.shortcuts import redirect
 from django.template import loader, TemplateDoesNotExist, Context
 from django.utils.decorators import method_decorator
 from django.views.decorators.clickjacking import xframe_options_exempt
-from django.views.generic import FormView
+from django.views.generic import FormView, RedirectView
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import AllowAny
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from mainsite.models import EmailBlacklist, BadgrApp
 from mainsite.serializers import VerifiedAuthTokenSerializer
-from .models import EmailBlacklist
 
 
 ##
@@ -50,13 +49,6 @@ def error500(request):
     })))
 
 
-@login_required(
-    login_url=getattr(
-        settings, 'ROOT_INFO_REDIRECT',
-        getattr(settings, 'LOGIN_URL', '/login')
-    ),
-    redirect_field_name=None
-)
 def info_view(request):
     return redirect(getattr(settings, 'LOGIN_REDIRECT_URL'))
 
@@ -123,3 +115,8 @@ class ClearCacheView(FormView):
         cache.clear()
         return super(ClearCacheView, self).form_valid(form)
 
+
+class RedirectToUiLogin(RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        badgrapp = BadgrApp.objects.get_current()
+        return badgrapp.ui_login_redirect if badgrapp.ui_login_redirect is not None else badgrapp.email_confirmation_redirect
