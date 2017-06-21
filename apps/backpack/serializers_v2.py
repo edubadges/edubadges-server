@@ -11,10 +11,10 @@ from issuer.helpers import BadgeCheckHelper
 from issuer.models import BadgeInstance, BadgeClass
 from issuer.serializers_v2 import BadgeRecipientSerializerV2, EvidenceItemSerializerV2
 from mainsite.drf_fields import ValidImageField
-from mainsite.serializers import MarkdownCharField, HumanReadableBooleanField
+from mainsite.serializers import MarkdownCharField, HumanReadableBooleanField, OriginalJsonSerializerMixin
 
 
-class BackpackAssertionSerializerV2(DetailSerializerV2):
+class BackpackAssertionSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     acceptance = serializers.ChoiceField(choices=BadgeInstance.ACCEPTANCE_CHOICES, default=BadgeInstance.ACCEPTANCE_ACCEPTED)
 
     # badgeinstance

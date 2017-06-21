@@ -150,3 +150,15 @@ class VerifiedAuthTokenSerializer(AuthTokenSerializer):
         return attrs
 
 
+class OriginalJsonSerializerMixin(serializers.Serializer):
+    def to_representation(self, instance):
+        representation = super(OriginalJsonSerializerMixin, self).to_representation(instance)
+
+        if hasattr(instance, 'get_filtered_json'):
+            # properties in original_json not natively supported
+            extra_properties = instance.get_filtered_json()
+            if extra_properties and len(extra_properties) > 0:
+                representation.update(extra_properties)
+
+        return representation
+

@@ -399,10 +399,13 @@ class V1BadgeClassSerializer(serializers.Serializer):
     image = BadgeImageURLField()
     criteria = BadgeURLField()
     issuer = V1IssuerSerializer()
-    # alignment = TODO
     tags = serializers.ListField(child=BadgeStringField(), required=False)
+
     def to_representation(self, instance):
-        return super(V1BadgeClassSerializer, self).to_representation(instance)
+        representation = super(V1BadgeClassSerializer, self).to_representation(instance)
+        if 'alignment' in instance:
+            representation['alignment'] = instance['alignment']
+        return representation
 
 
 class V1InstanceSerializer(serializers.Serializer):
