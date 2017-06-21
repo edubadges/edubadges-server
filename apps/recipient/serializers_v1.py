@@ -185,13 +185,10 @@ class RecipientGroupSerializerV1(LinkedDataEntitySerializer):
 
 class IssuerRecipientGroupListSerializerV1(serializers.Serializer):
     def to_representation(self, issuer):
-        issuer_slug = issuer.slug
-        if not issuer_slug:
-            raise ValidationError("Invalid issuer_slug")
         groups_serializer = RecipientGroupSerializerV1(issuer.cached_recipient_groups(), many=True, context=self.context)
         return OrderedDict([
             ("@context", OriginSetting.HTTP+"/public/context/pathways"),
             ("@type", "IssuerRecipientGroupList"),
-            ("issuer", OriginSetting.HTTP+reverse('issuer_json', kwargs={'entity_id': issuer_slug})),
+            ("issuer", OriginSetting.HTTP+reverse('issuer_json', kwargs={'entity_id': issuer.entity_id})),
             ("recipientGroups", groups_serializer.data)
         ])
