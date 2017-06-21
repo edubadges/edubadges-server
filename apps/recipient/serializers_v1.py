@@ -188,7 +188,7 @@ class IssuerRecipientGroupListSerializerV1(serializers.Serializer):
         issuer_slug = issuer.slug
         if not issuer_slug:
             raise ValidationError("Invalid issuer_slug")
-        groups_serializer = RecipientGroupSerializerV1(issuer.recipientgroup_set.all(), many=True, context=self.context)
+        groups_serializer = RecipientGroupSerializerV1(issuer.cached_recipient_groups(), many=True, context=self.context)
         return OrderedDict([
             ("@context", OriginSetting.HTTP+"/public/context/pathways"),
             ("@type", "IssuerRecipientGroupList"),
