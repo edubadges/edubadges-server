@@ -75,8 +75,17 @@
 
 			     {% if badge_class.criteria_text %}
 				     <h3 class="title title-small">Criteria</h3>
-				     <p>{{ badge_class.criteria_text|markdownify|safe }}</p>
+				     {{ badge_class.criteria_text|markdownify|safe }}
 			     {% endif %}
+
+		    {% if badge_instance.cached_evidence|length > 0 %}
+			    <h3 class="title title-small">Evidence</h3>
+			    <ul>
+			    {% for evidence in badge_instance.cached_evidence %}
+				    <li>{% if evidence.narrative %}{{ evidence.narrative|markdownify|safe }}{% endif %} {% if evidence.evidence_url %}<a href="{{ evidence.evidence_url }}">{{ evidence.evidence_url }}</a>{% endif %}</li>
+			    {% endfor %}
+			    </ul>
+		    {% endif %}
 
 			    <div class="l-childrenhorizontal l-childrenhorizontal-small l-offsetleft">
 				    {% if not badge_class.criteria_text %}

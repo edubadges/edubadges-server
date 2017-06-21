@@ -33,11 +33,11 @@
 			    </a>
 			    <p class="heading-x-meta">Created {{ badge_class.created_at|date:'F d, Y' }}</p>
 
-			    <p>{{ badge_class.description|markdownify|safe }}</p>
+			    <p>{{ badge_class.description }}</p>
 
 		      {% if badge_class.criteria_text %}
 		      <h3 class="title title-small">Criteria</h3>
-			    <p>{{ badge_class.criteria_text|markdownify|safe }}</p>
+			    {{ badge_class.criteria_text|markdownify|safe }}
 					{% endif %}
 
 			    <div class="l-childrenhorizontal l-childrenhorizontal-small l-offsetleft">
