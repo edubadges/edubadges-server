@@ -105,7 +105,7 @@ class RecipientGroupSerializerV1(LinkedDataEntitySerializer):
     description = StripTagsCharField(required=False)
     slug = StripTagsCharField(read_only=True, source='entity_id')
     active = serializers.BooleanField(source='is_active', default=True)
-    issuer = LinkedDataReferenceField(keys=['slug', 'entity_id'], field_names={'slug': 'entity_id'}, model=Issuer)
+    issuer = LinkedDataReferenceField(keys=['slug'], field_names={'slug': 'entity_id'}, model=Issuer)
     member_count = serializers.IntegerField(read_only=True)
     members = RecipientGroupMembershipSerializerV1(
         read_only=False, many=True, required=False, source='cached_members'
