@@ -33,7 +33,7 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
     first_name = StripTagsCharField(max_length=30, allow_blank=True)
     last_name = StripTagsCharField(max_length=30, allow_blank=True)
     email = serializers.EmailField(source='primary_email', required=False)
-    password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+    password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False)
 
     def create(self, validated_data):
         user = BadgeUser.objects.create(

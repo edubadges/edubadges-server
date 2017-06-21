@@ -60,7 +60,16 @@ class BadgeUserDetail(BaseEntityDetailView):
         """
         Update the current user's profile
         """
-        return super(BadgeUserDetail, self).put(request, **kwargs)
+        obj = self.get_object(request, **kwargs)
+        if not self.has_object_permissions(request, obj):
+            return Response(status=HTTP_404_NOT_FOUND)
+
+        context = self.get_context_data(**kwargs)
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(obj, data=request.data, context=context, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(updated_by=request.user)
+        return Response(serializer.data)
 
     def get_object(self, request, **kwargs):
         version = getattr(request, 'version', 'v1')
