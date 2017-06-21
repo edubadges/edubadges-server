@@ -5,7 +5,7 @@ from issuer.models import Issuer
 from issuer.permissions import IsEditor, IsIssuerEditor
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from recipient.models import RecipientGroup
-from recipient.serializers_v1 import RecipientGroupSerializerV1
+from recipient.serializers_v1 import RecipientGroupSerializerV1, IssuerRecipientGroupListSerializerV1
 from recipient.serializers_v2 import RecipientGroupSerializerV2
 
 _TRUE_VALUES = ['true','t','on','yes','y','1',1,1.0,True]
@@ -20,10 +20,10 @@ def _scrub_boolean(boolean_str, default=None):
     return default
 
 
-class IssuerRecipientGroupList(VersionedObjectMixin, BaseEntityListView):
+class IssuerRecipientGroupList(BaseEntityDetailView, VersionedObjectMixin):
     model = Issuer  # used by get_object()
     permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor)
-    v1_serializer_class = RecipientGroupSerializerV1
+    v1_serializer_class = IssuerRecipientGroupListSerializerV1
     v2_serializer_class = RecipientGroupSerializerV2
 
     def get_objects(self, request, **kwargs):
