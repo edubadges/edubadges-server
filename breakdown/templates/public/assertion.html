@@ -9,7 +9,7 @@
         <meta property="og:type"               content="website" />
         <meta property="og:url"                content="{{ badge_instance_public_url }}" />
         <meta property="og:title"              content="{{ badge_class.name }}" />
-        <meta property="og:description"        content="{{ badge_class.json.description }}" />
+        <meta property="og:description"        content="{{ badge_class.description }}" />
 
         <meta property="og:image"              content="{{ badgeclass_image_png }}" />
         <meta property="og:image:secure_url"   content="{{ badgeclass_image_png }}" />
@@ -58,12 +58,12 @@
 
             	<a class="stack" href="{{ issuer_url }}">
 				    <div class="stack-x-image">
-					    <img src="{% if issuer.json.image %}{{ issuer.json.image }}{% else %}{% static 'badgr-ui/images/issuer-placeholder.png' %}{% endif %}"
+					    <img src="{% if issuer.image %}{{ issuer.image.url }}{% else %}{% static 'badgr-ui/images/issuer-placeholder.png' %}{% endif %}"
 					         width="40"
-					         alt="{{ issuer.json.name }}" />
+					         alt="{{ issuer.name }}" />
 				    </div>
 				    <div class="stack-x-text">
-					    <h2>{{ issuer.json.name }}</h2>
+					    <h2>{{ issuer.name }}</h2>
                         <small>{{ badgeclass_count }} {% if badgeclass_count > 1 %}Badges{% else %}Badge{% endif %}</small>
 				    </div>
 			    </a>
@@ -71,7 +71,7 @@
 
 			    <p class="heading-x-meta">Issued {{ badge_instance.created_at|date:'F d, Y' }} to {{ obscured_recipient }}</p>
 
-			    <p>{{ badge_class.json.description }}</p>
+			    <p>{{ badge_class.description|markdownify|safe }}</p>
 
 			     {% if badge_class.criteria_text %}
 				     <h3 class="title title-small">Criteria</h3>
@@ -80,11 +80,13 @@
 
 			    <div class="l-childrenhorizontal l-childrenhorizontal-small l-offsetleft">
 				    {% if not badge_class.criteria_text %}
-					    <a class="button button-primaryghost" href="{{ badge_class.json.criteria }}" target="_blank">View Criteria</a>
+					    <a class="button button-primaryghost" href="{{ badge_class.criteria_url }}" target="_blank">View Criteria</a>
 				    {% endif %}
+
 				    {% if badge_instance.json.evidence %}
 				    <a class="button button-primaryghost" href="{{ badge_instance.json.evidence }}" target="_blank">View evidence</a>
 				    {% endif %}
+
 			      {% if badge_instance_public_url %}
 				    <a class="button button-primaryghost" href="{{ badge_instance_public_url }}" target="_blank">View JSON</a>
 				    {% endif %}

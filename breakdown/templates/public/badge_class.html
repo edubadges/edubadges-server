@@ -20,20 +20,20 @@
 		    <div class="heading-x-text">
 			    <h1>{{ badge_class.name }}</h1>
 
-				  <a class="stack" href="{% url 'issuer_json' entity_id=issuer.entity_id %}">
+				  <a class="stack" href="{{ issuer.public_url }}">
 				    <div class="stack-x-image">
-					    <img src="{% if issuer.json.image %}{{ issuer.json.image }}{% else %}{% static 'badgr-ui/images/issuer-placeholder.png' %}{% endif %}"
+					    <img src="{% if issuer.image %}{{ issuer.image.url }}{% else %}{% static 'badgr-ui/images/issuer-placeholder.png' %}{% endif %}"
 					         width="40"
-					         alt="{{ issuer.json.name }}" />
+					         alt="{{ issuer.name }}" />
 				    </div>
 				    <div class="stack-x-text">
-					    <h2>{{ issuer.json.name }}</h2>
+					    <h2>{{ issuer.name }}</h2>
                         <small>{{ badgeclass_count }} {% if badgeclass_count > 1 %}Badges{% else %}Badge{% endif %}</small>
 				    </div>
 			    </a>
 			    <p class="heading-x-meta">Created {{ badge_class.created_at|date:'F d, Y' }}</p>
 
-			    <p>{{ badge_class.json.description }}</p>
+			    <p>{{ badge_class.description|markdownify|safe }}</p>
 
 		      {% if badge_class.criteria_text %}
 		      <h3 class="title title-small">Criteria</h3>
@@ -42,9 +42,9 @@
 
 			    <div class="l-childrenhorizontal l-childrenhorizontal-small l-offsetleft">
 				    {% if not badge_class.criteria_text %}
-					  <a class="button button-primaryghost" href="{{ badge_class.json.criteria }}" target="_blank">View Criteria</a>
+					  <a class="button button-primaryghost" href="{{ badge_class.criteria_url }}" target="_blank">View Criteria</a>
 				    {% endif %}
-				    <a class="button button-primaryghost" href="{{ badge_class.get_absolute_url }}.json" target="_blank">View JSON</a>
+				    <a class="button button-primaryghost" href="{{ badge_class.public_url }}.json" target="_blank">View JSON</a>
 				    {% if external_source_url %}
 					    <a class="button button-primaryghost" href="{{ external_source_url }}" target="_blank">View Original</a>
 				    {% endif %}
