@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from django.contrib.admin import ModelAdmin, TabularInline
+from django.contrib.admin import ModelAdmin, StackedInline, TabularInline
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 
@@ -11,12 +11,18 @@ from mainsite.admin import badgr_admin
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceEvidence
 
 
+class IssuerStaffInline(TabularInline):
+    model = Issuer.staff.through
+    extra = 0
+
+
+
 class IssuerAdmin(DjangoObjectActions, ModelAdmin):
     readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url')
-    list_display = ('img', 'name', 'slug', 'created_by', 'created_at')
+    list_display = ('img', 'name', 'entity_id', 'created_by', 'created_at')
     list_display_links = ('img', 'name')
     list_filter = ('created_at',)
-    search_fields = ('name', 'slug')
+    search_fields = ('name', 'entity_id')
     fieldsets = (
         ('Metadata', {
             'fields': ('created_by', 'created_at', 'source', 'source_url', 'slug', 'entity_id'),
@@ -29,6 +35,9 @@ class IssuerAdmin(DjangoObjectActions, ModelAdmin):
         #     'fields': ('old_json',)
         # }),
     )
+    inlines = [
+        IssuerStaffInline,
+    ]
     change_actions = ['redirect_badgeclasses']
 
     def img(self, obj):
@@ -51,14 +60,14 @@ badgr_admin.register(Issuer, IssuerAdmin)
 
 class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
     readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url')
-    list_display = ('badge_image', 'name', 'slug', 'issuer_link', 'recipient_count')
+    list_display = ('badge_image', 'name', 'entity_id', 'issuer_link', 'recipient_count')
     list_display_links = ('badge_image', 'name',)
     list_filter = ('created_at',)
-    search_fields = ('name', 'slug', 'issuer__name',)
+    search_fields = ('name', 'entity_id', 'issuer__name',)
     raw_id_fields = ('issuer',)
     fieldsets = (
         ('Metadata', {
-            'fields': ('created_by', 'created_at', 'source', 'source_url', 'slug'),
+            'fields': ('created_by', 'created_at', 'source', 'source_url', 'entity_id', 'slug'),
             'classes': ("collapse",)
         }),
         (None, {
@@ -99,26 +108,26 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
 badgr_admin.register(BadgeClass, BadgeClassAdmin)
 
 
-class BadgeEvidenceInline(TabularInline):
+class BadgeEvidenceInline(StackedInline):
     model = BadgeInstanceEvidence
-    fields = ('evidence_url','narrative',)
+    fields = ('evidence_url', 'narrative',)
     extra = 0
 
 
 class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
-    readonly_fields = ('created_at', 'created_by', 'image', 'slug', 'old_json')
-    list_display = ('badge_image', 'recipient_identifier', 'slug', 'badgeclass', 'issuer')
+    readonly_fields = ('created_at', 'created_by', 'image', 'entity_id', 'old_json', 'salt')
+    list_display = ('badge_image', 'recipient_identifier', 'entity_id', 'badgeclass', 'issuer')
     list_display_links = ('badge_image', 'recipient_identifier', )
     list_filter = ('created_at',)
-    search_fields = ('recipient_identifier', 'slug', 'badgeclass__name', 'issuer__name')
+    search_fields = ('recipient_identifier', 'entity_id', 'badgeclass__name', 'issuer__name')
     raw_id_fields = ('badgeclass', 'issuer')
     fieldsets = (
         ('Metadata', {
-            'fields': ('created_by', 'created_at', 'slug', 'salt', 'badgeclass', 'issuer'),
+            'fields': ('created_by', 'created_at', 'slug', 'entity_id', 'salt', 'badgeclass', 'issuer'),
             'classes': ("collapse",)
         }),
         (None, {
-            'fields': ('acceptance', 'recipient_identifier', 'image')
+            'fields': ('acceptance', 'recipient_identifier', 'image', 'narrative')
         }),
         ('Revocation', {
             'fields': ('revoked', 'revocation_reason')
