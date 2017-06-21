@@ -123,8 +123,8 @@ class BadgeCheckHelper(object):
     @classmethod
     def cache_instance(cls):
         if cls._cache_instance is None:
-            # cls._cache_instance = DjangoCacheRequestsCacheBackend(namespace='badgr_requests_cache')
-            cls._cache_instance = RedisCache(namespace='badgr_requests_cache')
+            # TODO: note this class is broken and does not work correctly!
+            cls._cache_instance = DjangoCacheRequestsCacheBackend(namespace='badgr_requests_cache')
         return cls._cache_instance
 
     @classmethod
@@ -132,7 +132,7 @@ class BadgeCheckHelper(object):
         return getattr(settings, 'BADGECHECK_OPTIONS', {
             'include_original_json': True,
             'use_cache': True,
-            'cache_backend': cls.cache_instance()
+            # 'cache_backend': cls.cache_instance()  #  just use locmem cache for now 
         })
 
     @classmethod
