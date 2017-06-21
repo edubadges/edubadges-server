@@ -12,7 +12,7 @@ badgr_admin.autodiscover()
 
 from django.views.generic.base import RedirectView, TemplateView
 
-from mainsite.views import ClearCacheView, LoginAndObtainAuthToken
+from mainsite.views import ClearCacheView, LoginAndObtainAuthToken, RedirectToUiLogin
 from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation, error404, error500
 from django.contrib.auth import views as contrib_auth_views
 
@@ -28,6 +28,7 @@ urlpatterns = [
 
     # Home
     url(r'^$', info_view, name='index'),
+    url(r'^accounts/login/$', RedirectToUiLogin.as_view(), name='legacy_login_redirect'),
 
     # Admin URLs
     url(r'^staff/clear-cache$', ClearCacheView.as_view(), name='badgr_admin_clear_cache'),
