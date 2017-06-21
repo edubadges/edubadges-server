@@ -1,11 +1,13 @@
 # Created by wiggins@concentricsky.com on 3/31/16.
+from rest_framework.response import Response
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_201_CREATED
 
 from entity.api import BaseEntityListView, VersionedObjectMixin, BaseEntityDetailView
 from issuer.models import Issuer
 from issuer.permissions import IsEditor, IsIssuerEditor
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from recipient.models import RecipientGroup
-from recipient.serializers_v1 import RecipientGroupSerializerV1
+from recipient.serializers_v1 import RecipientGroupSerializerV1, IssuerRecipientGroupListSerializerV1
 from recipient.serializers_v2 import RecipientGroupSerializerV2
 
 _TRUE_VALUES = ['true','t','on','yes','y','1',1,1.0,True]
@@ -48,7 +50,17 @@ class IssuerRecipientGroupList(VersionedObjectMixin, BaseEntityListView):
               type: boolean
               paramType: query
         """
-        return super(IssuerRecipientGroupList, self).get(request, **kwargs)
+        if request.version == 'v1':
+            # For v1 requests, we must treat an Issuer instance as the object to be serialized in order to preserve
+            # legacy behavior.
+            obj = self.get_object(request, **kwargs)
+            if not self.has_object_permissions(request, obj):
+                return Response(status=HTTP_404_NOT_FOUND)
+            context = self.get_context_data(**kwargs)
+            serializer = IssuerRecipientGroupListSerializerV1(obj, context=context)
+            return Response(serializer.data)
+        else:
+            return super(IssuerRecipientGroupList, self).get(request, **kwargs)
 
     def post(self, request, **kwargs):
         """

@@ -105,7 +105,7 @@ class RecipientGroupSerializerV1(LinkedDataEntitySerializer):
     description = StripTagsCharField(required=False)
     slug = StripTagsCharField(read_only=True, source='entity_id')
     active = serializers.BooleanField(source='is_active', default=True)
-    issuer = LinkedDataReferenceField(keys=['entity_id'], model=Issuer)
+    issuer = LinkedDataReferenceField(keys=['slug'], field_names={'slug': 'entity_id'}, model=Issuer)
     member_count = serializers.IntegerField(read_only=True)
     members = RecipientGroupMembershipSerializerV1(
         read_only=False, many=True, required=False, source='cached_members'
@@ -183,15 +183,12 @@ class RecipientGroupSerializerV1(LinkedDataEntitySerializer):
         return instance
 
 
-class RecipientGroupListSerializerV1(serializers.Serializer):
-    def to_representation(self, recipient_groups):
-        issuer_slug = self.context.get('issuer_slug', None)
-        if not issuer_slug:
-            raise ValidationError("Invalid issuer_slug")
-        groups_serializer = RecipientGroupSerializerV1(recipient_groups, many=True, context=self.context)
+class IssuerRecipientGroupListSerializerV1(serializers.Serializer):
+    def to_representation(self, issuer):
+        groups_serializer = RecipientGroupSerializerV1(issuer.cached_recipient_groups(), many=True, context=self.context)
         return OrderedDict([
             ("@context", OriginSetting.HTTP+"/public/context/pathways"),
             ("@type", "IssuerRecipientGroupList"),
-            ("issuer", OriginSetting.HTTP+reverse('issuer_json', kwargs={'entity_id': issuer_slug})),
+            ("issuer", OriginSetting.HTTP+reverse('issuer_json', kwargs={'entity_id': issuer.entity_id})),
             ("recipientGroups", groups_serializer.data)
         ])
