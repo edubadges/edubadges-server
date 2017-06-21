@@ -1,5 +1,5 @@
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.utils.decorators import method_decorator
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import DetailView
@@ -57,3 +57,13 @@ class LegacyCollectionShareRedirectView(RedirectView):
         kwargs.pop('pk')
         url = reverse(new_pattern_name, args=args, kwargs=kwargs)
         return url
+
+
+class LegacyBadgeShareRedirectView(RedirectView):
+    permanent = True
+
+    def get_redirect_url(self, *args, **kwargs):
+        entity_id = kwargs.get('share_hash', None)
+        if not entity_id:
+            raise Http404
+        return reverse('badgeinstance_json', kwargs={'entity_id': entity_id})
