@@ -16,7 +16,10 @@ class BadgeInstanceHTMLRenderer(BrowsableAPIRenderer):
         context = super(BadgeInstanceHTMLRenderer, self).get_context(
             data, accepted_media_type, renderer_context)
 
-        badge_instance = renderer_context.get('badge_instance')
+        badge_instance = renderer_context.get('badge_instance', None)
+        if not badge_instance:
+            # 404
+            return context
 
         obi_version = renderer_context.get('obi_version', utils.CURRENT_OBI_VERSION)
         context['obi_version'] = obi_version
