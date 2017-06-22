@@ -12,9 +12,9 @@ json_patterns = [
 ]
 
 image_patterns = [
-    url(r'^/issuers/(?P<entity_id>[^/]+)/image$', IssuerImage.as_view(), name='issuer_image'),
-    url(r'^/badges/(?P<entity_id>[^/]+)/image', BadgeClassImage.as_view(), name='badgeclass_image'),
-    url(r'^/assertions/(?P<entity_id>[^/]+)/image', BadgeInstanceImage.as_view(), name='badgeinstance_image'),
+    url(r'^/issuers/(?P<entity_id>[^/]+)/image$', IssuerImage.as_view(slugToEntityIdRedirect=True), name='issuer_image'),
+    url(r'^/badges/(?P<entity_id>[^/]+)/image', BadgeClassImage.as_view(slugToEntityIdRedirect=True), name='badgeclass_image'),
+    url(r'^/assertions/(?P<entity_id>[^/]+)/image', BadgeInstanceImage.as_view(slugToEntityIdRedirect=True), name='badgeinstance_image'),
     url(r'^/badges/(?P<entity_id>[^/]+)/criteria', BadgeClassCriteria.as_view(), name='badgeclass_criteria'),
 ]
 

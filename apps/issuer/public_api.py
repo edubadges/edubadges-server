@@ -23,13 +23,7 @@ from .renderers import BadgeInstanceHTMLRenderer, BadgeClassHTMLRenderer, Issuer
 
 logger = badgrlog.BadgrLogger()
 
-
-class JSONComponentView(VersionedObjectMixin, APIView):
-    """
-    Abstract Component Class
-    """
-    permission_classes = (permissions.AllowAny,)
-    html_renderer_class = None
+class SlugToEntityIdRedirectMixin(object):
     slugToEntityIdRedirect = False
 
     def get_entity_id_by_slug(self, slug):
@@ -50,6 +44,13 @@ class JSONComponentView(VersionedObjectMixin, APIView):
         except (Resolver404, NoReverseMatch):
             raise Http404
 
+class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMixin):
+    """
+    Abstract Component Class
+    """
+    permission_classes = (permissions.AllowAny,)
+    html_renderer_class = None
+    
     def log(self, obj):
         pass
 
@@ -113,11 +114,10 @@ class ComponentPropertyDetailView(APIView):
         return redirect(p.url)
 
 
-class ImagePropertyDetailView(ComponentPropertyDetailView):
+class ImagePropertyDetailView(ComponentPropertyDetailView, SlugToEntityIdRedirectMixin):
     """
     a subclass of ComponentPropertyDetailView, for image fields, if query_param type='png' re-encode if necessary
     """
-
     def get_object(self, entity_id):
         try:
             current_object = self.model.cached.get(entity_id=entity_id)
@@ -128,9 +128,12 @@ class ImagePropertyDetailView(ComponentPropertyDetailView):
             return current_object
 
     def get(self, request, **kwargs):
+
         entity_id = kwargs.get('entity_id')
         current_object = self.get_object(entity_id)
-        if current_object is None:
+        if current_object is None and self.slugToEntityIdRedirect and getattr(request, 'version', 'v1') == 'v2':
+            return self.get_slug_to_entity_id_redirect(kwargs.get('entity_id', None))
+        elif current_object is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         image_prop = getattr(current_object, self.prop)
