@@ -84,9 +84,13 @@
 				    {{ badge_instance.narrative|markdownify|safe }}
 				  {% endif %}
 			    {% for evidence in badge_instance.cached_evidence %}
-				    <div>
+				    <div class="bordered l-padding-2x l-marginBottom-2x">
 					    {% if evidence.narrative %}{{ evidence.narrative|markdownify|safe }}{% endif %}
-					    {% if evidence.evidence_url %}<a class="button button-primaryghost" href="{{ evidence.evidence_url }}">View Evidence URL</a>{% endif %}
+					    {% if evidence.evidence_url %}
+							<div class="l-childrenhorizontal l-childrenhorizontal-small l-childrenhorizontal-right">
+									<a class="button button-primaryghost" href="{{ evidence.evidence_url }}">View Evidence URL</a>
+							</div>
+					    {% endif %}
 				    </div>
 			    {% endfor %}
 		    {% endif %}
