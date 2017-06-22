@@ -78,22 +78,26 @@
 				     {{ badge_class.criteria_text|markdownify|safe }}
 			     {% endif %}
 
-		    {% if badge_instance.cached_evidence|length > 0 %}
+		    {% if badge_instance.cached_evidence|length > 0 or badge_instance.narrative %}
 			    <h3 class="title title-small">Evidence</h3>
-			    <ul>
+			    {% if badge_instance.narrative %}
+				    {{ badge_instance.narrative|markdownify|safe }}
+				  {% endif %}
 			    {% for evidence in badge_instance.cached_evidence %}
-				    <li>{% if evidence.narrative %}{{ evidence.narrative|markdownify|safe }}{% endif %} {% if evidence.evidence_url %}<a href="{{ evidence.evidence_url }}">{{ evidence.evidence_url }}</a>{% endif %}</li>
+				    <div class="bordered l-padding-2x l-marginBottom-2x">
+					    {% if evidence.narrative %}{{ evidence.narrative|markdownify|safe }}{% endif %}
+					    {% if evidence.evidence_url %}
+							<div class="l-childrenhorizontal l-childrenhorizontal-small l-childrenhorizontal-right">
+									<a class="button button-primaryghost" href="{{ evidence.evidence_url }}">View Evidence URL</a>
+							</div>
+					    {% endif %}
+				    </div>
 			    {% endfor %}
-			    </ul>
 		    {% endif %}
 
 			    <div class="l-childrenhorizontal l-childrenhorizontal-small l-offsetleft">
 				    {% if not badge_class.criteria_text %}
 					    <a class="button button-primaryghost" href="{{ badge_class.criteria_url }}" target="_blank">View Criteria</a>
-				    {% endif %}
-
-				    {% if badge_instance.json.evidence %}
-				    <a class="button button-primaryghost" href="{{ badge_instance.json.evidence }}" target="_blank">View evidence</a>
 				    {% endif %}
 
 			      {% if badge_instance_public_url %}
