@@ -5,6 +5,7 @@ import os
 from PIL import Image
 from django.conf import settings
 from django.core.files.storage import DefaultStorage
+from django.core.urlresolvers import resolve, reverse, Resolver404, NoReverseMatch
 from django.http import Http404
 from django.shortcuts import redirect
 from django.views.generic import RedirectView
@@ -22,8 +23,35 @@ from .renderers import BadgeInstanceHTMLRenderer, BadgeClassHTMLRenderer, Issuer
 
 logger = badgrlog.BadgrLogger()
 
+class SlugToEntityIdRedirectMixin(object):
+    slugToEntityIdRedirect = False
 
-class JSONComponentView(VersionedObjectMixin, APIView):
+    def get_entity_id_by_slug(self, slug):
+        try:
+            object = self.model.cached.get(slug=slug)
+            return getattr(object, 'entity_id', None)
+        except self.model.DoesNotExist:
+            return None
+
+    def get_slug_to_entity_id_redirect_url(self, slug):
+        try:
+            pattern_name = resolve(self.request.path_info).url_name
+            entity_id = self.get_entity_id_by_slug(slug)
+            if entity_id is None:
+                raise Http404
+            return reverse(pattern_name, kwargs={'entity_id': entity_id})
+        except (Resolver404, NoReverseMatch):
+            return None
+
+    def get_slug_to_entity_id_redirect(self, slug):
+        redirect_url = self.get_slug_to_entity_id_redirect_url(slug)
+        if redirect_url is not None:
+            return redirect(redirect_url, permanent=True)
+        else:
+            raise Http404
+
+
+class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMixin):
     """
     Abstract Component Class
     """
@@ -34,7 +62,14 @@ class JSONComponentView(VersionedObjectMixin, APIView):
         pass
 
     def get(self, request, **kwargs):
-        self.current_object = self.get_object(request, **kwargs)
+        try:
+            self.current_object = self.get_object(request, **kwargs)
+        except Http404:
+            if self.slugToEntityIdRedirect:
+                return self.get_slug_to_entity_id_redirect(kwargs.get('entity_id', None))
+            else:
+                raise
+
         self.log(self.current_object)
         if self.current_object.source_url and self.current_object.original_json:
             json = self.current_object.get_original_json()
@@ -86,11 +121,10 @@ class ComponentPropertyDetailView(APIView):
         return redirect(p.url)
 
 
-class ImagePropertyDetailView(ComponentPropertyDetailView):
+class ImagePropertyDetailView(ComponentPropertyDetailView, SlugToEntityIdRedirectMixin):
     """
     a subclass of ComponentPropertyDetailView, for image fields, if query_param type='png' re-encode if necessary
     """
-
     def get_object(self, entity_id):
         try:
             current_object = self.model.cached.get(entity_id=entity_id)
@@ -101,9 +135,12 @@ class ImagePropertyDetailView(ComponentPropertyDetailView):
             return current_object
 
     def get(self, request, **kwargs):
+
         entity_id = kwargs.get('entity_id')
         current_object = self.get_object(entity_id)
-        if current_object is None:
+        if current_object is None and self.slugToEntityIdRedirect and getattr(request, 'version', 'v1') == 'v2':
+            return self.get_slug_to_entity_id_redirect(kwargs.get('entity_id', None))
+        elif current_object is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         image_prop = getattr(current_object, self.prop)
@@ -210,14 +247,18 @@ class BadgeClassImage(ImagePropertyDetailView):
         logger.event(badgrlog.BadgeClassImageRetrievedEvent(obj, self.request))
 
 
-class BadgeClassCriteria(RedirectView):
+class BadgeClassCriteria(RedirectView, SlugToEntityIdRedirectMixin):
     permanent = False
+    model = BadgeClass
 
     def get_redirect_url(self, *args, **kwargs):
         try:
-            badge_class = BadgeClass.cached.get(slug=kwargs.get('slug'))
-        except BadgeClass.DoesNotExist:
-            raise Http404
+            badge_class = self.model.cached.get(entity_id=kwargs.get('entity_id'))
+        except self.model.DoesNotExist:
+            if self.slugToEntityIdRedirect:
+                return self.get_slug_to_entity_id_redirect_url(kwargs.get('entity_id'))
+            else:
+                return None
         return badge_class.get_absolute_url()
 
 
@@ -243,8 +284,14 @@ class BadgeInstanceJson(JSONComponentView):
         return context
 
     def get(self, request, **kwargs):
-        current_object = self.get_object(request, **kwargs)
-        self.current_object = current_object
+        try:
+            current_object = self.get_object(request, **kwargs)
+            self.current_object = current_object
+        except Http404:
+            if self.slugToEntityIdRedirect:
+                return self.get_slug_to_entity_id_redirect(kwargs.get('entity_id', None))
+            else:
+                raise
 
         if current_object.revoked is False:
 
