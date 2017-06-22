@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from rest_framework import permissions
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_302_FOUND
 from rest_framework.views import APIView
@@ -48,7 +49,12 @@ class BackpackAssertionDetail(BaseEntityDetailView):
     v1_serializer_class = LocalBadgeInstanceUploadSerializerV1
     v2_serializer_class = BackpackAssertionSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, VerifiedEmailMatchesRecipientIdentifier)
-    http_method_names = ('get', 'delete')
+    http_method_names = ('get', 'delete', 'put')
+
+    def get_context_data(self, **kwargs):
+        context = super(BackpackAssertionDetail, self).get_context_data(**kwargs)
+        context['format'] = self.request.query_params.get('json_format', 'v1')  # for /v1/earner/badges compat
+        return context
 
     def get(self, request, **kwargs):
         return super(BackpackAssertionDetail, self).get(request, **kwargs)
@@ -58,6 +64,11 @@ class BackpackAssertionDetail(BaseEntityDetailView):
         obj.acceptance = BadgeInstance.ACCEPTANCE_REJECTED
         obj.save()
         return Response(status=HTTP_200_OK)
+
+    def put(self, request, **kwargs):
+        fields_whitelist = ('acceptance',)
+        data = {k: v for k, v in request.data.items() if k in fields_whitelist}
+        return super(BackpackAssertionDetail, self).put(request, data=data, **kwargs)
 
 
 class BackpackAssertionDetailImage(ImagePropertyDetailView):

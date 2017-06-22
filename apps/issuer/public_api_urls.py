@@ -6,16 +6,16 @@ from .public_api import (IssuerJson, IssuerImage, BadgeClassJson,
                          BadgeInstanceImage)
 
 json_patterns = [
-    url(r'^/issuers/(?P<entity_id>[^/.]+)$', IssuerJson.as_view(), name='issuer_json'),
-    url(r'^/badges/(?P<entity_id>[^/.]+)$', BadgeClassJson.as_view(), name='badgeclass_json'),
-    url(r'^/assertions/(?P<entity_id>[^/.]+)$', BadgeInstanceJson.as_view(), name='badgeinstance_json'),
+    url(r'^/issuers/(?P<entity_id>[^/.]+)$', IssuerJson.as_view(slugToEntityIdRedirect=True), name='issuer_json'),
+    url(r'^/badges/(?P<entity_id>[^/.]+)$', BadgeClassJson.as_view(slugToEntityIdRedirect=True), name='badgeclass_json'),
+    url(r'^/assertions/(?P<entity_id>[^/.]+)$', BadgeInstanceJson.as_view(slugToEntityIdRedirect=True), name='badgeinstance_json'),
 ]
 
 image_patterns = [
-    url(r'^/issuers/(?P<entity_id>[^/]+)/image$', IssuerImage.as_view(), name='issuer_image'),
-    url(r'^/badges/(?P<entity_id>[^/]+)/image', BadgeClassImage.as_view(), name='badgeclass_image'),
-    url(r'^/assertions/(?P<entity_id>[^/]+)/image', BadgeInstanceImage.as_view(), name='badgeinstance_image'),
-    url(r'^/badges/(?P<entity_id>[^/]+)/criteria', BadgeClassCriteria.as_view(), name='badgeclass_criteria'),
+    url(r'^/issuers/(?P<entity_id>[^/]+)/image$', IssuerImage.as_view(slugToEntityIdRedirect=True), name='issuer_image'),
+    url(r'^/badges/(?P<entity_id>[^/]+)/image', BadgeClassImage.as_view(slugToEntityIdRedirect=True), name='badgeclass_image'),
+    url(r'^/assertions/(?P<entity_id>[^/]+)/image', BadgeInstanceImage.as_view(slugToEntityIdRedirect=True), name='badgeinstance_image'),
+    url(r'^/badges/(?P<entity_id>[^/]+)/criteria', BadgeClassCriteria.as_view(slugToEntityIdRedirect=True), name='badgeclass_criteria'),
 ]
 
 urlpatterns = format_suffix_patterns(json_patterns, allowed=['json']) + image_patterns

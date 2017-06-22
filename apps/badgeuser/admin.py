@@ -5,19 +5,20 @@ from .models import BadgeUser, EmailAddressVariant
 
 
 class BadgeUserAdmin(ModelAdmin):
-    readonly_fields = ('entity_id', 'date_joined', 'last_login', 'username')
-    list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'last_login', 'date_joined')
+    readonly_fields = ('entity_id', 'date_joined', 'last_login', 'username', 'entity_id',)
+    list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'entity_id', 'date_joined')
     list_filter = ('is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')
-    search_fields = ('email', 'first_name', 'last_name', 'username')
+    search_fields = ('email', 'first_name', 'last_name', 'username', 'entity_id')
     fieldsets = (
-        ('Metadata', {'fields': ('entity_id', 'username', 'last_login', 'date_joined',), 'classes': ('collapse',)}),
+        ('Metadata', {'fields': ('entity_id', 'username', 'date_joined',), 'classes': ('collapse',)}),
         (None, {'fields': ('email', 'first_name', 'last_name', )}),
         ('Access', {'fields': ('is_active', 'is_staff', 'is_superuser', 'password')}),
-        ('Permissions', {'fields': ('groups','user_permissions')}),
+        ('Permissions', {'fields': ('groups', 'user_permissions')}),
     )
     pass
 
 badgr_admin.register(BadgeUser, BadgeUserAdmin)
+
 
 class EmailAddressVariantAdmin(ModelAdmin):
     search_fields = ('canonical_email', 'email',)

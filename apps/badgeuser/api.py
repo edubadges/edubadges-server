@@ -60,7 +60,7 @@ class BadgeUserDetail(BaseEntityDetailView):
         """
         Update the current user's profile
         """
-        return super(BadgeUserDetail, self).put(request, **kwargs)
+        return super(BadgeUserDetail, self).put(request, allow_partial=True, **kwargs)
 
     def get_object(self, request, **kwargs):
         version = getattr(request, 'version', 'v1')
