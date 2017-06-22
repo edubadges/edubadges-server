@@ -613,6 +613,23 @@ class UserProfileTests(BadgrTestCase):
         self.assertUserLoggedIn()
         self.assertEqual(len(mail.outbox), 1)
 
+        response = self.client.put('/v1/user/profile', {
+            'first_name': 'Barry',
+            'last_name': 'Manilow'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual('Barry', response.data.get('first_name'))
+
+        new_password = 'superstar!'
+        response = self.client.put('/v1/user/profile', {
+            'password': new_password
+        })
+        self.assertEqual(response.status_code, 200)
+        self.client.logout()
+        self.client.login(username=username, password=new_password)
+        self.assertUserLoggedIn()
+
+
     def assertUserLoggedIn(self, user_pk=None):
         self.assertIn(SESSION_KEY, self.client.session)
         if user_pk is not None:
