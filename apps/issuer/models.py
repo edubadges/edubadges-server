@@ -681,7 +681,7 @@ class BadgeInstance(BaseAuditedModel,
             json['revocationReason'] = self.revocation_reason
 
         if obi_version == '1_1':
-            json["uid"] = self.slug
+            json["uid"] = self.entity_id
             json["verify"] = {
                 "url": add_obi_version_ifneeded(self.public_url, obi_version),
                 "type": "hosted"
