@@ -125,7 +125,7 @@ class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
         serializer = serializer_class(obj, context=context)
         return Response(serializer.data)
 
-    def put(self, request, **kwargs):
+    def put(self, request, allow_partial=False, **kwargs):
         """
         PUT a new version of an entity
         """
@@ -135,7 +135,7 @@ class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
 
         context = self.get_context_data(**kwargs)
         serializer_class = self.get_serializer_class()
-        serializer = serializer_class(obj, data=request.data, context=context)
+        serializer = serializer_class(obj, data=request.data, partial=allow_partial, context=context)
         serializer.is_valid(raise_exception=True)
         serializer.save(updated_by=request.user)
         return Response(serializer.data)
