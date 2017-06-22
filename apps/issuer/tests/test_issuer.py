@@ -226,6 +226,32 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(second_response.status_code, 200)
         self.assertEqual(len(test_issuer.staff.all()), 1)
 
+    def test_modify_staff_user_role(self):
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+        self.assertEqual(test_issuer.staff.count(), 1)
+
+        other_user = self.setup_user(authenticate=False)
+
+        first_response = self.client.post('/v1/issuer/issuers/{slug}/staff'.format(slug=test_issuer.entity_id), {
+            'action': 'add',
+            'email': other_user.primary_email
+        })
+        self.assertEqual(first_response.status_code, 200)
+        self.assertEqual(len(test_issuer.staff.all()), 2)
+        self.assertEqual(test_issuer.editors.count(), 1)
+        self.assertEqual(test_issuer.staff.count(), 2)
+
+        second_response = self.client.post('/v1/issuer/issuers/{slug}/staff'.format(slug=test_issuer.entity_id), {
+            'action': 'modify',
+            'email': other_user.primary_email,
+            'role': 'editor'
+        })
+        self.assertEqual(second_response.status_code, 200)
+        staff = test_issuer.staff.all()
+        self.assertEqual(test_issuer.editors.count(), 2)
+
+
     def test_cannot_modify_or_remove_self(self):
         """
         The authenticated issuer owner cannot modify their own role or remove themself from the list.

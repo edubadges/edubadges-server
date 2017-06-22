@@ -190,7 +190,7 @@ class IssuerStaffList(VersionedObjectMixin, APIView):
         elif action == 'modify':
             role = serializer.validated_data.get('role')
             try:
-                staff_instance, = IssuerStaff.objects.get(
+                staff_instance = IssuerStaff.objects.get(
                     user=user_to_modify,
                     issuer=current_issuer
                 )
