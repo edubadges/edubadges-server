@@ -11,19 +11,19 @@ class RecipientGroupMembershipInline(TabularInline):
 
 
 class RecipientGroupAdmin(ModelAdmin):
-    list_display = ('name','issuer','is_active', 'created_at')
-    list_filter = ('is_active','created_at',)
+    list_display = ('name', 'issuer', 'is_active', 'created_at', 'entity_id')
+    list_filter = ('is_active', 'created_at',)
     search_fields = ('name', 'issuer__name')
-    # readonly_fields = ('created_by','created_at','updated_by','updated_by',)
+    readonly_fields = ('created_by', 'created_at', 'created_by', 'entity_id', 'slug')
     raw_id_fields = ('issuer',)
     filter_horizontal = ('pathways',)
     fieldsets = (
-        # ('Metadata', {
-        #     'fields': ('is_active','created_by','created_at','updated_by','updated_by',),
-        #     'classes': ('collapse',)
-        # }),
+        ('Metadata', {
+            'fields': ('is_active', 'created_by', 'created_at', 'updated_by', 'entity_id', 'slug'),
+            'classes': ('collapse',)
+        }),
         (None, {
-            'fields': ('name', 'description', 'issuer','pathways')
+            'fields': ('name', 'description', 'issuer', 'pathways')
         }),
     )
     inlines = [RecipientGroupMembershipInline]
@@ -32,17 +32,17 @@ badgr_admin.register(RecipientGroup, RecipientGroupAdmin)
 
 
 class RecipientProfileAdmin(ModelAdmin):
-    list_display = ('recipient_identifier','display_name','public')
+    list_display = ( 'public', 'recipient_identifier', 'display_name', 'entity_id')
     search_fields = ('recipient_identifier', 'display_name',)
-    # readonly_fields = ('created_by','created_at','updated_by','updated_by',)
     raw_id_fields = ('badge_user',)
+    readonly_fields = ('created_by', 'created_at', 'entity_id', 'slug')
     fieldsets = (
-        # ('Metadata', {
-        #     'fields': ('is_active','created_by','created_at','updated_by','updated_by',),
-        #     'classes': ('collapse',)
-        # }),
+        ('Metadata', {
+            'fields': ('is_active', 'created_by', 'created_at', 'entity_id', 'slug',),
+            'classes': ('collapse',)
+        }),
         (None, {
-            'fields': ('public','recipient_identifier', 'display_name', 'badge_user')
+            'fields': ('public', 'recipient_identifier', 'display_name', 'badge_user')
         }),
     )
     inlines = [RecipientGroupMembershipInline]
