@@ -5,6 +5,7 @@ import os
 from PIL import Image
 from django.conf import settings
 from django.core.files.storage import DefaultStorage
+from django.core.urlresolvers import resolve, reverse, Resolver404, NoReverseMatch
 from django.http import Http404
 from django.shortcuts import redirect
 from django.views.generic import RedirectView
@@ -29,12 +30,38 @@ class JSONComponentView(VersionedObjectMixin, APIView):
     """
     permission_classes = (permissions.AllowAny,)
     html_renderer_class = None
+    slugToEntityIdRedirect = False
+
+    def get_entity_id_by_slug(self, slug):
+        try:
+            object = self.model.cached.get(slug=slug)
+            return getattr(object, 'entity_id', None)
+        except self.model.DoesNotExist:
+            return None
+
+    def get_slug_to_entity_id_redirect(self, slug):
+        try:
+            pattern_name = resolve(self.request.path_info).url_name
+            entity_id = self.get_entity_id_by_slug(slug)
+            if entity_id is None:
+                raise Http404
+            redirect_url = reverse(pattern_name, kwargs={'entity_id': entity_id})
+            return redirect(redirect_url, permanent=True)
+        except (Resolver404, NoReverseMatch):
+            raise Http404
 
     def log(self, obj):
         pass
 
     def get(self, request, **kwargs):
-        self.current_object = self.get_object(request, **kwargs)
+        try:
+            self.current_object = self.get_object(request, **kwargs)
+        except Http404:
+            if self.slugToEntityIdRedirect and getattr(request, 'version', 'v1') == 'v2':
+                return self.get_slug_to_entity_id_redirect(kwargs.get('entity_id', None))
+            else:
+                raise
+
         self.log(self.current_object)
         if self.current_object.source_url and self.current_object.original_json:
             json = self.current_object.get_original_json()
@@ -243,8 +270,14 @@ class BadgeInstanceJson(JSONComponentView):
         return context
 
     def get(self, request, **kwargs):
-        current_object = self.get_object(request, **kwargs)
-        self.current_object = current_object
+        try:
+            current_object = self.get_object(request, **kwargs)
+            self.current_object = current_object
+        except Http404:
+            if self.slugToEntityIdRedirect and getattr(request, 'version', 'v1') == 'v2':
+                return self.get_slug_to_entity_id_redirect(kwargs.get('entity_id', None))
+            else:
+                raise
 
         if current_object.revoked is False:
 

@@ -6,9 +6,9 @@ from .public_api import (IssuerJson, IssuerImage, BadgeClassJson,
                          BadgeInstanceImage)
 
 json_patterns = [
-    url(r'^/issuers/(?P<entity_id>[^/.]+)$', IssuerJson.as_view(), name='issuer_json'),
-    url(r'^/badges/(?P<entity_id>[^/.]+)$', BadgeClassJson.as_view(), name='badgeclass_json'),
-    url(r'^/assertions/(?P<entity_id>[^/.]+)$', BadgeInstanceJson.as_view(), name='badgeinstance_json'),
+    url(r'^/issuers/(?P<entity_id>[^/.]+)$', IssuerJson.as_view(slugToEntityIdRedirect=True), name='issuer_json'),
+    url(r'^/badges/(?P<entity_id>[^/.]+)$', BadgeClassJson.as_view(slugToEntityIdRedirect=True), name='badgeclass_json'),
+    url(r'^/assertions/(?P<entity_id>[^/.]+)$', BadgeInstanceJson.as_view(slugToEntityIdRedirect=True), name='badgeinstance_json'),
 ]
 
 image_patterns = [
