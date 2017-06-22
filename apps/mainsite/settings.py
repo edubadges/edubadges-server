@@ -350,6 +350,7 @@ BADGR_APP_ID = 1
 ##
 
 MARKDOWNIFY_WHITELIST_TAGS = [
+    'h1','h2','h3','h4','h5','h6',
     'a',
     'abbr',
     'acronym',
@@ -361,7 +362,10 @@ MARKDOWNIFY_WHITELIST_TAGS = [
     'ol',
     'p',
     'strong',
-    'ul'
+    'ul',
+    'code',
+    'pre',
+    'hr'
 ]
 
 
