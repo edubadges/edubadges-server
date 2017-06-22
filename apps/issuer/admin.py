@@ -18,23 +18,22 @@ class IssuerStaffInline(TabularInline):
 
 
 class IssuerAdmin(DjangoObjectActions, ModelAdmin):
-    readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url')
+    readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id', 'slug')
     list_display = ('img', 'name', 'entity_id', 'created_by', 'created_at')
     list_display_links = ('img', 'name')
     list_filter = ('created_at',)
     search_fields = ('name', 'entity_id')
-    readonly_fields = ('entity_id',)
     fieldsets = (
         ('Metadata', {
-            'fields': ('created_by', 'created_at', 'source', 'source_url', 'slug', 'entity_id'),
+            'fields': ('created_by', 'created_at', 'source', 'source_url', 'entity_id', 'slug'),
             'classes': ("collapse",)
         }),
         (None, {
             'fields': ('image', 'name', 'url', 'email', 'description')
         }),
-        # ('JSON', {
-        #     'fields': ('old_json',)
-        # }),
+        ('JSON', {
+            'fields': ('old_json',)
+        }),
     )
     inlines = [
         IssuerStaffInline,
@@ -60,13 +59,12 @@ badgr_admin.register(Issuer, IssuerAdmin)
 
 
 class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
-    readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url')
+    readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id', 'slug')
     list_display = ('badge_image', 'name', 'entity_id', 'issuer_link', 'recipient_count')
     list_display_links = ('badge_image', 'name',)
     list_filter = ('created_at',)
     search_fields = ('name', 'entity_id', 'issuer__name',)
     raw_id_fields = ('issuer',)
-    readonly_fields = ('entity_id',)
     fieldsets = (
         ('Metadata', {
             'fields': ('created_by', 'created_at', 'source', 'source_url', 'entity_id', 'slug'),
@@ -78,9 +76,9 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
         ('Criteria', {
             'fields': ('criteria_url', 'criteria_text',)
         }),
-        # ('JSON', {
-        #     'fields': ('old_json',)
-        # }),
+        ('JSON', {
+            'fields': ('old_json',)
+        }),
     )
     change_actions = ['redirect_issuer', 'redirect_instances']
 
@@ -117,16 +115,15 @@ class BadgeEvidenceInline(StackedInline):
 
 
 class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
-    readonly_fields = ('created_at', 'created_by', 'image', 'entity_id', 'old_json', 'salt')
+    readonly_fields = ('created_at', 'created_by', 'image', 'entity_id', 'old_json', 'salt', 'entity_id', 'slug')
     list_display = ('badge_image', 'recipient_identifier', 'entity_id', 'badgeclass', 'issuer')
     list_display_links = ('badge_image', 'recipient_identifier', )
     list_filter = ('created_at',)
     search_fields = ('recipient_identifier', 'entity_id', 'badgeclass__name', 'issuer__name')
     raw_id_fields = ('badgeclass', 'issuer')
-    readonly_fields = ('entity_id',)
     fieldsets = (
         ('Metadata', {
-            'fields': ('created_by', 'created_at', 'slug', 'entity_id', 'salt', 'badgeclass', 'issuer'),
+            'fields': ('created_by', 'created_at', 'entity_id', 'slug', 'salt', 'badgeclass', 'issuer'),
             'classes': ("collapse",)
         }),
         (None, {
@@ -135,9 +132,9 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
         ('Revocation', {
             'fields': ('revoked', 'revocation_reason')
         }),
-        # ('JSON', {
-        #     'fields': ('old_json',)
-        # }),
+        ('JSON', {
+            'fields': ('old_json',)
+        }),
     )
     change_actions = ['redirect_issuer', 'redirect_badgeclass']
     inlines = (BadgeEvidenceInline,)
