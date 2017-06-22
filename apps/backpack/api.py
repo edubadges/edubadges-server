@@ -69,14 +69,6 @@ class BackpackAssertionDetail(BaseEntityDetailView):
         fields_whitelist = ('acceptance',)
         data = {k: v for k, v in request.data.items() if k in fields_whitelist}
         return super(BackpackAssertionDetail, self).put(request, data=data, **kwargs)
-        # obj = self.get_object(request, **kwargs)
-        # if 'acceptance' in request.data:
-        #     acceptance = request.data.get('acceptance')
-        #     if acceptance not in (c[0] for c in BadgeInstance.ACCEPTANCE_CHOICES):
-        #         raise ValidationError({'acceptance': "Invalid acceptance value '{}'".format(acceptance)})
-        #     obj.acceptance = acceptance
-        #     obj.save()
-        # return Response(status=HTTP_200_OK)
 
 
 class BackpackAssertionDetailImage(ImagePropertyDetailView):
