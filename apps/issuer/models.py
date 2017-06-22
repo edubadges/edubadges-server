@@ -29,7 +29,7 @@ from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManag
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage
 from mainsite.models import (BadgrApp, EmailBlacklist)
-from mainsite.utils import OriginSetting
+from mainsite.utils import OriginSetting, generate_entity_uri
 from .utils import generate_sha256_hashstring, CURRENT_OBI_VERSION, get_obi_context, add_obi_version_ifneeded
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
@@ -513,6 +513,10 @@ class BadgeInstance(BaseAuditedModel,
         if self.pk is None:
             self.salt = uuid.uuid4().hex
             self.created_at = datetime.datetime.now()
+
+            # do this now instead of in AbstractVersionedEntity.save() so we can use it for image name
+            if self.entity_id is None:
+                self.entity_id = generate_entity_uri()
 
             if not self.image:
                 badgeclass_name, ext = os.path.splitext(self.badgeclass.image.file.name)
