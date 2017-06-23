@@ -35,7 +35,7 @@ class IssuerRecipientGroupList(VersionedObjectMixin, BaseEntityListView):
     def get_context_data(self, **kwargs):
         context = super(IssuerRecipientGroupList, self).get_context_data(**kwargs)
         context['issuer'] = self.get_object(self.request, **kwargs)
-        context['embed_recipients'] = _scrub_boolean(self.request.query_params.get('embedRecipients', False))
+        context['embedRecipients'] = _scrub_boolean(self.request.query_params.get('embedRecipients', False))
         return context
 
     def get(self, request, **kwargs):
@@ -77,7 +77,7 @@ class RecipientGroupDetail(BaseEntityDetailView):
 
     def get_context_data(self, **kwargs):
         context = super(RecipientGroupDetail, self).get_context_data(**kwargs)
-        context['embed_recipients'] = _scrub_boolean(self.request.query_params.get('embedRecipients', False))
+        context['embedRecipients'] = _scrub_boolean(self.request.query_params.get('embedRecipients', False))
         context['recipient_group'] = self.get_object(self.request, **kwargs)
         return context
 
