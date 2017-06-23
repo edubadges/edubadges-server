@@ -23,7 +23,7 @@ class PathwayList(AbstractIssuerAPIEndpoint):
         """
 
         try:
-            issuer = Issuer.cached.get(entity_id=issuer_slug)
+            issuer = Issuer.cached.get_by_slug_or_entity_id(issuer_slug)
         except Issuer.DoesNotExist:
             return Response("Could not find issuer", status=status.HTTP_404_NOT_FOUND)
 
@@ -71,7 +71,7 @@ class PathwayList(AbstractIssuerAPIEndpoint):
 class PathwayAPIEndpoint(AbstractIssuerAPIEndpoint):
     def _get_issuer_and_pathway(self, issuer_slug, pathway_slug):
         try:
-            issuer = Issuer.cached.get(entity_id=issuer_slug)
+            issuer = Issuer.cached.get_by_slug_or_entity_id(issuer_slug)
         except Issuer.DoesNotExist:
             return None, None
         try:
