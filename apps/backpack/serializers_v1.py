@@ -202,6 +202,13 @@ class CollectionSerializerV1(serializers.Serializer):
     )
     published = serializers.BooleanField(required=False)
 
+    def to_representation(self, instance):
+        representation = super(CollectionSerializerV1, self).to_representation(instance)
+        if representation.get('share_url', None) is None:
+            #  V1 api expects share_url to be an empty string and not null if unpublished
+            representation['share_url'] = ""
+        return representation
+
     def create(self, validated_data):
         new_collection = BackpackCollection.objects.create(
             name=validated_data.get('name'),
