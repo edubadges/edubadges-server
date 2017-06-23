@@ -229,6 +229,7 @@ class CollectionSerializerV1(serializers.Serializer):
 
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
+        instance.description = validated_data.get('description', instance.description)
         instance.published = validated_data.get('published', instance.published)
 
         if 'cached_collects' in validated_data\
