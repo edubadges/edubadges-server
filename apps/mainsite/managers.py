@@ -27,3 +27,11 @@ class SlugOrJsonIdCacheModelManager(cachemodel.CacheModelManager):
 
     def get_by_id(self, idstring):
         return self.get_by_slug_or_id(idstring)
+
+    def get_by_slug_or_entity_id(self, query):
+        try:
+            return self.get(entity_id=query)
+        except self.model.DoesNotExist:
+            pass
+
+        return self.get(slug=query)
