@@ -41,7 +41,7 @@ class PathwaySerializer(serializers.Serializer):
     elementCount = serializers.IntegerField(read_only=True, source='cached_elements.count')
 
     def to_representation(self, instance):
-        issuer_slug = instance.cached_issuer.slug
+        issuer_slug = instance.cached_issuer.entity_id
 
         representation = super(PathwaySerializer, self).to_representation(instance)
 
