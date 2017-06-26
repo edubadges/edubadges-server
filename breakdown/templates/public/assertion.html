@@ -71,11 +71,7 @@
 
 			    <p class="heading-x-meta">Issued {{ badge_instance.created_at|date:'F d, Y' }} to {{ obscured_recipient }}</p>
 
-                <div class="markdowneditor">
-                    <div class="markdowneditor-x-display">
-			            {{ badge_class.description|markdownify|safe }}
-                    </div>
-                </div>
+			    <p>{{ badge_class.description }}</p>
 
 			     {% if badge_class.criteria_text %}
 				     <h3 class="title title-small">Criteria</h3>
