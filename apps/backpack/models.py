@@ -30,11 +30,14 @@ class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeinstances(self):
-        return self.assertions.all()
+        return self.assertions.filter(revoked=False, acceptance__ne=BadgeInstance.ACCEPTANCE_REJECTED)
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_collects(self):
-        return self.backpackcollectionbadgeinstance_set.all()
+        return self.backpackcollectionbadgeinstance_set.filter(
+            badgeinstance__revoked=False,
+            badgeinstance__acceptance__in=(BadgeInstance.ACCEPTANCE_ACCEPTED,BadgeInstance.ACCEPTANCE_UNACCEPTED)
+        )
 
     @property
     def owner(self):
