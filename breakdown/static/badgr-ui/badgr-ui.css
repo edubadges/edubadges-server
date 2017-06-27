@@ -1023,6 +1023,42 @@ app {
   background-color: #c30a28;
   color: #fff; }
 
+.button-auth {
+  color: transparent;
+  border-radius: 3px;
+  border: none;
+  height: 40px;
+  position: relative;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none; }
+  .button-auth::after {
+    content: "";
+    background-size: contain;
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px; }
+  .button-auth.button-auth-facebook {
+    background: #4767AA; }
+    .button-auth.button-auth-facebook::after {
+      background: url(3c885dbdb069f2a95481b36125690b96.svg) no-repeat center; }
+  .button-auth.button-auth-kony {
+    background: #303E48; }
+    .button-auth.button-auth-kony::after {
+      background: url(9202ee7cf819882a4e79e458d4c4a38a.svg) no-repeat center; }
+  .button-auth.button-auth-linkedin_oauth2 {
+    background: #0077B5; }
+    .button-auth.button-auth-linkedin_oauth2::after {
+      background: url(4b85f254cf0f9e9e5c33a4ac8fc1631d.svg) no-repeat center; }
+  .button-auth.button-auth-google {
+    background: #FFFFFF;
+    border: 1px solid #E1E0E5; }
+    .button-auth.button-auth-google::after {
+      background: url(7cc4f4448bb25624b7755479892054db.svg) no-repeat center; }
+
 .button-close-x {
   position: relative;
   float: right; }
@@ -2036,6 +2072,30 @@ app {
       border-color: #f01f31; }
   .formfield.formfield-is-error .formfield-x-error {
     display: block; }
+  .formfield .formfield-x-buttongrid {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: row;
+            flex-direction: row;
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    -webkit-box-align: baseline;
+        -ms-flex-align: baseline;
+            align-items: baseline;
+    margin: -8px; }
+    .formfield .formfield-x-buttongrid > * {
+      min-width: 220px;
+      max-width: 488px;
+      margin: 8px;
+      -webkit-box-flex: 1;
+          -ms-flex-positive: 1;
+              flex-grow: 1; }
 
 .formfield-locked input:not([type='checkbox']),
 .formfield-locked select,
@@ -2276,6 +2336,32 @@ app {
   width: 18px; }
   .formradiobutton-notext .formradiobutton-x-text::before {
     margin-right: 0; }
+
+.formdivider {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -ms-flex-wrap: nowrap;
+      flex-wrap: nowrap;
+  margin: 24px 0;
+  color: #a09eaf;
+  font-weight: bold;
+  font-size: 14px; }
+  .formdivider::before, .formdivider::after {
+    content: "";
+    background: #e1e0e5;
+    height: 1px;
+    -webkit-box-flex: 1;
+        -ms-flex-positive: 1;
+            flex-grow: 1; }
+  .formdivider > * {
+    margin: 0 8px; }
 
 .header {
   -webkit-box-align: center;
@@ -2975,84 +3061,90 @@ app {
     background-color: #ffffff; }
   .markdowneditor .markdowneditor-x-preview,
   .markdowneditor .markdowneditor-x-display {
-    -webkit-box-sizing: border-box;
-            box-sizing: border-box; }
+    -webkit-box-sizing: border-box !important;
+            box-sizing: border-box !important; }
     .markdowneditor .markdowneditor-x-preview em,
     .markdowneditor .markdowneditor-x-display em {
-      font-style: italic; }
+      font-style: italic !important; }
     .markdowneditor .markdowneditor-x-preview ul,
     .markdowneditor .markdowneditor-x-display ul {
-      list-style-type: disc;
-      list-style-position: inside; }
+      list-style-type: disc !important;
+      list-style-position: inside !important; }
     .markdowneditor .markdowneditor-x-preview ol,
     .markdowneditor .markdowneditor-x-display ol {
-      list-style-type: decimal;
-      list-style-position: inside; }
+      list-style-type: decimal !important;
+      list-style-position: inside !important; }
     .markdowneditor .markdowneditor-x-preview ul ul, .markdowneditor .markdowneditor-x-preview ol ul,
     .markdowneditor .markdowneditor-x-display ul ul,
     .markdowneditor .markdowneditor-x-display ol ul {
-      list-style-type: circle;
-      list-style-position: inside;
-      margin-left: 15px; }
+      list-style-type: circle !important;
+      list-style-position: inside !important;
+      margin-left: 15px !important; }
     .markdowneditor .markdowneditor-x-preview ol ol, .markdowneditor .markdowneditor-x-preview ul ol,
     .markdowneditor .markdowneditor-x-display ol ol,
     .markdowneditor .markdowneditor-x-display ul ol {
-      list-style-type: lower-latin;
-      list-style-position: inside;
-      margin-left: 15px; }
+      list-style-type: lower-latin !important;
+      list-style-position: inside !important;
+      margin-left: 15px !important; }
     .markdowneditor .markdowneditor-x-preview h1,
     .markdowneditor .markdowneditor-x-display h1 {
-      display: block;
-      font-weight: bold;
-      margin-left: 0;
-      margin-right: 0;
-      font-size: 2em;
-      margin-top: 0.67em;
-      margin-bottom: 0.67em; }
+      display: block !important;
+      font-weight: bold !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      color: black !important;
+      font-size: 2em !important;
+      margin-top: 0.67em !important;
+      margin-bottom: 0.67em !important; }
     .markdowneditor .markdowneditor-x-preview h2,
     .markdowneditor .markdowneditor-x-display h2 {
-      display: block;
-      font-weight: bold;
-      margin-left: 0;
-      margin-right: 0;
-      font-size: 1.5em;
-      margin-top: 0.83em;
-      margin-bottom: 0.83em; }
+      display: block !important;
+      font-weight: bold !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      color: black !important;
+      font-size: 1.5em !important;
+      margin-top: 0.83em !important;
+      margin-bottom: 0.83em !important; }
     .markdowneditor .markdowneditor-x-preview h3,
     .markdowneditor .markdowneditor-x-display h3 {
-      display: block;
-      font-weight: bold;
-      margin-left: 0;
-      margin-right: 0;
-      font-size: 1.17em;
-      margin-top: 1em;
-      margin-bottom: 1em; }
+      display: block !important;
+      font-weight: bold !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      color: black !important;
+      font-size: 1.17em !important;
+      margin-top: 1em !important;
+      margin-bottom: 1em !important; }
     .markdowneditor .markdowneditor-x-preview h4,
     .markdowneditor .markdowneditor-x-display h4 {
-      display: block;
-      font-weight: bold;
-      margin-left: 0;
-      margin-right: 0;
-      margin-top: 1.33em;
-      margin-bottom: 1.33em; }
+      display: block !important;
+      font-weight: bold !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      color: black !important;
+      margin-top: 1.33em !important;
+      margin-bottom: 1.33em !important; }
     .markdowneditor .markdowneditor-x-preview h5,
     .markdowneditor .markdowneditor-x-display h5 {
-      display: block;
-      font-weight: bold;
-      margin-left: 0;
-      margin-right: 0;
-      font-size: .83em;
-      margin-top: 1.67em;
-      margin-bottom: 1.67em; }
+      display: block !important;
+      font-weight: bold !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      color: black !important;
+      font-size: .83em !important;
+      margin-top: 1.67em !important;
+      margin-bottom: 1.67em !important; }
     .markdowneditor .markdowneditor-x-preview h6,
     .markdowneditor .markdowneditor-x-display h6 {
-      display: block;
-      font-weight: bold;
-      margin-left: 0;
-      margin-right: 0;
-      font-size: .67em;
-      margin-top: 2.33em;
-      margin-bottom: 2.33em; }
+      display: block !important;
+      font-weight: bold !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      color: black !important;
+      font-size: .67em !important;
+      margin-top: 2.33em !important;
+      margin-bottom: 2.33em !important; }
 
 .menu {
   background-color: #05012c;
@@ -5127,6 +5219,12 @@ Default - Not used
       -webkit-box-shadow: rgba(5, 1, 44, 0.12) -1px -1px 0 0 inset;
               box-shadow: rgba(5, 1, 44, 0.12) -1px -1px 0 0 inset; }
 
+.table-staffeditor td, .table-staffeditor th {
+  min-width: 200px; }
+
+.table-staffeditor .table-staffeditor-x-role {
+  max-width: 200px; }
+
 .table-import {
   color: #78768d;
   max-width: 1024px;
@@ -5248,7 +5346,7 @@ Default - Not used
   transition: opacity 250ms ease-out;
   width: 320px;
   will-change: opacity;
-  z-index: 3; }
+  z-index: 5; }
   .tooltip .tooltip-x-content {
     background-color: #fff;
     border-radius: 6px;
@@ -5496,4 +5594,4 @@ Styleguide 4.0
 .o-canvas {
   background-color: #fff; }
 
-/*# sourceMappingURL=theme-default.4626a69e56d2d1b04a9c.css.map*/
+/*# sourceMappingURL=theme-default.3517102f10a09f73a35c.css.map*/
