@@ -152,7 +152,11 @@ class BadgeCheckHelper(object):
         else:
             badgecheck_recipient_profile = None
 
-        response = badgecheck.verify(query, recipient_profile=badgecheck_recipient_profile, **cls.badgecheck_options())
+        try:
+            response = badgecheck.verify(query, recipient_profile=badgecheck_recipient_profile, **cls.badgecheck_options())
+        except ValueError as e:
+            raise ValidationError([{'name': "INVALID_BADGE", 'description': str(e)}])
+
         report = response.get('report', {})
         is_valid = report.get('valid')
 
