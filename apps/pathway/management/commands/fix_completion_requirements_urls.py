@@ -65,8 +65,12 @@ class Command(BaseCommand):
         url_match_prefix = kwargs.get('url_match_prefix')
         url_expected_prefix = kwargs.get('url_expected_prefix')
 
+        pe_count = PathwayElement.objects.count()
+
+        n = 0
         for pe in PathwayElement.objects.all():
-            logger.debug('Processing PathwayElement(pk={})...'.format(pe.pk))
+            n += 1
+            logger.debug('({}/{}) Processing PathwayElement(pk={})...'.format(n, pe_count, pe.pk))
 
             if pe.completion_requirements is None:
                 logger.debug('    completion_requirements is None, skipping'.format(pe.pk))
@@ -83,7 +87,7 @@ class Command(BaseCommand):
             if badge_urls_changed or element_urls_changed:
                 logger.debug('    saving PathwayElement(pk={})...'.format(pe.pk))
                 if not dry_run:
-                    pe.save()
+                    pe.save(update_badges=False)
                     logger.debug('    done')
                 else:
                     logger.debug('    (skipped due to --dry-run)')
@@ -99,7 +103,6 @@ class Command(BaseCommand):
             if len(unexpected_element_urls) > 0:
                 logger.debug('        found unexpected urls: {}'.format(unexpected_element_urls))
                 self.unexpected_element_urls[pe.pk] = unexpected_element_urls
-
 
         logger.debug('UNEXPECTED BADGE URLs (pk, urls):')
 

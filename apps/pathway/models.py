@@ -161,8 +161,9 @@ class PathwayElement(basic_models.DefaultModel):
         return self.jsonld_id
 
     def save(self, *args, **kwargs):
+        update_badges = kwargs.pop('update_badges', True)
         ret = super(PathwayElement, self).save(*args, **kwargs)
-        if self.completion_requirements:
+        if self.completion_requirements and update_badges:
             self._update_badges_from_completion_requirements()
         return ret
 
