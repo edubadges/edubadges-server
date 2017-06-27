@@ -11,6 +11,7 @@ from django.db import models, transaction
 from entity.models import BaseVersionedEntity
 from issuer.models import BaseAuditedModel, BadgeInstance
 from backpack.sharing import SharingManager
+from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.utils import OriginSetting
 
 
@@ -23,6 +24,8 @@ class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
     slug = models.CharField(max_length=254, blank=True, null=True, default=None)
 
     assertions = models.ManyToManyField('issuer.BadgeInstance', blank=True, through='backpack.BackpackCollectionBadgeInstance')
+
+    cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
 
     def publish(self):
         super(BackpackCollection, self).publish()
