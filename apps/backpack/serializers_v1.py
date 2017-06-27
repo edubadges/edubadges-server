@@ -141,7 +141,7 @@ class CollectionBadgesSerializerV1(serializers.ListSerializer):
             updated_ids.add(entry.pk)
 
         if not self.context.get('add_only', False):
-            for old_entry in collection.badges.all():
+            for old_entry in collection.cached_collects():
                 if old_entry.pk not in updated_ids:
                     old_entry.delete()
 
