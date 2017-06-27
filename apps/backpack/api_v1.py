@@ -15,7 +15,7 @@ class CollectionLocalBadgeInstanceList(APIView):
     queryset = BackpackCollectionBadgeInstance.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
 
-    def get(self, request, slug):
+    def get(self, request, slug, **kwargs):
         """
         GET the badges in a single Collection
         """
@@ -28,7 +28,7 @@ class CollectionLocalBadgeInstanceList(APIView):
         serializer = CollectionBadgeSerializerV1(collection_badges, many=True)
         return Response(serializer.data)
 
-    def post(self, request, slug):
+    def post(self, request, slug, **kwargs):
         """
         POST new badge(s) to add them to a existing Collection.
         Returns resulting complete list of collection contents.
@@ -59,7 +59,7 @@ class CollectionLocalBadgeInstanceList(APIView):
                 status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def put(self, request, slug):
+    def put(self, request, slug, **kwargs):
         """
         Update the list of badges included in a collection among
         those added to the logged-in user's badges. Cannot be used to
@@ -101,7 +101,7 @@ class CollectionLocalBadgeInstanceDetail(APIView):
     queryset = BackpackCollectionBadgeInstance.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
 
-    def get(self, request, collection_slug, slug):
+    def get(self, request, collection_slug, slug, **kwargs):
         item = BackpackCollectionBadgeInstance.objects.find(request.user, collection_slug, slug)
 
         if item is None:
@@ -149,7 +149,7 @@ class CollectionLocalBadgeInstanceDetail(APIView):
     #     serializer = CollectionBadgeSerializer(item)
     #     return Response(serializer.data)
 
-    def delete(self, request, collection_slug, badge_id):
+    def delete(self, request, collection_slug, badge_id, **kwargs):
         """
         Remove a badge from a collection (does not delete it
         from the earner's account)
@@ -182,11 +182,9 @@ class CollectionGenerateShare(APIView):
     queryset = BackpackCollection.objects.all()
     permission_classes = (permissions.IsAuthenticated, IsOwner,)
 
-    def get(self, request, slug):
+    def get(self, request, slug, **kwargs):
         try:
-            collection = self.queryset.get(
-                owner=request.user,
-                slug=slug)
+            collection = BackpackCollection.cached.get_by_slug_or_entity_id(slug)
         except BackpackCollection.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -195,7 +193,7 @@ class CollectionGenerateShare(APIView):
 
         return Response(collection.share_url)
 
-    def delete(self, request, slug):
+    def delete(self, request, slug, **kwargs):
         try:
             collection = self.queryset.get(
                 owner=request.user,
