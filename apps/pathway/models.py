@@ -256,7 +256,7 @@ class PathwayElement(basic_models.DefaultModel):
             order = 1
             for badge_id in self.completion_requirements.get('badges'):
                 try:
-                    badgeclass = BadgeClass.cached.get_by_slug_or_id(badge_id)
+                    badgeclass = BadgeClass.cached.get_by_slug_or_entity_id_or_id(badge_id)
                 except BadgeClass.DoesNotExist:
                     raise ValidationError("Invalid badge id: {}".format(badge_id))
 
