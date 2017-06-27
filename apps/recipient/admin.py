@@ -8,6 +8,9 @@ from recipient.models import RecipientGroup, RecipientProfile, RecipientGroupMem
 class RecipientGroupMembershipInline(TabularInline):
     model = RecipientGroupMembership
     extra = 0
+    raw_id_fields = ('recipient_profile',)
+    exclude = ('slug', 'entity_version',)
+    readonly_fields = ('entity_id',)
 
 
 class RecipientGroupAdmin(ModelAdmin):
@@ -19,7 +22,7 @@ class RecipientGroupAdmin(ModelAdmin):
     filter_horizontal = ('pathways',)
     fieldsets = (
         ('Metadata', {
-            'fields': ('is_active', 'created_by', 'created_at', 'updated_by', 'entity_id', 'slug'),
+            'fields': ('is_active', 'created_by', 'created_at', 'entity_id', 'slug'),
             'classes': ('collapse',)
         }),
         (None, {
