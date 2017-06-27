@@ -25,6 +25,17 @@ class SlugOrJsonIdCacheModelManager(cachemodel.CacheModelManager):
                 raise self.model.DoesNotExist
         return self.get(**{self.slug_field_name: slug})
 
+    def get_by_slug_or_entity_id_or_id(self, slug):
+        if slug.startswith(OriginSetting.HTTP):
+            path = slug[len(OriginSetting.HTTP):]
+            try:
+                r = resolve(path)
+                slug = r.kwargs.get(self.get_slug_kwarg_name())
+            except Resolver404 as e:
+                raise self.model.DoesNotExist
+
+        return self.get_by_slug_or_entity_id(slug)
+
     def get_by_id(self, idstring):
         return self.get_by_slug_or_id(idstring)
 
