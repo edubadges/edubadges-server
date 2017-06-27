@@ -1,8 +1,6 @@
 import logging
 import re
-from functools import partial
 
-from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from pathway.models import PathwayElement
