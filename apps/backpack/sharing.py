@@ -26,8 +26,9 @@ class LinkedinShareProvider(ShareProvider):
 
     def share_url(self, instance, **kwargs):
         url = None
-        if hasattr(instance, 'cached_badgeclass'):
-            url = self.certification_share_url(instance, **kwargs)
+        # sharing as a certification is broken so disabling for now [Wiggins june 2017]
+        # if hasattr(instance, 'cached_badgeclass'):
+        #     url = self.certification_share_url(instance, **kwargs)
 
         if not url:
             url = self.feed_share_url(instance, **kwargs)
