@@ -18,19 +18,19 @@
 	<div class="wrap l-containerhorizontal l-headeredsection">
 
 		<div class="l-gridthree">
-			{% for entry in badges %}
+			{% for badge in badges %}
 			<div>
 				<article class="card card-largeimage">
-					<a class="card-x-main" href="{{ entry.badge_instance.share_url }}">
+					<a class="card-x-main" href="{{ badge.share_url }}">
 						<div class="card-x-image">
 							<div class="badge badge-flat">
-								<img alt="{{ entry.badge_instance.cached_badgeclass.name }} Badge" src="{{ entry.badge_instance.image_url }}" width="80">
+								<img alt="{{ badge.cached_badgeclass.name }} Badge" src="{{ badge.image_url }}" width="80">
 							</div>
 						</div>
 						<div class="card-x-text">
-							<h1>{{ entry.badge_instance.cached_badgeclass.name }}</h1>
-							<small>{{ entry.badge_instance.cached_issuer.name }}</small>
-							<p>{{ entry.badge_instance.badgeclass.json.description }}</p>
+							<h1>{{ badge.cached_badgeclass.name }}</h1>
+							<small>{{ badge.cached_issuer.name }}</small>
+							<p>{{ badge.cached_badgeclass.json.description }}</p>
 						</div>
 					</a>
 				</article>
