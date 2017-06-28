@@ -274,6 +274,7 @@ class IssuerStaff(cachemodel.CacheModel):
     def publish(self):
         super(IssuerStaff, self).publish()
         self.issuer.publish()
+        self.user.publish()
 
     def delete(self, *args, **kwargs):
         publish_issuer = kwargs.pop('publish_issuer', True)
