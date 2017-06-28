@@ -150,7 +150,7 @@ class IssuerStaffList(VersionedObjectMixin, APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        if request.user not in current_issuer.owners:
+        if not request.user.is_superuser and request.user not in current_issuer.owners:
             raise PermissionDenied("Must be an owner of an issuer profile to modify permissions")
 
         try:
