@@ -15,7 +15,7 @@ logger.addHandler(logging.StreamHandler())
 
 
 class Command(BaseCommand):
-    help = 'Perform prefix substitution of badge URLs in pathway completion requirements'
+    help = 'Resolve BadgeClass slug URLs to entity ID URLs'
 
     unrecognized_badge_urls = defaultdict(list)
 
