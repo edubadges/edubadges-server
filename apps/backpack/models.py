@@ -31,6 +31,11 @@ class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
         super(BackpackCollection, self).publish()
         self.created_by.publish()
 
+    def delete(self, *args, **kwargs):
+        super(BackpackCollection, self).delete(*args, **kwargs)
+        self.created_by.publish()
+        self.publish_delete()
+
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeinstances(self):
         return self.assertions.filter(
