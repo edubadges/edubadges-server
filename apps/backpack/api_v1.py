@@ -113,8 +113,14 @@ class CollectionLocalBadgeInstanceDetail(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         if collection.created_by != request.user:
             return Response(status=status.HTTP_404_NOT_FOUND)
+        badge_instance = None
         try:
             badge_instance = BadgeInstance.cached.get(entity_id=slug)
+        except BadgeInstance.DoesNotExist:
+            pass
+        try:
+            if not badge_instance:
+                badge_instance = BadgeInstance.objects.get(slug=slug)
         except BadgeInstance.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -195,8 +201,14 @@ class CollectionLocalBadgeInstanceDetail(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         if collection.created_by != request.user:
             return Response(status=status.HTTP_404_NOT_FOUND)
+        badge_instance = None
         try:
             badge_instance = BadgeInstance.cached.get(entity_id=slug)
+        except BadgeInstance.DoesNotExist:
+            pass
+        try:
+            if not badge_instance:
+                badge_instance = BadgeInstance.objects.get(slug=slug)
         except BadgeInstance.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
