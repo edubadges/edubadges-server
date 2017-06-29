@@ -140,8 +140,7 @@ class ShareBackpackAssertion(BaseEntityDetailView):
         if not badge:
             return Response(status=HTTP_404_NOT_FOUND)
 
-        share = BackpackBadgeShare(provider=provider)
-        share.set_badge(badge)
+        share = BackpackBadgeShare(provider=provider, badgeinstance=badge)
         share_url = share.get_share_url(provider)
         if not share_url:
             return Response({'error': "invalid share provider"}, status=HTTP_400_BAD_REQUEST)

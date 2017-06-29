@@ -141,7 +141,7 @@ class BackpackBadgeShare(BaseSharedModel):
     badgeinstance = models.ForeignKey("issuer.BadgeInstance", null=True)
 
     def get_share_url(self, provider, **kwargs):
-        return SharingManager.share_url(provider, self.badge, **kwargs)
+        return SharingManager.share_url(provider, self.badgeinstance, **kwargs)
 
 
 class BackpackCollectionShare(BaseSharedModel):
