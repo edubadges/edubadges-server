@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 
 from backpack.models import BackpackCollectionBadgeInstance, BackpackCollection
 from backpack.serializers_v1 import CollectionBadgeSerializerV1
+from issuer.models import BadgeInstance
 from mainsite.permissions import IsOwner
 
 
@@ -101,9 +102,27 @@ class CollectionLocalBadgeInstanceDetail(APIView):
     queryset = BackpackCollectionBadgeInstance.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
 
-    def get(self, request, collection_slug, slug, **kwargs):
-        item = BackpackCollectionBadgeInstance.objects.find(request.user, collection_slug, slug)
+    def get(self, request, **kwargs):
+        collection_slug = kwargs.get('collection_slug', None)
+        slug = kwargs.get('slug', None)
+        if not collection_slug or not slug:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        try:
+            collection = BackpackCollection.cached.get_by_slug_or_entity_id(collection_slug)
+        except BackpackCollection.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if collection.created_by != request.user:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        try:
+            badge_instance = BadgeInstance.cached.get(entity_id=slug)
+        except BadgeInstance.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
+        item = None
+        for collect in collection.cached_collects():
+            if collect.badgeinstance_id == badge_instance.id:
+                item = collect
+                break
         if item is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -149,7 +168,7 @@ class CollectionLocalBadgeInstanceDetail(APIView):
     #     serializer = CollectionBadgeSerializer(item)
     #     return Response(serializer.data)
 
-    def delete(self, request, collection_slug, badge_id, **kwargs):
+    def delete(self, request, **kwargs):
         """
         Remove a badge from a collection (does not delete it
         from the earner's account)
@@ -166,8 +185,26 @@ class CollectionLocalBadgeInstanceDetail(APIView):
               type: integer
               paramType: path
         """
-        item = LocalBadgeInstanceCollection.objects.find(request.user, collection_slug, badge_id)
+        collection_slug = kwargs.get('collection_slug')
+        slug = kwargs.get('slug')
+        if not collection_slug or not slug:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        try:
+            collection = BackpackCollection.cached.get_by_slug_or_entity_id(collection_slug)
+        except BackpackCollection.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if collection.created_by != request.user:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        try:
+            badge_instance = BadgeInstance.cached.get(entity_id=slug)
+        except BadgeInstance.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
+        item = None
+        for collect in collection.cached_collects():
+            if collect.badgeinstance_id == badge_instance.id:
+                item = collect
+                break
         if item is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
