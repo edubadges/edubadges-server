@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.http import Http404
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED
+from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from rest_framework.views import APIView
 
 import badgrlog
@@ -151,6 +151,6 @@ class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
         if not self.has_object_permissions(request, obj):
             return Response(status=HTTP_404_NOT_FOUND)
         obj.delete()
-        return Response(status=HTTP_200_OK)
+        return Response(status=HTTP_204_NO_CONTENT)
 
 

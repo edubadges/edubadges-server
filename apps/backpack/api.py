@@ -4,7 +4,8 @@ from __future__ import unicode_literals
 from rest_framework import permissions
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_302_FOUND
+from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_302_FOUND, \
+    HTTP_204_NO_CONTENT
 from rest_framework.views import APIView
 
 from backpack.models import BackpackCollection, BackpackBadgeShare, BackpackCollectionShare
@@ -63,7 +64,7 @@ class BackpackAssertionDetail(BaseEntityDetailView):
         obj = self.get_object(request, **kwargs)
         obj.acceptance = BadgeInstance.ACCEPTANCE_REJECTED
         obj.save()
-        return Response(status=HTTP_200_OK)
+        return Response(status=HTTP_204_NO_CONTENT)
 
     def put(self, request, **kwargs):
         fields_whitelist = ('acceptance',)
