@@ -21,10 +21,13 @@ class CollectionLocalBadgeInstanceList(APIView):
         GET the badges in a single Collection
         """
         try:
-            collection = BackpackCollection.cached.get(created_by=request.user, entity_id=slug)
+            collection = BackpackCollection.cached.get_by_slug_or_entity_id(slug)
         except BackpackCollection.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        collection_badges = collection.cached_badgeinstances()
+        if collection.created_by != request.user:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        collection_badges = collection.cached_collects()
 
         serializer = CollectionBadgeSerializerV1(collection_badges, many=True)
         return Response(serializer.data)
