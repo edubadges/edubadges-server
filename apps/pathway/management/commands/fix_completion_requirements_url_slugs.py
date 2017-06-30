@@ -3,6 +3,7 @@ import re
 from urlparse import urlparse
 
 from collections import defaultdict
+from django.core.exceptions import FieldError
 from django.core.management.base import BaseCommand
 from django.core.urlresolvers import resolve
 
@@ -18,38 +19,44 @@ class Command(BaseCommand):
     help = 'Resolve BadgeClass slug URLs to entity ID URLs'
 
     unrecognized_badge_urls = defaultdict(list)
+    unrecognized_element_urls = defaultdict(list)
 
     def add_arguments(self, parser):
         parser.add_argument('--dry-run', action='store_true', default=False)
 
-    def _resolve_entity_id_url(self, url, pk):
+    def _resolve_entity_id_url(self, url, pk, model=BadgeClass):
+        # import pdb; pdb.set_trace();
         parsed = urlparse(url)
         resolved = resolve(parsed.path)
 
-        entity_id = resolved.kwargs.get('entity_id')
+        entity_id = resolved.kwargs.get('entity_id', resolved.kwargs.get('element_slug'))
         try:
-            bc = BadgeClass.objects.get(entity_id=entity_id)
+            bc = model.objects.get(entity_id=entity_id)
             path = bc.get_absolute_url()
             return parsed._replace(path=path).geturl()
-        except BadgeClass.DoesNotExist:
+        except (FieldError, model.DoesNotExist):
             pass
 
         try:
-            bc = BadgeClass.objects.get(slug=entity_id)
-            path = bc.get_absolute_url()
+            el = model.objects.get(slug=entity_id)
+            path = urlparse(el.jsonld_id).path
             return parsed._replace(path=path).geturl()
         except BadgeClass.DoesNotExist:
             # Unable to resolve badge, do no modify and log for further analysis
             self.unrecognized_badge_urls[pk].append(url)
             return url
+        except PathwayElement.DoesNotExist:
+            # Unable to resolve element, do no modify and log for further analysis
+            self.unrecognized_element_urls[pk].append(url)
+            return url
 
-    def _resolve_entity_id_urls(self, pe, property_name):
+    def _resolve_entity_id_urls(self, pe, property_name, model=BadgeClass):
         completion_requirements = pe.completion_requirements
         original_urls = completion_requirements.get(property_name, None)
         if original_urls is not None:
 
             new_urls = [
-                self._resolve_entity_id_url(url, pe.pk)
+                self._resolve_entity_id_url(url, pe.pk, model=model)
                 for url in original_urls
             ]
 
@@ -83,8 +90,11 @@ class Command(BaseCommand):
             new_badge_urls, badge_urls_changed = self._resolve_entity_id_urls(pe, 'badges')
             if badge_urls_changed:
                 pe.completion_requirements['badges'] = new_badge_urls
+            new_element_urls, element_urls_changed = self._resolve_entity_id_urls(pe, 'elements', model=PathwayElement)
+            if element_urls_changed:
+                pe.completion_requirements['elements'] = new_element_urls
 
-            if badge_urls_changed:
+            if badge_urls_changed or element_urls_changed:
                 logger.debug('    saving PathwayElement(pk={})...'.format(pe.pk))
                 if not dry_run:
                     pe.save(update_badges=False)
@@ -97,4 +107,6 @@ class Command(BaseCommand):
         logger.debug('UNRECOGNIZED BADGE URLs (pk, urls):')
         for pk, urls in self.unrecognized_badge_urls.items():
             logger.debug('    {}, {}'.format(pk, urls))
-
+        logger.debug('UNRECOGNIZED ELEMENT URLs (pk, urls):')
+        for pk, urls in self.unrecognized_element_urls.items():
+            logger.debug('    {}, {}'.format(pk, urls))
