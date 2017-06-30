@@ -49,11 +49,7 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
             email_address = CachedEmailAddress.objects.get(pk=confirmation.email_address_id)
             email_address.save()
 
-            return u"{}{}?email={}".format(
-                badgr_app.email_confirmation_redirect,
-                urllib.quote(email_address.user.first_name.encode('utf8')),
-                urllib.quote(email_address.email.encode('utf8'))
-            )
+            return badgr_app.email_confirmation_redirect
 
         except Resolver404, EmailConfirmation.DoesNotExist:
             return badgr_app.email_confirmation_redirect

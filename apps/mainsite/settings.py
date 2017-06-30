@@ -164,6 +164,8 @@ SOCIALACCOUNT_PROVIDERS = {
         'environment': 'dev'
     }
 }
+SOCIALACCOUNT_ADAPTER = 'badgrsocialauth.adapter.BadgrSocialAccountAdapter'
+
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_URLS_REGEX = r'^.*$'
