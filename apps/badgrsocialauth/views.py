@@ -34,6 +34,12 @@ class BadgrSocialLogin(RedirectView):
             raise ValidationError('No {} provider found'.format(provider_name))
 
 
+class BadgrSocialLoginCancel(RedirectView):
+    def get_redirect_url(self):
+        badgr_app = get_session_badgr_app(self.request)
+        if badgr_app is not None:
+            return set_url_query_params(badgr_app.ui_login_redirect)
+
 class BadgrSocialEmailExists(RedirectView):
     def get_redirect_url(self):
         badgr_app = get_session_badgr_app(self.request)
