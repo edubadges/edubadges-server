@@ -278,7 +278,7 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
         test_issuer = self.setup_issuer(owner=test_user)
 
         response = self.client.delete('/v1/issuer/issuers/{slug}'.format(slug=test_issuer.entity_id), {})
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
     def test_delete_issuer_with_unissued_badgeclass_successfully(self):
         test_user = self.setup_user(authenticate=True)
@@ -288,7 +288,7 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
         test_badgeclass.save()
 
         response = self.client.delete('/v1/issuer/issuers/{slug}'.format(slug=test_issuer.entity_id), {})
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
     def test_cant_delete_issuer_with_issued_badge(self):
         test_user = self.setup_user(authenticate=True)

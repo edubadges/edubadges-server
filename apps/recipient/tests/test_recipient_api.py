@@ -39,7 +39,7 @@ class RecipientApiTests(SetupIssuerHelper, BadgrTestCase):
         response = self.client.delete('/v2/issuers/{issuer}/recipient-groups/{group}'.format(
             issuer=self.test_issuer.entity_id,
             group=group_slug))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
         get_response = self.client.get('/v2/issuers/{issuer}/recipient-groups/{group}'.format(
             issuer=self.test_issuer.entity_id,
