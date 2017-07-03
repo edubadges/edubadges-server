@@ -18,7 +18,10 @@ class RecipientGroupAPIEndpoint(AbstractIssuerAPIEndpoint):
         try:
             issuer = Issuer.cached.get(entity_id=issuer_slug)
         except Issuer.DoesNotExist:
-            return None, None
+            try:
+                issuer = Issuer.cached.get(slug=issuer_slug)
+            except Issuer.DoesNotExist:
+                return None, None
         try:
             self.check_object_permissions(self.request, issuer)
         except PermissionDenied:
@@ -27,7 +30,10 @@ class RecipientGroupAPIEndpoint(AbstractIssuerAPIEndpoint):
         try:
             recipient_group = RecipientGroup.cached.get(entity_id=group_slug)
         except RecipientGroup.DoesNotExist:
-            return issuer, None
+            try:
+                recipient_group = RecipientGroup.cached.get(slug=group_slug)
+            except RecipientGroup.DoesNotExist:
+                return issuer, None
 
         if recipient_group.issuer != issuer:
             return issuer, None

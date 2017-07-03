@@ -156,7 +156,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
             issuer=test_issuer.entity_id,
             badge=test_badgeclass.entity_id
         ))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
         self.assertFalse(BadgeClass.objects.filter(entity_id=test_badgeclass.entity_id).exists())
 
