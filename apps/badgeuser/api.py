@@ -20,6 +20,7 @@ from badgeuser.permissions import BadgeUserIsAuthenticatedUser
 from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserTokenSerializerV1
 from badgeuser.serializers_v2 import BadgeUserTokenSerializerV2, BadgeUserSerializerV2
 from badgeuser.tasks import process_email_verification
+from badgrsocialauth.utils import set_url_query_params
 from entity.api import BaseEntityDetailView
 from entity.serializers import BaseSerializerV2
 from mainsite.models import BadgrApp
@@ -330,5 +331,7 @@ class BadgeUserEmailConfirm(BaseUserRecoveryView):
 
         # get badgr_app url redirect
         redirect_url = get_adapter().get_email_confirmation_redirect_url(request)
+
+        redirect_url = set_url_query_params(redirect_url, authToken=user.auth_token)
 
         return Response(status=HTTP_302_FOUND, headers={'Location': redirect_url})

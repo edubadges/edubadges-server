@@ -1,10 +1,14 @@
+import urllib
+import urlparse
+
 from django.contrib.auth import logout
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.http import HttpResponseBadRequest
 from django.views.generic import RedirectView
 
-from badgrsocialauth.utils import set_url_query_params, set_session_badgr_app, get_session_badgr_app
+from badgrsocialauth.utils import set_url_query_params, set_session_badgr_app, get_session_badgr_app, \
+    get_session_verification_email
 from mainsite.models import BadgrApp
 
 
@@ -51,5 +55,6 @@ class BadgrSocialEmailExists(RedirectView):
 class BadgrSocialAccountVerifyEmail(RedirectView):
     def get_redirect_url(self):
         badgr_app = get_session_badgr_app(self.request)
+        verification_email = get_session_verification_email(self.request)
         if badgr_app is not None:
-            return badgr_app.ui_signup_success_redirect
+            return urlparse.urljoin(badgr_app.ui_signup_success_redirect.rstrip('/') + '/', urllib.quote(verification_email.encode('utf-8')))

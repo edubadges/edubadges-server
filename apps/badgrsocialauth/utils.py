@@ -16,6 +16,14 @@ def set_url_query_params(url, **kwargs):
     return urlparse.urlunparse(url_parts)
 
 
+def get_session_verification_email(request):
+    return request.session.get('verification_email', None)
+
+
+def set_session_verification_email(request, verification_email):
+    request.session['verification_email'] = verification_email
+
+
 def get_session_badgr_app(request):
     try:
         return BadgrApp.objects.get(pk=request.session.get('badgr_app_pk', None))

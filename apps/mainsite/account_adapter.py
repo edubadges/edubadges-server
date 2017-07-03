@@ -49,11 +49,13 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
             email_address = CachedEmailAddress.objects.get(pk=confirmation.email_address_id)
             email_address.save()
 
-            return u"{}{}?email={}".format(
-                badgr_app.email_confirmation_redirect,
-                urllib.quote(email_address.user.first_name.encode('utf8')),
-                urllib.quote(email_address.email.encode('utf8'))
+            redirect_url = urlparse.urljoin(
+                badgr_app.email_confirmation_redirect.rstrip('/') + '/',
+                urllib.quote(email_address.user.first_name.encode('utf8'))
             )
+            redirect_url = set_url_query_params(redirect_url, email=email_address.email.encode('utf8'))
+
+            return redirect_url
 
         except Resolver404, EmailConfirmation.DoesNotExist:
             return badgr_app.email_confirmation_redirect
