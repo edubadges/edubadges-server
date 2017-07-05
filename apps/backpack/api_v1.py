@@ -231,13 +231,14 @@ class CollectionGenerateShare(APIView):
     """
     Allows a Collection to be public by generation of a shareable hash.
     """
-    queryset = BackpackCollection.objects.all()
-    permission_classes = (permissions.IsAuthenticated, IsOwner,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, slug, **kwargs):
         try:
             collection = BackpackCollection.cached.get_by_slug_or_entity_id(slug)
         except BackpackCollection.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if not request.user == collection.owner:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         collection.published = True
@@ -247,10 +248,10 @@ class CollectionGenerateShare(APIView):
 
     def delete(self, request, slug, **kwargs):
         try:
-            collection = self.queryset.get(
-                owner=request.user,
-                slug=slug)
+            collection = BackpackCollection.cached.get_by_slug_or_entity_id(slug)
         except BackpackCollection.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if not request.user == collection.owner:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         collection.share_hash = ''
