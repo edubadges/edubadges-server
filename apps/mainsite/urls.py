@@ -136,3 +136,6 @@ if settings.DEBUG and apps.is_installed('debug_toolbar'):
         ]
     except ImportError:
         pass
+
+handler404 = error404
+handler500 = error500

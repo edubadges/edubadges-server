@@ -1,3 +1,33 @@
 {% extends "rest_framework/base.html" %}
 
+{% load staticfiles %}
+{% load rest_framework %}
+
 {% block title %}Badgr REST API{% endblock %}
+
+{% block meta %}
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NONE,NOARCHIVE" />
+        <link href="{% static 'badgr-ui/badgr-ui.css' %}" rel="stylesheet">
+        <style type="text/css">
+            li.navbar-text {list-style: none;}
+        </style>
+{% endblock %}
+
+{% block navbar %}
+        <header class="header l-containerhorizontal">
+            <a href="{{ BADGR_UI_URL }}">
+                <picture>
+                    <source media="(min-width: 640px)" srcset="{% static 'badgr-ui/images/logo-desktop.svg' %}">
+                    <img alt="Badgr logo" src="{% static 'badgr-ui/images/logo.svg' %}">
+                </picture>
+            </a>
+            {% block userlinks %}
+                {% if user.is_authenticated %}
+                    {% optional_logout request user %}
+                {% else %}
+                    {% optional_login request %}
+                {% endif %}
+            {% endblock %}
+		</header>
+{% endblock %}
