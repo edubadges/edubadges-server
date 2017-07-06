@@ -1,7 +1,7 @@
 from allauth.account.utils import user_email
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 
-from badgrsocialauth.utils import set_session_verification_email
+from badgrsocialauth.utils import set_session_verification_email, get_session_verified_user
 
 
 class BadgrSocialAccountAdapter(DefaultSocialAccountAdapter):
@@ -12,3 +12,9 @@ class BadgrSocialAccountAdapter(DefaultSocialAccountAdapter):
         set_session_verification_email(request, email)
 
         return super(BadgrSocialAccountAdapter, self).save_user(request, sociallogin, form)
+
+    def pre_social_login(self, request, sociallogin):
+        verified_user = get_session_verified_user(request)
+
+        if verified_user is not None:
+            request.user = verified_user

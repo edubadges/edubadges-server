@@ -60,10 +60,12 @@ urlpatterns = [
 
     # REST Framework
     url(r'^api-auth/token$', LoginAndObtainAuthToken.as_view()),
-    url(r'^account/', include('badgrsocialauth.urls')),
+    url(r'^account/', include('badgrsocialauth.redirect_urls')),
 
     # v1 API endpoints
     url(r'^v1/user/', include('badgeuser.v1_api_urls'), kwargs={'version': 'v1'}),
+    url(r'^v1/user/', include('badgrsocialauth.v1_api_urls'), kwargs={'version': 'v1'}),
+
     url(r'^v1/issuer/', include('issuer.v1_api_urls'), kwargs={'version': 'v1'}),
     url(r'^v1/earner/', include('backpack.v1_api_urls'), kwargs={'version': 'v1'}),
 

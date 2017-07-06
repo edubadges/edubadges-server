@@ -1,6 +1,7 @@
 import urllib
 import urlparse
 
+from badgeuser.models import BadgeUser
 from mainsite.models import BadgrApp
 
 
@@ -33,3 +34,14 @@ def get_session_badgr_app(request):
 
 def set_session_badgr_app(request, badgr_app):
     request.session['badgr_app_pk'] = badgr_app.pk
+
+
+def get_session_verified_user(request):
+    try:
+        return BadgeUser.objects.get(pk=request.session.get('badgr_verified_user_pk', None))
+    except BadgeUser.DoesNotExist:
+        return None
+
+
+def set_session_verified_user(request, verified_user):
+    request.session['badgr_verified_user_pk'] = verified_user.pk

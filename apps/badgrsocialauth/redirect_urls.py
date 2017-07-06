@@ -3,7 +3,7 @@ from django.conf.urls import url
 from django.utils import importlib
 
 from badgrsocialauth.views import BadgrSocialLogin, BadgrSocialEmailExists, BadgrSocialAccountVerifyEmail, \
-    BadgrSocialLoginCancel
+    BadgrSocialLoginCancel, BadgrAccountConnected
 
 urlpatterns = [
     url(r'^sociallogin', BadgrSocialLogin.as_view(permanent=False)),
@@ -16,6 +16,9 @@ urlpatterns = [
 
     # Intercept allauth email verification view and redirect to UI
     url(r'^verifyemail', BadgrSocialAccountVerifyEmail.as_view(permanent=False), name='account_email_verification_sent'),
+
+    # Intercept allauth email verification view and redirect to UI
+    url(r'^connected', BadgrAccountConnected.as_view(permanent=False), name='socialaccount_connections'),
 ]
 
 

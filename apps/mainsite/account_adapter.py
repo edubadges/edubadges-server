@@ -105,6 +105,7 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
             return '/'
 
     def login(self, request, user):
+        # Preserve badgr_app across login boundary
         badgr_app = get_session_badgr_app(request)
         ret = super(BadgrAccountAdapter, self).login(request, user)
         set_session_badgr_app(request, badgr_app)
