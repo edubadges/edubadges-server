@@ -12,12 +12,9 @@ from mainsite.permissions import AuthenticatedWithVerifiedEmail
 
 
 class BadgrSocialAccountList(BaseEntityListView):
-    """
-    Issuer list resource for the authenticated user
-    """
     model = SocialAccount
     v1_serializer_class = BadgrSocialAccountSerializerV1
-    v2_serializer_class = BadgrSocialAccountSerializerV1
+    v2_serializer_class = None
     permission_classes = (AuthenticatedWithVerifiedEmail,)
 
     def get_objects(self, request, **kwargs):
@@ -31,7 +28,7 @@ class BadgrSocialAccountList(BaseEntityListView):
 class BadgrSocialAccountDetail(BaseEntityDetailView):
     model = SocialAccount
     v1_serializer_class = BadgrSocialAccountSerializerV1
-    v2_serializer_class = BadgrSocialAccountSerializerV1
+    v2_serializer_class = None
     permission_classes = (AuthenticatedWithVerifiedEmail, IsSocialAccountOwner)
 
     def get_object(self, request, **kwargs):
