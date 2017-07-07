@@ -259,29 +259,6 @@ class BadgeUserEmailConfirm(BaseUserRecoveryView):
     v1_serializer_class = BaseSerializer
     v2_serializer_class = BaseSerializerV2
 
-    def post(self, request, **kwargs):
-        """
-        Request a confirmation email be resent to an existing unverified email address
-        ---
-        parameters:
-            - name: email
-              description: The email to confirm
-              required: true
-              type: string
-              paramType: form
-        """
-        email = request.data.get('email')
-        try:
-            email_address = CachedEmailAddress.cached.get(email=email)
-        except CachedEmailAddress.DoesNotExist:
-            # return 200 here because we don't want to expose information about which emails we know about
-            return self.get_response()
-
-        if not email_address.verified:
-            email_address.send_confirmation(request=request)
-
-        return self.get_response()
-
     def get(self, request, **kwargs):
         """
         Confirm an email address with a token provided in an email
