@@ -24,9 +24,9 @@ class BadgrSocialAccountAdapter(DefaultSocialAccountAdapter):
         """
         try:
             auth_token = get_session_auth_token(request)
-            verified_user = get_verified_user(auth_token)
+            if auth_token is not None:
+                verified_user = get_verified_user(auth_token)
+                request.user = verified_user
         except AuthenticationFailed as e:
             raise ImmediateHttpResponse(HttpResponseForbidden(e.detail))
 
-        if verified_user is not None:
-            request.user = verified_user

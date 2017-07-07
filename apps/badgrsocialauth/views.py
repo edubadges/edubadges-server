@@ -41,10 +41,9 @@ class BadgrSocialLogin(RedirectView):
             raise ValidationError('No {} provider found'.format(provider_name))
 
         auth_token = self.request.GET.get('authToken', None)
-        get_verified_user(auth_token)  # Raises AuthenticationFailed if auth token is invalid
-        set_session_auth_token(self.request, auth_token)
-
         if auth_token is not None:
+            get_verified_user(auth_token)  # Raises AuthenticationFailed if auth token is invalid
+            set_session_auth_token(self.request, auth_token)
             return set_url_query_params(redirect_url, process=AuthProcess.CONNECT)
         else:
             return redirect_url
