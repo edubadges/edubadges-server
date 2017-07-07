@@ -1,6 +1,8 @@
 import urllib
 import urlparse
 
+from rest_framework.authentication import TokenAuthentication
+
 from mainsite.models import BadgrApp
 
 
@@ -33,3 +35,17 @@ def get_session_badgr_app(request):
 
 def set_session_badgr_app(request, badgr_app):
     request.session['badgr_app_pk'] = badgr_app.pk
+
+
+def get_session_auth_token(request):
+    return request.session.get('badgr_auth_token', None)
+
+
+def set_session_auth_token(request, auth_token):
+    request.session['badgr_auth_token'] = auth_token
+
+
+def get_verified_user(auth_token):
+    authenticator = TokenAuthentication()
+    verified_user, _ = authenticator.authenticate_credentials(auth_token)
+    return verified_user

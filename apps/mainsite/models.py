@@ -82,6 +82,7 @@ class BadgrApp(basic_models.DefaultModel):
     forgot_password_redirect = models.URLField()
     ui_login_redirect = models.URLField(null=True)
     ui_signup_success_redirect = models.URLField(null=True)
+    ui_connect_success_redirect = models.URLField(null=True)
     objects = BadgrAppManager()
 
     def __unicode__(self):
