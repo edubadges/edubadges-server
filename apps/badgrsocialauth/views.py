@@ -7,7 +7,6 @@ from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from django.views.generic import RedirectView
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 
 from badgrsocialauth.utils import set_url_query_params, set_session_badgr_app, get_session_badgr_app, \

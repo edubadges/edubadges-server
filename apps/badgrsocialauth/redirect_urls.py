@@ -11,13 +11,13 @@ urlpatterns = [
     # Intercept allauth cancel login view
     url(r'^cancellogin', BadgrSocialLoginCancel.as_view(permanent=False), name='socialaccount_login_cancelled'),
 
-    # Intercept allauth signut view (if account with given email already exists) and redirect to UI
+    # Intercept allauth signup view (if account with given email already exists) and redirect to UI
     url(r'^emailexists', BadgrSocialEmailExists.as_view(permanent=False), name='socialaccount_signup'),
 
     # Intercept allauth email verification view and redirect to UI
     url(r'^verifyemail', BadgrSocialAccountVerifyEmail.as_view(permanent=False), name='account_email_verification_sent'),
 
-    # Intercept allauth connections view (attached a new social account an
+    # Intercept allauth connections view (attached a new social account)
     url(r'^connected', BadgrAccountConnected.as_view(permanent=False), name='socialaccount_connections'),
 ]
 
