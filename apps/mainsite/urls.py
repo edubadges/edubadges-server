@@ -1,8 +1,6 @@
-from allauth.socialaccount import providers
 from django.apps import apps
 from django.conf import settings
 from django.conf.urls import include, url
-from django.utils import importlib
 
 from backpack.views import LegacyCollectionShareRedirectView
 from mainsite.admin import badgr_admin
@@ -14,7 +12,6 @@ from django.views.generic.base import RedirectView, TemplateView
 
 from mainsite.views import ClearCacheView, LoginAndObtainAuthToken, RedirectToUiLogin
 from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation, error404, error500
-from django.contrib.auth import views as contrib_auth_views
 
 
 urlpatterns = [
@@ -25,6 +22,9 @@ urlpatterns = [
 
     # Apple app universal URL endpoint
     url(r'^apple-app-site-association', AppleAppSiteAssociation.as_view(), name="apple-app-site-association"),
+
+    # OAuth2 provider URLs
+    url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 
     # Home
     url(r'^$', info_view, name='index'),

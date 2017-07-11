@@ -33,9 +33,13 @@ INSTALLED_APPS = [
     'badgrsocialauth.providers.google',
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.linkedin_oauth2',
+    'allauth.socialaccount.providers.oauth2',
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
+
+    # OAuth 2 provider
+    'oauth2_provider',
 
     'django-ismigrated',
     'mainsite',
@@ -54,6 +58,7 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'oauth2_provider.middleware.OAuth2TokenMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_auth_lti.middleware.LTIAuthMiddleware',
@@ -79,27 +84,34 @@ ALLOWED_HOSTS = ['*', ]
 #
 ##
 
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(TOP_DIR, 'breakdown', 'templates/'),
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                # 'django.template.context_processors.request',
+                'django.contrib.messages.context_processors.messages',
+
+                'mainsite.context_processors.extra_settings'
+            ],
+        },
+    },
+]
+
 TEMPLATE_LOADERS = [
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
 ]
-
-TEMPLATE_DIRS = [
-    os.path.join(TOP_DIR, 'breakdown', 'templates'),
-]
-
-TEMPLATE_CONTEXT_PROCESSORS = [
-    'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.debug',
-    'django.core.context_processors.media',
-    'django.core.context_processors.static',
-    'django.core.context_processors.request',
-    'django.contrib.messages.context_processors.messages',
-    'django.core.context_processors.i18n',
-
-    'mainsite.context_processors.extra_settings'
-]
-
 
 
 ##
@@ -132,6 +144,8 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/docs'
 
 AUTHENTICATION_BACKENDS = [
+    'oauth2_provider.backends.OAuth2Backend',
+
     # Object permissions for issuing badges
     'rules.permissions.ObjectPermissionBackend',
 
@@ -305,6 +319,7 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'mainsite.authentication.BadgrOAuth2Authentication',
         'rest_framework.authentication.TokenAuthentication',
         'entity.authentication.ExplicitCSRFSessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
@@ -388,6 +403,17 @@ def determine_version():
 
 ARTIFACT_VERSION = determine_version()
 
+
+OAUTH2_PROVIDER = {
+    'SCOPES': {
+        'rw:issuer': 'Read/write issuers scope',
+        'rw:issuer:*': 'Read/write issuer scope',
+        'l:issuer': 'List issuers scope',
+    },
+
+    'OAUTH2_VALIDATOR_CLASS': 'mainsite.oauth_validator.BadgrRequestValidator'
+
+}
 
 ##
 #

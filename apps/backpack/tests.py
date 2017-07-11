@@ -2,10 +2,10 @@ import base64
 
 import os
 import responses
-from django.contrib.auth import get_user_model
 
 from badgeuser.models import CachedEmailAddress, BadgeUser
-from composition.models import (LocalBadgeInstance,
+
+from backpack.models import (LocalBadgeInstance,
                                 Collection, LocalBadgeInstanceCollection, )
 from composition.serializers import (CollectionSerializer, )
 from issuer.models import BadgeClass, Issuer

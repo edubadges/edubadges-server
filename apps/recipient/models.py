@@ -1,6 +1,7 @@
 # Created by wiggins@concentricsky.com on 3/31/16.
 import basic_models
 import cachemodel
+from basic_models.models import CreatedUpdatedAt, IsActive, CreatedUpdatedBy
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
 
@@ -11,7 +12,7 @@ from mainsite.utils import OriginSetting
 from pathway.completionspec import CompletionRequirementSpecFactory, ElementJunctionCompletionRequirementSpec
 
 
-class RecipientProfile(BaseVersionedEntity, basic_models.DefaultModel):
+class RecipientProfile(BaseVersionedEntity, CreatedUpdatedAt, CreatedUpdatedBy, IsActive):
     badge_user = models.ForeignKey('badgeuser.BadgeUser', null=True, blank=True)
     recipient_identifier = models.EmailField(max_length=1024)
     public = models.BooleanField(default=False)
@@ -65,7 +66,7 @@ class RecipientProfile(BaseVersionedEntity, basic_models.DefaultModel):
         return BadgeInstance.objects.filter(revoked=False, recipient_identifier=self.recipient_identifier)
 
 
-class RecipientGroup(BaseAuditedModel, BaseVersionedEntity, basic_models.ActiveModel):
+class RecipientGroup(BaseAuditedModel, BaseVersionedEntity, IsActive):
     issuer = models.ForeignKey('issuer.Issuer')
     name = models.CharField(max_length=254)
     description = models.TextField(blank=True, null=True)

@@ -1,3 +1,4 @@
+from oauth2_provider.contrib.rest_framework import TokenHasScope
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -7,7 +8,8 @@ import badgrlog
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
 from issuer.models import Issuer, BadgeClass, BadgeInstance
 from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
-                                IsEditor, IsStaff, ApprovedIssuersOnly)
+                                IsEditor, IsStaff, ApprovedIssuersOnly, BadgrOAuthTokenHasScope,
+                                BadgrOAuthTokenHasEntityScope)
 from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    BadgeInstanceSerializerV1)
 from issuer.serializers_v2 import IssuerSerializerV2, BadgeClassSerializerV2, BadgeInstanceSerializerV2
@@ -25,7 +27,8 @@ class IssuerList(BaseEntityListView):
     model = Issuer
     v1_serializer_class = IssuerSerializerV1
     v2_serializer_class = IssuerSerializerV2
-    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, ApprovedIssuersOnly)
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, ApprovedIssuersOnly, BadgrOAuthTokenHasScope)
+    valid_scopes = ["rw:issuer", "rw:issuer:*"]
 
     create_event = badgrlog.IssuerCreatedEvent
 
@@ -51,7 +54,8 @@ class IssuerDetail(BaseEntityDetailView):
     model = Issuer
     v1_serializer_class = IssuerSerializerV1
     v2_serializer_class = IssuerSerializerV2
-    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor)
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, BadgrOAuthTokenHasEntityScope)
+    valid_scopes = ["rw:issuer", "rw:issuer:*"]
 
     @apispec_get_operation('Issuer',
         summary="Get a single Issuer",
