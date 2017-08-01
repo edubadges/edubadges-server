@@ -6,12 +6,11 @@ from allauth.account.utils import user_pk_to_url_str
 from django.conf import settings
 from django.contrib.auth import logout
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.sites.shortcuts import get_current_site
 from django.core.urlresolvers import resolve, Resolver404, reverse
 
 from allauth.account.adapter import DefaultAccountAdapter, get_adapter
-from allauth.account import app_settings
 from allauth.account.models import EmailConfirmation
-from allauth.utils import get_current_site, build_absolute_uri
 
 from badgeuser.models import CachedEmailAddress
 from badgrsocialauth.utils import set_url_query_params, get_session_badgr_app, set_session_badgr_app
@@ -65,7 +64,7 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
         temp_key = default_token_generator.make_token(emailconfirmation.email_address.user)
         token = "{uidb36}-{key}".format(uidb36=user_pk_to_url_str(emailconfirmation.email_address.user),
                                         key=temp_key)
-        activate_url = OriginSetting.HTTP + reverse(url_name, kwargs={'confirm_id': emailconfirmation.pk})
+        activate_url = OriginSetting.HTTP + reverse(url_name, kwargs={'confirm_id': emailconfirmation.key})
         tokenized_activate_url = "{}?token={}".format(activate_url, token)
         return tokenized_activate_url
 

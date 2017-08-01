@@ -11,6 +11,8 @@ import hmac
 import uuid
 
 import requests
+from basic_models.managers import ActiveObjectsManager
+from basic_models.models import CreatedUpdatedBy, CreatedUpdatedAt, IsActive
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.storage import DefaultStorage
@@ -19,6 +21,7 @@ from django.db import models
 
 from autoslug import AutoSlugField
 import cachemodel
+from django.db.models import Manager
 from jsonfield import JSONField
 
 from mainsite.utils import OriginSetting, fetch_remote_file_to_storage
@@ -59,7 +62,7 @@ class EmailBlacklist(models.Model):
         return hmac.compare_digest(hashed.hexdigest(), str(signature))
 
 
-class BadgrAppManager(basic_models.ActiveModelManager):
+class BadgrAppManager(Manager):
     def get_current(self, request=None):
         if request and request.META.get('HTTP_ORIGIN'):
             origin = request.META.get('HTTP_ORIGIN')
@@ -74,7 +77,7 @@ class BadgrAppManager(basic_models.ActiveModelManager):
         return self.get(id=badgr_app_id)
 
 
-class BadgrApp(basic_models.DefaultModel):
+class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive):
     name = models.CharField(max_length=254)
     cors = models.CharField(max_length=254, unique=True)
     email_confirmation_redirect = models.URLField()

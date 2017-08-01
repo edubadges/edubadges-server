@@ -5,6 +5,7 @@ import os
 
 import basic_models
 import cachemodel
+from basic_models.models import CreatedUpdatedAt
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
 
@@ -126,7 +127,7 @@ class BackpackCollectionBadgeInstance(cachemodel.CacheModel):
         return BackpackCollection.cached.get(id=self.collection_id)
 
 
-class BaseSharedModel(cachemodel.CacheModel, basic_models.TimestampedModel):
+class BaseSharedModel(cachemodel.CacheModel, CreatedUpdatedAt):
     SHARE_PROVIDERS = [(p.provider_code, p.provider_name) for code,p in SharingManager.ManagerProviders.items()]
     provider = models.CharField(max_length=254, choices=SHARE_PROVIDERS)
 

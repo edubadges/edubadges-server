@@ -1,4 +1,7 @@
+import oauth2_provider
+import rest_framework
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from rest_framework import permissions
 import rules
 
@@ -169,3 +172,49 @@ class VerifiedEmailMatchesRecipientIdentifier(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         recipient_identifier = getattr(obj, 'recipient_identifier', None)
         return recipient_identifier and recipient_identifier in request.user.all_recipient_identifiers
+
+
+class BadgrOAuthTokenHasScope(permissions.BasePermission):
+    def has_permission(self, request, view):
+        token = request.auth
+
+        # Do not apply scope if using a non-oauth tokens
+        if not isinstance(token, oauth2_provider.models.AccessToken):
+            return True
+
+        if not token:
+            return False
+
+        valid_scopes = self._get_valid_scopes(request, view)
+        return token.is_valid(valid_scopes)
+
+    def _get_valid_scopes(self, request, view):
+        return getattr(view, "valid_scopes")
+
+
+class BadgrOAuthTokenHasEntityScope(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        token = request.auth
+
+        # Do not apply scope if using a non-oauth tokens
+        if not isinstance(token, oauth2_provider.models.AccessToken):
+            return True
+
+        if not token:
+            return False
+
+        valid_scopes = self._get_valid_scopes(request, view)
+        valid_scopes = set([self._resolve_wildcard(scope, obj.entity_id) for scope in valid_scopes])
+        token_scopes = set(token.scope.split())
+
+        return not token.is_expired() and len(valid_scopes.intersection(token_scopes)) > 0
+
+    def _resolve_wildcard(self, scope, entity_id):
+        if scope.endswith(':*'):
+            base_scope, _ = scope.rsplit(':*', 1)
+            return ':'.join([base_scope, entity_id])
+        else:
+            return scope
+
+    def _get_valid_scopes(self, request, view):
+        return getattr(view, "valid_scopes")

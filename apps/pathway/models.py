@@ -5,6 +5,7 @@ import cachemodel
 import basic_models
 import itertools
 from autoslug import AutoSlugField
+from basic_models.models import IsActive, CreatedUpdatedAt, CreatedUpdatedBy
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse, resolve, Resolver404
@@ -16,7 +17,7 @@ from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.utils import OriginSetting
 
 
-class Pathway(basic_models.ActiveModel):
+class Pathway(cachemodel.CacheModel, IsActive):
     issuer = models.ForeignKey('issuer.Issuer')
     slug = AutoSlugField(max_length=254, populate_from='populate_slug', unique=True, blank=False)
     root_element = models.OneToOneField('pathway.PathwayElement', related_name='toplevel_pathway', null=True)
@@ -139,7 +140,7 @@ class Pathway(basic_models.ActiveModel):
         return tree
 
 
-class PathwayElement(basic_models.DefaultModel):
+class PathwayElement(cachemodel.CacheModel, CreatedUpdatedAt, CreatedUpdatedBy, IsActive):
     # this should match the path in api_urls.py but used internally to improve performance
     PathwayElementUrl = '/v2/issuers/{issuer_slug}/pathways/{pathway_slug}/elements/{element_slug}'
 

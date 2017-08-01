@@ -434,6 +434,8 @@ class BadgeInstance(BaseAuditedModel,
                     BaseOpenBadgeObjectModel):
     entity_class_name = 'Assertion'
 
+    issued_on = models.DateTimeField(blank=False, null=False, default=datetime.datetime.now)
+
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.CASCADE, related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
 

@@ -19,7 +19,7 @@ class PathwayElementBadgeInline(TabularInline):
     raw_id_fields = ('badgeclass', 'element')
 
 
-class PathwayElementAdmin(basic_models.DefaultModelAdmin):
+class PathwayElementAdmin(ModelAdmin):
     list_display = ('name', 'slug', 'pathway_name', 'issuer', 'is_active', 'created_at')
     list_filter = ('is_active', 'created_at')
     search_fields = ('name', 'slug', 'description',)
