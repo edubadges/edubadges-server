@@ -28,7 +28,7 @@ class IssuerList(BaseEntityListView):
     v1_serializer_class = IssuerSerializerV1
     v2_serializer_class = IssuerSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, ApprovedIssuersOnly, BadgrOAuthTokenHasScope)
-    valid_scopes = ["rw:issuer", "rw:issuer:*"]
+    valid_scopes = ["l:issuer"]
 
     create_event = badgrlog.IssuerCreatedEvent
 
@@ -90,9 +90,10 @@ class AllBadgeClassesList(BaseEntityListView):
     POST to create a new badgeclass within the issuer context
     """
     model = BadgeClass
-    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, BadgrOAuthTokenHasScope)
     v1_serializer_class = BadgeClassSerializerV1
     v2_serializer_class = BadgeClassSerializerV2
+    valid_scopes = ["l:badgeclass"]
 
     def get_objects(self, request, **kwargs):
         return request.user.cached_badgeclasses()
@@ -110,10 +111,11 @@ class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
     POST to create a new badgeclass within the issuer context
     """
     model = Issuer  # used by get_object()
-    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor)
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, BadgrOAuthTokenHasEntityScope)
     v1_serializer_class = BadgeClassSerializerV1
     v2_serializer_class = BadgeClassSerializerV2
     create_event = badgrlog.BadgeClassCreatedEvent
+    valid_scopes = ["rw:issuer", "rw:issuer:*"]
 
     def get_objects(self, request, **kwargs):
         issuer = self.get_object(request, **kwargs)
@@ -146,9 +148,11 @@ class BadgeClassDetail(BaseEntityDetailView):
     GET details on one BadgeClass. PUT and DELETE should be restricted to BadgeClasses that haven't been issued yet.
     """
     model = BadgeClass
-    permission_classes = (AuthenticatedWithVerifiedEmail, MayEditBadgeClass,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayEditBadgeClass, BadgrOAuthTokenHasEntityScope)
     v1_serializer_class = BadgeClassSerializerV1
     v2_serializer_class = BadgeClassSerializerV2
+
+    valid_scopes = ["rw:badgeclass", "rw:badgeclass:*"]
 
     def get(self, request, **kwargs):
         """
@@ -181,9 +185,10 @@ class BadgeClassDetail(BaseEntityDetailView):
 
 class BatchAssertions(VersionedObjectMixin, BaseEntityView):
     model = BadgeClass  # used by .get_object()
-    permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass, BadgrOAuthTokenHasScope)
     v1_serializer_class = BadgeInstanceSerializerV1
     v2_serializer_class = BadgeInstanceSerializerV2
+    valid_scopes = ["rw:assertion"]
 
     def get_context_data(self, **kwargs):
         context = super(BatchAssertions, self).get_context_data(**kwargs)
@@ -235,10 +240,11 @@ class BadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
     POST to issue a new assertion
     """
     model = BadgeClass  # used by get_object()
-    permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass, BadgrOAuthTokenHasScope)
     v1_serializer_class = BadgeInstanceSerializerV1
     v2_serializer_class = BadgeInstanceSerializerV2
     create_event = badgrlog.BadgeInstanceCreatedEvent
+    valid_scopes = ["l:assertion"]
 
     def get_objects(self, request, **kwargs):
         badgeclass = self.get_object(request, **kwargs)
@@ -279,10 +285,11 @@ class IssuerBadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
     Retrieve all assertions within one issuer
     """
     model = Issuer  # used by get_object()
-    permission_classes = (AuthenticatedWithVerifiedEmail, IsStaff,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsStaff, BadgrOAuthTokenHasScope)
     v1_serializer_class = BadgeInstanceSerializerV1
     v2_serializer_class = BadgeInstanceSerializerV2
     create_event = badgrlog.BadgeInstanceCreatedEvent
+    valid_scopes = ["l:assertion"]
 
     def get_objects(self, request, **kwargs):
         issuer = self.get_object(request, **kwargs)
@@ -315,9 +322,10 @@ class BadgeInstanceDetail(BaseEntityDetailView):
     Endpoints for (GET)ting a single assertion or revoking a badge (DELETE)
     """
     model = BadgeInstance
-    permission_classes = (AuthenticatedWithVerifiedEmail, MayEditBadgeClass,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayEditBadgeClass, BadgrOAuthTokenHasEntityScope)
     v1_serializer_class = BadgeInstanceSerializerV1
     v2_serializer_class = BadgeInstanceSerializerV2
+    valid_scopes = ["rw:assertion", "rw:assertion:*"]
 
     def get(self, request, **kwargs):
         """
