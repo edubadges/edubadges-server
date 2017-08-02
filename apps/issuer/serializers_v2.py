@@ -126,7 +126,7 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
     image = serializers.FileField(read_only=True)
     recipient = BadgeRecipientSerializerV2(source='*')
 
-    issuedOn = serializers.DateTimeField(source='issued_on', read_only=False)
+    issuedOn = serializers.DateTimeField(source='issued_on', required=False)
     narrative = MarkdownCharField(required=False)
     evidence = EvidenceItemSerializerV2(many=True, required=False)
 
