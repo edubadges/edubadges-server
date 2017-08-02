@@ -23,6 +23,7 @@ from django.db.models import ProtectedError
 from json import loads as json_loads
 from jsonfield import JSONField
 from openbadges_bakery import bake
+from django.utils import timezone
 
 from entity.models import BaseVersionedEntity
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager, BadgeInstanceEvidenceManager
@@ -434,7 +435,7 @@ class BadgeInstance(BaseAuditedModel,
                     BaseOpenBadgeObjectModel):
     entity_class_name = 'Assertion'
 
-    issued_on = models.DateTimeField(blank=False, null=False, default=datetime.datetime.now)
+    issued_on = models.DateTimeField(blank=False, null=False, default=timezone.now)
 
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.CASCADE, related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
@@ -709,7 +710,7 @@ class BadgeInstance(BaseAuditedModel,
         if self.narrative and obi_version == '2_0':
             json['narrative'] = self.narrative
 
-        json['issuedOn'] = self.created_at.isoformat()
+        json['issuedOn'] = self.issued_on.isoformat()
 
         if self.salt:
             json['recipient'] = {
