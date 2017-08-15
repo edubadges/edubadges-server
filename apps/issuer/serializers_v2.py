@@ -152,3 +152,4 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
             raise serializers.ValidationError({"badgeclass": "This field is required"})
 
         return super(BadgeInstanceSerializerV2, self).create(validated_data)
+
