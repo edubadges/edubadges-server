@@ -113,7 +113,7 @@ class EvidenceItemSerializerV2(BaseSerializerV2, OriginalJsonSerializerMixin):
     narrative = MarkdownCharField(required=False)
 
     def validate(self, attrs):
-        if not (attrs.get('url', None) or attrs.get('narrative', None)):
+        if not (attrs.get('evidence_url', None) or attrs.get('narrative', None)):
             raise serializers.ValidationError("Either url or narrative is required")
 
 
