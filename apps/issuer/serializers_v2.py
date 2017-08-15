@@ -116,6 +116,8 @@ class EvidenceItemSerializerV2(BaseSerializerV2, OriginalJsonSerializerMixin):
         if not (attrs.get('evidence_url', None) or attrs.get('narrative', None)):
             raise serializers.ValidationError("Either url or narrative is required")
 
+        return attrs
+
 
 class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     openBadgeId = serializers.URLField(source='jsonld_id', read_only=True)
