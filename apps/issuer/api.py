@@ -1,3 +1,5 @@
+import django
+from django.http import Http404
 from oauth2_provider.contrib.rest_framework import TokenHasScope
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -6,6 +8,7 @@ from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK
 
 import badgrlog
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
+from entity.serializers import BaseSerializerV2
 from issuer.models import Issuer, BadgeClass, BadgeInstance
 from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
                                 IsEditor, IsStaff, ApprovedIssuersOnly, BadgrOAuthTokenHasScope,
@@ -183,7 +186,7 @@ class BadgeClassDetail(BaseEntityDetailView):
         return super(BadgeClassDetail, self).put(request, **kwargs)
 
 
-class BatchAssertions(VersionedObjectMixin, BaseEntityView):
+class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):
     model = BadgeClass  # used by .get_object()
     permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass, BadgrOAuthTokenHasScope)
     v1_serializer_class = BadgeInstanceSerializerV1
@@ -191,7 +194,7 @@ class BatchAssertions(VersionedObjectMixin, BaseEntityView):
     valid_scopes = ["rw:assertion"]
 
     def get_context_data(self, **kwargs):
-        context = super(BatchAssertions, self).get_context_data(**kwargs)
+        context = super(BatchAssertionsIssue, self).get_context_data(**kwargs)
         context['badgeclass'] = self.get_object(self.request, **kwargs)
         return context
 
@@ -232,6 +235,66 @@ class BatchAssertions(VersionedObjectMixin, BaseEntityView):
             self.log_create(new_instance)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class BatchAssertionsRevoke(VersionedObjectMixin, BaseEntityView):
+    model = BadgeInstance
+    permission_classes = (AuthenticatedWithVerifiedEmail, BadgrOAuthTokenHasScope)
+    v2_serializer_class = BadgeInstanceSerializerV2
+    valid_scopes = ["rw:assertion"]
+
+    def get_context_data(self, **kwargs):
+        context = super(BatchAssertionsRevoke, self).get_context_data(**kwargs)
+        context['badgeclass'] = self.get_object(self.request, **kwargs)
+        return context
+
+    def _process_revoke(self, request, revocation):
+        response = {
+            "revoked": False,
+        }
+
+        entity_id = revocation.get("entityId", None)
+        revocation_reason = revocation.get("revocationReason", None)
+
+        if entity_id is None:
+            return dict(response, reason="entityId is required")
+
+        response["entityId"] = entity_id
+
+        if revocation_reason is None:
+            return dict(response, reason="revocationReason is required")
+
+        response["revocationReason"] = revocation_reason
+
+        try:
+            assertion = self.get_object(request, entity_id=entity_id)
+        except Http404:
+            return dict(response, reason="permission denied or object not found")
+
+        if not self.has_object_permissions(request, assertion):
+            dict(response, reason="permission denied or object not found")
+
+
+        try:
+            assertion.revoke(revocation_reason)
+        except Exception as e:
+            return dict(response, reason=e.message)
+
+        return dict(response, revoked=True)
+
+    def post(self, request, **kwargs):
+        """
+        POST to revoke multiple assertions
+        """
+
+        result = [
+            self._process_revoke(request, revocation)
+            for revocation in self.request.data
+        ]
+
+        response_data = BaseSerializerV2.response_envelope(result=result, success=True, description="revoked badges")
+
+        return Response(status=HTTP_200_OK, data=response_data)
 
 
 class BadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
