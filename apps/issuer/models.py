@@ -440,7 +440,14 @@ class BadgeInstance(BaseAuditedModel,
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.CASCADE, related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
 
+
+    RECIPIENT_TYPE_EMAIL = 'email'
+    RECIPIENT_TYPE_CHOICES = (
+        (RECIPIENT_TYPE_EMAIL, 'email'),
+    )
     recipient_identifier = models.EmailField(max_length=1024, blank=False, null=False)
+    recipient_type = models.CharField(max_length=255, choices=RECIPIENT_TYPE_CHOICES, default=RECIPIENT_TYPE_EMAIL, blank=False, null=False)
+
     image = models.FileField(upload_to='uploads/badges', blank=True)
 
     # slug has been deprecated for now, but preserve existing values

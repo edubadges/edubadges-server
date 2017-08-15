@@ -105,7 +105,7 @@ class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
 
 class BadgeRecipientSerializerV2(BaseSerializerV2):
     identity = serializers.CharField(source='recipient_identifier')
-    type = serializers.CharField(default='email', required=False)
+    type = serializers.CharField(default='email', required=False, source='recipient_type')
 
 
 class EvidenceItemSerializerV2(BaseSerializerV2, OriginalJsonSerializerMixin):
@@ -150,6 +150,10 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
         else:
             # badgeclass is required on create
             raise serializers.ValidationError({"badgeclass": "This field is required"})
+
+
+        validated_data['issuer'] = validated_data['badgeclass'].issuer
+
 
         return super(BadgeInstanceSerializerV2, self).create(validated_data)
 
