@@ -810,3 +810,37 @@ class BadgeInstanceEvidence(OriginalJsonMixin, cachemodel.CacheModel):
         if self.narrative:
             json['narrative'] = self.narrative
         return json
+
+
+class BadgeClassAlignment(OriginalJsonMixin, cachemodel.CacheModel):
+    badgeclass = models.ForeignKey('issuer.BadgeClass')
+    target_name = models.TextField()
+    target_url = models.CharField(max_length=2083)
+    target_description = models.TextField(blank=True, null=True, default=None)
+    target_framework = models.TextField(blank=True, null=True, default=None)
+    target_code = models.TextField(blank=True, null=True, default=None)
+
+    def publish(self):
+        super(BadgeClassAlignment, self).publish()
+        self.badgeclass.publish()
+
+    def delete(self, *args, **kwargs):
+        super(BadgeClassAlignment, self).delete(*args, **kwargs)
+        self.badgeclass.publish()
+
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_context=False):
+        json = OrderedDict()
+        if include_context:
+            obi_version, context_iri = get_obi_context(obi_version)
+            json['@context'] = context_iri
+
+        json['targetName'] = self.target_name
+        json['targetUrl'] = self.target_name
+        if self.target_description:
+            json['targetDescription'] = self.target_description
+        if self.target_framework:
+            json['targetFramework'] = self.target_framework
+        if self.target_code:
+            json['targetCode'] = self.target_code
+
+        return json

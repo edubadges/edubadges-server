@@ -68,6 +68,14 @@ class IssuerSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
         return new_issuer
 
 
+class AlignmentItemSerializerV2(BaseSerializerV2, OriginalJsonSerializerMixin):
+    targetName = serializers.CharField(source='target_name')
+    targetUrl = serializers.URLField(source='target_url')
+    targetDescription = serializers.URLField(source='target_description', required=False)
+    targetFramework = serializers.URLField(source='target_framework', required=False)
+    targetCode = serializers.URLField(source='target_code', required=False)
+
+
 class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     openBadgeId = serializers.URLField(source='jsonld_id', read_only=True)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
@@ -80,6 +88,8 @@ class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
 
     criteriaUrl = StripTagsCharField(source='criteria_url', required=False, allow_null=True, validators=[URLValidator()])
     criteriaNarrative = MarkdownCharField(source='criteria_text', required=False, allow_null=True)
+
+    alignment = AlignmentItemSerializerV2(many=True, required=False)
 
     class Meta(DetailSerializerV2.Meta):
         model = BadgeClass
