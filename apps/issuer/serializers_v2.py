@@ -89,7 +89,7 @@ class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     criteriaUrl = StripTagsCharField(source='criteria_url', required=False, allow_null=True, validators=[URLValidator()])
     criteriaNarrative = MarkdownCharField(source='criteria_text', required=False, allow_null=True)
 
-    alignment = AlignmentItemSerializerV2(many=True, required=False)
+    alignments = AlignmentItemSerializerV2(source='cached_alignments', many=True, required=False)
 
     class Meta(DetailSerializerV2.Meta):
         model = BadgeClass

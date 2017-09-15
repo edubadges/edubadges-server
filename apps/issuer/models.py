@@ -376,6 +376,20 @@ class BadgeClass(ResizeUploadedImage,
         return self.badgeinstances.all()
 
     @cachemodel.cached_method(auto_publish=True)
+    def cached_alignments(self):
+        return self.badgeclassalignment_set.all()
+
+    @property
+    def alignment_items(self):
+        if hasattr(self, '_alignment_items'):
+            return getattr(self, '_alignment_items', [])
+        return self.cached_alignments()
+
+    @alignment_items.setter
+    def alignment_items(self, value):
+        self._alignment_items = value
+
+    @cachemodel.cached_method(auto_publish=True)
     def cached_pathway_elements(self):
         return [peb.element for peb in self.pathwayelementbadge_set.all()]
 
@@ -428,6 +442,7 @@ class BadgeClass(ResizeUploadedImage,
 
     def get_filtered_json(self, excluded_fields=('@context', 'id', 'type', 'name', 'description', 'image', 'criteria', 'issuer')):
         return super(BadgeClass, self).get_filtered_json(excluded_fields=excluded_fields)
+
 
 
 class BadgeInstance(BaseAuditedModel,

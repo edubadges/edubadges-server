@@ -35,6 +35,14 @@ class IssuerManager(models.Manager):
 class BadgeClassManager(models.Manager):
 
     @transaction.atomic
+    def create(self, alignments=None, **kwargs):
+        instance = super(BadgeClassManager, self).create(**kwargs)
+        if alignments is not None:
+            for alignment in alignments:
+                instance.badgeclassalignment_set.create(**alignment)
+        return instance
+
+    @transaction.atomic
     def get_or_create_from_ob2(self, issuer, badgeclass_obo, source=None, original_json=None):
         criteria_url = None
         criteria_text = None
