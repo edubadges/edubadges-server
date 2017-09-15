@@ -111,6 +111,14 @@ class IssuerRoleActionSerializerV1(serializers.Serializer):
         return attrs
 
 
+class AlignmentItemSerializerV1(serializers.Serializer):
+    target_name = serializers.CharField()
+    target_url = serializers.URLField()
+    target_description = serializers.URLField(required=False)
+    target_framework = serializers.URLField(required=False)
+    target_code = serializers.URLField(required=False)
+
+
 class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1()
@@ -124,6 +132,8 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
     recipient_count = serializers.IntegerField(required=False, read_only=True)
     pathway_element_count = serializers.IntegerField(required=False, read_only=True)
     description = StripTagsCharField(max_length=16384, required=True)
+
+    alignment = AlignmentItemSerializerV1(read_only=True, many=True, source='cached_alignments')
 
     def to_representation(self, instance):
         representation = super(BadgeClassSerializerV1, self).to_representation(instance)
