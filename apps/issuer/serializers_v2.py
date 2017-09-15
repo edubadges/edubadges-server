@@ -1,7 +1,9 @@
 import uuid
 
 import os
-from django.core.validators import URLValidator
+
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.validators import URLValidator, EmailValidator, RegexValidator
 from rest_framework import serializers
 
 from badgeuser.models import BadgeUser
@@ -10,7 +12,7 @@ from issuer.models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from mainsite.drf_fields import ValidImageField
 from mainsite.serializers import StripTagsCharField, MarkdownCharField, HumanReadableBooleanField, \
     OriginalJsonSerializerMixin
-from mainsite.validators import ChoicesValidator
+from mainsite.validators import ChoicesValidator, TelephoneValidator
 
 
 class IssuerStaffSerializerV2(DetailSerializerV2):
@@ -113,9 +115,33 @@ class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
         return super(BadgeClassSerializerV2, self).create(validated_data)
 
 
+
+
 class BadgeRecipientSerializerV2(BaseSerializerV2):
     identity = serializers.CharField(source='recipient_identifier')
-    type = serializers.CharField(default='email', required=False, source='recipient_type')
+    type = serializers.ChoiceField(
+        choices=BadgeInstance.RECIPIENT_TYPE_CHOICES,
+        default=BadgeInstance.RECIPIENT_TYPE_EMAIL,
+        required=False,
+        source='recipient_type'
+    )
+
+    VALIDATORS = {
+        BadgeInstance.RECIPIENT_TYPE_EMAIL: EmailValidator(),
+        BadgeInstance.RECIPIENT_TYPE_URL: URLValidator(),
+        BadgeInstance.RECIPIENT_TYPE_ID: URLValidator(),
+        BadgeInstance.RECIPIENT_TYPE_TELEPHONE: TelephoneValidator(),
+    }
+
+    def validate(self, attrs):
+        recipient_type = attrs.get('recipient_type')
+        recipient_identifier = attrs.get('recipient_identifier')
+        if recipient_type in self.VALIDATORS:
+            try:
+                self.VALIDATORS[recipient_type](recipient_identifier)
+            except DjangoValidationError as e:
+                raise serializers.ValidationError(e.message)
+        return attrs
 
 
 class EvidenceItemSerializerV2(BaseSerializerV2, OriginalJsonSerializerMixin):

@@ -448,7 +448,6 @@ class BadgeClass(ResizeUploadedImage,
         return super(BadgeClass, self).get_filtered_json(excluded_fields=excluded_fields)
 
 
-
 class BadgeInstance(BaseAuditedModel,
                     BaseVersionedEntity,
                     BaseOpenBadgeObjectModel):
@@ -459,10 +458,15 @@ class BadgeInstance(BaseAuditedModel,
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.CASCADE, related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
 
-
     RECIPIENT_TYPE_EMAIL = 'email'
+    RECIPIENT_TYPE_ID = 'id'
+    RECIPIENT_TYPE_TELEPHONE = 'telephone'
+    RECIPIENT_TYPE_URL = 'url'
     RECIPIENT_TYPE_CHOICES = (
         (RECIPIENT_TYPE_EMAIL, 'email'),
+        (RECIPIENT_TYPE_ID, 'id'),
+        (RECIPIENT_TYPE_TELEPHONE, 'telephone'),
+        (RECIPIENT_TYPE_URL, 'url'),
     )
     recipient_identifier = models.EmailField(max_length=1024, blank=False, null=False)
     recipient_type = models.CharField(max_length=255, choices=RECIPIENT_TYPE_CHOICES, default=RECIPIENT_TYPE_EMAIL, blank=False, null=False)

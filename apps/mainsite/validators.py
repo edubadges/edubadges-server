@@ -1,6 +1,7 @@
 # encoding: utf-8
 from __future__ import unicode_literals
 
+from django.core.validators import RegexValidator
 from rest_framework.exceptions import ValidationError
 
 from mainsite.utils import verify_svg
@@ -42,4 +43,10 @@ class ChoicesValidator(object):
             raise ValidationError("'{}' is not supported. Only {} is available".format(value, self.choices))
 
 
+class TelephoneValidator(RegexValidator):
+    message = 'Telephone number does not conform to E.164'
+    code = 'invalid'
+    regex = r'^\+?[1-9]\d{1,14}$'
 
+    def __init__(self, *args, **kwargs):
+        super(TelephoneValidator, self).__init__(self.regex, *args, **kwargs)

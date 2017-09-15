@@ -15,7 +15,7 @@ from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, 
     OriginalJsonSerializerMixin
 from mainsite.utils import OriginSetting
 from mainsite.validators import ChoicesValidator
-from .models import Issuer, BadgeClass, IssuerStaff
+from .models import Issuer, BadgeClass, IssuerStaff, BadgeInstance
 
 
 class CachedListSerializer(serializers.ListSerializer):
@@ -238,7 +238,8 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
     slug = serializers.CharField(max_length=255, read_only=True, source='entity_id')
     image = serializers.FileField(read_only=True)  # use_url=True, might be necessary
     email = serializers.EmailField(max_length=1024, required=False, write_only=True)
-    recipient_identifier = serializers.EmailField(max_length=1024, required=False)
+    recipient_identifier = serializers.CharField(max_length=1024, required=False)
+    recipient_type = serializers.CharField(default=BadgeInstance.RECIPIENT_TYPE_EMAIL)
     allow_uppercase = serializers.BooleanField(default=False, required=False, write_only=True)
     evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
     narrative = MarkdownCharField(required=False, allow_blank=True)
