@@ -427,6 +427,10 @@ class BadgeClass(ResizeUploadedImage,
             if self.criteria_text:
                 json['criteria']['narrative'] = self.criteria_text
 
+
+        if obi_version == '2_0':
+            json['alignment'] = [ a.get_json(obi_version=obi_version) for a in self.cached_alignments() ]
+
         if include_extra:
             extra = self.get_filtered_json()
             if extra is not None:
@@ -850,7 +854,7 @@ class BadgeClassAlignment(OriginalJsonMixin, cachemodel.CacheModel):
             json['@context'] = context_iri
 
         json['targetName'] = self.target_name
-        json['targetUrl'] = self.target_name
+        json['targetUrl'] = self.target_url
         if self.target_description:
             json['targetDescription'] = self.target_description
         if self.target_framework:
