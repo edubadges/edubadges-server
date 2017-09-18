@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     # deprecated packages to remove in v1.2
     'composer',
     'credential_store',
+    'storages',
 ]
 
 MIDDLEWARE_CLASSES = [

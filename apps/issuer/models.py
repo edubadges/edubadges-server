@@ -136,7 +136,7 @@ class BadgeInstance(AbstractBadgeInstance):
             self.created_at = datetime.datetime.now()
             self.json['issuedOn'] = self.created_at.isoformat()
 
-            imageFile = default_storage.open(self.badgeclass.image.file.name)
+            imageFile = default_storage.open(self.badgeclass.image)
             self.image = bake(imageFile, json.dumps(self.json, indent=2))
 
             self.image.open()

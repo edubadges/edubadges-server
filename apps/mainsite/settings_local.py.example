@@ -13,6 +13,12 @@ DEBUG_MEDIA = DEBUG
 TIME_ZONE = 'America/Los_Angeles'
 LANGUAGE_CODE = 'en-us'
 
+#DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
+#AZURE_ACCOUNT_NAME = 'azureaccountname'
+#AZURE_ACCOUNT_KEY = ''
+#MEDIA_URL = 'http://azureaccountname.blob.core.windows.net/'
+#AZURE_CONTAINER = 'mediafiles'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
