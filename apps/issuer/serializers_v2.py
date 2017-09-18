@@ -92,6 +92,7 @@ class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     criteriaNarrative = MarkdownCharField(source='criteria_text', required=False, allow_null=True)
 
     alignments = AlignmentItemSerializerV2(source='cached_alignments', many=True, required=False)
+    tags = serializers.ListField(child=StripTagsCharField(max_length=1024), source='tag_items', required=False)
 
     class Meta(DetailSerializerV2.Meta):
         model = BadgeClass

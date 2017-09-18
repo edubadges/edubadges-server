@@ -390,6 +390,20 @@ class BadgeClass(ResizeUploadedImage,
         self._alignment_items = value
 
     @cachemodel.cached_method(auto_publish=True)
+    def cached_tags(self):
+        return self.badgeclasstag_set.all()
+
+    @property
+    def tag_items(self):
+        if hasattr(self, '_tag_items'):
+            return getattr(self, '_tag_items', [])
+        return self.cached_tags()
+
+    @tag_items.setter
+    def tag_items(self, value):
+        self._tag_items = value
+
+    @cachemodel.cached_method(auto_publish=True)
     def cached_pathway_elements(self):
         return [peb.element for peb in self.pathwayelementbadge_set.all()]
 
@@ -427,9 +441,9 @@ class BadgeClass(ResizeUploadedImage,
             if self.criteria_text:
                 json['criteria']['narrative'] = self.criteria_text
 
-
         if obi_version == '2_0':
             json['alignment'] = [ a.get_json(obi_version=obi_version) for a in self.cached_alignments() ]
+            json['tags'] = list(self.cached_tags())
 
         if include_extra:
             extra = self.get_filtered_json()
@@ -867,3 +881,19 @@ class BadgeClassAlignment(OriginalJsonMixin, cachemodel.CacheModel):
             json['targetCode'] = self.target_code
 
         return json
+
+
+class BadgeClassTag(cachemodel.CacheModel):
+    badgeclass = models.ForeignKey('issuer.BadgeClass')
+    name = models.CharField(max_length=254, db_index=True)
+
+    def __unicode__(self):
+        return self.name
+
+    def publish(self):
+        super(BadgeClassTag, self).publish()
+        self.badgeclass.publish()
+
+    def delete(self, *args, **kwargs):
+        super(BadgeClassTag, self).delete(*args, **kwargs)
+        self.badgeclass.publish()

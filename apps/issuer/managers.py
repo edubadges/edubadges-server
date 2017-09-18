@@ -35,11 +35,16 @@ class IssuerManager(models.Manager):
 class BadgeClassManager(models.Manager):
 
     @transaction.atomic
-    def create(self, alignments=None, **kwargs):
+    def create(self, alignments=None, tag_items=None, **kwargs):
         instance = super(BadgeClassManager, self).create(**kwargs)
         if alignments is not None:
             for alignment in alignments:
                 instance.badgeclassalignment_set.create(**alignment)
+
+        if tag_items is not None:
+            for tag_name in tag_items:
+                instance.badgeclasstag_set.get_or_create(name=tag_name)
+
         return instance
 
     @transaction.atomic
