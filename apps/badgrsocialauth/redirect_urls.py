@@ -1,6 +1,7 @@
+import importlib
+
 from allauth.socialaccount import providers
 from django.conf.urls import url
-from django.utils import importlib
 
 from badgrsocialauth.views import BadgrSocialLogin, BadgrSocialEmailExists, BadgrSocialAccountVerifyEmail, \
     BadgrSocialLoginCancel, BadgrAccountConnected
@@ -24,7 +25,7 @@ urlpatterns = [
 
 for provider in providers.registry.get_list():
     try:
-        prov_mod = importlib.import_module(provider.package + '.urls')
+        prov_mod = importlib.import_module(provider.get_package() + '.urls')
     except ImportError:
         continue
     prov_urlpatterns = getattr(prov_mod, 'urlpatterns', None)

@@ -1,7 +1,9 @@
 import uuid
 
 import os
-from django.core.validators import URLValidator
+
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.validators import URLValidator, EmailValidator, RegexValidator
 from rest_framework import serializers
 
 from badgeuser.models import BadgeUser
@@ -10,7 +12,7 @@ from issuer.models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from mainsite.drf_fields import ValidImageField
 from mainsite.serializers import StripTagsCharField, MarkdownCharField, HumanReadableBooleanField, \
     OriginalJsonSerializerMixin
-from mainsite.validators import ChoicesValidator
+from mainsite.validators import ChoicesValidator, TelephoneValidator
 
 
 class IssuerStaffSerializerV2(DetailSerializerV2):
@@ -68,6 +70,14 @@ class IssuerSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
         return new_issuer
 
 
+class AlignmentItemSerializerV2(BaseSerializerV2, OriginalJsonSerializerMixin):
+    targetName = serializers.CharField(source='target_name')
+    targetUrl = serializers.URLField(source='target_url')
+    targetDescription = serializers.URLField(source='target_description', required=False)
+    targetFramework = serializers.URLField(source='target_framework', required=False)
+    targetCode = serializers.URLField(source='target_code', required=False)
+
+
 class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     openBadgeId = serializers.URLField(source='jsonld_id', read_only=True)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
@@ -80,6 +90,9 @@ class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
 
     criteriaUrl = StripTagsCharField(source='criteria_url', required=False, allow_null=True, validators=[URLValidator()])
     criteriaNarrative = MarkdownCharField(source='criteria_text', required=False, allow_null=True)
+
+    alignments = AlignmentItemSerializerV2(source='cached_alignments', many=True, required=False)
+    tags = serializers.ListField(child=StripTagsCharField(max_length=1024), source='tag_items', required=False)
 
     class Meta(DetailSerializerV2.Meta):
         model = BadgeClass
@@ -103,9 +116,33 @@ class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
         return super(BadgeClassSerializerV2, self).create(validated_data)
 
 
+
+
 class BadgeRecipientSerializerV2(BaseSerializerV2):
     identity = serializers.CharField(source='recipient_identifier')
-    type = serializers.CharField(default='email', required=False)
+    type = serializers.ChoiceField(
+        choices=BadgeInstance.RECIPIENT_TYPE_CHOICES,
+        default=BadgeInstance.RECIPIENT_TYPE_EMAIL,
+        required=False,
+        source='recipient_type'
+    )
+
+    VALIDATORS = {
+        BadgeInstance.RECIPIENT_TYPE_EMAIL: EmailValidator(),
+        BadgeInstance.RECIPIENT_TYPE_URL: URLValidator(),
+        BadgeInstance.RECIPIENT_TYPE_ID: URLValidator(),
+        BadgeInstance.RECIPIENT_TYPE_TELEPHONE: TelephoneValidator(),
+    }
+
+    def validate(self, attrs):
+        recipient_type = attrs.get('recipient_type')
+        recipient_identifier = attrs.get('recipient_identifier')
+        if recipient_type in self.VALIDATORS:
+            try:
+                self.VALIDATORS[recipient_type](recipient_identifier)
+            except DjangoValidationError as e:
+                raise serializers.ValidationError(e.message)
+        return attrs
 
 
 class EvidenceItemSerializerV2(BaseSerializerV2, OriginalJsonSerializerMixin):
@@ -113,8 +150,10 @@ class EvidenceItemSerializerV2(BaseSerializerV2, OriginalJsonSerializerMixin):
     narrative = MarkdownCharField(required=False)
 
     def validate(self, attrs):
-        if not (attrs.get('url', None) or attrs.get('narrative', None)):
+        if not (attrs.get('evidence_url', None) or attrs.get('narrative', None)):
             raise serializers.ValidationError("Either url or narrative is required")
+
+        return attrs
 
 
 class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
@@ -126,7 +165,7 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
     image = serializers.FileField(read_only=True)
     recipient = BadgeRecipientSerializerV2(source='*')
 
-    issuedOn = serializers.DateTimeField(source='created_at', read_only=True)
+    issuedOn = serializers.DateTimeField(source='issued_on', required=False)
     narrative = MarkdownCharField(required=False)
     evidence = EvidenceItemSerializerV2(many=True, required=False)
 
@@ -151,4 +190,9 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
             # badgeclass is required on create
             raise serializers.ValidationError({"badgeclass": "This field is required"})
 
+
+        validated_data['issuer'] = validated_data['badgeclass'].issuer
+
+
         return super(BadgeInstanceSerializerV2, self).create(validated_data)
+

@@ -23,6 +23,7 @@ from django.db.models import ProtectedError
 from json import loads as json_loads
 from jsonfield import JSONField
 from openbadges_bakery import bake
+from django.utils import timezone
 
 from entity.models import BaseVersionedEntity
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager, BadgeInstanceEvidenceManager
@@ -375,6 +376,34 @@ class BadgeClass(ResizeUploadedImage,
         return self.badgeinstances.all()
 
     @cachemodel.cached_method(auto_publish=True)
+    def cached_alignments(self):
+        return self.badgeclassalignment_set.all()
+
+    @property
+    def alignment_items(self):
+        if hasattr(self, '_alignment_items'):
+            return getattr(self, '_alignment_items', [])
+        return self.cached_alignments()
+
+    @alignment_items.setter
+    def alignment_items(self, value):
+        self._alignment_items = value
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_tags(self):
+        return self.badgeclasstag_set.all()
+
+    @property
+    def tag_items(self):
+        if hasattr(self, '_tag_items'):
+            return getattr(self, '_tag_items', [])
+        return self.cached_tags()
+
+    @tag_items.setter
+    def tag_items(self, value):
+        self._tag_items = value
+
+    @cachemodel.cached_method(auto_publish=True)
     def cached_pathway_elements(self):
         return [peb.element for peb in self.pathwayelementbadge_set.all()]
 
@@ -412,6 +441,10 @@ class BadgeClass(ResizeUploadedImage,
             if self.criteria_text:
                 json['criteria']['narrative'] = self.criteria_text
 
+        if obi_version == '2_0':
+            json['alignment'] = [ a.get_json(obi_version=obi_version) for a in self.cached_alignments() ]
+            json['tags'] = list(self.cached_tags())
+
         if include_extra:
             extra = self.get_filtered_json()
             if extra is not None:
@@ -434,10 +467,24 @@ class BadgeInstance(BaseAuditedModel,
                     BaseOpenBadgeObjectModel):
     entity_class_name = 'Assertion'
 
+    issued_on = models.DateTimeField(blank=False, null=False, default=timezone.now)
+
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.CASCADE, related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
 
+    RECIPIENT_TYPE_EMAIL = 'email'
+    RECIPIENT_TYPE_ID = 'id'
+    RECIPIENT_TYPE_TELEPHONE = 'telephone'
+    RECIPIENT_TYPE_URL = 'url'
+    RECIPIENT_TYPE_CHOICES = (
+        (RECIPIENT_TYPE_EMAIL, 'email'),
+        (RECIPIENT_TYPE_ID, 'id'),
+        (RECIPIENT_TYPE_TELEPHONE, 'telephone'),
+        (RECIPIENT_TYPE_URL, 'url'),
+    )
     recipient_identifier = models.EmailField(max_length=1024, blank=False, null=False)
+    recipient_type = models.CharField(max_length=255, choices=RECIPIENT_TYPE_CHOICES, default=RECIPIENT_TYPE_EMAIL, blank=False, null=False)
+
     image = models.FileField(upload_to='uploads/badges', blank=True)
 
     # slug has been deprecated for now, but preserve existing values
@@ -707,7 +754,7 @@ class BadgeInstance(BaseAuditedModel,
         if self.narrative and obi_version == '2_0':
             json['narrative'] = self.narrative
 
-        json['issuedOn'] = self.created_at.isoformat()
+        json['issuedOn'] = self.issued_on.isoformat()
 
         if self.salt:
             json['recipient'] = {
@@ -800,3 +847,53 @@ class BadgeInstanceEvidence(OriginalJsonMixin, cachemodel.CacheModel):
         if self.narrative:
             json['narrative'] = self.narrative
         return json
+
+
+class BadgeClassAlignment(OriginalJsonMixin, cachemodel.CacheModel):
+    badgeclass = models.ForeignKey('issuer.BadgeClass')
+    target_name = models.TextField()
+    target_url = models.CharField(max_length=2083)
+    target_description = models.TextField(blank=True, null=True, default=None)
+    target_framework = models.TextField(blank=True, null=True, default=None)
+    target_code = models.TextField(blank=True, null=True, default=None)
+
+    def publish(self):
+        super(BadgeClassAlignment, self).publish()
+        self.badgeclass.publish()
+
+    def delete(self, *args, **kwargs):
+        super(BadgeClassAlignment, self).delete(*args, **kwargs)
+        self.badgeclass.publish()
+
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_context=False):
+        json = OrderedDict()
+        if include_context:
+            obi_version, context_iri = get_obi_context(obi_version)
+            json['@context'] = context_iri
+
+        json['targetName'] = self.target_name
+        json['targetUrl'] = self.target_url
+        if self.target_description:
+            json['targetDescription'] = self.target_description
+        if self.target_framework:
+            json['targetFramework'] = self.target_framework
+        if self.target_code:
+            json['targetCode'] = self.target_code
+
+        return json
+
+
+class BadgeClassTag(cachemodel.CacheModel):
+    badgeclass = models.ForeignKey('issuer.BadgeClass')
+    name = models.CharField(max_length=254, db_index=True)
+
+    def __unicode__(self):
+        return self.name
+
+    def publish(self):
+        super(BadgeClassTag, self).publish()
+        self.badgeclass.publish()
+
+    def delete(self, *args, **kwargs):
+        super(BadgeClassTag, self).delete(*args, **kwargs)
+        self.badgeclass.publish()

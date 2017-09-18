@@ -1,5 +1,5 @@
 # Django stuff
-Django==1.8.15
+Django==1.10.7
 semver==2.6.0
 pytz==2016.7
 # PIL support
@@ -10,16 +10,16 @@ MySQL-python==1.2.5
 
 # Email support
 boto==2.33.0
-django-boto==0.3.9
+django-boto==0.3.12
 django-ses==0.6.0
-django-storages==1.1.8
+django-storages==1.6.5
 
 python-resize-image==1.1.10
 
 # CSky models
-git+https://github.com/concentricsky/django-cachemodel.git@v2.1.4
-git+https://github.com/concentricsky/django-basic-models.git@v2.1.2
-git+https://github.com/concentricsky/django-ismigrated.git@v0.1.7
+git+https://github.com/concentricsky/django-cachemodel.git@v2.1.6
+git+https://github.com/concentricsky/django-basic-models.git@v3.0.2
+git+https://github.com/concentricsky/django-ismigrated.git@v1.0.0
 
 django-object-actions==0.8.2
 
@@ -28,12 +28,16 @@ python-memcached==1.58
 djangorestframework==3.6.2
 
 # Django Allauth
-git+https://github.com/concentricsky/django-allauth.git@0.23.0-csky
-oauthlib==0.7.2
-requests==2.5.1
+# git+https://github.com/concentricsky/django-allauth.git@0.23.0-csky
+django-allauth==0.32.0
+oauthlib==2.0.2
+requests==2.18.1
 requests-oauthlib==0.4.2
 # Permissions framework
 rules==0.4
+
+# OAuth
+django-oauth-toolkit==1.0.0
 
 # Some extras
 django-cors-headers==1.1.0
@@ -49,7 +53,7 @@ simplejson==3.6.4
 PyLD==0.6.3
 rfc3987==1.3.4
 pypng==0.0.18
-jsonfield==1.0.0
+jsonfield==2.0.2
 PyJWT==1.4.0
 
 # markdown support
@@ -65,14 +69,14 @@ git+https://github.com/concentricsky/python-randomnames@v1.0.3
 git+https://github.com/concentricsky/openbadges-bakery@1.0.0b3
 
 celery==3.1.24
-django-celery==3.1.17
+django-celery==3.2.1
 python-json-logger==0.1.2
 
 # SSL Support
 cffi==1.2.1
 cryptography==1.0.2
 enum34==1.0.4
-idna==2.0
+idna==2.5
 ipaddress==1.0.14
 pyasn1==0.1.9
 pycparser==2.14
@@ -90,6 +94,6 @@ backports.csv==1.0.4
 more-itertools==2.5.0
 
 
-git+https://github.com/openbadges/badgecheck.git@v1.0.0.dev2
+git+https://github.com/openbadges/badgecheck.git@v1.0.0b1
 
 apispec==0.22.0

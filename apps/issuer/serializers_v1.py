@@ -15,7 +15,7 @@ from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, 
     OriginalJsonSerializerMixin
 from mainsite.utils import OriginSetting
 from mainsite.validators import ChoicesValidator
-from .models import Issuer, BadgeClass, IssuerStaff
+from .models import Issuer, BadgeClass, IssuerStaff, BadgeInstance
 
 
 class CachedListSerializer(serializers.ListSerializer):
@@ -111,6 +111,14 @@ class IssuerRoleActionSerializerV1(serializers.Serializer):
         return attrs
 
 
+class AlignmentItemSerializerV1(serializers.Serializer):
+    target_name = serializers.CharField()
+    target_url = serializers.URLField()
+    target_description = serializers.URLField(required=False)
+    target_framework = serializers.URLField(required=False)
+    target_code = serializers.URLField(required=False)
+
+
 class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1()
@@ -124,6 +132,8 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
     recipient_count = serializers.IntegerField(required=False, read_only=True)
     pathway_element_count = serializers.IntegerField(required=False, read_only=True)
     description = StripTagsCharField(max_length=16384, required=True)
+
+    alignment = AlignmentItemSerializerV1(read_only=True, many=True, source='cached_alignments')
 
     def to_representation(self, instance):
         representation = super(BadgeClassSerializerV1, self).to_representation(instance)
@@ -228,7 +238,8 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
     slug = serializers.CharField(max_length=255, read_only=True, source='entity_id')
     image = serializers.FileField(read_only=True)  # use_url=True, might be necessary
     email = serializers.EmailField(max_length=1024, required=False, write_only=True)
-    recipient_identifier = serializers.EmailField(max_length=1024, required=False)
+    recipient_identifier = serializers.CharField(max_length=1024, required=False)
+    recipient_type = serializers.CharField(default=BadgeInstance.RECIPIENT_TYPE_EMAIL)
     allow_uppercase = serializers.BooleanField(default=False, required=False, write_only=True)
     evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
     narrative = MarkdownCharField(required=False, allow_blank=True)
