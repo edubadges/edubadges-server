@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_celery_results',
 
     # OAuth 2 provider
     'oauth2_provider',
