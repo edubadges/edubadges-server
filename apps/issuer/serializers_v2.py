@@ -71,11 +71,11 @@ class IssuerSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
 
 
 class AlignmentItemSerializerV2(BaseSerializerV2, OriginalJsonSerializerMixin):
-    targetName = serializers.CharField(source='target_name')
+    targetName = StripTagsCharField(source='target_name')
     targetUrl = serializers.URLField(source='target_url')
-    targetDescription = serializers.URLField(source='target_description', required=False)
-    targetFramework = serializers.URLField(source='target_framework', required=False)
-    targetCode = serializers.URLField(source='target_code', required=False)
+    targetDescription = StripTagsCharField(source='target_description', required=False)
+    targetFramework = StripTagsCharField(source='target_framework', required=False)
+    targetCode = StripTagsCharField(source='target_code', required=False)
 
 
 class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):

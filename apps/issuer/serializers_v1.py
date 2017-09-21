@@ -112,11 +112,11 @@ class IssuerRoleActionSerializerV1(serializers.Serializer):
 
 
 class AlignmentItemSerializerV1(serializers.Serializer):
-    target_name = serializers.CharField()
+    target_name = StripTagsCharField()
     target_url = serializers.URLField()
-    target_description = serializers.URLField(required=False)
-    target_framework = serializers.URLField(required=False)
-    target_code = serializers.URLField(required=False)
+    target_description = StripTagsCharField(required=False)
+    target_framework = StripTagsCharField(required=False)
+    target_code = StripTagsCharField(required=False)
 
 
 class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
