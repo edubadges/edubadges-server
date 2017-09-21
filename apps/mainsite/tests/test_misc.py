@@ -11,7 +11,7 @@ from django.test import override_settings, TransactionTestCase
 
 from badgeuser.models import BadgeUser, CachedEmailAddress
 from mainsite.models import BadgrApp
-from mainsite.settings import TOP_DIR
+from mainsite import TOP_DIR
 from mainsite.tests.base import BadgrTestCase
 
 

@@ -78,6 +78,9 @@ UNSUBSCRIBE_SECRET_KEY = 'kAYWM0YWI2MDj/FODBZjE0ZDI4N'
 # "*" matches anything, ".example.com" matches example.com and all subdomains
 ALLOWED_HOSTS = ['*', ]
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+
 ##
 #
 #  Templates
@@ -428,18 +431,3 @@ OAUTH2_PROVIDER = {
 import os
 import certifi
 os.environ['REQUESTS_CA_BUNDLE'] = certifi.old_where()
-
-##
-#
-#  Import settings_local.
-#
-##
-
-try:
-    from settings_local import *
-except ImportError as e:
-    import traceback
-    traceback.print_exc()
-    sys.stderr.write("no settings_local found, setting DEBUG=True...\n")
-    DEBUG = True
-
