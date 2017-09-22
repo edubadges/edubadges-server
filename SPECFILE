@@ -1,0 +1,55 @@
+Summary: Badgr Server
+Name: badgr-server
+Version: %{version}
+Release: release
+Source0: ./%{name}-%{version}-code.tar.gz
+Source1: ./%{name}-%{version}-static.tar.gz
+License: Proprietary
+Group: Development/Libraries
+Prefix: %{_prefix}
+
+BuildArch: x86_64
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
+
+Vendor: Concentric Sky, Inc.
+
+Requires(pre): /usr/sbin/useradd, /usr/bin/getent
+Requires(postun): /usr/sbin/userdel
+
+%description
+RPM Representation of Code and Static tarballs.
+
+%pre
+/usr/bin/getent group web || /usr/sbin/groupadd -r web
+/usr/bin/getent passwd web || /usr/sbin/useradd -r -d /opt/site -s /sbin/nologin web
+
+%prep
+%setup -n %{version}
+%setup -D -a 1 -n %{version}
+
+%post
+#/usr/bin/touch /opt/site/wsgi/wsgi.py
+
+%build
+
+%install
+%{__rm} -rf %{buildroot}
+mkdir -p %{buildroot}/opt/site/builds/%{version}/
+mkdir -p %{buildroot}/opt/site/static/%{version}/
+cp -Rp ./code %{buildroot}/opt/site/builds/%{version}/
+cp -Rp ./env %{buildroot}/opt/site/builds/%{version}/
+cp -Rp ./%{version}/* %{buildroot}/opt/site/static/%{version}/
+ln -s /opt/site/builds/%{version}/code %{buildroot}/opt/site/code
+ln -s /opt/site/builds/%{version}/env %{buildroot}/opt/site/env
+ln -s /opt/site/static/%{version} %{buildroot}/opt/site/staticfiles
+
+%clean
+%{__rm} -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(0770,web,web)
+%attr(0770,web,web) /opt/site/builds/%{version}
+%attr(0770,web,web) /opt/site/static/%{version}
+/opt/site/code
+/opt/site/env
+/opt/site/staticfiles
