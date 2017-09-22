@@ -1,12 +1,33 @@
 import StringIO
+import math
+from xml.etree import cElementTree as ET
 
 from PIL import Image
 from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from resizeimage.resizeimage import resize_contain
-from xml.etree import cElementTree as ET
 
 from mainsite.utils import verify_svg
+
+
+def resize_contain(image, size):
+    """
+    Resize image according to size.
+    image:      a Pillow image instance
+    size:       a list of two integers [width, height]
+
+    taken from python-resize-image==1.1.10
+    """
+    img_format = image.format
+    img = image.copy()
+    img.thumbnail((size[0], size[1]), Image.LANCZOS)
+    background = Image.new('RGBA', (size[0], size[1]), (255, 255, 255, 0))
+    img_position = (
+        int(math.ceil((size[0] - img.size[0]) / 2)),
+        int(math.ceil((size[1] - img.size[1]) / 2))
+    )
+    background.paste(img, img_position)
+    background.format = img_format
+    return background
 
 
 class ResizeUploadedImage(object):
