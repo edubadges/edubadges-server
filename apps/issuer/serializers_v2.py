@@ -19,7 +19,7 @@ class IssuerStaffSerializerV2(DetailSerializerV2):
     user = EntityRelatedFieldV2(source='cached_user', queryset=BadgeUser.cached)
     role = serializers.CharField(validators=[ChoicesValidator(dict(IssuerStaff.ROLE_CHOICES).keys())])
 
-    class Meta:
+    class Meta(DetailSerializerV2.Meta):
         apispec_definition = ('IssuerStaff', {
             'properties': {
                 'role': {
@@ -77,6 +77,12 @@ class AlignmentItemSerializerV2(BaseSerializerV2, OriginalJsonSerializerMixin):
     targetFramework = StripTagsCharField(source='target_framework', required=False)
     targetCode = StripTagsCharField(source='target_code', required=False)
 
+    class Meta:
+        apispec_definition = ('BadgeClassAlignment', {
+            'properties': {
+            }
+        })
+
 
 class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     openBadgeId = serializers.URLField(source='jsonld_id', read_only=True)
@@ -96,6 +102,15 @@ class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
 
     class Meta(DetailSerializerV2.Meta):
         model = BadgeClass
+        apispec_definition = ('BadgeClass', {
+            'properties': {
+                'createdBy': {
+                    'type': 'string',
+                    'format': 'entityId',
+                    'description': "entityId of the BadgeUser who created this issuer",
+                }
+            }
+        })
 
     def update(self, instance, validated_data):
         if 'cached_issuer' in validated_data:

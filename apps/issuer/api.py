@@ -40,14 +40,14 @@ class IssuerList(BaseEntityListView):
 
     @apispec_list_operation('Issuer',
         summary="Get a list of Issuers for authenticated user",
-        tags=["Issuer"],
+        tags=["Issuers"],
     )
     def get(self, request, **kwargs):
         return super(IssuerList, self).get(request, **kwargs)
 
     @apispec_post_operation('Issuer', IssuerSerializerV2,
         summary="Create a new Issuer",
-        tags=["Issuer"],
+        tags=["Issuers"],
     )
     def post(self, request, **kwargs):
         return super(IssuerList, self).post(request, **kwargs)
@@ -62,21 +62,21 @@ class IssuerDetail(BaseEntityDetailView):
 
     @apispec_get_operation('Issuer',
         summary="Get a single Issuer",
-        tags=["Issuer"],
+        tags=["Issuers"],
     )
     def get(self, request, **kwargs):
         return super(IssuerDetail, self).get(request, **kwargs)
 
     @apispec_put_operation('Issuer', IssuerSerializerV2,
        summary="Update a single Issuer",
-       tags=["Issuer"],
+       tags=["Issuers"],
    )
     def put(self, request, **kwargs):
         return super(IssuerDetail, self).put(request, **kwargs)
 
     @apispec_delete_operation('Issuer',
         summary="Delete a single Issuer",
-        tags=["Issuer"],
+        tags=["Issuers"],
         responses={
             "400": {
                 'description': "Unable to delete issuer"
@@ -101,11 +101,22 @@ class AllBadgeClassesList(BaseEntityListView):
     def get_objects(self, request, **kwargs):
         return request.user.cached_badgeclasses()
 
+    @apispec_get_operation('BadgeClass',
+        summary="Get a list of BadgeClasses for authenticated user",
+        tags=["BadgeClasses"],
+    )
     def get(self, request, **kwargs):
         """
         GET a list of badgeclasses the user has access to
         """
         return super(AllBadgeClassesList, self).get(request, **kwargs)
+
+    @apispec_get_operation('BadgeClass',
+        summary="Create a new BadgeClass",
+        tags=["BadgeClasses"],
+    )
+    def post(self, request, **kwargs):
+        return super(AllBadgeClassesList, self).post(request, **kwargs)
 
 
 class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
@@ -129,20 +140,20 @@ class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
         context['issuer'] = self.get_object(self.request, **kwargs)
         return context
 
+    @apispec_list_operation('BadgeClass',
+        summary="Get a list of BadgeClasses for a single Issuer",
+        description="Authenticated user must have owner, editor, or staff status on the Issuer",
+        tags=["BadgeClasses"],
+    )
     def get(self, request, **kwargs):
-        """
-        GET a list of badgeclasses within one Issuer context.
-        Authenticated user must have owner, editor, or staff status on Issuer
-        """
-
         return super(IssuerBadgeClassList, self).get(request, **kwargs)
 
+    @apispec_list_operation('BadgeClass',
+        summary="Create a new BadgeClass associated with an Issuer",
+        description="Authenticated user must have owner, editor, or staff status on the Issuer",
+        tags=["BadgeClasses"],
+    )
     def post(self, request, **kwargs):
-        """
-        Define a new BadgeClass to be owned by a particular Issuer.
-        Authenticated user must have owner or editor status on Issuer
-        """
-
         return super(IssuerBadgeClassList, self).post(request, **kwargs)
 
 
@@ -157,16 +168,20 @@ class BadgeClassDetail(BaseEntityDetailView):
 
     valid_scopes = ["rw:badgeclass", "rw:badgeclass:*"]
 
+    @apispec_get_operation('BadgeClass',
+        summary='Get a single BadgeClass',
+        tags=['BadgeClasses'],
+    )
     def get(self, request, **kwargs):
-        """
-        GET single BadgeClass representation
-        """
         return super(BadgeClassDetail, self).get(request, **kwargs)
 
+    @apispec_get_operation('BadgeClass',
+        summary="Delete a BadgeClass",
+        description="Restricted to owners or editors (not staff) of the corresponding Issuer.",
+        tags=['BadgeClasses'],
+    )
     def delete(self, request, **kwargs):
         """
-        DELETE a badge class that has never been issued. This will fail if any assertions exist for the BadgeClass.
-        Restricted to owners or editors (not staff) of the corresponding Issuer.
         ---
         responseMessages:
             - code: 400
@@ -179,10 +194,11 @@ class BadgeClassDetail(BaseEntityDetailView):
         # logger.event(badgrlog.BadgeClassDeletedEvent(old_badgeclass, request.user))
         return super(BadgeClassDetail, self).delete(request, **kwargs)
 
+    @apispec_get_operation('BadgeClass',
+        summary='Update an existing BadgeClass.  Previously issued BadgeInstances will NOT be updated',
+        tags=['BadgeClasses'],
+    )
     def put(self, request, **kwargs):
-        """
-        Update an existing badge class. Existing BadgeInstances will NOT be updated.
-        """
         return super(BadgeClassDetail, self).put(request, **kwargs)
 
 
