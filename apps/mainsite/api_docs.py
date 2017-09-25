@@ -95,6 +95,11 @@ class BadgrAPISpec(APISpec, BadgrAPISpecBuilder):
         self.scrape_endpoints()
         self.info.update({"description": preamble})
 
+    def to_dict(self):
+        # sort models alphabetically
+        self._definitions = OrderedDict([(k, self._definitions[k]) for k in sorted(self._definitions.keys())])
+        return super(BadgrAPISpec, self).to_dict()
+
     def scrape_serializers(self):
         """
         Iterate over installed apps looking for serializers with Meta.apispec_definition
