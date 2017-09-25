@@ -75,11 +75,6 @@ class IssuerDetail(BaseEntityDetailView):
     @apispec_delete_operation('Issuer',
         summary="Delete a single Issuer",
         tags=["Issuers"],
-        responses={
-            "400": {
-                'description': "Unable to delete issuer"
-            },
-        }
     )
     def delete(self, request, **kwargs):
         return super(IssuerDetail, self).delete(request, **kwargs)
@@ -99,7 +94,7 @@ class AllBadgeClassesList(BaseEntityListView):
     def get_objects(self, request, **kwargs):
         return request.user.cached_badgeclasses()
 
-    @apispec_get_operation('BadgeClass',
+    @apispec_list_operation('BadgeClass',
         summary="Get a list of BadgeClasses for authenticated user",
         tags=["BadgeClasses"],
     )
@@ -109,7 +104,7 @@ class AllBadgeClassesList(BaseEntityListView):
         """
         return super(AllBadgeClassesList, self).get(request, **kwargs)
 
-    @apispec_get_operation('BadgeClass',
+    @apispec_post_operation('BadgeClass', BadgeClassSerializerV2,
         summary="Create a new BadgeClass",
         tags=["BadgeClasses"],
     )
@@ -146,7 +141,7 @@ class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
     def get(self, request, **kwargs):
         return super(IssuerBadgeClassList, self).get(request, **kwargs)
 
-    @apispec_list_operation('BadgeClass',
+    @apispec_post_operation('BadgeClass', BadgeClassSerializerV2,
         summary="Create a new BadgeClass associated with an Issuer",
         description="Authenticated user must have owner, editor, or staff status on the Issuer",
         tags=["Issuers"],
@@ -173,7 +168,7 @@ class BadgeClassDetail(BaseEntityDetailView):
     def get(self, request, **kwargs):
         return super(BadgeClassDetail, self).get(request, **kwargs)
 
-    @apispec_get_operation('BadgeClass',
+    @apispec_delete_operation('BadgeClass',
         summary="Delete a BadgeClass",
         description="Restricted to owners or editors (not staff) of the corresponding Issuer.",
         tags=['BadgeClasses'],
@@ -192,7 +187,7 @@ class BadgeClassDetail(BaseEntityDetailView):
         # logger.event(badgrlog.BadgeClassDeletedEvent(old_badgeclass, request.user))
         return super(BadgeClassDetail, self).delete(request, **kwargs)
 
-    @apispec_get_operation('BadgeClass',
+    @apispec_put_operation('BadgeClass', BadgeClassSerializerV2,
         summary='Update an existing BadgeClass.  Previously issued BadgeInstances will NOT be updated',
         tags=['BadgeClasses'],
     )

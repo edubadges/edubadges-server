@@ -26,11 +26,15 @@ def apispec_operation(*spec_args, **spec_kwargs):
 def apispec_get_operation(entity_class_name, *spec_args, **spec_kwargs):
 
     defaults = {
-        'responses': {
-            "200": {
+        'responses': OrderedDict([
+            ("200", {
                 'schema': {'$ref': '#/definitions/{}'.format(entity_class_name)},
-            }
-        }
+                'description': "Successful operation"
+            }),
+            ("404", {
+                'description': "{} not found".format(entity_class_name)
+            })
+        ])
     }
     spec_kwargs = BadgrAPISpec.merge_specs(defaults, spec_kwargs)
 
@@ -47,11 +51,19 @@ def apispec_put_operation(entity_class_name, serializer_cls, *spec_args, **spec_
                                                               include_write_only=True,
                                                               include_read_only=True)
     defaults = {
-        'responses': {
-            "200": {
+        'responses': OrderedDict([
+
+            ("200", {
                 'schema': {'$ref': '#/definitions/{}'.format(entity_class_name)},
-            }
-        },
+                'description': "Successfully updated"
+            }),
+            ("400", {
+                'description': "Validation error"
+            }),
+            ("404", {
+                'description': "{} not found".format(entity_class_name)
+            })
+        ]),
         'parameters': [
             {
                 "in": "body",
@@ -74,11 +86,14 @@ def apispec_put_operation(entity_class_name, serializer_cls, *spec_args, **spec_
 def apispec_delete_operation(entity_class_name, *spec_args, **spec_kwargs):
 
     defaults = {
-        'responses': {
-            "200": {
+        'responses': OrderedDict([
+            ("204", {
                 'description': "{} was deleted successfully.".format(entity_class_name)
-            }
-        }
+            }),
+            ("404", {
+                'description': "{} not found".format(entity_class_name)
+            })
+        ])
     }
     spec_kwargs = BadgrAPISpec.merge_specs(defaults, spec_kwargs)
 
@@ -93,14 +108,15 @@ def apispec_delete_operation(entity_class_name, *spec_args, **spec_kwargs):
 def apispec_list_operation(entity_class_name, *spec_args, **spec_kwargs):
 
     defaults = {
-        'responses': {
-            "200": {
+        'responses': OrderedDict([
+            ("200", {
                 'schema': {
-                    'type': "Array",
+                    'type': "array",
                     'items': {'$ref': '#/definitions/{}'.format(entity_class_name)},
-                }
-            }
-        }
+                },
+                'description': "Successful operation"
+            }),
+        ])
     }
     spec_kwargs = BadgrAPISpec.merge_specs(defaults, spec_kwargs)
 
@@ -119,11 +135,15 @@ def apispec_post_operation(entity_class_name, serializer_cls, *spec_args, **spec
                                                               include_read_only=False)
 
     defaults = {
-        'responses': {
-            "200": {
+        'responses': OrderedDict([
+            ("201", {
                 'schema': {'$ref': '#/definitions/{}'.format(entity_class_name)},
-            }
-        },
+                'description': "Successfully created"
+            }),
+            ("400", {
+                'description': "Validation error"
+            })
+        ]),
         'parameters': [
             {
                 "in": "body",
