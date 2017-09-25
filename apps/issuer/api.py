@@ -1,6 +1,4 @@
-import django
 from django.http import Http404
-from oauth2_provider.contrib.rest_framework import TokenHasScope
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -16,7 +14,7 @@ from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
 from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    BadgeInstanceSerializerV1)
 from issuer.serializers_v2 import IssuerSerializerV2, BadgeClassSerializerV2, BadgeInstanceSerializerV2
-from mainsite.decorators import apispec_operation, apispec_get_operation, apispec_put_operation, \
+from mainsite.decorators import apispec_get_operation, apispec_put_operation, \
     apispec_delete_operation, apispec_list_operation, apispec_post_operation
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 
@@ -143,7 +141,7 @@ class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
     @apispec_list_operation('BadgeClass',
         summary="Get a list of BadgeClasses for a single Issuer",
         description="Authenticated user must have owner, editor, or staff status on the Issuer",
-        tags=["BadgeClasses"],
+        tags=["Issuers"],
     )
     def get(self, request, **kwargs):
         return super(IssuerBadgeClassList, self).get(request, **kwargs)
@@ -151,7 +149,7 @@ class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
     @apispec_list_operation('BadgeClass',
         summary="Create a new BadgeClass associated with an Issuer",
         description="Authenticated user must have owner, editor, or staff status on the Issuer",
-        tags=["BadgeClasses"],
+        tags=["Issuers"],
     )
     def post(self, request, **kwargs):
         return super(IssuerBadgeClassList, self).post(request, **kwargs)

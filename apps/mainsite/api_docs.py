@@ -37,11 +37,11 @@ class BadgrAPISpecBuilder(object):
     def get_serializer_properties(cls, serializer, include_read_only=True, include_write_only=True):
         assert isinstance(serializer, BaseSerializer)
 
-        return {
-            field_name: cls.get_field_property(field)
+        return OrderedDict([
+            (field_name, cls.get_field_property(field))
             for field_name, field in serializer.get_fields().items()
             if (not field.read_only or include_read_only) and (not field.write_only or include_write_only)
-        }
+        ])
 
     @classmethod
     def get_field_property(cls, field):

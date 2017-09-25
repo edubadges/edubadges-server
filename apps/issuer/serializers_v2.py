@@ -1,6 +1,7 @@
 import uuid
 
 import os
+from collections import OrderedDict
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.validators import URLValidator, EmailValidator, RegexValidator
@@ -32,7 +33,7 @@ class IssuerStaffSerializerV2(DetailSerializerV2):
 
 
 class IssuerSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
-    openBadgeId = serializers.URLField(source='jsonld_id', read_only=True, help_text="The url to find the Open Badge")
+    openBadgeId = serializers.URLField(source='jsonld_id', read_only=True)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     createdBy = EntityRelatedFieldV2(source='cached_creator', read_only=True)
     name = StripTagsCharField(max_length=1024)
@@ -45,13 +46,60 @@ class IssuerSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     class Meta(DetailSerializerV2.Meta):
         model = Issuer
         apispec_definition = ('Issuer', {
-            'properties': {
-                'createdBy': {
+            'properties': OrderedDict([
+                ('entityId', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "Unique identifier for this Issuer",
+                }),
+                ('entityType', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "\"Issuer\"",
+                }),
+                ('openBadgeId', {
+                    'type': "string",
+                    'format': "url",
+                    'description': "URL of the OpenBadge compliant json",
+                }),
+                ('createdAt', {
+                    'type': 'string',
+                    'format': 'ISO8601 timestamp',
+                    'description': "Timestamp when the Issuer was created",
+                }),
+                ('createdBy', {
                     'type': 'string',
                     'format': 'entityId',
-                    'description': "entityId of the BadgeUser who created this issuer",
-                }
-            }
+                    'description': "BadgeUser who created this Issuer",
+                }),
+
+                ('name', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "Name of the Issuer",
+                }),
+                ('image', {
+                    'type': "string",
+                    'format': "data:image/png;base64",
+                    'description': "Base64 encoded string of an image that represents the Issuer",
+                }),
+                ('email', {
+                    'type': "string",
+                    'format': "email",
+                    'description': "Contact email for the Issuer",
+                }),
+                ('url', {
+                    'type': "string",
+                    'format': "url",
+                    'description': "Homepage or website associated with the Issuer",
+                }),
+                ('description', {
+                    'type': "string",
+                    'format': "text",
+                    'description': "Short description of the Issuer",
+                }),
+
+            ])
         })
 
     def validate_image(self, image):
