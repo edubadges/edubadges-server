@@ -36,6 +36,9 @@ class BadgeClassManager(models.Manager):
 
     @transaction.atomic
     def create(self, alignments=None, tag_items=None, **kwargs):
+        if alignments is None and 'cached_alignments' in kwargs:
+            # may have been passed alignments as cached_alignments from a serializer
+            alignments = kwargs.pop('cached_alignments')
         instance = super(BadgeClassManager, self).create(**kwargs)
         if alignments is not None:
             for alignment in alignments:
