@@ -1,7 +1,7 @@
 import re
 
 from allauth.account.adapter import get_adapter
-from allauth.account.models import EmailConfirmation
+from allauth.account.models import EmailConfirmation, EmailConfirmationHMAC
 from allauth.account.utils import user_pk_to_url_str, url_str_to_user_pk
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
@@ -273,13 +273,12 @@ class BadgeUserEmailConfirm(BaseUserRecoveryView):
 
         token = request.query_params.get('token')
 
-        try:
-            emailconfirmation = EmailConfirmation.objects.get(pk=kwargs.get('confirm_id'))
-        except EmailConfirmation.DoesNotExist:
+        emailconfirmation = EmailConfirmationHMAC.from_key(kwargs.get('confirm_id'))
+        if emailconfirmation is None:
             return Response(status=HTTP_404_NOT_FOUND)
 
         try:
-            email_address = CachedEmailAddress.cached.get(pk=emailconfirmation.email_address_id)
+            email_address = CachedEmailAddress.cached.get(pk=emailconfirmation.email_address.pk)
         except CachedEmailAddress.DoesNotExist:
             return Response(status=HTTP_404_NOT_FOUND)
 
