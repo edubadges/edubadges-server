@@ -10,7 +10,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.urlresolvers import resolve, Resolver404, reverse
 
 from allauth.account.adapter import DefaultAccountAdapter, get_adapter
-from allauth.account.models import EmailConfirmation
+from allauth.account.models import EmailConfirmation, EmailConfirmationHMAC
 
 from badgeuser.models import CachedEmailAddress
 from badgrsocialauth.utils import set_url_query_params, get_session_badgr_app, set_session_badgr_app
@@ -43,9 +43,9 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
 
         try:
             resolverMatch = resolve(request.path)
-            confirmation = EmailConfirmation.objects.get(pk=resolverMatch.kwargs.get('confirm_id'))
+            confirmation = EmailConfirmationHMAC.from_key(resolverMatch.kwargs.get('confirm_id'))
             # publish changes to cache
-            email_address = CachedEmailAddress.objects.get(pk=confirmation.email_address_id)
+            email_address = CachedEmailAddress.objects.get(pk=confirmation.email_address.pk)
             email_address.save()
 
             redirect_url = urlparse.urljoin(
