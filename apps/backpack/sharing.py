@@ -71,3 +71,7 @@ class SharingManager(object):
         manager = manager_cls(provider)
         url = manager.share_url(badge_instance, **kwargs)
         return url
+
+    @classmethod
+    def is_provider_supported(cls, provider):
+        return provider in SharingManager.ManagerProviders

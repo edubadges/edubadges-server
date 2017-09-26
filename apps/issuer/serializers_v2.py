@@ -61,7 +61,7 @@ class IssuerSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
         return image
 
     def create(self, validated_data):
-        staff = validated_data.pop('staff_items')
+        staff = validated_data.pop('staff_items', [])
         new_issuer = super(IssuerSerializerV2, self).create(validated_data)
 
         # update staff after issuer is created
