@@ -151,14 +151,82 @@ class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     class Meta(DetailSerializerV2.Meta):
         model = BadgeClass
         apispec_definition = ('BadgeClass', {
-            'properties': {
-                'createdBy': {
+            'properties': OrderedDict([
+                ('entityId', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "Unique identifier for this BadgeClass",
+                }),
+                ('entityType', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "\"BadgeClass\"",
+                }),
+                ('openBadgeId', {
+                    'type': "string",
+                    'format': "url",
+                    'description': "URL of the OpenBadge compliant json",
+                }),
+                ('createdAt', {
+                    'type': 'string',
+                    'format': 'ISO8601 timestamp',
+                    'description': "Timestamp when the BadgeClass was created",
+                }),
+                ('createdBy', {
                     'type': 'string',
                     'format': 'entityId',
-                    'description': "entityId of the BadgeUser who created this issuer",
-                }
-            }
+                    'description': "BadgeUser who created this BadgeClass",
+                }),
+
+                ('issuer', {
+                    'type': 'string',
+                    'format': 'entityId',
+                    'description': "entityId of the Issuer who owns the BadgeClass",
+                }),
+
+                ('name', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "Name of the BadgeClass",
+                }),
+                ('description', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "Short description of the BadgeClass",
+                }),
+                ('image', {
+                    'type': "string",
+                    'format': "data:image/png;base64",
+                    'description': "Base64 encoded string of an image that represents the BadgeClass.",
+                }),
+                ('criteriaUrl', {
+                    'type': "string",
+                    'format': "url",
+                    'description': "External URL that describes in a human-readable format the criteria for the BadgeClass"
+                }),
+                ('criteriaNarrative', {
+                    'type': "string",
+                    'format': "markdown",
+                    'description': "Markdown formatted description of the criteria"
+                }),
+                ('tags', {
+                    'type': "array",
+                    'items': {
+                        'type': "string",
+                        'format': "string"
+                    },
+                    'description': "List of tags that describe the BadgeClass"
+                }),
+                ('alignments', {
+                    'type': "array",
+                    'items': {
+                        '$ref': '#/definitions/BadgeClassAlignment'
+                    },
+                    'description': "List of objects describing objectives or educational standards"
+                }),
+            ])
         })
+
 
     def update(self, instance, validated_data):
         if 'cached_issuer' in validated_data:
