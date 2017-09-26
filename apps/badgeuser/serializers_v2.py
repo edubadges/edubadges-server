@@ -90,6 +90,17 @@ class BadgeUserSerializerV2(DetailSerializerV2):
 class BadgeUserTokenSerializerV2(BaseSerializerV2):
     token = serializers.CharField(read_only=True, source='cached_token')
 
+    class Meta:
+        apispec_definition = ('BadgeUserToken', {
+            'properties': OrderedDict([
+                ('token', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "Access token to use in the Authorization header",
+                }),
+            ])
+        })
+
     def update(self, instance, validated_data):
         # noop
         return instance

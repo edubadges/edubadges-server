@@ -23,6 +23,7 @@ from badgeuser.tasks import process_email_verification
 from badgrsocialauth.utils import set_url_query_params
 from entity.api import BaseEntityDetailView
 from entity.serializers import BaseSerializerV2
+from mainsite.decorators import apispec_get_operation, apispec_put_operation, apispec_operation
 from mainsite.models import BadgrApp
 from mainsite.utils import OriginSetting
 
@@ -51,16 +52,20 @@ class BadgeUserDetail(BaseEntityDetailView):
 
         return Response(status=HTTP_404_NOT_FOUND)
 
+    @apispec_get_operation('BadgeUser',
+        summary="Get a single BadgeUser profile",
+        description="Use the entityId 'self' to retrieve the authenticated user's profile",
+        tags=['BadgeUsers']
+    )
     def get(self, request, **kwargs):
-        """
-        Get the current user's profile
-        """
         return super(BadgeUserDetail, self).get(request, **kwargs)
 
+    @apispec_put_operation('BadgeUser', BadgeUserSerializerV2,
+        summary="Update a BadgeUser",
+        description="Use the entityId 'self' to update the authenticated user's profile",
+        tags=['BadgeUsers']
+    )
     def put(self, request, **kwargs):
-        """
-        Update the current user's profile
-        """
         return super(BadgeUserDetail, self).put(request, allow_partial=True, **kwargs)
 
     def get_object(self, request, **kwargs):
@@ -117,17 +122,19 @@ class BadgeUserToken(BaseEntityDetailView):
     def get_object(self, request, **kwargs):
         return request.user
 
+    @apispec_get_operation('BadgeUserToken',
+        summary="Get the authenticated user's auth token",
+        description="A new auth token will be created if none already exist for this user",
+        tags=['Authentication'],
+    )
     def get(self, request, **kwargs):
-        """
-        Get the authenticated user's auth token.
-        A new auth token will be created if none already exist for this user.
-        """
         return super(BadgeUserToken, self).get(request, **kwargs)
 
+    @apispec_operation(
+        summary="Invalidate the old token and create a new one",
+        tags=['Authentication'],
+    )
     def put(self, request, **kwargs):
-        """
-        Invalidate the old token (if it exists) and create a new one.
-        """
         request.user.replace_token()  # generate new token first
         self.token_replaced = True
         return super(BadgeUserToken, self).put(request, **kwargs)
@@ -163,21 +170,32 @@ class BadgeUserForgotPassword(BaseUserRecoveryView):
     def get(self, request, *args, **kwargs):
         badgr_app = BadgrApp.objects.get_current(request)
         redirect_url = badgr_app.forgot_password_redirect
-        token = request.GET.get('token','')
+        token = request.GET.get('token', '')
         tokenized_url = "{}{}".format(redirect_url, token)
         return Response(status=HTTP_302_FOUND, headers={'Location': tokenized_url})
 
+    @apispec_operation(
+        summary="Request an account recovery email",
+        tags=["Authentication"],
+        parameters=[
+            {
+                "in": "body",
+                "name": "body",
+                "required": True,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "email": {
+                            "type": "string",
+                            "format": "email",
+                            "description": "The email address on file to send recovery email to"
+                        }
+                    }
+                },
+            }
+        ]
+    )
     def post(self, request, **kwargs):
-        """
-        Request an account recovery email.
-        ---
-        parameters:
-            - name: email
-              type: string
-              description: The email address on file to send recovery email
-              required: true
-        """
-
         email = request.data.get('email')
         try:
             email_address = CachedEmailAddress.cached.get(email=email)
@@ -215,22 +233,34 @@ class BadgeUserForgotPassword(BaseUserRecoveryView):
 
         return self.get_response()
 
+    @apispec_operation(
+        summary="Recover an account and set a new password",
+        tags=["Authentication"],
+        parameters=[
+            {
+                "in": "body",
+                "name": "body",
+                "required": True,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "token": {
+                            "type": "string",
+                            "format": "string",
+                            "description": "The token recieved in the recovery email",
+                            'required': True
+                        },
+                        "password": {
+                            'type': "string",
+                            'description': "The new password to use",
+                            'required': True
+                        }
+                    }
+                },
+            }
+        ]
+    )
     def put(self, request, **kwargs):
-        """
-        Recover an account and set a new password.
-        ---
-        parameters:
-            - name: token
-              type: string
-              paramType: form
-              description: The token received in the recovery email
-              required: true
-            - name: password
-              type: string
-              paramType: form
-              description: The new password to use
-              required: true
-        """
         token = request.data.get('token')
         password = request.data.get('password')
 
