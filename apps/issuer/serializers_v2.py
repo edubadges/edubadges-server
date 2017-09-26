@@ -227,7 +227,6 @@ class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
             ])
         })
 
-
     def update(self, instance, validated_data):
         if 'cached_issuer' in validated_data:
             validated_data.pop('cached_issuer')  # issuer is not updatable
@@ -247,8 +246,6 @@ class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
         return super(BadgeClassSerializerV2, self).create(validated_data)
 
 
-
-
 class BadgeRecipientSerializerV2(BaseSerializerV2):
     identity = serializers.CharField(source='recipient_identifier')
     type = serializers.ChoiceField(
@@ -265,6 +262,22 @@ class BadgeRecipientSerializerV2(BaseSerializerV2):
         BadgeInstance.RECIPIENT_TYPE_TELEPHONE: TelephoneValidator(),
     }
 
+    class Meta:
+        apispec_definition = ('AssertionRecipient', {
+            'properties': OrderedDict([
+                ('identity', {
+                    'type': 'string',
+                    'format': 'string',
+                    'description': 'Either the hash of the identity or the plaintext value'
+                }),
+                ('type', {
+                    'type': 'string',
+                    'enum': [c[0] for c in BadgeInstance.RECIPIENT_TYPE_CHOICES],
+                    'description': "Type of identifier used to identify recipient"
+                }),
+            ])
+        })
+
     def validate(self, attrs):
         recipient_type = attrs.get('recipient_type')
         recipient_identifier = attrs.get('recipient_identifier')
@@ -279,6 +292,22 @@ class BadgeRecipientSerializerV2(BaseSerializerV2):
 class EvidenceItemSerializerV2(BaseSerializerV2, OriginalJsonSerializerMixin):
     url = serializers.URLField(source='evidence_url', max_length=1024, required=False)
     narrative = MarkdownCharField(required=False)
+
+    class Meta:
+        apispec_definition = ('AssertionEvidence', {
+            'properties': OrderedDict([
+                ('url', {
+                    'type': "string",
+                    'format': "url",
+                    'description': "URL of a webpage presenting evidence of the achievement",
+                }),
+                ('narrative', {
+                    'type': "string",
+                    'format': "markdown",
+                    'description': "Markdown narrative that describes the achievement",
+                }),
+            ])
+        })
 
     def validate(self, attrs):
         if not (attrs.get('evidence_url', None) or attrs.get('narrative', None)):
@@ -305,7 +334,80 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
     
     class Meta(DetailSerializerV2.Meta):
         model = BadgeInstance
-        
+        apispec_definition = ('Assertion', {
+            'properties': OrderedDict([
+                ('entityId', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "Unique identifier for this Assertion",
+                }),
+                ('entityType', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "\"Assertion\"",
+                }),
+                ('openBadgeId', {
+                    'type': "string",
+                    'format': "url",
+                    'description': "URL of the OpenBadge compliant json",
+                }),
+                ('createdAt', {
+                    'type': 'string',
+                    'format': 'ISO8601 timestamp',
+                    'description': "Timestamp when the Assertion was created",
+                }),
+                ('createdBy', {
+                    'type': 'string',
+                    'format': 'entityId',
+                    'description': "BadgeUser who created the Assertion",
+                }),
+
+                ('badgeclass', {
+                    'type': 'string',
+                    'format': 'entityId',
+                    'description': "BadgeClass that issued this Assertion",
+                }),
+                ('revoked', {
+                    'type': 'boolean',
+                    'description': "True if this Assertion has been revoked",
+                }),
+                ('revocationReason', {
+                    'type': 'string',
+                    'format': "string",
+                    'description': "Short description of why the Assertion was revoked",
+                }),
+
+                ('image', {
+                    'type': 'string',
+                    'format': 'url',
+                    'description': "URL to the baked assertion image",
+                }),
+                ('issuedOn', {
+                    'type': 'string',
+                    'format': 'ISO8601 timestamp',
+                    'description': "Timestamp when the Assertion was issued",
+                }),
+                ('narrative', {
+                    'type': 'string',
+                    'format': 'markdown',
+                    'description': "Markdown narrative of the achievement",
+                }),
+                ('evidence', {
+                    'type': 'array',
+                    'items': {
+                        '$ref': '#/definitions/AssertionEvidence'
+                    },
+                    'description': "List of evidence associated with the achievement"
+                }),
+                ('recipient', {
+                    'type': {
+                        '$ref': '#/definitions/AssertionRecipient'
+                    },
+                    'description': "Recipient that was issued the Assertion"
+                })
+            ])
+        })
+
     def update(self, instance, validated_data):
         # BadgeInstances are not updatable
         return instance
