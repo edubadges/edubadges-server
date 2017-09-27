@@ -16,6 +16,8 @@ from entity.api import BaseEntityListView, BaseEntityDetailView
 from issuer.models import BadgeInstance
 from issuer.permissions import AuditedModelOwner, VerifiedEmailMatchesRecipientIdentifier
 from issuer.public_api import ImagePropertyDetailView
+from mainsite.decorators import apispec_list_operation, apispec_post_operation, apispec_get_operation, \
+    apispec_delete_operation, apispec_put_operation, apispec_operation
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 
 
@@ -30,9 +32,17 @@ class BackpackAssertionList(BaseEntityListView):
         return filter(lambda a: (not a.revoked) and a.acceptance != BadgeInstance.ACCEPTANCE_REJECTED,
                       self.request.user.cached_badgeinstances())
 
+    @apispec_list_operation('Assertion',
+        summary="Get a list of Assertions in authenticated user's backpack ",
+        tags=['Backpack']
+    )
     def get(self, request, **kwargs):
         return super(BackpackAssertionList, self).get(request, **kwargs)
 
+    @apispec_post_operation('Assertion', BackpackAssertionSerializerV2,
+        summary="Upload a new Assertion to the backpack",
+        tags=['Backpack']
+    )
     def post(self, request, **kwargs):
         if kwargs.get('version', 'v1') == 'v1':
             return super(BackpackAssertionList, self).post(request, **kwargs)
@@ -57,15 +67,27 @@ class BackpackAssertionDetail(BaseEntityDetailView):
         context['format'] = self.request.query_params.get('json_format', 'v1')  # for /v1/earner/badges compat
         return context
 
+    @apispec_get_operation('Assertion',
+        summary="Get detail on an Assertion in the user's Backpack",
+        tags=['Backpack']
+    )
     def get(self, request, **kwargs):
         return super(BackpackAssertionDetail, self).get(request, **kwargs)
 
+    @apispec_delete_operation('Assertion',
+        summary='Remove an assertion from the backpack',
+        tags=['Backpack']
+    )
     def delete(self, request, **kwargs):
         obj = self.get_object(request, **kwargs)
         obj.acceptance = BadgeInstance.ACCEPTANCE_REJECTED
         obj.save()
         return Response(status=HTTP_204_NO_CONTENT)
 
+    @apispec_put_operation('Assertion', BackpackAssertionSerializerV2,
+        summary="Update acceptance of an Assertion in the user's Backpack",
+        tags=['Backpack']
+    )
     def put(self, request, **kwargs):
         fields_whitelist = ('acceptance',)
         data = {k: v for k, v in request.data.items() if k in fields_whitelist}
@@ -86,9 +108,17 @@ class BackpackCollectionList(BaseEntityListView):
     def get_objects(self, request, **kwargs):
         return self.request.user.cached_backpackcollections()
 
+    @apispec_get_operation('Collection',
+        summary='Get a list of Collections',
+        tags=['Backpack']
+    )
     def get(self, request, **kwargs):
         return super(BackpackCollectionList, self).get(request, **kwargs)
 
+    @apispec_post_operation('Collection', BackpackCollectionSerializerV2,
+        summary='Create a new Collection',
+        tags=['Backpack']
+    )
     def post(self, request, **kwargs):
         return super(BackpackCollectionList, self).post(request, **kwargs)
 
@@ -99,12 +129,24 @@ class BackpackCollectionDetail(BaseEntityDetailView):
     v2_serializer_class = BackpackCollectionSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, AuditedModelOwner)
 
+    @apispec_get_operation('Collection',
+        summary='Get a single Collection',
+        tags=['Backpack']
+    )
     def get(self, request, **kwargs):
         return super(BackpackCollectionDetail, self).get(request, **kwargs)
 
+    @apispec_put_operation('Collection', BackpackCollectionSerializerV2,
+        summary='Update a Collection',
+        tags=['Backpack']
+    )
     def put(self, request, **kwargs):
         return super(BackpackCollectionDetail, self).put(request, **kwargs)
 
+    @apispec_delete_operation('Collection',
+        summary='Delete a collection',
+        tags=['Backpack']
+    )
     def delete(self, request, **kwargs):
         return super(BackpackCollectionDetail, self).delete(request, **kwargs)
 
@@ -114,6 +156,39 @@ class BackpackImportBadge(BaseEntityListView):
     permission_classes = (AuthenticatedWithVerifiedEmail,)
     http_method_names = ('post',)
 
+    @apispec_operation(
+        summary="Import a new Assertion to the backpack",
+        tags=['Backpack'],
+        parameters=[
+            {
+                "in": "body",
+                "name": "body",
+                "required": True,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "url": {
+                            "type": "string",
+                            "format": "url",
+                            "description": "URL to an OpenBadge compliant badge",
+                            'required': False
+                        },
+                        "image": {
+                            'type': "string",
+                            'format': "data:image/png;base64",
+                            'description': "base64 encoded Baked OpenBadge image",
+                            'required': False
+                        },
+                        "assertion": {
+                            'type': "json",
+                            'description': "OpenBadge compliant json",
+                            'required': False
+                        },
+                    }
+                },
+            }
+        ]
+    )
     def post(self, request, **kwargs):
         return super(BackpackImportBadge, self).post(request, **kwargs)
 
