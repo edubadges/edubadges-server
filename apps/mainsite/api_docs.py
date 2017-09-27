@@ -98,7 +98,20 @@ class BadgrAPISpec(APISpec, BadgrAPISpecBuilder):
     def to_dict(self):
         # sort models alphabetically
         self._definitions = OrderedDict([(k, self._definitions[k]) for k in sorted(self._definitions.keys())])
-        return super(BadgrAPISpec, self).to_dict()
+        ret = super(BadgrAPISpec, self).to_dict()
+        ret['securityDefinitions'] = {
+            'api_key': {
+                "type": "apiKey",
+                "name": "Authorization",
+                "in": "header"
+            }
+        }
+        ret['security'] = [
+            {
+                'api_key': []
+            }
+        ]
+        return ret
 
     def scrape_serializers(self):
         """
@@ -152,7 +165,7 @@ class BadgrAPISpec(APISpec, BadgrAPISpecBuilder):
         for path, http_method, func in inspector.get_api_endpoints():
             http_method = http_method.lower()
 
-            if not path.startswith("/{}/".format(self.version)):  # skip if it doesnt match version
+            if not path.startswith('/api-auth/') and not path.startswith("/{}/".format(self.version)):  # skip if it doesnt match version
                 continue
 
             method_func = getattr(func.cls, http_method, None)
