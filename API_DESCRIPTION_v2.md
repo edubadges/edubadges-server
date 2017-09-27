@@ -20,22 +20,6 @@ The API does NOT support application/x-www-form-urlencoded or multipart/form-dat
 
 ## Response Envelope
 
-Success responses from the /v2/ API come in three basic forms, shown below:
-
-# Basic Response
-```json
-{
-  "status": {
-    "success": true,
-    "description": "ok"
-  },
-  "result": [
-    { /* single entry */}
-  ]
-}
-```
-
-# List Response
 ```json
 {
   "status": {
@@ -45,34 +29,6 @@ Success responses from the /v2/ API come in three basic forms, shown below:
   "result": [
     {/* entry */},
     {/* entry */},
-    ...
   ]
 }
 ```
-
-Unless otherwise documented, list responses SHOULD contain entities of a single type.
-
-# List Response (Paginated)
-```json
-{
-  "status": {
-    "success": true,
-   "description": "ok"
-  },
-  "result": [
-    {/* entry */},
-    {/* entry */},
-    ..
-  ],
-  "pagination": 
-    "hasNext": true,
-    "nextResult": "https://api.badgr.io/v2/endpoint?token=XXX",
-    "nextToken": "XXX",
-    "hasPrevious": false,
-    "previousResult": "https://api.badgr.io/v2/endpoint?token=YYY",
-    "previousToken": "YYY
-  }
-}
-```
-
-Unless otherwise documented, paginated list responses SHOULD contain entities of a single type.
