@@ -60,7 +60,7 @@ class BadgeUserDetail(BaseEntityDetailView):
     def get(self, request, **kwargs):
         return super(BadgeUserDetail, self).get(request, **kwargs)
 
-    @apispec_put_operation('BadgeUser', BadgeUserSerializerV2,
+    @apispec_put_operation('BadgeUser',
         summary="Update a BadgeUser",
         description="Use the entityId 'self' to update the authenticated user's profile",
         tags=['BadgeUsers']

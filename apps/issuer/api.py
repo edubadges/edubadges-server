@@ -45,7 +45,7 @@ class IssuerList(BaseEntityListView):
     def get(self, request, **kwargs):
         return super(IssuerList, self).get(request, **kwargs)
 
-    @apispec_post_operation('Issuer', IssuerSerializerV2,
+    @apispec_post_operation('Issuer',
         summary="Create a new Issuer",
         tags=["Issuers"],
     )
@@ -67,7 +67,7 @@ class IssuerDetail(BaseEntityDetailView):
     def get(self, request, **kwargs):
         return super(IssuerDetail, self).get(request, **kwargs)
 
-    @apispec_put_operation('Issuer', IssuerSerializerV2,
+    @apispec_put_operation('Issuer',
        summary="Update a single Issuer",
        tags=["Issuers"],
    )
@@ -103,7 +103,7 @@ class AllBadgeClassesList(BaseEntityListView):
     def get(self, request, **kwargs):
         return super(AllBadgeClassesList, self).get(request, **kwargs)
 
-    @apispec_post_operation('BadgeClass', BadgeClassSerializerV2,
+    @apispec_post_operation('BadgeClass',
         summary="Create a new BadgeClass",
         tags=["BadgeClasses"],
     )
@@ -140,7 +140,7 @@ class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
     def get(self, request, **kwargs):
         return super(IssuerBadgeClassList, self).get(request, **kwargs)
 
-    @apispec_post_operation('BadgeClass', BadgeClassSerializerV2,
+    @apispec_post_operation('BadgeClass',
         summary="Create a new BadgeClass associated with an Issuer",
         description="Authenticated user must have owner, editor, or staff status on the Issuer",
         tags=["Issuers", "BadgeClasses"],
@@ -184,7 +184,7 @@ class BadgeClassDetail(BaseEntityDetailView):
         # logger.event(badgrlog.BadgeClassDeletedEvent(old_badgeclass, request.user))
         return super(BadgeClassDetail, self).delete(request, **kwargs)
 
-    @apispec_put_operation('BadgeClass', BadgeClassSerializerV2,
+    @apispec_put_operation('BadgeClass',
         summary='Update an existing BadgeClass.  Previously issued BadgeInstances will NOT be updated',
         tags=['BadgeClasses'],
     )
@@ -204,7 +204,7 @@ class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):
         context['badgeclass'] = self.get_object(self.request, **kwargs)
         return context
 
-    @apispec_post_operation('Assertion', BadgeInstanceSerializerV2,
+    @apispec_post_operation('Assertion',
         summary='Issue multiple copies of the same BadgeClass to multiple recipients',
         tags=['Assertions'],
         parameters=[
@@ -289,7 +289,7 @@ class BatchAssertionsRevoke(VersionedObjectMixin, BaseEntityView):
 
         return dict(response, revoked=True)
 
-    @apispec_post_operation('Assertion', BadgeInstanceSerializerV2,
+    @apispec_post_operation('Assertion',
         summary='Revoke multiple Assertions',
         tags=['Assertions'],
         parameters=[
@@ -348,7 +348,7 @@ class BadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
 
         return super(BadgeInstanceList, self).get(request, **kwargs)
 
-    @apispec_post_operation('Assertion', BadgeInstanceSerializerV2,
+    @apispec_post_operation('Assertion',
         summary="Issue an Assertion to a single recipient",
         tags=['Assertions', 'BadgeClasses'],
     )
@@ -390,7 +390,7 @@ class IssuerBadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
     def get(self, request, **kwargs):
         return super(IssuerBadgeInstanceList, self).get(request, **kwargs)
 
-    @apispec_post_operation('Assertion', BadgeInstanceSerializerV2,
+    @apispec_post_operation('Assertion',
         summary="Issue a new Assertion to a recipient",
         tags=['Assertions', 'Issuers']
     )

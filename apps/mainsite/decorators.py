@@ -46,10 +46,7 @@ def apispec_get_operation(entity_class_name, *spec_args, **spec_kwargs):
     return decorator
 
 
-def apispec_put_operation(entity_class_name, serializer_cls, *spec_args, **spec_kwargs):
-    serializer_spec = BadgrAPISpecBuilder.get_serializer_spec(serializer_cls,
-                                                              include_write_only=True,
-                                                              include_read_only=True)
+def apispec_put_operation(entity_class_name, *spec_args, **spec_kwargs):
     defaults = {
         'responses': OrderedDict([
 
@@ -69,7 +66,7 @@ def apispec_put_operation(entity_class_name, serializer_cls, *spec_args, **spec_
                 "in": "body",
                 "name": "body",
                 "required": True,
-                "schema": serializer_spec,
+                'schema': {'$ref': '#/definitions/{}'.format(entity_class_name)},
             }
         ]
     }
@@ -128,11 +125,7 @@ def apispec_list_operation(entity_class_name, *spec_args, **spec_kwargs):
     return decorator
 
 
-def apispec_post_operation(entity_class_name, serializer_cls, *spec_args, **spec_kwargs):
-
-    serializer_spec = BadgrAPISpecBuilder.get_serializer_spec(serializer_cls,
-                                                              include_write_only=True,
-                                                              include_read_only=False)
+def apispec_post_operation(entity_class_name, *spec_args, **spec_kwargs):
 
     defaults = {
         'responses': OrderedDict([
@@ -149,7 +142,7 @@ def apispec_post_operation(entity_class_name, serializer_cls, *spec_args, **spec
                 "in": "body",
                 "name": "body",
                 "required": True,
-                "schema": serializer_spec,
+                'schema': {'$ref': '#/definitions/{}'.format(entity_class_name)},
             }
         ]
     }

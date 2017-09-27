@@ -39,7 +39,7 @@ class BackpackAssertionList(BaseEntityListView):
     def get(self, request, **kwargs):
         return super(BackpackAssertionList, self).get(request, **kwargs)
 
-    @apispec_post_operation('Assertion', BackpackAssertionSerializerV2,
+    @apispec_post_operation('Assertion',
         summary="Upload a new Assertion to the backpack",
         tags=['Backpack']
     )
@@ -84,7 +84,7 @@ class BackpackAssertionDetail(BaseEntityDetailView):
         obj.save()
         return Response(status=HTTP_204_NO_CONTENT)
 
-    @apispec_put_operation('Assertion', BackpackAssertionSerializerV2,
+    @apispec_put_operation('Assertion',
         summary="Update acceptance of an Assertion in the user's Backpack",
         tags=['Backpack']
     )
@@ -115,7 +115,7 @@ class BackpackCollectionList(BaseEntityListView):
     def get(self, request, **kwargs):
         return super(BackpackCollectionList, self).get(request, **kwargs)
 
-    @apispec_post_operation('Collection', BackpackCollectionSerializerV2,
+    @apispec_post_operation('Collection',
         summary='Create a new Collection',
         tags=['Backpack']
     )
@@ -136,7 +136,7 @@ class BackpackCollectionDetail(BaseEntityDetailView):
     def get(self, request, **kwargs):
         return super(BackpackCollectionDetail, self).get(request, **kwargs)
 
-    @apispec_put_operation('Collection', BackpackCollectionSerializerV2,
+    @apispec_put_operation('Collection',
         summary='Update a Collection',
         tags=['Backpack']
     )
