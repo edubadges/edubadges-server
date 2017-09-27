@@ -87,6 +87,9 @@ class EmailSerializerV1(serializers.ModelSerializer):
         model = CachedEmailAddress
         fields = ('id', 'email', 'verified', 'primary', 'variants')
         read_only_fields = ('id', 'verified', 'primary', 'variants')
+        apispec_definition = ('BadgeUserEmail', {
+
+        })
 
     def create(self, validated_data):
         new_address = validated_data.get('email')
