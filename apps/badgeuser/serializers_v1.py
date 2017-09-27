@@ -7,6 +7,9 @@ from .utils import notify_on_password_change
 
 
 class BadgeUserTokenSerializerV1(serializers.Serializer):
+    class Meta:
+        apispec_definition = ('BadgeUserToken', {})
+
     def to_representation(self, instance):
         representation = {
             'username': instance.username,
@@ -35,6 +38,9 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
     email = serializers.EmailField(source='primary_email', required=False)
     password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False)
     slug = serializers.CharField(source='entity_id', read_only=True)
+
+    class Meta:
+        apispec_definition = ('BadgeUser', {})
 
     def create(self, validated_data):
         user = BadgeUser.objects.create(

@@ -123,6 +123,7 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
 
 class CollectionBadgesSerializerV1(serializers.ListSerializer):
 
+
     def to_representation(self, data):
         filtered_data = [b for b in data if b.cached_badgeinstance.acceptance is not BadgeInstance.ACCEPTANCE_REJECTED and b.cached_badgeinstance.revoked is False]
         filtered_data = [c for c in filtered_data if c.cached_badgeinstance.recipient_identifier in c.cached_collection.owner.all_recipient_identifiers]
@@ -158,6 +159,7 @@ class CollectionBadgeSerializerV1(serializers.ModelSerializer):
         model = BackpackCollectionBadgeInstance
         list_serializer_class = CollectionBadgesSerializerV1
         fields = ('id', 'collection', 'badgeinstance')
+        apispec_definition = ('CollectionBadgeSerializerV1', {})
 
     def get_validators(self):
         return []
@@ -201,6 +203,9 @@ class CollectionSerializerV1(serializers.Serializer):
         read_only=False, many=True, required=False, source='cached_collects'
     )
     published = serializers.BooleanField(required=False)
+
+    class Meta:
+        apispec_definition = ('Collection', {})
 
     def to_representation(self, instance):
         representation = super(CollectionSerializerV1, self).to_representation(instance)
