@@ -73,9 +73,9 @@ class IssuerSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
 class AlignmentItemSerializerV2(BaseSerializerV2, OriginalJsonSerializerMixin):
     targetName = StripTagsCharField(source='target_name')
     targetUrl = serializers.URLField(source='target_url')
-    targetDescription = StripTagsCharField(source='target_description', required=False)
-    targetFramework = StripTagsCharField(source='target_framework', required=False)
-    targetCode = StripTagsCharField(source='target_code', required=False)
+    targetDescription = StripTagsCharField(source='target_description', required=False, allow_null=True)
+    targetFramework = StripTagsCharField(source='target_framework', required=False, allow_null=True)
+    targetCode = StripTagsCharField(source='target_code', required=False, allow_null=True)
 
 
 class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
@@ -91,7 +91,7 @@ class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     criteriaUrl = StripTagsCharField(source='criteria_url', required=False, allow_null=True, validators=[URLValidator()])
     criteriaNarrative = MarkdownCharField(source='criteria_text', required=False, allow_null=True)
 
-    alignments = AlignmentItemSerializerV2(source='cached_alignments', many=True, required=False)
+    alignments = AlignmentItemSerializerV2(source='alignment_items', many=True, required=False)
     tags = serializers.ListField(child=StripTagsCharField(max_length=1024), source='tag_items', required=False)
 
     class Meta(DetailSerializerV2.Meta):
