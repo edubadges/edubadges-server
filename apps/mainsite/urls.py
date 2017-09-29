@@ -4,6 +4,7 @@ from django.conf.urls import include, url
 
 from backpack.views import LegacyCollectionShareRedirectView
 from mainsite.admin import badgr_admin
+from mainsite.oauth2_api import AuthorizationApiView
 
 badgr_admin.autodiscover()
 # make sure that any view/model/form imports occur AFTER admin.autodiscover
@@ -24,6 +25,7 @@ urlpatterns = [
     url(r'^apple-app-site-association', AppleAppSiteAssociation.as_view(), name="apple-app-site-association"),
 
     # OAuth2 provider URLs
+    url(r'^o/authorize', AuthorizationApiView.as_view(), name='oauth2_api_authorize'),
     url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 
     # Home
