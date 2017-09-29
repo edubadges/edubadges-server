@@ -1,6 +1,6 @@
-import django
+from collections import OrderedDict
+
 from django.http import Http404
-from oauth2_provider.contrib.rest_framework import TokenHasScope
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -16,7 +16,7 @@ from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
 from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    BadgeInstanceSerializerV1)
 from issuer.serializers_v2 import IssuerSerializerV2, BadgeClassSerializerV2, BadgeInstanceSerializerV2
-from mainsite.decorators import apispec_operation, apispec_get_operation, apispec_put_operation, \
+from mainsite.decorators import apispec_get_operation, apispec_put_operation, \
     apispec_delete_operation, apispec_list_operation, apispec_post_operation
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 
@@ -40,14 +40,14 @@ class IssuerList(BaseEntityListView):
 
     @apispec_list_operation('Issuer',
         summary="Get a list of Issuers for authenticated user",
-        tags=["Issuer"],
+        tags=["Issuers"],
     )
     def get(self, request, **kwargs):
         return super(IssuerList, self).get(request, **kwargs)
 
-    @apispec_post_operation('Issuer', IssuerSerializerV2,
+    @apispec_post_operation('Issuer',
         summary="Create a new Issuer",
-        tags=["Issuer"],
+        tags=["Issuers"],
     )
     def post(self, request, **kwargs):
         return super(IssuerList, self).post(request, **kwargs)
@@ -62,26 +62,21 @@ class IssuerDetail(BaseEntityDetailView):
 
     @apispec_get_operation('Issuer',
         summary="Get a single Issuer",
-        tags=["Issuer"],
+        tags=["Issuers"],
     )
     def get(self, request, **kwargs):
         return super(IssuerDetail, self).get(request, **kwargs)
 
-    @apispec_put_operation('Issuer', IssuerSerializerV2,
+    @apispec_put_operation('Issuer',
        summary="Update a single Issuer",
-       tags=["Issuer"],
+       tags=["Issuers"],
    )
     def put(self, request, **kwargs):
         return super(IssuerDetail, self).put(request, **kwargs)
 
     @apispec_delete_operation('Issuer',
         summary="Delete a single Issuer",
-        tags=["Issuer"],
-        responses={
-            "400": {
-                'description': "Unable to delete issuer"
-            },
-        }
+        tags=["Issuers"],
     )
     def delete(self, request, **kwargs):
         return super(IssuerDetail, self).delete(request, **kwargs)
@@ -101,11 +96,19 @@ class AllBadgeClassesList(BaseEntityListView):
     def get_objects(self, request, **kwargs):
         return request.user.cached_badgeclasses()
 
+    @apispec_list_operation('BadgeClass',
+        summary="Get a list of BadgeClasses for authenticated user",
+        tags=["BadgeClasses"],
+    )
     def get(self, request, **kwargs):
-        """
-        GET a list of badgeclasses the user has access to
-        """
         return super(AllBadgeClassesList, self).get(request, **kwargs)
+
+    @apispec_post_operation('BadgeClass',
+        summary="Create a new BadgeClass",
+        tags=["BadgeClasses"],
+    )
+    def post(self, request, **kwargs):
+        return super(AllBadgeClassesList, self).post(request, **kwargs)
 
 
 class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
@@ -129,26 +132,27 @@ class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
         context['issuer'] = self.get_object(self.request, **kwargs)
         return context
 
+    @apispec_list_operation('BadgeClass',
+        summary="Get a list of BadgeClasses for a single Issuer",
+        description="Authenticated user must have owner, editor, or staff status on the Issuer",
+        tags=["Issuers", "BadgeClasses"],
+    )
     def get(self, request, **kwargs):
-        """
-        GET a list of badgeclasses within one Issuer context.
-        Authenticated user must have owner, editor, or staff status on Issuer
-        """
-
         return super(IssuerBadgeClassList, self).get(request, **kwargs)
 
+    @apispec_post_operation('BadgeClass',
+        summary="Create a new BadgeClass associated with an Issuer",
+        description="Authenticated user must have owner, editor, or staff status on the Issuer",
+        tags=["Issuers", "BadgeClasses"],
+    )
     def post(self, request, **kwargs):
-        """
-        Define a new BadgeClass to be owned by a particular Issuer.
-        Authenticated user must have owner or editor status on Issuer
-        """
-
         return super(IssuerBadgeClassList, self).post(request, **kwargs)
 
 
 class BadgeClassDetail(BaseEntityDetailView):
     """
-    GET details on one BadgeClass. PUT and DELETE should be restricted to BadgeClasses that haven't been issued yet.
+    GET details on one BadgeClass.
+    PUT and DELETE should be restricted to BadgeClasses that haven't been issued yet.
     """
     model = BadgeClass
     permission_classes = (AuthenticatedWithVerifiedEmail, MayEditBadgeClass, BadgrOAuthTokenHasEntityScope)
@@ -157,32 +161,34 @@ class BadgeClassDetail(BaseEntityDetailView):
 
     valid_scopes = ["rw:badgeclass", "rw:badgeclass:*"]
 
+    @apispec_get_operation('BadgeClass',
+        summary='Get a single BadgeClass',
+        tags=['BadgeClasses'],
+    )
     def get(self, request, **kwargs):
-        """
-        GET single BadgeClass representation
-        """
         return super(BadgeClassDetail, self).get(request, **kwargs)
 
-    def delete(self, request, **kwargs):
-        """
-        DELETE a badge class that has never been issued. This will fail if any assertions exist for the BadgeClass.
-        Restricted to owners or editors (not staff) of the corresponding Issuer.
-        ---
-        responseMessages:
-            - code: 400
-              message: Badge Class either couldn't be deleted. It may have already been issued, or it may already not exist.
-            - code: 200
-              message: Badge has been deleted.
-        """
+    @apispec_delete_operation('BadgeClass',
+        summary="Delete a BadgeClass",
+        description="Restricted to owners or editors (not staff) of the corresponding Issuer.",
+        tags=['BadgeClasses'],
+        responses=OrderedDict([
+            ("400", {
+                'description': "BadgeClass couldn't be deleted. It may have already been issued."
+            }),
 
+        ])
+    )
+    def delete(self, request, **kwargs):
         # TODO: log delete methods
         # logger.event(badgrlog.BadgeClassDeletedEvent(old_badgeclass, request.user))
         return super(BadgeClassDetail, self).delete(request, **kwargs)
 
+    @apispec_put_operation('BadgeClass',
+        summary='Update an existing BadgeClass.  Previously issued BadgeInstances will NOT be updated',
+        tags=['BadgeClasses'],
+    )
     def put(self, request, **kwargs):
-        """
-        Update an existing badge class. Existing BadgeInstances will NOT be updated.
-        """
         return super(BadgeClassDetail, self).put(request, **kwargs)
 
 
@@ -198,21 +204,22 @@ class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):
         context['badgeclass'] = self.get_object(self.request, **kwargs)
         return context
 
+    @apispec_post_operation('Assertion',
+        summary='Issue multiple copies of the same BadgeClass to multiple recipients',
+        tags=['Assertions'],
+        parameters=[
+            {
+                "in": "body",
+                "name": "body",
+                "required": True,
+                'schema': {
+                    "type": "array",
+                    'items': { '$ref': '#/definitions/Assertion' }
+                },
+            }
+        ]
+    )
     def post(self, request, **kwargs):
-        """
-        POST to issue multiple copies of the same badge to multiple recipients
-        ---
-        parameters:
-            - name: assertions
-              required: true
-              type: array
-              items: {
-                serializer: BadgeInstanceSerializer
-              }
-              paramType: form
-              description: a list of assertions to issue
-        """
-
         # verify the user has permission to the badgeclass
         badgeclass = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, badgeclass):
@@ -282,11 +289,22 @@ class BatchAssertionsRevoke(VersionedObjectMixin, BaseEntityView):
 
         return dict(response, revoked=True)
 
+    @apispec_post_operation('Assertion',
+        summary='Revoke multiple Assertions',
+        tags=['Assertions'],
+        parameters=[
+            {
+                "in": "body",
+                "name": "body",
+                "required": True,
+                'schema': {
+                    "type": "array",
+                    'items': { '$ref': '#/definitions/Assertion' }
+                },
+            }
+        ]
+    )
     def post(self, request, **kwargs):
-        """
-        POST to revoke multiple assertions
-        """
-
         result = [
             self._process_revoke(request, revocation)
             for revocation in self.request.data
@@ -318,11 +336,11 @@ class BadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
         context['badgeclass'] = self.get_object(self.request, **kwargs)
         return context
 
+    @apispec_list_operation('Assertion',
+        summary="Get a list of Assertions for a single BadgeClass",
+        tags=['Assertions', 'BadgeClasses'],
+    )
     def get(self, request, **kwargs):
-        """
-        Get a list of all issued assertions for a single BadgeClass.
-        """
-
         # verify the user has permission to the badgeclass
         badgeclass = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, badgeclass):
@@ -330,11 +348,11 @@ class BadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
 
         return super(BadgeInstanceList, self).get(request, **kwargs)
 
+    @apispec_post_operation('Assertion',
+        summary="Issue an Assertion to a single recipient",
+        tags=['Assertions', 'BadgeClasses'],
+    )
     def post(self, request, **kwargs):
-        """
-        Issue a badge to a single recipient.
-        """
-
         # verify the user has permission to the badgeclass
         badgeclass = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, badgeclass):
@@ -365,18 +383,18 @@ class IssuerBadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
 
         return assertions
 
+    @apispec_list_operation('Assertion',
+        summary='Get a list of Assertions for a single Issuer',
+        tags=['Assertions', 'Issuers']
+    )
     def get(self, request, **kwargs):
-        """
-        Get a list of assertions issued one issuer.
-        """
-
         return super(IssuerBadgeInstanceList, self).get(request, **kwargs)
 
+    @apispec_post_operation('Assertion',
+        summary="Issue a new Assertion to a recipient",
+        tags=['Assertions', 'Issuers']
+    )
     def post(self, request, **kwargs):
-        """
-        Issue a new Assertion to a recipient
-        """
-
         return super(IssuerBadgeInstanceList, self).post(request, **kwargs)
 
 
@@ -390,26 +408,23 @@ class BadgeInstanceDetail(BaseEntityDetailView):
     v2_serializer_class = BadgeInstanceSerializerV2
     valid_scopes = ["rw:assertion", "rw:assertion:*"]
 
+    @apispec_get_operation('Assertion',
+        summary="Get a single Assertion",
+        tags=['Assertions']
+    )
     def get(self, request, **kwargs):
-        """
-        GET a single assertion's details.
-        """
         return super(BadgeInstanceDetail, self).get(request, **kwargs)
 
+    @apispec_delete_operation('Assertion',
+        summary="Revoke an Assertion",
+        tags=['Assertions'],
+        responses=OrderedDict([
+            ('400', {
+                'description': "Assertion is already revoked"
+            })
+        ])
+    )
     def delete(self, request, **kwargs):
-        """
-        Revoke an issued badge assertion.
-        Limited to Issuer owner and editors (not staff)
-        ---
-        responseMessages:
-            - code: 200
-              message: Assertion has been revoked.
-            - code: 400
-              message: Assertion is already revoked
-            - code: 404
-              message: Assertion not found or user has inadequate permissions.
-        """
-
         # verify the user has permission to the assertion
         assertion = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, assertion):

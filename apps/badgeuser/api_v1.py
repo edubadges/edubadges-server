@@ -7,33 +7,36 @@ from rest_framework.views import APIView
 
 from badgeuser.models import CachedEmailAddress
 from badgeuser.serializers_v1 import EmailSerializerV1
+from mainsite.decorators import apispec_list_operation, apispec_post_operation, apispec_operation, \
+    apispec_get_operation, apispec_delete_operation, apispec_put_operation
 
 
 class BadgeUserEmailList(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
+    @apispec_list_operation('BadgeUserEmail',
+        summary="Get a list of user's registered emails",
+        tags=['BadgeUsers']
+    )
     def get(self, request, **kwargs):
-        """
-        Get a list of user's registered emails.
-        ---
-        serializer: EmailSerializerV1
-        """
         instances = request.user.cached_emails()
         serializer = EmailSerializerV1(instances, many=True, context={'request': request})
         return Response(serializer.data)
 
+    @apispec_operation(
+        summary="Register a new unverified email",
+        tags=['BadgeUsers'],
+        properties=[
+            {
+                'in': 'formData',
+                'name': "email",
+                'type': "string",
+                'format': "email",
+                'description': 'The email to register'
+            }
+        ]
+    )
     def post(self, request, **kwargs):
-        """
-        Register a new unverified email.
-        ---
-        serializer: EmailSerializerV1
-        parameters:
-            - name: email
-              description: The email to register
-              required: true
-              type: string
-              paramType: form
-        """
         serializer = EmailSerializerV1(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
@@ -57,18 +60,11 @@ class BadgeUserEmailView(APIView):
 class BadgeUserEmailDetail(BadgeUserEmailView):
     model = CachedEmailAddress
 
+    @apispec_get_operation('BadgeUserEmail',
+        summary="Get detail for one registered email",
+        tags=['BadgeUsers']
+    )
     def get(self, request, id, **kwargs):
-        """
-        Get detail for one registered email.
-        ---
-        serializer: EmailSerializerV1
-        parameters:
-            - name: id
-              type: string
-              paramType: path
-              description: the id of the registered email
-              required: true
-        """
         email_address = self.get_email(pk=id)
         if email_address is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -78,17 +74,11 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
         serializer = EmailSerializerV1(email_address, context={'request': request})
         return Response(serializer.data)
 
+    @apispec_delete_operation('BadgeUserEmail',
+        summary="Remove a registered email for the current user",
+        tags=['BadgeUsers']
+    )
     def delete(self, request, id, **kwargs):
-        """
-        Remove a registered email for the current user.
-        ---
-        parameters:
-            - name: id
-              type: string
-              paramType: path
-              description: the id of the registered email
-              required: true
-        """
         email_address = self.get_email(pk=id)
         if email_address is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -104,28 +94,11 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
         email_address.delete()
         return Response(status.HTTP_200_OK)
 
+    @apispec_put_operation('BadgeUserEmail',
+        summary='Update a registered email for the current user',
+        tags=['BadgeUsers']
+    )
     def put(self, request, id, **kwargs):
-        """
-        Update a registered email for the current user.
-        serializer: EmailSerializerV1
-        ---
-        parameters:
-            - name: id
-              type: string
-              paramType: path
-              description: the id of the registered email
-              required: true
-            - name: primary
-              type: boolean
-              paramType: form
-              description: Should this email be primary contact for the user
-              required: false
-            - name: resend
-              type: boolean
-              paramType: form
-              description: Request the verification email be resent
-              required: false
-        """
         email_address = self.get_email(pk=id)
         if email_address is None:
             return Response(status=status.HTTP_404_NOT_FOUND)

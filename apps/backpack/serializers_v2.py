@@ -1,6 +1,8 @@
 # encoding: utf-8
 from __future__ import unicode_literals
 
+from collections import OrderedDict
+
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError as RestframeworkValidationError
@@ -42,6 +44,59 @@ class BackpackCollectionSerializerV2(DetailSerializerV2):
 
     class Meta(DetailSerializerV2.Meta):
         model = BackpackCollection
+        apispec_definition = ('Collection', {
+            'properties': OrderedDict([
+                ('entityId', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "Unique identifier for this Collection",
+                }),
+                ('entityType', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "\"Collection\"",
+                }),
+                ('createdAt', {
+                    'type': 'string',
+                    'format': 'ISO8601 timestamp',
+                    'description': "Timestamp when the Collection was created",
+                }),
+                ('createdBy', {
+                    'type': 'string',
+                    'format': 'entityId',
+                    'description': "BadgeUser who created this Collection",
+                }),
+
+                ('name', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "Name of the Collection",
+                }),
+                ('description', {
+                    'type': "string",
+                    'format': "text",
+                    'description': "Short description of the Collection",
+                }),
+                ('share_url', {
+                    'type': "string",
+                    'format': "url",
+                    'description': "A public URL for sharing the Collection",
+                }),
+                ('published', {
+                    'type': "boolean",
+                    'description': "True if the Collection has a public share URL",
+                }),
+                ('assertions', {
+                    'type': "array",
+                    'items': {
+                        '$ref': '#/definitions/Assertion'
+                    },
+                    'description': "List of Assertions in the collection",
+                }),
+
+
+            ])
+        })
 
 
 class BackpackImportSerializerV2(DetailSerializerV2):

@@ -1,6 +1,7 @@
 import uuid
 
 import os
+from collections import OrderedDict
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.validators import URLValidator, EmailValidator, RegexValidator
@@ -19,7 +20,7 @@ class IssuerStaffSerializerV2(DetailSerializerV2):
     user = EntityRelatedFieldV2(source='cached_user', queryset=BadgeUser.cached)
     role = serializers.CharField(validators=[ChoicesValidator(dict(IssuerStaff.ROLE_CHOICES).keys())])
 
-    class Meta:
+    class Meta(DetailSerializerV2.Meta):
         apispec_definition = ('IssuerStaff', {
             'properties': {
                 'role': {
@@ -32,7 +33,7 @@ class IssuerStaffSerializerV2(DetailSerializerV2):
 
 
 class IssuerSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
-    openBadgeId = serializers.URLField(source='jsonld_id', read_only=True, help_text="The url to find the Open Badge")
+    openBadgeId = serializers.URLField(source='jsonld_id', read_only=True)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     createdBy = EntityRelatedFieldV2(source='cached_creator', read_only=True)
     name = StripTagsCharField(max_length=1024)
@@ -45,13 +46,60 @@ class IssuerSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     class Meta(DetailSerializerV2.Meta):
         model = Issuer
         apispec_definition = ('Issuer', {
-            'properties': {
-                'createdBy': {
+            'properties': OrderedDict([
+                ('entityId', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "Unique identifier for this Issuer",
+                }),
+                ('entityType', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "\"Issuer\"",
+                }),
+                ('openBadgeId', {
+                    'type': "string",
+                    'format': "url",
+                    'description': "URL of the OpenBadge compliant json",
+                }),
+                ('createdAt', {
+                    'type': 'string',
+                    'format': 'ISO8601 timestamp',
+                    'description': "Timestamp when the Issuer was created",
+                }),
+                ('createdBy', {
                     'type': 'string',
                     'format': 'entityId',
-                    'description': "entityId of the BadgeUser who created this issuer",
-                }
-            }
+                    'description': "BadgeUser who created this Issuer",
+                }),
+
+                ('name', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "Name of the Issuer",
+                }),
+                ('image', {
+                    'type': "string",
+                    'format': "data:image/png;base64",
+                    'description': "Base64 encoded string of an image that represents the Issuer",
+                }),
+                ('email', {
+                    'type': "string",
+                    'format': "email",
+                    'description': "Contact email for the Issuer",
+                }),
+                ('url', {
+                    'type': "string",
+                    'format': "url",
+                    'description': "Homepage or website associated with the Issuer",
+                }),
+                ('description', {
+                    'type': "string",
+                    'format': "text",
+                    'description': "Short description of the Issuer",
+                }),
+
+            ])
         })
 
     def validate_image(self, image):
@@ -77,6 +125,12 @@ class AlignmentItemSerializerV2(BaseSerializerV2, OriginalJsonSerializerMixin):
     targetFramework = StripTagsCharField(source='target_framework', required=False, allow_null=True)
     targetCode = StripTagsCharField(source='target_code', required=False, allow_null=True)
 
+    class Meta:
+        apispec_definition = ('BadgeClassAlignment', {
+            'properties': {
+            }
+        })
+
 
 class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     openBadgeId = serializers.URLField(source='jsonld_id', read_only=True)
@@ -96,6 +150,82 @@ class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
 
     class Meta(DetailSerializerV2.Meta):
         model = BadgeClass
+        apispec_definition = ('BadgeClass', {
+            'properties': OrderedDict([
+                ('entityId', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "Unique identifier for this BadgeClass",
+                }),
+                ('entityType', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "\"BadgeClass\"",
+                }),
+                ('openBadgeId', {
+                    'type': "string",
+                    'format': "url",
+                    'description': "URL of the OpenBadge compliant json",
+                }),
+                ('createdAt', {
+                    'type': 'string',
+                    'format': 'ISO8601 timestamp',
+                    'description': "Timestamp when the BadgeClass was created",
+                }),
+                ('createdBy', {
+                    'type': 'string',
+                    'format': 'entityId',
+                    'description': "BadgeUser who created this BadgeClass",
+                }),
+
+                ('issuer', {
+                    'type': 'string',
+                    'format': 'entityId',
+                    'description': "entityId of the Issuer who owns the BadgeClass",
+                }),
+
+                ('name', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "Name of the BadgeClass",
+                }),
+                ('description', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "Short description of the BadgeClass",
+                }),
+                ('image', {
+                    'type': "string",
+                    'format': "data:image/png;base64",
+                    'description': "Base64 encoded string of an image that represents the BadgeClass.",
+                }),
+                ('criteriaUrl', {
+                    'type': "string",
+                    'format': "url",
+                    'description': "External URL that describes in a human-readable format the criteria for the BadgeClass"
+                }),
+                ('criteriaNarrative', {
+                    'type': "string",
+                    'format': "markdown",
+                    'description': "Markdown formatted description of the criteria"
+                }),
+                ('tags', {
+                    'type': "array",
+                    'items': {
+                        'type': "string",
+                        'format': "string"
+                    },
+                    'description': "List of tags that describe the BadgeClass"
+                }),
+                ('alignments', {
+                    'type': "array",
+                    'items': {
+                        '$ref': '#/definitions/BadgeClassAlignment'
+                    },
+                    'description': "List of objects describing objectives or educational standards"
+                }),
+            ])
+        })
 
     def update(self, instance, validated_data):
         if 'cached_issuer' in validated_data:
@@ -116,8 +246,6 @@ class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
         return super(BadgeClassSerializerV2, self).create(validated_data)
 
 
-
-
 class BadgeRecipientSerializerV2(BaseSerializerV2):
     identity = serializers.CharField(source='recipient_identifier')
     type = serializers.ChoiceField(
@@ -134,6 +262,22 @@ class BadgeRecipientSerializerV2(BaseSerializerV2):
         BadgeInstance.RECIPIENT_TYPE_TELEPHONE: TelephoneValidator(),
     }
 
+    class Meta:
+        apispec_definition = ('AssertionRecipient', {
+            'properties': OrderedDict([
+                ('identity', {
+                    'type': 'string',
+                    'format': 'string',
+                    'description': 'Either the hash of the identity or the plaintext value'
+                }),
+                ('type', {
+                    'type': 'string',
+                    'enum': [c[0] for c in BadgeInstance.RECIPIENT_TYPE_CHOICES],
+                    'description': "Type of identifier used to identify recipient"
+                }),
+            ])
+        })
+
     def validate(self, attrs):
         recipient_type = attrs.get('recipient_type')
         recipient_identifier = attrs.get('recipient_identifier')
@@ -148,6 +292,22 @@ class BadgeRecipientSerializerV2(BaseSerializerV2):
 class EvidenceItemSerializerV2(BaseSerializerV2, OriginalJsonSerializerMixin):
     url = serializers.URLField(source='evidence_url', max_length=1024, required=False)
     narrative = MarkdownCharField(required=False)
+
+    class Meta:
+        apispec_definition = ('AssertionEvidence', {
+            'properties': OrderedDict([
+                ('url', {
+                    'type': "string",
+                    'format': "url",
+                    'description': "URL of a webpage presenting evidence of the achievement",
+                }),
+                ('narrative', {
+                    'type': "string",
+                    'format': "markdown",
+                    'description': "Markdown narrative that describes the achievement",
+                }),
+            ])
+        })
 
     def validate(self, attrs):
         if not (attrs.get('evidence_url', None) or attrs.get('narrative', None)):
@@ -174,7 +334,80 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
     
     class Meta(DetailSerializerV2.Meta):
         model = BadgeInstance
-        
+        apispec_definition = ('Assertion', {
+            'properties': OrderedDict([
+                ('entityId', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "Unique identifier for this Assertion",
+                }),
+                ('entityType', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "\"Assertion\"",
+                }),
+                ('openBadgeId', {
+                    'type': "string",
+                    'format': "url",
+                    'description': "URL of the OpenBadge compliant json",
+                }),
+                ('createdAt', {
+                    'type': 'string',
+                    'format': 'ISO8601 timestamp',
+                    'description': "Timestamp when the Assertion was created",
+                }),
+                ('createdBy', {
+                    'type': 'string',
+                    'format': 'entityId',
+                    'description': "BadgeUser who created the Assertion",
+                }),
+
+                ('badgeclass', {
+                    'type': 'string',
+                    'format': 'entityId',
+                    'description': "BadgeClass that issued this Assertion",
+                }),
+                ('revoked', {
+                    'type': 'boolean',
+                    'description': "True if this Assertion has been revoked",
+                }),
+                ('revocationReason', {
+                    'type': 'string',
+                    'format': "string",
+                    'description': "Short description of why the Assertion was revoked",
+                }),
+
+                ('image', {
+                    'type': 'string',
+                    'format': 'url',
+                    'description': "URL to the baked assertion image",
+                }),
+                ('issuedOn', {
+                    'type': 'string',
+                    'format': 'ISO8601 timestamp',
+                    'description': "Timestamp when the Assertion was issued",
+                }),
+                ('narrative', {
+                    'type': 'string',
+                    'format': 'markdown',
+                    'description': "Markdown narrative of the achievement",
+                }),
+                ('evidence', {
+                    'type': 'array',
+                    'items': {
+                        '$ref': '#/definitions/AssertionEvidence'
+                    },
+                    'description': "List of evidence associated with the achievement"
+                }),
+                ('recipient', {
+                    'type': {
+                        '$ref': '#/definitions/AssertionRecipient'
+                    },
+                    'description': "Recipient that was issued the Assertion"
+                })
+            ])
+        })
+
     def update(self, instance, validated_data):
         # BadgeInstances are not updatable
         return instance

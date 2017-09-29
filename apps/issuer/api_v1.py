@@ -21,6 +21,7 @@ from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    IssuerStaffSerializerV1)
 from issuer.serializers_v2 import IssuerSerializerV2
 from issuer.utils import get_badgeclass_by_identifier
+from mainsite.decorators import apispec_list_operation, apispec_operation
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 
 
@@ -79,17 +80,11 @@ class IssuerStaffList(VersionedObjectMixin, APIView):
     model = Issuer
     permission_classes = (AuthenticatedWithVerifiedEmail, IsOwnerOrStaff,)
 
+    @apispec_list_operation('IssuerStaff',
+        tags=['Issuers'],
+        summary="Get a list of users associated with a role on an Issuer"
+    )
     def get(self, request, **kwargs):
-        """
-        Get a list of users associated with a role on an Issuer
-        ---
-        parameters:
-            - name: slug
-              type: string
-              paramType: path
-              description: The slug of the issuer whose roles to view.
-              required: true
-        """
         current_issuer = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, current_issuer):
             return Response(
@@ -106,9 +101,12 @@ class IssuerStaffList(VersionedObjectMixin, APIView):
             return Response([], status=status.HTTP_200_OK)
         return Response(serializer.data)
 
+    @apispec_operation(
+        tags=['Issuers'],
+        summary="Add or remove a user from a role on an issuer. Limited to Owner users only"
+    )
     def post(self, request, **kwargs):
         """
-        Add or remove a user from a role on an issuer. Limited to Owner users only.
         ---
         parameters:
             - name: slug
@@ -219,18 +217,19 @@ class FindBadgeClassDetail(APIView):
     """
     permission_classes = (AuthenticatedWithVerifiedEmail,)
 
+    @apispec_operation(
+        summary="Get a specific BadgeClass by searching by identifier",
+        tags=['BadgeClasses'],
+        parameters=[
+            {
+                "in": "query",
+                "name": "identifier",
+                'required': True,
+                "description": "The identifier of the badge possible values: JSONld identifier, BadgeClass.id, or BadgeClass.slug"
+            }
+        ]
+    )
     def get(self, request, **kwargs):
-        """
-        GET a specific BadgeClass by searching by identifier
-        ---
-        serializer: BadgeClassSerializer
-        parameters:
-            - name: identifier
-              required: true
-              type: string
-              paramType: form
-              description: The identifier of the badge possible values: JSONld identifier, BadgeClass.id, or BadgeClass.slug
-        """
         identifier = request.query_params.get('identifier')
         badge = get_badgeclass_by_identifier(identifier)
         if badge is None:

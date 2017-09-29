@@ -473,12 +473,12 @@ class BadgeInstance(BaseAuditedModel,
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
 
     RECIPIENT_TYPE_EMAIL = 'email'
-    RECIPIENT_TYPE_ID = 'id'
+    RECIPIENT_TYPE_ID = 'openBadgeId'
     RECIPIENT_TYPE_TELEPHONE = 'telephone'
     RECIPIENT_TYPE_URL = 'url'
     RECIPIENT_TYPE_CHOICES = (
         (RECIPIENT_TYPE_EMAIL, 'email'),
-        (RECIPIENT_TYPE_ID, 'id'),
+        (RECIPIENT_TYPE_ID, 'openBadgeId'),
         (RECIPIENT_TYPE_TELEPHONE, 'telephone'),
         (RECIPIENT_TYPE_URL, 'url'),
     )

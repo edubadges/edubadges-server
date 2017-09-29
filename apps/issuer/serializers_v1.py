@@ -118,6 +118,9 @@ class AlignmentItemSerializerV1(serializers.Serializer):
     target_framework = StripTagsCharField(required=False)
     target_code = StripTagsCharField(required=False)
 
+    class Meta:
+        apispec_definition = ('BadgeClassAlignment', {})
+
 
 class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
@@ -134,6 +137,9 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
     description = StripTagsCharField(max_length=16384, required=True)
 
     alignment = AlignmentItemSerializerV1(read_only=True, many=True, source='cached_alignments')
+
+    class Meta:
+        apispec_definition = ('BadgeClass', {})
 
     def to_representation(self, instance):
         representation = super(BadgeClassSerializerV1, self).to_representation(instance)
@@ -226,6 +232,9 @@ class EvidenceItemSerializer(serializers.Serializer):
     evidence_url = serializers.URLField(max_length=1024, required=False, allow_blank=True)
     narrative = MarkdownCharField(required=False, allow_blank=True)
 
+    class Meta:
+        apispec_definition = ('AssertionEvidence', {})
+
     def validate(self, attrs):
         if not (attrs.get('evidence_url', None) or attrs.get('narrative', None)):
             raise serializers.ValidationError("Either url or narrative is required")
@@ -249,6 +258,9 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
     revocation_reason = serializers.CharField(read_only=True)
 
     create_notification = HumanReadableBooleanField(write_only=True, required=False, default=False)
+
+    class Meta:
+        apispec_definition = ('Assertion', {})
 
     def validate(self, data):
         if data.get('email') and not data.get('recipient_identifier'):

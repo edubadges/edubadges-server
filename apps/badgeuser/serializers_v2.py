@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from rest_framework import serializers
 
 from badgeuser.models import BadgeUser
@@ -12,7 +14,23 @@ class BadgeUserEmailSerializerV2(DetailSerializerV2):
     primary = serializers.BooleanField(required=False)
 
     class Meta(DetailSerializerV2.Meta):
-        apispec_definition = ('Email', {})
+        apispec_definition = ('BadgeUserEmail', {
+            'properties': OrderedDict([
+                ('email', {
+                    'type': "string",
+                    'format': "email",
+                    'description': "Email address associated with a BadgeUser",
+                }),
+                ('verified', {
+                    'type': "boolean",
+                    'description': "True if the email address has been verified",
+                }),
+                ('primary', {
+                    'type': "boolean",
+                    'description': "True for a single email address to receive email notifications",
+                }),
+            ])
+        })
 
 
 class BadgeUserSerializerV2(DetailSerializerV2):
@@ -23,7 +41,30 @@ class BadgeUserSerializerV2(DetailSerializerV2):
 
     class Meta(DetailSerializerV2.Meta):
         model = BadgeUser
-        apispec_definition = ('BadgeUser', {})
+        apispec_definition = ('BadgeUser', {
+            'properties': OrderedDict([
+                ('entityId', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "Unique identifier for this BadgeUser",
+                }),
+                ('entityType', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "\"BadgeUser\"",
+                }),
+                ('firstName', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "Given name",
+                }),
+                ('lastName', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "Family name",
+                }),
+            ]),
+        })
 
     def update(self, instance, validated_data):
         password = validated_data.pop('password') if 'password' in validated_data else None
@@ -48,6 +89,17 @@ class BadgeUserSerializerV2(DetailSerializerV2):
 
 class BadgeUserTokenSerializerV2(BaseSerializerV2):
     token = serializers.CharField(read_only=True, source='cached_token')
+
+    class Meta:
+        apispec_definition = ('BadgeUserToken', {
+            'properties': OrderedDict([
+                ('token', {
+                    'type': "string",
+                    'format': "string",
+                    'description': "Access token to use in the Authorization header",
+                }),
+            ])
+        })
 
     def update(self, instance, validated_data):
         # noop

@@ -37,11 +37,11 @@ class BadgrAPISpecBuilder(object):
     def get_serializer_properties(cls, serializer, include_read_only=True, include_write_only=True):
         assert isinstance(serializer, BaseSerializer)
 
-        return {
-            field_name: cls.get_field_property(field)
+        return OrderedDict([
+            (field_name, cls.get_field_property(field))
             for field_name, field in serializer.get_fields().items()
             if (not field.read_only or include_read_only) and (not field.write_only or include_write_only)
-        }
+        ])
 
     @classmethod
     def get_field_property(cls, field):
@@ -95,6 +95,24 @@ class BadgrAPISpec(APISpec, BadgrAPISpecBuilder):
         self.scrape_endpoints()
         self.info.update({"description": preamble})
 
+    def to_dict(self):
+        # sort models alphabetically
+        self._definitions = OrderedDict([(k, self._definitions[k]) for k in sorted(self._definitions.keys())])
+        ret = super(BadgrAPISpec, self).to_dict()
+        ret['securityDefinitions'] = {
+            'api_key': {
+                "type": "apiKey",
+                "name": "Authorization",
+                "in": "header"
+            }
+        }
+        ret['security'] = [
+            {
+                'api_key': []
+            }
+        ]
+        return ret
+
     def scrape_serializers(self):
         """
         Iterate over installed apps looking for serializers with Meta.apispec_definition
@@ -147,7 +165,7 @@ class BadgrAPISpec(APISpec, BadgrAPISpecBuilder):
         for path, http_method, func in inspector.get_api_endpoints():
             http_method = http_method.lower()
 
-            if not path.startswith("/{}/".format(self.version)):  # skip if it doesnt match version
+            if not path.startswith('/api-auth/') and not path.startswith("/{}/".format(self.version)):  # skip if it doesnt match version
                 continue
 
             method_func = getattr(func.cls, http_method, None)
