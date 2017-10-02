@@ -9,6 +9,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.urlresolvers import reverse
 from django.http import Http404
+from oauth2_provider.models import AccessToken
 from rest_framework import permissions, serializers
 from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 from rest_framework.response import Response
@@ -18,10 +19,10 @@ from rest_framework.status import HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUN
 from badgeuser.models import BadgeUser, CachedEmailAddress
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
 from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserTokenSerializerV1
-from badgeuser.serializers_v2 import BadgeUserTokenSerializerV2, BadgeUserSerializerV2
+from badgeuser.serializers_v2 import BadgeUserTokenSerializerV2, BadgeUserSerializerV2, AccessTokenSerializerV2
 from badgeuser.tasks import process_email_verification
 from badgrsocialauth.utils import set_url_query_params
-from entity.api import BaseEntityDetailView
+from entity.api import BaseEntityDetailView, BaseEntityListView
 from entity.serializers import BaseSerializerV2
 from mainsite.decorators import apispec_get_operation, apispec_put_operation, apispec_operation
 from mainsite.models import BadgrApp
@@ -341,3 +342,20 @@ class BadgeUserEmailConfirm(BaseUserRecoveryView):
         redirect_url = set_url_query_params(redirect_url, authToken=user.auth_token)
 
         return Response(status=HTTP_302_FOUND, headers={'Location': redirect_url})
+
+
+class AccessTokenList(BaseEntityListView):
+    model = AccessToken
+    v2_serializer_class = AccessTokenSerializerV2
+    valid_scopes = []
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_objects(self, request, **kwargs):
+        return request.user.oauth2_provider_accesstoken.all()
+
+    @apispec_operation(
+        summary='Get a list of access tokens for authenticated user',
+        tags=['Authentication']
+    )
+    def get(self, request, **kwargs):
+        return super(AccessTokenList, self).get(request, **kwargs)

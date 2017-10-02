@@ -104,3 +104,16 @@ class BadgeUserTokenSerializerV2(BaseSerializerV2):
     def update(self, instance, validated_data):
         # noop
         return instance
+
+
+class AccessTokenSerializerV2(BaseSerializerV2):
+    expires = serializers.DateTimeField(read_only=True)
+    scope = serializers.CharField(read_only=True)
+    created = serializers.DateTimeField(read_only=True)
+    updated = serializers.DateTimeField(read_only=True)
+
+    def to_representation(self, instance):
+        representation = super(AccessTokenSerializerV2, self).to_representation(instance)
+        representation['token'] = "***{}".format(instance.token[-5:])
+        representation['application'] = instance.application.name
+        return representation
