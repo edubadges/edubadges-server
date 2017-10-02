@@ -422,6 +422,8 @@ OAUTH2_PROVIDER = {
     'OAUTH2_VALIDATOR_CLASS': 'mainsite.oauth_validator.BadgrRequestValidator'
 
 }
+OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2_provider.Application'
+OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'oauth2_provider.AccessToken'
 
 # Allow use of weaker CAs (1024 bits) to avoid problem with chained certificates used by accounts.google.com
 # Ideally this environment variable would be set on a per-environment basis, only where needed
