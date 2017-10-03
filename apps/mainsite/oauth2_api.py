@@ -32,7 +32,13 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
 
     skip_authorization_completely = False
 
+    def get_authorization_redirect_url(self, scopes, credentials, allow=True):
+        uri, headers, body, status = self.create_authorization_response(
+            request=self.request, scopes=scopes, credentials=credentials, allow=allow)
+        return uri
+
     def post(self, request, *args, **kwargs):
+        # Copy/Pasta'd from oauth2_provider.views.BaseAuthorizationView.form_valid
         try:
             serializer = AuthorizationSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
@@ -46,12 +52,8 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
 
             scopes = ' '.join(serializer.data.get("scopes"))
             allow = serializer.data.get("allow")
-            uri, headers, body, status = self.create_authorization_response(
-                request=self.request, scopes=scopes, credentials=credentials, allow=allow)
-
-            return Response({
-                'success_url': uri
-            })
+            success_url = self.get_authorization_redirect_url(scopes, credentials, allow)
+            return Response({ 'success_url': success_url })
 
         except OAuthToolkitError as error:
             return Response({
@@ -59,9 +61,7 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
             }, status=HTTP_400_BAD_REQUEST)
 
     def get(self, request, *args, **kwargs):
-        """
-        Copy/Pasta'd from oauth2_provider.views.BaseAuthorizationView
-        """
+        # Copy/Pasta'd from oauth2_provider.views.BaseAuthorizationView.get
         try:
             scopes, credentials = self.validate_authorization_request(request)
             all_scopes = get_scopes_backend().get_all_scopes()
@@ -89,10 +89,8 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
             # This is useful for in-house applications-> assume an in-house applications
             # are already approved.
             if application.skip_authorization:
-                uri, headers, body, status = self.create_authorization_response(
-                    request=self.request, scopes=" ".join(scopes),
-                    credentials=credentials, allow=True)
-                return HttpResponseUriRedirect(uri)
+                success_url = self.get_authorization_redirect_url(" ".join(scopes), credentials)
+                return Response({ 'success_url': success_url })
 
             elif require_approval == "auto":
                 tokens = get_access_token_model().objects.filter(
@@ -104,10 +102,8 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
                 # check past authorizations regarded the same scopes as the current one
                 for token in tokens:
                     if token.allow_scopes(scopes):
-                        uri, headers, body, status = self.create_authorization_response(
-                            request=self.request, scopes=" ".join(scopes),
-                            credentials=credentials, allow=True)
-                        return HttpResponseUriRedirect(uri)
+                        success_url = self.get_authorization_redirect_url(" ".join(scopes), credentials)
+                        return Response({ 'success_url': success_url })
 
             return Response(kwargs)
 
