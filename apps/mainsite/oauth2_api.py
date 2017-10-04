@@ -66,29 +66,32 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
         # Copy/Pasta'd from oauth2_provider.views.BaseAuthorizationView.get
         try:
             scopes, credentials = self.validate_authorization_request(request)
-            all_scopes = get_scopes_backend().get_all_scopes()
-            kwargs["scopes"] = scopes
-            kwargs["scopes_descriptions"] = [all_scopes[scope] for scope in scopes]
+            # all_scopes = get_scopes_backend().get_all_scopes()
+            # kwargs["scopes"] = scopes
+            # kwargs["scopes_descriptions"] = [all_scopes[scope] for scope in scopes]
             # at this point we know an Application instance with such client_id exists in the database
 
             # TODO: Cache this!
             application = get_application_model().objects.get(client_id=credentials["client_id"])
 
-            # kwargs["application"] = application
             kwargs["client_id"] = credentials["client_id"]
             kwargs["redirect_uri"] = credentials["redirect_uri"]
             kwargs["response_type"] = credentials["response_type"]
             kwargs["state"] = credentials["state"]
             try:
-                kwargs["application"] = dict(
-                    name=application.applicationinfo.get_visible_name(),
-                    image=application.applicationinfo.icon.url,
-                )
+                kwargs["application"] = {
+                    "name": application.applicationinfo.get_visible_name(),
+                }
+                if application.applicationinfo.icon:
+                    kwargs["application"]['image'] = application.applicationinfo.icon.url
+                if application.applicationinfo.website_url:
+                    kwargs["application"]["url"] = application.applicationinfo.website_url
+                kwargs["scopes"] = application.applicationinfo.allowed_scopes.split(" ")
             except ApplicationInfo.DoesNotExist:
                 kwargs["application"] = dict(
-                    name=application.name
+                    name=application.name,
+                    scopes=["r:profile"]
                 )
-                pass
 
             self.oauth2_data = kwargs
 

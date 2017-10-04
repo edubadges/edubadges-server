@@ -94,8 +94,10 @@ class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive):
 
 class ApplicationInfo(cachemodel.CacheModel):
     application = models.OneToOneField('oauth2_provider.Application')
-    icon = models.ImageField(blank=True, null=True)
-    name = models.CharField(max_length=254, blank=True, null=True)
+    icon = models.FileField(blank=True, null=True)
+    name = models.CharField(max_length=254, blank=True, null=True, default=None)
+    website_url = models.URLField(blank=True, null=True, default=None)
+    allowed_scopes = models.TextField(blank=True)
 
     def get_visible_name(self):
         if self.name:
