@@ -23,6 +23,7 @@ from badgeuser.tasks import process_email_verification
 from badgrsocialauth.utils import set_url_query_params
 from entity.api import BaseEntityDetailView, BaseEntityListView
 from entity.serializers import BaseSerializerV2
+from issuer.permissions import BadgrOAuthTokenHasScope
 from mainsite.decorators import apispec_get_operation, apispec_put_operation, apispec_operation, \
     apispec_delete_operation, apispec_list_operation
 from mainsite.models import BadgrApp
@@ -33,7 +34,8 @@ class BadgeUserDetail(BaseEntityDetailView):
     model = BadgeUser
     v1_serializer_class = BadgeUserProfileSerializerV1
     v2_serializer_class = BadgeUserSerializerV2
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.AllowAny, BadgrOAuthTokenHasScope)
+    valid_scopes = ["r:profile"]
 
     def post(self, request, **kwargs):
         """
