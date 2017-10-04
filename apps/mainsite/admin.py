@@ -2,7 +2,7 @@
 import basic_models
 from allauth.socialaccount.models import SocialToken, SocialAccount
 
-from django.contrib.admin import AdminSite, ModelAdmin
+from django.contrib.admin import AdminSite, ModelAdmin, StackedInline
 from django.utils.module_loading import autodiscover_modules
 from django.utils.translation import ugettext_lazy
 from oauth2_provider.models import get_application_model, get_grant_model, get_access_token_model, \
@@ -10,7 +10,7 @@ from oauth2_provider.models import get_application_model, get_grant_model, get_a
 
 from badgeuser.models import CachedEmailAddress, ProxyEmailConfirmation
 from mainsite.admin_actions import delete_selected
-from mainsite.models import BadgrApp, EmailBlacklist
+from mainsite.models import BadgrApp, EmailBlacklist, ApplicationInfo
 
 
 class BadgrAdminSite(AdminSite):
@@ -71,7 +71,17 @@ Grant = get_grant_model()
 AccessToken = get_access_token_model()
 RefreshToken = get_refresh_token_model()
 
-badgr_admin.register(Application, ApplicationAdmin)
+
+class ApplicationInfoInline(StackedInline):
+    model = ApplicationInfo
+    extra = 1
+
+
+class ApplicationInfoAdmin(ApplicationAdmin):
+    inlines = [
+        ApplicationInfoInline
+    ]
+badgr_admin.register(Application, ApplicationInfoAdmin)
 badgr_admin.register(Grant, GrantAdmin)
 badgr_admin.register(AccessToken, AccessTokenAdmin)
 badgr_admin.register(RefreshToken, RefreshTokenAdmin)

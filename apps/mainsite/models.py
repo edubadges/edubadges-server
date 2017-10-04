@@ -90,3 +90,14 @@ class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive):
 
     def __unicode__(self):
         return self.cors
+
+
+class ApplicationInfo(cachemodel.CacheModel):
+    application = models.OneToOneField('oauth2_provider.Application')
+    icon = models.ImageField(blank=True, null=True)
+    name = models.CharField(max_length=254, blank=True, null=True)
+
+    def get_visible_name(self):
+        if self.name:
+            return self.name
+        return self.application.name

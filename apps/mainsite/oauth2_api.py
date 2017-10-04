@@ -13,6 +13,8 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 
+from mainsite.models import ApplicationInfo
+
 
 class AuthorizationSerializer(serializers.Serializer):
     client_id = serializers.CharField(required=True)
@@ -77,6 +79,16 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
             kwargs["redirect_uri"] = credentials["redirect_uri"]
             kwargs["response_type"] = credentials["response_type"]
             kwargs["state"] = credentials["state"]
+            try:
+                kwargs["application"] = dict(
+                    name=application.applicationinfo.get_visible_name(),
+                    image=application.applicationinfo.icon.url,
+                )
+            except ApplicationInfo.DoesNotExist:
+                kwargs["application"] = dict(
+                    name=application.name
+                )
+                pass
 
             self.oauth2_data = kwargs
 
