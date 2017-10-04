@@ -406,17 +406,9 @@ ARTIFACT_VERSION = determine_version()
 
 OAUTH2_PROVIDER = {
     'SCOPES': {
-        'rw:issuer': 'Read/write issuers scope',
-        'rw:issuer:*': 'Read/write issuer scope',
-        'l:issuer': 'List issuers scope',
-
-        'rw:badgeclass': 'Read/write badge classs scope',
-        'rw:badgeclass:*': 'Read/write badge class scope',
-        'l:badgeclass': 'List adgeclasses scope',
-
-        'rw:assertion': 'Read/write assertions scope',
-        'rw:assertion:*': 'Read/write assertion scope',
-        'l:assertion': 'List assertions scope',
+        'r:profile': 'Read user profile',
+        'rw:issuer': 'Read/write issuers',
+        'rw:issuer:*': 'Read/write single issuer',
     },
 
     'OAUTH2_VALIDATOR_CLASS': 'mainsite.oauth_validator.BadgrRequestValidator'

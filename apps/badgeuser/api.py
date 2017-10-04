@@ -347,7 +347,6 @@ class BadgeUserEmailConfirm(BaseUserRecoveryView):
 class AccessTokenList(BaseEntityListView):
     model = BadgrAccessToken
     v2_serializer_class = AccessTokenSerializerV2
-    valid_scopes = []
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_objects(self, request, **kwargs):
