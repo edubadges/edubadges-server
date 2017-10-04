@@ -107,8 +107,14 @@ class BadgeUserTokenSerializerV2(BaseSerializerV2):
         return instance
 
 
+
+class ApplicationInfoSerializer(serializers.Serializer):
+    name = serializers.CharField(read_only=True, source='get_visible_name')
+    image = serializers.URLField(read_only=True, source='get_icon_url')
+
+
 class AccessTokenSerializerV2(DetailSerializerV2):
-    application = serializers.CharField(read_only=True, source='application_name')
+    application = ApplicationInfoSerializer(source='applicationinfo')
     scope = serializers.CharField(read_only=True)
     expires = serializers.DateTimeField(read_only=True)
     created = serializers.DateTimeField(read_only=True)

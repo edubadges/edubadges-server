@@ -103,3 +103,7 @@ class ApplicationInfo(cachemodel.CacheModel):
         if self.name:
             return self.name
         return self.application.name
+
+    def get_icon_url(self):
+        if self.icon:
+            return self.icon.url

@@ -22,6 +22,7 @@ from backpack.models import BackpackCollection
 from entity.models import BaseVersionedEntity
 from issuer.models import Issuer, BadgeInstance
 from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager
+from mainsite.models import ApplicationInfo
 
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
@@ -347,3 +348,11 @@ class BadgrAccessToken(AccessToken, cachemodel.CacheModel):
     @property
     def application_name(self):
         return self.application.name
+
+    @property
+    def applicationinfo(self):
+        try:
+            return self.application.applicationinfo
+        except ApplicationInfo.DoesNotExist:
+            return ApplicationInfo()
+
