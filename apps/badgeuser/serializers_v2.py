@@ -111,6 +111,7 @@ class BadgeUserTokenSerializerV2(BaseSerializerV2):
 class ApplicationInfoSerializer(serializers.Serializer):
     name = serializers.CharField(read_only=True, source='get_visible_name')
     image = serializers.URLField(read_only=True, source='get_icon_url')
+    website_url = serializers.URLField(read_only=True)
 
 
 class AccessTokenSerializerV2(DetailSerializerV2):
