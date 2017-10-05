@@ -86,7 +86,7 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
                     kwargs["application"]['image'] = application.applicationinfo.icon.url
                 if application.applicationinfo.website_url:
                     kwargs["application"]["url"] = application.applicationinfo.website_url
-                kwargs["scopes"] = application.applicationinfo.allowed_scopes.split(" ")
+                kwargs["scopes"] = scopes = application.applicationinfo.allowed_scopes.split(" ")
             except ApplicationInfo.DoesNotExist:
                 kwargs["application"] = dict(
                     name=application.name,
@@ -107,7 +107,7 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
                 success_url = self.get_authorization_redirect_url(" ".join(scopes), credentials)
                 return Response({ 'success_url': success_url })
 
-            elif require_approval == "auto":
+            elif require_approval == "auto" and not request.user.is_anonymous:
                 tokens = get_access_token_model().objects.filter(
                     user=request.user,
                     application=application,
