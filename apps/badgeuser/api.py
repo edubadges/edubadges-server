@@ -9,6 +9,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.urlresolvers import reverse
 from django.http import Http404
+from django.utils import timezone
 from rest_framework import permissions, serializers
 from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 from rest_framework.response import Response
@@ -352,7 +353,7 @@ class AccessTokenList(BaseEntityListView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_objects(self, request, **kwargs):
-        return BadgrAccessToken.objects.filter(user=request.user)
+        return BadgrAccessToken.objects.filter(user=request.user, expires__gt=timezone.now())
 
     @apispec_list_operation('AccessToken',
         summary='Get a list of access tokens for authenticated user',
