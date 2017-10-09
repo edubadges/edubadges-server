@@ -13,6 +13,13 @@ from badgrsocialauth.utils import set_session_verification_email, get_session_au
 
 class BadgrSocialAccountAdapter(DefaultSocialAccountAdapter):
 
+    def authentication_error(self, request, provider_id, error=None, exception=None, extra_context=None):
+        badgr_app = get_session_badgr_app(self.request)
+        redirect_url = "{url}?authError={message}".format(
+            url=badgr_app.ui_login_redirect,
+            message=urllib.quote("Authentication error"))
+        raise ImmediateHttpResponse(HttpResponseRedirect(redirect_to=redirect_url))
+
     def _update_session(self, request, sociallogin):
         email = user_email(sociallogin.user)
         set_session_verification_email(request, email)
@@ -35,9 +42,8 @@ class BadgrSocialAccountAdapter(DefaultSocialAccountAdapter):
             auth_token = get_session_auth_token(request)
             if auth_token is not None:
                 verified_user = get_verified_user(auth_token)
-                if verified_user == sociallogin.user:
-                    request.user = verified_user
-                else:
+                request.user = verified_user
+                if sociallogin.is_existing and verified_user != sociallogin.user:
                     badgr_app = get_session_badgr_app(self.request)
                     redirect_url = "{url}?authError={message}".format(
                         url=badgr_app.ui_connect_success_redirect,
