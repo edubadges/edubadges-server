@@ -13,9 +13,11 @@ boto==2.33.0
 django-boto==0.3.12
 django-ses==0.6.0
 django-storages==1.6.5
-pycurl==7.43.0 --global-option="--with-nss"
+pycurl==7.43.0
 boto3==1.4.7
 
+
+python-resize-image==1.1.10
 
 # CSky models
 git+https://github.com/concentricsky/django-cachemodel.git@v2.1.6
