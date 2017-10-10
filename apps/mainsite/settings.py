@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_celery_results',
 
     # OAuth 2 provider
     'oauth2_provider',
@@ -77,6 +78,9 @@ UNSUBSCRIBE_SECRET_KEY = 'kAYWM0YWI2MDj/FODBZjE0ZDI4N'
 # Hosts/domain names that are valid for this site.
 # "*" matches anything, ".example.com" matches example.com and all subdomains
 ALLOWED_HOSTS = ['*', ]
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 ##
 #
@@ -423,18 +427,3 @@ OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'oauth2_provider.AccessToken'
 import os
 import certifi
 os.environ['REQUESTS_CA_BUNDLE'] = certifi.old_where()
-
-##
-#
-#  Import settings_local.
-#
-##
-
-try:
-    from settings_local import *
-except ImportError as e:
-    import traceback
-    traceback.print_exc()
-    sys.stderr.write("no settings_local found, setting DEBUG=True...\n")
-    DEBUG = True
-
