@@ -45,6 +45,8 @@ Requires(postun): /usr/sbin/userdel
 
 Requires: apr
 Requires: cairo
+Requires: httpd
+Requires: mod_wsgi
 Requires: libdbi
 Requires: libpng12
 Requires: libjpeg-turbo
@@ -65,6 +67,7 @@ Open Badge issuing and management with Django
 %pre
 /usr/bin/getent group %{app_user} || /usr/sbin/groupadd -r %{app_user}
 /usr/bin/getent passwd %{app_user} || /usr/sbin/useradd -r -d %{install_dir} -s /bin/bash %{app_user} -g %{app_user} -k /etc/skel -m
+/sbin/usermod -G %{app_user} apache
 
 %preun
 
