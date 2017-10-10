@@ -64,7 +64,7 @@ Open Badge issuing and management with Django
 
 %pre
 /usr/bin/getent group %{app_user} || /usr/sbin/groupadd -r %{app_user}
-/usr/bin/getent passwd %{app_user} || /usr/sbin/useradd -r -d /opt/site -s /bin/bash web -g web
+/usr/bin/getent passwd %{app_user} || /usr/sbin/useradd -r -d %{install_dir} -s /bin/bash %{app_user} -g %{app_user} -k /etc/skel -m
 
 %preun
 
@@ -149,7 +149,6 @@ echo '{"version": '"\"%{version}\""', "release": '"\"%{release}\""', "commit_sha
 %{__cp} -Rp %{base_dir}/static/* %{buildroot}%{install_dir}/static/%{version}/
 %{__cp} -Rp %{base_dir}/code/*  %{buildroot}%{install_dir}/builds/%{version}/code/
 %{__cp} -Rp %{install_dir}/builds/%{version}/env %{buildroot}%{install_dir}/builds/%{version}/
-
 
 
 %files
