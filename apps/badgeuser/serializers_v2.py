@@ -1,3 +1,4 @@
+import base64
 from collections import OrderedDict
 
 from rest_framework import serializers
@@ -104,3 +105,21 @@ class BadgeUserTokenSerializerV2(BaseSerializerV2):
     def update(self, instance, validated_data):
         # noop
         return instance
+
+
+
+class ApplicationInfoSerializer(serializers.Serializer):
+    name = serializers.CharField(read_only=True, source='get_visible_name')
+    image = serializers.URLField(read_only=True, source='get_icon_url')
+    website_url = serializers.URLField(read_only=True)
+
+
+class AccessTokenSerializerV2(DetailSerializerV2):
+    application = ApplicationInfoSerializer(source='applicationinfo')
+    scope = serializers.CharField(read_only=True)
+    expires = serializers.DateTimeField(read_only=True)
+    created = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        apispec_definition = ('AccessToken', {})
+

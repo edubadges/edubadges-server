@@ -13,6 +13,6 @@ class BadgrOAuth2Authentication(BaseAuthentication):
         oauthlib_core = get_oauthlib_core()
         valid, r = oauthlib_core.verify_request(request, scopes=[])
         if valid:
-            return r.access_token.application.user, r.access_token
+            return r.access_token.user, r.access_token
         else:
             return None

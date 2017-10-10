@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 
+import base64
 import random
+import re
 import string
 from hashlib import md5
 from itertools import chain
@@ -13,12 +15,14 @@ from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _
+from oauth2_provider.models import AccessToken
 from rest_framework.authtoken.models import Token
 
 from backpack.models import BackpackCollection
 from entity.models import BaseVersionedEntity
 from issuer.models import Issuer, BadgeInstance
 from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager
+from mainsite.models import ApplicationInfo
 
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
@@ -299,3 +303,56 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
                     # nothing to do, abort so we dont call .publish()
                     return
         return super(BadgeUser, self).save(*args, **kwargs)
+
+
+class BadgrAccessTokenManager(models.Manager):
+    def get_from_entity_id(self, entity_id):
+        # lookup by a faked
+        padding = len(entity_id) % 4
+        if padding > 0:
+            entity_id = '{}{}'.format(entity_id, (4-padding)*'=')
+        decoded = base64.urlsafe_b64decode(entity_id.encode('utf-8'))
+        id = re.sub(r'^{}'.format(self.model.fake_entity_id_prefix), '', decoded)
+        try:
+            pk = int(id)
+        except ValueError as e:
+            pass
+        else:
+            try:
+                obj = self.get(pk=pk)
+            except self.model.DoesNotExist:
+                pass
+            else:
+                return obj
+        raise self.model.DoesNotExist
+
+
+class BadgrAccessToken(AccessToken, cachemodel.CacheModel):
+    objects = BadgrAccessTokenManager()
+    fake_entity_id_prefix = "BadgrAccessToken.id="
+
+    class Meta:
+        proxy = True
+
+    @property
+    def entity_id(self):
+        # fake an entityId for this non-entity
+        digest = "{}{}".format(self.fake_entity_id_prefix, self.pk)
+        b64_string = base64.urlsafe_b64encode(digest)
+        b64_trimmed = re.sub(r'=+$', '', b64_string)
+        return b64_trimmed
+
+    def get_entity_class_name(self):
+        return 'AccessToken'
+
+    @property
+    def application_name(self):
+        return self.application.name
+
+    @property
+    def applicationinfo(self):
+        try:
+            return self.application.applicationinfo
+        except ApplicationInfo.DoesNotExist:
+            return ApplicationInfo()
+
