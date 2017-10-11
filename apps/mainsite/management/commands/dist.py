@@ -3,6 +3,7 @@ import sys
 from subprocess import call
 
 from django.apps import apps
+from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 
 
@@ -15,6 +16,8 @@ class Command(BaseCommand):
         Builds gulp resources.
         Gulp must be installed, and node_modules must be populated with `npm install`
         """
+
+        call_command('generate_swagger_spec')
 
         if apps.is_installed('badgebook'):
             # if badgebook is present, build its grunt

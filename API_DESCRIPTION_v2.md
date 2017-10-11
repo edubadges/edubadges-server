@@ -3,7 +3,7 @@
 Authentication is performed using the HTTP Basic Auth scheme.  Authenticate requests by including an Authorization header.  For example:
 
 ```bash
-curl https://api.badgr.io/v2/user/profile -H "Authorization: Token Wi3U7IMRxSXwvBH9m5x6NlEFdtd3CsJBsTHfYKFO7mI="
+curl https://api.badgr.io/v2/users/self -H "Authorization: Token <auth token>"
 ```
 
 # Generate Auth Token
