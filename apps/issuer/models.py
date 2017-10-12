@@ -706,6 +706,8 @@ class BadgeInstance(BaseAuditedModel,
         from recipient.models import RecipientProfile
         try:
             return RecipientProfile.cached.get(recipient_identifier=self.recipient_identifier)
+        except RecipientProfile.MultipleObjectsReturned:
+            return RecipientProfile.objects.filter(recipient_identifier=self.recipient_identifier).first()
         except RecipientProfile.DoesNotExist:
             return None
 
