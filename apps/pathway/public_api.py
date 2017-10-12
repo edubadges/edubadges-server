@@ -22,7 +22,7 @@ class PathwayElementJson(JSONComponentView):
     renderer_classes = (JSONRenderer, PathwayElementHTMLRenderer,)
     html_renderer_class = PathwayElementHTMLRenderer
 
-    def get(self, request, pathway_slug, element_slug, format='html'):
+    def get(self, request, pathway_slug, element_slug, **kwargs):
         try:
             self.current_object = self.model.cached.get(slug=element_slug)
         except self.model.DoesNotExist:
