@@ -329,7 +329,7 @@ class BadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
 
     def get_objects(self, request, **kwargs):
         badgeclass = self.get_object(request, **kwargs)
-        return badgeclass.cached_badgeinstances()
+        return [a for a in badgeclass.cached_badgeinstances() if not a.revoked]
 
     def get_context_data(self, **kwargs):
         context = super(BadgeInstanceList, self).get_context_data(**kwargs)
@@ -374,7 +374,7 @@ class IssuerBadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
 
     def get_objects(self, request, **kwargs):
         issuer = self.get_object(request, **kwargs)
-        assertions = issuer.cached_badgeinstances()
+        assertions = [a for a in issuer.cached_badgeinstances() if not a.revoked]
 
         # filter badgeclasses by recipient if present in query_params
         if 'recipient' in request.query_params:
