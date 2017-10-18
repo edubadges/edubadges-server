@@ -275,8 +275,9 @@ class RecipientCompletionSerializer(serializers.Serializer):
                     '@id': node['element'].jsonld_id,
                     'slug': node['element'].slug
                 }
-            for child in node['children'].values():
-                _walk(child)
+            if 'children' in node:
+                for child in node['children'].values():
+                    _walk(child)
         for completion in instance['completions']:
             _walk(completion)
 
