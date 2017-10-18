@@ -263,7 +263,26 @@ class PathwayElementCompletionSpecSerializer(serializers.Serializer):
 
 class RecipientCompletionSerializer(serializers.Serializer):
     recipient = LinkedDataReferenceField(keys=['slug'], model=RecipientProfile, field_names={'slug': 'entity_id'})
-    completions = serializers.ListField(child=serializers.DictField())
+    # completions = serializers.ListField(child=serializers.DictField())
+
+    def to_representation(self, instance):
+        represenation = super(RecipientCompletionSerializer, self).to_representation(instance)
+
+        # walk completions and scrub PathwayElements into jsonld references
+        def _walk(node):
+            if 'element' in node and isinstance(node['element'], PathwayElement):
+                node['element'] = {
+                    '@id': node['element'].jsonld_id,
+                    'slug': node['element'].slug
+                }
+            for child in node['children'].values():
+                _walk(child)
+        for completion in instance['completions']:
+            _walk(completion)
+
+        represenation['completions'] = instance['completions']
+        return represenation
+
 
 
 class PathwayElementCompletionSerializer(serializers.Serializer):
