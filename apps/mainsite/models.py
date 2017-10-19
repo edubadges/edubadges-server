@@ -2,6 +2,7 @@ import StringIO
 import abc
 import base64
 import os
+import re
 import urlparse
 
 import basic_models
@@ -14,7 +15,7 @@ import requests
 from basic_models.managers import ActiveObjectsManager
 from basic_models.models import CreatedUpdatedBy, CreatedUpdatedAt, IsActive
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core.files.storage import DefaultStorage
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -22,6 +23,7 @@ from django.db import models
 from autoslug import AutoSlugField
 import cachemodel
 from django.db.models import Manager
+from django.utils.deconstruct import deconstructible
 from jsonfield import JSONField
 
 from mainsite.utils import OriginSetting, fetch_remote_file_to_storage
@@ -92,12 +94,28 @@ class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive):
         return self.cors
 
 
+@deconstructible
+class DefinedScopesValidator(object):
+    message = "Does not match defined scopes"
+    code = 'invalid'
+
+    def __call__(self, value):
+        defined_scopes = set(getattr(settings, 'OAUTH2_PROVIDER', {}).get('SCOPES', {}).keys())
+        provided_scopes = set(s.strip() for s in re.split(r'[\s\n]+', value))
+        if provided_scopes - defined_scopes:
+            raise ValidationError(self.message, code=self.code)
+        pass
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__)
+
+
 class ApplicationInfo(cachemodel.CacheModel):
     application = models.OneToOneField('oauth2_provider.Application')
     icon = models.FileField(blank=True, null=True)
     name = models.CharField(max_length=254, blank=True, null=True, default=None)
     website_url = models.URLField(blank=True, null=True, default=None)
-    allowed_scopes = models.TextField(blank=True)
+    allowed_scopes = models.TextField(blank=False, validators=[DefinedScopesValidator()])
 
     def get_visible_name(self):
         if self.name:

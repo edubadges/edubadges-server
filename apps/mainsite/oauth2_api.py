@@ -1,6 +1,8 @@
 # encoding: utf-8
 from __future__ import unicode_literals
 
+import re
+
 from django.utils import timezone
 from oauth2_provider.exceptions import OAuthToolkitError
 from oauth2_provider.http import HttpResponseUriRedirect
@@ -86,7 +88,7 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
                     kwargs["application"]['image'] = application.applicationinfo.icon.url
                 if application.applicationinfo.website_url:
                     kwargs["application"]["url"] = application.applicationinfo.website_url
-                kwargs["scopes"] = scopes = application.applicationinfo.allowed_scopes.split(" ")
+                kwargs["scopes"] = [s for s in re.split(r'[\s\n]+', application.applicationinfo.allowed_scopes) if s]
             except ApplicationInfo.DoesNotExist:
                 kwargs["application"] = dict(
                     name=application.name,
