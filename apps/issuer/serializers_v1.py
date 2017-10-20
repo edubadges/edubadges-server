@@ -136,7 +136,8 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
     pathway_element_count = serializers.IntegerField(required=False, read_only=True)
     description = StripTagsCharField(max_length=16384, required=True)
 
-    alignment = AlignmentItemSerializerV1(read_only=True, many=True, source='cached_alignments')
+    alignment = AlignmentItemSerializerV1(many=True, source='alignment_items', required=False)
+    tags = serializers.ListField(child=StripTagsCharField(max_length=1024), source='tag_items', required=False)
 
     class Meta:
         apispec_definition = ('BadgeClass', {})
@@ -183,6 +184,13 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
 
         if 'image' in validated_data:
             instance.image = validated_data.get('image')
+
+        if 'tag_items' in validated_data:
+            for tag_name in validated_data['tag_items']:
+                instance.badgeclasstag_set.get_or_create(name=tag_name)
+        if 'alignment_items' in validated_data:
+            for alignment in validated_data['alignment_items']:
+                instance.badgeclassalignment_set.create(**alignment)
 
         instance.save()
         return instance
