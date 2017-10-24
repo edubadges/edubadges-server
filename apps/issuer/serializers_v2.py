@@ -121,9 +121,9 @@ class IssuerSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
 class AlignmentItemSerializerV2(BaseSerializerV2, OriginalJsonSerializerMixin):
     targetName = StripTagsCharField(source='target_name')
     targetUrl = serializers.URLField(source='target_url')
-    targetDescription = StripTagsCharField(source='target_description', required=False, allow_null=True)
-    targetFramework = StripTagsCharField(source='target_framework', required=False, allow_null=True)
-    targetCode = StripTagsCharField(source='target_code', required=False, allow_null=True)
+    targetDescription = StripTagsCharField(source='target_description', required=False, allow_null=True, allow_blank=True)
+    targetFramework = StripTagsCharField(source='target_framework', required=False, allow_null=True, allow_blank=True)
+    targetCode = StripTagsCharField(source='target_code', required=False, allow_null=True, allow_blank=True)
 
     class Meta:
         apispec_definition = ('BadgeClassAlignment', {
