@@ -114,9 +114,9 @@ class IssuerRoleActionSerializerV1(serializers.Serializer):
 class AlignmentItemSerializerV1(serializers.Serializer):
     target_name = StripTagsCharField()
     target_url = serializers.URLField()
-    target_description = StripTagsCharField(required=False)
-    target_framework = StripTagsCharField(required=False)
-    target_code = StripTagsCharField(required=False)
+    target_description = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
+    target_framework = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
+    target_code = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
 
     class Meta:
         apispec_definition = ('BadgeClassAlignment', {})
