@@ -39,7 +39,7 @@ class IssuerSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     name = StripTagsCharField(max_length=1024)
     image = ValidImageField(required=False)
     email = serializers.EmailField(max_length=255, required=True)
-    description = StripTagsCharField(max_length=1024, required=True)
+    description = StripTagsCharField(max_length=16384, required=True)
     url = serializers.URLField(max_length=1024, required=True)
     staff = IssuerStaffSerializerV2(many=True, source='staff_items', required=False)
 
@@ -121,9 +121,9 @@ class IssuerSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
 class AlignmentItemSerializerV2(BaseSerializerV2, OriginalJsonSerializerMixin):
     targetName = StripTagsCharField(source='target_name')
     targetUrl = serializers.URLField(source='target_url')
-    targetDescription = StripTagsCharField(source='target_description', required=False, allow_null=True)
-    targetFramework = StripTagsCharField(source='target_framework', required=False, allow_null=True)
-    targetCode = StripTagsCharField(source='target_code', required=False, allow_null=True)
+    targetDescription = StripTagsCharField(source='target_description', required=False, allow_null=True, allow_blank=True)
+    targetFramework = StripTagsCharField(source='target_framework', required=False, allow_null=True, allow_blank=True)
+    targetCode = StripTagsCharField(source='target_code', required=False, allow_null=True, allow_blank=True)
 
     class Meta:
         apispec_definition = ('BadgeClassAlignment', {
@@ -140,7 +140,7 @@ class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
 
     name = StripTagsCharField(max_length=1024)
     image = ValidImageField(required=False)
-    description = StripTagsCharField(max_length=1024, required=True)
+    description = StripTagsCharField(max_length=16384, required=True)
 
     criteriaUrl = StripTagsCharField(source='criteria_url', required=False, allow_null=True, validators=[URLValidator()])
     criteriaNarrative = MarkdownCharField(source='criteria_text', required=False, allow_null=True)

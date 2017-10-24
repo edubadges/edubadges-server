@@ -203,8 +203,14 @@ class BadgrOAuthTokenHasEntityScope(permissions.BasePermission):
         if not token:
             return False
 
+        # badgeclass/assertion objects defer to the issuer for permissions
+        if hasattr(obj, 'cached_issuer'):
+            entity_id = obj.cached_issuer.entity_id
+        else:
+            entity_id = obj.entity_id
+
         valid_scopes = self._get_valid_scopes(request, view)
-        valid_scopes = set([self._resolve_wildcard(scope, obj.entity_id) for scope in valid_scopes])
+        valid_scopes = set([self._resolve_wildcard(scope, entity_id) for scope in valid_scopes])
         token_scopes = set(token.scope.split())
 
         return not token.is_expired() and len(valid_scopes.intersection(token_scopes)) > 0
