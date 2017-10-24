@@ -159,7 +159,7 @@ class BadgeClassDetail(BaseEntityDetailView):
     v1_serializer_class = BadgeClassSerializerV1
     v2_serializer_class = BadgeClassSerializerV2
 
-    valid_scopes = ["rw:issuer"],
+    valid_scopes = ["rw:issuer"]
 
     @apispec_get_operation('BadgeClass',
         summary='Get a single BadgeClass',
