@@ -37,7 +37,11 @@
 
 		      {% if badge_class.criteria_text %}
 		      <h3 class="title title-small">Criteria</h3>
-			    {{ badge_class.criteria_text|markdownify|safe }}
+					<div class="markdowneditor">
+						<div class="markdowneditor-x-display">
+							{{ badge_class.criteria_text|markdownify|safe }}
+						</div>
+					</div>
 					{% endif %}
 
 			    <div class="l-childrenhorizontal l-childrenhorizontal-small l-offsetleft">
