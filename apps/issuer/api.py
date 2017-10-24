@@ -195,10 +195,10 @@ class BadgeClassDetail(BaseEntityDetailView):
 
 class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):
     model = BadgeClass  # used by .get_object()
-    permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass, BadgrOAuthTokenHasScope)
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass, BadgrOAuthTokenHasEntityScope)
     v1_serializer_class = BadgeInstanceSerializerV1
     v2_serializer_class = BadgeInstanceSerializerV2
-    valid_scopes = ["rw:issuer"]
+    valid_scopes = ["rw:issuer", "rw:issuer:*"]
 
     def get_context_data(self, **kwargs):
         context = super(BatchAssertionsIssue, self).get_context_data(**kwargs)
@@ -247,9 +247,9 @@ class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):
 
 class BatchAssertionsRevoke(VersionedObjectMixin, BaseEntityView):
     model = BadgeInstance
-    permission_classes = (AuthenticatedWithVerifiedEmail, BadgrOAuthTokenHasScope)
+    permission_classes = (AuthenticatedWithVerifiedEmail, BadgrOAuthTokenHasEntityScope)
     v2_serializer_class = BadgeInstanceSerializerV2
-    valid_scopes = ["rw:issuer"]
+    valid_scopes = ["rw:issuer", "rw:issuer:*"]
 
     def get_context_data(self, **kwargs):
         context = super(BatchAssertionsRevoke, self).get_context_data(**kwargs)
