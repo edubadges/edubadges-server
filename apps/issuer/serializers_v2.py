@@ -39,7 +39,7 @@ class IssuerSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     name = StripTagsCharField(max_length=1024)
     image = ValidImageField(required=False)
     email = serializers.EmailField(max_length=255, required=True)
-    description = StripTagsCharField(max_length=1024, required=True)
+    description = StripTagsCharField(max_length=16384, required=True)
     url = serializers.URLField(max_length=1024, required=True)
     staff = IssuerStaffSerializerV2(many=True, source='staff_items', required=False)
 
@@ -140,7 +140,7 @@ class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
 
     name = StripTagsCharField(max_length=1024)
     image = ValidImageField(required=False)
-    description = StripTagsCharField(max_length=1024, required=True)
+    description = StripTagsCharField(max_length=16384, required=True)
 
     criteriaUrl = StripTagsCharField(source='criteria_url', required=False, allow_null=True, validators=[URLValidator()])
     criteriaNarrative = MarkdownCharField(source='criteria_text', required=False, allow_null=True)
