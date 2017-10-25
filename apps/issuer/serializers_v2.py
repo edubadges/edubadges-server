@@ -16,6 +16,18 @@ from mainsite.serializers import StripTagsCharField, MarkdownCharField, HumanRea
 from mainsite.validators import ChoicesValidator, TelephoneValidator
 
 
+class IssuerAccessTokenSerializerV2(BaseSerializerV2):
+    token = serializers.CharField()
+    issuer = serializers.CharField()
+    expires = serializers.DateTimeField()
+
+    class Meta(DetailSerializerV2.Meta):
+        apispec_definition = ('AccessToken', {})
+
+    def to_representation(self, instance):
+        return super(IssuerAccessTokenSerializerV2, self).to_representation(instance)
+
+
 class IssuerStaffSerializerV2(DetailSerializerV2):
     user = EntityRelatedFieldV2(source='cached_user', queryset=BadgeUser.cached)
     role = serializers.CharField(validators=[ChoicesValidator(dict(IssuerStaff.ROLE_CHOICES).keys())])

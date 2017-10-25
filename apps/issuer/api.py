@@ -1,7 +1,11 @@
 from collections import OrderedDict
 
+import datetime
 from django.http import Http404
-from rest_framework import status
+from django.utils import timezone
+from oauth2_provider.models import AccessToken
+from oauthlib.oauth2.rfc6749.tokens import random_token_generator
+from rest_framework import status, serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK
@@ -15,7 +19,8 @@ from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
                                 BadgrOAuthTokenHasEntityScope)
 from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    BadgeInstanceSerializerV1)
-from issuer.serializers_v2 import IssuerSerializerV2, BadgeClassSerializerV2, BadgeInstanceSerializerV2
+from issuer.serializers_v2 import IssuerSerializerV2, BadgeClassSerializerV2, BadgeInstanceSerializerV2, \
+    IssuerAccessTokenSerializerV2
 from mainsite.decorators import apispec_get_operation, apispec_put_operation, \
     apispec_delete_operation, apispec_list_operation, apispec_post_operation
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
@@ -440,3 +445,56 @@ class BadgeInstanceDetail(BaseEntityDetailView):
 
         # logger.event(badgrlog.BadgeAssertionRevokedEvent(current_assertion, request.user))
         return Response(status=HTTP_200_OK)
+
+
+class IssuerTokensList(BaseEntityListView):
+    model = AccessToken
+    permission_classes = (AuthenticatedWithVerifiedEmail, BadgrOAuthTokenHasScope)
+    v2_serializer_class = IssuerAccessTokenSerializerV2
+    valid_scopes = ["rw:issuer"]
+
+    @apispec_post_operation('AccessToken',
+        summary="Retrieve issuer tokens",
+        tags=["Issuers"],
+    )
+    def post(self, request, **kwargs):
+        issuer_entityids = request.data.get('issuers', None)
+        if not issuer_entityids:
+            raise serializers.ValidationError({"issuers": "field is required"})
+
+        issuers = []
+        for issuer_entityid in issuer_entityids:
+            try:
+                issuer = Issuer.cached.get(entity_id=issuer_entityid)
+                self.check_object_permissions(request, issuer)
+            except Issuer.DoesNotExist as e:
+                raise serializers.ValidationError({"issuers": "unknown issuer"})
+            else:
+                issuers.append(issuer)
+
+        tokens = []
+        expires = timezone.now() + datetime.timedelta(weeks=5200)
+        for issuer in issuers:
+            scope = "rw:issuer:{}".format(issuer.entity_id)
+
+            accesstoken, created = AccessToken.objects.get_or_create(
+                user=request.auth.application.user,
+                application=request.auth.application,
+                scope=scope,
+                defaults=dict(
+                    expires=expires,
+                    token=random_token_generator(request)
+                )
+            )
+            tokens.append({
+                'issuer': issuer.entity_id,
+                'token': accesstoken.token,
+                'expires': accesstoken.expires,
+            })
+
+        serializer = IssuerAccessTokenSerializerV2(data=tokens, many=True, context=dict(
+            request=request,
+            kwargs=kwargs
+        ))
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data)

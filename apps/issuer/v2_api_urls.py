@@ -1,7 +1,8 @@
 from django.conf.urls import url
 
 from issuer.api import (IssuerList, IssuerDetail, IssuerBadgeClassList, BadgeClassDetail, BadgeInstanceList,
-                        BadgeInstanceDetail, IssuerBadgeInstanceList, AllBadgeClassesList, BatchAssertionsIssue, BatchAssertionsRevoke)
+                        BadgeInstanceDetail, IssuerBadgeInstanceList, AllBadgeClassesList, BatchAssertionsIssue,
+                        BatchAssertionsRevoke, IssuerTokensList)
 
 urlpatterns = [
 
@@ -17,4 +18,6 @@ urlpatterns = [
 
     url(r'^assertions/revoke', BatchAssertionsRevoke.as_view(), name='v2_api_assertion_revoke'),
     url(r'^assertions/(?P<entity_id>[^/]+)$', BadgeInstanceDetail.as_view(), name='v2_api_assertion_detail'),
+
+    url(r'^tokens/issuers$', IssuerTokensList.as_view(), name='v2_api_tokens_list'),
 ]
