@@ -49,7 +49,7 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
     slug = StripTagsCharField(max_length=255, source='entity_id', read_only=True)
     image = ValidImageField(required=False)
     email = serializers.EmailField(max_length=255, required=True)
-    description = StripTagsCharField(max_length=16384, required=True)
+    description = StripTagsCharField(max_length=16384, required=False)
     url = serializers.URLField(max_length=1024, required=True)
     staff = IssuerStaffSerializerV1(read_only=True, source='cached_issuerstaff', many=True)
 
