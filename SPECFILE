@@ -45,8 +45,6 @@ Requires(postun): /usr/sbin/userdel
 
 Requires: apr
 Requires: cairo
-Requires: httpd
-Requires: mod_wsgi
 Requires: libdbi
 Requires: libpng12
 Requires: libjpeg-turbo
