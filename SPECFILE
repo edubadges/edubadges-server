@@ -161,6 +161,9 @@ echo '{"version": '"\"%{version}\""', "release": '"\"%{release}\""', "commit_sha
 %config(noreplace) %attr(0644,root,root) %{install_dir}/etc/settings_local.py
 
 %changelog
+* Thu Oct 26 2017 Francisco Gray <fgray@concentricsky.com> - %{version}-%{release}
+- Removed httpd and mod_wsgi from Requires
+
 * Mon Oct 9 2017 Francisco Gray <fgray@concentricsky.com> - %{version}-%{release}
 - Updated pre/preun post/postun logic to work correctly during an upgrade.
 
