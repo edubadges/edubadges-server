@@ -14,6 +14,9 @@ from rest_framework.response import Response
 from rest_framework.serializers import ListSerializer
 from six import string_types
 
+from entity.serializers import BaseSerializerV2
+from mainsite.pagination import EncryptedCursorPagination
+
 
 class HumanReadableBooleanField(serializers.BooleanField):
     TRUE_VALUES = serializers.BooleanField.TRUE_VALUES | set(('on', 'On', 'ON'))
@@ -162,3 +165,22 @@ class OriginalJsonSerializerMixin(serializers.Serializer):
 
         return representation
 
+
+class CursorPaginatedListSerializer(serializers.ListSerializer):
+
+    def __init__(self, queryset, request, *args, **kwargs):
+        self.paginator = EncryptedCursorPagination()
+        self.page = self.paginator.paginate_queryset(queryset, request)
+        super(CursorPaginatedListSerializer, self).__init__(data=self.page, *args, **kwargs)
+
+    def to_representation(self, data):
+        representation = super(CursorPaginatedListSerializer, self).to_representation(data)
+        envelope = BaseSerializerV2.response_envelope(result=representation,
+                                                      success=True,
+                                                      description='ok')
+        envelope['pagination'] = self.paginator.get_page_info()
+        return envelope
+
+    @property
+    def data(self):
+        return super(serializers.ListSerializer, self).data

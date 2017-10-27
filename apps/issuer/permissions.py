@@ -178,12 +178,12 @@ class BadgrOAuthTokenHasScope(permissions.BasePermission):
     def has_permission(self, request, view):
         token = request.auth
 
+        if not token:
+            return False
+
         # Do not apply scope if using a non-oauth tokens
         if not isinstance(token, oauth2_provider.models.AccessToken):
             return True
-
-        if not token:
-            return False
 
         valid_scopes = self._get_valid_scopes(request, view)
         return token.is_valid(valid_scopes)

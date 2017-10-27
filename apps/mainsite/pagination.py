@@ -275,11 +275,17 @@ class EncryptedCursorPagination(BasePagination):
         """
         Given serialized page of data, return a paginated Response object.
         """
-        return Response(OrderedDict([
-            ('nextResults', self.next_link),
+        info = self.get_page_info()
+        info['results'] = data
+        return Response(info)
+
+    def get_page_info(self):
+        return OrderedDict([
             ('hasNext', self.has_next),
-            ('nextCursor', self.next_cursor),
-            ('previousResults', self.prev_link),
+            ('nextResults', self.next_link if self.has_next else None),
+            ('nextCursor', self.next_cursor if self.has_next else None),
             ('hasPrevious', self.has_prev),
-            ('previousCursor', self.prev_cursor),
-            ('results', data)]))
+            ('previousResults', self.prev_link if self.has_prev else None),
+            ('previousCursor', self.prev_cursor if self.has_prev else None),
+        ])
+

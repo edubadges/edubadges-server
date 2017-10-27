@@ -1,6 +1,8 @@
 from collections import OrderedDict
 
 import datetime
+
+from django.db.models import Q
 from django.http import Http404
 from django.utils import timezone
 from oauth2_provider.models import AccessToken
@@ -23,7 +25,9 @@ from issuer.serializers_v2 import IssuerSerializerV2, BadgeClassSerializerV2, Ba
     IssuerAccessTokenSerializerV2
 from mainsite.decorators import apispec_get_operation, apispec_put_operation, \
     apispec_delete_operation, apispec_list_operation, apispec_post_operation
+from mainsite.pagination import EncryptedCursorPagination
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from mainsite.serializers import CursorPaginatedListSerializer
 
 logger = badgrlog.BadgrLogger()
 
@@ -498,3 +502,52 @@ class IssuerTokensList(BaseEntityListView):
         ))
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data)
+
+
+class AssertionsChangedSince(BaseEntityView):
+    permission_classes = (BadgrOAuthTokenHasScope,)
+    valid_scopes = ["r:assertions"]
+
+    def get_user(self, request):
+        if request.user:
+            return request.user
+        if request.auth:
+            return request.auth.application.user
+
+    def get_queryset(self, request, since=None):
+        user = self.get_user(request)
+        issuer_ids = [i.id for i in user.cached_issuers()]
+
+        authorized_badgeusers = request.auth.application.accesstoken_set.all()
+        user_ids = [u.id for u in authorized_badgeusers]
+
+        # select badgeinstance.* where
+        #   (
+        #     badgeinstance.issuer_id in (:issuer_ids)
+        #     OR
+        #     backpackcollectionbadgeinstance.badgeuser_id in (:user_ids)
+        #   )
+        #   AND
+        #   badgeinstance.updated_at >= since
+
+        expr = Q(issuer_id__in=issuer_ids) | Q(backpackcollectionbadgeinstance__badgeuser_id__in=user_ids)
+
+        if since is not None:
+            expr &= Q(updated_at__gt=since)
+
+        qs = BadgeInstance.objects.filter(expr)
+        return qs
+
+    def get(self, request, **kwargs):
+        since = kwargs.get('since', None)
+        queryset = self.get_queryset(request, since=since)
+        context = self.get_context_data(**kwargs)
+        serializer = CursorPaginatedListSerializer(
+            queryset=queryset,
+            request=request,
+            child=BadgeInstanceSerializerV2(),
+            context=context)
+        serializer.is_valid()
+        return Response(serializer.data)
+
+        # return super(AssertionsChangedSince, self).get(request, **kwargs)
