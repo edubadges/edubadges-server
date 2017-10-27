@@ -51,7 +51,7 @@ class IssuerSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     name = StripTagsCharField(max_length=1024)
     image = ValidImageField(required=False)
     email = serializers.EmailField(max_length=255, required=True)
-    description = StripTagsCharField(max_length=16384, required=True)
+    description = StripTagsCharField(max_length=16384, required=False)
     url = serializers.URLField(max_length=1024, required=True)
     staff = IssuerStaffSerializerV2(many=True, source='staff_items', required=False)
 
