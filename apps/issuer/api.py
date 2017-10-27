@@ -2,6 +2,7 @@ from collections import OrderedDict
 
 import datetime
 
+import dateutil.parser
 from django.db.models import Q
 from django.http import Http404
 from django.utils import timezone
@@ -10,11 +11,11 @@ from oauthlib.oauth2.rfc6749.tokens import random_token_generator
 from rest_framework import status, serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 import badgrlog
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
-from entity.serializers import BaseSerializerV2
+from entity.serializers import BaseSerializerV2, V2ErrorSerializer
 from issuer.models import Issuer, BadgeClass, BadgeInstance
 from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
                                 IsEditor, IsStaff, ApprovedIssuersOnly, BadgrOAuthTokenHasScope,
@@ -504,6 +505,19 @@ class IssuerTokensList(BaseEntityListView):
         return Response(serializer.data)
 
 
+class PaginatedAssertionsSinceSerializer(CursorPaginatedListSerializer):
+    child = BadgeInstanceSerializerV2()
+
+    def __init__(self, *args, **kwargs):
+        self.timestamp = timezone.now()  # take timestamp now before SQL query is run in super.__init__
+        super(PaginatedAssertionsSinceSerializer, self).__init__(*args, **kwargs)
+
+    def to_representation(self, data):
+        representation = super(PaginatedAssertionsSinceSerializer, self).to_representation(data)
+        representation['timestamp'] = self.timestamp.isoformat()
+        return representation
+
+
 class AssertionsChangedSince(BaseEntityView):
     permission_classes = (BadgrOAuthTokenHasScope,)
     valid_scopes = ["r:assertions"]
@@ -539,13 +553,21 @@ class AssertionsChangedSince(BaseEntityView):
         return qs
 
     def get(self, request, **kwargs):
-        since = kwargs.get('since', None)
+        since = request.GET.get('since', None)
+        try:
+            since = dateutil.parser.parse(since)
+        except ValueError as e:
+            err = V2ErrorSerializer(data={}, field_errors={'since': ["must be iso8601 format"]}, validation_errors=[])
+            err._success = False
+            err._description = "bad request"
+            err.is_valid(raise_exception=False)
+            return Response(err.data, status=HTTP_400_BAD_REQUEST)
+
         queryset = self.get_queryset(request, since=since)
         context = self.get_context_data(**kwargs)
-        serializer = CursorPaginatedListSerializer(
+        serializer = PaginatedAssertionsSinceSerializer(
             queryset=queryset,
             request=request,
-            child=BadgeInstanceSerializerV2(),
             context=context)
         serializer.is_valid()
         return Response(serializer.data)
