@@ -241,6 +241,9 @@ class Issuer(ResizeUploadedImage,
         if self.image:
             json['image'] = OriginSetting.HTTP + reverse('issuer_image', kwargs={'entity_id': self.entity_id})
 
+        if self.source_url:
+            json['sourceUrl'] = self.source_url
+
         if include_extra:
             extra = self.get_filtered_json()
             if extra is not None:
@@ -433,10 +436,15 @@ class BadgeClass(ResizeUploadedImage,
         if self.image:
             json['image'] = OriginSetting.HTTP + reverse('badgeclass_image', kwargs={'entity_id': self.entity_id})
 
+
         # criteria
         if obi_version == '1_1':
             json["criteria"] = self.get_criteria_url()
+            if self.source_url:
+                json['source_url'] = self.source_url
         elif obi_version == '2_0':
+            if self.source_url:
+                json['sourceUrl'] = self.source_url
             json["criteria"] = {}
             if self.criteria_url:
                 json['criteria']['id'] = self.criteria_url
@@ -747,10 +755,14 @@ class BadgeInstance(BaseAuditedModel,
                 "url": add_obi_version_ifneeded(self.public_url, obi_version),
                 "type": "hosted"
             }
+            if self.source_url:
+                json["source_url"] = self.source_url
         elif obi_version == '2_0':
             json["verification"] = {
                 "type": "HostedBadge"
             }
+            if self.source_url:
+                json["sourceUrl"] = self.source_url
 
         if self.evidence_url:
             if obi_version == '1_1':
