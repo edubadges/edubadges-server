@@ -744,16 +744,22 @@ class BadgeInstance(BaseAuditedModel,
             pass
         return None
 
-    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True):
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_badgeclass=False, include_issuer=False, include_extra=True):
         obi_version, context_iri = get_obi_context(obi_version)
 
-        json = OrderedDict({'@context': context_iri})
-        json.update(OrderedDict(
-            type='Assertion',
-            id=add_obi_version_ifneeded(self.jsonld_id, obi_version),
-            image=OriginSetting.HTTP + reverse('badgeinstance_image', kwargs={'entity_id': self.entity_id}),
-            badge=add_obi_version_ifneeded(self.cached_badgeclass.jsonld_id, obi_version),
-        ))
+        json = OrderedDict([
+            ('@context', context_iri),
+            ('type', 'Assertion'),
+            ('id', add_obi_version_ifneeded(self.jsonld_id, obi_version)),
+            ('image', OriginSetting.HTTP + reverse('badgeinstance_image', kwargs={'entity_id': self.entity_id})),
+            ('badge', add_obi_version_ifneeded(self.cached_badgeclass.jsonld_id, obi_version)),
+        ])
+
+        if include_badgeclass:
+            json['badgeclass'] = self.cached_badgeclass.get_json(obi_version=obi_version, include_extra=include_extra)
+
+        if include_issuer:
+            json['issuer'] = self.cached_issuer.get_json(obi_version=obi_version, include_extra=include_extra)
 
         if self.revoked:
             return OrderedDict([

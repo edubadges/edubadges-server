@@ -279,3 +279,12 @@ class BackpackCollectionJson(JSONComponentView):
     permission_classes = (permissions.AllowAny,)
     model = BackpackCollection
     entity_id_field_name = 'share_hash'
+
+    def get_json(self, request):
+        includes = request.GET.getlist('include', [])
+        json = self.current_object.get_json(
+            obi_version=self._get_request_obi_version(request),
+            include_badgeclass=('badgeclass' in includes),
+            include_issuer=('issuer' in includes)
+        )
+        return json
