@@ -118,6 +118,10 @@ class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
             ('id', add_obi_version_ifneeded(self.share_url, obi_version)),
             ('name', self.name),
             ('description', self.description),
+            ('owner', OrderedDict([
+                ('firstName', self.cached_creator.first_name),
+                ('lastName', self.cached_creator.llast_name),
+            ]))
         ])
         json['badges'] = [b.get_json(obi_version=obi_version, include_extra=include_extra) for b in self.cached_badgeinstances()]
         return json
