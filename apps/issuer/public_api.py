@@ -63,6 +63,13 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
     def log(self, obj):
         pass
 
+    def get_json(self, request):
+        if getattr(self.current_object, 'source_url', None) and getattr(self.current_object, 'original_json', None):
+            json = self.current_object.get_original_json()
+        else:
+            json = self.current_object.get_json(obi_version=self._get_request_obi_version(request))
+        return json
+
     def get(self, request, **kwargs):
         try:
             self.current_object = self.get_object(request, **kwargs)
@@ -77,11 +84,7 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
         if self.is_requesting_html():
             return HttpResponseRedirect(redirect_to=self.get_badgrapp_redirect())
 
-        # render public JSON
-        if getattr(self.current_object, 'source_url', None) and getattr(self.current_object, 'original_json', None):
-            json = self.current_object.get_original_json()
-        else:
-            json = self.current_object.get_json(obi_version=self._get_request_obi_version(request))
+        json = self.get_json(request=request)
         return Response(json)
 
     def is_requesting_html(self):
@@ -194,6 +197,14 @@ class IssuerJson(JSONComponentView):
 
     def log(self, obj):
         logger.event(badgrlog.IssuerRetrievedEvent(obj, self.request))
+
+    def get_json(self, request):
+        includes = request.GET.getlist('include', [])
+        json = super(IssuerJson, self).get_json(request)
+        if 'badgeclasses' in includes:
+            obi_version=self._get_request_obi_version(request)
+            json['badgeclasses'] = [b.get_json(obi_version=obi_version) for b in self.current_object.cached_badgeclasses()]
+        return json
 
 
 class IssuerImage(ImagePropertyDetailView):
