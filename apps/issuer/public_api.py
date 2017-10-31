@@ -17,11 +17,13 @@ from rest_framework.views import APIView
 
 import badgrlog
 import utils
+from backpack.models import BackpackCollection
 from entity.api import VersionedObjectMixin
 from .models import Issuer, BadgeClass, BadgeInstance
 from .renderers import BadgeInstanceHTMLRenderer, BadgeClassHTMLRenderer, IssuerHTMLRenderer
 
 logger = badgrlog.BadgrLogger()
+
 
 class SlugToEntityIdRedirectMixin(object):
     slugToEntityIdRedirect = False
@@ -71,7 +73,7 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
                 raise
 
         self.log(self.current_object)
-        if self.current_object.source_url and self.current_object.original_json:
+        if getattr(self.current_object, 'source_url', None) and getattr(self.current_object, 'original_json', None):
             json = self.current_object.get_original_json()
         else:
             json = self.current_object.get_json(obi_version=self._get_request_obi_version(request))
@@ -183,6 +185,11 @@ class ImagePropertyDetailView(ComponentPropertyDetailView, SlugToEntityIdRedirec
             image_url = storage.url(new_name)
 
         return redirect(image_url)
+
+
+class BackpackCollectionJson(JSONComponentView):
+    model = BackpackCollection
+    entity_id_field_name = 'share_hash'
 
 
 class IssuerJson(JSONComponentView):

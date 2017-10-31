@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import os
+from collections import OrderedDict
 
 import basic_models
 import cachemodel
@@ -12,6 +13,7 @@ from django.db import models, transaction
 from entity.models import BaseVersionedEntity
 from issuer.models import BaseAuditedModel, BadgeInstance
 from backpack.sharing import SharingManager
+from issuer.utils import CURRENT_OBI_VERSION, get_obi_context, add_obi_version_ifneeded
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.utils import OriginSetting
 
@@ -104,6 +106,19 @@ class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
                         collection=self,
                         badgeinstance=badgeinstance
                     ).delete()
+
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True):
+        obi_version, context_iri = get_obi_context(obi_version)
+
+        json = OrderedDict([
+            ('@context', context_iri),
+            ('type', 'Collection'),
+            ('id', add_obi_version_ifneeded(self.share_url, obi_version)),
+            ('name', self.name),
+            ('description', self.description),
+        ])
+        json['badges'] = [b.get_json(obi_version=obi_version, include_extra=include_extra) for b in self.cached_badgeinstances()]
+        return json
 
 
 class BackpackCollectionBadgeInstance(cachemodel.CacheModel):

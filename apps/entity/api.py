@@ -73,6 +73,8 @@ class BaseEntityListView(BaseEntityView):
 
 
 class VersionedObjectMixin(object):
+    entity_id_field_name = 'entity_id'
+
     def has_object_permissions(self, request, obj):
         for permission in self.get_permissions():
             if not permission.has_object_permission(request, self, obj):
@@ -87,7 +89,7 @@ class VersionedObjectMixin(object):
             identifier = kwargs.get('entity_id')
 
         try:
-            self.object = self.model.cached.get(entity_id=identifier)
+            self.object = self.model.cached.get(**{self.get_entity_id_field_name(): identifier})
         except self.model.DoesNotExist:
             pass
         else:
@@ -108,6 +110,9 @@ class VersionedObjectMixin(object):
 
         # nothing found
         raise Http404
+
+    def get_entity_id_field_name(self):
+        return self.entity_id_field_name
 
 
 class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
