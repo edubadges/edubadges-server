@@ -75,7 +75,7 @@ class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
     @property
     def share_url(self):
         if self.published:
-            return OriginSetting.HTTP+reverse('backpack_shared_collection', kwargs={'share_hash': self.share_hash})
+            return OriginSetting.HTTP+reverse('collection_json', kwargs={'entity_id': self.share_hash})
 
     @property
     def badge_items(self):
@@ -120,7 +120,7 @@ class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
             ('description', self.description),
             ('owner', OrderedDict([
                 ('firstName', self.cached_creator.first_name),
-                ('lastName', self.cached_creator.llast_name),
+                ('lastName', self.cached_creator.last_name),
             ]))
         ])
         json['badges'] = [b.get_json(obi_version=obi_version, include_extra=include_extra) for b in self.cached_badgeinstances()]

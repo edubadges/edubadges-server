@@ -2,7 +2,6 @@ from django.apps import apps
 from django.conf import settings
 from django.conf.urls import include, url
 
-from backpack.views import LegacyCollectionShareRedirectView
 from mainsite.admin import badgr_admin
 from mainsite.oauth2_api import AuthorizationApiView
 
@@ -54,11 +53,8 @@ urlpatterns = [
     url(r'^public/', include('issuer.public_api_urls'), kwargs={'version': 'v2'}),
     url(r'^public/', include('pathway.public_api_urls'), kwargs={'version': 'v2'}),
 
-    # public pages shared from backpack
-    url(r'^share', include('backpack.share_urls')),
     # legacy share redirects
-    url(r'^earner/collections/(?P<pk>[^/]+)/(?P<share_hash>[^/]+)$', LegacyCollectionShareRedirectView.as_view(), name='legacy_shared_collection'),
-    url(r'^earner/collections/(?P<pk>[^/]+)/(?P<share_hash>[^/]+)/embed$', LegacyCollectionShareRedirectView.as_view(), name='legacy_shared_collection_embed'),
+    url(r'', include('backpack.share_urls')),
 
     # REST Framework
     url(r'^api-auth/token$', LoginAndObtainAuthToken.as_view()),
