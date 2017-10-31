@@ -113,7 +113,12 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
 
         path = self.request.path
         stripped_path = re.sub(r'^/public/', '', path)
-        return redirect+stripped_path
+        query_string = self.request.META.get('QUERY_STRING', None)
+        ret = '{redirect}{path}{query}'.format(
+            redirect=redirect,
+            path=stripped_path,
+            query='?'+query_string if query_string else '')
+        return ret
 
     @staticmethod
     def _get_request_obi_version(request):
