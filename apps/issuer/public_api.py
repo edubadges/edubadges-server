@@ -250,6 +250,16 @@ class BadgeInstanceJson(JSONComponentView):
     permission_classes = (permissions.AllowAny,)
     model = BadgeInstance
 
+    def get_json(self, request):
+        includes = request.GET.getlist('include', [])
+        json = super(BadgeInstanceJson, self).get_json(request)
+        obi_version = self._get_request_obi_version(request)
+        if 'badgeclass' in includes:
+            json['badgeclass'] = self.current_object.cached_badgeclass.get_json(obi_version=obi_version)
+        if 'issuer' in includes:
+            json['issuer'] = self.current_object.cached_issuer.get_json(obi_version=obi_version)
+        return json
+
 
 class BadgeInstanceImage(ImagePropertyDetailView):
     model = BadgeInstance
