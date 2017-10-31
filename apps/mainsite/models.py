@@ -79,7 +79,7 @@ class BadgrAppManager(Manager):
         return self.get(id=badgr_app_id)
 
 
-class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive):
+class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive, cachemodel.CacheModel):
     name = models.CharField(max_length=254)
     cors = models.CharField(max_length=254, unique=True)
     email_confirmation_redirect = models.URLField()
@@ -88,6 +88,7 @@ class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive):
     ui_login_redirect = models.URLField(null=True)
     ui_signup_success_redirect = models.URLField(null=True)
     ui_connect_success_redirect = models.URLField(null=True)
+    public_pages_redirect = models.URLField(null=True)
     objects = BadgrAppManager()
 
     def __unicode__(self):

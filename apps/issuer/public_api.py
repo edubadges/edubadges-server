@@ -1,4 +1,5 @@
 import StringIO
+import re
 
 import cairosvg
 import os
@@ -6,7 +7,7 @@ from PIL import Image
 from django.conf import settings
 from django.core.files.storage import DefaultStorage
 from django.core.urlresolvers import resolve, reverse, Resolver404, NoReverseMatch
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.views.generic import RedirectView
 from rest_framework import status, permissions
@@ -19,6 +20,7 @@ import badgrlog
 import utils
 from backpack.models import BackpackCollection
 from entity.api import VersionedObjectMixin
+from mainsite.models import BadgrApp
 from .models import Issuer, BadgeClass, BadgeInstance
 from .renderers import BadgeInstanceHTMLRenderer, BadgeClassHTMLRenderer, IssuerHTMLRenderer
 
@@ -73,27 +75,47 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
                 raise
 
         self.log(self.current_object)
+
+        if self.is_requesting_html():
+            return HttpResponseRedirect(redirect_to=self.get_badgrapp_redirect())
+
+        # render public JSON
         if getattr(self.current_object, 'source_url', None) and getattr(self.current_object, 'original_json', None):
             json = self.current_object.get_original_json()
         else:
             json = self.current_object.get_json(obi_version=self._get_request_obi_version(request))
         return Response(json)
 
-    def get_renderers(self):
-        """
-        Instantiates and returns the list of renderers that this view can use.
-        """
+    def is_requesting_html(self):
+        if self.format_kwarg == 'json':
+            return False
+
         HTTP_USER_AGENTS = ['LinkedInBot',]
+        HTTP_ACCEPTS = ['*/*', 'text/html']
+
         user_agent = self.request.META.get('HTTP_USER_AGENT', '')
+        http_accept = self.request.META.get('HTTP_ACCEPT', '*/*')
 
-        if self.request.META.get('HTTP_ACCEPT') == '*/*' or \
-                len([agent for agent in HTTP_USER_AGENTS if agent in user_agent]):
-            return [self.get_html_renderer_class()(), ]
+        if any(a in user_agent for a in HTTP_USER_AGENTS) or any(a in http_accept for a in HTTP_ACCEPTS):
+            return True
 
-        return [renderer() for renderer in self.renderer_classes]
+        return False
 
-    def get_html_renderer_class(self):
-        return self.html_renderer_class
+    def get_badgrapp_redirect(self):
+        badgrapp = self.current_object.cached_badgrapp
+        if not badgrapp.public_pages_redirect:
+            badgrapp = BadgrApp.objects.get_current(request=None)  # use the default badgrapp
+
+        redirect = badgrapp.public_pages_redirect
+        if not redirect:
+            redirect = 'https://{}/public/'.format(badgrapp.cors)
+        else:
+            if not redirect.endswith('/'):
+                redirect += '/'
+
+        path = self.request.path
+        stripped_path = re.sub(r'^/public/', '', path)
+        return redirect+stripped_path
 
     @staticmethod
     def _get_request_obi_version(request):
