@@ -64,6 +64,10 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
 
     def create(self, validated_data, **kwargs):
         new_issuer = Issuer(**validated_data)
+
+        # set badgrapp
+        new_issuer.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
+
         new_issuer.save()
         return new_issuer
 
@@ -76,6 +80,10 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
         instance.email = validated_data.get('email')
         instance.description = validated_data.get('description')
         instance.url = validated_data.get('url')
+
+        # set badgrapp
+        if not instance.badgrapp_id:
+            instance.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
 
         instance.save()
         return instance

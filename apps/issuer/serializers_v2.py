@@ -11,6 +11,7 @@ from badgeuser.models import BadgeUser
 from entity.serializers import DetailSerializerV2, EntityRelatedFieldV2, BaseSerializerV2
 from issuer.models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from mainsite.drf_fields import ValidImageField
+from mainsite.models import BadgrApp
 from mainsite.serializers import StripTagsCharField, MarkdownCharField, HumanReadableBooleanField, \
     OriginalJsonSerializerMixin
 from mainsite.validators import ChoicesValidator, TelephoneValidator
@@ -126,6 +127,9 @@ class IssuerSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
 
         # update staff after issuer is created
         new_issuer.staff_items = staff
+
+        # set badgrapp
+        new_issuer.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
 
         return new_issuer
 

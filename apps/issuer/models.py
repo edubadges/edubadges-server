@@ -92,6 +92,8 @@ class Issuer(ResizeUploadedImage,
     slug = models.CharField(max_length=255, blank=True, null=True, default=None)
     #slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
 
+    badgrapp = models.ForeignKey('mainsite.BadgrApp', blank=True, null=True, default=None)
+
     name = models.CharField(max_length=1024)
     image = models.FileField(upload_to='uploads/issuers', blank=True, null=True)
     description = models.TextField(blank=True, null=True, default=None)
@@ -259,6 +261,12 @@ class Issuer(ResizeUploadedImage,
 
     def get_filtered_json(self, excluded_fields=('@context', 'id', 'type', 'name', 'url', 'description', 'image', 'email')):
         return super(Issuer, self).get_filtered_json(excluded_fields=excluded_fields)
+
+    @property
+    def cached_badgrapp(self):
+        id = self.badgrapp_id if self.badgrapp_id else getattr(settings, 'BADGR_APP_ID', 1)
+        return BadgrApp.cached.get(id=id)
+
 
 
 class IssuerStaff(cachemodel.CacheModel):
@@ -470,6 +478,10 @@ class BadgeClass(ResizeUploadedImage,
 
     def get_filtered_json(self, excluded_fields=('@context', 'id', 'type', 'name', 'description', 'image', 'criteria', 'issuer')):
         return super(BadgeClass, self).get_filtered_json(excluded_fields=excluded_fields)
+
+    @property
+    def cached_badgrapp(self):
+        return self.cached_issuer.cached_badgrapp
 
 
 class BadgeInstance(BaseAuditedModel,
@@ -837,6 +849,10 @@ class BadgeInstance(BaseAuditedModel,
     def evidence_items(self):
         """exists to cajole EvidenceItemSerializer"""
         return self.cached_evidence()
+
+    @property
+    def cached_badgrapp(self):
+        return self.cached_issuer.cached_badgrapp
 
 
 class BadgeInstanceEvidence(OriginalJsonMixin, cachemodel.CacheModel):
