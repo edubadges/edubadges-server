@@ -756,10 +756,13 @@ class BadgeInstance(BaseAuditedModel,
         ))
 
         if self.revoked:
-            json['revoked'] = self.revoked
-
-        if self.revoked and self.revocation_reason:
-            json['revocationReason'] = self.revocation_reason
+            return OrderedDict([
+                ('@context', context_iri),
+                ('type', 'Assertion'),
+                ('id', add_obi_version_ifneeded(self.jsonld_id, obi_version)),
+                ('revoked', self.revoked),
+                ('revocationReason', self.revocation_reason if self.revocation_reason else "")
+            ])
 
         if obi_version == '1_1':
             json["uid"] = self.entity_id

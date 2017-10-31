@@ -1,8 +1,8 @@
 import StringIO
+import os
 import re
 
 import cairosvg
-import os
 from PIL import Image
 from django.conf import settings
 from django.core.files.storage import DefaultStorage
@@ -12,7 +12,6 @@ from django.shortcuts import redirect
 from django.views.generic import RedirectView
 from rest_framework import status, permissions
 from rest_framework.exceptions import ValidationError
-from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -22,7 +21,6 @@ from backpack.models import BackpackCollection
 from entity.api import VersionedObjectMixin
 from mainsite.models import BadgrApp
 from .models import Issuer, BadgeClass, BadgeInstance
-from .renderers import BadgeInstanceHTMLRenderer, BadgeClassHTMLRenderer, IssuerHTMLRenderer
 
 logger = badgrlog.BadgrLogger()
 
@@ -122,33 +120,9 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
         return request.query_params.get('v', utils.CURRENT_OBI_VERSION)
 
 
-class ComponentPropertyDetailView(APIView):
-    """
-    Abstract Component Class
-    """
+class ImagePropertyDetailView(APIView, SlugToEntityIdRedirectMixin):
     permission_classes = (permissions.AllowAny,)
 
-    def log(self, obj):
-        pass
-
-    def get(self, request, slug):
-        try:
-            current_object = self.model.cached.get(slug=slug)
-        except self.model.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        else:
-            self.log(current_object)
-
-        p = getattr(current_object, self.prop)
-        if not bool(p):
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        return redirect(p.url)
-
-
-class ImagePropertyDetailView(ComponentPropertyDetailView, SlugToEntityIdRedirectMixin):
-    """
-    a subclass of ComponentPropertyDetailView, for image fields, if query_param type='png' re-encode if necessary
-    """
     def get_object(self, entity_id):
         try:
             current_object = self.model.cached.get(entity_id=entity_id)
@@ -209,35 +183,15 @@ class ImagePropertyDetailView(ComponentPropertyDetailView, SlugToEntityIdRedirec
         return redirect(image_url)
 
 
-class BackpackCollectionJson(JSONComponentView):
-    model = BackpackCollection
-    entity_id_field_name = 'share_hash'
-
-
 class IssuerJson(JSONComponentView):
-    """
-    GET the actual OBI badge object for an issuer via the /public/issuers/ endpoint
-    """
+    permission_classes = (permissions.AllowAny,)
     model = Issuer
-    renderer_classes = (JSONRenderer, IssuerHTMLRenderer,)
-    html_renderer_class = IssuerHTMLRenderer
 
     def log(self, obj):
         logger.event(badgrlog.IssuerRetrievedEvent(obj, self.request))
 
-    def get_renderer_context(self, **kwargs):
-        context = super(IssuerJson, self).get_renderer_context(**kwargs)
-        if getattr(self, 'current_object', None):
-            context['issuer'] = self.current_object
-            context['badge_classes'] = self.current_object.cached_badgeclasses()
-            context['badgeclass_count'] = len(self.current_object.cached_badgeclasses())
-        return context
-
 
 class IssuerImage(ImagePropertyDetailView):
-    """
-    GET an image that represents an Issuer
-    """
     model = Issuer
     prop = 'image'
 
@@ -246,29 +200,14 @@ class IssuerImage(ImagePropertyDetailView):
 
 
 class BadgeClassJson(JSONComponentView):
-    """
-    GET the actual OBI badge object for a badgeclass via public/badges/:slug endpoint
-    """
+    permission_classes = (permissions.AllowAny,)
     model = BadgeClass
-    renderer_classes = (JSONRenderer, BadgeClassHTMLRenderer,)
-    html_renderer_class = BadgeClassHTMLRenderer
-
-    def get_renderer_context(self, **kwargs):
-        context = super(BadgeClassJson, self).get_renderer_context(**kwargs)
-        if getattr(self, 'current_object', None):
-            context['badge_class'] = self.current_object
-            context['issuer'] = self.current_object.cached_issuer
-            context['badgeclass_count'] = len(context['issuer'].cached_badgeclasses())
-        return context
 
     def log(self, obj):
         logger.event(badgrlog.BadgeClassRetrievedEvent(obj, self.request))
 
 
 class BadgeClassImage(ImagePropertyDetailView):
-    """
-    GET the unbaked badge image from a pretty url instead of media path
-    """
     model = BadgeClass
     prop = 'image'
 
@@ -292,56 +231,8 @@ class BadgeClassCriteria(RedirectView, SlugToEntityIdRedirectMixin):
 
 
 class BadgeInstanceJson(JSONComponentView):
-    model = BadgeInstance
-    renderer_classes = (JSONRenderer, BadgeInstanceHTMLRenderer,)
-    html_renderer_class = BadgeInstanceHTMLRenderer
     permission_classes = (permissions.AllowAny,)
-
-    def get_renderer_context(self, **kwargs):
-        context = super(BadgeInstanceJson, self).get_renderer_context()
-        context['obi_version'] = self._get_request_obi_version(self.request)
-
-        if getattr(self, 'current_object', None):
-            context['badge_instance'] = self.current_object
-            context['badge_class'] = self.current_object.cached_badgeclass
-            context['issuer'] = self.current_object.cached_issuer
-            context['badgeclass_count'] = len(context['issuer'].cached_badgeclasses())
-
-        if self.request.query_params.get('action', None) == 'download':
-            context['action'] = 'download'
-
-        return context
-
-    def get(self, request, **kwargs):
-        try:
-            current_object = self.get_object(request, **kwargs)
-            self.current_object = current_object
-        except Http404:
-            if self.slugToEntityIdRedirect:
-                return self.get_slug_to_entity_id_redirect(kwargs.get('entity_id', None))
-            else:
-                raise
-
-        if current_object.revoked is False:
-
-            logger.event(badgrlog.BadgeAssertionCheckedEvent(current_object, request))
-            if current_object.source_url and current_object.original_json:
-                json = current_object.get_original_json()
-            else:
-                json = current_object.get_json(obi_version=self._get_request_obi_version(request))
-            return Response(json)
-        else:
-            # TODO update terms based on final accepted terms in response to
-            # https://github.com/openbadges/openbadges-specification/issues/33
-            revocation_info = {
-                '@context': utils.CURRENT_OBI_CONTEXT_IRI,
-                'id': current_object.jsonld_id,
-                'revoked': True,
-                'revocationReason': current_object.revocation_reason
-            }
-
-            logger.event(badgrlog.RevokedBadgeAssertionCheckedEvent(current_object, request))
-            return Response(revocation_info, status=status.HTTP_410_GONE)
+    model = BadgeInstance
 
 
 class BadgeInstanceImage(ImagePropertyDetailView):
@@ -357,3 +248,8 @@ class BadgeInstanceImage(ImagePropertyDetailView):
             return None
         return obj
 
+
+class BackpackCollectionJson(JSONComponentView):
+    permission_classes = (permissions.AllowAny,)
+    model = BackpackCollection
+    entity_id_field_name = 'share_hash'
