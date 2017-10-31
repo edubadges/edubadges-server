@@ -25,15 +25,24 @@ class BadgrAdminSite(AdminSite):
 badgr_admin = BadgrAdminSite(name='badgradmin')
 
 # patch in our delete_selected that calls obj.delete()
-badgr_admin.disable_action('delete_selected')
-badgr_admin.add_action(delete_selected)
+# FIXME: custom action broken for django 1.10+
+# badgr_admin.disable_action('delete_selected')
+# badgr_admin.add_action(delete_selected)
 
 
 class BadgrAppAdmin(ModelAdmin):
     fieldsets = (
         ('Meta', {'fields': ('is_active', ),
                   'classes': ('collapse',)}),
-        (None, {'fields': ('name', 'cors', 'signup_redirect', 'email_confirmation_redirect', 'forgot_password_redirect', 'ui_login_redirect', 'ui_signup_success_redirect', 'ui_connect_success_redirect')})
+        (None, {
+            'fields': ('name', 'cors', ),
+        }),
+        ('signup', {
+            'fields': ('signup_redirect', 'email_confirmation_redirect', 'forgot_password_redirect', 'ui_login_redirect', 'ui_signup_success_redirect', 'ui_connect_success_redirect')
+        }),
+        ('public', {
+            'fields': ('public_pages_redirect',)
+        })
     )
     list_display = ('name', 'cors',)
 badgr_admin.register(BadgrApp, BadgrAppAdmin)

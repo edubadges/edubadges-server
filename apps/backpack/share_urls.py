@@ -1,7 +1,6 @@
 from django.conf.urls import url
 
-from backpack.views import SharedCollectionView, EmbeddedSharedCollectionView, LegacyBadgeShareRedirectView, \
-    RedirectSharedCollectionView, LegacyCollectionShareRedirectView
+from backpack.views import LegacyBadgeShareRedirectView, RedirectSharedCollectionView, LegacyCollectionShareRedirectView
 
 urlpatterns = [
     # legacy redirects
