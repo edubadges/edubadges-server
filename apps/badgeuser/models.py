@@ -130,6 +130,8 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
 
+    badgrapp = models.ForeignKey('mainsite.BadgrApp', blank=True, null=True, default=None)
+
     objects = BadgeUserManager()
 
     class Meta:

@@ -7,6 +7,7 @@ from collections import OrderedDict
 import basic_models
 import cachemodel
 from basic_models.models import CreatedUpdatedAt
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
 
@@ -15,6 +16,7 @@ from issuer.models import BaseAuditedModel, BadgeInstance
 from backpack.sharing import SharingManager
 from issuer.utils import CURRENT_OBI_VERSION, get_obi_context, add_obi_version_ifneeded
 from mainsite.managers import SlugOrJsonIdCacheModelManager
+from mainsite.models import BadgrApp
 from mainsite.utils import OriginSetting
 
 
@@ -119,6 +121,11 @@ class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
         ])
         json['badges'] = [b.get_json(obi_version=obi_version, include_extra=include_extra) for b in self.cached_badgeinstances()]
         return json
+
+    @property
+    def cached_badgrapp(self):
+        id = self.cached_creator.badgrapp_id if self.cached_creator.badgrapp_id else getattr(settings, 'BADGR_APP_ID', 1)
+        return BadgrApp.cached.get(id=id)
 
 
 class BackpackCollectionBadgeInstance(cachemodel.CacheModel):

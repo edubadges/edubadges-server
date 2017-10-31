@@ -11,7 +11,7 @@ class BadgeUserAdmin(ModelAdmin):
     search_fields = ('email', 'first_name', 'last_name', 'username', 'entity_id')
     fieldsets = (
         ('Metadata', {'fields': ('entity_id', 'username', 'date_joined',), 'classes': ('collapse',)}),
-        (None, {'fields': ('email', 'first_name', 'last_name', )}),
+        (None, {'fields': ('email', 'first_name', 'last_name', 'badgrapp')}),
         ('Access', {'fields': ('is_active', 'is_staff', 'is_superuser', 'password')}),
         ('Permissions', {'fields': ('groups', 'user_permissions')}),
     )

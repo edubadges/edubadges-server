@@ -10,6 +10,7 @@ class BadgeUserManager(UserManager):
                email,
                first_name,
                last_name,
+               badgrapp=None,
                plaintext_password=None,
                send_confirmation=True,
                create_email_address=True):
@@ -42,6 +43,7 @@ class BadgeUserManager(UserManager):
 
         user.first_name = first_name
         user.last_name = last_name
+        user.badgrapp = badgrapp
         if plaintext_password:
             user.set_password(plaintext_password)
         user.save()

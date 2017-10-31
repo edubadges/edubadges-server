@@ -6,6 +6,7 @@ from rest_framework import serializers
 from badgeuser.models import BadgeUser
 from badgeuser.utils import notify_on_password_change
 from entity.serializers import DetailSerializerV2, BaseSerializerV2
+from mainsite.models import BadgrApp
 from mainsite.serializers import StripTagsCharField
 
 
@@ -74,6 +75,8 @@ class BadgeUserSerializerV2(DetailSerializerV2):
         if password:
             instance.set_password(password)
             notify_on_password_change(instance)
+
+        instance.badgrapp = BadgrApp.objects.get_current(request=self.context.get('request', None))
 
         instance.save()
         return instance

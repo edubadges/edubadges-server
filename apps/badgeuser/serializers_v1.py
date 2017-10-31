@@ -1,6 +1,7 @@
 from django.conf import settings
 from rest_framework import serializers
 
+from mainsite.models import BadgrApp
 from mainsite.serializers import StripTagsCharField
 from .models import BadgeUser, CachedEmailAddress
 from .utils import notify_on_password_change
@@ -47,7 +48,8 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
             email=validated_data['primary_email'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
-            plaintext_password=validated_data['password']
+            plaintext_password=validated_data['password'],
+            badgrapp=BadgrApp.objects.get_current(request=self.context.get('request', None))
         )
         return user
 
