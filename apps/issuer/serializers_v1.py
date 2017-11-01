@@ -275,12 +275,22 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
 
     create_notification = HumanReadableBooleanField(write_only=True, required=False, default=False)
 
+    hashed = serializers.NullBooleanField(default=None, required=False)
+
     class Meta:
         apispec_definition = ('Assertion', {})
 
     def validate(self, data):
         if data.get('email') and not data.get('recipient_identifier'):
             data['recipient_identifier'] = data.get('email')
+
+        hashed = data.get('hashed', None)
+        if hashed is None:
+            recipient_type = data.get('recipient_type')
+            if recipient_type in (BadgeInstance.RECIPIENT_TYPE_URL, BadgeInstance.RECIPIENT_TYPE_ID):
+                data['hashed'] = False
+            else:
+                data['hashed'] = True
 
         return data
 
