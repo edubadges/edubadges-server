@@ -802,10 +802,11 @@ class BadgeInstance(BaseAuditedModel,
         if self.hashed:
             json['recipient'] = {
                 "hashed": True,
-                "salt": self.salt,
                 "type": self.recipient_type,
                 "identity": generate_sha256_hashstring(self.recipient_identifier.lower(), self.salt),
             }
+            if self.salt:
+                json['recipient']['salt'] = self.salt
         else:
             json['recipient'] = {
                 "hashed": False,
