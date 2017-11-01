@@ -504,6 +504,7 @@ class BadgeInstance(BaseAuditedModel,
     )
     acceptance = models.CharField(max_length=254, choices=ACCEPTANCE_CHOICES, default=ACCEPTANCE_UNACCEPTED)
 
+    hashed = models.BooleanField(default=True)
     salt = models.CharField(max_length=254, blank=True, null=True, default=None)
 
     narrative = models.TextField(blank=True, null=True, default=None)
@@ -761,17 +762,17 @@ class BadgeInstance(BaseAuditedModel,
 
         json['issuedOn'] = self.issued_on.isoformat()
 
-        if self.salt:
+        if self.hashed:
             json['recipient'] = {
-                "type": self.recipient_type,
-                "salt": self.salt,
                 "hashed": True,
+                "salt": self.salt,
+                "type": self.recipient_type,
                 "identity": generate_sha256_hashstring(self.recipient_identifier.lower(), self.salt),
             }
         else:
             json['recipient'] = {
-                "type": self.recipient_type,
                 "hashed": False,
+                "type": self.recipient_type,
                 "identity": self.recipient_identifier
             }
 

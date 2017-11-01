@@ -10,6 +10,7 @@ from rest_framework import serializers
 from badgeuser.models import BadgeUser
 from entity.serializers import DetailSerializerV2, EntityRelatedFieldV2, BaseSerializerV2
 from issuer.models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
+from issuer.utils import generate_sha256_hashstring
 from mainsite.drf_fields import ValidImageField
 from mainsite.serializers import StripTagsCharField, MarkdownCharField, HumanReadableBooleanField, \
     OriginalJsonSerializerMixin
@@ -248,6 +249,7 @@ class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
 
 class BadgeRecipientSerializerV2(BaseSerializerV2):
     identity = serializers.CharField(source='recipient_identifier')
+    hashed = serializers.NullBooleanField(default=None, required=False)
     type = serializers.ChoiceField(
         choices=BadgeInstance.RECIPIENT_TYPE_CHOICES,
         default=BadgeInstance.RECIPIENT_TYPE_EMAIL,
@@ -260,6 +262,13 @@ class BadgeRecipientSerializerV2(BaseSerializerV2):
         BadgeInstance.RECIPIENT_TYPE_URL: URLValidator(),
         BadgeInstance.RECIPIENT_TYPE_ID: URLValidator(),
         BadgeInstance.RECIPIENT_TYPE_TELEPHONE: TelephoneValidator(),
+    }
+    HASHED_DEFAULTS = {
+        BadgeInstance.RECIPIENT_TYPE_EMAIL: True,
+        BadgeInstance.RECIPIENT_TYPE_URL: False,
+        BadgeInstance.RECIPIENT_TYPE_ID: False,
+        BadgeInstance.RECIPIENT_TYPE_TELEPHONE: True,
+
     }
 
     class Meta:
@@ -281,12 +290,23 @@ class BadgeRecipientSerializerV2(BaseSerializerV2):
     def validate(self, attrs):
         recipient_type = attrs.get('recipient_type')
         recipient_identifier = attrs.get('recipient_identifier')
+        hashed = attrs.get('hashed')
         if recipient_type in self.VALIDATORS:
             try:
                 self.VALIDATORS[recipient_type](recipient_identifier)
             except DjangoValidationError as e:
                 raise serializers.ValidationError(e.message)
+        if hashed is None:
+            attrs['hashed'] = self.HASHED_DEFAULTS.get(recipient_type, True)
         return attrs
+
+    def to_representation(self, instance):
+        representation = super(BadgeRecipientSerializerV2, self).to_representation(instance)
+        if instance.hashed:
+            representation['salt'] = instance.salt
+            representation['identity'] = generate_sha256_hashstring(instance.recipient_identifier.lower(), instance.salt)
+
+        return representation
 
 
 class EvidenceItemSerializerV2(BaseSerializerV2, OriginalJsonSerializerMixin):
