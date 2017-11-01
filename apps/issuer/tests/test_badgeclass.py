@@ -43,7 +43,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
                     issuer=test_issuer.entity_id,
                     badgeclass=new_badgeclass_slug))
                 self.assertEqual(response.status_code, 200)
-                return response.data
+                return json.loads(response.content)
 
     def test_can_create_badgeclass(self):
         self._create_badgeclass_for_issuer_authenticated(self.get_test_image_path())
@@ -475,15 +475,24 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         alignments = [
             {
                 'target_name': "Alignment the first",
-                'target_url': "http://align.ment/1"
+                'target_url': "http://align.ment/1",
+                'target_framework': None,
+                'target_code': None,
+                'target_description': None,
             },
             {
                 'target_name': "Second Alignment",
-                'target_url': "http://align.ment/2"
+                'target_url': "http://align.ment/2",
+                'target_framework': None,
+                'target_code': None,
+                'target_description': None,
             },
             {
                 'target_name': "Third Alignment",
-                'target_url': "http://align.ment/3"
+                'target_url': "http://align.ment/3",
+                'target_framework': None,
+                'target_code': None,
+                'target_description': None,
             },
         ]
         new_badgeclass = self._create_badgeclass_for_issuer_authenticated(self.get_test_image_path(), alignment=alignments)
@@ -493,13 +502,16 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
             slug=self.issuer.entity_id,
             badgeclass=new_badgeclass['slug'])
 
-        # update alignments -- reorder, addition and deletion
+        # update alignments -- addition and deletion
         reordered_alignments = [
-            alignments[1],
             alignments[0],
+            alignments[1],
             {
                 'target_name': "added alignment",
-                'target_url': "http://align.ment/4"
+                'target_url': "http://align.ment/4",
+                'target_framework': None,
+                'target_code': None,
+                'target_description': None,
             }
         ]
         new_badgeclass['alignment'] = reordered_alignments

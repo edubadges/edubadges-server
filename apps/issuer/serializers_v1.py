@@ -184,7 +184,11 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
         if 'image' in validated_data:
             instance.image = validated_data.get('image')
 
+        instance.alignment_items = validated_data.get('alignment_items')
+        instance.tag_items = validated_data.get('tag_items')
+
         instance.save()
+
         return instance
 
     def validate(self, data):
