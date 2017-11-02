@@ -18,3 +18,17 @@ CACHES = {
         'VERSION': 1,
     }
 }
+
+
+# django test speedups
+PASSWORD_HASHERS = (
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+)
+DEBUG = False
+logging.disable(logging.CRITICAL)
+
+# EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
+
+CELERY_ALWAYS_EAGER = True
+CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
+BROKER_BACKEND = 'memory'
