@@ -419,13 +419,26 @@ class BadgeClass(ResizeUploadedImage,
 
     @property
     def tag_items(self):
-        if hasattr(self, '_tag_items'):
-            return getattr(self, '_tag_items', [])
         return self.cached_tags()
 
     @tag_items.setter
     def tag_items(self, value):
-        self._tag_items = value
+        existing_idx = [t.name for t in self.tag_items]
+        new_idx = value
+
+        with transaction.atomic():
+            if not self.pk:
+                self.save()
+
+            # add missing
+            for t in value:
+                if t not in existing_idx:
+                    tag = self.badgeclasstag_set.create(name=t)
+
+            # remove old
+            for tag in self.tag_items:
+                if tag.name not in new_idx:
+                    tag.delete()
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_pathway_elements(self):
