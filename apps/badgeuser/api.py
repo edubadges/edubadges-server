@@ -37,7 +37,7 @@ class BadgeUserDetail(BaseEntityDetailView):
     v2_serializer_class = BadgeUserSerializerV2
     permission_classes = (permissions.AllowAny, BadgrOAuthTokenHasScope)
     valid_scopes = {
-        "post": [],
+        "post": ["*"],
         "get": ["r:profile"],
         "put": ["rw:profile"],
     }
@@ -130,18 +130,20 @@ class BadgeUserToken(BaseEntityDetailView):
     def get_object(self, request, **kwargs):
         return request.user
 
-    @apispec_get_operation('BadgeUserToken',
-        summary="Get the authenticated user's auth token",
-        description="A new auth token will be created if none already exist for this user",
-        tags=['Authentication'],
-    )
+    # deprecate from public API docs in favor of oauth2
+    # @apispec_get_operation('BadgeUserToken',
+    #     summary="Get the authenticated user's auth token",
+    #     description="A new auth token will be created if none already exist for this user",
+    #     tags=['Authentication'],
+    # )
     def get(self, request, **kwargs):
         return super(BadgeUserToken, self).get(request, **kwargs)
 
-    @apispec_operation(
-        summary="Invalidate the old token and create a new one",
-        tags=['Authentication'],
-    )
+    # deprecate from public API docs in favor of oauth2
+    # @apispec_operation(
+    #     summary="Invalidate the old token and create a new one",
+    #     tags=['Authentication'],
+    # )
     def put(self, request, **kwargs):
         request.user.replace_token()  # generate new token first
         self.token_replaced = True
@@ -354,7 +356,8 @@ class BadgeUserEmailConfirm(BaseUserRecoveryView):
 class AccessTokenList(BaseEntityListView):
     model = BadgrAccessToken
     v2_serializer_class = AccessTokenSerializerV2
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated, BadgrOAuthTokenHasScope)
+    valid_scopes = ['rw:profile']
 
     def get_objects(self, request, **kwargs):
         return BadgrAccessToken.objects.filter(user=request.user, expires__gt=timezone.now())
@@ -370,7 +373,8 @@ class AccessTokenList(BaseEntityListView):
 class AccessTokenDetail(BaseEntityDetailView):
     model = BadgrAccessToken
     v2_serializer_class = AccessTokenSerializerV2
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated, BadgrOAuthTokenHasScope)
+    valid_scopes = ['rw:profile']
 
     def get_object(self, request, **kwargs):
         self.object = BadgrAccessToken.objects.get_from_entity_id(kwargs.get('entity_id'))

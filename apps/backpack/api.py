@@ -14,7 +14,7 @@ from backpack.serializers_v2 import BackpackAssertionSerializerV2, BackpackColle
     BackpackImportSerializerV2
 from entity.api import BaseEntityListView, BaseEntityDetailView
 from issuer.models import BadgeInstance
-from issuer.permissions import AuditedModelOwner, VerifiedEmailMatchesRecipientIdentifier
+from issuer.permissions import AuditedModelOwner, VerifiedEmailMatchesRecipientIdentifier, BadgrOAuthTokenHasScope
 from issuer.public_api import ImagePropertyDetailView
 from mainsite.decorators import apispec_list_operation, apispec_post_operation, apispec_get_operation, \
     apispec_delete_operation, apispec_put_operation, apispec_operation
@@ -25,8 +25,12 @@ class BackpackAssertionList(BaseEntityListView):
     model = BadgeInstance
     v1_serializer_class = LocalBadgeInstanceUploadSerializerV1
     v2_serializer_class = BackpackAssertionSerializerV2
-    permission_classes = (AuthenticatedWithVerifiedEmail, VerifiedEmailMatchesRecipientIdentifier)
+    permission_classes = (AuthenticatedWithVerifiedEmail, VerifiedEmailMatchesRecipientIdentifier, BadgrOAuthTokenHasScope)
     http_method_names = ('get', 'post')
+    valid_scopes = {
+        'get': ['r:backpack', 'rw:backpack'],
+        'post': ['rw:backpack'],
+    }
 
     def get_objects(self, request, **kwargs):
         return filter(lambda a: (not a.revoked) and a.acceptance != BadgeInstance.ACCEPTANCE_REJECTED,
@@ -59,8 +63,13 @@ class BackpackAssertionDetail(BaseEntityDetailView):
     model = BadgeInstance
     v1_serializer_class = LocalBadgeInstanceUploadSerializerV1
     v2_serializer_class = BackpackAssertionSerializerV2
-    permission_classes = (AuthenticatedWithVerifiedEmail, VerifiedEmailMatchesRecipientIdentifier)
+    permission_classes = (AuthenticatedWithVerifiedEmail, VerifiedEmailMatchesRecipientIdentifier, BadgrOAuthTokenHasScope)
     http_method_names = ('get', 'delete', 'put')
+    valid_scopes = {
+        'get': ['r:backpack', 'rw:backpack'],
+        'put': ['rw:backpack'],
+        'delete': ['rw:backpack'],
+    }
 
     def get_context_data(self, **kwargs):
         context = super(BackpackAssertionDetail, self).get_context_data(**kwargs)
@@ -94,16 +103,21 @@ class BackpackAssertionDetail(BaseEntityDetailView):
         return super(BackpackAssertionDetail, self).put(request, data=data, **kwargs)
 
 
-class BackpackAssertionDetailImage(ImagePropertyDetailView):
+class BackpackAssertionDetailImage(ImagePropertyDetailView, BadgrOAuthTokenHasScope):
     model = BadgeInstance
     prop = 'image'
+    valid_scopes = ['r:backpack', 'rw:backpack']
 
 
 class BackpackCollectionList(BaseEntityListView):
     model = BackpackCollection
     v1_serializer_class = CollectionSerializerV1
     v2_serializer_class = BackpackCollectionSerializerV2
-    permission_classes = (AuthenticatedWithVerifiedEmail, AuditedModelOwner)
+    permission_classes = (AuthenticatedWithVerifiedEmail, AuditedModelOwner, BadgrOAuthTokenHasScope)
+    valid_scopes = {
+        'get': ['r:backpack', 'rw:backpack'],
+        'post': ['rw:backpack'],
+    }
 
     def get_objects(self, request, **kwargs):
         return self.request.user.cached_backpackcollections()
@@ -127,7 +141,11 @@ class BackpackCollectionDetail(BaseEntityDetailView):
     model = BackpackCollection
     v1_serializer_class = CollectionSerializerV1
     v2_serializer_class = BackpackCollectionSerializerV2
-    permission_classes = (AuthenticatedWithVerifiedEmail, AuditedModelOwner)
+    permission_classes = (AuthenticatedWithVerifiedEmail, AuditedModelOwner, BadgrOAuthTokenHasScope)
+    valid_scopes = {
+        'get': ['r:backpack', 'rw:backpack'],
+        'post': ['rw:backpack'],
+    }
 
     @apispec_get_operation('Collection',
         summary='Get a single Collection',
@@ -153,8 +171,9 @@ class BackpackCollectionDetail(BaseEntityDetailView):
 
 class BackpackImportBadge(BaseEntityListView):
     v2_serializer_class = BackpackImportSerializerV2
-    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    permission_classes = (AuthenticatedWithVerifiedEmail,BadgrOAuthTokenHasScope)
     http_method_names = ('post',)
+    valid_scopes = ['rw:backpack']
 
     @apispec_operation(
         summary="Import a new Assertion to the backpack",
