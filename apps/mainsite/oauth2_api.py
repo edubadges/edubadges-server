@@ -88,7 +88,7 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
                     kwargs["application"]['image'] = application.applicationinfo.icon.url
                 if application.applicationinfo.website_url:
                     kwargs["application"]["url"] = application.applicationinfo.website_url
-                kwargs["scopes"] = [s for s in re.split(r'[\s\n]+', application.applicationinfo.allowed_scopes) if s]
+                scopes = kwargs["scopes"] = [s for s in re.split(r'[\s\n]+', application.applicationinfo.allowed_scopes) if s]
             except ApplicationInfo.DoesNotExist:
                 kwargs["application"] = dict(
                     name=application.name,
