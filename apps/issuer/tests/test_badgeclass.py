@@ -2,33 +2,36 @@
 from __future__ import unicode_literals
 
 import base64
-import os.path
+import json
 
-import os
 from django.core.files.images import get_image_dimensions
 from django.core.urlresolvers import reverse
-from mainsite.tests import BadgrTestCase, SetupIssuerHelper
 
 from issuer.models import BadgeClass
+from mainsite.tests import BadgrTestCase, SetupIssuerHelper
 from mainsite.utils import OriginSetting
 
 
 class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
 
-    def _create_badgeclass_for_issuer_authenticated(self, image_path):
+    def _create_badgeclass_for_issuer_authenticated(self, image_path, **kwargs):
         with open(image_path, 'r') as badge_image:
 
+            image_str = self._base64_data_uri_encode(badge_image, "image/png")
             example_badgeclass_props = {
                 'name': 'Badge of Awesome',
                 'description': "An awesome badge only awarded to awesome people or non-existent test entities",
-                'image': badge_image,
+                'image': image_str,
                 'criteria': 'http://wikipedia.org/Awesome',
             }
+            example_badgeclass_props.update(kwargs)
 
             test_user = self.setup_user(authenticate=True)
             test_issuer = self.setup_issuer(owner=test_user)
+            self.issuer = test_issuer
             response = self.client.post('/v1/issuer/issuers/{slug}/badges'.format(slug=test_issuer.entity_id),
-                example_badgeclass_props
+                data=example_badgeclass_props,
+                format="json"
             )
             self.assertEqual(response.status_code, 201)
             self.assertIn('slug', response.data)
@@ -40,6 +43,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
                     issuer=test_issuer.entity_id,
                     badgeclass=new_badgeclass_slug))
                 self.assertEqual(response.status_code, 200)
+                return json.loads(response.content)
 
     def test_can_create_badgeclass(self):
         self._create_badgeclass_for_issuer_authenticated(self.get_test_image_path())
@@ -423,5 +427,83 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
 
         self.assertEqual(get_response.data, put_response.data)
 
+    def test_can_create_and_update_badgeclass_with_alignments(self):
+        # create a badgeclass with alignments
+        alignments = [
+            {
+                'target_name': "Alignment the first",
+                'target_url': "http://align.ment/1",
+                'target_framework': None,
+                'target_code': None,
+                'target_description': None,
+            },
+            {
+                'target_name': "Second Alignment",
+                'target_url': "http://align.ment/2",
+                'target_framework': None,
+                'target_code': None,
+                'target_description': None,
+            },
+            {
+                'target_name': "Third Alignment",
+                'target_url': "http://align.ment/3",
+                'target_framework': None,
+                'target_code': None,
+                'target_description': None,
+            },
+        ]
+        new_badgeclass = self._create_badgeclass_for_issuer_authenticated(self.get_test_image_path(), alignment=alignments)
+        self.assertEqual(alignments, new_badgeclass.get('alignment', None))
 
+        new_badgeclass_url = '/v1/issuer/issuers/{slug}/badges/{badgeclass}'.format(
+            slug=self.issuer.entity_id,
+            badgeclass=new_badgeclass['slug'])
+
+        # update alignments -- addition and deletion
+        reordered_alignments = [
+            alignments[0],
+            alignments[1],
+            {
+                'target_name': "added alignment",
+                'target_url': "http://align.ment/4",
+                'target_framework': None,
+                'target_code': None,
+                'target_description': None,
+            }
+        ]
+        new_badgeclass['alignment'] = reordered_alignments
+
+        response = self.client.put(new_badgeclass_url, new_badgeclass, format="json")
+        updated_badgeclass = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(updated_badgeclass.get('alignment', None), reordered_alignments)
+
+        # make sure response we got from PUT matches what we get from GET
+        response = self.client.get(new_badgeclass_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, updated_badgeclass)
+
+    def test_can_create_and_update_badgeclass_with_tags(self):
+        # create a badgeclass with tags
+        tags = ["first", "second", "third"]
+        new_badgeclass = self._create_badgeclass_for_issuer_authenticated(self.get_test_image_path(), tags=tags)
+        self.assertEqual(tags, new_badgeclass.get('tags', None))
+
+        new_badgeclass_url = '/v1/issuer/issuers/{slug}/badges/{badgeclass}'.format(
+            slug=self.issuer.entity_id,
+            badgeclass=new_badgeclass['slug'])
+
+        # update tags -- addition and deletion
+        reordered_tags = ["second", "third", "fourth"]
+        new_badgeclass['tags'] = reordered_tags
+
+        response = self.client.put(new_badgeclass_url, new_badgeclass, format="json")
+        updated_badgeclass = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(updated_badgeclass.get('tags', None), reordered_tags)
+
+        # make sure response we got from PUT matches what we get from GET
+        response = self.client.get(new_badgeclass_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, updated_badgeclass)
 

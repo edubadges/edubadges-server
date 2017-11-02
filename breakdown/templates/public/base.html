@@ -1,0 +1,66 @@
+{% load staticfiles %}
+
+<!doctype html>
+<html prefix="og: http://ogp.me/ns#">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="x-ua-compatible" content="ie=edge">
+		<title>{% block page_title %}{% endblock %} - Badgr</title>
+		<meta name="description" content="">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<link rel="icon" type="image/png" sizes="32x32" href="{% static 'badgr-ui/images/favicon.png' %}">
+		<link rel="shortcut icon" href="{% static 'badgr-ui/images/favicon.ico' %}">
+		<link rel="apple-touch-icon" href="{% static 'badgr-ui/images/apple_touch.png' %}">
+
+		<link href="{% static 'badgr-ui/badgr-ui.css' %}" rel="stylesheet">
+
+		{% block extra_head %}
+		{% endblock %}
+	</head>
+
+	<body>
+
+		<!-- Since this uses the same stylesheet as Badgr UI content must be wrapped in an app tag -->
+
+		<app>
+
+			<header class="header l-containerhorizontal">
+				<a href="{{ BADGR_UI_URL }}">
+					<picture>
+						<source media="(min-width: 640px)" srcset="{% static 'badgr-ui/images/logo-desktop.svg' %}">
+						<img alt="Badgr logo" src="{% static 'badgr-ui/images/logo.svg' %}">
+					</picture>
+				</a>
+				<a class="header-x-menu" href="javascript:void(0)" onclick="document.getElementById('menu').scrollIntoView(false)">Main Navigation</a>
+			</header>
+
+			<main>
+				{% block content %}
+				{% endblock %}
+			</main>
+
+			<footer class="wrap l-containerhorizontal">
+				<div class="footer">
+					<ul>
+						<li>Copyright &copy; {{ copyrightYear }} <a href="https://concentricsky.com" target="_blank">Concentric Sky, Inc.</a></li>
+						<li>Powered by <a href="https://github.com/concentricsky/badgr-server" target="_blank">Badgr</a></li>
+					</ul>
+					<a href="https://support.badgr.io/" target="_blank">Documentation</a>
+				</div>
+			</footer>
+
+			<nav class="menu" id="menu">
+				<h1 class="visuallyhidden">Main Navigation</h1>
+				<ul>
+					{% block navigation_items_ui %}
+					{% endblock %}
+				</ul>
+			</nav>
+
+	</app>
+    {% block footer_extra_scripts %}{% endblock %}
+	</body>
+
+</html>
+
