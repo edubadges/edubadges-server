@@ -10,10 +10,13 @@ from apispec import APISpec
 from django.apps import apps
 from importlib import import_module
 
+from django.urls import reverse
 from rest_framework.fields import Field
 from rest_framework.relations import RelatedField
 from rest_framework.schemas import EndpointInspector
 from rest_framework.serializers import ListSerializer, SerializerMetaclass, BaseSerializer
+
+from mainsite.models import BadgrApp
 
 
 class BadgrAPISpecBuilder(object):
@@ -99,16 +102,27 @@ class BadgrAPISpec(APISpec, BadgrAPISpecBuilder):
         # sort models alphabetically
         self._definitions = OrderedDict([(k, self._definitions[k]) for k in sorted(self._definitions.keys())])
         ret = super(BadgrAPISpec, self).to_dict()
+        badgrapp = BadgrApp.objects.get_current()
         ret['securityDefinitions'] = {
-            'api_key': {
-                "type": "apiKey",
-                "name": "Authorization",
-                "in": "header"
+            'oauth2': {
+                "type": "oauth2",
+                "flow": "authorizationCode",
+                "authorizationUrl": badgrapp.oauth_authorization_redirect,
+                "tokenUrl": reverse("oauth2_provider:token"),
+                "scopes": {
+                    "r:profile": "Read profile",
+                }
             }
+            # 'api_key': {
+            #     "type": "apiKey",
+            #     "name": "Authorization",
+            #     "in": "header"
+            # },
         }
         ret['security'] = [
             {
-                'api_key': []
+                # 'api_key': [],
+                'oauth2': [],
             }
         ]
         return ret
@@ -219,7 +233,7 @@ class BadgrAPISpec(APISpec, BadgrAPISpecBuilder):
 
     def get_operation_spec(self, path, http_method, method_func):
         return {
-            'parameters': self.get_path_parameter_list(path)
+            'parameters': self.get_path_parameter_list(path),
         }
 
     def write_to(self, outfile):

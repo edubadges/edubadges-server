@@ -35,7 +35,7 @@ class BadgrAppAdmin(ModelAdmin):
         ('Meta', {'fields': ('is_active', ),
                   'classes': ('collapse',)}),
         (None, {
-            'fields': ('name', 'cors', ),
+            'fields': ('name', 'cors', 'oauth_authorization_redirect'),
         }),
         ('signup', {
             'fields': ('signup_redirect', 'email_confirmation_redirect', 'forgot_password_redirect', 'ui_login_redirect', 'ui_signup_success_redirect', 'ui_connect_success_redirect')

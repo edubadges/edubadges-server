@@ -63,6 +63,11 @@ class BadgeUserDetail(BaseEntityDetailView):
     @apispec_get_operation('BadgeUser',
         summary="Get a single BadgeUser profile",
         description="Use the entityId 'self' to retrieve the authenticated user's profile",
+        security=[
+            {
+                "oauth2": ["r:profile"]
+            }
+        ],
         tags=['BadgeUsers']
     )
     def get(self, request, **kwargs):

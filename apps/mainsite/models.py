@@ -89,6 +89,7 @@ class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive, cachemodel.CacheMod
     ui_signup_success_redirect = models.URLField(null=True)
     ui_connect_success_redirect = models.URLField(null=True)
     public_pages_redirect = models.URLField(null=True)
+    oauth_authorization_redirect = models.URLField(null=True)
     objects = BadgrAppManager()
 
     def __unicode__(self):

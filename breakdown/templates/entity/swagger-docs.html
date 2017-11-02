@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <title>Swagger UI</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="./swagger-ui.css" >
+    <link rel="stylesheet" type="text/css" href="{% static "swagger-ui/swagger-ui.css" %}" >
     <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32" />
     <link rel="icon" type="image/png" href="./favicon-16x16.png" sizes="16x16" />
     <style>
@@ -73,7 +73,8 @@
     window.onload = function() {
         // Build a system
         const ui = SwaggerUIBundle({
-            url: "{% static "swagger-ui/" %}badgr_spec_{{ version }}.json",
+            oauth2RedirectUrl: "{% static "swagger-ui" %}/oauth2_redirect.html",
+            url: "{% static "swagger-ui" %}/badgr_spec_{{ version }}.json",
             dom_id: '#swagger-ui',
             presets: [
                 SwaggerUIBundle.presets.apis,
@@ -83,7 +84,11 @@
                 SwaggerUIBundle.plugins.DownloadUrl
             ],
             layout: "StandaloneLayout"
-        })
+        });
+        ui.initOAuth({
+            clientId: "badgr-api-docs",
+            scopeSeparator: " ",
+        });
         window.ui = ui
     }
 </script>
