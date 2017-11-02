@@ -4,18 +4,17 @@ from __future__ import unicode_literals
 import json
 import re
 from collections import OrderedDict
-
-import six
-from apispec import APISpec
-from django.apps import apps
 from importlib import import_module
 
+from apispec import APISpec
+from django.apps import apps
+from django.conf import settings
 from django.urls import reverse
 from rest_framework.fields import Field
-from rest_framework.relations import RelatedField
 from rest_framework.schemas import EndpointInspector
 from rest_framework.serializers import ListSerializer, SerializerMetaclass, BaseSerializer
 
+from issuer.permissions import BadgrOAuthTokenHasScope
 from mainsite.models import BadgrApp
 
 
@@ -103,15 +102,17 @@ class BadgrAPISpec(APISpec, BadgrAPISpecBuilder):
         self._definitions = OrderedDict([(k, self._definitions[k]) for k in sorted(self._definitions.keys())])
         ret = super(BadgrAPISpec, self).to_dict()
         badgrapp = BadgrApp.objects.get_current()
+
+        scope_descriptions = getattr(settings, 'OAUTH2_PROVIDER', {}).get('SCOPES', {})
         ret['securityDefinitions'] = {
             'oauth2': {
                 "type": "oauth2",
                 "flow": "authorizationCode",
                 "authorizationUrl": badgrapp.oauth_authorization_redirect,
                 "tokenUrl": reverse("oauth2_provider:token"),
-                "scopes": {
-                    "r:profile": "Read profile",
-                }
+                "scopes": OrderedDict([
+                    (s, scope_descriptions.get(s,s)) for s in self.scrape_endpoints_for_scopes()
+                ])
             }
             # 'api_key': {
             #     "type": "apiKey",
@@ -171,6 +172,16 @@ class BadgrAPISpec(APISpec, BadgrAPISpecBuilder):
             'type': "string"
         } for param in self.get_path_parameters(path)]
 
+    def scrape_endpoints_for_scopes(self):
+        """
+        Iterate over the registered API endpoints output all the scopes
+        """
+        inspector = EndpointInspector()
+        all_scopes = set()
+        for path, http_method, func in inspector.get_api_endpoints():
+            all_scopes |= set(BadgrOAuthTokenHasScope.valid_scopes_for_view(func.cls, method=http_method))
+        return sorted(list(all_scopes))
+
     def scrape_endpoints(self):
         """
         Iterate over the registered API endpoints for this version and generate path specs
@@ -184,7 +195,7 @@ class BadgrAPISpec(APISpec, BadgrAPISpecBuilder):
 
             method_func = getattr(func.cls, http_method, None)
             if self.has_apispec_wrapper(method_func):
-                operation_spec = self.get_operation_spec(path, http_method, method_func)
+                operation_spec = self.get_operation_spec(path, http_method, view_cls=func.cls)
                 merged_spec = self.merge_specs(operation_spec, self.get_apispec_kwargs(method_func))
 
                 path_spec = {
@@ -231,10 +242,18 @@ class BadgrAPISpec(APISpec, BadgrAPISpecBuilder):
 
         return merged
 
-    def get_operation_spec(self, path, http_method, method_func):
-        return {
+    def get_operation_spec(self, path, http_method, view_cls):
+        spec = {
             'parameters': self.get_path_parameter_list(path),
         }
+
+        valid_scopes = BadgrOAuthTokenHasScope.valid_scopes_for_view(view_cls, method=http_method)
+        if valid_scopes:
+            spec['security'] = [
+                {"oauth2": valid_scopes}
+            ]
+
+        return spec
 
     def write_to(self, outfile):
         outfile.write(json.dumps(self.to_dict(), indent=4))
