@@ -176,7 +176,7 @@ class VerifiedEmailMatchesRecipientIdentifier(permissions.BasePermission):
 
 class BadgrOAuthTokenHasScope(permissions.BasePermission):
     def has_permission(self, request, view):
-        valid_scopes = self._get_valid_scopes(request, view)
+        valid_scopes = self.valid_scopes_for_view(view, method=request.method)
         token = request.auth
 
         if not token:
@@ -190,11 +190,16 @@ class BadgrOAuthTokenHasScope(permissions.BasePermission):
 
         return token.is_valid(valid_scopes)
 
-    def _get_valid_scopes(self, request, view):
-        method_scopes = getattr(view, "method_scopes", {})
-        if request.method in method_scopes:
-            return method_scopes[request.method]
-        return getattr(view, "valid_scopes", [])
+    @classmethod
+    def valid_scopes_for_view(cls, view, method=None):
+        valid_scopes = getattr(view, "valid_scopes", [])
+        if isinstance(valid_scopes, dict) and method is not None:
+            for m in (method, method.lower(), method.upper()):
+                if m in valid_scopes:
+                    return valid_scopes[m]
+            return []
+
+        return valid_scopes
 
 
 class BadgrOAuthTokenHasEntityScope(permissions.BasePermission):

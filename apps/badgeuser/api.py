@@ -36,10 +36,10 @@ class BadgeUserDetail(BaseEntityDetailView):
     v1_serializer_class = BadgeUserProfileSerializerV1
     v2_serializer_class = BadgeUserSerializerV2
     permission_classes = (permissions.AllowAny, BadgrOAuthTokenHasScope)
-    method_scopes = {
-        "POST": ['*'],
-        "GET": ["r:profile"],
-        "PUT": ["rw:profile"],
+    valid_scopes = {
+        "post": [],
+        "get": ["r:profile"],
+        "put": ["rw:profile"],
     }
 
     def post(self, request, **kwargs):
