@@ -88,12 +88,16 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
                     kwargs["application"]['image'] = application.applicationinfo.icon.url
                 if application.applicationinfo.website_url:
                     kwargs["application"]["url"] = application.applicationinfo.website_url
-                scopes = kwargs["scopes"] = [s for s in re.split(r'[\s\n]+', application.applicationinfo.allowed_scopes) if s]
+                app_scopes = [s for s in re.split(r'[\s\n]+', application.applicationinfo.allowed_scopes) if s]
             except ApplicationInfo.DoesNotExist:
+                app_scopes = ["r:profile"]
                 kwargs["application"] = dict(
                     name=application.name,
-                    scopes=["r:profile"]
+                    scopes=app_scopes
                 )
+
+            filtered_scopes = set(app_scopes) & set(scopes)
+            kwargs['scopes'] = list(filtered_scopes)
 
             self.oauth2_data = kwargs
 
@@ -106,7 +110,7 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
             # This is useful for in-house applications-> assume an in-house applications
             # are already approved.
             if application.skip_authorization:
-                success_url = self.get_authorization_redirect_url(" ".join(scopes), credentials)
+                success_url = self.get_authorization_redirect_url(" ".join(kwargs['scopes']), credentials)
                 return Response({ 'success_url': success_url })
 
             elif require_approval == "auto" and not request.user.is_anonymous:
@@ -119,7 +123,7 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
                 # check past authorizations regarded the same scopes as the current one
                 for token in tokens:
                     if token.allow_scopes(scopes):
-                        success_url = self.get_authorization_redirect_url(" ".join(scopes), credentials)
+                        success_url = self.get_authorization_redirect_url(" ".join(kwargs['scopes']), credentials)
                         return Response({ 'success_url': success_url })
 
             return Response(kwargs)
