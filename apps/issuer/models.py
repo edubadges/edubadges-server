@@ -394,13 +394,37 @@ class BadgeClass(ResizeUploadedImage,
 
     @property
     def alignment_items(self):
-        if hasattr(self, '_alignment_items'):
-            return getattr(self, '_alignment_items', [])
         return self.cached_alignments()
 
     @alignment_items.setter
     def alignment_items(self, value):
-        self._alignment_items = value
+        keys = ['target_name','target_url','target_description','target_framework', 'target_code']
+
+        def _identity(align):
+            """build a unique identity from alignment json"""
+            return "&".join("{}={}".format(k, align.get(k, None)) for k in keys)
+
+        def _obj_identity(alignment):
+            """build a unique identity from alignment json"""
+            return "&".join("{}={}".format(k, getattr(alignment, k)) for k in keys)
+
+        existing_idx = {_obj_identity(a): a for a in self.alignment_items}
+        new_idx = {_identity(a): a for a in value}
+
+        with transaction.atomic():
+            # HACKY, but force a save to self otherwise we can't create related objects here
+            if not self.pk:
+                self.save()
+
+            # add missing records
+            for align in value:
+                if _identity(align) not in existing_idx:
+                    alignment = self.badgeclassalignment_set.create(**align)
+
+            # remove old records
+            for alignment in self.alignment_items:
+                if _obj_identity(alignment) not in new_idx:
+                    alignment.delete()
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_tags(self):

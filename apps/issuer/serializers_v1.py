@@ -193,14 +193,11 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
         if 'image' in validated_data:
             instance.image = validated_data.get('image')
 
-        if 'tag_items' in validated_data:
-            for tag_name in validated_data['tag_items']:
-                instance.badgeclasstag_set.get_or_create(name=tag_name)
-        if 'alignment_items' in validated_data:
-            for alignment in validated_data['alignment_items']:
-                instance.badgeclassalignment_set.create(**alignment)
+        instance.alignment_items = validated_data.get('alignment_items')
+        instance.tag_items = validated_data.get('tag_items')
 
         instance.save()
+
         return instance
 
     def validate(self, data):
