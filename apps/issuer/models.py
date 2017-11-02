@@ -385,6 +385,8 @@ class BadgeClass(ResizeUploadedImage,
 
     @alignment_items.setter
     def alignment_items(self, value):
+        if value is None:
+            value = []
         keys = ['target_name','target_url','target_description','target_framework', 'target_code']
 
         def _identity(align):
@@ -423,6 +425,8 @@ class BadgeClass(ResizeUploadedImage,
 
     @tag_items.setter
     def tag_items(self, value):
+        if value is None:
+            value = []
         existing_idx = [t.name for t in self.tag_items]
         new_idx = value
 

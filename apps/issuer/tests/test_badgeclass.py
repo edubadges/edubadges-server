@@ -261,6 +261,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
 
     def test_can_create_badgeclass_with_alignment(self):
         with open(self.get_test_image_path(), 'r') as badge_image:
+            num_badgeclasses = BadgeClass.objects.count()
             test_user = self.setup_user(authenticate=True)
             test_issuer = self.setup_issuer(owner=test_user)
 
@@ -301,6 +302,8 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
             self.assertEqual(len(response.data['alignment']), 2)
             self.assertEqual(
                 response.data['alignment'][0]['targetName'], badgeclass_props['alignments'][0]['targetName'])
+
+            self.assertEqual(num_badgeclasses + 1, BadgeClass.objects.count())
 
     def test_new_badgeclass_updates_cached_issuer(self):
         test_user = self.setup_user(authenticate=True)
