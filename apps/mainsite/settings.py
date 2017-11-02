@@ -410,9 +410,15 @@ ARTIFACT_VERSION = determine_version()
 
 OAUTH2_PROVIDER = {
     'SCOPES': {
-        'r:profile': 'Read user profile',
-        'rw:issuer': 'Read/write issuers',
-        'rw:issuer:*': 'Read/write single issuer',
+        'r:profile': 'See who you are',
+        'rw:profile': 'Update your own User profile',
+        'r:backpack': "List assertions in a User's Backpack",
+        'rw:backpack': "Upload badges into a User's Backpack",
+        'rw:issuer': 'Create and update Issuers, create and update Badgeclasses, and award Assertions',
+
+        # private scopes used for integrations
+        'rw:issuer:*': 'Create and update Badgeclasses, and award Assertions for a single Issuer',
+        'r:assertions': 'Batch receive assertions'
     },
 
     'OAUTH2_VALIDATOR_CLASS': 'mainsite.oauth_validator.BadgrRequestValidator',
@@ -421,6 +427,8 @@ OAUTH2_PROVIDER = {
 }
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2_provider.Application'
 OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'oauth2_provider.AccessToken'
+
+API_DOCS_EXCLUDED_SCOPES = ['rw:issuer:*', 'r:assertions', '*']
 
 # Allow use of weaker CAs (1024 bits) to avoid problem with chained certificates used by accounts.google.com
 # Ideally this environment variable would be set on a per-environment basis, only where needed

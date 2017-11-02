@@ -104,6 +104,8 @@ class BadgrAPISpec(APISpec, BadgrAPISpecBuilder):
         badgrapp = BadgrApp.objects.get_current()
 
         scope_descriptions = getattr(settings, 'OAUTH2_PROVIDER', {}).get('SCOPES', {})
+        excluded_scopes = getattr(settings, 'API_DOCS_EXCLUDED_SCOPES', [])
+        filtered_scopes = {k: v for k,v in scope_descriptions.items() if k not in excluded_scopes}
         ret['securityDefinitions'] = {
             'oauth2': {
                 "type": "oauth2",
@@ -111,7 +113,7 @@ class BadgrAPISpec(APISpec, BadgrAPISpecBuilder):
                 "authorizationUrl": badgrapp.oauth_authorization_redirect,
                 "tokenUrl": reverse("oauth2_provider:token"),
                 "scopes": OrderedDict([
-                    (s, scope_descriptions.get(s,s)) for s in self.scrape_endpoints_for_scopes()
+                    (s, filtered_scopes.get(s,s)) for s in self.scrape_endpoints_for_scopes()
                 ])
             }
             # 'api_key': {
@@ -180,7 +182,8 @@ class BadgrAPISpec(APISpec, BadgrAPISpecBuilder):
         all_scopes = set()
         for path, http_method, func in inspector.get_api_endpoints():
             all_scopes |= set(BadgrOAuthTokenHasScope.valid_scopes_for_view(func.cls, method=http_method))
-        return sorted(list(all_scopes))
+        excluded_scopes = set(getattr(settings, 'API_DOCS_EXCLUDED_SCOPES', []))
+        return sorted(list(all_scopes ^ excluded_scopes))
 
     def scrape_endpoints(self):
         """
