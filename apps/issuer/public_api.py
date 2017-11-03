@@ -48,6 +48,9 @@ class SlugToEntityIdRedirectMixin(object):
     def get_slug_to_entity_id_redirect(self, slug):
         redirect_url = self.get_slug_to_entity_id_redirect_url(slug)
         if redirect_url is not None:
+            query = self.request.META.get('QUERY_STRING', '')
+            if query:
+                redirect_url = "{}?{}".format(redirect_url, query)
             return redirect(redirect_url, permanent=True)
         else:
             raise Http404
