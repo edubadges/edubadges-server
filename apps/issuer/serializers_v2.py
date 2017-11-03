@@ -287,22 +287,6 @@ class BadgeRecipientSerializerV2(BaseSerializerV2):
 
     }
 
-    class Meta:
-        apispec_definition = ('AssertionRecipient', {
-            'properties': OrderedDict([
-                ('identity', {
-                    'type': 'string',
-                    'format': 'string',
-                    'description': 'Either the hash of the identity or the plaintext value'
-                }),
-                ('type', {
-                    'type': 'string',
-                    'enum': [c[0] for c in BadgeInstance.RECIPIENT_TYPE_CHOICES],
-                    'description': "Type of identifier used to identify recipient"
-                }),
-            ])
-        })
-
     def validate(self, attrs):
         recipient_type = attrs.get('recipient_type')
         recipient_identifier = attrs.get('recipient_identifier')
@@ -436,9 +420,19 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
                     'description': "List of evidence associated with the achievement"
                 }),
                 ('recipient', {
-                    'type': {
-                        '$ref': '#/definitions/AssertionRecipient'
-                    },
+                    'type': 'object',
+                    'properties': OrderedDict([
+                        ('identity', {
+                            'type': 'string',
+                            'format': 'string',
+                            'description': 'Either the hash of the identity or the plaintext value'
+                        }),
+                        ('type', {
+                            'type': 'string',
+                            'enum': [c[0] for c in BadgeInstance.RECIPIENT_TYPE_CHOICES],
+                            'description': "Type of identifier used to identify recipient"
+                        }),
+                    ]),
                     'description': "Recipient that was issued the Assertion"
                 })
             ])
