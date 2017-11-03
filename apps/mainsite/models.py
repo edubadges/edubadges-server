@@ -66,8 +66,15 @@ class EmailBlacklist(models.Model):
 
 class BadgrAppManager(Manager):
     def get_current(self, request=None):
-        if request and request.META.get('HTTP_ORIGIN'):
-            origin = request.META.get('HTTP_ORIGIN')
+        origin = None
+
+        if request:
+            if request.META.get('HTTP_ORIGIN'):
+                origin = request.META.get('HTTP_ORIGIN')
+            elif request.META.get('HTTP_REFERER'):
+                origin = request.META.get('HTTP_REFERER')
+
+        if origin:
             url = urlparse.urlparse(origin)
             try:
                 return self.get(cors=url.netloc)

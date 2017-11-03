@@ -29,7 +29,7 @@ class BadgrSocialLogin(RedirectView):
         if provider_name is None:
             raise ValidationError('No provider specified')
 
-        badgr_app = BadgrApp.objects.get_current()
+        badgr_app = BadgrApp.objects.get_current(request=self.request)
         if badgr_app is not None:
             set_session_badgr_app(self.request, badgr_app)
         else:
