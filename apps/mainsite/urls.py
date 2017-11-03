@@ -10,7 +10,7 @@ badgr_admin.autodiscover()
 
 from django.views.generic.base import RedirectView, TemplateView
 
-from mainsite.views import ClearCacheView, LoginAndObtainAuthToken, RedirectToUiLogin
+from mainsite.views import ClearCacheView, LoginAndObtainAuthToken, RedirectToUiLogin, DocsAuthorizeRedirect
 from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation, error404, error500
 
 
@@ -41,6 +41,7 @@ urlpatterns = [
     # Swagger Docs
     url(r'^docs/v1/', TemplateView.as_view(template_name="entity/swagger-docs.html"), kwargs={'version': 'v1'}),
     url(r'^docs/v2/', TemplateView.as_view(template_name="entity/swagger-docs.html"), kwargs={'version': 'v2'}),
+    url(r'^docs/oauth2/authorize$', DocsAuthorizeRedirect.as_view(), name='docs_authorize_redirect'),
     url(r'^docs/?$', RedirectView.as_view(url='/docs/v2/', permanent=True)),
     url(r'^docs', RedirectView.as_view(url=getattr(settings, 'ROOT_INFO_REDIRECT', 'https://info.badgr.io/'), permanent=False)),
 

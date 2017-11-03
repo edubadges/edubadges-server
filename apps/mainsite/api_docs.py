@@ -15,7 +15,6 @@ from rest_framework.schemas import EndpointInspector
 from rest_framework.serializers import ListSerializer, SerializerMetaclass, BaseSerializer
 
 from issuer.permissions import BadgrOAuthTokenHasScope
-from mainsite.models import BadgrApp
 
 
 class BadgrAPISpecBuilder(object):
@@ -101,7 +100,6 @@ class BadgrAPISpec(APISpec, BadgrAPISpecBuilder):
         # sort models alphabetically
         self._definitions = OrderedDict([(k, self._definitions[k]) for k in sorted(self._definitions.keys())])
         ret = super(BadgrAPISpec, self).to_dict()
-        badgrapp = BadgrApp.objects.get_current()
 
         scope_descriptions = getattr(settings, 'OAUTH2_PROVIDER', {}).get('SCOPES', {})
         excluded_scopes = getattr(settings, 'API_DOCS_EXCLUDED_SCOPES', [])
@@ -110,7 +108,7 @@ class BadgrAPISpec(APISpec, BadgrAPISpecBuilder):
             'oauth2': {
                 "type": "oauth2",
                 "flow": "authorizationCode",
-                "authorizationUrl": badgrapp.oauth_authorization_redirect,
+                "authorizationUrl": reverse('docs_authorize_redirect'),
                 "tokenUrl": reverse("oauth2_provider:token"),
                 "scopes": OrderedDict([
                     (s, filtered_scopes.get(s,s)) for s in self.scrape_endpoints_for_scopes()
