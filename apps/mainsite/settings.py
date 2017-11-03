@@ -420,6 +420,7 @@ OAUTH2_PROVIDER = {
         'rw:issuer:*': 'Create and update Badgeclasses, and award Assertions for a single Issuer',
         'r:assertions': 'Batch receive assertions'
     },
+    'DEFAULT_SCOPES': ['r:profile'],
 
     'OAUTH2_VALIDATOR_CLASS': 'mainsite.oauth_validator.BadgrRequestValidator',
     'ACCESS_TOKEN_EXPIRE_SECONDS':  6*31*86400  # 6 months
