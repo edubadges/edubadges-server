@@ -782,7 +782,7 @@ class BadgeInstance(BaseAuditedModel,
             pass
         return None
 
-    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_badgeclass=False, include_issuer=False, include_extra=True):
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, expand_badgeclass=False, expand_issuer=False, include_extra=True):
         obi_version, context_iri = get_obi_context(obi_version)
 
         json = OrderedDict([
@@ -793,11 +793,11 @@ class BadgeInstance(BaseAuditedModel,
             ('badge', add_obi_version_ifneeded(self.cached_badgeclass.jsonld_id, obi_version)),
         ])
 
-        if include_badgeclass:
-            json['badgeclass'] = self.cached_badgeclass.get_json(obi_version=obi_version, include_extra=include_extra)
+        if expand_badgeclass:
+            json['badge'] = self.cached_badgeclass.get_json(obi_version=obi_version, include_extra=include_extra)
 
-        if include_issuer:
-            json['issuer'] = self.cached_issuer.get_json(obi_version=obi_version, include_extra=include_extra)
+            if expand_issuer:
+                json['badge']['issuer'] = self.cached_issuer.get_json(obi_version=obi_version, include_extra=include_extra)
 
         if self.revoked:
             return OrderedDict([

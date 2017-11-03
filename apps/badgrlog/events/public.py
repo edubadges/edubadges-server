@@ -44,6 +44,10 @@ class IssuerRetrievedEvent(BaseBadgeAssertionEvent):
     pass
 
 
+class IssuerBadgesRetrievedEvent(BaseBadgeAssertionEvent):
+    pass
+
+
 class IssuerImageRetrievedEvent(BaseBadgeAssertionEvent):
     pass
 

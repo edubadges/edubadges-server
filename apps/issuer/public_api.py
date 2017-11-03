@@ -66,11 +66,11 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
     def log(self, obj):
         pass
 
-    def get_json(self, request):
+    def get_json(self, request, **kwargs):
         if getattr(self.current_object, 'source_url', None) and getattr(self.current_object, 'original_json', None):
             json = self.current_object.get_original_json()
         else:
-            json = self.current_object.get_json(obi_version=self._get_request_obi_version(request))
+            json = self.current_object.get_json(obi_version=self._get_request_obi_version(request), **kwargs)
         return json
 
     def get(self, request, **kwargs):
@@ -201,13 +201,18 @@ class IssuerJson(JSONComponentView):
     def log(self, obj):
         logger.event(badgrlog.IssuerRetrievedEvent(obj, self.request))
 
+
+class IssuerBadgesJson(JSONComponentView):
+    permission_classes = (permissions.AllowAny,)
+    model = Issuer
+
+    def log(self, obj):
+        logger.event(badgrlog.IssuerBadgesRetrievedEvent(obj, self.request))
+
     def get_json(self, request):
-        includes = request.GET.getlist('include', [])
-        json = super(IssuerJson, self).get_json(request)
-        if 'badgeclasses' in includes:
-            obi_version=self._get_request_obi_version(request)
-            json['badgeclasses'] = [b.get_json(obi_version=obi_version) for b in self.current_object.cached_badgeclasses()]
-        return json
+        obi_version=self._get_request_obi_version(request)
+
+        return [b.get_json(obi_version=obi_version) for b in self.current_object.cached_badgeclasses()]
 
 
 class IssuerImage(ImagePropertyDetailView):
@@ -224,6 +229,16 @@ class BadgeClassJson(JSONComponentView):
 
     def log(self, obj):
         logger.event(badgrlog.BadgeClassRetrievedEvent(obj, self.request))
+
+    def get_json(self, request):
+        expands = request.GET.getlist('expand', [])
+        json = super(BadgeClassJson, self).get_json(request)
+        obi_version = self._get_request_obi_version(request)
+
+        if 'issuer' in expands:
+            json['issuer'] = self.current_object.cached_issuer.get_json(obi_version=obi_version)
+
+        return json
 
 
 class BadgeClassImage(ImagePropertyDetailView):
@@ -254,13 +269,13 @@ class BadgeInstanceJson(JSONComponentView):
     model = BadgeInstance
 
     def get_json(self, request):
-        includes = request.GET.getlist('include', [])
-        json = super(BadgeInstanceJson, self).get_json(request)
-        obi_version = self._get_request_obi_version(request)
-        if 'badgeclass' in includes:
-            json['badgeclass'] = self.current_object.cached_badgeclass.get_json(obi_version=obi_version)
-        if 'issuer' in includes:
-            json['issuer'] = self.current_object.cached_issuer.get_json(obi_version=obi_version)
+        expands = request.GET.getlist('expand', [])
+        json = super(BadgeInstanceJson, self).get_json(
+            request,
+            expand_badgeclass=('badge' in expands),
+            expand_issuer=('badge.issuer' in expands)
+        )
+
         return json
 
 
@@ -284,10 +299,10 @@ class BackpackCollectionJson(JSONComponentView):
     entity_id_field_name = 'share_hash'
 
     def get_json(self, request):
-        includes = request.GET.getlist('include', [])
+        expands = request.GET.getlist('expand', [])
         json = self.current_object.get_json(
             obi_version=self._get_request_obi_version(request),
-            include_badgeclass=('badgeclass' in includes),
-            include_issuer=('issuer' in includes)
+            expand_badgeclass=('badges.badge' in expands),
+            expand_issuer=('badges.badge.issuer' in expands)
         )
         return json

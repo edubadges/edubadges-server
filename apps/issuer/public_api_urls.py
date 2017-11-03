@@ -2,12 +2,13 @@ from django.conf.urls import url
 from django.views.decorators.clickjacking import xframe_options_exempt
 from rest_framework.urlpatterns import format_suffix_patterns
 
-from .public_api import (IssuerJson, IssuerImage, BadgeClassJson,
+from .public_api import (IssuerJson, IssuerBadgesJson, IssuerImage, BadgeClassJson,
                          BadgeClassImage, BadgeClassCriteria, BadgeInstanceJson,
                          BadgeInstanceImage, BackpackCollectionJson)
 
 json_patterns = [
     url(r'^issuers/(?P<entity_id>[^/.]+)$', xframe_options_exempt(IssuerJson.as_view(slugToEntityIdRedirect=True)), name='issuer_json'),
+    url(r'^issuers/(?P<entity_id>[^/.]+)/badges$', xframe_options_exempt(IssuerBadgesJson.as_view(slugToEntityIdRedirect=True)), name='issuer_badges_json'),
     url(r'^badges/(?P<entity_id>[^/.]+)$', xframe_options_exempt(BadgeClassJson.as_view(slugToEntityIdRedirect=True)), name='badgeclass_json'),
     url(r'^assertions/(?P<entity_id>[^/.]+)$', xframe_options_exempt(BadgeInstanceJson.as_view(slugToEntityIdRedirect=True)), name='badgeinstance_json'),
 
