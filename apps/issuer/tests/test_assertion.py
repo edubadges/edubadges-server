@@ -276,8 +276,13 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         ), {'revocation_reason': revocation_reason })
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get('/public/assertions/{assertion}'.format(assertion=test_assertion.entity_id))
-        self.assertEqual(response.status_code, 410)
+        response = self.client.get('/public/assertions/{assertion}.json'.format(assertion=test_assertion.entity_id))
+        self.assertEqual(response.status_code, 200)
+        assertion_obo = json.loads(response.content)
+        self.assertDictContainsSubset(dict(
+            revocationReason=revocation_reason,
+            revoked=True
+        ), assertion_obo)
 
     def test_cannot_revoke_assertion_if_missing_reason(self):
         test_user = self.setup_user(authenticate=True)
@@ -404,7 +409,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         assertion_entity_id = returned_assertions[0].get('entityId')
         expected = batch_assertion_props['assertions'][0]
 
-        response = self.client.get('/public/assertions/{assertion}?v=2_0'.format(
+        response = self.client.get('/public/assertions/{assertion}.json?v=2_0'.format(
             assertion=assertion_entity_id
         ), format='json')
         self.assertEqual(response.status_code, 200)
