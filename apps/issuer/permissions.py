@@ -182,6 +182,13 @@ class BadgrOAuthTokenHasScope(permissions.BasePermission):
         if not token:
             if '*' in valid_scopes:
                 return True
+
+            # fallback scopes for authenticated users
+            if request.user and request.user.is_authenticated:
+                default_auth_scopes = set(['rw:profile', 'rw:issuer', 'rw:backpack'])
+                if len(set(valid_scopes) & default_auth_scopes) > 0:
+                    return True
+
             return False
 
         # Do not apply scope if using a non-oauth tokens
