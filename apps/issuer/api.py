@@ -236,11 +236,15 @@ class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):
         if not self.has_object_permissions(request, badgeclass):
             return Response(status=HTTP_404_NOT_FOUND)
 
-        create_notification = request.data.get('create_notification', False)
+        try:
+            create_notification = request.data.get('create_notification', False)
+        except AttributeError:
+            return Response(status=HTTP_400_BAD_REQUEST)
+
+        # update passed in assertions to include create_notification
         def _include_create_notification(a):
             a['create_notification'] = create_notification
             return a
-        # update passed in assertions to include create_notification
         assertions = map(_include_create_notification, request.data.get('assertions'))
 
         # save serializers

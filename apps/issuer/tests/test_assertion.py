@@ -1,6 +1,8 @@
 # encoding: utf-8
 from __future__ import unicode_literals
 
+import json
+
 import png
 from django.apps import apps
 from django.core import mail
@@ -344,5 +346,79 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         badgeclass_data = response.data
         self.assertEqual(badgeclass_data.get('recipient_count'), original_recipient_count+1)
 
+    def test_batch_assertions_throws_400(self):
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+        invalid_batch_assertion_props = [
+            {
+                "recipient": {
+                    "identity": "foo@bar.com"
+                }
+            }
+        ]
+        response = self.client.post('/v2/badgeclasses/{badge}/issue'.format(
+            badge=test_badgeclass.entity_id
+        ), invalid_batch_assertion_props, format='json')
+        self.assertEqual(response.status_code, 400)
 
+    def test_batch_assertions_with_evidence(self):
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
 
+        batch_assertion_props = {
+            'assertions': [{
+                "recipient": {
+                    "identity": "foo@bar.com",
+                    "type": "email",
+                    "hashed": True,
+                },
+                "narrative": "foo@bar's test narrative",
+                "evidence": [
+                    {
+                        "url": "http://google.com?evidence=foo.bar",
+                    },
+                    {
+                        "url": "http://google.com?evidence=bar.baz",
+                        "narrative": "barbaz"
+                    }
+                ]
+            }],
+            'create_notification': True
+        }
+        response = self.client.post('/v2/badgeclasses/{badge}/issue'.format(
+            badge=test_badgeclass.entity_id
+        ), batch_assertion_props, format='json')
+        self.assertEqual(response.status_code, 201)
+
+        result = json.loads(response.content)
+        returned_assertions = result.get('result')
+
+        # verify results contain same evidence that was provided
+        for i in range(0, len(returned_assertions)):
+            expected = batch_assertion_props['assertions'][i]
+            self.assertListOfDictsContainsSubset(expected.get('evidence'), returned_assertions[i].get('evidence'))
+
+        # verify OBO returns same results
+        assertion_entity_id = returned_assertions[0].get('entityId')
+        expected = batch_assertion_props['assertions'][0]
+
+        response = self.client.get('/public/assertions/{assertion}?v=2_0'.format(
+            assertion=assertion_entity_id
+        ), format='json')
+        self.assertEqual(response.status_code, 200)
+
+        assertion_obo = json.loads(response.content)
+
+        expected = expected.get('evidence')
+        evidence = assertion_obo.get('evidence')
+        for i in range(0, len(expected)):
+            self.assertEqual(evidence[i].get('id'), expected[i].get('url'))
+            self.assertEqual(evidence[i].get('narrative', None), expected[i].get('narrative', None))
+
+    def assertListOfDictsContainsSubset(self, expected, actual):
+        for i in range(0, len(expected)):
+            a = expected[i]
+            b = actual[i]
+            self.assertDictContainsSubset(a, b)

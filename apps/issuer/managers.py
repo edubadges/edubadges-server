@@ -118,29 +118,35 @@ class BadgeInstanceManager(models.Manager):
                         badgeinstanceevidence = BadgeInstanceEvidence.objects.create_from_ob2(badgeinstance, evidence_item)
         return badgeinstance, created
 
-    def create_badgeinstance(
-            self, badgeclass, recipient_id, narrative=None, evidence=None,
-            notify=False, check_completions=True,
-            allow_uppercase=False, badgr_app=None, **kwargs
+    def create(self,
+        evidence=None,
+        notify=False,
+        check_completions=True,
+        allow_uppercase=False,
+        badgr_app=None,
+        **kwargs
     ):
+
         """
         Convenience method to award a badge to a recipient_id
         :param allow_uppercase: bool
         :type badgeclass: BadgeClass
-        :type recipient_id: str
         :type issuer: Issuer
         :type notify: bool
         :type check_completions: bool
         :type evidence: list of dicts(url=string, narrative=string)
         """
-        recipient_identifier = recipient_id if allow_uppercase else recipient_id.lower()
+        recipient_identifier = kwargs.pop('recipient_identifier')
+        recipient_identifier = recipient_identifier if allow_uppercase else recipient_identifier.lower()
+
+        badgeclass = kwargs.pop('badgeclass', None)
+        issuer = kwargs.pop('issuer', badgeclass.issuer)
 
         new_instance = self.model(
-            badgeclass=badgeclass,
-			issuer=badgeclass.issuer,
             recipient_identifier=recipient_identifier,
-			narrative=narrative,
-			**kwargs
+            badgeclass=badgeclass,
+            issuer=issuer,
+            **kwargs
         )
 
         with transaction.atomic():
