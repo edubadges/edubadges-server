@@ -125,7 +125,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         test_issuer = self.setup_issuer(owner=test_user)
 
         response = self.client.post('/v1/issuer/issuers/{slug}/badges'.format(slug=test_issuer.entity_id))
-        self.assertEqual(response.status_code, 401)
+        self.assertIn(response.status_code, (401, 403))
 
     def test_can_get_badgeclass_list_if_authenticated(self):
         """
@@ -149,7 +149,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         test_badgeclasses = list(self.setup_badgeclasses(issuer=test_issuer))
 
         response = self.client.get('/v1/issuer/issuers/{slug}/badges'.format(slug=test_issuer.entity_id))
-        self.assertEqual(response.status_code, 401)
+        self.assertIn(response.status_code, (401, 403))
 
     def test_can_delete_unissued_badgeclass(self):
         test_user = self.setup_user(authenticate=True)

@@ -22,7 +22,7 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
 
     def test_cant_create_issuer_if_unauthenticated(self):
         response = self.client.post('/v1/issuer/issuers', self.example_issuer_props)
-        self.assertEqual(response.status_code, 401)
+        self.assertIn(response.status_code, (401, 403))
 
     def test_create_issuer_if_authenticated(self):
         self.setup_user(authenticate=True)

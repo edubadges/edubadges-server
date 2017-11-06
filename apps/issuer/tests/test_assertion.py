@@ -203,7 +203,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
             issuer=test_issuer.entity_id,
             badge=test_badgeclass.entity_id,
         ), assertion)
-        self.assertEqual(response.status_code, 401)
+        self.assertIn(response.status_code, (401, 403))
 
     def test_issue_assertion_with_notify(self):
         test_user = self.setup_user(authenticate=True)
