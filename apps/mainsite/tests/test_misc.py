@@ -83,7 +83,9 @@ class TestSignup(BadgrTestCase):
             self.assertEqual(response.status_code, 302)
             self.assertEqual(response.get('location'), 'http://testserver/login/Tester?email={}'.format(urllib.quote(post_data['email'])))
 
-
+@override_settings(
+    ACCOUNT_EMAIL_CONFIRMATION_HMAC=False
+)
 class TestEmailCleanupCommand(BadgrTestCase):
     def test_email_added_for_user_missing_one(self):
         user = BadgeUser(email="newtest@example.com", first_name="Test", last_name="User")
