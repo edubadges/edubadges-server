@@ -25,7 +25,8 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
         with self.assertRaises(Issuer.DoesNotExist):
             Issuer.objects.get(entity_id=fake_entity_id)
 
-        with self.assertNumQueries(1):
+        # a db miss will generate 2 queries, lookup by entity_id and lookup by slug
+        with self.assertNumQueries(2):
             response = self.client.get('/public/issuers/imaginary-issuer')
             self.assertEqual(response.status_code, 404)
 
