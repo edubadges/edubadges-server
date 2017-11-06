@@ -255,6 +255,49 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
             self.assertEqual(response.status_code, 200)
             self.assertContains(response, "<p>This is <em>valid</em> markdown")
 
+    def test_can_create_badgeclass_with_alignment(self):
+        with open(self.get_test_image_path(), 'r') as badge_image:
+            test_user = self.setup_user(authenticate=True)
+            test_issuer = self.setup_issuer(owner=test_user)
+
+            badgeclass_props = {
+                'name': 'Badge of Slugs',
+                'description': "Recognizes slimy learners with a penchant for lettuce",
+                'image': self._base64_data_uri_encode(badge_image, 'image/png'),
+                'criteriaNarrative': 'Eat lettuce. Grow big.'
+            }
+
+            # valid markdown should be saved but html tags stripped
+            badgeclass_props['alignments'] = [
+                {
+                    'targetName': 'Align1',
+                    'targetUrl': 'http://examp.e.org/frmwrk/1'
+                },
+                {
+                    'targetName': 'Align2',
+                    'targetUrl': 'http://examp.e.org/frmwrk/2'
+                }
+            ]
+            # badgeclass_props['alignment_items'] = badgeclass_props['alignments']
+            response = self.client.post(
+                '/v2/issuers/{}/badgeclasses'.format(test_issuer.entity_id),
+                badgeclass_props, format='json'
+            )
+            self.assertEqual(response.status_code, 201)
+            self.assertIsNotNone(response.data)
+            new_badgeclass = response.data['result'][0]
+            self.assertIn('alignments', new_badgeclass.keys())
+            self.assertEqual(len(new_badgeclass['alignments']), 2)
+            self.assertEqual(
+                new_badgeclass['alignments'][0]['targetName'], badgeclass_props['alignments'][0]['targetName'])
+
+            # verify that public page renders markdown as html
+            response = self.client.get('/public/badges/{}?v=2_0'.format(new_badgeclass.get('entityId')))
+            self.assertIn('alignment', response.data.keys())
+            self.assertEqual(len(response.data['alignment']), 2)
+            self.assertEqual(
+                response.data['alignment'][0]['targetName'], badgeclass_props['alignments'][0]['targetName'])
+
     def test_new_badgeclass_updates_cached_issuer(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)

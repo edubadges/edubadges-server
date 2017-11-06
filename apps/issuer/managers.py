@@ -39,6 +39,8 @@ class BadgeClassManager(models.Manager):
         if alignments is None and 'cached_alignments' in kwargs:
             # may have been passed alignments as cached_alignments from a serializer
             alignments = kwargs.pop('cached_alignments')
+        elif alignments is None and 'alignment_items' in kwargs:
+            alignments = kwargs.pop('alignment_items')
         instance = super(BadgeClassManager, self).create(**kwargs)
         if alignments is not None:
             for alignment in alignments:
