@@ -137,6 +137,7 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
     description = StripTagsCharField(max_length=16384, required=True)
 
     alignment = AlignmentItemSerializerV1(many=True, required=False, source='cached_alignments')
+    tags = serializers.ListField(child=StripTagsCharField(max_length=1024), source='tag_items', required=False)
 
     class Meta:
         apispec_definition = ('BadgeClass', {})
