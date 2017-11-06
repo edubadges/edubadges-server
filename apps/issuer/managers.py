@@ -155,8 +155,13 @@ class BadgeInstanceManager(models.Manager):
         recipient_identifier = kwargs.pop('recipient_identifier')
         recipient_identifier = recipient_identifier if allow_uppercase else recipient_identifier.lower()
 
+        badgeclass = kwargs.pop('badgeclass', None)
+        issuer = kwargs.pop('issuer', badgeclass.issuer)
+
         new_instance = self.model(
             recipient_identifier=recipient_identifier,
+            badgeclass=badgeclass,
+            issuer=issuer,
             **kwargs
         )
 
