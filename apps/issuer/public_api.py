@@ -98,7 +98,7 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
         HTTP_ACCEPTS = ['*/*', 'text/html']
 
         user_agent = self.request.META.get('HTTP_USER_AGENT', '')
-        http_accept = self.request.META.get('HTTP_ACCEPT', '*/*')
+        http_accept = self.request.META.get('HTTP_ACCEPT', 'application/json')
 
         if any(a in user_agent for a in HTTP_USER_AGENTS) or any(a in http_accept for a in HTTP_ACCEPTS):
             return True
