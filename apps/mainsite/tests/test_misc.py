@@ -68,7 +68,10 @@ class TestSignup(BadgrTestCase):
             'email': 'test12345@example.com',
             'password': '1234567'
         }
-        self.client.post('/v1/user/profile', post_data)
+        response = self.client.post('/v1/user/profile', post_data)
+        self.assertEqual(response.status_code, 201)
+
+        user = BadgeUser.objects.get(entity_id=response.data.get('slug'))
 
         self.assertEqual(len(mail.outbox), 1)
         url_match = re.search(r'http://testserver(/v1/user/confirmemail.*)', mail.outbox[0].body)
@@ -77,13 +80,20 @@ class TestSignup(BadgrTestCase):
 
         confirmation = EmailConfirmation.objects.first()
 
+        expected_redirect_url = 'http://testserver/login/Tester?authToken={auth}&email={email}'.format(
+            email=urllib.quote(post_data['email']),
+            auth=user.auth_token
+        )
+
         with self.settings(ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL='http://frontend.ui/login/',
                            BADGR_APP_ID=badgr_app.id):
             response = self.client.get(confirm_url, follow=False)
             self.assertEqual(response.status_code, 302)
-            self.assertEqual(response.get('location'), 'http://testserver/login/Tester?email={}'.format(urllib.quote(post_data['email'])))
+            self.assertEqual(response.get('location'), expected_redirect_url)
 
-
+@override_settings(
+    ACCOUNT_EMAIL_CONFIRMATION_HMAC=False
+)
 class TestEmailCleanupCommand(BadgrTestCase):
     def test_email_added_for_user_missing_one(self):
         user = BadgeUser(email="newtest@example.com", first_name="Test", last_name="User")
