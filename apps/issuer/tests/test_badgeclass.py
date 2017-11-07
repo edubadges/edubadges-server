@@ -254,11 +254,6 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
             self.assertEqual(new_badgeclass.get('criteria_text', None), 'This is *valid* markdown mixed with raw document.write("and abusive html")')
             self.assertIn('slug', new_badgeclass)
 
-            # verify that public page renders markdown as html
-            response = self.client.get('/public/badges/{}'.format(new_badgeclass.get('slug')), HTTP_ACCEPT='*/*')
-            self.assertEqual(response.status_code, 200)
-            self.assertContains(response, "<p>This is <em>valid</em> markdown")
-
     def test_can_create_badgeclass_with_alignment(self):
         with open(self.get_test_image_path(), 'r') as badge_image:
             num_badgeclasses = BadgeClass.objects.count()
