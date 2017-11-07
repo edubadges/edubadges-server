@@ -11,7 +11,7 @@ from oauthlib.oauth2.rfc6749.tokens import random_token_generator
 from rest_framework import status, serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
 import badgrlog
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
@@ -467,6 +467,11 @@ class IssuerTokensList(BaseEntityListView):
         tags=["Issuers"],
     )
     def post(self, request, **kwargs):
+        if not isinstance(request.auth, AccessToken):
+            # need to use a oauth2 bearer token to authorize
+            error_response = BaseSerializerV2.response_envelope(result=[], success=False, description="Invalid token")
+            return Response(error_response, status=HTTP_403_FORBIDDEN)
+
         issuer_entityids = request.data.get('issuers', None)
         if not issuer_entityids:
             raise serializers.ValidationError({"issuers": "field is required"})
