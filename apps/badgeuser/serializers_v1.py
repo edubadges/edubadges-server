@@ -49,7 +49,7 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
             plaintext_password=validated_data['password'],
-            badgrapp=BadgrApp.objects.get_current(request=self.context.get('request', None))
+            request=self.context.get('request', None),
         )
         return user
 
