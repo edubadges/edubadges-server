@@ -56,6 +56,14 @@ badgr_admin.register(EmailBlacklist, EmailBlacklistAdmin)
 
 # 3rd party apps
 
+from rest_framework.authtoken.models import Token
+class TokenAdmin(ModelAdmin):
+    list_display = ('key','user','created')
+    list_filter = ('created',)
+    raw_id_fields = ('user',)
+    search_fields = ('user__email', 'user__first_name', 'user__last_name')
+badgr_admin.register(Token, TokenAdmin)
+
 from allauth.account.admin import EmailAddressAdmin, EmailConfirmationAdmin
 from allauth.socialaccount.admin import SocialApp, SocialAppAdmin, SocialTokenAdmin, SocialAccountAdmin
 from django.contrib.auth.admin import GroupAdmin
