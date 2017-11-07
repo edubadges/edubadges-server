@@ -473,7 +473,13 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
 
         self.assertEqual(get_response.data, put_response.data)
 
-    def test_can_create_and_update_badgeclass_with_alignments(self):
+    def test_can_create_and_update_badgeclass_with_alignments_v1(self):
+        self.can_create_and_update_badgeclass_with_alignments('/v1/issuer/issuers/{issuer}/badges/{badgeclass}')
+
+    def test_can_create_and_update_badgeclass_with_alignments_v2(self):
+        self.can_create_and_update_badgeclass_with_alignments('/v2/badgeclasses/{badgeclass}')
+
+    def can_create_and_update_badgeclass_with_alignments(self, badgeclass_url_format):
         # create a badgeclass with alignments
         alignments = [
             {
@@ -501,8 +507,8 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         new_badgeclass = self._create_badgeclass_for_issuer_authenticated(self.get_test_image_path(), alignment=alignments)
         self.assertEqual(alignments, new_badgeclass.get('alignment', None))
 
-        new_badgeclass_url = '/v1/issuer/issuers/{slug}/badges/{badgeclass}'.format(
-            slug=self.issuer.entity_id,
+        new_badgeclass_url = badgeclass_url_format.format(
+            issuer=self.issuer.entity_id,
             badgeclass=new_badgeclass['slug'])
 
         # update alignments -- addition and deletion
@@ -529,15 +535,22 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, updated_badgeclass)
 
-    def test_can_create_and_update_badgeclass_with_tags(self):
+    def test_can_create_and_update_badgeclass_with_tags_v1(self):
+        self.can_create_and_update_badgeclass_with_tags('/v1/issuer/issuers/{issuer}/badges/{badgeclass}')
+
+    def test_can_create_and_update_badgeclass_with_tags_v2(self):
+        self.can_create_and_update_badgeclass_with_tags('/v2/badgeclasses/{badgeclass}')
+
+    def can_create_and_update_badgeclass_with_tags(self, badgeclass_url_format):
         # create a badgeclass with tags
         tags = ["first", "second", "third"]
         new_badgeclass = self._create_badgeclass_for_issuer_authenticated(self.get_test_image_path(), tags=tags)
         self.assertEqual(tags, new_badgeclass.get('tags', None))
 
-        new_badgeclass_url = '/v1/issuer/issuers/{slug}/badges/{badgeclass}'.format(
-            slug=self.issuer.entity_id,
-            badgeclass=new_badgeclass['slug'])
+        new_badgeclass_url = badgeclass_url_format.format(
+            issuer=self.issuer.entity_id,
+            badgeclass=new_badgeclass['slug']
+        )
 
         # update tags -- addition and deletion
         reordered_tags = ["second", "third", "fourth"]
