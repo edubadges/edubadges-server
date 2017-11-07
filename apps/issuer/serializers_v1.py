@@ -136,7 +136,7 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
     pathway_element_count = serializers.IntegerField(required=False, read_only=True)
     description = StripTagsCharField(max_length=16384, required=True)
 
-    alignment = AlignmentItemSerializerV1(many=True, required=False, source='cached_alignments')
+    alignment = AlignmentItemSerializerV1(many=True, required=False, source='alignment_items')
     tags = serializers.ListField(child=StripTagsCharField(max_length=1024), source='tag_items', required=False)
 
     class Meta:
@@ -185,7 +185,7 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
         if 'image' in validated_data:
             instance.image = validated_data.get('image')
 
-        instance.alignment_items = validated_data.get('cached_alignments')
+        instance.alignment_items = validated_data.get('alignment_items')
         instance.tag_items = validated_data.get('tag_items')
 
         instance.save()
@@ -224,14 +224,7 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
         if 'issuer' in self.context:
             validated_data['issuer'] = self.context.get('issuer')
 
-        alignments = []
-        if 'cached_alignments' in validated_data:
-            alignments = validated_data.pop('cached_alignments')
-        tags = []
-
         new_badgeclass = BadgeClass(**validated_data)
-        if alignments:
-            new_badgeclass.alignment_items = alignments
 
         # Use AutoSlugField's pre_save to provide slug if empty, else auto-unique
         new_badgeclass.slug = BadgeClass._meta.get_field('slug').pre_save(new_badgeclass, add=True)
