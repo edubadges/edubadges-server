@@ -20,6 +20,9 @@ urlpatterns = [
     url(r'^favicon\.ico[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL, permanent=True)),
     url(r'^robots\.txt$', RedirectView.as_view(url='%srobots.txt' % settings.STATIC_URL, permanent=True)),
 
+    # legacy logo url redirect
+    url(r'^static/images/header-logo-120.png$', RedirectView.as_view(url='{}images/logo.png'.format(settings.STATIC_URL), permanent=True)),
+
     # Apple app universal URL endpoint
     url(r'^apple-app-site-association', AppleAppSiteAssociation.as_view(), name="apple-app-site-association"),
 
