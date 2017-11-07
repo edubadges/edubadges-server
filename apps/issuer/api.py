@@ -563,14 +563,15 @@ class AssertionsChangedSince(BaseEntityView):
 
     def get(self, request, **kwargs):
         since = request.GET.get('since', None)
-        try:
-            since = dateutil.parser.parse(since)
-        except ValueError as e:
-            err = V2ErrorSerializer(data={}, field_errors={'since': ["must be iso8601 format"]}, validation_errors=[])
-            err._success = False
-            err._description = "bad request"
-            err.is_valid(raise_exception=False)
-            return Response(err.data, status=HTTP_400_BAD_REQUEST)
+        if since is not None:
+            try:
+                since = dateutil.parser.parse(since)
+            except ValueError as e:
+                err = V2ErrorSerializer(data={}, field_errors={'since': ["must be iso8601 format"]}, validation_errors=[])
+                err._success = False
+                err._description = "bad request"
+                err.is_valid(raise_exception=False)
+                return Response(err.data, status=HTTP_400_BAD_REQUEST)
 
         queryset = self.get_queryset(request, since=since)
         context = self.get_context_data(**kwargs)
