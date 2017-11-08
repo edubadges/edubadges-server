@@ -195,7 +195,11 @@ class BadgrOAuthTokenHasScope(permissions.BasePermission):
         if not isinstance(token, oauth2_provider.models.AccessToken):
             return True
 
-        return token.is_valid(valid_scopes)
+        # default behavior of token.is_valid(valid_scopes) requires ALL of valid_scopes on the token
+        # we want to check if ANY of valid_scopes are present in the token
+        matching_scopes = set(valid_scopes) & set(token.scope.split())
+        return not token.is_expired() and len(matching_scopes) > 0
+
 
     @classmethod
     def valid_scopes_for_view(cls, view, method=None):
