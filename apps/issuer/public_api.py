@@ -300,6 +300,9 @@ class BackpackCollectionJson(JSONComponentView):
 
     def get_json(self, request):
         expands = request.GET.getlist('expand', [])
+        if not self.current_object.published:
+            raise Http404
+
         json = self.current_object.get_json(
             obi_version=self._get_request_obi_version(request),
             expand_badgeclass=('badges.badge' in expands),
