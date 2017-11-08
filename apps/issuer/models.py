@@ -713,6 +713,9 @@ class BadgeInstance(BaseAuditedModel,
         TODO: consider making this an option on initial save and having a foreign key to
         the notification model instance (which would link through to the OpenBadge)
         """
+        if self.recipient_type != BadgeInstance.RECIPIENT_TYPE_EMAIL:
+            return
+
         try:
             EmailBlacklist.objects.get(email=self.recipient_identifier)
         except EmailBlacklist.DoesNotExist:
