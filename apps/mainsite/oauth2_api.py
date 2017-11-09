@@ -5,10 +5,10 @@ import re
 
 from django.utils import timezone
 from oauth2_provider.exceptions import OAuthToolkitError
-from oauth2_provider.http import HttpResponseUriRedirect
-from oauth2_provider.models import get_application_model, get_access_token_model
-from oauth2_provider.scopes import get_scopes_backend
+from oauth2_provider.models import get_application_model, get_access_token_model, AccessToken
+from oauth2_provider.oauth2_validators import OAuth2Validator
 from oauth2_provider.settings import oauth2_settings
+from oauth2_provider.views import TokenView as OAuth2ProviderTokenView
 from oauth2_provider.views.mixins import OAuthLibMixin
 from rest_framework import serializers
 from rest_framework.response import Response
@@ -132,3 +132,43 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
             return Response({
                 'error': error.oauthlib_error.description
             }, status=HTTP_400_BAD_REQUEST)
+
+
+class BadgrOAuth2Validator(OAuth2Validator):
+
+    def get_existing_tokens(self, request):
+        return AccessToken.objects.filter(user=request.user, application=request.client).order_by('-created')
+
+    def _create_access_token(self, expires, request, token):
+        access_token = self.get_existing_tokens(request).first()
+        if access_token:
+            # reuse existing access_token and preserve original token, but bump expiration
+            access_token.expires = expires
+            access_token.scope = " ".join(set(access_token.scope.split()) | set(token["scope"].split()))
+            access_token.save()
+        else:
+            access_token = AccessToken.objects.create(
+                user=request.user,
+                application=request.client,
+                scope=token["scope"],
+                expires=expires,
+                token=token["access_token"],
+            )
+        return access_token
+
+    def save_bearer_token(self, token, request, *args, **kwargs):
+        existing_access_tokens = self.get_existing_tokens(request=request)
+        if len(existing_access_tokens) > 0:
+            # revoke old duplicate tokens (if any) so there is only one AccessToken per user+application
+            for old_token in existing_access_tokens[1:]:
+                old_token.revoke()
+
+            # pass existing refresh_token for save_bearer_token() to handle
+            request.refresh_token_instance = existing_access_tokens[0].refresh_token
+            
+        super(BadgrOAuth2Validator, self).save_bearer_token(token, request, *args, **kwargs)
+
+
+class TokenView(OAuth2ProviderTokenView):
+    validator_class = BadgrOAuth2Validator
+
