@@ -435,6 +435,8 @@ API_DOCS_EXCLUDED_SCOPES = ['rw:issuer:*', 'r:assertions', '*']
 BADGR_PUBLIC_BOT_USERAGENTS = [
     'LinkedInBot',   # 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'
     'Twitterbot',    # 'Twitterbot/1.0'
+    'facebook',      # https://developers.facebook.com/docs/sharing/webmasters/crawler
+    'Facebot',
 ]
 
 

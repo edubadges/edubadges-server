@@ -8,7 +8,7 @@
 	<meta property="og:type"               content="website" />
 	<meta property="og:url"                content="{{ public_url }}" />
 	<meta property="og:title"              content="{{ title }}" />
-	<meta property="og:description"        content="None" />
+	<meta property="og:description"        content="{{ description }}" />
 
 	<meta property="og:image"              content="{{ image_url }}" />
 	<meta property="og:image:secure_url"   content="{{ image_url }}" />
@@ -17,6 +17,13 @@
 </head>
 
 <body>
+	<img src="{{ image_url }}"/>
+	<h1>{{ title }}</h1>
+	<div>{{ description }}</div>
+	<a href="{{ public_url }}">{{ public_url }}</a>
 
+	<script>
+		window.location = "{{ public_url }}";
+	</script>
 </body>
 </html>

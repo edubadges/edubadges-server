@@ -219,6 +219,7 @@ class IssuerJson(JSONComponentView):
         )
         return dict(
             title=self.current_object.name,
+            description=self.current_object.description,
             public_url=self.current_object.public_url,
             image_url=image_url
         )
@@ -269,6 +270,7 @@ class BadgeClassJson(JSONComponentView):
         )
         return dict(
             title=self.current_object.name,
+            description=self.current_object.description,
             public_url=self.current_object.public_url,
             image_url=image_url
         )
@@ -318,6 +320,7 @@ class BadgeInstanceJson(JSONComponentView):
         )
         return dict(
             title=self.current_object.cached_badgeclass.name,
+            description=self.current_object.cached_badgeclass.description,
             public_url=self.current_object.public_url,
             image_url=image_url
         )
