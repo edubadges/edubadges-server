@@ -5,7 +5,7 @@ import re
 
 from django.utils import timezone
 from oauth2_provider.exceptions import OAuthToolkitError
-from oauth2_provider.models import get_application_model, get_access_token_model, AccessToken
+from oauth2_provider.models import get_application_model, get_access_token_model, AccessToken, RefreshToken
 from oauth2_provider.oauth2_validators import OAuth2Validator
 from oauth2_provider.settings import oauth2_settings
 from oauth2_provider.views import TokenView as OAuth2ProviderTokenView
@@ -164,7 +164,10 @@ class BadgrOAuth2Validator(OAuth2Validator):
                 old_token.revoke()
 
             # pass existing refresh_token for save_bearer_token() to handle
-            request.refresh_token_instance = existing_access_tokens[0].refresh_token
+            try:
+                request.refresh_token_instance = existing_access_tokens[0].refresh_token
+            except RefreshToken.DoesNotExist as e:
+                pass
             
         super(BadgrOAuth2Validator, self).save_bearer_token(token, request, *args, **kwargs)
 
