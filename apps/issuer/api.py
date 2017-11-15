@@ -16,7 +16,7 @@ from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_
 import badgrlog
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
 from entity.serializers import BaseSerializerV2, V2ErrorSerializer
-from issuer.models import Issuer, BadgeClass, BadgeInstance
+from issuer.models import Issuer, BadgeClass, BadgeInstance, IssuerStaff
 from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
                                 IsEditor, IsStaff, ApprovedIssuersOnly, BadgrOAuthTokenHasScope,
                                 BadgrOAuthTokenHasEntityScope)
@@ -490,6 +490,15 @@ class IssuerTokensList(BaseEntityListView):
         expires = timezone.now() + datetime.timedelta(weeks=5200)
         for issuer in issuers:
             scope = "rw:issuer:{}".format(issuer.entity_id)
+
+            # grant application user staff access to issuer if needed
+            staff, staff_created = IssuerStaff.cached.get_or_create(
+                issuer=issuer,
+                user=request.auth.application.user,
+                defaults=dict(
+                    role=IssuerStaff.ROLE_STAFF
+                )
+            )
 
             accesstoken, created = AccessToken.objects.get_or_create(
                 user=request.auth.application.user,

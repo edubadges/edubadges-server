@@ -12,7 +12,7 @@ class PublicAPITests(SetupOAuth2ApplicationHelper, SetupIssuerHelper, BadgrTestC
     def test_can_get_batch_issuer_tokens(self):
 
         # create an oauth2 application
-        application_user = self.setup_user(email='service@email.test')
+        application_user = self.setup_user(email='service@email.test', authenticate=False)
         application = self.setup_oauth2_application(user=application_user)
 
         # application can retrieve a token
@@ -31,7 +31,7 @@ class PublicAPITests(SetupOAuth2ApplicationHelper, SetupIssuerHelper, BadgrTestC
         }
 
         # create a badgr user who owns several issuers
-        badgr_user = self.setup_user(email='user@email.test')
+        badgr_user = self.setup_user(email='user@email.test', authenticate=False)
         issuers = [self.setup_issuer(owner=badgr_user, name="issuer #{}".format(i)) for i in range(1, 4)]
 
         issuer_ids = [i.entity_id for i in issuers]
