@@ -8,12 +8,37 @@ import os
 from django.core.cache import cache
 from django.core.cache.backends.filebased import FileBasedCache
 from django.test import override_settings, TransactionTestCase
+from oauth2_provider.models import Application
+
 from mainsite import TOP_DIR
 from rest_framework.test import APITransactionTestCase
 
 from badgeuser.models import BadgeUser
 from issuer.models import Issuer, BadgeClass
 from mainsite.models import BadgrApp
+
+
+class SetupOAuth2ApplicationHelper(object):
+    def setup_oauth2_application(self,
+                                 client_id=None,
+                                 client_secret=None,
+                                 name='test client app',
+                                 **kwargs):
+        if client_id is None:
+            client_id = "test"
+        if client_secret is None:
+            client_secret = "secret"
+
+        if 'authorization_grant_type' not in kwargs:
+            kwargs['authorization_grant_type'] = Application.GRANT_CLIENT_CREDENTIALS
+
+        application = Application.objects.create(
+            name=name,
+            client_id=client_id,
+            client_secret=client_secret,
+            **kwargs
+        )
+        return application
 
 
 class SetupUserHelper(object):
