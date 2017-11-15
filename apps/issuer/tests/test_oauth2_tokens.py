@@ -12,7 +12,7 @@ class PublicAPITests(SetupOAuth2ApplicationHelper, SetupIssuerHelper, BadgrTestC
     def test_can_get_issuer_scoped_token(self):
         # create an oauth2 application
         application_user = self.setup_user(authenticate=False)
-        application = self.setup_oauth2_application(user=application_user)
+        application = self.setup_oauth2_application(user=application_user, allowed_scopes="rw:issuer rw:issuer:*")
 
         badgr_user = self.setup_user(authenticate=False)
         issuer = self.setup_issuer(owner=badgr_user)

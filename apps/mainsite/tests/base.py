@@ -15,7 +15,7 @@ from rest_framework.test import APITransactionTestCase
 
 from badgeuser.models import BadgeUser
 from issuer.models import Issuer, BadgeClass
-from mainsite.models import BadgrApp
+from mainsite.models import BadgrApp, ApplicationInfo
 
 
 class SetupOAuth2ApplicationHelper(object):
@@ -23,6 +23,7 @@ class SetupOAuth2ApplicationHelper(object):
                                  client_id=None,
                                  client_secret=None,
                                  name='test client app',
+                                 allowed_scopes=None,
                                  **kwargs):
         if client_id is None:
             client_id = "test"
@@ -38,6 +39,14 @@ class SetupOAuth2ApplicationHelper(object):
             client_secret=client_secret,
             **kwargs
         )
+
+        if allowed_scopes:
+            application_info = ApplicationInfo.objects.create(
+                application=application,
+                name=name,
+                allowed_scopes=allowed_scopes
+            )
+
         return application
 
 
