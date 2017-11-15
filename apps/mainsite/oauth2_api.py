@@ -146,6 +146,7 @@ class BadgrOAuth2Validator(OAuth2Validator):
             access_token.expires = expires
             access_token.scope = " ".join(set(access_token.scope.split()) | set(token["scope"].split()))
             access_token.save()
+            token['access_token'] = access_token.token
         else:
             access_token = AccessToken.objects.create(
                 user=request.user,
@@ -168,7 +169,7 @@ class BadgrOAuth2Validator(OAuth2Validator):
                 request.refresh_token_instance = existing_access_tokens[0].refresh_token
             except RefreshToken.DoesNotExist as e:
                 pass
-            
+
         super(BadgrOAuth2Validator, self).save_bearer_token(token, request, *args, **kwargs)
 
 
