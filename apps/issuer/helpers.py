@@ -162,7 +162,7 @@ class BadgeCheckHelper(object):
 
         # we expect to get 3 obos: Assertion, Issuer and BadgeClass
         obos = {n.get('type'): n for n in response.get('graph', [])}
-        if len(set(('Assertion', 'Issuer', 'BadgeClass')) & set(obos.keys())) != 3:
+        if len(set(('Assertion', 'Issuer', 'Profile', 'BadgeClass')) & set(obos.keys())) != 3:
             raise ValidationError([{'name': "ASSERTION_NOT_FOUND", 'description': "Unable to find an assertion"}])
 
         if not is_valid:
@@ -172,7 +172,7 @@ class BadgeCheckHelper(object):
                 errors = [{'name': "UNABLE_TO_VERIFY", 'description': "Unable to verify the assertion"}]
             raise ValidationError(errors)
 
-        issuer_obo = obos.get('Issuer')
+        issuer_obo = obos.get('Profile', obos.get('Issuer'))
         badgeclass_obo = obos.get('BadgeClass')
         assertion_obo = obos.get('Assertion')
         original_json = response.get('input').get('original_json', {})
