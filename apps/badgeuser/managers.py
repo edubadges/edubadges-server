@@ -2,6 +2,8 @@ from allauth.account.managers import EmailAddressManager
 from django.contrib.auth.models import UserManager
 from django.core.exceptions import ValidationError
 
+from mainsite.models import BadgrApp
+
 
 class BadgeUserManager(UserManager):
     duplicate_email_error = 'Account could not be created. An account with this email address may already exist.'
@@ -10,7 +12,7 @@ class BadgeUserManager(UserManager):
                email,
                first_name,
                last_name,
-               badgrapp=None,
+               request=None,
                plaintext_password=None,
                send_confirmation=True,
                create_email_address=True):
@@ -38,6 +40,8 @@ class BadgeUserManager(UserManager):
                 if len(existing_email.user.cached_emails()) == 0:
                     existing_email.user.delete()
 
+        badgrapp = BadgrApp.objects.get_current(request=request)
+
         if user is None:
             user = self.model(email=email)
 
@@ -50,7 +54,7 @@ class BadgeUserManager(UserManager):
 
         # create email address record as needed
         if create_email_address:
-            CachedEmailAddress.objects.add_email(user, email, signup=True, confirm=send_confirmation)
+            CachedEmailAddress.objects.add_email(user, email, request=request, signup=True, confirm=send_confirmation)
         return user
 
 

@@ -35,6 +35,12 @@ class IssuerManager(models.Manager):
 class BadgeClassManager(models.Manager):
 
     @transaction.atomic
+    def create(self, **kwargs):
+        obj = self.model(**kwargs)
+        obj.save()
+        return obj
+
+    @transaction.atomic
     def get_or_create_from_ob2(self, issuer, badgeclass_obo, source=None, original_json=None):
         criteria_url = None
         criteria_text = None

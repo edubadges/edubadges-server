@@ -3,7 +3,7 @@ from django.conf import settings
 from django.conf.urls import include, url
 
 from mainsite.admin import badgr_admin
-from mainsite.oauth2_api import AuthorizationApiView
+from mainsite.oauth2_api import AuthorizationApiView, TokenView
 
 badgr_admin.autodiscover()
 # make sure that any view/model/form imports occur AFTER admin.autodiscover
@@ -20,11 +20,15 @@ urlpatterns = [
     url(r'^favicon\.ico[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL, permanent=True)),
     url(r'^robots\.txt$', RedirectView.as_view(url='%srobots.txt' % settings.STATIC_URL, permanent=True)),
 
+    # legacy logo url redirect
+    url(r'^static/images/header-logo-120.png$', RedirectView.as_view(url='{}images/logo.png'.format(settings.STATIC_URL), permanent=True)),
+
     # Apple app universal URL endpoint
     url(r'^apple-app-site-association', AppleAppSiteAssociation.as_view(), name="apple-app-site-association"),
 
     # OAuth2 provider URLs
-    url(r'^o/authorize', AuthorizationApiView.as_view(), name='oauth2_api_authorize'),
+    url(r'^o/authorize/?$', AuthorizationApiView.as_view(), name='oauth2_api_authorize'),
+    url(r'^o/token/?$', TokenView.as_view(), name='oauth2_provider_token'),
     url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 
     # Home

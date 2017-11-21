@@ -398,6 +398,8 @@ class BadgeClass(ResizeUploadedImage,
 
     @alignment_items.setter
     def alignment_items(self, value):
+        if value is None:
+            value = []
         keys = ['target_name','target_url','target_description','target_framework', 'target_code']
 
         def _identity(align):
@@ -436,6 +438,8 @@ class BadgeClass(ResizeUploadedImage,
 
     @tag_items.setter
     def tag_items(self, value):
+        if value is None:
+            value = []
         existing_idx = [t.name for t in self.tag_items]
         new_idx = value
 
@@ -461,11 +465,12 @@ class BadgeClass(ResizeUploadedImage,
     def cached_completion_elements(self):
         return [pce for pce in self.completion_elements.all()]
 
-    def issue(self, recipient_id=None, evidence=None, narrative=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None):
+    def issue(self, recipient_id=None, evidence=None, narrative=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None, **kwargs):
         return BadgeInstance.objects.create(
             badgeclass=self, recipient_identifier=recipient_id, narrative=narrative, evidence=evidence,
             notify=notify, created_by=created_by, allow_uppercase=allow_uppercase,
-            badgr_app=badgr_app
+            badgr_app=badgr_app,
+            **kwargs
         )
 
     def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True):
@@ -541,7 +546,7 @@ class BadgeInstance(BaseAuditedModel,
         (RECIPIENT_TYPE_TELEPHONE, 'telephone'),
         (RECIPIENT_TYPE_URL, 'url'),
     )
-    recipient_identifier = models.EmailField(max_length=1024, blank=False, null=False)
+    recipient_identifier = models.EmailField(max_length=1024, blank=False, null=False, db_index=True)
     recipient_type = models.CharField(max_length=255, choices=RECIPIENT_TYPE_CHOICES, default=RECIPIENT_TYPE_EMAIL, blank=False, null=False)
 
     image = models.FileField(upload_to='uploads/badges', blank=True)
@@ -709,6 +714,9 @@ class BadgeInstance(BaseAuditedModel,
         TODO: consider making this an option on initial save and having a foreign key to
         the notification model instance (which would link through to the OpenBadge)
         """
+        if self.recipient_type != BadgeInstance.RECIPIENT_TYPE_EMAIL:
+            return
+
         try:
             EmailBlacklist.objects.get(email=self.recipient_identifier)
         except EmailBlacklist.DoesNotExist:

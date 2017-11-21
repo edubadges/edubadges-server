@@ -31,15 +31,16 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
     def is_open_for_signup(self, request):
         return getattr(settings, 'OPEN_FOR_SIGNUP', True)
 
-    def get_email_confirmation_redirect_url(self, request):
+    def get_email_confirmation_redirect_url(self, request, badgr_app=None):
         """
         The URL to return to after successful e-mail confirmation.
         """
-        badgr_app = BadgrApp.objects.get_current(request)
-        if not badgr_app:
-            logger = logging.getLogger(self.__class__.__name__)
-            logger.warning("Could not determine authorized badgr app")
-            return super(BadgrAccountAdapter, self).get_email_confirmation_redirect_url(request)
+        if badgr_app is None:
+            badgr_app = BadgrApp.objects.get_current(request)
+            if not badgr_app:
+                logger = logging.getLogger(self.__class__.__name__)
+                logger.warning("Could not determine authorized badgr app")
+                return super(BadgrAccountAdapter, self).get_email_confirmation_redirect_url(request)
 
         try:
             resolverMatch = resolve(request.path)
@@ -65,7 +66,13 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
         token = "{uidb36}-{key}".format(uidb36=user_pk_to_url_str(emailconfirmation.email_address.user),
                                         key=temp_key)
         activate_url = OriginSetting.HTTP + reverse(url_name, kwargs={'confirm_id': emailconfirmation.key})
-        tokenized_activate_url = "{}?token={}".format(activate_url, token)
+        badgrapp = BadgrApp.objects.get_current(request=request)
+
+        tokenized_activate_url = "{url}?token={token}&a={badgrapp}".format(
+            url=activate_url,
+            token=token,
+            badgrapp=badgrapp.id
+        )
         return tokenized_activate_url
 
     def send_confirmation_mail(self, request, emailconfirmation, signup):

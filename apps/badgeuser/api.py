@@ -3,6 +3,7 @@ import re
 from allauth.account.adapter import get_adapter
 from allauth.account.models import EmailConfirmationHMAC
 from allauth.account.utils import user_pk_to_url_str, url_str_to_user_pk
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
@@ -312,6 +313,13 @@ class BadgeUserEmailConfirm(BaseUserRecoveryView):
         """
 
         token = request.query_params.get('token')
+        badgrapp_id = request.query_params.get('a', None)
+        if badgrapp_id is None:
+            badgrapp_id = getattr(settings, 'BADGR_APP_ID', 1)
+        try:
+            badgrapp = BadgrApp.objects.get(id=badgrapp_id)
+        except BadgrApp.DoesNotExist:
+            return Response(status=HTTP_404_NOT_FOUND)
 
         emailconfirmation = EmailConfirmationHMAC.from_key(kwargs.get('confirm_id'))
         if emailconfirmation is None:
@@ -346,7 +354,7 @@ class BadgeUserEmailConfirm(BaseUserRecoveryView):
         process_email_verification.delay(email_address.pk)
 
         # get badgr_app url redirect
-        redirect_url = get_adapter().get_email_confirmation_redirect_url(request)
+        redirect_url = get_adapter().get_email_confirmation_redirect_url(request, badgr_app=badgrapp)
 
         redirect_url = set_url_query_params(redirect_url, authToken=user.auth_token)
 

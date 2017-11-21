@@ -1,0 +1,118 @@
+{% extends "public/base.html" %}
+{% load staticfiles %}
+
+{% block page_title %}Pathway Detail{% endblock %}
+
+{% block content %}
+
+	<header class="wrap wrap-light l-heading l-containerhorizontal">
+
+		<div class="l-article">
+
+			<div>
+
+				<div class="heading">
+					<div class="heading-x-text">
+
+						<h1>
+							{{ pathway_element.name }}
+						</h1>
+
+						<p>{{ pathway_element.description }}</p>
+
+						<div class="l-childrenhorizontal">
+							{% if pathway_element.get_absolute_url not in pathway_element.get_alignment_url %}
+								<a href="{{ pathway_element.alignment_url }}"
+								   class="button button-primaryghost l-offsetleft"
+								   target="_blank"
+								>Alignment URL</a>
+							{% endif %}
+						</div>
+
+						<h2 class="titledivider">Issuer</h2>
+
+						<a class="stack" href="{{ HTTP_ORIGIN }}{{ issuer.get_absolute_url }}">
+							<div class="stack-x-image">
+								<img src="{% if issuer.image %}{{ issuer.image.url }}{% else %}{% static 'badgr-ui/images/issuer-placeholder-2x.png' %}{% endif %}"
+								     width="40"
+								     alt="{{ issuer.name }} avatar" />
+							</div>
+							<div class="stack-x-text">
+								<h2>{{ issuer.name }}</h2>
+							</div>
+						</a>
+
+					</div>
+				</div>
+
+			</div>
+
+			{% if pathway_element.completion_badgeclass %}
+				<aside>
+					<h1 class="title title-small">Completion Badge</h1>
+					<div class="card card-actionsright">
+						<a href="#" class="card-x-main" >
+							<div class="card-x-image">
+								<img width="40" src="{{ pathway_element.completion_badgeclass.image.url }}">
+							</div>
+							<div class="card-x-text">
+								<h1>{{ pathway_element.completion_badgeclass.name }}</h1>
+								<small>{{ pathway_element.completion_badgeclass.json.description }}</small>
+							</div>
+						</a>
+					</div>
+				</aside>
+			{% endif %}
+
+		</div>
+
+	</header>
+
+
+	<div class="wrap l-containerhorizontal l-containervertical l-childrenvertical">
+
+		<article class="pathwayheading">
+			<h1 class="title">Completion Requirements</h1>
+			{% if pathway_element.cached_children %}
+				<p>Completion of this pathway is based on completing the following child element(s).</p>
+				{% if pathway_element.junction_config.type == "Conjunction" %}
+					<p>ALL checked children are required for completion</p>
+				{% elif pathway_element.junction_config.type == "Disjunction" %}
+					<p>At least ONE checked child is required for completion</p>
+				{% endif %}
+				<div class="pathway-root l-childrenvertical">
+					{% for element in pathway_element.cached_children %}
+						{% include "public/pathway_element_contents.html" %}
+					{% endfor %}
+				</div>
+			{% elif pathway_element.completion_requirement_type == "BadgeJunction" %}
+				<p>Completion of this element is based the following badge(s).</p>
+
+				{% if pathway_element.junction_config.type == "Conjunction" %}
+					<p>Completion of this element is based on completing the following child element(s).</p>
+				{% elif pathway_element.junction_config.type == "Disjunction" %}
+					<p>At least ONE badge is required for completion</p>
+				{% endif %}
+
+				<div class="l-gridthree pathwayheading-x-actions">
+					{% for badge in pathway_element.cached_badges %}
+						<div class="card card-actionsright">
+							<a href="#" class="card-x-main">
+								<div class="card-x-image">
+									<img src="{{ badge.cached_badgeclass.image.url }}" width="40">
+								</div>
+								<div class="card-x-text">
+									<h1>{{ badge.cached_badgeclass.name }}</h1>
+									<small>{{ badge.cached_badgeclass.json.description }}</small>
+								</div>
+							</a>
+						</div>
+					{% endfor %}
+				</div>
+			{% endif %}
+		</article>
+
+
+		{# element #}
+	</div>
+{% endblock %}

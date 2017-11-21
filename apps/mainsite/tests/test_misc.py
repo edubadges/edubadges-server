@@ -51,15 +51,17 @@ class TestCacheSettings(TransactionTestCase):
                 self.assertEqual(retrieved, "hello cached world")
 
 
-@override_settings(HTTP_ORIGIN='http://testserver')
+@override_settings(HTTP_ORIGIN='http://api.testserver')
 class TestSignup(BadgrTestCase):
     def setUp(self):
         pass  # avoid BadgrTestCase.setUp
 
     def test_user_signup_email_confirmation_redirect(self):
-        badgr_app = BadgrApp(cors='testserver',
-                             email_confirmation_redirect='http://testserver/login/',
-                             forgot_password_redirect='http://testserver/forgot-password/')
+        from django.conf import settings
+        http_origin = getattr(settings, 'HTTP_ORIGIN')
+        badgr_app = BadgrApp(cors='frontend.ui',
+                             email_confirmation_redirect='http://frontend.ui/login/',
+                             forgot_password_redirect='http://frontend.ui/forgot-password/')
         badgr_app.save()
 
         post_data = {
@@ -68,22 +70,31 @@ class TestSignup(BadgrTestCase):
             'email': 'test12345@example.com',
             'password': '1234567'
         }
-        self.client.post('/v1/user/profile', post_data)
+        response = self.client.post('/v1/user/profile', post_data)
+        self.assertEqual(response.status_code, 201)
+
+        user = BadgeUser.objects.get(entity_id=response.data.get('slug'))
 
         self.assertEqual(len(mail.outbox), 1)
-        url_match = re.search(r'http://testserver(/v1/user/confirmemail.*)', mail.outbox[0].body)
+        url_match = re.search(r'{}(/v1/user/confirmemail.*)'.format(http_origin), mail.outbox[0].body)
         self.assertIsNotNone(url_match)
         confirm_url = url_match.group(1)
 
-        confirmation = EmailConfirmation.objects.first()
+        expected_redirect_url = '{badgrapp_redirect}{first_name}?authToken={auth}&email={email}'.format(
+            badgrapp_redirect=badgr_app.email_confirmation_redirect,
+            first_name=post_data['first_name'],
+            email=urllib.quote(post_data['email']),
+            auth=user.auth_token
+        )
 
-        with self.settings(ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL='http://frontend.ui/login/',
-                           BADGR_APP_ID=badgr_app.id):
+        with self.settings(BADGR_APP_ID=badgr_app.id):
             response = self.client.get(confirm_url, follow=False)
             self.assertEqual(response.status_code, 302)
-            self.assertEqual(response.get('location'), 'http://testserver/login/Tester?email={}'.format(urllib.quote(post_data['email'])))
+            self.assertEqual(response.get('location'), expected_redirect_url)
 
-
+@override_settings(
+    ACCOUNT_EMAIL_CONFIRMATION_HMAC=False
+)
 class TestEmailCleanupCommand(BadgrTestCase):
     def test_email_added_for_user_missing_one(self):
         user = BadgeUser(email="newtest@example.com", first_name="Test", last_name="User")

@@ -2,10 +2,10 @@
 from __future__ import unicode_literals
 
 from datetime import timedelta
+import os
 import random
 import time
 
-import os
 from django.core.cache import cache
 from django.core.cache.backends.filebased import FileBasedCache
 from django.test import override_settings, TransactionTestCase
@@ -16,7 +16,39 @@ from rest_framework.test import APITransactionTestCase
 from badgeuser.models import BadgeUser
 from issuer.models import Issuer, BadgeClass
 from mainsite import TOP_DIR
-from mainsite.models import BadgrApp
+from mainsite.models import BadgrApp, ApplicationInfo
+
+
+class SetupOAuth2ApplicationHelper(object):
+    def setup_oauth2_application(self,
+                                 client_id=None,
+                                 client_secret=None,
+                                 name='test client app',
+                                 allowed_scopes=None,
+                                 **kwargs):
+        if client_id is None:
+            client_id = "test"
+        if client_secret is None:
+            client_secret = "secret"
+
+        if 'authorization_grant_type' not in kwargs:
+            kwargs['authorization_grant_type'] = Application.GRANT_CLIENT_CREDENTIALS
+
+        application = Application.objects.create(
+            name=name,
+            client_id=client_id,
+            client_secret=client_secret,
+            **kwargs
+        )
+
+        if allowed_scopes:
+            application_info = ApplicationInfo.objects.create(
+                application=application,
+                name=name,
+                allowed_scopes=allowed_scopes
+            )
+
+        return application
 
 
 class SetupUserHelper(object):

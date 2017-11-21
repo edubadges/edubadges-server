@@ -353,5 +353,6 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
             notify=validated_data.get('create_notification'),
             created_by=self.context.get('request').user,
             allow_uppercase=validated_data.get('allow_uppercase'),
+            recipient_type=validated_data.get('recipient_type', BadgeInstance.RECIPIENT_TYPE_EMAIL),
             badgr_app=BadgrApp.objects.get_current(self.context.get('request'))
         )

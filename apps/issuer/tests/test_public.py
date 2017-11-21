@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import json
 
+from mainsite.models import BadgrApp
 from mainsite.tests import BadgrTestCase, SetupIssuerHelper
 
 from issuer.models import Issuer
@@ -25,7 +26,8 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
         with self.assertRaises(Issuer.DoesNotExist):
             Issuer.objects.get(entity_id=fake_entity_id)
 
-        with self.assertNumQueries(1):
+        # a db miss will generate 2 queries, lookup by entity_id and lookup by slug
+        with self.assertNumQueries(2):
             response = self.client.get('/public/issuers/imaginary-issuer')
             self.assertEqual(response.status_code, 404)
 
@@ -80,33 +82,29 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
 
             self.assertEqual(content['type'], 'Assertion')
 
-    def test_get_assertion_html(self):
-        """ Ensure hosted Assertion page returns HTML if */* is requested and that it has OpenGraph metadata properties. """
-        test_user = self.setup_user(authenticate=False)
-        test_issuer = self.setup_issuer(owner=test_user)
-        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
-        assertion = test_badgeclass.issue(recipient_id='new.recipient@email.test')
+    def test_get_assertion_html_redirects_to_frontend(self):
+        badgr_app = BadgrApp(cors='frontend.ui',
+                             public_pages_redirect='http://frontend.ui/public')
+        badgr_app.save()
 
-        with self.assertNumQueries(0):
-            response = self.client.get('/public/assertions/{}'.format(assertion.entity_id),
-                                       **{'HTTP_ACCEPT': '*/*'})
-            self.assertEqual(response.status_code, 200)
+        testcase_headers = [
+            # browsers will send Accept: */* by default
+            {'HTTP_ACCEPT': '*/*'},
 
-            self.assertContains(response, '<meta property="og:url"')
+            # linkedinbot should get redirect to html
+            {'HTTP_USER_AGENT': 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'}
+        ]
 
-    def test_get_assertion_html_linkedin(self):
-        test_user = self.setup_user(authenticate=False)
-        test_issuer = self.setup_issuer(owner=test_user)
-        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
-        assertion = test_badgeclass.issue(recipient_id='new.recipient@email.test')
+        with self.settings(BADGR_APP_ID=badgr_app.id):
+            test_user = self.setup_user(authenticate=False)
+            test_issuer = self.setup_issuer(owner=test_user)
+            test_issuer.cached_badgrapp  # publish badgrapp to cache
+            test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+            assertion = test_badgeclass.issue(recipient_id='new.recipient@email.test')
 
-        with self.assertNumQueries(0):
-            response = self.client.get('/public/assertions/{}'.format(assertion.entity_id),
-                                       **{'HTTP_USER_AGENT': 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'})
-            self.assertEqual(response.status_code, 200)
-
-            self.assertContains(response, '<meta property="og:url"')
-
-
-
+            for headers in testcase_headers:
+                with self.assertNumQueries(0):
+                    response = self.client.get('/public/assertions/{}'.format(assertion.entity_id), **headers)
+                    self.assertEqual(response.status_code, 302)
+                    self.assertEqual(response.get('Location'), 'http://frontend.ui/public/assertions/{}'.format(assertion.entity_id))
 

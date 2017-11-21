@@ -5,10 +5,10 @@ import re
 
 from django.utils import timezone
 from oauth2_provider.exceptions import OAuthToolkitError
-from oauth2_provider.http import HttpResponseUriRedirect
-from oauth2_provider.models import get_application_model, get_access_token_model
-from oauth2_provider.scopes import get_scopes_backend
+from oauth2_provider.models import get_application_model, get_access_token_model, AccessToken, RefreshToken
+from oauth2_provider.oauth2_validators import OAuth2Validator
 from oauth2_provider.settings import oauth2_settings
+from oauth2_provider.views import TokenView as OAuth2ProviderTokenView
 from oauth2_provider.views.mixins import OAuthLibMixin
 from rest_framework import serializers
 from rest_framework.response import Response
@@ -132,3 +132,8 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
             return Response({
                 'error': error.oauthlib_error.description
             }, status=HTTP_400_BAD_REQUEST)
+
+
+class TokenView(OAuth2ProviderTokenView):
+    pass
+

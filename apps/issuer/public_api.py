@@ -8,7 +8,7 @@ from django.conf import settings
 from django.core.files.storage import DefaultStorage
 from django.core.urlresolvers import resolve, reverse, Resolver404, NoReverseMatch
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render_to_response
 from django.views.generic import RedirectView
 from rest_framework import status, permissions
 from rest_framework.exceptions import ValidationError
@@ -20,6 +20,7 @@ import utils
 from backpack.models import BackpackCollection
 from entity.api import VersionedObjectMixin
 from mainsite.models import BadgrApp
+from mainsite.utils import OriginSetting
 from .models import Issuer, BadgeClass, BadgeInstance
 
 logger = badgrlog.BadgrLogger()
@@ -62,6 +63,7 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
     """
     permission_classes = (permissions.AllowAny,)
     html_renderer_class = None
+    template_name = 'public/bot_openbadge.html'
 
     def log(self, obj):
         pass
@@ -84,23 +86,32 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
 
         self.log(self.current_object)
 
+        if self.is_bot():
+            # if user agent matches a known bot, return a stub html with opengraph tags
+            return render_to_response(self.template_name, context=self.get_context_data())
+
         if self.is_requesting_html():
             return HttpResponseRedirect(redirect_to=self.get_badgrapp_redirect())
 
         json = self.get_json(request=request)
         return Response(json)
 
+    def is_bot(self):
+        bot_useragents = getattr(settings, 'BADGR_PUBLIC_BOT_USERAGENTS', ['LinkedInBot'])
+        user_agent = self.request.META.get('HTTP_USER_AGENT', '')
+        if any(a in user_agent for a in bot_useragents):
+            return True
+        return False
+
     def is_requesting_html(self):
         if self.format_kwarg == 'json':
             return False
 
-        HTTP_USER_AGENTS = ['LinkedInBot',]
-        HTTP_ACCEPTS = ['*/*', 'text/html']
+        html_accepts = ['*/*', 'text/html']
 
-        user_agent = self.request.META.get('HTTP_USER_AGENT', '')
-        http_accept = self.request.META.get('HTTP_ACCEPT', '*/*')
+        http_accept = self.request.META.get('HTTP_ACCEPT', 'application/json')
 
-        if any(a in user_agent for a in HTTP_USER_AGENTS) or any(a in http_accept for a in HTTP_ACCEPTS):
+        if self.is_bot() or any(a in http_accept for a in html_accepts):
             return True
 
         return False
@@ -201,6 +212,18 @@ class IssuerJson(JSONComponentView):
     def log(self, obj):
         logger.event(badgrlog.IssuerRetrievedEvent(obj, self.request))
 
+    def get_context_data(self, **kwargs):
+        image_url = "{}{}?type=png".format(
+            OriginSetting.HTTP,
+            reverse('issuer_image', kwargs={'entity_id': self.current_object.entity_id})
+        )
+        return dict(
+            title=self.current_object.name,
+            description=self.current_object.description,
+            public_url=self.current_object.public_url,
+            image_url=image_url
+        )
+
 
 class IssuerBadgesJson(JSONComponentView):
     permission_classes = (permissions.AllowAny,)
@@ -240,6 +263,18 @@ class BadgeClassJson(JSONComponentView):
 
         return json
 
+    def get_context_data(self, **kwargs):
+        image_url = "{}{}?type=png".format(
+            OriginSetting.HTTP,
+            reverse('badgeclass_image', kwargs={'entity_id': self.current_object.entity_id})
+        )
+        return dict(
+            title=self.current_object.name,
+            description=self.current_object.description,
+            public_url=self.current_object.public_url,
+            image_url=image_url
+        )
+
 
 class BadgeClassImage(ImagePropertyDetailView):
     model = BadgeClass
@@ -278,6 +313,18 @@ class BadgeInstanceJson(JSONComponentView):
 
         return json
 
+    def get_context_data(self, **kwargs):
+        image_url = "{}{}?type=png".format(
+            OriginSetting.HTTP,
+            reverse('badgeclass_image', kwargs={'entity_id': self.current_object.cached_badgeclass.entity_id})
+        )
+        return dict(
+            title=self.current_object.cached_badgeclass.name,
+            description=self.current_object.cached_badgeclass.description,
+            public_url=self.current_object.public_url,
+            image_url=image_url
+        )
+
 
 class BadgeInstanceImage(ImagePropertyDetailView):
     model = BadgeInstance
@@ -300,6 +347,9 @@ class BackpackCollectionJson(JSONComponentView):
 
     def get_json(self, request):
         expands = request.GET.getlist('expand', [])
+        if not self.current_object.published:
+            raise Http404
+
         json = self.current_object.get_json(
             obi_version=self._get_request_obi_version(request),
             expand_badgeclass=('badges.badge' in expands),

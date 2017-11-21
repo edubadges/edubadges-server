@@ -11,12 +11,12 @@ from oauthlib.oauth2.rfc6749.tokens import random_token_generator
 from rest_framework import status, serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
 import badgrlog
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
 from entity.serializers import BaseSerializerV2, V2ErrorSerializer
-from issuer.models import Issuer, BadgeClass, BadgeInstance
+from issuer.models import Issuer, BadgeClass, BadgeInstance, IssuerStaff
 from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
                                 IsEditor, IsStaff, ApprovedIssuersOnly, BadgrOAuthTokenHasScope,
                                 BadgrOAuthTokenHasEntityScope)
@@ -467,6 +467,11 @@ class IssuerTokensList(BaseEntityListView):
         tags=["Issuers"],
     )
     def post(self, request, **kwargs):
+        if not isinstance(request.auth, AccessToken):
+            # need to use a oauth2 bearer token to authorize
+            error_response = BaseSerializerV2.response_envelope(result=[], success=False, description="Invalid token")
+            return Response(error_response, status=HTTP_403_FORBIDDEN)
+
         issuer_entityids = request.data.get('issuers', None)
         if not issuer_entityids:
             raise serializers.ValidationError({"issuers": "field is required"})
@@ -485,6 +490,15 @@ class IssuerTokensList(BaseEntityListView):
         expires = timezone.now() + datetime.timedelta(weeks=5200)
         for issuer in issuers:
             scope = "rw:issuer:{}".format(issuer.entity_id)
+
+            # grant application user staff access to issuer if needed
+            staff, staff_created = IssuerStaff.cached.get_or_create(
+                issuer=issuer,
+                user=request.auth.application.user,
+                defaults=dict(
+                    role=IssuerStaff.ROLE_STAFF
+                )
+            )
 
             accesstoken, created = AccessToken.objects.get_or_create(
                 user=request.auth.application.user,
@@ -558,14 +572,15 @@ class AssertionsChangedSince(BaseEntityView):
 
     def get(self, request, **kwargs):
         since = request.GET.get('since', None)
-        try:
-            since = dateutil.parser.parse(since)
-        except ValueError as e:
-            err = V2ErrorSerializer(data={}, field_errors={'since': ["must be iso8601 format"]}, validation_errors=[])
-            err._success = False
-            err._description = "bad request"
-            err.is_valid(raise_exception=False)
-            return Response(err.data, status=HTTP_400_BAD_REQUEST)
+        if since is not None:
+            try:
+                since = dateutil.parser.parse(since)
+            except ValueError as e:
+                err = V2ErrorSerializer(data={}, field_errors={'since': ["must be iso8601 format"]}, validation_errors=[])
+                err._success = False
+                err._description = "bad request"
+                err.is_valid(raise_exception=False)
+                return Response(err.data, status=HTTP_400_BAD_REQUEST)
 
         queryset = self.get_queryset(request, since=since)
         context = self.get_context_data(**kwargs)

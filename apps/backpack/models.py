@@ -33,12 +33,13 @@ class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
 
     def publish(self):
         super(BackpackCollection, self).publish()
+        self.publish_by('share_hash')
         self.created_by.publish()
 
     def delete(self, *args, **kwargs):
         super(BackpackCollection, self).delete(*args, **kwargs)
+        self.publish_delete('share_hash')
         self.created_by.publish()
-        self.publish_delete()
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeinstances(self):
@@ -69,6 +70,7 @@ class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
         if value and not self.share_hash:
             self.share_hash = os.urandom(16).encode('hex')
         elif not value and self.share_hash:
+            self.publish_delete('share_hash')
             self.share_hash = ''
 
     @property

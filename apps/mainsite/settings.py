@@ -431,8 +431,19 @@ OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'oauth2_provider.AccessToken'
 
 API_DOCS_EXCLUDED_SCOPES = ['rw:issuer:*', 'r:assertions', '*']
 
+
+BADGR_PUBLIC_BOT_USERAGENTS = [
+    'LinkedInBot',   # 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'
+    'Twitterbot',    # 'Twitterbot/1.0'
+    'facebook',      # https://developers.facebook.com/docs/sharing/webmasters/crawler
+    'Facebot',
+]
+
+
 # Allow use of weaker CAs (1024 bits) to avoid problem with chained certificates used by accounts.google.com
 # Ideally this environment variable would be set on a per-environment basis, only where needed
 import os
 import certifi
 os.environ['REQUESTS_CA_BUNDLE'] = certifi.old_where()
+
+
