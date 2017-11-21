@@ -1,10 +1,12 @@
 import base64
 
+import json
 import os
+from badgecheck.openbadges_context import (OPENBADGES_CONTEXT_V2_URI, OPENBADGES_CONTEXT_V1_URI,
+                                                    OPENBADGES_CONTEXT_V2_DICT)
 import responses
 
 from badgeuser.models import CachedEmailAddress, BadgeUser
-
 from issuer.models import BadgeClass, Issuer, BadgeInstance
 from mainsite.tests.base import BadgrTestCase
 
@@ -43,10 +45,9 @@ def setup_basic_1_0(**kwargs):
 
 def setup_resources(resources):
     for item in resources:
-        response_body = item.get(
-            'response_body',
-            open(os.path.join(dir, 'testfiles', item['filename'])).read()
-        )
+        response_body = item.get('response_body')
+        if response_body is None:
+            response_body = open(os.path.join(dir, 'testfiles', item['filename'])).read()
         responses.add(
             responses.GET, item['url'],
             body=response_body,
@@ -75,6 +76,10 @@ class TestBadgeUploads(BadgrTestCase):
     @responses.activate
     def test_submit_basic_1_0_badge_via_url(self):
         setup_basic_1_0()
+        setup_resources([
+            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
+        ])
         self.setup_user(email='test@example.com', token_scope='rw:backpack')
 
         post_input = {
@@ -89,7 +94,7 @@ class TestBadgeUploads(BadgrTestCase):
         self.assertEqual(
             get_response.data[0].get('json', {}).get('id'),
             'http://a.com/instance'
-        )
+        )  # The API is now returning Badgr's BadgeInstance.jsonld_id value for the json id instead of the openBadgeId on the /v1 API.
 
         new_instance = BadgeInstance.objects.first()
         self.assertEqual(get_response.data[0].get('json', {}).get('image', {}).get('id'), new_instance.image_url())
@@ -132,11 +137,11 @@ class TestBadgeUploads(BadgrTestCase):
             body=open(os.path.join(dir, 'testfiles/unbaked_image.png')).read(),
             status=200, content_type='image/png'
         )
-        from badgecheck.openbadges_context import OPENBADGES_CONTEXT_V2_URI, OPENBADGES_CONTEXT_V1_URI, OPENBADGES_CONTEXT_V2_DICT
-        responses.add(
-            responses.GET, OPENBADGES_CONTEXT_V2_URI, json=OPENBADGES_CONTEXT_V2_DICT
-        )
-        setup_resources([{'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'}])
+
+        setup_resources([
+            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
+        ])
 
         self.setup_user(email='test@example.com', token_scope='rw:backpack')
 
@@ -152,7 +157,7 @@ class TestBadgeUploads(BadgrTestCase):
         self.assertEqual(
             get_response.data[0].get('json', {}).get('id'),
             'http://a.com/instance'
-        )
+        )  # The API is now returning Badgr's BadgeInstance.jsonld_id value for the json id instead of the openBadgeId on the /v1 API.
 
         new_instance = BadgeInstance.objects.first()
         self.assertEqual(get_response.data[0].get('json', {}).get('image', {}).get('id'), new_instance.image_url())
@@ -160,7 +165,11 @@ class TestBadgeUploads(BadgrTestCase):
     @responses.activate
     def test_submit_basic_1_0_badge_via_url_plain_json(self):
         setup_basic_1_0()
-        self.setup_user(token_scope='rw:backpack')
+        self.setup_user(email='test@example.com', token_scope='rw:backpack')
+        setup_resources([
+            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
+        ])
 
         post_input = {
             'url': 'http://a.com/instance'
@@ -177,6 +186,10 @@ class TestBadgeUploads(BadgrTestCase):
     @responses.activate
     def test_submit_basic_1_0_badge_via_url_bad_email(self):
         setup_basic_1_0()
+        setup_resources([
+            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
+        ])
         self.setup_user(email='not.test@email.example.com', authenticate=True)
 
         post_input = {
@@ -187,14 +200,18 @@ class TestBadgeUploads(BadgrTestCase):
         )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response.data[0],
-            'The badge you are trying to import does not belong to one of your verified e-mail addresses.'
+            response.data[1],
+            'The recipient does not match any of your verified emails'
         )
 
     @responses.activate
     def test_submit_basic_1_0_badge_from_image_url_baked_w_assertion(self):
         setup_basic_1_0()
-        self.setup_user(authenticate=True)
+        self.setup_user(email='test@example.com', authenticate=True)
+        setup_resources([
+            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
+        ])
 
         responses.add(
             responses.GET, 'http://a.com/baked_image',
@@ -215,12 +232,17 @@ class TestBadgeUploads(BadgrTestCase):
             get_response.data[0].get('json', {}).get('id'),
             'http://a.com/instance'
         )
+        #  The error in this test should be fixed by the update to latest openbadges 1.0.1
 
 
     @responses.activate
     def test_submit_basic_1_0_badge_image_png(self):
         setup_basic_1_0()
-        self.setup_user(authenticate=True)
+        setup_resources([
+            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
+        ])
+        self.setup_user(email='test@example.com', authenticate=True)
 
         image = open(os.path.join(dir, 'testfiles/baked_image.png'))
         post_input = {
@@ -240,7 +262,11 @@ class TestBadgeUploads(BadgrTestCase):
     @responses.activate
     def test_submit_basic_1_0_badge_image_datauri_png(self):
         setup_basic_1_0()
-        self.setup_user(authenticate=True)
+        setup_resources([
+            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
+        ])
+        self.setup_user(email='test@example.com', authenticate=True)
 
         image = open(os.path.join(dir, 'testfiles/baked_image.png'))
         encoded = 'data:image/png;base64,' + base64.b64encode(image.read())
@@ -257,11 +283,16 @@ class TestBadgeUploads(BadgrTestCase):
             get_response.data[0].get('json', {}).get('id'),
             'http://a.com/instance'
         )
+        # I think this test failure will be fixed by a badgecheck update to openbadges 1.0.1 as well
 
     @responses.activate
     def test_submit_basic_1_0_badge_assertion(self):
         setup_basic_1_0()
-        self.setup_user(authenticate=True)
+        setup_resources([
+            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
+        ])
+        self.setup_user(email='test@example.com', authenticate=True)
 
         post_input = {
             'assertion': open(os.path.join(dir, 'testfiles/1_0_basic_instance.json')).read()
@@ -281,9 +312,11 @@ class TestBadgeUploads(BadgrTestCase):
     def test_submit_basic_1_0_badge_url_variant_email(self):
         setup_basic_1_0(**{'exclude': 'http://a.com/instance'})
         setup_resources([
-            {'url': 'http://a.com/instance3', 'filename': '1_0_basic_instance3.json'}
+            {'url': 'http://a.com/instance3', 'filename': '1_0_basic_instance3.json'},
+            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
         ])
-        self.setup_user(authenticate=True)
+        self.setup_user(email='test@example.com', authenticate=True)
 
         post_input = {
             'url': 'http://a.com/instance3',
@@ -292,7 +325,9 @@ class TestBadgeUploads(BadgrTestCase):
         response = self.client.post(
             '/v1/earner/badges', post_input
         )
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 201)  # This API feature seems like it has broken. It's not used by our
+                                                     # own client but was designed as one of the methods to add an
+                                                     # email case variant.
         get_response = self.client.get('/v1/earner/badges')
         self.assertEqual(get_response.status_code, 200)
         self.assertEqual(
@@ -309,7 +344,11 @@ class TestBadgeUploads(BadgrTestCase):
     @responses.activate
     def test_submit_basic_1_0_badge_with_inaccessible_badge_image(self):
         setup_basic_1_0(**{'exclude': ['http://a.com/badgeclass_image']})
-        self.setup_user(authenticate=True)
+        setup_resources([
+            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
+        ])
+        self.setup_user(email='test@example.com', authenticate=True)
 
         post_input = {
             'url': 'http://a.com/instance'
@@ -319,11 +358,16 @@ class TestBadgeUploads(BadgrTestCase):
         )
         self.assertEqual(response.status_code, 400)
         self.assertTrue(response.data[0].startswith('Error retrieving image'))
+        # Badgecheck is correctly determining the issue, but the error message isn't coming through the v1 API.
 
     @responses.activate
     def test_submit_basic_1_0_badge_missing_issuer(self):
         setup_basic_1_0(**{'exclude': ['http://a.com/issuer']})
-        self.setup_user(authenticate=True)
+        setup_resources([
+            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
+        ])
+        self.setup_user(email='test@example.com', authenticate=True)
 
         post_input = {
             'url': 'http://a.com/instance'
@@ -332,17 +376,24 @@ class TestBadgeUploads(BadgrTestCase):
             '/v1/earner/badges', post_input
         )
         self.assertEqual(response.status_code, 400)
-        self.assertTrue(response.data[0].startswith('Error attempting'))
+        self.assertTrue(response.data[0].startswith('ASSERTION_NOT_FOUND'))
+        # This error message should likely be improved to indicate that it was the issuer node that was not found
+        # Waiting on upgrade to latest openbadges 1.0.1 to see if FETCH_HTTP_NODE error message improved to include
+        # the url it was trying to fetch.
 
     @responses.activate
     def test_submit_basic_1_0_badge_missing_badge_prop(self):
-        self.setup_user(authenticate=True)
+        self.setup_user(email='test@example.com', authenticate=True)
 
         responses.add(
             responses.GET, 'http://a.com/instance',
             body=open(os.path.join(dir, 'testfiles/1_0_basic_instance_missing_badge_prop.json')).read(),
             status=200, content_type='application/json'
         )
+        setup_resources([
+            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
+        ])
 
         post_input = {
             'url': 'http://a.com/instance'
@@ -354,11 +405,18 @@ class TestBadgeUploads(BadgrTestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data[0], u'Badge components not well formed. Missing structure: badge')
+        # Now this returns "ASSERTION_NOT_FOUND"
+        # The error message should be improved, because the issue is not that an Assertion isn't found,
+        # it's that a BadgeClass isn't found.
 
     @responses.activate
     def test_submit_basic_0_5_0_badge_via_url(self):
         setup_basic_0_5_0()
-        self.setup_user(authenticate=True)
+        setup_resources([
+            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
+        ])
+        self.setup_user(email='test@example.com', authenticate=True)
 
         post_input = {
             'url': 'http://oldstyle.com/instance'
@@ -369,8 +427,7 @@ class TestBadgeUploads(BadgrTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertTrue(
             response.data[0].startswith("Sorry, v0.5 badges are not supported"))
-
-        # TODO: reimplement if we decide to accept 0.5 badges in the composer
+        # TODO: Update to reflect that we can accept 0.5 badges with update to openbadges verifier 1.0.1
         # get_response = self.client.get('/v1/earner/badges')
         # self.assertEqual(get_response.status_code, 200)
         # self.assertEqual(
@@ -381,7 +438,11 @@ class TestBadgeUploads(BadgrTestCase):
     @responses.activate
     def test_submit_0_5_badge_upload_by_assertion(self):
         setup_basic_0_5_0()
-        self.setup_user(authenticate=True)
+        setup_resources([
+            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
+        ])
+        self.setup_user(email='test@example.com', authenticate=True)
 
         post_input = {
             'assertion': open(os.path.join(dir, 'testfiles', '0_5_basic_instance.json')).read()
@@ -390,14 +451,17 @@ class TestBadgeUploads(BadgrTestCase):
             '/v1/earner/badges', post_input
         )
         self.assertEqual(response.status_code, 400)
+        # TODO Update to support 0.5 badges
 
     @responses.activate
     def test_creating_no_duplicate_badgeclasses_and_issuers(self):
         setup_basic_1_0()
-        self.setup_user(authenticate=True)
         setup_resources([
-            {'url': 'http://a.com/instance2', 'filename': '1_0_basic_instance2.json'}
+            {'url': 'http://a.com/instance2', 'filename': '1_0_basic_instance2.json'},
+            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
         ])
+        self.setup_user(email='test@example.com', authenticate=True)
 
         post_input = {
             'url': 'http://a.com/instance'
@@ -432,15 +496,17 @@ class TestBadgeUploads(BadgrTestCase):
         it again.
         """
         pass
+        # TODO: Re-evaluate badgecheck caching strategy
 
     @responses.activate
     def test_submit_badge_assertion_with_bad_date(self):
         setup_basic_1_0()
         setup_resources([
-            {'url': 'http://a.com/instancebaddate',
-             'filename': '1_0_basic_instance_with_bad_date.json'}
+            {'url': 'http://a.com/instancebaddate', 'filename': '1_0_basic_instance_with_bad_date.json'},
+            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
         ])
-        self.setup_user(authenticate=True)
+        self.setup_user(email='test@example.com', authenticate=True)
 
         post_input = {
             'url': 'http://a.com/instancebaddate'
@@ -452,15 +518,17 @@ class TestBadgeUploads(BadgrTestCase):
 
         self.assertTrue(response.data['details']['instance']['BadgeInstanceSerializerV1_0']['issuedOn'][0]
                         .startswith('Invalid format'))
+        # TODO: Report better error message for an invalid property from BadgeCheckHelper
 
     @responses.activate
     def test_submit_badge_invalid_component_json(self):
         setup_basic_1_0(**{'exclude': ['http://a.com/issuer']})
         setup_resources([
-            {'url': 'http://a.com/issuer',
-             'filename': '1_0_basic_issuer_invalid_json.json'}
+            {'url': 'http://a.com/issuer', 'filename': '1_0_basic_issuer_invalid_json.json'},
+            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
         ])
-        self.setup_user(authenticate=True)
+        self.setup_user(email='test@example.com', authenticate=True)
 
         post_input = {
             'url': 'http://a.com/instance'
@@ -470,15 +538,16 @@ class TestBadgeUploads(BadgrTestCase):
         )
         self.assertEqual(response.status_code, 400)
 
-        self.assertTrue(response.data[1].startswith('Unable to find a valid json component'))
+        self.assertTrue(response.data[0].startswith('ASSERTION_NOT_FOUND'))
 
     @responses.activate
     def test_submit_badge_invalid_assertion_json(self):
         setup_resources([
-            {'url': 'http://a.com/instance',
-             'filename': '1_0_basic_issuer_invalid_json.json'}
+            {'url': 'http://a.com/instance', 'filename': '1_0_basic_issuer_invalid_json.json'},
+            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
         ])
-        self.setup_user(authenticate=True)
+        self.setup_user(email='test@example.com', authenticate=True)
 
         post_input = {
             'url': 'http://a.com/instance'
@@ -488,7 +557,7 @@ class TestBadgeUploads(BadgrTestCase):
         )
         self.assertEqual(response.status_code, 400)
 
-        self.assertTrue(response.data[0].startswith('Unable to get valid baked image or valid json response from'))
+        self.assertTrue(response.data[0].startswith('ASSERTION_NOT_FOUND'))
 
 
 class TestCollections(BadgrTestCase):
@@ -521,60 +590,44 @@ class TestCollections(BadgrTestCase):
         )
 
         self.local_badge_instance_1, _ = BadgeInstance.objects.get_or_create(
-            recipient_user=self.user,
             recipient_identifier="test@example.com",
-            issuer_badgeclass=self.badge_class,
-            created_at="2015-12-15T15:55:51Z",
-            created_by=None,
-            slug="3949c957-11e2-464d-b1c0-0d4fa645e93a",
-            json="{\"issuedOn\":\"2013-10-25T12:55:31\",\"uid\":\"dc8959d7639e64178ec24fb222f11d050528df74\",\"type\":\"Assertion\",\"image\":\"http://localhost:8000/media/uploads/badges/local_badgeinstance_174e70bf-b7a8-4b71-8125-c34d1a994a7c.png\",\"badge\":{\"description\":\"The MozFest 2013 Reveler Badge is special edition badge acknowledging a personal commitment to forging the future of the web during MozFest: working with peers to imagine and build an open future of learning, making, journalism, data, science, privacy, and mobile.\",\"tags\":[],\"image\":\"http://badger.openbadges.org/badge/image/mozfest-reveler.png\",\"criteria\":\"http://badger.openbadges.org/badge/criteria/mozfest-reveler\",\"issuer\":{\"url\":\"http://openbadges.org\",\"type\":\"Issuer\",\"id\":\"http://badger.openbadges.org/program/meta/bda68a0b505bc0c7cf21bc7900280ee74845f693\",\"name\":\"Open Badges\"},\"type\":\"BadgeClass\",\"id\":\"http://badger.openbadges.org/badge/meta/mozfest-reveler\",\"name\":\"MozFest Reveler\"},\"@context\":\"https://w3id.org/openbadges/v1\",\"recipient\":{\"type\":\"email\",\"recipient\":\"test@example.com\"},\"id\":\"http://badger.openbadges.org/badge/assertion/dc8959d7639e64178ec24fb222f11d050528df74\"}",
-            revocation_reason=None,
-            identifier="http://badger.openbadges.org/badge/assertion/dc8959d7639e64178ec24fb222f11d050528df74",
+            badgeclass=self.badge_class,
+            issuer=self.issuer,
             image="uploads/badges/local_badgeinstance_174e70bf-b7a8-4b71-8125-c34d1a994a7c.png",
-            revoked=False
+            acceptance=BadgeInstance.ACCEPTANCE_ACCEPTED
         )
 
         self.local_badge_instance_2, _ = BadgeInstance.objects.get_or_create(
-            recipient_user=self.user,
             recipient_identifier="test@example.com",
-            issuer_badgeclass=self.badge_class,
-            created_at="2015-12-21T20:41:16Z",
-            created_by=None,
-            slug="32f81606-4430-40df-a9fc-382a2d1f1574",
-            revocation_reason=None,
-            identifier="http://badger.openbadges.org/badge/assertion/c14a16d06481ba99fdf82b0b4b12d275c03c76cd",
-            image="uploads/badges/local_badgeinstance_bf562e3a-9f26-493e-840f-0ecb31d7bebc.png",
-            revoked=False
+            badgeclass=self.badge_class,
+            issuer=self.issuer,
+            image="uploads/badges/local_badgeinstance_174e70bf-b7a8-4b71-8125-c34d1a994a7c.png",
+            acceptance=BadgeInstance.ACCEPTANCE_ACCEPTED
         )
 
         self.local_badge_instance_3, _ = BadgeInstance.objects.get_or_create(
-            recipient_user=self.user,
             recipient_identifier="test@example.com",
-            issuer_badgeclass=self.badge_class,
-            created_at="2015-12-28T15:54:50Z",
-            created_by=None,
-            slug="c36110d9-938a-4052-9a13-ed8424454ed5",
-            revocation_reason=None,
-            identifier="http://app.achievery.com/badge-assertion/4613999",
-            image="uploads/badges/local_badgeinstance_e63cdadc-7cad-46ee-a4d0-a75458678e04.png",
-            revoked=False
+            badgeclass=self.badge_class,
+            issuer=self.issuer,
+            image="uploads/badges/local_badgeinstance_174e70bf-b7a8-4b71-8125-c34d1a994a7c.png",
+            acceptance=BadgeInstance.ACCEPTANCE_ACCEPTED
         )
 
         self.collection, _ = BackpackCollection.objects.get_or_create(
-            owner=self.user,
+            created_by=self.user,
             description='The Freshest Ones',
             name='Fresh Badges',
             slug='fresh-badges'
         )
 
         BackpackCollection.objects.create(
-            owner=self.user,
+            created_by=self.user,
             description='It\'s even fresher.',
             name='Cool New Collection',
             slug='cool-new-collection'
         )
         BackpackCollection.objects.create(
-            owner=self.user,
+            created_by=self.user,
             description='Newest!',
             name='New collection',
             slug='new-collection'
