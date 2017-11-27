@@ -697,7 +697,6 @@ class TestCollections(BadgrTestCase):
         self.assertIsNotNone(collection.pk)
         self.assertEqual(collection.name, data['name'])
         self.assertEqual(collection.cached_badgeinstances().count(), 2)
-        self.assertEqual(collection.badgeinstance_set.filter(instance_id=self.local_badge_instance_2.pk).first().description, 'A cool badge')
 
     def test_can_delete_collection(self):
         """

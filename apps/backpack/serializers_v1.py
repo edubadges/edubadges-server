@@ -219,10 +219,11 @@ class CollectionSerializerV1(serializers.Serializer):
         return representation
 
     def create(self, validated_data):
+        owner = validated_data.get('created_by', self.context.get('user', None))
         new_collection = BackpackCollection.objects.create(
             name=validated_data.get('name'),
             description=validated_data.get('description', ''),
-            created_by=validated_data.get('created_by')
+            created_by=owner
         )
         published = validated_data.get('published', False)
         if published:
