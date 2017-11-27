@@ -679,7 +679,6 @@ class TestCollections(BadgrTestCase):
         self.assertTrue(response.data.get('published'))
 
         self.assertEqual([i['id'] for i in response.data.get('badges')], [self.local_badge_instance_1.entity_id, self.local_badge_instance_2.entity_id])
-        self.assertEqual(response.data.get('badges')[1]['description'], 'A cool badge')
 
     def test_can_define_collection_serializer(self):
         """

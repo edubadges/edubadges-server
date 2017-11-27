@@ -173,9 +173,10 @@ class CollectionBadgeSerializerV1(serializers.ModelSerializer):
             collection = self.parent.parent.instance
         elif not collection and self.parent.instance:
             collection = self.parent.instance
-        # if not collection:
-            # return LocalBadgeInstanceCollection(
-            #     instance_id=data.get('id'), description=description)
+        if not collection:
+            return BackpackCollectionBadgeInstance(
+                badgeinstance=BadgeInstance.cached.get(entity_id=data.get('id'))
+            )
 
         try:
             badgeinstance = BadgeInstance.cached.get(entity_id=data.get('id'))
@@ -228,10 +229,10 @@ class CollectionSerializerV1(serializers.Serializer):
             new_collection.published = published
             new_collection.save()
 
-        if validated_data.get('badges') is not None:
-            for entry in validated_data['cached_collects']:
-                entry.collection = new_collection
-                entry.save()
+        for collect in validated_data.get('cached_collects', []):
+            collect.collection = new_collection
+            collect.badgeuser = new_collection.created_by
+            collect.save()
 
         return new_collection
 
