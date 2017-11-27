@@ -177,7 +177,10 @@ class CollectionBadgeSerializerV1(serializers.ModelSerializer):
             # return LocalBadgeInstanceCollection(
             #     instance_id=data.get('id'), description=description)
 
-        badgeinstance = BadgeInstance.cached.get(entity_id=data.get('id'))
+        try:
+            badgeinstance = BadgeInstance.cached.get(entity_id=data.get('id'))
+        except BadgeInstance.DoesNotExist:
+            raise RestframeworkValidationError("Assertion not found")
         if badgeinstance.recipient_identifier not in collection.owner.all_recipient_identifiers:
             raise serializers.ValidationError("Cannot add badge to a collection created by a different recipient.")
 
