@@ -160,11 +160,6 @@ class BadgeCheckHelper(object):
         report = response.get('report', {})
         is_valid = report.get('valid')
 
-        # we expect to get 3 obos: Assertion, Issuer and BadgeClass
-        obos = {n.get('type'): n for n in response.get('graph', [])}
-        if len(set(('Assertion', 'Issuer', 'Profile', 'BadgeClass')) & set(obos.keys())) != 3:
-            raise ValidationError([{'name': "ASSERTION_NOT_FOUND", 'description': "Unable to find an assertion"}])
-
         if not is_valid:
             if report.get('errorCount', 0) > 0:
                 errors = list(cls.translate_errors(report.get('messages', [])))
@@ -172,9 +167,26 @@ class BadgeCheckHelper(object):
                 errors = [{'name': "UNABLE_TO_VERIFY", 'description': "Unable to verify the assertion"}]
             raise ValidationError(errors)
 
-        issuer_obo = obos.get('Profile', obos.get('Issuer'))
-        badgeclass_obo = obos.get('BadgeClass')
-        assertion_obo = obos.get('Assertion')
+        def _first_node_match(graph, condition):
+            """return the first dict in a list of dicts that matches condition dict"""
+            for node in graph:
+                if all(item in node.items() for item in condition.items()):
+                    return node
+
+        graph = response.get('graph', [])
+
+        assertion_obo = _first_node_match(graph, dict(type="Assertion"))
+        if not assertion_obo:
+            raise ValidationError([{'name': "ASSERTION_NOT_FOUND", 'description': "Unable to find an assertion"}])
+
+        badgeclass_obo = _first_node_match(graph, dict(id=assertion_obo.get('badge', None)))
+        if not badgeclass_obo:
+            raise ValidationError([{'name': "ASSERTION_NOT_FOUND", 'description': "Unable to find a badgeclass"}])
+
+        issuer_obo = _first_node_match(graph, dict(id=badgeclass_obo.get('issuer', None)))
+        if not issuer_obo:
+            raise ValidationError([{'name': "ASSERTION_NOT_FOUND", 'description': "Unable to find an issuer"}])
+
         original_json = response.get('input').get('original_json', {})
 
         recipient_identifier = report.get('recipientProfile', {}).get('email', None)
