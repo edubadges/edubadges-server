@@ -887,19 +887,21 @@ class TestCollections(BadgrTestCase):
         self.assertEqual(response.status_code, 204)
 
     def test_api_handles_null_description_and_adds_badge(self):
-        self.assertEqual(self.collection.badges.count(), 0)
+        self.assertEqual(len(self.collection.cached_badgeinstances()), 0)
 
-        data = {'badges': [{'id': self.local_badge_instance_1.pk, 'description': None}]}
+        data = {
+            'badges': [{'id': self.local_badge_instance_1.entity_id, 'description': None}],
+            'name': self.collection.name,
+        }
 
         self.client.force_authenticate(user=self.user)
         response = self.client.put(
-            '/v1/earner/collections/{}'.format(self.collection.slug), data=data,
+            '/v1/earner/collections/{}'.format(self.collection.entity_id), data=data,
             format='json')
         self.assertEqual(response.status_code, 200)
 
-        entry = self.collection.badges.first()
-        self.assertEqual(entry.description, '')
-        self.assertEqual(entry.instance_id, self.local_badge_instance_1.pk)
+        entry = self.collection.cached_collects().first()
+        self.assertEqual(entry.badgeinstance_id, self.local_badge_instance_1.pk)
 
     def test_can_add_remove_collection_badges_collection_badgelist_api(self):
         """
