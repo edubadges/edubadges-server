@@ -97,6 +97,6 @@ backports.csv==1.0.4
 more-itertools==2.5.0
 
 
-git+https://github.com/openbadges/badgecheck.git@v1.0.0b1
+openbadges==1.0.1
 
 apispec==0.22.0

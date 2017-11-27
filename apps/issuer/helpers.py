@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import uuid
 from collections import MutableMapping
 
-import badgecheck
+import openbadges
 from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
@@ -153,7 +153,7 @@ class BadgeCheckHelper(object):
             badgecheck_recipient_profile = None
 
         try:
-            response = badgecheck.verify(query, recipient_profile=badgecheck_recipient_profile, **cls.badgecheck_options())
+            response = openbadges.verify(query, recipient_profile=badgecheck_recipient_profile, **cls.badgecheck_options())
         except ValueError as e:
             raise ValidationError([{'name': "INVALID_BADGE", 'description': str(e)}])
 
