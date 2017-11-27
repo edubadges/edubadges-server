@@ -9,13 +9,14 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from requests_cache.backends import RedisCache, BaseCache
+from requests_cache.backends import BaseCache
 
 from issuer.models import Issuer, BadgeClass, BadgeInstance
+from mainsite.utils import first_node_match
 
 
-# TODO: Fix this class, its broken!
 class DjangoCacheDict(MutableMapping):
+    """TODO: Fix this class, its broken!"""
     _keymap_cache_key = "DjangoCacheDict_keys"
 
     def __init__(self, namespace, id=None, timeout=None):
@@ -168,23 +169,17 @@ class BadgeCheckHelper(object):
                 errors = [{'name': "UNABLE_TO_VERIFY", 'description': "Unable to verify the assertion"}]
             raise ValidationError(errors)
 
-        def _first_node_match(graph, condition):
-            """return the first dict in a list of dicts that matches condition dict"""
-            for node in graph:
-                if all(item in node.items() for item in condition.items()):
-                    return node
-
         graph = response.get('graph', [])
 
-        assertion_obo = _first_node_match(graph, dict(type="Assertion"))
+        assertion_obo = first_node_match(graph, dict(type="Assertion"))
         if not assertion_obo:
             raise ValidationError([{'name': "ASSERTION_NOT_FOUND", 'description': "Unable to find an assertion"}])
 
-        badgeclass_obo = _first_node_match(graph, dict(id=assertion_obo.get('badge', None)))
+        badgeclass_obo = first_node_match(graph, dict(id=assertion_obo.get('badge', None)))
         if not badgeclass_obo:
             raise ValidationError([{'name': "ASSERTION_NOT_FOUND", 'description': "Unable to find a badgeclass"}])
 
-        issuer_obo = _first_node_match(graph, dict(id=badgeclass_obo.get('issuer', None)))
+        issuer_obo = first_node_match(graph, dict(id=badgeclass_obo.get('issuer', None)))
         if not issuer_obo:
             raise ValidationError([{'name': "ASSERTION_NOT_FOUND", 'description': "Unable to find an issuer"}])
 

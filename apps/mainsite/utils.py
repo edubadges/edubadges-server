@@ -126,3 +126,10 @@ def generate_entity_uri():
     b64_string = base64.urlsafe_b64encode(entity_uuid.bytes)
     b64_trimmed = re.sub(r'=+$', '', b64_string)
     return b64_trimmed
+
+
+def first_node_match(graph, condition):
+    """return the first dict in a list of dicts that matches condition dict"""
+    for node in graph:
+        if all(item in node.items() for item in condition.items()):
+            return node

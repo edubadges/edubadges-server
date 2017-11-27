@@ -12,6 +12,7 @@ from mainsite.tests.base import BadgrTestCase
 
 from backpack.models import BackpackCollection, BackpackCollectionBadgeInstance
 from backpack.serializers_v1 import (CollectionSerializerV1)
+from mainsite.utils import first_node_match
 
 dir = os.path.dirname(__file__)
 
@@ -199,10 +200,10 @@ class TestBadgeUploads(BadgrTestCase):
             '/v1/earner/badges', post_input
         )
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(
-            response.data[1],
-            'The recipient does not match any of your verified emails'
-        )
+        self.assertIsNotNone(first_node_match(response.data, dict(
+            messageLevel='ERROR',
+            name='VERIFY_RECIPIENT_IDENTIFIER',
+        )))
 
     @responses.activate
     def test_submit_basic_1_0_badge_from_image_url_baked_w_assertion(self):
@@ -357,8 +358,10 @@ class TestBadgeUploads(BadgrTestCase):
             '/v1/earner/badges', post_input
         )
         self.assertEqual(response.status_code, 400)
-        self.assertTrue(response.data[0].startswith('Error retrieving image'))
-        # Badgecheck is correctly determining the issue, but the error message isn't coming through the v1 API.
+        self.assertIsNotNone(first_node_match(response.data, dict(
+            messageLevel='ERROR',
+            name='IMAGE_VALIDATION'
+        )))
 
     @responses.activate
     def test_submit_basic_1_0_badge_missing_issuer(self):
@@ -376,10 +379,10 @@ class TestBadgeUploads(BadgrTestCase):
             '/v1/earner/badges', post_input
         )
         self.assertEqual(response.status_code, 400)
-        self.assertTrue(response.data[0].startswith('FETCH_HTTP_NODE'))
-        # This error message should likely be improved to indicate that it was the issuer node that was not found
-        # Waiting on upgrade to latest openbadges 1.0.1 to see if FETCH_HTTP_NODE error message improved to include
-        # the url it was trying to fetch.
+        self.assertIsNotNone(first_node_match(response.data, dict(
+            messageLevel='ERROR',
+            name='FETCH_HTTP_NODE'
+        )))
 
     @responses.activate
     def test_submit_basic_1_0_badge_missing_badge_prop(self):
@@ -404,10 +407,11 @@ class TestBadgeUploads(BadgrTestCase):
         )
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data[0], u'Badge components not well formed. Missing structure: badge')
-        # Now this returns "ASSERTION_NOT_FOUND"
-        # The error message should be improved, because the issue is not that an Assertion isn't found,
-        # it's that a BadgeClass isn't found.
+        self.assertIsNotNone(first_node_match(response.data, dict(
+            messageLevel='ERROR',
+            name='VALIDATE_PROPERTY',
+            prop_name='badge'
+        )))
 
     @responses.activate
     def test_submit_basic_0_5_0_badge_via_url(self):
@@ -516,9 +520,11 @@ class TestBadgeUploads(BadgrTestCase):
         )
         self.assertEqual(response.status_code, 400)
 
-        self.assertTrue(response.data['details']['instance']['BadgeInstanceSerializerV1_0']['issuedOn'][0]
-                        .startswith('Invalid format'))
-        # TODO: Report better error message for an invalid property from BadgeCheckHelper
+        self.assertIsNotNone(first_node_match(response.data, dict(
+            messageLevel='ERROR',
+            name='VALIDATE_PROPERTY',
+            prop_name='issuedOn'
+        )))
 
     @responses.activate
     def test_submit_badge_invalid_component_json(self):
@@ -538,7 +544,10 @@ class TestBadgeUploads(BadgrTestCase):
         )
         self.assertEqual(response.status_code, 400)
 
-        self.assertTrue(response.data[0].startswith('FETCH_HTTP_NODE'))
+        self.assertIsNotNone(first_node_match(response.data, dict(
+            messageLevel='ERROR',
+            name='FETCH_HTTP_NODE'
+        )))
 
     @responses.activate
     def test_submit_badge_invalid_assertion_json(self):
@@ -558,7 +567,10 @@ class TestBadgeUploads(BadgrTestCase):
         self.assertEqual(response.status_code, 400)
 
         # openbadges returns FETCH_HTTP_NODE error when retrieving invalid json
-        self.assertTrue(response.data[0].startswith('FETCH_HTTP_NODE'))
+        self.assertIsNotNone(first_node_match(response.data, dict(
+            messageLevel='ERROR',
+            name='FETCH_HTTP_NODE'
+        )))
 
 
 class TestCollections(BadgrTestCase):
