@@ -2,7 +2,7 @@ import base64
 
 import json
 import os
-from badgecheck.openbadges_context import (OPENBADGES_CONTEXT_V2_URI, OPENBADGES_CONTEXT_V1_URI,
+from openbadges.verifier.openbadges_context import (OPENBADGES_CONTEXT_V2_URI, OPENBADGES_CONTEXT_V1_URI,
                                                     OPENBADGES_CONTEXT_V2_DICT)
 import responses
 
@@ -376,7 +376,7 @@ class TestBadgeUploads(BadgrTestCase):
             '/v1/earner/badges', post_input
         )
         self.assertEqual(response.status_code, 400)
-        self.assertTrue(response.data[0].startswith('ASSERTION_NOT_FOUND'))
+        self.assertTrue(response.data[0].startswith('FETCH_HTTP_NODE'))
         # This error message should likely be improved to indicate that it was the issuer node that was not found
         # Waiting on upgrade to latest openbadges 1.0.1 to see if FETCH_HTTP_NODE error message improved to include
         # the url it was trying to fetch.
@@ -538,7 +538,7 @@ class TestBadgeUploads(BadgrTestCase):
         )
         self.assertEqual(response.status_code, 400)
 
-        self.assertTrue(response.data[0].startswith('ASSERTION_NOT_FOUND'))
+        self.assertTrue(response.data[0].startswith('FETCH_HTTP_NODE'))
 
     @responses.activate
     def test_submit_badge_invalid_assertion_json(self):
@@ -557,7 +557,8 @@ class TestBadgeUploads(BadgrTestCase):
         )
         self.assertEqual(response.status_code, 400)
 
-        self.assertTrue(response.data[0].startswith('ASSERTION_NOT_FOUND'))
+        # openbadges returns FETCH_HTTP_NODE error when retrieving invalid json
+        self.assertTrue(response.data[0].startswith('FETCH_HTTP_NODE'))
 
 
 class TestCollections(BadgrTestCase):
