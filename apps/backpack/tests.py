@@ -704,7 +704,7 @@ class TestCollections(BadgrTestCase):
         """
         Authorized user may delete one of their defined collections.
         """
-        collection = BackpackCollection.objects.first()
+        collection = BackpackCollection.objects.filter(created_by_id=self.user.id).first()
 
         self.client.force_authenticate(user=self.user)
         response = self.client.delete('/v1/earner/collections/{}'.format(collection.entity_id))
@@ -717,7 +717,7 @@ class TestCollections(BadgrTestCase):
         via update method.
         """
         collection = BackpackCollection.objects.first()
-        self.assertEqual(collection.share_url, '')
+        self.assertIn(collection.share_url, ('', None))
 
         serializer = CollectionSerializerV1(
             collection,
@@ -737,7 +737,7 @@ class TestCollections(BadgrTestCase):
         serializer.save()
 
         self.assertFalse(collection.published)
-        self.assertEqual(collection.share_url, '')
+        self.assertIn(collection.share_url, ('', None))
 
     def test_can_publish_unpublish_collection_api_share_method(self):
         """
@@ -811,18 +811,21 @@ class TestCollections(BadgrTestCase):
             format='json')
 
         self.assertEqual(response.status_code, 200)
-        collection = BackpackCollection.objects.first()  # reload
+        collection = BackpackCollection.objects.get(entity_id=response.data.get('slug'))  # reload
         self.assertEqual(collection.cached_badgeinstances().count(), 2)
         self.assertEqual([i.entity_id for i in collection.cached_badgeinstances()], [self.local_badge_instance_1.entity_id, self.local_badge_instance_2.entity_id])
 
-        data = {'badges': [{'id': self.local_badge_instance_2.entity_id}, {'id': self.local_badge_instance_3.entity_id}]}
+        data = {
+            'badges': [{'id': self.local_badge_instance_2.entity_id}, {'id': self.local_badge_instance_3.entity_id}],
+            'name': collection.name,
+        }
         response = self.client.put(
             '/v1/earner/collections/{}'.format(collection.entity_id),
             data=data, format='json')
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual([i['id'] for i in response.data.get('badges')], [self.local_badge_instance_2.entity_id, self.local_badge_instance_3.entity_id])
-        collection = BackpackCollection.objects.first()  # reload
+        collection = BackpackCollection.objects.get(entity_id=response.data.get('slug'))  # reload
         self.assertEqual(collection.cached_badgeinstances().count(), 2)
         self.assertEqual([i.entity_id for i in collection.cached_badgeinstances()], [self.local_badge_instance_2.entity_id, self.local_badge_instance_3.entity_id])
 
