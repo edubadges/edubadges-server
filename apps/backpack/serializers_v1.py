@@ -104,7 +104,7 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
             )
             owner.publish()  # update BadgeUser.cached_badgeinstances()
         except DjangoValidationError as e:
-            raise RestframeworkValidationError(e.messages)
+            raise RestframeworkValidationError(e.args[0])
         return instance
 
     def update(self, instance, validated_data):

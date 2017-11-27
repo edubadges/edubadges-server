@@ -119,6 +119,7 @@ class BadgeCheckHelper(object):
                 for errors, backpack_error in cls.error_map:
                     if m.get('name') in errors:
                         yield backpack_error
+                yield m
 
     @classmethod
     def cache_instance(cls):
