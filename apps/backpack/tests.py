@@ -428,16 +428,10 @@ class TestBadgeUploads(BadgrTestCase):
         response = self.client.post(
             '/v1/earner/badges', post_input
         )
-        self.assertEqual(response.status_code, 400)
-        self.assertTrue(
-            response.data[0].startswith("Sorry, v0.5 badges are not supported"))
-        # TODO: Update to reflect that we can accept 0.5 badges with update to openbadges verifier 1.0.1
-        # get_response = self.client.get('/v1/earner/badges')
-        # self.assertEqual(get_response.status_code, 200)
-        # self.assertEqual(
-        #     get_response.data[0].get('json', {}).get('id'),
-        #     'http://oldstyle.com/instance'
-        # )
+        self.assertEqual(response.status_code, 201)
+        get_response = self.client.get('/v1/earner/badges')
+        self.assertEqual(get_response.status_code, 200)
+        self.assertIsNotNone(first_node_match(get_response.data, {'id': response.get('id')}))
 
     @responses.activate
     def test_submit_0_5_badge_upload_by_assertion(self):
