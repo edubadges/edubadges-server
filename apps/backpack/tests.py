@@ -963,20 +963,22 @@ class TestCollections(BadgrTestCase):
 
     def test_badge_share_json(self):
         """
-        Badge Share page returns JSON by default
+        Legacy Badge Share pages should redirect to public pages
         """
-        response = self.client.get('/share/badge/{}'.format(self.local_badge_instance_1.pk), content_type="application/json")
+        response = self.client.get('/share/badge/{}'.format(self.local_badge_instance_1.pk), **dict(
+            HTTP_ACCEPT="application/json"
+        ))
 
-        self.assertEqual(response.data.get('uid'), u'dc8959d7639e64178ec24fb222f11d050528df74')
+        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response.get('Location', None), self.local_badge_instance_1.public_url)
 
     def test_badge_share_html(self):
         """
-        Badge Share page returns HTML if requested
+        Legacy Badge Share pages should redirect to public pages
         """
-        response = self.client.get(
-            '/share/badge/{}'.format(self.local_badge_instance_1.pk),
-            **{'HTTP_ACCEPT': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'}
-        )
+        response = self.client.get('/share/badge/{}'.format(self.local_badge_instance_1.entity_id), **dict(
+            HTTP_ACCEPT='text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+        ))
 
-        self.assertContains(response, "<h1>{}</h1>".format(self.local_badge_instance_1.cached_badgeclass.name))
-        self.assertContains(response, 'href="{}.json"'.format(self.local_badge_instance_1.get_public_url()))
+        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response.get('Location', None), self.local_badge_instance_1.public_url)

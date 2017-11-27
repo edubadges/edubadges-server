@@ -576,6 +576,7 @@ class BadgeInstance(BaseAuditedModel,
     old_json = JSONField()
 
     objects = BadgeInstanceManager()
+    cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
 
     @property
     def extended_json(self):
