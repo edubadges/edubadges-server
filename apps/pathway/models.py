@@ -265,7 +265,7 @@ class PathwayElement(cachemodel.CacheModel, CreatedUpdatedAt, CreatedUpdatedBy, 
                 try:
                     pathway_badge = PathwayElementBadge.cached.get(element=self, badgeclass=badgeclass)
                     if pathway_badge.pk in _idx:
-                        del _idx[pathway_badge.pk]
+                        del _idx[pathway_badge.pk]  # Don't queue this badge up to be deleted from requirements.
                 except PathwayElementBadge.DoesNotExist:
                     pathway_badge = PathwayElementBadge(pathway=self.cached_pathway, element=self, badgeclass=badgeclass)
                 pathway_badge.ordering = order

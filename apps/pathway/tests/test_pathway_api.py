@@ -3,6 +3,7 @@ import json
 
 import os
 from django.contrib.auth.models import Permission
+from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.test import override_settings
 from mainsite import TOP_DIR
@@ -14,6 +15,7 @@ from issuer.serializers_v1 import BadgeInstanceSerializerV1
 from mainsite.tests.base import BadgrTestCase, SetupIssuerHelper
 from mainsite.utils import OriginSetting
 from pathway.completionspec import CompletionRequirementSpecFactory
+from pathway.models import PathwayElement
 from pathway.serializers import PathwaySerializer, PathwayElementSerializer
 from recipient.models import RecipientProfile, RecipientGroupMembership, RecipientGroup
 
@@ -21,6 +23,7 @@ from recipient.models import RecipientProfile, RecipientGroupMembership, Recipie
 class PathwayApiTests(SetupIssuerHelper, BadgrTestCase):
 
     def setUp(self):
+        cache.clear()
         super(PathwayApiTests, self).setUp()
 
         # instructor
@@ -147,13 +150,38 @@ class PathwayApiTests(SetupIssuerHelper, BadgrTestCase):
                      'requiredNumber': 1,
                  },
                  'badges': [
-                     adv1_plumbing_badge['json']['id'],
-                     adv2_plumbing_badge['json']['id']
+                     adv1_plumbing_badge['json']['id']
                  ],
              })
          }, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, "Created pathway element")
         adv_plumbing_element = response.data
+        adv_instance = PathwayElement.objects.get(slug=adv_plumbing_element['slug'])
+        self.assertEqual(len(adv_instance.cached_badges()), 1, "One BadgeClass is now associated with the new element.")
+
+        adv_plumbing_element.update({
+            'requirements': {
+                '@type': 'BadgeJunction',
+                'junctionConfig': {
+                    '@type': 'Disjunction',
+                    'requiredNumber': 1,
+                },
+                'badges': [
+                    adv1_plumbing_badge['json']['id'],
+                    adv2_plumbing_badge['json']['id']
+                ]
+            }
+        })
+        response = self.client.put(
+            reverse('pathway_element_detail', kwargs={
+                'issuer_slug': self.issuer.get('slug'),
+                'pathway_slug': pathway.get('slug'),
+                'element_slug': adv_plumbing_element.get('slug')
+            }),
+            adv_plumbing_element, format='json'
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(adv_instance.cached_badges()), 2, "The new BadgeClass has been added.")
 
         # update requirements
         plumber_element.update({
