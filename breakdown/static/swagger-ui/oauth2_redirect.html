@@ -6,6 +6,11 @@
 <script>
 	'use strict';
 	function run () {
+		if (!window.opener) {
+			// dont crash if can't find oauth information, redirect back to docs instead
+			window.location = '/docs/';
+			return;
+		}
 		var oauth2 = window.opener.swaggerUIRedirectOauth2;
 		var sentState = oauth2.state;
 		var redirectUrl = oauth2.redirectUrl;
