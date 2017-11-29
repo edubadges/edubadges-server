@@ -3,9 +3,11 @@ import itertools
 from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 
 import badgrlog
 from mainsite.celery import app
+
 
 logger = get_task_logger(__name__)
 badgrLogger = badgrlog.BadgrLogger()
@@ -73,6 +75,17 @@ def award_badges_for_pathway_completion(self, badgeinstance_pk):
         'locked': True,
         'resume': _lock_resume(lock_key)
     }
+
+
+@app.task()
+def resave_all_elements():
+    from pathway.models import PathwayElement
+    for el in PathwayElement.objects.all():
+        try:
+            el.save(update_badges=True)
+        except ValidationError as e:
+            print("ERROR on {}: {}".format(el.pk, e.message))
+            pass
 
 
 def _acquire_lock(key, taskId, expiration=60*5):

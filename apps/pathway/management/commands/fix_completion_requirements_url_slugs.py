@@ -99,12 +99,12 @@ class Command(BaseCommand):
                 pe.completion_requirements['badges'] = [u[0] for u in new_badges]
                 for peb in current_badges:
                     if peb not in badges:
-                        logger.debug('Adding Badge {} to Element {} badge set.'.format(peb.badgeclass.entity_id, pe.slug))
+                        logger.debug('    Adding Badge {} to Element {} badge set.'.format(peb.badgeclass.entity_id, pe.slug))
                         if not dry_run:
                             peb.delete()
                 for b in badges:
                     if b not in current_badges and b is not None:
-                        logger.debug('Removing Badge {} from Element {} badge set.'.format(b.entity_id, pe.slug))
+                        logger.debug('    Removing Badge {} from Element {} badge set.'.format(b.entity_id, pe.slug))
                         if not dry_run:
                             PathwayElementBadge.objects.create(badgeclass=b, element=pe, pathway=pe.pathway)
 
@@ -118,7 +118,7 @@ class Command(BaseCommand):
                 pe.completion_requirements['elements'] = [e[0] for e in new_elements]
                 for e in elements:
                     if e not in current_children:
-                        logger.debug('Adding Element {} to Element {} children set.'.format(e.slug, pe.slug))
+                        logger.debug('    Adding Element {} to Element {} children set.'.format(e.slug, pe.slug))
                         if not dry_run:
                             pe.pathwayelement_set.add(e)
             if badge_urls_changed or element_urls_changed:
@@ -138,4 +138,4 @@ class Command(BaseCommand):
         for pk, urls in self.unrecognized_element_urls.items():
             logger.debug('    {}, {}'.format(pk, urls))
 
-        logger.debug('    ')
+        logger.debug('Badge updates: {}, Element updates: {}'.format(badge_updates, element_updates))

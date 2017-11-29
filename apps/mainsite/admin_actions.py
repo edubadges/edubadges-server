@@ -4,6 +4,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.contrib.admin.utils import get_deleted_objects, model_ngettext
+from django.core.cache import cache
 from django.db import router
 from django.template.response import TemplateResponse
 from django.utils.encoding import force_text
@@ -75,3 +76,7 @@ def delete_selected(modeladmin, request, queryset):
     ], context, current_app=modeladmin.admin_site.name)
 
 delete_selected.short_description = ugettext_lazy("Delete selected %(verbose_name_plural)s")
+
+
+def clear_cache():
+    cache.clear()
