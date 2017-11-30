@@ -14,7 +14,7 @@ class _AbstractVersionedEntity(cachemodel.CacheModel):
         abstract = True
 
     def get_entity_class_name(self):
-        if self.entity_class_name:
+        if hasattr(self, 'entity_class_name') and self.entity_class_name:
             return self.entity_class_name
         return self.__class__.__name__
 
