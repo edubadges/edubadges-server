@@ -10,6 +10,16 @@ class ShareProvider(object):
         self.provider = provider
 
 
+class TwitterShareProvider(ShareProvider):
+    provider_code = 'twitter'
+    provider_name = 'Twitter'
+
+    def share_url(self, badge_instance, **kwargs):
+        return "https://twitter.com/intent/tweet?text={url}".format(
+            url=urllib.quote(badge_instance.share_url)
+        )
+
+
 class FacebookShareProvider(ShareProvider):
     provider_code = 'facebook'
     provider_name = 'Facebook'
@@ -61,6 +71,7 @@ class SharingManager(object):
     ManagerProviders = {
         FacebookShareProvider.provider_code: FacebookShareProvider,
         LinkedinShareProvider.provider_code: LinkedinShareProvider,
+        TwitterShareProvider.provider_code: TwitterShareProvider,
     }
 
     @classmethod

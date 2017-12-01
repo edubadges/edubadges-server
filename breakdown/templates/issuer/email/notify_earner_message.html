@@ -109,6 +109,13 @@
         ">
           <a href="{{ HTTP_ORIGIN }}{% url 'v1_api_analytics_share_badge' slug=badge_id %}?provider=linkedin"><img srcset="{% static 'images/emaillinkedin-2x.png' %} 2x" src="{% static 'images/emaillinkedin.png' %}" alt=""></a>
         </td>
+	      <td style="
+          padding-bottom: 16px;
+          padding-left: 8px;
+          padding-top: 4px;
+        ">
+		      <a href="{{ HTTP_ORIGIN }}{% url 'v1_api_analytics_share_badge' slug=badge_id %}?provider=twitter"><img srcset="{% static 'images/emailtwitter-2x.png' %} 2x" src="{% static 'images/emailtwitter.png' %}" alt=""></a>
+	      </td>
       </tr>
     </table>
   </td>
