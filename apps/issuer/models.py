@@ -558,6 +558,8 @@ class BadgeInstance(BaseAuditedModel,
     revoked = models.BooleanField(default=False)
     revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
 
+    expires_at = models.DateTimeField(blank=True, null=True, default=None)
+
     ACCEPTANCE_UNACCEPTED = 'Unaccepted'
     ACCEPTANCE_ACCEPTED = 'Accepted'
     ACCEPTANCE_REJECTED = 'Rejected'
@@ -838,6 +840,9 @@ class BadgeInstance(BaseAuditedModel,
             elif obi_version == '2_0':
                 # obi v2 multiple evidence
                 json['evidence'] = [e.get_json(obi_version) for e in self.cached_evidence()]
+
+        if self.expires_at:
+            json['expires'] = self.expires_at.isoformat()
 
         if self.narrative and obi_version == '2_0':
             json['narrative'] = self.narrative

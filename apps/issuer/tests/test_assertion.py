@@ -3,10 +3,13 @@ from __future__ import unicode_literals
 
 import json
 
+import dateutil.parser
 import png
 from django.apps import apps
 from django.core import mail
 from django.core.urlresolvers import reverse
+from django.utils import timezone
+
 from mainsite.tests import BadgrTestCase, SetupIssuerHelper
 from openbadges_bakery import unbake
 
@@ -15,6 +18,51 @@ from mainsite.utils import OriginSetting
 
 
 class AssertionTests(SetupIssuerHelper, BadgrTestCase):
+
+    def test_can_issue_assertion_with_expiration(self):
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+
+        expiration = timezone.now()
+
+        # can issue assertion with expiration
+        assertion = {
+            "email": "test@example.com",
+            "create_notification": False,
+            "expires": expiration.isoformat()
+        }
+        response = self.client.post('/v1/issuer/issuers/{issuer}/badges/{badge}/assertions'.format(
+            issuer=test_issuer.entity_id,
+            badge=test_badgeclass.entity_id
+        ), assertion)
+        self.assertEqual(response.status_code, 201)
+        assertion_json = response.data
+        self.assertEqual(dateutil.parser.parse(assertion_json.get('expires')), expiration)
+
+        # v1 endpoint returns expiration
+        response = self.client.get('/v1/issuer/issuers/{issuer}/badges/{badge}/assertions/{assertion}'.format(
+            issuer=test_issuer.entity_id,
+            badge=test_badgeclass.entity_id,
+            assertion=assertion_json.get('slug')
+        ))
+        self.assertEqual(response.status_code, 200)
+        v1_json = response.data
+        self.assertEqual(dateutil.parser.parse(v1_json.get('expires')), expiration)
+
+        # v2 endpoint returns expiration
+        response = self.client.get('/v2/assertions/{assertion}'.format(
+            assertion=assertion_json.get('slug')
+        ))
+        self.assertEqual(response.status_code, 200)
+        v2_json = response.data.get('result')[0]
+        self.assertEqual(dateutil.parser.parse(v2_json.get('expires')), expiration)
+
+        # public url returns expiration
+        response = self.client.get(assertion_json.get('public_url'))
+        self.assertEqual(response.status_code, 200)
+        public_json = response.data
+        self.assertEqual(dateutil.parser.parse(public_json.get('expires')), expiration)
 
     def test_can_issue_badge_if_authenticated(self):
         test_user = self.setup_user(authenticate=True)

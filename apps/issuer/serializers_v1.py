@@ -270,6 +270,8 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
     revoked = HumanReadableBooleanField(read_only=True)
     revocation_reason = serializers.CharField(read_only=True)
 
+    expires = serializers.DateTimeField(source='expires_at', required=False)
+
     create_notification = HumanReadableBooleanField(write_only=True, required=False, default=False)
 
     hashed = serializers.NullBooleanField(default=None, required=False)
@@ -354,5 +356,6 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
             created_by=self.context.get('request').user,
             allow_uppercase=validated_data.get('allow_uppercase'),
             recipient_type=validated_data.get('recipient_type', BadgeInstance.RECIPIENT_TYPE_EMAIL),
-            badgr_app=BadgrApp.objects.get_current(self.context.get('request'))
+            badgr_app=BadgrApp.objects.get_current(self.context.get('request')),
+            expires_at=validated_data.get('expires_at', None)
         )

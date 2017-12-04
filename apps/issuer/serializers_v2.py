@@ -351,6 +351,8 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
 
     revoked = HumanReadableBooleanField(read_only=True)
     revocationReason = serializers.CharField(source='revocation_reason', read_only=True)
+
+    expires = serializers.DateTimeField(source='expires_at', required=False)
     
     class Meta(DetailSerializerV2.Meta):
         model = BadgeInstance
@@ -434,7 +436,12 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
                         }),
                     ]),
                     'description': "Recipient that was issued the Assertion"
-                })
+                }),
+                ('expires', {
+                    'type': 'string',
+                    'format': 'ISO8601 timestamp',
+                    'description': "Timestamp when the Assertion expires",
+                }),
             ])
         })
 
