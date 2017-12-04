@@ -179,7 +179,15 @@ class BadgeUserForgotPassword(BaseUserRecoveryView):
     v2_serializer_class = BaseSerializerV2
 
     def get(self, request, *args, **kwargs):
-        badgr_app = BadgrApp.objects.get_current(request)
+        badgr_app = None
+        badgrapp_id = self.request.GET.get('a', None)
+        if badgrapp_id is not None:
+            try:
+                badgr_app = BadgrApp.objects.get(id=badgrapp_id)
+            except BadgrApp.DoesNotExist:
+                pass
+        if not badgr_app:
+            badgr_app = BadgrApp.objects.get_current(request)
         redirect_url = badgr_app.forgot_password_redirect
         token = request.GET.get('token', '')
         tokenized_url = "{}{}".format(redirect_url, token)
@@ -229,11 +237,15 @@ class BadgeUserForgotPassword(BaseUserRecoveryView):
         token = "{uidb36}-{key}".format(uidb36=user_pk_to_url_str(user),
                                         key=temp_key)
 
+        badgrapp = BadgrApp.objects.get_current(request=request)
+
         api_path = reverse('{version}_api_auth_forgot_password'.format(version=request.version))
-        reset_url = "{origin}{path}?token={token}".format(
+        reset_url = "{origin}{path}?token={token}&a={badgrapp}".format(
             origin=OriginSetting.HTTP,
             path=api_path,
-            token=token)
+            token=token,
+            badgrapp=badgrapp.id
+        )
 
         email_context = {
             "site": get_current_site(request),
