@@ -1,0 +1,30 @@
+{
+    "@context": "https://w3id.org/openbadges/v2",
+    "type": "Assertion",
+    "id": "http://a.com/assertion-embedded1",
+    "badge": {
+        "type": "BadgeClass",
+        "id": "urn:uuid:8b4efa06-41bc-4f53-a80d-e3d5e063c936",
+        "name": "Embedded badgeclass",
+        "description": "bespoke embedded badgeclass",
+        "criteria": {
+            "narrative": "do it"
+        },
+        "image": "http://a.com/badgeclass_image",
+        "issuer": {
+          "type": "Issuer",
+          "name": "Basic Issuer",
+          "url": "http://a.com/issuer/website"
+        }
+    },
+    "verify": {
+        "url": "http://a.com/assertion-embedded1",
+        "type": "hosted"
+    },
+    "issuedOn": "2017-06-29T21:50:14+00:00",
+    "recipient": {
+        "type": "email",
+        "hashed": false,
+        "identity": "test@example.com"
+    }
+}

@@ -566,6 +566,26 @@ class TestBadgeUploads(BadgrTestCase):
             name='FETCH_HTTP_NODE'
         )))
 
+    @responses.activate
+    def test_submit_badges_with_intragraph_references(self):
+        setup_resources([
+            {'url': 'http://a.com/assertion-embedded1', 'filename': '2_0_assertion_embedded_badgeclass.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)},
+            {'url': 'http://a.com/badgeclass_image', 'filename': "unbaked_image.png"},
+        ])
+        self.setup_user(email='test@example.com', authenticate=True)
+
+        assertion = {
+            "@context": 'https://w3id.org/openbadges/v2',
+            "id": 'http://a.com/assertion-embedded1',
+            "type": "Assertion",
+        }
+        post_input = {
+            'assertion': json.dumps(assertion)
+        }
+        response = self.client.post('/v1/earner/badges', post_input, format='json')
+        self.assertEqual(response.status_code, 201)
+
 
 class TestCollections(BadgrTestCase):
     def setUp(self):
