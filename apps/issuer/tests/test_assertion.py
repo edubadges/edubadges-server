@@ -367,6 +367,32 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         ), invalid_batch_assertion_props, format='json')
         self.assertEqual(response.status_code, 400)
 
+    def test_batch_assertions_with_invalid_issuedon(self):
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+        invalid_batch_assertion_props = {
+            "assertions": [
+                {
+                    'recipient': {
+                        "identity": "foo@bar.com",
+                        "type": "email"
+                    }
+                },
+                {
+                    'recipient': {
+                        "identity": "bar@baz.com",
+                        "type": "email"
+                    },
+                    'issuedOn': 1512151153620
+                },
+            ]
+        }
+        response = self.client.post('/v2/badgeclasses/{badge}/issue'.format(
+            badge=test_badgeclass.entity_id
+        ), invalid_batch_assertion_props, format='json')
+        self.assertEqual(response.status_code, 400)
+
     def test_batch_assertions_with_evidence(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
