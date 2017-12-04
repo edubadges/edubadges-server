@@ -18,9 +18,10 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from mainsite.admin_actions import clear_cache
 from mainsite.models import EmailBlacklist, BadgrApp
 from mainsite.serializers import VerifiedAuthTokenSerializer
-
+from pathway.tasks import resave_all_elements
 
 ##
 #
@@ -97,23 +98,41 @@ class LoginAndObtainAuthToken(ObtainAuthToken):
     serializer_class = VerifiedAuthTokenSerializer
 
 
-class ClearCacheForm(forms.Form):
-    confirmed = forms.BooleanField(required=True, label='Are you sure you want to clear the cache?')
+class SitewideActionForm(forms.Form):
+    ACTION_CLEAR_CACHE = 'CLEAR_CACHE'
+    ACTION_RESAVE_ELEMENTS = 'RESAVE_ELEMENTS'
+
+    ACTIONS = {
+        ACTION_CLEAR_CACHE: clear_cache,
+        ACTION_RESAVE_ELEMENTS: resave_all_elements,
+    }
+    CHOICES = (
+        (ACTION_CLEAR_CACHE, 'Clear Cache',),
+        (ACTION_RESAVE_ELEMENTS, 'Re-save Pathway Elements',),
+    )
+
+    action = forms.ChoiceField(choices=CHOICES, required=True, label="Pick an action")
+    confirmed = forms.BooleanField(required=True, label='Are you sure you want to perform this action?')
 
 
-class ClearCacheView(FormView):
-    form_class = ClearCacheForm
-    template_name = 'admin/clear_cache.html'
+class SitewideActionFormView(FormView):
+    form_class = SitewideActionForm
+    template_name = 'admin/sitewide_actions.html'
     success_url = reverse_lazy('admin:index')
 
     @method_decorator(staff_member_required)
     def dispatch(self, request, *args, **kwargs):
-        return super(ClearCacheView, self).dispatch(request, *args, **kwargs)
+        return super(SitewideActionFormView, self).dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        from django.core.cache import cache
-        cache.clear()
-        return super(ClearCacheView, self).form_valid(form)
+        action = form.ACTIONS[form.cleaned_data['action']]
+
+        if hasattr(action, 'delay'):
+            action.delay()
+        else:
+            action()
+
+        return super(SitewideActionFormView, self).form_valid(form)
 
 
 class RedirectToUiLogin(RedirectView):

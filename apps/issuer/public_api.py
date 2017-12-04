@@ -62,6 +62,7 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
     Abstract Component Class
     """
     permission_classes = (permissions.AllowAny,)
+    authentication_classes = ()
     html_renderer_class = None
     template_name = 'public/bot_openbadge.html'
 

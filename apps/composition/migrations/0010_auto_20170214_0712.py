@@ -84,7 +84,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('composition', '0009_auto_20161007_1358'),
-        ('issuer', '0017_auto_20170227_1334'),
+        ('issuer', '0019_auto_20170413_1136')
     ]
 
     operations = [

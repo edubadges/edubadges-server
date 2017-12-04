@@ -20,6 +20,7 @@ from mainsite.utils import OriginSetting
 
 
 class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
+    entity_class_name = 'BackpackCollection'
     name = models.CharField(max_length=128)
     description = models.CharField(max_length=255, blank=True)
     share_hash = models.CharField(max_length=255, null=False, blank=True)

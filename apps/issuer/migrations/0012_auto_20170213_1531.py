@@ -27,7 +27,7 @@ def deserialize_badgeclass_json(apps, schema_editor):
 
         criteria_url = badgeclass.old_json.get('criteria_url')
 
-        local_criteria_url = OriginSetting.HTTP+reverse('badgeclass_criteria', kwargs={'slug': badgeclass.slug})
+        local_criteria_url = OriginSetting.HTTP+reverse('badgeclass_criteria', kwargs={'entity_id': badgeclass.slug})
         if criteria_url != local_criteria_url:
             badgeclass.criteria_url = criteria_url
 

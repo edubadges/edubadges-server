@@ -251,7 +251,13 @@ class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):
         context = self.get_context_data(**kwargs)
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(many=True, data=assertions, context=context)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid(raise_exception=False):
+            serializer = V2ErrorSerializer(instance={},
+                                           success=False,
+                                           description="bad request",
+                                           field_errors=serializer._errors,
+                                           validation_errors=[])
+            return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
         new_instances = serializer.save(created_by=request.user)
         for new_instance in new_instances:
             self.log_create(new_instance)

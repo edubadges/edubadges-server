@@ -14,7 +14,7 @@ class _AbstractVersionedEntity(cachemodel.CacheModel):
         abstract = True
 
     def get_entity_class_name(self):
-        if self.entity_class_name:
+        if hasattr(self, 'entity_class_name') and self.entity_class_name:
             return self.entity_class_name
         return self.__class__.__name__
 
@@ -62,4 +62,8 @@ class BaseVersionedEntity(_AbstractVersionedEntity):
     class Meta:
         abstract = True
 
-
+    def __unicode__(self):
+        try:
+            return u'{}{}'.format(type(self)._meta.object_name, self.entity_id)
+        except AttributeError:
+            return self.entity_id
