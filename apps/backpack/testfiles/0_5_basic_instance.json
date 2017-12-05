@@ -10,5 +10,6 @@
             "origin": "http://oldstyle.com",
             "name": "Basic Issuer"
         }
-    }
+    },
+    "issued_on": "2011-12-31"
 }
