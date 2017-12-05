@@ -99,6 +99,7 @@ class TestBadgeUploads(BadgrTestCase):
 
         new_instance = BadgeInstance.objects.first()
         self.assertEqual(get_response.data[0].get('json', {}).get('image', {}).get('id'), new_instance.image_url())
+        # Previously .image_url() was returning the Django endpoint that allowed us to track hits in the BadgrLog
 
     @responses.activate
     def test_submit_basic_1_1_badge_via_url(self):
