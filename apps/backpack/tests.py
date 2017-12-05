@@ -93,9 +93,9 @@ class TestBadgeUploads(BadgrTestCase):
         get_response = self.client.get('/v1/earner/badges')
         self.assertEqual(get_response.status_code, 200)
         self.assertEqual(
-            get_response.data[0].get('json', {}).get('id'),
-            'http://a.com/instance'
-        )  # The API is now returning Badgr's BadgeInstance.jsonld_id value for the json id instead of the openBadgeId on the /v1 API.
+            get_response.data[0].get('json', {}).get('id'), 'http://a.com/instance',
+            "The badge in our backpack should report its JSON-LD id as its original OpenBadgeId"
+        )
 
         new_instance = BadgeInstance.objects.first()
         self.assertEqual(get_response.data[0].get('json', {}).get('image', {}).get('id'), new_instance.image_url())
@@ -156,9 +156,9 @@ class TestBadgeUploads(BadgrTestCase):
         get_response = self.client.get('/v1/earner/badges')
         self.assertEqual(get_response.status_code, 200)
         self.assertEqual(
-            get_response.data[0].get('json', {}).get('id'),
-            'http://a.com/instance'
-        )  # The API is now returning Badgr's BadgeInstance.jsonld_id value for the json id instead of the openBadgeId on the /v1 API.
+            get_response.data[0].get('json', {}).get('id'), 'http://a.com/instance',
+            "The badge in our backpack should report its JSON-LD id as its original OpenBadgeId"
+        )
 
         new_instance = BadgeInstance.objects.first()
         self.assertEqual(get_response.data[0].get('json', {}).get('image', {}).get('id'), new_instance.image_url())
@@ -230,10 +230,9 @@ class TestBadgeUploads(BadgrTestCase):
         get_response = self.client.get('/v1/earner/badges')
         self.assertEqual(get_response.status_code, 200)
         self.assertEqual(
-            get_response.data[0].get('json', {}).get('id'),
-            'http://a.com/instance'
+            get_response.data[0].get('json', {}).get('id'), 'http://a.com/instance',
+            "The badge in our backpack should report its JSON-LD id as its original OpenBadgeId"
         )
-        #  The error in this test should be fixed by the update to latest openbadges 1.0.1
 
 
     @responses.activate
@@ -256,8 +255,8 @@ class TestBadgeUploads(BadgrTestCase):
         get_response = self.client.get('/v1/earner/badges')
         self.assertEqual(get_response.status_code, 200)
         self.assertEqual(
-            get_response.data[0].get('json', {}).get('id'),
-            'http://a.com/instance'
+            get_response.data[0].get('json', {}).get('id'), 'http://a.com/instance',
+            "The badge in our backpack should report its JSON-LD id as its original OpenBadgeId"
         )
 
     @responses.activate
@@ -281,8 +280,8 @@ class TestBadgeUploads(BadgrTestCase):
         get_response = self.client.get('/v1/earner/badges')
         self.assertEqual(get_response.status_code, 200)
         self.assertEqual(
-            get_response.data[0].get('json', {}).get('id'),
-            'http://a.com/instance'
+            get_response.data[0].get('json', {}).get('id'), 'http://a.com/instance',
+            "The badge in our backpack should report its JSON-LD id as its original OpenBadgeId"
         )
         # I think this test failure will be fixed by a badgecheck update to openbadges 1.0.1 as well
 
@@ -305,8 +304,8 @@ class TestBadgeUploads(BadgrTestCase):
         get_response = self.client.get('/v1/earner/badges')
         self.assertEqual(get_response.status_code, 200)
         self.assertEqual(
-            get_response.data[0].get('json', {}).get('id'),
-            'http://a.com/instance'
+            get_response.data[0].get('json', {}).get('id'), 'http://a.com/instance',
+            "The badge in our backpack should report its JSON-LD id as its original OpenBadgeId"
         )
 
     @responses.activate
@@ -431,7 +430,9 @@ class TestBadgeUploads(BadgrTestCase):
         self.assertEqual(response.status_code, 201)
         get_response = self.client.get('/v1/earner/badges')
         self.assertEqual(get_response.status_code, 200)
-        self.assertIsNotNone(first_node_match(get_response.data, {'id': response.get('id')}))
+        self.assertIsNotNone(
+            first_node_match(get_response.data, {'id': response.get('id')}),
+            "The badge in our backpack should report its JSON-LD id as the original OpenBadgeId")
 
     @responses.activate
     def test_submit_0_5_badge_upload_by_assertion(self):
