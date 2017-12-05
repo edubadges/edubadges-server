@@ -1,20 +1,21 @@
 # encoding: utf-8
 from __future__ import unicode_literals
 
+from datetime import timedelta
+import os
 import random
 import time
 
-import os
 from django.core.cache import cache
 from django.core.cache.backends.filebased import FileBasedCache
 from django.test import override_settings, TransactionTestCase
-from oauth2_provider.models import Application
-
-from mainsite import TOP_DIR
+from django.utils import timezone
+from oauth2_provider.models import AccessToken, Application
 from rest_framework.test import APITransactionTestCase
 
 from badgeuser.models import BadgeUser
 from issuer.models import Issuer, BadgeClass
+from mainsite import TOP_DIR
 from mainsite.models import BadgrApp, ApplicationInfo
 
 
@@ -60,7 +61,8 @@ class SetupUserHelper(object):
                    create_email_address=True,
                    verified=True,
                    primary=True,
-                   send_confirmation=False):
+                   send_confirmation=False,
+                   token_scope=None):
 
         if email is None:
             email = 'setup_user_{}@email.test'.format(random.random())
@@ -79,7 +81,17 @@ class SetupUserHelper(object):
             email.verified = verified
             email.primary = primary
             email.save()
-        if authenticate:
+
+        if token_scope:
+            app = Application.objects.create(
+                client_id='test', client_secret='testsecret', authorization_grant_type='client-credentials',  # 'authorization-code'
+                user=user)
+            token = AccessToken.objects.create(
+                user=user, scope=token_scope, expires=timezone.now() + timedelta(hours=1),
+                token='prettyplease', application=app
+            )
+            self.client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(token.token))
+        elif authenticate:
             self.client.force_authenticate(user=user)
         return user
 

@@ -104,7 +104,7 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
             )
             owner.publish()  # update BadgeUser.cached_badgeinstances()
         except DjangoValidationError as e:
-            raise RestframeworkValidationError(e.messages)
+            raise RestframeworkValidationError(e.args[0])
         return instance
 
     def update(self, instance, validated_data):
@@ -173,11 +173,15 @@ class CollectionBadgeSerializerV1(serializers.ModelSerializer):
             collection = self.parent.parent.instance
         elif not collection and self.parent.instance:
             collection = self.parent.instance
-        # if not collection:
-            # return LocalBadgeInstanceCollection(
-            #     instance_id=data.get('id'), description=description)
+        if not collection:
+            return BackpackCollectionBadgeInstance(
+                badgeinstance=BadgeInstance.cached.get(entity_id=data.get('id'))
+            )
 
-        badgeinstance = BadgeInstance.cached.get(entity_id=data.get('id'))
+        try:
+            badgeinstance = BadgeInstance.cached.get(entity_id=data.get('id'))
+        except BadgeInstance.DoesNotExist:
+            raise RestframeworkValidationError("Assertion not found")
         if badgeinstance.recipient_identifier not in collection.owner.all_recipient_identifiers:
             raise serializers.ValidationError("Cannot add badge to a collection created by a different recipient.")
 
@@ -215,20 +219,21 @@ class CollectionSerializerV1(serializers.Serializer):
         return representation
 
     def create(self, validated_data):
+        owner = validated_data.get('created_by', self.context.get('user', None))
         new_collection = BackpackCollection.objects.create(
             name=validated_data.get('name'),
             description=validated_data.get('description', ''),
-            created_by=validated_data.get('created_by')
+            created_by=owner
         )
         published = validated_data.get('published', False)
         if published:
             new_collection.published = published
             new_collection.save()
 
-        if validated_data.get('badges') is not None:
-            for entry in validated_data['cached_collects']:
-                entry.collection = new_collection
-                entry.save()
+        for collect in validated_data.get('cached_collects', []):
+            collect.collection = new_collection
+            collect.badgeuser = new_collection.created_by
+            collect.save()
 
         return new_collection
 

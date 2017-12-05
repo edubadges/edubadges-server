@@ -578,6 +578,7 @@ class BadgeInstance(BaseAuditedModel,
     old_json = JSONField()
 
     objects = BadgeInstanceManager()
+    cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
 
     @property
     def extended_json(self):
@@ -614,6 +615,8 @@ class BadgeInstance(BaseAuditedModel,
 
     @property
     def jsonld_id(self):
+        if self.source_url:
+            return self.source_url
         return OriginSetting.HTTP + self.get_absolute_url()
 
     @property

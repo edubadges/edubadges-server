@@ -70,10 +70,7 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
         pass
 
     def get_json(self, request, **kwargs):
-        if getattr(self.current_object, 'source_url', None) and getattr(self.current_object, 'original_json', None):
-            json = self.current_object.get_original_json()
-        else:
-            json = self.current_object.get_json(obi_version=self._get_request_obi_version(request), **kwargs)
+        json = self.current_object.get_json(obi_version=self._get_request_obi_version(request), **kwargs)
         return json
 
     def get(self, request, **kwargs):

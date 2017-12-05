@@ -3,10 +3,15 @@ from __future__ import unicode_literals
 
 import json
 
+import responses
+from openbadges.verifier.openbadges_context import OPENBADGES_CONTEXT_V1_URI, OPENBADGES_CONTEXT_V2_URI, \
+    OPENBADGES_CONTEXT_V2_DICT
+
+from backpack.tests import setup_resources, setup_basic_1_0
 from mainsite.models import BadgrApp
 from mainsite.tests import BadgrTestCase, SetupIssuerHelper
 
-from issuer.models import Issuer
+from issuer.models import Issuer, BadgeInstance
 
 
 class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
@@ -107,4 +112,30 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
                     response = self.client.get('/public/assertions/{}'.format(assertion.entity_id), **headers)
                     self.assertEqual(response.status_code, 302)
                     self.assertEqual(response.get('Location'), 'http://frontend.ui/public/assertions/{}'.format(assertion.entity_id))
+
+    @responses.activate
+    def test_uploaded_badge_returns_coerced_json(self):
+        setup_basic_1_0()
+        setup_resources([
+            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
+        ])
+        self.setup_user(email='test@example.com', authenticate=True)
+
+        post_input = {
+            'url': 'http://a.com/instance'
+        }
+        response = self.client.post(
+            '/v1/earner/badges', post_input
+        )
+        self.assertEqual(response.status_code, 201)
+        uploaded_badge = response.data
+        assertion_entityid = uploaded_badge.get('id')
+        assertion_url = '/public/assertions/{}?v=2_0'.format(assertion_entityid)
+        response = self.client.get(assertion_url)
+        self.assertEqual(response.status_code, 200)
+        coerced_assertion = response.data
+        assertion = BadgeInstance.objects.get(entity_id=assertion_entityid)
+        self.assertDictEqual(coerced_assertion, assertion.get_json(obi_version="2_0"))
+        self.assertEqual(coerced_assertion.get('id'), 'http://a.com/instance?v=2_0')
 

@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 import os
 from collections import OrderedDict
 
-import basic_models
 import cachemodel
 from basic_models.models import CreatedUpdatedAt
 from django.conf import settings

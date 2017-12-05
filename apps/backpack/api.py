@@ -145,6 +145,8 @@ class BackpackCollectionDetail(BaseEntityDetailView):
     valid_scopes = {
         'get': ['r:backpack', 'rw:backpack'],
         'post': ['rw:backpack'],
+        'put': ['rw:backpack'],
+        'delete': ['rw:backpack']
     }
 
     @apispec_get_operation('Collection',
