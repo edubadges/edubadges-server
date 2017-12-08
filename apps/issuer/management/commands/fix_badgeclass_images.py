@@ -19,7 +19,7 @@ class Command(BaseCommand):
         store = DefaultStorage()
         placeholder_storage_name = "placeholder/badge-failed.svg"
         if not store.exists(placeholder_storage_name):
-            with open(os.path.join(TOP_DIR, 'breakdown', 'static', 'badgr-ui', 'images', 'badge-failed.svg'), 'r') as fh:
+            with open(os.path.join(TOP_DIR, 'apps', 'mainsite', 'static', 'badgr-ui', 'images', 'badge-failed.svg'), 'r') as fh:
                 store.save(placeholder_storage_name, fh)
 
         report = {

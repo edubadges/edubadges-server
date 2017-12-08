@@ -94,9 +94,6 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            os.path.join(TOP_DIR, 'breakdown', 'templates/'),
-        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
