@@ -91,13 +91,6 @@ urlpatterns = [
 
 ]
 
-
-if apps.is_installed('badgebook'):
-    urlpatterns += [
-        url(r'^v1/badgebook', include('badgebook.api_urls')),
-        url(r'^badgebook', include('badgebook.urls')),
-    ]
-
 # Test URLs to allow you to see these pages while DEBUG is True
 if getattr(settings, 'DEBUG_ERRORS', False):
     urlpatterns = [
