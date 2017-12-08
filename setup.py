@@ -13,12 +13,16 @@ def dependencies_from_requirements(requirements_filename):
     with open(requirements_filename) as fh:
         for line in fh.read().split("\n"):
             line = line.strip()
-            if line.startswith('#') or line.startswith('--'):
+            if len(line) < 1 or line.startswith('#') or line.startswith('--'):
                 continue
-            matches = re.match(r'git\+(?P<path>.+/)(?P<package_name>.+)(\.git)?@(?P<version>.+)$', line)
+            matches = re.match(r'git\+(?P<path>.+/)(?P<package_name>.+)\.git@(?P<version>.+)$', line)
             if matches:
                 d = matches.groupdict()
-                dependency_links.append("{path}{package_name}.git@{version}#egg={package_name}-{version}".format(**d))
+                dependency_links.append("{line}#egg={package_name}-{version}".format(
+                    line=line,
+                    package_name=d.get('package_name'),
+                    version=d.get('version')
+                ))
                 install_requires.append("{package_name}=={version}".format(**d))
             else:
                 install_requires.append(line)

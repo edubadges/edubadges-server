@@ -1,7 +1,7 @@
 # Django stuff
 Django==1.10.7
 semver==2.6.0
-pytz==2016.7
+pytz==2017.2
 # PIL support
 Pillow>=2.6.1,<3
 
@@ -20,7 +20,7 @@ boto3==1.4.7
 python-resize-image==1.1.10
 
 # CSky models
-git+https://github.com/concentricsky/django-cachemodel.git@v2.1.6
+git+https://github.com/concentricsky/django-cachemodel.git@v2.1.7
 git+https://github.com/concentricsky/django-basic-models.git@v3.0.2
 git+https://github.com/concentricsky/django-ismigrated.git@v1.0.0
 
@@ -50,10 +50,10 @@ sqlparse==0.1.14
 netaddr
 
 # Utilities for working with badges
-jsonschema==2.4.0
+jsonschema==2.6.0
 simplejson==3.6.4
 # JSON-LD
-PyLD==0.6.3
+PyLD==0.7.1
 rfc3987==1.3.4
 pypng==0.0.18
 jsonfield==2.0.2
@@ -65,11 +65,11 @@ django-markdownify==0.1.0
 bleach==2.0.0
 
 # LTI support
-git+https://github.com/concentricsky/django-auth-lti@v1.2.2-csky
-git+https://github.com/concentricsky/python-randomnames@v1.0.3
+#git+https://github.com/concentricsky/django-auth-lti.git@v1.2.2-csky
+#git+https://github.com/concentricsky/python-randomnames.git@v1.0.3
 
 # Badgr related utilities
-git+https://github.com/concentricsky/openbadges-bakery@1.0.0b3
+git+https://github.com/concentricsky/openbadges-bakery.git@1.0.0b3
 
 celery==4.1.0
 django-celery-results==1.0.1
