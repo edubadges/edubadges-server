@@ -1,23 +1,53 @@
 import os
-from setuptools import find_packages, setup
+import re
 
-with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
-    README = readme.read()
+from setuptools import find_packages, setup
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
+
+def dependencies_from_requirements(requirements_filename):
+    install_requires = []
+    dependency_links = []
+    with open(requirements_filename) as fh:
+        for line in fh.read().split("\n"):
+            line = line.strip()
+            if line.startswith('#') or line.startswith('--'):
+                continue
+            matches = re.match(r'git\+(?P<path>.+/)(?P<package_name>.+)(\.git)?@(?P<version>.+)$', line)
+            if matches:
+                d = matches.groupdict()
+                dependency_links.append("{path}{package_name}.git@{version}#egg={package_name}-{version}".format(**d))
+                install_requires.append("{package_name}=={version}".format(**d))
+            else:
+                install_requires.append(line)
+    return install_requires, dependency_links
+
+
+with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
+    README = readme.read()
+
+install_requires, dependency_links = dependencies_from_requirements('requirements.txt')
+
+
 setup(
     name='badgr-server',
     version='2.0.23',
+
     packages=find_packages(),
     include_package_data=True,
+
     license='GNU Affero General Public License v3',
     description='Digital badge management for issuers, earners, and consumers',
     long_description=README,
     url='https://badgr.io/',
     author='Concentric Sky',
     author_email='badgr@concentricsky.com',
+
+    install_requires=install_requires,
+    dependency_links=dependency_links,
+
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',

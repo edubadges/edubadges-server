@@ -1,1 +1,3 @@
 include README.md
+recursive-include breakdown/templates *
+recursive-include breakdown/static *
