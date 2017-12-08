@@ -93,7 +93,7 @@ setup(
         "bleach==2.0.0",
 
         # Badgr related utilities
-        "openbadges-bakery==1.0.0b3",
+        "openbadges-bakery==1.0.0b4",
 
         "celery==4.1.0",
         "django-celery-results==1.0.1",
@@ -130,7 +130,6 @@ setup(
         "git+https://github.com/concentricsky/django-basic-models.git@v3.0.2#egg=django-basic-models-3.0.2",
         "git+https://github.com/concentricsky/django-ismigrated.git@v1.0.0#egg=django-ismigrated-1.0.0",
         "git+https://github.com/concentricsky/apispec-djangorestframework.git@v1.0.5#egg=apispec-djangorestframework-1.0.5",
-        "git+https://github.com/concentricsky/openbadges-bakery.git@1.0.0b3#egg=openbadges-bakery-1.0.0b3",
     ],
 
 
