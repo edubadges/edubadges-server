@@ -17,9 +17,6 @@ setup(
     package_dir={'': "apps"},
     packages=find_packages('apps'),
     include_package_data=True,
-    data_files=[
-        ('', ('README.md', 'API_DESCRIPTION_v1.md', 'API_DESCRIPTION_v2.md')),
-    ],
 
     license='GNU Affero General Public License v3',
     description='Digital badge management for issuers, earners, and consumers',
@@ -94,10 +91,6 @@ setup(
         "Markdown==2.6.8",
         "django-markdownify==0.1.0",
         "bleach==2.0.0",
-
-        # LTI support
-        #git+https://github.com/concentricsky/django-auth-lti.git@v1.2.2-csky
-        #git+https://github.com/concentricsky/python-randomnames.git@v1.0.3
 
         # Badgr related utilities
         #git+https://github.com/concentricsky/openbadges-bakery.git@1.0.0b3
