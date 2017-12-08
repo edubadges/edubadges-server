@@ -17,6 +17,9 @@ setup(
     package_dir={'': "apps"},
     packages=find_packages('apps'),
     include_package_data=True,
+    data_files=[
+        ('', ('README.md', 'API_DESCRIPTION_v1.md', 'API_DESCRIPTION_v2.md')),
+    ],
 
     license='GNU Affero General Public License v3',
     description='Digital badge management for issuers, earners, and consumers',
@@ -126,6 +129,11 @@ setup(
 
         "openbadges==1.0.1",
         "apispec==0.22.0",
+
+        "apispec-djangorestframework==1.0.5",
+    ],
+    dependency_links=[
+        "git+https://github.com/concentricsky/apispec-djangorestframework.git@v1.0.5#egg=apispec-djangorestframework-1.0.5",
     ],
 
 
@@ -144,4 +152,5 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
+
 )

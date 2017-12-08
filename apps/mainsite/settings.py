@@ -50,6 +50,9 @@ INSTALLED_APPS = [
     'pathway',
     'recipient',
 
+    # api docs
+    'apispec_drf',
+
     # deprecated
     'composition',
 ]
