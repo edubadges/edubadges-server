@@ -14,7 +14,8 @@ setup(
     name='badgr-server',
     version='2.0.23',
 
-    packages=find_packages(),
+    package_dir={'': "apps"},
+    packages=find_packages('apps'),
     include_package_data=True,
 
     license='GNU Affero General Public License v3',
