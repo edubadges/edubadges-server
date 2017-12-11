@@ -364,6 +364,10 @@ class BadgeClass(ResizeUploadedImage,
     def jsonld_id(self):
         return OriginSetting.HTTP + self.get_absolute_url()
 
+    @property
+    def issuer_jsonld_id(self):
+        return self.cached_issuer.jsonld_id
+
     def get_criteria_url(self):
         if self.criteria_url:
             return self.criteria_url
@@ -618,6 +622,14 @@ class BadgeInstance(BaseAuditedModel,
         if self.source_url:
             return self.source_url
         return OriginSetting.HTTP + self.get_absolute_url()
+
+    @property
+    def badgeclass_jsonld_id(self):
+        return self.cached_badgeclass.jsonld_id
+
+    @property
+    def issuer_jsonld_id(self):
+        return self.cached_issuer.jsonld_id
 
     @property
     def public_url(self):

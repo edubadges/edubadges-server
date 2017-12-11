@@ -154,6 +154,7 @@ class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     createdBy = EntityRelatedFieldV2(source='cached_creator', read_only=True)
     issuer = EntityRelatedFieldV2(source='cached_issuer', required=False, queryset=Issuer.cached)
+    issuerOpenBadgeId = serializers.URLField(source='issuer_jsonld_id', read_only=True)
 
     name = StripTagsCharField(max_length=1024)
     image = ValidImageField(required=False)
@@ -341,6 +342,10 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     createdBy = EntityRelatedFieldV2(source='cached_creator', read_only=True)
     badgeclass = EntityRelatedFieldV2(source='cached_badgeclass', required=False, queryset=BadgeClass.cached)
+    badgeclassOpenBadgeId = serializers.URLField(source='badgeclass_jsonld_id', read_only=True)
+
+    issuer = EntityRelatedFieldV2(source='cached_issuer', required=False, queryset=Issuer.cached)
+    issuerOpenBadgeId = serializers.URLField(source='issuer_jsonld_id', read_only=True)
 
     image = serializers.FileField(read_only=True)
     recipient = BadgeRecipientSerializerV2(source='*')
