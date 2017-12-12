@@ -9,6 +9,10 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
     README = readme.read()
 
+# execute version.py in the local namespace, but dont import the module. export a version string __version__
+execfile(os.path.join(os.path.dirname(__file__), 'apps/mainsite/version.py'))
+version = __version__
+
 
 def dependencies_from_requirements(requirements_filename):
     install_requires = []
@@ -37,7 +41,7 @@ install_requires, dependency_links = dependencies_from_requirements('requirement
 
 setup(
     name='badgr-server',
-    version='2.0.23',
+    version=version,
 
     package_dir={'': "apps"},
     packages=find_packages('apps'),

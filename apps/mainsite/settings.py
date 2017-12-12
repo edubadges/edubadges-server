@@ -402,7 +402,7 @@ def determine_version():
         with open(version_path, 'r') as version_file:
             return version_file.readline()
     import mainsite
-    return mainsite.__version__
+    return mainsite.version.__version__
 
 ARTIFACT_VERSION = determine_version()
 
