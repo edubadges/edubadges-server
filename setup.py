@@ -50,7 +50,6 @@ setup(
         # CSky models
         "django-cachemodel==2.1.7",
         "django-basic-models==3.0.2",
-        "django-ismigrated==1.0.0",
 
         "django-object-actions==0.8.2",
 
@@ -124,12 +123,6 @@ setup(
         "apispec==0.22.0",
 
         "apispec-djangorestframework==1.0.5",
-    ],
-    dependency_links=[
-        "git+https://github.com/concentricsky/django-cachemodel.git@v2.1.7#egg=django-cachemodel-2.1.7",
-        "git+https://github.com/concentricsky/django-basic-models.git@v3.0.2#egg=django-basic-models-3.0.2",
-        "git+https://github.com/concentricsky/django-ismigrated.git@v1.0.0#egg=django-ismigrated-1.0.0",
-        "git+https://github.com/concentricsky/apispec-djangorestframework.git@v1.0.5#egg=apispec-djangorestframework-1.0.5",
     ],
 
 

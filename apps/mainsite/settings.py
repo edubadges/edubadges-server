@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     # OAuth 2 provider
     'oauth2_provider',
 
-    'django-ismigrated',
     'mainsite',
     'entity',
     'issuer',
