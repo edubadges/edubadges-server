@@ -10,7 +10,7 @@ from rest_framework.exceptions import ValidationError as RestframeworkValidation
 from backpack.models import BackpackCollection
 from entity.serializers import DetailSerializerV2, EntityRelatedFieldV2
 from issuer.helpers import BadgeCheckHelper
-from issuer.models import BadgeInstance, BadgeClass
+from issuer.models import BadgeInstance, BadgeClass, Issuer
 from issuer.serializers_v2 import BadgeRecipientSerializerV2, EvidenceItemSerializerV2
 from mainsite.drf_fields import ValidImageField
 from mainsite.serializers import MarkdownCharField, HumanReadableBooleanField, OriginalJsonSerializerMixin
@@ -20,15 +20,20 @@ class BackpackAssertionSerializerV2(DetailSerializerV2, OriginalJsonSerializerMi
     acceptance = serializers.ChoiceField(choices=BadgeInstance.ACCEPTANCE_CHOICES, default=BadgeInstance.ACCEPTANCE_ACCEPTED)
 
     # badgeinstance
-    openBadgeId = serializers.URLField(source='source_url', read_only=True)
+    openBadgeId = serializers.URLField(source='jsonld_id', read_only=True)
     badgeclass = EntityRelatedFieldV2(source='cached_badgeclass', required=False, queryset=BadgeClass.cached)
+    badgeclassOpenBadgeId = serializers.URLField(source='badgeclass_jsonld_id', read_only=True)
+    issuer = EntityRelatedFieldV2(source='cached_issuer', required=False, queryset=Issuer.cached)
+    issuerOpenBadgeId = serializers.URLField(source='issuer_jsonld_id', read_only=True)
+
     image = serializers.FileField(read_only=True)
     recipient = BadgeRecipientSerializerV2(source='*')
-    # issuedOn = serializers.DateTimeField(source='created_at', read_only=True)
+    issuedOn = serializers.DateTimeField(source='issued_on', read_only=True)
     narrative = MarkdownCharField(required=False)
     evidence = EvidenceItemSerializerV2(many=True, required=False)
     revoked = HumanReadableBooleanField(read_only=True)
     revocationReason = serializers.CharField(source='revocation_reason', read_only=True)
+    expires = serializers.DateTimeField(source='expires_at', required=False)
 
     class Meta(DetailSerializerV2.Meta):
         model = BadgeInstance
