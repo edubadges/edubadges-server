@@ -21,7 +21,7 @@ python-resize-image==1.1.10
 
 # CSky models
 django-cachemodel==2.1.7
-django-basic-models==3.0.2
+django-basic-models==3.0.4
 
 django-object-actions==0.8.2
 
