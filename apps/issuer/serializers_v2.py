@@ -358,7 +358,9 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
     revocationReason = serializers.CharField(source='revocation_reason', read_only=True)
 
     expires = serializers.DateTimeField(source='expires_at', required=False)
-    
+
+    notify = HumanReadableBooleanField(write_only=True, required=False, default=False)
+
     class Meta(DetailSerializerV2.Meta):
         model = BadgeInstance
         apispec_definition = ('Assertion', {
