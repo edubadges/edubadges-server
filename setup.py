@@ -9,9 +9,9 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
     README = readme.read()
 
-# execute version.py in the local namespace, but dont import the module. export a version string __version__
+# execute version.py in the local namespace, but dont import the module.
 execfile(os.path.join(os.path.dirname(__file__), 'apps/mainsite/version.py'))
-version = __version__
+version = ".".join(map(str, VERSION))
 
 
 def dependencies_from_requirements(requirements_filename):
