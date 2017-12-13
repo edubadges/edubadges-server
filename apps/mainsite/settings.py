@@ -388,24 +388,6 @@ MARKDOWNIFY_WHITELIST_TAGS = [
 ]
 
 
-##
-#
-#  artifact version
-#
-##
-
-
-def determine_version():
-    version_path = os.path.join(TOP_DIR, 'version.txt')
-    if os.path.exists(version_path):
-        with open(version_path, 'r') as version_file:
-            return version_file.readline()
-    import mainsite
-    return mainsite.get_version()
-
-ARTIFACT_VERSION = determine_version()
-
-
 OAUTH2_PROVIDER = {
     'SCOPES': {
         'r:profile': 'See who you are',
