@@ -441,6 +441,10 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
                             'enum': [c[0] for c in BadgeInstance.RECIPIENT_TYPE_CHOICES],
                             'description': "Type of identifier used to identify recipient"
                         }),
+                        ('hashed', {
+                            'type': 'boolean',
+                            'description': "Whether or not the identity value is hashed."
+                        }),
                     ]),
                     'description': "Recipient that was issued the Assertion"
                 }),
