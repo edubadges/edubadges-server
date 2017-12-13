@@ -7,30 +7,18 @@ settings_local.py
 AppleDouble
 *.sqlite*
 *.sass-cache
-staticfiles/*
-mediafiles
-mediafiles/*
-mediafiles_*/*
-emailfiles/*
+
+staticfiles*
+mediafiles*
+emailfiles*
 logs/*
 node_modules/*
 bower_components/*
 npm-debug.log
-breakdown/static/js/script.js
-breakdown/static/js/component-library.js
-breakdown/static/js/app.js
-breakdown/static/js/lti-app.js
-breakdown/static/css/style.css
-breakdown/static/css/screen.css
-breakdown/static/css/*.map
-
-breakdown/static/swagger-ui/badgr_spec_*.json
 
 .ropeproject
 .idea/*
 *.iml
-
-build/badgebook/
 
 test.cache/
 
@@ -38,5 +26,6 @@ test.cache/
 .tox/
 *.egg-info/
 build/
+dist/
 htmlcov/
 
