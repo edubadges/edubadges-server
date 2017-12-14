@@ -21,7 +21,7 @@ from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    IssuerStaffSerializerV1)
 from issuer.serializers_v2 import IssuerSerializerV2
 from issuer.utils import get_badgeclass_by_identifier
-from mainsite.decorators import apispec_list_operation, apispec_operation
+from apispec_drf.decorators import apispec_list_operation, apispec_operation
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 
 

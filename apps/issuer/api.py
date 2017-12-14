@@ -24,7 +24,7 @@ from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    BadgeInstanceSerializerV1)
 from issuer.serializers_v2 import IssuerSerializerV2, BadgeClassSerializerV2, BadgeInstanceSerializerV2, \
     IssuerAccessTokenSerializerV2
-from mainsite.decorators import apispec_get_operation, apispec_put_operation, \
+from apispec_drf.decorators import apispec_get_operation, apispec_put_operation, \
     apispec_delete_operation, apispec_list_operation, apispec_post_operation
 from mainsite.pagination import EncryptedCursorPagination
 from mainsite.permissions import AuthenticatedWithVerifiedEmail

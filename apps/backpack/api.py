@@ -16,7 +16,7 @@ from entity.api import BaseEntityListView, BaseEntityDetailView
 from issuer.models import BadgeInstance
 from issuer.permissions import AuditedModelOwner, VerifiedEmailMatchesRecipientIdentifier, BadgrOAuthTokenHasScope
 from issuer.public_api import ImagePropertyDetailView
-from mainsite.decorators import apispec_list_operation, apispec_post_operation, apispec_get_operation, \
+from apispec_drf.decorators import apispec_list_operation, apispec_post_operation, apispec_get_operation, \
     apispec_delete_operation, apispec_put_operation, apispec_operation
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 

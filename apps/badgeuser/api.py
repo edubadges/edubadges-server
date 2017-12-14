@@ -26,7 +26,7 @@ from badgrsocialauth.utils import set_url_query_params
 from entity.api import BaseEntityDetailView, BaseEntityListView
 from entity.serializers import BaseSerializerV2
 from issuer.permissions import BadgrOAuthTokenHasScope
-from mainsite.decorators import apispec_get_operation, apispec_put_operation, apispec_operation, \
+from apispec_drf.decorators import apispec_get_operation, apispec_put_operation, apispec_operation, \
     apispec_delete_operation, apispec_list_operation
 from mainsite.models import BadgrApp
 from mainsite.utils import OriginSetting

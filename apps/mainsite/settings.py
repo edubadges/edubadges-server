@@ -42,13 +42,15 @@ INSTALLED_APPS = [
     # OAuth 2 provider
     'oauth2_provider',
 
-    'django-ismigrated',
     'mainsite',
     'entity',
     'issuer',
     'backpack',
     'pathway',
     'recipient',
+
+    # api docs
+    'apispec_drf',
 
     # deprecated
     'composition',
@@ -62,7 +64,6 @@ MIDDLEWARE_CLASSES = [
     'oauth2_provider.middleware.OAuth2TokenMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django_auth_lti.middleware.LTIAuthMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'mainsite.middleware.MaintenanceMiddleware',
@@ -91,9 +92,6 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            os.path.join(TOP_DIR, 'breakdown', 'templates/'),
-        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -388,24 +386,6 @@ MARKDOWNIFY_WHITELIST_TAGS = [
     'pre',
     'hr'
 ]
-
-
-##
-#
-#  artifact version
-#
-##
-
-
-def determine_version():
-    version_path = os.path.join(TOP_DIR, 'version.txt')
-    if os.path.exists(version_path):
-        with open(version_path, 'r') as version_file:
-            return version_file.readline()
-    import mainsite
-    return mainsite.__version__
-
-ARTIFACT_VERSION = determine_version()
 
 
 OAUTH2_PROVIDER = {

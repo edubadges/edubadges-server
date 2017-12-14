@@ -5,11 +5,14 @@ import os
 import semver
 
 
-__all__ = ['APPS_DIR','TOP_DIR']
+__all__ = ['APPS_DIR', 'TOP_DIR', 'get_version']
 
 
-VERSION = (2, 0, 0)
-__version__ = semver.format_version(*VERSION)
+def get_version(version=None):
+    if version is None:
+        from .version import VERSION
+        version = VERSION
+    return semver.format_version(*version)
 
 
 # assume we are ./apps/mainsite/__init__.py

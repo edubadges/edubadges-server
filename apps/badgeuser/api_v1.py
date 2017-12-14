@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 
 from badgeuser.models import CachedEmailAddress
 from badgeuser.serializers_v1 import EmailSerializerV1
-from mainsite.decorators import apispec_list_operation, apispec_post_operation, apispec_operation, \
+from apispec_drf.decorators import apispec_list_operation, apispec_post_operation, apispec_operation, \
     apispec_get_operation, apispec_delete_operation, apispec_put_operation
 
 

@@ -1,1 +1,4 @@
-include README.md
+include *.md
+include requirements.txt
+recursive-include apps/*/templates *
+recursive-include apps/*/static *

@@ -43,11 +43,12 @@ urlpatterns = [
     url(r'^health', include('health.urls')),
 
     # Swagger Docs
-    url(r'^docs/v1/', TemplateView.as_view(template_name="entity/swagger-docs.html"), kwargs={'version': 'v1'}),
-    url(r'^docs/v2/', TemplateView.as_view(template_name="entity/swagger-docs.html"), kwargs={'version': 'v2'}),
+    #
+    # api docs
+    #
     url(r'^docs/oauth2/authorize$', DocsAuthorizeRedirect.as_view(), name='docs_authorize_redirect'),
-    url(r'^docs/?$', RedirectView.as_view(url='/docs/v2/', permanent=True)),
-    url(r'^docs', RedirectView.as_view(url=getattr(settings, 'ROOT_INFO_REDIRECT', 'https://info.badgr.io/'), permanent=False)),
+    url(r'^docs/?$', RedirectView.as_view(url='/docs/v2/', permanent=True)),  # default redirect to /v2/
+    url(r'^docs/', include('apispec_drf.urls')),
 
     # JSON-LD Context
     url(r'^json-ld/', include('badgrlog.urls')),
@@ -89,13 +90,6 @@ urlpatterns = [
 
 
 ]
-
-
-if apps.is_installed('badgebook'):
-    urlpatterns += [
-        url(r'^v1/badgebook', include('badgebook.api_urls')),
-        url(r'^badgebook', include('badgebook.urls')),
-    ]
 
 # Test URLs to allow you to see these pages while DEBUG is True
 if getattr(settings, 'DEBUG_ERRORS', False):
