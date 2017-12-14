@@ -273,6 +273,7 @@ class BadgeRecipientSerializerV2(BaseSerializerV2):
         required=False,
         source='recipient_type'
     )
+    plaintextIdentity = serializers.CharField(source='recipient_identifier', read_only=True, required=False)
 
     VALIDATORS = {
         BadgeInstance.RECIPIENT_TYPE_EMAIL: EmailValidator(),
@@ -444,6 +445,10 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
                         ('hashed', {
                             'type': 'boolean',
                             'description': "Whether or not the identity value is hashed."
+                        }),
+                        ('plaintextIdentity', {
+                            'type': 'string',
+                            'description': "The plaintext identity"
                         }),
                     ]),
                     'description': "Recipient that was issued the Assertion"
