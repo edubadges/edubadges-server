@@ -3,7 +3,7 @@ Django==1.10.7
 semver==2.6.0
 pytz==2017.2
 # PIL support
-Pillow>=2.6.1<3
+Pillow==2.9.0
 
 # mysql database
 MySQL-python==1.2.5
