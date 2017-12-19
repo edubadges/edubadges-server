@@ -5,6 +5,9 @@ Badgr Server is a web application for issuing [Open Badges](http://openbadges.or
 
 *Version: 2.0.x*
 
+### About the Badgr Project
+Badgr was developed by [Concentric Sky](https://concentricsky.com), starting in 2015 to serve as an open source reference implementation of the Open Badges Specification. It provides functionality to issue portable, verifiable Open Badges as well as to allow users to manage badges they have been awarded by any issuer that uses this open data standard. Since 2015, Badgr has grown to be used by hundreds of educational institutions and other people and organizations worldwide. 
+
 ## How to get started on your local development environment.
 Prerequisites:
 
