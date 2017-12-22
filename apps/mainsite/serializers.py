@@ -117,6 +117,15 @@ class JSONDictField(serializers.DictField):
         return super(JSONDictField, self).to_internal_value(data)
 
 
+class CachedUrlHyperlinkedRelatedField(serializers.HyperlinkedRelatedField):
+    def get_url(self, obj, view_name, request, format):
+        """
+        The value of this field is driven by a source argument that returns the actual URL,
+        so no need to reverse it from a value.
+        """
+        return obj
+
+
 class StripTagsCharField(serializers.CharField):
     def __init__(self, *args, **kwargs):
         self.strip_tags = kwargs.pop('strip_tags', True)

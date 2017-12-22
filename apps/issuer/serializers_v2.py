@@ -13,8 +13,8 @@ from issuer.models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from issuer.utils import generate_sha256_hashstring
 from mainsite.drf_fields import ValidImageField
 from mainsite.models import BadgrApp
-from mainsite.serializers import StripTagsCharField, MarkdownCharField, HumanReadableBooleanField, \
-    OriginalJsonSerializerMixin
+from mainsite.serializers import (CachedUrlHyperlinkedRelatedField, StripTagsCharField, MarkdownCharField,
+                                  HumanReadableBooleanField, OriginalJsonSerializerMixin)
 from mainsite.validators import ChoicesValidator, TelephoneValidator
 
 
@@ -343,7 +343,9 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     createdBy = EntityRelatedFieldV2(source='cached_creator', read_only=True)
     badgeclass = EntityRelatedFieldV2(source='cached_badgeclass', required=False, queryset=BadgeClass.cached)
-    badgeclassOpenBadgeId = serializers.URLField(source='badgeclass_jsonld_id', required=False)
+    badgeclassOpenBadgeId = CachedUrlHyperlinkedRelatedField(
+        source='badgeclass_jsonld_id', view_name='badgeclass_json', lookup_field='entity_id',
+        queryset=BadgeClass.cached, required=False)
 
     issuer = EntityRelatedFieldV2(source='cached_issuer', required=False, queryset=Issuer.cached)
     issuerOpenBadgeId = serializers.URLField(source='issuer_jsonld_id', read_only=True)
@@ -469,30 +471,27 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
     def update(self, instance, validated_data):
         # BadgeInstances are not updatable
         return instance
-    
-    def create(self, validated_data):
-        if 'cached_badgeclass' in validated_data:
+
+    def validate(self, data):
+        if 'cached_badgeclass' in data and 'badgeclass_jsonld_id' in data:
+            raise serializers.ValidationError(
+                {"badgeclass": ["Only one of badgeclass and badgeclassOpenBadgeId allowed."]})
+
+        if 'cached_badgeclass' in data:
             # included badgeclass in request
-            validated_data['badgeclass'] = validated_data.pop('cached_badgeclass')
+            data['badgeclass'] = data.pop('cached_badgeclass')
         elif 'badgeclass' in self.context:
             # badgeclass was passed in context
-            validated_data['badgeclass'] = self.context.get('badgeclass')
-        elif 'badgeclass_jsonld_id' in validated_data:
-            jsonld_id = validated_data.pop('badgeclass_jsonld_id')
-            try:
-                entity_id = re.search(r'/public/badges/(?P<entity_id>[^/.]+)$', jsonld_id).group(1)
-
-            except AttributeError:
-                pass
-            else:
-                try:
-                    validated_data['badgeclass'] = BadgeClass.cached.get(entity_id=entity_id)
-                except BadgeClass.DoesNotExist:
-                    raise serializers.ValidationError({"badgeclassOpenBadgeId": ["Could not identify BadgeClass"]})
+            data['badgeclass'] = self.context.get('badgeclass')
+        elif 'badgeclass_jsonld_id' in data:
+            data['badgeclass'] = data.pop('badgeclass_jsonld_id')
         else:
             # badgeclass is required on create
             raise serializers.ValidationError({"badgeclass": ["This field is required"]})
 
-        validated_data['issuer'] = validated_data['badgeclass'].issuer
+        expected_issuer = self.context.get('kwargs', {}).get('issuer')
+        if expected_issuer and data['badgeclass'].issuer != expected_issuer:
+            raise serializers.ValidationError({"badgeclass": ["Could not find matching badgeclass for this issuer."]})
 
-        return super(BadgeInstanceSerializerV2, self).create(validated_data)
+        data['issuer'] = data['badgeclass'].issuer
+        return data

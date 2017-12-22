@@ -416,7 +416,7 @@ class IssuerBadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
         tags=['Assertions', 'Issuers']
     )
     def post(self, request, **kwargs):
-        issuer = self.get_object(request, **kwargs)  # trigger a has_object_permissions() check
+        kwargs['issuer'] = self.get_object(request, **kwargs)  # trigger a has_object_permissions() check
         return super(IssuerBadgeInstanceList, self).post(request, **kwargs)
 
 
