@@ -501,3 +501,21 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
             a = expected[i]
             b = actual[i]
             self.assertDictContainsSubset(a, b)
+
+
+class V2ApiAssertionTests(SetupIssuerHelper, BadgrTestCase):
+    def test_v2_issue_by_badgeclassOpenBadgeId(self):
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+
+        new_assertion_props = {
+            'recipient': {
+                'identity': 'test3@example.com'
+            },
+            'badgeclassOpenBadgeId': test_badgeclass.jsonld_id
+        }
+        response = self.client.post('/v2/issuers/{issuer}/assertions'.format(
+            issuer=test_issuer.entity_id
+        ), new_assertion_props, format='json')
+        self.assertEqual(response.status_code, 201)

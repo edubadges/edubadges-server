@@ -1,7 +1,7 @@
-import uuid
-
-import os
 from collections import OrderedDict
+import os
+import re
+import uuid
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.validators import URLValidator, EmailValidator, RegexValidator
@@ -343,7 +343,7 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     createdBy = EntityRelatedFieldV2(source='cached_creator', read_only=True)
     badgeclass = EntityRelatedFieldV2(source='cached_badgeclass', required=False, queryset=BadgeClass.cached)
-    badgeclassOpenBadgeId = serializers.URLField(source='badgeclass_jsonld_id', read_only=True)
+    badgeclassOpenBadgeId = serializers.URLField(source='badgeclass_jsonld_id', required=False)
 
     issuer = EntityRelatedFieldV2(source='cached_issuer', required=False, queryset=Issuer.cached)
     issuerOpenBadgeId = serializers.URLField(source='issuer_jsonld_id', read_only=True)
@@ -396,6 +396,11 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
                     'type': 'string',
                     'format': 'entityId',
                     'description': "BadgeClass that issued this Assertion",
+                }),
+                ('badgeclassOpenBadgeId', {
+                    'type': 'string',
+                    'format': 'url',
+                    'description': "URL of the BadgeClass to award",
                 }),
                 ('revoked', {
                     'type': 'boolean',
@@ -472,13 +477,22 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
         elif 'badgeclass' in self.context:
             # badgeclass was passed in context
             validated_data['badgeclass'] = self.context.get('badgeclass')
+        elif 'badgeclass_jsonld_id' in validated_data:
+            jsonld_id = validated_data.pop('badgeclass_jsonld_id')
+            try:
+                entity_id = re.search(r'/public/badges/(?P<entity_id>[^/.]+)$', jsonld_id).group(1)
+
+            except AttributeError:
+                pass
+            else:
+                try:
+                    validated_data['badgeclass'] = BadgeClass.cached.get(entity_id=entity_id)
+                except BadgeClass.DoesNotExist:
+                    raise serializers.ValidationError({"badgeclassOpenBadgeId": ["Could not identify BadgeClass"]})
         else:
             # badgeclass is required on create
-            raise serializers.ValidationError({"badgeclass": "This field is required"})
-
+            raise serializers.ValidationError({"badgeclass": ["This field is required"]})
 
         validated_data['issuer'] = validated_data['badgeclass'].issuer
 
-
         return super(BadgeInstanceSerializerV2, self).create(validated_data)
-
