@@ -523,7 +523,6 @@ class V2ApiAssertionTests(SetupIssuerHelper, BadgrTestCase):
     def test_v2_issue_by_badgeclassOpenBadgeId_permissions(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
-        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
 
         other_user = self.setup_user(authenticate=False)
         other_issuer = self.setup_issuer(owner=other_user)
@@ -539,3 +538,25 @@ class V2ApiAssertionTests(SetupIssuerHelper, BadgrTestCase):
             issuer=test_issuer.entity_id
         ), new_assertion_props, format='json')
         self.assertEqual(response.status_code, 400)
+
+    def test_v2_issue_entity_id_in_path(self):
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+
+        new_assertion_props = {
+            'recipient': {
+                'identity': 'test3@example.com'
+            }
+        }
+        response = self.client.post('/v2/badgeclasses/{badgeclass}/assertions'.format(
+            badgeclass=test_badgeclass.entity_id), new_assertion_props, format='json')
+        self.assertEqual(response.status_code, 201)
+
+        other_user = self.setup_user(authenticate=False)
+        other_issuer = self.setup_issuer(owner=other_user)
+        other_badgeclass = self.setup_badgeclass(issuer=other_issuer)
+
+        response = self.client.post('/v2/badgeclasses/{badgeclass}/assertions'.format(
+            badgeclass=other_badgeclass.entity_id), new_assertion_props, format='json')
+        self.assertEqual(response.status_code, 404)
