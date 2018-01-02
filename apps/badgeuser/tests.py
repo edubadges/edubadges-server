@@ -416,7 +416,7 @@ class UserEmailTests(BadgrTestCase):
             self.assertEqual(response.status_code, 200)
             # received email with recovery url
             self.assertEqual(len(mail.outbox), 1)
-            matches = re.search(r'/v1/user/forgot-password\?token=(.*)', mail.outbox[0].body)
+            matches = re.search(r'/v1/user/forgot-password\?token=([-0-9a-zA-Z]*)', mail.outbox[0].body)
             self.assertIsNotNone(matches)
             token = matches.group(1)
             new_password = 'new-password-ee'
