@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 import StringIO
 import datetime
-import json
 import re
 import uuid
 from collections import OrderedDict
@@ -21,6 +20,7 @@ from django.core.urlresolvers import reverse
 from django.db import models, transaction
 from django.db.models import ProtectedError
 from json import loads as json_loads
+from json import dumps as json_dumps
 from jsonfield import JSONField
 from openbadges_bakery import bake
 from django.utils import timezone
@@ -467,7 +467,7 @@ class BadgeClass(ResizeUploadedImage,
 
     @property
     def extension_items(self):
-        return {e.name: json.loads(e.original_json) for e in self.cached_extensions()}
+        return {e.name: json_loads(e.original_json) for e in self.cached_extensions()}
 
     @extension_items.setter
     def extension_items(self, value):
@@ -478,7 +478,7 @@ class BadgeClass(ResizeUploadedImage,
         with transaction.atomic():
             # add new
             for ext_name, ext in value.items():
-                ext_json = json.dumps(ext)
+                ext_json = json_dumps(ext)
                 ext, ext_created = self.badgeclassextension_set.get_or_create(name=ext_name, defaults=dict(
                     original_json=ext_json
                 ))
@@ -539,6 +539,10 @@ class BadgeClass(ResizeUploadedImage,
         if obi_version == '2_0':
             json['alignment'] = [ a.get_json(obi_version=obi_version) for a in self.cached_alignments() ]
             json['tags'] = list(t.name for t in self.cached_tags())
+
+        if len(self.cached_extensions()) > 0:
+            for extension in self.cached_extensions():
+                json[extension.name] = json_loads(extension.original_json)
 
         if include_extra:
             extra = self.get_filtered_json()
@@ -683,7 +687,7 @@ class BadgeInstance(BaseAuditedModel,
                 badgeclass_name, ext = os.path.splitext(self.badgeclass.image.file.name)
                 new_image = StringIO.StringIO()
                 bake(image_file=self.cached_badgeclass.image.file,
-                     assertion_json_string=json.dumps(self.json, indent=2),
+                     assertion_json_string=json_dumps(self.json, indent=2),
                      output_file=new_image)
                 self.image.save(name='assertion-{id}.{ext}'.format(id=self.entity_id, ext=ext),
                                 content=ContentFile(new_image.read()),
