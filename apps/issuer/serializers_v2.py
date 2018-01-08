@@ -166,6 +166,8 @@ class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     alignments = AlignmentItemSerializerV2(source='alignment_items', many=True, required=False)
     tags = serializers.ListField(child=StripTagsCharField(max_length=1024), source='tag_items', required=False)
 
+    extensions = serializers.DictField(source='extension_items', required=False)
+
     class Meta(DetailSerializerV2.Meta):
         model = BadgeClass
         apispec_definition = ('BadgeClass', {

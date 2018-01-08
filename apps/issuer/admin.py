@@ -8,7 +8,8 @@ from django_object_actions import DjangoObjectActions
 
 from mainsite.admin import badgr_admin
 
-from .models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceEvidence, BadgeClassAlignment, BadgeClassTag
+from .models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceEvidence, BadgeClassAlignment, BadgeClassTag, \
+    BadgeClassExtension
 
 
 class IssuerStaffInline(TabularInline):
@@ -70,6 +71,12 @@ class BadgeClassTagInline(TabularInline):
     fields = ('name',)
 
 
+class BadgeClassExtensionInline(TabularInline):
+    model = BadgeClassExtension
+    extra = 0
+    fields = ('name', 'original_json')
+
+
 class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
     readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id', 'slug')
     list_display = ('badge_image', 'name', 'entity_id', 'issuer_link', 'recipient_count')
@@ -95,6 +102,7 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
     inlines = [
         BadgeClassTagInline,
         BadgeClassAlignmentInline,
+        BadgeClassExtensionInline,
     ]
     change_actions = ['redirect_issuer', 'redirect_instances']
 

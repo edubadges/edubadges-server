@@ -462,6 +462,37 @@ class BadgeClass(ResizeUploadedImage,
                     tag.delete()
 
     @cachemodel.cached_method(auto_publish=True)
+    def cached_extensions(self):
+        return self.badgeclassextension_set.all()
+
+    @property
+    def extension_items(self):
+        return {e.name: json.loads(e.original_json) for e in self.cached_extensions()}
+
+    @extension_items.setter
+    def extension_items(self, value):
+        if value is None:
+            value = {}
+        touched_idx = []
+
+        with transaction.atomic():
+            # add new
+            for ext_name, ext in value.items():
+                ext_json = json.dumps(ext)
+                ext, ext_created = self.badgeclassextension_set.get_or_create(name=ext_name, defaults=dict(
+                    original_json=ext_json
+                ))
+                if not ext_created:
+                    ext.original_json = ext_json
+                    ext.save()
+                touched_idx.append(ext.pk)
+
+            # remove old
+            for extension in self.cached_extensions():
+                if extension.pk not in touched_idx:
+                    extension.delete()
+
+    @cachemodel.cached_method(auto_publish=True)
     def cached_pathway_elements(self):
         return [peb.element for peb in self.pathwayelementbadge_set.all()]
 
@@ -1009,4 +1040,21 @@ class BadgeClassTag(cachemodel.CacheModel):
 
     def delete(self, *args, **kwargs):
         super(BadgeClassTag, self).delete(*args, **kwargs)
+        self.badgeclass.publish()
+
+
+class BadgeClassExtension(cachemodel.CacheModel):
+    badgeclass = models.ForeignKey('issuer.BadgeClass')
+    name = models.CharField(max_length=254)
+    original_json = models.TextField(blank=True, null=True, default=None)
+
+    def __unicode__(self):
+        return self.name
+
+    def publish(self):
+        super(BadgeClassExtension, self).publish()
+        self.badgeclass.publish()
+
+    def delete(self, *args, **kwargs):
+        super(BadgeClassExtension, self).delete(*args, **kwargs)
         self.badgeclass.publish()
