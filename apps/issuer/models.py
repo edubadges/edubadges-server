@@ -95,6 +95,9 @@ class BaseOpenBadgeObjectModel(OriginalJsonMixin, cachemodel.CacheModel):
         touched_idx = []
 
         with transaction.atomic():
+            if not self.pk:
+                self.save()
+
             # add new
             for ext_name, ext in value.items():
                 ext_json = json_dumps(ext)
