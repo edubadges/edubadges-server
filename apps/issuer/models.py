@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 import StringIO
 import datetime
-import json
 import re
 import uuid
 from collections import OrderedDict
@@ -21,6 +20,7 @@ from django.core.urlresolvers import reverse
 from django.db import models, transaction
 from django.db.models import ProtectedError
 from json import loads as json_loads
+from json import dumps as json_dumps
 from jsonfield import JSONField
 from openbadges_bakery import bake
 from django.utils import timezone
@@ -73,6 +73,54 @@ class OriginalJsonMixin(models.Model):
 class BaseOpenBadgeObjectModel(OriginalJsonMixin, cachemodel.CacheModel):
     source = models.CharField(max_length=254, default='local')
     source_url = models.CharField(max_length=254, blank=True, null=True, default=None)
+
+    class Meta:
+        abstract = True
+
+    def get_extensions_manager(self):
+        raise NotImplementedError()
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_extensions(self):
+        return self.get_extensions_manager().all()
+
+    @property
+    def extension_items(self):
+        return {e.name: json_loads(e.original_json) for e in self.cached_extensions()}
+
+    @extension_items.setter
+    def extension_items(self, value):
+        if value is None:
+            value = {}
+        touched_idx = []
+
+        with transaction.atomic():
+            if not self.pk:
+                self.save()
+
+            # add new
+            for ext_name, ext in value.items():
+                ext_json = json_dumps(ext)
+                ext, ext_created = self.get_extensions_manager().get_or_create(name=ext_name, defaults=dict(
+                    original_json=ext_json
+                ))
+                if not ext_created:
+                    ext.original_json = ext_json
+                    ext.save()
+                touched_idx.append(ext.pk)
+
+            # remove old
+            for extension in self.cached_extensions():
+                if extension.pk not in touched_idx:
+                    extension.delete()
+
+
+class BaseOpenBadgeExtension(cachemodel.CacheModel):
+    name = models.CharField(max_length=254)
+    original_json = models.TextField(blank=True, null=True, default=None)
+
+    def __unicode__(self):
+        return self.name
 
     class Meta:
         abstract = True
@@ -201,6 +249,9 @@ class Issuer(ResizeUploadedImage,
                     if staff_record.role != IssuerStaff.ROLE_OWNER or len(self.owners) > 1:
                         staff_record.delete()
 
+    def get_extensions_manager(self):
+        return self.issuerextension_set
+
     @cachemodel.cached_method(auto_publish=True)
     def cached_editors(self):
         UserModel = get_user_model()
@@ -245,6 +296,10 @@ class Issuer(ResizeUploadedImage,
 
         if self.source_url:
             json['sourceUrl'] = self.source_url
+
+        if len(self.cached_extensions()) > 0:
+            for extension in self.cached_extensions():
+                json[extension.name] = json_loads(extension.original_json)
 
         if include_extra:
             extra = self.get_filtered_json()
@@ -461,6 +516,9 @@ class BadgeClass(ResizeUploadedImage,
                 if tag.name not in new_idx:
                     tag.delete()
 
+    def get_extensions_manager(self):
+        return self.badgeclassextension_set
+
     @cachemodel.cached_method(auto_publish=True)
     def cached_pathway_elements(self):
         return [peb.element for peb in self.pathwayelementbadge_set.all()]
@@ -508,6 +566,10 @@ class BadgeClass(ResizeUploadedImage,
         if obi_version == '2_0':
             json['alignment'] = [ a.get_json(obi_version=obi_version) for a in self.cached_alignments() ]
             json['tags'] = list(t.name for t in self.cached_tags())
+
+        if len(self.cached_extensions()) > 0:
+            for extension in self.cached_extensions():
+                json[extension.name] = json_loads(extension.original_json)
 
         if include_extra:
             extra = self.get_filtered_json()
@@ -652,7 +714,7 @@ class BadgeInstance(BaseAuditedModel,
                 badgeclass_name, ext = os.path.splitext(self.badgeclass.image.file.name)
                 new_image = StringIO.StringIO()
                 bake(image_file=self.cached_badgeclass.image.file,
-                     assertion_json_string=json.dumps(self.json, indent=2),
+                     assertion_json_string=json_dumps(self.json, indent=2),
                      output_file=new_image)
                 self.image.save(name='assertion-{id}.{ext}'.format(id=self.entity_id, ext=ext),
                                 content=ContentFile(new_image.read()),
@@ -786,6 +848,9 @@ class BadgeInstance(BaseAuditedModel,
         adapter = get_adapter()
         adapter.send_mail(template_name, self.recipient_identifier, context=email_context)
 
+    def get_extensions_manager(self):
+        return self.badgeinstanceextension_set
+
     @property
     def cached_recipient_profile(self):
         from recipient.models import RecipientProfile
@@ -878,6 +943,10 @@ class BadgeInstance(BaseAuditedModel,
                 "type": self.recipient_type,
                 "identity": self.recipient_identifier
             }
+
+        if len(self.cached_extensions()) > 0:
+            for extension in self.cached_extensions():
+                json[extension.name] = json_loads(extension.original_json)
 
         if include_extra:
             extra = self.get_filtered_json()
@@ -1010,3 +1079,39 @@ class BadgeClassTag(cachemodel.CacheModel):
     def delete(self, *args, **kwargs):
         super(BadgeClassTag, self).delete(*args, **kwargs)
         self.badgeclass.publish()
+
+
+class IssuerExtension(BaseOpenBadgeExtension):
+    issuer = models.ForeignKey('issuer.Issuer')
+
+    def publish(self):
+        super(IssuerExtension, self).publish()
+        self.issuer.publish()
+
+    def delete(self, *args, **kwargs):
+        super(IssuerExtension, self).delete(*args, **kwargs)
+        self.issuer.publish()
+
+
+class BadgeClassExtension(BaseOpenBadgeExtension):
+    badgeclass = models.ForeignKey('issuer.BadgeClass')
+
+    def publish(self):
+        super(BadgeClassExtension, self).publish()
+        self.badgeclass.publish()
+
+    def delete(self, *args, **kwargs):
+        super(BadgeClassExtension, self).delete(*args, **kwargs)
+        self.badgeclass.publish()
+
+
+class BadgeInstanceExtension(BaseOpenBadgeExtension):
+    badgeinstance = models.ForeignKey('issuer.BadgeInstance')
+
+    def publish(self):
+        super(BadgeInstanceExtension, self).publish()
+        self.badgeinstance.publish()
+
+    def delete(self, *args, **kwargs):
+        super(BadgeInstanceExtension, self).delete(*args, **kwargs)
+        self.badgeinstance.publish()

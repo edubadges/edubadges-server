@@ -8,13 +8,19 @@ from django_object_actions import DjangoObjectActions
 
 from mainsite.admin import badgr_admin
 
-from .models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceEvidence, BadgeClassAlignment, BadgeClassTag
+from .models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceEvidence, BadgeClassAlignment, BadgeClassTag, \
+    BadgeClassExtension, IssuerExtension, BadgeInstanceExtension
 
 
 class IssuerStaffInline(TabularInline):
     model = Issuer.staff.through
     extra = 0
 
+
+class IssuerExtensionInline(TabularInline):
+    model = IssuerExtension
+    extra = 0
+    fields = ('name', 'original_json')
 
 
 class IssuerAdmin(DjangoObjectActions, ModelAdmin):
@@ -37,6 +43,7 @@ class IssuerAdmin(DjangoObjectActions, ModelAdmin):
     )
     inlines = [
         IssuerStaffInline,
+        IssuerExtensionInline
     ]
     change_actions = ['redirect_badgeclasses']
 
@@ -70,6 +77,12 @@ class BadgeClassTagInline(TabularInline):
     fields = ('name',)
 
 
+class BadgeClassExtensionInline(TabularInline):
+    model = BadgeClassExtension
+    extra = 0
+    fields = ('name', 'original_json')
+
+
 class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
     readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id', 'slug')
     list_display = ('badge_image', 'name', 'entity_id', 'issuer_link', 'recipient_count')
@@ -95,6 +108,7 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
     inlines = [
         BadgeClassTagInline,
         BadgeClassAlignmentInline,
+        BadgeClassExtensionInline,
     ]
     change_actions = ['redirect_issuer', 'redirect_instances']
 
@@ -130,6 +144,12 @@ class BadgeEvidenceInline(StackedInline):
     extra = 0
 
 
+class BadgeInstanceExtensionInline(TabularInline):
+    model = BadgeInstanceExtension
+    extra = 0
+    fields = ('name', 'original_json')
+
+
 class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
     readonly_fields = ('created_at', 'created_by', 'image', 'entity_id', 'old_json', 'salt', 'entity_id', 'slug')
     list_display = ('badge_image', 'recipient_identifier', 'entity_id', 'badgeclass', 'issuer')
@@ -153,7 +173,10 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
         }),
     )
     change_actions = ['redirect_issuer', 'redirect_badgeclass']
-    inlines = (BadgeEvidenceInline,)
+    inlines = [
+        BadgeEvidenceInline,
+        BadgeInstanceExtensionInline
+    ]
 
     def badge_image(self, obj):
         try:
@@ -181,3 +204,12 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
     redirect_issuer.short_description = "See this Issuer"
 
 badgr_admin.register(BadgeInstance, BadgeInstanceAdmin)
+
+
+class ExtensionAdmin(ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name', 'original_json')
+
+badgr_admin.register(IssuerExtension, ExtensionAdmin)
+badgr_admin.register(BadgeClassExtension, ExtensionAdmin)
+badgr_admin.register(BadgeInstanceExtension, ExtensionAdmin)
