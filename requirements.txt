@@ -4,6 +4,7 @@ semver==2.6.0
 pytz==2017.2
 # PIL support
 Pillow==2.9.0
+python-dateutil==2.6.1
 
 # mysql database
 MySQL-python==1.2.5
