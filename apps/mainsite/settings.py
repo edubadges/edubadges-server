@@ -12,7 +12,7 @@ import logging
 ##
 
 INSTALLED_APPS = [
-    # https://github.com/concentricsky/django-client-admin
+    'mainsite',
 
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     # OAuth 2 provider
     'oauth2_provider',
 
-    'mainsite',
     'entity',
     'issuer',
     'backpack',

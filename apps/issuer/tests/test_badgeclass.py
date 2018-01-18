@@ -13,6 +13,29 @@ from mainsite.utils import OriginSetting
 
 
 class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
+    def _create_badgeclass_with_v2(self, image_path=None, **kwargs):
+        if image_path is None:
+            image_path = self.get_test_image_path()
+
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+        self.issuer = test_issuer
+        with open(image_path, 'r') as badge_image:
+            badgeclass_props = {
+                'name': 'Badge of Slugs',
+                'description': "Recognizes slimy learners with a penchant for lettuce",
+                'image': self._base64_data_uri_encode(badge_image, 'image/png'),
+                'criteriaNarrative': 'Eat lettuce. Grow big.'
+            }
+
+        badgeclass_props.update(kwargs)
+
+        response = self.client.post(
+            '/v2/issuers/{}/badgeclasses'.format(test_issuer.entity_id),
+            badgeclass_props, format='json'
+        )
+        self.assertEqual(response.status_code, 201)
+        return response.data['result'][0]
 
     def _create_badgeclass_for_issuer_authenticated(self, image_path, **kwargs):
         with open(image_path, 'r') as badge_image:
@@ -657,3 +680,61 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         response = self.client.get(new_badgeclass_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data.get('result')[0], updated_badgeclass)
+
+    def test_can_create_badgeclass_with_extensions(self):
+        example_extensions = {
+            "schema:location": {
+                "@context": "https://openbadgespec.org/extensions/geoCoordinatesExtension/context.json",
+                "type": ["Extension", "extensions:GeoCoordinates", "schema:Place"],
+                "name": "Stadium of Light, Sunderland",
+                "description": "A foodball stadium in Sunderland, England that is home to Sunderland A.F.C.",
+                "geo": {
+                    "latitude": 54.914440,
+                    "longitude": -1.387721
+                }
+            }
+        }
+        badgeclass = self._create_badgeclass_with_v2(extensions=example_extensions)
+        self.verify_badgeclass_extensions(badgeclass, example_extensions)
+
+    def test_can_update_badgeclass_with_extensions(self):
+        example_extensions = {
+            "extensions:ExampleExtension": {
+                "@context":"https://openbadgespec.org/extensions/exampleExtension/context.json",
+                "type": ["Extension", "extensions:ExampleExtension"],
+                "exampleProperty": "I'm a property, short and sweet."
+            }
+        }
+        # create a badgeclass with a single extension
+        badgeclass = self._create_badgeclass_with_v2(extensions=example_extensions)
+        self.verify_badgeclass_extensions(badgeclass, example_extensions)
+
+        example_extensions['extensions:ApplyLink'] = {
+            "@context":"https://openbadgespec.org/extensions/applyLinkExtension/context.json",
+            "type": ["Extension", "extensions:ApplyLink"],
+            "url": "http://website.test/apply"
+        }
+        # update badgeclass and add an extension
+        badgeclass['extensions'] = example_extensions
+        response = self.client.put("/v2/badgeclasses/{badge}".format(badge=badgeclass.get('entityId')), data=badgeclass, format="json")
+        self.assertEqual(response.status_code, 200)
+        updated_badgeclass = response.data['result'][0]
+
+        self.verify_badgeclass_extensions(updated_badgeclass, example_extensions)
+
+    def verify_badgeclass_extensions(self, badgeclass, example_extensions):
+        self.assertDictEqual(badgeclass.get('extensions'), example_extensions)
+
+        # extensions appear when GET from api
+        response = self.client.get("/v2/badgeclasses/{badge}".format(badge=badgeclass.get('entityId')))
+        self.assertEqual(response.status_code, 200)
+        self.assertGreater(len(response.data.get('result', [])), 0)
+        fetched_badgeclass = response.data['result'][0]
+        self.assertDictEqual(fetched_badgeclass.get('extensions'), example_extensions)
+
+        # extensions appear in public object
+        response = self.client.get("/public/badges/{badge}".format(badge=badgeclass.get('entityId')))
+        self.assertEqual(response.status_code, 200)
+        public_json = json.loads(response.content)
+        for extension_name, extension_data in example_extensions.items():
+            self.assertDictEqual(public_json.get(extension_name), extension_data)

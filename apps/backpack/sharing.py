@@ -30,6 +30,21 @@ class FacebookShareProvider(ShareProvider):
         )
 
 
+class PortfoliumShareProvider(ShareProvider):
+    provider_code = 'portfolium'
+    provider_name = 'Portfolium'
+    source_name = "Badgr"
+
+    def get_source_name(self):
+        return self.source_name
+
+    def share_url(self, badge_instance, **kwargs):
+        return "https://portfolium.com/share/badge?source={source}&u={url}".format(
+            url=urllib.quote(badge_instance.share_url),
+            source=self.get_source_name()
+        )
+
+
 class LinkedinShareProvider(ShareProvider):
     provider_code = 'linkedin'
     provider_name = 'LinkedIn'
@@ -72,6 +87,7 @@ class SharingManager(object):
         FacebookShareProvider.provider_code: FacebookShareProvider,
         LinkedinShareProvider.provider_code: LinkedinShareProvider,
         TwitterShareProvider.provider_code: TwitterShareProvider,
+        PortfoliumShareProvider.provider_code: PortfoliumShareProvider,
     }
 
     @classmethod

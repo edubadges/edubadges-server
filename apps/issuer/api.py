@@ -350,7 +350,14 @@ class BadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
 
     def get_objects(self, request, **kwargs):
         badgeclass = self.get_object(request, **kwargs)
-        return [a for a in badgeclass.cached_badgeinstances() if not a.revoked]
+        assertions = [a for a in badgeclass.cached_badgeinstances() if not a.revoked]
+
+        # filter badgeclasses by recipient if present in query_params
+        if 'recipient' in request.query_params:
+            recipient_id = request.query_params.get('recipient').lower()
+            assertions = filter(lambda a: a.recipient_identifier == recipient_id, assertions)
+
+        return assertions
 
     def get_context_data(self, **kwargs):
         context = super(BadgeInstanceList, self).get_context_data(**kwargs)
@@ -360,6 +367,14 @@ class BadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
     @apispec_list_operation('Assertion',
         summary="Get a list of Assertions for a single BadgeClass",
         tags=['Assertions', 'BadgeClasses'],
+        parameters=[
+            {
+                'in': 'query',
+                'name': "recipient",
+                'type': "string",
+                'description': 'A recipient identifier to filter by'
+            }
+        ]
     )
     def get(self, request, **kwargs):
         # verify the user has permission to the badgeclass
@@ -406,7 +421,15 @@ class IssuerBadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
 
     @apispec_list_operation('Assertion',
         summary='Get a list of Assertions for a single Issuer',
-        tags=['Assertions', 'Issuers']
+        tags=['Assertions', 'Issuers'],
+        parameters=[
+            {
+                'in': 'query',
+                'name': "recipient",
+                'type': "string",
+                'description': 'A recipient identifier to filter by'
+            }
+        ]
     )
     def get(self, request, **kwargs):
         return super(IssuerBadgeInstanceList, self).get(request, **kwargs)
