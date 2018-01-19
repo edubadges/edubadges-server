@@ -230,20 +230,32 @@ class ShareBackpackAssertion(BaseEntityDetailView):
               type: string
               paramType: query
         """
+        from recipient.api import _scrub_boolean
+        redirect = _scrub_boolean(request.query_params.get('redirect', "1"))
+
         provider = request.query_params.get('provider')
+        if not provider:
+            return Response({'error': "unspecified share provider"}, status=HTTP_400_BAD_REQUEST)
+        provider = provider.lower()
+
+        source = request.query_params.get('source', 'unknown')
 
         badge = self.get_object(request, **kwargs)
         if not badge:
             return Response(status=HTTP_404_NOT_FOUND)
 
-        share = BackpackBadgeShare(provider=provider, badgeinstance=badge)
+        share = BackpackBadgeShare(provider=provider, badgeinstance=badge, source=source)
         share_url = share.get_share_url(provider)
         if not share_url:
             return Response({'error': "invalid share provider"}, status=HTTP_400_BAD_REQUEST)
 
         share.save()
-        headers = {'Location': share_url}
-        return Response(status=HTTP_302_FOUND, headers=headers)
+
+        if redirect:
+            headers = {'Location': share_url}
+            return Response(status=HTTP_302_FOUND, headers=headers)
+        else:
+            return Response({'url': share_url})
 
 
 class ShareBackpackCollection(BaseEntityDetailView):
@@ -262,17 +274,29 @@ class ShareBackpackCollection(BaseEntityDetailView):
               type: string
               paramType: query
         """
+        from recipient.api import _scrub_boolean
+        redirect = _scrub_boolean(request.query_params.get('redirect', "1"))
+
         provider = request.query_params.get('provider')
+        if not provider:
+            return Response({'error': "unspecified share provider"}, status=HTTP_400_BAD_REQUEST)
+        provider = provider.lower()
+
+        source = request.query_params.get('source', 'unknown')
 
         collection = self.get_object(request, **kwargs)
         if not collection:
             return Response(status=HTTP_404_NOT_FOUND)
 
-        share = BackpackCollectionShare(provider=provider, collection=collection)
+        share = BackpackCollectionShare(provider=provider, collection=collection, source=source)
         share_url = share.get_share_url(provider, title=collection.name, summary=collection.description)
         if not share_url:
             return Response({'error': "invalid share provider"}, status=HTTP_400_BAD_REQUEST)
 
         share.save()
-        headers = {'Location': share_url}
-        return Response(status=HTTP_302_FOUND, headers=headers)
+
+        if redirect:
+            headers = {'Location': share_url}
+            return Response(status=HTTP_302_FOUND, headers=headers)
+        else:
+            return Response({'url': share_url})

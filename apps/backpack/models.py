@@ -163,6 +163,7 @@ class BackpackCollectionBadgeInstance(cachemodel.CacheModel):
 class BaseSharedModel(cachemodel.CacheModel, CreatedUpdatedAt):
     SHARE_PROVIDERS = [(p.provider_code, p.provider_name) for code,p in SharingManager.ManagerProviders.items()]
     provider = models.CharField(max_length=254, choices=SHARE_PROVIDERS)
+    source = models.CharField(max_length=254, default="unknown")
 
     class Meta:
         abstract = True
