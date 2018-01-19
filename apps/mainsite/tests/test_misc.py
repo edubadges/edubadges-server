@@ -1,5 +1,6 @@
 import re
 import urllib
+import urlparse
 import warnings
 
 import os
@@ -90,7 +91,12 @@ class TestSignup(BadgrTestCase):
 
             response = self.client.get(confirm_url, follow=False)
             self.assertEqual(response.status_code, 302)
-            self.assertEqual(response.get('location'), expected_redirect_url)
+
+            actual = urlparse.urlparse(response.get('location'))
+            expected = urlparse.urlparse(expected_redirect_url)
+            self.assertEqual(actual.netloc, expected.netloc)
+            self.assertEqual(actual.scheme, expected.scheme)
+            self.assertDictEqual(urlparse.parse_qs(actual.query), urlparse.parse_qs(expected.query))
 
 @override_settings(
     ACCOUNT_EMAIL_CONFIRMATION_HMAC=False
