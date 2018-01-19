@@ -4,6 +4,7 @@ semver==2.6.0
 pytz==2017.2
 # PIL support
 Pillow==2.9.0
+python-dateutil==2.6.1
 
 # mysql database
 MySQL-python==1.2.5
@@ -86,7 +87,7 @@ backports.csv==1.0.4
 # EncryptedCursorPagination dependencies
 more-itertools==2.5.0
 
-openbadges==1.0.1
+openbadges==1.0.2
 apispec==0.22.0
 
 apispec-djangorestframework==1.0.5

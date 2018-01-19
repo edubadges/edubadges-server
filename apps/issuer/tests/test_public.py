@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import json
 
 import responses
+from django.urls import reverse
 from openbadges.verifier.openbadges_context import OPENBADGES_CONTEXT_V1_URI, OPENBADGES_CONTEXT_V2_URI, \
     OPENBADGES_CONTEXT_V2_DICT
 
@@ -12,6 +13,7 @@ from mainsite.models import BadgrApp
 from mainsite.tests import BadgrTestCase, SetupIssuerHelper
 
 from issuer.models import Issuer, BadgeInstance
+from mainsite.utils import OriginSetting
 
 
 class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
@@ -87,6 +89,32 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
 
             self.assertEqual(content['type'], 'Assertion')
 
+    def test_scrapers_get_html_stub(self):
+        test_user = self.setup_user(authenticate=False)
+        test_issuer = self.setup_issuer(owner=test_user)
+        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+        assertion = test_badgeclass.issue(recipient_id='new.recipient@email.test')
+        testcase_headers = [
+            # bots/scrapers should get an html stub with opengraph tags
+            {'HTTP_USER_AGENT': 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'},
+            {'HTTP_USER_AGENT': 'Twitterbot/1.0'},
+            {'HTTP_USER_AGENT': 'facebook'},
+            {'HTTP_USER_AGENT': 'Facebot'},
+        ]
+        for headers in testcase_headers:
+            with self.assertNumQueries(0):
+                response = self.client.get('/public/assertions/{}'.format(assertion.entity_id), **headers)
+                self.assertEqual(response.status_code, 200)
+
+                # should have received an html stub with og meta tags
+                self.assertTrue(response.get('content-type').startswith('text/html'))
+                self.assertContains(response, '<meta property="og:url" content="{}">'.format(assertion.public_url), html=True)
+                png_image_url = "{}{}?type=png".format(
+                    OriginSetting.HTTP,
+                    reverse('badgeclass_image', kwargs={'entity_id': assertion.cached_badgeclass.entity_id})
+                )
+                self.assertContains(response, '<meta property="og:image" content="{}">'.format(png_image_url), html=True)
+
     def test_get_assertion_html_redirects_to_frontend(self):
         badgr_app = BadgrApp(cors='frontend.ui',
                              public_pages_redirect='http://frontend.ui/public')
@@ -95,9 +123,6 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
         testcase_headers = [
             # browsers will send Accept: */* by default
             {'HTTP_ACCEPT': '*/*'},
-
-            # linkedinbot should get redirect to html
-            {'HTTP_USER_AGENT': 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'}
         ]
 
         with self.settings(BADGR_APP_ID=badgr_app.id):

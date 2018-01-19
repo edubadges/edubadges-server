@@ -2,6 +2,8 @@ import base64
 
 import json
 import os
+
+from django.urls import reverse
 from openbadges.verifier.openbadges_context import (OPENBADGES_CONTEXT_V2_URI, OPENBADGES_CONTEXT_V1_URI,
                                                     OPENBADGES_CONTEXT_V2_DICT)
 import responses
@@ -12,7 +14,7 @@ from mainsite.tests.base import BadgrTestCase
 
 from backpack.models import BackpackCollection, BackpackCollectionBadgeInstance
 from backpack.serializers_v1 import (CollectionSerializerV1)
-from mainsite.utils import first_node_match
+from mainsite.utils import first_node_match, OriginSetting
 
 dir = os.path.dirname(__file__)
 
@@ -98,8 +100,8 @@ class TestBadgeUploads(BadgrTestCase):
         )
 
         new_instance = BadgeInstance.objects.first()
-        self.assertEqual(get_response.data[0].get('json', {}).get('image', {}).get('id'), new_instance.image_url())
-        # Previously .image_url() was returning the Django endpoint that allowed us to track hits in the BadgrLog
+        expected_url = "{}{}".format(OriginSetting.HTTP, reverse('badgeinstance_image', kwargs=dict(entity_id=new_instance.entity_id)))
+        self.assertEqual(get_response.data[0].get('json', {}).get('image', {}).get('id'), expected_url)
 
     @responses.activate
     def test_submit_basic_1_1_badge_via_url(self):
@@ -162,7 +164,8 @@ class TestBadgeUploads(BadgrTestCase):
         )
 
         new_instance = BadgeInstance.objects.first()
-        self.assertEqual(get_response.data[0].get('json', {}).get('image', {}).get('id'), new_instance.image_url())
+        expected_url = "{}{}".format(OriginSetting.HTTP, reverse('badgeinstance_image', kwargs=dict(entity_id=new_instance.entity_id)))
+        self.assertEqual(get_response.data[0].get('json', {}).get('image', {}).get('id'), expected_url)
 
     @responses.activate
     def test_submit_basic_1_0_badge_via_url_plain_json(self):

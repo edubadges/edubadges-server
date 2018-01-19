@@ -1,5 +1,6 @@
 import re
 import urllib
+import urlparse
 import warnings
 
 import os
@@ -51,11 +52,11 @@ class TestCacheSettings(TransactionTestCase):
                 self.assertEqual(retrieved, "hello cached world")
 
 
-@override_settings(HTTP_ORIGIN='http://api.testserver')
+@override_settings(
+    HTTP_ORIGIN='http://api.testserver',
+    ACCOUNT_EMAIL_CONFIRMATION_HMAC=True
+)
 class TestSignup(BadgrTestCase):
-    def setUp(self):
-        pass  # avoid BadgrTestCase.setUp
-
     def test_user_signup_email_confirmation_redirect(self):
         from django.conf import settings
         http_origin = getattr(settings, 'HTTP_ORIGIN')
@@ -64,33 +65,38 @@ class TestSignup(BadgrTestCase):
                              forgot_password_redirect='http://frontend.ui/forgot-password/')
         badgr_app.save()
 
-        post_data = {
-            'first_name': 'Tester',
-            'last_name': 'McSteve',
-            'email': 'test12345@example.com',
-            'password': '1234567'
-        }
-        response = self.client.post('/v1/user/profile', post_data)
-        self.assertEqual(response.status_code, 201)
-
-        user = BadgeUser.objects.get(entity_id=response.data.get('slug'))
-
-        self.assertEqual(len(mail.outbox), 1)
-        url_match = re.search(r'{}(/v1/user/confirmemail.*)'.format(http_origin), mail.outbox[0].body)
-        self.assertIsNotNone(url_match)
-        confirm_url = url_match.group(1)
-
-        expected_redirect_url = '{badgrapp_redirect}{first_name}?authToken={auth}&email={email}'.format(
-            badgrapp_redirect=badgr_app.email_confirmation_redirect,
-            first_name=post_data['first_name'],
-            email=urllib.quote(post_data['email']),
-            auth=user.auth_token
-        )
-
         with self.settings(BADGR_APP_ID=badgr_app.id):
+            post_data = {
+                'first_name': 'Tester',
+                'last_name': 'McSteve',
+                'email': 'test12345@example.com',
+                'password': '1234567'
+            }
+            response = self.client.post('/v1/user/profile', post_data)
+            self.assertEqual(response.status_code, 201)
+
+            user = BadgeUser.objects.get(entity_id=response.data.get('slug'))
+
+            self.assertEqual(len(mail.outbox), 1)
+            url_match = re.search(r'{}(/v1/user/confirmemail.*)'.format(http_origin), mail.outbox[0].body)
+            self.assertIsNotNone(url_match)
+            confirm_url = url_match.group(1)
+
+            expected_redirect_url = '{badgrapp_redirect}{first_name}?authToken={auth}&email={email}'.format(
+                badgrapp_redirect=badgr_app.email_confirmation_redirect,
+                first_name=post_data['first_name'],
+                email=urllib.quote(post_data['email']),
+                auth=user.auth_token
+            )
+
             response = self.client.get(confirm_url, follow=False)
             self.assertEqual(response.status_code, 302)
-            self.assertEqual(response.get('location'), expected_redirect_url)
+
+            actual = urlparse.urlparse(response.get('location'))
+            expected = urlparse.urlparse(expected_redirect_url)
+            self.assertEqual(actual.netloc, expected.netloc)
+            self.assertEqual(actual.scheme, expected.scheme)
+            self.assertDictEqual(urlparse.parse_qs(actual.query), urlparse.parse_qs(expected.query))
 
 @override_settings(
     ACCOUNT_EMAIL_CONFIRMATION_HMAC=False
