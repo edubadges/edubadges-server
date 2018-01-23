@@ -434,9 +434,8 @@ class TestBadgeUploads(BadgrTestCase):
         self.assertEqual(response.status_code, 201)
         get_response = self.client.get('/v1/earner/badges')
         self.assertEqual(get_response.status_code, 200)
-        self.assertIsNotNone(
-            first_node_match(get_response.data, {'id': response.get('id')}),
-            "The badge in our backpack should report its JSON-LD id as the original OpenBadgeId")
+        self.assertEqual(get_response.data[0].get('json', {}).get('id'), post_input.get('url'),
+                         "The badge in our backpack should report its JSON-LD id as the original OpenBadgeId")
 
     @responses.activate
     def test_submit_0_5_badge_upload_by_assertion(self):
