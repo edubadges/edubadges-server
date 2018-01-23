@@ -15,6 +15,7 @@ from .models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceEvidence, Ba
 class IssuerStaffInline(TabularInline):
     model = Issuer.staff.through
     extra = 0
+    raw_id_fields = ('user',)
 
 
 class IssuerExtensionInline(TabularInline):
