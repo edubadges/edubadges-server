@@ -322,16 +322,20 @@ class TestBadgeUploads(BadgrTestCase):
         ])
         self.setup_user(email='test@example.com', authenticate=True)
 
+        # add variant explicitly
+        response = self.client.post('/v1/user/emails', dict(
+            email='TEST@example.com'
+        ))
+        self.assertEqual(response.status_code, 400)  # adding a variant successfully returns a 400
+
         post_input = {
             'url': 'http://a.com/instance3',
-            'recipient_identifier': "TEST@example.com"
         }
         response = self.client.post(
             '/v1/earner/badges', post_input
         )
-        self.assertEqual(response.status_code, 201)  # This API feature seems like it has broken. It's not used by our
-                                                     # own client but was designed as one of the methods to add an
-                                                     # email case variant.
+        self.assertEqual(response.status_code, 201)
+
         get_response = self.client.get('/v1/earner/badges')
         self.assertEqual(get_response.status_code, 200)
         self.assertEqual(
