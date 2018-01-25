@@ -43,26 +43,30 @@ def award_badges_for_pathway_completion(self, badgeinstance_pk):
 
             completions = list(itertools.chain.from_iterable([recipient_profile.cached_completions(p) for p in pathways]))
             for completion in completions:
-                if 'completionBadge' in completion:
+                completion_badgeclass = None
+                if 'element' in completion and completion['element'].completion_badgeclass:
+                    completion_badgeclass = completion['element'].completion_badgeclass
+                elif 'completionBadge' in completion:
                     try:
                         completion_badgeclass = BadgeClass.cached.get(entity_id=completion.get('completionBadge').get('slug'))
-                        try:
-                            awarded_badge = BadgeInstance.objects.get(
-                                recipient_identifier=recipient_profile.recipient_identifier,
-                                badgeclass=completion_badgeclass)
-                            # badge was already awarded
-                        except BadgeInstance.DoesNotExist:
-                            # need to award badge
-                            awarded_badge = completion_badgeclass.issue(
-                                recipient_profile.recipient_identifier,
-                                notify=getattr(settings, 'ISSUER_NOTIFY_DEFAULT', True),
-                                created_by=None
-                            )
                     except BadgeClass.DoesNotExist:
                         # got an erroneous badgeclass for a completionBadge
                         pass
-                    else:
-                        awards.append(awarded_badge)
+                    
+                if completion_badgeclass:
+                    try:
+                        awarded_badge = BadgeInstance.objects.get(
+                            recipient_identifier=recipient_profile.recipient_identifier,
+                            badgeclass=completion_badgeclass)
+                        # badge was already awarded
+                    except BadgeInstance.DoesNotExist:
+                        # need to award badge
+                        awarded_badge = completion_badgeclass.issue(
+                            recipient_profile.recipient_identifier,
+                            notify=getattr(settings, 'ISSUER_NOTIFY_DEFAULT', True),
+                            created_by=None
+                        )
+                    awards.append(awarded_badge)
 
         finally:
             _release_lock(lock_key)
