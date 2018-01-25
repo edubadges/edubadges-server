@@ -44,7 +44,7 @@ def award_badges_for_pathway_completion(self, badgeinstance_pk):
             completions = list(itertools.chain.from_iterable([recipient_profile.cached_completions(p) for p in pathways]))
             for completion in completions:
                 completion_badgeclass = None
-                if 'element' in completion and completion['element'].completion_badgeclass:
+                if 'element' in completion and hasattr(completion['element'], 'completion_badgeclass'):
                     completion_badgeclass = completion['element'].completion_badgeclass
                 elif 'completionBadge' in completion:
                     try:
