@@ -1,18 +1,20 @@
 # encoding: utf-8
 from __future__ import unicode_literals
 
+import io
 import json
 
 import responses
 from django.urls import reverse
 from openbadges.verifier.openbadges_context import OPENBADGES_CONTEXT_V1_URI, OPENBADGES_CONTEXT_V2_URI, \
     OPENBADGES_CONTEXT_V2_DICT
+from openbadges_bakery import unbake
 
 from backpack.tests import setup_resources, setup_basic_1_0
+from issuer.models import Issuer, BadgeInstance
+from issuer.utils import CURRENT_OBI_VERSION, OBI_VERSION_CONTEXT_IRIS
 from mainsite.models import BadgrApp
 from mainsite.tests import BadgrTestCase, SetupIssuerHelper
-
-from issuer.models import Issuer, BadgeInstance
 from mainsite.utils import OriginSetting
 
 
@@ -163,4 +165,40 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
         assertion = BadgeInstance.objects.get(entity_id=assertion_entityid)
         self.assertDictEqual(coerced_assertion, assertion.get_json(obi_version="2_0"))
         self.assertEqual(coerced_assertion.get('id'), 'http://a.com/instance?v=2_0')
+
+    def verify_baked_image_response(self, assertion, response, obi_version, **kwargs):
+        self.assertEqual(response.status_code, 200)
+        baked_image = io.BytesIO(b"".join(response.streaming_content))
+        baked_json = unbake(baked_image)
+        baked_metadata = json.loads(baked_json)
+        assertion_metadata = assertion.get_json(obi_version=obi_version, **kwargs)
+        self.assertDictEqual(baked_metadata, assertion_metadata)
+
+    def test_get_versioned_baked_images(self):
+        test_user = self.setup_user(authenticate=False)
+        test_issuer = self.setup_issuer(owner=test_user)
+        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+        assertion = test_badgeclass.issue(recipient_id='new.recipient@email.test')
+
+        response = self.client.get('/public/assertions/{}/image'.format(assertion.entity_id), follow=True)
+        self.verify_baked_image_response(assertion, response, obi_version=CURRENT_OBI_VERSION)
+
+        for obi_version in OBI_VERSION_CONTEXT_IRIS.keys():
+            response = self.client.get('/public/assertions/{assertion}/baked?v={version}'.format(
+                assertion=assertion.entity_id,
+                version=obi_version
+            ), follow=True)
+
+            if obi_version == CURRENT_OBI_VERSION:
+                # current_obi_versions aren't re-baked expanded
+                self.verify_baked_image_response(assertion, response, obi_version=obi_version)
+            else:
+                self.verify_baked_image_response(
+                    assertion,
+                    response,
+                    obi_version=obi_version,
+                    expand_badgeclass=True,
+                    expand_issuer=True,
+                    include_extra=True
+                )
 
