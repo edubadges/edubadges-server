@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import json
 
+import dateutil.parser
 from django.core.files.storage import DefaultStorage
 from django.db import models, transaction
 
@@ -96,17 +97,23 @@ class BadgeInstanceManager(models.Manager):
         else:
             image = _fetch_image_and_get_file(image_url, upload_to='remote/assertion')
 
+        issued_on = None
+        if 'issuedOn' in assertion_obo:
+            issued_on = dateutil.parser.parse(assertion_obo.get('issuedOn'))
+
         badgeinstance, created = self.get_or_create(
             source_url=assertion_obo.get('id'),
             defaults=dict(
                 recipient_identifier=recipient_identifier,
+                hashed=assertion_obo.get('recipient', {}).get('hashed', True),
                 source=source if source is not None else 'local',
                 original_json=original_json,
                 badgeclass=badgeclass,
                 issuer=badgeclass.cached_issuer,
                 image=image,
                 acceptance=self.model.ACCEPTANCE_ACCEPTED,
-                narrative=assertion_obo.get('narrative', None)
+                narrative=assertion_obo.get('narrative', None),
+                issued_on=issued_on
             )
         )
         if created:

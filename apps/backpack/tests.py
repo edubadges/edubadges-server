@@ -3,10 +3,14 @@ import base64
 import json
 import os
 
+import datetime
+import dateutil.parser
 from django.urls import reverse
+from django.utils import timezone
 from openbadges.verifier.openbadges_context import (OPENBADGES_CONTEXT_V2_URI, OPENBADGES_CONTEXT_V1_URI,
                                                     OPENBADGES_CONTEXT_V2_DICT)
 import responses
+from openbadges_bakery import bake, unbake
 
 from badgeuser.models import CachedEmailAddress, BadgeUser
 from issuer.models import BadgeClass, Issuer, BadgeInstance
@@ -262,6 +266,90 @@ class TestBadgeUploads(BadgrTestCase):
             get_response.data[0].get('json', {}).get('id'), 'http://a.com/instance',
             "The badge in our backpack should report its JSON-LD id as its original OpenBadgeId"
         )
+
+    @responses.activate
+    def test_submit_baked_badge_preserves_metadata_roundtrip(self):
+        setup_basic_1_0()
+        setup_resources([
+            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)},
+            {'url': "https://openbadgespec.org/extensions/exampleExtension/context.json", 'response_body': json.dumps(
+                {
+                    "@context": {
+                        "obi": "https://w3id.org/openbadges#",
+                        "exampleProperty": "http://schema.org/text"
+                    },
+                    "obi:validation": [
+                        {
+                            "obi:validatesType": "obi:extensions/#ExampleExtension",
+                            "obi:validationSchema": "https://openbadgespec.org/extensions/exampleExtension/schema.json"
+                        }
+                    ]
+                }
+            )},
+            {'url': "https://openbadgespec.org/extensions/exampleExtension/schema.json", 'response_body': json.dumps(
+                {
+                    "$schema": "http://json-schema.org/draft-04/schema#",
+                    "title": "1.1 Open Badge Example Extension",
+                    "description": "An extension that allows you to add a single string exampleProperty to an extension object to represent some of your favorite text.",
+                    "type": "object",
+                    "properties": {
+                        "exampleProperty": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "exampleProperty"
+                    ]
+                }
+            )}
+        ])
+        self.setup_user(email='test@example.com', authenticate=True)
+
+        metadata = {
+            "uid": "1234123abc",
+            "recipient": {"identity": "test@example.com", "hashed": False, "type": "email"},
+            "badge": "http://a.com/badgeclass",
+            "issuedOn": "2015-04-30T00:00+0:00",
+            "verify": {"type":"hosted", "url":"http://a.com/instance"},
+            "extensions:ExampleExtension": {
+                "@context": "https://openbadgespec.org/extensions/exampleExtension/context.json",
+                "type": ["Extension", "extensions:ExampleExtension"],
+                "exampleProperty": "some extended text"
+            },
+            "extensions:unknown": {
+                "type": ["Extension", "extensions:unknown"],
+                "unknown": 42,
+            },
+            "unknownMetadata": 55
+        }
+        with open(os.path.join(dir, 'testfiles/baked_image.png')) as image_file:
+            original_image = bake(image_file, json.dumps(metadata))
+
+        original_image.seek(0)
+        self.assertDictEqual(json.loads(unbake(original_image)), metadata)
+
+        original_image.seek(0)
+        response = self.client.post('/v1/earner/badges', {'image': original_image})
+        self.assertEqual(response.status_code, 201)
+
+        public_url = response.data.get('shareUrl')
+        self.assertIsNotNone(public_url)
+        response = self.client.get(public_url, Accept="application/json")
+
+        for key in ['issuedOn']:
+            fetched_ts = dateutil.parser.parse(response.data.get(key))
+            metadata_ts = dateutil.parser.parse(metadata.get(key))
+            self.assertEqual(fetched_ts, metadata_ts)
+
+        for key in ['recipient', 'extensions:ExampleExtension', 'extensions:unknown']:
+            fetched_dict = response.data.get(key)
+            self.assertIsNotNone(fetched_dict, "Field '{}' is missing".format(key))
+            metadata_dict = metadata.get(key)
+            self.assertDictContainsSubset(metadata_dict, fetched_dict)
+
+        for key in ['unknownMetadata']:
+            self.assertEqual(response.data.get(key), metadata.get(key))
 
     @responses.activate
     def test_submit_basic_1_0_badge_image_datauri_png(self):
