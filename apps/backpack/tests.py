@@ -268,8 +268,50 @@ class TestBadgeUploads(BadgrTestCase):
         )
 
     @responses.activate
-    def test_submit_baked_badge_preserves_metadata_roundtrip(self):
-        setup_basic_1_0()
+    def test_submit_baked_1_1_badge_preserves_metadata_roundtrip(self):
+        assertion_metadata = {
+            "@context": "https://w3id.org/openbadges/v1",
+            "type": "Assertion",
+            "id": "http://a.com/instance2",
+            "recipient": {"identity": "test@example.com", "hashed": False, "type": "email"},
+            "badge": "http://a.com/badgeclass",
+            "issuedOn": "2015-04-30T00:00+00:00",
+            "verify": {"type": "hosted", "url": "http://a.com/instance2"},
+            "extensions:ExampleExtension": {
+                "@context": "https://openbadgespec.org/extensions/exampleExtension/context.json",
+                "type": ["Extension", "extensions:ExampleExtension"],
+                "exampleProperty": "some extended text"
+            },
+            "schema:unknownMetadata": 55
+        }
+        badgeclass_metadata = {
+            "@context": "https://w3id.org/openbadges/v1",
+            "type": "BadgeClass",
+            "id": "http://a.com/badgeclass",
+            "name": "Basic Badge",
+            "description": "Basic as it gets. v1.1",
+            "image": "http://a.com/badgeclass_image",
+            "criteria": "http://a.com/badgeclass_criteria",
+            "issuer": "http://a.com/issuer"
+        }
+        issuer_metadata = {
+            "@context": "https://w3id.org/openbadges/v1",
+            "type": "Issuer",
+            "id": "http://a.com/issuer",
+            "name": "Basic Issuer",
+            "url": "http://a.com/issuer/website"
+        }
+
+        with open(os.path.join(dir, 'testfiles/baked_image.png')) as image_file:
+            original_image = bake(image_file, json.dumps(assertion_metadata))
+            original_image.seek(0)
+
+        responses.add(
+            responses.GET, 'http://a.com/badgeclass_image',
+            body=open(os.path.join(dir, 'testfiles/unbaked_image.png')).read(),
+            status=200, content_type='image/png'
+        )
+
         setup_resources([
             {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
             {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)},
@@ -277,11 +319,12 @@ class TestBadgeUploads(BadgrTestCase):
                 {
                     "@context": {
                         "obi": "https://w3id.org/openbadges#",
+                        "extensions": "https://w3id.org/openbadges/extensions#",
                         "exampleProperty": "http://schema.org/text"
                     },
                     "obi:validation": [
                         {
-                            "obi:validatesType": "obi:extensions/#ExampleExtension",
+                            "obi:validatesType": "extensions:ExampleExtension",
                             "obi:validationSchema": "https://openbadgespec.org/extensions/exampleExtension/schema.json"
                         }
                     ]
@@ -302,32 +345,14 @@ class TestBadgeUploads(BadgrTestCase):
                         "exampleProperty"
                     ]
                 }
-            )}
+            )},
+            {'url': 'http://a.com/instance2', 'response_body': json.dumps(assertion_metadata)},
+            {'url': 'http://a.com/badgeclass', 'response_body': json.dumps(badgeclass_metadata)},
+            {'url': 'http://a.com/issuer', 'response_body': json.dumps(issuer_metadata)}
         ])
         self.setup_user(email='test@example.com', authenticate=True)
 
-        metadata = {
-            "uid": "1234123abc",
-            "recipient": {"identity": "test@example.com", "hashed": False, "type": "email"},
-            "badge": "http://a.com/badgeclass",
-            "issuedOn": "2015-04-30T00:00+0:00",
-            "verify": {"type":"hosted", "url":"http://a.com/instance"},
-            "extensions:ExampleExtension": {
-                "@context": "https://openbadgespec.org/extensions/exampleExtension/context.json",
-                "type": ["Extension", "extensions:ExampleExtension"],
-                "exampleProperty": "some extended text"
-            },
-            "extensions:unknown": {
-                "type": ["Extension", "extensions:unknown"],
-                "unknown": 42,
-            },
-            "unknownMetadata": 55
-        }
-        with open(os.path.join(dir, 'testfiles/baked_image.png')) as image_file:
-            original_image = bake(image_file, json.dumps(metadata))
-
-        original_image.seek(0)
-        self.assertDictEqual(json.loads(unbake(original_image)), metadata)
+        self.assertDictEqual(json.loads(unbake(original_image)), assertion_metadata)
 
         original_image.seek(0)
         response = self.client.post('/v1/earner/badges', {'image': original_image})
@@ -339,17 +364,17 @@ class TestBadgeUploads(BadgrTestCase):
 
         for key in ['issuedOn']:
             fetched_ts = dateutil.parser.parse(response.data.get(key))
-            metadata_ts = dateutil.parser.parse(metadata.get(key))
+            metadata_ts = dateutil.parser.parse(assertion_metadata.get(key))
             self.assertEqual(fetched_ts, metadata_ts)
 
-        for key in ['recipient', 'extensions:ExampleExtension', 'extensions:unknown']:
+        for key in ['recipient', 'extensions:ExampleExtension']:
             fetched_dict = response.data.get(key)
             self.assertIsNotNone(fetched_dict, "Field '{}' is missing".format(key))
-            metadata_dict = metadata.get(key)
+            metadata_dict = assertion_metadata.get(key)
             self.assertDictContainsSubset(metadata_dict, fetched_dict)
 
-        for key in ['unknownMetadata']:
-            self.assertEqual(response.data.get(key), metadata.get(key))
+        for key in ['schema:unknownMetadata']:
+            self.assertEqual(response.data.get(key), assertion_metadata.get(key))
 
     @responses.activate
     def test_submit_basic_1_0_badge_image_datauri_png(self):
