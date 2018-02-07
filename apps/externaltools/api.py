@@ -2,10 +2,11 @@
 from __future__ import unicode_literals
 
 from apispec_drf.decorators import apispec_list_operation
+from rest_framework.exceptions import ValidationError
 
-from entity.api import BaseEntityListView
-from externaltools.models import ExternalTool
-from externaltools.serializers_v2 import ExternalToolSerializerV2
+from entity.api import BaseEntityListView, BaseEntityDetailView
+from externaltools.models import ExternalTool, ExternalToolLaunchpoint
+from externaltools.serializers_v2 import ExternalToolSerializerV2, ExternalToolLaunchSerializerV2
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 
 
@@ -28,3 +29,16 @@ class ExternalToolList(BaseEntityListView):
         return super(ExternalToolList, self).get(request, **kwargs)
 
 
+class ExternalToolLaunch(BaseEntityDetailView):
+    model = ExternalTool  # used by VersionedObjectMixin
+    v2_serializer_class = ExternalToolLaunchSerializerV2
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    http_method_names = ['get']
+
+    def get_object(self, request, **kwargs):
+        externaltool = super(ExternalToolLaunch, self).get_object(request, **kwargs)
+        try:
+            launchpoint = externaltool.get_launchpoint(kwargs.get('launchpoint'))
+        except ExternalToolLaunchpoint.DoesNotExist:
+            raise ValidationError(["Unknown launchpoint"])
+        return launchpoint

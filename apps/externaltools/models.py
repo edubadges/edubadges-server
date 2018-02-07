@@ -24,6 +24,12 @@ class ExternalTool(BaseAuditedModel, BaseVersionedEntity):
     def cached_launchpoints(self):
         return self.externaltoollaunchpoint_set.all()
 
+    def get_launchpoint(self, launchpoint_name):
+        try:
+            return next(lp for lp in self.cached_launchpoints() if lp.launchpoint == launchpoint_name)
+        except StopIteration:
+            raise ExternalToolLaunchpoint.DoesNotExist
+
 
 class ExternalToolLaunchpoint(cachemodel.CacheModel):
     externaltool = models.ForeignKey('externaltools.ExternalTool')
@@ -39,3 +45,23 @@ class ExternalToolLaunchpoint(cachemodel.CacheModel):
     def delete(self, *args, **kwargs):
         super(ExternalToolLaunchpoint, self).delete(*args, **kwargs)
         self.externaltool.publish()
+
+    @property
+    def cached_externaltool(self):
+        return ExternalTool.cached.get(pk=self.externaltool_id)
+
+    def get_tool_consumer(self):
+        return lti.ToolConsumer(
+            consumer_key=self.cached_externaltool.client_id,
+            consumer_secret=self.cached_externaltool.client_secret,
+            launch_url=self.launch_url,
+            params=dict(
+                lti_message_type="basic-lti-launch-request",
+                lti_version="1.1",
+                resource_link_id=self.pk,
+            )
+        )
+
+    def generate_launch_data(self):
+        tool_consumer = self.get_tool_consumer()
+        return tool_consumer.generate_launch_data()
