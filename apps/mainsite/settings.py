@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'backpack',
     'pathway',
     'recipient',
+    'externaltools',
 
     # api docs
     'apispec_drf',
