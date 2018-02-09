@@ -88,7 +88,9 @@ urlpatterns = [
     url(r'^v2/', include('badgeuser.v2_api_urls'), kwargs={'version': 'v2'}),
     url(r'^v2/backpack/', include('backpack.v2_api_urls'), kwargs={'version': 'v2'}),
 
+
     # External Tools
+    url(r'^v1/externaltools/', include('externaltools.v1_api_urls'), kwargs={'version': 'v1'}),
     url(r'^v2/externaltools/', include('externaltools.v2_api_urls'), kwargs={'version': 'v2'}),
 
 

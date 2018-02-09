@@ -21,7 +21,7 @@ class ExternalToolSerializerV2(DetailSerializerV2):
         representation = super(ExternalToolSerializerV2, self).to_representation(instance)
         representation['launchpoints'] = {
             lp.launchpoint: {
-                "url": "{}{}".format(OriginSetting.HTTP, reverse("externaltools_launch", kwargs=dict(
+                "url": "{}{}".format(OriginSetting.HTTP, reverse("v2_api_externaltools_launch", kwargs=dict(
                     launchpoint=lp.launchpoint,
                     entity_id=lp.cached_externaltool.entity_id
                 ))),
