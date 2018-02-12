@@ -15,7 +15,7 @@ from mainsite.drf_fields import ValidImageField
 from mainsite.models import BadgrApp
 from mainsite.serializers import (CachedUrlHyperlinkedRelatedField, StripTagsCharField, MarkdownCharField,
                                   HumanReadableBooleanField, OriginalJsonSerializerMixin)
-from mainsite.validators import ChoicesValidator, TelephoneValidator
+from mainsite.validators import ChoicesValidator, TelephoneValidator, BadgeExtensionValidator
 
 
 class IssuerAccessTokenSerializerV2(BaseSerializerV2):
@@ -56,7 +56,7 @@ class IssuerSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     description = StripTagsCharField(max_length=16384, required=False)
     url = serializers.URLField(max_length=1024, required=True)
     staff = IssuerStaffSerializerV2(many=True, source='staff_items', required=False)
-    extensions = serializers.DictField(source='extension_items', required=False)
+    extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
 
     class Meta(DetailSerializerV2.Meta):
         model = Issuer
@@ -167,7 +167,7 @@ class BadgeClassSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
     alignments = AlignmentItemSerializerV2(source='alignment_items', many=True, required=False)
     tags = serializers.ListField(child=StripTagsCharField(max_length=1024), source='tag_items', required=False)
 
-    extensions = serializers.DictField(source='extension_items', required=False)
+    extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
 
     class Meta(DetailSerializerV2.Meta):
         model = BadgeClass
@@ -367,7 +367,7 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
 
     notify = HumanReadableBooleanField(write_only=True, required=False, default=False)
 
-    extensions = serializers.DictField(source='extension_items', required=False)
+    extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
 
     class Meta(DetailSerializerV2.Meta):
         model = BadgeInstance

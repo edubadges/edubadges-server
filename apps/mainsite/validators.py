@@ -5,6 +5,7 @@ from django.core.validators import RegexValidator
 from rest_framework.exceptions import ValidationError
 
 from mainsite.utils import verify_svg
+import openbadges.verifier
 
 
 class ValidImageValidator(object):
@@ -50,3 +51,19 @@ class TelephoneValidator(RegexValidator):
 
     def __init__(self, *args, **kwargs):
         super(TelephoneValidator, self).__init__(self.regex, *args, **kwargs)
+
+
+class BadgeExtensionValidator(object):
+    message = "Invalid OpenBadges Extension"
+
+    def __call__(self, value):
+        if len(value) > 0:
+            result = openbadges.verifier.validate_extensions(value.copy())
+            report = result.get('report', {})
+            if not report.get('valid', False):
+                messages = report.get('messages', [])
+                if len(messages) > 0:
+                    msg = messages[0].get('result', self.message)
+                else:
+                    msg = self.message
+                raise ValidationError(msg)
