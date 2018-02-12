@@ -31,4 +31,11 @@ class ExternalToolSerializerV1(serializers.Serializer):
 
 class ExternalToolLaunchSerializerV1(serializers.Serializer):
     launch_url = serializers.URLField()
-    launch_data = serializers.DictField(source='generate_launch_data')
+
+    def to_representation(self, instance):
+        representation = super(ExternalToolLaunchSerializerV1, self).to_representation(instance)
+        requesting_user = self.context['request'].user if 'request' in self.context else None
+        context_id = self.context.get('tool_launch_context_id', None)
+        representation['launch_data'] = instance.generate_launch_data(user=requesting_user, context_id=context_id)
+
+        return representation

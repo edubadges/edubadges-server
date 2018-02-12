@@ -6,7 +6,8 @@ import lti
 from django.db import models
 
 from entity.models import BaseVersionedEntity
-from issuer.models import BaseAuditedModel
+from issuer.models import BaseAuditedModel, BadgeInstance
+from mainsite.utils import OriginSetting, get_tool_consumer_instance_guid
 
 
 class ExternalTool(BaseAuditedModel, BaseVersionedEntity):
@@ -62,6 +63,47 @@ class ExternalToolLaunchpoint(cachemodel.CacheModel):
             )
         )
 
-    def generate_launch_data(self):
+    def lookup_obj_by_launchpoint(self, launch_data, user, context_id):
+        roles = []
+        obj = None
+        if self.launchpoint in ['issuer_assertion_action', 'earner_assertion_action']:
+            obj = BadgeInstance.cached.get_by_slug_or_entity_id(context_id)
+            if obj:
+                launch_data.update(
+                    custom_badgr_assertion_id=obj.entity_id,
+                    custom_badgr_badgeclass_id=obj.cached_badgeclass.entity_id,
+                    custom_badgr_badgeclass_name=obj.cached_badgeclass.name,
+                    custom_badgr_issuer_id=obj.cached_issuer.entity_id,
+                    custom_badgr_issuer_name=obj.cached_issuer.name,
+                )
+                if any(s.user.id == user.id for s in obj.cached_issuer.cached_issuerstaff()):
+                    roles.append(['issuer'])
+
+                if obj.recipient_identifier in user.all_recipient_identifiers:
+                    roles.append(['earner'])
+
+        launch_data['roles'] = roles
+        return obj
+
+    def generate_launch_data(self, user=None, context_id=None, **additional_launch_data):
         tool_consumer = self.get_tool_consumer()
-        return tool_consumer.generate_launch_data()
+        launch_data = tool_consumer.generate_launch_data()
+        launch_data.update(dict(
+            tool_consumer_instance_guid=get_tool_consumer_instance_guid(),
+            badgr_api_url=OriginSetting.HTTP,
+            custom_launchpoint=self.launchpoint
+        ))
+        launch_data.update(additional_launch_data)
+        if user is not None:
+            launch_data.update(dict(
+                custom_badgr_user_id=user.entity_id,
+                lis_person_name_family=user.last_name,
+                lis_person_name_given=user.first_name,
+                lis_person_contact_email_primary=user.primary_email
+            ))
+        if context_id is not None:
+            launch_data['custom_context_id'] = context_id
+            context_obj = self.lookup_obj_by_launchpoint(launch_data, user, context_id)
+
+        return launch_data
+

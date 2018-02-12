@@ -37,6 +37,11 @@ class ExternalToolLaunch(BaseEntityDetailView):
     permission_classes = (AuthenticatedWithVerifiedEmail,)
     http_method_names = ['get']
 
+    def get_context_data(self, **kwargs):
+        context = super(ExternalToolLaunch, self).get_context_data(**kwargs)
+        context['tool_launch_context_id'] = self.request.query_params.get('context_id', None)
+        return context
+
     def get_object(self, request, **kwargs):
         externaltool = super(ExternalToolLaunch, self).get_object(request, **kwargs)
         try:
