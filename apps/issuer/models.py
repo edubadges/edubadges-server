@@ -31,7 +31,8 @@ from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage
 from mainsite.models import (BadgrApp, EmailBlacklist)
 from mainsite.utils import OriginSetting, generate_entity_uri
-from .utils import generate_sha256_hashstring, CURRENT_OBI_VERSION, get_obi_context, add_obi_version_ifneeded
+from .utils import generate_sha256_hashstring, CURRENT_OBI_VERSION, get_obi_context, add_obi_version_ifneeded, \
+    UNVERSIONED_BAKED_VERSION
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
@@ -716,7 +717,7 @@ class BadgeInstance(BaseAuditedModel,
                 bake(image_file=self.cached_badgeclass.image.file,
                      assertion_json_string=json_dumps(self.json, indent=2),
                      output_file=new_image)
-                self.image.save(name='assertion-{id}.{ext}'.format(id=self.entity_id, ext=ext),
+                self.image.save(name='assertion-{id}{ext}'.format(id=self.entity_id, ext=ext),
                                 content=ContentFile(new_image.read()),
                                 save=False)
 
@@ -998,6 +999,58 @@ class BadgeInstance(BaseAuditedModel,
     @property
     def cached_badgrapp(self):
         return self.cached_issuer.cached_badgrapp
+
+    def get_baked_image_url(self, obi_version=CURRENT_OBI_VERSION):
+        if obi_version == UNVERSIONED_BAKED_VERSION:
+            # requested version is the one referenced in assertion.image
+            return self.image.url
+
+        try:
+            baked_image = BadgeInstanceBakedImage.cached.get(badgeinstance=self, obi_version=obi_version)
+        except BadgeInstanceBakedImage.DoesNotExist:
+            # rebake
+            baked_image = BadgeInstanceBakedImage(badgeinstance=self, obi_version=obi_version)
+
+            json_to_bake = self.get_json(
+                obi_version=obi_version,
+                expand_issuer=True,
+                expand_badgeclass=True,
+                include_extra=True
+            )
+            badgeclass_name, ext = os.path.splitext(self.badgeclass.image.file.name)
+            new_image = StringIO.StringIO()
+            bake(image_file=self.cached_badgeclass.image.file,
+                 assertion_json_string=json_dumps(json_to_bake, indent=2),
+                 output_file=new_image)
+            baked_image.image.save(
+                name='assertion-{id}-{version}{ext}'.format(id=self.entity_id, ext=ext, version=obi_version),
+                content=ContentFile(new_image.read()),
+                save=False
+            )
+            baked_image.save()
+
+        return baked_image.image.url
+
+
+def _baked_badge_instance_filename_generator(instance, filename):
+    return "baked/{version}/{filename}".format(
+        version=instance.obi_version,
+        filename=filename
+    )
+
+
+class BadgeInstanceBakedImage(cachemodel.CacheModel):
+    badgeinstance = models.ForeignKey('issuer.BadgeInstance')
+    obi_version = models.CharField(max_length=254)
+    image = models.FileField(upload_to=_baked_badge_instance_filename_generator, blank=True)
+
+    def publish(self):
+        self.publish_by('badgeinstance', 'obi_version')
+        return super(BadgeInstanceBakedImage, self).publish()
+
+    def delete(self, *args, **kwargs):
+        self.publish_delete('badgeinstance', 'obi_version')
+        return super(BadgeInstanceBakedImage, self).delete(*args, **kwargs)
 
 
 class BadgeInstanceEvidence(OriginalJsonMixin, cachemodel.CacheModel):
