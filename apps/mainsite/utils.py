@@ -14,6 +14,7 @@ import os
 import requests
 from django.apps import apps
 from django.conf import settings
+from django.core.cache import cache
 from django.core.files.storage import DefaultStorage
 from django.core.urlresolvers import get_callable
 from xml.etree import cElementTree as ET
@@ -133,3 +134,13 @@ def first_node_match(graph, condition):
     for node in graph:
         if all(item in node.items() for item in condition.items()):
             return node
+
+
+def get_tool_consumer_instance_guid():
+    guid = getattr(settings, 'EXTERNALTOOL_CONSUMER_INSTANCE_GUID', None)
+    if guid is None:
+        guid = cache.get("external_tool_consumer_instance_guid")
+        if guid is None:
+            guid = "badgr-tool-consumer:{}".format(generate_entity_uri())
+            cache.set("external_tool_consumer_instance_guid", guid, timeout=None)
+    return guid

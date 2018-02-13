@@ -1,6 +1,7 @@
 # encoding: utf-8
 from __future__ import unicode_literals
 
+from django.core.exceptions import FieldError
 from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
@@ -101,7 +102,7 @@ class VersionedObjectMixin(object):
             # try a lookup by legacy slug if its v1
             try:
                 self.object = self.model.cached.get(slug=identifier)
-            except self.model.DoesNotExist:
+            except (self.model.DoesNotExist, FieldError):
                 raise Http404
             else:
                 if not self.has_object_permissions(request, self.object):
