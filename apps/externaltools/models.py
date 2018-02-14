@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import cachemodel
 import lti
 from django.db import models
+from lti import LaunchParams
 
 from entity.models import BaseVersionedEntity
 from issuer.models import BaseAuditedModel, BadgeInstance
@@ -51,16 +52,20 @@ class ExternalToolLaunchpoint(cachemodel.CacheModel):
     def cached_externaltool(self):
         return ExternalTool.cached.get(pk=self.externaltool_id)
 
-    def get_tool_consumer(self):
+    def get_tool_consumer(self, extra_params=None):
+        params = dict(
+            lti_message_type="basic-lti-launch-request",
+            lti_version="1.1",
+            resource_link_id=self.pk,
+        )
+        if extra_params:
+            params.update(extra_params)
+
         return lti.ToolConsumer(
             consumer_key=self.cached_externaltool.client_id,
             consumer_secret=self.cached_externaltool.client_secret,
             launch_url=self.launch_url,
-            params=dict(
-                lti_message_type="basic-lti-launch-request",
-                lti_version="1.1",
-                resource_link_id=self.pk,
-            )
+            params=params
         )
 
     def lookup_obj_by_launchpoint(self, launch_data, user, context_id):
@@ -77,33 +82,33 @@ class ExternalToolLaunchpoint(cachemodel.CacheModel):
                     custom_badgr_issuer_name=obj.cached_issuer.name,
                 )
                 if any(s.user.id == user.id for s in obj.cached_issuer.cached_issuerstaff()):
-                    roles.append(['issuer'])
+                    roles.append('issuer')
 
                 if obj.recipient_identifier in user.all_recipient_identifiers:
-                    roles.append(['earner'])
+                    roles.append('earner')
 
         launch_data['roles'] = roles
         return obj
 
     def generate_launch_data(self, user=None, context_id=None, **additional_launch_data):
-        tool_consumer = self.get_tool_consumer()
-        launch_data = tool_consumer.generate_launch_data()
-        launch_data.update(dict(
+        params = dict(
             tool_consumer_instance_guid=get_tool_consumer_instance_guid(),
-            badgr_api_url=OriginSetting.HTTP,
+            custom_badgr_api_url=OriginSetting.HTTP,
             custom_launchpoint=self.launchpoint
-        ))
-        launch_data.update(additional_launch_data)
+        )
+        params.update(additional_launch_data)
         if user is not None:
-            launch_data.update(dict(
+            params.update(dict(
                 custom_badgr_user_id=user.entity_id,
                 lis_person_name_family=user.last_name,
                 lis_person_name_given=user.first_name,
                 lis_person_contact_email_primary=user.primary_email
             ))
         if context_id is not None:
-            launch_data['custom_context_id'] = context_id
-            context_obj = self.lookup_obj_by_launchpoint(launch_data, user, context_id)
+            params['custom_context_id'] = context_id
+            context_obj = self.lookup_obj_by_launchpoint(params, user, context_id)
 
+        tool_consumer = self.get_tool_consumer(extra_params=params)
+        launch_data = tool_consumer.generate_launch_data()
         return launch_data
 
