@@ -32,6 +32,8 @@ def get_obi_context(obi_version):
 def add_obi_version_ifneeded(url, obi_version):
     if obi_version == CURRENT_OBI_VERSION:
         return url
+    if not url.startswith(OriginSetting.HTTP):
+        return url
     return "{url}{sep}v={obi_version}".format(
         url=url,
         sep='&' if '?' in url else '?',
