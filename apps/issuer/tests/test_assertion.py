@@ -172,6 +172,97 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         assertion_public_url = OriginSetting.HTTP+reverse('badgeinstance_json', kwargs={'entity_id': assertion_slug})
         self.assertEqual(assertion.get('json').get('evidence'), assertion_public_url)
 
+    def test_v2_issue_with_evidence(self):
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+
+        evidence_items = [
+            {
+                'url': "http://fake.evidence.url.test",
+            },
+            {
+                'url': "http://second.evidence.url.test",
+                "narrative": "some description of how second evidence was collected"
+            }
+        ]
+        assertion_args = {
+            "recipient": {"identity": "test@example.com"},
+            "notify": False,
+            "evidence": evidence_items
+        }
+        response = self.client.post('/v2/badgeclasses/{badge}/assertions'.format(
+            badge=test_badgeclass.entity_id
+        ), assertion_args, format='json')
+        self.assertEqual(response.status_code, 201)
+
+        assertion_slug = response.data['result'][0]['entityId']
+        response = self.client.get('/v1/issuer/issuers/{issuer}/badges/{badge}/assertions/{assertion}'.format(
+            issuer=test_issuer.entity_id,
+            badge=test_badgeclass.entity_id,
+            assertion=assertion_slug))
+        self.assertEqual(response.status_code, 200)
+        assertion = response.data
+
+        v2_json = self.client.get('/public/assertions/{}?v=2_0'.format(assertion_slug), format='json').data
+
+        fetched_evidence_items = assertion.get('evidence_items')
+        self.assertEqual(len(fetched_evidence_items), len(evidence_items))
+        for i in range(0, len(evidence_items)):
+            self.assertEqual(v2_json['evidence'][i].get('id'), evidence_items[i].get('url'))
+            self.assertEqual(v2_json['evidence'][i].get('narrative'), evidence_items[i].get('narrative'))
+            self.assertEqual(fetched_evidence_items[i].get('evidence_url'), evidence_items[i].get('url'))
+            self.assertEqual(fetched_evidence_items[i].get('narrative'), evidence_items[i].get('narrative'))
+
+        # ob1.0 evidence url also present
+        self.assertIsNotNone(assertion.get('json'))
+        assertion_public_url = OriginSetting.HTTP + reverse('badgeinstance_json', kwargs={'entity_id': assertion_slug})
+        self.assertEqual(assertion.get('json').get('evidence'), assertion_public_url)
+
+    def test_issue_badge_with_ob2_one_evidence_item(self):
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+
+        evidence_items = [
+            {
+                'narrative': "Executed some sweet skateboard tricks that made us completely forget the badge criteria"
+            }
+        ]
+        assertion_args = {
+            "email": "test@example.com",
+            "create_notification": False,
+            "evidence_items": evidence_items
+        }
+        response = self.client.post('/v1/issuer/issuers/{issuer}/badges/{badge}/assertions'.format(
+            issuer=test_issuer.entity_id,
+            badge=test_badgeclass.entity_id
+        ), assertion_args, format='json')
+        self.assertEqual(response.status_code, 201)
+
+        assertion_slug = response.data.get('slug')
+        response = self.client.get('/v1/issuer/issuers/{issuer}/badges/{badge}/assertions/{assertion}'.format(
+            issuer=test_issuer.entity_id,
+            badge=test_badgeclass.entity_id,
+            assertion=assertion_slug))
+        self.assertEqual(response.status_code, 200)
+        assertion = response.data
+
+        v2_json = self.client.get('/public/assertions/{}?v=2_0'.format(assertion_slug), format='json').data
+
+        fetched_evidence_items = assertion.get('evidence_items')
+        self.assertEqual(len(fetched_evidence_items), len(evidence_items))
+        for i in range(0,len(evidence_items)):
+            self.assertEqual(v2_json['evidence'][i].get('id'), evidence_items[i].get('url'))
+            self.assertEqual(v2_json['evidence'][i].get('narrative'), evidence_items[i].get('narrative'))
+            self.assertEqual(fetched_evidence_items[i].get('url'), evidence_items[i].get('url'))
+            self.assertEqual(fetched_evidence_items[i].get('narrative'), evidence_items[i].get('narrative'))
+
+        # ob1.0 evidence url also present
+        self.assertIsNotNone(assertion.get('json'))
+        assertion_public_url = OriginSetting.HTTP+reverse('badgeinstance_json', kwargs={'entity_id': assertion_slug})
+        self.assertEqual(assertion.get('json').get('evidence'), assertion_public_url)
+
     def test_resized_png_image_baked_properly(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)

@@ -988,8 +988,10 @@ class BadgeInstance(BaseAuditedModel,
         evidence_list = self.cached_evidence()
         if len(evidence_list) > 1:
             return self.public_url
-        if len(evidence_list) == 1:
+        if len(evidence_list) == 1 and evidence_list[0].evidence_url:
             return evidence_list[0].evidence_url
+        elif len(evidence_list) == 1:
+            return self.public_url
 
     @property
     def evidence_items(self):
@@ -1055,7 +1057,7 @@ class BadgeInstanceBakedImage(cachemodel.CacheModel):
 
 class BadgeInstanceEvidence(OriginalJsonMixin, cachemodel.CacheModel):
     badgeinstance = models.ForeignKey('issuer.BadgeInstance')
-    evidence_url = models.CharField(max_length=2083)
+    evidence_url = models.CharField(max_length=2083, blank=True, null=True, default=None)
     narrative = models.TextField(blank=True, null=True, default=None)
 
     objects = BadgeInstanceEvidenceManager()
