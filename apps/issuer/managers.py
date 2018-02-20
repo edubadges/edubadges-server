@@ -7,7 +7,7 @@ import dateutil.parser
 from django.core.files.storage import DefaultStorage
 from django.db import models, transaction
 
-from mainsite.utils import fetch_remote_file_to_storage
+from mainsite.utils import fetch_remote_file_to_storage, list_of
 from pathway.tasks import award_badges_for_pathway_completion
 
 
@@ -73,7 +73,7 @@ class BadgeInstanceEvidenceManager(models.Manager):
     @transaction.atomic
     def create_from_ob2(self, badgeinstance, evidence_obo):
         return self.create(
-            badgeintance=badgeinstance,
+            badgeinstance=badgeinstance,
             evidence_url=evidence_obo.get('id', None),
             narrative=evidence_obo.get('narrative', None),
             original_json=json.dumps(evidence_obo)
@@ -83,7 +83,9 @@ class BadgeInstanceEvidenceManager(models.Manager):
 def _fetch_image_and_get_file(url, upload_to=''):
     status_code, storage_name = fetch_remote_file_to_storage(url, upload_to=upload_to)
     if status_code == 200:
-        return DefaultStorage().open(storage_name)
+        image = DefaultStorage().open(storage_name)
+        image.name = storage_name
+        return image
 
 
 class BadgeInstanceManager(models.Manager):
@@ -117,18 +119,20 @@ class BadgeInstanceManager(models.Manager):
             )
         )
         if created:
-            evidence = assertion_obo.get('evidence', None)
+            evidence = list_of(assertion_obo.get('evidence', None))
             if evidence:
                 from issuer.models import BadgeInstanceEvidence
-                if isinstance(evidence, basestring):
-                    # we got a single iri as 'evidence' field
-                    BadgeInstanceEvidence.objects.create(
-                        badgeinstance=badgeinstance,
-                        evidence_url=evidence
-                    )
-                else:
-                    for evidence_item in evidence:
-                        badgeinstanceevidence = BadgeInstanceEvidence.objects.create_from_ob2(badgeinstance, evidence_item)
+                for evidence_item in evidence:
+                    if isinstance(evidence_item, basestring):
+                        # we got an IRI as 'evidence' value
+                        BadgeInstanceEvidence.objects.create(
+                            badgeinstance=badgeinstance,
+                            evidence_url=evidence_item
+                        )
+                    else:
+                        # we got a single evidence item dict
+                        BadgeInstanceEvidence.objects.create_from_ob2(badgeinstance, evidence_item)
+
         return badgeinstance, created
 
     def create(self,

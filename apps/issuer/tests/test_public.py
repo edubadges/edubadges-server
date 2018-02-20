@@ -164,7 +164,8 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
         coerced_assertion = response.data
         assertion = BadgeInstance.objects.get(entity_id=assertion_entityid)
         self.assertDictEqual(coerced_assertion, assertion.get_json(obi_version="2_0"))
-        self.assertEqual(coerced_assertion.get('id'), 'http://a.com/instance?v=2_0')
+        # We should not change the declared jsonld ID of the requested object
+        self.assertEqual(coerced_assertion.get('id'), 'http://a.com/instance')
 
     def verify_baked_image_response(self, assertion, response, obi_version, **kwargs):
         self.assertEqual(response.status_code, 200)

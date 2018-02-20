@@ -144,3 +144,11 @@ def get_tool_consumer_instance_guid():
             guid = "badgr-tool-consumer:{}".format(generate_entity_uri())
             cache.set("external_tool_consumer_instance_guid", guid, timeout=None)
     return guid
+
+
+def list_of(value):
+    if value is None:
+        return []
+    elif isinstance(value, list):
+        return value
+    return [value]
