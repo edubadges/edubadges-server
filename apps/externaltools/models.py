@@ -75,6 +75,7 @@ class ExternalToolLaunchpoint(cachemodel.CacheModel):
             obj = BadgeInstance.cached.get_by_slug_or_entity_id(context_id)
             if obj:
                 launch_data.update(
+                    custom_badgr_assertion_recipient=obj.recipient_identifier,
                     custom_badgr_assertion_id=obj.entity_id,
                     custom_badgr_badgeclass_id=obj.cached_badgeclass.entity_id,
                     custom_badgr_badgeclass_name=obj.cached_badgeclass.name,
