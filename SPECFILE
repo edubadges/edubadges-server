@@ -113,14 +113,6 @@ export PYCURL_SSL_LIBRARY=nss
 
 %{__cp} %{base_dir}/code/settings_local.py.build %{base_dir}/code/apps/mainsite/settings_local.py
 
-# INSTALL NODE PACKAGES
-cd %{base_dir}/code/breakdown
-npm install
-npm install grunt
-
-# RUN ./manage.py dist
-%{install_dir}/builds/%{version}/env/bin/python %{base_dir}/code/manage.py dist
-
 # DELETE NODE_MODULES
 %{__rm} -rf %{base_dir}/code/breakdown/node_modules
 %{__rm} -f %{base_dir}/code/apps/mainsite/settings_local.py
@@ -130,11 +122,6 @@ echo "STATIC_ROOT = '%{base_dir}/static/'" >> %{base_dir}/code/settings_local.py
 %{__cp} %{base_dir}/code/settings_local.py.build %{base_dir}/code/apps/mainsite/settings_local.py
 %{install_dir}/builds/%{version}/env/bin/python %{base_dir}/code/manage.py collectstatic --noinput
 %{__rm} -f %{base_dir}/code/apps/mainsite/settings_local.py
-
-# DELETE ALL .pyc/.pyo FILES
-cd %{install_dir}
-find . -name "*.pyc" -exec rm -rf {} \;
-find . -name "*.pyo" -exec rm -rf {} \;
 
 # GENERATE VERSION INFO
 echo "%{version}-%{release}" > %{base_dir}/code/version.txt
@@ -161,11 +148,15 @@ echo '{"version": '"\"%{version}\""', "release": '"\"%{release}\""', "commit_sha
 %config(noreplace) %attr(0644,root,root) %{install_dir}/etc/settings_local.py
 
 %changelog
-* Thu Oct 26 2017 Francisco Gray <fgray@concentricsky.com> - %{version}-%{release}
+* Thu Feb 22 2018 Francisco Gray <fgray@concentricsky.com>
+- Removed npm install / build step
+- Removed manage.py dist command
+
+* Thu Oct 26 2017 Francisco Gray <fgray@concentricsky.com>
 - Removed httpd and mod_wsgi from Requires
 
-* Mon Oct 9 2017 Francisco Gray <fgray@concentricsky.com> - %{version}-%{release}
+* Mon Oct 9 2017 Francisco Gray <fgray@concentricsky.com>
 - Updated pre/preun post/postun logic to work correctly during an upgrade.
 
-* Fri Oct 6 2017 Francisco Gray <fgray@concentricsky.com> - %{version}-%{release}
+* Fri Oct 6 2017 Francisco Gray <fgray@concentricsky.com>
 - First packaging of badgr-server
