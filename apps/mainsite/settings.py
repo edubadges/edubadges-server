@@ -132,7 +132,7 @@ STATICFILES_FINDERS = [
 STATIC_ROOT = os.path.join(TOP_DIR, 'staticfiles')
 STATIC_URL = HTTP_ORIGIN+'/static/'
 STATICFILES_DIRS = [
-    os.path.join(TOP_DIR, 'breakdown', 'static'),
+    os.path.join(TOP_DIR, 'apps', 'mainsite', 'static'),
 ]
 
 ##
