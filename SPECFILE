@@ -113,9 +113,8 @@ export PYCURL_SSL_LIBRARY=nss
 
 %{__cp} %{base_dir}/code/settings_local.py.build %{base_dir}/code/apps/mainsite/settings_local.py
 
-# DELETE NODE_MODULES
-%{__rm} -rf %{base_dir}/code/breakdown/node_modules
-%{__rm} -f %{base_dir}/code/apps/mainsite/settings_local.py
+# RUN ./manage.py dist
+%{install_dir}/builds/%{version}/env/bin/python %{base_dir}/code/manage.py dist
 
 # COLLECT STATIC FILES
 echo "STATIC_ROOT = '%{base_dir}/static/'" >> %{base_dir}/code/settings_local.py.build
@@ -150,7 +149,6 @@ echo '{"version": '"\"%{version}\""', "release": '"\"%{release}\""', "commit_sha
 %changelog
 * Thu Feb 22 2018 Francisco Gray <fgray@concentricsky.com>
 - Removed npm install / build step
-- Removed manage.py dist command
 
 * Thu Oct 26 2017 Francisco Gray <fgray@concentricsky.com>
 - Removed httpd and mod_wsgi from Requires
