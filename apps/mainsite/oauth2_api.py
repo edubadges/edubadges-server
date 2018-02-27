@@ -7,6 +7,7 @@ from django.utils import timezone
 from oauth2_provider.exceptions import OAuthToolkitError
 from oauth2_provider.models import get_application_model, get_access_token_model, AccessToken, RefreshToken
 from oauth2_provider.oauth2_validators import OAuth2Validator
+from oauth2_provider.scopes import get_scopes_backend
 from oauth2_provider.settings import oauth2_settings
 from oauth2_provider.views import TokenView as OAuth2ProviderTokenView
 from oauth2_provider.views.mixins import OAuthLibMixin
@@ -98,6 +99,8 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
 
             filtered_scopes = set(app_scopes) & set(scopes)
             kwargs['scopes'] = list(filtered_scopes)
+            all_scopes = get_scopes_backend().get_all_scopes()
+            kwargs['scopes_descriptions'] = {scope: all_scopes[scope] for scope in scopes}
 
             self.oauth2_data = kwargs
 
