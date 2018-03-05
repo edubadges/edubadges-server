@@ -143,6 +143,7 @@ class BadgeInstanceManager(models.Manager):
 
     def create(self,
         evidence=None,
+        extensions=None,
         notify=False,
         check_completions=True,
         allow_uppercase=False,
@@ -184,6 +185,13 @@ class BadgeInstanceManager(models.Manager):
                     if narrative:
                         new_evidence.narrative = narrative
                     new_evidence.save()
+
+            if extensions is not None:
+                for name, ext in extensions.items():
+                    new_instance.badgeinstanceextension_set.create(
+                        name=name,
+                        original_json=json.dumps(ext)
+                    )
 
         if check_completions:
             award_badges_for_pathway_completion.delay(badgeinstance_pk=new_instance.pk)

@@ -14,7 +14,7 @@ from mainsite.models import BadgrApp
 from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField, \
     OriginalJsonSerializerMixin
 from mainsite.utils import OriginSetting
-from mainsite.validators import ChoicesValidator
+from mainsite.validators import ChoicesValidator, BadgeExtensionValidator
 from .models import Issuer, BadgeClass, IssuerStaff, BadgeInstance
 
 
@@ -276,6 +276,8 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
 
     hashed = serializers.NullBooleanField(default=None, required=False)
 
+    extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
+
     class Meta:
         apispec_definition = ('Assertion', {})
 
@@ -357,5 +359,6 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
             allow_uppercase=validated_data.get('allow_uppercase'),
             recipient_type=validated_data.get('recipient_type', BadgeInstance.RECIPIENT_TYPE_EMAIL),
             badgr_app=BadgrApp.objects.get_current(self.context.get('request')),
-            expires_at=validated_data.get('expires_at', None)
+            expires_at=validated_data.get('expires_at', None),
+            extensions=validated_data.get('extension_items', None)
         )
