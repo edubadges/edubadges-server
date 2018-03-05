@@ -16,6 +16,7 @@ class ExternalToolSerializerV2(DetailSerializerV2):
 
     class Meta(DetailSerializerV2.Meta):
         model = ExternalTool
+        # apispec_definition = ('ExternalTool', {})
 
     def to_representation(self, instance):
         representation = super(ExternalToolSerializerV2, self).to_representation(instance)

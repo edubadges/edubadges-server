@@ -21,11 +21,11 @@ class ExternalToolList(BaseEntityListView):
     def get_objects(self, request, **kwargs):
         return ExternalTool.objects.all()
 
-    @apispec_list_operation(
-        'ExternalTool',
-        summary="Get a list of registered tools",
-        tags=["External Tools"]
-    )
+    # @apispec_list_operation(
+    #     'ExternalTool',
+    #     summary="Get a list of registered tools",
+    #     tags=["External Tools"]
+    # )
     def get(self, request, **kwargs):
         return super(ExternalToolList, self).get(request, **kwargs)
 
