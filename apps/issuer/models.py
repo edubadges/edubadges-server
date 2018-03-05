@@ -672,10 +672,7 @@ class BadgeInstance(BaseAuditedModel,
 
     @property
     def cached_badgeclass(self):
-        # memoized to improve performance
-        if not hasattr(self, '_cached_badgeclass'):
-            self._cached_badgeclass = BadgeClass.cached.get(pk=self.badgeclass_id)
-        return self._cached_badgeclass
+        return BadgeClass.cached.get(pk=self.badgeclass_id)
 
     def get_absolute_url(self):
         return reverse('badgeinstance_json', kwargs={'entity_id': self.entity_id})
