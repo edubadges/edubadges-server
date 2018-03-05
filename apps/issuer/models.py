@@ -430,6 +430,14 @@ class BadgeClass(ResizeUploadedImage,
         return OriginSetting.HTTP+reverse('badgeclass_criteria', kwargs={'entity_id': self.entity_id})
 
     @property
+    def description_nonnull(self):
+        return self.description if self.description else ""
+
+    @description_nonnull.setter
+    def description_nonnull(self, value):
+        self.description = value
+
+    @property
     def owners(self):
         return self.cached_issuer.owners
 
@@ -543,7 +551,7 @@ class BadgeClass(ResizeUploadedImage,
             type='BadgeClass',
             id=add_obi_version_ifneeded(self.jsonld_id, obi_version),
             name=self.name,
-            description=self.description,
+            description=self.description_nonnull,
             issuer=add_obi_version_ifneeded(self.cached_issuer.jsonld_id, obi_version),
         ))
         if self.image:

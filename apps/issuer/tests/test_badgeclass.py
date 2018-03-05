@@ -738,3 +738,25 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         public_json = json.loads(response.content)
         for extension_name, extension_data in example_extensions.items():
             self.assertDictEqual(public_json.get(extension_name), extension_data)
+
+    def test_null_description_not_serialized(self):
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+        test_badgeclass = self.setup_badgeclass(issuer=test_issuer, description=None)
+        self.assertIsNone(test_badgeclass.description)
+
+        response = self.client.get('/v1/issuer/issuers/{issuer}/badges/{badgeclass}'.format(
+            issuer=test_issuer.entity_id,
+            badgeclass=test_badgeclass.entity_id))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data.get('description', None), "")
+
+        response = self.client.get('/v2/badgeclasses/{badgeclass}'.format(
+            badgeclass=test_badgeclass.entity_id))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data.get('result', [])[0].get('description', None), "")
+
+        response = self.client.get('/public/badges/{badgeclass}'.format(
+            badgeclass=test_badgeclass.entity_id))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data.get('description', None), "")
