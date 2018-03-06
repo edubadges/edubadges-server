@@ -29,6 +29,8 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
     narrative = MarkdownCharField(required=False, read_only=True)
     evidence_items = EvidenceItemSerializer(many=True, required=False, read_only=True)
 
+    extensions = serializers.DictField(source='extension_items', read_only=True)
+
     # Reinstantiation using fields from badge instance when returned by .create
     # id = serializers.IntegerField(read_only=True)
     # json = V1InstanceSerializer(read_only=True)
