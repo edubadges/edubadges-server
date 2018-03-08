@@ -19,6 +19,9 @@ class ExternalTool(BaseAuditedModel, BaseVersionedEntity):
     client_id = models.CharField(max_length=254, blank=True, null=True)
     client_secret = models.CharField(max_length=254, blank=True, null=True)
 
+    def __unicode__(self):
+        return self.name
+
     def get_lti_config(self):
         return lti.ToolConfig.create_from_xml(self.xml_config)
 
@@ -113,3 +116,21 @@ class ExternalToolLaunchpoint(cachemodel.CacheModel):
         launch_data = tool_consumer.generate_launch_data()
         return launch_data
 
+
+class ExternalToolUserActivation(BaseAuditedModel, cachemodel.CacheModel):
+    externaltool = models.ForeignKey('externaltools.ExternalTool')
+    user = models.ForeignKey('badgeuser.BadgeUser')
+    is_active = models.BooleanField(default=True, db_index=True)
+
+
+    def publish(self):
+        super(ExternalToolUserActivation, self).publish()
+        self.user.publish()
+
+    def delete(self, *args, **kwargs):
+        super(ExternalToolUserActivation, self).delete(*args, **kwargs)
+        self.user.publish()
+
+    @property
+    def cached_externaltool(self):
+        return ExternalTool.cached.get(pk=self.externaltool_id)

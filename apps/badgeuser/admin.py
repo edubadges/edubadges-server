@@ -1,7 +1,16 @@
-from django.contrib.admin import ModelAdmin
+from django.contrib.admin import ModelAdmin, TabularInline
+
+from externaltools.models import ExternalToolUserActivation
 from mainsite.admin import badgr_admin
 
 from .models import BadgeUser, EmailAddressVariant
+
+
+class ExternalToolInline(TabularInline):
+    model = ExternalToolUserActivation
+    fk_name = 'user'
+    fields = ('externaltool',)
+    extra = 0
 
 
 class BadgeUserAdmin(ModelAdmin):
@@ -15,7 +24,9 @@ class BadgeUserAdmin(ModelAdmin):
         ('Access', {'fields': ('is_active', 'is_staff', 'is_superuser', 'password')}),
         ('Permissions', {'fields': ('groups', 'user_permissions')}),
     )
-    pass
+    inlines = [
+        ExternalToolInline
+    ]
 
 badgr_admin.register(BadgeUser, BadgeUserAdmin)
 
