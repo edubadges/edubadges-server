@@ -293,7 +293,13 @@ class Issuer(ResizeUploadedImage,
             email=self.email,
             description=self.description))
         if self.image:
-            json['image'] = OriginSetting.HTTP + reverse('issuer_image', kwargs={'entity_id': self.entity_id})
+            image_url = OriginSetting.HTTP + reverse('issuer_image', kwargs={'entity_id': self.entity_id})
+            json['image'] = image_url
+            if self.original_json:
+                image_info = self.get_original_json().get('image', None)
+                if isinstance(image_info, dict):
+                    json['image'] = image_info
+                    json['image']['id'] = image_url
 
         if self.source_url:
             json['sourceUrl'] = self.source_url
@@ -555,8 +561,13 @@ class BadgeClass(ResizeUploadedImage,
             issuer=self.cached_issuer.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.cached_issuer.jsonld_id, obi_version),
         ))
         if self.image:
-            json['image'] = OriginSetting.HTTP + reverse('badgeclass_image', kwargs={'entity_id': self.entity_id})
-
+            image_url = OriginSetting.HTTP + reverse('badgeclass_image', kwargs={'entity_id': self.entity_id})
+            json['image'] = image_url
+            if self.original_json:
+                image_info = self.get_original_json().get('image', None)
+                if isinstance(image_info, dict):
+                    json['image'] = image_info
+                    json['image']['id'] = image_url
 
         # criteria
         if obi_version == '1_1':
@@ -884,10 +895,17 @@ class BadgeInstance(BaseAuditedModel,
         json = OrderedDict([
             ('@context', context_iri),
             ('type', 'Assertion'),
-            ('id', self.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.jsonld_id, obi_version)),
-            ('image', OriginSetting.HTTP + reverse('badgeinstance_image', kwargs={'entity_id': self.entity_id})),
-            ('badge', self.cached_badgeclass.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.cached_badgeclass.jsonld_id, obi_version)),
+            ('id', add_obi_version_ifneeded(self.jsonld_id, obi_version)),
+            ('badge', add_obi_version_ifneeded(self.cached_badgeclass.jsonld_id, obi_version)),
         ])
+
+        image_url = OriginSetting.HTTP + reverse('badgeinstance_image', kwargs={'entity_id': self.entity_id})
+        json['image'] = image_url
+        if self.original_json:
+            image_info = self.get_original_json().get('image', None)
+            if isinstance(image_info, dict):
+                json['image'] = image_info
+                json['image']['id'] = image_url
 
         if expand_badgeclass:
             json['badge'] = self.cached_badgeclass.get_json(obi_version=obi_version, include_extra=include_extra)

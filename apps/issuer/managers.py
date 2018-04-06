@@ -19,6 +19,8 @@ class IssuerManager(models.Manager):
         image_url = issuer_obo.get('image', None)
         image = None
         if image_url:
+           if isinstance(image_url, dict):
+               image_url = image_url.get('id')
            image = _fetch_image_and_get_file(image_url, upload_to='remote/issuer')
         return self.get_or_create(
             source_url=issuer_obo.get('id'),
@@ -58,7 +60,10 @@ class BadgeClassManager(models.Manager):
             criteria_url = criteria.get('id', None)
             criteria_text = criteria.get('narrative', None)
 
-        image = _fetch_image_and_get_file(badgeclass_obo.get('image'), upload_to='remote/badgeclass')
+        image_url = badgeclass_obo.get('image')
+        if isinstance(image_url, dict):
+            image_url = image_url.get('id')
+        image = _fetch_image_and_get_file(image_url, upload_to='remote/badgeclass')
 
         return self.get_or_create(
             source_url=badgeclass_obo.get('id'),
@@ -103,6 +108,8 @@ class BadgeInstanceManager(models.Manager):
         if image_url is None:
             image = badgeclass.image.file
         else:
+            if isinstance(image_url, dict):
+                image_url = image_url.get('id')
             image = _fetch_image_and_get_file(image_url, upload_to='remote/assertion')
 
         issued_on = None
