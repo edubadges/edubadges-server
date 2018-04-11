@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import cachemodel
 import lti
+from django.core.cache import cache
 from django.db import models
 from lti import LaunchParams
 
@@ -11,16 +12,39 @@ from issuer.models import BaseAuditedModel, BadgeInstance
 from mainsite.utils import OriginSetting, get_tool_consumer_instance_guid
 
 
+class ExternalToolManager(cachemodel.CacheModelManager):
+    global_tools_cache_key = "global_cached_externaltools"
+
+    def global_tools(self):
+        tools = cache.get(self.global_tools_cache_key)
+        if tools is None:
+            return self.publish_global_tools()
+        return tools
+
+    def publish_global_tools(self):
+        tools = self.filter(is_active=True, requires_user_activation=False)
+        cache.set(self.global_tools_cache_key, tools, timeout=None)
+        return tools
+
+
 class ExternalTool(BaseAuditedModel, BaseVersionedEntity):
     name = models.CharField(max_length=254)
     description = models.CharField(max_length=254, blank=True, null=True)
-    xml_config = models.TextField()
+    xml_config = models.TextField(blank=True, null=True)
     config_url = models.URLField(blank=True, null=True)
     client_id = models.CharField(max_length=254, blank=True, null=True)
     client_secret = models.CharField(max_length=254, blank=True, null=True)
+    requires_user_activation = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
+
+    cached = ExternalToolManager()
 
     def __unicode__(self):
         return self.name
+
+    def publish(self):
+        super(ExternalTool, self).publish()
+        ExternalTool.cached.publish_global_tools()
 
     def get_lti_config(self):
         return lti.ToolConfig.create_from_xml(self.xml_config)

@@ -19,7 +19,7 @@ class ExternalToolList(BaseEntityListView):
     http_method_names = ['get']
 
     def get_objects(self, request, **kwargs):
-        return request.user.cached_externaltools()
+        return list(ExternalTool.cached.global_tools()) + list(request.user.cached_externaltools())
 
     # @apispec_list_operation(
     #     'ExternalTool',

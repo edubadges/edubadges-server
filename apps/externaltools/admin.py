@@ -24,7 +24,7 @@ class ExternalToolAdmin(ModelAdmin):
             'classes': ("collapse",)
         }),
         (None, {
-            'fields': ('name', 'config_url', 'client_id', 'client_secret')
+            'fields': ('is_active', 'requires_user_activation', 'name', 'config_url', 'client_id', 'client_secret')
         }),
         ('Config', {
             'fields': ('xml_config',)
