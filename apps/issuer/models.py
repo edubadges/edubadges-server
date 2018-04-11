@@ -281,13 +281,13 @@ class Issuer(ResizeUploadedImage,
     def image_preview(self):
         return self.image
 
-    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True):
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True, use_canonical_id=False):
         obi_version, context_iri = get_obi_context(obi_version)
 
         json = OrderedDict({'@context': context_iri})
         json.update(OrderedDict(
             type='Issuer',
-            id=add_obi_version_ifneeded(self.jsonld_id, obi_version),
+            id=self.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.jsonld_id, obi_version),
             name=self.name,
             url=self.url,
             email=self.email,
@@ -544,15 +544,15 @@ class BadgeClass(ResizeUploadedImage,
             **kwargs
         )
 
-    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True):
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True, use_canonical_id=False):
         obi_version, context_iri = get_obi_context(obi_version)
         json = OrderedDict({'@context': context_iri})
         json.update(OrderedDict(
             type='BadgeClass',
-            id=add_obi_version_ifneeded(self.jsonld_id, obi_version),
+            id=self.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.jsonld_id, obi_version),
             name=self.name,
             description=self.description_nonnull,
-            issuer=add_obi_version_ifneeded(self.cached_issuer.jsonld_id, obi_version),
+            issuer=self.cached_issuer.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.cached_issuer.jsonld_id, obi_version),
         ))
         if self.image:
             json['image'] = OriginSetting.HTTP + reverse('badgeclass_image', kwargs={'entity_id': self.entity_id})
@@ -720,7 +720,7 @@ class BadgeInstance(BaseAuditedModel,
                 badgeclass_name, ext = os.path.splitext(self.badgeclass.image.file.name)
                 new_image = StringIO.StringIO()
                 bake(image_file=self.cached_badgeclass.image.file,
-                     assertion_json_string=json_dumps(self.json, indent=2),
+                     assertion_json_string=json_dumps(self.get_json(obi_version=UNVERSIONED_BAKED_VERSION), indent=2),
                      output_file=new_image)
                 self.image.save(name='assertion-{id}{ext}'.format(id=self.entity_id, ext=ext),
                                 content=ContentFile(new_image.read()),
@@ -878,15 +878,15 @@ class BadgeInstance(BaseAuditedModel,
             pass
         return None
 
-    def get_json(self, obi_version=CURRENT_OBI_VERSION, expand_badgeclass=False, expand_issuer=False, include_extra=True):
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, expand_badgeclass=False, expand_issuer=False, include_extra=True, use_canonical_id=False):
         obi_version, context_iri = get_obi_context(obi_version)
 
         json = OrderedDict([
             ('@context', context_iri),
             ('type', 'Assertion'),
-            ('id', add_obi_version_ifneeded(self.jsonld_id, obi_version)),
+            ('id', self.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.jsonld_id, obi_version)),
             ('image', OriginSetting.HTTP + reverse('badgeinstance_image', kwargs={'entity_id': self.entity_id})),
-            ('badge', add_obi_version_ifneeded(self.cached_badgeclass.jsonld_id, obi_version)),
+            ('badge', self.cached_badgeclass.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.cached_badgeclass.jsonld_id, obi_version)),
         ])
 
         if expand_badgeclass:
@@ -899,7 +899,7 @@ class BadgeInstance(BaseAuditedModel,
             return OrderedDict([
                 ('@context', context_iri),
                 ('type', 'Assertion'),
-                ('id', add_obi_version_ifneeded(self.jsonld_id, obi_version)),
+                ('id', self.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.jsonld_id, obi_version)),
                 ('revoked', self.revoked),
                 ('revocationReason', self.revocation_reason if self.revocation_reason else "")
             ])
@@ -907,7 +907,7 @@ class BadgeInstance(BaseAuditedModel,
         if obi_version == '1_1':
             json["uid"] = self.entity_id
             json["verify"] = {
-                "url": add_obi_version_ifneeded(self.public_url, obi_version),
+                "url": self.public_url if use_canonical_id else add_obi_version_ifneeded(self.public_url, obi_version),
                 "type": "hosted"
             }
             if self.source_url:

@@ -12,7 +12,7 @@ from openbadges_bakery import unbake
 
 from backpack.tests import setup_resources, setup_basic_1_0
 from issuer.models import Issuer, BadgeInstance
-from issuer.utils import CURRENT_OBI_VERSION, OBI_VERSION_CONTEXT_IRIS
+from issuer.utils import CURRENT_OBI_VERSION, OBI_VERSION_CONTEXT_IRIS, UNVERSIONED_BAKED_VERSION
 from mainsite.models import BadgrApp
 from mainsite.tests import BadgrTestCase, SetupIssuerHelper
 from mainsite.utils import OriginSetting
@@ -182,7 +182,7 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
         assertion = test_badgeclass.issue(recipient_id='new.recipient@email.test')
 
         response = self.client.get('/public/assertions/{}/image'.format(assertion.entity_id), follow=True)
-        self.verify_baked_image_response(assertion, response, obi_version=CURRENT_OBI_VERSION)
+        self.verify_baked_image_response(assertion, response, obi_version=UNVERSIONED_BAKED_VERSION)
 
         for obi_version in OBI_VERSION_CONTEXT_IRIS.keys():
             response = self.client.get('/public/assertions/{assertion}/baked?v={version}'.format(
@@ -190,7 +190,7 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
                 version=obi_version
             ), follow=True)
 
-            if obi_version == CURRENT_OBI_VERSION:
+            if obi_version == UNVERSIONED_BAKED_VERSION:
                 # current_obi_versions aren't re-baked expanded
                 self.verify_baked_image_response(assertion, response, obi_version=obi_version)
             else:
