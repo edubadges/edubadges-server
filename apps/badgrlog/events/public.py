@@ -12,6 +12,7 @@ class BaseBadgeAssertionEvent(BaseBadgrEvent):
         return {
             'ipAddress': client_ip_from_request(self.request),
             'badgeInstance': self.badge_instance.json,
+            'referer': self.request.META.get('HTTP_REFERER')
         }
 
 
@@ -43,5 +44,21 @@ class IssuerRetrievedEvent(BaseBadgeAssertionEvent):
     pass
 
 
+class IssuerBadgesRetrievedEvent(BaseBadgeAssertionEvent):
+    pass
+
+
 class IssuerImageRetrievedEvent(BaseBadgeAssertionEvent):
     pass
+
+
+class PathwayElementRetrievedEvent(BaseBadgrEvent):
+    def __init__(self, pathway_element, request):
+        self.request = request
+        self.pathway_element = pathway_element
+
+    def to_representation(self):
+        return {
+            'ipAddress': client_ip_from_request(self.request),
+            'pathwayElement': self.pathway_element
+        }

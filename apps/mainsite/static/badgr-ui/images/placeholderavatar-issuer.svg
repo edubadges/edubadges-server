@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="81px" height="81px" viewBox="0 0 81 81" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.8.3 (29802) - http://www.bohemiancoding.com/sketch -->
+    <title>placeholderavatar-issuer</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="80" height="80" rx="6"></rect>
+        <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="80" height="80" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+    </defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Placeholder-/-Issuer">
+            <g id="image">
+                <use id="bounds" stroke="#E1E0E5" mask="url(#mask-2)" stroke-width="4" xlink:href="#path-1"></use>
+                <g id="icon" opacity="0.300000012" transform="translate(14.936504, 16.047607)" fill="#CCCCCC">
+                    <polygon id="Fill-1" points="4.65884906 37.3887958 44.1751547 37.3887958 44.1751547 32.2601728 4.65884906 32.2601728"></polygon>
+                    <polygon id="Fill-2" points="0 47.8113131 48.8337602 47.8113131 48.8337602 42.6826901 0 42.6826901"></polygon>
+                    <polygon id="Fill-3" points="10.6627164 32.2601728 16.2495842 32.2601728 16.2495842 14.144845 10.6627164 14.144845"></polygon>
+                    <polygon id="Fill-4" points="21.8671424 32.2601728 27.4540103 32.2601728 27.4540103 14.144845 21.8671424 14.144845"></polygon>
+                    <polygon id="Fill-5" points="33.0715685 32.2601728 38.6584363 32.2601728 38.6584363 14.144845 33.0715685 14.144845"></polygon>
+                    <polygon id="Fill-6" points="24.144783 9.926207e-05 4.65882471 14.3104637 44.1751303 14.3104637"></polygon>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

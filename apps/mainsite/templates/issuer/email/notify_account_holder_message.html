@@ -1,0 +1,21 @@
+{% extends "issuer/email/base_notify_award.html" %}
+
+{% load staticfiles %}
+
+
+
+{% block how_to_use_title %}
+Your badge is ready
+{% endblock %}
+
+
+{% block how_to_use_row %}
+This badge has been automatically added to your {{ site_name }} account. Wherever you
+share or display your badge, portable information about your achievement will
+be locked inside. You may also save this badge image for your records or to upload to any Open
+Badges-compatible service.
+{% endblock %}
+
+{% block call_to_action_label %}
+Go To Account
+{% endblock %}

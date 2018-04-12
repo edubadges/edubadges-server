@@ -1,0 +1,11 @@
+Please confirm your email address on Badgr,
+{{ email.email }}
+
+A Badgr user has requested to add this email to their account or use it in a connected application.
+Once confirmed, you may upload badges to your Badgr account that have been issued to this address
+or use features within connected applications.
+
+{{ activate_url }}
+
+If you didn't make this request, you can safely ignore this email, and
+no action will be taken on your behalf.

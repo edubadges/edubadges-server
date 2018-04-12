@@ -1,185 +1,44 @@
+import StringIO
 import abc
 import base64
+import os
+import re
+import urlparse
+
+import basic_models
 from datetime import datetime, timedelta
-from hashlib import sha1
+from hashlib import sha1, md5
 import hmac
 import uuid
 
+import requests
+from basic_models.managers import ActiveObjectsManager
+from basic_models.models import CreatedUpdatedBy, CreatedUpdatedAt, IsActive
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.core.files.storage import DefaultStorage
 from django.core.urlresolvers import reverse
 from django.db import models
 
 from autoslug import AutoSlugField
 import cachemodel
+from django.db.models import Manager
+from django.utils.deconstruct import deconstructible
 from jsonfield import JSONField
 
+from mainsite.utils import OriginSetting, fetch_remote_file_to_storage
 from .mixins import ResizeUploadedImage
 
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
-class AbstractComponent(cachemodel.CacheModel):
-    """
-    A base class for Issuer badge objects, those that are part of badges issue
-    by users on this system.
-    """
-    created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(AUTH_USER_MODEL, blank=True, null=True,
-                                   related_name="+")
-    identifier = models.CharField(max_length=1024, null=False,
-                                  default='get_full_url')
-    json = JSONField()
-
-    class Meta:
-        abstract = True
-
-    def __unicode__(self):
-        return self.name
-
-    def get_full_url(self):
-        try:
-            return self.json['id']
-        except (KeyError, TypeError):
-            if self.get_absolute_url().startswith('/'):
-                return settings.HTTP_ORIGIN + self.get_absolute_url()
-            else:
-                return '_:null'
-
-    def prop(self, property_name):
-        return self.json.get(property_name)
-
-    @property
-    def owner(self):
-        return self.created_by
-
-
-class AbstractIssuer(ResizeUploadedImage, AbstractComponent):
-    """
-    Open Badges Specification IssuerOrg object
-    """
-    image = models.FileField(upload_to='uploads/issuers', blank=True,
-                              null=True)
-    name = models.CharField(max_length=1024)
-    slug = AutoSlugField(max_length=255, populate_from='name', unique=True,
-                         blank=False, editable=True)
-
-
-    def get_absolute_url(self):
-        return reverse('issuer_json', kwargs={'slug': self.slug})
-
-    @property
-    def editors(self):
-        # TODO Test this:
-        return self.staff.filter(issuerstaff__editor=True)
-
-    class Meta:
-        abstract = True
-
-    def publish(self):
-        super(AbstractIssuer, self).publish()
-        self.publish_by('slug')
-
-    def delete(self, *args, **kwargs):
-        super(AbstractIssuer, self).delete(*args, **kwargs)
-        self.publish_delete("slug")
-
-
-class AbstractBadgeClass(ResizeUploadedImage, AbstractComponent):
-    """
-    Open Badges Specification BadgeClass object
-    """
-    #  issuer = models.ForeignKey(Issuer, blank=False, null=False,
-    #                             on_delete=models.PROTECT,
-    #                             related_name="badgeclasses")
-
-    criteria_text = models.TextField(blank=True, null=True)  # TODO: CKEditor field
-    image = models.FileField(upload_to='uploads/badges', blank=True)
-    name = models.CharField(max_length=255)
-    slug = AutoSlugField(max_length=255, populate_from='name', unique=True,
-                         blank=False, editable=True)
-
-    class Meta:
-        abstract = True
-        verbose_name_plural = "Badge classes"
-
-    def get_absolute_url(self):
-        return reverse('badgeclass_json', kwargs={'slug': self.slug})
-
-    @property
-    def owner(self):
-        return self.issuer.owner
-
-    def publish(self):
-        super(AbstractBadgeClass, self).publish()
-        self.publish_by('slug')
-
-    def delete(self, *args, **kwargs):
-        super(AbstractBadgeClass, self).delete(*args, **kwargs)
-        self.publish_delete('slug')
-
-
-class AbstractBadgeInstance(AbstractComponent):
-    """
-    Open Badges Specification Assertion object
-    """
-    # # 0.5 BadgeInstances have no notion of a BadgeClass (null=True)
-    # badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False,
-    #                                on_delete=models.PROTECT,
-    #                                related_name='assertions')
-    # # 0.5 BadgeInstances have no notion of a BadgeClass (null=True)
-    # issuer = models.ForeignKey(Issuer, blank=False, null=False)
-
-    recipient_identifier = models.EmailField(max_length=1024, blank=False,
-                                             null=False)
-    image = models.FileField(upload_to='uploads/badges', blank=True)  # upload_to='issued' in cred_store
-    slug = AutoSlugField(max_length=255, populate_from='populate_slug',
-                         unique=True, blank=False, editable=False)
-
-    revoked = models.BooleanField(default=False)
-    revocation_reason = models.CharField(max_length=255, blank=True, null=True,  # TODO: blank=True, null=True?
-                                         default=None)
-
-    class Meta:
-        abstract = True
-
-    def __unicode__(self):
-        if self.badgeclass:
-            badge_class_name = self.badgeclass.name
-        else:
-            badge_class_name = self.json['badge']['name']
-
-        return "%s issued to %s" % (badge_class_name,
-                                    self.recipient_identifier,)
-
-    def get_absolute_url(self):
-        return reverse('badgeinstance_json', kwargs={'slug': self.slug})
-
-    def populate_slug(self):
-        return str(uuid.uuid4())
-
-    #  def image_url(self):
-    #      if getattr(settings, 'MEDIA_URL').startswith('http'):
-    #          return getattr(settings, 'MEDIA_URL') \
-    #              + self.image.name
-    #      else:
-    #          return getattr(settings, 'HTTP_ORIGIN') \
-    #              + getattr(settings, 'MEDIA_URL') \
-    #              + self.image.name
-
-    def publish(self):
-        super(AbstractBadgeInstance, self).publish()
-        self.publish_by('slug')
-        self.publish_by('slug', 'revoked')
-
-    def delete(self, *args, **kwargs):
-        super(AbstractBadgeInstance, self).delete(*args, **kwargs)
-        self.publish_delete('slug')
-        self.publish_delete('slug', 'revoked')
-
-
 class EmailBlacklist(models.Model):
     email = models.EmailField(unique=True)
+
+    class Meta:
+        verbose_name = 'Blacklisted email'
+        verbose_name_plural = 'Blacklisted emails'
 
     @staticmethod
     def generate_email_signature(email):
@@ -203,3 +62,75 @@ class EmailBlacklist(models.Model):
 
         hashed = hmac.new(secret_key, email_encoded + expiration, sha1)
         return hmac.compare_digest(hashed.hexdigest(), str(signature))
+
+
+class BadgrAppManager(Manager):
+    def get_current(self, request=None):
+        origin = None
+
+        if request:
+            if request.META.get('HTTP_ORIGIN'):
+                origin = request.META.get('HTTP_ORIGIN')
+            elif request.META.get('HTTP_REFERER'):
+                origin = request.META.get('HTTP_REFERER')
+
+        if origin:
+            url = urlparse.urlparse(origin)
+            try:
+                return self.get(cors=url.netloc)
+            except self.model.DoesNotExist:
+                pass
+        badgr_app_id = getattr(settings, 'BADGR_APP_ID', None)
+        if not badgr_app_id:
+            raise ImproperlyConfigured("Must specify a BADGR_APP_ID")
+        return self.get(id=badgr_app_id)
+
+
+class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive, cachemodel.CacheModel):
+    name = models.CharField(max_length=254)
+    cors = models.CharField(max_length=254, unique=True)
+    email_confirmation_redirect = models.URLField()
+    signup_redirect = models.URLField()
+    forgot_password_redirect = models.URLField()
+    ui_login_redirect = models.URLField(null=True)
+    ui_signup_success_redirect = models.URLField(null=True)
+    ui_connect_success_redirect = models.URLField(null=True)
+    public_pages_redirect = models.URLField(null=True)
+    oauth_authorization_redirect = models.URLField(null=True)
+    objects = BadgrAppManager()
+
+    def __unicode__(self):
+        return self.cors
+
+
+@deconstructible
+class DefinedScopesValidator(object):
+    message = "Does not match defined scopes"
+    code = 'invalid'
+
+    def __call__(self, value):
+        defined_scopes = set(getattr(settings, 'OAUTH2_PROVIDER', {}).get('SCOPES', {}).keys())
+        provided_scopes = set(s.strip() for s in re.split(r'[\s\n]+', value))
+        if provided_scopes - defined_scopes:
+            raise ValidationError(self.message, code=self.code)
+        pass
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__)
+
+
+class ApplicationInfo(cachemodel.CacheModel):
+    application = models.OneToOneField('oauth2_provider.Application')
+    icon = models.FileField(blank=True, null=True)
+    name = models.CharField(max_length=254, blank=True, null=True, default=None)
+    website_url = models.URLField(blank=True, null=True, default=None)
+    allowed_scopes = models.TextField(blank=False, validators=[DefinedScopesValidator()])
+
+    def get_visible_name(self):
+        if self.name:
+            return self.name
+        return self.application.name
+
+    def get_icon_url(self):
+        if self.icon:
+            return self.icon.url

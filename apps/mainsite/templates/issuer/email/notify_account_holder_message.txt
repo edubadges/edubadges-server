@@ -1,0 +1,49 @@
+************************************
+Congratulations, you earned a badge!
+************************************
+
+---------
+{{ badge_name }}
+---------
+
+{{ badge_description }}
+
+---------
+Issuer
+---------
+
+{{ issuer_name }}
+{{ issuer_url }}
+
+----------
+Your badge is ready
+----------
+
+This badge has been automatically added to your {{ site_name }} ( {{ site_url }} ) account. Wherever you
+share or display your badge, portable information about your achievement will
+be locked inside.{% if promote_mobile %}
+
+You can also download our mobile app to take your badges on the go!
+http://info.badgr.io/#mobile{% endif %}
+
+----------
+Download
+----------
+
+You may also save this badge image for your records or to upload to any Open
+Badges-compatible service:
+{{ download_url }}
+
+-----------
+Open Badges: Portable Digital Credentials
+-----------
+
+Open digital badges let you take your credentials from the many places you learn,
+and combine them to tell a cohesive story about your learning.
+
+Learn more at http://openbadges.org
+
+
+Unsubscribe: If you wish not to be notified of any future badge awards from
+this service, click the link below:
+{{ unsubscribe_url }}

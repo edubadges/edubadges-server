@@ -1,0 +1,160 @@
+%define name badgr-server
+%define install_dir /opt/site
+%define app_user web
+%define base_dir %{_builddir}/%{version}
+%define _unpackaged_files_terminate_build 0
+
+Summary: Badgr Server
+Name: %{name}
+Version: %{version}
+Release: %{release}
+Source0: ./%{name}.tar.gz
+License: GNU Affero General Public License v3
+Group: Development/Libraries
+BuildArch: x86_64
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
+
+Vendor: Concentric Sky, Inc.
+
+BuildRequires: mysql-devel
+BuildRequires: autoconf
+BuildRequires: automake
+BuildRequires: cyrus-sasl-devel
+BuildRequires: gcc
+BuildRequires: libffi-devel
+BuildRequires: libjpeg-turbo
+BuildRequires: libjpeg-turbo-devel
+BuildRequires: libpng12
+BuildRequires: libpng12-devel
+BuildRequires: libtool
+BuildRequires: libxslt-devel
+BuildRequires: memcached-devel
+BuildRequires: python2-boto
+BuildRequires: python2-boto3
+BuildRequires: python-devel
+BuildRequires: python-pip
+BuildRequires: python-virtualenv
+BuildRequires: ruby
+BuildRequires: ruby-devel
+BuildRequires: rubygems
+BuildRequires: swig
+BuildRequires: zlib-devel
+
+Requires(pre): /usr/sbin/useradd, /usr/bin/getent
+Requires(postun): /usr/sbin/userdel
+
+Requires: apr
+Requires: cairo
+Requires: libdbi
+Requires: libpng12
+Requires: libjpeg-turbo
+Requires: MySQL-python
+
+%description
+Open Badge issuing and management with Django
+
+%prep
+%setup -n %{version}
+
+%clean
+%{__rm} -rf %{buildroot}
+%{__rm} -rf %{install_dir}/builds/%{version}
+%{__rm} -rf %{install_dir}/static/%{version}
+
+
+%pre
+/usr/bin/getent group %{app_user} || /usr/sbin/groupadd -r %{app_user}
+/usr/bin/getent passwd %{app_user} || /usr/sbin/useradd -r -d %{install_dir} -s /bin/bash %{app_user} -g %{app_user} -k /etc/skel -m
+/sbin/usermod -G %{app_user} apache
+
+%preun
+
+%post
+%{__rm} -f %{install_dir}/code
+%{__rm} -f %{install_dir}/env
+%{__rm} -f %{install_dir}/staticfiles
+%{__ln_s} -f %{install_dir}/builds/%{version}/code %{install_dir}/code
+%{__ln_s} -f %{install_dir}/builds/%{version}/env %{install_dir}/env
+%{__ln_s} -f %{install_dir}/static/%{version} %{install_dir}/staticfiles
+%{__ln_s} -f %{install_dir}/etc/settings_local.py %{install_dir}/builds/%{version}/code/apps/mainsite/settings_local.py
+/bin/chown %{app_user}:%{app_user} -R %{install_dir}
+
+%postun
+if [ "$1" = "1" ]; then
+    # If the first argument to %preun and %postun is 1, the action is an upgrade.
+    %{__rm} -rf %{install_dir}/builds/%{version}
+    %{__rm} -rf %{install_dir}/static/%{version}
+elif [ "$1" = "0" ]; then
+    # If the first argument to %preun and %postun is 0, the action is uninstallation.
+    %{__rm} -rf %{install_dir}/builds/%{version}
+    %{__rm} -rf %{install_dir}/static/%{version}
+    %{__rm} -f %{install_dir}/code
+    %{__rm} -f %{install_dir}/env
+    %{__rm} -f %{install_dir}/staticfiles
+fi
+
+
+%build
+%{__mkdir_p} %{install_dir}/builds/%{version}
+
+# BUILD BASIC VIRTUALENV
+/usr/bin/virtualenv %{install_dir}/builds/%{version}/env
+
+# UPGRADE PIP/Virtualenv
+%{install_dir}/builds/%{version}/env/bin/pip install -U pip
+%{install_dir}/builds/%{version}/env/bin/pip install -U virtualenv
+
+# INSTALL PYCURL FIRST...
+export PYCURL_SSL_LIBRARY=nss
+%{install_dir}/builds/%{version}/env/bin/easy_install pycurl
+
+# INSTALL PROJECT DEPENDENCIES
+%{install_dir}/builds/%{version}/env/bin/pip install -r %{base_dir}/code/requirements.txt
+
+%{__cp} %{base_dir}/code/settings_local.py.build %{base_dir}/code/apps/mainsite/settings_local.py
+
+# RUN ./manage.py dist
+%{install_dir}/builds/%{version}/env/bin/python %{base_dir}/code/manage.py dist
+
+# COLLECT STATIC FILES
+echo "STATIC_ROOT = '%{base_dir}/static/'" >> %{base_dir}/code/settings_local.py.build
+%{__cp} %{base_dir}/code/settings_local.py.build %{base_dir}/code/apps/mainsite/settings_local.py
+%{install_dir}/builds/%{version}/env/bin/python %{base_dir}/code/manage.py collectstatic --noinput
+%{__rm} -f %{base_dir}/code/apps/mainsite/settings_local.py
+
+# GENERATE VERSION INFO
+echo "%{version}-%{release}" > %{base_dir}/code/version.txt
+echo '{"version": '"\"%{version}\""', "release": '"\"%{release}\""', "commit_sha": '"\"%{git_sha}\""', "build_date": '"\"%{build_date}\""'}' > %{base_dir}/code/buildInfo.json
+
+
+%install
+%{__mkdir_p} %{buildroot}%{install_dir}/builds/%{version}/code
+%{__mkdir_p} %{buildroot}%{install_dir}/static/%{version}/
+
+%{__install} -D -m 640 %{base_dir}/code/apps/mainsite/settings_local.py.example %{buildroot}%{install_dir}/etc/settings_local.py
+%{__install} -D -m 640 %{base_dir}/code/wsgi.py %{buildroot}%{install_dir}/wsgi/wsgi.py
+%{__cp} -Rp %{base_dir}/static/* %{buildroot}%{install_dir}/static/%{version}/
+%{__cp} -Rp %{base_dir}/code/*  %{buildroot}%{install_dir}/builds/%{version}/code/
+%{__cp} -Rp %{install_dir}/builds/%{version}/env %{buildroot}%{install_dir}/builds/%{version}/
+
+
+%files
+%license %{install_dir}/builds/%{version}/code/LICENSE
+%defattr(0750,%{app_user},%{app_user},0750)
+%{install_dir}/wsgi/wsgi.py
+%{install_dir}/builds/%{version}
+%{install_dir}/static/%{version}
+%config(noreplace) %attr(0644,root,root) %{install_dir}/etc/settings_local.py
+
+%changelog
+* Thu Feb 22 2018 Francisco Gray <fgray@concentricsky.com>
+- Removed npm install / build step
+
+* Thu Oct 26 2017 Francisco Gray <fgray@concentricsky.com>
+- Removed httpd and mod_wsgi from Requires
+
+* Mon Oct 9 2017 Francisco Gray <fgray@concentricsky.com>
+- Updated pre/preun post/postun logic to work correctly during an upgrade.
+
+* Fri Oct 6 2017 Francisco Gray <fgray@concentricsky.com>
+- First packaging of badgr-server

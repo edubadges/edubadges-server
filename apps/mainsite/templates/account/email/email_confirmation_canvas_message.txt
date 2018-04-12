@@ -1,0 +1,11 @@
+Please verify your email address on Badgr,
+{{ email.email }}
+
+You've joined a course in Canvas where you're using Badgr as a teacher. We
+now require email addresses to be confirmed to enable access to Badgr. In
+order to use Badgr within your course, please confirm your email address.
+
+{{ activate_url }}
+
+If you do not wish to use Badgr at this time in your Canvas course, you can
+safely ignore this email, and no action will be taken on your behalf.

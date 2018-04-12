@@ -1,0 +1,39 @@
+{% extends "rest_framework_swagger/base.html" %}
+{% load staticfiles %}
+
+{% block style %}
+	{{ block.super }}
+	<link href="{% static 'badgr-ui/badgr-ui.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block header %}
+	<header class="header l-containerhorizontal">
+		<a href="{{ BADGR_UI_URL }}">
+			<picture>
+				<source media="(min-width: 640px)" srcset="{% static 'badgr-ui/images/logo-desktop.svg' %}">
+				<img alt="Badgr logo" src="{% static 'badgr-ui/images/logo.svg' %}">
+			</picture>
+		</a>
+		<a class="header-x-menu" href="javascript:void(0)" onclick="document.getElementById('menu').scrollIntoView(false)">Main Navigation</a>
+	</header>
+{% endblock %}
+
+{% block django_rest_swagger %}
+{% endblock %}
+
+{% block body %}
+<app>
+	{{ block.super }}
+
+	<nav class="menu" id="menu">
+		<h1 class="visuallyhidden">Main Navigation</h1>
+		<ul>
+			{% if user.is_authenticated %}
+				<li class="menuitem" ><a href="{% url "logout"%}">{{ user.email }}</a></li>
+			{% else %}
+				<li class="menuitem" ><a href="{% url "login"%}?next={{ request.path }}">Sign In</a></li>
+			{% endif %}
+		</ul>
+	</nav>
+</app>
+{% endblock %}

@@ -1,712 +1,623 @@
-from itertools import chain
-import logging
-from django.apps import apps
+from collections import OrderedDict
 
-from django.conf import settings
-from django.contrib.auth import get_user_model
+import datetime
+
+import dateutil.parser
 from django.db.models import Q
-
-from allauth.account.models import EmailAddress
-from rest_framework import status, authentication, permissions
-from rest_framework.exceptions import ValidationError, PermissionDenied
+from django.http import Http404
+from django.utils import timezone
+from oauth2_provider.models import AccessToken
+from oauthlib.oauth2.rfc6749.tokens import random_token_generator
+from rest_framework import status, serializers
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
+
 import badgrlog
-
-from .models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
-from .serializers import (IssuerSerializer, BadgeClassSerializer,
-                          BadgeInstanceSerializer, IssuerRoleActionSerializer,
-                          IssuerStaffSerializer)
-from .permissions import (MayIssueBadgeClass, MayEditBadgeClass,
-                          IsEditor, IsStaff, IsOwnerOrStaff)
-
+from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
+from entity.serializers import BaseSerializerV2, V2ErrorSerializer
+from issuer.models import Issuer, BadgeClass, BadgeInstance, IssuerStaff
+from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
+                                IsEditor, IsStaff, ApprovedIssuersOnly, BadgrOAuthTokenHasScope,
+                                BadgrOAuthTokenHasEntityScope)
+from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
+                                   BadgeInstanceSerializerV1)
+from issuer.serializers_v2 import IssuerSerializerV2, BadgeClassSerializerV2, BadgeInstanceSerializerV2, \
+    IssuerAccessTokenSerializerV2
+from apispec_drf.decorators import apispec_get_operation, apispec_put_operation, \
+    apispec_delete_operation, apispec_list_operation, apispec_post_operation
+from mainsite.pagination import EncryptedCursorPagination
+from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from mainsite.serializers import CursorPaginatedListSerializer
 
 logger = badgrlog.BadgrLogger()
 
 
-class AbstractIssuerAPIEndpoint(APIView):
-    authentication_classes = (
-        authentication.TokenAuthentication,
-        authentication.SessionAuthentication,
-        authentication.BasicAuthentication,
+class IssuerList(BaseEntityListView):
+    """
+    Issuer list resource for the authenticated user
+    """
+    model = Issuer
+    v1_serializer_class = IssuerSerializerV1
+    v2_serializer_class = IssuerSerializerV2
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, ApprovedIssuersOnly, BadgrOAuthTokenHasScope)
+    valid_scopes = ["rw:issuer"]
+
+    create_event = badgrlog.IssuerCreatedEvent
+
+    def get_objects(self, request, **kwargs):
+        return self.request.user.cached_issuers()
+
+    @apispec_list_operation('Issuer',
+        summary="Get a list of Issuers for authenticated user",
+        tags=["Issuers"],
     )
-    permission_classes = (permissions.IsAuthenticated,)
+    def get(self, request, **kwargs):
+        return super(IssuerList, self).get(request, **kwargs)
 
-    def get_object(self, slug, queryset=None):
-        """ Ensure user has permissions on Issuer """
-
-        queryset = queryset if queryset is not None else self.queryset
-        try:
-            obj = queryset.get(slug=slug)
-        except self.model.DoesNotExist:
-            return None
-
-        try:
-            self.check_object_permissions(self.request, obj)
-        except PermissionDenied:
-            return None
-        else:
-            return obj
-
-    def get_list(self, slug=None, queryset=None, related=None):
-        """ Ensure user has permissions on Issuer, and return badgeclass queryset if so. """
-        queryset = queryset if queryset is not None else self.queryset
-
-        obj = queryset
-        if slug is not None:
-            obj = queryset.filter(slug=slug)
-        if related is not None:
-            obj = queryset.select_related(related)
-
-        if not obj.exists():
-            return self.model.objects.none()
-
-        try:
-            self.check_object_permissions(self.request, obj[0])
-        except PermissionDenied:
-            return self.model.objects.none()
-        else:
-            return obj
+    @apispec_post_operation('Issuer',
+        summary="Create a new Issuer",
+        tags=["Issuers"],
+    )
+    def post(self, request, **kwargs):
+        return super(IssuerList, self).post(request, **kwargs)
 
 
-class IssuerList(AbstractIssuerAPIEndpoint):
-    """
-    Issuer List resource for the authenticated user
-    """
-    queryset = Issuer.objects.all()
+class IssuerDetail(BaseEntityDetailView):
     model = Issuer
-    serializer_class = IssuerSerializer
+    v1_serializer_class = IssuerSerializerV1
+    v2_serializer_class = IssuerSerializerV2
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, BadgrOAuthTokenHasEntityScope)
+    valid_scopes = ["rw:issuer", "rw:issuer:*"]
 
-    def get(self, request):
-        """
-        GET a list of issuers owned, edited or staffed by the logged in user
-        ---
-        serializer: IssuerSerializer
-        """
-        # Get the Issuers this user owns, edits, or staffs:
-        user_issuers = self.get_list(queryset=self.queryset.filter(
-            Q(owner__id=request.user.id) |
-            Q(staff__id=request.user.id)).distinct()
-        )
-        if not user_issuers.exists():
-            return Response([])
+    @apispec_get_operation('Issuer',
+        summary="Get a single Issuer",
+        tags=["Issuers"],
+    )
+    def get(self, request, **kwargs):
+        return super(IssuerDetail, self).get(request, **kwargs)
 
-        serializer = IssuerSerializer(user_issuers, many=True, context={'request': request})
-        return Response(serializer.data)
+    @apispec_put_operation('Issuer',
+       summary="Update a single Issuer",
+       tags=["Issuers"],
+   )
+    def put(self, request, **kwargs):
+        return super(IssuerDetail, self).put(request, **kwargs)
 
-    def post(self, request):
-        """
-        Define a new issuer to be owned by the logged in user
-        ---
-        parameters:
-            - name: name
-              description: The name of the Issuer
-              required: true
-              type: string
-              paramType: form
-            - name: description
-              description: A short text description of the new Issuer
-              required: true
-              type: string
-              paramType: form
-            - name: url
-              description: A fully-qualified URL of the Issuer's website or homepage
-              required: true
-              type: string
-              paramType: form
-            - name: email
-              description: A contact email for the Issuer
-              required: true
-              type: string
-              paramType: form
-            - name: image
-              description: An image file that represents the Issuer, such as a logo
-              required: false
-              type: file
-              paramType: form
-        """
-        if getattr(settings, 'BADGR_APPROVED_ISSUERS_ONLY', False) \
-                and not request.user.has_perm('issuer.add_issuer'):
-            return Response(
-                "User not in an approved issuers group",
-                status=status.HTTP_403_FORBIDDEN
-            )
-
-        serializer = IssuerSerializer(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-
-        # Pass in user values where we have a real user object instead of a url
-        # and non-model-field data to go into json
-        serializer.save(
-            owner=request.user,
-            created_by=request.user
-        )
-        issuer = serializer.data
-
-        logger.event(badgrlog.IssuerCreatedEvent(issuer))
-        return Response(issuer, status=status.HTTP_201_CREATED)
+    @apispec_delete_operation('Issuer',
+        summary="Delete a single Issuer",
+        tags=["Issuers"],
+    )
+    def delete(self, request, **kwargs):
+        return super(IssuerDetail, self).delete(request, **kwargs)
 
 
-class IssuerDetail(AbstractIssuerAPIEndpoint):
-    """
-    GET details on one issuer. PUT and DELETE should be highly restricted operations and are not implemented yet
-    """
-    queryset = Issuer.objects.all()
-    model = Issuer
-    serializer_class = IssuerSerializer
-    permission_classes = (permissions.IsAuthenticated, IsStaff,)
-
-    def get(self, request, slug):
-        """
-        Detail view for one issuer owned, edited, or staffed by the authenticated user
-        ---
-        serializer: IssuerSerializer
-        """
-        try:
-            current_issuer = Issuer.cached.get(slug=slug)
-        except Issuer.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        else:
-            serializer = IssuerSerializer(current_issuer, context={'request': request})
-            return Response(serializer.data)
-
-    def delete(self, request, slug):
-        """
-        DELETE an issuer if it hasn't issued any badges yet.
-        ---
-        parameters:
-            - name: slug
-              type: string
-              paramType: path
-              description: The slug of the issuer to delete.
-              required: true
-        """
-        issuer = self.get_object(slug)
-        if issuer is None:
-            return Response(
-                "Issuer {} not found. Authenticated user must have owner, editor or staff rights on the issuer.".format(slug),
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        # determine if the issuer can be deleted
-        issued_count = sum(bc.recipient_count() for bc in issuer.cached_badgeclasses())
-        if issued_count > 0:
-            return Response(
-                "Issuer {} can not be removed since it has previously issued badges.".format(slug),
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # remove all badgeclasses owned by issuer
-        for bc in issuer.cached_badgeclasses():
-            bc.delete()
-
-        # remove issuer staff
-        IssuerStaff.objects.filter(issuer=issuer).delete()
-
-        if apps.is_installed('badgebook'):
-            try:
-                from badgebook.models import LmsCourseInfo
-                # update LmsCourseInfo's that were using this issuer as the default_issuer
-                for course_info in LmsCourseInfo.objects.filter(default_issuer=issuer):
-                    course_info.default_issuer = None
-                    course_info.save()
-            except ImportError:
-                pass
-
-        # delete the issuer
-        issuer.delete()
-        return Response("Issuer {} has been deleted.".format(slug), status.HTTP_200_OK)
-
-
-class IssuerStaffList(AbstractIssuerAPIEndpoint):
-    """ View or modify an issuer's staff members and privileges """
-    role = 'staff'
-    queryset = Issuer.objects.all()
-    model = Issuer
-    permission_classes = (permissions.IsAuthenticated, IsOwnerOrStaff,)
-
-    def get(self, request, slug):
-        """
-        Get a list of users associated with a role on an Issuer
-        ---
-        parameters:
-            - name: slug
-              type: string
-              paramType: path
-              description: The slug of the issuer whose roles to view.
-              required: true
-        """
-        current_issuer = self.get_object(slug)
-
-        if current_issuer is None:
-            return Response(
-                "Issuer %s not found. Authenticated user must have owner, editor or staff rights on the issuer." % slug,
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        serializer = IssuerStaffSerializer(
-            IssuerStaff.objects.filter(issuer=current_issuer),
-            many=True
-        )
-
-        if len(serializer.data) == 0:
-            return Response([], status=status.HTTP_200_OK)
-        return Response(serializer.data)
-
-    def post(self, request, slug):
-        """
-        Add or remove a user from a role on an issuer. Limited to Owner users only.
-        ---
-        parameters:
-            - name: slug
-              type: string
-              paramType: path
-              description: The slug of the issuer whose roles to modify.
-              required: true
-            - name: action
-              type: string
-              paramType: form
-              description: The action to perform on the user. Must be one of 'add', 'modify', or 'remove'.
-              required: true
-            - name: username
-              type: string
-              paramType: form
-              description: The username of the user to add or remove from this role.
-              required: false
-            - name: email
-              type: string
-              paramType: form
-              description: A verified email address of the user to add or remove from this role.
-              required: false
-            - name: editor
-              type: boolean
-              paramType: form
-              description: Should the user have editor privileges?
-              defaultValue: false
-              required: false
-        """
-        # validate POST data
-        serializer = IssuerRoleActionSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        current_issuer = self.get_object(slug)
-        if current_issuer is None:
-            return Response(
-                "Issuer %s not found. Authenticated user must be Issuer's owner to modify user permissions." % slug,
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        try:
-            if serializer.validated_data.get('username'):
-                user_id = serializer.validated_data.get('username')
-                user_to_modify = get_user_model().objects.get(username=user_id)
-            else:
-                user_id = serializer.validated_data.get('email')
-                user_to_modify = EmailAddress.objects.get(
-                    email=user_id).user
-        except (get_user_model().DoesNotExist, EmailAddress.DoesNotExist,):
-            error_text = "User {} not found. Cannot modify Issuer permissions.".format(user_id)
-            if user_id is None:
-                error_text = 'User not found. Neither email address or username was provided.'
-            return Response(
-                error_text, status=status.HTTP_404_NOT_FOUND
-            )
-
-        action = serializer.validated_data.get('action')
-        if action in ('add', 'modify'):
-
-            editor_privilege = serializer.validated_data.get('editor')
-            staff_instance, created = IssuerStaff.objects.get_or_create(
-                user=user_to_modify,
-                issuer=current_issuer,
-                defaults={'editor': editor_privilege}
-            )
-
-            if created is False and staff_instance.editor != editor_privilege:
-                staff_instance.editor = editor_privilege
-                staff_instance.save(update_fields=('editor',))
-
-        elif action == 'remove':
-            IssuerStaff.objects.filter(user=user_to_modify, issuer=current_issuer).delete()
-            return Response(
-                "User %s has been removed from %s staff." % (user_to_modify.username, current_issuer.name),
-                status=status.HTTP_200_OK)
-
-        return Response(IssuerStaffSerializer(staff_instance).data)
-
-
-class AllBadgeClassesList(AbstractIssuerAPIEndpoint):
+class AllBadgeClassesList(BaseEntityListView):
     """
     GET a list of badgeclasses within one issuer context or
     POST to create a new badgeclass within the issuer context
     """
-    queryset = Issuer.objects.all()
-    model = Issuer
-    permission_classes = (permissions.IsAuthenticated, IsEditor,)
-
-    def get(self, request):
-        """
-        GET a list of badgeclasses within one Issuer context.
-        Authenticated user must have owner, editor, or staff status on Issuer
-        ---
-        serializer: BadgeClassSerializer
-        """
-        # Ensure current user has permissions on current issuer
-        user_badgeclasses = request.user.cached_badgeclasses()
-
-        serializer = BadgeClassSerializer(
-            user_badgeclasses, many=True, context={'request': request}
-        )
-        return Response(serializer.data)
-
-
-class BadgeClassList(AbstractIssuerAPIEndpoint):
-    """
-    GET a list of badgeclasses within one issuer context or
-    POST to create a new badgeclass within the issuer context
-    """
-    queryset = Issuer.objects.all()
-    model = Issuer
-    permission_classes = (permissions.IsAuthenticated, IsEditor,)
-
-    def get(self, request, issuerSlug):
-        """
-        GET a list of badgeclasses within one Issuer context.
-        Authenticated user must have owner, editor, or staff status on Issuer
-        ---
-        serializer: BadgeClassSerializer
-        """
-        # Ensure current user has permissions on current issuer
-        current_issuer = self.get_list(issuerSlug)
-
-        if not current_issuer.exists():
-            return Response(
-                "Issuer %s not found or inadequate permissions." % issuerSlug,
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        issuer_badge_classes = current_issuer[0].badgeclasses.all()
-
-        if not issuer_badge_classes.exists():
-            return Response([], status=status.HTTP_200_OK)
-
-        serializer = BadgeClassSerializer(issuer_badge_classes, many=True, context={'request': request})
-        return Response(serializer.data)
-
-    def post(self, request, issuerSlug):
-        """
-        Define a new BadgeClass to be owned by a particular Issuer.
-        Authenticated user must have owner or editor status on Issuer
-        ('staff' status is inadequate)
-        ---
-        serializer: BadgeClassSerializer
-        parameters:
-            - name: issuerSlug
-              required: true
-              type: string
-              paramType: path
-              description: slug of the Issuer to be owner of the new BadgeClass
-            - name: name
-              required: true
-              type: string
-              paramType: form
-              description: A short name for the new BadgeClass
-            - name: slug
-              required: false
-              type: string
-              paramType: form
-              description: Optionally customizable slug. Otherwise generated from name
-            - name: image
-              type: file
-              required: true
-              paramType: form
-              description: An image to represent the BadgeClass. Must be a square PNG with no existing OBI assertion data baked into it.
-            - name: criteria
-              type: string
-              required: true
-              paramType: form
-              description: Either a URL of a remotely hosted criteria page or a text string describing the criteria.
-        """
-
-        # Step 1: Locate the issuer
-        current_issuer = self.get_object(issuerSlug)
-
-        if current_issuer is None:
-            return Response(
-                "Issuer %s not found or inadequate permissions." % issuerSlug,
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        # Step 2: validate, create new Badge Class
-        serializer = BadgeClassSerializer(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-
-        serializer.save(
-            issuer=current_issuer,
-            created_by=request.user,
-            description=request.data.get('description')
-        )
-        badge_class = serializer.data
-
-        logger.event(badgrlog.BadgeClassCreatedEvent(badge_class, request.data.get('image')))
-        return Response(badge_class, status=status.HTTP_201_CREATED)
-
-
-class BadgeClassDetail(AbstractIssuerAPIEndpoint):
-    """
-    GET details on one BadgeClass. PUT and DELETE should be restricted to BadgeClasses that haven't been issued yet.
-    """
-    queryset = BadgeClass.objects.all()
     model = BadgeClass
-    permission_classes = (permissions.IsAuthenticated, MayEditBadgeClass,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, BadgrOAuthTokenHasScope)
+    v1_serializer_class = BadgeClassSerializerV1
+    v2_serializer_class = BadgeClassSerializerV2
+    valid_scopes = ["rw:issuer"]
 
-    def get(self, request, issuerSlug, badgeSlug):
-        """
-        GET single BadgeClass representation
-        ---
-        serializer: BadgeClassSerializer
-        """
+    def get_objects(self, request, **kwargs):
+        return request.user.cached_badgeclasses()
 
-        try:
-            current_badgeclass = BadgeClass.cached.get(slug=badgeSlug)
-            self.check_object_permissions(self.request, current_badgeclass)
-        except (BadgeClass.DoesNotExist, PermissionDenied):
-            return Response(
-                "BadgeClass %s could not be found, or inadequate permissions." % badgeSlug,
-                status=status.HTTP_404_NOT_FOUND
-            )
-        else:
-            serializer = BadgeClassSerializer(current_badgeclass, context={'request': request})
-            return Response(serializer.data)
+    @apispec_list_operation('BadgeClass',
+        summary="Get a list of BadgeClasses for authenticated user",
+        tags=["BadgeClasses"],
+    )
+    def get(self, request, **kwargs):
+        return super(AllBadgeClassesList, self).get(request, **kwargs)
 
-    def delete(self, request, issuerSlug, badgeSlug):
-        """
-        DELETE a badge class that has never been issued. This will fail if any assertions exist for the BadgeClass.
-        Restricted to owners or editors (not staff) of the corresponding Issuer.
-        ---
-        responseMessages:
-            - code: 400
-              message: Badge Class either couldn't be deleted. It may have already been issued, or it may already not exist.
-            - code: 200
-              message: Badge has been deleted.
-        """
-
-        try:
-            current_badgeclass = BadgeClass.cached.get(slug=badgeSlug)
-            self.check_object_permissions(self.request, current_badgeclass)
-        except (BadgeClass.DoesNotExist, PermissionDenied):
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        else:
-            if current_badgeclass.recipient_count() < 1:
-                old_badgeclass = current_badgeclass.json
-                current_badgeclass.delete()
-                logger.event(badgrlog.BadgeClassDeletedEvent(old_badgeclass, request.user))
-                return Response("Badge " + badgeSlug + " has been deleted.", status.HTTP_200_OK)
-            else:
-                return Response("Badge class could not be deleted. It has already been issued at least once.", status=status.HTTP_400_BAD_REQUEST)
+    @apispec_post_operation('BadgeClass',
+        summary="Create a new BadgeClass",
+        tags=["BadgeClasses"],
+    )
+    def post(self, request, **kwargs):
+        return super(AllBadgeClassesList, self).post(request, **kwargs)
 
 
-
-class BadgeInstanceList(AbstractIssuerAPIEndpoint):
+class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
     """
-    GET a list of assertions per issuer & per badgeclass
+    GET a list of badgeclasses within one issuer context or
+    POST to create a new badgeclass within the issuer context
+    """
+    model = Issuer  # used by get_object()
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, BadgrOAuthTokenHasEntityScope)
+    v1_serializer_class = BadgeClassSerializerV1
+    v2_serializer_class = BadgeClassSerializerV2
+    create_event = badgrlog.BadgeClassCreatedEvent
+    valid_scopes = ["rw:issuer", "rw:issuer:*"]
+
+    def get_objects(self, request, **kwargs):
+        issuer = self.get_object(request, **kwargs)
+        return issuer.cached_badgeclasses()
+
+    def get_context_data(self, **kwargs):
+        context = super(IssuerBadgeClassList, self).get_context_data(**kwargs)
+        context['issuer'] = self.get_object(self.request, **kwargs)
+        return context
+
+    @apispec_list_operation('BadgeClass',
+        summary="Get a list of BadgeClasses for a single Issuer",
+        description="Authenticated user must have owner, editor, or staff status on the Issuer",
+        tags=["Issuers", "BadgeClasses"],
+    )
+    def get(self, request, **kwargs):
+        return super(IssuerBadgeClassList, self).get(request, **kwargs)
+
+    @apispec_post_operation('BadgeClass',
+        summary="Create a new BadgeClass associated with an Issuer",
+        description="Authenticated user must have owner, editor, or staff status on the Issuer",
+        tags=["Issuers", "BadgeClasses"],
+    )
+    def post(self, request, **kwargs):
+        issuer = self.get_object(request, **kwargs)  # trigger a has_object_permissions() check
+        return super(IssuerBadgeClassList, self).post(request, **kwargs)
+
+
+class BadgeClassDetail(BaseEntityDetailView):
+    """
+    GET details on one BadgeClass.
+    PUT and DELETE should be restricted to BadgeClasses that haven't been issued yet.
+    """
+    model = BadgeClass
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayEditBadgeClass, BadgrOAuthTokenHasEntityScope)
+    v1_serializer_class = BadgeClassSerializerV1
+    v2_serializer_class = BadgeClassSerializerV2
+
+    valid_scopes = ["rw:issuer", "rw:issuer:*"]
+
+    @apispec_get_operation('BadgeClass',
+        summary='Get a single BadgeClass',
+        tags=['BadgeClasses'],
+    )
+    def get(self, request, **kwargs):
+        return super(BadgeClassDetail, self).get(request, **kwargs)
+
+    @apispec_delete_operation('BadgeClass',
+        summary="Delete a BadgeClass",
+        description="Restricted to owners or editors (not staff) of the corresponding Issuer.",
+        tags=['BadgeClasses'],
+        responses=OrderedDict([
+            ("400", {
+                'description': "BadgeClass couldn't be deleted. It may have already been issued."
+            }),
+
+        ])
+    )
+    def delete(self, request, **kwargs):
+        # TODO: log delete methods
+        # logger.event(badgrlog.BadgeClassDeletedEvent(old_badgeclass, request.user))
+        return super(BadgeClassDetail, self).delete(request, **kwargs)
+
+    @apispec_put_operation('BadgeClass',
+        summary='Update an existing BadgeClass.  Previously issued BadgeInstances will NOT be updated',
+        tags=['BadgeClasses'],
+    )
+    def put(self, request, **kwargs):
+        return super(BadgeClassDetail, self).put(request, **kwargs)
+
+
+class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):
+    model = BadgeClass  # used by .get_object()
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass, BadgrOAuthTokenHasEntityScope)
+    v1_serializer_class = BadgeInstanceSerializerV1
+    v2_serializer_class = BadgeInstanceSerializerV2
+    valid_scopes = ["rw:issuer", "rw:issuer:*"]
+
+    def get_context_data(self, **kwargs):
+        context = super(BatchAssertionsIssue, self).get_context_data(**kwargs)
+        context['badgeclass'] = self.get_object(self.request, **kwargs)
+        return context
+
+    @apispec_post_operation('Assertion',
+        summary='Issue multiple copies of the same BadgeClass to multiple recipients',
+        tags=['Assertions'],
+        parameters=[
+            {
+                "in": "body",
+                "name": "body",
+                "required": True,
+                'schema': {
+                    "type": "array",
+                    'items': { '$ref': '#/definitions/Assertion' }
+                },
+            }
+        ]
+    )
+    def post(self, request, **kwargs):
+        # verify the user has permission to the badgeclass
+        badgeclass = self.get_object(request, **kwargs)
+        if not self.has_object_permissions(request, badgeclass):
+            return Response(status=HTTP_404_NOT_FOUND)
+
+        try:
+            create_notification = request.data.get('create_notification', False)
+        except AttributeError:
+            return Response(status=HTTP_400_BAD_REQUEST)
+
+        # update passed in assertions to include create_notification
+        def _include_create_notification(a):
+            a['create_notification'] = create_notification
+            return a
+        assertions = map(_include_create_notification, request.data.get('assertions'))
+
+        # save serializers
+        context = self.get_context_data(**kwargs)
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(many=True, data=assertions, context=context)
+        if not serializer.is_valid(raise_exception=False):
+            serializer = V2ErrorSerializer(instance={},
+                                           success=False,
+                                           description="bad request",
+                                           field_errors=serializer._errors,
+                                           validation_errors=[])
+            return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+        new_instances = serializer.save(created_by=request.user)
+        for new_instance in new_instances:
+            self.log_create(new_instance)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class BatchAssertionsRevoke(VersionedObjectMixin, BaseEntityView):
+    model = BadgeInstance
+    permission_classes = (AuthenticatedWithVerifiedEmail, BadgrOAuthTokenHasEntityScope)
+    v2_serializer_class = BadgeInstanceSerializerV2
+    valid_scopes = ["rw:issuer", "rw:issuer:*"]
+
+    def get_context_data(self, **kwargs):
+        context = super(BatchAssertionsRevoke, self).get_context_data(**kwargs)
+        context['badgeclass'] = self.get_object(self.request, **kwargs)
+        return context
+
+    def _process_revoke(self, request, revocation):
+        response = {
+            "revoked": False,
+        }
+
+        entity_id = revocation.get("entityId", None)
+        revocation_reason = revocation.get("revocationReason", None)
+
+        if entity_id is None:
+            return dict(response, reason="entityId is required")
+
+        response["entityId"] = entity_id
+
+        if revocation_reason is None:
+            return dict(response, reason="revocationReason is required")
+
+        response["revocationReason"] = revocation_reason
+
+        try:
+            assertion = self.get_object(request, entity_id=entity_id)
+        except Http404:
+            return dict(response, reason="permission denied or object not found")
+
+        if not self.has_object_permissions(request, assertion):
+            dict(response, reason="permission denied or object not found")
+
+
+        try:
+            assertion.revoke(revocation_reason)
+        except Exception as e:
+            return dict(response, reason=e.message)
+
+        return dict(response, revoked=True)
+
+    @apispec_post_operation('Assertion',
+        summary='Revoke multiple Assertions',
+        tags=['Assertions'],
+        parameters=[
+            {
+                "in": "body",
+                "name": "body",
+                "required": True,
+                'schema': {
+                    "type": "array",
+                    'items': { '$ref': '#/definitions/Assertion' }
+                },
+            }
+        ]
+    )
+    def post(self, request, **kwargs):
+        result = [
+            self._process_revoke(request, revocation)
+            for revocation in self.request.data
+        ]
+
+        response_data = BaseSerializerV2.response_envelope(result=result, success=True, description="revoked badges")
+
+        return Response(status=HTTP_200_OK, data=response_data)
+
+
+class BadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
+    """
+    GET a list of assertions for a single badgeclass
     POST to issue a new assertion
     """
-    queryset = BadgeClass.objects.all()
-    model = BadgeClass
-    serializer_class = BadgeInstanceSerializer
-    permission_classes = (permissions.IsAuthenticated, MayIssueBadgeClass,)
+    model = BadgeClass  # used by get_object()
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass, BadgrOAuthTokenHasEntityScope)
+    v1_serializer_class = BadgeInstanceSerializerV1
+    v2_serializer_class = BadgeInstanceSerializerV2
+    create_event = badgrlog.BadgeInstanceCreatedEvent
+    valid_scopes = ["rw:issuer", "rw:issuer:*"]
 
-    def post(self, request, issuerSlug, badgeSlug):
-        """
-        Issue a badge to a single recipient.
-        ---
-        serializer: BadgeInstanceSerializer
-        """
-        badgeclass_queryset = self.queryset.filter(issuer__slug=issuerSlug)
-        current_badgeclass = self.get_object(badgeSlug, queryset=badgeclass_queryset)
+    def get_objects(self, request, **kwargs):
+        badgeclass = self.get_object(request, **kwargs)
+        assertions = [a for a in badgeclass.cached_badgeinstances() if not a.revoked]
 
-        if current_badgeclass is None:
-            return Response(
-                "Issuer not found or current user lacks permission to issue badges.",
-                status=status.HTTP_404_NOT_FOUND
-            )
+        # filter badgeclasses by recipient if present in query_params
+        if 'recipient' in request.query_params:
+            recipient_id = request.query_params.get('recipient').lower()
+            assertions = filter(lambda a: a.recipient_identifier == recipient_id, assertions)
 
-        data = {}
-        if request.data.get('recipient_identifier') is not None:
-            data['recipient_identifier'] = \
-                request.data.get('recipient_identifier')
-        elif request.data.get('recipient_id') is not None:
-            data['recipient_identifier'] = request.data.get('recipient_id')
-        elif request.data.get('email') is not None:
-            data['recipient_identifier'] = request.data.get('email')
-        if request.data.get('evidence') is not None:
-            data['evidence'] = request.data.get('evidence')
-        if request.data.get('create_notification') is not None:
-            data['create_notification'] = True
+        return assertions
 
-        serializer = BadgeInstanceSerializer(data=data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
+    def get_context_data(self, **kwargs):
+        context = super(BadgeInstanceList, self).get_context_data(**kwargs)
+        context['badgeclass'] = self.get_object(self.request, **kwargs)
+        return context
 
-        serializer.save(
-            issuer=current_badgeclass.issuer,
-            badgeclass=current_badgeclass,
-            created_by=request.user
-        )
-        badge_instance = serializer.data
+    @apispec_list_operation('Assertion',
+        summary="Get a list of Assertions for a single BadgeClass",
+        tags=['Assertions', 'BadgeClasses'],
+        parameters=[
+            {
+                'in': 'query',
+                'name': "recipient",
+                'type': "string",
+                'description': 'A recipient identifier to filter by'
+            }
+        ]
+    )
+    def get(self, request, **kwargs):
+        # verify the user has permission to the badgeclass
+        badgeclass = self.get_object(request, **kwargs)
+        if not self.has_object_permissions(request, badgeclass):
+            return Response(status=HTTP_404_NOT_FOUND)
 
+        return super(BadgeInstanceList, self).get(request, **kwargs)
 
-        logger.event(badgrlog.BadgeInstanceCreatedEvent(badge_instance, request.user))
-        return Response(badge_instance, status=status.HTTP_201_CREATED)
+    @apispec_post_operation('Assertion',
+        summary="Issue an Assertion to a single recipient",
+        tags=['Assertions', 'BadgeClasses'],
+    )
+    def post(self, request, **kwargs):
+        # verify the user has permission to the badgeclass
+        badgeclass = self.get_object(request, **kwargs)
+        if not self.has_object_permissions(request, badgeclass):
+            return Response(status=HTTP_404_NOT_FOUND)
 
-    def get(self, request, issuerSlug, badgeSlug):
-        """
-        Get a list of all issued assertions for a single BadgeClass.
-        ---
-        serializer: BadgeInstanceSerializer
-        """
-        badgeclass_queryset = self.queryset.filter(issuer__slug=issuerSlug) \
-            .select_related('badgeinstances')
-        # Ensure current user has permissions on current badgeclass
-        current_badgeclass = self.get_object(badgeSlug,
-                                             queryset=badgeclass_queryset)
-        if current_badgeclass is None:
-            return Response(
-                "BadgeClass %s not found or inadequate permissions." % badgeSlug,
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        badge_instances = current_badgeclass.badgeinstances.filter(revoked=False)
-
-        if not badge_instances.exists():
-            return Response([], status=status.HTTP_200_OK)
-
-        serializer = BadgeInstanceSerializer(badge_instances, many=True,
-                                             context={'request': request})
-        return Response(serializer.data)
+        return super(BadgeInstanceList, self).post(request, **kwargs)
 
 
-class IssuerBadgeInstanceList(AbstractIssuerAPIEndpoint):
+class IssuerBadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
     """
-    Retrieve assertions by a recipient identifier within one issuer
+    Retrieve all assertions within one issuer
     """
-    queryset = Issuer.objects.all().select_related('badgeinstances')
-    model = Issuer
-    permission_classes = (permissions.IsAuthenticated, IsStaff,)
+    model = Issuer  # used by get_object()
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsStaff, BadgrOAuthTokenHasEntityScope)
+    v1_serializer_class = BadgeInstanceSerializerV1
+    v2_serializer_class = BadgeInstanceSerializerV2
+    create_event = badgrlog.BadgeInstanceCreatedEvent
+    valid_scopes = ["rw:issuer", "rw:issuer:*"]
 
-    def get(self, request, issuerSlug):
-        """
-        Get a list of assertions issued to one recpient by one issuer.
-        ---
-        serializer: BadgeInstanceSerializer
-        parameters:
-            - name: issuerSlug
-              required: true
-              type: string
-              paramType: path
-              description: slug of the Issuer to search for assertions under
-            - name: recipient
-              required: false
-              type: string
-              paramType: query
-              description: URL-encoded email address of earner to search by
-        """
-        current_issuer = self.get_object(issuerSlug)
+    def get_objects(self, request, **kwargs):
+        issuer = self.get_object(request, **kwargs)
+        assertions = [a for a in issuer.cached_badgeinstances() if not a.revoked]
 
-        if current_issuer is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        # filter badgeclasses by recipient if present in query_params
+        if 'recipient' in request.query_params:
+            recipient_id = request.query_params.get('recipient').lower()
+            assertions = filter(lambda a: a.recipient_identifier == recipient_id, assertions)
 
-        if request.query_params.get('recipient') is not None:
-            instances = current_issuer.badgeinstance_set.filter(
-                recipient_identifier=request.query_params.get('recipient'),
-                revoked=False)
-        else:
-            instances = current_issuer.badgeinstance_set.filter(revoked=False)
+        return assertions
 
-        serializer = BadgeInstanceSerializer(
-            instances, context={'request': request}, many=True
-        )
+    @apispec_list_operation('Assertion',
+        summary='Get a list of Assertions for a single Issuer',
+        tags=['Assertions', 'Issuers'],
+        parameters=[
+            {
+                'in': 'query',
+                'name': "recipient",
+                'type': "string",
+                'description': 'A recipient identifier to filter by'
+            }
+        ]
+    )
+    def get(self, request, **kwargs):
+        return super(IssuerBadgeInstanceList, self).get(request, **kwargs)
 
-        return Response(serializer.data)
+    @apispec_post_operation('Assertion',
+        summary="Issue a new Assertion to a recipient",
+        tags=['Assertions', 'Issuers']
+    )
+    def post(self, request, **kwargs):
+        kwargs['issuer'] = self.get_object(request, **kwargs)  # trigger a has_object_permissions() check
+        return super(IssuerBadgeInstanceList, self).post(request, **kwargs)
 
 
-class BadgeInstanceDetail(AbstractIssuerAPIEndpoint):
+class BadgeInstanceDetail(BaseEntityDetailView):
     """
     Endpoints for (GET)ting a single assertion or revoking a badge (DELETE)
     """
-    queryset = BadgeInstance.objects.all()
     model = BadgeInstance
-    permission_classes = (permissions.IsAuthenticated, MayEditBadgeClass,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayEditBadgeClass, BadgrOAuthTokenHasEntityScope)
+    v1_serializer_class = BadgeInstanceSerializerV1
+    v2_serializer_class = BadgeInstanceSerializerV2
+    valid_scopes = ["rw:issuer", "rw:issuer:*"]
 
-    def get(self, request, issuerSlug, badgeSlug, assertionSlug):
-        """
-        GET a single assertion's details.
-        The assertionSlug URL prameter is the only one that varies the request,
-        but the assertion must belong to an issuer owned, edited, or staffed by the
-        authenticated user.
-        ---
-        serializer: BadgeInstanceSerializer
-        """
-        try:
-            current_assertion = BadgeInstance.cached.get(slug=assertionSlug)
-        except (BadgeInstance.DoesNotExist, PermissionDenied):
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        else:
-            serializer = BadgeInstanceSerializer(current_assertion, context={'request': request})
-            return Response(serializer.data)
+    @apispec_get_operation('Assertion',
+        summary="Get a single Assertion",
+        tags=['Assertions']
+    )
+    def get(self, request, **kwargs):
+        return super(BadgeInstanceDetail, self).get(request, **kwargs)
 
-    def delete(self, request, issuerSlug, badgeSlug, assertionSlug):
-        """
-        Revoke an issued badge assertion.
-        Limited to Issuer owner and editors (not staff)
-        ---
-        parameters:
-            - name: revocation_reason
-              description: A short description of why the badge is to be revoked
-              required: true
-              type: string
-              paramType: form
-        responseMessages:
-            - code: 200
-              message: Assertion has been revoked.
-            - code: 400
-              message: Assertion is already revoked
-            - code: 404
-              message: Assertion not found or user has inadequate permissions.
-        """
-        if request.data.get('revocation_reason') is None:
-            raise ValidationError("The parameter revocation_reason is required \
-                                  to revoke a badge assertion")
-        current_assertion = self.get_object(assertionSlug)
-        if current_assertion is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    @apispec_delete_operation('Assertion',
+        summary="Revoke an Assertion",
+        tags=['Assertions'],
+        responses=OrderedDict([
+            ('400', {
+                'description': "Assertion is already revoked"
+            })
+        ])
+    )
+    def delete(self, request, **kwargs):
+        # verify the user has permission to the assertion
+        assertion = self.get_object(request, **kwargs)
+        if not self.has_object_permissions(request, assertion):
+            return Response(status=HTTP_404_NOT_FOUND)
 
-        if current_assertion.revoked is True:
-            return Response("Assertion is already revoked.",
-                            status=status.HTTP_400_BAD_REQUEST)
+        revocation_reason = request.data.get('revocation_reason', None)
+        if not revocation_reason:
+            raise ValidationError({'revocation_reason': "This field is required"})
 
-        current_assertion.revoked = True
-        current_assertion.revocation_reason = \
-            request.data.get('revocation_reason')
-        current_assertion.image.delete()
-        current_assertion.save()
+        assertion.revoke(revocation_reason)
 
-        if apps.is_installed('badgebook'):
+        # logger.event(badgrlog.BadgeAssertionRevokedEvent(current_assertion, request.user))
+        return Response(status=HTTP_200_OK)
+
+
+class IssuerTokensList(BaseEntityListView):
+    model = AccessToken
+    permission_classes = (AuthenticatedWithVerifiedEmail, BadgrOAuthTokenHasScope)
+    v2_serializer_class = IssuerAccessTokenSerializerV2
+    valid_scopes = ["rw:issuer"]
+
+    @apispec_post_operation('AccessToken',
+        summary="Retrieve issuer tokens",
+        tags=["Issuers"],
+    )
+    def post(self, request, **kwargs):
+        if not isinstance(request.auth, AccessToken):
+            # need to use a oauth2 bearer token to authorize
+            error_response = BaseSerializerV2.response_envelope(result=[], success=False, description="Invalid token")
+            return Response(error_response, status=HTTP_403_FORBIDDEN)
+
+        issuer_entityids = request.data.get('issuers', None)
+        if not issuer_entityids:
+            raise serializers.ValidationError({"issuers": "field is required"})
+
+        issuers = []
+        for issuer_entityid in issuer_entityids:
             try:
-                from badgebook.models import BadgeObjectiveAward, LmsCourseInfo
-                try:
-                    award = BadgeObjectiveAward.cached.get(badge_instance_id=current_assertion.id)
-                except BadgeObjectiveAward.DoesNotExist:
-                    pass
-                else:
-                    award.delete()
-            except ImportError:
-                pass
+                issuer = Issuer.cached.get(entity_id=issuer_entityid)
+                self.check_object_permissions(request, issuer)
+            except Issuer.DoesNotExist as e:
+                raise serializers.ValidationError({"issuers": "unknown issuer"})
+            else:
+                issuers.append(issuer)
 
-        logger.event(badgrlog.BadgeAssertionRevokedEvent(current_assertion, request.user))
-        return Response(
-            "Assertion {} has been revoked.".format(current_assertion.slug),
-            status=status.HTTP_200_OK
-        )
+        tokens = []
+        expires = timezone.now() + datetime.timedelta(weeks=5200)
+        for issuer in issuers:
+            scope = "rw:issuer:{}".format(issuer.entity_id)
+
+            # grant application user staff access to issuer if needed
+            staff, staff_created = IssuerStaff.cached.get_or_create(
+                issuer=issuer,
+                user=request.auth.application.user,
+                defaults=dict(
+                    role=IssuerStaff.ROLE_STAFF
+                )
+            )
+
+            accesstoken, created = AccessToken.objects.get_or_create(
+                user=request.auth.application.user,
+                application=request.auth.application,
+                scope=scope,
+                defaults=dict(
+                    expires=expires,
+                    token=random_token_generator(request)
+                )
+            )
+            tokens.append({
+                'issuer': issuer.entity_id,
+                'token': accesstoken.token,
+                'expires': accesstoken.expires,
+            })
+
+        serializer = IssuerAccessTokenSerializerV2(data=tokens, many=True, context=dict(
+            request=request,
+            kwargs=kwargs
+        ))
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data)
+
+
+class PaginatedAssertionsSinceSerializer(CursorPaginatedListSerializer):
+    child = BadgeInstanceSerializerV2()
+
+    def __init__(self, *args, **kwargs):
+        self.timestamp = timezone.now()  # take timestamp now before SQL query is run in super.__init__
+        super(PaginatedAssertionsSinceSerializer, self).__init__(*args, **kwargs)
+
+    def to_representation(self, data):
+        representation = super(PaginatedAssertionsSinceSerializer, self).to_representation(data)
+        representation['timestamp'] = self.timestamp.isoformat()
+        return representation
+
+
+class AssertionsChangedSince(BaseEntityView):
+    permission_classes = (BadgrOAuthTokenHasScope,)
+    valid_scopes = ["r:assertions"]
+
+    def get_user(self, request):
+        if request.user:
+            return request.user
+        if request.auth:
+            return request.auth.application.user
+
+    def get_queryset(self, request, since=None):
+        user = self.get_user(request)
+        issuer_ids = [i.id for i in user.cached_issuers()]
+
+        authorized_badgeusers = request.auth.application.accesstoken_set.all()
+        user_ids = [u.id for u in authorized_badgeusers]
+
+        # select badgeinstance.* where
+        #   (
+        #     badgeinstance.issuer_id in (:issuer_ids)
+        #     OR
+        #     backpackcollectionbadgeinstance.badgeuser_id in (:user_ids)
+        #   )
+        #   AND
+        #   badgeinstance.updated_at >= since
+
+        expr = Q(issuer_id__in=issuer_ids) | Q(backpackcollectionbadgeinstance__badgeuser_id__in=user_ids)
+
+        if since is not None:
+            expr &= Q(updated_at__gt=since)
+
+        qs = BadgeInstance.objects.filter(expr)
+        return qs
+
+    def get(self, request, **kwargs):
+        since = request.GET.get('since', None)
+        if since is not None:
+            try:
+                since = dateutil.parser.parse(since)
+            except ValueError as e:
+                err = V2ErrorSerializer(data={}, field_errors={'since': ["must be iso8601 format"]}, validation_errors=[])
+                err._success = False
+                err._description = "bad request"
+                err.is_valid(raise_exception=False)
+                return Response(err.data, status=HTTP_400_BAD_REQUEST)
+
+        queryset = self.get_queryset(request, since=since)
+        context = self.get_context_data(**kwargs)
+        serializer = PaginatedAssertionsSinceSerializer(
+            queryset=queryset,
+            request=request,
+            context=context)
+        serializer.is_valid()
+        return Response(serializer.data)
+
+        # return super(AssertionsChangedSince, self).get(request, **kwargs)

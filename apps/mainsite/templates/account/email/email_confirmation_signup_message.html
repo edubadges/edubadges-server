@@ -1,0 +1,43 @@
+{% extends "email/base.html" %}
+
+{% block afterlogo %}
+<!-- Begin Title Row -->
+<tr>
+  <td style="
+    padding-bottom: 16px;
+  ">
+    <h1 class="mstext" style="
+      color: #05012C;
+      font-family: 'Open Sans', Trebuchet, sans-serif;
+      font-weight: normal;
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 32px;
+      margin: 0;
+      text-align: center;
+    ">
+    Please confirm your Badgr account, <br>
+    <span style="word-break: break-all;">{{ email.email }}</span>
+    </h1>
+  </td>
+</tr>
+<!-- Begin Description Row -->
+<tr>
+  <td style="
+    padding-bottom: 8px;
+  ">
+    <p class="mstext" style="
+      color: #05012C;
+      font-family: 'Open Sans', Trebuchet, sans-serif;
+      font-size: 14px;
+      line-height: 24px;
+      margin: 0;
+      word-break: break-all;
+    ">
+    </p>
+  </td>
+</tr>
+{% endblock %}
+
+{% block button_url %}{{ activate_url }}{% endblock %}
+{% block button_text %}Confirm Now{% endblock %}

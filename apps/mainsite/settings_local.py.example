@@ -105,8 +105,13 @@ DEFAULT_FROM_EMAIL = ''
 #    '127.0.0.1',
 #)
 #DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECTS': False}
+#DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
-
+# Key used for symmetrical encryption of pagination cursors.  If not defined, encryption is disabled.  Must be 32 byte,
+# base64-encoded random string.  For example:
+# python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key())"
+#
+# PAGINATION_SECRET_KEY = ""
 
 
 LOGS_DIR = os.path.join(TOP_DIR, 'logs')
