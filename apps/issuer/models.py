@@ -564,10 +564,12 @@ class BadgeClass(ResizeUploadedImage,
             image_url = OriginSetting.HTTP + reverse('badgeclass_image', kwargs={'entity_id': self.entity_id})
             json['image'] = image_url
             if self.original_json:
-                image_info = self.get_original_json().get('image', None)
-                if isinstance(image_info, dict):
-                    json['image'] = image_info
-                    json['image']['id'] = image_url
+                original_json = self.get_original_json()
+                if original_json is not None:
+                    image_info = original_json.get('image', None)
+                    if isinstance(image_info, dict):
+                        json['image'] = image_info
+                        json['image']['id'] = image_url
 
         # criteria
         if obi_version == '1_1':
