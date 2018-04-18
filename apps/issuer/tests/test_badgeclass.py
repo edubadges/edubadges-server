@@ -630,11 +630,13 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         # update tags -- addition and deletion
         reordered_tags = ["second", "third", "fourth"]
         new_badgeclass['tags'] = reordered_tags
+        new_badgeclass['description'] = "new description"
 
         response = self.client.put(new_badgeclass_url, new_badgeclass, format="json")
         updated_badgeclass = json.loads(response.content)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(updated_badgeclass.get('tags', None), reordered_tags)
+        self.assertEqual(updated_badgeclass.get('description', None), "new description")
 
         # make sure response we got from PUT matches what we get from GET
         response = self.client.get(new_badgeclass_url)

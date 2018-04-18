@@ -129,12 +129,19 @@ class CachedUrlHyperlinkedRelatedField(serializers.HyperlinkedRelatedField):
 class StripTagsCharField(serializers.CharField):
     def __init__(self, *args, **kwargs):
         self.strip_tags = kwargs.pop('strip_tags', True)
+        self.convert_null = kwargs.pop('convert_null', False)  # Converts db nullable fields to empty strings
         super(StripTagsCharField, self).__init__(*args, **kwargs)
 
     def to_internal_value(self, data):
         value = super(StripTagsCharField, self).to_internal_value(data)
         if self.strip_tags:
             return strip_tags(value)
+        return value
+
+    def get_attribute(self, instance):
+        value = super(StripTagsCharField, self).get_attribute(instance)
+        if self.convert_null:
+            return value if value is not None else ""
         return value
 
 
