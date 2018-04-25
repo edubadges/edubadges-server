@@ -101,8 +101,8 @@ fi
 /usr/bin/virtualenv %{install_dir}/builds/%{version}/env
 
 # UPGRADE PIP/Virtualenv
-%{install_dir}/builds/%{version}/env/bin/pip install -U pip
-%{install_dir}/builds/%{version}/env/bin/pip install -U virtualenv
+%{install_dir}/builds/%{version}/env/bin/pip install -U pip==9.0.3
+%{install_dir}/builds/%{version}/env/bin/pip install -U virtualenv==15.0.2
 
 # INSTALL PYCURL FIRST...
 export PYCURL_SSL_LIBRARY=nss
@@ -147,6 +147,9 @@ echo '{"version": '"\"%{version}\""', "release": '"\"%{release}\""', "commit_sha
 %config(noreplace) %attr(0644,root,root) %{install_dir}/etc/settings_local.py
 
 %changelog
+* Wed Apr 25 2018 Francisco Gray <fgray@concentricsky.com>
+- Pinned versions of pip and virtualenv
+
 * Thu Feb 22 2018 Francisco Gray <fgray@concentricsky.com>
 - Removed npm install / build step
 
