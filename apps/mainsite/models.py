@@ -67,17 +67,25 @@ class EmailBlacklist(models.Model):
 class BadgrAppManager(Manager):
     def get_current(self, request=None):
         origin = None
+        existing_session_app_id = None
 
         if request:
             if request.META.get('HTTP_ORIGIN'):
                 origin = request.META.get('HTTP_ORIGIN')
             elif request.META.get('HTTP_REFERER'):
                 origin = request.META.get('HTTP_REFERER')
+            existing_session_app_id = request.session.get('badgr_app_pk', None)
 
         if origin:
             url = urlparse.urlparse(origin)
             try:
                 return self.get(cors=url.netloc)
+            except self.model.DoesNotExist:
+                pass
+
+        if existing_session_app_id:
+            try:
+                return self.get(id=existing_session_app_id)
             except self.model.DoesNotExist:
                 pass
         badgr_app_id = getattr(settings, 'BADGR_APP_ID', None)
