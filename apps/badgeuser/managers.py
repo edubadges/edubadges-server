@@ -64,9 +64,8 @@ class CachedEmailAddressManager(EmailAddressManager):
             email_address = self.get(user=user, email__iexact=email)
         except self.model.DoesNotExist:
             email_address = self.create(user=user, email=email)
-            if confirm:
-                email_address.send_confirmation(request=request,
-                                                signup=signup)
+        if confirm and not email_address.verified:
+            email_address.send_confirmation(request=request, signup=signup)
 
         # Add variant if it does not exist
         if email_address.email.lower() == email.lower() and email_address.email != email:
