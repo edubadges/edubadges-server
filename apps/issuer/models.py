@@ -329,6 +329,8 @@ class Issuer(ResizeUploadedImage,
         id = self.badgrapp_id if self.badgrapp_id else getattr(settings, 'BADGR_APP_ID', 1)
         return BadgrApp.cached.get(id=id)
 
+    def __unicode__(self):
+        return self.name
 
 
 class IssuerStaff(cachemodel.CacheModel):

@@ -93,6 +93,8 @@ urlpatterns = [
     url(r'^v1/externaltools/', include('externaltools.v1_api_urls'), kwargs={'version': 'v1'}),
     url(r'^v2/externaltools/', include('externaltools.v2_api_urls'), kwargs={'version': 'v2'}),
 
+    # include LTI endpoints
+    url(r'^v2/', include('lti_edu.urls'), kwargs={'version': 'v2'}),
 
 ]
 

@@ -132,6 +132,9 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
 
     badgrapp = models.ForeignKey('mainsite.BadgrApp', blank=True, null=True, default=None)
 
+    # canvas LTI id
+    lti_id = models.CharField(unique=True, max_length=50, default=None, null=True, blank=True,
+                              help_text='LTI user id, unique per user')
     objects = BadgeUserManager()
 
     class Meta:

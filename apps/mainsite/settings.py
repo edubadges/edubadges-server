@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'pathway',
     'recipient',
     'externaltools',
+    'lti_edu',
 
     # api docs
     'apispec_drf',
@@ -80,6 +81,7 @@ UNSUBSCRIBE_SECRET_KEY = 'kAYWM0YWI2MDj/FODBZjE0ZDI4N'
 # Hosts/domain names that are valid for this site.
 # "*" matches anything, ".example.com" matches example.com and all subdomains
 ALLOWED_HOSTS = ['*', ]
+X_FRAME_OPTIONS = 'ALLOW-FROM http://canvas.edubadges.nl/, https://canvas.edubadges.nl'
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
