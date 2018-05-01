@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'badgrsocialauth.providers.surf_conext',
     'badgrsocialauth.providers.kony',
     'badgrsocialauth.providers.google',
     'allauth.socialaccount.providers.facebook',
@@ -122,7 +123,8 @@ TEMPLATE_LOADERS = [
 #
 ##
 
-HTTP_ORIGIN = "http://localhost:8000"
+HTTP_ORIGIN = os.environ.get('SERVER_PROTOCOL', '') + os.environ.get('SERVER_NAME', '')
+HTTP_ORIGIN = 'http://localhost:8000' if HTTP_ORIGIN is '' else HTTP_ORIGIN
 
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -181,6 +183,12 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 SOCIALACCOUNT_ADAPTER = 'badgrsocialauth.adapter.BadgrSocialAccountAdapter'
+
+# Added property to allow auto signup on existing email address
+# -> this is for the usecase that user logs in with existing email, for which
+# in the case of SurfConext we trust that the passed email address is verified.
+# Is used in badgrsocialauth.adapter and defaults to False
+SOCIALACCOUNT_AUTO_SIGNUP = True
 
 
 CORS_ORIGIN_ALLOW_ALL = True

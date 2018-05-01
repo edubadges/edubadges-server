@@ -2,6 +2,8 @@ import urllib
 
 from allauth.account.utils import user_email
 from allauth.exceptions import ImmediateHttpResponse
+from allauth.socialaccount import app_settings
+from allauth.utils import email_address_exists
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.urls import reverse
@@ -52,3 +54,20 @@ class BadgrSocialAccountAdapter(DefaultSocialAccountAdapter):
         except AuthenticationFailed as e:
             raise ImmediateHttpResponse(HttpResponseForbidden(e.detail))
 
+
+    def is_auto_signup_allowed(self, request, sociallogin):
+        # If email is specified, check for duplicate and if so, no auto signup.
+        auto_signup = app_settings.AUTO_SIGNUP
+        if auto_signup:
+            email = user_email(sociallogin.user)
+            # Let's check if auto_signup is really possible...
+            if email:
+                # Change: in Badge always check for email
+                if email_address_exists(email):
+                    # Oops, another user already has this address.
+                    # Otherwise False, because we cannot trust which provider properly verified the emails.
+                    auto_signup = False
+            elif app_settings.EMAIL_REQUIRED:
+                # Nope, email is required and we don't have it yet...
+                auto_signup = False
+        return auto_signup
