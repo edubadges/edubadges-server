@@ -8,6 +8,7 @@ from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREA
 from rest_framework.views import APIView
 
 import badgrlog
+from mainsite.pagination import EncryptedCursorPagination
 
 
 class BaseEntityView(APIView):
@@ -57,7 +58,15 @@ class BaseEntityListView(BaseEntityView):
         context = self.get_context_data(**kwargs)
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(objects, many=True, context=context)
-        return Response(serializer.data)
+
+        headers = dict()
+        paginator = getattr(self, 'paginator', None)
+        if paginator and callable(getattr(paginator, 'get_link_header', None)):
+            link_header = paginator.get_link_header()
+            if link_header:
+                headers['Link'] = link_header
+
+        return Response(serializer.data, headers=headers)
 
     def post(self, request, **kwargs):
         """
@@ -160,3 +169,31 @@ class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
         return Response(status=HTTP_204_NO_CONTENT)
 
 
+class UncachedPaginatedViewMixin(object):
+    min_per_page = 1
+    max_per_page = 500
+    default_per_page = None  # dont paginate by default
+    per_page_query_parameter_name = 'num'
+
+    def get_queryset(self, request, **kwargs):
+        raise NotImplementedError
+
+    def get_objects(self, request, **kwargs):
+        queryset = self.get_queryset(request=request, **kwargs)
+
+        try:
+            per_page = int(request.query_params.get(self.per_page_query_parameter_name, self.default_per_page))
+            per_page = max(self.min_per_page, per_page)
+            per_page = min(self.max_per_page, per_page)
+        except (TypeError, ValueError):
+            per_page = None
+
+        # only paginate on request
+        if per_page:
+            self.paginator = EncryptedCursorPagination()
+            self.paginator.page_size = per_page
+            page = self.paginator.paginate_queryset(queryset, request=request)
+        else:
+            page = list(queryset)
+
+        return page
