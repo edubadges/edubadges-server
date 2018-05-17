@@ -262,8 +262,6 @@ class Issuer(ResizeUploadedImage,
     def cached_badgeclasses(self):
         return self.badgeclasses.all()
 
-    def cached_badgeinstances(self):
-        return chain(*[bc.cached_badgeinstances() for bc in self.cached_badgeclasses()])
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_pathways(self):
@@ -457,10 +455,6 @@ class BadgeClass(ResizeUploadedImage,
 
     def pathway_element_count(self):
         return len(self.cached_pathway_elements())
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_badgeinstances(self):
-        return self.badgeinstances.all()
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_alignments(self):
