@@ -232,12 +232,7 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
         if 'issuer' in self.context:
             validated_data['issuer'] = self.context.get('issuer')
 
-        new_badgeclass = BadgeClass(**validated_data)
-
-        # Use AutoSlugField's pre_save to provide slug if empty, else auto-unique
-        new_badgeclass.slug = BadgeClass._meta.get_field('slug').pre_save(new_badgeclass, add=True)
-
-        new_badgeclass.save()
+        new_badgeclass = BadgeClass.objects.create(**validated_data)
         return new_badgeclass
 
 
