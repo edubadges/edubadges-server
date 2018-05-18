@@ -63,12 +63,34 @@ badgr
 * `./manage.py dist` - generate docs swagger file(s)
 * `./manage.py createsuperuser` - follow prompts to create your first admin user account
 
+### Install and run Badgr UI {#badgr-ui}
+Start in your `badgr` directory and clone badgr-ui source code: `git clone https://github.com/concentricsky/badgr-ui.git badgr-ui`
+
+* Change to the `badgr-ui` directory and install dependencies. We recommend using a recent version of node and npm to run `npm install`.
+* To run the Angular badgr-ui local server run `npm run start`
+
+For more details view the Readme for [Badgr UI](https://github.com/concentricsky/badgr-ui).
+
 ### Run a server locally for development
 * `./manage.py runserver`
 * Navigate to http://localhost:8000/staff
-* login as your superuser you created above
+* Sign in as your superuser you created above
 
 API documentation is viewable at `/docs`
+
+#### Badgr App Configuration
+* Sign in to http://localhost:8000/staff
+* View the "Badgr app" records and use the staff admin forms to create a BadgrApp.
+
+If your badgr-ui is running on http://localhost:4000, use the following values:
+* CORS: ensure this setting matches the domain on which you are running badgr-ui, including the port if other than the standard HTTP or HTTPS ports. `localhost:4000`
+* Signup redirect: `http://localhost:4000/signup/`
+* Email confirmation redirect: `http://localhost:4000/auth/login/`
+* Forgot password redirect: `http://localhost:4000/change-password/`
+* UI login redirect: `http://localhost:4000/auth/login/`
+* UI signup success redirect: `http://localhost:4000/signup/success/`
+* UI connect success redirect: `http://localhost:4000/profile/`
+* Public pages redirect: `http://localhost:4000/public/`
 
 ### Additional configuration options
 Set these values in your settings_local.py file to configure the application to your specific needs. Required options are listed in bold.
