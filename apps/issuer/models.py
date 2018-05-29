@@ -204,6 +204,8 @@ class Issuer(ResizeUploadedImage,
 
     @property
     def jsonld_id(self):
+        if self.source_url:
+            return self.source_url
         return OriginSetting.HTTP + self.get_absolute_url()
 
     @property
@@ -422,6 +424,8 @@ class BadgeClass(ResizeUploadedImage,
 
     @property
     def jsonld_id(self):
+        if self.source_url:
+            return self.source_url
         return OriginSetting.HTTP + self.get_absolute_url()
 
     @property
