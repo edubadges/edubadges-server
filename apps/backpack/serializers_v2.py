@@ -117,6 +117,9 @@ class BackpackImportSerializerV2(DetailSerializerV2):
     def create(self, validated_data):
         try:
             instance, created = BadgeCheckHelper.get_or_create_assertion(**validated_data)
+            if not created:
+                instance.acceptance = BadgeInstance.ACCEPTANCE_ACCEPTED
+                instance.save()
         except DjangoValidationError as e:
             raise RestframeworkValidationError(e.messages)
         return instance

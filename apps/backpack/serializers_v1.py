@@ -104,6 +104,9 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
                 assertion=validated_data.get('assertion', None),
                 created_by=owner,
             )
+            if not created:
+                instance.acceptance = BadgeInstance.ACCEPTANCE_ACCEPTED
+                instance.save()
             owner.publish()  # update BadgeUser.cached_badgeinstances()
         except DjangoValidationError as e:
             raise RestframeworkValidationError(e.args[0])
