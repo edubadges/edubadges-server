@@ -357,13 +357,13 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
     recipient = BadgeRecipientSerializerV2(source='*')
 
     issuedOn = serializers.DateTimeField(source='issued_on', required=False)
-    narrative = MarkdownCharField(required=False)
+    narrative = MarkdownCharField(required=False, allow_null=True)
     evidence = EvidenceItemSerializerV2(many=True, required=False)
 
     revoked = HumanReadableBooleanField(read_only=True)
     revocationReason = serializers.CharField(source='revocation_reason', read_only=True)
 
-    expires = serializers.DateTimeField(source='expires_at', required=False)
+    expires = serializers.DateTimeField(source='expires_at', required=False, allow_null=True)
 
     notify = HumanReadableBooleanField(write_only=True, required=False, default=False)
 
@@ -474,13 +474,25 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
         })
 
     def update(self, instance, validated_data):
-        # BadgeInstances are not updatable
+        updateable_fields = [
+            'evidence',
+            'expires_at',
+            'extension_items',
+            'hashed',
+            'issued_on',
+            'narrative',
+            'recipient_identifier',
+            'recipient_type'
+        ]
+
+        for field_name in updateable_fields:
+            if field_name in validated_data:
+                setattr(instance, field_name, validated_data.get(field_name))
+        instance.save()
+
         return instance
 
     def validate(self, data):
-        if 'cached_badgeclass' in data and 'badgeclass_jsonld_id' in data:
-            raise serializers.ValidationError(
-                {"badgeclass": ["Only one of badgeclass and badgeclassOpenBadgeId allowed."]})
 
         if 'cached_badgeclass' in data:
             # included badgeclass in request

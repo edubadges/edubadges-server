@@ -499,6 +499,13 @@ class BadgeInstanceDetail(BaseEntityDetailView):
         # logger.event(badgrlog.BadgeAssertionRevokedEvent(current_assertion, request.user))
         return Response(status=HTTP_200_OK)
 
+    @apispec_delete_operation('Assertion',
+        summary="Update an Assertion",
+        tags=['Assertions'],
+    )
+    def put(self, request, **kwargs):
+        return super(BadgeInstanceDetail, self).put(request, **kwargs)
+
 
 class IssuerTokensList(BaseEntityListView):
     model = AccessToken
