@@ -14,7 +14,8 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
 import badgrlog
-from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
+from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView, \
+    UncachedPaginatedViewMixin
 from entity.serializers import BaseSerializerV2, V2ErrorSerializer
 from issuer.models import Issuer, BadgeClass, BadgeInstance, IssuerStaff
 from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
@@ -336,7 +337,7 @@ class BatchAssertionsRevoke(VersionedObjectMixin, BaseEntityView):
         return Response(status=HTTP_200_OK, data=response_data)
 
 
-class BadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
+class BadgeInstanceList(UncachedPaginatedViewMixin, VersionedObjectMixin, BaseEntityListView):
     """
     GET a list of assertions for a single badgeclass
     POST to issue a new assertion
@@ -348,16 +349,17 @@ class BadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
     create_event = badgrlog.BadgeInstanceCreatedEvent
     valid_scopes = ["rw:issuer", "rw:issuer:*"]
 
-    def get_objects(self, request, **kwargs):
+    def get_queryset(self, request=None, **kwargs):
         badgeclass = self.get_object(request, **kwargs)
-        assertions = [a for a in badgeclass.cached_badgeinstances() if not a.revoked]
+        queryset = BadgeInstance.objects.filter(
+            badgeclass=badgeclass,
+            revoked=False
+        )
 
-        # filter badgeclasses by recipient if present in query_params
         if 'recipient' in request.query_params:
             recipient_id = request.query_params.get('recipient').lower()
-            assertions = filter(lambda a: a.recipient_identifier == recipient_id, assertions)
-
-        return assertions
+            queryset = queryset.filter(recipient_identifier=recipient_id)
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super(BadgeInstanceList, self).get_context_data(**kwargs)
@@ -373,6 +375,12 @@ class BadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
                 'name': "recipient",
                 'type': "string",
                 'description': 'A recipient identifier to filter by'
+            },
+            {
+                'in': 'query',
+                'name': "num",
+                'type': "string",
+                'description': 'Request pagination of results'
             }
         ]
     )
@@ -397,7 +405,7 @@ class BadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
         return super(BadgeInstanceList, self).post(request, **kwargs)
 
 
-class IssuerBadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
+class IssuerBadgeInstanceList(UncachedPaginatedViewMixin, VersionedObjectMixin, BaseEntityListView):
     """
     Retrieve all assertions within one issuer
     """
@@ -408,16 +416,17 @@ class IssuerBadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
     create_event = badgrlog.BadgeInstanceCreatedEvent
     valid_scopes = ["rw:issuer", "rw:issuer:*"]
 
-    def get_objects(self, request, **kwargs):
+    def get_queryset(self, request=None, **kwargs):
         issuer = self.get_object(request, **kwargs)
-        assertions = [a for a in issuer.cached_badgeinstances() if not a.revoked]
+        queryset = BadgeInstance.objects.filter(
+            issuer=issuer,
+            revoked=False
+        )
 
-        # filter badgeclasses by recipient if present in query_params
         if 'recipient' in request.query_params:
             recipient_id = request.query_params.get('recipient').lower()
-            assertions = filter(lambda a: a.recipient_identifier == recipient_id, assertions)
-
-        return assertions
+            queryset = queryset.filter(recipient_identifier=recipient_id)
+        return queryset
 
     @apispec_list_operation('Assertion',
         summary='Get a list of Assertions for a single Issuer',
@@ -428,6 +437,12 @@ class IssuerBadgeInstanceList(VersionedObjectMixin, BaseEntityListView):
                 'name': "recipient",
                 'type': "string",
                 'description': 'A recipient identifier to filter by'
+            },
+            {
+                'in': 'query',
+                'name': "num",
+                'type': "string",
+                'description': 'Request pagination of results'
             }
         ]
     )

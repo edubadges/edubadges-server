@@ -31,7 +31,7 @@ def notify_badgerank_of_badgeclass(self, badgeclass_pk):
             'error': "Unknown badgeclass pk={}".format(badgeclass_pk)
         }
 
-    badgerank_notify_url = getattr(settings, 'BADGERANK_NOTIFY_URL', 'http://api.badgerank.org/v1/badgeclass/submit')
+    badgerank_notify_url = getattr(settings, 'BADGERANK_NOTIFY_URL', 'https://api.badgerank.org/v1/badgeclass/submit')
     response = requests.post(badgerank_notify_url, json=dict(url=badgeclass.public_url))
     if response.status_code != 200:
         return {

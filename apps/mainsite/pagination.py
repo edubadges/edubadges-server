@@ -124,7 +124,7 @@ class EncryptedCursorPagination(BasePagination):
     """
     cursor_query_param = 'cursor'
 
-    page_size = 50
+    page_size = 100
 
     # Model field to use for ordering.  Must be unique, not null, and monotonically increasing.
     #
@@ -288,4 +288,13 @@ class EncryptedCursorPagination(BasePagination):
             ('previousResults', self.prev_link if self.has_prev else None),
             ('previousCursor', self.prev_cursor if self.has_prev else None),
         ])
+
+    def get_link_header(self):
+        links = []
+        if self.has_next:
+            links.append('<{}>; rel="next"'.format(self.next_link))
+        if self.has_prev:
+            links.append('<{}>; rel="prev"'.format(self.prev_link))
+        if len(links):
+            return ', '.join(links)
 
