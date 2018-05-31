@@ -62,7 +62,7 @@ bleach==2.0.0
 # Badgr related utilities
 openbadges-bakery==1.0.0b4
 
-celery==4.1.0
+celery==4.1.1
 django-celery-results==1.0.1
 python-json-logger==0.1.2
 
