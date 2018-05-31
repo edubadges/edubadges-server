@@ -499,7 +499,7 @@ class BadgeInstanceDetail(BaseEntityDetailView):
         # logger.event(badgrlog.BadgeAssertionRevokedEvent(current_assertion, request.user))
         return Response(status=HTTP_200_OK)
 
-    @apispec_delete_operation('Assertion',
+    @apispec_put_operation('Assertion',
         summary="Update an Assertion",
         tags=['Assertions'],
     )
