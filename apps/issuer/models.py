@@ -992,18 +992,6 @@ class BadgeInstance(BaseAuditedModel,
     def cached_evidence(self):
         return self.badgeinstanceevidence_set.all()
 
-    @property
-    def evidence(self):
-        if hasattr(self, '_evidence_items'):
-            return getattr(self, '_evidence_items', [])
-        return self.cached_evidence()
-
-    @evidence.setter
-    def evidence(self, value):
-        """
-        Set this assertions badgeinstanceevidence from a list of EvidenceItemSerializerV2 data
-        """
-        self._evidence_items = value
 
     @property
     def evidence_url(self):

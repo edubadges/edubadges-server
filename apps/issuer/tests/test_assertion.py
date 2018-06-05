@@ -19,6 +19,58 @@ from mainsite.utils import OriginSetting
 
 class AssertionTests(SetupIssuerHelper, BadgrTestCase):
 
+    def test_can_update_assertion(self):
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+
+        assertion_data = {
+            "email": "test@example.com",
+            "create_notification": False,
+        }
+        response = self.client.post('/v1/issuer/issuers/{issuer}/badges/{badge}/assertions'.format(
+            issuer=test_issuer.entity_id,
+            badge=test_badgeclass.entity_id
+        ), assertion_data)
+        self.assertEqual(response.status_code, 201)
+        original_assertion = response.data
+
+        new_assertion_data = {
+            "recipient_type": "email",
+            "recipient_identifier": "test@example.com",
+            "narrative": "test narrative",
+            "evidence_items": [{
+                "narrative": "This is the evidence item narrative AGAIN!.",
+                "evidence_url": ""
+            }],
+        }
+        response = self.client.put('/v1/issuer/issuers/{issuer}/badges/{badge}/assertions/{assertion}'.format(
+            issuer=test_issuer.entity_id,
+            badge=test_badgeclass.entity_id,
+            assertion=original_assertion.get('slug'),
+        ), json.dumps(new_assertion_data), content_type='application/json')
+
+        self.assertEqual(response.status_code, 200)
+        updated_assertion = response.data
+        self.assertDictContainsSubset(new_assertion_data, updated_assertion)
+
+        # verify v2 api
+        v2_assertion_data = {
+            "evidence": [
+                {
+                    "narrative": "remove and add new narrative",
+                }
+            ]
+        }
+        response = self.client.put('/v2/assertions/{assertion}'.format(
+            assertion=original_assertion.get('slug')
+        ), json.dumps(v2_assertion_data), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        v2_assertion = data.get('result', [None])[0]
+        self.assertEqual(len(v2_assertion_data['evidence']), 1)
+        self.assertEqual(v2_assertion['evidence'][0]['narrative'], v2_assertion_data['evidence'][0]['narrative'])
+
     def test_can_issue_assertion_with_expiration(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)

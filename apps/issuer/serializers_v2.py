@@ -354,11 +354,11 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
     issuerOpenBadgeId = serializers.URLField(source='issuer_jsonld_id', read_only=True)
 
     image = serializers.FileField(read_only=True)
-    recipient = BadgeRecipientSerializerV2(source='*')
+    recipient = BadgeRecipientSerializerV2(source='*', required=False)
 
     issuedOn = serializers.DateTimeField(source='issued_on', required=False)
     narrative = MarkdownCharField(required=False, allow_null=True)
-    evidence = EvidenceItemSerializerV2(many=True, required=False)
+    evidence = EvidenceItemSerializerV2(source='evidence_items', many=True, required=False)
 
     revoked = HumanReadableBooleanField(read_only=True)
     revocationReason = serializers.CharField(source='revocation_reason', read_only=True)
@@ -475,7 +475,7 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
 
     def update(self, instance, validated_data):
         updateable_fields = [
-            'evidence',
+            'evidence_items',
             'expires_at',
             'extension_items',
             'hashed',
@@ -493,22 +493,29 @@ class BadgeInstanceSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin)
         return instance
 
     def validate(self, data):
+        request = self.context.get('request', None)
 
-        if 'cached_badgeclass' in data:
-            # included badgeclass in request
-            data['badgeclass'] = data.pop('cached_badgeclass')
-        elif 'badgeclass' in self.context:
-            # badgeclass was passed in context
-            data['badgeclass'] = self.context.get('badgeclass')
-        elif 'badgeclass_jsonld_id' in data:
-            data['badgeclass'] = data.pop('badgeclass_jsonld_id')
-        else:
-            # badgeclass is required on create
-            raise serializers.ValidationError({"badgeclass": ["This field is required"]})
+        if request and request.method != 'PUT':
+            # recipient and badgeclass are only required on create, ignored on update
+            if 'recipient_identifier' not in data:
+                raise serializers.ValidationError({'recipient_identifier': ["This field is required"]})
+
+            if 'cached_badgeclass' in data:
+                # included badgeclass in request
+                data['badgeclass'] = data.pop('cached_badgeclass')
+            elif 'badgeclass' in self.context:
+                # badgeclass was passed in context
+                data['badgeclass'] = self.context.get('badgeclass')
+            elif 'badgeclass_jsonld_id' in data:
+                data['badgeclass'] = data.pop('badgeclass_jsonld_id')
+            else:
+                raise serializers.ValidationError({"badgeclass": ["This field is required"]})
 
         expected_issuer = self.context.get('kwargs', {}).get('issuer')
         if expected_issuer and data['badgeclass'].issuer != expected_issuer:
             raise serializers.ValidationError({"badgeclass": ["Could not find matching badgeclass for this issuer."]})
 
-        data['issuer'] = data['badgeclass'].issuer
+        if 'badgeclass' in data:
+            data['issuer'] = data['badgeclass'].issuer
+
         return data
