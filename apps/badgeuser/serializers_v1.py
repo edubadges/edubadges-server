@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from mainsite.models import BadgrApp
 from mainsite.serializers import StripTagsCharField
-from .models import BadgeUser, CachedEmailAddress
+from .models import BadgeUser, CachedEmailAddress, TermsVersion
 from .utils import notify_on_password_change
 
 
@@ -39,6 +39,8 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
     email = serializers.EmailField(source='primary_email', required=False)
     password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False)
     slug = serializers.CharField(source='entity_id', read_only=True)
+    agreed_terms_version = serializers.IntegerField(required=False)
+    marketing_opt_in = serializers.BooleanField(required=False)
 
     class Meta:
         apispec_definition = ('BadgeUser', {})
@@ -49,6 +51,7 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
             plaintext_password=validated_data['password'],
+            marketing_opt_in=validated_data.get('marketing_opt_in', False),
             request=self.context.get('request', None),
         )
         return user
@@ -66,6 +69,12 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
             user.set_password(password)
             notify_on_password_change(user)
 
+        if 'agreed_terms_version' in validated_data:
+            user.agreed_terms_version = validated_data.get('agreed_terms_version')
+
+        if 'marketing_opt_in' in validated_data:
+            user.marketing_opt_in = validated_data.get('marketing_opt_in')
+
         user.save()
         return user
 
@@ -74,6 +83,8 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
 
         if self.context.get('include_token', False):
             representation['token'] = instance.cached_token()
+
+        representation['latest_terms_version'] = TermsVersion.cached.latest_version()
 
         return representation
 

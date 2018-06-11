@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 from rest_framework import serializers
 
-from badgeuser.models import BadgeUser
+from badgeuser.models import BadgeUser, TermsVersion
 from badgeuser.utils import notify_on_password_change
 from entity.serializers import DetailSerializerV2, BaseSerializerV2
 from mainsite.models import BadgrApp
@@ -40,6 +40,9 @@ class BadgeUserSerializerV2(DetailSerializerV2):
     lastName = StripTagsCharField(source='last_name', max_length=30, allow_blank=True)
     password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False)
     emails = BadgeUserEmailSerializerV2(many=True, source='email_items', required=False)
+    agreedTermsVersion = serializers.IntegerField(source='agreed_terms_version', required=False)
+    latestTermsVersion = serializers.IntegerField(source='latest_terms_version', required=False)
+    marketingOptIn = serializers.BooleanField(source='marketing_opt_in', required=False)
 
     class Meta(DetailSerializerV2.Meta):
         model = BadgeUser
@@ -83,6 +86,9 @@ class BadgeUserSerializerV2(DetailSerializerV2):
 
     def to_representation(self, instance):
         representation = super(BadgeUserSerializerV2, self).to_representation(instance)
+
+        representation['latestTermsVersion'] = TermsVersion.cached.latest_version()
+
         if not self.context.get('isSelf'):
             fields_shown_only_to_self = ['emails']
             for f in fields_shown_only_to_self:

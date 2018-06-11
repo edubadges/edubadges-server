@@ -9,6 +9,8 @@ from itertools import chain
 
 import cachemodel
 from allauth.account.models import EmailAddress, EmailConfirmation
+from basic_models.models import IsActive
+from django.core.cache import cache
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
@@ -20,7 +22,7 @@ from rest_framework.authtoken.models import Token
 
 from backpack.models import BackpackCollection
 from entity.models import BaseVersionedEntity
-from issuer.models import Issuer, BadgeInstance
+from issuer.models import Issuer, BadgeInstance, BaseAuditedModel
 from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager
 from mainsite.models import ApplicationInfo
 
@@ -131,6 +133,8 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     REQUIRED_FIELDS = ['email']
 
     badgrapp = models.ForeignKey('mainsite.BadgrApp', blank=True, null=True, default=None)
+
+    marketing_opt_in = models.BooleanField(default=False)
 
     objects = BadgeUserManager()
 
@@ -288,6 +292,32 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
                 Token.objects.get_or_create(user=self)
         return user_token.key
 
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_agreed_terms_version(self):
+        try:
+            return self.termsagreement_set.all().order_by('-terms_version')[0]
+        except IndexError:
+            pass
+        return None
+
+    @property
+    def agreed_terms_version(self):
+        v = self.cached_agreed_terms_version()
+        if v is None:
+            return 0
+        return v.terms_version
+
+    @agreed_terms_version.setter
+    def agreed_terms_version(self, value):
+        try:
+            value = int(value)
+        except ValueError as e:
+            return
+
+        if value > self.agreed_terms_version:
+            if TermsVersion.active_objects.filter(version=value).exists():
+                self.termsagreement_set.get_or_create(terms_version=value, defaults=dict(agreed=True))
+
     def replace_token(self):
         Token.objects.filter(user=self).delete()
         # user_token, created = \
@@ -362,3 +392,43 @@ class BadgrAccessToken(AccessToken, cachemodel.CacheModel):
         except ApplicationInfo.DoesNotExist:
             return ApplicationInfo()
 
+
+class TermsVersionManager(cachemodel.CacheModelManager):
+    latest_version_key = "badgr_server_cached_latest_version"
+
+    def latest_version(self):
+        try:
+            return self.all().order_by('-version')[0].version
+        except IndexError:
+            pass
+        return 0
+
+    def cached_latest_version(self):
+        latest = cache.get(self.latest_version_key)
+        if latest is None:
+            return self.publish_latest_version()
+        return latest
+
+    def publish_latest_version(self):
+        latest = self.latest_version()
+        cache.set(self.latest_version_key, latest, timeout=None)
+        return latest
+
+
+class TermsVersion(IsActive, BaseAuditedModel, cachemodel.CacheModel):
+    version = models.PositiveIntegerField(unique=True)
+    cached = TermsVersionManager()
+
+    def publish(self):
+        super(TermsVersion, self).publish()
+        TermsVersion.cached.publish_latest_version()
+
+
+class TermsAgreement(BaseAuditedModel, cachemodel.CacheModel):
+    user = models.ForeignKey('badgeuser.BadgeUser')
+    terms_version = models.PositiveIntegerField()
+    agreed = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ('-terms_version',)
+        unique_together = ('user', 'terms_version')
