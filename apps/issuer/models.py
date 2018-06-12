@@ -751,6 +751,18 @@ class BadgeInstance(BaseAuditedModel,
 
         super(BadgeInstance, self).save(*args, **kwargs)
 
+    def rebake(self, obi_version=CURRENT_OBI_VERSION, save=True):
+        new_image = StringIO.StringIO()
+        bake(
+            image_file=self.cached_badgeclass.image.file,
+            assertion_json_string=json_dumps(self.get_json(obi_version=obi_version), indent=2),
+            output_file=new_image
+        )
+        new_name = default_storage.save(self.image.name, ContentFile(new_image.read()))
+        self.image.name = new_name
+        if save:
+            self.save()
+
     def publish(self):
         super(BadgeInstance, self).publish()
         self.badgeclass.publish()
