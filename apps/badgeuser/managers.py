@@ -51,7 +51,7 @@ class BadgeUserManager(UserManager):
         user.last_name = last_name
         user.badgrapp = badgrapp
         user.marketing_opt_in = marketing_opt_in
-        user.agreed_terms_version = TermsVersion.cached.cached_latest_version()
+        user.agreed_terms_version = TermsVersion.cached.latest_version()
         if plaintext_password:
             user.set_password(plaintext_password)
         user.save()

@@ -47,7 +47,7 @@ class TermsVersionAdmin(ModelAdmin):
             'fields': ('created_at','created_by','updated_at','updated_by'),
             'classes': ('collapse',)
         }),
-        (None, {'fields': ('version',)})
+        (None, {'fields': ('is_active','version','short_description')})
     )
 
 badgr_admin.register(TermsVersion, TermsVersionAdmin)

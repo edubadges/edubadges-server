@@ -397,31 +397,37 @@ class TermsVersionManager(cachemodel.CacheModelManager):
     latest_version_key = "badgr_server_cached_latest_version"
 
     def latest_version(self):
-        try:
-            return self.all().order_by('-version')[0].version
-        except IndexError:
-            pass
+        latest = self.cached_latest()
+        if latest is not None:
+            return latest.version
         return 0
 
-    def cached_latest_version(self):
+    def latest(self):
+        try:
+            return self.all().order_by('-version')[0]
+        except IndexError:
+            pass
+
+    def cached_latest(self):
         latest = cache.get(self.latest_version_key)
         if latest is None:
-            return self.publish_latest_version()
+            return self.publish_latest()
         return latest
 
-    def publish_latest_version(self):
-        latest = self.latest_version()
+    def publish_latest(self):
+        latest = self.latest()
         cache.set(self.latest_version_key, latest, timeout=None)
         return latest
 
 
 class TermsVersion(IsActive, BaseAuditedModel, cachemodel.CacheModel):
     version = models.PositiveIntegerField(unique=True)
+    short_description = models.TextField(blank=True)
     cached = TermsVersionManager()
 
     def publish(self):
         super(TermsVersion, self).publish()
-        TermsVersion.cached.publish_latest_version()
+        TermsVersion.cached.publish_latest()
 
 
 class TermsAgreement(BaseAuditedModel, cachemodel.CacheModel):

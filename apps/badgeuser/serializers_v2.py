@@ -41,7 +41,6 @@ class BadgeUserSerializerV2(DetailSerializerV2):
     password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False)
     emails = BadgeUserEmailSerializerV2(many=True, source='email_items', required=False)
     agreedTermsVersion = serializers.IntegerField(source='agreed_terms_version', required=False)
-    latestTermsVersion = serializers.IntegerField(source='latest_terms_version', required=False)
     marketingOptIn = serializers.BooleanField(source='marketing_opt_in', required=False)
 
     class Meta(DetailSerializerV2.Meta):
@@ -88,6 +87,10 @@ class BadgeUserSerializerV2(DetailSerializerV2):
         representation = super(BadgeUserSerializerV2, self).to_representation(instance)
 
         representation['latestTermsVersion'] = TermsVersion.cached.latest_version()
+        latest = TermsVersion.cached.cached_latest()
+        representation['latestTermsVersion'] = latest.version
+        if latest.version != instance.agreed_terms_version:
+            representation['latestTermsDescription'] = latest.short_description
 
         if not self.context.get('isSelf'):
             fields_shown_only_to_self = ['emails']
