@@ -85,9 +85,10 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
             representation['token'] = instance.cached_token()
 
         latest = TermsVersion.cached.cached_latest()
-        representation['latest_terms_version'] = latest.version
-        if latest.version != instance.agreed_terms_version:
-            representation['latest_terms_description'] = latest.short_description
+        if latest:
+            representation['latest_terms_version'] = latest.version
+            if latest.version != instance.agreed_terms_version:
+                representation['latest_terms_description'] = latest.short_description
 
         return representation
 

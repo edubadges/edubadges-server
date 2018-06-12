@@ -86,11 +86,11 @@ class BadgeUserSerializerV2(DetailSerializerV2):
     def to_representation(self, instance):
         representation = super(BadgeUserSerializerV2, self).to_representation(instance)
 
-        representation['latestTermsVersion'] = TermsVersion.cached.latest_version()
         latest = TermsVersion.cached.cached_latest()
-        representation['latestTermsVersion'] = latest.version
-        if latest.version != instance.agreed_terms_version:
-            representation['latestTermsDescription'] = latest.short_description
+        if latest:
+            representation['latestTermsVersion'] = latest.version
+            if latest.version != instance.agreed_terms_version:
+                representation['latestTermsDescription'] = latest.short_description
 
         if not self.context.get('isSelf'):
             fields_shown_only_to_self = ['emails']

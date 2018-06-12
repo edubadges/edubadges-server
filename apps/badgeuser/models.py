@@ -416,7 +416,8 @@ class TermsVersionManager(cachemodel.CacheModelManager):
 
     def publish_latest(self):
         latest = self.latest()
-        cache.set(self.latest_version_key, latest, timeout=None)
+        if latest is not None:
+            cache.set(self.latest_version_key, latest, timeout=None)
         return latest
 
 
