@@ -316,6 +316,8 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
 
         if value > self.agreed_terms_version:
             if TermsVersion.active_objects.filter(version=value).exists():
+                if not self.pk:
+                    self.save()
                 self.termsagreement_set.get_or_create(terms_version=value, defaults=dict(agreed=True))
 
     def replace_token(self):
@@ -404,7 +406,7 @@ class TermsVersionManager(cachemodel.CacheModelManager):
 
     def latest(self):
         try:
-            return self.all().order_by('-version')[0]
+            return self.filter(is_active=True).order_by('-version')[0]
         except IndexError:
             pass
 
