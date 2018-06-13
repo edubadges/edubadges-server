@@ -173,11 +173,17 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
             'fields': ('old_json',)
         }),
     )
+    actions = ['rebake']
     change_actions = ['redirect_issuer', 'redirect_badgeclass']
     inlines = [
         BadgeEvidenceInline,
         BadgeInstanceExtensionInline
     ]
+
+    def rebake(self, request, queryset):
+        for obj in queryset:
+            obj.rebake(save=True)
+    rebake.short_description = "Rebake selected badge instances"
 
     def badge_image(self, obj):
         try:

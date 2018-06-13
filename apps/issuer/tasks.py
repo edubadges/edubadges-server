@@ -47,6 +47,19 @@ def notify_badgerank_of_badgeclass(self, badgeclass_pk):
         'success': True
     }
 
+@app.task(bind=True)
+def rebake_all_assertions(self, obi_version=CURRENT_OBI_VERSION, max_count=None):
+    count = 0
+    assertions = BadgeInstance.objects.filter(source_url__is_null=True)
+    while max_count is None or count < max_count:
+        assertion = assertions[count]
+        rebake_assertion_image.delay(assertion_entity_id=assertion.entity_id, obi_version=obi_version)
+        count += 1
+
+    return {
+        'success': True,
+        'message': "Enqueued {} assertions for rebaking".format(count)
+    }
 
 @app.task(bind=True)
 def rebake_assertion_image(self, assertion_entity_id=None, obi_version=CURRENT_OBI_VERSION):
@@ -57,6 +70,12 @@ def rebake_assertion_image(self, assertion_entity_id=None, obi_version=CURRENT_O
         return {
             'success': False,
             'error': "Unknown assertion entity_id={}".format(assertion_entity_id)
+        }
+
+    if assertion.source_url:
+        return {
+            'success': False,
+            'error': "Skipping imported assertion={}  source_url={}".format(assertion_entity_id, assertion.source_url)
         }
 
     assertion.rebake(obi_version=obi_version)

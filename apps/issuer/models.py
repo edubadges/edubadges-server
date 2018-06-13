@@ -752,6 +752,10 @@ class BadgeInstance(BaseAuditedModel,
         super(BadgeInstance, self).save(*args, **kwargs)
 
     def rebake(self, obi_version=CURRENT_OBI_VERSION, save=True):
+        if self.source_url:
+            # dont rebake imported assertions
+            return
+
         new_image = StringIO.StringIO()
         bake(
             image_file=self.cached_badgeclass.image.file,
