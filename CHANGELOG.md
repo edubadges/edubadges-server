@@ -5,7 +5,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [2.8.0]
+## [2.9.0] - 2018-06-18
+
+### New Features
+    - Track privacy policy agreements for users. When new versions are published, users should be asked to agree again.
+    - Track marketing opt-in for users.
+    - Celery task to rebake existing assertions to the defined CURRENT_OBI_VERSION
+
+### Bug Fixes
+    - Fixed issue with Android app being unable to login if backpack contains badges with evidence
+    - When baking images use the "canonical", unversioned, URL to the assertion as the baked "id" property
+
+
+## [2.8.0] - 2018-06-05
     - bugfix to ensure /v1/earner/badges endpoint serializer is the same now that OBI_VERSION is 2.0
     - optimize caching of BadgeInstances:
         - existing api clients should behave the same
