@@ -451,6 +451,8 @@ class V1BadgeInstanceSerializer(V1InstanceSerializer):
     """
     def to_representation(self, instance):
         localbadgeinstance_json = instance.json
+        if 'evidence' in localbadgeinstance_json:
+            localbadgeinstance_json['evidence'] = instance.evidence_url
         localbadgeinstance_json['uid'] = instance.entity_id
         localbadgeinstance_json['badge'] = instance.cached_badgeclass.json
         localbadgeinstance_json['badge']['criteria'] = instance.cached_badgeclass.get_criteria_url()
