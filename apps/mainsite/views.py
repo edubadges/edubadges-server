@@ -34,9 +34,9 @@ def error404(request):
         template = loader.get_template('error/404.html')
     except TemplateDoesNotExist:
         return HttpResponseServerError('<h1>Page not found (404)</h1>', content_type='text/html')
-    return HttpResponseNotFound(template.render(Context({
+    return HttpResponseNotFound(template.render({
         'STATIC_URL': getattr(settings, 'STATIC_URL', '/static/'),
-    })))
+    }))
 
 
 @xframe_options_exempt
@@ -45,9 +45,9 @@ def error500(request):
         template = loader.get_template('error/500.html')
     except TemplateDoesNotExist:
         return HttpResponseServerError('<h1>Server Error (500)</h1>', content_type='text/html')
-    return HttpResponseServerError(template.render(Context({
+    return HttpResponseServerError(template.render({
         'STATIC_URL': getattr(settings, 'STATIC_URL', '/static/'),
-    })))
+    }))
 
 
 def info_view(request):

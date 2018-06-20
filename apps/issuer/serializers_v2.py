@@ -304,7 +304,7 @@ class BadgeRecipientSerializerV2(BaseSerializerV2):
         if hashed is None:
             attrs['hashed'] = self.HASHED_DEFAULTS.get(recipient_type, True)
         return attrs
-
+        
     def to_representation(self, instance):
         representation = super(BadgeRecipientSerializerV2, self).to_representation(instance)
         if instance.hashed:

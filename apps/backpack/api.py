@@ -40,8 +40,18 @@ class BackpackAssertionList(BaseEntityListView):
         summary="Get a list of Assertions in authenticated user's backpack ",
         tags=['Backpack']
     )
-    def get(self, request, **kwargs):
-        return super(BackpackAssertionList, self).get(request, **kwargs)
+    def get(self, request, **kwargs): #function updated June 18, 2018 by Juan Carlos Garcia
+        mykwargs = kwargs
+        mykwargs['expands'] = []
+        expands = request.GET.getlist('expand', [])
+
+        # /assertions?expand=badgeclass&expand=issuer
+        if 'badgeclass' in expands:
+            mykwargs['expands'].append('badgeclass')
+        if 'issuer' in expands:
+            mykwargs['expands'].append('issuer')
+
+        return super(BackpackAssertionList, self).get(request, **mykwargs)
 
     @apispec_post_operation('Assertion',
         summary="Upload a new Assertion to the backpack",
@@ -50,7 +60,7 @@ class BackpackAssertionList(BaseEntityListView):
     def post(self, request, **kwargs):
         if kwargs.get('version', 'v1') == 'v1':
             return super(BackpackAssertionList, self).post(request, **kwargs)
-            
+
         raise NotImplementedError("use BackpackImportBadge.post instead")
 
     def get_context_data(self, **kwargs):
