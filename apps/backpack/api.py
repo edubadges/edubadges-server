@@ -45,7 +45,6 @@ class BackpackAssertionList(BaseEntityListView):
         mykwargs['expands'] = []
         expands = request.GET.getlist('expand', [])
 
-        # /assertions?expand=badgeclass&expand=issuer
         if 'badgeclass' in expands:
             mykwargs['expands'].append('badgeclass')
         if 'issuer' in expands:

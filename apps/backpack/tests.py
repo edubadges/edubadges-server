@@ -714,7 +714,6 @@ class TestBadgeUploads(BadgrTestCase):
         self.assertEqual(response.status_code, 201)
 
 class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
-    # TODO: Juan Carlos Garcia
     def test_no_expands(self):
         '''Expect correct result if no expand parameters are passed in'''
 

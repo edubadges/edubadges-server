@@ -56,19 +56,16 @@ class BaseEntityListView(BaseEntityView):
         """
         objects = self.get_objects(request, **kwargs)
         context = self.get_context_data(**kwargs)
-        # points to serializer class specified when BaseEntityListView, or sublclass of BaseEntityListView,
-        # was instantiated
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(objects, many=True, context=context)
 
-        # TODO: what's going on here
         headers = dict()
         paginator = getattr(self, 'paginator', None)
         if paginator and callable(getattr(paginator, 'get_link_header', None)):
             link_header = paginator.get_link_header()
             if link_header:
                 headers['Link'] = link_header
-        # .data goes to to_representation
+                
         return Response(serializer.data, headers=headers)
 
     def post(self, request, **kwargs):
