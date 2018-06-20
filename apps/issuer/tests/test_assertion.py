@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import json
+from unittest import skip
 
 import dateutil.parser
 import png
@@ -18,6 +19,35 @@ from mainsite.utils import OriginSetting
 
 
 class AssertionTests(SetupIssuerHelper, BadgrTestCase):
+
+    @skip("test does not pass when using FileStorage, but does when using S3BotoStorage, and behavior works as expected in server")
+    def test_can_rebake_assertion(self):
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+
+        import issuer.utils
+
+        # issue badge that gets baked with 1_1, while current version is 2_0
+        issuer.utils.CURRENT_OBI_VERSION = '2_0'
+        issuer.utils.UNVERSIONED_BAKED_VERSION = '1_1'
+        test_assertion = test_badgeclass.issue(recipient_id='test1@email.test')
+        v1_data = json.loads(str(unbake(test_assertion.image)))
+
+        self.assertDictContainsSubset({
+            '@context': u'https://w3id.org/openbadges/v1'
+        }, v1_data)
+
+        original_image_url = test_assertion.image_url()
+        test_assertion.rebake()
+        self.assertEqual(original_image_url, test_assertion.image_url())
+
+        v2_datastr = unbake(test_assertion.image)
+        self.assertTrue(v2_datastr)
+        v2_data = json.loads(v2_datastr)
+        self.assertDictContainsSubset({
+            '@context': u'https://w3id.org/openbadges/v2'
+        }, v2_data)
 
     def test_can_update_assertion(self):
         test_user = self.setup_user(authenticate=True)

@@ -585,6 +585,9 @@ class TestBadgeUploads(BadgrTestCase):
         ])
         self.setup_user(email='test@example.com', authenticate=True)
 
+        badgeclass_count = BadgeClass.objects.all().count()
+        issuer_count = Issuer.objects.all().count()
+
         post_input = {
             'url': 'http://a.com/instance'
         }
@@ -601,8 +604,8 @@ class TestBadgeUploads(BadgrTestCase):
         )
         self.assertEqual(response2.status_code, 201)
 
-        self.assertEqual(BadgeClass.objects.all().count(), 1)
-        self.assertEqual(Issuer.objects.all().count(), 1)
+        self.assertEqual(BadgeClass.objects.all().count(), badgeclass_count+1)
+        self.assertEqual(Issuer.objects.all().count(), issuer_count+1)
 
     def test_shouldnt_access_already_stored_badgeclass_for_validation(self):
         """

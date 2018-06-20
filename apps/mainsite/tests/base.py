@@ -13,7 +13,7 @@ from django.utils import timezone
 from oauth2_provider.models import AccessToken, Application
 from rest_framework.test import APITransactionTestCase
 
-from badgeuser.models import BadgeUser
+from badgeuser.models import BadgeUser, TermsVersion
 from issuer.models import Issuer, BadgeClass
 from mainsite import TOP_DIR
 from mainsite.models import BadgrApp, ApplicationInfo
@@ -62,7 +62,10 @@ class SetupUserHelper(object):
                    verified=True,
                    primary=True,
                    send_confirmation=False,
-                   token_scope=None):
+                   token_scope=None,
+                   terms_version=1
+                   ):
+
 
         if email is None:
             email = 'setup_user_{}@email.test'.format(random.random())
@@ -71,6 +74,13 @@ class SetupUserHelper(object):
                                         last_name=last_name,
                                         create_email_address=create_email_address,
                                         send_confirmation=send_confirmation)
+
+        if terms_version is not None:
+            # ensure there are terms and the user agrees to them to ensure there are no cache misses during tests
+            terms, created = TermsVersion.objects.get_or_create(version=terms_version)
+            user.agreed_terms_version = terms_version
+            user.save()
+
         if password is None:
             user.password = None
         else:

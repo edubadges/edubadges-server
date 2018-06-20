@@ -666,6 +666,11 @@ class BadgeInstance(BaseAuditedModel,
     objects = BadgeInstanceManager()
     cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
 
+    class Meta:
+        index_together = (
+                ('recipient_identifier', 'badgeclass', 'revoked'),
+        )
+
     @property
     def extended_json(self):
         extended_json = self.json
@@ -750,6 +755,22 @@ class BadgeInstance(BaseAuditedModel,
             self.revocation_reason = None
 
         super(BadgeInstance, self).save(*args, **kwargs)
+
+    def rebake(self, obi_version=CURRENT_OBI_VERSION, save=True):
+        if self.source_url:
+            # dont rebake imported assertions
+            return
+
+        new_image = StringIO.StringIO()
+        bake(
+            image_file=self.cached_badgeclass.image.file,
+            assertion_json_string=json_dumps(self.get_json(obi_version=obi_version), indent=2),
+            output_file=new_image
+        )
+        new_name = default_storage.save(self.image.name, ContentFile(new_image.read()))
+        self.image.name = new_name
+        if save:
+            self.save()
 
     def publish(self):
         super(BadgeInstance, self).publish()
