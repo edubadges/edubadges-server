@@ -37,7 +37,7 @@ Note: some of these packages would introduce additional security considerations 
 
 *Obtain source code and clone into code directory*
 
-* `git clone https://github.com/concentricsky/badgr-server-prerelease.git code`
+* `git clone https://github.com/concentricsky/badgr-server.git code`
 * `cd code`
 
 *Your Directory structure will look like this with default logs and mediafiles locations:*
