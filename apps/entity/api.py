@@ -65,7 +65,7 @@ class BaseEntityListView(BaseEntityView):
             link_header = paginator.get_link_header()
             if link_header:
                 headers['Link'] = link_header
-
+                
         return Response(serializer.data, headers=headers)
 
     def post(self, request, **kwargs):
@@ -129,7 +129,7 @@ class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
 
     def get(self, request, **kwargs):
         """
-        GET a single entity by its identifier 
+        GET a single entity by its identifier
         """
         obj = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, obj):

@@ -379,5 +379,3 @@ class BakedBadgeInstanceImage(VersionedObjectMixin, APIView, SlugToEntityIdRedir
         redirect_url = assertion.get_baked_image_url(obi_version=requested_version)
 
         return redirect(redirect_url, permanent=True)
-
-

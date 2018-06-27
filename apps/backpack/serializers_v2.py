@@ -14,6 +14,7 @@ from issuer.models import BadgeInstance, BadgeClass, Issuer
 from issuer.serializers_v2 import BadgeRecipientSerializerV2, EvidenceItemSerializerV2
 from mainsite.drf_fields import ValidImageField
 from mainsite.serializers import MarkdownCharField, HumanReadableBooleanField, OriginalJsonSerializerMixin
+from issuer.utils import generate_sha256_hashstring, CURRENT_OBI_VERSION
 
 
 class BackpackAssertionSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
@@ -37,6 +38,18 @@ class BackpackAssertionSerializerV2(DetailSerializerV2, OriginalJsonSerializerMi
 
     class Meta(DetailSerializerV2.Meta):
         model = BadgeInstance
+
+    def to_representation(self, instance):
+        representation = super(BackpackAssertionSerializerV2, self).to_representation(instance)
+        request_kwargs = self.context['kwargs']
+        expands = request_kwargs['expands']
+
+        if 'badgeclass' in expands:
+            representation['badgeclass'] = instance.cached_badgeclass.get_json(include_extra=True, use_canonical_id=True)
+            if 'issuer' in expands:
+                representation['badgeclass']['issuer'] = instance.cached_issuer.get_json(include_extra=True, use_canonical_id=True)
+
+        return representation
 
 
 class BackpackCollectionSerializerV2(DetailSerializerV2):
@@ -123,4 +136,3 @@ class BackpackImportSerializerV2(DetailSerializerV2):
         except DjangoValidationError as e:
             raise RestframeworkValidationError(e.messages)
         return instance
-

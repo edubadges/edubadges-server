@@ -173,6 +173,7 @@ class BadgeInstanceManager(models.Manager):
         badgeclass = kwargs.pop('badgeclass', None)
         issuer = kwargs.pop('issuer', badgeclass.issuer)
 
+        # self.model would be a BadgeInstance
         new_instance = self.model(
             recipient_identifier=recipient_identifier,
             badgeclass=badgeclass,
@@ -213,4 +214,3 @@ class BadgeInstanceManager(models.Manager):
             notify_badgerank_of_badgeclass.delay(badgeclass_pk=badgeclass.pk)
 
         return new_instance
-
