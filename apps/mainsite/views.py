@@ -18,6 +18,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from issuer.tasks import rebake_all_assertions
 from mainsite.admin_actions import clear_cache
 from mainsite.models import EmailBlacklist, BadgrApp
 from mainsite.serializers import VerifiedAuthTokenSerializer
@@ -101,14 +102,17 @@ class LoginAndObtainAuthToken(ObtainAuthToken):
 class SitewideActionForm(forms.Form):
     ACTION_CLEAR_CACHE = 'CLEAR_CACHE'
     ACTION_RESAVE_ELEMENTS = 'RESAVE_ELEMENTS'
+    ACTION_REBAKE_ALL_ASSERTIONS = "REBAKE_ALL_ASSERTIONS"
 
     ACTIONS = {
         ACTION_CLEAR_CACHE: clear_cache,
         ACTION_RESAVE_ELEMENTS: resave_all_elements,
+        ACTION_REBAKE_ALL_ASSERTIONS: rebake_all_assertions
     }
     CHOICES = (
         (ACTION_CLEAR_CACHE, 'Clear Cache',),
         (ACTION_RESAVE_ELEMENTS, 'Re-save Pathway Elements',),
+        (ACTION_REBAKE_ALL_ASSERTIONS, 'Rebake all assertions',),
     )
 
     action = forms.ChoiceField(choices=CHOICES, required=True, label="Pick an action")
