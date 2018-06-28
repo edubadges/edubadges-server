@@ -66,10 +66,8 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
     )
     def get(self, request, id, **kwargs):
         email_address = self.get_email(pk=id)
-        if email_address is None:
+        if email_address is None or email_address.user_id != self.request.user.id:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        if email_address.user_id != self.request.user.id:
-            return Response(status=status.HTTP_403_FORBIDDEN)
 
         serializer = EmailSerializerV1(email_address, context={'request': request})
         return Response(serializer.data)
