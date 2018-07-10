@@ -112,14 +112,15 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
                 email_address.set_as_primary()
                 email_address.publish()
         else:
-            send_confirmation = False
             if request.data.get('resend'):
+                send_confirmation = False
+                current_time = datetime.datetime.now()
                 last_request_time = email_address.get_last_verification_sent_time()
+
                 if last_request_time is None:
                     email_address.set_last_verification_sent_time(datetime.datetime.now())
                     send_confirmation = True
                 else:
-                    current_time = datetime.datetime.now()
                     time_delta = current_time - last_request_time
                     if time_delta > RATE_LIMIT_DELTA:
                         send_confirmation = True
@@ -128,8 +129,11 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
                     email_address.send_confirmation(request=request)
                     email_address.set_last_verification_sent_time(datetime.datetime.now())
                 else:
-                    return Response({"message": "Can only send one verification email every %s" % (str(RATE_LIMIT_DELTA))},
-                     status=status.HTTP_400_BAD_REQUEST)
+                    remaining_time_obj = RATE_LIMIT_DELTA - (datetime.datetime.now() - last_request_time)
+                    remaining_time_rep = str((remaining_time_obj.seconds//60)%60) + " minutes and " \
+                      + str(remaining_time_obj.seconds%60) + " seconds"
+                    return Response("Will be able to re-send verification email in %s." % (str(remaining_time_rep)),
+                     status=status.HTTP_429_TOO_MANY_REQUESTS)
 
 
         serializer = EmailSerializerV1(email_address, context={'request': request})
