@@ -1,6 +1,8 @@
 # encoding: utf-8
 from __future__ import unicode_literals
 
+import datetime
+
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,6 +12,8 @@ from badgeuser.serializers_v1 import EmailSerializerV1
 from apispec_drf.decorators import apispec_list_operation, apispec_post_operation, apispec_operation, \
     apispec_get_operation, apispec_delete_operation, apispec_put_operation
 
+
+RATE_LIMIT_DELTA = datetime.timedelta(minutes=5)
 
 class BadgeUserEmailList(APIView):
     permission_classes = (permissions.IsAuthenticated,)
@@ -108,8 +112,25 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
                 email_address.set_as_primary()
                 email_address.publish()
         else:
+            send_confirmation = False
             if request.data.get('resend'):
-                email_address.send_confirmation(request=request)
+                last_request_time = email_address.get_last_verification_sent_time()
+                if last_request_time is None:
+                    email_address.set_last_verification_sent_time(datetime.datetime.now())
+                    send_confirmation = True
+                else:
+                    current_time = datetime.datetime.now()
+                    time_delta = current_time - last_request_time
+                    if time_delta > RATE_LIMIT_DELTA:
+                        send_confirmation = True
+
+                if send_confirmation:
+                    email_address.send_confirmation(request=request)
+                    email_address.set_last_verification_sent_time(datetime.datetime.now())
+                else:
+                    return Response({"message": "Can only send one verification email every %s" % (str(RATE_LIMIT_DELTA))},
+                     status=status.HTTP_400_BAD_REQUEST)
+
 
         serializer = EmailSerializerV1(email_address, context={'request': request})
         serialized = serializer.data
