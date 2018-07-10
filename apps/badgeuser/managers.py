@@ -15,8 +15,10 @@ class BadgeUserManager(UserManager):
                request=None,
                plaintext_password=None,
                send_confirmation=True,
-               create_email_address=True):
-        from badgeuser.models import CachedEmailAddress
+               create_email_address=True,
+               marketing_opt_in=False
+               ):
+        from badgeuser.models import CachedEmailAddress, TermsVersion
 
         user = None
 
@@ -48,6 +50,8 @@ class BadgeUserManager(UserManager):
         user.first_name = first_name
         user.last_name = last_name
         user.badgrapp = badgrapp
+        user.marketing_opt_in = marketing_opt_in
+        user.agreed_terms_version = TermsVersion.cached.latest_version()
         if plaintext_password:
             user.set_password(plaintext_password)
         user.save()

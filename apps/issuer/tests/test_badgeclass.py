@@ -687,28 +687,25 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
 
     def test_can_create_badgeclass_with_extensions(self):
         example_extensions = {
-            "schema:location": {
-                "@context": "https://openbadgespec.org/extensions/geoCoordinatesExtension/context.json",
-                "type": ["Extension", "extensions:GeoCoordinates", "schema:Place"],
-                "name": "Stadium of Light, Sunderland",
-                "description": "A foodball stadium in Sunderland, England that is home to Sunderland A.F.C.",
-                "geo": {
-                    "latitude": 54.914440,
-                    "longitude": -1.387721
-                }
+            "extensions:originalCreator": {
+                "@context": "https://openbadgespec.org/extensions/originalCreatorExtension/context.json",
+                "type": ["Extension", "extensions:originalCreator"],
+                "url": "https://example.org/creator-organisation.json"
             }
         }
+
         badgeclass = self._create_badgeclass_with_v2(extensions=example_extensions)
         self.verify_badgeclass_extensions(badgeclass, example_extensions)
 
     def test_can_update_badgeclass_with_extensions(self):
         example_extensions = {
-            "extensions:ExampleExtension": {
-                "@context":"https://openbadgespec.org/extensions/exampleExtension/context.json",
-                "type": ["Extension", "extensions:ExampleExtension"],
-                "exampleProperty": "I'm a property, short and sweet."
+            "extensions:originalCreator": {
+                "@context": "https://openbadgespec.org/extensions/originalCreatorExtension/context.json",
+                "type": ["Extension", "extensions:originalCreator"],
+                "url": "https://example.org/creator-organisation.json"
             }
         }
+
         # create a badgeclass with a single extension
         badgeclass = self._create_badgeclass_with_v2(extensions=example_extensions)
         self.verify_badgeclass_extensions(badgeclass, example_extensions)

@@ -232,12 +232,7 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
         if 'issuer' in self.context:
             validated_data['issuer'] = self.context.get('issuer')
 
-        new_badgeclass = BadgeClass(**validated_data)
-
-        # Use AutoSlugField's pre_save to provide slug if empty, else auto-unique
-        new_badgeclass.slug = BadgeClass._meta.get_field('slug').pre_save(new_badgeclass, add=True)
-
-        new_badgeclass.save()
+        new_badgeclass = BadgeClass.objects.create(**validated_data)
         return new_badgeclass
 
 
@@ -256,7 +251,7 @@ class EvidenceItemSerializer(serializers.Serializer):
 
 class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
-    created_by = BadgeUserIdentifierFieldV1()
+    created_by = BadgeUserIdentifierFieldV1(read_only=True)
     slug = serializers.CharField(max_length=255, read_only=True, source='entity_id')
     image = serializers.FileField(read_only=True)  # use_url=True, might be necessary
     email = serializers.EmailField(max_length=1024, required=False, write_only=True)
@@ -264,13 +259,13 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
     recipient_type = serializers.CharField(default=BadgeInstance.RECIPIENT_TYPE_EMAIL)
     allow_uppercase = serializers.BooleanField(default=False, required=False, write_only=True)
     evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
-    narrative = MarkdownCharField(required=False, allow_blank=True)
+    narrative = MarkdownCharField(required=False, allow_blank=True, allow_null=True)
     evidence_items = EvidenceItemSerializer(many=True, required=False)
 
     revoked = HumanReadableBooleanField(read_only=True)
     revocation_reason = serializers.CharField(read_only=True)
 
-    expires = serializers.DateTimeField(source='expires_at', required=False)
+    expires = serializers.DateTimeField(source='expires_at', required=False, allow_null=True)
 
     create_notification = HumanReadableBooleanField(write_only=True, required=False, default=False)
 
@@ -362,3 +357,22 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
             expires_at=validated_data.get('expires_at', None),
             extensions=validated_data.get('extension_items', None)
         )
+
+    def update(self, instance, validated_data):
+        updateable_fields = [
+            'evidence_items',
+            'expires_at',
+            'extension_items',
+            'hashed',
+            'issued_on',
+            'narrative',
+            'recipient_identifier',
+            'recipient_type'
+        ]
+
+        for field_name in updateable_fields:
+            if field_name in validated_data:
+                setattr(instance, field_name, validated_data.get(field_name))
+        instance.save()
+
+        return instance

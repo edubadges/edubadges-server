@@ -3,6 +3,8 @@ import base64
 import json
 import os
 
+import collections
+
 import datetime
 import dateutil.parser
 from django.urls import reverse
@@ -14,14 +16,15 @@ from openbadges_bakery import bake, unbake
 
 from badgeuser.models import CachedEmailAddress, BadgeUser
 from issuer.models import BadgeClass, Issuer, BadgeInstance
-from mainsite.tests.base import BadgrTestCase
+from mainsite.tests.base import BadgrTestCase, SetupIssuerHelper
 
 from backpack.models import BackpackCollection, BackpackCollectionBadgeInstance
 from backpack.serializers_v1 import (CollectionSerializerV1)
 from mainsite.utils import first_node_match, OriginSetting
+from issuer.utils import generate_sha256_hashstring, CURRENT_OBI_VERSION
+
 
 dir = os.path.dirname(__file__)
-
 
 def setup_basic_1_0(**kwargs):
     if not kwargs or not 'http://a.com/instance' in kwargs.get('exclude', []):
@@ -582,6 +585,9 @@ class TestBadgeUploads(BadgrTestCase):
         ])
         self.setup_user(email='test@example.com', authenticate=True)
 
+        badgeclass_count = BadgeClass.objects.all().count()
+        issuer_count = Issuer.objects.all().count()
+
         post_input = {
             'url': 'http://a.com/instance'
         }
@@ -598,8 +604,8 @@ class TestBadgeUploads(BadgrTestCase):
         )
         self.assertEqual(response2.status_code, 201)
 
-        self.assertEqual(BadgeClass.objects.all().count(), 1)
-        self.assertEqual(Issuer.objects.all().count(), 1)
+        self.assertEqual(BadgeClass.objects.all().count(), badgeclass_count+1)
+        self.assertEqual(Issuer.objects.all().count(), issuer_count+1)
 
     def test_shouldnt_access_already_stored_badgeclass_for_validation(self):
         """
@@ -706,6 +712,141 @@ class TestBadgeUploads(BadgrTestCase):
         }
         response = self.client.post('/v1/earner/badges', post_input, format='json')
         self.assertEqual(response.status_code, 201)
+
+class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
+    def test_no_expands(self):
+        '''Expect correct result if no expand parameters are passed in'''
+
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+
+        test_recipient = self.setup_user(email='test_recipient@email.test', authenticate=True)
+        test_badgeclass.issue(recipient_id='test_recipient@email.test')
+
+        response = self.client.get('/v2/backpack/assertions')
+
+        self.assertEqual(response.status_code, 200)
+        # checking if 'badgeclass' was expanded into a dictionary
+        self.assertTrue(not isinstance(response.data['result'][0]['badgeclass'], collections.OrderedDict))
+
+    def test_expand_badgeclass_single_assertion_single_issuer(self):
+        '''For a client with a single badge, attempting to expand the badgeclass without
+        also expanding the issuer.'''
+
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+
+        test_recipient = self.setup_user(email='test_recipient@email.test', authenticate=True)
+        test_badgeclass.issue(recipient_id='test_recipient@email.test')
+
+        response = self.client.get('/v2/backpack/assertions?expand=badgeclass')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(isinstance(response.data['result'][0]['badgeclass'], collections.OrderedDict))
+        self.assertTrue(not isinstance(response.data['result'][0]['badgeclass']['issuer'], collections.OrderedDict))
+
+    def test_expand_issuer_single_assertion_single_issuer(self):
+        '''For a client with a single badge, attempting to expand the issuer without
+        also expanding the badgeclass should result in no expansion to the response.'''
+
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+
+        test_recipient = self.setup_user(email='test_recipient@email.test', authenticate=True)
+        test_badgeclass.issue(recipient_id='test_recipient@email.test')
+
+        responseOne = self.client.get('/v2/backpack/assertions?expand=issuer')
+        responseTwo = self.client.get('/v2/backpack/assertions')
+
+        self.assertEqual(responseOne.status_code, 200)
+        self.assertEqual(responseTwo.status_code, 200)
+        self.assertEqual(responseOne.data, responseTwo.data)
+
+    def test_expand_badgeclass_and_isser_single_assertion_single_issuer(self):
+        '''For a client with a single badge, attempting to expand the badgeclass and issuer.'''
+
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+
+        test_recipient = self.setup_user(email='test_recipient@email.test', authenticate=True)
+        test_badgeclass.issue(recipient_id='test_recipient@email.test')
+
+        response = self.client.get('/v2/backpack/assertions?expand=badgeclass&expand=issuer')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(isinstance(response.data['result'][0]['badgeclass'], collections.OrderedDict))
+        self.assertTrue(isinstance(response.data['result'][0]['badgeclass']['issuer'], collections.OrderedDict))
+
+    def test_expand_badgeclass_mult_assertions_mult_issuers(self):
+        '''For a client with multiple badges, attempting to expand the badgeclass without
+        also expanding the issuer.'''
+
+        # define users and issuers
+        test_user = self.setup_user(email='test_recipient@email.test', authenticate=True)
+        test_issuer_one = self.setup_issuer(name="Test Issuer 1",owner=test_user)
+        test_issuer_two = self.setup_issuer(name="Test Issuer 2",owner=test_user)
+        test_issuer_three = self.setup_issuer(name="Test Issuer 3",owner=test_user)
+
+        # define badgeclasses
+        test_badgeclass_one = self.setup_badgeclass(name='Test Badgeclass 1',issuer=test_issuer_one)
+        test_badgeclass_two = self.setup_badgeclass(name='Test Badgeclass 2',issuer=test_issuer_one)
+        test_badgeclass_three = self.setup_badgeclass(name='Test Badgeclass 3',issuer=test_issuer_two)
+        test_badgeclass_four = self.setup_badgeclass(name='Test Badgeclass 4',issuer=test_issuer_three)
+        test_badgeclass_five = self.setup_badgeclass(name='Test Badgeclass 5',issuer=test_issuer_three)
+        test_badgeclass_six = self.setup_badgeclass(name='Test Badgeclass 6',issuer=test_issuer_three)
+
+        # issue badges to user
+        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
+        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
+        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
+        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
+        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
+        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
+
+        response = self.client.get('/v2/backpack/assertions?expand=badgeclass')
+
+        self.assertEqual(len(response.data['result']), 6)
+        for i in range(6):
+            self.assertTrue(isinstance(response.data['result'][i]['badgeclass'], collections.OrderedDict))
+            self.assertTrue(not isinstance(response.data['result'][i]['badgeclass']['issuer'], collections.OrderedDict))
+
+    def test_expand_badgeclass_and_issuer_mult_assertions_mult_issuers(self):
+        '''For a client with multiple badges, attempting to expand the badgeclass and issuer.'''
+
+        # define users and issuers
+        test_user = self.setup_user(email='test_recipient@email.test', authenticate=True)
+        test_issuer_one = self.setup_issuer(name="Test Issuer 1",owner=test_user)
+        test_issuer_two = self.setup_issuer(name="Test Issuer 2",owner=test_user)
+        test_issuer_three = self.setup_issuer(name="Test Issuer 3",owner=test_user)
+
+        # define badgeclasses
+        test_badgeclass_one = self.setup_badgeclass(name='Test Badgeclass 1',issuer=test_issuer_one)
+        test_badgeclass_two = self.setup_badgeclass(name='Test Badgeclass 2',issuer=test_issuer_one)
+        test_badgeclass_three = self.setup_badgeclass(name='Test Badgeclass 3',issuer=test_issuer_two)
+        test_badgeclass_four = self.setup_badgeclass(name='Test Badgeclass 4',issuer=test_issuer_three)
+        test_badgeclass_five = self.setup_badgeclass(name='Test Badgeclass 5',issuer=test_issuer_three)
+        test_badgeclass_six = self.setup_badgeclass(name='Test Badgeclass 6',issuer=test_issuer_three)
+
+        # issue badges to user
+        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
+        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
+        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
+        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
+        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
+        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
+
+        response = self.client.get('/v2/backpack/assertions?expand=badgeclass&expand=issuer')
+
+        self.assertEqual(len(response.data['result']), 6)
+        for i in range(6):
+            self.assertTrue(isinstance(response.data['result'][i]['badgeclass'], collections.OrderedDict))
+            self.assertTrue(isinstance(response.data['result'][i]['badgeclass']['issuer'], collections.OrderedDict))
+
+
 
 
 class TestCollections(BadgrTestCase):

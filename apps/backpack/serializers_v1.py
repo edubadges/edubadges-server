@@ -104,6 +104,9 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
                 assertion=validated_data.get('assertion', None),
                 created_by=owner,
             )
+            if not created:
+                instance.acceptance = BadgeInstance.ACCEPTANCE_ACCEPTED
+                instance.save()
             owner.publish()  # update BadgeUser.cached_badgeinstances()
         except DjangoValidationError as e:
             raise RestframeworkValidationError(e.args[0])
@@ -448,6 +451,9 @@ class V1BadgeInstanceSerializer(V1InstanceSerializer):
     """
     def to_representation(self, instance):
         localbadgeinstance_json = instance.json
+        if 'evidence' in localbadgeinstance_json:
+            localbadgeinstance_json['evidence'] = instance.evidence_url
+        localbadgeinstance_json['uid'] = instance.entity_id
         localbadgeinstance_json['badge'] = instance.cached_badgeclass.json
         localbadgeinstance_json['badge']['criteria'] = instance.cached_badgeclass.get_criteria_url()
         if instance.cached_badgeclass.criteria_text:

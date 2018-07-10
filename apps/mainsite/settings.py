@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'badgrsocialauth.providers.kony',
     'badgrsocialauth.providers.google',
     'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.azure',
     'allauth.socialaccount.providers.linkedin_oauth2',
     'allauth.socialaccount.providers.oauth2',
     'corsheaders',
@@ -408,7 +409,8 @@ OAUTH2_PROVIDER = {
 
         # private scopes used for integrations
         'rw:issuer:*': 'Create and update Badgeclasses, and award Assertions for a single Issuer',
-        'r:assertions': 'Batch receive assertions'
+        'r:assertions': 'Batch receive assertions',
+        'rw:badgeuserAdmin': 'Ability to signup new BadgeUsers'
     },
     'DEFAULT_SCOPES': ['r:profile'],
 
@@ -419,7 +421,7 @@ OAUTH2_PROVIDER = {
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2_provider.Application'
 OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'oauth2_provider.AccessToken'
 
-API_DOCS_EXCLUDED_SCOPES = ['rw:issuer:*', 'r:assertions', '*']
+API_DOCS_EXCLUDED_SCOPES = ['rw:issuer:*', 'r:assertions', '*', 'rw:badgeuserAdmin']
 
 
 BADGR_PUBLIC_BOT_USERAGENTS = [

@@ -204,6 +204,8 @@ class Issuer(ResizeUploadedImage,
 
     @property
     def jsonld_id(self):
+        if self.source_url:
+            return self.source_url
         return OriginSetting.HTTP + self.get_absolute_url()
 
     @property
@@ -262,8 +264,6 @@ class Issuer(ResizeUploadedImage,
     def cached_badgeclasses(self):
         return self.badgeclasses.all()
 
-    def cached_badgeinstances(self):
-        return chain(*[bc.cached_badgeinstances() for bc in self.cached_badgeclasses()])
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_pathways(self):
@@ -426,6 +426,8 @@ class BadgeClass(ResizeUploadedImage,
 
     @property
     def jsonld_id(self):
+        if self.source_url:
+            return self.source_url
         return OriginSetting.HTTP + self.get_absolute_url()
 
     @property
@@ -459,10 +461,6 @@ class BadgeClass(ResizeUploadedImage,
 
     def pathway_element_count(self):
         return len(self.cached_pathway_elements())
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_badgeinstances(self):
-        return self.badgeinstances.all()
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_alignments(self):
@@ -670,6 +668,11 @@ class BadgeInstance(BaseAuditedModel,
     objects = BadgeInstanceManager()
     cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
 
+    class Meta:
+        index_together = (
+                ('recipient_identifier', 'badgeclass', 'revoked'),
+        )
+
     @property
     def extended_json(self):
         extended_json = self.json
@@ -754,6 +757,22 @@ class BadgeInstance(BaseAuditedModel,
             self.revocation_reason = None
 
         super(BadgeInstance, self).save(*args, **kwargs)
+
+    def rebake(self, obi_version=CURRENT_OBI_VERSION, save=True):
+        if self.source_url:
+            # dont rebake imported assertions
+            return
+
+        new_image = StringIO.StringIO()
+        bake(
+            image_file=self.cached_badgeclass.image.file,
+            assertion_json_string=json_dumps(self.get_json(obi_version=obi_version), indent=2),
+            output_file=new_image
+        )
+        new_name = default_storage.save(self.image.name, ContentFile(new_image.read()))
+        self.image.name = new_name
+        if save:
+            self.save()
 
     def publish(self):
         super(BadgeInstance, self).publish()
@@ -996,18 +1015,6 @@ class BadgeInstance(BaseAuditedModel,
     def cached_evidence(self):
         return self.badgeinstanceevidence_set.all()
 
-    @property
-    def evidence(self):
-        if hasattr(self, '_evidence_items'):
-            return getattr(self, '_evidence_items', [])
-        return self.cached_evidence()
-
-    @evidence.setter
-    def evidence(self, value):
-        """
-        Set this assertions badgeinstanceevidence from a list of EvidenceItemSerializerV2 data
-        """
-        self._evidence_items = value
 
     @property
     def evidence_url(self):
@@ -1024,6 +1031,33 @@ class BadgeInstance(BaseAuditedModel,
     def evidence_items(self):
         """exists to cajole EvidenceItemSerializer"""
         return self.cached_evidence()
+
+    @evidence_items.setter
+    def evidence_items(self, value):
+        def _key(narrative, url):
+            return u'{}-{}'.format(narrative, url)
+        existing_evidence_idx = {_key(e.narrative, e.evidence_url): e for e in self.evidence_items}
+        new_evidence_idx = {_key(v.get('narrative',''), v.get('evidence_url','')): v for v in value}
+
+        with transaction.atomic():
+            if not self.pk:
+                self.save()
+
+            # add missing
+            for evidence_data in value:
+                key = _key(evidence_data.get('narrative',''), evidence_data.get('evidence_url',''))
+                if key not in existing_evidence_idx:
+                    evidence_record, created = BadgeInstanceEvidence.cached.get_or_create(
+                        badgeinstance=self,
+                        narrative=evidence_data.get('narrative', None),
+                        evidence_url=evidence_data.get('evidence_url', None)
+                    )
+
+            # remove old
+            for evidence_record in self.evidence_items:
+                key = _key(evidence_record.narrative or '', evidence_record.evidence_url or '')
+                if key not in new_evidence_idx:
+                    evidence_record.delete()
 
     @property
     def cached_badgrapp(self):
