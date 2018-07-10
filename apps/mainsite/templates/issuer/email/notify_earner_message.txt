@@ -2,14 +2,13 @@
 Congratulations, you earned a badge!
 ************************************
 
----------
 {{ badge_name }}
----------
+
 
 {{ badge_description }}
 
 ---------
-Issuer
+This badge was issued by:
 ---------
 
 {{ issuer_name }}
@@ -33,6 +32,14 @@ be automatically added.{% if promote_mobile %}
 
 You can also download our mobile app to take your badges on the go!
 http://info.badgr.io/#mobile{% endif %}
+
+-----------
+Know your Rights
+-----------
+The issuer of this badge has provided {{ site_name }} with your email address and the
+data about your achievement contained in this badge. You may request a copy of your data,
+request removal of data about you, or request rectification of incorrect information by contacting
+{{ help_email }}.
 
 -----------
 Open Badges: Portable Digital Credentials
