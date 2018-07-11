@@ -17,8 +17,11 @@ from mainsite.celery import app
 logger = get_task_logger(__name__)
 badgrLogger = badgrlog.BadgrLogger()
 
+rebake_task_queue_name = getattr(settings, 'BACKGROUND_TASK_QUEUE_NAME', 'default')
+badgerank_task_queue_name = getattr(settings, 'BADGERANK_TASK_QUEUE_NAME', 'default')
 
-@app.task(bind=True, autoretry_for=(ConnectionError,), retry_backoff=True, max_retries=10)
+
+@app.task(bind=True, queue=badgerank_task_queue_name, autoretry_for=(ConnectionError,), retry_backoff=True, max_retries=10)
 def notify_badgerank_of_badgeclass(self, badgeclass_pk):
     badgerank_enabled = getattr(settings, 'BADGERANK_NOTIFY_ENABLED', True)
     if not badgerank_enabled:
@@ -47,7 +50,8 @@ def notify_badgerank_of_badgeclass(self, badgeclass_pk):
         'success': True
     }
 
-@app.task(bind=True)
+
+@app.task(bind=True, queue=rebake_task_queue_name)
 def rebake_all_assertions(self, obi_version=CURRENT_OBI_VERSION, max_count=None):
     count = 0
     assertions = BadgeInstance.objects.filter(source_url__is_null=True)
@@ -61,7 +65,8 @@ def rebake_all_assertions(self, obi_version=CURRENT_OBI_VERSION, max_count=None)
         'message': "Enqueued {} assertions for rebaking".format(count)
     }
 
-@app.task(bind=True)
+
+@app.task(bind=True, queue=rebake_task_queue_name)
 def rebake_assertion_image(self, assertion_entity_id=None, obi_version=CURRENT_OBI_VERSION):
 
     try:
