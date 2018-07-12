@@ -188,6 +188,9 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_URLS_REGEX = r'^.*$'
 CORS_MODEL = 'mainsite.BadgrApp'
 
+CORS_EXPOSE_HEADERS = (
+    'link',
+)
 
 ##
 #
