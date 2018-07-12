@@ -130,8 +130,10 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
                     email_address.set_last_verification_sent_time(datetime.datetime.now())
                 else:
                     remaining_time_obj = RATE_LIMIT_DELTA - (datetime.datetime.now() - last_request_time)
-                    remaining_time_rep = str((remaining_time_obj.seconds//60)%60) + " minutes and " \
-                      + str(remaining_time_obj.seconds%60) + " seconds"
+                    remaining_min = (remaining_time_obj.seconds//60)%60
+                    remaining_sec = remaining_time_obj.seconds%60
+                    remaining_time_rep = "{} minutes and {} seconds".format(remaining_min, remaining_sec)
+
                     return Response("Will be able to re-send verification email in %s." % (str(remaining_time_rep)),
                      status=status.HTTP_429_TOO_MANY_REQUESTS)
 

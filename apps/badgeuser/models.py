@@ -36,7 +36,7 @@ class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
         verbose_name_plural = _("email addresses")
 
     def generate_verification_time_cache_key(self):
-        return str(super(CachedEmailAddress, self).email) + "_verification_request_date"
+        return "{}_verification_request_date".format(self.email)
 
     def get_last_verification_sent_time(self):
         cached_time = cache.get(self.generate_verification_time_cache_key())
