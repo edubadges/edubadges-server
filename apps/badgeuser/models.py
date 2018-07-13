@@ -35,6 +35,16 @@ class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
         verbose_name = _("email address")
         verbose_name_plural = _("email addresses")
 
+    def generate_verification_time_cache_key(self):
+        return "{}_verification_request_date".format(self.email)
+
+    def get_last_verification_sent_time(self):
+        cached_time = cache.get(self.generate_verification_time_cache_key())
+        return cached_time
+
+    def set_last_verification_sent_time(self, new_datetime):
+        cache.set(self.generate_verification_time_cache_key(), new_datetime)
+
     def publish(self):
         super(CachedEmailAddress, self).publish()
         self.publish_by('email')
@@ -179,7 +189,7 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     def email_items(self, value):
         """
         Update this users EmailAddress from a list of BadgeUserEmailSerializerV2 data
-        :param value: list(BadgeUserEmailSerializerV2) 
+        :param value: list(BadgeUserEmailSerializerV2)
         :return: None
         """
         if len(value) < 1:
