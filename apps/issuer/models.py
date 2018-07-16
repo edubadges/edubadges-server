@@ -632,7 +632,7 @@ class BadgeInstance(BaseAuditedModel,
         (RECIPIENT_TYPE_TELEPHONE, 'telephone'),
         (RECIPIENT_TYPE_URL, 'url'),
     )
-    recipient_identifier = models.EmailField(max_length=1024, blank=False, null=False, db_index=True)
+    recipient_identifier = models.EmailField(max_length=768, blank=False, null=False, db_index=True)
     recipient_type = models.CharField(max_length=255, choices=RECIPIENT_TYPE_CHOICES, default=RECIPIENT_TYPE_EMAIL, blank=False, null=False)
 
     image = models.FileField(upload_to='uploads/badges', blank=True)
