@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from django.core.exceptions import FieldError
 from django.http import Http404
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
+from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_412_PRECONDITION_FAILED
 from rest_framework.views import APIView
 
 import badgrlog
@@ -65,7 +65,7 @@ class BaseEntityListView(BaseEntityView):
             link_header = paginator.get_link_header()
             if link_header:
                 headers['Link'] = link_header
-                
+
         return Response(serializer.data, headers=headers)
 
     def post(self, request, **kwargs):
@@ -77,7 +77,15 @@ class BaseEntityListView(BaseEntityView):
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(data=request.data, context=context)
         serializer.is_valid(raise_exception=True)
-        new_instance = serializer.save(created_by=request.user)
+
+        new_instance = None
+        if 'email' in request.data:
+            new_instance = serializer.save(created_by=request.user, email=request.data['email'])
+        else:
+            new_instance = serializer.save(created_by=request.user)
+        if (type(new_instance) == bool and not new_instance):
+            return Response(status=HTTP_412_PRECONDITION_FAILED)
+
         self.log_create(new_instance)
         return Response(serializer.data, status=HTTP_201_CREATED)
 

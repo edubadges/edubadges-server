@@ -148,7 +148,7 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
 
     def test_add_user_to_issuer_editors_set_too_many_methods(self):
         """
-        Enter a username or email. Both are not allowed. 
+        Enter a username or email. Both are not allowed.
         """
         test_user = self.setup_user(authenticate=True)
         issuer = self.setup_issuer(owner=test_user)
@@ -300,3 +300,15 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
         response = self.client.delete('/v1/issuer/issuers/{slug}'.format(slug=test_issuer.entity_id), {})
         self.assertEqual(response.status_code, 400)
 
+    def test_cant_create_issuer_with_unverified_email(self):
+        test_user = self.setup_user(authenticate=True)
+        new_issuer_props = {
+            'name': 'Test Issuer Name',
+            'description': 'Test issuer description',
+            'url': 'http://example.com/1',
+            'email': 'example1@example.org'
+        }
+
+        response = self.client.post('/v1/issuer/issuers', new_issuer_props)
+
+        self.assertEqual(response.status_code, 412)
