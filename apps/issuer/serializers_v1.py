@@ -63,6 +63,12 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
         return image
 
     def create(self, validated_data, **kwargs):
+        user = validated_data['created_by']
+        potential_email = validated_data['email']
+
+        if potential_email not in [e.email for e in user.verified_emails]:
+            raise serializers.ValidationError("Email field is not a validated email.")
+
         new_issuer = Issuer(**validated_data)
 
         # set badgrapp
@@ -101,26 +107,6 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
         representation['pathwayCount'] = len(obj.cached_pathways())
 
         return representation
-
-    def save(self, **kwargs):
-        """ Creates a new Issuer instance, or updates an existing instance,
-            if valid data is passed, returns False otherwise.
-        """
-        save_successful = False
-        user = kwargs['created_by']
-        potential_email = kwargs['email']
-        verified_emails = user.verified_emails
-        u_verified_emails = set()
-        for e in verified_emails:
-            u_verified_emails.add(e.email)
-
-        if potential_email in u_verified_emails:
-            save_successful = True
-
-        if save_successful:
-            return super(IssuerSerializerV1, self).save(created_by=user)
-        return False
-
 
 
 class IssuerRoleActionSerializerV1(serializers.Serializer):
