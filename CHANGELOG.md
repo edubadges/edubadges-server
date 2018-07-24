@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [2.10.3] - 2018-07-20
+    - include an ?expand paramter on /v2/backpack for including badge and issuer information in results
+    - GDPR Compliant award notification
+    - Add Share to Pinterest 
+    - Remove Share to Portfolium 
+    - Implement rate limiting on resend verification mail 
+
+
 ## [2.9.0] - 2018-06-18
 
 ### New Features
