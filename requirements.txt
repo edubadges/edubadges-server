@@ -28,7 +28,7 @@ djangorestframework==3.6.2
 # Django Allauth
 django-allauth==0.36.0
 oauthlib==2.0.2
-requests==2.18.1
+requests==2.19.1
 requests-oauthlib==0.4.2
 # Permissions framework
 rules==0.4
