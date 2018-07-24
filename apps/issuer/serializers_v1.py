@@ -63,6 +63,12 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
         return image
 
     def create(self, validated_data, **kwargs):
+        user = validated_data['created_by']
+        potential_email = validated_data['email']
+
+        if potential_email not in [e.email for e in user.verified_emails]:
+            raise serializers.ValidationError("Email field is not a validated email.")
+
         new_issuer = Issuer(**validated_data)
 
         # set badgrapp

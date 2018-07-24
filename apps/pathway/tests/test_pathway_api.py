@@ -31,7 +31,6 @@ class PathwayApiTests(SetupIssuerHelper, BadgrTestCase):
         self.instructor.set_password('secret')
         self.instructor.save()
         self.instructor.user_permissions.add(Permission.objects.get(codename="add_issuer"))
-
         CachedEmailAddress(email='instructor@local.test', verified=True, primary=True, user=self.instructor).save()
         self.assertTrue(self.client.login(username='instructor', password='secret'), "Instructor can log in")
 
@@ -42,10 +41,13 @@ class PathwayApiTests(SetupIssuerHelper, BadgrTestCase):
             'url': "http://example.test",
             'email': "unittest@example.test",
         }
+        CachedEmailAddress(email=issuer_data['email'], verified=True, user=self.instructor).save()
+
         response = self.client.post(reverse('v1_api_issuer_list'), issuer_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, "Created an issuer")
         self.assertTrue(response.data['slug'], "Received an issuer with a slug")
         self.issuer = response.data
+
 
         # make a default badgeclass
         self.badgeclass = self.setup_badgeclass(issuer=Issuer.cached.get(entity_id=self.issuer.get('slug')))
@@ -488,4 +490,3 @@ class PathwayCompletionTests(SetupIssuerHelper, BadgrTestCase):
         response = self.client.delete('/v1/issuer/issuers/{}/badges/{}'.format(second_badgeclass.issuer.entity_id, second_badgeclass.entity_id))
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data, 'Badge could not be deleted. It is being used as a pathway completion badge.')
-
