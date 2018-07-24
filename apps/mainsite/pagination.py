@@ -297,4 +297,3 @@ class EncryptedCursorPagination(BasePagination):
             links.append('<{}>; rel="prev"'.format(self.prev_link))
         if len(links):
             return ', '.join(links)
-
