@@ -17,3 +17,4 @@ DATABASES = {
 }
 
 CELERY_ALWAYS_EAGER = True
+SECRET_KEY = 'aninsecurekeyusedfortesting'
