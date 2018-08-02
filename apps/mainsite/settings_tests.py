@@ -18,3 +18,4 @@ DATABASES = {
 
 CELERY_ALWAYS_EAGER = True
 SECRET_KEY = 'aninsecurekeyusedfortesting'
+UNSUBSCRIBE_SECRET_KEY = SECRET_KEY
