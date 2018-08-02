@@ -192,9 +192,19 @@ class BadgeCheckHelper(object):
             badgeclass, badgeclass_created = BadgeClass.objects.get_or_create_from_ob2(issuer, badgeclass_obo, original_json=original_json.get(badgeclass_obo.get('id')))
             return BadgeInstance.objects.get_or_create_from_ob2(badgeclass, assertion_obo, recipient_identifier=recipient_identifier, original_json=original_json.get(assertion_obo.get('id')))
 
+    @classmethod
+    def get_assertion_obo(cls, badge_instance):
+        try:
+            response = openbadges.verify(badge_instance.source_url, recipient_profile=None, **cls.badgecheck_options())
+        except ValueError as e:
+            return None
 
+        report = response.get('report', {})
+        is_valid = report.get('valid')
 
+        if is_valid:
+            graph = response.get('graph', [])
 
-
-
-
+            assertion_obo = first_node_match(graph, dict(type="Assertion"))
+            if assertion_obo:
+                return assertion_obo
