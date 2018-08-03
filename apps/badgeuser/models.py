@@ -132,9 +132,9 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
     USER_TYPE_CHOICES = (
-            (1, 'default'),
-            (2, 'issuer'),
-            (3, 'issuer_creator')
+            (1, 'Non Issuer'),
+            (2, 'Issuer'),
+            (3, 'Issuer Admin')
         )
     user_type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES, default=1)
     badgrapp = models.ForeignKey('mainsite.BadgrApp', blank=True, null=True, default=None)

@@ -25,10 +25,9 @@ class TermsAgreementInline(TabularInline):
     readonly_fields = ('created_at', 'terms_version')
     fields = ('created_at', 'terms_version')
 
-
 class BadgeUserAdmin(UserAdmin):
     readonly_fields = ('entity_id', 'date_joined', 'last_login', 'username', 'entity_id', 'agreed_terms_version')
-    list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'entity_id', 'date_joined')
+    list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'entity_id', 'date_joined', 'user_type')
     list_filter = ('is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')
     search_fields = ('email', 'first_name', 'last_name', 'username', 'entity_id')
     fieldsets = (
@@ -41,6 +40,22 @@ class BadgeUserAdmin(UserAdmin):
         ExternalToolInline,
         TermsAgreementInline
     ]
+    
+    def set_user_to_non_issuer(self, request, queryset):
+        queryset.update(user_type=1)
+    set_user_to_non_issuer.short_description = 'Set user(s) to Non Issuer'
+
+    def set_user_to_issuer(self, request, queryset):
+        queryset.update(user_type=2)
+    set_user_to_issuer.short_description = 'Set user(s) to Issuer'
+
+    def set_user_to_issuer_admin(self, request, queryset):
+            queryset.update(user_type=3)
+    set_user_to_issuer_admin.short_description = 'Set user(s) to Issuer Admin'
+
+
+    actions = [set_user_to_non_issuer, set_user_to_issuer, set_user_to_issuer_admin]
+    
 
 badgr_admin.register(BadgeUser, BadgeUserAdmin)
 

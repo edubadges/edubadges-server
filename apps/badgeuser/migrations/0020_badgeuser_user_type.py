@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='badgeuser',
             name='user_type',
-            field=models.PositiveSmallIntegerField(choices=[(1, 'default'), (2, 'issuer'), (3, 'issuer_creator')], default=1),
+            field=models.PositiveSmallIntegerField(choices=[(1, 'Non Issuer'), (2, 'Issuer'), (3, 'Issuer Admin')], default=1),
         ),
     ]
