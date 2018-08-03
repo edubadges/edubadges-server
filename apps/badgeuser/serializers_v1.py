@@ -41,6 +41,7 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
     slug = serializers.CharField(source='entity_id', read_only=True)
     agreed_terms_version = serializers.IntegerField(required=False)
     marketing_opt_in = serializers.BooleanField(required=False)
+    user_type = serializers.IntegerField(required=False)
 
     class Meta:
         apispec_definition = ('BadgeUser', {})
