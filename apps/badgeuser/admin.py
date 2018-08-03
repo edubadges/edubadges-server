@@ -1,5 +1,8 @@
 from django.contrib.admin import ModelAdmin, TabularInline
 
+from django.contrib.auth.admin import UserAdmin
+
+
 from externaltools.models import ExternalToolUserActivation
 from mainsite.admin import badgr_admin
 
@@ -23,7 +26,7 @@ class TermsAgreementInline(TabularInline):
     fields = ('created_at', 'terms_version')
 
 
-class BadgeUserAdmin(ModelAdmin):
+class BadgeUserAdmin(UserAdmin):
     readonly_fields = ('entity_id', 'date_joined', 'last_login', 'username', 'entity_id', 'agreed_terms_version')
     list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'entity_id', 'date_joined')
     list_filter = ('is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')
@@ -40,7 +43,6 @@ class BadgeUserAdmin(ModelAdmin):
     ]
 
 badgr_admin.register(BadgeUser, BadgeUserAdmin)
-
 
 class EmailAddressVariantAdmin(ModelAdmin):
     search_fields = ('canonical_email', 'email',)
