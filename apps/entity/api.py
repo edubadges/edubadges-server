@@ -65,7 +65,7 @@ class BaseEntityListView(BaseEntityView):
             link_header = paginator.get_link_header()
             if link_header:
                 headers['Link'] = link_header
-
+                
         return Response(serializer.data, headers=headers)
 
     def post(self, request, **kwargs):

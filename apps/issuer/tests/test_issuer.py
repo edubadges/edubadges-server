@@ -25,9 +25,7 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
         self.assertIn(response.status_code, (401, 403))
 
     def test_create_issuer_if_authenticated(self):
-        test_user = self.setup_user(authenticate=True)
-        issuer_email = CachedEmailAddress.objects.create(
-            user=test_user, email=self.example_issuer_props['email'], verified=True)
+        self.setup_user(authenticate=True)
 
         response = self.client.post('/v1/issuer/issuers', self.example_issuer_props)
         self.assertEqual(response.status_code, 201)
@@ -54,9 +52,7 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(response.status_code, 403)
 
     def _create_issuer_with_image_and_test_resizing(self, image_path, desired_width=400, desired_height=400):
-        test_user = self.setup_user(authenticate=True)
-        issuer_email = CachedEmailAddress.objects.create(
-            user=test_user, email=self.example_issuer_props['email'], verified=True)
+        self.setup_user(authenticate=True)
 
         with open(image_path, 'r') as badge_image:
             issuer_fields_with_image = self.example_issuer_props.copy()
@@ -86,7 +82,7 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
         self._create_issuer_with_image_and_test_resizing(image_path, 300, 300)
 
     def test_can_update_issuer_if_authenticated(self):
-        test_user = self.setup_user(authenticate=True)
+        self.setup_user(authenticate=True)
 
         original_issuer_props = {
             'name': 'Test Issuer Name',
@@ -94,10 +90,6 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
             'url': 'http://example.com/1',
             'email': 'example1@example.org'
         }
-
-
-        issuer_email_1 = CachedEmailAddress.objects.create(
-            user=test_user, email=original_issuer_props['email'], verified=True)
 
         response = self.client.post('/v1/issuer/issuers', original_issuer_props)
         response_slug = response.data.get('slug')
@@ -108,9 +100,6 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
             'url': 'http://example.com/2',
             'email': 'example2@example.org'
         }
-
-        issuer_email_2 = CachedEmailAddress.objects.create(
-            user=test_user, email=updated_issuer_props['email'], verified=True)
 
         response = self.client.put('/v1/issuer/issuers/{}'.format(response_slug), updated_issuer_props)
         self.assertEqual(response.status_code, 200)
@@ -159,7 +148,7 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
 
     def test_add_user_to_issuer_editors_set_too_many_methods(self):
         """
-        Enter a username or email. Both are not allowed.
+        Enter a username or email. Both are not allowed. 
         """
         test_user = self.setup_user(authenticate=True)
         issuer = self.setup_issuer(owner=test_user)
@@ -311,28 +300,3 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
         response = self.client.delete('/v1/issuer/issuers/{slug}'.format(slug=test_issuer.entity_id), {})
         self.assertEqual(response.status_code, 400)
 
-    def test_cant_create_issuer_with_unverified_email_v1(self):
-        test_user = self.setup_user(authenticate=True)
-        new_issuer_props = {
-            'name': 'Test Issuer Name',
-            'description': 'Test issuer description',
-            'url': 'http://example.com/1',
-            'email': 'example1@example.org'
-        }
-
-        response = self.client.post('/v1/issuer/issuers', new_issuer_props)
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data[0], 'Email field is not a validated email.')
-
-    def test_cant_create_issuer_with_unverified_email_v2(self):
-        test_user = self.setup_user(authenticate=True)
-        new_issuer_props = {
-            'name': 'Test Issuer Name',
-            'description': 'Test issuer description',
-            'url': 'http://example.com/1',
-            'email': 'example1@example.org'
-        }
-
-        response = self.client.post('/v2/issuers', new_issuer_props)
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data['validationErrors'][0], 'Email field is not a validated email.')
