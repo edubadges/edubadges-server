@@ -40,7 +40,8 @@ def login(request):
     # TODO:  MAKE ALL SURFCONEXT VARIABLES VARIABLE
     # redirect_url = 'https://oidc.connect.surfconext.nl/authorize?%s' % (urllib.urlencode(data))
     # redirect_url = 'https://oidc.surfconext.nl/authorize?%s' % (urllib.urlencode(data))
-    redirect_url = 'https://oidc.test.surfconext.nl/authorize?%s' % (urllib.urlencode(data))
+#     redirect_url = 'https://oidc.test.surfconext.nl/authorize?%s' % (urllib.urlencode(data))
+    redirect_url = settings.SURFCONEXT_DOMAIN_URL + '/authorize?%s' %  (urllib.urlencode(data))
 
     print('logging into, redirect', data)
     return HttpResponseRedirect(redirect_url)
@@ -85,7 +86,7 @@ def callback(request):
             'scope': 'openid',
             'grant_type': 'authorization_code',
             'code': code}
-    url = 'https://oidc.test.surfconext.nl/token?%s' % (urllib.urlencode(data))
+    url =  settings.SURFCONEXT_DOMAIN_URL + '/token?%s' % (urllib.urlencode(data))
     response = requests.post(url)
 
     if response.status_code != 200:
@@ -100,7 +101,7 @@ def callback(request):
 
     # 2. Retrieve user information with the access token
     headers = {'Authorization': 'bearer %s' % data['access_token']}
-    url = 'https://oidc.test.surfconext.nl/userinfo'
+    url = settings.SURFCONEXT_DOMAIN_URL + '/userinfo'
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
         error = 'Server error: User info endpoint error (http %s). Try alternative login methods' % response.status_code
