@@ -16,7 +16,7 @@ from mainsite.celery import app
 logger = get_task_logger(__name__)
 badgrLogger = badgrlog.BadgrLogger()
 
-rebake_task_queue_name = getattr(settings, 'BACKGROUND_TASK_QUEUE_NAME', 'default')
+background_task_queue_name = getattr(settings, 'BACKGROUND_TASK_QUEUE_NAME', 'default')
 badgerank_task_queue_name = getattr(settings, 'BADGERANK_TASK_QUEUE_NAME', 'default')
 
 
@@ -50,7 +50,7 @@ def notify_badgerank_of_badgeclass(self, badgeclass_pk):
     }
 
 
-@app.task(bind=True, queue=rebake_task_queue_name)
+@app.task(bind=True, queue=background_task_queue_name)
 def rebake_all_assertions(self, obi_version=CURRENT_OBI_VERSION, max_count=None):
     count = 0
     assertions = BadgeInstance.objects.filter(source_url__is_null=True)
@@ -65,7 +65,7 @@ def rebake_all_assertions(self, obi_version=CURRENT_OBI_VERSION, max_count=None)
     }
 
 
-@app.task(bind=True, queue=rebake_task_queue_name)
+@app.task(bind=True, queue=background_task_queue_name)
 def rebake_assertion_image(self, assertion_entity_id=None, obi_version=CURRENT_OBI_VERSION):
 
     try:
@@ -89,7 +89,7 @@ def rebake_assertion_image(self, assertion_entity_id=None, obi_version=CURRENT_O
     }
 
 
-@app.task(bind=True)
+@app.task(bind=True, queue=background_task_queue_name)
 def update_issuedon_all_assertions(self, start=None, end=None):
     start_date = None
     end_date = None
@@ -126,7 +126,7 @@ def update_issuedon_all_assertions(self, start=None, end=None):
     }
 
 
-@app.task(bind=True)
+@app.task(bind=True, queue=background_task_queue_name)
 def update_issuedon_imported_assertion(self, assertion_entityid):
 
     try:
