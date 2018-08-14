@@ -53,7 +53,7 @@ def notify_badgerank_of_badgeclass(self, badgeclass_pk):
 @app.task(bind=True, queue=background_task_queue_name)
 def rebake_all_assertions(self, obi_version=CURRENT_OBI_VERSION, max_count=None):
     count = 0
-    assertions = BadgeInstance.objects.filter(source_url__is_null=True)
+    assertions = BadgeInstance.objects.filter(source_url__isnull=True)
     while max_count is None or count < max_count:
         assertion = assertions[count]
         rebake_assertion_image.delay(assertion_entity_id=assertion.entity_id, obi_version=obi_version)
