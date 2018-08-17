@@ -129,15 +129,8 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     """
     entity_class_name = 'BadgeUser'
 
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email']
-    USER_TYPE_CHOICES = (
-            (1, 'Non Issuer'),
-            (2, 'Issuer'),
-            (3, 'Issuer Admin')
-        )
-    user_type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES, default=1)
     badgrapp = models.ForeignKey('mainsite.BadgrApp', blank=True, null=True, default=None)
+    faculty = models.ManyToManyField('institution.Faculty', blank=True)
 
     # canvas LTI id
     lti_id = models.CharField(unique=True, max_length=50, default=None, null=True, blank=True,
@@ -150,6 +143,9 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         verbose_name = _('badge user')
         verbose_name_plural = _('badge users')
         db_table = 'users'
+        permissions=(('view_issuer_tab', 'User can view Issuer tab in front end'),
+                     ('has_faculty_scope', 'User has scope for faculty in Admin page'),
+                     ('has_institution_scope', 'User has scope for institution in Admin page'))
 
     def __unicode__(self):
         return u"{} <{}>".format(self.get_full_name(), self.email)
@@ -350,6 +346,10 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
                     return
         return super(BadgeUser, self).save(*args, **kwargs)
 
+class BadgeUserProxy(BadgeUser):
+    class Meta:
+        proxy = True
+        verbose_name = 'Badge User Interface for SuperUser'
 
 class BadgrAccessTokenManager(models.Manager):
     def get_from_entity_id(self, entity_id):

@@ -1,4 +1,6 @@
+import json
 from django.conf import settings
+from django.contrib.auth.models import Permission
 from rest_framework import serializers
 
 from mainsite.models import BadgrApp
@@ -41,10 +43,19 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
     slug = serializers.CharField(source='entity_id', read_only=True)
     agreed_terms_version = serializers.IntegerField(required=False)
     marketing_opt_in = serializers.BooleanField(required=False)
-    user_type = serializers.IntegerField(required=False)
+    user_permissions = serializers.SerializerMethodField(required=False)
 
     class Meta:
         apispec_definition = ('BadgeUser', {})
+
+    def get_user_permissions(self, obj):
+        perms = obj.user_permissions.all() | Permission.objects.filter(group__user=obj)
+        perms = list(x.codename for x in perms)
+        if obj.is_staff:
+            perms.insert(0, u'is_staff')
+        if obj.is_superuser:
+            perms.insert(0,u'is_superuser')
+        return json.dumps(perms)
 
     def create(self, validated_data):
         user = BadgeUser.objects.create(
