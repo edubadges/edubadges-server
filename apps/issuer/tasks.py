@@ -51,16 +51,24 @@ def notify_badgerank_of_badgeclass(self, badgeclass_pk):
 
 
 @app.task(bind=True, queue=background_task_queue_name)
-def rebake_all_assertions(self, obi_version=CURRENT_OBI_VERSION, max_count=None):
+def rebake_all_assertions(self, obi_version=CURRENT_OBI_VERSION, limit=None, offset=0):
+    queryset = BadgeInstance.objects.filter(source_url__isnull=True).order_by("pk")
+    if limit:
+        queryset = queryset[offset:offset+limit]
+    else:
+        queryset = queryset[offset:]
+    assertions = queryset.only("entity_id")
+
     count = 0
-    assertions = BadgeInstance.objects.filter(source_url__isnull=True).only("entity_id")
-    while max_count is None or count < max_count:
-        assertion = assertions[count]
+    for assertion in assertions:
         rebake_assertion_image.delay(assertion_entity_id=assertion.entity_id, obi_version=obi_version)
         count += 1
 
     return {
         'success': True,
+        'count': count,
+        'limit': limit,
+        'offset': offset,
         'message': "Enqueued {} assertions for rebaking".format(count)
     }
 
