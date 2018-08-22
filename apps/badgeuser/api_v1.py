@@ -7,10 +7,21 @@ from rest_framework.views import APIView
 
 from badgeuser.models import CachedEmailAddress
 from badgeuser.serializers_v1 import EmailSerializerV1
+from institution.serializers_v1 import FacultySerializerV1
 from apispec_drf.decorators import apispec_list_operation, apispec_post_operation, apispec_operation, \
     apispec_get_operation, apispec_delete_operation, apispec_put_operation
 
-
+class BadgeUserFacultyList(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    @apispec_list_operation('BadgeUserFaculty',
+        summary="Get a list of user's faculties",
+        tags=['BadgeUsers']
+    )
+    def get(self, request, **kwargs):
+        instances = request.user.faculty
+        serializer = FacultySerializerV1(instances, many=True, context={'request': request})
+        return Response(serializer.data)
+    
 class BadgeUserEmailList(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 

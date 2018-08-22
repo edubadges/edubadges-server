@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 import datetime
 
-import dateutil.parser
+import dateutil.parser, json
 from django.db.models import Q
 from django.http import Http404
 from django.utils import timezone
@@ -61,6 +61,7 @@ class IssuerList(BaseEntityListView):
         tags=["Issuers"],
     )
     def post(self, request, **kwargs):
+        request.data[u'faculty'] = json.loads(request.data[u'faculty']) 
         return super(IssuerList, self).post(request, **kwargs)
 
 

@@ -41,6 +41,9 @@ class IssuerAdmin(DjangoObjectActions, ModelAdmin):
         ('JSON', {
             'fields': ('old_json',)
         }),
+        ('Faculties', {
+            'fields': ('faculty',) 
+        }),
     )
     inlines = [
         IssuerStaffInline,

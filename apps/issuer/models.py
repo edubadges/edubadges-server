@@ -152,6 +152,7 @@ class Issuer(ResizeUploadedImage,
 
     objects = IssuerManager()
     cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
+    faculty = models.ForeignKey('institution.Faculty', blank=True, null=True, default=None)
 
     def publish(self, *args, **kwargs):
         super(Issuer, self).publish(*args, **kwargs)

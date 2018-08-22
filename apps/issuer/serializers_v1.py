@@ -9,6 +9,8 @@ from rest_framework import serializers
 
 import utils
 from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserIdentifierFieldV1
+from institution.serializers_v1 import FacultySerializerV1
+from institution.models import Faculty
 from mainsite.drf_fields import ValidImageField
 from mainsite.models import BadgrApp
 from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField, \
@@ -52,6 +54,7 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
     description = StripTagsCharField(max_length=16384, required=False)
     url = serializers.URLField(max_length=1024, required=True)
     staff = IssuerStaffSerializerV1(read_only=True, source='cached_issuerstaff', many=True)
+    faculty = FacultySerializerV1(read_only=True)
 
     class Meta:
         apispec_definition = ('Issuer', {})
@@ -63,6 +66,10 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
         return image
 
     def create(self, validated_data, **kwargs):
+        faculty_id = self.context['request'].data['faculty']['id']
+        faculty = Faculty.objects.get(pk=faculty_id)
+        validated_data['faculty'] = faculty
+
         new_issuer = Issuer(**validated_data)
 
         # set badgrapp

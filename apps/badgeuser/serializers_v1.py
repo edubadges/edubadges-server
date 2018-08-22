@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.auth.models import Permission
 from rest_framework import serializers
 
+from institution.serializers_v1 import FacultySerializerV1
 from mainsite.models import BadgrApp
 from mainsite.serializers import StripTagsCharField
 from .models import BadgeUser, CachedEmailAddress, TermsVersion
@@ -44,6 +45,7 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
     agreed_terms_version = serializers.IntegerField(required=False)
     marketing_opt_in = serializers.BooleanField(required=False)
     user_permissions = serializers.SerializerMethodField(required=False)
+    faculty = FacultySerializerV1(many=True)
 
     class Meta:
         apispec_definition = ('BadgeUser', {})
