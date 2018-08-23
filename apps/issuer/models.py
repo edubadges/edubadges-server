@@ -868,6 +868,7 @@ class BadgeInstance(BaseAuditedModel,
                     self.recipient_identifier),
                 'site_name': badgr_app.name,
                 'site_url': badgr_app.signup_redirect,
+                'badgr_app': badgr_app,
             }
             if badgr_app.cors == 'badgr.io':
                 email_context['promote_mobile'] = True
