@@ -84,6 +84,7 @@ class IssuerDetail(BaseEntityDetailView):
        tags=["Issuers"],
    )
     def put(self, request, **kwargs):
+        request.data[u'faculty'] = json.loads(request.data[u'faculty']) 
         return super(IssuerDetail, self).put(request, **kwargs)
 
     @apispec_delete_operation('Issuer',

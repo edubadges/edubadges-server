@@ -54,7 +54,7 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
     description = StripTagsCharField(max_length=16384, required=False)
     url = serializers.URLField(max_length=1024, required=True)
     staff = IssuerStaffSerializerV1(read_only=True, source='cached_issuerstaff', many=True)
-    faculty = FacultySerializerV1(read_only=True)
+    faculty = FacultySerializerV1()
 
     class Meta:
         apispec_definition = ('Issuer', {})
@@ -79,6 +79,10 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
         return new_issuer
 
     def update(self, instance, validated_data):
+        faculty_id = self.context['request'].data['faculty']['id']
+        faculty = Faculty.objects.get(pk=faculty_id)
+        validated_data['faculty'] = faculty
+        
         instance.name = validated_data.get('name')
 
         if 'image' in validated_data:
@@ -87,6 +91,7 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
         instance.email = validated_data.get('email')
         instance.description = validated_data.get('description')
         instance.url = validated_data.get('url')
+        instance.faculty = validated_data.get('faculty')
 
         # set badgrapp
         if not instance.badgrapp_id:
