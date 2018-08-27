@@ -47,7 +47,8 @@ class IssuerList(BaseEntityListView):
     create_event = badgrlog.IssuerCreatedEvent
 
     def get_objects(self, request, **kwargs):
-        return self.request.user.cached_issuers()
+#         return self.request.user.cached_issuers()
+        return self.request.user.cached_issuers_within_scope()
 
     @apispec_list_operation('Issuer',
         summary="Get a list of Issuers for authenticated user",
@@ -61,7 +62,10 @@ class IssuerList(BaseEntityListView):
         tags=["Issuers"],
     )
     def post(self, request, **kwargs):
-        request.data[u'faculty'] = json.loads(request.data[u'faculty']) 
+        if request.data['faculty']:
+            request.data[u'faculty'] = json.loads(request.data[u'faculty'])
+        else:
+            request.data[u'faculty'] = None 
         return super(IssuerList, self).post(request, **kwargs)
 
 
@@ -84,7 +88,10 @@ class IssuerDetail(BaseEntityDetailView):
        tags=["Issuers"],
    )
     def put(self, request, **kwargs):
-        request.data[u'faculty'] = json.loads(request.data[u'faculty']) 
+        if request.data['faculty']:
+            request.data[u'faculty'] = json.loads(request.data[u'faculty'])
+        else:
+             request.data[u'faculty'] = None
         return super(IssuerDetail, self).put(request, **kwargs)
 
     @apispec_delete_operation('Issuer',

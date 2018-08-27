@@ -45,7 +45,7 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
     agreed_terms_version = serializers.IntegerField(required=False)
     marketing_opt_in = serializers.BooleanField(required=False)
     user_permissions = serializers.SerializerMethodField(required=False)
-    faculty = FacultySerializerV1(many=True)
+    faculty = FacultySerializerV1(many=True,  allow_null=True)
 
     class Meta:
         apispec_definition = ('BadgeUser', {})
