@@ -144,8 +144,8 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         verbose_name_plural = _('badge users')
         db_table = 'users'
         permissions=(('view_issuer_tab', 'User can view Issuer tab in front end'),
-                     ('has_faculty_scope', 'User has scope for faculty in Admin page'),
-                     ('has_institution_scope', 'User has scope for institution in Admin page'))
+                     ('has_faculty_scope', 'User has faculty scope'),
+                     ('has_institution_scope', 'User has institution scope'))
 
     def __unicode__(self):
         return u"{} <{}>".format(self.get_full_name(), self.email)
@@ -153,6 +153,11 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     def get_full_name(self):
         return u"%s %s" % (self.first_name, self.last_name)
 
+    def get_institution(self):
+        faculty = self.faculty.first()
+        if faculty:
+            return faculty.institution
+    
     def email_user(self, subject, message, from_email=None, **kwargs):
         """
         Sends an email to this User.
@@ -271,6 +276,22 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):
         return Issuer.objects.filter(staff__id=self.id).distinct()
+
+    @cachemodel.cached_method()
+    def cached_issuers_within_scope(self):
+        '''
+        used to create the list of issuers in the frontend
+        '''
+        queryset = Issuer.objects.filter(staff__id=self.id) # personal issuers
+        if self.has_perm(u'badgeuser.has_institution_scope'):
+            institution = self.get_institution()
+            if institution:
+                queryset = queryset | Issuer.objects.filter(faculty__institution=institution) # add insitution issuers
+        elif self.has_perm(u'badgeuser.has_faculty_scope'):
+            faculties = self.faculty.all()
+            if faculties:
+                queryset = queryset | Issuer.objects.filter(faculty__in=self.faculty.all()) # add faculty issuers
+        return queryset.distinct()
 
     @property
     def peers(self):
