@@ -80,12 +80,14 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
         activate_url = self.get_email_confirmation_url(
             request,
             emailconfirmation)
+        badgr_app = get_session_badgr_app(request)
         ctx = {
             "user": emailconfirmation.email_address.user,
             "email": emailconfirmation.email_address,
             "activate_url": activate_url,
             "current_site": current_site,
             "key": emailconfirmation.key,
+            "badgr_app": badgr_app
         }
         if signup == 'canvas':
             email_template = 'account/email/email_confirmation_canvas'

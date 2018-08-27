@@ -273,6 +273,7 @@ class BadgeUserForgotPassword(BaseUserRecoveryView):
             "site": get_current_site(request),
             "user": user,
             "password_reset_url": reset_url,
+            'badgr_app': badgrapp
         }
         get_adapter().send_mail('account/email/password_reset_key', email, email_context)
 
