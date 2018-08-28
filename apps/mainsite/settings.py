@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'badgrsocialauth.providers.eduid',
     'badgrsocialauth.providers.surf_conext',
     'badgrsocialauth.providers.kony',
     'badgrsocialauth.providers.google',
