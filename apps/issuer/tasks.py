@@ -51,7 +51,7 @@ def notify_badgerank_of_badgeclass(self, badgeclass_pk):
 
 
 @app.task(bind=True, queue=background_task_queue_name)
-def rebake_all_assertions(self, obi_version=CURRENT_OBI_VERSION, limit=None, offset=0):
+def rebake_all_assertions(self, obi_version=CURRENT_OBI_VERSION, limit=None, offset=0, replay=False):
     queryset = BadgeInstance.objects.filter(source_url__isnull=True).order_by("pk")
     if limit:
         queryset = queryset[offset:offset+limit]
@@ -63,6 +63,9 @@ def rebake_all_assertions(self, obi_version=CURRENT_OBI_VERSION, limit=None, off
     for assertion in assertions:
         rebake_assertion_image.delay(assertion_entity_id=assertion.entity_id, obi_version=obi_version)
         count += 1
+
+    if replay:
+        rebake_all_assertions.delay(obi_version=obi_version, limit=limit, offset=offset+limit, replay=True)
 
     return {
         'success': True,
