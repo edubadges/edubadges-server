@@ -64,7 +64,7 @@ def rebake_all_assertions(self, obi_version=CURRENT_OBI_VERSION, limit=None, off
         rebake_assertion_image.delay(assertion_entity_id=assertion.entity_id, obi_version=obi_version)
         count += 1
 
-    if replay:
+    if limit and replay and count >= limit:
         rebake_all_assertions.delay(obi_version=obi_version, limit=limit, offset=offset+limit, replay=True)
 
     return {
