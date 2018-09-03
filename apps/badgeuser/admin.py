@@ -56,7 +56,7 @@ class TermsAgreementInline(TabularInline):
 class BadgeUserAdmin(UserAdmin):
     actions = None
     readonly_fields = ('entity_id', 'date_joined', 'last_login', 'username', 'entity_id', 'agreed_terms_version')
-    list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'entity_id', 'date_joined', 'get_faculties')
+    list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'entity_id', 'date_joined') #, 'get_faculties')
     list_filter = ('is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')
     search_fields = ('email', 'first_name', 'last_name', 'username', 'entity_id')
     fieldsets = (
@@ -71,9 +71,6 @@ class BadgeUserAdmin(UserAdmin):
         ExternalToolInline,
         TermsAgreementInline
     ]
-
-    def get_faculties(self, obj):
-        return [f.name for f in obj.faculty.all()]
 
 
     def get_queryset(self, request):
@@ -147,6 +144,7 @@ badgr_admin.register(BadgeUser, BadgeUserAdmin)
 
 class BadgeUserProxyAdmin(BadgeUserAdmin):
     actions = ['delete_selected']
+    list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'entity_id', 'date_joined', 'get_faculties')
     fieldsets = (
         ('Metadata', {'fields': ('entity_id', 'username', 'date_joined',), 'classes': ('collapse',)}),
         (None, {'fields': ('email', 'first_name', 'last_name', 'badgrapp', 'agreed_terms_version', 'marketing_opt_in')}),
@@ -154,6 +152,9 @@ class BadgeUserProxyAdmin(BadgeUserAdmin):
         ('Permissions', {'fields': ('groups', 'user_permissions')}),
         ('Faculties', {'fields': ('faculty',) }),
     )
+
+    def get_faculties(self, obj):
+        return [f.name for f in obj.faculty.all()]
 
 badgr_admin.register(BadgeUserProxy, BadgeUserProxyAdmin)
 
