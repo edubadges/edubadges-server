@@ -25,9 +25,10 @@ def login(request):
 
     # state contains the data required for the redirect after the login via SurfConext,
     # it contains the user token, type of process and which badge_app
-    state = '%s-%s-%s' % (request.GET.get('process', 'login'),
+    state = '%s-%s-%s-%s' % (request.GET.get('process', 'login'),
                           get_session_auth_token(request),
-                          request.session.get('badgr_app_pk', None))
+                          request.session.get('badgr_app_pk', None), 
+                          request.META['HTTP_REFERER'])
 
     data = {'client_id': _current_app.client_id,
             'redirect_uri': '%s/account/openid/login/callback/' % settings.HTTP_ORIGIN,
@@ -67,7 +68,7 @@ def callback(request):
     """
     print('getting callback', request.GET.get('state'))
     # extract the state of the redirect
-    process, auth_token, badgr_app_pk = tuple(request.GET.get('state').split('-'))
+    process, auth_token, badgr_app_pk, referer_url = tuple(request.GET.get('state').split('-'))
 
     # check if code is given
     code = request.GET.get('code', None)
@@ -128,5 +129,11 @@ def callback(request):
     # login for connect because socialLogin can only connect to request.user
     if process == 'connect' and request.user.is_anonymous() and auth_token:
         request.user = get_verified_user(auth_token=auth_token)
-
-    return complete_social_login(request, login)
+    
+    ret = complete_social_login(request, login)
+    # override the response with a redirect to staff dashboard if the login came from there
+    if referer_url.split('/')[3] == 'staff':
+        return HttpResponseRedirect(referer_url)
+    else:
+        return ret
+    
