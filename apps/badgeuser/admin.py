@@ -54,6 +54,7 @@ class TermsAgreementInline(TabularInline):
 #     TODO: add scope to lti admin page and make duplications modular
 
 class BadgeUserAdmin(UserAdmin):
+    actions = None
     readonly_fields = ('entity_id', 'date_joined', 'last_login', 'username', 'entity_id', 'agreed_terms_version')
     list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'entity_id', 'date_joined', 'get_faculties')
     list_filter = ('is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')
@@ -145,6 +146,7 @@ badgr_admin.register(BadgeUser, BadgeUserAdmin)
 
 
 class BadgeUserProxyAdmin(BadgeUserAdmin):
+    actions = ['delete_selected']
     fieldsets = (
         ('Metadata', {'fields': ('entity_id', 'username', 'date_joined',), 'classes': ('collapse',)}),
         (None, {'fields': ('email', 'first_name', 'last_name', 'badgrapp', 'agreed_terms_version', 'marketing_opt_in')}),
