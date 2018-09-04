@@ -6,6 +6,7 @@ from allauth.socialaccount.models import SocialApp
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse
 
 from badgrsocialauth.utils import set_session_badgr_app, get_session_auth_token, get_verified_user, get_session_badgr_app
 from mainsite.models import BadgrApp
@@ -25,10 +26,12 @@ def login(request):
 
     # state contains the data required for the redirect after the login via SurfConext,
     # it contains the user token, type of process and which badge_app
+    
+    referer = request.META['HTTP_REFERER'].split('/')[3]
     state = '%s-%s-%s-%s' % (request.GET.get('process', 'login'),
                           get_session_auth_token(request),
                           request.session.get('badgr_app_pk', None), 
-                          request.META['HTTP_REFERER'])
+                          referer)
 
     data = {'client_id': _current_app.client_id,
             'redirect_uri': '%s/account/openid/login/callback/' % settings.HTTP_ORIGIN,
@@ -68,7 +71,7 @@ def callback(request):
     """
     print('getting callback', request.GET.get('state'))
     # extract the state of the redirect
-    process, auth_token, badgr_app_pk, referer_url = tuple(request.GET.get('state').split('-'))
+    process, auth_token, badgr_app_pk, referer = tuple(request.GET.get('state').split('-'))
 
     # check if code is given
     code = request.GET.get('code', None)
@@ -132,8 +135,8 @@ def callback(request):
     
     ret = complete_social_login(request, login)
     # override the response with a redirect to staff dashboard if the login came from there
-    if referer_url.split('/')[3] == 'staff':
-        return HttpResponseRedirect(referer_url)
+    if referer == 'staff':
+        return HttpResponseRedirect(reverse('admin:index'))
     else:
         return ret
     
