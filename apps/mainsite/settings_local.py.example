@@ -119,6 +119,7 @@ DEFAULT_FROM_EMAIL = ''
 #
 # PAGINATION_SECRET_KEY = ""
 
+SECRET_KEY = '{{secret_key}}'
 
 LOGS_DIR = os.path.join(TOP_DIR, 'logs')
 if not os.path.exists(LOGS_DIR):
