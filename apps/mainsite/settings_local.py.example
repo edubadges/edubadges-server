@@ -139,6 +139,12 @@ LOGGING = {
             'formatter': 'json',
             'class': 'logging.FileHandler',
             'filename': os.path.join(LOGS_DIR, 'badgr_events.log')
+        },
+        'badgr_debug' : {
+            'level': 'INFO',
+            'formatter': 'badgr',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOGS_DIR, 'badgr_debug.log')
         }
     },
     'loggers': {
@@ -153,14 +159,20 @@ LOGGING = {
             'handlers': ['badgr_events'],
             'level': 'INFO',
             'propagate': False,
-
+        },
+         'Badgr.Debug' : {
+            'handlers': ['badgr_debug'],
+            'level': 'INFO',
+            'propagate': True,
         }
-
     },
     'formatters': {
         'default': {
             'format': '%(asctime)s %(levelname)s %(module)s %(message)s'
         },
+        'badgr': {
+            'format': '%(asctime)s | %(levelname)s | %(funcName)s | %(pathname)s:%(lineno)d | %(message)s'
+        }, 
         'json': {
             '()': 'mainsite.formatters.JsonFormatter',
             'format': '%(asctime)s',
