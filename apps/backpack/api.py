@@ -41,7 +41,7 @@ class BackpackAssertionList(BaseEntityListView):
         tags=['Backpack']
     )
     def get(self, request, **kwargs):
-        mykwargs = kwargs
+        mykwargs = kwargs.copy()
         mykwargs['expands'] = []
         expands = request.GET.getlist('expand', [])
 
@@ -90,7 +90,16 @@ class BackpackAssertionDetail(BaseEntityDetailView):
         tags=['Backpack']
     )
     def get(self, request, **kwargs):
-        return super(BackpackAssertionDetail, self).get(request, **kwargs)
+        mykwargs = kwargs.copy()
+        mykwargs['expands'] = []
+        expands = request.GET.getlist('expand', [])
+
+        if 'badgeclass' in expands:
+            mykwargs['expands'].append('badgeclass')
+        if 'issuer' in expands:
+            mykwargs['expands'].append('issuer')
+
+        return super(BackpackAssertionDetail, self).get(request, **mykwargs)
 
     @apispec_delete_operation('Assertion',
         summary='Remove an assertion from the backpack',

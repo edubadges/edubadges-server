@@ -1,5 +1,7 @@
 import re
 
+import datetime
+
 from allauth.account.adapter import get_adapter
 from allauth.account.models import EmailConfirmationHMAC
 from allauth.account.utils import user_pk_to_url_str, url_str_to_user_pk
@@ -11,7 +13,7 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.utils import timezone
-from rest_framework import permissions, serializers
+from rest_framework import permissions, serializers, status
 from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
@@ -31,6 +33,7 @@ from apispec_drf.decorators import apispec_get_operation, apispec_put_operation,
 from mainsite.models import BadgrApp
 from mainsite.utils import OriginSetting
 
+RATE_LIMIT_DELTA = datetime.timedelta(minutes=5)
 
 class BadgeUserDetail(BaseEntityDetailView):
     model = BadgeUser
@@ -222,6 +225,25 @@ class BadgeUserForgotPassword(BaseUserRecoveryView):
             # return 200 here because we don't want to expose information about which emails we know about
             return self.get_response()
 
+        # email rate limiting
+        send_email = False
+        current_time = datetime.datetime.now()
+        last_request_time = email_address.get_last_forgot_password_sent_time()
+
+        if last_request_time is None:
+            send_email = True
+        else:
+            time_delta = current_time - last_request_time
+            if time_delta > RATE_LIMIT_DELTA:
+                send_email = True
+
+        if not send_email:
+            return Response("Forgot password request limit exceeded. Please check your"
+                + " inbox for an existing message or wait to retry.",
+                status=status.HTTP_429_TOO_MANY_REQUESTS)
+
+        email_address.set_last_forgot_password_sent_time(datetime.datetime.now())
+
         #
         # taken from allauth.account.forms.ResetPasswordForm
         #
@@ -251,6 +273,7 @@ class BadgeUserForgotPassword(BaseUserRecoveryView):
             "site": get_current_site(request),
             "user": user,
             "password_reset_url": reset_url,
+            'badgr_app': badgrapp
         }
         get_adapter().send_mail('account/email/password_reset_key', email, email_context)
 
@@ -415,5 +438,3 @@ class AccessTokenDetail(BaseEntityDetailView):
     )
     def delete(self, request, **kwargs):
         return super(AccessTokenDetail, self).delete(request, **kwargs)
-
-

@@ -26,6 +26,7 @@ from issuer.utils import generate_sha256_hashstring, CURRENT_OBI_VERSION
 
 dir = os.path.dirname(__file__)
 
+
 def setup_basic_1_0(**kwargs):
     if not kwargs or not 'http://a.com/instance' in kwargs.get('exclude', []):
         responses.add(
@@ -713,6 +714,7 @@ class TestBadgeUploads(BadgrTestCase):
         response = self.client.post('/v1/earner/badges', post_input, format='json')
         self.assertEqual(response.status_code, 201)
 
+
 class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
     def test_no_expands(self):
         '''Expect correct result if no expand parameters are passed in'''
@@ -730,6 +732,10 @@ class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
         # checking if 'badgeclass' was expanded into a dictionary
         self.assertTrue(not isinstance(response.data['result'][0]['badgeclass'], collections.OrderedDict))
 
+        fid = response.data['result'][0]['entityId']
+        response = self.client.get('/v2/backpack/assertions/{}'.format(fid))
+        self.assertEqual(response.status_code, 200)
+
     def test_expand_badgeclass_single_assertion_single_issuer(self):
         '''For a client with a single badge, attempting to expand the badgeclass without
         also expanding the issuer.'''
@@ -746,6 +752,12 @@ class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(isinstance(response.data['result'][0]['badgeclass'], collections.OrderedDict))
         self.assertTrue(not isinstance(response.data['result'][0]['badgeclass']['issuer'], collections.OrderedDict))
+
+        fid = response.data['result'][0]['entityId']
+        response = self.client.get('/v2/backpack/assertions/{}?expand=badgeclass&expand=issuer'.format(fid))
+        self.assertEqual(response.status_code, 200)
+
+        self.assertTrue(isinstance(response.data['result'][0]['badgeclass'], dict))
 
     def test_expand_issuer_single_assertion_single_issuer(self):
         '''For a client with a single badge, attempting to expand the issuer without

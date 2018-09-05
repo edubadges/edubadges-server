@@ -3,7 +3,7 @@ Django==1.11.13
 semver==2.6.0
 pytz==2017.2
 # PIL support
-Pillow==2.9.0
+Pillow==3.1.1
 python-dateutil==2.6.1
 
 # mysql database
@@ -28,7 +28,7 @@ djangorestframework==3.6.2
 # Django Allauth
 django-allauth==0.36.0
 oauthlib==2.0.2
-requests==2.18.1
+requests==2.19.1
 requests-oauthlib==0.4.2
 # Permissions framework
 rules==0.4

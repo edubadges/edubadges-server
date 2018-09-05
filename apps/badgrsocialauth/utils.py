@@ -59,7 +59,8 @@ def set_session_verification_email(request, verification_email):
 
 def get_session_badgr_app(request):
     try:
-        return BadgrApp.objects.get(pk=request.session.get('badgr_app_pk', None))
+        if request and hasattr(request, 'session'):
+            return BadgrApp.objects.get(pk=request.session.get('badgr_app_pk', None))
     except BadgrApp.DoesNotExist:
         return None
 

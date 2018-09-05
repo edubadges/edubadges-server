@@ -3,7 +3,6 @@
 {% load staticfiles %}
 
 
-
 {% block how_to_use_title %}
 Badge Storage and Access
 {% endblock %}
@@ -15,6 +14,30 @@ to create a {{ site_name }} account, your badges awarded from this issuer will
 be automatically added.
 {% endblock %}
 
+{% block know_your_rights %}
+<h2 class="mstext" style="
+    color: #05012C;
+    font-family: 'Open Sans', Trebuchet, sans-serif;
+    font-weight: normal;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 32px;
+    margin: 0;
+    ">
+    Know Your Rights
+</h2>
+<p class="mstext" style="
+      color: #05012C;
+      font-family: 'Open Sans', Trebuchet, sans-serif;
+      font-size: 14px;
+      line-height: 24px;
+      margin: 0 0 1em 0;
+    ">
+    The issuer of this badge has provided {{ site_name }} with your email address and the
+    data about your achievement contained in this badge. You may request a copy of your data,
+    request removal of data about you, or request rectification of incorrect information by contacting
+    {{ help_email }}.
+</p>{% endblock %}
 
 {% block call_to_action_label %}
 Create Account

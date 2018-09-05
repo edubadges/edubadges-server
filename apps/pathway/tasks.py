@@ -12,8 +12,10 @@ from mainsite.celery import app
 logger = get_task_logger(__name__)
 badgrLogger = badgrlog.BadgrLogger()
 
+pathways_task_queue_name = getattr(settings, 'PATHWAYS_TASK_QUEUE_NAME', 'default')
 
-@app.task(bind=True)
+
+@app.task(bind=True, queue=pathways_task_queue_name)
 def award_badges_for_pathway_completion(self, badgeinstance_pk):
     from issuer.models import BadgeInstance, BadgeClass
 
@@ -81,7 +83,7 @@ def award_badges_for_pathway_completion(self, badgeinstance_pk):
     }
 
 
-@app.task()
+@app.task(queue=pathways_task_queue_name)
 def resave_all_elements():
     from pathway.models import PathwayElement
     for el in PathwayElement.objects.all():

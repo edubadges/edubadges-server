@@ -35,6 +35,26 @@ class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
         verbose_name = _("email address")
         verbose_name_plural = _("email addresses")
 
+    def generate_forgot_password_time_cache_key(self):
+        return "{}_forgot_request_date".format(self.email)
+
+    def get_last_forgot_password_sent_time(self):
+        cached_time = cache.get(self.generate_forgot_password_time_cache_key())
+        return cached_time
+
+    def set_last_forgot_password_sent_time(self, new_datetime):
+        cache.set(self.generate_forgot_password_time_cache_key(), new_datetime)
+
+    def generate_verification_time_cache_key(self):
+        return "{}_verification_request_date".format(self.email)
+
+    def get_last_verification_sent_time(self):
+        cached_time = cache.get(self.generate_verification_time_cache_key())
+        return cached_time
+
+    def set_last_verification_sent_time(self, new_datetime):
+        cache.set(self.generate_verification_time_cache_key(), new_datetime)
+
     def publish(self):
         super(CachedEmailAddress, self).publish()
         self.publish_by('email')

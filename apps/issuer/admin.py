@@ -155,7 +155,7 @@ class BadgeInstanceExtensionInline(TabularInline):
 
 
 class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
-    readonly_fields = ('created_at', 'created_by', 'image', 'entity_id', 'old_json', 'salt', 'entity_id', 'slug')
+    readonly_fields = ('created_at', 'created_by', 'updated_at','updated_by', 'image', 'entity_id', 'old_json', 'salt', 'entity_id', 'slug', 'source', 'source_url')
     list_display = ('badge_image', 'recipient_identifier', 'entity_id', 'badgeclass', 'issuer')
     list_display_links = ('badge_image', 'recipient_identifier', )
     list_filter = ('created_at',)
@@ -163,11 +163,14 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
     raw_id_fields = ('badgeclass', 'issuer')
     fieldsets = (
         ('Metadata', {
-            'fields': ('created_by', 'created_at', 'entity_id', 'slug', 'salt', 'badgeclass', 'issuer'),
+            'fields': ('source', 'source_url', 'created_by', 'created_at', 'updated_by','updated_at', 'entity_id', 'slug', 'salt'),
             'classes': ("collapse",)
         }),
-        (None, {
-            'fields': ('acceptance', 'recipient_identifier', 'image', 'narrative')
+        ('Badgeclass', {
+            'fields': ('badgeclass', 'issuer')
+        }),
+        ('Assertion', {
+            'fields': ('entity_id', 'acceptance', 'recipient_type', 'recipient_identifier', 'image', 'issued_on', 'expires_at', 'narrative')
         }),
         ('Revocation', {
             'fields': ('revoked', 'revocation_reason')

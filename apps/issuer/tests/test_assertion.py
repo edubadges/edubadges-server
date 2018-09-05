@@ -101,6 +101,12 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(len(v2_assertion_data['evidence']), 1)
         self.assertEqual(v2_assertion['evidence'][0]['narrative'], v2_assertion_data['evidence'][0]['narrative'])
 
+        instance = BadgeInstance.objects.get(entity_id=original_assertion['slug'])
+        image = instance.image
+        image_data = json.loads(unbake(image))
+
+        self.assertEqual(image_data.get('evidence', {})[0].get('narrative'), v2_assertion_data['evidence'][0]['narrative'])
+
     def test_can_issue_assertion_with_expiration(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)

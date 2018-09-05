@@ -78,9 +78,6 @@ MIDDLEWARE_CLASSES = [
 
 ROOT_URLCONF = 'mainsite.urls'
 
-SECRET_KEY = '{{secret_key}}'
-UNSUBSCRIBE_SECRET_KEY = 'kAYWM0YWI2MDj/FODBZjE0ZDI4N'
-
 # Hosts/domain names that are valid for this site.
 # "*" matches anything, ".example.com" matches example.com and all subdomains
 ALLOWED_HOSTS = ['*', ]
@@ -200,6 +197,9 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_URLS_REGEX = r'^.*$'
 CORS_MODEL = 'mainsite.BadgrApp'
 
+CORS_EXPOSE_HEADERS = (
+    'link',
+)
 
 ##
 #
@@ -210,9 +210,6 @@ CORS_MODEL = 'mainsite.BadgrApp'
 MEDIA_ROOT = os.path.join(TOP_DIR, 'mediafiles')
 MEDIA_URL = '/media/'
 ADMIN_MEDIA_PREFIX = STATIC_URL+'admin/'
-
-BADGR_UI_URL = 'https://badgr.io/'
-# BADGR_UI_URL = 'localhost:4000/'
 
 
 ##

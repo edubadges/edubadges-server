@@ -42,12 +42,18 @@ class BackpackAssertionSerializerV2(DetailSerializerV2, OriginalJsonSerializerMi
     def to_representation(self, instance):
         representation = super(BackpackAssertionSerializerV2, self).to_representation(instance)
         request_kwargs = self.context['kwargs']
-        expands = request_kwargs['expands']
+        expands = request_kwargs.get('expands', [])
+
+        if self.parent is not None:
+            # we'll have a bare representation
+            instance_data_pointer = representation
+        else:
+            instance_data_pointer = representation['result'][0]
 
         if 'badgeclass' in expands:
-            representation['badgeclass'] = instance.cached_badgeclass.get_json(include_extra=True, use_canonical_id=True)
+            instance_data_pointer['badgeclass'] = instance.cached_badgeclass.get_json(include_extra=True, use_canonical_id=True)
             if 'issuer' in expands:
-                representation['badgeclass']['issuer'] = instance.cached_issuer.get_json(include_extra=True, use_canonical_id=True)
+                instance_data_pointer['badgeclass']['issuer'] = instance.cached_issuer.get_json(include_extra=True, use_canonical_id=True)
 
         return representation
 
