@@ -127,9 +127,9 @@ class IssuerSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):
         user = validated_data['created_by']
         potential_email = validated_data['email']
 
-        if potential_email not in [e.email for e in user.verified_emails]:
+        if not user.is_email_verified(potential_email):
             raise serializers.ValidationError("Email field is not a validated email.")
-            
+
         staff = validated_data.pop('staff_items', [])
         new_issuer = super(IssuerSerializerV2, self).create(validated_data)
 

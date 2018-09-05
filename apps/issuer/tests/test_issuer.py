@@ -6,9 +6,11 @@ import os.path
 import os
 from django.contrib.auth import get_user_model
 from django.core.files.images import get_image_dimensions
+from oauth2_provider.models import Application
 
 from badgeuser.models import CachedEmailAddress
 from issuer.models import Issuer, BadgeClass
+from mainsite.models import ApplicationInfo
 from mainsite.tests.base import BadgrTestCase, SetupIssuerHelper
 
 
@@ -336,3 +338,21 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
         response = self.client.post('/v2/issuers', new_issuer_props)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data['validationErrors'][0], 'Email field is not a validated email.')
+
+    def test_trusted_user_can_create_issuer_with_unverified_email(self):
+        test_user = self.setup_user(authenticate=True)
+        application = Application.objects.create(user=test_user)
+        app_info = ApplicationInfo.objects.create(application=application, trust_email_verification=True)
+
+        new_issuer_props = {
+            'name': 'Test Issuer Name',
+            'description': 'Test issuer description',
+            'url': 'http://example.com/1',
+            'email': 'an+unknown+email@badgr.test'
+        }
+
+        response = self.client.post('/v2/issuers', new_issuer_props)
+        self.assertEqual(response.status_code, 201)
+
+        response = self.client.post('/v1/issuer/issuers', new_issuer_props)
+        self.assertEqual(response.status_code, 201)

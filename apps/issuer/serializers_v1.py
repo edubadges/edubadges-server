@@ -66,7 +66,7 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
         user = validated_data['created_by']
         potential_email = validated_data['email']
 
-        if potential_email not in [e.email for e in user.verified_emails]:
+        if not user.is_email_verified(potential_email):
             raise serializers.ValidationError("Email field is not a validated email.")
 
         new_issuer = Issuer(**validated_data)
