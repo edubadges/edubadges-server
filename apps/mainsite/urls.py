@@ -1,6 +1,7 @@
 from django.apps import apps
 from django.conf import settings
 from django.conf.urls import include, url
+from django.contrib.auth import views as auth_views
 
 from mainsite.admin import badgr_admin
 from mainsite.oauth2_api import AuthorizationApiView, TokenView
@@ -38,6 +39,7 @@ urlpatterns = [
     # Admin URLs
     url(r'^staff/sidewide-actions$', SitewideActionFormView.as_view(), name='badgr_admin_sitewide_actions'),
     url(r'^staff/', include(badgr_admin.urls)),
+    url(r'^staff/superlogin', auth_views.LoginView.as_view(), name ='badgr_admin_super_login'),
 
     # Service health endpoint
     url(r'^health', include('health.urls')),
