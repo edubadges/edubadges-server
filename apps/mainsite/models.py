@@ -65,7 +65,7 @@ class EmailBlacklist(models.Model):
 
 
 class BadgrAppManager(Manager):
-    def get_current(self, request=None):
+    def get_current(self, request=None, raise_exception=True):
         origin = None
         existing_session_app_id = None
 
@@ -89,7 +89,7 @@ class BadgrAppManager(Manager):
             except self.model.DoesNotExist:
                 pass
         badgr_app_id = getattr(settings, 'BADGR_APP_ID', None)
-        if not badgr_app_id:
+        if raise_exception and not badgr_app_id:
             raise ImproperlyConfigured("Must specify a BADGR_APP_ID")
         return self.get(id=badgr_app_id)
 

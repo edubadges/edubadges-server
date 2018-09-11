@@ -81,6 +81,8 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
             request,
             emailconfirmation)
         badgr_app = get_session_badgr_app(request)
+        if not badgr_app:
+            badgr_app = BadgrApp.objects.get_current(request, raise_exception=False)
         ctx = {
             "user": emailconfirmation.email_address.user,
             "email": emailconfirmation.email_address,
