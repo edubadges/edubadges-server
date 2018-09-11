@@ -4,6 +4,7 @@ import time
 from django import forms
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
+from django.http import HttpResponseForbidden
 from django.core.urlresolvers import reverse_lazy
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseServerError, HttpResponseNotFound
@@ -126,7 +127,13 @@ class SitewideActionFormView(FormView):
     form_class = SitewideActionForm
     template_name = 'admin/sitewide_actions.html'
     success_url = reverse_lazy('admin:index')
-
+    
+    def render_to_response(self, context, **response_kwargs):
+        if self.request.user.is_superuser:
+            return super(SitewideActionFormView, self).render_to_response(context, **response_kwargs)
+        else:
+            return HttpResponseForbidden()
+        
     @method_decorator(staff_member_required)
     def dispatch(self, request, *args, **kwargs):
         return super(SitewideActionFormView, self).dispatch(request, *args, **kwargs)

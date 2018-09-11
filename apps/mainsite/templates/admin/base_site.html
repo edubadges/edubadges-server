@@ -45,6 +45,8 @@ body.login #header {
 {% block nav-global %}{% endblock %}
 
 {% block userlinks %}
+	{% if user.is_superuser %}
 	<a href="{% url 'badgr_admin_sitewide_actions' %}">Sitewide Actions</a> /
+	{% endif %}
 	{{ block.super }}
 {% endblock %}
