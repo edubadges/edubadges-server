@@ -61,7 +61,7 @@ bleach==2.0.0
 
 # Open Badges related utilities
 # openbadges==1.0.3
-git+https://github.com/concentricsky/badgecheck@v1.0.4b1
+git+https://github.com/concentricsky/badgecheck.git@v1.0.4b1
 openbadges-bakery==1.0.1
 
 celery==4.1.1
