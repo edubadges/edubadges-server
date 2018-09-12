@@ -18,6 +18,7 @@ def _clean_version_tag(tag):
     matches = re.match(r'^v(?P<version>.+)$', tag)
     if matches:
         return tag[1:]
+    return tag
 
 
 def dependencies_from_requirements(requirements_filename):
@@ -31,12 +32,13 @@ def dependencies_from_requirements(requirements_filename):
             matches = re.match(r'git\+(?P<path>.+/)(?P<package_name>.+)\.git@(?P<version>.+)$', line)
             if matches:
                 d = matches.groupdict()
+                d['cleanversion'] = _clean_version_tag(d.get('version'))
                 dependency_links.append("{line}#egg={package_name}-{version}".format(
                     line=line,
                     package_name=d.get('package_name'),
-                    version=_clean_version_tag(d.get('version'))
+                    version=d.get('cleanversion')
                 ))
-                install_requires.append("{package_name}=={version}".format(**d))
+                install_requires.append("{package_name}=={cleanversion}".format(**d))
             else:
                 install_requires.append(line)
     return install_requires, dependency_links
