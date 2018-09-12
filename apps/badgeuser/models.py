@@ -297,7 +297,7 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     def cached_issuers(self):
         return Issuer.objects.filter(staff__id=self.id).distinct()
 
-#     @cachemodel.cached_method() caching does not always show issuers properly therefore disabled it now
+    @cachemodel.cached_method() caching does not always show issuers properly therefore disabled it now
     def cached_issuers_within_scope(self):
         '''
         used to create the list of issuers in the frontend
