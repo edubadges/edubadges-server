@@ -14,6 +14,12 @@ execfile(os.path.join(os.path.dirname(__file__), 'apps/mainsite/version.py'))
 version = ".".join(map(str, VERSION))
 
 
+def _clean_version_tag(tag):
+    matches = re.match(r'^v(?P<version>.+)$', tag)
+    if matches:
+        return tag[1:]
+
+
 def dependencies_from_requirements(requirements_filename):
     install_requires = []
     dependency_links = []
@@ -28,7 +34,7 @@ def dependencies_from_requirements(requirements_filename):
                 dependency_links.append("{line}#egg={package_name}-{version}".format(
                     line=line,
                     package_name=d.get('package_name'),
-                    version=d.get('version')
+                    version=_clean_version_tag(d.get('version'))
                 ))
                 install_requires.append("{package_name}=={version}".format(**d))
             else:
