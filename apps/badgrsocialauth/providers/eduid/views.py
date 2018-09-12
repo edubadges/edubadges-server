@@ -8,7 +8,6 @@ from allauth.socialaccount.helpers import render_authentication_error, complete_
 from allauth.socialaccount.models import SocialApp
 from badgrsocialauth.utils import get_session_auth_token
 from .provider import EduIDProvider
-current_app = SocialApp.objects.get_current(provider='edu_id')
 logger = logging.getLogger('Badgr.Debug')
 
 def encode(username, password): #client_id, secret
@@ -23,6 +22,7 @@ def encode(username, password): #client_id, secret
     return 'Basic ' + b64encode(username_password.encode()).decode()
 
 def login(request):
+    current_app = SocialApp.objects.get_current(provider='edu_id')
     # the only thing set in state is the referer (frontend, or staff)
     referer = request.META['HTTP_REFERER'].split('/')[3]
     state = referer
@@ -40,6 +40,7 @@ def login(request):
     
 
 def callback(request):
+    current_app = SocialApp.objects.get_current(provider='edu_id')
     #extract state of redirect
     referer = request.GET.get('state')
     code = request.GET.get('code', None) # access codes to access user info endpoint
