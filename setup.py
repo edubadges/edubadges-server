@@ -21,6 +21,12 @@ def _clean_version_tag(tag):
     return tag
 
 
+def _hack_package_name(name):
+    if name == 'badgecheck':
+        return 'openbadges'
+    return name
+
+
 def dependencies_from_requirements(requirements_filename):
     install_requires = []
     dependency_links = []
@@ -33,6 +39,7 @@ def dependencies_from_requirements(requirements_filename):
             if matches:
                 d = matches.groupdict()
                 d['cleanversion'] = _clean_version_tag(d.get('version'))
+                d['package_name'] = _hack_package_name(d.get('package_name'))
                 dependency_links.append("{line}#egg={package_name}-{version}".format(
                     line=line,
                     package_name=d.get('package_name'),
