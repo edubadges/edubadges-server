@@ -324,7 +324,9 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
 
         response = self.client.post('/v1/issuer/issuers', new_issuer_props)
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data[0], 'Email field is not a validated email.')
+        self.assertEqual(
+            response.data[0],
+            'Issuer email must be one of your verified addresses. Add this email to your profile and try again.')
 
     def test_cant_create_issuer_with_unverified_email_v2(self):
         test_user = self.setup_user(authenticate=True)
@@ -337,7 +339,9 @@ class IssuerTests(SetupIssuerHelper, BadgrTestCase):
 
         response = self.client.post('/v2/issuers', new_issuer_props)
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data['validationErrors'][0], 'Email field is not a validated email.')
+        self.assertEqual(
+            response.data['validationErrors'][0],
+            'Issuer email must be one of your verified addresses. Add this email to your profile and try again.')
 
     def test_trusted_user_can_create_issuer_with_unverified_email(self):
         test_user = self.setup_user(authenticate=True)
