@@ -556,6 +556,8 @@ class UserBadgeTests(BadgrTestCase):
         badgeclass.issue(recipient_id='New+email@newemail.com', allow_uppercase=True)
         badgeclass.issue(recipient_id='New+Email@newemail.com', allow_uppercase=True)
 
+        outbox_count = len(mail.outbox)
+
         response = self.client.post('/v1/user/emails', {
             'email': 'new+email@newemail.com',
         })
@@ -568,8 +570,8 @@ class UserBadgeTests(BadgrTestCase):
         with self.settings(BADGR_APP_ID=self.badgr_app.id):
             # Mark email as verified
             email = CachedEmailAddress.cached.get(email='new+email@newemail.com')
-            self.assertEqual(len(mail.outbox), 1)
-            verify_url = re.search("(?P<url>/v1/[^\s]+)", mail.outbox[0].body).group("url")
+            self.assertEqual(len(mail.outbox), outbox_count+1)
+            verify_url = re.search("(?P<url>/v1/[^\s]+)", mail.outbox[-1].body).group("url")
             response = self.client.get(verify_url)
             self.assertEqual(response.status_code, 302)
 

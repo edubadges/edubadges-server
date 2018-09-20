@@ -207,9 +207,6 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         self.assertIn('slug', response.data)
         assertion_slug = response.data.get('slug')
 
-        # Assert mail not sent if "create_notification" param included but set to false
-        self.assertEqual(len(mail.outbox), 0)
-
         # assert that the BadgeInstance was published to and fetched from cache
         query_count = 1 if apps.is_installed('badgebook') else 0
         with self.assertNumQueries(query_count):
