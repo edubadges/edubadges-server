@@ -476,7 +476,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
 
         assertion = {
-            "email": "ottonomy@gmail.com",
+            "email": "unittest@unittesting.badgr.io",
             'create_notification': True
         }
         response = self.client.post('/v1/issuer/issuers/{issuer}/badges/{badge}/assertions'.format(
@@ -485,6 +485,32 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         ), assertion)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(len(mail.outbox), 1)
+
+    def test_first_assertion_always_notifies_recipient(self):
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+
+        outbox_count = len(mail.outbox)
+
+        assertion = {
+            "email": "first_recipients_assertion@unittesting.badgr.io",
+            'create_notification': False
+        }
+        response = self.client.post('/v1/issuer/issuers/{issuer}/badges/{badge}/assertions'.format(
+            issuer=test_issuer.entity_id,
+            badge=test_badgeclass.entity_id,
+        ), assertion)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(len(mail.outbox), outbox_count+1)
+
+        # should not get notified of second assertion
+        response = self.client.post('/v1/issuer/issuers/{issuer}/badges/{badge}/assertions'.format(
+            issuer=test_issuer.entity_id,
+            badge=test_badgeclass.entity_id,
+        ), assertion)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(len(mail.outbox), outbox_count+1)
 
     def test_authenticated_owner_list_assertions(self):
         test_user = self.setup_user(authenticate=True)

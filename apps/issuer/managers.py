@@ -204,6 +204,11 @@ class BadgeInstanceManager(models.Manager):
         if check_completions:
             award_badges_for_pathway_completion.delay(badgeinstance_pk=new_instance.pk)
 
+        if not notify:
+            # always notify if this is the first time issuing to a recipient
+            if self.filter(recipient_identifier=recipient_identifier).count() == 1:
+                notify = True
+
         if notify:
             new_instance.notify_earner(badgr_app=badgr_app)
 
