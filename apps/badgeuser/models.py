@@ -284,6 +284,19 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     def all_recipient_identifiers(self):
         return [e.email for e in self.cached_emails() if e.verified] + [e.email for e in self.cached_email_variants()]
 
+    def is_email_verified(self, email):
+        if email in self.all_recipient_identifiers:
+            return True
+
+        try:
+            app_infos = ApplicationInfo.objects.filter(application__user=self)
+            if any(app_info.trust_email_verification for app_info in app_infos):
+                return True
+        except ApplicationInfo.DoesNotExist:
+            return False
+
+        return False
+
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):
         return Issuer.objects.filter(staff__id=self.id).distinct()

@@ -133,6 +133,7 @@ class ApplicationInfo(cachemodel.CacheModel):
     name = models.CharField(max_length=254, blank=True, null=True, default=None)
     website_url = models.URLField(blank=True, null=True, default=None)
     allowed_scopes = models.TextField(blank=False, validators=[DefinedScopesValidator()])
+    trust_email_verification = models.BooleanField(default=False)
 
     def get_visible_name(self):
         if self.name:
