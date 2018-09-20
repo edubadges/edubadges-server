@@ -4,8 +4,10 @@ from __future__ import unicode_literals
 import json
 from unittest import skip
 
+import datetime
 import dateutil.parser
 import png
+import pytz
 from django.apps import apps
 from django.core import mail
 from django.core.urlresolvers import reverse
@@ -48,6 +50,42 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         self.assertDictContainsSubset({
             '@context': u'https://w3id.org/openbadges/v2'
         }, v2_data)
+
+    def test_put_rebakes_assertion(self):
+        test_user = self.setup_user(authenticate=True)
+        test_issuer = self.setup_issuer(owner=test_user)
+        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+        test_assertion = test_badgeclass.issue(recipient_id='test1@email.test')
+
+        # v1 api
+        v1_backdate = datetime.datetime(year=2021, month=3, day=3, tzinfo=pytz.UTC)
+        updated_data = dict(
+            expires=v1_backdate.isoformat()
+        )
+
+        response = self.client.put('/v1/issuer/issuers/{issuer}/badges/{badge}/assertions/{assertion}'.format(
+            issuer=test_assertion.cached_issuer.entity_id,
+            badge=test_assertion.cached_badgeclass.entity_id,
+            assertion=test_assertion.entity_id
+        ), updated_data)
+        self.assertEqual(response.status_code, 200)
+        updated_assertion = BadgeInstance.objects.get(entity_id=test_assertion.entity_id)
+        updated_obo = json.loads(str(unbake(updated_assertion.image)))
+        self.assertEqual(updated_obo.get('expires', None), updated_data.get('expires'))
+
+        # v2 api
+        v2_backdate = datetime.datetime(year=2002, month=3, day=3, tzinfo=pytz.UTC)
+        updated_data = dict(
+            issuedOn=v2_backdate.isoformat()
+        )
+
+        response = self.client.put('/v2/assertions/{assertion}'.format(
+            assertion=test_assertion.entity_id
+        ), updated_data)
+        self.assertEqual(response.status_code, 200)
+        updated_assertion = BadgeInstance.objects.get(entity_id=test_assertion.entity_id)
+        updated_obo = json.loads(str(unbake(updated_assertion.image)))
+        self.assertEqual(updated_obo.get('issuedOn', None), updated_data.get('issuedOn'))
 
     def test_can_update_assertion(self):
         test_user = self.setup_user(authenticate=True)
