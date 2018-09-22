@@ -41,7 +41,7 @@ class AbstractIssuerAPIEndpoint(APIView):
 
         queryset = queryset if queryset is not None else self.queryset
         try:
-            obj = queryset.get(slug=slug)
+            obj = queryset.get(entity_id=slug)
         except self.model.DoesNotExist:
             return None
 
