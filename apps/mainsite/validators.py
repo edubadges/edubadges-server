@@ -59,11 +59,12 @@ class BadgeExtensionValidator(object):
     def __call__(self, value):
         if len(value) > 0:
             result = openbadges.verifier.validate_extensions(value.copy())
-            report = result.get('report', {})
-            if not report.get('valid', False):
-                messages = report.get('messages', [])
-                if len(messages) > 0:
-                    msg = messages[0].get('result', self.message)
-                else:
-                    msg = self.message
-                raise ValidationError(msg)
+            # uncomment until extensions have been approved
+#             report = result.get('report', {})
+#             if not report.get('valid', False):
+#                 messages = report.get('messages', [])
+#                 if len(messages) > 0:
+#                     msg = messages[0].get('result', self.message)
+#                 else:
+#                     msg = self.message
+#                 raise ValidationError(msg)
