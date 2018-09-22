@@ -1,6 +1,6 @@
 import uuid
 
-import os
+import os, json
 from django.apps import apps
 from django.core.urlresolvers import reverse
 from django.core.validators import URLValidator
@@ -17,7 +17,7 @@ from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, 
     OriginalJsonSerializerMixin
 from mainsite.utils import OriginSetting
 from mainsite.validators import ChoicesValidator, BadgeExtensionValidator
-from .models import Issuer, BadgeClass, IssuerStaff, BadgeInstance
+from .models import Issuer, BadgeClass, IssuerStaff, BadgeInstance, BadgeClassExtension
 
 
 class CachedListSerializer(serializers.ListSerializer):
@@ -55,10 +55,11 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
     url = serializers.URLField(max_length=1024, required=True)
     staff = IssuerStaffSerializerV1(read_only=True, source='cached_issuerstaff', many=True)
     faculty = FacultySerializerV1(required=False, allow_null=True)
+    extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
 
     class Meta:
         apispec_definition = ('Issuer', {})
-        
+
 
     def validate_image(self, image):
         if image is not None:
@@ -85,7 +86,7 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
             faculty_id = self.context['request'].data['faculty']['id']
             faculty = Faculty.objects.get(pk=faculty_id)
             validated_data['faculty'] = faculty
-        
+
         instance.name = validated_data.get('name')
 
         if 'image' in validated_data:
@@ -158,9 +159,9 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
     recipient_count = serializers.IntegerField(required=False, read_only=True)
     pathway_element_count = serializers.IntegerField(required=False, read_only=True)
     description = StripTagsCharField(max_length=16384, required=True, convert_null=True)
-
     alignment = AlignmentItemSerializerV1(many=True, source='alignment_items', required=False)
     tags = serializers.ListField(child=StripTagsCharField(max_length=1024), source='tag_items', required=False)
+    extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
 
     class Meta:
         apispec_definition = ('BadgeClass', {})
@@ -189,6 +190,29 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
         else:
             return None
 
+    def remove_extensions(self, instance, extensions_to_remove):
+        extensions = instance.cached_extensions()
+        for ext in extensions:
+            if ext.name in extensions_to_remove:
+                ext.delete()
+
+    def update_extensions(self, instance, extensions_to_update, received_extension_items):
+        current_extensions = instance.cached_extensions()
+        for ext in current_extensions:
+            if ext.name in extensions_to_update:
+                new_values = received_extension_items[ext.name]
+                ext.original_json = json.dumps(new_values)
+                ext.save()
+
+    def add_extensions(self, instance, add_these_extensions, extension_items):
+        for extension_name in add_these_extensions:
+            original_json=extension_items[extension_name]
+            extension = BadgeClassExtension(name=extension_name,
+                                            original_json=json.dumps(original_json),
+                                            badgeclass_id=instance.pk)
+            extension.save()
+
+
     def update(self, instance, validated_data):
 
         new_name = validated_data.get('name')
@@ -210,6 +234,18 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
 
         instance.alignment_items = validated_data.get('alignment_items')
         instance.tag_items = validated_data.get('tag_items')
+
+        extension_items = validated_data.get('extension_items')
+        if extension_items.get('languageExtension'):
+            del extension_items.get('languageExtension')['typedLanguage']
+        received_extensions = extension_items.keys()
+        current_extension_names = instance.extension_items.keys()
+        remove_these_extensions = set(current_extension_names) - set(received_extensions)
+        update_these_extensions =  set(current_extension_names).intersection(set(received_extensions))
+        add_these_extensions = set(received_extensions) - set(current_extension_names)
+        self.remove_extensions(instance, remove_these_extensions)
+        self.update_extensions(instance, update_these_extensions, extension_items)
+        self.add_extensions(instance, add_these_extensions, extension_items)
 
         instance.save()
 
@@ -239,6 +275,15 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
 
         return data
 
+    def filter_extensions(self, validated_data):
+        extension_items = validated_data['extension_items']
+        for extension_name in extension_items.keys():
+            extension_item = extension_items[extension_name]
+            if extension_name == 'languageExtension':
+                del extension_item['typedLanguage']
+
+
+
     def create(self, validated_data, **kwargs):
 
         if 'image' not in validated_data:
@@ -247,6 +292,7 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
         if 'issuer' in self.context:
             validated_data['issuer'] = self.context.get('issuer')
 
+        self.filter_extensions(validated_data)
         new_badgeclass = BadgeClass.objects.create(**validated_data)
         return new_badgeclass
 
@@ -285,7 +331,6 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
     create_notification = HumanReadableBooleanField(write_only=True, required=False, default=False)
 
     hashed = serializers.NullBooleanField(default=None, required=False)
-
     extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
 
     class Meta:

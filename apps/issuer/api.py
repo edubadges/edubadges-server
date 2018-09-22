@@ -17,6 +17,7 @@ import badgrlog
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView, \
     UncachedPaginatedViewMixin
 from entity.serializers import BaseSerializerV2, V2ErrorSerializer
+from issuer.utils import mapExtensionsToDict
 from issuer.models import Issuer, BadgeClass, BadgeInstance, IssuerStaff
 from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
                                 IsEditor, IsStaff, ApprovedIssuersOnly, BadgrOAuthTokenHasScope,
@@ -65,7 +66,7 @@ class IssuerList(BaseEntityListView):
         if request.data['faculty']:
             request.data[u'faculty'] = json.loads(request.data[u'faculty'])
         else:
-            request.data[u'faculty'] = None 
+            request.data[u'faculty'] = None
         return super(IssuerList, self).post(request, **kwargs)
 
 
@@ -128,6 +129,7 @@ class AllBadgeClassesList(BaseEntityListView):
         tags=["BadgeClasses"],
     )
     def post(self, request, **kwargs):
+        mapExtensionsToDict(request)
         return super(AllBadgeClassesList, self).post(request, **kwargs)
 
 
@@ -167,6 +169,7 @@ class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
     )
     def post(self, request, **kwargs):
         issuer = self.get_object(request, **kwargs)  # trigger a has_object_permissions() check
+        mapExtensionsToDict(request)
         return super(IssuerBadgeClassList, self).post(request, **kwargs)
 
 
@@ -210,6 +213,7 @@ class BadgeClassDetail(BaseEntityDetailView):
         tags=['BadgeClasses'],
     )
     def put(self, request, **kwargs):
+        mapExtensionsToDict(request)
         return super(BadgeClassDetail, self).put(request, **kwargs)
 
 
