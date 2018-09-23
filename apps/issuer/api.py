@@ -67,6 +67,7 @@ class IssuerList(BaseEntityListView):
             request.data[u'faculty'] = json.loads(request.data[u'faculty'])
         else:
             request.data[u'faculty'] = None
+        mapExtensionsToDict(request)
         return super(IssuerList, self).post(request, **kwargs)
 
 
@@ -93,6 +94,7 @@ class IssuerDetail(BaseEntityDetailView):
             request.data[u'faculty'] = json.loads(request.data[u'faculty'])
         else:
              request.data[u'faculty'] = None
+        mapExtensionsToDict(request)
         return super(IssuerDetail, self).put(request, **kwargs)
 
     @apispec_delete_operation('Issuer',

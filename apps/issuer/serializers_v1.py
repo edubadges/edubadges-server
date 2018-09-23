@@ -17,9 +17,37 @@ from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, 
     OriginalJsonSerializerMixin
 from mainsite.utils import OriginSetting
 from mainsite.validators import ChoicesValidator, BadgeExtensionValidator
-from .models import Issuer, BadgeClass, IssuerStaff, BadgeInstance, BadgeClassExtension
+from .models import Issuer, BadgeClass, IssuerStaff, BadgeInstance, BadgeClassExtension, IssuerExtension
 
+class ExtensionsSaverMixin(object):
+    def remove_extensions(self, instance, extensions_to_remove):
+        extensions = instance.cached_extensions()
+        for ext in extensions:
+            if ext.name in extensions_to_remove:
+                ext.delete()
 
+    def update_extensions(self, instance, extensions_to_update, received_extension_items):
+        current_extensions = instance.cached_extensions()
+        for ext in current_extensions:
+            if ext.name in extensions_to_update:
+                new_values = received_extension_items[ext.name]
+                ext.original_json = json.dumps(new_values)
+                ext.save()
+
+    def save_extensions(self, validated_data, instance):
+        extension_items = validated_data.get('extension_items')
+        if extension_items.get('languageExtension'):
+            del extension_items.get('languageExtension')['typedLanguage']
+        received_extensions = extension_items.keys()
+        current_extension_names = instance.extension_items.keys()
+        remove_these_extensions = set(current_extension_names) - set(received_extensions)
+        update_these_extensions =  set(current_extension_names).intersection(set(received_extensions))
+        add_these_extensions = set(received_extensions) - set(current_extension_names)
+        self.remove_extensions(instance, remove_these_extensions)
+        self.update_extensions(instance, update_these_extensions, extension_items)
+        self.add_extensions(instance, add_these_extensions, extension_items)
+  
+    
 class CachedListSerializer(serializers.ListSerializer):
     def to_representation(self, data):
         return [self.child.to_representation(item) for item in data]
@@ -44,7 +72,7 @@ class IssuerStaffSerializerV1(serializers.Serializer):
         })
 
 
-class IssuerSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
+class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1()
     name = StripTagsCharField(max_length=1024)
@@ -100,7 +128,7 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
         # set badgrapp
         if not instance.badgrapp_id:
             instance.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
-
+        self.save_extensions(validated_data, instance)
         instance.save()
         return instance
 
@@ -117,6 +145,14 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
         representation['pathwayCount'] = len(obj.cached_pathways())
 
         return representation
+    
+    def add_extensions(self, instance, add_these_extensions, extension_items):
+        for extension_name in add_these_extensions:
+            original_json=extension_items[extension_name]
+            extension = IssuerExtension(name=extension_name,
+                                            original_json=json.dumps(original_json),
+                                            issuer_id=instance.pk)
+            extension.save()
 
 
 class IssuerRoleActionSerializerV1(serializers.Serializer):
@@ -146,7 +182,7 @@ class AlignmentItemSerializerV1(serializers.Serializer):
         apispec_definition = ('BadgeClassAlignment', {})
 
 
-class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
+class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1()
     id = serializers.IntegerField(required=False, read_only=True)
@@ -189,21 +225,7 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
             return criteria_url
         else:
             return None
-
-    def remove_extensions(self, instance, extensions_to_remove):
-        extensions = instance.cached_extensions()
-        for ext in extensions:
-            if ext.name in extensions_to_remove:
-                ext.delete()
-
-    def update_extensions(self, instance, extensions_to_update, received_extension_items):
-        current_extensions = instance.cached_extensions()
-        for ext in current_extensions:
-            if ext.name in extensions_to_update:
-                new_values = received_extension_items[ext.name]
-                ext.original_json = json.dumps(new_values)
-                ext.save()
-
+    
     def add_extensions(self, instance, add_these_extensions, extension_items):
         for extension_name in add_these_extensions:
             original_json=extension_items[extension_name]
@@ -212,7 +234,7 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
                                             badgeclass_id=instance.pk)
             extension.save()
 
-
+    
     def update(self, instance, validated_data):
 
         new_name = validated_data.get('name')
@@ -235,17 +257,7 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer
         instance.alignment_items = validated_data.get('alignment_items')
         instance.tag_items = validated_data.get('tag_items')
 
-        extension_items = validated_data.get('extension_items')
-        if extension_items.get('languageExtension'):
-            del extension_items.get('languageExtension')['typedLanguage']
-        received_extensions = extension_items.keys()
-        current_extension_names = instance.extension_items.keys()
-        remove_these_extensions = set(current_extension_names) - set(received_extensions)
-        update_these_extensions =  set(current_extension_names).intersection(set(received_extensions))
-        add_these_extensions = set(received_extensions) - set(current_extension_names)
-        self.remove_extensions(instance, remove_these_extensions)
-        self.update_extensions(instance, update_these_extensions, extension_items)
-        self.add_extensions(instance, add_these_extensions, extension_items)
+        self.save_extensions(validated_data, instance)
 
         instance.save()
 
