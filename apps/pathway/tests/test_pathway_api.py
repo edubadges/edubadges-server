@@ -12,6 +12,7 @@ from rest_framework import status
 from badgeuser.models import BadgeUser, CachedEmailAddress
 from issuer.models import BadgeClass, BadgeInstance, Issuer
 from issuer.serializers_v1 import BadgeInstanceSerializerV1
+from mainsite.models import BadgrApp
 from mainsite.tests.base import BadgrTestCase, SetupIssuerHelper
 from mainsite.utils import OriginSetting
 from pathway.completionspec import CompletionRequirementSpecFactory
@@ -20,6 +21,9 @@ from pathway.serializers import PathwaySerializer, PathwayElementSerializer
 from recipient.models import RecipientProfile, RecipientGroupMembership, RecipientGroup
 
 
+@override_settings(
+    BADGR_APP_ID=1
+)
 class PathwayApiTests(SetupIssuerHelper, BadgrTestCase):
 
     def setUp(self):
@@ -48,9 +52,12 @@ class PathwayApiTests(SetupIssuerHelper, BadgrTestCase):
         self.assertTrue(response.data['slug'], "Received an issuer with a slug")
         self.issuer = response.data
 
-
         # make a default badgeclass
         self.badgeclass = self.setup_badgeclass(issuer=Issuer.cached.get(entity_id=self.issuer.get('slug')))
+
+        self.badgr_app = BadgrApp.objects.create(cors='testserver',
+                                                 email_confirmation_redirect='http://testserver/login/',
+                                                 forgot_password_redirect='http://testserver/reset-password/')
 
     def test_can_create_pathway(self):
         pathway_data = {
@@ -242,6 +249,7 @@ class PathwayApiTests(SetupIssuerHelper, BadgrTestCase):
 
 @override_settings(
     ISSUER_NOTIFY_DEFAULT=False,
+    BADGR_APP_ID=1
 )
 class PathwayCompletionTests(SetupIssuerHelper, BadgrTestCase):
     def setUp(self):
@@ -257,6 +265,10 @@ class PathwayCompletionTests(SetupIssuerHelper, BadgrTestCase):
         )
 
         self.test_badgeclass = self.setup_badgeclass(issuer=self.test_issuer)
+
+        self.badgr_app = BadgrApp.objects.create(cors='testserver',
+                                                 email_confirmation_redirect='http://testserver/login/',
+                                                 forgot_password_redirect='http://testserver/reset-password/')
 
     def create_group(self):
         # Authenticate as an editor of the issuer in question
