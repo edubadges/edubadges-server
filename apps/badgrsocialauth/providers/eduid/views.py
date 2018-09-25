@@ -72,12 +72,6 @@ def callback(request):
         return render_authentication_error(request, EduIDProvider.id, error=error)
     userinfo_json = response.json()
     
-    '''
-    STUB!!!!
-    '''
-    userinfo_json['email'] = 'EDUIDTEST@plop.plet'
-    userinfo_json['edu_id'] = 'verylongEDUiDstring1'
-    
     # retrieved data in fields and ensure that email & sub are in extra_data
     if 'email' not in userinfo_json or 'sub' not in userinfo_json:
         error = 'Sorry, your account has no email attached from SurfConext, try another login method.'
