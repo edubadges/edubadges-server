@@ -38,6 +38,7 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
     first_name = StripTagsCharField(max_length=30, allow_blank=True)
     last_name = StripTagsCharField(max_length=30, allow_blank=True)
     email = serializers.EmailField(source='primary_email', required=False)
+    current_password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False)
     password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False, validators=[PasswordValidator()])
     slug = serializers.CharField(source='entity_id', read_only=True)
     agreed_terms_version = serializers.IntegerField(required=False)
@@ -61,14 +62,21 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
         first_name = validated_data.get('first_name')
         last_name = validated_data.get('last_name')
         password = validated_data.get('password')
+        current_password = validated_data.get('current_password')
+
         if first_name:
             user.first_name = first_name
         if last_name:
             user.last_name = last_name
 
         if password:
-            user.set_password(password)
-            notify_on_password_change(user)
+            if not current_password:
+                raise serializers.ValidationError({'currrent_password': "Field is required"})
+            if user.check_password(current_password):
+                user.set_password(password)
+                notify_on_password_change(user)
+            else:
+                raise serializers.ValidationError({'currrent_password': "Incorrect password"})
 
         if 'agreed_terms_version' in validated_data:
             user.agreed_terms_version = validated_data.get('agreed_terms_version')

@@ -605,6 +605,7 @@ class UserProfileTests(BadgrTestCase):
             'first_name': first,
             'last_name': last,
             'password': new_password,
+            'current_password': original_password
         })
         self.assertEqual(response.status_code, 200)
         self.assertEqual(first, response.data.get('first_name'))
@@ -622,15 +623,15 @@ class UserProfileTests(BadgrTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual('Barry', response.data.get('first_name'))
 
-        new_password = 'superstar!'
+        third_password = 'superstar!'
         response = self.client.put('/v1/user/profile', {
-            'password': new_password
+            'password': third_password,
+            'current_password': new_password
         })
         self.assertEqual(response.status_code, 200)
         self.client.logout()
-        self.client.login(username=username, password=new_password)
+        self.client.login(username=username, password=third_password)
         self.assertUserLoggedIn()
-
 
     def assertUserLoggedIn(self, user_pk=None):
         self.assertIn(SESSION_KEY, self.client.session)

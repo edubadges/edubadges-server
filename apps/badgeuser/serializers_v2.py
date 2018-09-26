@@ -40,6 +40,7 @@ class BadgeUserSerializerV2(DetailSerializerV2):
     firstName = StripTagsCharField(source='first_name', max_length=30, allow_blank=True)
     lastName = StripTagsCharField(source='last_name', max_length=30, allow_blank=True)
     password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False, validators=[PasswordValidator()])
+    currentPassword = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False)
     emails = BadgeUserEmailSerializerV2(many=True, source='email_items', required=False)
     agreedTermsVersion = serializers.IntegerField(source='agreed_terms_version', required=False)
     marketingOptIn = serializers.BooleanField(source='marketing_opt_in', required=False)
@@ -73,11 +74,17 @@ class BadgeUserSerializerV2(DetailSerializerV2):
 
     def update(self, instance, validated_data):
         password = validated_data.pop('password') if 'password' in validated_data else None
+        current_password = validated_data.pop('currentPassword') if 'currentPassword' in validated_data else None
         super(BadgeUserSerializerV2, self).update(instance, validated_data)
 
         if password:
-            instance.set_password(password)
-            notify_on_password_change(instance)
+            if not current_password:
+                raise serializers.ValidationError({'currrent_password': "Field is required"})
+            if instance.check_password(current_password):
+                instance.set_password(password)
+                notify_on_password_change(instance)
+            else:
+                raise serializers.ValidationError({'currrent_password': "Incorrect password"})
 
         instance.badgrapp = BadgrApp.objects.get_current(request=self.context.get('request', None))
 
