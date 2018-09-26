@@ -34,7 +34,7 @@ requests-oauthlib==0.4.2
 rules==0.4
 
 # OAuth
-django-oauth-toolkit==1.0.0
+django-oauth-toolkit==1.1.2
 
 # Some extras
 django-cors-headers==1.1.0

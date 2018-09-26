@@ -28,7 +28,7 @@ class BadgrRequestValidator(OAuth2Validator):
     def get_existing_tokens(self, request):
         return AccessToken.objects.filter(user=request.user, application=request.client).order_by('-created')
 
-    def _create_access_token(self, expires, request, token):
+    def _create_access_token(self, expires, request, token, *args, **kwargs):
         access_token = self.get_existing_tokens(request).first()
         if access_token:
             # reuse existing access_token and preserve original token, but bump expiration
