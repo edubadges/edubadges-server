@@ -7,6 +7,7 @@ from allauth.account.models import EmailConfirmationHMAC
 from allauth.account.utils import user_pk_to_url_str, url_str_to_user_pk
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -17,7 +18,8 @@ from rest_framework import permissions, serializers, status
 from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
-from rest_framework.status import HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED
+from rest_framework.status import HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, \
+    HTTP_400_BAD_REQUEST
 
 from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
@@ -324,6 +326,11 @@ class BadgeUserForgotPassword(BaseUserRecoveryView):
 
         if not default_token_generator.check_token(user, key):
             return Response(status=HTTP_404_NOT_FOUND)
+
+        try:
+            validate_password(password)
+        except DjangoValidationError as e:
+            return Response(dict(password=e.messages), status=HTTP_400_BAD_REQUEST)
 
         user.set_password(password)
         user.save()

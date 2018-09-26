@@ -8,6 +8,7 @@ from badgeuser.utils import notify_on_password_change
 from entity.serializers import DetailSerializerV2, BaseSerializerV2
 from mainsite.models import BadgrApp
 from mainsite.serializers import StripTagsCharField
+from mainsite.validators import PasswordValidator
 
 
 class BadgeUserEmailSerializerV2(DetailSerializerV2):
@@ -38,7 +39,7 @@ class BadgeUserEmailSerializerV2(DetailSerializerV2):
 class BadgeUserSerializerV2(DetailSerializerV2):
     firstName = StripTagsCharField(source='first_name', max_length=30, allow_blank=True)
     lastName = StripTagsCharField(source='last_name', max_length=30, allow_blank=True)
-    password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False)
+    password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False, validators=[PasswordValidator()])
     emails = BadgeUserEmailSerializerV2(many=True, source='email_items', required=False)
     agreedTermsVersion = serializers.IntegerField(source='agreed_terms_version', required=False)
     marketingOptIn = serializers.BooleanField(source='marketing_opt_in', required=False)

@@ -70,7 +70,7 @@ class TestSignup(BadgrTestCase):
                 'first_name': 'Tester',
                 'last_name': 'McSteve',
                 'email': 'test12345@example.com',
-                'password': '1234567'
+                'password': 'secr3t4nds3cur3'
             }
             response = self.client.post('/v1/user/profile', post_data)
             self.assertEqual(response.status_code, 201)

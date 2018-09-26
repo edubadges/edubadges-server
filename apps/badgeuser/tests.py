@@ -64,7 +64,7 @@ class UserCreateTests(BadgrTestCase):
             'first_name': 'Test',
             'last_name': 'User',
             'email': 'newuniqueuser1@example.com',
-            'password': '123456'
+            'password': 'secr3t4nds3cur3'
         }
 
         response = self.client.post('/v1/user/profile', user_data)
@@ -93,7 +93,7 @@ class UserCreateTests(BadgrTestCase):
             'first_name': 'NEW Test',
             'last_name': 'User',
             'email': email,
-            'password': '123456'
+            'password': 'secr3t4nds3cur3'
         }
 
         # create an existing user that owns email -- but unverified
@@ -138,7 +138,7 @@ class UserCreateTests(BadgrTestCase):
             'first_name': 'NEW Test',
             'last_name': 'User',
             'email': email,
-            'password': '123456'
+            'password': 'secr3t4nds3cur3'
         }
         response = self.client.post('/v1/user/profile', user_data)
 
@@ -200,7 +200,7 @@ class UserCreateTests(BadgrTestCase):
         response = self.client.post('/v1/user/profile', {
             'first_name': 'existing',
             'last_name': 'user',
-            'password': 'secret',
+            'password': 'secr3t4nds3cur3',
             'email': email
         })
         self.assertEqual(response.status_code, 201)
@@ -210,7 +210,7 @@ class UserCreateTests(BadgrTestCase):
         response = self.client.post('/v1/user/profile', {
             'first_name': 'existing',
             'last_name': 'user',
-            'password': 'secret',
+            'password': 'secr3t4nds3cur3',
             'email': 'nonexistent23+extra@test.nonexistent'
         })
         self.assertEqual(response.status_code, 201)
@@ -220,7 +220,7 @@ class UserCreateTests(BadgrTestCase):
         response = self.client.post('/v1/user/profile', {
             'first_name': 'existing',
             'last_name': 'user',
-            'password': 'secret',
+            'password': 'secr3t4nds3cur3',
             'email': 'VERYNONEXISTENT@test.nonexistent'
         })
         self.assertEqual(response.status_code, 201)

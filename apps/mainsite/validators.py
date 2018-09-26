@@ -1,6 +1,7 @@
 # encoding: utf-8
 from __future__ import unicode_literals
 
+from django.contrib.auth.password_validation import validate_password
 from django.core.validators import RegexValidator
 from rest_framework.exceptions import ValidationError
 
@@ -67,3 +68,8 @@ class BadgeExtensionValidator(object):
                 else:
                     msg = self.message
                 raise ValidationError(msg)
+
+
+class PasswordValidator(object):
+    def __call__(self, value):
+        validate_password(value)

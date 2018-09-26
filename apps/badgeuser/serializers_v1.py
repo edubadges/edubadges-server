@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 from mainsite.models import BadgrApp
 from mainsite.serializers import StripTagsCharField
+from mainsite.validators import PasswordValidator
 from .models import BadgeUser, CachedEmailAddress, TermsVersion
 from .utils import notify_on_password_change
 
@@ -37,7 +38,7 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
     first_name = StripTagsCharField(max_length=30, allow_blank=True)
     last_name = StripTagsCharField(max_length=30, allow_blank=True)
     email = serializers.EmailField(source='primary_email', required=False)
-    password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False)
+    password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False, validators=[PasswordValidator()])
     slug = serializers.CharField(source='entity_id', read_only=True)
     agreed_terms_version = serializers.IntegerField(required=False)
     marketing_opt_in = serializers.BooleanField(required=False)
