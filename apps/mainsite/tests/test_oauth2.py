@@ -20,6 +20,10 @@ class OAuth2TokenTests(BadgrTestCase):
             authorization_grant_type=Application.GRANT_CLIENT_CREDENTIALS,
             name='test client app'
         )
+        ApplicationInfo.objects.create(
+            application=application,
+            allowed_scopes='rw:issuer'
+        )
 
         request_data = dict(
             grant_type='client_credentials',
@@ -43,6 +47,10 @@ class OAuth2TokenTests(BadgrTestCase):
             user=client_user,
             authorization_grant_type=Application.GRANT_CLIENT_CREDENTIALS,
             name='test client app'
+        )
+        ApplicationInfo.objects.create(
+            application=application,
+            allowed_scopes='rw:issuer'
         )
 
         request_data = dict(

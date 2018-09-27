@@ -1,16 +1,18 @@
 # encoding: utf-8
 from __future__ import unicode_literals
 
+import json
 import re
 
+from django.http import HttpResponse
 from django.utils import timezone
 from oauth2_provider.exceptions import OAuthToolkitError
-from oauth2_provider.models import get_application_model, get_access_token_model, AccessToken, RefreshToken
-from oauth2_provider.oauth2_validators import OAuth2Validator
+from oauth2_provider.models import get_application_model, get_access_token_model, Application
 from oauth2_provider.scopes import get_scopes_backend
 from oauth2_provider.settings import oauth2_settings
 from oauth2_provider.views import TokenView as OAuth2ProviderTokenView
 from oauth2_provider.views.mixins import OAuthLibMixin
+from oauthlib.oauth2.rfc6749.utils import scope_to_list
 from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST
@@ -138,5 +140,29 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
 
 
 class TokenView(OAuth2ProviderTokenView):
-    pass
+    def post(self, request, *args, **kwargs):
+        client_id = request.POST.get('client_id', None)
+        requested_scopes = [s for s in scope_to_list(request.POST.get('scope', '')) if s]
+        if client_id:
+            try:
+                oauth_app = Application.objects.get(client_id=client_id)
+            except Application.DoesNotExist:
+                return HttpResponse(json.dumps({"error": "invalid client_id"}), status=HTTP_400_BAD_REQUEST)
+
+            try:
+                allowed_scopes = oauth_app.applicationinfo.scope_list
+            except ApplicationInfo.DoesNotExist:
+                allowed_scopes = ['r:profile']
+
+            # handle rw:issuer:* scopes
+            if 'rw:issuer:*' in allowed_scopes:
+                issuer_scopes = filter(lambda x: x.startswith(r'rw:issuer:'), requested_scopes)
+                allowed_scopes.extend(issuer_scopes)
+
+            filtered_scopes = set(allowed_scopes) & set(requested_scopes)
+            if len(filtered_scopes) < len(requested_scopes):
+                return HttpResponse(json.dumps({"error": "invalid scope requested"}), status=HTTP_400_BAD_REQUEST)
+
+        return super(TokenView, self).post(request, *args, **kwargs)
+
 

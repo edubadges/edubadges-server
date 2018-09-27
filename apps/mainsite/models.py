@@ -143,3 +143,7 @@ class ApplicationInfo(cachemodel.CacheModel):
     def get_icon_url(self):
         if self.icon:
             return self.icon.url
+
+    @property
+    def scope_list(self):
+        return [s for s in re.split(r'[\s\n]+', self.allowed_scopes) if s]
