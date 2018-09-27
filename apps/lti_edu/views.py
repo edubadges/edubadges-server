@@ -154,7 +154,7 @@ class LtiViewSet(mixins.CreateModelMixin,
 
         # document that consent was given, update date and name if required.
         defaults = {'date_consent_given': timezone.now(),
-                    'first_name': request.data.get('first_name', ''), 'last_name': request.data.get('last_name'', ')}
+                    'first_name': request.data.get('first_name', ''), 'last_name': request.data.get('last_name', '')}
         StudentsEnrolled.objects.update_or_create(
             badge_class=badge_class, email=request.data['email'], defaults=defaults)
 

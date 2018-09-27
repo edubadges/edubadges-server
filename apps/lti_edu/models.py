@@ -41,6 +41,7 @@ class ResourceLinkBadge(models.Model):
 class StudentsEnrolled(models.Model):
     badge_class = models.ForeignKey(BadgeClass, related_name='lti_students', on_delete=models.CASCADE)
     date_created = models.DateTimeField(default=timezone.now)
+    edu_id = models.CharField(max_length=400, default='', blank=True, null=True)
 
     date_consent_given = models.DateTimeField(default=None, blank=True, null=True)
 
