@@ -1,11 +1,12 @@
 from collections import OrderedDict
 
-import datetime
+import datetime, copy
 
 import dateutil.parser, json
 from django.db.models import Q
 from django.http import Http404
 from django.utils import timezone
+from django.shortcuts import get_object_or_404
 from oauth2_provider.models import AccessToken
 from oauthlib.oauth2.rfc6749.tokens import random_token_generator
 from rest_framework import status, serializers
@@ -28,6 +29,7 @@ from issuer.serializers_v2 import IssuerSerializerV2, BadgeClassSerializerV2, Ba
     IssuerAccessTokenSerializerV2
 from apispec_drf.decorators import apispec_get_operation, apispec_put_operation, \
     apispec_delete_operation, apispec_list_operation, apispec_post_operation
+from lti_edu.models import StudentsEnrolled
 from mainsite.pagination import EncryptedCursorPagination
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from mainsite.serializers import CursorPaginatedListSerializer
@@ -416,8 +418,19 @@ class BadgeInstanceList(UncachedPaginatedViewMixin, VersionedObjectMixin, BaseEn
         badgeclass = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, badgeclass):
             return Response(status=HTTP_404_NOT_FOUND)
-
-        return super(BadgeInstanceList, self).post(request, **kwargs)
+        recipients = request.data.pop('recipients')
+        for recipient in recipients:
+            if recipient['selected']:
+                request.data['recipientprofile_name'] = recipient['recipient_name']
+                request.data['recipient_type'] = recipient['recipient_type']
+                request.data['recipient_identifier'] = recipient['recipient_identifier']
+                response = super(BadgeInstanceList, self).post(request, **kwargs) 
+                if response.status_code == 201:
+                    badge_class = get_object_or_404(BadgeClass, entity_id=request.data.get('badge_class', -1))
+                    StudentsEnrolled.objects \
+                        .filter(badge_class=badge_class, edu_id=recipient['recipient_identifier']) \
+                        .update(date_awarded=timezone.now(), assertion_slug=response.data.get('slug'))
+        return response
 
 
 class IssuerBadgeInstanceList(UncachedPaginatedViewMixin, VersionedObjectMixin, BaseEntityListView):

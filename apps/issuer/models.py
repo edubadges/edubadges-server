@@ -638,7 +638,6 @@ class BadgeInstance(BaseAuditedModel,
         (RECIPIENT_TYPE_EDUID, 'eduID'),
     )
     
-#     recipient_identifier = models.EmailField(max_length=512, blank=False, null=False, db_index=True)
     recipient_identifier = models.CharField(max_length=512, blank=False, null=False, db_index=True)
     recipient_type = models.CharField(max_length=255, choices=RECIPIENT_TYPE_CHOICES, default=RECIPIENT_TYPE_EMAIL, blank=False, null=False)
 
