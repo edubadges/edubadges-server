@@ -11,6 +11,7 @@ from django.urls import reverse
 from badgrsocialauth.utils import set_session_badgr_app, get_session_auth_token, get_verified_user, get_session_badgr_app
 from mainsite.models import BadgrApp
 from .provider import SurfConextProvider
+from institution.models import Institution
 
 
 def login(request):
@@ -118,6 +119,9 @@ def callback(request):
     if 'email' not in extra_data or 'sub' not in extra_data:
         error = 'Sorry, your account has no email attached from SurfConext, try another login method.'
         return render_authentication_error(request, SurfConextProvider.id, error)
+    if "schac_home_organization" not in extra_data:
+        error = 'Sorry, your account has no home organization attached from SurfConext, try another login method.'
+        return render_authentication_error(request, SurfConextProvider.id, error)
 
     # 3. Complete social login and return to frontend
     provider = SurfConextProvider(request)
@@ -134,6 +138,10 @@ def callback(request):
         request.user = get_verified_user(auth_token=auth_token)
     
     ret = complete_social_login(request, login)
+    institution_name = extra_data['schac_home_organization']
+    institution, created = Institution.objects.get_or_create(name=institution_name)
+    request.user.institution = institution
+    request.user.save()
     # override the response with a redirect to staff dashboard if the login came from there
     if referer == 'staff':
         return HttpResponseRedirect(reverse('admin:index'))

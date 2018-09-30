@@ -151,6 +151,7 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
 
     badgrapp = models.ForeignKey('mainsite.BadgrApp', blank=True, null=True, default=None)
     faculty = models.ManyToManyField('institution.Faculty', blank=True)
+    institution = models.ForeignKey('institution.Institution', blank=True, null=True, default=None)
 
     # canvas LTI id
     lti_id = models.CharField(unique=True, max_length=50, default=None, null=True, blank=True,
