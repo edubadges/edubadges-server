@@ -10,7 +10,7 @@ from oauth2_provider.models import get_application_model, get_grant_model, get_a
 
 from badgeuser.models import CachedEmailAddress, ProxyEmailConfirmation
 from mainsite.admin_actions import delete_selected
-from mainsite.models import BadgrApp, EmailBlacklist, ApplicationInfo
+from mainsite.models import BadgrApp, EmailBlacklist, ApplicationInfo, AccessTokenProxy, LegacyTokenProxy
 
 
 class BadgrAdminSite(AdminSite):
@@ -56,13 +56,15 @@ badgr_admin.register(EmailBlacklist, EmailBlacklistAdmin)
 
 # 3rd party apps
 
-from rest_framework.authtoken.models import Token
-class TokenAdmin(ModelAdmin):
-    list_display = ('key','user','created')
+class LegacyTokenAdmin(ModelAdmin):
+    list_display = ('obscured_token','user','created')
     list_filter = ('created',)
     raw_id_fields = ('user',)
     search_fields = ('user__email', 'user__first_name', 'user__last_name')
-badgr_admin.register(Token, TokenAdmin)
+    readonly_fields = ('obscured_token','created')
+    fields = ('obscured_token', 'user', 'created')
+
+badgr_admin.register(LegacyTokenProxy, LegacyTokenAdmin)
 
 from allauth.account.admin import EmailAddressAdmin, EmailConfirmationAdmin
 from allauth.socialaccount.admin import SocialApp, SocialAppAdmin, SocialTokenAdmin, SocialAccountAdmin
@@ -99,6 +101,14 @@ class ApplicationInfoAdmin(ApplicationAdmin):
         ApplicationInfoInline
     ]
 badgr_admin.register(Application, ApplicationInfoAdmin)
-badgr_admin.register(Grant, GrantAdmin)
-badgr_admin.register(AccessToken, AccessTokenAdmin)
-badgr_admin.register(RefreshToken, RefreshTokenAdmin)
+# badgr_admin.register(Grant, GrantAdmin)
+# badgr_admin.register(RefreshToken, RefreshTokenAdmin)
+
+
+class SecuredAccessTokenAdmin(AccessTokenAdmin):
+    list_display = ("obscured_token", "user", "application", "expires")
+    raw_id_fields = ('user','application')
+    fields = ('obscured_token','user','application','expires','scope',)
+    readonly_fields = ('obscured_token',)
+badgr_admin.register(AccessTokenProxy, SecuredAccessTokenAdmin)
+

@@ -25,6 +25,8 @@ import cachemodel
 from django.db.models import Manager
 from django.utils.deconstruct import deconstructible
 from jsonfield import JSONField
+from oauth2_provider.models import AccessToken
+from rest_framework.authtoken.models import Token
 
 from mainsite.utils import OriginSetting, fetch_remote_file_to_storage
 from .mixins import ResizeUploadedImage
@@ -147,3 +149,39 @@ class ApplicationInfo(cachemodel.CacheModel):
     @property
     def scope_list(self):
         return [s for s in re.split(r'[\s\n]+', self.allowed_scopes) if s]
+
+
+class AccessTokenProxy(AccessToken):
+    class Meta:
+        proxy = True
+        verbose_name = 'access token'
+        verbose_name_plural = 'access tokens'
+
+    def __str__(self):
+        return self.obscured_token
+
+    def __unicode__(self):
+        return self.obscured_token
+
+    @property
+    def obscured_token(self):
+        if self.token:
+            return "{}***".format(self.token[:4])
+
+
+class LegacyTokenProxy(Token):
+    class Meta:
+        proxy = True
+        verbose_name = 'Legacy token'
+        verbose_name_plural = 'Legacy tokens'
+
+    def __str__(self):
+        return self.obscured_token
+
+    def __unicode__(self):
+        return self.obscured_token
+
+    @property
+    def obscured_token(self):
+        if self.key:
+            return "{}***".format(self.key[:4])
