@@ -30,7 +30,7 @@ class PublicAPITests(SetupOAuth2ApplicationHelper, SetupIssuerHelper, BadgrTestC
 
         # create an oauth2 application
         application_user = self.setup_user(email='service@email.test', authenticate=False)
-        application = self.setup_oauth2_application(user=application_user)
+        application = self.setup_oauth2_application(user=application_user, allowed_scopes='rw:issuer')
 
         # application can retrieve a token
         response = self.client.post(reverse('oauth2_provider_token'), data=dict(
