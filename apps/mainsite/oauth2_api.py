@@ -4,6 +4,10 @@ from __future__ import unicode_literals
 import json
 import re
 
+import datetime
+
+from django.conf import settings
+from django.core.cache import cache
 from django.http import HttpResponse
 from django.utils import timezone
 from oauth2_provider.exceptions import OAuthToolkitError
@@ -15,10 +19,11 @@ from oauth2_provider.views.mixins import OAuthLibMixin
 from oauthlib.oauth2.rfc6749.utils import scope_to_list
 from rest_framework import serializers
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_429_TOO_MANY_REQUESTS, HTTP_401_UNAUTHORIZED
 from rest_framework.views import APIView
 
 from mainsite.models import ApplicationInfo
+from mainsite.utils import client_ip_from_request
 
 
 class AuthorizationSerializer(serializers.Serializer):
@@ -141,6 +146,28 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
 
 class TokenView(OAuth2ProviderTokenView):
     def post(self, request, *args, **kwargs):
+
+        def _request_identity(request):
+            return client_ip_from_request(self.request)
+
+        def _backoff_cache_key(request):
+            return "failed_token_backoff_{}".format(_request_identity(request))
+
+        _backoff_period = getattr(settings, 'TOKEN_BACKOFF_PERIOD_SECONDS', 2)
+
+        # check for existing backoff
+        backoff = cache.get(_backoff_cache_key(request))
+        if backoff is not None:
+            backoff_until = backoff.get('until', None)
+            backoff_count = backoff.get('count', 1)
+            if backoff_until > timezone.now():
+                backoff_count += 1
+                backoff_until = timezone.now() + datetime.timedelta(seconds=_backoff_period ** backoff_count)
+                cache.set(_backoff_cache_key(request), dict(until=backoff_until, count=backoff_count), timeout=None)
+                # return the same error as a failed login attempt
+                return HttpResponse(json.dumps({"error_description": "Invalid credentials given.", "error": "invalid_grant"}), status=HTTP_401_UNAUTHORIZED)
+
+        # pre-validate scopes requested
         client_id = request.POST.get('client_id', None)
         requested_scopes = [s for s in scope_to_list(request.POST.get('scope', '')) if s]
         if client_id:
@@ -163,6 +190,22 @@ class TokenView(OAuth2ProviderTokenView):
             if len(filtered_scopes) < len(requested_scopes):
                 return HttpResponse(json.dumps({"error": "invalid scope requested"}), status=HTTP_400_BAD_REQUEST)
 
-        return super(TokenView, self).post(request, *args, **kwargs)
+        # let parent method do actual authentication
+        response = super(TokenView, self).post(request, *args, **kwargs)
+
+        # update backoff for failed logins
+        if response.status_code == 401:
+            # failed login attempt
+            backoff = cache.get(_backoff_cache_key(request))
+            if backoff is None:
+                backoff = {'count': 0}
+            backoff['count'] += 1
+            backoff['until'] = timezone.now() + datetime.timedelta(seconds=_backoff_period ** backoff['count'])
+            cache.set(_backoff_cache_key(request), backoff, timeout=None)
+        elif response.status_code == 200:
+            # reset backoff on successful login
+            cache.set(_backoff_cache_key(request), None)
+
+        return response
 
 
