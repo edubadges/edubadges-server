@@ -44,7 +44,7 @@ class BadgeUserDetail(BaseEntityDetailView):
     permission_classes = (permissions.AllowAny, BadgrOAuthTokenHasScope)
     valid_scopes = {
         "post": ["*"],
-        "get": ["r:profile"],
+        "get": ["r:profile", "rw:profile"],
         "put": ["rw:profile"],
     }
 
