@@ -1,16 +1,16 @@
 # Created by wiggins@concentricsky.com on 10/8/15.
-import basic_models
 from allauth.socialaccount.models import SocialToken, SocialAccount
-
 from django.contrib.admin import AdminSite, ModelAdmin, StackedInline
 from django.utils.module_loading import autodiscover_modules
 from django.utils.translation import ugettext_lazy
 from oauth2_provider.models import get_application_model, get_grant_model, get_access_token_model, \
     get_refresh_token_model
 
+import badgrlog
 from badgeuser.models import CachedEmailAddress, ProxyEmailConfirmation
-from mainsite.admin_actions import delete_selected
 from mainsite.models import BadgrApp, EmailBlacklist, ApplicationInfo
+
+badgrlogger = badgrlog.BadgrLogger()
 
 
 class BadgrAdminSite(AdminSite):
@@ -20,6 +20,17 @@ class BadgrAdminSite(AdminSite):
 
     def autodiscover(self):
         autodiscover_modules('admin', register_to=self)
+
+    def login(self, request, extra_context=None):
+        response = super(BadgrAdminSite, self).login(request, extra_context)
+        if request.method == 'POST':
+            # form submission
+            if response.status_code != 302:
+                # failed /staff login
+                username = request.POST.get('username', None)
+                badgrlogger.event(badgrlog.FailedLoginAttempt(request, username, endpoint='/staff/login'))
+
+        return response
 
 
 badgr_admin = BadgrAdminSite(name='badgradmin')

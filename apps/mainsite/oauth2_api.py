@@ -21,10 +21,12 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
 from rest_framework.views import APIView
 
+import badgrlog
 from mainsite.models import ApplicationInfo
 from mainsite.oauth_validator import BadgrRequestValidator, BadgrOauthServer
 from mainsite.utils import client_ip_from_request
 
+badgrlogger = badgrlog.BadgrLogger()
 
 class AuthorizationSerializer(serializers.Serializer):
     client_id = serializers.CharField(required=True)
@@ -198,19 +200,22 @@ class TokenView(OAuth2ProviderTokenView):
         # let parent method do actual authentication
         response = super(TokenView, self).post(request, *args, **kwargs)
 
-        # update backoff for failed logins
-        if _backoff_period is not None:
-            if response.status_code == 401:
-                # failed login attempt
+        if response.status_code == 401:
+            # failed login attempt
+            username = request.POST.get('username', None)
+            badgrlogger.event(badgrlog.FailedLoginAttempt(request, username, endpoint='/o/token'))
+
+            if _backoff_period is not None:
+                # update backoff for failed logins
                 backoff = cache.get(_backoff_cache_key(request))
                 if backoff is None:
                     backoff = {'count': 0}
                 backoff['count'] += 1
                 backoff['until'] = timezone.now() + datetime.timedelta(seconds=_backoff_period ** backoff['count'])
                 cache.set(_backoff_cache_key(request), backoff, timeout=None)
-            elif response.status_code == 200:
-                # reset backoff on successful login
-                cache.set(_backoff_cache_key(request), None)
+        elif response.status_code == 200:
+            # successful login
+            cache.set(_backoff_cache_key(request), None)  # clear any existing backoff
 
         return response
 
