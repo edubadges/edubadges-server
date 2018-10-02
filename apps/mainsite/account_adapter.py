@@ -109,8 +109,8 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
             badgr_app = get_session_badgr_app(request)
 
             if badgr_app is not None:
-                return set_url_query_params(badgr_app.ui_login_redirect,
-                                            authToken=request.user.auth_token)
+                params = dict(authToken=request.user.auth_token)
+                return set_url_query_params(badgr_app.ui_login_redirect, **params)
         else:
             return '/'
 

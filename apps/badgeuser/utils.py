@@ -47,7 +47,9 @@ def decrypt_auth_code(cipher, secret_key=None):
             raise ValueError("must specify a secret key")
 
     crypto = Fernet(secret_key)
-    message = _unmarshall(crypto.decrypt(cipher))
+
+    decrypted = crypto.decrypt(cipher.encode('utf-8'))
+    message = _unmarshall(decrypted)
     if message and 'expires' in message:
         expires = dateutil.parser.parse(message.get('expires'))
         if expires > timezone.now():

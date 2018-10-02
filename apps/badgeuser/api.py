@@ -1,10 +1,11 @@
-import re
-
 import datetime
+import re
 
 from allauth.account.adapter import get_adapter
 from allauth.account.models import EmailConfirmationHMAC
 from allauth.account.utils import user_pk_to_url_str, url_str_to_user_pk
+from apispec_drf.decorators import apispec_get_operation, apispec_put_operation, apispec_operation, \
+    apispec_delete_operation, apispec_list_operation
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
@@ -14,24 +15,25 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.utils import timezone
+from oauth2_provider.models import Application, AccessToken
 from rest_framework import permissions, serializers, status
 from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 from rest_framework.status import HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, \
     HTTP_400_BAD_REQUEST
+from rest_framework.views import APIView
 
 from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
 from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserTokenSerializerV1
 from badgeuser.serializers_v2 import BadgeUserTokenSerializerV2, BadgeUserSerializerV2, AccessTokenSerializerV2
 from badgeuser.tasks import process_email_verification
+from badgeuser.utils import decrypt_auth_code
 from badgrsocialauth.utils import set_url_query_params
-from entity.api import BaseEntityDetailView, BaseEntityListView
+from entity.api import BaseEntityDetailView, BaseEntityListView, BaseEntityView
 from entity.serializers import BaseSerializerV2
 from issuer.permissions import BadgrOAuthTokenHasScope
-from apispec_drf.decorators import apispec_get_operation, apispec_put_operation, apispec_operation, \
-    apispec_delete_operation, apispec_list_operation
 from mainsite.models import BadgrApp
 from mainsite.utils import OriginSetting
 
@@ -445,3 +447,47 @@ class AccessTokenDetail(BaseEntityDetailView):
     )
     def delete(self, request, **kwargs):
         return super(AccessTokenDetail, self).delete(request, **kwargs)
+
+
+class AuthCodeExchange(BaseEntityView):
+    v2_serializer_class = AccessTokenSerializerV2
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, **kwargs):
+        def _error_response():
+            return Response({}, status=HTTP_400_BAD_REQUEST)
+
+        code = request.data.get('code')
+        if not code:
+            return _error_response()
+        payload = decrypt_auth_code(code)
+
+        # retrieve oauth2 application from payload
+        app_client_id = payload.get('app')
+        if not app_client_id:
+            return _error_response()
+        try:
+            application = Application.objects.get(client_id=app_client_id)
+        except Application.DoesNotExist:
+            return _error_response()
+
+        # retrieve user from payload
+        user_entityid = payload.get('user')
+        if not user_entityid:
+            return _error_response()
+        try:
+            user = BadgeUser.cached.get(entity_id=user_entityid)
+        except BadgeUser.DoesNotExist:
+            return _error_response()
+
+        accesstoken = AccessToken.objects.filter(
+            user=user,
+            application=application
+        ).first()
+
+        # serialize token
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(accesstoken, context=self.get_context_data())
+
+        return Response(serializer.data, status=HTTP_200_OK)
+

@@ -59,12 +59,17 @@ class AuthTokenTests(BadgrTestCase):
         self.assertEqual(Token.objects.get(user=user).key, user.cached_token())
 
     def test_can_use_authcode_exchange(self):
-        payload = dict(
-            foo=42
-        )
+        payload = "fakeentityid"
         code = generate_auth_code(payload)
         decrypted_payload = decrypt_auth_code(code)
         self.assertEqual(payload, decrypted_payload)
+
+        response = self.client.post(reverse('v2_api_auth_code_exchange'), dict(code=code))
+        self.assertEqual(response.status_code, 200)
+
+        returned_payload = response.data
+        self.assertEqual(payload, returned_payload)
+
 
 
 class UserCreateTests(BadgrTestCase):
