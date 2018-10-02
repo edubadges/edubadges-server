@@ -1,10 +1,9 @@
 # encoding: utf-8
 from __future__ import unicode_literals
 
+import datetime
 import json
 import re
-
-import datetime
 
 from django.conf import settings
 from django.core.cache import cache
@@ -19,10 +18,11 @@ from oauth2_provider.views.mixins import OAuthLibMixin
 from oauthlib.oauth2.rfc6749.utils import scope_to_list
 from rest_framework import serializers
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_429_TOO_MANY_REQUESTS, HTTP_401_UNAUTHORIZED
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
 from rest_framework.views import APIView
 
 from mainsite.models import ApplicationInfo
+from mainsite.oauth_validator import BadgrRequestValidator, BadgrOauthServer
 from mainsite.utils import client_ip_from_request
 
 
@@ -145,6 +145,10 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
 
 
 class TokenView(OAuth2ProviderTokenView):
+
+    server_class = BadgrOauthServer
+    validator_class = BadgrRequestValidator
+
     def post(self, request, *args, **kwargs):
 
         def _request_identity(request):
