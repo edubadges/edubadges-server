@@ -155,17 +155,18 @@ class TokenView(OAuth2ProviderTokenView):
 
         _backoff_period = getattr(settings, 'TOKEN_BACKOFF_PERIOD_SECONDS', 2)
 
-        # check for existing backoff
-        backoff = cache.get(_backoff_cache_key(request))
-        if backoff is not None:
-            backoff_until = backoff.get('until', None)
-            backoff_count = backoff.get('count', 1)
-            if backoff_until > timezone.now():
-                backoff_count += 1
-                backoff_until = timezone.now() + datetime.timedelta(seconds=_backoff_period ** backoff_count)
-                cache.set(_backoff_cache_key(request), dict(until=backoff_until, count=backoff_count), timeout=None)
-                # return the same error as a failed login attempt
-                return HttpResponse(json.dumps({"error_description": "Invalid credentials given.", "error": "invalid_grant"}), status=HTTP_401_UNAUTHORIZED)
+        if _backoff_period is not None:
+            # check for existing backoff
+            backoff = cache.get(_backoff_cache_key(request))
+            if backoff is not None:
+                backoff_until = backoff.get('until', None)
+                backoff_count = backoff.get('count', 1)
+                if backoff_until > timezone.now():
+                    backoff_count += 1
+                    backoff_until = timezone.now() + datetime.timedelta(seconds=_backoff_period ** backoff_count)
+                    cache.set(_backoff_cache_key(request), dict(until=backoff_until, count=backoff_count), timeout=None)
+                    # return the same error as a failed login attempt
+                    return HttpResponse(json.dumps({"error_description": "Invalid credentials given.", "error": "invalid_grant"}), status=HTTP_401_UNAUTHORIZED)
 
         # pre-validate scopes requested
         client_id = request.POST.get('client_id', None)
@@ -194,17 +195,18 @@ class TokenView(OAuth2ProviderTokenView):
         response = super(TokenView, self).post(request, *args, **kwargs)
 
         # update backoff for failed logins
-        if response.status_code == 401:
-            # failed login attempt
-            backoff = cache.get(_backoff_cache_key(request))
-            if backoff is None:
-                backoff = {'count': 0}
-            backoff['count'] += 1
-            backoff['until'] = timezone.now() + datetime.timedelta(seconds=_backoff_period ** backoff['count'])
-            cache.set(_backoff_cache_key(request), backoff, timeout=None)
-        elif response.status_code == 200:
-            # reset backoff on successful login
-            cache.set(_backoff_cache_key(request), None)
+        if _backoff_period is not None:
+            if response.status_code == 401:
+                # failed login attempt
+                backoff = cache.get(_backoff_cache_key(request))
+                if backoff is None:
+                    backoff = {'count': 0}
+                backoff['count'] += 1
+                backoff['until'] = timezone.now() + datetime.timedelta(seconds=_backoff_period ** backoff['count'])
+                cache.set(_backoff_cache_key(request), backoff, timeout=None)
+            elif response.status_code == 200:
+                # reset backoff on successful login
+                cache.set(_backoff_cache_key(request), None)
 
         return response
 
