@@ -55,22 +55,22 @@ class TermsAgreementInline(TabularInline):
 
 class BadgeUserAdmin(UserAdmin):
     actions = None
-    readonly_fields = ('entity_id', 'date_joined', 'last_login', 'username', 'entity_id', 'agreed_terms_version')
-    list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'entity_id', 'date_joined') #, 'get_faculties')
-    list_filter = ('is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')
+    readonly_fields = ('email', 'first_name', 'last_name', 'entity_id', 'date_joined', 'last_login', 'username', 'entity_id', 'agreed_terms_version')
+    list_display = ('is_active', 'is_staff', 'entity_id', 'date_joined') #, 'get_faculties')
+    list_filter = ('is_active', 'is_staff', 'date_joined', 'last_login')
     search_fields = ('email', 'first_name', 'last_name', 'username', 'entity_id')
     fieldsets = (
         ('Metadata', {'fields': ('entity_id', 'username', 'date_joined',), 'classes': ('collapse',)}),
-        (None, {'fields': ('email', 'first_name', 'last_name', 'badgrapp', 'agreed_terms_version', 'marketing_opt_in')}),
-        ('Access', {'fields': ('is_active', 'is_staff', 'is_superuser', 'password')}),
+        (None, {'fields': ('email', 'first_name', 'last_name')}),
+        ('Access', {'fields': ('is_active', 'is_staff')}),
         ('Permissions', {'fields': ('groups',)}),
         ('Faculties', {'fields': ('faculty',) }),
     )
     filter_horizontal = ('faculty','groups', 'user_permissions')
-    inlines = [
-        ExternalToolInline,
-        TermsAgreementInline
-    ]
+#     inlines = [
+#         ExternalToolInline,
+#         TermsAgreementInline
+#     ]
 
 
     def get_queryset(self, request):
@@ -144,7 +144,9 @@ badgr_admin.register(BadgeUser, BadgeUserAdmin)
 
 class BadgeUserProxyAdmin(BadgeUserAdmin):
     actions = ['delete_selected']
+    readonly_fields = ('entity_id', 'date_joined', 'last_login', 'username', 'entity_id', 'agreed_terms_version')
     list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'entity_id', 'date_joined', 'get_faculties')
+    list_filter = ('is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')
     fieldsets = (
         ('Metadata', {'fields': ('entity_id', 'username', 'date_joined',), 'classes': ('collapse',)}),
         (None, {'fields': ('email', 'first_name', 'last_name', 'badgrapp', 'agreed_terms_version', 'marketing_opt_in')}),
