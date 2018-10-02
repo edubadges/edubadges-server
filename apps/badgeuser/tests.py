@@ -8,6 +8,8 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.test import override_settings
+
+from badgeuser.utils import generate_auth_code, decrypt_auth_code
 from mainsite import TOP_DIR
 from rest_framework.authtoken.models import Token
 
@@ -55,6 +57,14 @@ class AuthTokenTests(BadgrTestCase):
 
         self.assertEqual(user.cached_token(), second_response.data.get('token'))
         self.assertEqual(Token.objects.get(user=user).key, user.cached_token())
+
+    def test_can_use_authcode_exchange(self):
+        payload = dict(
+            foo=42
+        )
+        code = generate_auth_code(payload)
+        decrypted_payload = decrypt_auth_code(code)
+        self.assertEqual(payload, decrypted_payload)
 
 
 class UserCreateTests(BadgrTestCase):

@@ -1,10 +1,13 @@
+import datetime
+import json
+
+import dateutil
+from allauth.account.adapter import get_adapter
+from cryptography.fernet import Fernet
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import send_mail
 from django.template import Context
-from django.template.loader import get_template
-
-from allauth.account.adapter import get_adapter
+from django.utils import timezone
 
 from mainsite.models import BadgrApp
 
@@ -25,3 +28,45 @@ def notify_on_password_change(user, request=None):
 
     email_context = Context(base_context)
     get_adapter().send_mail('account/email/password_reset_confirmation', user.primary_email, base_context)
+
+
+def generate_auth_code(payload, expires_seconds=600, secret_key=None):
+    if secret_key is None:
+        secret_key = getattr(settings, 'AUTHCODE_SECRET_KEY', None)
+        if secret_key is None:
+            raise ValueError("must specify a secret key")
+    crypto = Fernet(secret_key)
+    digest = crypto.encrypt(_marshall(payload, expires_seconds))
+    return digest
+
+
+def decrypt_auth_code(cipher, secret_key=None):
+    if secret_key is None:
+        secret_key = getattr(settings, 'AUTHCODE_SECRET_KEY', None)
+        if secret_key is None:
+            raise ValueError("must specify a secret key")
+
+    crypto = Fernet(secret_key)
+    message = _unmarshall(crypto.decrypt(cipher))
+    if message and 'expires' in message:
+        expires = dateutil.parser.parse(message.get('expires'))
+        if expires > timezone.now():
+            payload = message.get('payload')
+            return payload
+
+
+# helper functions for generate/decrypt_auth_code
+
+def _marshall(payload, expires_seconds):
+    expires_at = timezone.now() + datetime.timedelta(seconds=expires_seconds)
+    return json.dumps(dict(
+        expires=expires_at.isoformat(),
+        payload=payload
+    ))
+
+
+def _unmarshall(digest):
+    try:
+        return json.loads(digest)
+    except ValueError:
+        pass
