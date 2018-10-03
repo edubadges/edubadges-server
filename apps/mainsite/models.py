@@ -108,6 +108,8 @@ class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive, cachemodel.CacheMod
     public_pages_redirect = models.URLField(null=True)
     oauth_authorization_redirect = models.URLField(null=True)
     use_auth_code_exchange = models.BooleanField(default=False)
+    oauth_application = models.ForeignKey("oauth2_provider.Application", null=True, blank=True)
+
     objects = BadgrAppManager()
 
     def __unicode__(self):

@@ -19,7 +19,7 @@ from django.core.mail import send_mail
 from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from oauth2_provider.models import AccessToken
+from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
 from oauthlib.oauth2 import BearerToken
 from rest_framework.authtoken.models import Token
@@ -382,9 +382,18 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
 
 class BadgrAccessTokenManager(models.Manager):
 
-    def generate_new_token_for_user(self, user, application, scope, expires=None, refresh_token=False):
+    def generate_new_token_for_user(self, user, scope, application=None, expires=None, refresh_token=False):
+        if application is None:
+            application, created = Application.objects.get_or_create(
+                client_id='public',
+                client_type=Application.CLIENT_PUBLIC,
+                authorization_grant_type=Application.GRANT_PASSWORD,
+            )
+            if created:
+                ApplicationInfo.objects.create(application=application)
+
         with transaction.atomic():
-            # reuse existing token record
+            # reuse existing token records
             existing_tokens = self.filter(user=user, application=application).order_by('-created')
             if len(existing_tokens) < 1:
                 # create new token

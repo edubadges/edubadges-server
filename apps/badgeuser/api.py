@@ -22,7 +22,7 @@ from rest_framework.serializers import BaseSerializer
 from rest_framework.status import HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, \
     HTTP_400_BAD_REQUEST
 
-from badgeuser.authcode import accesstoken_for_authcode
+from badgeuser.authcode import accesstoken_for_authcode, authcode_for_accesstoken
 from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
 from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserTokenSerializerV1
@@ -399,7 +399,17 @@ class BadgeUserEmailConfirm(BaseUserRecoveryView):
         # get badgr_app url redirect
         redirect_url = get_adapter().get_email_confirmation_redirect_url(request, badgr_app=badgrapp)
 
-        redirect_url = set_url_query_params(redirect_url, authToken=user.auth_token)
+        # generate an AccessToken for the user
+        accesstoken = BadgrAccessToken.objects.generate_new_token_for_user(
+            user,
+            application=badgrapp.oauth_application if badgrapp.oauth_application_id else None,
+            scope='rw:backpack rw:profile rw:issuer')
+
+        if badgrapp.use_auth_code_exchange:
+            authcode = authcode_for_accesstoken(accesstoken)
+            redirect_url = set_url_query_params(redirect_url, authCode=authcode)
+        else:
+            redirect_url = set_url_query_params(redirect_url, authToken=accesstoken.token)
 
         return Response(status=HTTP_302_FOUND, headers={'Location': redirect_url})
 

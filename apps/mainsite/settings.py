@@ -343,7 +343,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'mainsite.authentication.BadgrOAuth2Authentication',
-        # 'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
         # 'entity.authentication.ExplicitCSRFSessionAuthentication',
         # 'rest_framework.authentication.BasicAuthentication',
     ),
