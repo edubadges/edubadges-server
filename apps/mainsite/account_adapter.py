@@ -12,7 +12,8 @@ from django.core.urlresolvers import resolve, Resolver404, reverse
 from allauth.account.adapter import DefaultAccountAdapter, get_adapter
 from allauth.account.models import EmailConfirmation, EmailConfirmationHMAC
 
-from badgeuser.models import CachedEmailAddress
+from badgeuser.authcode import authcode_for_accesstoken
+from badgeuser.models import CachedEmailAddress, BadgrAccessToken
 from badgrsocialauth.utils import set_url_query_params, get_session_badgr_app, set_session_badgr_app
 from mainsite.models import BadgrApp, EmailBlacklist
 from mainsite.utils import OriginSetting
@@ -109,7 +110,17 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
             badgr_app = get_session_badgr_app(request)
 
             if badgr_app is not None:
-                params = dict(authToken=request.user.auth_token)
+                accesstoken = BadgrAccessToken.objects.generate_new_token_for_user(
+                    request.user,
+                    application=badgr_app.oauth_application if badgr_app.oauth_application_id else None,
+                    scope='rw:backpack rw:profile rw:issuer')
+
+                if badgr_app.use_auth_code_exchange:
+                    authcode = authcode_for_accesstoken(accesstoken)
+                    params = dict(authCode=authcode)
+                else:
+                    params = dict(authToken=accesstoken.token)
+
                 return set_url_query_params(badgr_app.ui_login_redirect, **params)
         else:
             return '/'
