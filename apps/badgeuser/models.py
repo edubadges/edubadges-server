@@ -403,7 +403,8 @@ class BadgrAccessTokenManager(models.Manager):
 
             if len(existing_tokens) > 1:
                 # remove any duplicate records if they exist
-                existing_tokens[1:].delete()
+                for t in existing_tokens[1:]:
+                    t.delete()
 
             if expires is None:
                 expires = timezone.now() + datetime.timedelta(seconds=86400)
