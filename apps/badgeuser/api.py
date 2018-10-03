@@ -448,32 +448,3 @@ class AccessTokenDetail(BaseEntityDetailView):
         return super(AccessTokenDetail, self).delete(request, **kwargs)
 
 
-class AuthCodeExchange(BaseEntityView):
-    v2_serializer_class = AccessTokenSerializerV2
-    permission_classes = (permissions.AllowAny,)
-
-    def get_context_data(self, **kwargs):
-        context = super(AuthCodeExchange, self).get_context_data(**kwargs)
-        context.update({
-            'include_token': True
-        })
-        return context
-
-    def post(self, request, **kwargs):
-        def _error_response():
-            return Response({"error": "Invalid authcode"}, status=HTTP_400_BAD_REQUEST)
-
-        code = request.data.get('code')
-        if not code:
-            return _error_response()
-
-        accesstoken = accesstoken_for_authcode(code)
-        if accesstoken is None:
-            return _error_response()
-
-        # serialize token
-        serializer_class = self.get_serializer_class()
-        serializer = serializer_class(accesstoken, context=self.get_context_data())
-
-        return Response(serializer.data, status=HTTP_200_OK)
-
