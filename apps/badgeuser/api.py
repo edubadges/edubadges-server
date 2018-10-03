@@ -15,21 +15,19 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.utils import timezone
-from oauth2_provider.models import Application, AccessToken
 from rest_framework import permissions, serializers, status
 from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 from rest_framework.status import HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, \
     HTTP_400_BAD_REQUEST
-from rest_framework.views import APIView
 
+from badgeuser.authcode import accesstoken_for_authcode
 from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
 from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserTokenSerializerV1
 from badgeuser.serializers_v2 import BadgeUserTokenSerializerV2, BadgeUserSerializerV2, AccessTokenSerializerV2
 from badgeuser.tasks import process_email_verification
-from badgeuser.utils import decrypt_auth_code
 from badgrsocialauth.utils import set_url_query_params
 from entity.api import BaseEntityDetailView, BaseEntityListView, BaseEntityView
 from entity.serializers import BaseSerializerV2
@@ -38,6 +36,7 @@ from mainsite.models import BadgrApp
 from mainsite.utils import OriginSetting
 
 RATE_LIMIT_DELTA = datetime.timedelta(minutes=5)
+
 
 class BadgeUserDetail(BaseEntityDetailView):
     model = BadgeUser
@@ -453,37 +452,24 @@ class AuthCodeExchange(BaseEntityView):
     v2_serializer_class = AccessTokenSerializerV2
     permission_classes = (permissions.AllowAny,)
 
+    def get_context_data(self, **kwargs):
+        context = super(AuthCodeExchange, self).get_context_data(**kwargs)
+        context.update({
+            'include_token': True
+        })
+        return context
+
     def post(self, request, **kwargs):
         def _error_response():
-            return Response({}, status=HTTP_400_BAD_REQUEST)
+            return Response({"error": "Invalid authcode"}, status=HTTP_400_BAD_REQUEST)
 
         code = request.data.get('code')
         if not code:
             return _error_response()
-        payload = decrypt_auth_code(code)
 
-        # retrieve oauth2 application from payload
-        app_client_id = payload.get('app')
-        if not app_client_id:
+        accesstoken = accesstoken_for_authcode(code)
+        if accesstoken is None:
             return _error_response()
-        try:
-            application = Application.objects.get(client_id=app_client_id)
-        except Application.DoesNotExist:
-            return _error_response()
-
-        # retrieve user from payload
-        user_entityid = payload.get('user')
-        if not user_entityid:
-            return _error_response()
-        try:
-            user = BadgeUser.cached.get(entity_id=user_entityid)
-        except BadgeUser.DoesNotExist:
-            return _error_response()
-
-        accesstoken = AccessToken.objects.filter(
-            user=user,
-            application=application
-        ).first()
 
         # serialize token
         serializer_class = self.get_serializer_class()

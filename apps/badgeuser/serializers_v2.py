@@ -127,7 +127,6 @@ class BadgeUserTokenSerializerV2(BaseSerializerV2):
         return instance
 
 
-
 class ApplicationInfoSerializer(serializers.Serializer):
     name = serializers.CharField(read_only=True, source='get_visible_name')
     image = serializers.URLField(read_only=True, source='get_icon_url')
@@ -143,4 +142,12 @@ class AccessTokenSerializerV2(DetailSerializerV2):
 
     class Meta:
         apispec_definition = ('AccessToken', {})
+
+    def pre_envelope(self, representation, instance):
+        if self.context.get('include_token', False):
+            representation['access_token'] = instance.token
+        return representation
+
+
+
 

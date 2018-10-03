@@ -71,8 +71,12 @@ class BaseSerializerV2(serializers.Serializer):
 
         return envelope
 
+    def pre_envelope(self, representation, instance):
+        return representation
+
     def to_representation(self, instance):
         representation = super(BaseSerializerV2, self).to_representation(instance)
+        representation = self.pre_envelope(representation, instance)
         if self.parent is not None:
             return representation
         else:
