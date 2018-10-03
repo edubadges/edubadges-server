@@ -10,7 +10,7 @@ from django.views.generic import RedirectView
 from rest_framework.exceptions import AuthenticationFailed
 
 from badgrsocialauth.utils import set_url_query_params, set_session_badgr_app, get_session_badgr_app, \
-    get_session_verification_email, set_session_auth_token, get_verified_user
+    get_session_verification_email, set_session_authcode
 from mainsite.models import BadgrApp
 
 
@@ -40,10 +40,9 @@ class BadgrSocialLogin(RedirectView):
         except NoReverseMatch:
             raise ValidationError('No {} provider found'.format(provider_name))
 
-        auth_token = self.request.GET.get('authToken', None)
-        if auth_token is not None:
-            get_verified_user(auth_token)  # Raises AuthenticationFailed if auth token is invalid
-            set_session_auth_token(self.request, auth_token)
+        authcode = self.request.GET.get('authCode', None)
+        if authcode is not None:
+            set_session_authcode(self.request, authcode)
             return set_url_query_params(redirect_url, process=AuthProcess.CONNECT)
         else:
             return redirect_url

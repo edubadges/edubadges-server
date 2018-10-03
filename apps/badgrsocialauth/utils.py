@@ -38,12 +38,12 @@ def set_session_badgr_app(request, badgr_app):
     request.session['badgr_app_pk'] = badgr_app.pk
 
 
-def get_session_auth_token(request):
-    return request.session.get('badgr_auth_token', None)
+def get_session_authcode(request):
+    return request.session.get('badgr_authcode', None)
 
 
-def set_session_auth_token(request, auth_token):
-    request.session['badgr_auth_token'] = auth_token
+def set_session_authcode(request, authcode):
+    request.session['badgr_authcode'] = authcode
 
 
 def get_verified_user(auth_token):
