@@ -382,7 +382,7 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
 
 class BadgrAccessTokenManager(models.Manager):
 
-    def generate_new_token_for_user(self, user, scope, application=None, expires=None, refresh_token=False):
+    def generate_new_token_for_user(self, user, scope='r:profile', application=None, expires=None, refresh_token=False):
         if application is None:
             application, created = Application.objects.get_or_create(
                 client_id='public',

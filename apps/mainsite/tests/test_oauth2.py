@@ -95,7 +95,7 @@ class OAuth2TokenTests(BadgrTestCase):
             authorization_grant_type=Application.GRANT_PASSWORD
         )
         ApplicationInfo.objects.create(application=application)
-        accesstoken = BadgrAccessToken.objects.generate_new_token_for_user(user, application, scope='r:profile')
+        accesstoken = BadgrAccessToken.objects.generate_new_token_for_user(user, application=application, scope='r:profile')
 
         # can exchange valid authcode for accesstoken
         authcode = authcode_for_accesstoken(accesstoken)
