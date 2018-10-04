@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.13.0] - 2018-10-04
+ - both /v1/ and /v2/ Assertion PUT endpoints rebake assertion image
+ - Automatically notifiy recipient the first time they are awarded an assertion
+ - Require a verified email when creating an issuer.
+
+
 ## [2.12.9] - 2018-09-14
  - use png preview images when sharing to social 
  - implement batching for the Rebake all badge images task
