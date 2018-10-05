@@ -56,7 +56,7 @@ class TermsAgreementInline(TabularInline):
 class BadgeUserAdmin(UserAdmin):
     actions = None
     readonly_fields = ('email', 'first_name', 'last_name', 'entity_id', 'date_joined', 'last_login', 'username', 'entity_id', 'agreed_terms_version')
-    list_display = ('is_active', 'is_staff', 'entity_id', 'date_joined') #, 'get_faculties')
+    list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'date_joined') #, 'get_faculties')
     list_filter = ('is_active', 'is_staff', 'date_joined', 'last_login')
     search_fields = ('email', 'first_name', 'last_name', 'username', 'entity_id')
     fieldsets = (
