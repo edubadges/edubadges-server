@@ -19,7 +19,7 @@ class BadgrSocialAccountAdapter(DefaultSocialAccountAdapter):
         badgr_app = get_session_badgr_app(self.request)
         redirect_url = "{url}?authError={message}".format(
             url=badgr_app.ui_login_redirect,
-            message=urllib.quote("Authentication error"))
+            message=urllib.quote("Authentication error. "+error))
         raise ImmediateHttpResponse(HttpResponseRedirect(redirect_to=redirect_url))
 
     def _update_session(self, request, sociallogin):

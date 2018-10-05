@@ -73,8 +73,16 @@ def callback(request):
     userinfo_json = response.json()
     
     # retrieved data in fields and ensure that email & sub are in extra_data
-    if 'email' not in userinfo_json or 'sub' not in userinfo_json:
-        error = 'Sorry, your account has no email attached from SurfConext, try another login method.'
+    if 'sub' not in userinfo_json:
+        error = 'Sorry, your EduID account has no identifier.'
+        logger.debug(error)
+        return render_authentication_error(request, EduIDProvider.id, error)
+    if 'email' not in userinfo_json:
+        error = 'Sorry, your EduID account has no email attached from SurfConext. Login to EduID and link you institution account, then try again.'
+        logger.debug(error)
+        return render_authentication_error(request, EduIDProvider.id, error)
+    if 'name' not in userinfo_json:
+        error = 'Sorry, your EduID account has no name attached from SurfConext. Login to EduID and link you institution account, then try again.'
         logger.debug(error)
         return render_authentication_error(request, EduIDProvider.id, error)
     
