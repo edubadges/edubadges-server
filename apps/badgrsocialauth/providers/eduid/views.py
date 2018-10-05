@@ -6,7 +6,8 @@ from django.urls import reverse
 from django.shortcuts import redirect
 from allauth.socialaccount.helpers import render_authentication_error, complete_social_login
 from allauth.socialaccount.models import SocialApp
-from badgrsocialauth.utils import get_session_auth_token
+from badgrsocialauth.utils import set_session_badgr_app
+from mainsite.models import BadgrApp
 from .provider import EduIDProvider
 logger = logging.getLogger('Badgr.Debug')
 
@@ -25,7 +26,8 @@ def login(request):
     current_app = SocialApp.objects.get_current(provider='edu_id')
     # the only thing set in state is the referer (frontend, or staff)
     referer = request.META['HTTP_REFERER'].split('/')[3]
-    state = referer
+    badgr_app_pk = request.session.get('badgr_app_pk', None)
+    state = json.dumps([referer,badgr_app_pk])
     params = {
     "state": state,
     'redirect_uri': '%s/account/eduid/login/callback/' % settings.HTTP_ORIGIN,
@@ -42,7 +44,8 @@ def login(request):
 def callback(request):
     current_app = SocialApp.objects.get_current(provider='edu_id')
     #extract state of redirect
-    referer = request.GET.get('state')
+    state = json.loads(request.GET.get('state'))
+    referer, badgr_app_pk = state
     code = request.GET.get('code', None) # access codes to access user info endpoint
     if code is None: #check if code is given
         error = 'Server error: No userToken found in callback'
@@ -78,7 +81,7 @@ def callback(request):
         logger.debug(error)
         return render_authentication_error(request, EduIDProvider.id, error)
     if 'email' not in userinfo_json:
-        error = 'Sorry, your EduID account has no email attached from SurfConext. Login to EduID and link you institution account, then try again.'
+        error = 'Sorry, your EduID account does not have your institution mail. Login to EduID and link you institution account, then try again.'
         logger.debug(error)
         return render_authentication_error(request, EduIDProvider.id, error)
     if 'name' not in userinfo_json:
@@ -87,6 +90,7 @@ def callback(request):
         return render_authentication_error(request, EduIDProvider.id, error)
     
     # 3. Complete social login 
+    set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app_pk))
     provider = EduIDProvider(request)
     login = provider.sociallogin_from_response(request, userinfo_json)
     ret = complete_social_login(request, login)
