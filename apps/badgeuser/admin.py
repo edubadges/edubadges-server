@@ -127,7 +127,8 @@ class BadgeUserAdmin(UserAdmin):
         '''
         if not self.get_queryset(request).filter(id=object_id).exists():
             return HttpResponseRedirect(reverse('admin:badgeuser_badgeuser_changelist'))
-        return super(BadgeUserAdmin, self).delete_view(request, object_id, form_url, extra_context)
+#         (self, request, object_id, extra_context=None):
+        return super(BadgeUserAdmin, self).delete_view(request, object_id, extra_context)
 
     def history_view(self, request, object_id, form_url='', extra_context=None):
         '''
@@ -135,7 +136,7 @@ class BadgeUserAdmin(UserAdmin):
         '''
         if not self.get_queryset(request).filter(id=object_id).exists():
             return HttpResponseRedirect(reverse('admin:badgeuser_badgeuser_changelist'))
-        return super(BadgeUserAdmin, self).history_view(request, object_id, form_url, extra_context)
+        return super(BadgeUserAdmin, self).history_view(request, object_id, extra_context)
 
 
 
