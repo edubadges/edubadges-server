@@ -90,17 +90,17 @@ background-color: transparent;
 </style>
 	<center>
 	<div class="formfield">
-		<div>
-			<img src="{% static "images/edu_id_logo.png" %}" 
-			alt="Login with SurfConext" 
-			href="/account/sociallogin?provider=surf_conext" 
-			class="button"
-			style=>
-		</div>
+		<div style=";border:1px solid #E1E0E5; border-radius: 5px;">
+			<a href="/account/sociallogin?provider=surf_conext">
+				<img src="{% static "images/surf_conext_logo.png" %}" 
+				alt="Login with SurfConext" 
+				class="button">
+			</a>  
+		</div><br><br>
 		<a
 			class="myButton"
 			href="/account/sociallogin?provider=surf_conext" 
-			>Sign in with EduID
+			>Sign in with SurfConext
 		</a>
 	</div>
 	</center>
