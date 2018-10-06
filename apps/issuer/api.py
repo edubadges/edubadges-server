@@ -50,8 +50,7 @@ class IssuerList(BaseEntityListView):
     create_event = badgrlog.IssuerCreatedEvent
 
     def get_objects(self, request, **kwargs):
-#         return self.request.user.cached_issuers()
-        return self.request.user.cached_issuers_within_scope()
+        return self.request.user.cached_issuers()
 
     @apispec_list_operation('Issuer',
         summary="Get a list of Issuers for authenticated user",
