@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect
 
 from django_object_actions import DjangoObjectActions
 
-from mainsite.admin import badgr_admin
+from mainsite.admin import badgr_admin, FilterByScopeMixin
 
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceEvidence, BadgeClassAlignment, BadgeClassTag, \
     BadgeClassExtension, IssuerExtension, BadgeInstanceExtension
@@ -24,9 +24,9 @@ class IssuerExtensionInline(TabularInline):
     fields = ('name', 'original_json')
 
 
-class IssuerAdmin(DjangoObjectActions, ModelAdmin):
+class IssuerAdmin(DjangoObjectActions, FilterByScopeMixin, ModelAdmin):
     readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id', 'slug')
-    list_display = ('img', 'name', 'entity_id', 'created_by', 'created_at')
+    list_display = ('img', 'name', 'entity_id', 'created_by', 'created_at', 'faculty')
     list_display_links = ('img', 'name')
     list_filter = ('created_at',)
     search_fields = ('name', 'entity_id')

@@ -11,7 +11,8 @@ from oauth2_provider.models import get_application_model, get_grant_model, get_a
 from badgeuser.models import CachedEmailAddress, ProxyEmailConfirmation
 from mainsite.admin_actions import delete_selected
 from mainsite.models import BadgrApp, EmailBlacklist, ApplicationInfo
-
+from django.http import HttpResponseRedirect
+from django.core.urlresolvers import reverse
 
 class BadgrAdminSite(AdminSite):
     site_header = ugettext_lazy('Badgr')
@@ -102,3 +103,48 @@ badgr_admin.register(Application, ApplicationInfoAdmin)
 badgr_admin.register(Grant, GrantAdmin)
 badgr_admin.register(AccessToken, AccessTokenAdmin)
 badgr_admin.register(RefreshToken, RefreshTokenAdmin)
+
+
+class FilterByScopeMixin(object):
+    
+    def get_queryset(self, request):
+        """
+        Override filtering in Admin page
+        """
+        qs = self.model._default_manager.get_queryset()
+        if not request.user.is_superuser:
+            if request.user.has_perm(u'badgeuser.has_institution_scope'):
+                institution_id = request.user.faculty.first().institution.id
+                qs = qs.filter(faculty__institution_id=institution_id).distinct()
+            elif request.user.has_perm(u'badgeuser.has_faculty_scope'):
+                qs = qs.filter(faculty__in=request.user.faculty.all()).distinct()
+        ordering = self.get_ordering(request)
+        if ordering:
+            qs = qs.order_by(*ordering)
+        return qs
+    
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        '''
+        Overrides super.change_view to add a check to see if this object is in the request.user's scope
+        '''
+        if not self.get_queryset(request).filter(id=object_id).exists():
+            return HttpResponseRedirect(reverse('admin:{}_{}_changelist'.format(self.model._meta.app_label, self.model._meta.model_name)))
+        return super(FilterByScopeMixin, self).change_view(request, object_id, form_url, extra_context)
+
+    def delete_view(self, request, object_id, form_url='', extra_context=None):
+        '''
+        Overrides super.delete_view to add a check to see if this object is in the request.user's scope
+        '''
+        if not self.get_queryset(request).filter(id=object_id).exists():
+            return HttpResponseRedirect(reverse('admin:{}_{}_changelist'.format(self.model._meta.app_label, self.model._meta.model_name)))
+        return super(FilterByScopeMixin, self).delete_view(request, object_id, extra_context)
+
+    def history_view(self, request, object_id, form_url='', extra_context=None):
+        '''
+        Overrides super.history_view to add a check to see if this object is in the request.user's scope
+        '''
+        if not self.get_queryset(request).filter(id=object_id).exists():
+            return HttpResponseRedirect(reverse('admin:{}_{}_changelist'.format(self.model._meta.app_label, self.model._meta.model_name)))
+        return super(FilterByScopeMixin, self).history_view(request, object_id, extra_context)
+
+

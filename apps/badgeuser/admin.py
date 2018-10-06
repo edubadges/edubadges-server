@@ -1,10 +1,8 @@
-from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
 from django.contrib.admin import ModelAdmin, TabularInline
 from django.contrib.auth.admin import UserAdmin
 
 from externaltools.models import ExternalToolUserActivation
-from mainsite.admin import badgr_admin
+from mainsite.admin import badgr_admin, FilterByScopeMixin
 
 from .models import BadgeUser, BadgeUserProxy, EmailAddressVariant, TermsVersion, TermsAgreement
 from . import utils
@@ -53,7 +51,8 @@ class TermsAgreementInline(TabularInline):
 
 #     TODO: add scope to lti admin page and make duplications modular
 
-class BadgeUserAdmin(UserAdmin):
+class BadgeUserAdmin(FilterByScopeMixin, UserAdmin):
+    
     actions = None
     readonly_fields = ('email', 'first_name', 'last_name', 'entity_id', 'date_joined', 'last_login', 'username', 'entity_id', 'agreed_terms_version')
     list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'date_joined') #, 'get_faculties')
@@ -67,27 +66,6 @@ class BadgeUserAdmin(UserAdmin):
         ('Faculties', {'fields': ('faculty',) }),
     )
     filter_horizontal = ('faculty','groups', 'user_permissions')
-#     inlines = [
-#         ExternalToolInline,
-#         TermsAgreementInline
-#     ]
-
-
-    def get_queryset(self, request):
-        """
-        Override filtering in Admin page
-        """
-        qs = self.model._default_manager.get_queryset()
-        if not request.user.is_superuser:
-            if request.user.has_perm(u'badgeuser.has_institution_scope'):
-                institution_id = request.user.faculty.first().institution.id
-                qs = qs.filter(faculty__institution_id=institution_id).distinct()
-            elif request.user.has_perm(u'badgeuser.has_faculty_scope'):
-                qs = qs.filter(faculty__in=request.user.faculty.all()).distinct()
-        ordering = self.get_ordering(request)
-        if ordering:
-            qs = qs.order_by(*ordering)
-        return qs
 
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):
@@ -111,33 +89,6 @@ class BadgeUserAdmin(UserAdmin):
                 if not request.user.has_perm(u'badgeuser.has_institution_scope'):
                   form_field.queryset = form_field.queryset.exclude(name='Instellings Admin')
         return form_field
-
-    def change_view(self, request, object_id, form_url='', extra_context=None):
-        '''
-        Overrides super.change_view to add a check to see if this object is in the request.user's scope
-        '''
-        if not self.get_queryset(request).filter(id=object_id).exists():
-            return HttpResponseRedirect(reverse('admin:badgeuser_badgeuser_changelist'))
-#         self.filter_horizontal =
-        return super(BadgeUserAdmin, self).change_view(request, object_id, form_url, extra_context)
-
-    def delete_view(self, request, object_id, form_url='', extra_context=None):
-        '''
-        Overrides super.delete_view to add a check to see if this object is in the request.user's scope
-        '''
-        if not self.get_queryset(request).filter(id=object_id).exists():
-            return HttpResponseRedirect(reverse('admin:badgeuser_badgeuser_changelist'))
-#         (self, request, object_id, extra_context=None):
-        return super(BadgeUserAdmin, self).delete_view(request, object_id, extra_context)
-
-    def history_view(self, request, object_id, form_url='', extra_context=None):
-        '''
-        Overrides super.history_view to add a check to see if this object is in the request.user's scope
-        '''
-        if not self.get_queryset(request).filter(id=object_id).exists():
-            return HttpResponseRedirect(reverse('admin:badgeuser_badgeuser_changelist'))
-        return super(BadgeUserAdmin, self).history_view(request, object_id, extra_context)
-
 
 
 badgr_admin.register(BadgeUser, BadgeUserAdmin)
