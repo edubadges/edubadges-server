@@ -18,10 +18,11 @@ from oauth2_provider.views.mixins import OAuthLibMixin
 from oauthlib.oauth2.rfc6749.utils import scope_to_list
 from rest_framework import serializers
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_200_OK
 from rest_framework.views import APIView
 
 import badgrlog
+from badgeuser.authcode import accesstoken_for_authcode
 from mainsite.models import ApplicationInfo
 from mainsite.oauth_validator import BadgrRequestValidator, BadgrOauthServer
 from mainsite.utils import client_ip_from_request
@@ -220,3 +221,25 @@ class TokenView(OAuth2ProviderTokenView):
         return response
 
 
+class AuthCodeExchange(APIView):
+    permission_classes = []
+
+    def post(self, request, **kwargs):
+        def _error_response():
+            return Response({"error": "Invalid authcode"}, status=HTTP_400_BAD_REQUEST)
+
+        code = request.data.get('code')
+        if not code:
+            return _error_response()
+
+        accesstoken = accesstoken_for_authcode(code)
+        if accesstoken is None:
+            return _error_response()
+
+        data = dict(
+            access_token=accesstoken.token,
+            token_type="Bearer",
+            scope=accesstoken.scope
+        )
+
+        return Response(data, status=HTTP_200_OK)

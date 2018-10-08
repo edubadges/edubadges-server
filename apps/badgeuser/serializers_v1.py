@@ -90,9 +90,6 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
     def to_representation(self, instance):
         representation = super(BadgeUserProfileSerializerV1, self).to_representation(instance)
 
-        if self.context.get('include_token', False):
-            representation['token'] = instance.cached_token()
-
         latest = TermsVersion.cached.cached_latest()
         if latest:
             representation['latest_terms_version'] = latest.version

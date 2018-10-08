@@ -1,10 +1,7 @@
+from allauth.account.adapter import get_adapter
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import send_mail
 from django.template import Context
-from django.template.loader import get_template
-
-from allauth.account.adapter import get_adapter
 
 from mainsite.models import BadgrApp
 
@@ -25,3 +22,4 @@ def notify_on_password_change(user, request=None):
 
     email_context = Context(base_context)
     get_adapter().send_mail('account/email/password_reset_confirmation', user.primary_email, base_context)
+
