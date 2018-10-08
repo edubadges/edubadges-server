@@ -728,6 +728,11 @@ class BadgeInstance(BaseAuditedModel,
     @property
     def owners(self):
         return self.issuer.owners
+    
+    def get_email_address(self):
+        from allauth.socialaccount.models import SocialAccount
+        account = SocialAccount.objects.get(uid=self.recipient_identifier)
+        return account.user.cached_emails().first().email
 
     def save(self, *args, **kwargs):
         if self.pk is None:
@@ -750,10 +755,11 @@ class BadgeInstance(BaseAuditedModel,
 
             try:
                 from badgeuser.models import CachedEmailAddress
-                existing_email = CachedEmailAddress.cached.get(email=self.recipient_identifier)
-                if self.recipient_identifier != existing_email.email and \
-                        self.recipient_identifier not in [e.email for e in existing_email.cached_variants()]:
-                    existing_email.add_variant(self.recipient_identifier)
+                email_address = self.get_email_address()
+                existing_email = CachedEmailAddress.cached.get(email=email_address)
+                if email_address != existing_email.email and \
+                        email_address not in [e.email for e in existing_email.cached_variants()]:
+                    existing_email.add_variant(email_address)
             except CachedEmailAddress.DoesNotExist:
                 pass
 
@@ -837,11 +843,11 @@ class BadgeInstance(BaseAuditedModel,
         TODO: consider making this an option on initial save and having a foreign key to
         the notification model instance (which would link through to the OpenBadge)
         """
-        if self.recipient_type != BadgeInstance.RECIPIENT_TYPE_EMAIL:
-            return
 
+        email_address = self.get_email_address()
+        
         try:
-            EmailBlacklist.objects.get(email=self.recipient_identifier)
+            EmailBlacklist.objects.get(email=email_address)
         except EmailBlacklist.DoesNotExist:
             # Allow sending, as this email is not blacklisted.
             pass
@@ -871,7 +877,7 @@ class BadgeInstance(BaseAuditedModel,
                 'image_url': self.public_url + '/image',
                 'download_url': self.public_url + "?action=download",
                 'unsubscribe_url': getattr(settings, 'HTTP_ORIGIN') + EmailBlacklist.generate_email_signature(
-                    self.recipient_identifier),
+                    email_address),
                 'site_name': badgr_app.name,
                 'site_url': badgr_app.signup_redirect,
                 'badgr_app': badgr_app,
@@ -885,14 +891,14 @@ class BadgeInstance(BaseAuditedModel,
         template_name = 'issuer/email/notify_earner'
         try:
             from badgeuser.models import CachedEmailAddress
-            CachedEmailAddress.objects.get(email=self.recipient_identifier, verified=True)
+            CachedEmailAddress.objects.get(email=email_address, verified=True)
             template_name = 'issuer/email/notify_account_holder'
             email_context['site_url'] = badgr_app.email_confirmation_redirect
         except CachedEmailAddress.DoesNotExist:
             pass
 
         adapter = get_adapter()
-        adapter.send_mail(template_name, self.recipient_identifier, context=email_context)
+        adapter.send_mail(template_name, email_address, context=email_context)
 
     def get_extensions_manager(self):
         return self.badgeinstanceextension_set
@@ -911,7 +917,7 @@ class BadgeInstance(BaseAuditedModel,
     def recipient_user(self):
         from badgeuser.models import CachedEmailAddress
         try:
-            email_address = CachedEmailAddress.cached.get(email=self.recipient_identifier)
+            email_address = CachedEmailAddress.cached.get(email=self.get_email_address())
             if email_address.verified:
                 return email_address.user
         except CachedEmailAddress.DoesNotExist:

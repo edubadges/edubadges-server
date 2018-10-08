@@ -1,12 +1,5 @@
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse
-from allauth.account.models import EmailAddress
 from allauth.socialaccount import providers
-from allauth.socialaccount.providers.base import Provider, ProviderAccount
-from badgeuser.models import BadgeUser
-from badgrsocialauth.adapter import BadgrSocialAccountAdapter
+from allauth.socialaccount.providers.base import Provider
 from badgrsocialauth.utils import BadgrSocialAuthProviderMixin
 
 class SurfConextProvider(BadgrSocialAuthProviderMixin, Provider):
