@@ -1,6 +1,6 @@
 # settings_local.py is for all instance specific settings
 
-
+import random
 from settings import *
 from mainsite import TOP_DIR
 
@@ -112,6 +112,12 @@ DEFAULT_FROM_EMAIL = ''
 # python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key())"
 #
 # PAGINATION_SECRET_KEY = ""
+
+ALLOWED_HOSTS = ['<your badgr server domain>', ]
+
+SECRET_KEY = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(40))
+
+UNSUBSCRIBE_KEY = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(40))
 
 
 LOGS_DIR = os.path.join(TOP_DIR, 'logs')
