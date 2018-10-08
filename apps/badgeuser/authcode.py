@@ -28,7 +28,7 @@ def accesstoken_for_authcode(authcode, secret_key=None):
 
 def encrypt_authcode(payload, expires_seconds=None, secret_key=None):
     if expires_seconds is None:
-        expires_seconds = getattr(settings, 'AUTHCODE_EXPIRES_SECONDS', 600)
+        expires_seconds = getattr(settings, 'AUTHCODE_EXPIRES_SECONDS', 10)
 
     if secret_key is None:
         secret_key = getattr(settings, 'AUTHCODE_SECRET_KEY', None)
