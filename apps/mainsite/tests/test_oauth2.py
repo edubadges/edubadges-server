@@ -3,6 +3,8 @@ import urllib
 from django.urls import reverse
 from oauth2_provider.models import AccessToken, Application
 
+from badgeuser.authcode import encrypt_authcode, decrypt_authcode, authcode_for_accesstoken
+from badgeuser.models import BadgrAccessToken
 from issuer.models import Issuer
 from mainsite.models import ApplicationInfo
 from mainsite.tests import BadgrTestCase
@@ -19,6 +21,10 @@ class OAuth2TokenTests(BadgrTestCase):
             user=client_user,
             authorization_grant_type=Application.GRANT_CLIENT_CREDENTIALS,
             name='test client app'
+        )
+        ApplicationInfo.objects.create(
+            application=application,
+            allowed_scopes='rw:issuer'
         )
 
         request_data = dict(
@@ -43,6 +49,10 @@ class OAuth2TokenTests(BadgrTestCase):
             user=client_user,
             authorization_grant_type=Application.GRANT_CLIENT_CREDENTIALS,
             name='test client app'
+        )
+        ApplicationInfo.objects.create(
+            application=application,
+            allowed_scopes='rw:issuer'
         )
 
         request_data = dict(
@@ -70,3 +80,35 @@ class OAuth2TokenTests(BadgrTestCase):
             data={'name': 'Another Issuer', 'url': 'http://a.com/b', 'email': client_user.email}
         )
         self.assertEqual(response.status_code, 201)
+
+    def test_can_encrypt_decrypt_authcode(self):
+        payload = "fakeentityid"
+        code = encrypt_authcode(payload)
+        decrypted_payload = decrypt_authcode(code)
+        self.assertEqual(payload, decrypted_payload)
+
+    def test_can_use_authcode_exchange(self):
+        user = self.setup_user(authenticate=True)
+        application = Application.objects.create(
+            client_id='testing-authcode',
+            client_type=Application.CLIENT_PUBLIC,
+            authorization_grant_type=Application.GRANT_PASSWORD
+        )
+        ApplicationInfo.objects.create(application=application)
+        accesstoken = BadgrAccessToken.objects.generate_new_token_for_user(user, application=application, scope='r:profile')
+
+        # can exchange valid authcode for accesstoken
+        authcode = authcode_for_accesstoken(accesstoken)
+        response = self.client.post(reverse('oauth2_code_exchange'), dict(code=authcode))
+        self.assertEqual(response.status_code, 200)
+        self.assertDictContainsSubset({'access_token': accesstoken.token}, response.data)
+
+        # cant exchange invalid authcode
+        response = self.client.post(reverse('oauth2_code_exchange'), dict(code="InvalidAuthCode"))
+        self.assertEqual(response.status_code, 400)
+
+        # cant exchange expired authcode
+        expired_authcode = authcode_for_accesstoken(accesstoken, expires_seconds=0)
+        response = self.client.post(reverse('oauth2_code_exchange'), dict(code=expired_authcode))
+        self.assertEqual(response.status_code, 400)
+

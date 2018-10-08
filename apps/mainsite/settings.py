@@ -181,6 +181,28 @@ SOCIALACCOUNT_PROVIDERS = {
 SOCIALACCOUNT_ADAPTER = 'badgrsocialauth.adapter.BadgrSocialAccountAdapter'
 
 
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+
+##
+#
+#  CORS
+#
+##
+
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_URLS_REGEX = r'^.*$'
 CORS_MODEL = 'mainsite.BadgrApp'
@@ -323,7 +345,7 @@ REST_FRAMEWORK = {
         'mainsite.authentication.BadgrOAuth2Authentication',
         'rest_framework.authentication.TokenAuthentication',
         'entity.authentication.ExplicitCSRFSessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication',
     ),
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',
     'DEFAULT_VERSION': 'v1',
@@ -403,11 +425,13 @@ OAUTH2_PROVIDER = {
     'DEFAULT_SCOPES': ['r:profile'],
 
     'OAUTH2_VALIDATOR_CLASS': 'mainsite.oauth_validator.BadgrRequestValidator',
-    'ACCESS_TOKEN_EXPIRE_SECONDS':  6*31*86400  # 6 months
+    'ACCESS_TOKEN_EXPIRE_SECONDS':  86400
 
 }
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2_provider.Application'
 OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'oauth2_provider.AccessToken'
+
+OAUTH2_TOKEN_SESSION_TIMEOUT_SECONDS = OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
 
 API_DOCS_EXCLUDED_SCOPES = ['rw:issuer:*', 'r:assertions', '*', 'rw:badgeuserAdmin']
 

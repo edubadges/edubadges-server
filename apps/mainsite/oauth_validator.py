@@ -1,8 +1,29 @@
+from django.conf import settings
 from oauth2_provider.oauth2_validators import OAuth2Validator, AccessToken, RefreshToken
 from oauth2_provider.scopes import get_scopes_backend
+from oauthlib.oauth2 import Server
+
+
+class BadgrOauthServer(Server):
+    """
+    used for providing a default grant type
+    """
+    @property
+    def default_grant_type(self):
+        return "password"
 
 
 class BadgrRequestValidator(OAuth2Validator):
+
+    def authenticate_client(self, request, *args, **kwargs):
+        # if a request doesnt include client_id or grant_type assume defaults
+        if not (request.client_id and request.grant_type and request.client_secret):
+            request.grant_type = 'password'
+            request.client_id = getattr(settings, 'OAUTH2_DEFAULT_CLIENT_ID', 'public')
+            request.client_secret = u''
+            request.scopes = ['rw:profile', 'rw:issuer', 'rw:backpack']
+        return super(BadgrRequestValidator, self).authenticate_client(request, *args, **kwargs)
+
     def validate_scopes(self, client_id, scopes, client, request, *args, **kwargs):
         available_scopes = get_scopes_backend().get_available_scopes(application=client, request=request)
 
@@ -28,7 +49,7 @@ class BadgrRequestValidator(OAuth2Validator):
     def get_existing_tokens(self, request):
         return AccessToken.objects.filter(user=request.user, application=request.client).order_by('-created')
 
-    def _create_access_token(self, expires, request, token):
+    def _create_access_token(self, expires, request, token, *args, **kwargs):
         access_token = self.get_existing_tokens(request).first()
         if access_token:
             # reuse existing access_token and preserve original token, but bump expiration

@@ -1,23 +1,33 @@
 # encoding: utf-8
 from __future__ import unicode_literals
 
+import datetime
+import json
 import re
 
+from django.conf import settings
+from django.core.cache import cache
+from django.http import HttpResponse
 from django.utils import timezone
 from oauth2_provider.exceptions import OAuthToolkitError
-from oauth2_provider.models import get_application_model, get_access_token_model, AccessToken, RefreshToken
-from oauth2_provider.oauth2_validators import OAuth2Validator
+from oauth2_provider.models import get_application_model, get_access_token_model, Application
 from oauth2_provider.scopes import get_scopes_backend
 from oauth2_provider.settings import oauth2_settings
 from oauth2_provider.views import TokenView as OAuth2ProviderTokenView
 from oauth2_provider.views.mixins import OAuthLibMixin
+from oauthlib.oauth2.rfc6749.utils import scope_to_list
 from rest_framework import serializers
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_200_OK
 from rest_framework.views import APIView
 
+import badgrlog
+from badgeuser.authcode import accesstoken_for_authcode
 from mainsite.models import ApplicationInfo
+from mainsite.oauth_validator import BadgrRequestValidator, BadgrOauthServer
+from mainsite.utils import client_ip_from_request
 
+badgrlogger = badgrlog.BadgrLogger()
 
 class AuthorizationSerializer(serializers.Serializer):
     client_id = serializers.CharField(required=True)
@@ -138,5 +148,98 @@ class AuthorizationApiView(OAuthLibMixin, APIView):
 
 
 class TokenView(OAuth2ProviderTokenView):
-    pass
 
+    server_class = BadgrOauthServer
+    validator_class = BadgrRequestValidator
+
+    def post(self, request, *args, **kwargs):
+
+        def _request_identity(request):
+            return client_ip_from_request(self.request)
+
+        def _backoff_cache_key(request):
+            return "failed_token_backoff_{}".format(_request_identity(request))
+
+        _backoff_period = getattr(settings, 'TOKEN_BACKOFF_PERIOD_SECONDS', 2)
+
+        if _backoff_period is not None:
+            # check for existing backoff
+            backoff = cache.get(_backoff_cache_key(request))
+            if backoff is not None:
+                backoff_until = backoff.get('until', None)
+                backoff_count = backoff.get('count', 1)
+                if backoff_until > timezone.now():
+                    backoff_count += 1
+                    backoff_until = timezone.now() + datetime.timedelta(seconds=_backoff_period ** backoff_count)
+                    cache.set(_backoff_cache_key(request), dict(until=backoff_until, count=backoff_count), timeout=None)
+                    # return the same error as a failed login attempt
+                    return HttpResponse(json.dumps({"error_description": "Invalid credentials given.", "error": "invalid_grant"}), status=HTTP_401_UNAUTHORIZED)
+
+        # pre-validate scopes requested
+        client_id = request.POST.get('client_id', None)
+        requested_scopes = [s for s in scope_to_list(request.POST.get('scope', '')) if s]
+        if client_id:
+            try:
+                oauth_app = Application.objects.get(client_id=client_id)
+            except Application.DoesNotExist:
+                return HttpResponse(json.dumps({"error": "invalid client_id"}), status=HTTP_400_BAD_REQUEST)
+
+            try:
+                allowed_scopes = oauth_app.applicationinfo.scope_list
+            except ApplicationInfo.DoesNotExist:
+                allowed_scopes = ['r:profile']
+
+            # handle rw:issuer:* scopes
+            if 'rw:issuer:*' in allowed_scopes:
+                issuer_scopes = filter(lambda x: x.startswith(r'rw:issuer:'), requested_scopes)
+                allowed_scopes.extend(issuer_scopes)
+
+            filtered_scopes = set(allowed_scopes) & set(requested_scopes)
+            if len(filtered_scopes) < len(requested_scopes):
+                return HttpResponse(json.dumps({"error": "invalid scope requested"}), status=HTTP_400_BAD_REQUEST)
+
+        # let parent method do actual authentication
+        response = super(TokenView, self).post(request, *args, **kwargs)
+
+        if response.status_code == 401:
+            # failed login attempt
+            username = request.POST.get('username', None)
+            badgrlogger.event(badgrlog.FailedLoginAttempt(request, username, endpoint='/o/token'))
+
+            if _backoff_period is not None:
+                # update backoff for failed logins
+                backoff = cache.get(_backoff_cache_key(request))
+                if backoff is None:
+                    backoff = {'count': 0}
+                backoff['count'] += 1
+                backoff['until'] = timezone.now() + datetime.timedelta(seconds=_backoff_period ** backoff['count'])
+                cache.set(_backoff_cache_key(request), backoff, timeout=None)
+        elif response.status_code == 200:
+            # successful login
+            cache.set(_backoff_cache_key(request), None)  # clear any existing backoff
+
+        return response
+
+
+class AuthCodeExchange(APIView):
+    permission_classes = []
+
+    def post(self, request, **kwargs):
+        def _error_response():
+            return Response({"error": "Invalid authcode"}, status=HTTP_400_BAD_REQUEST)
+
+        code = request.data.get('code')
+        if not code:
+            return _error_response()
+
+        accesstoken = accesstoken_for_authcode(code)
+        if accesstoken is None:
+            return _error_response()
+
+        data = dict(
+            access_token=accesstoken.token,
+            token_type="Bearer",
+            scope=accesstoken.scope
+        )
+
+        return Response(data, status=HTTP_200_OK)

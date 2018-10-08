@@ -8,13 +8,17 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.test import override_settings
+from oauth2_provider.models import AccessToken, Application
+from oauthlib.common import generate_token
+
+from badgeuser.authcode import encrypt_authcode, decrypt_authcode, authcode_for_accesstoken
 from mainsite import TOP_DIR
 from rest_framework.authtoken.models import Token
 
-from badgeuser.models import BadgeUser
+from badgeuser.models import BadgeUser, BadgrAccessToken
 from badgeuser.models import EmailAddressVariant, CachedEmailAddress
 from issuer.models import BadgeClass, Issuer
-from mainsite.models import BadgrApp
+from mainsite.models import BadgrApp, ApplicationInfo
 from mainsite.tests.base import BadgrTestCase
 
 
@@ -64,7 +68,7 @@ class UserCreateTests(BadgrTestCase):
             'first_name': 'Test',
             'last_name': 'User',
             'email': 'newuniqueuser1@example.com',
-            'password': '123456'
+            'password': 'secr3t4nds3cur3'
         }
 
         response = self.client.post('/v1/user/profile', user_data)
@@ -93,7 +97,7 @@ class UserCreateTests(BadgrTestCase):
             'first_name': 'NEW Test',
             'last_name': 'User',
             'email': email,
-            'password': '123456'
+            'password': 'secr3t4nds3cur3'
         }
 
         # create an existing user that owns email -- but unverified
@@ -138,7 +142,7 @@ class UserCreateTests(BadgrTestCase):
             'first_name': 'NEW Test',
             'last_name': 'User',
             'email': email,
-            'password': '123456'
+            'password': 'secr3t4nds3cur3'
         }
         response = self.client.post('/v1/user/profile', user_data)
 
@@ -200,7 +204,7 @@ class UserCreateTests(BadgrTestCase):
         response = self.client.post('/v1/user/profile', {
             'first_name': 'existing',
             'last_name': 'user',
-            'password': 'secret',
+            'password': 'secr3t4nds3cur3',
             'email': email
         })
         self.assertEqual(response.status_code, 201)
@@ -210,7 +214,7 @@ class UserCreateTests(BadgrTestCase):
         response = self.client.post('/v1/user/profile', {
             'first_name': 'existing',
             'last_name': 'user',
-            'password': 'secret',
+            'password': 'secr3t4nds3cur3',
             'email': 'nonexistent23+extra@test.nonexistent'
         })
         self.assertEqual(response.status_code, 201)
@@ -220,7 +224,7 @@ class UserCreateTests(BadgrTestCase):
         response = self.client.post('/v1/user/profile', {
             'first_name': 'existing',
             'last_name': 'user',
-            'password': 'secret',
+            'password': 'secr3t4nds3cur3',
             'email': 'VERYNONEXISTENT@test.nonexistent'
         })
         self.assertEqual(response.status_code, 201)
@@ -605,6 +609,7 @@ class UserProfileTests(BadgrTestCase):
             'first_name': first,
             'last_name': last,
             'password': new_password,
+            'current_password': original_password
         })
         self.assertEqual(response.status_code, 200)
         self.assertEqual(first, response.data.get('first_name'))
@@ -622,15 +627,15 @@ class UserProfileTests(BadgrTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual('Barry', response.data.get('first_name'))
 
-        new_password = 'superstar!'
+        third_password = 'superstar!'
         response = self.client.put('/v1/user/profile', {
-            'password': new_password
+            'password': third_password,
+            'current_password': new_password
         })
         self.assertEqual(response.status_code, 200)
         self.client.logout()
-        self.client.login(username=username, password=new_password)
+        self.client.login(username=username, password=third_password)
         self.assertUserLoggedIn()
-
 
     def assertUserLoggedIn(self, user_pk=None):
         self.assertIn(SESSION_KEY, self.client.session)

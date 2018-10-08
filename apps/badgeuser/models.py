@@ -8,6 +8,7 @@ from hashlib import md5
 from itertools import chain
 
 import cachemodel
+import datetime
 from allauth.account.models import EmailAddress, EmailConfirmation
 from basic_models.models import IsActive
 from django.core.cache import cache
@@ -16,8 +17,11 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models, transaction
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from oauth2_provider.models import AccessToken
+from oauth2_provider.models import AccessToken, Application
+from oauthlib.common import generate_token
+from oauthlib.oauth2 import BearerToken
 from rest_framework.authtoken.models import Token
 
 from backpack.models import BackpackCollection
@@ -377,6 +381,41 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
 
 
 class BadgrAccessTokenManager(models.Manager):
+
+    def generate_new_token_for_user(self, user, scope='r:profile', application=None, expires=None, refresh_token=False):
+        if application is None:
+            application, created = Application.objects.get_or_create(
+                client_id='public',
+                client_type=Application.CLIENT_PUBLIC,
+                authorization_grant_type=Application.GRANT_PASSWORD,
+            )
+            if created:
+                ApplicationInfo.objects.create(application=application)
+
+        with transaction.atomic():
+            # reuse existing token records
+            existing_tokens = self.filter(user=user, application=application).order_by('-created')
+            if len(existing_tokens) < 1:
+                # create new token
+                accesstoken = self.model(application=application, user=user)
+            else:
+                accesstoken = existing_tokens[0]
+
+            if len(existing_tokens) > 1:
+                # remove any duplicate records if they exist
+                for t in existing_tokens[1:]:
+                    t.delete()
+
+            if expires is None:
+                expires = timezone.now() + datetime.timedelta(seconds=86400)
+
+            accesstoken.token = generate_token()
+            accesstoken.expires = expires
+            accesstoken.scope = scope
+            accesstoken.save()
+
+        return accesstoken
+
     def get_from_entity_id(self, entity_id):
         # lookup by a faked
         padding = len(entity_id) % 4
