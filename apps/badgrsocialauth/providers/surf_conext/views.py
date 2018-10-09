@@ -123,6 +123,11 @@ def callback(request):
         error = 'Sorry, your account has no home organization attached from SurfConext, try another login method.'
         return render_authentication_error(request, SurfConextProvider.id, error)
 
+    if 'family_name' in extra_data:
+        extra_data['family_name'] = ''
+    if 'given_name' in extra_data:
+        extra_data['given_name'] = ''
+    
     # 3. Complete social login and return to frontend
     provider = SurfConextProvider(request)
     login = provider.sociallogin_from_response(request, extra_data)
