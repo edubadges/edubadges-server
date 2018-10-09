@@ -61,7 +61,7 @@ class BadgeUserAdmin(FilterByScopeMixin, UserAdmin):
     fieldsets = (
         ('Metadata', {'fields': ('entity_id', 'username', 'date_joined',), 'classes': ('collapse',)}),
         (None, {'fields': ('email', 'first_name', 'last_name')}),
-        ('Access', {'fields': ('is_active', 'is_staff')}),
+        ('Access', {'fields': ('is_active', 'is_staff', 'password')}),
         ('Permissions', {'fields': ('groups',)}),
         ('Faculties', {'fields': ('faculty',) }),
     )
