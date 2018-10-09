@@ -37,9 +37,10 @@ http://info.badgr.io/#mobile{% endif %}
 Know your Rights
 -----------
 The issuer of this badge has provided {{ site_name }} with your email address and the
-data about your achievement contained in this badge. You may request a copy of your data,
-request removal of data about you, or request rectification of incorrect information by contacting
-{{ help_email }}. If you have questions about this badge, please contact the issuer at {{ issuer_email }}.
+data about your achievement contained in this badge.  If you have questions about this badge,
+please contact the issuer at {{ issuer_email }}. You may request a copy of your data, request
+removal of data about you, or request to have incorrect information updated by contacting
+{{ help_email }}.
 
 -----------
 Open Badges: Portable Digital Credentials
