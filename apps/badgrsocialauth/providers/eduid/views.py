@@ -37,7 +37,7 @@ def login(request):
       'Cache-Control': "no-cache",
       'Authorization': encode(current_app.client_id, current_app.secret)
     }
-    response = requests.post("{}/login".format(settings.EDUID_PROVIDER_URL+'/oidc'), data=json.dumps(params), headers=headers)    
+    response = requests.post("{}/login".format(settings.EDUID_PROVIDER_URL), data=json.dumps(params), headers=headers)    
     return redirect(response.text)
     
 
@@ -63,12 +63,12 @@ def callback(request):
     headers = {'Content-Type': "application/x-www-form-urlencoded",
                'Cache-Control': "no-cache"
     }
-    response = requests.post("{}/token".format(settings.EDUID_PROVIDER_URL+'/oidc'), data=urllib.parse.urlencode(payload), headers=headers)
+    response = requests.post("{}/token".format(settings.EDUID_PROVIDER_URL), data=urllib.parse.urlencode(payload), headers=headers)
     token_json = response.json()
     
     # 2. now with access token we can request userinfo
     headers = {"Authorization": "Bearer " + token_json['access_token'] }
-    response = requests.get("{}/userinfo".format(settings.EDUID_PROVIDER_URL+'/oidc'), headers=headers)
+    response = requests.get("{}/userinfo".format(settings.EDUID_PROVIDER_URL), headers=headers)
     if response.status_code != 200:
         error = 'Server error: User info endpoint error (http %s). Try alternative login methods' % response.status_code
         logger.debug(error)
