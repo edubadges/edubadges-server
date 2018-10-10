@@ -9,6 +9,24 @@ from mainsite.tests import SetupIssuerHelper, BadgrTestCase, SetupOAuth2Applicat
 
 
 class PublicAPITests(SetupOAuth2ApplicationHelper, SetupIssuerHelper, BadgrTestCase):
+    def test_client_credentials_token(self):
+        # define oauth application
+        application_user = self.setup_user(authenticate=False)
+        application = self.setup_oauth2_application(
+            user=application_user,
+            allowed_scopes="rw:issuer rw:backpack rw:profile",
+            trust_email=True)
+
+        # retrieve an rw:issuer token
+        response = self.client.post('/o/token', data=dict(
+            grant_type="client_credentials",
+            client_id=application.client_id,
+            client_secret=application.client_secret,
+            scope="rw:issuer"
+        ))
+        self.assertEqual(response.status_code, 200)
+
+
     def test_can_get_issuer_scoped_token(self):
         # create an oauth2 application
         application_user = self.setup_user(authenticate=False)

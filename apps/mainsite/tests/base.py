@@ -25,6 +25,7 @@ class SetupOAuth2ApplicationHelper(object):
                                  client_secret=None,
                                  name='test client app',
                                  allowed_scopes=None,
+                                 trust_email=False,
                                  **kwargs):
         if client_id is None:
             client_id = "test"
@@ -45,7 +46,8 @@ class SetupOAuth2ApplicationHelper(object):
             application_info = ApplicationInfo.objects.create(
                 application=application,
                 name=name,
-                allowed_scopes=allowed_scopes
+                allowed_scopes=allowed_scopes,
+                trust_email_verification=trust_email
             )
 
         return application
