@@ -457,3 +457,8 @@ CELERY_ALWAYS_EAGER = True
 BADGERANK_NOTIFY_ON_BADGECLASS_CREATE = True
 BADGERANK_NOTIFY_ON_FIRST_ASSERTION = True
 BADGERANK_NOTIFY_URL = 'https://api.badgerank.org/v1/badgeclass/submit'
+
+
+from cryptography.fernet import Fernet
+PAGINATION_SECRET_KEY = Fernet.generate_key()
+AUTHCODE_SECRET_KEY = Fernet.generate_key()
