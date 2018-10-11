@@ -297,8 +297,11 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
 
     def get_recipient_identifier(self):
         from allauth.socialaccount.models import SocialAccount
-        account = SocialAccount.objects.get(user=self.pk)
-        return account.extra_data['sub']
+        try:
+            account = SocialAccount.objects.get(user=self.pk)
+            return account.extra_data['sub']
+        except SocialAccount.DoesNotExist:
+            return None
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):
