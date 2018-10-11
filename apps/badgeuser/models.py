@@ -293,7 +293,8 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
 
     @property
     def all_recipient_identifiers(self):
-        return [e.email for e in self.cached_emails() if e.verified] + [e.email for e in self.cached_email_variants()]
+        return [self.get_recipient_identifier()]
+#         return [e.email for e in self.cached_emails() if e.verified] + [e.email for e in self.cached_email_variants()]
 
     def get_recipient_identifier(self):
         from allauth.socialaccount.models import SocialAccount
