@@ -25,6 +25,7 @@ from entity.models import BaseVersionedEntity
 from issuer.models import Issuer, BadgeInstance, BaseAuditedModel
 from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager
 from mainsite.models import ApplicationInfo
+from allauth.socialaccount.models import SocialLogin
 
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
@@ -294,6 +295,11 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     def all_recipient_identifiers(self):
         return [e.email for e in self.cached_emails() if e.verified] + [e.email for e in self.cached_email_variants()]
 
+    def get_recipient_identifier(self):
+        from allauth.socialaccount.models import SocialAccount
+        account = SocialAccount.objects.get(user=self.pk)
+        return account.extra_data['sub']
+
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):
         '''
@@ -322,7 +328,8 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeinstances(self):
-        return BadgeInstance.objects.filter(recipient_identifier__in=self.all_recipient_identifiers)
+#         return BadgeInstance.objects.filter(recipient_identifier__in=self.all_recipient_identifiers)
+        return BadgeInstance.objects.filter(recipient_identifier=self.get_recipient_identifier())
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_externaltools(self):
