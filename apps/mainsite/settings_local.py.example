@@ -144,7 +144,9 @@ LOGGING = {
         'badgr_debug' : {
             'level': 'INFO',
             'formatter': 'badgr',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'maxBytes': 15728640,  # 1024 * 1024 * 15B = 15MB
+            'backupCount': 40,
             'filename': os.path.join(LOGS_DIR, 'badgr_debug.log')
         }
     },
@@ -154,7 +156,6 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-
         # Badgr.Events emits all badge related activity
         'Badgr.Events': {
             'handlers': ['badgr_events'],
