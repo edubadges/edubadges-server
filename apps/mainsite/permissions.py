@@ -2,6 +2,8 @@ from rest_framework import permissions
 
 from badgeuser.models import CachedEmailAddress
 
+import logging
+logger=logging.getLogger('Badgr.Debug')            
 
 class IsOwner(permissions.BasePermission):
     """
@@ -27,4 +29,11 @@ class AuthenticatedWithVerifiedEmail(permissions.BasePermission):
     message = "This function only available to authenticated users with confirmed email addresses."
 
     def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated() and request.user.verified
+        result = request.user and request.user.is_authenticated() and request.user.verified
+        if not result:
+            log = {'message':self.message, 
+                   'request.user': request.user, 
+                   'is_authenticated': request.user.is_authenticated(),
+                   'verified': request.user.verified} 
+            logger.error(log)
+        return result

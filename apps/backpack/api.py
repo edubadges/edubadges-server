@@ -12,7 +12,7 @@ from backpack.models import BackpackCollection, BackpackBadgeShare, BackpackColl
 from backpack.serializers_v1 import CollectionSerializerV1, LocalBadgeInstanceUploadSerializerV1
 from backpack.serializers_v2 import BackpackAssertionSerializerV2, BackpackCollectionSerializerV2, \
     BackpackImportSerializerV2
-from entity.api import BaseEntityListView, BaseEntityDetailView
+from entity.api import BaseEntityListView, BaseEntityDetailView, LogPermissionsFailMixin
 from issuer.models import BadgeInstance
 from issuer.permissions import AuditedModelOwner, VerifiedEmailMatchesRecipientIdentifier, BadgrOAuthTokenHasScope
 from issuer.public_api import ImagePropertyDetailView
@@ -21,7 +21,7 @@ from apispec_drf.decorators import apispec_list_operation, apispec_post_operatio
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 
 
-class BackpackAssertionList(BaseEntityListView):
+class BackpackAssertionList(LogPermissionsFailMixin, BaseEntityListView):
     model = BadgeInstance
     v1_serializer_class = LocalBadgeInstanceUploadSerializerV1
     v2_serializer_class = BackpackAssertionSerializerV2

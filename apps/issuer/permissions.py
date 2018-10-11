@@ -4,9 +4,11 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from rest_framework import permissions
 import rules
+import logging
 
 from issuer.models import IssuerStaff
 
+logger=logging.getLogger('Badgr.Debug')
 SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
 
 
@@ -171,8 +173,12 @@ class VerifiedEmailMatchesRecipientIdentifier(permissions.BasePermission):
     """
     def has_object_permission(self, request, view, obj):
         recipient_identifier = getattr(obj, 'recipient_identifier', None)
-        return recipient_identifier and recipient_identifier in request.user.all_recipient_identifiers
-
+        result =  recipient_identifier and recipient_identifier in request.user.all_recipient_identifiers
+        if not result:
+            logger.error({'recipient_identifier': recipient_identifier,
+                          'request.user.all_recipient_identifiers':request.user.all_recipient_identifiers
+                          })
+        return result
 
 class BadgrOAuthTokenHasScope(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -188,7 +194,10 @@ class BadgrOAuthTokenHasScope(permissions.BasePermission):
                 default_auth_scopes = set(['rw:profile', 'rw:issuer', 'rw:backpack'])
                 if len(set(valid_scopes) & default_auth_scopes) > 0:
                     return True
-
+            
+            logger.error({'valid_scopes':valid_scopes, 
+                          'user': request.user,
+                          'is_authenticated': request.user.is_authenticated,})
             return False
 
         # Do not apply scope if using a non-oauth tokens

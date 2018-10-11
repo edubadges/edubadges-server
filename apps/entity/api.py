@@ -7,9 +7,25 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from rest_framework.views import APIView
 
-import badgrlog
+import badgrlog, logging
 from mainsite.pagination import EncryptedCursorPagination
 
+logger=logging.getLogger('Badgr.Debug')
+
+class LogPermissionsFailMixin():
+    def check_permissions(self, request):
+        """
+        Overrides check permissions to log when permission fails
+        """
+        for permission in self.get_permissions():
+            if not permission.has_permission(request, self):
+                logger.error({'permission.message':permission.message,
+                              'request.user': request.user,
+                              "request.path": request.path})
+                self.permission_denied(
+                    request, message=getattr(permission, 'message', None)
+                )
+    
 
 class BaseEntityView(APIView):
     create_event = None
