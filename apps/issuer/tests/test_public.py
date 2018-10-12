@@ -102,6 +102,7 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
             {'HTTP_USER_AGENT': 'Twitterbot/1.0'},
             {'HTTP_USER_AGENT': 'facebook'},
             {'HTTP_USER_AGENT': 'Facebot'},
+            {'HTTP_USER_AGENT': 'Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)'},
         ]
         for headers in testcase_headers:
             with self.assertNumQueries(0):

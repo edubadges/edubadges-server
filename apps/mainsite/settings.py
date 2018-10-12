@@ -441,6 +441,7 @@ BADGR_PUBLIC_BOT_USERAGENTS = [
     'Twitterbot',    # 'Twitterbot/1.0'
     'facebook',      # https://developers.facebook.com/docs/sharing/webmasters/crawler
     'Facebot',
+    'Slackbot',
 ]
 
 
