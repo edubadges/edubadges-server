@@ -173,7 +173,7 @@ class AcceptTermsView(TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super(AcceptTermsView, self).get_context_data(**kwargs)
-        badgr_app_pk = kwargs['state'].split('-')[2]
+        badgr_app_pk = kwargs['state'].split('-')[0]
         badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
         context['ui_login_redirect'] = badgr_app.ui_login_redirect
         return context

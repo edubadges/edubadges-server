@@ -56,7 +56,7 @@ def after_terms_agreement(request, **kwargs):
         return render_authentication_error(request, SurfConextProvider.id, error)
     
     headers = {'Authorization': 'bearer %s' % access_token}
-    process, auth_token, badgr_app_pk, referer = kwargs['state'].split('-')
+    badgr_app_pk, process, auth_token, referer = kwargs['state'].split('-')
     url = settings.SURFCONEXT_DOMAIN_URL + '/userinfo'
 
     response = requests.get(url, headers=headers)
@@ -174,7 +174,9 @@ def callback(request):
     # retrieved data in fields and ensure that email & sud are in extra_data
     extra_data = response.json()
               
-    keyword_arguments = {'access_token':access_token, 'state': '-'.join((process, auth_token, badgr_app_pk, referer))}
+    keyword_arguments = {'access_token':access_token, 
+                         'state': '-'.join((badgr_app_pk, process, auth_token, referer)),
+                         'after_terms_agreement_url_name': 'surf_conext_terms_accepted_callback'}
      
     if not check_if_user_already_exists(extra_data['sub']):
         return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))

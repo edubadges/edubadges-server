@@ -100,7 +100,7 @@ urlpatterns = [
     url(r'^lti_edu/', include('lti_edu.api_urls')),
     
     # Accept Terms View
-    url(r'^accept_terms/(?P<state>[^/]+)/(?P<access_token>[^/]+)', AcceptTermsView.as_view(), name='accept_terms'),
+    url(r'^accept_terms/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', AcceptTermsView.as_view(), name='accept_terms'),
     
 ]
 
