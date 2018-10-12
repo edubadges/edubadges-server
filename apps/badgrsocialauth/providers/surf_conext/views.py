@@ -8,7 +8,7 @@ from django.http import HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 
-from badgrsocialauth.utils import set_session_badgr_app, get_session_auth_token, get_verified_user, get_session_badgr_app
+from badgrsocialauth.utils import set_session_badgr_app, get_session_auth_token, get_verified_user, get_session_badgr_app, check_if_user_already_exists
 from mainsite.models import BadgrApp
 from .provider import SurfConextProvider
 from institution.models import Institution
@@ -48,6 +48,64 @@ def login(request):
     print('logging into, redirect', data)
     return HttpResponseRedirect(redirect_url)
 
+
+def after_terms_agreement(request, **kwargs):
+    access_token = kwargs.get('access_token', None)
+    if not access_token:
+        error = 'Sorry, we could not find you SurfConext credentials.'
+        return render_authentication_error(request, SurfConextProvider.id, error)
+    
+    headers = {'Authorization': 'bearer %s' % access_token}
+    process, auth_token, badgr_app_pk, referer = kwargs['state'].split('-')
+    url = settings.SURFCONEXT_DOMAIN_URL + '/userinfo'
+
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        error = 'Server error: User info endpoint error (http %s). Try alternative login methods' % response.status_code
+        return render_authentication_error(request, SurfConextProvider.id, error=error)
+
+    # retrieved data in fields and ensure that email & sud are in extra_data
+    extra_data = response.json()
+     
+    print('getting extra data', extra_data)
+    if 'email' not in extra_data or 'sub' not in extra_data:
+        error = 'Sorry, your account has no email attached from SurfConext, try another login method.'
+        return render_authentication_error(request, SurfConextProvider.id, error)
+    if "schac_home_organization" not in extra_data:
+        error = 'Sorry, your account has no home organization attached from SurfConext, try another login method.'
+        return render_authentication_error(request, SurfConextProvider.id, error)
+  
+    if 'family_name' in extra_data:
+        extra_data['family_name'] = ''
+    if 'given_name' in extra_data:
+        extra_data['given_name'] = ''
+      
+    # 3. Complete social login and return to frontend
+    provider = SurfConextProvider(request)
+    login = provider.sociallogin_from_response(request, extra_data)
+  
+    # Reset the badgr app id after login as django overturns it
+    set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app_pk))
+  
+    # connect process in which OpenID connects with, either login or connect, if you connect then login user with token
+    login.state = {'process': process}
+  
+    # login for connect because socialLogin can only connect to request.user
+    if process == 'connect' and request.user.is_anonymous() and auth_token:
+        request.user = get_verified_user(auth_token=auth_token)
+      
+    ret = complete_social_login(request, login)
+    if not request.user.is_anonymous(): # the social login succeeded
+        institution_name = extra_data['schac_home_organization']
+        institution, created = Institution.objects.get_or_create(name=institution_name)
+        request.user.institution = institution
+        request.user.save()
+        
+    # override the response with a redirect to staff dashboard if the login came from there
+    if referer == 'staff':
+        return HttpResponseRedirect(reverse('admin:index'))
+    else:
+        return ret
 
 @csrf_exempt
 def callback(request):
@@ -115,41 +173,10 @@ def callback(request):
 
     # retrieved data in fields and ensure that email & sud are in extra_data
     extra_data = response.json()
-    print('getting extra data', extra_data)
-    if 'email' not in extra_data or 'sub' not in extra_data:
-        error = 'Sorry, your account has no email attached from SurfConext, try another login method.'
-        return render_authentication_error(request, SurfConextProvider.id, error)
-    if "schac_home_organization" not in extra_data:
-        error = 'Sorry, your account has no home organization attached from SurfConext, try another login method.'
-        return render_authentication_error(request, SurfConextProvider.id, error)
+              
+    keyword_arguments = {'access_token':access_token, 'state': '-'.join((process, auth_token, badgr_app_pk, referer))}
+     
+    if not check_if_user_already_exists(extra_data['sub']):
+        return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))
 
-    if 'family_name' in extra_data:
-        extra_data['family_name'] = ''
-    if 'given_name' in extra_data:
-        extra_data['given_name'] = ''
-    
-    # 3. Complete social login and return to frontend
-    provider = SurfConextProvider(request)
-    login = provider.sociallogin_from_response(request, extra_data)
-
-    # Reset the badgr app id after login as django overturns it
-    set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app_pk))
-
-    # connect process in which OpenID connects with, either login or connect, if you connect then login user with token
-    login.state = {'process': process}
-
-    # login for connect because socialLogin can only connect to request.user
-    if process == 'connect' and request.user.is_anonymous() and auth_token:
-        request.user = get_verified_user(auth_token=auth_token)
-    
-    ret = complete_social_login(request, login)
-    institution_name = extra_data['schac_home_organization']
-    institution, created = Institution.objects.get_or_create(name=institution_name)
-    request.user.institution = institution
-    request.user.save()
-    # override the response with a redirect to staff dashboard if the login came from there
-    if referer == 'staff':
-        return HttpResponseRedirect(reverse('admin:index'))
-    else:
-        return ret
-    
+    return after_terms_agreement(request, **keyword_arguments)

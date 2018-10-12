@@ -11,7 +11,7 @@ badgr_admin.autodiscover()
 
 from django.views.generic.base import RedirectView, TemplateView
 
-from mainsite.views import SitewideActionFormView, LoginAndObtainAuthToken, RedirectToUiLogin, DocsAuthorizeRedirect
+from mainsite.views import SitewideActionFormView, LoginAndObtainAuthToken, RedirectToUiLogin, DocsAuthorizeRedirect, AcceptTermsView
 from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation, error404, error500
 
 
@@ -97,8 +97,11 @@ urlpatterns = [
 
     # include LTI endpoints
     url(r'^v2/', include('lti_edu.urls'), kwargs={'version': 'v2'}),
-    url(r'^lti_edu/', include('lti_edu.api_urls'))
-
+    url(r'^lti_edu/', include('lti_edu.api_urls')),
+    
+    # Accept Terms View
+    url(r'^accept_terms/(?P<state>[^/]+)/(?P<access_token>[^/]+)', AcceptTermsView.as_view(), name='accept_terms'),
+    
 ]
 
 # Test URLs to allow you to see these pages while DEBUG is True

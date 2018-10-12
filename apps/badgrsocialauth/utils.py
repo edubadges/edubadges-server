@@ -35,7 +35,13 @@ class BadgrSocialAuthProviderMixin:
                     last_name=data.get('family_name', None)
                     )
 
-
+def check_if_user_already_exists(sociallogin_identifier):
+    from allauth.socialaccount.models import SocialAccount
+    try:
+        SocialAccount.objects.get(uid=sociallogin_identifier)
+        return True
+    except SocialAccount.DoesNotExist:
+        return False
 
 def set_url_query_params(url, **kwargs):
     """

@@ -12,7 +12,7 @@ from django.shortcuts import redirect
 from django.template import loader, TemplateDoesNotExist, Context
 from django.utils.decorators import method_decorator
 from django.views.decorators.clickjacking import xframe_options_exempt
-from django.views.generic import FormView, RedirectView
+from django.views.generic import FormView, RedirectView, TemplateView
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import AllowAny
 from rest_framework.renderers import JSONRenderer
@@ -166,3 +166,15 @@ class DocsAuthorizeRedirect(RedirectView):
         if query:
             url = "{}?{}".format(url, query)
         return url
+
+class AcceptTermsView(TemplateView):
+    
+    template_name = 'terms_of_service/accept_terms.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super(AcceptTermsView, self).get_context_data(**kwargs)
+        badgr_app_pk = kwargs['state'].split('-')[2]
+        badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
+        context['ui_login_redirect'] = badgr_app.ui_login_redirect
+        return context
+        
