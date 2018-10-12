@@ -106,7 +106,7 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
         if self.format_kwarg == 'json':
             return False
 
-        html_accepts = ['*/*', 'text/html']
+        html_accepts = ['text/html']
 
         http_accept = self.request.META.get('HTTP_ACCEPT', 'application/json')
 

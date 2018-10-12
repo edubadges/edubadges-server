@@ -122,9 +122,14 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
                              public_pages_redirect='http://frontend.ui/public')
         badgr_app.save()
 
-        testcase_headers = [
-            # browsers will send Accept: */* by default
-            {'HTTP_ACCEPT': '*/*'},
+        redirect_accepts = [
+            {'HTTP_ACCEPT': 'application/xml,application/xhtml+xml,text/html;q=0.9, text/plain;q=0.8,image/png,*/*;q=0.5'},  # safari/chrome
+            {'HTTP_ACCEPT': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'},  # firefox
+            {'HTTP_ACCEPT': 'text/html, application/xhtml+xml, image/jxr, */*'},  # edge
+        ]
+        json_accepts = [
+            {'HTTP_ACCEPT': '*/*'},  # curl
+            {},  # no accept header
         ]
 
         with self.settings(BADGR_APP_ID=badgr_app.id):
@@ -134,11 +139,17 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
             test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
             assertion = test_badgeclass.issue(recipient_id='new.recipient@email.test')
 
-            for headers in testcase_headers:
+            for headers in redirect_accepts:
                 with self.assertNumQueries(0):
                     response = self.client.get('/public/assertions/{}'.format(assertion.entity_id), **headers)
                     self.assertEqual(response.status_code, 302)
                     self.assertEqual(response.get('Location'), 'http://frontend.ui/public/assertions/{}'.format(assertion.entity_id))
+
+            for headers in json_accepts:
+                with self.assertNumQueries(0):
+                    response = self.client.get('/public/assertions/{}'.format(assertion.entity_id), **headers)
+                    self.assertEqual(response.status_code, 200)
+                    self.assertEqual(response.get('Content-Type'), "application/ld+json")
 
     @responses.activate
     def test_uploaded_badge_returns_coerced_json(self):
