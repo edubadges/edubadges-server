@@ -42,7 +42,7 @@ def login(request):
     
 
 def after_terms_agreement(request, **kwargs):
-    badgr_app_pk, referer = kwargs['state'].split('-')
+    badgr_app_pk, login_type, referer = kwargs['state'].split('-')
     access_token = kwargs.get('access_token', None)
     if not access_token:
         error = 'Sorry, we could not find you EduID credentials.'
@@ -117,7 +117,7 @@ def callback(request):
     userinfo_json = response.json()
     
     keyword_arguments = {'access_token':token_json['access_token'], 
-                         'state': '-'.join((str(badgr_app_pk), referer)),
+                         'state': '-'.join((str(badgr_app_pk), 'edu_id', referer)),
                          'after_terms_agreement_url_name': 'eduid_terms_accepted_callback'}
     if not check_if_user_already_exists(userinfo_json['sub']):
         return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))
