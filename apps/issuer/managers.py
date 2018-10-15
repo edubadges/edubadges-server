@@ -2,20 +2,46 @@
 from __future__ import unicode_literals
 
 import json
+import urlparse
 
 from django.conf import settings
 import dateutil.parser
 from django.core.files.storage import DefaultStorage
 from django.db import models, transaction
+from django.urls import resolve, Resolver404
 
-from mainsite.utils import fetch_remote_file_to_storage, list_of
+from mainsite.utils import fetch_remote_file_to_storage, list_of, OriginSetting
 from pathway.tasks import award_badges_for_pathway_completion
 
 
-class IssuerManager(models.Manager):
+def resolve_source_url_referencing_local_object(source_url):
+    if source_url.startswith(OriginSetting.HTTP):
+        try:
+            match = resolve(urlparse.urlparse(source_url).path)
+            return match
+        except Resolver404 as e:
+            pass
+
+
+class BaseOpenBadgeObjectManager(models.Manager):
+    def get_local_object(self, source_url):
+        match = resolve_source_url_referencing_local_object(source_url)
+        if match:
+            try:
+                return self.get(entity_id=match.kwargs.get('entity_id'))
+            except self.model.DoesNotExist:
+                return None
+
+
+class IssuerManager(BaseOpenBadgeObjectManager):
 
     @transaction.atomic
     def get_or_create_from_ob2(self, issuer_obo, source=None, original_json=None):
+        source_url = issuer_obo.get('id')
+        local_object = self.get_local_object(source_url)
+        if local_object:
+            return local_object, False
+
         image_url = issuer_obo.get('image', None)
         image = None
         if image_url:
@@ -23,7 +49,7 @@ class IssuerManager(models.Manager):
                image_url = image_url.get('id')
            image = _fetch_image_and_get_file(image_url, upload_to='remote/issuer')
         return self.get_or_create(
-            source_url=issuer_obo.get('id'),
+            source_url=source_url,
             defaults=dict(
                 source=source if source is not None else 'local',
                 name=issuer_obo.get('name'),
@@ -36,7 +62,7 @@ class IssuerManager(models.Manager):
         )
 
 
-class BadgeClassManager(models.Manager):
+class BadgeClassManager(BaseOpenBadgeObjectManager):
 
     @transaction.atomic
     def create(self, **kwargs):
@@ -51,6 +77,11 @@ class BadgeClassManager(models.Manager):
 
     @transaction.atomic
     def get_or_create_from_ob2(self, issuer, badgeclass_obo, source=None, original_json=None):
+        source_url = badgeclass_obo.get('id')
+        local_object = self.get_local_object(source_url)
+        if local_object:
+            return local_object, False
+
         criteria_url = None
         criteria_text = None
         criteria = badgeclass_obo.get('criteria', None)
@@ -66,7 +97,7 @@ class BadgeClassManager(models.Manager):
         image = _fetch_image_and_get_file(image_url, upload_to='remote/badgeclass')
 
         return self.get_or_create(
-            source_url=badgeclass_obo.get('id'),
+            source_url=source_url,
             defaults=dict(
                 issuer=issuer,
                 source=source if source is not None else 'local',
@@ -99,10 +130,15 @@ def _fetch_image_and_get_file(url, upload_to=''):
         return image
 
 
-class BadgeInstanceManager(models.Manager):
+class BadgeInstanceManager(BaseOpenBadgeObjectManager):
 
     @transaction.atomic
     def get_or_create_from_ob2(self, badgeclass, assertion_obo, recipient_identifier, source=None, original_json=None):
+        source_url = assertion_obo.get('id')
+        local_object = self.get_local_object(source_url)
+        if local_object:
+            return local_object, False
+
         image_url = assertion_obo.get('image', None)
         image = None
         if image_url is None:
