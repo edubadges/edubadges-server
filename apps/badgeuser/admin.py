@@ -68,6 +68,22 @@ class BadgeUserAdmin(FilterByScopeMixin, UserAdmin):
     filter_horizontal = ('faculty','groups', 'user_permissions')
 
 
+    def get_queryset(self, request):
+        """
+        Override filtering in Admin page
+        """
+        qs = self.model._default_manager.get_queryset()
+        if not request.user.is_superuser:
+            if request.user.has_perm(u'badgeuser.has_institution_scope'):
+                institution_id = request.user.institution.id
+                qs = qs.filter(institution_id=institution_id).distinct()
+            elif request.user.has_perm(u'badgeuser.has_faculty_scope'):
+                qs = qs.filter(faculty__in=request.user.faculty.all()).distinct()
+        ordering = self.get_ordering(request)
+        if ordering:
+            qs = qs.order_by(*ordering)
+        return qs
+
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         '''
         Overrides super.formfield_for_manytomany to filter:

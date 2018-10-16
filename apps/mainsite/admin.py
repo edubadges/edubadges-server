@@ -107,22 +107,6 @@ badgr_admin.register(RefreshToken, RefreshTokenAdmin)
 
 class FilterByScopeMixin(object):
     
-    def get_queryset(self, request):
-        """
-        Override filtering in Admin page
-        """
-        qs = self.model._default_manager.get_queryset()
-        if not request.user.is_superuser:
-            if request.user.has_perm(u'badgeuser.has_institution_scope'):
-                institution_id = request.user.faculty.first().institution.id
-                qs = qs.filter(faculty__institution_id=institution_id).distinct()
-            elif request.user.has_perm(u'badgeuser.has_faculty_scope'):
-                qs = qs.filter(faculty__in=request.user.faculty.all()).distinct()
-        ordering = self.get_ordering(request)
-        if ordering:
-            qs = qs.order_by(*ordering)
-        return qs
-    
     def change_view(self, request, object_id, form_url='', extra_context=None):
         '''
         Overrides super.change_view to add a check to see if this object is in the request.user's scope

@@ -25,6 +25,23 @@ class IssuerExtensionInline(TabularInline):
 
 
 class IssuerAdmin(DjangoObjectActions, FilterByScopeMixin, ModelAdmin):
+    
+    def get_queryset(self, request):
+        """
+        Override filtering in Admin page
+        """
+        qs = self.model._default_manager.get_queryset()
+        if not request.user.is_superuser:
+            if request.user.has_perm(u'badgeuser.has_institution_scope'):
+                institution_id = request.user.institution.id
+                qs = qs.filter(faculty__institution_id=institution_id).distinct()
+            elif request.user.has_perm(u'badgeuser.has_faculty_scope'):
+                qs = qs.filter(faculty__in=request.user.faculty.all()).distinct()
+        ordering = self.get_ordering(request)
+        if ordering:
+            qs = qs.order_by(*ordering)
+        return qs
+    
     readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id', 'slug')
     list_display = ('img', 'name', 'entity_id', 'created_by', 'created_at', 'faculty')
     list_display_links = ('img', 'name')
