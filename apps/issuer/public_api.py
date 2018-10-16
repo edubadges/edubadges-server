@@ -170,34 +170,59 @@ class ImagePropertyDetailView(APIView, SlugToEntityIdRedirectMixin):
         if image_type not in ['original', 'png']:
             raise ValidationError(u"invalid image type: {}".format(image_type))
 
+        supported_fmts = {
+            'square': (1, 1),
+            'wide': (1.91, 1)
+        }
+        image_fmt = request.query_params.get('fmt', 'square').lower()
+        if image_fmt not in supported_fmts.keys():
+            raise ValidationError(u"invalid image format: {}".format(image_fmt))
+
         image_url = image_prop.url
         filename, ext = os.path.splitext(image_prop.name)
         basename = os.path.basename(filename)
         dirname = os.path.dirname(filename)
         version_suffix = getattr(settings, 'CAIROSVG_VERSION_SUFFIX', '1')
-        new_name = '{dirname}/converted{version}/{basename}.png'.format(dirname=dirname, basename=basename, version=version_suffix)
+        new_name = '{dirname}/converted{version}/{basename}{fmt_suffix}.png'.format(
+            dirname=dirname,
+            basename=basename,
+            version=version_suffix,
+            fmt_suffix="-{}".format(image_fmt) if image_fmt != 'square' else ""
+        )
         storage = DefaultStorage()
 
-        if image_type == 'original':
+        def _fit_to_height(img, ar, height=400):
+            img.thumbnail((height,height))
+            new_size = (int(ar[0]*height), int(ar[1]*height))
+            new_img = Image.new("RGBA", new_size)
+            new_img.paste(img, ((new_size[0] - height)/2, (new_size[1] - height)/2))
+            new_img.show()
+            return new_img
+
+        if image_type == 'original' and image_fmt == 'square':
             image_url = image_prop.url
-        elif image_type == 'png' and ext == '.svg':
+        elif ext == '.svg':
             if not storage.exists(new_name):
                 with storage.open(image_prop.name, 'rb') as input_svg:
                     svg_buf = StringIO.StringIO()
                     out_buf = StringIO.StringIO()
                     cairosvg.svg2png(file_obj=input_svg, write_to=svg_buf)
                     img = Image.open(svg_buf)
-                    img.thumbnail((400, 400))
-                    img.save(out_buf, format=image_type)
+
+                    img = _fit_to_height(img, supported_fmts[image_fmt])
+
+                    img.save(out_buf, format='png')
                     storage.save(new_name, out_buf)
             image_url = storage.url(new_name)
-        elif ext != '.png':
-            # attempt to use PIL to do desired image conversion
+        else:
             if not storage.exists(new_name):
                 with storage.open(image_prop.name, 'rb') as input_svg:
                     out_buf = StringIO.StringIO()
                     img = Image.open(input_svg)
-                    img.save(out_buf, format=image_type)
+
+                    img = _fit_to_height(img, supported_fmts[image_fmt])
+
+                    img.save(out_buf, format='png')
                     storage.save(new_name, out_buf)
             image_url = storage.url(new_name)
 
