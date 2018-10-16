@@ -443,6 +443,12 @@ BADGR_PUBLIC_BOT_USERAGENTS = [
     'Facebot',
     'Slackbot',
 ]
+BADGR_PUBLIC_BOT_USERAGENTS_WIDE = [
+    'LinkedInBot',
+    'Twitterbot',
+    'facebook',
+    'Facebot',
+]
 
 
 # Allow use of weaker CAs (1024 bits) to avoid problem with chained certificates used by accounts.google.com

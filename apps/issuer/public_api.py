@@ -96,7 +96,20 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
         return Response(json)
 
     def is_bot(self):
+        """
+        bots get an stub that contains opengraph tags
+        """
         bot_useragents = getattr(settings, 'BADGR_PUBLIC_BOT_USERAGENTS', ['LinkedInBot'])
+        user_agent = self.request.META.get('HTTP_USER_AGENT', '')
+        if any(a in user_agent for a in bot_useragents):
+            return True
+        return False
+
+    def is_wide_bot(self):
+        """
+        some bots prefer a wide aspect ratio for the image
+        """
+        bot_useragents = getattr(settings, 'BADGR_PUBLIC_BOT_USERAGENTS_WIDE', ['LinkedInBot'])
         user_agent = self.request.META.get('HTTP_USER_AGENT', '')
         if any(a in user_agent for a in bot_useragents):
             return True
@@ -241,6 +254,9 @@ class IssuerJson(JSONComponentView):
             OriginSetting.HTTP,
             reverse('issuer_image', kwargs={'entity_id': self.current_object.entity_id})
         )
+        if self.is_wide_bot():
+            image_url = "{}&fmt=wide".format(image_url)
+
         return dict(
             title=self.current_object.name,
             description=self.current_object.description,
@@ -292,6 +308,8 @@ class BadgeClassJson(JSONComponentView):
             OriginSetting.HTTP,
             reverse('badgeclass_image', kwargs={'entity_id': self.current_object.entity_id})
         )
+        if self.is_wide_bot():
+            image_url = "{}&fmt=wide".format(image_url)
         return dict(
             title=self.current_object.name,
             description=self.current_object.description,
@@ -342,6 +360,8 @@ class BadgeInstanceJson(JSONComponentView):
             OriginSetting.HTTP,
             reverse('badgeclass_image', kwargs={'entity_id': self.current_object.cached_badgeclass.entity_id})
         )
+        if self.is_wide_bot():
+            image_url = "{}&fmt=wide".format(image_url)
         return dict(
             title=self.current_object.cached_badgeclass.name,
             description=self.current_object.cached_badgeclass.description,
