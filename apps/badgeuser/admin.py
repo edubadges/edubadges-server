@@ -3,7 +3,7 @@ from django.contrib.admin import ModelAdmin, TabularInline
 from externaltools.models import ExternalToolUserActivation
 from mainsite.admin import badgr_admin
 
-from .models import BadgeUser, EmailAddressVariant, TermsVersion, TermsAgreement
+from .models import BadgeUser, EmailAddressVariant, TermsVersion, TermsAgreement, CachedEmailAddress
 
 
 class ExternalToolInline(TabularInline):
@@ -23,6 +23,13 @@ class TermsAgreementInline(TabularInline):
     fields = ('created_at', 'terms_version')
 
 
+class EmailAddressInline(TabularInline):
+    model = CachedEmailAddress
+    fk_name = 'user'
+    extra = 0
+    fields = ('email','verified','primary')
+
+
 class BadgeUserAdmin(ModelAdmin):
     readonly_fields = ('entity_id', 'date_joined', 'last_login', 'username', 'entity_id', 'agreed_terms_version')
     list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'entity_id', 'date_joined')
@@ -35,8 +42,9 @@ class BadgeUserAdmin(ModelAdmin):
         ('Permissions', {'fields': ('groups', 'user_permissions')}),
     )
     inlines = [
+        EmailAddressInline,
         ExternalToolInline,
-        TermsAgreementInline
+        TermsAgreementInline,
     ]
 
 badgr_admin.register(BadgeUser, BadgeUserAdmin)
