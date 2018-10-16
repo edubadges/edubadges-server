@@ -116,7 +116,7 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
                     OriginSetting.HTTP,
                     reverse('badgeclass_image', kwargs={'entity_id': assertion.cached_badgeclass.entity_id})
                 )
-                self.assertContains(response, '<meta property="og:image" content="{}">'.format(png_image_url), html=True)
+                self.assertContains(response, '<meta property="og:image" content="{}'.format(png_image_url))
 
     def test_get_assertion_html_redirects_to_frontend(self):
         badgr_app = BadgrApp(cors='frontend.ui',
