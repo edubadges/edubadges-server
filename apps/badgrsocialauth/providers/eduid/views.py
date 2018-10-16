@@ -1,4 +1,4 @@
-import urllib, requests, json, logging
+import urllib, requests, json, logging, urlparse
 from base64 import b64encode
 from django.conf import settings
 from django.http import HttpResponseRedirect
@@ -25,7 +25,7 @@ def encode(username, password): #client_id, secret
 def login(request):
     current_app = SocialApp.objects.get_current(provider='edu_id')
     # the only thing set in state is the referer (frontend, or staff)
-    referer = request.META['HTTP_REFERER'].split('/')[3]
+    referer = json.dumps(request.META['HTTP_REFERER'].split('/')[3:])
     badgr_app_pk = request.session.get('badgr_app_pk', None)
     state = json.dumps([referer,badgr_app_pk])
     params = {
@@ -42,6 +42,9 @@ def login(request):
     
 
 def after_terms_agreement(request, **kwargs):
+    '''
+    this is the second part of the callback, after consent has been given, or is user already exists
+    '''
     badgr_app_pk, login_type, referer = kwargs['state'].split('-')
     access_token = kwargs.get('access_token', None)
     if not access_token:
@@ -71,14 +74,16 @@ def after_terms_agreement(request, **kwargs):
         return render_authentication_error(request, EduIDProvider.id, error)
     
     # 3. Complete social login 
-    set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app_pk))
+    badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
+    set_session_badgr_app(request, badgr_app)
     provider = EduIDProvider(request)
     login = provider.sociallogin_from_response(request, userinfo_json)
     ret = complete_social_login(request, login)
    
     # 4. Return the user to where she came from (ie the referer: frontend or staff dahsboard)
-    if referer == 'staff':
-        return HttpResponseRedirect(reverse('admin:index'))
+    if 'public' in json.loads(referer):
+        url = ret.url+'&public='+json.loads(referer)[-1]
+        return HttpResponseRedirect(url)
     else:
         return ret
 
@@ -117,7 +122,7 @@ def callback(request):
     userinfo_json = response.json()
     
     keyword_arguments = {'access_token':token_json['access_token'], 
-                         'state': '-'.join((str(badgr_app_pk), 'edu_id', referer)),
+                         'state': '-'.join((str(badgr_app_pk), 'edu_id', str(referer))),
                          'after_terms_agreement_url_name': 'eduid_terms_accepted_callback'}
     if not check_if_user_already_exists(userinfo_json['sub']):
         return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))
