@@ -3,13 +3,13 @@ Django==1.11.15
 semver==2.6.0
 pytz==2017.2
 # PIL support
-Pillow==3.1.1
+Pillow==3.3.2
 python-dateutil==2.6.1
 
 # mysql database
 MySQL-python==1.2.5
 
-django-storages==1.6.5
+django-storages==1.7
 
 
 
@@ -52,12 +52,12 @@ PyLD==0.7.1
 rfc3987==1.3.4
 pypng==0.0.18
 jsonfield==2.0.2
-PyJWT==1.4.0
+PyJWT==1.5.1
 
 # markdown support
 Markdown==2.6.8
 django-markdownify==0.1.0
-bleach==2.0.0
+bleach==2.1.4
 
 # Badgr related utilities
 openbadges-bakery==1.0.0b4
