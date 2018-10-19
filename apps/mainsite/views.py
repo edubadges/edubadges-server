@@ -176,6 +176,7 @@ class AcceptTermsView(TemplateView):
         badgr_app_pk = kwargs['state'].split('-')[0]
         badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
         login_type = kwargs['state'].split('-')[1]
+        context['privacy_statement_url'] = badgr_app.public_pages_redirect + '/privacy-policy'
         if login_type == 'surf_conext':
             context['ui_login_redirect'] = badgr_app.ui_login_redirect.replace('login', 'staff-login')
         elif login_type == 'edu_id':
