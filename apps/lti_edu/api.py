@@ -11,6 +11,23 @@ from lti_edu.views import LtiViewSet
 from issuer.models import BadgeClass
 from entity.api import BaseEntityListView
 
+
+class LTICheckIfStudentIsEnrolled(BaseEntityListView):
+    
+    permission_classes = (AuthenticatedWithVerifiedEmail, )
+    model = StudentsEnrolled
+    serializer_class = StudentsEnrolledSerializer
+    
+    def post(self, request, **kwargs):
+        badge_class = get_object_or_404(BadgeClass, entity_id=request.data['badgeclass_slug'])
+        try:
+            StudentsEnrolled.objects.get(edu_id=request.data['edu_id'], 
+                                         badge_class_id=badge_class.pk)
+            return Response(data='alreadyEnrolled', status=200)
+        except StudentsEnrolled.DoesNotExist:
+            return Response(data='notEnrolled', status=200)
+        
+
 class LTIStudentsEnrolledDetail(BaseEntityListView):
     permission_classes = (AuthenticatedWithVerifiedEmail, )
     
@@ -38,12 +55,12 @@ class LTIStudentsEnrolledDetail(BaseEntityListView):
         try:
             StudentsEnrolled.objects.get(edu_id=request.data['edu_id'], 
                                          badge_class_id=badge_class.pk)
-            return Response(data='already enrolled', status=200)
+            return Response(data='alreadyEnrolled', status=200)
         except StudentsEnrolled.DoesNotExist:
             StudentsEnrolled.objects.update_or_create(
                 badge_class=badge_class, email=request.data['email'], 
                 edu_id=request.data['edu_id'], defaults=defaults)
-            return Response(data='OK', status=200)
+            return Response(data='enrolled', status=200)
         
     def get(self, request, **kwargs):
         if 'badgeclass_slug' not in kwargs:
