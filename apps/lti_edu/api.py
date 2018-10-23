@@ -29,7 +29,7 @@ class LTIStudentsEnrolledDetail(BaseEntityListView):
 
         badge_class = get_object_or_404(BadgeClass, entity_id=request.data['badgeclass_slug'])
 
-        # implicit consent given by enrolling?
+        # consent given when enrolling
         defaults = {'date_consent_given': timezone.now(),
                     'first_name': request.data.get('first_name', ''), 
                     'last_name': request.data.get('last_name', '')}

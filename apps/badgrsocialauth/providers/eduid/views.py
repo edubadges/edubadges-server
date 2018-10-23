@@ -1,15 +1,39 @@
-import urllib, requests, json, logging, urlparse
+import urllib, requests, json, logging, urlparse, os
 from base64 import b64encode
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
+from django.utils import timezone
 from allauth.socialaccount.helpers import render_authentication_error, complete_social_login
 from allauth.socialaccount.models import SocialApp
 from badgrsocialauth.utils import set_session_badgr_app, check_if_user_already_exists
 from mainsite.models import BadgrApp
 from .provider import EduIDProvider
+from lti_edu.models import StudentsEnrolled
+from rest_framework.response import Response
+from issuer.models import BadgeClass
 logger = logging.getLogger('Badgr.Debug')
+
+def enroll_student(user, edu_id, badgeclass_slug):
+    badge_class = get_object_or_404(BadgeClass, entity_id=badgeclass_slug)
+    
+    # consent given wehen enrolling
+    defaults = {'date_consent_given': timezone.now(),
+                'first_name': user.first_name, 
+                'last_name': user.last_name}
+    
+    # check if not already enrolled
+    try:
+        StudentsEnrolled.objects.get(edu_id=edu_id, 
+                                     badge_class_id=badge_class.pk)
+        return 'alreadyEnrolled'
+    except StudentsEnrolled.DoesNotExist:
+        StudentsEnrolled.objects.update_or_create(
+            badge_class=badge_class, email=user.email, 
+            edu_id=edu_id, defaults=defaults)
+        return 'enrolled'
+        
 
 def encode(username, password): #client_id, secret
     """Returns an HTTP basic authentication encrypted string given a valid
@@ -25,7 +49,7 @@ def encode(username, password): #client_id, secret
 def login(request):
     current_app = SocialApp.objects.get_current(provider='edu_id')
     # the only thing set in state is the referer (frontend, or staff)
-    referer = json.dumps(request.META['HTTP_REFERER'].split('/')[3:])
+    referer = json.dumps(urlparse.urlparse(request.META['HTTP_REFERER']).path.split('/')[1:])
     badgr_app_pk = request.session.get('badgr_app_pk', None)
     state = json.dumps([referer,badgr_app_pk])
     params = {
@@ -80,9 +104,14 @@ def after_terms_agreement(request, **kwargs):
     login = provider.sociallogin_from_response(request, userinfo_json)
     ret = complete_social_login(request, login)
    
-    # 4. Return the user to where she came from (ie the referer: frontend or staff dahsboard)
+    # 4. Return the user to where she came from (ie the referer: public enrollment or main page)
     if 'public' in json.loads(referer):
-        url = ret.url+'&public='+json.loads(referer)[-1]
+        if 'badges' in json.loads(referer):
+            badgeclass_slug = json.loads(referer)[-1]
+            if badgeclass_slug:
+                edu_id = userinfo_json['sub']
+                enrolled = enroll_student(request.user, edu_id, badgeclass_slug)
+        url = ret.url+'&public=true'+'&badgeclassSlug='+badgeclass_slug+'&enrollmentStatus='+enrolled
         return HttpResponseRedirect(url)
     else:
         return ret
