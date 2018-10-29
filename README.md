@@ -92,6 +92,16 @@ If your badgr-ui is running on http://localhost:4000, use the following values:
 * UI connect success redirect: `http://localhost:4000/profile/`
 * Public pages redirect: `http://localhost:4000/public/`
 
+#### Sign-In Configuration
+
+* [Create an oAuth2 Provider Application](http://localhost:8000/staff/oauth2_provider/application/add/) with
+    * Client id: `public`
+    * Client type: Public
+    * allowed scopes: `rw:profile rw:issuer rw:backpack`
+    * Authorization grant type: Resource owner password-based
+    * Name: `localdev`
+    * Redirect uris: `http://localhost:4000`
+
 ### Additional configuration options
 Set these values in your settings_local.py file to configure the application to your specific needs. Required options are listed in bold.
 * *HELP_EMAIL* (Required)
