@@ -46,6 +46,25 @@ def encode(username, password): #client_id, secret
     username_password = '%s:%s' % (username, password)
     return 'Basic ' + b64encode(username_password.encode()).decode()
 
+# rewrite of login based on new settings for eduid (now working on dev needs testing for prod)
+#def login(request):
+#    current_app = SocialApp.objects.get_current(provider='edu_id')
+#    # the only thing set in state is the referer (frontend, or staff)
+#    referer = json.dumps(request.META['HTTP_REFERER'].split('/')[3:])
+#    badgr_app_pk = request.session.get('badgr_app_pk', None)
+#    state = json.dumps([referer,badgr_app_pk])
+#    params = {
+#    "state": state,
+#    'redirect_uri': '%s/account/eduid/login/callback/' % settings.HTTP_ORIGIN,
+#    }
+#    headers = {
+#      'Content-Type': "application/json",
+#      'Cache-Control': "no-cache",
+#      'Authorization': encode(current_app.client_id, current_app.secret)
+#    }
+#    response = requests.post("{}/login".format(settings.EDUID_PROVIDER_URL), data=json.dumps(params), headers=headers)    
+#    return redirect(response.text)
+
 def login(request):
     current_app = SocialApp.objects.get_current(provider='edu_id')
     # the only thing set in state is the referer (frontend, or staff)
@@ -54,16 +73,12 @@ def login(request):
     state = json.dumps([referer,badgr_app_pk])
     params = {
     "state": state,
+    "client_id": current_app.client_id,
+    "response_type": "code",
+    "scope": "openid",
     'redirect_uri': '%s/account/eduid/login/callback/' % settings.HTTP_ORIGIN,
     }
-    headers = {
-      'Content-Type': "application/json",
-      'Cache-Control': "no-cache",
-      'Authorization': encode(current_app.client_id, current_app.secret)
-    }
-    response = requests.post("{}/login".format(settings.EDUID_PROVIDER_URL), data=json.dumps(params), headers=headers)    
-    return redirect(response.text)
-    
+    return redirect("{}/login?{}".format(settings.EDUID_PROVIDER_URL, urllib.parse.urlencode(params)))
 
 def after_terms_agreement(request, **kwargs):
     '''
