@@ -303,6 +303,14 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
             return account.extra_data['sub']
         except SocialAccount.DoesNotExist:
             return None
+        
+    def get_social_account(self):
+        from allauth.socialaccount.models import SocialAccount
+        try:
+            account = SocialAccount.objects.get(user=self.pk)
+            return account
+        except SocialAccount.DoesNotExist:
+            return None
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):
