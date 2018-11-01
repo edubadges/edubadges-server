@@ -6,14 +6,17 @@ from rest_framework.response import Response
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from issuer.permissions import BadgrOAuthTokenHasEntityScope
 from lti_edu.models import StudentsEnrolled
-from lti_edu.serializers import StudentsEnrolledSerializer
+from lti_edu.serializers import StudentsEnrolledSerializer, StudentsEnrolledSerializerWithRelations
 from lti_edu.views import LtiViewSet
 from issuer.models import BadgeClass
 from entity.api import BaseEntityListView
+from allauth.socialaccount.models import SocialAccount
 
 
-class LTICheckIfStudentIsEnrolled(BaseEntityListView):
-    
+class CheckIfStudentIsEnrolled(BaseEntityListView):
+    """
+    POST to check if student is enrolled
+    """
     permission_classes = (AuthenticatedWithVerifiedEmail, )
     model = StudentsEnrolled
     serializer_class = StudentsEnrolledSerializer
@@ -26,9 +29,40 @@ class LTICheckIfStudentIsEnrolled(BaseEntityListView):
             return Response(data='alreadyEnrolled', status=200)
         except StudentsEnrolled.DoesNotExist:
             return Response(data='notEnrolled', status=200)
-        
 
-class LTIStudentsEnrolledDetail(BaseEntityListView):
+class StudentEnrollmentList(BaseEntityListView):
+    """
+    GET a list of enrollments for a student
+    DELETE to delete enrollment
+    """
+    permission_classes = (AuthenticatedWithVerifiedEmail, )
+    model = StudentsEnrolled
+    serializer_class = StudentsEnrolledSerializerWithRelations
+    
+    def get_objects(self, request, **kwargs):
+        recipient_identifier = request.user.get_recipient_identifier() 
+        return StudentsEnrolled.objects.filter(edu_id=recipient_identifier)
+    
+    def get(self, request, **kwargs):
+        return super(StudentEnrollmentList, self).get(request, **kwargs)
+    
+    def delete(self, request, **kwargs):
+        enrollment = StudentsEnrolled.objects.get(id=request.data['enrollmentID'])
+        if enrollment.date_awarded:
+            return Response(data='Awarded enrollments cannot be withdrawn', status=403)
+        if request.user.get_recipient_identifier() == enrollment.edu_id:
+            enrollment.delete()
+            return Response(status=200)
+        else:
+            return Response(data='Users can only withdraw their own enrollments', status=403) 
+
+
+
+class StudentsEnrolledList(BaseEntityListView):
+    """
+    GET: get  list of enrollments for a badgeclass
+    POST: to enroll student
+    """
     permission_classes = (AuthenticatedWithVerifiedEmail, )
     
     model = StudentsEnrolled
@@ -61,9 +95,9 @@ class LTIStudentsEnrolledDetail(BaseEntityListView):
                 badge_class=badge_class, email=request.data['email'], 
                 edu_id=request.data['edu_id'], defaults=defaults)
             return Response(data='enrolled', status=200)
-        
+         
     def get(self, request, **kwargs):
         if 'badgeclass_slug' not in kwargs:
             return Response(data='field missing', status=500)
-        return super(LTIStudentsEnrolledDetail, self).get(request, **kwargs) 
- 
+        return super(StudentsEnrolledList, self).get(request, **kwargs) 
+  
