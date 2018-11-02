@@ -1,5 +1,5 @@
 # Django stuff
-Django==1.11.13
+Django==1.11.15
 semver==2.6.0
 pytz==2017.2
 # PIL support
@@ -28,7 +28,7 @@ djangorestframework==3.6.2
 # Django Allauth
 django-allauth==0.37.1
 oauthlib==2.1.0
-requests==2.19.1
+requests==2.20.0
 requests-oauthlib==0.4.2
 # Permissions framework
 rules==0.4
@@ -68,7 +68,7 @@ python-json-logger==0.1.2
 
 # SSL Support
 cffi==1.11.5
-cryptography==2.2.2
+cryptography==2.3
 enum34==1.0.4
 idna==2.5
 ipaddress==1.0.14
