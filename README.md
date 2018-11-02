@@ -109,11 +109,6 @@ If your badgr-ui is running on http://localhost:4000, use the following values:
 * [Edit your super user](http://localhost:8000/staff/badgeuser/badgeuser/1/change/)
     * Add an email address, check "verified" and "primary"
 
-**Terms Configuration**
-
-* [Add an initial TermsVersion Object](http://localhost:8000/staff/badgeuser/termsversion/)
-    * This prevents the frontend from repeatedly asking the enduser to agree to terms
-
 * [Create an oAuth2 Provider Application](http://localhost:8000/staff/oauth2_provider/application/add/) with
     * Client id: `public`
     * Client type: Public
