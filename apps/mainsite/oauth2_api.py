@@ -155,6 +155,9 @@ class TokenView(OAuth2ProviderTokenView):
     def post(self, request, *args, **kwargs):
 
         def _request_identity(request):
+            username = request.POST.get('username', None)
+            if username:
+                return username
             return client_ip_from_request(self.request)
 
         def _backoff_cache_key(request):
@@ -162,15 +165,18 @@ class TokenView(OAuth2ProviderTokenView):
 
         _backoff_period = getattr(settings, 'TOKEN_BACKOFF_PERIOD_SECONDS', 2)
 
-        if _backoff_period is not None:
-            # check for existing backoff
+        grant_type = request.POST.get('grant_type', 'password')
+
+        if grant_type == 'password' and _backoff_period is not None:
+            # check for existing backoff for password attempts
             backoff = cache.get(_backoff_cache_key(request))
             if backoff is not None:
                 backoff_until = backoff.get('until', None)
                 backoff_count = backoff.get('count', 1)
                 if backoff_until > timezone.now():
                     backoff_count += 1
-                    backoff_until = timezone.now() + datetime.timedelta(seconds=_backoff_period ** backoff_count)
+                    backoff_seconds = min(86400, _backoff_period ** backoff_count)  # maximum backoff is 24 hours
+                    backoff_until = timezone.now() + datetime.timedelta(seconds=backoff_seconds)
                     cache.set(_backoff_cache_key(request), dict(until=backoff_until, count=backoff_count), timeout=None)
                     # return the same error as a failed login attempt
                     return HttpResponse(json.dumps({"error_description": "Invalid credentials given.", "error": "invalid_grant"}), status=HTTP_401_UNAUTHORIZED)
@@ -201,8 +207,8 @@ class TokenView(OAuth2ProviderTokenView):
         # let parent method do actual authentication
         response = super(TokenView, self).post(request, *args, **kwargs)
 
-        if response.status_code == 401:
-            # failed login attempt
+        if grant_type == "password" and response.status_code == 401:
+            # failed password login attempt
             username = request.POST.get('username', None)
             badgrlogger.event(badgrlog.FailedLoginAttempt(request, username, endpoint='/o/token'))
 

@@ -20,8 +20,10 @@ class BadgrOAuth2Authentication(BaseAuthentication):
         if valid:
             token_session_timeout = getattr(settings, 'OAUTH2_TOKEN_SESSION_TIMEOUT_SECONDS', None)
             if token_session_timeout is not None:
-                r.access_token.expires = timezone.now() + datetime.timedelta(seconds=token_session_timeout)
-                r.access_token.save()
+                new_expiration = timezone.now() + datetime.timedelta(seconds=token_session_timeout)
+                if r.access_token.expires < new_expiration:
+                    r.access_token.expires = new_expiration
+                    r.access_token.save()
             if r.client.authorization_grant_type == Application.GRANT_CLIENT_CREDENTIALS:
                 return r.client.user, r.access_token
             else:

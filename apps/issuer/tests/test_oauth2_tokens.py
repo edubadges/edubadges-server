@@ -5,6 +5,7 @@ import json
 
 from django.urls import reverse
 
+from badgeuser.models import BadgrAccessToken
 from mainsite.tests import SetupIssuerHelper, BadgrTestCase, SetupOAuth2ApplicationHelper
 
 
@@ -68,9 +69,9 @@ class PublicAPITests(SetupOAuth2ApplicationHelper, SetupIssuerHelper, BadgrTestC
         # create a badgr user who owns several issuers
         badgr_user = self.setup_user(email='user@email.test', authenticate=False)
         issuers = [self.setup_issuer(owner=badgr_user, name="issuer #{}".format(i)) for i in range(1, 4)]
-
         issuer_ids = [i.entity_id for i in issuers]
 
+        # get rw:issuer:* tokens for the issuers
         response = self.client.post(reverse('v2_api_tokens_list'), data=dict(
             issuers=issuer_ids
         ), format="json", **auth_headers)
@@ -82,6 +83,9 @@ class PublicAPITests(SetupOAuth2ApplicationHelper, SetupIssuerHelper, BadgrTestC
         issuer_tokens = {r.get('issuer'): r.get('token') for r in result.get('result')}
         self.assertEqual(set(issuer_tokens.keys()), set(issuer_ids))
 
+        access_tokens = [BadgrAccessToken.objects.get(token=t) for t in issuer_tokens.values()]
+        self.assertEqual(len(access_tokens), len(issuer_tokens))
+
         # we should be able to use tokens to access the issuer
         for issuer_id, issuer_token in issuer_tokens.items():
             response = self.client.get(reverse('v2_api_issuer_detail', kwargs=dict(entity_id=issuer_id)),
@@ -89,5 +93,12 @@ class PublicAPITests(SetupOAuth2ApplicationHelper, SetupIssuerHelper, BadgrTestC
                  Authorization="Bearer {}".format(issuer_token)
             )
             self.assertEqual(response.status_code, 200)
+
+        # ensure that issuer tokens didnt change and still have same expiration
+        for access_token in access_tokens:
+            updated_access_token = BadgrAccessToken.objects.get(pk=access_token.pk)
+            self.assertEqual(updated_access_token.token, access_token.token)
+            self.assertEqual(updated_access_token.expires, access_token.expires)
+
 
 
