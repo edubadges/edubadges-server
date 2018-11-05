@@ -20,7 +20,6 @@ class LogPermissionsFailMixin():
         for permission in self.get_permissions():
             if not permission.has_permission(request, self):
                 logger.error({'permission.message':permission.message,
-                              'request.user': request.user,
                               "request.path": request.path})
                 self.permission_denied(
                     request, message=getattr(permission, 'message', None)

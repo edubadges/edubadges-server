@@ -175,9 +175,7 @@ class VerifiedEmailMatchesRecipientIdentifier(permissions.BasePermission):
         recipient_identifier = getattr(obj, 'recipient_identifier', None)
         result =  recipient_identifier and recipient_identifier in request.user.all_recipient_identifiers
         if not result:
-            logger.error({'recipient_identifier': recipient_identifier,
-                          'request.user.all_recipient_identifiers':request.user.all_recipient_identifiers
-                          })
+            logger.error('permission denied at VerifiedEmailMatchesRecipientIdentifier')
         return result
 
 class BadgrOAuthTokenHasScope(permissions.BasePermission):
@@ -195,8 +193,7 @@ class BadgrOAuthTokenHasScope(permissions.BasePermission):
                 if len(set(valid_scopes) & default_auth_scopes) > 0:
                     return True
             
-            logger.error({'valid_scopes':valid_scopes, 
-                          'user': request.user,
+            logger.error({'valid_scopes':valid_scopes,
                           'is_authenticated': request.user.is_authenticated,})
             return False
 

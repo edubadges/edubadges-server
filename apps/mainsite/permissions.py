@@ -31,8 +31,7 @@ class AuthenticatedWithVerifiedEmail(permissions.BasePermission):
     def has_permission(self, request, view):
         result = request.user and request.user.is_authenticated() and request.user.verified
         if not result:
-            log = {'message':self.message, 
-                   'request.user': request.user, 
+            log = {'message':self.message,
                    'is_authenticated': request.user.is_authenticated(),
                    'verified': request.user.verified} 
             logger.error(log)
