@@ -12,7 +12,8 @@ from allauth.account.models import EmailAddress, EmailConfirmation
 from basic_models.models import IsActive
 from django.core.cache import cache
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Permission
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models, transaction
@@ -26,7 +27,6 @@ from issuer.models import Issuer, BadgeInstance, BaseAuditedModel
 from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager
 from mainsite.models import ApplicationInfo
 from allauth.socialaccount.models import SocialLogin
-
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
     objects = CachedEmailAddressManager()
@@ -175,6 +175,18 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     def get_full_name(self):
         return u"%s %s" % (self.first_name, self.last_name)
 
+    def gains_permission(self, permission_codename, model):
+        content_type = ContentType.objects.get_for_model(model)
+        permission = Permission.objects.get(codename=permission_codename, content_type=content_type)
+        self.user_permissions.add(permission)
+        # you still need to reload user from db to refresh permission cache if you want effect to be immediate
+        
+    def loses_permission(self, permission_codename, model):
+        content_type = ContentType.objects.get_for_model(model)
+        permission = Permission.objects.get(codename=permission_codename, content_type=content_type)
+        self.user_permissions.remove(permission)
+        # you still need to reload user from db to refresh permission cache if you want effect to be immediate
+
     def get_institution(self):
         faculty = self.faculty.first()
         if faculty:
@@ -311,6 +323,12 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
             return account
         except SocialAccount.DoesNotExist:
             return None
+
+    def staff_memberships(self):
+        """
+        Returns all staff memberships
+        """
+        return Issuer.objects.filter(staff__id=self.id) 
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):

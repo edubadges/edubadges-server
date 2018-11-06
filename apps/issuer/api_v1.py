@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 import badgrlog
-from badgeuser.models import CachedEmailAddress
+from badgeuser.models import CachedEmailAddress, BadgeUser
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
 from issuer.models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
@@ -181,7 +181,8 @@ class IssuerStaffList(VersionedObjectMixin, APIView):
                     'role': role
                 }
             )
-
+            if created:
+                user_to_modify.gains_permission('view_issuer_tab', BadgeUser)
             if created is False:
                 raise ValidationError("Could not add user to staff list. User already in staff list.")
 
@@ -199,6 +200,9 @@ class IssuerStaffList(VersionedObjectMixin, APIView):
 
         elif action == 'remove':
             IssuerStaff.objects.filter(user=user_to_modify, issuer=current_issuer).delete()
+            if not user_to_modify.staff_memberships():
+                user_to_modify.loses_permission('view_issuer_tab', BadgeUser)
+                user_to_modify.save()
             current_issuer.publish()
             user_to_modify.publish()
             return Response(
