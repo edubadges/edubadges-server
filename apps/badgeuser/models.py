@@ -383,36 +383,27 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
 class BadgrAccessTokenManager(models.Manager):
 
     def generate_new_token_for_user(self, user, scope='r:profile', application=None, expires=None, refresh_token=False):
-        if application is None:
-            application, created = Application.objects.get_or_create(
-                client_id='public',
-                client_type=Application.CLIENT_PUBLIC,
-                authorization_grant_type=Application.GRANT_PASSWORD,
-            )
-            if created:
-                ApplicationInfo.objects.create(application=application)
-
         with transaction.atomic():
-            # reuse existing token records
-            existing_tokens = self.filter(user=user, application=application).order_by('-created')
-            if len(existing_tokens) < 1:
-                # create new token
-                accesstoken = self.model(application=application, user=user)
-            else:
-                accesstoken = existing_tokens[0]
-
-            if len(existing_tokens) > 1:
-                # remove any duplicate records if they exist
-                for t in existing_tokens[1:]:
-                    t.delete()
+            if application is None:
+                application, created = Application.objects.get_or_create(
+                    client_id='public',
+                    client_type=Application.CLIENT_PUBLIC,
+                    authorization_grant_type=Application.GRANT_PASSWORD,
+                )
+                if created:
+                    ApplicationInfo.objects.create(application=application)
 
             if expires is None:
-                expires = timezone.now() + datetime.timedelta(seconds=86400)
+                access_token_expires_seconds = getattr(settings, 'OAUTH2_PROVIDER', {}).get('ACCESS_TOKEN_EXPIRE_SECONDS', 86400)
+                expires = timezone.now() + datetime.timedelta(seconds=access_token_expires_seconds)
 
-            accesstoken.token = generate_token()
-            accesstoken.expires = expires
-            accesstoken.scope = scope
-            accesstoken.save()
+            accesstoken = self.create(
+                application=application,
+                user=user,
+                expires=expires,
+                token=generate_token(),
+                scope=scope
+            )
 
         return accesstoken
 
