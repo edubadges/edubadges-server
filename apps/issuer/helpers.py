@@ -149,7 +149,7 @@ class BadgeCheckHelper(object):
 
         if created_by:
             badgecheck_recipient_profile = {
-                'email': created_by.all_recipient_identifiers
+                'id': created_by.get_recipient_identifier(),
             }
         else:
             badgecheck_recipient_profile = None
@@ -160,6 +160,13 @@ class BadgeCheckHelper(object):
             raise ValidationError([{'name': "INVALID_BADGE", 'description': str(e)}])
 
         report = response.get('report', {})
+        # override VALIDATE_PROPERTY for id, until IMS accepts EduID iri format 
+        if report['errorCount'] == 1:
+            if report['messages'][0]['name'] == 'VALIDATE_PROPERTY':
+                report['messages'].pop(0)
+                report['errorCount'] = 0
+                report['valid'] = True
+
         is_valid = report.get('valid')
 
         if not is_valid:
@@ -185,7 +192,7 @@ class BadgeCheckHelper(object):
 
         original_json = response.get('input').get('original_json', {})
 
-        recipient_identifier = report.get('recipientProfile', {}).get('email', None)
+        recipient_identifier = report.get('recipientProfile', {}).get('id', None)
 
         with transaction.atomic():
             issuer, issuer_created = Issuer.objects.get_or_create_from_ob2(issuer_obo, original_json=original_json.get(issuer_obo.get('id')))
