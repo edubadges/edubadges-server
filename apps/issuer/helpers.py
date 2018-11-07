@@ -148,8 +148,10 @@ class BadgeCheckHelper(object):
         query = query[0]
 
         if created_by:
+            recipient_id = created_by.get_recipient_identifier(),        
             badgecheck_recipient_profile = {
                 'id': created_by.get_recipient_identifier(),
+                'email': [email.email for email in created_by.verified_emails]
             }
         else:
             badgecheck_recipient_profile = None
@@ -192,7 +194,9 @@ class BadgeCheckHelper(object):
 
         original_json = response.get('input').get('original_json', {})
 
-        recipient_identifier = report.get('recipientProfile', {}).get('id', None)
+        recipient_identifier = report.get('recipientProfile', {}).get('id', None) # first use 'id' as the recipient_identifier type
+        if not recipient_identifier: # the assertion might instead have the 'email' recipient_identifier type
+            recipient_identifier = report.get('recipientProfile', {}).get('email', None) 
 
         with transaction.atomic():
             issuer, issuer_created = Issuer.objects.get_or_create_from_ob2(issuer_obo, original_json=original_json.get(issuer_obo.get('id')))

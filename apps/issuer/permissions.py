@@ -165,18 +165,22 @@ class AuditedModelOwner(permissions.BasePermission):
         return created_by_id and request.user.id == created_by_id
 
 
-class VerifiedEmailMatchesRecipientIdentifier(permissions.BasePermission):
+class RecipientIdentifiersMatch(permissions.BasePermission):
     """
     one of request user's verified emails matches obj.recipient_identifier
+    OR
+    user's edu ID matches obj.recipient_identifier
     ---
     model: BadgeInstance
     """
     def has_object_permission(self, request, view, obj):
         recipient_identifier = getattr(obj, 'recipient_identifier', None)
-        result =  recipient_identifier and recipient_identifier in request.user.all_recipient_identifiers
+        verified_emails = [email.email for email in request.user.verified_emails]
+        result =  recipient_identifier and recipient_identifier in request.user.all_recipient_identifiers+verified_emails
         if not result:
             logger.error('permission denied at VerifiedEmailMatchesRecipientIdentifier')
         return result
+    
 
 class BadgrOAuthTokenHasScope(permissions.BasePermission):
     def has_permission(self, request, view):

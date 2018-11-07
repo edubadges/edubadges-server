@@ -14,7 +14,7 @@ from backpack.serializers_v2 import BackpackAssertionSerializerV2, BackpackColle
     BackpackImportSerializerV2
 from entity.api import BaseEntityListView, BaseEntityDetailView, LogPermissionsFailMixin
 from issuer.models import BadgeInstance
-from issuer.permissions import AuditedModelOwner, VerifiedEmailMatchesRecipientIdentifier, BadgrOAuthTokenHasScope
+from issuer.permissions import AuditedModelOwner, RecipientIdentifiersMatch, BadgrOAuthTokenHasScope
 from issuer.public_api import ImagePropertyDetailView
 from apispec_drf.decorators import apispec_list_operation, apispec_post_operation, apispec_get_operation, \
     apispec_delete_operation, apispec_put_operation, apispec_operation
@@ -25,7 +25,7 @@ class BackpackAssertionList(LogPermissionsFailMixin, BaseEntityListView):
     model = BadgeInstance
     v1_serializer_class = LocalBadgeInstanceUploadSerializerV1
     v2_serializer_class = BackpackAssertionSerializerV2
-    permission_classes = (AuthenticatedWithVerifiedEmail, VerifiedEmailMatchesRecipientIdentifier, BadgrOAuthTokenHasScope)
+    permission_classes = (AuthenticatedWithVerifiedEmail, RecipientIdentifiersMatch, BadgrOAuthTokenHasScope)
     http_method_names = ('get', 'post')
     valid_scopes = {
         'get': ['r:backpack', 'rw:backpack'],
@@ -72,7 +72,7 @@ class BackpackAssertionDetail(BaseEntityDetailView):
     model = BadgeInstance
     v1_serializer_class = LocalBadgeInstanceUploadSerializerV1
     v2_serializer_class = BackpackAssertionSerializerV2
-    permission_classes = (AuthenticatedWithVerifiedEmail, VerifiedEmailMatchesRecipientIdentifier, BadgrOAuthTokenHasScope)
+    permission_classes = (AuthenticatedWithVerifiedEmail, RecipientIdentifiersMatch, BadgrOAuthTokenHasScope)
     http_method_names = ('get', 'delete', 'put')
     valid_scopes = {
         'get': ['r:backpack', 'rw:backpack'],
