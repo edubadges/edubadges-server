@@ -36,8 +36,8 @@ class ExtensionsSaverMixin(object):
 
     def save_extensions(self, validated_data, instance):
         extension_items = validated_data.get('extension_items')
-        if extension_items.get('languageExtension'):
-            del extension_items.get('languageExtension')['typedLanguage']
+        if extension_items.get('LanguageExtension'):
+            del extension_items['LanguageExtension']['typedLanguage']
         received_extensions = extension_items.keys()
         current_extension_names = instance.extension_items.keys()
         remove_these_extensions = set(current_extension_names) - set(received_extensions)
