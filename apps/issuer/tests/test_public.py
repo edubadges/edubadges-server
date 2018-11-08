@@ -10,6 +10,7 @@ from openbadges.verifier.openbadges_context import OPENBADGES_CONTEXT_V1_URI, OP
     OPENBADGES_CONTEXT_V2_DICT
 from openbadges_bakery import unbake
 
+from backpack.models import BackpackCollection, BackpackCollectionBadgeInstance
 from backpack.tests import setup_resources, setup_basic_1_0
 from issuer.models import Issuer, BadgeInstance
 from issuer.utils import CURRENT_OBI_VERSION, OBI_VERSION_CONTEXT_IRIS, UNVERSIONED_BAKED_VERSION
@@ -92,10 +93,20 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
             self.assertEqual(content['type'], 'Assertion')
 
     def test_scrapers_get_html_stub(self):
-        test_user = self.setup_user(authenticate=False)
+        test_user_email = 'test.user@email.test'
+
+        test_user = self.setup_user(authenticate=False, email=test_user_email)
         test_issuer = self.setup_issuer(owner=test_user)
         test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
-        assertion = test_badgeclass.issue(recipient_id='new.recipient@email.test')
+        assertion = test_badgeclass.issue(recipient_id=test_user_email)
+
+        # create a shared collection
+        test_collection = BackpackCollection.objects.create(created_by=test_user, name='Test Collection', description="testing")
+        BackpackCollectionBadgeInstance.objects.create(collection=test_collection, badgeinstance=assertion, badgeuser=test_user)  # add assertion to collection
+        test_collection.published = True
+        test_collection.save()
+        self.assertIsNotNone(test_collection.share_url)
+
         testcase_headers = [
             # bots/scrapers should get an html stub with opengraph tags
             {'HTTP_USER_AGENT': 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'},
@@ -104,6 +115,8 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
             {'HTTP_USER_AGENT': 'Facebot'},
             {'HTTP_USER_AGENT': 'Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)'},
         ]
+
+        # check that public assertion pages get og stubs served to bots
         for headers in testcase_headers:
             with self.assertNumQueries(0):
                 response = self.client.get('/public/assertions/{}'.format(assertion.entity_id), **headers)
@@ -117,6 +130,14 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
                     reverse('badgeclass_image', kwargs={'entity_id': assertion.cached_badgeclass.entity_id})
                 )
                 self.assertContains(response, '<meta property="og:image" content="{}'.format(png_image_url))
+
+        # check that collections get og stubs served to bots
+        for headers in testcase_headers:
+            with self.assertNumQueries(0):
+                response = self.client.get(test_collection.share_url, **headers)
+                self.assertEqual(response.status_code, 200)
+                self.assertTrue(response.get('content-type').startswith('text/html'))
+                self.assertContains(response, '<meta property="og:url" content="{}">'.format(test_collection.share_url), html=True)
 
     def test_get_assertion_html_redirects_to_frontend(self):
         badgr_app = BadgrApp(cors='frontend.ui',
