@@ -130,6 +130,7 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
 
     def get_badgrapp_redirect(self):
         badgrapp = self.current_object.cached_badgrapp
+        badgrapp = BadgrApp.cached.get(pk=badgrapp.pk)  # ensure we have latest badgrapp information
         if not badgrapp.public_pages_redirect:
             badgrapp = BadgrApp.objects.get_current(request=None)  # use the default badgrapp
 
