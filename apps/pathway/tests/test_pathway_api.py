@@ -12,6 +12,7 @@ from rest_framework import status
 from badgeuser.models import BadgeUser, CachedEmailAddress
 from issuer.models import BadgeClass, BadgeInstance, Issuer
 from issuer.serializers_v1 import BadgeInstanceSerializerV1
+from mainsite.models import BadgrApp
 from mainsite.tests.base import BadgrTestCase, SetupIssuerHelper
 from mainsite.utils import OriginSetting
 from pathway.completionspec import CompletionRequirementSpecFactory
@@ -20,6 +21,9 @@ from pathway.serializers import PathwaySerializer, PathwayElementSerializer
 from recipient.models import RecipientProfile, RecipientGroupMembership, RecipientGroup
 
 
+@override_settings(
+    BADGR_APP_ID=1
+)
 class PathwayApiTests(SetupIssuerHelper, BadgrTestCase):
 
     def setUp(self):
@@ -31,7 +35,6 @@ class PathwayApiTests(SetupIssuerHelper, BadgrTestCase):
         self.instructor.set_password('secret')
         self.instructor.save()
         self.instructor.user_permissions.add(Permission.objects.get(codename="add_issuer"))
-
         CachedEmailAddress(email='instructor@local.test', verified=True, primary=True, user=self.instructor).save()
         self.assertTrue(self.client.login(username='instructor', password='secret'), "Instructor can log in")
 
@@ -42,6 +45,8 @@ class PathwayApiTests(SetupIssuerHelper, BadgrTestCase):
             'url': "http://example.test",
             'email': "unittest@example.test",
         }
+        CachedEmailAddress(email=issuer_data['email'], verified=True, user=self.instructor).save()
+
         response = self.client.post(reverse('v1_api_issuer_list'), issuer_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, "Created an issuer")
         self.assertTrue(response.data['slug'], "Received an issuer with a slug")
@@ -49,6 +54,10 @@ class PathwayApiTests(SetupIssuerHelper, BadgrTestCase):
 
         # make a default badgeclass
         self.badgeclass = self.setup_badgeclass(issuer=Issuer.cached.get(entity_id=self.issuer.get('slug')))
+
+        self.badgr_app = BadgrApp.objects.create(cors='testserver',
+                                                 email_confirmation_redirect='http://testserver/login/',
+                                                 forgot_password_redirect='http://testserver/reset-password/')
 
     def test_can_create_pathway(self):
         pathway_data = {
@@ -240,6 +249,7 @@ class PathwayApiTests(SetupIssuerHelper, BadgrTestCase):
 
 @override_settings(
     ISSUER_NOTIFY_DEFAULT=False,
+    BADGR_APP_ID=1
 )
 class PathwayCompletionTests(SetupIssuerHelper, BadgrTestCase):
     def setUp(self):
@@ -255,6 +265,10 @@ class PathwayCompletionTests(SetupIssuerHelper, BadgrTestCase):
         )
 
         self.test_badgeclass = self.setup_badgeclass(issuer=self.test_issuer)
+
+        self.badgr_app = BadgrApp.objects.create(cors='testserver',
+                                                 email_confirmation_redirect='http://testserver/login/',
+                                                 forgot_password_redirect='http://testserver/reset-password/')
 
     def create_group(self):
         # Authenticate as an editor of the issuer in question
@@ -488,4 +502,3 @@ class PathwayCompletionTests(SetupIssuerHelper, BadgrTestCase):
         response = self.client.delete('/v1/issuer/issuers/{}/badges/{}'.format(second_badgeclass.issuer.entity_id, second_badgeclass.entity_id))
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data, 'Badge could not be deleted. It is being used as a pathway completion badge.')
-

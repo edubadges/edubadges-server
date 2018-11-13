@@ -9,9 +9,11 @@ from requests import ConnectionError
 
 import badgrlog
 from issuer.helpers import BadgeCheckHelper
-from issuer.models import BadgeClass, BadgeInstance
+from issuer.managers import resolve_source_url_referencing_local_object
+from issuer.models import BadgeClass, BadgeInstance, Issuer
 from issuer.utils import CURRENT_OBI_VERSION
 from mainsite.celery import app
+from mainsite.utils import OriginSetting
 
 logger = get_task_logger(__name__)
 badgrLogger = badgrlog.BadgrLogger()
@@ -177,4 +179,96 @@ def update_issuedon_imported_assertion(self, assertion_entityid):
         'assertion': assertion.entity_id,
         'source_url': assertion.source_url,
         'updated': updated
+    }
+
+
+@app.task(bind=True, queue=background_task_queue_name)
+def remove_backpack_duplicates(self, limit=None, offset=0, replay=False, report_only=False):
+
+    queryset = Issuer.objects.filter(source_url__isnull=False).order_by("pk")
+    if limit:
+        queryset = queryset[offset:offset+limit]
+    else:
+        queryset = queryset[offset:]
+
+    imported_issuers = queryset.only("entity_id", "source_url")
+
+    count = 0
+    for issuer in imported_issuers:
+        if resolve_source_url_referencing_local_object(issuer.source_url):
+            remove_backpack_duplicate_issuer.delay(issuer_entity_id=issuer.entity_id, report_only=report_only)
+            count += 1
+
+    if limit and replay and count >= limit:
+        remove_backpack_duplicates.delay(limit=limit, offset=offset+limit, replay=True, report_only=report_only)
+
+    return {
+        'success': True,
+        'count': count,
+        'limit': limit,
+        'offset': offset,
+        'report_only': report_only,
+        'message': "Enqueued {} duplicate issuers for removal".format(count)
+    }
+
+
+@app.task(bind=True, queue=background_task_queue_name)
+def remove_backpack_duplicate_issuer(self, issuer_entity_id=None, report_only=False):
+    try:
+        issuer = Issuer.objects.get(entity_id=issuer_entity_id)
+    except Issuer.DoesNotExist:
+        return {
+            'success': False,
+            'message': "No such issuer",
+            'issuer_entity_id': issuer_entity_id
+        }
+
+    if not resolve_source_url_referencing_local_object(issuer.source_url):
+        return {
+            'success': False,
+            'message': "Not a duplicate issuer",
+            'issuer_entity_id': issuer_entity_id
+        }
+
+    assertions = Issuer.badgeinstances.all()
+    badgeclasses = Issuer.badgeclasses.all()
+
+    # ensure this issuer doesn't own any non-duplicate objects
+    for badgeclass in badgeclasses:
+        if not resolve_source_url_referencing_local_object(badgeclass.source_url):
+            return {
+                'success': False,
+                'message': "A non-duplicate badgeclass was found owned by this issuer.",
+                'issuer_entity_id': issuer_entity_id,
+                'badgeclass_entity_id': badgeclass.entity_id
+            }
+    for assertion in assertions:
+        if not resolve_source_url_referencing_local_object(assertion.source_url):
+            return {
+                'success': False,
+                'message': "A non-duplicate assertion was found owned by this issuer.",
+                'issuer_entity_id': issuer_entity_id,
+                'assertion_entity_id': assertion.entity_id
+            }
+
+    if not report_only:
+        # purge assertions, then badgeclasses, then the issuer
+        assertion_count = 0
+        for assertion in assertions:
+            assertion.delete()
+            assertion_count += 1
+
+        badgeclass_count = 0
+        for badgeclass in badgeclasses:
+            badgeclass.delete()
+            badgeclass_count += 1
+
+        issuer.delete()
+
+    return {
+        'success': True,
+        'message': "Duplicate Issuer Report" if report_only else "Issuer removed.",
+        'issuer_entity_id': issuer_entity_id,
+        'badgeclass_count': badgeclass_count,
+        'assertion_count': assertion_count,
     }

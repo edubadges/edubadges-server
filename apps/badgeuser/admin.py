@@ -3,10 +3,8 @@ from django.contrib.auth.admin import UserAdmin
 
 from externaltools.models import ExternalToolUserActivation
 from mainsite.admin import badgr_admin, FilterByScopeMixin
-
-from .models import BadgeUser, BadgeUserProxy, EmailAddressVariant, TermsVersion, TermsAgreement
+from .models import BadgeUser, EmailAddressVariant, TermsVersion, TermsAgreement, CachedEmailAddress, BadgeUserProxy
 from . import utils
-
 
 class ExternalToolInline(TabularInline):
     model = ExternalToolUserActivation
@@ -66,6 +64,11 @@ class BadgeUserAdmin(FilterByScopeMixin, UserAdmin):
         ('Faculties', {'fields': ('faculty',) }),
     )
     filter_horizontal = ('faculty','groups', 'user_permissions')
+    inlines = [
+        EmailAddressInline,
+        ExternalToolInline,
+        TermsAgreementInline,
+    ]
 
 
     def get_queryset(self, request):
@@ -108,6 +111,13 @@ class BadgeUserAdmin(FilterByScopeMixin, UserAdmin):
 
 
 badgr_admin.register(BadgeUser, BadgeUserAdmin)
+
+
+class EmailAddressInline(TabularInline):
+    model = CachedEmailAddress
+    fk_name = 'user'
+    extra = 0
+    fields = ('email','verified','primary')
 
 
 class BadgeUserProxyAdmin(BadgeUserAdmin):

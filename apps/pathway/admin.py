@@ -50,3 +50,20 @@ class PathwayElementAdmin(ModelAdmin):
         return obj.pathway.issuer
 badgr_admin.register(PathwayElement, PathwayElementAdmin)
 
+
+class PathwayElementBadgeAdmin(ModelAdmin):
+    list_display = ('pathway_name', 'element_name', 'badge_name')
+    raw_id_fields = ('badgeclass', 'pathway', 'element')
+
+    def pathway_name(self, obj):
+        return obj.pathway.name
+    pathway_name.short_description = 'pathway'
+
+    def element_name(self, obj):
+        return obj.element.name
+    element_name.short_description = 'element'
+
+    def badge_name(self, obj):
+        return obj.badgeclass.name
+    badge_name.short_description = 'badge'
+badgr_admin.register(PathwayElementBadge, PathwayElementBadgeAdmin)

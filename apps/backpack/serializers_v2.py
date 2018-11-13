@@ -139,6 +139,7 @@ class BackpackImportSerializerV2(DetailSerializerV2):
             if not created:
                 instance.acceptance = BadgeInstance.ACCEPTANCE_ACCEPTED
                 instance.save()
+                raise RestframeworkValidationError([{'name': "DUPLICATE_BADGE", 'description': "You already have this badge in your backpack"}])
         except DjangoValidationError as e:
             raise RestframeworkValidationError(e.messages)
         return instance

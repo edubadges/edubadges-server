@@ -70,7 +70,7 @@ class TestSignup(BadgrTestCase):
                 'first_name': 'Tester',
                 'last_name': 'McSteve',
                 'email': 'test12345@example.com',
-                'password': '1234567'
+                'password': 'secr3t4nds3cur3'
             }
             response = self.client.post('/v1/user/profile', post_data)
             self.assertEqual(response.status_code, 201)
@@ -96,7 +96,11 @@ class TestSignup(BadgrTestCase):
             expected = urlparse.urlparse(expected_redirect_url)
             self.assertEqual(actual.netloc, expected.netloc)
             self.assertEqual(actual.scheme, expected.scheme)
-            self.assertDictEqual(urlparse.parse_qs(actual.query), urlparse.parse_qs(expected.query))
+
+            actual_query = urlparse.parse_qs(actual.query)
+            expected_query = urlparse.parse_qs(expected.query)
+            self.assertEqual(actual_query.get('email'), expected_query.get('email'))
+            self.assertIsNotNone(actual_query.get('authToken'))
 
 @override_settings(
     ACCOUNT_EMAIL_CONFIRMATION_HMAC=False

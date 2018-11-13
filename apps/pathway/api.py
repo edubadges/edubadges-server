@@ -14,6 +14,8 @@ from recipient.models import RecipientGroup, RecipientProfile
 
 
 class PathwayList(AbstractIssuerAPIEndpoint):
+    model = Issuer
+    queryset = Issuer.objects.all()
 
     def get(self, request, issuer_slug, **kwargs):
         """
@@ -55,6 +57,9 @@ class PathwayList(AbstractIssuerAPIEndpoint):
               type: string
               paramType: form
         """
+        if not self.get_object(issuer_slug, queryset=Issuer.objects.all()):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
         serializer = PathwaySerializer(data=request.data, context={
             'request': request,
             'issuer_slug': issuer_slug,

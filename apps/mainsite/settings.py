@@ -80,7 +80,8 @@ ROOT_URLCONF = 'mainsite.urls'
 
 # Hosts/domain names that are valid for this site.
 # "*" matches anything, ".example.com" matches example.com and all subdomains
-ALLOWED_HOSTS = ['*', ]
+
+ALLOWED_HOSTS = ['*', ] # ['<your badgr server domain>', ]
 X_FRAME_OPTIONS = 'ALLOW-FROM http://canvas.edubadges.nl/, https://canvas.edubadges.nl'
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -194,6 +195,28 @@ SOCIALACCOUNT_ADAPTER = 'badgrsocialauth.adapter.BadgrSocialAccountAdapter'
 # Is used in badgrsocialauth.adapter and defaults to False
 SOCIALACCOUNT_AUTO_SIGNUP = True
 
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+
+##
+#
+#  CORS
+#
+##
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_URLS_REGEX = r'^.*$'
@@ -337,7 +360,7 @@ REST_FRAMEWORK = {
         'mainsite.authentication.BadgrOAuth2Authentication',
         'rest_framework.authentication.TokenAuthentication',
         'entity.authentication.ExplicitCSRFSessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication',
     ),
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',
     'DEFAULT_VERSION': 'v1',
@@ -412,24 +435,32 @@ OAUTH2_PROVIDER = {
         # private scopes used for integrations
         'rw:issuer:*': 'Create and update Badgeclasses, and award Assertions for a single Issuer',
         'r:assertions': 'Batch receive assertions',
-        'rw:badgeuserAdmin': 'Ability to signup new BadgeUsers'
     },
     'DEFAULT_SCOPES': ['r:profile'],
 
     'OAUTH2_VALIDATOR_CLASS': 'mainsite.oauth_validator.BadgrRequestValidator',
-    'ACCESS_TOKEN_EXPIRE_SECONDS':  6*31*86400  # 6 months
+    'ACCESS_TOKEN_EXPIRE_SECONDS':  86400
 
 }
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2_provider.Application'
 OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'oauth2_provider.AccessToken'
 
-API_DOCS_EXCLUDED_SCOPES = ['rw:issuer:*', 'r:assertions', '*', 'rw:badgeuserAdmin']
+OAUTH2_TOKEN_SESSION_TIMEOUT_SECONDS = OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
+
+API_DOCS_EXCLUDED_SCOPES = ['rw:issuer:*', 'r:assertions', '*']
 
 
 BADGR_PUBLIC_BOT_USERAGENTS = [
     'LinkedInBot',   # 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'
     'Twitterbot',    # 'Twitterbot/1.0'
     'facebook',      # https://developers.facebook.com/docs/sharing/webmasters/crawler
+    'Facebot',
+    'Slackbot',
+]
+BADGR_PUBLIC_BOT_USERAGENTS_WIDE = [
+    'LinkedInBot',
+    'Twitterbot',
+    'facebook',
     'Facebot',
 ]
 
@@ -447,3 +478,10 @@ CELERY_ALWAYS_EAGER = True
 BADGERANK_NOTIFY_ON_BADGECLASS_CREATE = True
 BADGERANK_NOTIFY_ON_FIRST_ASSERTION = True
 BADGERANK_NOTIFY_URL = 'https://api.badgerank.org/v1/badgeclass/submit'
+
+
+from cryptography.fernet import Fernet
+PAGINATION_SECRET_KEY = Fernet.generate_key()
+AUTHCODE_SECRET_KEY = Fernet.generate_key()
+
+AUTHCODE_EXPIRES_SECONDS = 600  # needs to be long enough to fetch information from socialauth providers

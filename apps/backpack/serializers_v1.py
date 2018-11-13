@@ -107,6 +107,7 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
             if not created:
                 instance.acceptance = BadgeInstance.ACCEPTANCE_ACCEPTED
                 instance.save()
+                raise RestframeworkValidationError([{'name': "DUPLICATE_BADGE", 'description': "You already have this badge in your backpack"}])
             owner.publish()  # update BadgeUser.cached_badgeinstances()
         except DjangoValidationError as e:
             raise RestframeworkValidationError(e.args[0])
@@ -206,7 +207,7 @@ class CollectionSerializerV1(serializers.Serializer):
     name = StripTagsCharField(required=True, max_length=128)
     slug = StripTagsCharField(required=False, max_length=128, source='entity_id')
     description = StripTagsCharField(required=False, allow_blank=True, allow_null=True, max_length=255)
-    share_hash = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=255)
+    share_hash = serializers.CharField(read_only=True)
     share_url = serializers.CharField(read_only=True, max_length=1024)
     badges = CollectionBadgeSerializerV1(
         read_only=False, many=True, required=False, source='cached_collects'

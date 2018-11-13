@@ -302,13 +302,21 @@ class Issuer(ResizeUploadedImage,
                     json['image'] = image_info
                     json['image']['id'] = image_url
 
+        # source url
         if self.source_url:
-            json['sourceUrl'] = self.source_url
+            if obi_version == '1_1':
+                json["source_url"] = self.source_url
+                json["hosted_url"] = OriginSetting.HTTP + self.get_absolute_url()
+            elif obi_version == '2_0':
+                json["sourceUrl"] = self.source_url
+                json["hostedUrl"] = OriginSetting.HTTP + self.get_absolute_url()
 
+        # extensions
         if len(self.cached_extensions()) > 0:
             for extension in self.cached_extensions():
                 json[extension.name] = json_loads(extension.original_json)
 
+        # pass through imported json
         if include_extra:
             extra = self.get_filtered_json()
             if extra is not None:
@@ -561,6 +569,8 @@ class BadgeClass(ResizeUploadedImage,
             description=self.description_nonnull,
             issuer=self.cached_issuer.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.cached_issuer.jsonld_id, obi_version),
         ))
+
+        # image
         if self.image:
             image_url = OriginSetting.HTTP + reverse('badgeclass_image', kwargs={'entity_id': self.entity_id})
             json['image'] = image_url
@@ -575,25 +585,33 @@ class BadgeClass(ResizeUploadedImage,
         # criteria
         if obi_version == '1_1':
             json["criteria"] = self.get_criteria_url()
-            if self.source_url:
-                json['source_url'] = self.source_url
         elif obi_version == '2_0':
-            if self.source_url:
-                json['sourceUrl'] = self.source_url
             json["criteria"] = {}
             if self.criteria_url:
                 json['criteria']['id'] = self.criteria_url
             if self.criteria_text:
                 json['criteria']['narrative'] = self.criteria_text
 
+        # source_url
+        if self.source_url:
+            if obi_version == '1_1':
+                json["source_url"] = self.source_url
+                json["hosted_url"] = OriginSetting.HTTP + self.get_absolute_url()
+            elif obi_version == '2_0':
+                json["sourceUrl"] = self.source_url
+                json["hostedUrl"] = OriginSetting.HTTP + self.get_absolute_url()
+
+        # alignment / tags
         if obi_version == '2_0':
             json['alignment'] = [ a.get_json(obi_version=obi_version) for a in self.cached_alignments() ]
             json['tags'] = list(t.name for t in self.cached_tags())
 
+        # extensions
         if len(self.cached_extensions()) > 0:
             for extension in self.cached_extensions():
                 json[extension.name] = json_loads(extension.original_json)
 
+        # pass through imported json
         if include_extra:
             extra = self.get_filtered_json()
             if extra is not None:
@@ -878,6 +896,7 @@ class BadgeInstance(BaseAuditedModel,
                 'help_email': getattr(settings, 'HELP_EMAIL', 'help@badgr.io'),
                 'issuer_name': re.sub(r'[^\w\s]+', '', self.issuer.name, 0, re.I),
                 'issuer_url': self.issuer.url,
+                'issuer_email': self.issuer.email,
                 'issuer_detail': self.issuer.public_url,
                 'issuer_image_url': issuer_image_url,
                 'badge_instance_url': self.public_url,
@@ -970,15 +989,21 @@ class BadgeInstance(BaseAuditedModel,
                 "url": self.public_url if use_canonical_id else add_obi_version_ifneeded(self.public_url, obi_version),
                 "type": "hosted"
             }
-            if self.source_url:
-                json["source_url"] = self.source_url
         elif obi_version == '2_0':
             json["verification"] = {
                 "type": "HostedBadge"
             }
-            if self.source_url:
-                json["sourceUrl"] = self.source_url
 
+        # source url
+        if self.source_url:
+            if obi_version == '1_1':
+                json["source_url"] = self.source_url
+                json["hosted_url"] = OriginSetting.HTTP + self.get_absolute_url()
+            elif obi_version == '2_0':
+                json["sourceUrl"] = self.source_url
+                json["hostedUrl"] = OriginSetting.HTTP + self.get_absolute_url()
+
+        # evidence
         if self.evidence_url:
             if obi_version == '1_1':
                 # obi v1 single evidence url
@@ -987,14 +1012,16 @@ class BadgeInstance(BaseAuditedModel,
                 # obi v2 multiple evidence
                 json['evidence'] = [e.get_json(obi_version) for e in self.cached_evidence()]
 
-        if self.expires_at:
-            json['expires'] = self.expires_at.isoformat()
-
+        # narrative
         if self.narrative and obi_version == '2_0':
             json['narrative'] = self.narrative
 
+        # issuedOn / expires
         json['issuedOn'] = self.issued_on.isoformat()
+        if self.expires_at:
+            json['expires'] = self.expires_at.isoformat()
 
+        # recipient
         if self.hashed:
             json['recipient'] = {
                 "hashed": True,
@@ -1010,10 +1037,12 @@ class BadgeInstance(BaseAuditedModel,
                 "identity": self.recipient_identifier
             }
 
+        # extensions
         if len(self.cached_extensions()) > 0:
             for extension in self.cached_extensions():
                 json[extension.name] = json_loads(extension.original_json)
 
+        # pass through imported json
         if include_extra:
             extra = self.get_filtered_json()
             if extra is not None:

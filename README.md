@@ -3,7 +3,7 @@
 
 Badgr-server is the Python/Django API backend for issuing [Open Badges](http://openbadges.org). In addition to a powerful Issuer API and browser-based user interface for issuing, Badgr offers integrated badge management and sharing for badge earners. Free accounts are hosted by Concentric Sky at [Badgr.io](http://info.badgr.io), but for complete control over your own issuing environment, Badgr Server is available open source as a Python/Django application.
 
-See also [badgr-ui](https://github.com/concentricsky/badgr-ui-prerelease), the Angular front end that serves as users' interface for this project.
+See also [badgr-ui](https://github.com/concentricsky/badgr-ui), the Angular front end that serves as users' interface for this project.
 
 ### About the Badgr Project
 Badgr was developed by [Concentric Sky](https://concentricsky.com), starting in 2015 to serve as an open source reference implementation of the Open Badges Specification. It provides functionality to issue portable, verifiable Open Badges as well as to allow users to manage badges they have been awarded by any issuer that uses this open data standard. Since 2015, Badgr has grown to be used by hundreds of educational institutions and other people and organizations worldwide. See [Project Homepage](https://badgr.org) for more details about contributing to and integrating with Badgr.
@@ -80,7 +80,7 @@ API documentation is viewable at `/docs`
 
 #### Badgr App Configuration
 * Sign in to http://localhost:8000/staff
-* View the "Badgr app" records and use the staff admin forms to create a BadgrApp.
+* View the "Badgr app" records and use the staff admin forms to create a BadgrApp. BadgrApp(s) describe the configuration that badgr-server needs to know about an associated installation of badgr-ui.
 
 If your badgr-ui is running on http://localhost:4000, use the following values:
 * CORS: ensure this setting matches the domain on which you are running badgr-ui, including the port if other than the standard HTTP or HTTPS ports. `localhost:4000`
@@ -91,6 +91,31 @@ If your badgr-ui is running on http://localhost:4000, use the following values:
 * UI signup success redirect: `http://localhost:4000/signup/success/`
 * UI connect success redirect: `http://localhost:4000/profile/`
 * Public pages redirect: `http://localhost:4000/public/`
+
+#### Additional Configuration
+
+**Sign-In Configuration**
+
+* [Create an oAuth2 Provider Application](http://localhost:8000/staff/oauth2_provider/application/add/) with
+    * Client id: `public`
+    * Client type: Public
+    * allowed scopes: `rw:profile rw:issuer rw:backpack`
+    * Authorization grant type: Resource owner password-based
+    * Name: `localdev`
+    * Redirect uris: `http://localhost:4000`
+
+**User Configuration**
+
+* [Edit your super user](http://localhost:8000/staff/badgeuser/badgeuser/1/change/)
+    * Add an email address, check "verified" and "primary"
+
+* [Create an oAuth2 Provider Application](http://localhost:8000/staff/oauth2_provider/application/add/) with
+    * Client id: `public`
+    * Client type: Public
+    * allowed scopes: `rw:profile rw:issuer rw:backpack`
+    * Authorization grant type: Resource owner password-based
+    * Name: `localdev`
+    * Redirect uris: `http://localhost:4000`
 
 ### Additional configuration options
 Set these values in your settings_local.py file to configure the application to your specific needs. Required options are listed in bold.

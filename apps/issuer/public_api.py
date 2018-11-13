@@ -96,7 +96,20 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
         return Response(json)
 
     def is_bot(self):
+        """
+        bots get an stub that contains opengraph tags
+        """
         bot_useragents = getattr(settings, 'BADGR_PUBLIC_BOT_USERAGENTS', ['LinkedInBot'])
+        user_agent = self.request.META.get('HTTP_USER_AGENT', '')
+        if any(a in user_agent for a in bot_useragents):
+            return True
+        return False
+
+    def is_wide_bot(self):
+        """
+        some bots prefer a wide aspect ratio for the image
+        """
+        bot_useragents = getattr(settings, 'BADGR_PUBLIC_BOT_USERAGENTS_WIDE', ['LinkedInBot'])
         user_agent = self.request.META.get('HTTP_USER_AGENT', '')
         if any(a in user_agent for a in bot_useragents):
             return True
@@ -106,7 +119,7 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
         if self.format_kwarg == 'json':
             return False
 
-        html_accepts = ['*/*', 'text/html']
+        html_accepts = ['text/html']
 
         http_accept = self.request.META.get('HTTP_ACCEPT', 'application/json')
 
@@ -117,6 +130,7 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
 
     def get_badgrapp_redirect(self):
         badgrapp = self.current_object.cached_badgrapp
+        badgrapp = BadgrApp.cached.get(pk=badgrapp.pk)  # ensure we have latest badgrapp information
         if not badgrapp.public_pages_redirect:
             badgrapp = BadgrApp.objects.get_current(request=None)  # use the default badgrapp
 
@@ -170,34 +184,59 @@ class ImagePropertyDetailView(APIView, SlugToEntityIdRedirectMixin):
         if image_type not in ['original', 'png']:
             raise ValidationError(u"invalid image type: {}".format(image_type))
 
+        supported_fmts = {
+            'square': (1, 1),
+            'wide': (1.91, 1)
+        }
+        image_fmt = request.query_params.get('fmt', 'square').lower()
+        if image_fmt not in supported_fmts.keys():
+            raise ValidationError(u"invalid image format: {}".format(image_fmt))
+
         image_url = image_prop.url
         filename, ext = os.path.splitext(image_prop.name)
         basename = os.path.basename(filename)
         dirname = os.path.dirname(filename)
         version_suffix = getattr(settings, 'CAIROSVG_VERSION_SUFFIX', '1')
-        new_name = '{dirname}/converted{version}/{basename}.png'.format(dirname=dirname, basename=basename, version=version_suffix)
+        new_name = '{dirname}/converted{version}/{basename}{fmt_suffix}.png'.format(
+            dirname=dirname,
+            basename=basename,
+            version=version_suffix,
+            fmt_suffix="-{}".format(image_fmt) if image_fmt != 'square' else ""
+        )
         storage = DefaultStorage()
 
-        if image_type == 'original':
+        def _fit_to_height(img, ar, height=400):
+            img.thumbnail((height,height))
+            new_size = (int(ar[0]*height), int(ar[1]*height))
+            new_img = Image.new("RGBA", new_size)
+            new_img.paste(img, ((new_size[0] - height)/2, (new_size[1] - height)/2))
+            new_img.show()
+            return new_img
+
+        if image_type == 'original' and image_fmt == 'square':
             image_url = image_prop.url
-        elif image_type == 'png' and ext == '.svg':
+        elif ext == '.svg':
             if not storage.exists(new_name):
                 with storage.open(image_prop.name, 'rb') as input_svg:
                     svg_buf = StringIO.StringIO()
                     out_buf = StringIO.StringIO()
                     cairosvg.svg2png(file_obj=input_svg, write_to=svg_buf)
                     img = Image.open(svg_buf)
-                    img.thumbnail((400, 400))
-                    img.save(out_buf, format=image_type)
+
+                    img = _fit_to_height(img, supported_fmts[image_fmt])
+
+                    img.save(out_buf, format='png')
                     storage.save(new_name, out_buf)
             image_url = storage.url(new_name)
-        elif ext != '.png':
-            # attempt to use PIL to do desired image conversion
+        else:
             if not storage.exists(new_name):
                 with storage.open(image_prop.name, 'rb') as input_svg:
                     out_buf = StringIO.StringIO()
                     img = Image.open(input_svg)
-                    img.save(out_buf, format=image_type)
+
+                    img = _fit_to_height(img, supported_fmts[image_fmt])
+
+                    img.save(out_buf, format='png')
                     storage.save(new_name, out_buf)
             image_url = storage.url(new_name)
 
@@ -216,6 +255,9 @@ class IssuerJson(JSONComponentView):
             OriginSetting.HTTP,
             reverse('issuer_image', kwargs={'entity_id': self.current_object.entity_id})
         )
+        if self.is_wide_bot():
+            image_url = "{}&fmt=wide".format(image_url)
+
         return dict(
             title=self.current_object.name,
             description=self.current_object.description,
@@ -267,6 +309,8 @@ class BadgeClassJson(JSONComponentView):
             OriginSetting.HTTP,
             reverse('badgeclass_image', kwargs={'entity_id': self.current_object.entity_id})
         )
+        if self.is_wide_bot():
+            image_url = "{}&fmt=wide".format(image_url)
         return dict(
             title=self.current_object.name,
             description=self.current_object.description,
@@ -317,6 +361,8 @@ class BadgeInstanceJson(JSONComponentView):
             OriginSetting.HTTP,
             reverse('badgeclass_image', kwargs={'entity_id': self.current_object.cached_badgeclass.entity_id})
         )
+        if self.is_wide_bot():
+            image_url = "{}&fmt=wide".format(image_url)
         return dict(
             title=self.current_object.cached_badgeclass.name,
             description=self.current_object.cached_badgeclass.description,
@@ -343,6 +389,22 @@ class BackpackCollectionJson(JSONComponentView):
     permission_classes = (permissions.AllowAny,)
     model = BackpackCollection
     entity_id_field_name = 'share_hash'
+
+    def get_context_data(self, **kwargs):
+        chosen_assertion = sorted(self.current_object.cached_badgeinstances(), lambda a,b: cmp(a.issued_on, b.issued_on))[0]
+        image_url = "{}{}?type=png".format(
+            OriginSetting.HTTP,
+            reverse('badgeinstance_image', kwargs={'entity_id': chosen_assertion.entity_id})
+        )
+        if self.is_wide_bot():
+            image_url = "{}&fmt=wide".format(image_url)
+
+        return dict(
+            title=self.current_object.name,
+            description=self.current_object.description,
+            public_url=self.current_object.share_url,
+            image_url=image_url
+        )
 
     def get_json(self, request):
         expands = request.GET.getlist('expand', [])

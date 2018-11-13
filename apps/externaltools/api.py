@@ -15,11 +15,14 @@ class ExternalToolList(BaseEntityListView):
     model = ExternalTool
     v1_serializer_class = ExternalToolSerializerV1
     v2_serializer_class = ExternalToolSerializerV2
-    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    permission_classes = ()
     http_method_names = ['get']
 
     def get_objects(self, request, **kwargs):
-        return list(ExternalTool.cached.global_tools()) + list(request.user.cached_externaltools())
+        tools = list(ExternalTool.cached.global_tools())
+        if self.request.user.is_authenticated():
+            tools.extend(request.user.cached_externaltools())
+        return tools
 
     # @apispec_list_operation(
     #     'ExternalTool',

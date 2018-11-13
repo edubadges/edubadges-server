@@ -1,3 +1,4 @@
+from mainsite.utils import client_ip_from_request
 from .base import BaseBadgrEvent
 
 
@@ -25,4 +26,19 @@ class EmailConfirmed(BaseBadgrEvent):
     def to_representation(self):
         return {
             'email': self.email_address.email,
+        }
+
+
+class FailedLoginAttempt(BaseBadgrEvent):
+    def __init__(self, request, username, endpoint, **kwargs):
+        self.request = request
+        self.username = username
+        self.endpoint = endpoint
+
+    def to_representation(self):
+        return {
+            'username': self.username,
+            'endpoint': self.endpoint,
+            'ipAddress': client_ip_from_request(self.request)
+
         }

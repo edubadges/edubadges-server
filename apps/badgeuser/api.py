@@ -1,12 +1,14 @@
-import re
-
 import datetime
+import re
 
 from allauth.account.adapter import get_adapter
 from allauth.account.models import EmailConfirmationHMAC
 from allauth.account.utils import user_pk_to_url_str, url_str_to_user_pk
+from apispec_drf.decorators import apispec_get_operation, apispec_put_operation, apispec_operation, \
+    apispec_delete_operation, apispec_list_operation
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -17,23 +19,24 @@ from rest_framework import permissions, serializers, status
 from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
-from rest_framework.status import HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED
+from rest_framework.status import HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, \
+    HTTP_400_BAD_REQUEST
 
+from badgeuser.authcode import accesstoken_for_authcode, authcode_for_accesstoken
 from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
 from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserTokenSerializerV1
 from badgeuser.serializers_v2 import BadgeUserTokenSerializerV2, BadgeUserSerializerV2, AccessTokenSerializerV2
 from badgeuser.tasks import process_email_verification
 from badgrsocialauth.utils import set_url_query_params
-from entity.api import BaseEntityDetailView, BaseEntityListView
+from entity.api import BaseEntityDetailView, BaseEntityListView, BaseEntityView
 from entity.serializers import BaseSerializerV2
 from issuer.permissions import BadgrOAuthTokenHasScope
-from apispec_drf.decorators import apispec_get_operation, apispec_put_operation, apispec_operation, \
-    apispec_delete_operation, apispec_list_operation
 from mainsite.models import BadgrApp
 from mainsite.utils import OriginSetting
 
 RATE_LIMIT_DELTA = datetime.timedelta(minutes=5)
+
 
 class BadgeUserDetail(BaseEntityDetailView):
     model = BadgeUser
@@ -42,7 +45,7 @@ class BadgeUserDetail(BaseEntityDetailView):
     permission_classes = (permissions.AllowAny, BadgrOAuthTokenHasScope)
     valid_scopes = {
         "post": ["*"],
-        "get": ["r:profile"],
+        "get": ["r:profile", "rw:profile"],
         "put": ["rw:profile"],
     }
 
@@ -325,6 +328,11 @@ class BadgeUserForgotPassword(BaseUserRecoveryView):
         if not default_token_generator.check_token(user, key):
             return Response(status=HTTP_404_NOT_FOUND)
 
+        try:
+            validate_password(password)
+        except DjangoValidationError as e:
+            return Response(dict(password=e.messages), status=HTTP_400_BAD_REQUEST)
+
         user.set_password(password)
         user.save()
         return self.get_response()
@@ -391,7 +399,17 @@ class BadgeUserEmailConfirm(BaseUserRecoveryView):
         # get badgr_app url redirect
         redirect_url = get_adapter().get_email_confirmation_redirect_url(request, badgr_app=badgrapp)
 
-        redirect_url = set_url_query_params(redirect_url, authToken=user.auth_token)
+        # generate an AccessToken for the user
+        accesstoken = BadgrAccessToken.objects.generate_new_token_for_user(
+            user,
+            application=badgrapp.oauth_application if badgrapp.oauth_application_id else None,
+            scope='rw:backpack rw:profile rw:issuer')
+
+        if badgrapp.use_auth_code_exchange:
+            authcode = authcode_for_accesstoken(accesstoken)
+            redirect_url = set_url_query_params(redirect_url, authCode=authcode)
+        else:
+            redirect_url = set_url_query_params(redirect_url, authToken=accesstoken.token)
 
         return Response(status=HTTP_302_FOUND, headers={'Location': redirect_url})
 
@@ -438,3 +456,5 @@ class AccessTokenDetail(BaseEntityDetailView):
     )
     def delete(self, request, **kwargs):
         return super(AccessTokenDetail, self).delete(request, **kwargs)
+
+

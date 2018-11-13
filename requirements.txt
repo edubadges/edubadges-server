@@ -26,15 +26,15 @@ python-memcached==1.58
 djangorestframework==3.6.2
 
 # Django Allauth
-django-allauth==0.36.0
-oauthlib==2.0.2
+django-allauth==0.37.1
+oauthlib==2.1.0
 requests==2.20.0
 requests-oauthlib==0.4.2
 # Permissions framework
 rules==0.4
 
 # OAuth
-django-oauth-toolkit==1.0.0
+django-oauth-toolkit==1.1.2
 
 # Some extras
 django-cors-headers==1.1.0
@@ -52,15 +52,15 @@ PyLD==0.7.1
 rfc3987==1.3.4
 pypng==0.0.18
 jsonfield==2.0.2
-PyJWT==1.5.1
 
 # markdown support
 Markdown==2.6.8
 django-markdownify==0.1.0
 bleach==2.1.4
 
-# Badgr related utilities
-openbadges-bakery==1.0.0b4
+# Open Badges related utilities
+openbadges==1.0.3
+openbadges-bakery==1.0.1
 
 celery==4.1.1
 django-celery-results==1.0.1
@@ -87,7 +87,6 @@ backports.csv==1.0.4
 # EncryptedCursorPagination dependencies
 more-itertools==2.5.0
 
-openbadges==1.0.3
 apispec==0.22.0
 
 apispec-djangorestframework==1.0.5

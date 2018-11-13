@@ -131,7 +131,7 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
         BadgeClassAlignmentInline,
         BadgeClassExtensionInline,
     ]
-    change_actions = ['redirect_issuer', 'redirect_instances']
+    change_actions = ['redirect_issuer', 'redirect_instances', 'redirect_pathwaybadges']
 
     def badge_image(self, obj):
         return u'<img src="{}" width="32"/>'.format(obj.image.url) if obj.image else ''
@@ -155,6 +155,13 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
         )
     redirect_issuer.label = "Issuer"
     redirect_issuer.short_description = "See this Issuer"
+
+    def redirect_pathwaybadges(self, request, obj):
+        return HttpResponseRedirect(
+            reverse('admin:pathway_pathwayelementbadge_changelist') + '?badgeclass__id={}'.format(obj.id)
+        )
+    redirect_pathwaybadges.label = "Pathway Badges"
+    redirect_pathwaybadges.short_description = "Pathway Badges"
 
 badgr_admin.register(BadgeClass, BadgeClassAdmin)
 

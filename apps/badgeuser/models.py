@@ -8,6 +8,7 @@ from hashlib import md5
 from itertools import chain
 
 import cachemodel
+import datetime
 from allauth.account.models import EmailAddress, EmailConfirmation
 from basic_models.models import IsActive
 from django.core.cache import cache
@@ -17,8 +18,11 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models, transaction
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from oauth2_provider.models import AccessToken
+from oauth2_provider.models import AccessToken, Application
+from oauthlib.common import generate_token
+from oauthlib.oauth2 import BearerToken
 from rest_framework.authtoken.models import Token
 
 from backpack.models import BackpackCollection
@@ -330,6 +334,19 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         """
         return Issuer.objects.filter(staff__id=self.id) 
 
+    def is_email_verified(self, email):
+        if email in self.all_recipient_identifiers:
+            return True
+
+        try:
+            app_infos = ApplicationInfo.objects.filter(application__user=self)
+            if any(app_info.trust_email_verification for app_info in app_infos):
+                return True
+        except ApplicationInfo.DoesNotExist:
+            return False
+
+        return False
+
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):
         '''
@@ -427,6 +444,32 @@ class BadgeUserProxy(BadgeUser):
         verbose_name = 'Badge User Interface for SuperUser'
 
 class BadgrAccessTokenManager(models.Manager):
+
+    def generate_new_token_for_user(self, user, scope='r:profile', application=None, expires=None, refresh_token=False):
+        with transaction.atomic():
+            if application is None:
+                application, created = Application.objects.get_or_create(
+                    client_id='public',
+                    client_type=Application.CLIENT_PUBLIC,
+                    authorization_grant_type=Application.GRANT_PASSWORD,
+                )
+                if created:
+                    ApplicationInfo.objects.create(application=application)
+
+            if expires is None:
+                access_token_expires_seconds = getattr(settings, 'OAUTH2_PROVIDER', {}).get('ACCESS_TOKEN_EXPIRE_SECONDS', 86400)
+                expires = timezone.now() + datetime.timedelta(seconds=access_token_expires_seconds)
+
+            accesstoken = self.create(
+                application=application,
+                user=user,
+                expires=expires,
+                token=generate_token(),
+                scope=scope
+            )
+
+        return accesstoken
+
     def get_from_entity_id(self, entity_id):
         # lookup by a faked
         padding = len(entity_id) % 4

@@ -7,7 +7,7 @@ from badgrsocialauth.views import BadgrSocialLogin, BadgrSocialEmailExists, Badg
     BadgrSocialLoginCancel, BadgrAccountConnected
 
 urlpatterns = [
-    url(r'^sociallogin', BadgrSocialLogin.as_view(permanent=False)),
+    url(r'^sociallogin', BadgrSocialLogin.as_view(permanent=False), name='socialaccount_login'),
 
     # Intercept allauth cancel login view
     url(r'^cancellogin', BadgrSocialLoginCancel.as_view(permanent=False), name='socialaccount_login_cancelled'),

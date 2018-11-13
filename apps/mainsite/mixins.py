@@ -2,11 +2,17 @@ import StringIO
 
 from PIL import Image
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from resizeimage.resizeimage import resize_contain
 from xml.etree import cElementTree as ET
 
 from mainsite.utils import verify_svg
+
+
+def _decompression_bomb_check(image, max_pixels=Image.MAX_IMAGE_PIXELS):
+    pixels = image.size[0] * image.size[1]
+    return pixels > max_pixels
 
 
 class ResizeUploadedImage(object):
@@ -15,6 +21,8 @@ class ResizeUploadedImage(object):
         if self.pk is None and self.image:
             try:
                 image = Image.open(self.image)
+                if _decompression_bomb_check(image):
+                    raise ValidationError("Invalid image")
             except IOError:
                 return super(ResizeUploadedImage, self).save(*args, **kwargs)
 

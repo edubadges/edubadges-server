@@ -7,11 +7,10 @@ from django.conf import settings
 from allauth.utils import email_address_exists
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.http import HttpResponseForbidden, HttpResponseRedirect
-from django.urls import reverse
 from rest_framework.exceptions import AuthenticationFailed
 
-from badgrsocialauth.utils import set_session_verification_email, get_session_auth_token, get_verified_user, \
-    get_session_badgr_app, set_url_query_params
+from badgeuser.authcode import accesstoken_for_authcode
+from badgrsocialauth.utils import set_session_verification_email, get_session_badgr_app, get_session_authcode
 
 
 class BadgrSocialAccountAdapter(DefaultSocialAccountAdapter):
@@ -42,11 +41,14 @@ class BadgrSocialAccountAdapter(DefaultSocialAccountAdapter):
         """
         self._update_session(request, sociallogin)
         try:
-            auth_token = get_session_auth_token(request)
-            if auth_token is not None:
-                verified_user = get_verified_user(auth_token)
-                request.user = verified_user
-                if sociallogin.is_existing and verified_user != sociallogin.user:
+            authcode = get_session_authcode(request)
+            if authcode is not None:
+                accesstoken = accesstoken_for_authcode(authcode)
+                if not accesstoken:
+                    raise ImmediateHttpResponse(HttpResponseForbidden())
+
+                request.user = accesstoken.user
+                if sociallogin.is_existing and accesstoken.user != sociallogin.user:
                     badgr_app = get_session_badgr_app(self.request)
                     redirect_url = "{url}?authError={message}".format(
                         url=badgr_app.ui_connect_success_redirect,

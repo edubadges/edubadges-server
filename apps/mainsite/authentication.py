@@ -1,3 +1,7 @@
+import datetime
+
+from django.conf import settings
+from django.utils import timezone
 from oauth2_provider.models import Application
 from oauth2_provider.oauth2_backends import get_oauthlib_core
 from rest_framework.authentication import BaseAuthentication
@@ -14,6 +18,12 @@ class BadgrOAuth2Authentication(BaseAuthentication):
         oauthlib_core = get_oauthlib_core()
         valid, r = oauthlib_core.verify_request(request, scopes=[])
         if valid:
+            token_session_timeout = getattr(settings, 'OAUTH2_TOKEN_SESSION_TIMEOUT_SECONDS', None)
+            if token_session_timeout is not None:
+                new_expiration = timezone.now() + datetime.timedelta(seconds=token_session_timeout)
+                if r.access_token.expires < new_expiration:
+                    r.access_token.expires = new_expiration
+                    r.access_token.save()
             if r.client.authorization_grant_type == Application.GRANT_CLIENT_CREDENTIALS:
                 return r.client.user, r.access_token
             else:

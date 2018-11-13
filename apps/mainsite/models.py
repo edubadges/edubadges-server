@@ -25,6 +25,8 @@ import cachemodel
 from django.db.models import Manager
 from django.utils.deconstruct import deconstructible
 from jsonfield import JSONField
+from oauth2_provider.models import AccessToken
+from rest_framework.authtoken.models import Token
 
 from mainsite.utils import OriginSetting, fetch_remote_file_to_storage
 from .mixins import ResizeUploadedImage
@@ -65,7 +67,7 @@ class EmailBlacklist(models.Model):
 
 
 class BadgrAppManager(Manager):
-    def get_current(self, request=None):
+    def get_current(self, request=None, raise_exception=True):
         origin = None
         existing_session_app_id = None
 
@@ -89,7 +91,7 @@ class BadgrAppManager(Manager):
             except self.model.DoesNotExist:
                 pass
         badgr_app_id = getattr(settings, 'BADGR_APP_ID', None)
-        if not badgr_app_id:
+        if raise_exception and not badgr_app_id:
             raise ImproperlyConfigured("Must specify a BADGR_APP_ID")
         return self.get(id=badgr_app_id)
 
@@ -105,6 +107,9 @@ class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive, cachemodel.CacheMod
     ui_connect_success_redirect = models.URLField(null=True)
     public_pages_redirect = models.URLField(null=True)
     oauth_authorization_redirect = models.URLField(null=True)
+    use_auth_code_exchange = models.BooleanField(default=False)
+    oauth_application = models.ForeignKey("oauth2_provider.Application", null=True, blank=True)
+
     objects = BadgrAppManager()
 
     def __unicode__(self):
@@ -133,6 +138,7 @@ class ApplicationInfo(cachemodel.CacheModel):
     name = models.CharField(max_length=254, blank=True, null=True, default=None)
     website_url = models.URLField(blank=True, null=True, default=None)
     allowed_scopes = models.TextField(blank=False, validators=[DefinedScopesValidator()])
+    trust_email_verification = models.BooleanField(default=False)
 
     def get_visible_name(self):
         if self.name:
@@ -142,3 +148,43 @@ class ApplicationInfo(cachemodel.CacheModel):
     def get_icon_url(self):
         if self.icon:
             return self.icon.url
+
+    @property
+    def scope_list(self):
+        return [s for s in re.split(r'[\s\n]+', self.allowed_scopes) if s]
+
+
+class AccessTokenProxy(AccessToken):
+    class Meta:
+        proxy = True
+        verbose_name = 'access token'
+        verbose_name_plural = 'access tokens'
+
+    def __str__(self):
+        return self.obscured_token
+
+    def __unicode__(self):
+        return self.obscured_token
+
+    @property
+    def obscured_token(self):
+        if self.token:
+            return "{}***".format(self.token[:4])
+
+
+class LegacyTokenProxy(Token):
+    class Meta:
+        proxy = True
+        verbose_name = 'Legacy token'
+        verbose_name_plural = 'Legacy tokens'
+
+    def __str__(self):
+        return self.obscured_token
+
+    def __unicode__(self):
+        return self.obscured_token
+
+    @property
+    def obscured_token(self):
+        if self.key:
+            return "{}***".format(self.key[:4])
