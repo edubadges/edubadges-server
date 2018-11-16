@@ -335,7 +335,7 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         return Issuer.objects.filter(staff__id=self.id) 
 
     def is_email_verified(self, email):
-        if email in self.all_recipient_identifiers:
+        if email in [e.email for e in self.verified_emails]:
             return True
 
         try:

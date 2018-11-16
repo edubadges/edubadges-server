@@ -23,31 +23,12 @@ class TermsAgreementInline(TabularInline):
     fields = ('created_at', 'terms_version')
 
 
-# class AdminQuerysetFilterMixin(object):
-#
-# #     def _object_in_scope(self, request, object_id):
-# #         if not request.user.is_superuser:
-# #             if request.user.has_perm(u'badgeuser.has_institution_scope'):
-# #
-# #             elif request.user.has_perm(u'badgeuser.has_faculty_scope'):
-#
-#     def get_queryset(self, request):
-#         """
-#         Abstract class to handle queryset filtering in Admin pages
-#         """
-#         qs = self.model._default_manager.get_queryset()
-#         if not request.user.is_superuser:
-#             if request.user.has_perm(u'badgeuser.has_institution_scope'):
-#                 institution_id = request.user.faculty.first().institution.id
-#                 qs = qs.filter(faculty__institution_id=institution_id).distinct()
-#             elif request.user.has_perm(u'badgeuser.has_faculty_scope'):
-#                 qs = qs.filter(faculty__in=request.user.faculty.all()).distinct()
-#         ordering = self.get_ordering(request)
-#         if ordering:
-#             qs = qs.order_by(*ordering)
-#         return qs
+class EmailAddressInline(TabularInline):
+    model = CachedEmailAddress
+    fk_name = 'user'
+    extra = 0
+    fields = ('email','verified','primary')
 
-#     TODO: add scope to lti admin page and make duplications modular
 
 class BadgeUserAdmin(FilterByScopeMixin, UserAdmin):
     
@@ -64,11 +45,6 @@ class BadgeUserAdmin(FilterByScopeMixin, UserAdmin):
         ('Faculties', {'fields': ('faculty',) }),
     )
     filter_horizontal = ('faculty','groups', 'user_permissions')
-    inlines = [
-        EmailAddressInline,
-        ExternalToolInline,
-        TermsAgreementInline,
-    ]
 
 
     def get_queryset(self, request):
@@ -113,13 +89,6 @@ class BadgeUserAdmin(FilterByScopeMixin, UserAdmin):
 badgr_admin.register(BadgeUser, BadgeUserAdmin)
 
 
-class EmailAddressInline(TabularInline):
-    model = CachedEmailAddress
-    fk_name = 'user'
-    extra = 0
-    fields = ('email','verified','primary')
-
-
 class BadgeUserProxyAdmin(BadgeUserAdmin):
     actions = ['delete_selected']
     readonly_fields = ('entity_id', 'date_joined', 'last_login', 'username', 'entity_id', 'agreed_terms_version')
@@ -132,6 +101,11 @@ class BadgeUserProxyAdmin(BadgeUserAdmin):
         ('Permissions', {'fields': ('groups', 'user_permissions')}),
         ('Faculties', {'fields': ('faculty',) }),
     )
+    inlines = [
+        EmailAddressInline,
+        ExternalToolInline,
+        TermsAgreementInline,
+    ]
 
     def get_faculties(self, obj):
         return [f.name for f in obj.faculty.all()]

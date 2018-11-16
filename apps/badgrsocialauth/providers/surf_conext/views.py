@@ -8,7 +8,7 @@ from django.http import HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 
-from badgrsocialauth.utils import set_session_badgr_app, get_session_auth_token, get_verified_user, get_session_badgr_app, check_if_user_already_exists
+from badgrsocialauth.utils import set_session_badgr_app, get_session_authcode, get_verified_user, get_session_badgr_app, check_if_user_already_exists
 from mainsite.models import BadgrApp
 from .provider import SurfConextProvider
 from institution.models import Institution
@@ -30,7 +30,7 @@ def login(request):
     
     referer = request.META['HTTP_REFERER'].split('/')[3]
     state = '%s-%s-%s-%s' % (request.GET.get('process', 'login'),
-                          get_session_auth_token(request),
+                          get_session_authcode(request),
                           request.session.get('badgr_app_pk', None), 
                           referer)
 
