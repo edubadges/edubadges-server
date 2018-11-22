@@ -105,9 +105,10 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
                 created_by=owner,
             )
             if not created:
+                if instance.acceptance == BadgeInstance.ACCEPTANCE_ACCEPTED:
+                    raise RestframeworkValidationError([{'name': "DUPLICATE_BADGE", 'description': "You already have this badge in your backpack"}])
                 instance.acceptance = BadgeInstance.ACCEPTANCE_ACCEPTED
                 instance.save()
-                raise RestframeworkValidationError([{'name': "DUPLICATE_BADGE", 'description': "You already have this badge in your backpack"}])
             owner.publish()  # update BadgeUser.cached_badgeinstances()
         except DjangoValidationError as e:
             raise RestframeworkValidationError(e.args[0])
