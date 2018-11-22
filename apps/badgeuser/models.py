@@ -210,7 +210,10 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         super(BadgeUser, self).delete(*args, **kwargs)
         self.publish_delete('username')
 
-    @cachemodel.cached_method(auto_publish=True)
+#     @cachemodel.cached_method(auto_publish=True) 
+    # turned it off, because if user logs in for FIRST time, this caching will result in the user having no verified emails. 
+    # This results in api calls responding with a 403 after the failure of the AuthenticatedWithVerifiedEmail permission check.
+    # Which will logout the user automatically with the error: Token expired.
     def cached_emails(self):
         return CachedEmailAddress.objects.filter(user=self)
 
