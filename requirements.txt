@@ -59,7 +59,7 @@ django-markdownify==0.1.0
 bleach==2.1.4
 
 # Open Badges related utilities
-openbadges==1.0.3
+openbadges==1.1.0
 openbadges-bakery==1.0.1
 
 celery==4.1.1
