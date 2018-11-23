@@ -1,4 +1,4 @@
-import urllib
+import urllib, json
 
 import requests
 from allauth.socialaccount.helpers import render_authentication_error, complete_social_login
@@ -29,15 +29,14 @@ def login(request):
     # it contains the user token, type of process and which badge_app
     
     referer = request.META['HTTP_REFERER'].split('/')[3]
-    state = '%s-%s-%s-%s' % (request.GET.get('process', 'login'),
+    state = json.dumps([request.GET.get('process', 'login'),
                           get_session_authcode(request),
                           request.session.get('badgr_app_pk', None), 
-                          referer)
+                          referer])
 
     data = {'client_id': _current_app.client_id,
             'redirect_uri': '%s/account/openid/login/callback/' % settings.HTTP_ORIGIN,
             'response_type': 'code',
-
             # SurfConext does not support other scopes, as such the complete OpenID flow is not supported
             'scope': 'openid',
             'state': state
@@ -56,7 +55,7 @@ def after_terms_agreement(request, **kwargs):
         return render_authentication_error(request, SurfConextProvider.id, error)
     
     headers = {'Authorization': 'bearer %s' % access_token}
-    badgr_app_pk, login_type, process, auth_token, referer = kwargs['state'].split('-')
+    badgr_app_pk, login_type, process, auth_token, referer = json.loads(kwargs['state'])
     url = settings.SURFCONEXT_DOMAIN_URL + '/userinfo'
 
     response = requests.get(url, headers=headers)
@@ -130,7 +129,7 @@ def callback(request):
     """
     print('getting callback', request.GET.get('state'))
     # extract the state of the redirect
-    process, auth_token, badgr_app_pk, referer = tuple(request.GET.get('state').split('-'))
+    process, auth_token, badgr_app_pk, referer = json.loads(request.GET.get('state'))
 
     # check if code is given
     code = request.GET.get('code', None)
@@ -175,7 +174,7 @@ def callback(request):
     extra_data = response.json()
               
     keyword_arguments = {'access_token':access_token, 
-                         'state': '-'.join((badgr_app_pk, 'surf_conext' ,process, auth_token, referer)),
+                         'state': json.dumps([badgr_app_pk, 'surf_conext' ,process, auth_token, referer]),
                          'after_terms_agreement_url_name': 'surf_conext_terms_accepted_callback'}
      
     if not check_if_user_already_exists(extra_data['sub']):

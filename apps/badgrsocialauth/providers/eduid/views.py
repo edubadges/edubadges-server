@@ -46,25 +46,6 @@ def encode(username, password): #client_id, secret
     username_password = '%s:%s' % (username, password)
     return 'Basic ' + b64encode(username_password.encode()).decode()
 
-# rewrite of login based on new settings for eduid (now working on dev needs testing for prod)
-#def login(request):
-#    current_app = SocialApp.objects.get_current(provider='edu_id')
-#    # the only thing set in state is the referer (frontend, or staff)
-#    referer = json.dumps(request.META['HTTP_REFERER'].split('/')[3:])
-#    badgr_app_pk = request.session.get('badgr_app_pk', None)
-#    state = json.dumps([referer,badgr_app_pk])
-#    params = {
-#    "state": state,
-#    'redirect_uri': '%s/account/eduid/login/callback/' % settings.HTTP_ORIGIN,
-#    }
-#    headers = {
-#      'Content-Type': "application/json",
-#      'Cache-Control': "no-cache",
-#      'Authorization': encode(current_app.client_id, current_app.secret)
-#    }
-#    response = requests.post("{}/login".format(settings.EDUID_PROVIDER_URL), data=json.dumps(params), headers=headers)    
-#    return redirect(response.text)
-
 def login(request):
     current_app = SocialApp.objects.get_current(provider='edu_id')
     # the only thing set in state is the referer (frontend, or staff)
@@ -84,7 +65,7 @@ def after_terms_agreement(request, **kwargs):
     '''
     this is the second part of the callback, after consent has been given, or is user already exists
     '''
-    badgr_app_pk, login_type, referer = kwargs['state'].split('-')
+    badgr_app_pk, login_type, referer = json.loads(kwargs['state'])
     access_token = kwargs.get('access_token', None)
     if not access_token:
         error = 'Sorry, we could not find you EduID credentials.'
@@ -120,9 +101,9 @@ def after_terms_agreement(request, **kwargs):
     ret = complete_social_login(request, login)
    
     # 4. Return the user to where she came from (ie the referer: public enrollment or main page)
-    if 'public' in json.loads(referer):
-        if 'badges' in json.loads(referer):
-            badgeclass_slug = json.loads(referer)[-1]
+    if 'public' in referer:
+        if 'badges' in referer:
+            badgeclass_slug = referer[-1]
             if badgeclass_slug:
                 edu_id = userinfo_json['sub']
                 enrolled = enroll_student(request.user, edu_id, badgeclass_slug)
@@ -166,7 +147,7 @@ def callback(request):
     userinfo_json = response.json()
     
     keyword_arguments = {'access_token':token_json['access_token'], 
-                         'state': '-'.join((str(badgr_app_pk), 'edu_id', str(referer))),
+                        'state': json.dumps([str(badgr_app_pk), 'edu_id']+ [json.loads(referer)]),
                          'after_terms_agreement_url_name': 'eduid_terms_accepted_callback'}
     if not check_if_user_already_exists(userinfo_json['sub']):
         return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))

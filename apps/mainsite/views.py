@@ -1,5 +1,5 @@
 import base64
-import time
+import time, json
 
 from django import forms
 from django.conf import settings
@@ -173,9 +173,9 @@ class AcceptTermsView(TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super(AcceptTermsView, self).get_context_data(**kwargs)
-        badgr_app_pk = kwargs['state'].split('-')[0]
+        badgr_app_pk = json.loads(kwargs['state'])[0]
         badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
-        login_type = kwargs['state'].split('-')[1]
+        login_type = json.loads(kwargs['state'])[1]
         context['privacy_statement_url'] = badgr_app.public_pages_redirect + '/privacy-policy'
         if login_type == 'surf_conext':
             context['ui_login_redirect'] = badgr_app.ui_login_redirect.replace('login', 'staff-login')
