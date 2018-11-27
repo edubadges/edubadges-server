@@ -781,7 +781,7 @@ class BadgeInstance(BaseAuditedModel,
             try:
                 from badgeuser.models import CachedEmailAddress
                 email_address = self.get_email_address()
-                existing_email = CachedEmailAddress.cached.get(email=email_address)
+                existing_email = CachedEmailAddress.cached.get_student_email(email_address)
                 if email_address != existing_email.email and \
                         email_address not in [e.email for e in existing_email.cached_variants()]:
                     existing_email.add_variant(email_address)
@@ -917,7 +917,7 @@ class BadgeInstance(BaseAuditedModel,
         template_name = 'issuer/email/notify_earner'
         try:
             from badgeuser.models import CachedEmailAddress
-            CachedEmailAddress.objects.get(email=email_address, verified=True)
+            email = CachedEmailAddress.cached.get_student_email(email_address)
             template_name = 'issuer/email/notify_account_holder'
             email_context['site_url'] = badgr_app.email_confirmation_redirect
         except CachedEmailAddress.DoesNotExist:
@@ -943,7 +943,7 @@ class BadgeInstance(BaseAuditedModel,
     def recipient_user(self):
         from badgeuser.models import CachedEmailAddress
         try:
-            email_address = CachedEmailAddress.cached.get(email=self.get_email_address())
+            email_address = CachedEmailAddress.cached.get_student_email(self.get_email_address())
             if email_address.verified:
                 return email_address.user
         except CachedEmailAddress.DoesNotExist:

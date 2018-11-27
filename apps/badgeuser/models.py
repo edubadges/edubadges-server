@@ -28,12 +28,13 @@ from rest_framework.authtoken.models import Token
 from backpack.models import BackpackCollection
 from entity.models import BaseVersionedEntity
 from issuer.models import Issuer, BadgeInstance, BaseAuditedModel
-from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager
+from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager, EmailAddressCacheModelManager
 from mainsite.models import ApplicationInfo
-from allauth.socialaccount.models import SocialLogin
+
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
     objects = CachedEmailAddressManager()
+    cached = EmailAddressCacheModelManager()
 
     class Meta:
         proxy = True
@@ -330,6 +331,14 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
             return account
         except SocialAccount.DoesNotExist:
             return None
+        
+    def has_edu_id_social_account(self):
+        social_account = self.get_social_account()
+        return social_account.provider == 'edu_id'
+    
+    def has_surf_conext_social_account(self):
+        social_account = self.get_social_account()
+        return social_account.provider == 'surf_conext'
 
     def staff_memberships(self):
         """

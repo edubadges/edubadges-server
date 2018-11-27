@@ -1,6 +1,7 @@
 from allauth.account.managers import EmailAddressManager
 from django.contrib.auth.models import UserManager
 from django.core.exceptions import ValidationError
+from cachemodel.managers import CacheModelManager
 
 from mainsite.models import BadgrApp
 
@@ -76,3 +77,17 @@ class CachedEmailAddressManager(EmailAddressManager):
             self.model.add_variant(email)
 
         return email_address
+
+
+class EmailAddressCacheModelManager(CacheModelManager):
+    
+    def get_student_email(self, email_address):
+        from badgeuser.models import CachedEmailAddress
+        all_matching_emails = CachedEmailAddress.cached.filter(email=email_address)
+        student_email = [email for email in all_matching_emails if email.user.has_edu_id_social_account()]
+        if not student_email:
+            raise CachedEmailAddress.DoesNotExist
+        if len(student_email) > 1:
+            raise CachedEmailAddress.MultipleObjectsReturned
+        return student_email[0]
+    
