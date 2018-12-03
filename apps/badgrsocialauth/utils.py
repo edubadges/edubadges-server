@@ -1,4 +1,4 @@
-import urllib
+import urllib, unicodedata
 import urlparse
 
 from rest_framework.authentication import TokenAuthentication
@@ -87,3 +87,6 @@ def get_verified_user(auth_token):
     authenticator = TokenAuthentication()
     verified_user, _ = authenticator.authenticate_credentials(auth_token)
     return verified_user
+
+def normalize_username(name):
+    return unicodedata.normalize('NFKD', name).encode('ascii','ignore')

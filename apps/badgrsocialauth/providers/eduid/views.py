@@ -7,7 +7,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.utils import timezone
 from allauth.socialaccount.helpers import render_authentication_error, complete_social_login
 from allauth.socialaccount.models import SocialApp
-from badgrsocialauth.utils import set_session_badgr_app, check_if_user_already_exists
+from badgrsocialauth.utils import set_session_badgr_app, check_if_user_already_exists, normalize_username #, check_if_user_info_changed
 from mainsite.models import BadgrApp
 from .provider import EduIDProvider
 from lti_edu.models import StudentsEnrolled
@@ -93,13 +93,17 @@ def after_terms_agreement(request, **kwargs):
         logger.debug(error)
         return render_authentication_error(request, EduIDProvider.id, error)
     
+    userinfo_json['family_name'] = normalize_username(userinfo_json['family_name'])
+    userinfo_json['given_name'] = normalize_username(userinfo_json['given_name'])
+    userinfo_json['name'] = normalize_username(userinfo_json['name'])
+    
     # 3. Complete social login 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
     set_session_badgr_app(request, badgr_app)
     provider = EduIDProvider(request)
     login = provider.sociallogin_from_response(request, userinfo_json)
     ret = complete_social_login(request, login)
-   
+    
     # 4. Return the user to where she came from (ie the referer: public enrollment or main page)
     if 'public' in referer:
         if 'badges' in referer:
