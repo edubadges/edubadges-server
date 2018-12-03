@@ -469,7 +469,7 @@ BADGR_PUBLIC_BOT_USERAGENTS_WIDE = [
 # Ideally this environment variable would be set on a per-environment basis, only where needed
 import os
 import certifi
-os.environ['REQUESTS_CA_BUNDLE'] = certifi.old_where()
+os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
 
 # default celery to always_eager
 CELERY_ALWAYS_EAGER = True
