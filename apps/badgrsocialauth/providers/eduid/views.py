@@ -93,10 +93,6 @@ def after_terms_agreement(request, **kwargs):
         logger.debug(error)
         return render_authentication_error(request, EduIDProvider.id, error)
     
-    userinfo_json['family_name'] = normalize_username(userinfo_json['family_name'])
-    userinfo_json['given_name'] = normalize_username(userinfo_json['given_name'])
-    userinfo_json['name'] = normalize_username(userinfo_json['name'])
-    
     # 3. Complete social login 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
     set_session_badgr_app(request, badgr_app)
