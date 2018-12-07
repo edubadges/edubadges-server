@@ -89,7 +89,7 @@ class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
         if not self.emailaddressvariant_set.exists() and self.email != self.email.lower():
             self.add_variant(self.email.lower())
 
-    @cachemodel.cached_method(auto_publish=True)
+#     @cachemodel.cached_method(auto_publish=True) # no caching due to errors in update_user_params
     def cached_variants(self):
         return self.emailaddressvariant_set.all()
 
