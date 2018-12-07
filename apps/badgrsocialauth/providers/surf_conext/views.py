@@ -8,7 +8,7 @@ from django.http import HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 
-from badgrsocialauth.utils import set_session_badgr_app, get_session_authcode, get_verified_user, get_session_badgr_app, check_if_user_already_exists
+from badgrsocialauth.utils import set_session_badgr_app, get_session_authcode, get_verified_user, get_session_badgr_app, get_social_account
 from mainsite.models import BadgrApp
 from .provider import SurfConextProvider
 from institution.models import Institution
