@@ -23,12 +23,15 @@ class CheckIfStudentIsEnrolled(BaseEntityListView):
     
     def post(self, request, **kwargs):
         badge_class = get_object_or_404(BadgeClass, entity_id=request.data['badgeclass_slug'])
-        try:
-            StudentsEnrolled.objects.get(edu_id=request.data['edu_id'], 
-                                         badge_class_id=badge_class.pk)
-            return Response(data='alreadyEnrolled', status=200)
-        except StudentsEnrolled.DoesNotExist:
-            return Response(data='notEnrolled', status=200)
+        if request.data.get('edu_id'):
+            try:
+                StudentsEnrolled.objects.get(edu_id=request.data['edu_id'], 
+                                             badge_class_id=badge_class.pk)
+                return Response(data='alreadyEnrolled', status=200)
+            except StudentsEnrolled.DoesNotExist:
+                return Response(data='notEnrolled', status=200)
+        else:
+            return Response(data='noEduID', status=200)
 
 class StudentEnrollmentList(BaseEntityListView):
     """
