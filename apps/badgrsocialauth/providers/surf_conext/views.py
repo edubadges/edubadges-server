@@ -177,7 +177,7 @@ def callback(request):
                          'state': json.dumps([badgr_app_pk, 'surf_conext' ,process, auth_token, referer]),
                          'after_terms_agreement_url_name': 'surf_conext_terms_accepted_callback'}
      
-    if not check_if_user_already_exists(extra_data['sub']):
+    if not get_social_account(extra_data['sub']):
         return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))
 
     return after_terms_agreement(request, **keyword_arguments)

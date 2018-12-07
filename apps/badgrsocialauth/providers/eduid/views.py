@@ -7,7 +7,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.utils import timezone
 from allauth.socialaccount.helpers import render_authentication_error, complete_social_login
 from allauth.socialaccount.models import SocialApp
-from badgrsocialauth.utils import set_session_badgr_app, check_if_user_already_exists, normalize_username #, check_if_user_info_changed
+from badgrsocialauth.utils import set_session_badgr_app, get_social_account, update_user_params
 from mainsite.models import BadgrApp
 from .provider import EduIDProvider
 from lti_edu.models import StudentsEnrolled
@@ -79,19 +79,28 @@ def after_terms_agreement(request, **kwargs):
         return render_authentication_error(request, EduIDProvider.id, error=error)
     userinfo_json = response.json()
     
-    # retrieved data in fields and ensure that email & sub are in extra_data
     if 'sub' not in userinfo_json:
         error = 'Sorry, your EduID account has no identifier.'
         logger.debug(error)
         return render_authentication_error(request, EduIDProvider.id, error)
-    if 'email' not in userinfo_json:
-        error = 'Sorry, your EduID account does not have your institution mail. Login to EduID and link you institution account, then try again.'
-        logger.debug(error)
-        return render_authentication_error(request, EduIDProvider.id, error)
-    if 'name' not in userinfo_json:
-        error = 'Sorry, your EduID account has no name attached from SurfConext. Login to EduID and link you institution account, then try again.'
-        logger.debug(error)
-        return render_authentication_error(request, EduIDProvider.id, error)
+
+    social_account = get_social_account(userinfo_json['sub']) 
+    if not social_account: # user does not exist
+        # ensure that email & names are in extra_data
+        if 'email' not in userinfo_json:
+            error = 'Sorry, your EduID account does not have your institution mail. Login to EduID and link you institution account, then try again.'
+            logger.debug(error)
+            return render_authentication_error(request, EduIDProvider.id, error)
+        if 'family_name' not in userinfo_json:
+            error = 'Sorry, your EduID account has no family_name attached from SurfConext. Login to EduID and link you institution account, then try again.'
+            logger.debug(error)
+            return render_authentication_error(request, EduIDProvider.id, error)
+        if 'given_name' not in userinfo_json:
+            error = 'Sorry, your EduID account has no first_name attached from SurfConext. Login to EduID and link you institution account, then try again.'
+            logger.debug(error)
+            return render_authentication_error(request, EduIDProvider.id, error)
+    else: # user already exists
+        update_user_params(social_account.user, userinfo_json)
     
     # 3. Complete social login 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
@@ -149,7 +158,7 @@ def callback(request):
     keyword_arguments = {'access_token':token_json['access_token'], 
                         'state': json.dumps([str(badgr_app_pk), 'edu_id']+ [json.loads(referer)]),
                          'after_terms_agreement_url_name': 'eduid_terms_accepted_callback'}
-    if not check_if_user_already_exists(userinfo_json['sub']):
+    if not get_social_account(userinfo_json['sub']):
         return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))
     
     return after_terms_agreement(request, **keyword_arguments)

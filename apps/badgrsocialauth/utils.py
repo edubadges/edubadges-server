@@ -35,13 +35,13 @@ class BadgrSocialAuthProviderMixin:
                     last_name=data.get('family_name', None)
                     )
 
-def check_if_user_already_exists(sociallogin_identifier):
+def get_social_account(sociallogin_identifier):
     from allauth.socialaccount.models import SocialAccount
     try:
-        SocialAccount.objects.get(uid=sociallogin_identifier)
-        return True
+        social_account = SocialAccount.objects.get(uid=sociallogin_identifier)
+        return social_account
     except SocialAccount.DoesNotExist:
-        return False
+        return None
 
 def set_url_query_params(url, **kwargs):
     """
@@ -88,5 +88,22 @@ def get_verified_user(auth_token):
     verified_user, _ = authenticator.authenticate_credentials(auth_token)
     return verified_user
 
-def normalize_username(name):
-    return unicodedata.normalize('NFKD', name).encode('ascii','ignore')
+def update_user_params(user, userinfo):
+    user.first_name = userinfo['given_name']
+    user.last_name = userinfo['family_name']
+    user.save()
+    user_emails = user.email_items
+    email_found = False
+    for email in user_emails:
+        email_and_variants = [email] + list(email.cached_variants())
+        if userinfo['email'] in [email_variant.email for email_variant in email_and_variants]: # the email is already there, make it verified
+            email.verified = True
+            email.save()
+            email_found = True
+            break
+    if not email_found: # no email, make a new verified one
+        new_email = EmailAddress.objects.create(email=userinfo['email'],
+                                                verified = True,
+                                                primary = False,
+                                                user = user)
+
