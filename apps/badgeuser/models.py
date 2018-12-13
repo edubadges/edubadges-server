@@ -191,11 +191,6 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         permission = Permission.objects.get(codename=permission_codename, content_type=content_type)
         self.user_permissions.remove(permission)
         # you still need to reload user from db to refresh permission cache if you want effect to be immediate
-
-    def get_institution(self):
-        faculty = self.faculty.first()
-        if faculty:
-            return faculty.institution
     
     def email_user(self, subject, message, from_email=None, **kwargs):
         """
@@ -366,7 +361,7 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         '''
         queryset = Issuer.objects.filter(staff__id=self.id) # personal issuers
         if self.has_perm(u'badgeuser.has_institution_scope'):
-            institution = self.get_institution()
+            institution = self.institution
             if institution:
                 queryset = queryset | Issuer.objects.filter(faculty__institution=institution) # add insitution issuers
         elif self.has_perm(u'badgeuser.has_faculty_scope'):
