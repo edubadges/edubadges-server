@@ -46,22 +46,12 @@ class BadgeUserAdmin(FilterByScopeMixin, UserAdmin):
     )
     filter_horizontal = ('faculty','groups', 'user_permissions')
 
-
-    def get_queryset(self, request):
-        """
-        Override filtering in Admin page
-        """
-        qs = self.model._default_manager.get_queryset()
-        if not request.user.is_superuser:
-            if request.user.has_perm(u'badgeuser.has_institution_scope'):
-                institution_id = request.user.institution.id
-                qs = qs.filter(institution_id=institution_id).distinct()
-            elif request.user.has_perm(u'badgeuser.has_faculty_scope'):
-                qs = qs.filter(faculty__in=request.user.faculty.all()).distinct()
-        ordering = self.get_ordering(request)
-        if ordering:
-            qs = qs.order_by(*ordering)
-        return qs
+    def filter_queryset_institution(self, queryset, request):
+        institution_id = request.user.institution.id
+        return queryset.filter(institution_id=institution_id).distinct()
+    
+    def filter_queryset_faculty(self, queryset, request):
+        return queryset.filter(faculty__in=request.user.faculty.all()).distinct()
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         '''
@@ -78,11 +68,16 @@ class BadgeUserAdmin(FilterByScopeMixin, UserAdmin):
                 elif request.user.has_perm(u'badgeuser.has_faculty_scope'):
                     list_of_faculty_ids = request.user.faculty.all().values_list('id')
                     form_field.queryset = form_field.queryset.filter(id__in=list_of_faculty_ids)
+                else:
+                    form_field.queryset = form_field.queryset.none() 
 
         elif db_field.attname == 'groups':
             if not request.user.is_superuser:
+                form_field.queryset = form_field.queryset.exclude(name='Superuser')
                 if not request.user.has_perm(u'badgeuser.has_institution_scope'):
-                  form_field.queryset = form_field.queryset.exclude(name='Instellings Admin')
+                    form_field.queryset = form_field.queryset.exclude(name='Instellings Admin')
+                    if not request.user.has_perm(u'badgeuser.has_faculty_scope'):
+                        form_field.queryset = form_field.queryset.exclude(name='Faculteits Admin')
         return form_field
 
 
