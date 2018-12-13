@@ -121,7 +121,24 @@ class FilterByScopeMixin(object):
     
     """
     This class uses the get_queryset method to determine permissions for the change, delete and history view.
+    To use, create a filter_queryset_institution() filter_queryset_faculty() methods in the Admin class 
     """
+    def get_queryset(self, request):
+        """
+        Override filtering in Admin page
+        """
+        queryset = self.model._default_manager.get_queryset()
+        if not request.user.is_superuser:
+            if request.user.has_perm(u'badgeuser.has_institution_scope'):
+                queryset = self.filter_queryset_institution(queryset, request)
+            elif request.user.has_perm(u'badgeuser.has_faculty_scope'):
+                queryset = self.filter_queryset_faculty(queryset, request)
+            else:
+                queryset = self.model.objects.none()
+        ordering = self.get_ordering(request)
+        if ordering:
+            queryset = queryset.order_by(*ordering)
+        return queryset
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
         '''
