@@ -41,7 +41,7 @@ class LtiClientAdmin(admin.ModelAdmin):
 #         qs = self.model._default_manager.get_queryset()
 #         if not request.user.is_superuser:
 #             if request.user.has_perm(u'badgeuser.has_institution_scope'):
-#                 institution_id = request.user.faculty.first().institution.id
+#                 institution_id = request.user.institution.id
 #                 qs = qs.filter(faculty__institution_id=institution_id).distinct()
 #             elif request.user.has_perm(u'badgeuser.has_faculty_scope'):
 #                 qs = qs.filter(faculty__in=request.user.faculty.all()).distinct()

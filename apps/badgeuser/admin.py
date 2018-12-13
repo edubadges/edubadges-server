@@ -73,7 +73,7 @@ class BadgeUserAdmin(FilterByScopeMixin, UserAdmin):
         if db_field.attname == 'faculty':
             if not request.user.is_superuser:
                 if request.user.has_perm(u'badgeuser.has_institution_scope'):
-                    institution_id = request.user.faculty.first().institution.id
+                    institution_id = request.user.institution.id
                     form_field.queryset = form_field.queryset.filter(institution_id=institution_id)
                 elif request.user.has_perm(u'badgeuser.has_faculty_scope'):
                     list_of_faculty_ids = request.user.faculty.all().values_list('id')
