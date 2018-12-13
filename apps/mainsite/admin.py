@@ -119,6 +119,10 @@ badgr_admin.register(Application, ApplicationInfoAdmin)
 
 class FilterByScopeMixin(object):
     
+    """
+    This class uses the get_queryset method to determine permissions for the change, delete and history view.
+    """
+    
     def change_view(self, request, object_id, form_url='', extra_context=None):
         '''
         Overrides super.change_view to add a check to see if this object is in the request.user's scope
