@@ -418,10 +418,9 @@ class BadgeInstanceList(UncachedPaginatedViewMixin, VersionedObjectMixin, BaseEn
         if not self.has_object_permissions(request, badgeclass):
             return Response(status=HTTP_404_NOT_FOUND)
         recipients = request.data.pop('recipients')
+        if not self.has_object_permissions(request, badgeclass):
+            return Response(status=HTTP_404_NOT_FOUND)
         for recipient in recipients:
-            if recipient['selected_for_removal']:
-                enrollment = StudentsEnrolled.objects.get(badge_class_id=badgeclass.id, edu_id = recipient['recipient_identifier'])
-                enrollment.delete()
             if recipient['selected']:
                 request.data['recipientprofile_name'] = recipient['recipient_name']
                 request.data['recipient_type'] = recipient['recipient_type']

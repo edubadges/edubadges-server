@@ -51,6 +51,7 @@ class StudentsEnrolled(models.Model):
 
     assertion_slug = models.CharField(max_length=150, default='', blank=True, null=True)
     date_awarded = models.DateTimeField(default=None, blank=True, null=True)
+    denied = models.BooleanField(default=False)
 
     def __str__(self):
         return self.email
