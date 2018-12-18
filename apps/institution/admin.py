@@ -17,9 +17,11 @@ class FacultyAdmin(FilterByScopeMixin, admin.ModelAdmin):
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "institution":
-            kwargs["queryset"] = Institution.objects.filter(id=request.user.institution.id)
-        return super(FacultyAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
-         
+            if not request.user.is_superuser:
+                kwargs["queryset"] = Institution.objects.filter(id=request.user.institution.id)
+            else:
+                kwargs["queryset"] = Institution.objects.all()
+        return super(FacultyAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)         
 
 badgr_admin.register(Institution, InstitutionAdmin)
 badgr_admin.register(Faculty, FacultyAdmin)
