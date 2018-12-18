@@ -68,7 +68,7 @@ def after_terms_agreement(request, **kwargs):
     badgr_app_pk, login_type, referer = json.loads(kwargs['state'])
     access_token = kwargs.get('access_token', None)
     if not access_token:
-        error = 'Sorry, we could not find you EduID credentials.'
+        error = 'Sorry, we could not find your EduID credentials.'
         return render_authentication_error(request, EduIDProvider.id, error)
     
     headers = {"Authorization": "Bearer " + access_token }
@@ -88,15 +88,15 @@ def after_terms_agreement(request, **kwargs):
     if not social_account: # user does not exist
         # ensure that email & names are in extra_data
         if 'email' not in userinfo_json:
-            error = 'Sorry, your EduID account does not have your institution mail. Login to EduID and link you institution account, then try again.'
+            error = 'Sorry, your EduID account does not have your institution mail. Login to EduID and link your institution account, then try again.'
             logger.debug(error)
             return render_authentication_error(request, EduIDProvider.id, error)
         if 'family_name' not in userinfo_json:
-            error = 'Sorry, your EduID account has no family_name attached from SurfConext. Login to EduID and link you institution account, then try again.'
+            error = 'Sorry, your EduID account has no family_name attached from SurfConext. Login to EduID and link your institution account, then try again.'
             logger.debug(error)
             return render_authentication_error(request, EduIDProvider.id, error)
         if 'given_name' not in userinfo_json:
-            error = 'Sorry, your EduID account has no first_name attached from SurfConext. Login to EduID and link you institution account, then try again.'
+            error = 'Sorry, your EduID account has no first_name attached from SurfConext. Login to EduID and link your institution account, then try again.'
             logger.debug(error)
             return render_authentication_error(request, EduIDProvider.id, error)
     else: # user already exists
