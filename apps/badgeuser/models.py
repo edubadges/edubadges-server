@@ -172,7 +172,9 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         db_table = 'users'
         permissions=(('view_issuer_tab', 'User can view Issuer tab in front end'),
                      ('has_faculty_scope', 'User has faculty scope'),
-                     ('has_institution_scope', 'User has institution scope'))
+                     ('has_institution_scope', 'User has institution scope'),
+                     ('ui_issuer_add', 'User can add issuer in front end')
+                     )
 
     def __unicode__(self):
         return u"{} <{}>".format(self.get_full_name(), self.email)
