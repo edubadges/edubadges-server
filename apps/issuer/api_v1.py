@@ -157,8 +157,10 @@ class IssuerStaffList(VersionedObjectMixin, APIView):
                 user_to_modify = get_user_model().objects.get(username=user_id)
             else:
                 user_id = serializer.validated_data.get('email')
-                user_to_modify = CachedEmailAddress.objects.get(
-                    email=user_id, verified=True).user
+                matching_email = [email for email in CachedEmailAddress.objects.filter(email=user_id, verified=True) if email.user.has_surf_conext_social_account()]
+                if not matching_email:
+                    raise CachedEmailAddress.DoesNotExist
+                user_to_modify = matching_email[0].user
         except (get_user_model().DoesNotExist, CachedEmailAddress.DoesNotExist,):
             error_text = "User not found. Email must be verified and correspond to an existing user."
             if user_id is None:
