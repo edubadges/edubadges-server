@@ -134,7 +134,7 @@ class IsStaff(permissions.BasePermission):
 class ApprovedIssuersOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == 'POST' and getattr(settings, 'BADGR_APPROVED_ISSUERS_ONLY', False):
-            return request.user.has_perm('issuer.add_issuer')
+            return request.user.has_perm('issuer.ui_issuer_add')
         return True
 
 
