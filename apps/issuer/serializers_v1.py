@@ -334,6 +334,7 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
     image = serializers.FileField(read_only=True)  # use_url=True, might be necessary
     email = serializers.EmailField(max_length=1024, required=False, write_only=True)
     recipient_identifier = serializers.CharField(max_length=1024, required=False)
+    recipient_email = serializers.SerializerMethodField()
     recipient_type = serializers.CharField(default=BadgeInstance.RECIPIENT_TYPE_EMAIL)
     allow_uppercase = serializers.BooleanField(default=False, required=False, write_only=True)
     evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
@@ -353,6 +354,9 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
     class Meta:
         apispec_definition = ('Assertion', {})
 
+    def get_recipient_email(self, obj):
+        return obj.get_email_address()
+        
     def validate(self, data):
         if data.get('email') and not data.get('recipient_identifier'):
             data['recipient_identifier'] = data.get('email')
