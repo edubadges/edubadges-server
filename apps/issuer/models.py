@@ -4,6 +4,7 @@ import StringIO
 import datetime
 import re
 import uuid
+import logging
 from collections import OrderedDict
 from itertools import chain
 
@@ -35,7 +36,7 @@ from .utils import generate_sha256_hashstring, CURRENT_OBI_VERSION, get_obi_cont
     UNVERSIONED_BAKED_VERSION
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
-
+logger = logging.getLogger('Badgr.Debug')
 
 class BaseAuditedModel(cachemodel.CacheModel):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -924,7 +925,11 @@ class BadgeInstance(BaseAuditedModel,
             pass
 
         adapter = get_adapter()
-        adapter.send_mail(template_name, email_address, context=email_context)
+        try:
+            adapter.send_mail(template_name, email_address, context=email_context)
+            logger.info('Mail sent to: {}'.format(email_address))
+        except Exception as e:
+            logger.exception('Mail failure to: {} with error {} : {}'.format(email_address, type(e), e.message))      
 
     def get_extensions_manager(self):
         return self.badgeinstanceextension_set
