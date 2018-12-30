@@ -44,7 +44,6 @@ def login(request):
             
     redirect_url = settings.SURFCONEXT_DOMAIN_URL + '/authorize?%s' %  (urllib.urlencode(data))
 
-    print('logging into, redirect', data)
     return HttpResponseRedirect(redirect_url)
 
 
@@ -66,7 +65,6 @@ def after_terms_agreement(request, **kwargs):
     # retrieved data in fields and ensure that email & sud are in extra_data
     extra_data = response.json()
      
-    print('getting extra data', extra_data)
     if 'email' not in extra_data or 'sub' not in extra_data:
         error = 'Sorry, your account has no email attached from SurfConext, try another login method.'
         return render_authentication_error(request, SurfConextProvider.id, error)
@@ -127,7 +125,6 @@ def callback(request):
 
     :return: Either renders authentication error, or completes the social login
     """
-    print('getting callback', request.GET.get('state'))
     # extract the state of the redirect
     process, auth_token, badgr_app_pk, referer = json.loads(request.GET.get('state'))
 
