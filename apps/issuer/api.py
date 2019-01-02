@@ -516,10 +516,12 @@ class BadgeInstanceDetail(BaseEntityDetailView):
     )
     def delete(self, request, **kwargs):
         # verify the user has permission to the assertion
-        assertion = self.get_object(request, **kwargs)
+        try:
+            assertion = self.get_object(request, **kwargs)
+        except Http404 as e:
+            return Response({'error': 'You do not have permission. Check your assigned role in the Issuer'}, status=HTTP_404_NOT_FOUND)
         if not self.has_object_permissions(request, assertion):
-            return Response(status=HTTP_404_NOT_FOUND)
-
+            return Response({'error': 'You do not have permission. Check your assigned role in the Issuer'}, status=HTTP_404_NOT_FOUND)
         revocation_reason = request.data.get('revocation_reason', None)
         if not revocation_reason:
             raise ValidationError({'revocation_reason': "This field is required"})
