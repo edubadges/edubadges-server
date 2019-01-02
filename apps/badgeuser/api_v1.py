@@ -59,7 +59,11 @@ class BadgeUserEmailList(APIView):
     def post(self, request, **kwargs):
         serializer = EmailSerializerV1(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-
+        try: # check if email already exists
+            CachedEmailAddress.objects.get(email = request.data.get('email'))
+            return Response({'error': "Could not register email address. Address already in use."}, status=status.HTTP_400_BAD_REQUEST)
+        except CachedEmailAddress.DoesNotExist:
+            pass 
         email_address = serializer.save(user=request.user)
         email = serializer.data
         email_address.send_confirmation(request)
