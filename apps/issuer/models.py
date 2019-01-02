@@ -756,7 +756,7 @@ class BadgeInstance(BaseAuditedModel,
         from allauth.socialaccount.models import SocialAccount
         if self.recipient_identifier.startswith('urn:mace:eduid'): # is EduID
             account = SocialAccount.objects.get(uid=self.recipient_identifier)
-            return account.user.cached_emails().first().email
+            return account.user.primary_email
         else: # recipient identifier is an email
             return self.recipient_identifier
 
