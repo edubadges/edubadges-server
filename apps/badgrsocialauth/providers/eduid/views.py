@@ -11,29 +11,22 @@ from badgrsocialauth.utils import set_session_badgr_app, get_social_account, upd
 from mainsite.models import BadgrApp
 from .provider import EduIDProvider
 from lti_edu.models import StudentsEnrolled
-from rest_framework.response import Response
 from issuer.models import BadgeClass
 logger = logging.getLogger('Badgr.Debug')
 
 def enroll_student(user, edu_id, badgeclass_slug):
     badge_class = get_object_or_404(BadgeClass, entity_id=badgeclass_slug)
-    
     # consent given wehen enrolling
     defaults = {'date_consent_given': timezone.now(),
                 'first_name': user.first_name, 
                 'last_name': user.last_name}
+    if user.may_enroll(badge_class):
+        StudentsEnrolled.objects.create(badge_class=badge_class, 
+                                        email=user.email, 
+                                        edu_id=edu_id, 
+                                        **defaults)
+    return 'enrolled'
     
-    # check if not already enrolled
-    try:
-        StudentsEnrolled.objects.get(edu_id=edu_id, 
-                                     badge_class_id=badge_class.pk)
-        return 'alreadyEnrolled'
-    except StudentsEnrolled.DoesNotExist:
-        StudentsEnrolled.objects.update_or_create(
-            badge_class=badge_class, email=user.email, 
-            edu_id=edu_id, defaults=defaults)
-        return 'enrolled'
-        
 
 def encode(username, password): #client_id, secret
     """Returns an HTTP basic authentication encrypted string given a valid

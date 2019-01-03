@@ -429,9 +429,10 @@ class BadgeInstanceList(UncachedPaginatedViewMixin, VersionedObjectMixin, BaseEn
                 response = super(BadgeInstanceList, self).post(request, **kwargs) 
                 if response.status_code == 201:
                     badge_class = get_object_or_404(BadgeClass, entity_id=request.data.get('badge_class', -1))
-                    StudentsEnrolled.objects \
-                        .filter(badge_class=badge_class, edu_id=recipient['recipient_identifier']) \
-                        .update(date_awarded=timezone.now(), assertion_slug=response.data.get('slug'))
+                    most_recent_enrollment = StudentsEnrolled.objects.filter(badge_class=badge_class, edu_id=recipient['recipient_identifier']).last()
+                    most_recent_enrollment.date_awarded = timezone.now()
+                    most_recent_enrollment.assertion_slug = response.data.get('slug')
+                    most_recent_enrollment.save()
         return response
 
 

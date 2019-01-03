@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
-from issuer.models import BadgeClass, Issuer
+from issuer.models import BadgeClass, Issuer, BadgeInstance
 import random
 
 
@@ -55,3 +55,17 @@ class StudentsEnrolled(models.Model):
 
     def __str__(self):
         return self.email
+    
+    @property
+    def assertion(self):
+        try:
+            return BadgeInstance.objects.get(entity_id=self.assertion_slug)
+        except BadgeInstance.DoesNotExist:
+            return None
+        
+    def assertion_is_revoked(self):
+        assertion = self.assertion
+        if assertion:
+            return assertion.revoked
+        else:
+            return False    

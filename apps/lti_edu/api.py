@@ -25,12 +25,10 @@ class CheckIfStudentIsEnrolled(BaseEntityListView):
     def post(self, request, **kwargs):
         badge_class = get_object_or_404(BadgeClass, entity_id=request.data['badgeclass_slug'])
         if request.data.get('edu_id'):
-            try:
-                StudentsEnrolled.objects.get(edu_id=request.data['edu_id'], 
-                                             badge_class_id=badge_class.pk)
-                return Response(data='alreadyEnrolled', status=200)
-            except StudentsEnrolled.DoesNotExist:
+            if request.user.may_enroll(badge_class):
                 return Response(data='notEnrolled', status=200)
+            else:
+                return Response(data='enrolled', status=200)
         else:
             return Response(data='noEduID', status=200)
 
@@ -76,28 +74,21 @@ class StudentsEnrolledList(BaseEntityListView):
         return StudentsEnrolled.objects.filter(badge_class_id=badge_class.pk)
     
     def post(self, request, **kwargs):
-        
         for field in ['badgeclass_slug', 'edu_id']:
             if field not in request.data:
                 return Response(data='field missing', status=401)
-
         badge_class = get_object_or_404(BadgeClass, entity_id=request.data['badgeclass_slug'])
-
         # consent given when enrolling
         defaults = {'date_consent_given': timezone.now(),
                     'first_name': request.data.get('first_name', ''), 
                     'last_name': request.data.get('last_name', '')}
-        
-        # check if not already enrolled
-        try:
-            StudentsEnrolled.objects.get(edu_id=request.data['edu_id'], 
-                                         badge_class_id=badge_class.pk)
-            return Response(data='alreadyEnrolled', status=200)
-        except StudentsEnrolled.DoesNotExist:
-            StudentsEnrolled.objects.update_or_create(
-                badge_class=badge_class, email=request.data['email'], 
-                edu_id=request.data['edu_id'], defaults=defaults)
+        if request.user.may_enroll(badge_class):
+            enrollment = StudentsEnrolled.objects.create(edu_id=request.data['edu_id'], 
+                                                        badge_class_id=badge_class.pk, 
+                                                        email=request.data['email'],
+                                                        **defaults)
             return Response(data='enrolled', status=200)
+        return Response({'error': 'Cannot enroll'}, status=400)
          
     def get(self, request, **kwargs):
         if 'badgeclass_slug' not in kwargs:
