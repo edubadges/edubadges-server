@@ -1,3 +1,0 @@
-[submodule "apps/ims"]
-	path = apps/ims
-	url = git@github.com:edubadges/django_ims_toolbox.git
