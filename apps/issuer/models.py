@@ -927,9 +927,8 @@ class BadgeInstance(BaseAuditedModel,
         adapter = get_adapter()
         try:
             adapter.send_mail(template_name, email_address, context=email_context)
-            logger.info('Mail sent to: {}'.format(email_address))
         except Exception as e:
-            logger.exception('Mail failure to: {} with error {} : {}'.format(email_address, type(e), e.message))      
+            logger.exception('Mail failure with error {} : {}'.format(type(e), e.message))      
 
     def get_extensions_manager(self):
         return self.badgeinstanceextension_set
