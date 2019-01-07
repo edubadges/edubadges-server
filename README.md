@@ -64,12 +64,12 @@ badgr
 * `./manage.py createsuperuser` - follow prompts to create your first admin user account
 
 ### Install and run Badgr UI {#badgr-ui}
-Start in your `badgr` directory and clone badgr-ui source code: `git clone https://github.com/concentricsky/badgr-ui.git badgr-ui`
+Start in your `badgr` directory and clone badgr-ui source code: `git clone https://github.com/edubadges/badgr-ui.git badgr-ui`
 
 * Change to the `badgr-ui` directory and install dependencies. We recommend using a recent version of node and npm to run `npm install`.
 * To run the Angular badgr-ui local server run `npm run start`
 
-For more details view the Readme for [Badgr UI](https://github.com/concentricsky/badgr-ui).
+For more details view the Readme for [Badgr UI](https://github.com/edubadges/badgr-ui.git).
 
 ### Run a server locally for development
 * `./manage.py runserver`
