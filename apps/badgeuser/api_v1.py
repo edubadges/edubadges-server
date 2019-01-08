@@ -10,17 +10,21 @@ from rest_framework.views import APIView
 from badgeuser.models import CachedEmailAddress
 from badgeuser.serializers_v1 import EmailSerializerV1
 from institution.serializers_v1 import FacultySerializerV1
+from institution.models import Faculty
 from apispec_drf.decorators import apispec_list_operation, apispec_post_operation, apispec_operation, \
     apispec_get_operation, apispec_delete_operation, apispec_put_operation
 
 class BadgeUserFacultyList(APIView):
     permission_classes = (permissions.IsAuthenticated,)
+    
     @apispec_list_operation('BadgeUserFaculty',
         summary="Get a list of user's faculties",
         tags=['BadgeUsers']
     )
     def get(self, request, **kwargs):
-        instances = request.user.faculty
+        instances = request.user.faculty.all()
+        if request.user.has_perm('badgeuser.has_institution_scope'): # add institution faculties
+            instances = instances | Faculty.objects.filter(institution = request.user.institution)
         serializer = FacultySerializerV1(instances, many=True, context={'request': request})
         return Response(serializer.data)
     
@@ -55,7 +59,11 @@ class BadgeUserEmailList(APIView):
     def post(self, request, **kwargs):
         serializer = EmailSerializerV1(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-
+        try: # check if email already exists
+            CachedEmailAddress.objects.get(email = request.data.get('email'))
+            return Response({'error': "Could not register email address. Address already in use."}, status=status.HTTP_400_BAD_REQUEST)
+        except CachedEmailAddress.DoesNotExist:
+            pass 
         email_address = serializer.save(user=request.user)
         email = serializer.data
         email_address.send_confirmation(request)

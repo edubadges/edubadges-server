@@ -1,4 +1,4 @@
-import urllib
+import urllib, unicodedata
 import urlparse
 
 from rest_framework.authentication import TokenAuthentication
@@ -24,24 +24,28 @@ class BadgrSocialAuthProviderMixin:
  
     def extract_email_addresses(self, data, user=None):
         # Force verification of email addresses because SurfConext will only transmit verified emails
-        return [EmailAddress(email=data['email'].strip().lower(),
-                             verified=True,
-                             primary=True)]
+        if data.get('email'):
+            return [EmailAddress(email=data['email'].strip().lower(),
+                                 verified=True,
+                                 primary=True)]
+        else:
+            return []
  
     def extract_common_fields(self, data):
         # extracts data required to build user model
-        return dict(email=data['email'],
+        return dict( # email=data['email'],
+                    email = data.get('email', None),
                     first_name=data.get('given_name', None),
                     last_name=data.get('family_name', None)
                     )
 
-def check_if_user_already_exists(sociallogin_identifier):
+def get_social_account(sociallogin_identifier):
     from allauth.socialaccount.models import SocialAccount
     try:
-        SocialAccount.objects.get(uid=sociallogin_identifier)
-        return True
+        social_account = SocialAccount.objects.get(uid=sociallogin_identifier)
+        return social_account
     except SocialAccount.DoesNotExist:
-        return False
+        return None
 
 def set_url_query_params(url, **kwargs):
     """
@@ -87,3 +91,27 @@ def get_verified_user(auth_token):
     authenticator = TokenAuthentication()
     verified_user, _ = authenticator.authenticate_credentials(auth_token)
     return verified_user
+
+def update_user_params(user, userinfo):
+    if userinfo.get('given_name'):
+        user.first_name = userinfo['given_name']
+        user.save()
+    if userinfo.get('family_name'):
+        user.last_name = userinfo['family_name']
+        user.save()
+    if userinfo.get('email'):
+        user_emails = user.email_items
+        email_found = False
+        for email in user_emails:
+            email_and_variants = [email] + list(email.cached_variants())
+            if userinfo['email'] in [email_variant.email for email_variant in email_and_variants]: # the email is already there, make it verified
+                email.verified = True
+                email.save()
+                email_found = True
+                break
+        if not email_found: # no email, make a new verified one
+            new_email = EmailAddress.objects.create(email=userinfo['email'],
+                                                    verified = True,
+                                                    primary = False,
+                                                    user = user)
+

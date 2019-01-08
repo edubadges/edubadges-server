@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'oauth2_provider',
 
     'entity',
+    'ims',
     'institution',
     'issuer',
     'backpack',

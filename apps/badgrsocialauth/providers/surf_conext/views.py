@@ -8,7 +8,7 @@ from django.http import HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 
-from badgrsocialauth.utils import set_session_badgr_app, get_session_authcode, get_verified_user, get_session_badgr_app, check_if_user_already_exists
+from badgrsocialauth.utils import set_session_badgr_app, get_session_authcode, get_verified_user, get_session_badgr_app, get_social_account
 from mainsite.models import BadgrApp
 from .provider import SurfConextProvider
 from institution.models import Institution
@@ -44,7 +44,6 @@ def login(request):
             
     redirect_url = settings.SURFCONEXT_DOMAIN_URL + '/authorize?%s' %  (urllib.urlencode(data))
 
-    print('logging into, redirect', data)
     return HttpResponseRedirect(redirect_url)
 
 
@@ -66,7 +65,6 @@ def after_terms_agreement(request, **kwargs):
     # retrieved data in fields and ensure that email & sud are in extra_data
     extra_data = response.json()
      
-    print('getting extra data', extra_data)
     if 'email' not in extra_data or 'sub' not in extra_data:
         error = 'Sorry, your account has no email attached from SurfConext, try another login method.'
         return render_authentication_error(request, SurfConextProvider.id, error)
@@ -127,7 +125,6 @@ def callback(request):
 
     :return: Either renders authentication error, or completes the social login
     """
-    print('getting callback', request.GET.get('state'))
     # extract the state of the redirect
     process, auth_token, badgr_app_pk, referer = json.loads(request.GET.get('state'))
 
@@ -177,7 +174,7 @@ def callback(request):
                          'state': json.dumps([badgr_app_pk, 'surf_conext' ,process, auth_token, referer]),
                          'after_terms_agreement_url_name': 'surf_conext_terms_accepted_callback'}
      
-    if not check_if_user_already_exists(extra_data['sub']):
+    if not get_social_account(extra_data['sub']):
         return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))
 
     return after_terms_agreement(request, **keyword_arguments)

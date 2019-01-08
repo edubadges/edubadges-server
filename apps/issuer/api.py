@@ -418,6 +418,8 @@ class BadgeInstanceList(UncachedPaginatedViewMixin, VersionedObjectMixin, BaseEn
         if not self.has_object_permissions(request, badgeclass):
             return Response(status=HTTP_404_NOT_FOUND)
         recipients = request.data.pop('recipients')
+        if not self.has_object_permissions(request, badgeclass):
+            return Response(status=HTTP_404_NOT_FOUND)
         for recipient in recipients:
             if recipient['selected']:
                 request.data['recipientprofile_name'] = recipient['recipient_name']
@@ -427,9 +429,10 @@ class BadgeInstanceList(UncachedPaginatedViewMixin, VersionedObjectMixin, BaseEn
                 response = super(BadgeInstanceList, self).post(request, **kwargs) 
                 if response.status_code == 201:
                     badge_class = get_object_or_404(BadgeClass, entity_id=request.data.get('badge_class', -1))
-                    StudentsEnrolled.objects \
-                        .filter(badge_class=badge_class, edu_id=recipient['recipient_identifier']) \
-                        .update(date_awarded=timezone.now(), assertion_slug=response.data.get('slug'))
+                    most_recent_enrollment = StudentsEnrolled.objects.filter(badge_class=badge_class, edu_id=recipient['recipient_identifier']).last()
+                    most_recent_enrollment.date_awarded = timezone.now()
+                    most_recent_enrollment.assertion_slug = response.data.get('slug')
+                    most_recent_enrollment.save()
         return response
 
 
@@ -514,10 +517,12 @@ class BadgeInstanceDetail(BaseEntityDetailView):
     )
     def delete(self, request, **kwargs):
         # verify the user has permission to the assertion
-        assertion = self.get_object(request, **kwargs)
+        try:
+            assertion = self.get_object(request, **kwargs)
+        except Http404 as e:
+            return Response({'error': 'You do not have permission. Check your assigned role in the Issuer'}, status=HTTP_404_NOT_FOUND)
         if not self.has_object_permissions(request, assertion):
-            return Response(status=HTTP_404_NOT_FOUND)
-
+            return Response({'error': 'You do not have permission. Check your assigned role in the Issuer'}, status=HTTP_404_NOT_FOUND)
         revocation_reason = request.data.get('revocation_reason', None)
         if not revocation_reason:
             raise ValidationError({'revocation_reason': "This field is required"})

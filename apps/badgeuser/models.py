@@ -24,6 +24,7 @@ from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
 from oauthlib.oauth2 import BearerToken
 from rest_framework.authtoken.models import Token
+from lti_edu.models import StudentsEnrolled
 
 from backpack.models import BackpackCollection
 from entity.models import BaseVersionedEntity
@@ -89,7 +90,7 @@ class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
         if not self.emailaddressvariant_set.exists() and self.email != self.email.lower():
             self.add_variant(self.email.lower())
 
-    @cachemodel.cached_method(auto_publish=True)
+#     @cachemodel.cached_method(auto_publish=True) # no caching due to errors in update_user_params
     def cached_variants(self):
         return self.emailaddressvariant_set.all()
 
@@ -172,7 +173,9 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         db_table = 'users'
         permissions=(('view_issuer_tab', 'User can view Issuer tab in front end'),
                      ('has_faculty_scope', 'User has faculty scope'),
-                     ('has_institution_scope', 'User has institution scope'))
+                     ('has_institution_scope', 'User has institution scope'),
+                     ('ui_issuer_add', 'User can add issuer in front end')
+                     )
 
     def __unicode__(self):
         return u"{} <{}>".format(self.get_full_name(), self.email)
@@ -429,6 +432,31 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         #         Token.objects.get_or_create(user=self)
         self.save()
         return self.cached_token()
+    
+    def may_enroll(self, badge_class):
+        """
+        Checks to see if user may enroll
+            no enrollments: May enroll
+            any not awarded assertions: May not enroll
+            Any awarded and not revoked: May not enroll
+            All revoked: May enroll 
+        """
+        social_account = self.get_social_account()
+        if social_account.provider == 'edu_id':
+            edu_id = social_account.extra_data['sub']
+            enrollments = StudentsEnrolled.objects.filter(edu_id=edu_id, badge_class_id=badge_class.pk)
+            if not enrollments:
+                return True # no enrollments
+            else:
+                for enrollment in enrollments:
+                    if not bool(enrollment.assertion_slug): # has never been awarded
+                        return False
+                    else: #has been awarded
+                        if not enrollment.assertion_is_revoked():
+                            return False
+                return True # all have been awarded and revoked
+        else: # no eduID
+            return False
 
     def save(self, *args, **kwargs):
         if not self.username:

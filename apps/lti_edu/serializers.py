@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from datetime import datetime
 from rest_framework import serializers
-from issuer.models import BadgeClass, Issuer
+from issuer.models import BadgeClass, Issuer, BadgeInstance
 from lti_edu.models import StudentsEnrolled
 from cryptography.utils import read_only_property
 
@@ -55,6 +55,14 @@ class StudentsEnrolledSerializerWithRelations(serializers.ModelSerializer):
     Serializer of students enrolled with representation of it's relations to badgeclass and issuer
     """
     badge_class = BadgeClassSerializerWithRelations()
+    revoked = serializers.SerializerMethodField('get_assertion_revokation')
+    
+    def get_assertion_revokation(self, enrollment):
+        badge_instance = BadgeInstance.objects.filter(entity_id=enrollment.assertion_slug).first()
+        if badge_instance:
+            return badge_instance.revoked
+        else:
+            return False
     
     class Meta:
         model = StudentsEnrolled
