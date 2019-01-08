@@ -16,7 +16,7 @@ All notable changes to this project performed by the Edubadges team will be docu
  - fixes add staff with duplicate email bug
  - superuser made exempt of faculty filtering in Issuer admin
  - makes it possible for teachers to deny enrollments
-
+ - makes faculties visible in badgeuser admin page
 
 ## [1.0.0]
 
