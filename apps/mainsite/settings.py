@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'recipient',
     'externaltools',
     'lti_edu',
+    'theming',
 
     # api docs
     'apispec_drf',
