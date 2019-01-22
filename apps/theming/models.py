@@ -14,13 +14,15 @@ class Theme(models.Model):
     """
     welcome_message = models.CharField('welcomeMessage',max_length=512)
     service_name = models.CharField('serviceName',max_length=512)
-    showPoweredByBadgr = models.CharField('showPoweredByBadgr',max_length=512)
-    showApiDocsLink = models.CharField('showApiDocsLink',max_length=512)
-    termsOfServiceLink = models.CharField('termsOfServiceLink',max_length=512)
-    privacyPolicyLink = models.CharField('privacyPolicyLink',max_length=512)
+    show_powered_by_badgr = models.BooleanField('showPoweredByBadgr',  default=False)
+    show_api_docs_link = models.BooleanField('showApiDocsLink', default=False)
+    terms_of_service_link = models.CharField('termsOfServiceLink', max_length=512)
+    privacy_policy_link = models.CharField('privacyPolicyLink', max_length=512)
     logo_small = models.FileField('logoImg.small',upload_to='themes')
     logo_desktop = models.FileField('logoImg.desktop',upload_to='themes')
     subdomain = models.CharField('Sub domain', max_length=56, unique=True)
     institution = models.ForeignKey(Institution, related_name='theme')
     changed_on = models.DateTimeField(auto_now=True)
+
+
 

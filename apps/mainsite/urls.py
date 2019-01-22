@@ -99,6 +99,9 @@ urlpatterns = [
     # include LTI endpoints
     url(r'^v2/', include('lti_edu.urls'), kwargs={'version': 'v2'}),
     url(r'^lti_edu/', include('lti_edu.api_urls')),
+
+    # include theming endpoints
+    url(r'v2/', include('theming.api_urls'), kwargs={'version':'v2'}),
     
     # Accept Terms View
     url(r'^accept_terms/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', AcceptTermsView.as_view(), name='accept_terms'),

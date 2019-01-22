@@ -126,7 +126,7 @@ class TermsVersionAdmin(ModelAdmin):
             'classes': ('collapse',)
         }),
         (None, {'fields': (
-            'latest_terms_version', 'is_active','version','short_description',
+            'latest_terms_version', 'is_active','version','teacher','short_description','content',
         )})
     )
 
