@@ -1,3 +1,4 @@
+from django.contrib.sites.models import Site
 from django.db import models
 
 from institution.models import Institution
@@ -20,7 +21,7 @@ class Theme(models.Model):
     privacy_policy_link = models.CharField('privacyPolicyLink', max_length=512)
     logo_small = models.FileField('logoImg.small',upload_to='themes')
     logo_desktop = models.FileField('logoImg.desktop',upload_to='themes')
-    subdomain = models.CharField('Sub domain', max_length=56, unique=True)
+    site = models.OneToOneField(Site,null=True, related_name='theme')
     institution = models.ForeignKey(Institution, related_name='theme')
     changed_on = models.DateTimeField(auto_now=True)
 
