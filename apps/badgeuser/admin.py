@@ -34,7 +34,7 @@ class BadgeUserAdmin(FilterByScopeMixin, UserAdmin):
     
     actions = None
     readonly_fields = ('email', 'first_name', 'last_name', 'entity_id', 'date_joined', 'last_login', 'username', 'entity_id', 'agreed_terms_version')
-    list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'date_joined') #, 'get_faculties')
+    list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'date_joined', 'faculties')
     list_filter = ('is_active', 'is_staff', 'date_joined', 'last_login')
     search_fields = ('email', 'first_name', 'last_name', 'username', 'entity_id')
     fieldsets = (
@@ -79,7 +79,9 @@ class BadgeUserAdmin(FilterByScopeMixin, UserAdmin):
                     if not request.user.has_perm(u'badgeuser.has_faculty_scope'):
                         form_field.queryset = form_field.queryset.exclude(name='Faculteits Admin')
         return form_field
-
+     
+    def faculties(self, obj):
+        return [f.name for f in obj.faculty.all()]
 
 badgr_admin.register(BadgeUser, BadgeUserAdmin)
 
@@ -87,7 +89,7 @@ badgr_admin.register(BadgeUser, BadgeUserAdmin)
 class BadgeUserProxyAdmin(BadgeUserAdmin):
     actions = ['delete_selected']
     readonly_fields = ('entity_id', 'date_joined', 'last_login', 'username', 'entity_id', 'agreed_terms_version')
-    list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'entity_id', 'date_joined', 'get_faculties')
+    list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'entity_id', 'date_joined', 'faculties')
     list_filter = ('is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')
     fieldsets = (
         ('Metadata', {'fields': ('entity_id', 'username', 'date_joined',), 'classes': ('collapse',)}),
@@ -102,7 +104,7 @@ class BadgeUserProxyAdmin(BadgeUserAdmin):
         TermsAgreementInline,
     ]
 
-    def get_faculties(self, obj):
+    def faculties(self, obj):
         return [f.name for f in obj.faculty.all()]
 
 badgr_admin.register(BadgeUserProxy, BadgeUserProxyAdmin)
