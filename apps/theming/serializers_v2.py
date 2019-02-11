@@ -38,8 +38,8 @@ class ThemeSerializer(serializers.Serializer):
             'serviceName': instance.service_name,
             'showPoweredByBadgr': instance.show_powered_by_badgr,
             'showApiDocsLink': instance.show_api_docs_link,
-            'termsOfServiceLink': instance.terms_of_service_link,
-            'privacyPolicyLink': instance.privacy_policy_link,
+            'termsOfServiceLink': instance.terms_of_service_link.url,
+            'privacyPolicyLink': instance.privacy_policy_link.url,
             'logoImg': {
                 'small': instance.logo_small.url,
                 'desktop': instance.logo_desktop.url
