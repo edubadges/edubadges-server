@@ -1,6 +1,7 @@
 import urllib, requests, json, logging, urlparse, os
 from base64 import b64encode
 from django.conf import settings
+from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import redirect, get_object_or_404
@@ -45,12 +46,21 @@ def login(request):
     referer = json.dumps(urlparse.urlparse(request.META['HTTP_REFERER']).path.split('/')[1:])
     badgr_app_pk = request.session.get('badgr_app_pk', None)
     state = json.dumps([referer,badgr_app_pk])
+    try:
+        redirect_domain = get_current_site(request).domain
+        scheme = request.is_secure() and "https" or "http"
+        if scheme:
+            redirect_domain = 'https://{}'.format(redirect_domain)
+        else:
+            redirect_domain = 'http://{}'.format(redirect_domain)
+    except Exception as e:
+        redirect_domain = settings.HTTP_ORIGIN
     params = {
     "state": state,
     "client_id": current_app.client_id,
     "response_type": "code",
     "scope": "openid",
-    'redirect_uri': '%s/account/eduid/login/callback/' % settings.HTTP_ORIGIN,
+    'redirect_uri': '%s/account/eduid/login/callback/' % redirect_domain,
     }
     return redirect("{}/login?{}".format(settings.EDUID_PROVIDER_URL, urllib.parse.urlencode(params)))
 
