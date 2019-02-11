@@ -1,7 +1,8 @@
-import urllib, requests, json, logging, urlparse, os
+import urllib, requests, json, logging, os
+from urlparse import urlparse, urlsplit
 from base64 import b64encode
 from django.conf import settings
-from django.contrib.sites.shortcuts import get_current_site
+from django.contrib.sites.models import Site
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import redirect, get_object_or_404
@@ -42,17 +43,22 @@ def encode(username, password): #client_id, secret
 
 def login(request):
     current_app = SocialApp.objects.get_current(provider='edu_id')
-    # the only thing set in state is the referer (frontend, or staff)
-    referer = json.dumps(urlparse.urlparse(request.META['HTTP_REFERER']).path.split('/')[1:])
+    # the only thing set in state is the referer (frontend, or staff) , this is not the referer url.
+    referer = json.dumps(urlparse(request.META['HTTP_REFERER']).path.split('/')[1:])
     badgr_app_pk = request.session.get('badgr_app_pk', None)
     state = json.dumps([referer,badgr_app_pk])
     try:
-        redirect_domain = get_current_site(request).domain
-        scheme = request.is_secure() and "https" or "http"
-        if scheme:
-            redirect_domain = 'https://{}'.format(redirect_domain)
-        else:
-            redirect_domain = 'http://{}'.format(redirect_domain)
+        referrer_url = request.META['HTTP_REFERER']
+        referer_parsed = urlsplit(referrer_url)
+        port = request.META['SERVER_PORT']
+        referer_domain = referer_parsed.hostname
+        redirect_domain = Site.objects.get(domain=referer_domain).domain # check if it's a registered site (if not it will raise an exception)
+        scheme = request.is_secure() and "https" or "http" # get the right scheme
+        redirect_domain = '{}://{}'.format(scheme,redirect_domain)
+
+        if port != 80:
+            redirect_domain = "{}:{}".format(redirect_domain, port) # if port is not 8- add port to redirect url
+
     except Exception as e:
         redirect_domain = settings.HTTP_ORIGIN
     params = {
