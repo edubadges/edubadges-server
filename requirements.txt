@@ -42,6 +42,7 @@ django-autoslug==1.9.3
 wsgiref==0.1.2
 sqlparse==0.1.14
 netaddr
+django-extensions==2.1.5
 
 # Utilities for working with badges
 jsonschema==2.6.0

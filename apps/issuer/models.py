@@ -931,7 +931,7 @@ class BadgeInstance(BaseAuditedModel,
             logger.exception('Mail failure with error {} : {}'.format(type(e), e.message))      
 
     def get_extensions_manager(self):
-        return self.badgeinstanceextension_set
+        return self.badgeinstanceextension_set.all()
 
     @property
     def cached_recipient_profile(self):
