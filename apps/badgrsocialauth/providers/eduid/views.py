@@ -66,7 +66,9 @@ def login(request):
     "client_id": current_app.client_id,
     "response_type": "code",
     "scope": "openid",
-    'redirect_uri': '%s/account/eduid/login/callback/' % redirect_domain,
+    'redirect_uri': '%s/account/eduid/login/callback/'  % settings.HTTP_ORIGIN,
+# this part needs fixing        
+#    'redirect_uri': '%s/account/eduid/login/callback/'     % redirect_domain,
     }
     return redirect("{}/login?{}".format(settings.EDUID_PROVIDER_URL, urllib.parse.urlencode(params)))
 
