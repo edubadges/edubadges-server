@@ -47,30 +47,17 @@ def login(request):
     referer = json.dumps(urlparse(request.META['HTTP_REFERER']).path.split('/')[1:])
     badgr_app_pk = request.session.get('badgr_app_pk', None)
     state = json.dumps([referer,badgr_app_pk])
-    try:
-        referrer_url = request.META['HTTP_REFERER']
-        referer_parsed = urlsplit(referrer_url)
-        port = request.META['SERVER_PORT']
-        referer_domain = referer_parsed.hostname
-        redirect_domain = Site.objects.get(domain=referer_domain).domain # check if it's a registered site (if not it will raise an exception)
-        scheme = request.is_secure() and "https" or "http" # get the right scheme
-        redirect_domain = '{}://{}'.format(scheme,redirect_domain)
 
-        if port != 80:
-            redirect_domain = "{}:{}".format(redirect_domain, port) # if port is not 8- add port to redirect url
-
-    except Exception as e:
-        redirect_domain = settings.HTTP_ORIGIN
     params = {
     "state": state,
     "client_id": current_app.client_id,
     "response_type": "code",
     "scope": "openid",
-    'redirect_uri': '%s/account/eduid/login/callback/'  % settings.HTTP_ORIGIN,
-# this part needs fixing        
-#    'redirect_uri': '%s/account/eduid/login/callback/'     % redirect_domain,
+    'redirect_uri': '%s/account/eduid/login/callback/' % settings.HTTP_ORIGIN,
+
     }
     return redirect("{}/login?{}".format(settings.EDUID_PROVIDER_URL, urllib.parse.urlencode(params)))
+
 
 def after_terms_agreement(request, **kwargs):
     '''
@@ -146,7 +133,7 @@ def callback(request):
     # 1. Exchange callback Token for access token
     payload = {
      "grant_type": "authorization_code",
-    "redirect_uri": '%s/account/eduid/login/callback/' % settings.HTTP_ORIGIN,
+     "redirect_uri": '%s/account/eduid/login/callback/' % settings.HTTP_ORIGIN,
      "code": code,
      "client_id": current_app.client_id,
      "client_secret": current_app.secret
