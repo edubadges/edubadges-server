@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project performed by the Edubadges team will be documented in this file.
 
+## [1.0.2] - 2019-02-19
+  - added theming
+  - baking extension into badgeinstances
+
 
 ## [1.0.1] - 2019-01-08
  - initial integration of IMS package

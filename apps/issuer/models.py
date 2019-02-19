@@ -128,6 +128,7 @@ class BaseOpenBadgeExtension(cachemodel.CacheModel):
         abstract = True
 
 
+
 class Issuer(ResizeUploadedImage,
              ScrubUploadedSvgImage,
              BaseAuditedModel,
