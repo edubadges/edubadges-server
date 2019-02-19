@@ -13,7 +13,6 @@ import logging
 
 INSTALLED_APPS = [
     'mainsite',
-
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -23,9 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django_object_actions',
     'markdownify',
-
     'badgeuser',
-
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -54,6 +51,7 @@ INSTALLED_APPS = [
     'recipient',
     'externaltools',
     'lti_edu',
+    'theming',
 
     # api docs
     'apispec_drf',

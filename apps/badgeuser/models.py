@@ -587,11 +587,15 @@ class TermsVersionManager(cachemodel.CacheModelManager):
 class TermsVersion(IsActive, BaseAuditedModel, cachemodel.CacheModel):
     version = models.PositiveIntegerField(unique=True)
     short_description = models.TextField(blank=True)
+    content = models.TextField(blank=True)
+    teacher = models.BooleanField(default=False)
     cached = TermsVersionManager()
 
     def publish(self):
         super(TermsVersion, self).publish()
         TermsVersion.cached.publish_latest()
+
+
 
 
 class TermsAgreement(BaseAuditedModel, cachemodel.CacheModel):

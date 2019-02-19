@@ -167,6 +167,7 @@ class DocsAuthorizeRedirect(RedirectView):
             url = "{}?{}".format(url, query)
         return url
 
+
 class AcceptTermsView(TemplateView):
     
     template_name = 'terms_of_service/accept_terms.html'

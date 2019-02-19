@@ -1,6 +1,8 @@
-import urllib, requests, json, logging, urlparse, os
+import urllib, requests, json, logging, os
+from urlparse import urlparse, urlsplit
 from base64 import b64encode
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import redirect, get_object_or_404
@@ -41,18 +43,21 @@ def encode(username, password): #client_id, secret
 
 def login(request):
     current_app = SocialApp.objects.get_current(provider='edu_id')
-    # the only thing set in state is the referer (frontend, or staff)
-    referer = json.dumps(urlparse.urlparse(request.META['HTTP_REFERER']).path.split('/')[1:])
+    # the only thing set in state is the referer (frontend, or staff) , this is not the referer url.
+    referer = json.dumps(urlparse(request.META['HTTP_REFERER']).path.split('/')[1:])
     badgr_app_pk = request.session.get('badgr_app_pk', None)
     state = json.dumps([referer,badgr_app_pk])
+
     params = {
     "state": state,
     "client_id": current_app.client_id,
     "response_type": "code",
     "scope": "openid",
     'redirect_uri': '%s/account/eduid/login/callback/' % settings.HTTP_ORIGIN,
+
     }
     return redirect("{}/login?{}".format(settings.EDUID_PROVIDER_URL, urllib.parse.urlencode(params)))
+
 
 def after_terms_agreement(request, **kwargs):
     '''
@@ -128,7 +133,7 @@ def callback(request):
     # 1. Exchange callback Token for access token
     payload = {
      "grant_type": "authorization_code",
-    "redirect_uri": '%s/account/eduid/login/callback/' % settings.HTTP_ORIGIN,
+     "redirect_uri": '%s/account/eduid/login/callback/' % settings.HTTP_ORIGIN,
      "code": code,
      "client_id": current_app.client_id,
      "client_secret": current_app.secret

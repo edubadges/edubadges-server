@@ -129,7 +129,7 @@ class Pathway(cachemodel.CacheModel, IsActive):
 
         def _build(parent, node):
             node['children'] = {}
-            for child in node['element'].cached_children():
+            for child in node['element'].cached_children(): 
                 new_node = {
                     'element': child,
                 }

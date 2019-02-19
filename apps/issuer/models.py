@@ -761,7 +761,9 @@ class BadgeInstance(BaseAuditedModel,
             return self.recipient_identifier
 
     def save(self, *args, **kwargs):
+        created = False
         if self.pk is None:
+            created = True
             self.salt = uuid.uuid4().hex
             self.created_at = datetime.datetime.now()
 
@@ -793,6 +795,11 @@ class BadgeInstance(BaseAuditedModel,
             self.revocation_reason = None
 
         super(BadgeInstance, self).save(*args, **kwargs)
+        if created:
+            for extension in self.badgeclass.badgeclassextension_set.all():
+                BadgeInstanceExtension.objects.create(badgeinstance=self,
+                                                      name=extension.name,
+                                                      original_json=extension.original_json)
 
     def rebake(self, obi_version=CURRENT_OBI_VERSION, save=True):
         if self.source_url:
@@ -1045,7 +1052,9 @@ class BadgeInstance(BaseAuditedModel,
         if len(self.cached_extensions()) > 0:
             for extension in self.cached_extensions():
                 json[extension.name] = json_loads(extension.original_json)
-
+        if self.pk is None:
+            for extension in self.badgeclass.badgeclassextension_set.all():
+                json[extension.name] = json_loads(extension.original_json)
         # pass through imported json
         if include_extra:
             extra = self.get_filtered_json()
