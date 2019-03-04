@@ -30,6 +30,9 @@ from pathway.tasks import resave_all_elements
 #  Error Handler Views
 #
 ##
+from theming.utils import get_theme
+
+
 @xframe_options_exempt
 def error404(request):
     try:
@@ -183,4 +186,9 @@ class AcceptTermsView(TemplateView):
         elif login_type == 'edu_id':
             context['ui_login_redirect'] = badgr_app.ui_login_redirect
         return context
-        
+
+    def get_template_names(self):
+        theme = get_theme(self.request)
+        if theme is not None and theme.terms_and_conditions_template is not None:
+            return [theme.terms_and_conditions_template, self.template_name]
+        return [self.template_name, ]
