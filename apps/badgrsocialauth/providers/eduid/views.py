@@ -12,7 +12,6 @@ from allauth.socialaccount.models import SocialApp
 
 from badgeuser.models import TermsVersion
 from badgrsocialauth.utils import set_session_badgr_app, get_social_account, update_user_params
-from ims.models import LTITenant
 from mainsite.models import BadgrApp
 from mainsite.views import TermsAndConditionsView
 from theming.models import Theme
@@ -127,22 +126,7 @@ def after_terms_agreement(request, **kwargs):
 
     provider = EduIDProvider(request)
     login = provider.sociallogin_from_response(request, userinfo_json)
-    if login.user.agreed_terms_version == 0:
-        try:
-            if TermsVersion.objects.filter(
-                    terms_and_conditions_template=badgr_app.theme.terms_and_conditions_template).exists():
-                latest_terms_and_conditions = TermsVersion.objects.filter(
-                    terms_and_conditions_template=badgr_app.theme.terms_and_conditions_template).order_by('-version').all()[0]
-        except Theme.DoesNotExist as e:
-            if TermsVersion.objects.filter(
-                terms_and_conditions_template=TermsAndConditionsView.template_name).order_by('-version').exists():
-                latest_terms_and_conditions = TermsVersion.objects.filter(
-                    terms_and_conditions_template=TermsAndConditionsView.template_name).order_by('-version').all()[0]
-            else:
-                latest_terms_and_conditions = TermsVersion.objects.filter(
-                    terms_and_conditions_template__isnull=True).order_by('-version').all()[0]
-        login.user.agreed_terms_version(latest_terms_and_conditions.version)
-        login.user.save()
+    check_agreed_term_and_conditions(login.user, badgr_app)
 
     ret = complete_social_login(request, login)
     set_session_badgr_app(request, badgr_app)
@@ -175,6 +159,23 @@ def after_terms_agreement(request, **kwargs):
     else:
         return ret
 
+def check_agreed_term_and_conditions(user, badgr_app):
+    latest_terms_and_conditions = TermsVersion.objects.filter(
+        terms_and_conditions_template__isnull=True).order_by('-version').all()[0]
+    if user.agreed_terms_version == 0:
+        try:
+            if TermsVersion.objects.filter(
+                    terms_and_conditions_template=badgr_app.theme.terms_and_conditions_template).exists():
+                latest_terms_and_conditions = TermsVersion.objects.filter(
+                    terms_and_conditions_template=badgr_app.theme.terms_and_conditions_template).order_by('-version').all()[0]
+        except Theme.DoesNotExist as e:
+            if TermsVersion.objects.filter(
+                terms_and_conditions_template=TermsAndConditionsView.template_name).order_by('-version').exists():
+                latest_terms_and_conditions = TermsVersion.objects.filter(
+                    terms_and_conditions_template=TermsAndConditionsView.template_name).order_by('-version').all()[0]
+
+        user.agreed_terms_version = latest_terms_and_conditions.version
+        user.save()
 
 def callback(request):
     print(request.__dict__)
