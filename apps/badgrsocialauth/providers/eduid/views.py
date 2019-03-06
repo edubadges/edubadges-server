@@ -9,9 +9,13 @@ from django.shortcuts import redirect, get_object_or_404
 from django.utils import timezone
 from allauth.socialaccount.helpers import render_authentication_error, complete_social_login
 from allauth.socialaccount.models import SocialApp
+
+from badgeuser.models import TermsVersion
 from badgrsocialauth.utils import set_session_badgr_app, get_social_account, update_user_params
 from ims.models import LTITenant
 from mainsite.models import BadgrApp
+from mainsite.views import TermsAndConditionsView
+from theming.models import Theme
 from .provider import EduIDProvider
 from lti_edu.models import StudentsEnrolled, LtiBadgeUserTennant, UserCurrentContextId
 from issuer.models import BadgeClass
@@ -123,6 +127,23 @@ def after_terms_agreement(request, **kwargs):
 
     provider = EduIDProvider(request)
     login = provider.sociallogin_from_response(request, userinfo_json)
+    if login.user.agreed_terms_version == 0:
+        try:
+            if TermsVersion.objects.filter(
+                    terms_and_conditions_template=badgr_app.theme.terms_and_conditions_template).exists():
+                latest_terms_and_conditions = TermsVersion.objects.filter(
+                    terms_and_conditions_template=badgr_app.theme.terms_and_conditions_template).order_by('-version').all()[0]
+        except Theme.DoesNotExist as e:
+            if TermsVersion.objects.filter(
+                terms_and_conditions_template=TermsAndConditionsView.template_name).order_by('-version').exists():
+                latest_terms_and_conditions = TermsVersion.objects.filter(
+                    terms_and_conditions_template=TermsAndConditionsView.template_name).order_by('-version').all()[0]
+            else:
+                latest_terms_and_conditions = TermsVersion.objects.filter(
+                    terms_and_conditions_template__isnull=True).order_by('-version').all()[0]
+        login.user.agreed_terms_version(latest_terms_and_conditions.version)
+        login.user.save()
+
     ret = complete_social_login(request, login)
     set_session_badgr_app(request, badgr_app)
 

@@ -15,14 +15,14 @@ from mainsite.models import BadgrApp
 """
 
 """
-get templates in directoyr
+get templates in directory
 """
 def get_current_templates():
     templates = []
     for template in os.listdir(os.path.join(settings.TOP_DIR,'apps', 'mainsite','templates','terms_of_service')):
-        templates.append(os.path.join('terms_of_service', template))
+        templates.append((os.path.join('terms_of_service', template),os.path.join('terms_of_service', template)))
 
-    return templates
+    return tuple(templates)
 
 
 class Theme(models.Model):
@@ -43,8 +43,7 @@ class Theme(models.Model):
     changed_on = models.DateTimeField(auto_now=True)
     terms_and_conditions_template = models.CharField('Terms and conditions template',
                                                      null=True,
-                                                     max_length=512,
-                                                     choices=[]
+                                                     max_length=512
                                                      )
 
     def __str__(self):

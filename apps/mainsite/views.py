@@ -11,8 +11,9 @@ from django.http import HttpResponse, HttpResponseServerError, HttpResponseNotFo
 from django.shortcuts import redirect
 from django.template import loader, TemplateDoesNotExist, Context
 from django.utils.decorators import method_decorator
+from django.views import View
 from django.views.decorators.clickjacking import xframe_options_exempt
-from django.views.generic import FormView, RedirectView, TemplateView
+from django.views.generic import FormView, RedirectView, TemplateView, DeleteView
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import AllowAny
 from rest_framework.renderers import JSONRenderer
@@ -171,12 +172,12 @@ class DocsAuthorizeRedirect(RedirectView):
         return url
 
 
-class AcceptTermsView(TemplateView):
+class TermsAndConditionsView(TemplateView):
     
     template_name = 'terms_of_service/accept_terms.html'
     
     def get_context_data(self, **kwargs):
-        context = super(AcceptTermsView, self).get_context_data(**kwargs)
+        context = super(TermsAndConditionsView, self).get_context_data(**kwargs)
         badgr_app_pk = json.loads(kwargs['state'])[0]
         badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
         login_type = json.loads(kwargs['state'])[1]
@@ -192,3 +193,11 @@ class AcceptTermsView(TemplateView):
         if theme is not None and theme.terms_and_conditions_template is not None:
             return [theme.terms_and_conditions_template, self.template_name]
         return [self.template_name, ]
+
+
+class AcceptTermsAndConditionsView(View):
+
+    def post(self, request, **kwargs):
+        pass
+
+
