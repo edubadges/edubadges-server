@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'badgeuser',
     'allauth',
     'allauth.account',
+    'social_django',
     'allauth.socialaccount',
     'badgrsocialauth.providers.eduid',
     'badgrsocialauth.providers.surf_conext',
