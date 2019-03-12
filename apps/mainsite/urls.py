@@ -3,6 +3,7 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib.auth import views as auth_views
 
+from ims.views import base
 from mainsite.admin import badgr_admin
 from mainsite.oauth2_api import AuthorizationApiView, TokenView, AuthCodeExchange
 
@@ -99,7 +100,8 @@ urlpatterns = [
     # include LTI endpoints
     url(r'^v2/', include('lti_edu.urls'), kwargs={'version': 'v2'}),
     url(r'^lti_edu/', include('lti_edu.api_urls')),
-    
+    url(r'^lti_issuer/', include('issuer.lti_urls')),
+
     # include Institution endpoints
     url(r'^institution/', include('institution.api_urls')),
 
@@ -109,6 +111,15 @@ urlpatterns = [
     # Accept Terms View
     url(r'^accept_terms/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', AcceptTermsView.as_view(), name='accept_terms'),
     
+]
+
+urlpatterns += [
+    url(
+        r'^(?P<app_slug>[A-Za-z0-9\-]+)/config/(?P<tenant_slug>[A-Za-z0-9\-]+)\.xml$',
+        base.lti_config,
+        name='lti-config'
+    ),
+    url(r'^(?P<slug>[A-Za-z0-9\-]+)/?$', base.lti_launch)
 ]
 
 # Test URLs to allow you to see these pages while DEBUG is True
