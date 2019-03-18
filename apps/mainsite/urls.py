@@ -100,7 +100,7 @@ urlpatterns = [
     # include LTI endpoints
     url(r'^v2/', include('lti_edu.urls'), kwargs={'version': 'v2'}),
     url(r'^lti_edu/', include('lti_edu.api_urls')),
-    url(r'^lti_issuer/', include('issuer.lti_urls')),
+    url(r'^lti_issuer/', include('lti_edu.lti_urls')),
 
     # include Institution endpoints
     url(r'^institution/', include('institution.api_urls')),
@@ -117,11 +117,11 @@ urlpatterns = [
 
 urlpatterns += [
     url(
-        r'^(?P<app_slug>[A-Za-z0-9\-]+)/config/(?P<tenant_slug>[A-Za-z0-9\-]+)\.xml$',
+        r'^lti_app/(?P<app_slug>[A-Za-z0-9\-]+)/config/(?P<tenant_slug>[A-Za-z0-9\-]+)\.xml$',
         base.lti_config,
         name='lti-config'
     ),
-    url(r'^(?P<slug>[A-Za-z0-9\-]+)/?$', base.lti_launch)
+    url(r'^lti_app/(?P<slug>[A-Za-z0-9\-]+)/?$', base.lti_launch)
 ]
 
 # Test URLs to allow you to see these pages while DEBUG is True
