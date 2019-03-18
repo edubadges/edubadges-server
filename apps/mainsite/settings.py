@@ -82,7 +82,8 @@ ROOT_URLCONF = 'mainsite.urls'
 # "*" matches anything, ".example.com" matches example.com and all subdomains
 
 ALLOWED_HOSTS = ['*', ] # ['<your badgr server domain>', ]
-X_FRAME_OPTIONS = 'ALLOW-FROM http://canvas.edubadges.nl/, https://canvas.edubadges.nl'
+#X_FRAME_OPTIONS = 'ALLOW-FROM http://canvas.edubadges.nl/, https://canvas.edubadges.nl'
+X_FRAME_OPTIONS = 'ALLOW-FROM https://canvas.edubadges.nl'
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
