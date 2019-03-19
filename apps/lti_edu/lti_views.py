@@ -22,5 +22,4 @@ class LoginLti(TemplateView):
     def post(self, request,*args, **kwargs):
         post = request.POST
 
-
         return self.get(request, *args, **kwargs)

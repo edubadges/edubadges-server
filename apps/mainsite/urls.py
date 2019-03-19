@@ -116,14 +116,14 @@ urlpatterns = [
     
 ]
 
-urlpatterns += [
-    url(
-        r'^lti_app/(?P<app_slug>[A-Za-z0-9\-]+)/config/(?P<tenant_slug>[A-Za-z0-9\-]+)\.xml$',
-        base.lti_config,
-        name='lti-config'
-    ),
-    url(r'^lti_app/(?P<slug>[A-Za-z0-9\-]+)/?$', base.lti_launch)
-]
+# urlpatterns += [
+#     url(
+#         r'^lti_app/(?P<app_slug>[A-Za-z0-9\-]+)/config/(?P<tenant_slug>[A-Za-z0-9\-]+)\.xml$',
+#         base.lti_config,
+#         name='lti-config'
+#     ),
+#     url(r'^lti_app/(?P<slug>[A-Za-z0-9\-]+)/?$', base.lti_launch)
+# ]
 
 # Test URLs to allow you to see these pages while DEBUG is True
 if getattr(settings, 'DEBUG_ERRORS', False):
