@@ -30,16 +30,7 @@ class BadgeClassLtiContextSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BadgeClassLtiContext
-        fields = ['badge_class','context_id']
-
-    def to_representation(self, instance):
-        data = {
-            'badgeClassEntityId': instance.badge_class.entity_id,
-            'contextId': instance.context_id
-        }
-        return data
-
-
+        fields = ['badge_class']
 
 
 class StudentsEnrolledSerializer(serializers.ModelSerializer):

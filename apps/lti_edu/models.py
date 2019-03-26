@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth import user_logged_out
+
 from ims.models import LTITenant
 from issuer.models import BadgeClass, Issuer, BadgeInstance
 import random
@@ -19,31 +19,12 @@ class LtiBadgeUserTennant(models.Model):
     badge_user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE)
     lti_tennant = models.ForeignKey(LTITenant, on_delete=models.CASCADE)
     lti_user_id = models.CharField(max_length=512)
-    token = models.CharField(max_length=512, null=True)
-    current_lti_data = models.TextField(null=True, blank=True)
-    staff= models.BooleanField(default=False)
+    time_out = models.DateTimeField(null=True)
 
 
 class BadgeClassLtiContext(models.Model):
-    badge_class = models.ForeignKey(BadgeClass, on_delete=models.CASCADE, related_name='lti_context')
+    badge_class = models.ForeignKey(BadgeClass, on_delete=models.CASCADE)
     context_id = models.CharField(max_length=512)
-
-    class Meta:
-        unique_together = ('badge_class', 'context_id',)
-
-class UserCurrentContextId(models.Model):
-    badge_user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE)
-    context_id = models.CharField(max_length=512, null=True)
-
-    class Meta:
-        unique_together = ('badge_user', 'context_id',)
-
-#delete when user logs out
-def delete_user_context_id(**kwargs):
-    UserCurrentContextId.objects.filter(badge_user=kwargs['user']).all().delete()
-
-user_logged_out.connect(delete_user_context_id)
-
 
 
 class LtiClient(models.Model):
@@ -84,7 +65,6 @@ class StudentsEnrolled(models.Model):
     assertion_slug = models.CharField(max_length=150, default='', blank=True, null=True)
     date_awarded = models.DateTimeField(default=None, blank=True, null=True)
     denied = models.BooleanField(default=False)
-    badge_class_lti_context = models.ForeignKey(BadgeClassLtiContext, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.email

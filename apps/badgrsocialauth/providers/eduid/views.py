@@ -13,7 +13,7 @@ from badgrsocialauth.utils import set_session_badgr_app, get_social_account, upd
 from ims.models import LTITenant
 from mainsite.models import BadgrApp
 from .provider import EduIDProvider
-from lti_edu.models import StudentsEnrolled, LtiBadgeUserTennant, UserCurrentContextId
+from lti_edu.models import StudentsEnrolled, LtiBadgeUserTennant
 from issuer.models import BadgeClass
 logger = logging.getLogger('Badgr.Debug')
 
@@ -47,8 +47,7 @@ def login(request):
     # the only thing set in state is the referer (frontend, or staff) , this is not the referer url.
     referer = json.dumps(urlparse(request.META['HTTP_REFERER']).path.split('/')[1:])
     badgr_app_pk = request.session.get('badgr_app_pk', None)
-    lti_data = request.session.get('lti_data', None)
-    state = json.dumps([referer,badgr_app_pk, lti_data])
+    state = json.dumps([referer,badgr_app_pk])
 
     params = {
     "state": state,
@@ -65,7 +64,7 @@ def after_terms_agreement(request, **kwargs):
     '''
     this is the second part of the callback, after consent has been given, or is user already exists
     '''
-    badgr_app_pk, login_type, lti_data, referer = json.loads(kwargs['state'])
+    badgr_app_pk, login_type, referer = json.loads(kwargs['state'])
     access_token = kwargs.get('access_token', None)
     if not access_token:
         error = 'Sorry, we could not find your eduID credentials.'
@@ -110,18 +109,13 @@ def after_terms_agreement(request, **kwargs):
     ret = complete_social_login(request, login)
 
     #create lti_connection
-    if lti_data is not None and 'lti_user_id' in lti_data:
+    if 'lti_user_id' in request.session:
         if not request.user.is_anonymous():
-            tenant = LTITenant.objects.get(client_key=lti_data['lti_tenant'])
-            badgeuser_tennant, _ = LtiBadgeUserTennant.objects.get_or_create(lti_user_id=lti_data['lti_user_id'],
+            tenant = LTITenant.objects.get(client_key=request.session['lti_tenant'])
+            badgeuser_tennant, _ = LtiBadgeUserTennant.objects.get_or_create(lti_user_id=request.session['lti_user_id'],
                                                                              badge_user=request.user,
-                                                                             lti_tennant=tenant,
-                                                                             staff=False
-                                                                            )
-            user_current_context_id,_ = UserCurrentContextId.objects.get_or_create(badge_user=request.user)
-            user_current_context_id.context_id = lti_data['lti_context_id']
-            user_current_context_id.save()
-
+                                                                             lti_tennant=tenant)
+        del request.session['lti_user_id']
 
     # 4. Return the user to where she came from (ie the referer: public enrollment or main page)
     if 'public' in referer:
@@ -135,13 +129,12 @@ def after_terms_agreement(request, **kwargs):
     else:
         return ret
 
-
 def callback(request):
     current_app = SocialApp.objects.get_current(provider='edu_id')
     #extract state of redirect
     state = json.loads(request.GET.get('state'))
-    referer, badgr_app_pk, lti_data = state
-    code = request.GET.get('code', None)  # access codes to access user info endpoint
+    referer, badgr_app_pk = state
+    code = request.GET.get('code', None) # access codes to access user info endpoint
     if code is None: #check if code is given
         error = 'Server error: No userToken found in callback'
         logger.debug(error)
@@ -154,6 +147,7 @@ def callback(request):
      "code": code,
      "client_id": current_app.client_id,
      "client_secret": current_app.secret,
+
     }
     headers = {'Content-Type': "application/x-www-form-urlencoded",
                'Cache-Control': "no-cache"
@@ -171,7 +165,7 @@ def callback(request):
     userinfo_json = response.json()
     
     keyword_arguments = {'access_token':token_json['access_token'], 
-                        'state': json.dumps([str(badgr_app_pk), 'edu_id', lti_data]+ [json.loads(referer)]),
+                        'state': json.dumps([str(badgr_app_pk), 'edu_id']+ [json.loads(referer)]),
                          'after_terms_agreement_url_name': 'eduid_terms_accepted_callback'}
     if not get_social_account(userinfo_json['sub']):
         return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))
