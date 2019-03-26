@@ -10,9 +10,10 @@ from django.utils import timezone
 from allauth.socialaccount.helpers import render_authentication_error, complete_social_login
 from allauth.socialaccount.models import SocialApp
 from badgrsocialauth.utils import set_session_badgr_app, get_social_account, update_user_params
+from ims.models import LTITenant
 from mainsite.models import BadgrApp
 from .provider import EduIDProvider
-from lti_edu.models import StudentsEnrolled
+from lti_edu.models import StudentsEnrolled, LtiBadgeUserTennant
 from issuer.models import BadgeClass
 logger = logging.getLogger('Badgr.Debug')
 
@@ -106,7 +107,16 @@ def after_terms_agreement(request, **kwargs):
     provider = EduIDProvider(request)
     login = provider.sociallogin_from_response(request, userinfo_json)
     ret = complete_social_login(request, login)
-    
+
+    #create lti_connection
+    if 'lti_user_id' in request.session:
+        if not request.user.is_anonymous():
+            tenant = LTITenant.objects.get(client_key=request.session['lti_tenant'])
+            badgeuser_tennant, _ = LtiBadgeUserTennant.objects.get_or_create(lti_user_id=request.session['lti_user_id'],
+                                                                             badge_user=request.user,
+                                                                             lti_tennant=tenant)
+        del request.session['lti_user_id']
+
     # 4. Return the user to where she came from (ie the referer: public enrollment or main page)
     if 'public' in referer:
         if 'badges' in referer:
@@ -136,7 +146,8 @@ def callback(request):
      "redirect_uri": '%s/account/eduid/login/callback/' % settings.HTTP_ORIGIN,
      "code": code,
      "client_id": current_app.client_id,
-     "client_secret": current_app.secret
+     "client_secret": current_app.secret,
+
     }
     headers = {'Content-Type': "application/x-www-form-urlencoded",
                'Cache-Control': "no-cache"

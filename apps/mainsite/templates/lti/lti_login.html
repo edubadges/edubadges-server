@@ -1,0 +1,50 @@
+{% extends "lti/lti_base.html" %}
+{% block content %}
+<a target="_blank" href="{{ login_url }}">login</a></div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    function Request() {
+
+        this.poll = false;
+
+        this.activatePoll = function () {
+            this.poll = true;
+            this.runPoll();
+        };
+
+        this.disablePoll = function () {
+            this.poll = false;
+        };
+
+        this.runPoll = function () {
+            var self = this;
+            var poll = setTimeout(function () {
+                $.ajax({
+                    url: '/lti_issuer/check_login',
+                    success: function (response) {
+                        console.log(response);
+                        if(response['loggedin']){
+                            window.location ='{{ after_login }}';
+                        }
+                    },
+                    dataType: "json",
+                    complete: function () {
+                        if (self.poll == false) {
+                            clearTimeout(poll);
+                        } else {
+                            self.runPoll();
+                        }
+                    }
+                })
+            }, 1000);
+        };
+    }
+
+    $(document).ready(function () {
+        $request = new Request();
+        $request.activatePoll();
+    });
+</script>
+
+{% endblock %}

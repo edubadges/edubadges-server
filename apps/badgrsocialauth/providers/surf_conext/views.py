@@ -9,6 +9,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 
 from badgrsocialauth.utils import set_session_badgr_app, get_session_authcode, get_verified_user, get_session_badgr_app, get_social_account
+from ims.models import LTITenant
+from lti_edu.models import LtiBadgeUserTennant
 from mainsite.models import BadgrApp
 from .provider import SurfConextProvider
 from institution.models import Institution
@@ -97,7 +99,15 @@ def after_terms_agreement(request, **kwargs):
         institution, created = Institution.objects.get_or_create(name=institution_name)
         request.user.institution = institution
         request.user.save()
-        
+
+    if 'lti_user_id' in request.session:
+        if not request.user.is_anonymous():
+            tenant = LTITenant.objects.get(client_key=request.session['lti_tenant'])
+            badgeuser_tennant,_ = LtiBadgeUserTennant.objects.get_or_create(lti_user_id=request.session['lti_user_id'],
+                                                                            badge_user=request.user,
+                                                                            lti_tennant=tenant)
+        del request.session['lti_user_id']
+
     # override the response with a redirect to staff dashboard if the login came from there
     if referer == 'staff':
         return HttpResponseRedirect(reverse('admin:index'))
