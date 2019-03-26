@@ -2,7 +2,7 @@ from collections import OrderedDict
 from datetime import datetime
 from rest_framework import serializers
 from issuer.models import BadgeClass, Issuer, BadgeInstance
-from lti_edu.models import StudentsEnrolled
+from lti_edu.models import StudentsEnrolled, BadgeClassLtiContext
 from cryptography.utils import read_only_property
 
 
@@ -24,6 +24,13 @@ class BadgeClassSerializer(serializers.ModelSerializer):
     class Meta:
         model = BadgeClass
         fields = '__all__'
+
+
+class BadgeClassLtiContextSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = BadgeClassLtiContext
+        fields = ['badge_class']
 
 
 class StudentsEnrolledSerializer(serializers.ModelSerializer):

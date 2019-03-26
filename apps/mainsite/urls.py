@@ -113,14 +113,14 @@ urlpatterns = [
     
 ]
 
-# urlpatterns += [
-#     url(
-#         r'^lti_app/(?P<app_slug>[A-Za-z0-9\-]+)/config/(?P<tenant_slug>[A-Za-z0-9\-]+)\.xml$',
-#         base.lti_config,
-#         name='lti-config'
-#     ),
-#     url(r'^lti_app/(?P<slug>[A-Za-z0-9\-]+)/?$', base.lti_launch)
-# ]
+urlpatterns += [
+    url(
+        r'^lti_app/(?P<app_slug>[A-Za-z0-9\-]+)/config/(?P<tenant_slug>[A-Za-z0-9\-]+)\.xml$',
+        base.lti_config,
+        name='lti-config'
+    ),
+    url(r'^lti_app/(?P<slug>[A-Za-z0-9\-]+)/?$', base.lti_launch)
+]
 
 # Test URLs to allow you to see these pages while DEBUG is True
 if getattr(settings, 'DEBUG_ERRORS', False):
@@ -132,7 +132,7 @@ if getattr(settings, 'DEBUG_ERRORS', False):
 # If DEBUG_MEDIA is set, have django serve anything in MEDIA_ROOT at MEDIA_URL
 if getattr(settings, 'DEBUG_MEDIA', True):
     from django.views.static import serve as static_serve
-    media_url = getattr(settings, 'MEDIA_URL', '/media/').lstrip('/')
+    media_url = getattr(settings, 'HTTP_ORIGIN_MEDIA', '/media/').lstrip('/')
     urlpatterns = [
         url(r'^media/(?P<path>.*)$', static_serve, {
             'document_root': settings.MEDIA_ROOT
@@ -143,7 +143,7 @@ if getattr(settings, 'DEBUG_MEDIA', True):
 if getattr(settings, 'DEBUG_STATIC', True):
     from django.contrib.staticfiles.views import serve as staticfiles_serve
     static_url = getattr(settings, 'STATIC_URL', '/static/')
-    static_url = static_url.replace(getattr(settings, 'HTTP_ORIGIN', 'http://localhost:8000'), '')
+    static_url = static_url.replace(getattr(settings, 'HTTP_ORIGIN_MEDIA', 'http://localhost:8000'), '')
     static_url = static_url.lstrip('/')
     urlpatterns = [
         url(r'^%s(?P<path>.*)' % (static_url,), staticfiles_serve, kwargs={

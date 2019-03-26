@@ -6,8 +6,9 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST 
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from issuer.permissions import BadgrOAuthTokenHasEntityScope
-from lti_edu.models import StudentsEnrolled
-from lti_edu.serializers import StudentsEnrolledSerializer, StudentsEnrolledSerializerWithRelations
+from lti_edu.models import StudentsEnrolled, BadgeClassLtiContext
+from lti_edu.serializers import StudentsEnrolledSerializer, StudentsEnrolledSerializerWithRelations, \
+    BadgeClassLtiContextSerializer
 from lti_edu.views import LtiViewSet
 from issuer.models import BadgeClass
 from entity.api import BaseEntityListView, BaseEntityDetailView
@@ -117,4 +118,32 @@ class StudentsEnrolledDetail(BaseEntityDetailView):
             message = 'Succesfully updated enrollment of {}'.format(enrollment['recipient_name'].encode('utf-8'))
             return Response(data=message, status=HTTP_200_OK)
         return Response(data='No enrollment to deny', status=HTTP_400_BAD_REQUEST)
-      
+
+
+class BadgeClassLtiContextListView(BaseEntityListView):
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    model = BadgeClassLtiContext
+    serializer_class = BadgeClassLtiContextSerializer
+
+    def get_objects(self, request, **kwargs):
+
+        if 'lti_context_id' in request.session:
+            return BadgeClassLtiContext.objects.filter(context_id=request.session['lti_context_id'])
+        return []
+
+
+class BadgeClassLtiContextDetailView(BaseEntityDetailView):
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    model = BadgeClassLtiContext
+    serializer_class = BadgeClassLtiContextSerializer
+
+    def put(self, request, **kwargs):
+        if 'lti_context_id' in request.session:
+            context_id = request.session['lti_context_id']
+            badge_class = BadgeClass.objects.get(entity_id=request.data['badge_class'])
+            BadgeClassLtiContext.objects.get_or_create(context_id=context_id, badge_class=badge_class)
+            message = 'Succesfully added badgeclass'
+            return Response(data=message, status=HTTP_200_OK)
+
+
+        return Response(data='No context id found', status=HTTP_400_BAD_REQUEST)

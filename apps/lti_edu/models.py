@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
+from ims.models import LTITenant
 from issuer.models import BadgeClass, Issuer, BadgeInstance
 import random
 
@@ -12,6 +13,18 @@ def get_uuid():
 class LtiPayload(models.Model):
     date_created = models.DateTimeField(default=timezone.now)
     data = models.TextField()
+
+
+class LtiBadgeUserTennant(models.Model):
+    badge_user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE)
+    lti_tennant = models.ForeignKey(LTITenant, on_delete=models.CASCADE)
+    lti_user_id = models.CharField(max_length=512)
+    time_out = models.DateTimeField(null=True)
+
+
+class BadgeClassLtiContext(models.Model):
+    badge_class = models.ForeignKey(BadgeClass, on_delete=models.CASCADE)
+    context_id = models.CharField(max_length=512)
 
 
 class LtiClient(models.Model):
