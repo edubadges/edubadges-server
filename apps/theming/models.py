@@ -25,5 +25,8 @@ class Theme(models.Model):
     institution = models.ForeignKey(Institution, related_name='theme')
     changed_on = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.service_name
 
-
+    def __unicode__(self):
+        return self.service_name
