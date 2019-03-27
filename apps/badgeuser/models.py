@@ -159,6 +159,11 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     badgrapp = models.ForeignKey('mainsite.BadgrApp', blank=True, null=True, default=None)
     faculty = models.ManyToManyField('institution.Faculty', blank=True)
     institution = models.ForeignKey('institution.Institution', blank=True, null=True, default=None)
+    is_staff = models.BooleanField(
+        _('Backend-staff member'),
+        default=False,
+        help_text=_('Designates whether the user can log into this admin site.'),
+    )
 
     # canvas LTI id
     lti_id = models.CharField(unique=True, max_length=50, default=None, null=True, blank=True,
