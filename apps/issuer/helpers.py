@@ -163,11 +163,20 @@ class BadgeCheckHelper(object):
 
         report = response.get('report', {})
         # override VALIDATE_PROPERTY for id, until IMS accepts EduID iri format 
-        if report['errorCount'] == 1:
-            if report['messages'][0]['name'] == 'VALIDATE_PROPERTY':
-                report['messages'].pop(0)
-                report['errorCount'] = 0
-                report['valid'] = True
+                
+        if report['errorCount'] > 0:
+            index_of_uri_format_failure = None
+            uri_format_message_found = False
+            for index, message in enumerate(report['messages']):
+                if 'not valid in unknown type node' in message['result']:
+                    index_of_uri_format_failure = index
+                    uri_format_message_found = True
+            if uri_format_message_found:
+                report['errorCount'] -= 1
+                report['messages'].pop(index_of_uri_format_failure)
+                if report['errorCount'] == 0:
+                    report['valid'] = True
+        
 
         is_valid = report.get('valid')
 
