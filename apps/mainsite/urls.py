@@ -99,6 +99,9 @@ urlpatterns = [
     # include LTI endpoints
     url(r'^v2/', include('lti_edu.urls'), kwargs={'version': 'v2'}),
     url(r'^lti_edu/', include('lti_edu.api_urls')),
+    
+    # include Institution endpoints
+    url(r'^institution/', include('institution.api_urls')),
 
     # include theming endpoints
     url(r'v2/', include('theming.api_urls'), kwargs={'version':'v2'}),
