@@ -177,9 +177,10 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         verbose_name_plural = _('badge users')
         db_table = 'users'
         permissions=(('view_issuer_tab', 'User can view Issuer tab in front end'),
+                     ('view_management_tab', 'User can view Management dashboard'),
                      ('has_faculty_scope', 'User has faculty scope'),
                      ('has_institution_scope', 'User has institution scope'),
-                     ('ui_issuer_add', 'User can add issuer in front end')
+                     ('ui_issuer_add', 'User can add issuer in front end'),
                      )
 
     def __unicode__(self):
