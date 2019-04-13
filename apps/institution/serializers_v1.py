@@ -17,3 +17,8 @@ class FacultySerializerV1(serializers.Serializer):
 
     class Meta:
         model = Faculty
+        
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name')
+        instance.save()
+        return instance
