@@ -10,7 +10,7 @@ from django.urls import reverse
 
 from badgrsocialauth.utils import set_session_badgr_app, get_session_authcode, get_verified_user, get_session_badgr_app, get_social_account
 from ims.models import LTITenant
-from lti_edu.models import LtiBadgeUserTennant
+from lti_edu.models import LtiBadgeUserTennant, UserCurrentContextId
 from mainsite.models import BadgrApp
 from .provider import SurfConextProvider
 from institution.models import Institution
@@ -103,9 +103,14 @@ def after_terms_agreement(request, **kwargs):
     if 'lti_user_id' in request.session:
         if not request.user.is_anonymous():
             tenant = LTITenant.objects.get(client_key=request.session['lti_tenant'])
-            badgeuser_tennant,_ = LtiBadgeUserTennant.objects.get_or_create(lti_user_id=request.session['lti_user_id'],
+            badgeuser_tennant, _ = LtiBadgeUserTennant.objects.get_or_create(lti_user_id=request.session['lti_user_id'],
                                                                             badge_user=request.user,
-                                                                            lti_tennant=tenant)
+                                                                            lti_tennant=tenant,
+                                                                            staff=True)
+            user_current_context_id = UserCurrentContextId.objects.get_or_create(badge_user=request.user)
+            user_current_context_id.context_id = request.session['lti_context_id']
+            user_current_context_id.save()
+
         del request.session['lti_user_id']
 
     # override the response with a redirect to staff dashboard if the login came from there
