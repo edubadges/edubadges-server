@@ -13,7 +13,7 @@ from badgrsocialauth.utils import set_session_badgr_app, get_social_account, upd
 from ims.models import LTITenant
 from mainsite.models import BadgrApp
 from .provider import EduIDProvider
-from lti_edu.models import StudentsEnrolled, LtiBadgeUserTennant
+from lti_edu.models import StudentsEnrolled, LtiBadgeUserTennant, UserCurrentContextId
 from issuer.models import BadgeClass
 logger = logging.getLogger('Badgr.Debug')
 
@@ -114,7 +114,13 @@ def after_terms_agreement(request, **kwargs):
             tenant = LTITenant.objects.get(client_key=request.session['lti_tenant'])
             badgeuser_tennant, _ = LtiBadgeUserTennant.objects.get_or_create(lti_user_id=request.session['lti_user_id'],
                                                                              badge_user=request.user,
-                                                                             lti_tennant=tenant)
+                                                                             lti_tennant=tenant,
+                                                                             staff=False
+                                                                            )
+            user_current_context_id = UserCurrentContextId.objects.get_or_create(badge_user=request.user)
+            user_current_context_id.context_id = request.session['lti_context_id']
+            user_current_context_id.save()
+
         del request.session['lti_user_id']
 
     # 4. Return the user to where she came from (ie the referer: public enrollment or main page)
@@ -129,12 +135,13 @@ def after_terms_agreement(request, **kwargs):
     else:
         return ret
 
+
 def callback(request):
     current_app = SocialApp.objects.get_current(provider='edu_id')
     #extract state of redirect
     state = json.loads(request.GET.get('state'))
     referer, badgr_app_pk = state
-    code = request.GET.get('code', None) # access codes to access user info endpoint
+    code = request.GET.get('code', None)  # access codes to access user info endpoint
     if code is None: #check if code is given
         error = 'Server error: No userToken found in callback'
         logger.debug(error)
@@ -147,7 +154,6 @@ def callback(request):
      "code": code,
      "client_id": current_app.client_id,
      "client_secret": current_app.secret,
-
     }
     headers = {'Content-Type': "application/x-www-form-urlencoded",
                'Cache-Control': "no-cache"

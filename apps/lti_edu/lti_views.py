@@ -7,15 +7,28 @@ from django.views import View
 from django.views.generic import TemplateView
 
 from badgrsocialauth.utils import set_session_badgr_app
-from lti_edu.models import LtiBadgeUserTennant
+from lti_edu.models import LtiBadgeUserTennant, UserCurrentContextId
 from mainsite.models import BadgrApp
 
 
 class CheckLogin(View):
 
     def get(self,request):
+
         response = {'loggedin':True}
         if not request.user.is_authenticated():
+            response['loggedin'] = False
+        elif not request.user.has_edu_id_social_account():
+            response['loggedin'] = False
+        return JsonResponse(response)
+
+class CheckLoginAdmin(View):
+    def get(self,request):
+
+        response = {'loggedin':True}
+        if not request.user.is_authenticated():
+            response['loggedin'] = False
+        elif not request.user.has_surf_conext_social_account():
             response['loggedin'] = False
         return JsonResponse(response)
 
@@ -32,23 +45,32 @@ def login_user(request, user):
 
 class LoginLti(TemplateView):
     template_name = "lti/lti_login.html"
+    staff = False
 
     def get_context_data(self, **kwargs):
         context_data = super(LoginLti, self).get_context_data(**kwargs)
         context_data['ltitest'] = 'yes lti test'
         badgr_app = BadgrApp.objects.get_current(request=self.request)
-
+        context_data['login_url'] = self.get_login_url()
         if badgr_app is not None:
             set_session_badgr_app(self.request, badgr_app)
         if not self.request.user.is_authenticated():
             # check login
             try:
-                ltibadgetennant = LtiBadgeUserTennant.objects.get(lti_tennant=kwargs['tenant'], lti_user_id=self.request.POST['user_id'])
+                ltibadgetennant = LtiBadgeUserTennant.objects.get(lti_tennant=kwargs['tenant'],
+                                                                  lti_user_id=self.request.POST['user_id'],
+                                                                  staff=self.staff)
                 login_user(self.request, ltibadgetennant.badge_user)
+
             except Exception as e:
                 pass
-            context_data['login_url'] = self.get_login_url()
+        if self.request.user.is_authenticated():
+            user_current_context_id = UserCurrentContextId.objects.get_or_create(badge_user=self.request.user)
+            user_current_context_id.context_id = self.request.session['lti_context_id']
+            user_current_context_id.save()
+
         context_data['after_login'] = self.get_after_login()
+        context_data['check_login'] = self.get_check_login_url()
         return context_data
 
     def post(self, request,*args, **kwargs):
@@ -59,6 +81,7 @@ class LoginLti(TemplateView):
         request.session['lti_context_id'] = context_id
         request.session['lti_tenant'] = kwargs['tenant'].client_key.hex
 
+
         return self.get(request, *args, **kwargs)
 
     def get_login_url(self):
@@ -68,9 +91,12 @@ class LoginLti(TemplateView):
         badgr_app = BadgrApp.objects.get_current(request=self.request)
         return '{}/recipient/badges?embedVersion=1&embedWidth=800&embedHeight=800'.format(badgr_app.cors)
 
+    def get_check_login_url(self):
+        return reverse('check-login')
+
 
 class LoginLtiStaff(LoginLti):
-
+    staff = True
 
     def get_login_url(self):
         return '/account/sociallogin?provider=surf_conext'
@@ -78,3 +104,6 @@ class LoginLtiStaff(LoginLti):
     def get_after_login(self):
         badgr_app = BadgrApp.objects.get_current(request=self.request)
         return '{}/issuer?embedVersion=1&embedWidth=800&embedHeight=800'.format(badgr_app.cors)
+
+    def get_check_login_url(self):
+        return reverse('check-login-staff')

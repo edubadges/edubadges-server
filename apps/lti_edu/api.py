@@ -124,10 +124,9 @@ class BadgeClassLtiContextListView(BaseEntityListView):
 
     def get_objects(self, request, **kwargs):
 
-        if 'lti_context_id' in kwargs:
-            lti_context_id = kwargs['lti_context_id']
-            badgeclasses_per_context_id = BadgeClassLtiContext.objects.filter(context_id=lti_context_id).all()
-            return badgeclasses_per_context_id
+        if 'lti_context_id' in request.session:
+            lti_context_id = request.session['lti_context_id']
+            return BadgeClassLtiContext.objects.filter(context_id=lti_context_id)
         return []
 
 
@@ -136,20 +135,16 @@ class BadgeClassLtiContextDetailView(BaseEntityDetailView):
     model = BadgeClassLtiContext
     serializer_class = BadgeClassLtiContextSerializer
 
-    def post(self, request, **kwargs):
+    def put(self, request, **kwargs):
+        if 'lti_context_id' in request.session:
+            context_id = request.session['lti_context_id']
+            badge_class = BadgeClass.objects.get(entity_id=request.data['badge_class'])
+            BadgeClassLtiContext.objects.get_or_create(context_id=context_id, badge_class=badge_class)
+            message = 'Succesfully added badgeclass'
+            return Response(data=message, status=HTTP_200_OK)
 
-        context_id = request.data['contextId']
-        badge_class = BadgeClass.objects.get(entity_id=request.data['badgeClassEntityId'])
-        BadgeClassLtiContext.objects.get_or_create(context_id=context_id, badge_class=badge_class)
-        message = 'Succesfully added badgeclass'
-        return Response(data=message, status=HTTP_200_OK)
 
-    def delete(self, request, **kwargs):
-        context_id = request.data['contextId']
-        badge_class = BadgeClass.objects.get(entity_id=request.data['badgeClassEntityId'])
-        BadgeClassLtiContext.objects.get(context_id=context_id, badge_class=badge_class).delete()
-        message = 'Succesfully deleted badgeclass'
-        return Response(data=message, status=HTTP_200_OK)
+        return Response(data='No context id found', status=HTTP_400_BAD_REQUEST)
 
 
 class CurrentContextView(BaseEntityDetailView):
