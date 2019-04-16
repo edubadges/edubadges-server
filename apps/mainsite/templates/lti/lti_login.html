@@ -21,7 +21,7 @@
             var self = this;
             var poll = setTimeout(function () {
                 $.ajax({
-                    url: '/lti_issuer/check_login',
+                    url: '{{ check_login }}',
                     success: function (response) {
                         console.log(response);
                         if(response['loggedin']){

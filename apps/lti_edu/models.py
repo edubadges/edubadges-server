@@ -20,12 +20,24 @@ class LtiBadgeUserTennant(models.Model):
     badge_user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE)
     lti_tennant = models.ForeignKey(LTITenant, on_delete=models.CASCADE)
     lti_user_id = models.CharField(max_length=512)
-    time_out = models.DateTimeField(null=True)
+    token = models.CharField(max_length=512, null=True)
+    staff= models.BooleanField(default=False)
 
 
 class BadgeClassLtiContext(models.Model):
-    badge_class = models.ForeignKey(BadgeClass, on_delete=models.CASCADE)
+    badge_class = models.ForeignKey(BadgeClass, on_delete=models.CASCADE, related_name='lti_context')
     context_id = models.CharField(max_length=512)
+
+    class Meta:
+        unique_together = ('badge_class', 'context_id',)
+
+class UserCurrentContextId(models.Model):
+    badge_user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE)
+    context_id = models.CharField(max_length=512, null=True)
+
+    class Meta:
+        unique_together = ('badge_user', 'context_id',)
+
 
 
 class LtiClient(models.Model):

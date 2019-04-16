@@ -1,10 +1,11 @@
+from django.http import JsonResponse
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 
-from lti_edu.models import StudentsEnrolled, BadgeClassLtiContext
+from lti_edu.models import StudentsEnrolled, BadgeClassLtiContext, UserCurrentContextId
 from lti_edu.serializers import StudentsEnrolledSerializer, StudentsEnrolledSerializerWithRelations, \
     BadgeClassLtiContextSerializer
 from issuer.models import BadgeClass
@@ -124,7 +125,8 @@ class BadgeClassLtiContextListView(BaseEntityListView):
     def get_objects(self, request, **kwargs):
 
         if 'lti_context_id' in request.session:
-            return BadgeClassLtiContext.objects.filter(context_id=request.session['lti_context_id'])
+            lti_context_id = request.session['lti_context_id']
+            return BadgeClassLtiContext.objects.filter(context_id=lti_context_id)
         return []
 
 
@@ -143,3 +145,19 @@ class BadgeClassLtiContextDetailView(BaseEntityDetailView):
 
 
         return Response(data='No context id found', status=HTTP_400_BAD_REQUEST)
+
+
+class CurrentContextView(BaseEntityDetailView):
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+
+    def get(self, request,**kwargs):
+        response = {'loggedin': True,
+                    'lticontext': None}
+        if not request.user.is_authenticated():
+            response['loggedin'] = False
+        else:
+            user_current_context_id = UserCurrentContextId.objects.get(badge_user=request.user)
+
+            response['lticontext'] = user_current_context_id.context_id
+
+        return JsonResponse(response)
