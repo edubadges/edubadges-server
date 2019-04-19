@@ -1,5 +1,5 @@
 from django.db import models
-# from autoslug import AutoSlugField
+from autoslug import AutoSlugField
 # from mainsite.managers import SlugOrJsonIdCacheModelManager
 
 class Institution(models.Model):
@@ -24,5 +24,4 @@ class Faculty(models.Model):
     def get_institution(self):
         return self.institution
 
-#     slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
-#     cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='id', slug_field_name='id')
+    entity_id = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True, default=None, null=True)
