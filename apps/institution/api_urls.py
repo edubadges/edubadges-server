@@ -4,6 +4,6 @@ from institution.api import FacultyList, FacultyDetail
 
 urlpatterns = [
     url(r'^faculties$', FacultyList.as_view(), name='api_faculty_list'),
-    url(r'^faculties/(?P<id>[^/]+)$', FacultyDetail.as_view(), name='api_faculty_detail'),
+    url(r'^faculties/(?P<slug>[^/]+)$', FacultyDetail.as_view(), name='api_faculty_detail'),
     ]
 

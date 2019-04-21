@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.serializers import UUIDField
 from .models import Faculty, Institution
-
+from mainsite.serializers import StripTagsCharField
 
 
 class InstitutionSerializerV1(serializers.Serializer):
@@ -11,9 +11,9 @@ class InstitutionSerializerV1(serializers.Serializer):
         model = Institution
 
 class FacultySerializerV1(serializers.Serializer):
-    id = serializers.ReadOnlyField()
     name = serializers.CharField(max_length=512)
-#     institution = InstitutionSerializerV1()
+    slug = StripTagsCharField(max_length=255, read_only=True, source='entity_id')
+
 
     class Meta:
         model = Faculty

@@ -28,7 +28,7 @@ class FacultyDetail(BaseEntityDetailView):
         return super(FacultyDetail, self).get(request, **kwargs)
 
     def get_object(self, request, **kwargs):
-        return Faculty.objects.get(id=kwargs.get('id'))
+        return Faculty.objects.get(entity_id=kwargs.get('slug'))
 
     def put(self, request, **kwargs):
         return super(FacultyDetail, self).put(request, **kwargs)
