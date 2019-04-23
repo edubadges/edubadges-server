@@ -186,6 +186,15 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     def __unicode__(self):
         return u"{} <{}>".format(self.get_full_name(), self.email)
 
+
+    def within_scope(self, object):
+        if object:
+            if self.has_perm('badgeuser.has_institution_scope'):
+                return object.institution == self.institution
+            if self.has_perm('badgeuser.has_faculty_scope'):
+                return object.faculty in self.faculty.all()
+        return False
+
     def get_full_name(self):
         return u"%s %s" % (self.first_name, self.last_name)
 
