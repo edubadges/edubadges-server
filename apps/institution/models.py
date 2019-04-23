@@ -16,6 +16,9 @@ class Faculty(BaseVersionedEntity, models.Model):
     def __str__(self):
         return self.name
 
+    def __unicode__(self):
+        return u'{}'.format(self.name)
+
     class Meta:
         verbose_name_plural = 'faculties'
         unique_together = ('name', 'institution')
