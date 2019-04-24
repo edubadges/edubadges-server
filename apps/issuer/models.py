@@ -202,6 +202,12 @@ class Issuer(ResizeUploadedImage,
         return reverse('issuer_json', kwargs={'entity_id': self.entity_id})
 
     @property
+    def institution(self):
+        if self.faculty:
+            return self.faculty.institution
+        return None
+
+    @property
     def public_url(self):
         return OriginSetting.HTTP+self.get_absolute_url()
 
