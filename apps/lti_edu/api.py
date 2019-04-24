@@ -3,11 +3,13 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
-from mainsite.permissions import AuthenticatedWithVerifiedEmail
 
-from lti_edu.models import StudentsEnrolled, BadgeClassLtiContext, UserCurrentContextId
-from lti_edu.serializers import StudentsEnrolledSerializer, StudentsEnrolledSerializerWithRelations, \
-    BadgeClassLtiContextSerializer
+from lti_edu.models import BadgeClassLtiContext, UserCurrentContextId
+from mainsite.permissions import AuthenticatedWithVerifiedEmail, MayUseManagementDashboard
+
+from lti_edu.models import StudentsEnrolled, LtiClient
+from lti_edu.permissions import IssuerWithinUserScope
+from lti_edu.serializers import StudentsEnrolledSerializer, StudentsEnrolledSerializerWithRelations, LtiClientsSerializer, BadgeClassLtiContextSerializer
 from issuer.models import BadgeClass
 from entity.api import BaseEntityListView, BaseEntityDetailView
 
@@ -29,6 +31,28 @@ class CheckIfStudentIsEnrolled(BaseEntityListView):
                 return Response(data='enrolled', status=200)
         else:
             return Response(data='noEduID', status=200)
+
+
+class LtiClientsList(BaseEntityListView):
+    """
+    GET a list of lti clients within users scope
+    POST to create new lti client
+    """
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, IssuerWithinUserScope)
+    model = LtiClient
+    serializer_class = LtiClientsSerializer
+
+    def get_objects(self, request, **kwargs):
+        if request.user.has_perm('badgeuser.has_institution_scope'):
+            institution_id = request.user.institution.id
+            return LtiClient.objects.filter(issuer__faculty__institution_id=institution_id).distinct()
+        elif request.user.has_perm('badgeuser.has_faculty_scope'):
+            return LtiClient.objects.filter(issuer__faculty__in=request.user.faculty.all()).distinct()
+        return LtiClient.objects.none()
+
+    def post(self, request, **kwargs):
+        return super(LtiClientsList, self).post(request, **kwargs)
+
 
 
 class StudentEnrollmentList(BaseEntityListView):

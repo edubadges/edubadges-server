@@ -2,6 +2,8 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth import user_logged_out
 from ims.models import LTITenant
+from django.core.exceptions import ValidationError
+
 from issuer.models import BadgeClass, Issuer, BadgeInstance
 
 import random
@@ -66,6 +68,18 @@ class LtiClient(models.Model):
         if self.issuer:
             return self.issuer.institution
         return None
+
+    def validate_unique(self, *args, **kwargs):
+        super(LtiClient, self).validate_unique(*args, **kwargs)
+        if self.__class__.objects.filter(issuer=self.issuer, name=self.name).exists():
+            raise ValidationError(
+                message='LtiClient with this name and Issuer already exists.',
+                code='unique_together',
+            )
+
+    def save(self, *args, **kwargs):
+        self.validate_unique()
+        super(LtiClient, self).save(*args, **kwargs)
 
 
 class ResourceLinkBadge(models.Model):
