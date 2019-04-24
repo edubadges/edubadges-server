@@ -11,6 +11,7 @@ class InstitutionSerializerV1(serializers.Serializer):
         model = Institution
 
 class FacultySerializerV1(serializers.Serializer):
+    id = serializers.ReadOnlyField()
     name = serializers.CharField(max_length=512)
     slug = StripTagsCharField(max_length=255, read_only=True, source='entity_id')
 

@@ -1,7 +1,10 @@
 from django.db import models
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 from issuer.models import BadgeClass, Issuer, BadgeInstance
+from entity.models import BaseVersionedEntity
+
 import random
 
 
@@ -14,7 +17,7 @@ class LtiPayload(models.Model):
     data = models.TextField()
 
 
-class LtiClient(models.Model):
+class LtiClient(BaseVersionedEntity, models.Model):
     date_created = models.DateTimeField(default=timezone.now)
     name = models.CharField(max_length=400, default='', blank=True, null=True)
 
@@ -27,6 +30,21 @@ class LtiClient(models.Model):
 
     def __str__(self):
         return self.name
+
+    # class Meta:
+    #     unique_together = ('name', 'issuer')
+
+    def validate_unique(self, *args, **kwargs):
+        super(LtiClient, self).validate_unique(*args, **kwargs)
+        if self.__class__.objects.filter(issuer=self.issuer, name=self.name).exists():
+            raise ValidationError(
+                message='LtiClient with this name and Issuer already exists.',
+                code='unique_together',
+            )
+
+    def save(self, *args, **kwargs):
+        self.validate_unique()
+        super(LtiClient, self).save(*args, **kwargs)
 
 
 class ResourceLinkBadge(models.Model):
