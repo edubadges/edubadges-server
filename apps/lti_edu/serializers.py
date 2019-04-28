@@ -103,10 +103,12 @@ class LtiClientsSerializer(serializers.ModelSerializer):
 
     name = serializers.CharField(max_length=512)
     slug = StripTagsCharField(max_length=255, read_only=True, source='entity_id')
+    consumer_key = serializers.CharField(max_length=512, read_only=True)
+    shared_secret = serializers.CharField(max_length=512, read_only=True)
 
     class Meta:
         model = LtiClient
-        fields = ('name', 'slug')
+        fields = ('name', 'slug', 'consumer_key', 'shared_secret')
 
     def to_internal_value(self, data):
         internal_value = super(LtiClientsSerializer, self).to_internal_value(data)
@@ -117,9 +119,16 @@ class LtiClientsSerializer(serializers.ModelSerializer):
         })
         return internal_value
 
+    def to_representation(self, instance):
+        representation = super(LtiClientsSerializer, self).to_representation(instance)
+        issuer_slug = ''
+        if instance.issuer:
+            issuer_slug = instance.issuer.entity_id
+        representation['issuer_slug'] = issuer_slug
+        return representation
+
     def update(self, instance, validated_data):
-        issuer_slug = validated_data.pop('issuer_slug')
-        instance.issuer = Issuer.objects.get(entity_id=issuer_slug)
+        instance.issuer = validated_data.get('issuer')
         instance.name = validated_data.get('name')
         instance.save()
         return instance

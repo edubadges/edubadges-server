@@ -3,9 +3,8 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
-
 from lti_edu.models import BadgeClassLtiContext, UserCurrentContextId
-from mainsite.permissions import AuthenticatedWithVerifiedEmail, MayUseManagementDashboard
+from mainsite.permissions import AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope
 
 from lti_edu.models import StudentsEnrolled, LtiClient
 from lti_edu.permissions import IssuerWithinUserScope
@@ -53,6 +52,20 @@ class LtiClientsList(BaseEntityListView):
     def post(self, request, **kwargs):
         return super(LtiClientsList, self).post(request, **kwargs)
 
+
+class LtiClientDetail(BaseEntityDetailView):
+    model = LtiClient
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope, IssuerWithinUserScope)
+    serializer_class = LtiClientsSerializer
+
+    def get(self, request, **kwargs):
+        return super(LtiClientDetail, self).get(request, **kwargs)
+
+    def get_object(self, request, **kwargs):
+        return LtiClient.objects.get(entity_id=kwargs.get('slug'))
+
+    def put(self, request, **kwargs):
+        return super(LtiClientDetail, self).put(request, **kwargs)
 
 
 class StudentEnrollmentList(BaseEntityListView):
