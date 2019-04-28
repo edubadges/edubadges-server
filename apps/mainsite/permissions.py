@@ -36,7 +36,8 @@ class AuthenticatedWithVerifiedEmail(permissions.BasePermission):
                    'verified': request.user.verified} 
             logger.error(log)
         return result
-    
+
+
 class MayUseManagementDashboard(permissions.BasePermission):
     """
     Allows access to api calls that are actuated from the management dashboard
@@ -44,3 +45,13 @@ class MayUseManagementDashboard(permissions.BasePermission):
     
     def has_permission(selfs, request, view):
         return request.user.has_perm('badgeuser.view_management_tab')
+
+
+
+class ObjectWithinUserScope(permissions.BasePermission):
+    """
+    Checks to see if object is within user's scope
+    """
+
+    def has_object_permission(self, request, view, obj):
+        return request.user.within_scope(obj)

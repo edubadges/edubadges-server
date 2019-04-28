@@ -31,8 +31,12 @@ class LtiClient(BaseVersionedEntity, models.Model):
     def __str__(self):
         return self.name
 
-    # class Meta:
-    #     unique_together = ('name', 'issuer')
+    @property
+    def institution(self):
+        if self.issuer:
+            return self.issuer.institution
+        return None
+
 
     def validate_unique(self, *args, **kwargs):
         super(LtiClient, self).validate_unique(*args, **kwargs)
