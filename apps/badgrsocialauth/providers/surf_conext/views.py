@@ -24,6 +24,7 @@ def login(request):
 
     :return: HTTP redirect to WAYF
     """
+    lti_data = request.session.get('lti_data', None)
 
     _current_app = SocialApp.objects.get_current(provider='surf_conext')
 
@@ -31,9 +32,11 @@ def login(request):
     # it contains the user token, type of process and which badge_app
     
     referer = request.META['HTTP_REFERER'].split('/')[3]
+
     state = json.dumps([request.GET.get('process', 'login'),
                           get_session_authcode(request),
-                          request.session.get('badgr_app_pk', None), 
+                          request.session.get('badgr_app_pk', None),
+                          lti_data,
                           referer])
 
     data = {'client_id': _current_app.client_id,
@@ -56,7 +59,8 @@ def after_terms_agreement(request, **kwargs):
         return render_authentication_error(request, SurfConextProvider.id, error)
     
     headers = {'Authorization': 'bearer %s' % access_token}
-    badgr_app_pk, login_type, process, auth_token, referer = json.loads(kwargs['state'])
+    badgr_app_pk, login_type, process, auth_token, lti_data, referer = json.loads(kwargs['state'])
+    tot_lti_data = request.session.get('lti_data', None)
     url = settings.SURFCONEXT_DOMAIN_URL + '/userinfo'
 
     response = requests.get(url, headers=headers)
@@ -100,18 +104,18 @@ def after_terms_agreement(request, **kwargs):
         request.user.institution = institution
         request.user.save()
 
-    if 'lti_user_id' in request.session:
+    if lti_data is not None and 'lti_user_id' in lti_data:
         if not request.user.is_anonymous():
-            tenant = LTITenant.objects.get(client_key=request.session['lti_tenant'])
-            badgeuser_tennant, _ = LtiBadgeUserTennant.objects.get_or_create(lti_user_id=request.session['lti_user_id'],
+            tenant = LTITenant.objects.get(client_key=lti_data['lti_tenant'])
+            badgeuser_tennant, _ = LtiBadgeUserTennant.objects.get_or_create(lti_user_id=lti_data['lti_user_id'],
                                                                             badge_user=request.user,
                                                                             lti_tennant=tenant,
                                                                             staff=True)
-            user_current_context_id = UserCurrentContextId.objects.get_or_create(badge_user=request.user)
-            user_current_context_id.context_id = request.session['lti_context_id']
+            user_current_context_id,_ = UserCurrentContextId.objects.get_or_create(badge_user=request.user)
+            user_current_context_id.context_id = lti_data['lti_context_id']
             user_current_context_id.save()
 
-        del request.session['lti_user_id']
+
 
     # override the response with a redirect to staff dashboard if the login came from there
     if referer == 'staff':
@@ -141,7 +145,7 @@ def callback(request):
     :return: Either renders authentication error, or completes the social login
     """
     # extract the state of the redirect
-    process, auth_token, badgr_app_pk, referer = json.loads(request.GET.get('state'))
+    process, auth_token, badgr_app_pk,lti_data, referer = json.loads(request.GET.get('state'))
 
     # check if code is given
     code = request.GET.get('code', None)
@@ -186,7 +190,7 @@ def callback(request):
     extra_data = response.json()
               
     keyword_arguments = {'access_token':access_token, 
-                         'state': json.dumps([badgr_app_pk, 'surf_conext' ,process, auth_token, referer]),
+                         'state': json.dumps([badgr_app_pk, 'surf_conext' ,process, auth_token,lti_data, referer]),
                          'after_terms_agreement_url_name': 'surf_conext_terms_accepted_callback'}
      
     if not get_social_account(extra_data['sub']):
