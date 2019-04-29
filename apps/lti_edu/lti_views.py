@@ -60,26 +60,26 @@ class LoginLti(TemplateView):
                 ltibadgetennant = LtiBadgeUserTennant.objects.get(lti_tennant=kwargs['tenant'],
                                                                   lti_user_id=self.request.POST['user_id'],
                                                                   staff=self.staff)
-                login_user(self.request, ltibadgetennant.badge_user)
+                #login_user(self.request, ltibadgetennant.badge_user)
 
             except Exception as e:
                 pass
-        if self.request.user.is_authenticated():
-            user_current_context_id = UserCurrentContextId.objects.get_or_create(badge_user=self.request.user)
-            user_current_context_id.context_id = self.request.session['lti_context_id']
-            user_current_context_id.save()
+
 
         context_data['after_login'] = self.get_after_login()
         context_data['check_login'] = self.get_check_login_url()
         return context_data
 
-    def post(self, request,*args, **kwargs):
+    def post(self, request, *args, **kwargs):
         post = request.POST
         user_id = post['user_id']
         context_id = post['context_id']
-        request.session['lti_user_id'] = user_id
-        request.session['lti_context_id'] = context_id
-        request.session['lti_tenant'] = kwargs['tenant'].client_key.hex
+        lti_data = {}
+        lti_data['lti_user_id'] = user_id
+        lti_data['lti_context_id'] = context_id
+        lti_data['lti_tenant'] = kwargs['tenant'].client_key.hex
+        #lti_data['post_data'] = post
+        request.session['lti_data'] = lti_data
 
 
         return self.get(request, *args, **kwargs)
@@ -99,7 +99,7 @@ class LoginLtiStaff(LoginLti):
     staff = True
 
     def get_login_url(self):
-        return '/account/sociallogin?provider=surf_conext'
+        return reverse('surf_conext_login')
 
     def get_after_login(self):
         badgr_app = BadgrApp.objects.get_current(request=self.request)
