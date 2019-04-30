@@ -1069,7 +1069,6 @@ class BadgeInstance(BaseAuditedModel,
                 for k,v in extra.items():
                     if k not in json:
                         json[k] = v
-
         return json
 
     @property

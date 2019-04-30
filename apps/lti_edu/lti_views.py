@@ -103,7 +103,7 @@ class LoginLtiStaff(LoginLti):
 
     def get_after_login(self):
         badgr_app = BadgrApp.objects.get_current(request=self.request)
-        return '{}/issuer?embedVersion=1&embedWidth=800&embedHeight=800'.format(badgr_app.cors)
+        return '{}/lti-badges?embedVersion=1&embedWidth=800&embedHeight=800'.format(badgr_app.cors)
 
     def get_check_login_url(self):
         return reverse('check-login-staff')
