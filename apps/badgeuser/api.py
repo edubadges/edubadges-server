@@ -25,7 +25,7 @@ from rest_framework.status import HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUN
 from badgeuser.authcode import accesstoken_for_authcode, authcode_for_accesstoken
 from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
-from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserTokenSerializerV1
+from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserTokenSerializerV1, BadgeUserManagementSerializer
 from badgeuser.serializers_v2 import BadgeUserTokenSerializerV2, BadgeUserSerializerV2, AccessTokenSerializerV2
 from badgeuser.tasks import process_email_verification
 from badgrsocialauth.utils import set_url_query_params
@@ -34,9 +34,43 @@ from entity.serializers import BaseSerializerV2
 from issuer.permissions import BadgrOAuthTokenHasScope
 from mainsite.models import BadgrApp
 from mainsite.utils import OriginSetting
+from mainsite.permissions import AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope
 
 RATE_LIMIT_DELTA = datetime.timedelta(minutes=5)
 
+
+class BadgeUserList(BaseEntityListView):
+    """
+    GET user list within user scope for management console
+    """
+    model = BadgeUser
+    http_method_names = ['get']
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope)
+    serializer_class = BadgeUserManagementSerializer
+
+    def get_objects(self, request, **kwargs):
+        if request.user.has_perm('badgeuser.has_institution_scope'):
+            institution_id = request.user.institution.id
+            return BadgeUser.objects.filter(institution_id=institution_id)
+        elif request.user.has_perm('badgeuser.has_faculty_scope'):
+            return BadgeUser.objects.filter(faculty__in=request.user.faculty.all()).distinct()
+        return BadgeUser.objects.none()
+
+class BadgeUserManagementDetail(BaseEntityDetailView):
+    """
+    GET user for mananagement console
+    put to change user
+    """
+    model = BadgeUser
+    http_method_names = ['get', 'put']
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope)
+    serializer_class = BadgeUserManagementSerializer
+
+    def put(self, request, **kwargs):
+        return super(BadgeUserManagementDetail, self).put(request, **kwargs)
+
+    def get(self, request, **kwargs):
+        return super(BadgeUserManagementDetail, self).get(request, **kwargs)
 
 class BadgeUserDetail(BaseEntityDetailView):
     model = BadgeUser

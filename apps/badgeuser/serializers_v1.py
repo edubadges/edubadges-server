@@ -1,9 +1,11 @@
 import json
+from collections import OrderedDict
 from django.conf import settings
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Permission, Group
 from rest_framework import serializers
 
 from institution.serializers_v1 import FacultySerializerV1
+from institution.models import Faculty
 from mainsite.models import BadgrApp
 from mainsite.serializers import StripTagsCharField
 from mainsite.validators import PasswordValidator
@@ -175,3 +177,39 @@ class BadgeUserIdentifierFieldV1(serializers.CharField):
         except BadgeUser.DoesNotExist:
             return None
 
+
+class BadgeUserManagementSerializer(serializers.ModelSerializer):
+
+    first_name = serializers.CharField(read_only=True, max_length=512)
+    last_name = serializers.CharField(read_only=True, max_length=512)
+    slug = StripTagsCharField(max_length=255, read_only=True, source='entity_id')
+    faculties = FacultySerializerV1(many=True,  allow_null=True, source='faculty')
+    email = serializers.EmailField(source='primary_email', read_only=True)
+
+    class Meta:
+        model = BadgeUser
+        fields = ('first_name', 'last_name', 'slug', 'faculties', 'email')
+
+    def to_internal_value(self, data):
+        internal_value = super(BadgeUserManagementSerializer, self).to_internal_value(data)
+        internal_value['faculty'] = [OrderedDict(fac) for fac in data['faculties']]
+        return internal_value
+
+    def update(self, instance, validated_data):
+        current_faculties = set([i.entity_id for i in instance.faculty.all()])
+        new_faculties = set([f['slug'] for f in validated_data['faculty']])
+        faculties_to_remove = current_faculties.difference(new_faculties)
+        faculties_to_add = new_faculties.difference(current_faculties)
+
+
+        if faculties_to_remove:
+            for slug in faculties_to_remove:
+                fac = Faculty.objects.get(entity_id=slug)
+                instance.faculty.remove(fac)
+                pass
+        if faculties_to_add:
+            for slug in faculties_to_add:
+                fac = Faculty.objects.get(entity_id=slug)
+                instance.faculty.add(fac)
+        instance.save()
+        return instance
