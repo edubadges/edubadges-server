@@ -9,12 +9,16 @@ class FacultyList(BaseEntityListView):
     Faculty list
     """
     model = Faculty
-    permission_classes = (AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, UserHasInstitutionScope)
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayUseManagementDashboard)
     serializer_class = FacultySerializerV1
     
     def get_objects(self, request, **kwargs):
-        return Faculty.objects.filter(institution=self.request.user.institution)
-    
+        if request.user.has_perm('badgeuser.has_institution_scope'):
+            return Faculty.objects.filter(institution=self.request.user.institution)
+        elif request.user.has_perm('badgeuser.has_faculty_scope'):
+            return request.user.faculty.all()
+        return Faculty.objects.none()
+
     def get(self, request, **kwargs):
         return super(FacultyList, self).get(request, **kwargs)
 
