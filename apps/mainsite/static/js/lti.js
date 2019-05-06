@@ -36,6 +36,11 @@ function Request() {
 }
 
 $(document).ready(function () {
+    $.ajaxSetup({
+        xhrFields: {
+        withCredentials: true
+      }
+    });
     $request = new Request();
     $request.activatePoll();
 });
