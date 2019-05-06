@@ -28,8 +28,8 @@ class CheckLoginAdmin(View):
         response = {'loggedin':True}
         if not request.user.is_authenticated():
             response['loggedin'] = False
-        elif not request.user.has_surf_conext_social_account():
-            response['loggedin'] = False
+        # elif not request.user.has_surf_conext_social_account():
+        #     response['loggedin'] = False
         return JsonResponse(response)
 
 def login_user(request, user):
