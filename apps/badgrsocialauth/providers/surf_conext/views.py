@@ -60,6 +60,8 @@ def after_terms_agreement(request, **kwargs):
     
     headers = {'Authorization': 'bearer %s' % access_token}
     badgr_app_pk, login_type, process, auth_token, lti_data, referer = json.loads(kwargs['state'])
+    set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app_pk))
+
     tot_lti_data = request.session.get('lti_data', None)
     url = settings.SURFCONEXT_DOMAIN_URL + '/userinfo'
 
@@ -88,8 +90,7 @@ def after_terms_agreement(request, **kwargs):
     login = provider.sociallogin_from_response(request, extra_data)
   
     # Reset the badgr app id after login as django overturns it
-    set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app_pk))
-  
+
     # connect process in which OpenID connects with, either login or connect, if you connect then login user with token
     login.state = {'process': process}
   

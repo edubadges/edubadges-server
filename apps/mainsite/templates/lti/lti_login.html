@@ -1,4 +1,4 @@
 {% extends "lti/lti_base.html" %}
 {% block content %}
-<a target="_blank" href="{{ login_url }}"  id='login-link' next-url="{{ after_login }}">login</a>
+<a target="_blank" href="{{ login_url }}"  id='login-link' next-url="{{ after_login }}" check-login="{{ check_login }}">login</a>
 {% endblock %}

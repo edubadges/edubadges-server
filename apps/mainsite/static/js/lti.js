@@ -15,7 +15,7 @@ function Request() {
         var self = this;
         var poll = setTimeout(function () {
             $.ajax({
-                url: '{{ check_login }}',
+                url: $('#login-link').attr('check-login'),
                 success: function (response) {
                     console.log(response);
                     if(response['loggedin']){

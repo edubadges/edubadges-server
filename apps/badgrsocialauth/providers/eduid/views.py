@@ -66,6 +66,9 @@ def after_terms_agreement(request, **kwargs):
     this is the second part of the callback, after consent has been given, or is user already exists
     '''
     badgr_app_pk, login_type, lti_data, referer = json.loads(kwargs['state'])
+    badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
+    set_session_badgr_app(request, badgr_app)
+
     access_token = kwargs.get('access_token', None)
     if not access_token:
         error = 'Sorry, we could not find your eduID credentials.'
@@ -103,8 +106,7 @@ def after_terms_agreement(request, **kwargs):
         update_user_params(social_account.user, userinfo_json)
     
     # 3. Complete social login 
-    badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
-    set_session_badgr_app(request, badgr_app)
+
     provider = EduIDProvider(request)
     login = provider.sociallogin_from_response(request, userinfo_json)
     ret = complete_social_login(request, login)
