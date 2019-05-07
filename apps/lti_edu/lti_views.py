@@ -54,6 +54,8 @@ class LoginLti(TemplateView):
         context_data['login_url'] = self.get_login_url()
         if badgr_app is not None:
             set_session_badgr_app(self.request, badgr_app)
+        else:
+            print('badgr app is none in lti_view')
         if not self.request.user.is_authenticated():
             # check login
             try:
