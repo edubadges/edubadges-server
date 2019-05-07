@@ -33,9 +33,12 @@ def login(request):
     
     referer = request.META['HTTP_REFERER'].split('/')[3]
 
+    badgr_app_pk = request.session.get('badgr_app_pk', None)
+    if badgr_app_pk is None:
+        print('none here')
     state = json.dumps([request.GET.get('process', 'login'),
                           get_session_authcode(request),
-                          request.session.get('badgr_app_pk', None),
+                          badgr_app_pk,
                           lti_data,
                           referer])
 
@@ -60,6 +63,8 @@ def after_terms_agreement(request, **kwargs):
     
     headers = {'Authorization': 'bearer %s' % access_token}
     badgr_app_pk, login_type, process, auth_token, lti_data, referer = json.loads(kwargs['state'])
+    if badgr_app_pk is None:
+        print('none here')
     set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app_pk))
 
     tot_lti_data = request.session.get('lti_data', None)
@@ -148,6 +153,8 @@ def callback(request):
     # extract the state of the redirect
     process, auth_token, badgr_app_pk,lti_data, referer = json.loads(request.GET.get('state'))
 
+    if badgr_app_pk is None:
+        print('none here')
     # check if code is given
     code = request.GET.get('code', None)
     if code is None:
