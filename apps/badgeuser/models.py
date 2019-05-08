@@ -13,16 +13,17 @@ from allauth.account.models import EmailAddress, EmailConfirmation
 from basic_models.models import IsActive
 from django.core.cache import cache
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser, Permission
+from django.contrib.auth.models import AbstractUser, Permission, Group
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models, transaction
+from django.db.models.signals import post_save, pre_save
+from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
-from oauthlib.oauth2 import BearerToken
 from rest_framework.authtoken.models import Token
 from lti_edu.models import StudentsEnrolled
 
@@ -31,6 +32,7 @@ from entity.models import BaseVersionedEntity
 from issuer.models import Issuer, BadgeInstance, BaseAuditedModel
 from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager, EmailAddressCacheModelManager
 from mainsite.models import ApplicationInfo
+from mainsite.utils import generate_entity_uri
 
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
@@ -192,7 +194,10 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
             if self.has_perm('badgeuser.has_institution_scope'):
                 return object.institution == self.institution
             if self.has_perm('badgeuser.has_faculty_scope'):
-                return object.faculty in self.faculty.all()
+                if object.faculty.__class__.__name__ == 'ManyRelatedManager':
+                    return bool(set(object.faculty.all()).intersection(set(self.faculty.all())))
+                else:
+                    return object.faculty in self.faculty.all()
         return False
 
     def get_full_name(self):
@@ -203,13 +208,13 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         permission = Permission.objects.get(codename=permission_codename, content_type=content_type)
         self.user_permissions.add(permission)
         # you still need to reload user from db to refresh permission cache if you want effect to be immediate
-        
+
     def loses_permission(self, permission_codename, model):
         content_type = ContentType.objects.get_for_model(model)
         permission = Permission.objects.get(codename=permission_codename, content_type=content_type)
         self.user_permissions.remove(permission)
         # you still need to reload user from db to refresh permission cache if you want effect to be immediate
-    
+
     def email_user(self, subject, message, from_email=None, **kwargs):
         """
         Sends an email to this User.
@@ -224,7 +229,7 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         super(BadgeUser, self).delete(*args, **kwargs)
         self.publish_delete('username')
 
-#     @cachemodel.cached_method(auto_publish=True) 
+#     @cachemodel.cached_method(auto_publish=True)
     # turned it off, because if user logs in for FIRST time, this caching will result in the user having no verified emails. 
     # This results in api calls responding with a 403 after the failure of the AuthenticatedWithVerifiedEmail permission check.
     # Which will logout the user automatically with the error: Token expired.
@@ -329,6 +334,15 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         return [self.get_recipient_identifier()]
 #         return [e.email for e in self.cached_emails() if e.verified] + [e.email for e in self.cached_email_variants()]
 
+    @property
+    def highest_group(self):
+        groups = list(self.groups.filter(rank__gte=0))
+        groups.sort(key=lambda x: x.rank)
+        if groups:
+            return groups[0]
+        else:
+            return None
+
     def get_recipient_identifier(self):
         from allauth.socialaccount.models import SocialAccount
         try:
@@ -336,7 +350,7 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
             return account.extra_data['sub']
         except SocialAccount.DoesNotExist:
             return None
-        
+
     def get_social_account(self):
         from allauth.socialaccount.models import SocialAccount
         try:
@@ -344,11 +358,11 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
             return account
         except SocialAccount.DoesNotExist:
             return None
-        
+
     def has_edu_id_social_account(self):
         social_account = self.get_social_account()
         return social_account.provider == 'edu_id'
-    
+
     def has_surf_conext_social_account(self):
         social_account = self.get_social_account()
         return social_account.provider == 'surf_conext'
@@ -357,7 +371,7 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         """
         Returns all staff memberships
         """
-        return Issuer.objects.filter(staff__id=self.id) 
+        return Issuer.objects.filter(staff__id=self.id)
 
     def is_email_verified(self, email):
         if email in [e.email for e in self.verified_emails]:
@@ -447,7 +461,7 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         #         Token.objects.get_or_create(user=self)
         self.save()
         return self.cached_token()
-    
+
     def may_enroll(self, badge_class):
         """
         Checks to see if user may enroll
@@ -611,8 +625,6 @@ class TermsVersion(IsActive, BaseAuditedModel, cachemodel.CacheModel):
         TermsVersion.cached.publish_latest()
 
 
-
-
 class TermsAgreement(BaseAuditedModel, cachemodel.CacheModel):
     user = models.ForeignKey('badgeuser.BadgeUser')
     terms_version = models.PositiveIntegerField()
@@ -621,3 +633,20 @@ class TermsAgreement(BaseAuditedModel, cachemodel.CacheModel):
     class Meta:
         ordering = ('-terms_version',)
         unique_together = ('user', 'terms_version')
+
+
+Group.add_to_class('entity_id', models.CharField(max_length=254, null=True, default=None))
+Group.add_to_class('rank', models.PositiveIntegerField(null=True, default=None))
+
+@receiver(post_save, sender=Group)
+def generate_entity_id(sender, instance, **kwargs):
+    if instance.entity_id is None:
+        instance.entity_id = generate_entity_uri()
+        instance.save()
+
+@receiver(pre_save, sender=Group)
+def check_rank_uniqueness(sender, instance, **kwargs):
+    if instance.rank is not None:
+        instance_with_same_rank = sender.objects.filter(rank=instance.rank).first()
+        if bool(instance_with_same_rank) and instance_with_same_rank != instance:
+            raise ValidationError("Group rank already ascribed, choose another")

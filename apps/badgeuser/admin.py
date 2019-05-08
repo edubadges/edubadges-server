@@ -1,10 +1,11 @@
 from django.contrib.admin import ModelAdmin, TabularInline
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.admin import UserAdmin, GroupAdmin
+from django.contrib.auth.models import Group
 
 from externaltools.models import ExternalToolUserActivation
 from mainsite.admin import badgr_admin, FilterByScopeMixin
-from .models import BadgeUser, EmailAddressVariant, TermsVersion, TermsAgreement, CachedEmailAddress, BadgeUserProxy
-from . import utils
+from .models import BadgeUser, EmailAddressVariant, TermsVersion, TermsAgreement, \
+                    CachedEmailAddress, BadgeUserProxy
 
 class ExternalToolInline(TabularInline):
     model = ExternalToolUserActivation
@@ -134,6 +135,15 @@ class TermsVersionAdmin(ModelAdmin):
 
     def latest_terms_version(self, obj):
         return TermsVersion.cached.latest_version()
+
     latest_terms_version.short_description = "Current Terms Version"
 
 badgr_admin.register(TermsVersion, TermsVersionAdmin)
+
+
+class GroupAdmin(GroupAdmin):
+    model = Group
+    fields = ('name', 'permissions', 'rank')
+
+badgr_admin.unregister(Group)
+badgr_admin.register(Group, GroupAdmin)

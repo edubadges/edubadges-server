@@ -11,7 +11,7 @@ from mainsite.serializers import StripTagsCharField
 from mainsite.validators import PasswordValidator
 from .models import BadgeUser, CachedEmailAddress, TermsVersion
 from .utils import notify_on_password_change
-
+from management.serializers import GroupSerializer
 
 class BadgeUserTokenSerializerV1(serializers.Serializer):
     class Meta:
@@ -185,31 +185,76 @@ class BadgeUserManagementSerializer(serializers.ModelSerializer):
     slug = StripTagsCharField(max_length=255, read_only=True, source='entity_id')
     faculties = FacultySerializerV1(many=True,  allow_null=True, source='faculty')
     email = serializers.EmailField(source='primary_email', read_only=True)
+    groups = GroupSerializer(many=True, allow_null=True)
 
     class Meta:
         model = BadgeUser
-        fields = ('first_name', 'last_name', 'slug', 'faculties', 'email')
+        fields = ('first_name', 'last_name', 'slug', 'faculties', 'email', 'groups')
+
+    def filter_groups_by_user_scope(self, groups):
+        highest_user_rank = self.context['request'].user.highest_group.rank
+        groups_within_scope = []
+        for group in groups:
+            if group.rank >= highest_user_rank:
+                groups_within_scope.append(group)
+        return groups_within_scope
+
+    def filter_faculties_by_user_scope(self, faculties):
+        faculties_within_scope = []
+        for faculty in faculties:
+            if self.context['request'].user.within_scope(faculty):
+                faculties_within_scope.append(faculty)
+        return faculties_within_scope
+
+    def to_representation(self, instance):
+        representation = super(BadgeUserManagementSerializer, self).to_representation(instance)
+        faculties = [Faculty.objects.get(entity_id=faculty['slug']) for faculty in representation['faculties']]
+        groups = [Group.objects.get(entity_id=group['slug']) for group in representation['groups']]
+        representation['faculties'] = [FacultySerializerV1().to_representation(faculty) for faculty in self.filter_faculties_by_user_scope(faculties)]
+        representation['groups'] = [GroupSerializer().to_representation(group) for group in self.filter_groups_by_user_scope(groups)]
+        return representation
 
     def to_internal_value(self, data):
         internal_value = super(BadgeUserManagementSerializer, self).to_internal_value(data)
         internal_value['faculty'] = [OrderedDict(fac) for fac in data['faculties']]
+        internal_value['groups'] = [OrderedDict(group) for group in data['groups']]
         return internal_value
 
     def update(self, instance, validated_data):
-        current_faculties = set([i.entity_id for i in instance.faculty.all()])
-        new_faculties = set([f['slug'] for f in validated_data['faculty']])
+        current_faculties = set(self.filter_faculties_by_user_scope([i for i in instance.faculty.all()]))
+        current_groups = set(self.filter_groups_by_user_scope([i for i in instance.groups.all()]))
+        new_faculties = set([Faculty.objects.get(entity_id=d['slug']) for d in validated_data['faculty']])
+        new_groups = set([Group.objects.get(entity_id=d['slug']) for d in validated_data['groups']])
+
         faculties_to_remove = current_faculties.difference(new_faculties)
         faculties_to_add = new_faculties.difference(current_faculties)
+        groups_to_remove = current_groups.difference(new_groups)
+        groups_to_add = new_groups.difference(current_groups)
 
+        if faculties_to_remove or faculties_to_add:
+            for faculty in faculties_to_remove.union(faculties_to_add):
+                if not self.context['request'].user.within_scope(faculty):
+                    raise serializers.ValidationError("Faculty outside scope.")
+
+        if groups_to_remove or groups_to_add:
+            for group in groups_to_remove.union(groups_to_add):
+                if group.rank < self.context['request'].user.highest_group.rank:
+                    raise serializers.ValidationError("Group outside scope.")
 
         if faculties_to_remove:
-            for slug in faculties_to_remove:
-                fac = Faculty.objects.get(entity_id=slug)
+            for fac in faculties_to_remove:
                 instance.faculty.remove(fac)
                 pass
         if faculties_to_add:
-            for slug in faculties_to_add:
-                fac = Faculty.objects.get(entity_id=slug)
+            for fac in faculties_to_add:
                 instance.faculty.add(fac)
+        if groups_to_remove:
+            for group in groups_to_remove:
+                instance.groups.remove(group)
+                pass
+        if groups_to_add:
+            for group in groups_to_add:
+                instance.groups.add(group)
+
         instance.save()
         return instance

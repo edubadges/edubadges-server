@@ -1,8 +1,8 @@
 from entity.api import BaseEntityListView, BaseEntityDetailView
 from institution.models import Faculty
 from institution.serializers_v1 import FacultySerializerV1
-from mainsite.permissions import AuthenticatedWithVerifiedEmail, MayUseManagementDashboard
-from institution.permissions import ObjectWithinScope, UserHasInstitutionScope
+from mainsite.permissions import AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope
+from institution.permissions import UserHasInstitutionScope
 
 class FacultyList(BaseEntityListView):
     """
@@ -27,7 +27,7 @@ class FacultyList(BaseEntityListView):
     
 class FacultyDetail(BaseEntityDetailView):
     model = Faculty
-    permission_classes = (AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, UserHasInstitutionScope, ObjectWithinScope)
+    permission_classes = (AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, UserHasInstitutionScope, ObjectWithinUserScope)
     serializer_class = FacultySerializerV1
     
     def get(self, request, **kwargs):

@@ -26,5 +26,7 @@ class Faculty(BaseVersionedEntity, models.Model):
     name = models.CharField(max_length=512)
     institution = models.ForeignKey(Institution, blank=False, null=False)
 
-    def get_institution(self):
-        return self.institution
+    # needed for the within_scope method of user
+    @property
+    def faculty(self):
+        return self
