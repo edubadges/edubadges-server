@@ -1,5 +1,3 @@
-from django.conf.urls import url
-
 from management.api import GroupList, FacultyStats
 
 urlpatterns = [

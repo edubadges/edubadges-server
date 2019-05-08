@@ -1,8 +1,8 @@
-from django.contrib.auth.models import Group
+from institution.models import Faculty
 from entity.api import BaseEntityListView, BaseEntityDetailView
 from mainsite.permissions import AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope
-from management.serializers import GroupSerializer, FacultySerializerStatistics, BadgeClassSerializerStatistics, IssuerSerializerStatistics
-from institution.models import Faculty
+from django.contrib.auth.models import Group
+from management.serializers import GroupSerializer, FacultySerializerStatistics
 
 
 class GroupList(BaseEntityListView):
