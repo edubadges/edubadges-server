@@ -93,7 +93,7 @@ class LoginLti(TemplateView):
         lti_data['lti_user_id'] = user_id
         lti_data['lti_context_id'] = context_id
         lti_data['lti_tenant'] = kwargs['tenant'].client_key.hex
-        #lti_data['post_data'] = post
+        lti_data['post_data'] = post
         request.session['lti_data'] = lti_data
 
 
