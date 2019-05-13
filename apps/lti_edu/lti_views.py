@@ -46,6 +46,15 @@ def login_user(request, user):
 class LoginLti(TemplateView):
     template_name = "lti/lti_login.html"
     staff = False
+    teacher_roles = [
+        'urn:lti:instrole:ims/lis/Administrator',
+        'urn:lti:sysrole:ims/lis/SysAdmin',
+        'urn:lti:sysrole:ims/lis/Creator',
+        'urn:lti:sysrole:ims/lis/Administrator',
+
+
+
+    ]
 
     def get_context_data(self, **kwargs):
         context_data = super(LoginLti, self).get_context_data(**kwargs)
@@ -76,6 +85,10 @@ class LoginLti(TemplateView):
         post = request.POST
         user_id = post['user_id']
         context_id = post['context_id']
+        if 'roles' in post:
+            role = post['roles']
+            if role != 'urn:lti:instrole:ims/lis/Administrator':
+                print('admin!')
         lti_data = {}
         lti_data['lti_user_id'] = user_id
         lti_data['lti_context_id'] = context_id

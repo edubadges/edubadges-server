@@ -130,6 +130,9 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
         Preserve badgr_app session data across Django login() boundary
         """
         badgr_app = get_session_badgr_app(request)
+        if badgr_app is None:
+            url = request.build_absolute_uri()
+            print('Badgr app is none in login {}'.format(url))
         ret = super(BadgrAccountAdapter, self).login(request, user)
         set_session_badgr_app(request, badgr_app)
         return ret
