@@ -1,4 +1,9 @@
 {% extends "lti/lti_base.html" %}
+{% load static %}
 {% block content %}
 <a target="_blank" href="{{ login_url }}"  id='login-link' next-url="{{ after_login }}" check-login="{{ check_login }}">login</a>
+{% endblock %}
+{% block extra_js %}
+<script src='{% static "js/jquery.min.js" %}'></script>
+<script src='{% static "js/lti.js" %}'></script>
 {% endblock %}
