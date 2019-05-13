@@ -39,7 +39,7 @@ def login(request):
     state = json.dumps([request.GET.get('process', 'login'),
                           get_session_authcode(request),
                           badgr_app_pk,
-                          lti_data,
+                          lti_data['lti_context_id'],
                           referer])
 
     data = {'client_id': _current_app.client_id,
@@ -62,12 +62,12 @@ def after_terms_agreement(request, **kwargs):
         return render_authentication_error(request, SurfConextProvider.id, error)
     
     headers = {'Authorization': 'bearer %s' % access_token}
-    badgr_app_pk, login_type, process, auth_token, lti_data, referer = json.loads(kwargs['state'])
+    badgr_app_pk, login_type, process, auth_token, lti_context_id, referer = json.loads(kwargs['state'])
     if badgr_app_pk is None:
         print('none here')
     set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app_pk))
 
-    tot_lti_data = request.session.get('lti_data', None)
+    lti_data = request.session.get('lti_data', None)
     url = settings.SURFCONEXT_DOMAIN_URL + '/userinfo'
 
     response = requests.get(url, headers=headers)
