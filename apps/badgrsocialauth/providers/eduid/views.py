@@ -47,6 +47,8 @@ def login(request):
     # the only thing set in state is the referer (frontend, or staff) , this is not the referer url.
     referer = json.dumps(urlparse(request.META['HTTP_REFERER']).path.split('/')[1:])
     badgr_app_pk = request.session.get('badgr_app_pk', None)
+    if badgr_app_pk is None:
+        print('badgr_app is none in login beofre after temrm agreement')
     lti_data = request.session.get('lti_data', None)
     state = json.dumps([referer,badgr_app_pk, lti_data])
 
@@ -66,6 +68,8 @@ def after_terms_agreement(request, **kwargs):
     this is the second part of the callback, after consent has been given, or is user already exists
     '''
     badgr_app_pk, login_type, lti_data, referer = json.loads(kwargs['state'])
+    if badgr_app_pk is None:
+        print('badgr_app is none in after temrm agreement')
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
     set_session_badgr_app(request, badgr_app)
 
@@ -143,6 +147,8 @@ def callback(request):
     #extract state of redirect
     state = json.loads(request.GET.get('state'))
     referer, badgr_app_pk, lti_data = state
+    if badgr_app_pk is None:
+        print('badgr_app is none in call back')
     code = request.GET.get('code', None)  # access codes to access user info endpoint
     if code is None: #check if code is given
         error = 'Server error: No userToken found in callback'
