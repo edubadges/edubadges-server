@@ -69,6 +69,8 @@ class LoginLti(TemplateView):
 
     def get_context_data(self, **kwargs):
         context_data = super(LoginLti, self).get_context_data(**kwargs)
+        if self.request.user.is_authenticated():
+            logout_user(self.request, self.request.user)
         context_data['ltitest'] = 'yes lti test'
         badgr_app = kwargs['tenant'].badgr_app
         context_data['login_url'] = self.get_login_url()
@@ -76,8 +78,7 @@ class LoginLti(TemplateView):
             set_session_badgr_app(self.request, badgr_app)
         else:
             print('badgr app is none in lti_view')
-        if self.request.user.is_authenticated():
-            logout_user(self.request, self.request.user)
+
             # check login
         try:
             ltibadgetennant = LtiBadgeUserTennant.objects.get(lti_tennant=kwargs['tenant'],
