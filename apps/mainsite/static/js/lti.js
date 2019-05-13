@@ -1,3 +1,4 @@
+var loginWindow = null;
 function Request() {
 
     this.poll = false;
@@ -20,7 +21,11 @@ function Request() {
                     console.log(response);
                     if(response['loggedin']){
                         window.location =$('#login-link').attr('next-url');
+                        if(loginWindow != null){
+                            loginWindow.close();
+                        }
                     }
+
                 },
                 dataType: "json",
                 complete: function () {
@@ -43,4 +48,10 @@ $(document).ready(function () {
     });
     $request = new Request();
     $request.activatePoll();
+    $('#login-link').click(function () {
+
+        loginWindow = window.open($('#login-link').attr('href'));
+        return false;
+
+    })
 });

@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from django.views.generic import TemplateView
 
 from lti_edu.lti_views import LoginLti, LoginLtiStaff, CheckLogin, CheckLoginAdmin
 
