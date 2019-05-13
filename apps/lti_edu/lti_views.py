@@ -1,5 +1,6 @@
 from django.conf import settings
-from django.contrib.auth import login, load_backend
+from django.contrib.auth import login, load_backend, logout
+from django.contrib.sessions.models import Session
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -42,6 +43,16 @@ def login_user(request, user):
     if hasattr(user, 'backend'):
         return login(request, user)
 
+def logout_user(request, user):
+    """Log in a user without requiring credentials with user object"""
+    if not hasattr(user, 'backend'):
+        for backend in settings.AUTHENTICATION_BACKENDS:
+            if user == load_backend(backend).get_user(user.pk):
+                user.backend = backend
+                break
+    if hasattr(user, 'backend'):
+        return logout(request)
+
 
 class LoginLti(TemplateView):
     template_name = "lti/lti_login.html"
@@ -65,19 +76,20 @@ class LoginLti(TemplateView):
             set_session_badgr_app(self.request, badgr_app)
         else:
             print('badgr app is none in lti_view')
-        if not self.request.user.is_authenticated():
+        if self.request.user.is_authenticated():
+            logout_user(self.request, self.request.user)
             # check login
-            try:
-                ltibadgetennant = LtiBadgeUserTennant.objects.get(lti_tennant=kwargs['tenant'],
-                                                                  lti_user_id=self.request.POST['user_id'],
-                                                                  staff=self.staff)
-                #login_user(self.request, ltibadgetennant.badge_user)
+        try:
+            ltibadgetennant = LtiBadgeUserTennant.objects.get(lti_tennant=kwargs['tenant'],
+                                                              lti_user_id=self.request.POST['user_id'],
+                                                              staff=self.staff)
+            #login_user(self.request, ltibadgetennant.badge_user)
 
-            except Exception as e:
-                pass
+        except Exception as e:
+            pass
 
 
-        context_data['after_login'] = self.get_after_login()
+        context_data['after_login'] = self.get_after_login(badgr_app)
         context_data['check_login'] = self.get_check_login_url()
         return context_data
 
@@ -102,8 +114,7 @@ class LoginLti(TemplateView):
     def get_login_url(self):
         return reverse('edu_id_login')
 
-    def get_after_login(self):
-        badgr_app = BadgrApp.objects.get_current(request=self.request)
+    def get_after_login(self, badgr_app):
         scheme = self.request.is_secure() and "https" or "http"
         return '{}://{}/lti-badges?embedVersion=1&embedWidth=800&embedHeight=800'.format(scheme,badgr_app.cors)
 
@@ -117,9 +128,8 @@ class LoginLtiStaff(LoginLti):
     def get_login_url(self):
         return reverse('surf_conext_login')
 
-    def get_after_login(self):
+    def get_after_login(self, badgr_app):
         scheme = self.request.is_secure() and "https" or "http"
-        badgr_app = BadgrApp.objects.get_current(request=self.request)
         return '{}://{}/issuer?embedVersion=1&embedWidth=800&embedHeight=800'.format(scheme, badgr_app.cors)
 
     def get_check_login_url(self):
