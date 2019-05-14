@@ -1,9 +1,7 @@
 from datetime import datetime
 from rest_framework import serializers
 from issuer.models import BadgeClass, Issuer, BadgeInstance
-from lti_edu.models import StudentsEnrolled, LtiClient, get_uuid
-from mainsite.serializers import StripTagsCharField #, RelationPrimaryKeyAsSlugCharField
-
+from lti_edu.models import StudentsEnrolled
 
 
 class LTIrequestSerializer(serializers.Serializer):
@@ -73,46 +71,3 @@ class StudentsEnrolledSerializerWithRelations(serializers.ModelSerializer):
         readable_date = str(datetime.strptime(ret['date_created'], '%Y-%m-%dT%H:%M:%S.%fZ').date())
         ret['date_created'] = readable_date
         return ret
-
-
-class LtiClientsSerializer(serializers.ModelSerializer):
-
-    name = serializers.CharField(max_length=512)
-    slug = StripTagsCharField(max_length=255, read_only=True, source='entity_id')
-    consumer_key = serializers.CharField(max_length=512, read_only=True)
-    shared_secret = serializers.CharField(max_length=512, read_only=True)
-
-    class Meta:
-        model = LtiClient
-        fields = ('name', 'slug', 'consumer_key', 'shared_secret')
-
-    def to_internal_value(self, data):
-        internal_value = super(LtiClientsSerializer, self).to_internal_value(data)
-        issuer_slug = data.get("issuer_slug")
-        issuer = Issuer.objects.get(entity_id=issuer_slug)
-        internal_value.update({
-            "issuer": issuer
-        })
-        return internal_value
-
-    def to_representation(self, instance):
-        representation = super(LtiClientsSerializer, self).to_representation(instance)
-        issuer_slug = ''
-        if instance.issuer:
-            issuer_slug = instance.issuer.entity_id
-        representation['issuer_slug'] = issuer_slug
-        return representation
-
-    def update(self, instance, validated_data):
-        instance.issuer = validated_data.get('issuer')
-        instance.name = validated_data.get('name')
-        instance.save()
-        return instance
-
-    def create(self, validated_data, **kwargs):
-        del validated_data['created_by']
-        validated_data['shared_secret'] = get_uuid()
-        validated_data['consumer_key'] = get_uuid()
-        new_client = LtiClient(**validated_data)
-        new_client.save()
-        return new_client
