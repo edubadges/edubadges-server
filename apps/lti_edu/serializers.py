@@ -1,9 +1,7 @@
 from datetime import datetime
 from rest_framework import serializers
 from issuer.models import BadgeClass, Issuer, BadgeInstance
-from lti_edu.models import StudentsEnrolled, LtiClient, get_uuid, BadgeClassLtiContext
-from mainsite.serializers import StripTagsCharField
-
+from lti_edu.models import StudentsEnrolled, BadgeClassLtiContext
 
 from mainsite.drf_fields import ValidImageField
 
@@ -96,7 +94,6 @@ class StudentsEnrolledSerializerWithRelations(serializers.ModelSerializer):
         ret = serializers.ModelSerializer.to_representation(self, instance)
         readable_date = str(datetime.strptime(ret['date_created'], '%Y-%m-%dT%H:%M:%S.%fZ').date())
         ret['date_created'] = readable_date
-        return ret
 
 
 class LtiClientsSerializer(serializers.ModelSerializer):

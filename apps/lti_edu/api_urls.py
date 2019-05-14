@@ -1,6 +1,7 @@
 from django.conf.urls import url
-from lti_edu.api import StudentsEnrolledList, CheckIfStudentIsEnrolled, StudentEnrollmentList, StudentsEnrolledDetail, LtiClientsList, \
-                        LtiClientDetail, BadgeClassLtiContextListView, CurrentContextView, BadgeClassLtiContextDetailView
+from lti_edu.api import BadgeClassLtiContextListView, CurrentContextView, BadgeClassLtiContextDetailView
+from lti_edu.api import StudentsEnrolledList, CheckIfStudentIsEnrolled, StudentEnrollmentList, StudentsEnrolledDetail
+
 urlpatterns = [
     url(r'^enroll$', StudentsEnrolledList.as_view(), name='api_lti_edu_enroll_student'),
     url(r'^withdraw', StudentEnrollmentList.as_view(), name='api_lti_edu_withdraw_student'),
@@ -11,7 +12,4 @@ urlpatterns = [
     url(r'^badgeclasslticontext/(?P<lti_context_id>[^/]+)', BadgeClassLtiContextListView.as_view(), name='badgeclasslticontext_list'),
     url(r'^addbadgeclasslticontext', BadgeClassLtiContextDetailView.as_view(), name='badgeclasslticontext_add'),
     url(r'^lticontext', CurrentContextView.as_view(), name='lticontext'),
-    url(r'^clients', LtiClientsList.as_view(), name='api_lti_edu_clients_list'),
-    url(r'^clients$', LtiClientsList.as_view(), name='api_lti_edu_clients_list'),
-    url(r'^clients/(?P<slug>[^/]+)$', LtiClientDetail.as_view(), name='api_lti_edu_clients_detail'),
 ]
