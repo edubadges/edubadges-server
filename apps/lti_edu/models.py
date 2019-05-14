@@ -2,7 +2,6 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth import user_logged_out
 from ims.models import LTITenant
-from django.core.exceptions import ValidationError
 
 from issuer.models import BadgeClass, Issuer, BadgeInstance
 
@@ -80,7 +79,6 @@ class LtiClient(models.Model):
     def save(self, *args, **kwargs):
         self.validate_unique()
         super(LtiClient, self).save(*args, **kwargs)
-
 
 class ResourceLinkBadge(models.Model):
     # resource link is unique per placement, for each placement a unique badgeClass is created
