@@ -67,6 +67,11 @@ class LoginLti(TemplateView):
 
     ]
 
+    def dispatch(self, *args, **kwargs):
+        response = super(LoginLti, self).dispatch(*args, **kwargs)
+        response['X-Frame-Options'] = 'ALLOW-FROM {}'.format(kwargs['tenant'].lms_domain)
+        return response
+
     def get_context_data(self, **kwargs):
         context_data = super(LoginLti, self).get_context_data(**kwargs)
 
