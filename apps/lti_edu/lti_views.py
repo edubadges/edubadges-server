@@ -106,8 +106,8 @@ class LoginLti(TemplateView):
         context_id = post['context_id']
         if 'roles' in post:
             role = post['roles']
-            if role != 'urn:lti:instrole:ims/lis/Administrator':
-                print('admin!')
+            if role in self.teacher_roles:
+                self.staff = True
         lti_data = {}
         lti_data['lti_user_id'] = user_id
         lti_data['lti_context_id'] = context_id
@@ -119,14 +119,30 @@ class LoginLti(TemplateView):
         return self.get(request, *args, **kwargs)
 
     def get_login_url(self):
+        if self.staff:
+            return self.get_login_url_staff()
         return reverse('edu_id_login')
 
     def get_after_login(self, badgr_app):
+        if self.staff:
+            return self.get_after_login_staff(badgr_app)
         scheme = self.request.is_secure() and "https" or "http"
         return '{}://{}/lti-badges?embedVersion=1&embedWidth=800&embedHeight=800'.format(scheme,badgr_app.cors)
 
     def get_check_login_url(self):
+        if self.staff:
+            return self.get_check_login_url_staff()
         return reverse('check-login')
+
+    def get_login_url_staff(self):
+        return reverse('surf_conext_login')
+
+    def get_after_login_staff(self, badgr_app):
+        scheme = self.request.is_secure() and "https" or "http"
+        return '{}://{}/issuer?embedVersion=1&embedWidth=800&embedHeight=800'.format(scheme, badgr_app.cors)
+
+    def get_check_login_url_staff(self):
+        return reverse('check-login-staff')
 
 
 class LoginLtiStaff(LoginLti):

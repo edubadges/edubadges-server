@@ -50,7 +50,10 @@ def login(request):
     if badgr_app_pk is None:
         print('badgr_app is none in login beofre after temrm agreement')
     lti_data = request.session.get('lti_data', None)
-    state = json.dumps([referer,badgr_app_pk, lti_data['lti_context_id']])
+    lti_context_id = ''
+    if lti_data is not None:
+        lti_context_id= lti_data['lti_context_id']
+    state = json.dumps([referer,badgr_app_pk, lti_context_id])
 
     params = {
     "state": state,

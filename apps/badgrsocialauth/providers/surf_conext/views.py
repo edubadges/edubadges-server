@@ -25,6 +25,9 @@ def login(request):
     :return: HTTP redirect to WAYF
     """
     lti_data = request.session.get('lti_data', None)
+    lti_context_id = ''
+    if lti_data is not None:
+        lti_context_id = lti_data['lti_context_id']
 
     _current_app = SocialApp.objects.get_current(provider='surf_conext')
 
@@ -39,7 +42,7 @@ def login(request):
     state = json.dumps([request.GET.get('process', 'login'),
                           get_session_authcode(request),
                           badgr_app_pk,
-                          lti_data['lti_context_id'],
+                          lti_context_id,
                           referer])
 
     data = {'client_id': _current_app.client_id,
