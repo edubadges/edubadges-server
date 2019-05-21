@@ -33,7 +33,9 @@ class BadgeClassLtiContextSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = {
             'badgeClassEntityId': instance.badge_class.entity_id,
-            'contextId': instance.context_id
+            'contextId': instance.context_id,
+            'name': instance.badge_class.name,
+            'image':instance.badge_class.image.url,
         }
         return data
 
