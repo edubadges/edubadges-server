@@ -18,14 +18,14 @@ def login(request):
     """
     Redirect to login page of SURFconext openID, this is "Where are you from" page
 
-    Note: core differences in OpenID and SurfConext is authentication method and incomplete autodiscovery endpoint.
+    Note: core differences in OpenID and SURFconext is authentication method and incomplete autodiscovery endpoint.
 
     :return: HTTP redirect to WAYF
     """
 
     _current_app = SocialApp.objects.get_current(provider='surf_conext')
 
-    # state contains the data required for the redirect after the login via SurfConext,
+    # state contains the data required for the redirect after the login via SURFconext,
     # it contains the user token, type of process and which badge_app
     
     referer = request.META['HTTP_REFERER'].split('/')[3]
@@ -37,7 +37,7 @@ def login(request):
     data = {'client_id': _current_app.client_id,
             'redirect_uri': '%s/account/openid/login/callback/' % settings.HTTP_ORIGIN,
             'response_type': 'code',
-            # SurfConext does not support other scopes, as such the complete OpenID flow is not supported
+            # SURFconext does not support other scopes, as such the complete OpenID flow is not supported
             'scope': 'openid',
             'state': state
             }
@@ -50,7 +50,7 @@ def login(request):
 def after_terms_agreement(request, **kwargs):
     access_token = kwargs.get('access_token', None)
     if not access_token:
-        error = 'Sorry, we could not find you SurfConext credentials.'
+        error = 'Sorry, we could not find you SURFconext credentials.'
         return render_authentication_error(request, SurfConextProvider.id, error)
     
     headers = {'Authorization': 'bearer %s' % access_token}
@@ -66,10 +66,10 @@ def after_terms_agreement(request, **kwargs):
     extra_data = response.json()
      
     if 'email' not in extra_data or 'sub' not in extra_data:
-        error = 'Sorry, your account has no email attached from SurfConext, try another login method.'
+        error = 'Sorry, your account has no email attached from SURFconext, try another login method.'
         return render_authentication_error(request, SurfConextProvider.id, error)
     if "schac_home_organization" not in extra_data:
-        error = 'Sorry, your account has no home organization attached from SurfConext, try another login method.'
+        error = 'Sorry, your account has no home organization attached from SURFconext, try another login method.'
         return render_authentication_error(request, SurfConextProvider.id, error)
   
     if 'family_name' in extra_data:

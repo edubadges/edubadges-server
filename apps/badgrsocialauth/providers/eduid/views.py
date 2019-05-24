@@ -35,7 +35,7 @@ def encode(username, password): #client_id, secret
     username and password.
     """
     if ':' in username:
-        message = {'message':'Found a ":" in username, this is not allowed', 'source': 'EduID login encoding'}
+        message = {'message':'Found a ":" in username, this is not allowed', 'source': 'eduID login encoding'}
         logger.error(message)
         raise Exception(message)
     username_password = '%s:%s' % (username, password)
@@ -66,7 +66,7 @@ def after_terms_agreement(request, **kwargs):
     badgr_app_pk, login_type, referer = json.loads(kwargs['state'])
     access_token = kwargs.get('access_token', None)
     if not access_token:
-        error = 'Sorry, we could not find your EduID credentials.'
+        error = 'Sorry, we could not find your eduID credentials.'
         return render_authentication_error(request, EduIDProvider.id, error)
     
     headers = {"Authorization": "Bearer " + access_token }
@@ -78,7 +78,7 @@ def after_terms_agreement(request, **kwargs):
     userinfo_json = response.json()
     
     if 'sub' not in userinfo_json:
-        error = 'Sorry, your EduID account has no identifier.'
+        error = 'Sorry, your eduID account has no identifier.'
         logger.debug(error)
         return render_authentication_error(request, EduIDProvider.id, error)
 
@@ -86,15 +86,15 @@ def after_terms_agreement(request, **kwargs):
     if not social_account: # user does not exist
         # ensure that email & names are in extra_data
         if 'email' not in userinfo_json:
-            error = 'Sorry, your EduID account does not have your institution mail. Login to EduID and link your institution account, then try again.'
+            error = 'Sorry, your eduID account does not have your institution mail. Login to eduID and link your institution account, then try again.'
             logger.debug(error)
             return render_authentication_error(request, EduIDProvider.id, error)
         if 'family_name' not in userinfo_json:
-            error = 'Sorry, your EduID account has no family_name attached from SurfConext. Login to EduID and link your institution account, then try again.'
+            error = 'Sorry, your eduID account has no family_name attached from SURFconext. Login to eduID and link your institution account, then try again.'
             logger.debug(error)
             return render_authentication_error(request, EduIDProvider.id, error)
         if 'given_name' not in userinfo_json:
-            error = 'Sorry, your EduID account has no first_name attached from SurfConext. Login to EduID and link your institution account, then try again.'
+            error = 'Sorry, your eduID account has no first_name attached from SURFconext. Login to eduID and link your institution account, then try again.'
             logger.debug(error)
             return render_authentication_error(request, EduIDProvider.id, error)
     else: # user already exists

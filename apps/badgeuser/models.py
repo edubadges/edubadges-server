@@ -159,6 +159,11 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     badgrapp = models.ForeignKey('mainsite.BadgrApp', blank=True, null=True, default=None)
     faculty = models.ManyToManyField('institution.Faculty', blank=True)
     institution = models.ForeignKey('institution.Institution', blank=True, null=True, default=None)
+    is_staff = models.BooleanField(
+        _('Backend-staff member'),
+        default=False,
+        help_text=_('Designates whether the user can log into this admin site.'),
+    )
 
     # canvas LTI id
     lti_id = models.CharField(unique=True, max_length=50, default=None, null=True, blank=True,
@@ -172,9 +177,10 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         verbose_name_plural = _('badge users')
         db_table = 'users'
         permissions=(('view_issuer_tab', 'User can view Issuer tab in front end'),
+                     ('view_management_tab', 'User can view Management dashboard'),
                      ('has_faculty_scope', 'User has faculty scope'),
                      ('has_institution_scope', 'User has institution scope'),
-                     ('ui_issuer_add', 'User can add issuer in front end')
+                     ('ui_issuer_add', 'User can add issuer in front end'),
                      )
 
     def __unicode__(self):
