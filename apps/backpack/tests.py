@@ -117,7 +117,8 @@ class TestBadgeUploads(BadgrTestCase):
             '@context': 'https://w3id.org/openbadges/v1',
             'id': 'http://a.com/instance',
             'type': 'Assertion',
-            "recipient": {"identity": "test@example.com", "hashed": False, "type": "email"},
+             "recipient": {"identity": "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18",
+                           "hashed": False, "type": "id"},
             "badge": "http://a.com/badgeclass",
             "issuedOn": "2015-04-30",
             "verify": {"type": "hosted", "url": "http://a.com/instance"}
@@ -277,7 +278,8 @@ class TestBadgeUploads(BadgrTestCase):
             "@context": "https://w3id.org/openbadges/v1",
             "type": "Assertion",
             "id": "http://a.com/instance2",
-            "recipient": {"identity": "test@example.com", "hashed": False, "type": "email"},
+            "recipient": {"identity": "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18",
+                          "hashed": False, "type": "id"},
             "badge": "http://a.com/badgeclass",
             "issuedOn": "2015-04-30T00:00+00:00",
             "verify": {"type": "hosted", "url": "http://a.com/instance2"},
@@ -891,7 +893,7 @@ class TestCollections(BadgrTestCase):
         )
 
         self.local_badge_instance_1 = BadgeInstance.objects.create(
-            recipient_identifier="test@example.com",
+            recipient_identifier="urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18",
             badgeclass=self.badge_class,
             issuer=self.issuer,
             image="uploads/badges/local_badgeinstance_174e70bf-b7a8-4b71-8125-c34d1a994a7c.png",
@@ -899,7 +901,7 @@ class TestCollections(BadgrTestCase):
         )
 
         self.local_badge_instance_2 = BadgeInstance.objects.create(
-            recipient_identifier="test@example.com",
+            recipient_identifier="urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18",
             badgeclass=self.badge_class,
             issuer=self.issuer,
             image="uploads/badges/local_badgeinstance_174e70bf-b7a8-4b71-8125-c34d1a994a7c.png",
@@ -907,7 +909,7 @@ class TestCollections(BadgrTestCase):
         )
 
         self.local_badge_instance_3 = BadgeInstance.objects.create(
-            recipient_identifier="test@example.com",
+            recipient_identifier="urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18",
             badgeclass=self.badge_class,
             issuer=self.issuer,
             image="uploads/badges/local_badgeinstance_174e70bf-b7a8-4b71-8125-c34d1a994a7c.png",

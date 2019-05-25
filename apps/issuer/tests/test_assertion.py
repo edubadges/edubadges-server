@@ -104,8 +104,8 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         original_assertion = response.data
 
         new_assertion_data = {
-            "recipient_type": "email",
-            "recipient_identifier": "test@example.com",
+            "recipient_type": "id",
+            "recipient_identifier": "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18",
             "narrative": "test narrative",
             "evidence_items": [{
                 "narrative": "This is the evidence item narrative AGAIN!.",
@@ -310,7 +310,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
             }
         ]
         assertion_args = {
-            "recipient": {"identity": "test@example.com"},
+            "recipient": {"identity": "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18"},
             "notify": False,
             "evidence": evidence_items
         }
@@ -663,14 +663,14 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
             "assertions": [
                 {
                     'recipient': {
-                        "identity": "foo@bar.com",
-                        "type": "email"
+                        "identity": "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18",
+                        "type": "id",
                     }
                 },
                 {
                     'recipient': {
-                        "identity": "bar@baz.com",
-                        "type": "email"
+                        "identity": "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18",
+                        "type": "id",
                     },
                     'issuedOn': 1512151153620
                 },
@@ -689,8 +689,8 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         batch_assertion_props = {
             'assertions': [{
                 "recipient": {
-                    "identity": "foo@bar.com",
-                    "type": "email",
+                    "identity": "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18",
+                    "type": "id",
                     "hashed": True,
                 },
                 "narrative": "foo@bar's test narrative",
