@@ -17,7 +17,7 @@ from badgeuser.models import BadgeUser, TermsVersion
 from issuer.models import Issuer, BadgeClass
 from mainsite import TOP_DIR
 from mainsite.models import BadgrApp, ApplicationInfo
-
+from allauth.socialaccount.models import SocialAccount
 
 class SetupOAuth2ApplicationHelper(object):
     def setup_oauth2_application(self,
@@ -93,6 +93,18 @@ class SetupUserHelper(object):
             email.verified = verified
             email.primary = primary
             email.save()
+
+        extra_data = {"family_name": "Neci",
+                      "sub": "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18",
+                      "email": email.email,
+                      "name": "Er\u00f4ss Neci",
+                      "given_name": "Er\u00f4ss"}
+
+        socialaccount = SocialAccount(extra_data=extra_data,
+                                      uid="urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18",
+                                      provider='edu_id',
+                                      user=user)
+        socialaccount.save()
 
         if token_scope:
             app = Application.objects.create(
