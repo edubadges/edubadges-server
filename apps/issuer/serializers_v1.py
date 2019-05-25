@@ -335,7 +335,7 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
     email = serializers.EmailField(max_length=1024, required=False, write_only=True)
     recipient_identifier = serializers.CharField(max_length=1024, required=False)
     recipient_email = serializers.SerializerMethodField()
-    recipient_type = serializers.CharField(default=BadgeInstance.RECIPIENT_TYPE_EMAIL)
+    recipient_type = serializers.CharField(default=BadgeInstance.RECIPIENT_TYPE_EDUID)
     allow_uppercase = serializers.BooleanField(default=False, required=False, write_only=True)
     evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
     narrative = MarkdownCharField(required=False, allow_blank=True, allow_null=True)
