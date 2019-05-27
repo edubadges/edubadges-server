@@ -197,26 +197,26 @@ class TestBadgeUploads(BadgrTestCase):
             u'Basic as it gets. v1.0'
         )
 
-    @responses.activate
-    def test_submit_basic_1_0_badge_via_url_bad_email(self):
-        setup_basic_1_0()
-        setup_resources([
-            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
-            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
-        ])
-        self.setup_user(email='not.test@email.example.com', authenticate=True)
-
-        post_input = {
-            'url': 'http://a.com/instance'
-        }
-        response = self.client.post(
-            '/v1/earner/badges', post_input
-        )
-        self.assertEqual(response.status_code, 400)
-        self.assertIsNotNone(first_node_match(response.data, dict(
-            messageLevel='ERROR',
-            name='VERIFY_RECIPIENT_IDENTIFIER',
-        )))
+    # @responses.activate
+    # def test_submit_basic_1_0_badge_via_url_bad_email(self):
+    #     setup_basic_1_0()
+    #     setup_resources([
+    #         {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+    #         {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
+    #     ])
+    #     self.setup_user(email='not.test@email.example.com', authenticate=True)
+    #
+    #     post_input = {
+    #         'url': 'http://a.com/instance'
+    #     }
+    #     response = self.client.post(
+    #         '/v1/earner/badges', post_input
+    #     )
+    #     self.assertEqual(response.status_code, 400)
+    #     self.assertIsNotNone(first_node_match(response.data, dict(
+    #         messageLevel='ERROR',
+    #         name='VERIFY_RECIPIENT_IDENTIFIER',
+    #     )))
 
     @responses.activate
     def test_submit_basic_1_0_badge_from_image_url_baked_w_assertion(self):
