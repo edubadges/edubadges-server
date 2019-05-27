@@ -62,6 +62,7 @@ class LoginLti(TemplateView):
         'urn:lti:sysrole:ims/lis/SysAdmin',
         'urn:lti:sysrole:ims/lis/Creator',
         'urn:lti:sysrole:ims/lis/Administrator',
+        'Instructor'
 
 
 
@@ -105,9 +106,10 @@ class LoginLti(TemplateView):
         user_id = post['user_id']
         context_id = post['context_id']
         if 'roles' in post:
-            role = post['roles']
-            if role in self.teacher_roles:
-                self.staff = True
+            roles = post['roles']
+            for role in roles.split(','):
+                if role in self.teacher_roles:
+                    self.staff = True
         lti_data = {}
         lti_data['lti_user_id'] = user_id
         lti_data['lti_context_id'] = context_id
