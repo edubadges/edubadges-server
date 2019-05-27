@@ -1,4 +1,9 @@
 var loginWindow = null;
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function Request() {
 
     this.poll = false;
@@ -20,9 +25,13 @@ function Request() {
                 success: function (response) {
                     console.log(response);
                     if(response['loggedin']){
-                        window.location =$('#login-link').attr('next-url');
                         if(loginWindow != null){
-                            loginWindow.close();
+                            setTimeout(function(){
+                                console.log('in timeout function');
+                                loginWindow.close();
+                                window.location =$('#login-link').attr('next-url');
+
+                                },2000);
                         }
                     }
 
