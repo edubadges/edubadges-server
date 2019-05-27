@@ -539,26 +539,26 @@ class TestBadgeUploads(BadgrTestCase):
             prop_name='badge'
         )))
 
-    @responses.activate
-    def test_submit_basic_0_5_0_badge_via_url(self):
-        setup_basic_0_5_0()
-        setup_resources([
-            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
-            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
-        ])
-        self.setup_user(email='test@example.com', authenticate=True)
-
-        post_input = {
-            'url': 'http://oldstyle.com/instance'
-        }
-        response = self.client.post(
-            '/v1/earner/badges', post_input
-        )
-        self.assertEqual(response.status_code, 201)
-        get_response = self.client.get('/v1/earner/badges')
-        self.assertEqual(get_response.status_code, 200)
-        self.assertEqual(get_response.data[0].get('json', {}).get('id'), post_input.get('url'),
-                         "The badge in our backpack should report its JSON-LD id as the original OpenBadgeId")
+    # @responses.activate
+    # def test_submit_basic_0_5_0_badge_via_url(self):
+    #     setup_basic_0_5_0()
+    #     setup_resources([
+    #         {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+    #         {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
+    #     ])
+    #     self.setup_user(email='test@example.com', authenticate=True)
+    #
+    #     post_input = {
+    #         'url': 'http://oldstyle.com/instance'
+    #     }
+    #     response = self.client.post(
+    #         '/v1/earner/badges', post_input
+    #     )
+    #     self.assertEqual(response.status_code, 201)
+    #     get_response = self.client.get('/v1/earner/badges')
+    #     self.assertEqual(get_response.status_code, 200)
+    #     self.assertEqual(get_response.data[0].get('json', {}).get('id'), post_input.get('url'),
+    #                      "The badge in our backpack should report its JSON-LD id as the original OpenBadgeId")
 
     @responses.activate
     def test_submit_0_5_badge_upload_by_assertion(self):
