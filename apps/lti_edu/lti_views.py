@@ -62,7 +62,9 @@ class LoginLti(TemplateView):
         'urn:lti:sysrole:ims/lis/SysAdmin',
         'urn:lti:sysrole:ims/lis/Creator',
         'urn:lti:sysrole:ims/lis/Administrator',
-        'Instructor'
+        'Instructor',
+        'urn:lti:role:ims/lis/TeachingAssistant',
+        'ContentDeveloper'
 
 
 
