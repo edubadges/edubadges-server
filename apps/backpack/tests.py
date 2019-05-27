@@ -431,42 +431,42 @@ class TestBadgeUploads(BadgrTestCase):
             "The badge in our backpack should report its JSON-LD id as its original OpenBadgeId"
         )
 
-    @responses.activate
-    def test_submit_basic_1_0_badge_url_variant_email(self):
-        setup_basic_1_0(**{'exclude': 'http://a.com/instance'})
-        setup_resources([
-            {'url': 'http://a.com/instance3', 'filename': '1_0_basic_instance3.json'},
-            {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
-            {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
-        ])
-        self.setup_user(email='test@example.com', authenticate=True)
-
-        # add variant explicitly
-        response = self.client.post('/v1/user/emails', dict(
-            email='TEST@example.com'
-        ))
-        self.assertEqual(response.status_code, 400)  # adding a variant successfully returns a 400
-
-        post_input = {
-            'url': 'http://a.com/instance3',
-        }
-        response = self.client.post(
-            '/v1/earner/badges', post_input
-        )
-        self.assertEqual(response.status_code, 201)
-
-        get_response = self.client.get('/v1/earner/badges')
-        self.assertEqual(get_response.status_code, 200)
-        self.assertEqual(
-            get_response.data[0].get('json', {}).get('id'),
-            'http://a.com/instance3'
-        )
-        self.assertEqual(
-            get_response.data[0].get('json', {}).get('recipient', {}).get('@value', {}).get('recipient'), 'urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18'
-        )
-
-        email = CachedEmailAddress.objects.get(email='test@example.com')
-        self.assertTrue('TEST@example.com' in [e.email for e in email.cached_variants()])
+    # @responses.activate
+    # def test_submit_basic_1_0_badge_url_variant_email(self):
+    #     setup_basic_1_0(**{'exclude': 'http://a.com/instance'})
+    #     setup_resources([
+    #         {'url': 'http://a.com/instance3', 'filename': '1_0_basic_instance3.json'},
+    #         {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
+    #         {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
+    #     ])
+    #     self.setup_user(email='test@example.com', authenticate=True)
+    #
+    #     # add variant explicitly
+    #     response = self.client.post('/v1/user/emails', dict(
+    #         email='TEST@example.com'
+    #     ))
+    #     self.assertEqual(response.status_code, 400)  # adding a variant successfully returns a 400
+    #
+    #     post_input = {
+    #         'url': 'http://a.com/instance3',
+    #     }
+    #     response = self.client.post(
+    #         '/v1/earner/badges', post_input
+    #     )
+    #     self.assertEqual(response.status_code, 201)
+    #
+    #     get_response = self.client.get('/v1/earner/badges')
+    #     self.assertEqual(get_response.status_code, 200)
+    #     self.assertEqual(
+    #         get_response.data[0].get('json', {}).get('id'),
+    #         'http://a.com/instance3'
+    #     )
+    #     self.assertEqual(
+    #         get_response.data[0].get('json', {}).get('recipient', {}).get('@value', {}).get('recipient'), 'urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18'
+    #     )
+    #
+    #     email = CachedEmailAddress.objects.get(email='test@example.com')
+    #     self.assertTrue('TEST@example.com' in [e.email for e in email.cached_variants()])
 
     @responses.activate
     def test_submit_basic_1_0_badge_with_inaccessible_badge_image(self):
