@@ -3,6 +3,8 @@ from rest_framework import serializers
 from issuer.models import BadgeClass, Issuer, BadgeInstance
 from lti_edu.models import StudentsEnrolled, BadgeClassLtiContext
 
+from mainsite.drf_fields import ValidImageField
+
 
 class LTIrequestSerializer(serializers.Serializer):
     user_id = serializers.CharField(max_length=150, default=1)
@@ -25,19 +27,23 @@ class BadgeClassSerializer(serializers.ModelSerializer):
 
 
 class BadgeClassLtiContextSerializer(serializers.ModelSerializer):
+    badgeClassEntityId = serializers.CharField(source='badge_class.entity_id')
+    contextId = serializers.CharField(source='context_id')
+    name = serializers.CharField(source='badge_class.name')
+    image = ValidImageField(source='badge_class.image')
 
     class Meta:
         model = BadgeClassLtiContext
-        fields = ['badge_class','context_id']
+        fields = ['badgeClassEntityId','contextId','name','image']
 
-    def to_representation(self, instance):
-        data = {
-            'badgeClassEntityId': instance.badge_class.entity_id,
-            'contextId': instance.context_id,
-            'name': instance.badge_class.name,
-            'image':instance.badge_class.image.url,
-        }
-        return data
+    # def to_representation(self, instance):
+    #     data = {
+    #         'badgeClassEntityId': instance.badge_class.entity_id,
+    #         'contextId': instance.context_id,
+    #         'name': instance.badge_class.name,
+    #         'image':instance.badge_class.image,
+    #     }
+    #     return data
 
 
 
