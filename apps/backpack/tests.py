@@ -462,7 +462,7 @@ class TestBadgeUploads(BadgrTestCase):
             'http://a.com/instance3'
         )
         self.assertEqual(
-            get_response.data[0].get('json', {}).get('recipient', {}).get('@value', {}).get('recipient'), 'TEST@example.com'
+            get_response.data[0].get('json', {}).get('recipient', {}).get('@value', {}).get('recipient'), 'urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18'
         )
 
         email = CachedEmailAddress.objects.get(email='test@example.com')
