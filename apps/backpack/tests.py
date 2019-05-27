@@ -21,6 +21,7 @@ from mainsite.tests.base import BadgrTestCase, SetupIssuerHelper
 from backpack.models import BackpackCollection, BackpackCollectionBadgeInstance
 from backpack.serializers_v1 import (CollectionSerializerV1)
 from mainsite.utils import first_node_match, OriginSetting
+from mainsite.tests.base import add_social_account_to_user
 from issuer.utils import generate_sha256_hashstring, CURRENT_OBI_VERSION
 
 
@@ -867,6 +868,8 @@ class TestCollections(BadgrTestCase):
     def setUp(self):
         super(TestCollections, self).setUp()
         self.user, _ = BadgeUser.objects.get_or_create(email='test@example.com')
+
+        add_social_account_to_user(self.user, self.user.email)
 
         self.cached_email, _ = CachedEmailAddress.objects.get_or_create(user=self.user, email='test@example.com', verified=True, primary=True)
 
