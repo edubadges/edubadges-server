@@ -35,6 +35,7 @@ class CheckLoginAdmin(View):
 
 def login_user(request, user):
     """Log in a user without requiring credentials with user object"""
+
     if not hasattr(user, 'backend'):
         for backend in settings.AUTHENTICATION_BACKENDS:
             if user == load_backend(backend).get_user(user.pk):
@@ -49,14 +50,19 @@ def check_user_changed(request, user):
     if request.session.get('lti_user_id',None) == request.POST['user_id'] and request.session.get('lti_roles', None) == request.POST['roles']:
         return False
     """Log in a user without requiring credentials with user object"""
-    if not hasattr(user, 'backend'):
-        for backend in settings.AUTHENTICATION_BACKENDS:
-            if user == load_backend(backend).get_user(user.pk):
-                user.backend = backend
-                break
-    if hasattr(user, 'backend'):
-        return logout(request)
+    return logout_badgr_user(request, user)
 
+
+def logout_badgr_user(request, user):
+    if request.user.is_authenticated():
+        if not hasattr(user, 'backend'):
+            for backend in settings.AUTHENTICATION_BACKENDS:
+                if user == load_backend(backend).get_user(user.pk):
+                    user.backend = backend
+                    break
+        if hasattr(user, 'backend'):
+            return logout(request)
+    return False
 
 class LoginLti(TemplateView):
     template_name = "lti/lti_login.html"
