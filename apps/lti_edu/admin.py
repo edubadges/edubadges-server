@@ -3,7 +3,6 @@ from django.contrib import admin
 from lti_edu.models import LtiPayload, StudentsEnrolled, LtiClient, ResourceLinkBadge
 from mainsite.admin import badgr_admin, FilterByScopeMixin
 from issuer.models import Issuer
-from ims.models import IMSArchive, LTIApp, LTITenant
 
 
 @admin.register(LtiPayload)
@@ -73,8 +72,8 @@ class LTITenantAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('organization',)}
 
 
-badgr_admin.register(IMSArchive, IMSArchiveAdmin)
-badgr_admin.register(LTIApp, LTIAppAdmin)
-badgr_admin.register(LTITenant, LTITenantAdmin)
+# badgr_admin.register(IMSArchive, IMSArchiveAdmin)
+# badgr_admin.register(LTIApp, LTIAppAdmin)
+# badgr_admin.register(LTITenant, LTITenantAdmin)
 
 
