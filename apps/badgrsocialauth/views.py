@@ -11,13 +11,15 @@ from rest_framework.exceptions import AuthenticationFailed
 
 from badgrsocialauth.utils import set_url_query_params, set_session_badgr_app, get_session_badgr_app, \
     get_session_verification_email, set_session_authcode
+from lti_edu.lti_views import logout_badgr_user
 from mainsite.models import BadgrApp
 
 
 class BadgrSocialLogin(RedirectView):
     def get(self, request, *args, **kwargs):
         try:
-            logout(request)
+            # logout(request)
+            logout_badgr_user(request, request.user)
             return super(BadgrSocialLogin, self).get(request, *args, **kwargs)
         except ValidationError as e:
             return HttpResponseBadRequest(e.message)
