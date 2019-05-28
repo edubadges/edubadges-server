@@ -25,14 +25,16 @@ function Request() {
                 success: function (response) {
                     console.log(response);
                     if(response['loggedin']){
-                        if(loginWindow != null){
+
                             setTimeout(function(){
                                 console.log('in timeout function');
-                                loginWindow.close();
+                                if(loginWindow != null) {
+                                    loginWindow.close();
+                                }
                                 window.location =$('#login-link').attr('next-url');
 
                                 },2000);
-                        }
+
                     }
 
                 },

@@ -26,8 +26,12 @@ def login(request):
     """
     lti_data = request.session.get('lti_data', None)
     lti_context_id = ''
+    lti_user_id = ''
+    lti_roles = ''
     if lti_data is not None:
         lti_context_id = lti_data['lti_context_id']
+        lti_user_id = lti_data['lti_user_id']
+        lti_roles = lti_data['lti_roles']
 
     _current_app = SocialApp.objects.get_current(provider='surf_conext')
 
@@ -43,6 +47,8 @@ def login(request):
                           get_session_authcode(request),
                           badgr_app_pk,
                           lti_context_id,
+                          lti_user_id,
+                          lti_roles,
                           referer])
 
     data = {'client_id': _current_app.client_id,
@@ -65,7 +71,7 @@ def after_terms_agreement(request, **kwargs):
         return render_authentication_error(request, SurfConextProvider.id, error)
     
     headers = {'Authorization': 'bearer %s' % access_token}
-    badgr_app_pk, login_type, process, auth_token, lti_context_id, referer = json.loads(kwargs['state'])
+    badgr_app_pk, login_type, process, auth_token, lti_context_id,lti_user_id,lti_roles, referer = json.loads(kwargs['state'])
     if badgr_app_pk is None:
         print('none here')
     set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app_pk))
@@ -124,7 +130,8 @@ def after_terms_agreement(request, **kwargs):
             user_current_context_id.context_id = lti_data['lti_context_id']
             user_current_context_id.save()
 
-
+    request.session['lti_user_id'] = lti_user_id
+    request.session['lti_roles'] = lti_roles
 
     # override the response with a redirect to staff dashboard if the login came from there
     if referer == 'staff':
@@ -154,7 +161,7 @@ def callback(request):
     :return: Either renders authentication error, or completes the social login
     """
     # extract the state of the redirect
-    process, auth_token, badgr_app_pk,lti_data, referer = json.loads(request.GET.get('state'))
+    process, auth_token, badgr_app_pk,lti_data,lti_user_id,lti_roles, referer = json.loads(request.GET.get('state'))
 
     if badgr_app_pk is None:
         print('none here')
@@ -201,7 +208,7 @@ def callback(request):
     extra_data = response.json()
               
     keyword_arguments = {'access_token':access_token, 
-                         'state': json.dumps([badgr_app_pk, 'surf_conext' ,process, auth_token,lti_data, referer]),
+                         'state': json.dumps([badgr_app_pk, 'surf_conext' ,process, auth_token,lti_data, lti_user_id,lti_roles,referer]),
                          'after_terms_agreement_url_name': 'surf_conext_terms_accepted_callback'}
      
     if not get_social_account(extra_data['sub']):

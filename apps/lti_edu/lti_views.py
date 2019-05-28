@@ -43,7 +43,11 @@ def login_user(request, user):
     if hasattr(user, 'backend'):
         return login(request, user)
 
-def logout_user(request, user):
+def check_user_changed(request, user):
+    lti_user_id = request.session.get('lti_user_id',None)
+    lti_roles = request.session.get('lti_roles', None)
+    if request.session.get('lti_user_id',None) == request.POST['user_id'] and request.session.get('lti_roles', None) == request.POST['roles']:
+        return False
     """Log in a user without requiring credentials with user object"""
     if not hasattr(user, 'backend'):
         for backend in settings.AUTHENTICATION_BACKENDS:
@@ -103,10 +107,11 @@ class LoginLti(TemplateView):
 
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated():
-            logout_user(request, request.user)
+            check_user_changed(request, request.user)
         post = request.POST
         user_id = post['user_id']
         context_id = post['context_id']
+        roles = ''
         if 'roles' in post:
             roles = post['roles']
             for role in roles.split(','):
@@ -114,6 +119,7 @@ class LoginLti(TemplateView):
                     self.staff = True
         lti_data = {}
         lti_data['lti_user_id'] = user_id
+        lti_data['lti_roles'] = roles
         lti_data['lti_context_id'] = context_id
         lti_data['lti_tenant'] = kwargs['tenant'].client_key.hex
         lti_data['post_data'] = post
