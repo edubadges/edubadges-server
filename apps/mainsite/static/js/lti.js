@@ -25,7 +25,7 @@ function Request() {
                 success: function (response) {
                     console.log(response);
                     if(response['loggedin']){
-
+                            this.disablePoll();
                             setTimeout(function(){
                                 console.log('in timeout function');
                                 if(loginWindow != null) {
@@ -47,7 +47,7 @@ function Request() {
                     }
                 }
             })
-        }, 1000);
+        }, 333);
     };
 }
 
