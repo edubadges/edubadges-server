@@ -1,6 +1,6 @@
 import random
 import re
-
+import unittest
 import os
 from django.contrib.auth import SESSION_KEY
 from django.core import mail
@@ -24,6 +24,7 @@ from mainsite.tests.base import BadgrTestCase
 
 class AuthTokenTests(BadgrTestCase):
 
+    @unittest.skip('For debug speedup')
     def test_create_user_auth_token(self):
         """
         Ensure that get can create a token for a user that doesn't have one
@@ -40,6 +41,7 @@ class AuthTokenTests(BadgrTestCase):
         second_response = self.client.get('/v1/user/auth-token')
         self.assertEqual(token, second_response.data.get('token'))
 
+    @unittest.skip('For debug speedup')
     def test_update_user_auth_token(self):
         """
         Ensure that a PUT request updates a user token.
