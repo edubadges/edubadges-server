@@ -816,7 +816,6 @@ class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
         test_recipient = self.setup_user(email='test_recipient@email.test',
                                          authenticate=True,
                                          eduid=self.eduid)
-        # test_badgeclass.issue(recipient_id='test_recipient@email.test')
         test_badgeclass.issue(recipient_id=self.eduid)
 
         response = self.client.get('/v2/backpack/assertions?expand=badgeclass&expand=issuer')
@@ -860,9 +859,8 @@ class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
 
     def test_expand_badgeclass_and_issuer_mult_assertions_mult_issuers(self):
         '''For a client with multiple badges, attempting to expand the badgeclass and issuer.'''
-
         # define users and issuers
-        test_user = self.setup_user(email='test_recipient@email.test', authenticate=True)
+        test_user = self.setup_user(email='test_recipient@email.test', authenticate=True, eduid=self.eduid)
         test_issuer_one = self.setup_issuer(name="Test Issuer 1",owner=test_user)
         test_issuer_two = self.setup_issuer(name="Test Issuer 2",owner=test_user)
         test_issuer_three = self.setup_issuer(name="Test Issuer 3",owner=test_user)
@@ -876,12 +874,12 @@ class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
         test_badgeclass_six = self.setup_badgeclass(name='Test Badgeclass 6',issuer=test_issuer_three)
 
         # issue badges to user
-        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
-        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
-        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
-        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
-        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
-        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
+        test_badgeclass_one.issue(recipient_id=self.eduid)
+        test_badgeclass_one.issue(recipient_id=self.eduid)
+        test_badgeclass_one.issue(recipient_id=self.eduid)
+        test_badgeclass_one.issue(recipient_id=self.eduid)
+        test_badgeclass_one.issue(recipient_id=self.eduid)
+        test_badgeclass_one.issue(recipient_id=self.eduid)
 
         response = self.client.get('/v2/backpack/assertions?expand=badgeclass&expand=issuer')
 
