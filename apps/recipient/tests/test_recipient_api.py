@@ -26,11 +26,13 @@ class RecipientApiTests(SetupIssuerHelper, BadgrTestCase):
             'description': 'A pathway used for testing.'
         })
 
+    @unittest.skip('For debug speedup')
     def test_can_create_group(self):
         response = self.create_group()
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data['name'], 'Group of Testing')
 
+    @unittest.skip('For debug speedup')
     def test_can_delete_group(self):
         response = self.create_group()
         self.assertIn('slug', response.data)
@@ -46,6 +48,7 @@ class RecipientApiTests(SetupIssuerHelper, BadgrTestCase):
             group=group_slug))
         self.assertEqual(get_response.status_code, 404)
 
+    @unittest.skip('For debug speedup')
     def test_can_add_member_to_group(self):
         response = self.create_group()
         self.assertIn('slug', response.data)
@@ -66,6 +69,7 @@ class RecipientApiTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(get_response.status_code, 200)
         self.assertEqual(len(get_response.data['memberships']), 1)
 
+    @unittest.skip('For debug speedup')
     def test_can_add_multiple_members_to_group(self):
         response = self.create_group()
         self.assertIn('slug', response.data)
@@ -117,6 +121,7 @@ class RecipientApiTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(len(group.cached_members()), 2)
         self.assertTrue(sammi in [m.recipient_profile for m in group.cached_members()])
 
+    @unittest.skip('For debug speedup')
     def test_subscribe_group_to_pathway(self):
         group_response = self.create_group()
         group_slug = group_response.data.get('slug')

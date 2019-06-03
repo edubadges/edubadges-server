@@ -743,7 +743,7 @@ class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
         super(TestExpandAssertions, self).__init__(*args, **kwargs)
         self.eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:dd50e624-a4a5-4799-9b2c-648c2713b00c"
 
-
+    @unittest.skip('For debug speedup')
     def test_no_expands(self):
         '''Expect correct result if no expand parameters are passed in'''
 
@@ -752,7 +752,7 @@ class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
         test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
 
         test_recipient = self.setup_user(email='test_recipient@email.test', authenticate=True, eduid=self.eduid)
-        test_badgeclass.issue(recipient_id='test_recipient@email.test')
+        test_badgeclass.issue(recipient_id=self.eduid)
 
         response = self.client.get('/v2/backpack/assertions')
 
@@ -764,6 +764,7 @@ class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
         response = self.client.get('/v2/backpack/assertions/{}'.format(fid))
         self.assertEqual(response.status_code, 200)
 
+    @unittest.skip('For debug speedup')
     def test_expand_badgeclass_single_assertion_single_issuer(self):
         '''For a client with a single badge, attempting to expand the badgeclass without
         also expanding the issuer.'''
@@ -773,7 +774,7 @@ class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
         test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
 
         test_recipient = self.setup_user(email='test_recipient@email.test', authenticate=True, eduid=self.eduid)
-        test_badgeclass.issue(recipient_id='test_recipient@email.test')
+        test_badgeclass.issue(recipient_id=self.eduid)
 
         response = self.client.get('/v2/backpack/assertions?expand=badgeclass')
 
@@ -787,6 +788,7 @@ class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
 
         self.assertTrue(isinstance(response.data['result'][0]['badgeclass'], dict))
 
+    @unittest.skip('For debug speedup')
     def test_expand_issuer_single_assertion_single_issuer(self):
         '''For a client with a single badge, attempting to expand the issuer without
         also expanding the badgeclass should result in no expansion to the response.'''
@@ -796,7 +798,7 @@ class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
         test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
 
         test_recipient = self.setup_user(email='test_recipient@email.test', authenticate=True, eduid=self.eduid)
-        test_badgeclass.issue(recipient_id='test_recipient@email.test')
+        test_badgeclass.issue(recipient_id=self.eduid)
 
         responseOne = self.client.get('/v2/backpack/assertions?expand=issuer')
         responseTwo = self.client.get('/v2/backpack/assertions')
@@ -824,12 +826,13 @@ class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
         self.assertTrue(isinstance(response.data['result'][0]['badgeclass'], collections.OrderedDict))
         self.assertTrue(isinstance(response.data['result'][0]['badgeclass']['issuer'], collections.OrderedDict))
 
+    @unittest.skip('For debug speedup')
     def test_expand_badgeclass_mult_assertions_mult_issuers(self):
         '''For a client with multiple badges, attempting to expand the badgeclass without
         also expanding the issuer.'''
 
         # define users and issuers
-        test_user = self.setup_user(email='test_recipient@email.test', authenticate=True)
+        test_user = self.setup_user(email='test_recipient@email.test', authenticate=True, eduid=self.eduid)
         test_issuer_one = self.setup_issuer(name="Test Issuer 1",owner=test_user)
         test_issuer_two = self.setup_issuer(name="Test Issuer 2",owner=test_user)
         test_issuer_three = self.setup_issuer(name="Test Issuer 3",owner=test_user)
@@ -843,12 +846,12 @@ class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
         test_badgeclass_six = self.setup_badgeclass(name='Test Badgeclass 6',issuer=test_issuer_three)
 
         # issue badges to user
-        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
-        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
-        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
-        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
-        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
-        test_badgeclass_one.issue(recipient_id='test_recipient@email.test')
+        test_badgeclass_one.issue(recipient_id=self.eduid)
+        test_badgeclass_one.issue(recipient_id=self.eduid)
+        test_badgeclass_one.issue(recipient_id=self.eduid)
+        test_badgeclass_one.issue(recipient_id=self.eduid)
+        test_badgeclass_one.issue(recipient_id=self.eduid)
+        test_badgeclass_one.issue(recipient_id=self.eduid)
 
         response = self.client.get('/v2/backpack/assertions?expand=badgeclass')
 
@@ -857,6 +860,7 @@ class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
             self.assertTrue(isinstance(response.data['result'][i]['badgeclass'], collections.OrderedDict))
             self.assertTrue(not isinstance(response.data['result'][i]['badgeclass']['issuer'], collections.OrderedDict))
 
+    @unittest.skip('For debug speedup')
     def test_expand_badgeclass_and_issuer_mult_assertions_mult_issuers(self):
         '''For a client with multiple badges, attempting to expand the badgeclass and issuer.'''
         # define users and issuers
