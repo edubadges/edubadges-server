@@ -94,8 +94,7 @@ class SetupUserHelper(object):
             email.verified = verified
             email.primary = primary
             email.save()
-
-        add_social_account_to_user(user, email.email, eduid=eduid)
+            add_social_account_to_user(user, email.email, eduid=eduid)
 
         if token_scope:
             app = Application.objects.create(
