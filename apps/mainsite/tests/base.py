@@ -66,7 +66,9 @@ class SetupUserHelper(object):
                    send_confirmation=False,
                    token_scope=None,
                    terms_version=1,
-                   eduid=None
+                   eduid=None,
+                   teacher=False,
+                   surfconext_id=None
                    ):
 
 
@@ -94,7 +96,11 @@ class SetupUserHelper(object):
             email.verified = verified
             email.primary = primary
             email.save()
-            add_social_account_to_user(user, email.email, eduid=eduid)
+            if not teacher:
+                add_student_social_account_to_user(user, email.email, eduid=eduid)
+            else:
+                add_teacher_social_account_to_user(user, email.email, surfconext_id=surfconext_id)
+
 
         if token_scope:
             app = Application.objects.create(
@@ -196,7 +202,7 @@ class BadgrTestCase(SetupUserHelper, APITransactionTestCase, CachingTestCase):
 
         self.assertEquals(self.badgr_app.pk, badgr_app_id)
 
-def add_social_account_to_user(user, email, eduid=None):
+def add_student_social_account_to_user(user, email, eduid=None):
     extra_data = {"family_name": "Neci",
                   "sub": "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18" if not eduid else eduid,
                   "email": email,
@@ -206,5 +212,18 @@ def add_social_account_to_user(user, email, eduid=None):
     socialaccount = SocialAccount(extra_data=extra_data,
                                   uid="urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18" if not eduid else eduid,
                                   provider='edu_id',
+                                  user=user)
+    socialaccount.save()
+
+def add_teacher_social_account_to_user(user, email, surfconext_id=None):
+    extra_data = {"family_name": "Teacher",
+                  "sub": "7980e81d94c0c5a201bf6809c51e5edc8c7d2600" if not surfconext_id else surfconext_id,
+                  "email": email,
+                  "name": "Er\u00f4ss Neci",
+                  "given_name": "Er\u00f4ss"}
+
+    socialaccount = SocialAccount(extra_data=extra_data,
+                                  uid="7980e81d94c0c5a201bf6809c51e5edc8c7d2600" if not surfconext_id else surfconext_id,
+                                  provider='surf_conext',
                                   user=user)
     socialaccount.save()
