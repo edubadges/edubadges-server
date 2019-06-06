@@ -29,14 +29,8 @@ class AuthenticatedWithVerifiedEmail(permissions.BasePermission):
     message = "This function only available to authenticated users with confirmed email addresses."
 
     def has_permission(self, request, view):
-        result = request.user and request.user.is_authenticated() and request.user.verified
-        if not result:
-            log = {'message':self.message,
-                   'is_authenticated': request.user.is_authenticated(),
-                   'verified': request.user.verified} 
-            logger.error(log)
-        return result
-    
+        return request.user and request.user.is_authenticated() and request.user.verified
+
 class MayUseManagementDashboard(permissions.BasePermission):
     """
     Allows access to api calls that are actuated from the management dashboard
