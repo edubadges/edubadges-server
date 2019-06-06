@@ -15,6 +15,8 @@ from rest_framework.test import APITransactionTestCase
 
 from badgeuser.models import BadgeUser, TermsVersion
 from issuer.models import Issuer, BadgeClass
+from institution.models import Institution, Faculty
+from django.contrib.auth.models import Group, Permission
 from mainsite import TOP_DIR
 from mainsite.models import BadgrApp, ApplicationInfo
 from allauth.socialaccount.models import SocialAccount
@@ -68,9 +70,10 @@ class SetupUserHelper(object):
                    terms_version=1,
                    eduid=None,
                    teacher=False,
-                   surfconext_id=None
+                   surfconext_id=None,
+                   faculty=None,
+                   groups=None
                    ):
-
 
         if email is None:
             email = 'setup_user_{}@email.test'.format(random.random())
@@ -79,6 +82,13 @@ class SetupUserHelper(object):
                                         last_name=last_name,
                                         create_email_address=create_email_address,
                                         send_confirmation=send_confirmation)
+
+        if groups:
+            for group in groups:
+                user.groups.add(group)
+                for perm in group.permissions.all():
+                    user.gains_permission(perm.codename, perm.content_type.model_class())
+            user.save()
 
         if terms_version is not None:
             # ensure there are terms and the user agrees to them to ensure there are no cache misses during tests
@@ -101,6 +111,13 @@ class SetupUserHelper(object):
             else:
                 add_teacher_social_account_to_user(user, email.email, surfconext_id=surfconext_id)
 
+        if teacher:
+            if faculty is not None:
+                user.faculty.add(faculty)
+                user.institution = faculty.institution
+                user.save()
+
+        user = BadgeUser.objects.get(pk=user.pk)
 
         if token_scope:
             app = Application.objects.create(
@@ -114,6 +131,25 @@ class SetupUserHelper(object):
         elif authenticate:
             self.client.force_authenticate(user=user)
         return user
+
+class SetupInstitutionHelper(object):
+    def setup_faculty(self,
+                      name='test faculty',
+                      institution=None):
+        if not institution:
+            institution = Institution.objects.create(name='Test Institution')
+        faculty = Faculty.objects.create(name=name, institution=institution)
+        return faculty
+
+
+class SetupPermissionHelper(object):
+    def setup_faculty_admin_group(self):
+        group = Group.objects.create(name='Faculty Admin')
+        codenames = ["change_badgeuser", "view_issuer_tab", "has_faculty_scope", "ui_issuer_add", "view_management_tab"]
+        for codename in codenames:
+            group.permissions.add(Permission.objects.get(codename=codename))
+        group.save()
+        return group
 
 
 class SetupIssuerHelper(object):
