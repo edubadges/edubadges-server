@@ -117,7 +117,7 @@ class SetupUserHelper(object):
                 user.institution = faculty.institution
                 user.save()
 
-        user = BadgeUser.objects.get(pk=user.pk)
+        user = BadgeUser.objects.get(pk=user.pk)  # reload user for caching permissions
 
         if token_scope:
             app = Application.objects.create(
