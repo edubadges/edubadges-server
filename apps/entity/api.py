@@ -87,7 +87,6 @@ class BaseEntityListView(BaseEntityView):
         """
         POST a new entity to be owned by the authenticated user
         """
-
         context = self.get_context_data(**kwargs)
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(data=request.data, context=context)
