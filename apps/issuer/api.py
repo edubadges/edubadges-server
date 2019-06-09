@@ -32,6 +32,7 @@ from apispec_drf.decorators import apispec_get_operation, apispec_put_operation,
 from lti_edu.models import StudentsEnrolled
 from mainsite.pagination import EncryptedCursorPagination
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from badgeuser.permissions import BadgeUserHasSurfconextSocialAccount
 from mainsite.serializers import CursorPaginatedListSerializer
 
 logger = badgrlog.BadgrLogger()
@@ -44,7 +45,7 @@ class IssuerList(BaseEntityListView):
     model = Issuer
     v1_serializer_class = IssuerSerializerV1
     v2_serializer_class = IssuerSerializerV2
-    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, ApprovedIssuersOnly, BadgrOAuthTokenHasScope)
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, ApprovedIssuersOnly, BadgrOAuthTokenHasScope, BadgeUserHasSurfconextSocialAccount)
     valid_scopes = ["rw:issuer"]
 
     create_event = badgrlog.IssuerCreatedEvent
@@ -64,13 +65,6 @@ class IssuerList(BaseEntityListView):
         tags=["Issuers"],
     )
     def post(self, request, **kwargs):
-        if request.data.get('faculty', None):
-            try:
-                request.data[u'faculty'] = json.loads(request.data[u'faculty'])
-            except TypeError: # ugly hack to enable testing, format differs
-                pass
-        else:
-            request.data[u'faculty'] = None
         mapExtensionsToDict(request)
         return super(IssuerList, self).post(request, **kwargs)
 
@@ -79,7 +73,7 @@ class IssuerDetail(BaseEntityDetailView):
     model = Issuer
     v1_serializer_class = IssuerSerializerV1
     v2_serializer_class = IssuerSerializerV2
-    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, BadgrOAuthTokenHasEntityScope)
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, BadgrOAuthTokenHasEntityScope, BadgeUserHasSurfconextSocialAccount)
     valid_scopes = ["rw:issuer", "rw:issuer:*"]
 
     @apispec_get_operation('Issuer',
@@ -94,10 +88,6 @@ class IssuerDetail(BaseEntityDetailView):
        tags=["Issuers"],
    )
     def put(self, request, **kwargs):
-        if request.data['faculty']:
-            request.data[u'faculty'] = json.loads(request.data[u'faculty'])
-        else:
-             request.data[u'faculty'] = None
         mapExtensionsToDict(request)
         return super(IssuerDetail, self).put(request, **kwargs)
 

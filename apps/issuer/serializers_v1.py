@@ -96,7 +96,7 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
         return image
 
     def create(self, validated_data, **kwargs):
-        if self.context['request'].data['faculty']:
+        if self.context['request'].data.get('faculty', None):
             faculty_id = self.context['request'].data['faculty']['id']
             faculty = Faculty.objects.get(pk=faculty_id)
             validated_data['faculty'] = faculty
