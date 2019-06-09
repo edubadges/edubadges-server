@@ -64,7 +64,7 @@ class IssuerList(BaseEntityListView):
         tags=["Issuers"],
     )
     def post(self, request, **kwargs):
-        if request.data['faculty']:
+        if request.data.get('faculty', None):
             try:
                 request.data[u'faculty'] = json.loads(request.data[u'faculty'])
             except TypeError: # ugly hack to enable testing, format differs
