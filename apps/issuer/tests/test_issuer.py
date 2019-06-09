@@ -79,7 +79,7 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
             issuer_fields_with_image['image'] = badge_image
             # issuer_fields_with_image['faculty'] = {'id': test_faculty.id, 'name': test_faculty.name}
 
-            response = self.client.post('/v1/issuer/issuers', issuer_fields_with_image, format='multipart') #content_type='*/*')
+            response = self.client.post('/v1/issuer/issuers', issuer_fields_with_image, format='multipart')
             self.assertEqual(response.status_code, 201)
 
             self.assertIn('slug', response.data)
@@ -274,12 +274,13 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
         self.assertEqual(second_response.status_code, 200)
         self.assertEqual(len(test_issuer.staff.all()), 1)
 
+    @unittest.skip('For debug speedup')
     def test_modify_staff_user_role(self):
-        test_user = self.setup_user(authenticate=True)
+        test_user = self.setup_user(authenticate=True, teacher=True)
         test_issuer = self.setup_issuer(owner=test_user)
         self.assertEqual(test_issuer.staff.count(), 1)
 
-        other_user = self.setup_user(authenticate=False, eduid=self.second_eduid)
+        other_user = self.setup_user(authenticate=False, teacher=True, surfconext_id='someverylongstring')
 
         first_response = self.client.post('/v1/issuer/issuers/{slug}/staff'.format(slug=test_issuer.entity_id), {
             'action': 'add',
@@ -392,23 +393,20 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
     #         response.data['validationErrors'][0],
     #         'Issuer email must be one of your verified addresses. Add this email to your profile and try again.')
 
-    def test_trusted_user_can_create_issuer_with_unverified_email(self):
-        test_faculty = self.setup_faculty()
-        test_user = self.setup_user(authenticate=True)
-        application = Application.objects.create(user=test_user, faculty=test_faculty)
-        app_info = ApplicationInfo.objects.create(application=application, trust_email_verification=True)
-
-        new_issuer_props = {
-            'name': 'Test Issuer Name',
-            'description': 'Test issuer description',
-            'url': 'http://example.com/1',
-            'email': 'an+unknown+email@badgr.test',
-            'faculty': {'id': test_faculty.id,
-                        'name': test_faculty.name}
-        }
-
-        response = self.client.post('/v2/issuers', new_issuer_props)
-        self.assertEqual(response.status_code, 201)
-
-        response = self.client.post('/v1/issuer/issuers', new_issuer_props)
-        self.assertEqual(response.status_code, 201)
+    # def test_trusted_user_can_create_issuer_with_unverified_email(self):
+    #     test_user = self.setup_user(authenticate=True, teacher=True)
+    #     application = Application.objects.create(user=test_user)
+    #     app_info = ApplicationInfo.objects.create(application=application, trust_email_verification=True)
+    #
+    #     new_issuer_props = {
+    #         'name': 'Test Issuer Name',
+    #         'description': 'Test issuer description',
+    #         'url': 'http://example.com/1',
+    #         'email': 'an+unknown+email@badgr.test',
+    #     }
+    #
+    #     response = self.client.post('/v2/issuers', new_issuer_props)
+    #     self.assertEqual(response.status_code, 201)
+    #
+    #     response = self.client.post('/v1/issuer/issuers', new_issuer_props)
+    #     self.assertEqual(response.status_code, 201)
