@@ -65,7 +65,10 @@ class IssuerList(BaseEntityListView):
     )
     def post(self, request, **kwargs):
         if request.data['faculty']:
-            request.data[u'faculty'] = json.loads(request.data[u'faculty'])
+            try:
+                request.data[u'faculty'] = json.loads(request.data[u'faculty'])
+            except TypeError: # ugly hack to enable testing, format differs
+                pass
         else:
             request.data[u'faculty'] = None
         mapExtensionsToDict(request)
