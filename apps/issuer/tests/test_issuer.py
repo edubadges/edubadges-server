@@ -100,7 +100,7 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
         image_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'testfiles', '300x300.png')
         self._create_issuer_with_image_and_test_resizing(image_path, 300, 300)
 
-    @unittest.skip('Fix later, issuer creation immutaable post bug')
+    # @unittest.skip('Fix later, issuer creation immutaable post bug')
     def test_can_update_issuer_if_authenticated(self):
         test_faculty = self.setup_faculty()
         test_group = self.setup_faculty_admin_group()
@@ -111,8 +111,8 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
             'description': 'Test issuer description',
             'url': 'http://example.com/1',
             'email': 'example1@example.org',
-            'faculty': json.dumps({'id': test_faculty.id,
-                                   'name': test_faculty.name})
+            'faculty': {'id': test_faculty.id,
+                        'name': test_faculty.name}
 
         }
 
@@ -120,20 +120,22 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
         issuer_email_1 = CachedEmailAddress.objects.create(
             user=test_user, email=original_issuer_props['email'], verified=True)
 
-        response = self.client.post('/v1/issuer/issuers', original_issuer_props)
+        response = self.client.post('/v1/issuer/issuers', json.dumps(original_issuer_props), content_type='application/json')
         response_slug = response.data.get('slug')
 
         updated_issuer_props = {
             'name': 'Test Issuer Name 2',
             'description': 'Test issuer description 2',
             'url': 'http://example.com/2',
-            'email': 'example2@example.org'
+            'email': 'example2@example.org',
+            'faculty': {'id': test_faculty.id,
+                        'name': test_faculty.name}
         }
 
         issuer_email_2 = CachedEmailAddress.objects.create(
             user=test_user, email=updated_issuer_props['email'], verified=True)
 
-        response = self.client.put('/v1/issuer/issuers/{}'.format(response_slug), updated_issuer_props)
+        response = self.client.put('/v1/issuer/issuers/{}'.format(response_slug), json.dumps(updated_issuer_props), content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(response.data['url'], updated_issuer_props['url'])
