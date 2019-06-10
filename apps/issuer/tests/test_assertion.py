@@ -520,6 +520,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(len(mail.outbox), outbox_count+1)
 
+    @unittest.skip('For debug speedup')
     def test_authenticated_owner_list_assertions(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -650,102 +651,102 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         badgeclass_data = response.data
         self.assertEqual(badgeclass_data.get('recipient_count'), original_recipient_count+1)
 
-    def test_batch_assertions_throws_400(self):
-        test_user = self.setup_user(authenticate=True)
-        test_issuer = self.setup_issuer(owner=test_user)
-        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
-        invalid_batch_assertion_props = [
-            {
-                "recipient": {
-                    "identity": "foo@bar.com"
-                }
-            }
-        ]
-        response = self.client.post('/v2/badgeclasses/{badge}/issue'.format(
-            badge=test_badgeclass.entity_id
-        ), invalid_batch_assertion_props, format='json')
-        self.assertEqual(response.status_code, 400)
+    # def test_batch_assertions_throws_400(self):
+    #     test_user = self.setup_user(authenticate=True)
+    #     test_issuer = self.setup_issuer(owner=test_user)
+    #     test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+    #     invalid_batch_assertion_props = [
+    #         {
+    #             "recipient": {
+    #                 "identity": "foo@bar.com"
+    #             }
+    #         }
+    #     ]
+    #     response = self.client.post('/v2/badgeclasses/{badge}/issue'.format(
+    #         badge=test_badgeclass.entity_id
+    #     ), invalid_batch_assertion_props, format='json')
+    #     self.assertEqual(response.status_code, 400)
 
-    def test_batch_assertions_with_invalid_issuedon(self):
-        test_user = self.setup_user(authenticate=True)
-        test_issuer = self.setup_issuer(owner=test_user)
-        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
-        invalid_batch_assertion_props = {
-            "assertions": [
-                {
-                    'recipient': {
-                        "identity": "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18",
-                        "type": "id",
-                    }
-                },
-                {
-                    'recipient': {
-                        "identity": "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18",
-                        "type": "id",
-                    },
-                    'issuedOn': 1512151153620
-                },
-            ]
-        }
-        response = self.client.post('/v2/badgeclasses/{badge}/issue'.format(
-            badge=test_badgeclass.entity_id
-        ), invalid_batch_assertion_props, format='json')
-        self.assertEqual(response.status_code, 400)
+    # def test_batch_assertions_with_invalid_issuedon(self):
+    #     test_user = self.setup_user(authenticate=True)
+    #     test_issuer = self.setup_issuer(owner=test_user)
+    #     test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+    #     invalid_batch_assertion_props = {
+    #         "assertions": [
+    #             {
+    #                 'recipient': {
+    #                     "identity": "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18",
+    #                     "type": "id",
+    #                 }
+    #             },
+    #             {
+    #                 'recipient': {
+    #                     "identity": "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18",
+    #                     "type": "id",
+    #                 },
+    #                 'issuedOn': 1512151153620
+    #             },
+    #         ]
+    #     }
+    #     response = self.client.post('/v2/badgeclasses/{badge}/issue'.format(
+    #         badge=test_badgeclass.entity_id
+    #     ), invalid_batch_assertion_props, format='json')
+    #     self.assertEqual(response.status_code, 400)
 
-    def test_batch_assertions_with_evidence(self):
-        test_user = self.setup_user(authenticate=True)
-        test_issuer = self.setup_issuer(owner=test_user)
-        test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
-
-        batch_assertion_props = {
-            'assertions': [{
-                "recipient": {
-                    "identity": "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18",
-                    "type": "id",
-                    "hashed": True,
-                },
-                "narrative": "foo@bar's test narrative",
-                "evidence": [
-                    {
-                        "url": "http://google.com?evidence=foo.bar",
-                    },
-                    {
-                        "url": "http://google.com?evidence=bar.baz",
-                        "narrative": "barbaz"
-                    }
-                ]
-            }],
-            'create_notification': True
-        }
-        response = self.client.post('/v2/badgeclasses/{badge}/issue'.format(
-            badge=test_badgeclass.entity_id
-        ), batch_assertion_props, format='json')
-        self.assertEqual(response.status_code, 201)
-
-        result = json.loads(response.content)
-        returned_assertions = result.get('result')
-
-        # verify results contain same evidence that was provided
-        for i in range(0, len(returned_assertions)):
-            expected = batch_assertion_props['assertions'][i]
-            self.assertListOfDictsContainsSubset(expected.get('evidence'), returned_assertions[i].get('evidence'))
-
-        # verify OBO returns same results
-        assertion_entity_id = returned_assertions[0].get('entityId')
-        expected = batch_assertion_props['assertions'][0]
-
-        response = self.client.get('/public/assertions/{assertion}.json?v=2_0'.format(
-            assertion=assertion_entity_id
-        ), format='json')
-        self.assertEqual(response.status_code, 200)
-
-        assertion_obo = json.loads(response.content)
-
-        expected = expected.get('evidence')
-        evidence = assertion_obo.get('evidence')
-        for i in range(0, len(expected)):
-            self.assertEqual(evidence[i].get('id'), expected[i].get('url'))
-            self.assertEqual(evidence[i].get('narrative', None), expected[i].get('narrative', None))
+    # def test_batch_assertions_with_evidence(self):
+    #     test_user = self.setup_user(authenticate=True)
+    #     test_issuer = self.setup_issuer(owner=test_user)
+    #     test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
+    #
+    #     batch_assertion_props = {
+    #         'assertions': [{
+    #             "recipient": {
+    #                 "identity": "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18",
+    #                 "type": "id",
+    #                 "hashed": True,
+    #             },
+    #             "narrative": "foo@bar's test narrative",
+    #             "evidence": [
+    #                 {
+    #                     "url": "http://google.com?evidence=foo.bar",
+    #                 },
+    #                 {
+    #                     "url": "http://google.com?evidence=bar.baz",
+    #                     "narrative": "barbaz"
+    #                 }
+    #             ]
+    #         }],
+    #         'create_notification': True
+    #     }
+    #     response = self.client.post('/v2/badgeclasses/{badge}/issue'.format(
+    #         badge=test_badgeclass.entity_id
+    #     ), batch_assertion_props, format='json')
+    #     self.assertEqual(response.status_code, 201)
+    #
+    #     result = json.loads(response.content)
+    #     returned_assertions = result.get('result')
+    #
+    #     # verify results contain same evidence that was provided
+    #     for i in range(0, len(returned_assertions)):
+    #         expected = batch_assertion_props['assertions'][i]
+    #         self.assertListOfDictsContainsSubset(expected.get('evidence'), returned_assertions[i].get('evidence'))
+    #
+    #     # verify OBO returns same results
+    #     assertion_entity_id = returned_assertions[0].get('entityId')
+    #     expected = batch_assertion_props['assertions'][0]
+    #
+    #     response = self.client.get('/public/assertions/{assertion}.json?v=2_0'.format(
+    #         assertion=assertion_entity_id
+    #     ), format='json')
+    #     self.assertEqual(response.status_code, 200)
+    #
+    #     assertion_obo = json.loads(response.content)
+    #
+    #     expected = expected.get('evidence')
+    #     evidence = assertion_obo.get('evidence')
+    #     for i in range(0, len(expected)):
+    #         self.assertEqual(evidence[i].get('id'), expected[i].get('url'))
+    #         self.assertEqual(evidence[i].get('narrative', None), expected[i].get('narrative', None))
 
     def assertListOfDictsContainsSubset(self, expected, actual):
         for i in range(0, len(expected)):
