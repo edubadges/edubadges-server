@@ -20,6 +20,7 @@ from django.contrib.auth.models import Group, Permission
 from mainsite import TOP_DIR
 from mainsite.models import BadgrApp, ApplicationInfo
 from allauth.socialaccount.models import SocialAccount
+from lti_edu.models import StudentsEnrolled
 
 class SetupOAuth2ApplicationHelper(object):
     def setup_oauth2_application(self,
@@ -131,6 +132,30 @@ class SetupUserHelper(object):
         elif authenticate:
             self.client.force_authenticate(user=user)
         return user
+
+    def enroll_user(self, recipient, badgeclass):
+        recipient_profile_extension = {'extensions:recipientProfile': {
+            "@context": "https://openbadgespec.org/extensions/recipientProfile/context.json",
+            "type": ["Extension",
+                     "extensions:RecipientProfile"],
+            "name": recipient.first_name+' '+recipient.last_name}}
+
+
+        assertion_post_data = {"email": "test@example.com",
+                               "badge_class": badgeclass.entity_id,
+                               "recipients": [{'selected': True,
+                                               'recipient_name': 'Piet Jonker',
+                                               'recipient_type': 'id',
+                                               'recipient_identifier': recipient.get_recipient_identifier(),
+                                               'extensions': recipient_profile_extension}]}
+        defaults = {'date_consent_given': timezone.now(),
+                    'first_name': 'Piet',
+                    'last_name': 'Jonker'}
+        StudentsEnrolled.objects.create(edu_id=recipient.get_recipient_identifier(),
+                                        badge_class_id=badgeclass.pk,
+                                        email="test@example.com", **defaults)
+        return assertion_post_data
+
 
 class SetupInstitutionHelper(object):
     def setup_faculty(self,

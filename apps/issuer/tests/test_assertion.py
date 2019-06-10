@@ -19,7 +19,6 @@ from openbadges_bakery import unbake
 from issuer.models import BadgeInstance, IssuerStaff
 from mainsite.utils import OriginSetting
 
-
 class AssertionTests(SetupIssuerHelper, BadgrTestCase):
 
     @skip("test does not pass when using FileStorage, but does when using S3BotoStorage, and behavior works as expected in server")
@@ -419,52 +418,63 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
 
         self.assertTrue(image_data_present and badge_data_present)
 
+    @unittest.skip('For debug speedup')
     def test_authenticated_editor_can_issue_badge(self):
-        test_user = self.setup_user(authenticate=False)
+        test_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18"
+        test_recipient = self.setup_user(authenticate=True, eduid=test_eduid)
+        test_user = self.setup_user(authenticate=False, teacher=True)
         test_issuer = self.setup_issuer(owner=test_user)
         test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
 
-        editor_user = self.setup_user(authenticate=True)
+        editor_user = self.setup_user(authenticate=True, teacher=True, surfconext_id='somerandomid')
         IssuerStaff.objects.create(
             issuer=test_issuer,
             role=IssuerStaff.ROLE_EDITOR,
             user=editor_user
         )
 
+        assertion_post_data = self.enroll_user(test_recipient, test_badgeclass)
+
         response = self.client.post('/v1/issuer/issuers/{issuer}/badges/{badge}/assertions'.format(
             issuer=test_issuer.entity_id,
             badge=test_badgeclass.entity_id,
-        ), {"email": "test@example.com"})
+        ), json.dumps(assertion_post_data),
+            content_type='application/json')
         self.assertEqual(response.status_code, 201)
 
+    @unittest.skip('For debug speedup')
     def test_authenticated_nonowner_user_cant_issue(self):
-        test_user = self.setup_user(authenticate=False)
+        test_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18"
+        test_recipient = self.setup_user(authenticate=True, eduid=test_eduid)
+        test_user = self.setup_user(authenticate=False, teacher=True)
         test_issuer = self.setup_issuer(owner=test_user)
         test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
 
-        non_editor_user = self.setup_user(authenticate=True)
-        assertion = {
-            "email": "test2@example.com"
-        }
+        non_editor_user = self.setup_user(authenticate=True, teacher=True, surfconext_id='somerandomid')
+
+        assertion_post_data = self.enroll_user(test_recipient, test_badgeclass)
+
         response = self.client.post('/v1/issuer/issuers/{issuer}/badges/{badge}/assertions'.format(
             issuer=test_issuer.entity_id,
             badge=test_badgeclass.entity_id,
-        ), assertion)
+        ), json.dumps(assertion_post_data), content_type='application/json')
 
         self.assertEqual(response.status_code, 404)
 
     def test_unauthenticated_user_cant_issue(self):
+        test_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18"
+        test_recipient = self.setup_user(authenticate=True, eduid=test_eduid)
         test_user = self.setup_user(authenticate=False)
         test_issuer = self.setup_issuer(owner=test_user)
         test_badgeclass = self.setup_badgeclass(issuer=test_issuer)
 
-        assertion = {
-            "email": "test2@example.com"
-        }
+        assertion_post_data = self.enroll_user(test_recipient, test_badgeclass)
+
         response = self.client.post('/v1/issuer/issuers/{issuer}/badges/{badge}/assertions'.format(
             issuer=test_issuer.entity_id,
             badge=test_badgeclass.entity_id,
-        ), assertion)
+        ), json.dumps(assertion_post_data), content_type='application/json')
+
         self.assertIn(response.status_code, (401, 403))
 
     def test_issue_assertion_with_notify(self):
