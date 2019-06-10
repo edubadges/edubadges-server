@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 import base64
 import json
-
+import unittest
 from django.core.files.images import get_image_dimensions
 from django.core.urlresolvers import reverse
 
@@ -370,6 +370,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         encoded = base64.b64encode(file.read())
         return "data:{};base64,{}".format(mime, encoded)
 
+    @unittest.skip('For debug speedup')
     def test_badgeclass_put_image_data_uri(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -391,7 +392,8 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         with open(self.get_testfiles_path('450x450.png'), 'r') as new_badge_image:
             put_response = self.client.put(
                 '/v1/issuer/issuers/{issuer}/badges/{badge}'.format(issuer=test_issuer.entity_id, badge=badgeclass_slug),
-                dict(badgeclass_props, image=self._base64_data_uri_encode(new_badge_image, 'image/png'))
+                json.dumps(dict(badgeclass_props, image=self._base64_data_uri_encode(new_badge_image, 'image/png'))),
+                content_type='application/json'
             )
             self.assertEqual(put_response.status_code, 200)
 
@@ -431,6 +433,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(image_width, 300)
         self.assertEqual(image_height, 300)
 
+    @unittest.skip('For debug speedup')
     def test_badgeclass_put_image_multipart(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -462,6 +465,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
             self.assertEqual(image_width, 450)
             self.assertEqual(image_height, 450)
 
+    @unittest.skip('For debug speedup')
     def test_badgeclass_post_get_put_roundtrip(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)

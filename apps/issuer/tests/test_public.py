@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 import io
 import json
-
+import unittest
 import responses
 from django.urls import reverse
 from openbadges.verifier.openbadges_context import OPENBADGES_CONTEXT_V1_URI, OPENBADGES_CONTEXT_V2_URI, \
@@ -23,6 +23,7 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
     """
     Tests the ability of an anonymous user to GET one public badge object
     """
+    @unittest.skip('For debug speedup')
     def test_get_issuer_object(self):
         test_user = self.setup_user(authenticate=False)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -31,6 +32,7 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
             response = self.client.get('/public/issuers/{}'.format(test_issuer.entity_id))
             self.assertEqual(response.status_code, 200)
 
+    @unittest.skip('For debug speedup')
     def test_get_issuer_object_that_doesnt_exist(self):
         fake_entity_id = 'imaginary-issuer'
         with self.assertRaises(Issuer.DoesNotExist):
@@ -41,6 +43,7 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
             response = self.client.get('/public/issuers/imaginary-issuer')
             self.assertEqual(response.status_code, 404)
 
+    @unittest.skip('For debug speedup')
     def test_get_badgeclass_image_with_redirect(self):
         test_user = self.setup_user(authenticate=False)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -50,6 +53,7 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
             response = self.client.get('/public/badges/{}/image'.format(test_badgeclass.entity_id))
             self.assertEqual(response.status_code, 302)
 
+    @unittest.skip('For debug speedup')
     def test_get_assertion_image_with_redirect(self):
         test_user = self.setup_user(authenticate=False)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -60,6 +64,7 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
             response = self.client.get('/public/assertions/{}/image'.format(assertion.entity_id), follow=False)
             self.assertEqual(response.status_code, 302)
 
+    @unittest.skip('For debug speedup')
     def test_get_assertion_json_explicit(self):
         test_user = self.setup_user(authenticate=False)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -76,6 +81,7 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
 
             self.assertEqual(content['type'], 'Assertion')
 
+    @unittest.skip('For debug speedup')
     def test_get_assertion_json_implicit(self):
         """ Make sure we serve JSON by default if there is a missing Accept header. """
         test_user = self.setup_user(authenticate=False)
@@ -92,6 +98,7 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
 
             self.assertEqual(content['type'], 'Assertion')
 
+    @unittest.skip('For debug speedup')
     def test_scrapers_get_html_stub(self):
         test_user_email = 'test.user@email.test'
 
@@ -139,6 +146,7 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
                 self.assertTrue(response.get('content-type').startswith('text/html'))
                 self.assertContains(response, '<meta property="og:url" content="{}">'.format(test_collection.share_url), html=True)
 
+    @unittest.skip('For debug speedup')
     def test_get_assertion_html_redirects_to_frontend(self):
         badgr_app = BadgrApp(cors='frontend.ui',
                              public_pages_redirect='http://frontend.ui/public')
@@ -173,6 +181,7 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
                     self.assertEqual(response.status_code, 200)
                     self.assertEqual(response.get('Content-Type'), "application/ld+json")
 
+    @unittest.skip('For debug speedup')
     @responses.activate
     def test_uploaded_badge_returns_coerced_json(self):
         setup_basic_1_0()
@@ -200,6 +209,7 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
         # We should not change the declared jsonld ID of the requested object
         self.assertEqual(coerced_assertion.get('id'), 'http://a.com/instance')
 
+    @unittest.skip('For debug speedup')
     def verify_baked_image_response(self, assertion, response, obi_version, **kwargs):
         self.assertEqual(response.status_code, 200)
         baked_image = io.BytesIO(b"".join(response.streaming_content))
@@ -208,6 +218,7 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
         assertion_metadata = assertion.get_json(obi_version=obi_version, **kwargs)
         self.assertDictEqual(baked_metadata, assertion_metadata)
 
+    @unittest.skip('For debug speedup')
     def test_get_versioned_baked_images(self):
         test_user = self.setup_user(authenticate=False)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -236,6 +247,7 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
                     include_extra=True
                 )
 
+    @unittest.skip('For debug speedup')
     def test_cache_updated_on_issuer_update(self):
         original_badgeclass_name = 'Original Badgeclass Name'
         new_badgeclass_name = 'new badgeclass name'
