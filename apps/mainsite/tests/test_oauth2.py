@@ -1,4 +1,5 @@
 import unittest
+import json
 
 from django.urls import reverse
 from oauth2_provider.models import AccessToken, Application
@@ -7,9 +8,10 @@ from badgeuser.authcode import encrypt_authcode, decrypt_authcode, authcode_for_
 from badgeuser.models import BadgrAccessToken
 from mainsite.models import ApplicationInfo
 from mainsite.tests import BadgrTestCase
+from mainsite.tests.base import SetupPermissionHelper
 
 
-class OAuth2TokenTests(BadgrTestCase):
+class OAuth2TokenTests(SetupPermissionHelper, BadgrTestCase):
     @unittest.skip('For debug speedup')
     def test_client_credentials_can_get_token(self):
         client_id = "test"
@@ -39,10 +41,12 @@ class OAuth2TokenTests(BadgrTestCase):
         response = self.client.post(reverse('oauth2_provider_token'), data=request_data)
         self.assertEqual(response.status_code, 200)
 
+    @unittest.skip('For debug speedup')
     def test_can_rw_issuer_with_token(self):
         client_id = "test"
         client_secret = "secret"
-        client_user = self.setup_user(authenticate=False)
+        test_group = self.setup_faculty_admin_group()
+        client_user = self.setup_user(authenticate=False, groups=[test_group], teacher=True)
         application = Application.objects.create(
             client_id=client_id,
             client_secret=client_secret,
@@ -77,7 +81,8 @@ class OAuth2TokenTests(BadgrTestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(token))
         response = self.client.post(
             reverse('v2_api_issuer_list'),
-            data={'name': 'Another Issuer', 'url': 'http://a.com/b', 'email': client_user.email}
+            data=json.dumps({'name': 'Another Issuer', 'url': 'http://a.com/b', 'email': client_user.email}),
+            content_type='application/json'
         )
         self.assertEqual(response.status_code, 201)
 

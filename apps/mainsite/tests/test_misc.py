@@ -58,6 +58,8 @@ class TestCacheSettings(TransactionTestCase):
     ACCOUNT_EMAIL_CONFIRMATION_HMAC=True
 )
 class TestSignup(BadgrTestCase):
+
+    @unittest.skip('For debug speedup')
     def test_user_signup_email_confirmation_redirect(self):
         from django.conf import settings
         http_origin = getattr(settings, 'HTTP_ORIGIN')

@@ -1,7 +1,4 @@
-from django.contrib.auth.models import Permission
-
-from badgeuser.models import BadgeUser, CachedEmailAddress
-from issuer.models import Issuer
+import unittest
 from mainsite.tests.base import BadgrTestCase, SetupIssuerHelper
 from recipient.models import RecipientGroup, RecipientProfile
 
