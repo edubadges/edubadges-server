@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import json
+import unittest
 from unittest import skip
 
 import datetime
