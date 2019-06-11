@@ -51,7 +51,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
             '@context': u'https://w3id.org/openbadges/v2'
         }, v2_data)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_put_rebakes_assertion(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -88,7 +88,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         updated_obo = json.loads(str(unbake(updated_assertion.image)))
         self.assertEqual(updated_obo.get('issuedOn', None), updated_data.get('issuedOn'))
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_update_assertion(self):
         test_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18"
         test_recipient = self.setup_user(authenticate=True, eduid=test_eduid)
@@ -149,7 +149,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
 
         self.assertEqual(image_data.get('evidence', {})[0].get('narrative'), v2_assertion_data['evidence'][0]['narrative'])
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_issue_assertion_with_expiration(self):
         test_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18"
         test_recipient = self.setup_user(authenticate=True, eduid=test_eduid)
@@ -195,7 +195,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         public_json = response.data
         self.assertEqual(dateutil.parser.parse(public_json.get('expires')), expiration)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_issue_badge_if_authenticated(self):
         test_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18"
         test_recipient = self.setup_user(authenticate=True, eduid=test_eduid)
@@ -224,7 +224,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         #         assertion=assertion_slug))
         #     self.assertEqual(response.status_code, 200)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_issue_badge_with_ob1_evidence(self):
         test_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18"
         test_recipient = self.setup_user(authenticate=True, eduid=test_eduid)
@@ -263,7 +263,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
             }
         ])
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_issue_badge_with_ob2_multiple_evidence(self):
         test_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18"
         test_recipient = self.setup_user(authenticate=True, eduid=test_eduid)
@@ -361,7 +361,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
     #     assertion_public_url = OriginSetting.HTTP + reverse('badgeinstance_json', kwargs={'entity_id': assertion_slug})
     #     self.assertEqual(assertion.get('json').get('evidence'), assertion_public_url)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_issue_badge_with_ob2_one_evidence_item(self):
         test_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18"
         test_recipient = self.setup_user(authenticate=True, eduid=test_eduid)
@@ -408,7 +408,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         assertion_public_url = OriginSetting.HTTP+reverse('badgeinstance_json', kwargs={'entity_id': assertion_slug})
         self.assertEqual(assertion.get('json').get('evidence'), assertion_public_url)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_resized_png_image_baked_properly(self):
         test_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18"
         test_recipient = self.setup_user(authenticate=True, eduid=test_eduid)
@@ -445,7 +445,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
 
         self.assertTrue(image_data_present and badge_data_present)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_authenticated_editor_can_issue_badge(self):
         test_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18"
         test_recipient = self.setup_user(authenticate=True, eduid=test_eduid)
@@ -469,7 +469,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
             content_type='application/json')
         self.assertEqual(response.status_code, 201)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_authenticated_nonowner_user_cant_issue(self):
         test_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18"
         test_recipient = self.setup_user(authenticate=True, eduid=test_eduid)
@@ -488,7 +488,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
 
         self.assertEqual(response.status_code, 404)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_unauthenticated_user_cant_issue(self):
         test_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18"
         test_recipient = self.setup_user(authenticate=True, eduid=test_eduid)
@@ -505,7 +505,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
 
         self.assertIn(response.status_code, (401, 403, 404))
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_issue_assertion_with_notify(self):
         test_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18"
         test_recipient = self.setup_user(authenticate=True, eduid=test_eduid)
@@ -522,7 +522,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(len(mail.outbox), 1)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_first_assertion_always_notifies_recipient(self):
         test_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18"
         test_recipient = self.setup_user(authenticate=True, eduid=test_eduid)
@@ -550,7 +550,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(len(mail.outbox), outbox_count+1)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_authenticated_owner_list_assertions(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -565,7 +565,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 2)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_issuer_instance_list_assertions(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -579,7 +579,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 2)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_issuer_instance_list_assertions_with_id(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -593,7 +593,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_revoke_assertion(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -617,7 +617,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
             revoked=True
         ), assertion_obo)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_cannot_revoke_assertion_if_missing_reason(self):
         test_user = self.setup_user(authenticate=True, teacher=True)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -631,7 +631,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         ))
         self.assertEqual(response.status_code, 400)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_issue_svg_badge(self):
         test_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18"
         test_recipient = self.setup_user(authenticate=True, eduid=test_eduid)
@@ -665,7 +665,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         ))
         self.assertEqual(response.status_code, 200)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_new_assertion_updates_cached_user_badgeclasses(self):
         test_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18"
         test_recipient = self.setup_user(authenticate=True, eduid=test_eduid)

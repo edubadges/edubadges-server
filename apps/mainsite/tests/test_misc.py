@@ -18,7 +18,7 @@ from mainsite.tests.base import BadgrTestCase
 
 class TestCacheSettings(TransactionTestCase):
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_long_cache_keys_shortened(self):
         cache_settings = {
             'default': {
@@ -59,7 +59,7 @@ class TestCacheSettings(TransactionTestCase):
 )
 class TestSignup(BadgrTestCase):
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_user_signup_email_confirmation_redirect(self):
         from django.conf import settings
         http_origin = getattr(settings, 'HTTP_ORIGIN')
@@ -110,7 +110,7 @@ class TestSignup(BadgrTestCase):
 )
 class TestEmailCleanupCommand(BadgrTestCase):
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_email_added_for_user_missing_one(self):
         user = BadgeUser(email="newtest@example.com", first_name="Test", last_name="User")
         user.save()
@@ -128,7 +128,7 @@ class TestEmailCleanupCommand(BadgrTestCase):
         self.assertTrue(email_record.emailconfirmation_set.exists())
         self.assertEqual(len(mail.outbox), 1)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_unverified_unprimary_email_sends_confirmation(self):
         """
         If there is only one email, and it's not primary, set it as primary.

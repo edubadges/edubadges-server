@@ -24,7 +24,7 @@ from mainsite.tests.base import BadgrTestCase
 
 class AuthTokenTests(BadgrTestCase):
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_create_user_auth_token(self):
         """
         Ensure that get can create a token for a user that doesn't have one
@@ -41,7 +41,7 @@ class AuthTokenTests(BadgrTestCase):
         second_response = self.client.get('/v1/user/auth-token')
         self.assertEqual(token, second_response.data.get('token'))
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_update_user_auth_token(self):
         """
         Ensure that a PUT request updates a user token.
@@ -65,7 +65,7 @@ class AuthTokenTests(BadgrTestCase):
 
 class UserCreateTests(BadgrTestCase):
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_create_user(self):
         user_data = {
             'first_name': 'Test',
@@ -79,7 +79,7 @@ class UserCreateTests(BadgrTestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(len(mail.outbox), 1)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_create_user_with_already_claimed_email(self):
         email = 'test2@example.com'
         user_data = {
@@ -95,7 +95,7 @@ class UserCreateTests(BadgrTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(len(mail.outbox), 0)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_create_user_with_preexisting_unconfirmed_email(self):
         email = 'unclaimed1@example.com'
         user_data = {
@@ -131,7 +131,7 @@ class UserCreateTests(BadgrTestCase):
         with self.assertRaises(BadgeUser.DoesNotExist):
             old_user = BadgeUser.objects.get(pk=existing_user_pk)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_user_can_not_add_secondary_email_of_preexisting_unclaimed_email(self):
         email = "unclaimed2@example.com"
         first_user = self.setup_user(authenticate=False)
@@ -142,7 +142,7 @@ class UserCreateTests(BadgrTestCase):
         response = self.client.post('/v1/user/emails', {'email': email})
         self.assertEqual(response.status_code, 400)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_create_account_with_same_email_since_deleted(self):
         email = 'unclaimed1@example.com'
         new_email = 'newjunkeremail@junk.net'
@@ -190,7 +190,7 @@ class UserCreateTests(BadgrTestCase):
 
         self.assertEqual(response.status_code, 201)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_shouldnt_error_when_user_exists_with_email(self):
         email = 'existing3@example.test'
 
@@ -205,7 +205,7 @@ class UserCreateTests(BadgrTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(len(mail.outbox), 0)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_autocreated_user_can_signup(self):
         email = 'existing4@example.test'
 
@@ -220,7 +220,7 @@ class UserCreateTests(BadgrTestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(len(mail.outbox), 1)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_should_signup_with_email_with_plus(self):
         response = self.client.post('/v1/user/profile', {
             'first_name': 'existing',
@@ -231,7 +231,7 @@ class UserCreateTests(BadgrTestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(len(mail.outbox), 1)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_should_signup_with_email_with_uc_email(self):
         response = self.client.post('/v1/user/profile', {
             'first_name': 'existing',
@@ -244,7 +244,7 @@ class UserCreateTests(BadgrTestCase):
 
 
 class UserUnitTests(BadgrTestCase):
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_user_can_have_unicode_characters_in_name(self):
         user = BadgeUser(
             username='abc', email='abc@example.com',
@@ -273,7 +273,7 @@ class UserEmailTests(BadgrTestCase):
         response = self.client.get('/v1/user/auth-token')
         self.assertEqual(response.status_code, 200)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_user_register_new_email(self):
         response = self.client.get('/v1/user/emails')
         self.assertEqual(response.status_code, 200)
@@ -300,7 +300,7 @@ class UserEmailTests(BadgrTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertTrue('Could not register email address. Address already in use.' in response.data['error'])
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_user_can_verify_new_email(self):
         response = self.client.get('/v1/user/emails')
         self.assertEqual(response.status_code, 200)
@@ -326,7 +326,7 @@ class UserEmailTests(BadgrTestCase):
         email = CachedEmailAddress.cached.get(email='new+email@newemail.com')
         self.assertTrue(email.verified)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_user_cant_register_new_email_verified_by_other(self):
         second_user = self.setup_user(authenticate=False, eduid="urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f19")
         existing_mail = CachedEmailAddress.objects.create(
@@ -349,7 +349,7 @@ class UserEmailTests(BadgrTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(starting_count, len(response.data))
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_user_can_remove_email(self):
         response = self.client.get('/v1/user/emails')
         self.assertEqual(response.status_code, 200)
@@ -369,7 +369,7 @@ class UserEmailTests(BadgrTestCase):
         response = self.client.get('/v1/user/emails/{}'.format(not_primary.get('id')))
         self.assertEqual(response.status_code, 404)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_user_can_make_email_primary(self):
         response = self.client.get('/v1/user/emails')
         self.assertEqual(response.status_code, 200)
@@ -393,7 +393,7 @@ class UserEmailTests(BadgrTestCase):
             else:
                 self.assertEqual(email['primary'], False)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_user_can_resend_verification_email(self):
         # register a new un-verified email
         response = self.client.post('/v1/user/emails', {
@@ -457,7 +457,7 @@ class UserEmailTests(BadgrTestCase):
     #         })
     #         self.assertEqual(response.status_code, 200)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_lower_variant_autocreated_on_new_email(self):
         first_email = CachedEmailAddress(
             email="HelloAgain@world.com", user=BadgeUser.objects.first(), verified=True
@@ -488,7 +488,7 @@ class UserEmailTests(BadgrTestCase):
     #     self.assertEqual(len(variants), 1)
     #     self.assertEqual(variants[0].email, 'HelloAgain@world.com')
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_create_variants(self):
         user = self.setup_user(authenticate=False, eduid="urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f19")
         first_email = CachedEmailAddress.objects.create(email="test@example.com", verified=True, user=user)
@@ -507,7 +507,7 @@ class UserEmailTests(BadgrTestCase):
         self.assertEqual(len(first_email.emailaddressvariant_set.all()), 2)
         self.assertEqual(len(first_email.cached_variants()), 2)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_user_can_create_variant_method(self):
         user = BadgeUser.objects.first()
         first_email = CachedEmailAddress(
@@ -521,7 +521,7 @@ class UserEmailTests(BadgrTestCase):
         self.assertFalse(user.can_add_variant("howdy@world.com"))  # is the original
         self.assertFalse(user.can_add_variant("howdyfeller@world.com"))  # not a match of original
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_create_variant_for_unconfirmed_email(self):
         user = BadgeUser.objects.first()
         new_email_address = "new@unconfirmed.info"
@@ -571,7 +571,7 @@ class UserBadgeTests(BadgrTestCase):
             )
             return badgeclass
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_badge_awards_transferred_on_email_verification(self):
         first_user_email = 'first+user@email.test'
         first_user = self.setup_user(email=first_user_email, authenticate=True)
@@ -615,7 +615,7 @@ class UserBadgeTests(BadgrTestCase):
 )
 class UserProfileTests(BadgrTestCase):
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_user_can_change_profile(self):
         first = 'firsty'
         last = 'lastington'

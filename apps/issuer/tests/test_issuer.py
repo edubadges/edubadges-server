@@ -26,12 +26,12 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
         super(IssuerTests, self).__init__(*args, **kwargs)
         self.second_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f19"
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_cant_create_issuer_if_unauthenticated(self):
         response = self.client.post('/v1/issuer/issuers', self.example_issuer_props)
         self.assertIn(response.status_code, (401, 403))
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_create_issuer_if_authenticated(self):
         test_faculty = self.setup_faculty()
         test_group = self.setup_faculty_admin_group()
@@ -60,7 +60,7 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
         #     response = self.client.get('/v1/issuer/issuers/{}'.format(slug))
         #     self.assertEqual(response.status_code, 200)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_cant_create_issuer_if_authenticated_with_unconfirmed_email(self):
         self.setup_user(authenticate=True, verified=False)
 
@@ -90,22 +90,22 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
             self.assertEqual(image_width, desired_width)
             self.assertEqual(image_height, desired_height)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_create_issuer_image_500x300_resizes_to_400x400(self):
         image_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'testfiles', '500x300.png')
         self._create_issuer_with_image_and_test_resizing(image_path)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_create_issuer_image_450x450_resizes_to_400x400(self):
         image_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'testfiles', '450x450.png')
         self._create_issuer_with_image_and_test_resizing(image_path)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_create_issuer_image_300x300_stays_300x300(self):
         image_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'testfiles', '300x300.png')
         self._create_issuer_with_image_and_test_resizing(image_path, 300, 300)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_update_issuer_if_authenticated(self):
         test_faculty = self.setup_faculty()
         test_group = self.setup_faculty_admin_group()
@@ -148,7 +148,7 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
         self.assertEqual(response.data['description'], updated_issuer_props['description'])
         self.assertEqual(response.data['email'], updated_issuer_props['email'])
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_get_empty_issuer_editors_set(self):
         test_user = self.setup_user(authenticate=True, teacher=True)
         issuer = self.setup_issuer(owner=test_user)
@@ -157,7 +157,7 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)  # Assert that there is just a single owner
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_add_user_to_issuer_editors_set_by_email(self):
         test_user = self.setup_user(authenticate=True, teacher=True)
         issuer = self.setup_issuer(owner=test_user)
@@ -172,7 +172,7 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 2)  # Assert that there is now one editor
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_cannot_add_user_by_unverified_email(self):
         test_user = self.setup_user(authenticate=True, teacher=True)
         self.client.force_authenticate(user=test_user)
@@ -188,7 +188,7 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
 
         self.assertEqual(post_response.status_code, 404)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_add_user_to_issuer_editors_set_too_many_methods(self):
         """
         Enter a username or email. Both are not allowed.
@@ -204,7 +204,7 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
         })
         self.assertEqual(response.status_code, 400)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_add_user_to_issuer_editors_set_missing_identifier(self):
         test_user = self.setup_user(authenticate=True)
         issuer = self.setup_issuer(owner=test_user)
@@ -216,7 +216,7 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.data, 'User not found. Neither email address or username was provided.')
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_bad_action_issuer_editors_set(self):
         test_user = self.setup_user(authenticate=True)
         issuer = self.setup_issuer(owner=test_user)
@@ -228,7 +228,7 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
         })
         self.assertEqual(response.status_code, 400)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_add_nonexistent_user_to_issuer_editors_set(self):
         test_user = self.setup_user(authenticate=True)
         issuer = self.setup_issuer(owner=test_user)
@@ -241,7 +241,7 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
         })
         self.assertContains(response, "User not found.".format(erroneous_username), status_code=404)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_add_user_to_nonexistent_issuer_editors_set(self):
         test_user = self.setup_user(authenticate=True)
         erroneous_issuer_slug = 'wrongissuer'
@@ -251,7 +251,7 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
         )
         self.assertEqual(response.status_code, 404)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_add_remove_user_with_issuer_staff_set(self):
         test_user = self.setup_user(authenticate=True, teacher=True)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -274,7 +274,7 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
         self.assertEqual(second_response.status_code, 200)
         self.assertEqual(len(test_issuer.staff.all()), 1)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_modify_staff_user_role(self):
         test_user = self.setup_user(authenticate=True, teacher=True)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -300,7 +300,7 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
         staff = test_issuer.staff.all()
         self.assertEqual(test_issuer.editors.count(), 2)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_cannot_modify_or_remove_self(self):
         """
         The authenticated issuer owner cannot modify their own role or remove themself from the list.
@@ -322,7 +322,7 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
 
         self.assertEqual(post_response.status_code, 400)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_delete_issuer_successfully(self):
         test_user = self.setup_user(authenticate=True, teacher=True)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -330,7 +330,7 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
         response = self.client.delete('/v1/issuer/issuers/{slug}'.format(slug=test_issuer.entity_id), {})
         self.assertEqual(response.status_code, 204)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_delete_issuer_with_unissued_badgeclass_successfully(self):
         test_user = self.setup_user(authenticate=True, teacher=True)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -341,7 +341,7 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
         response = self.client.delete('/v1/issuer/issuers/{slug}'.format(slug=test_issuer.entity_id), {})
         self.assertEqual(response.status_code, 204)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_cant_delete_issuer_with_issued_badge(self):
         test_faculty = self.setup_faculty()
         test_group = self.setup_faculty_admin_group()
@@ -357,7 +357,7 @@ class IssuerTests(SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelp
             response.data,
             'Issuer can not be deleted because it has previously issued badges.')
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_cant_create_issuer_without_permission_v1(self):
         test_faculty = self.setup_faculty()
         test_user = self.setup_user(authenticate=True, teacher=True, faculty=test_faculty)

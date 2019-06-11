@@ -12,7 +12,7 @@ from mainsite.tests.base import SetupPermissionHelper
 
 
 class OAuth2TokenTests(SetupPermissionHelper, BadgrTestCase):
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_client_credentials_can_get_token(self):
         client_id = "test"
         client_secret = "secret"
@@ -41,7 +41,7 @@ class OAuth2TokenTests(SetupPermissionHelper, BadgrTestCase):
         response = self.client.post(reverse('oauth2_provider_token'), data=request_data)
         self.assertEqual(response.status_code, 200)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_rw_issuer_with_token(self):
         client_id = "test"
         client_secret = "secret"
@@ -86,14 +86,14 @@ class OAuth2TokenTests(SetupPermissionHelper, BadgrTestCase):
         )
         self.assertEqual(response.status_code, 201)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_encrypt_decrypt_authcode(self):
         payload = "fakeentityid"
         code = encrypt_authcode(payload)
         decrypted_payload = decrypt_authcode(code)
         self.assertEqual(payload, decrypted_payload)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_use_authcode_exchange(self):
         user = self.setup_user(authenticate=True)
         application = Application.objects.create(
