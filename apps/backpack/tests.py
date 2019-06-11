@@ -87,7 +87,7 @@ def setup_basic_0_5_0(**kwargs):
 class TestBadgeUploads(BadgrTestCase):
 
     @responses.activate
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_submit_basic_1_0_badge_via_url(self):
         setup_basic_1_0()
         setup_resources([
@@ -115,7 +115,7 @@ class TestBadgeUploads(BadgrTestCase):
         self.assertEqual(get_response.data[0].get('json', {}).get('image', {}).get('id'), expected_url)
 
     @responses.activate
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_submit_basic_1_1_badge_via_url(self):
         assertion_data = {
             '@context': 'https://w3id.org/openbadges/v1',
@@ -181,7 +181,7 @@ class TestBadgeUploads(BadgrTestCase):
         self.assertEqual(get_response.data[0].get('json', {}).get('image', {}).get('id'), expected_url)
 
     @responses.activate
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_submit_basic_1_0_badge_via_url_plain_json(self):
         setup_basic_1_0()
         self.setup_user(email='test@example.com', token_scope='rw:backpack')
@@ -224,7 +224,7 @@ class TestBadgeUploads(BadgrTestCase):
     #     )))
 
     @responses.activate
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_submit_basic_1_0_badge_from_image_url_baked_w_assertion(self):
         setup_basic_1_0()
         self.setup_user(email='test@example.com', authenticate=True)
@@ -255,7 +255,7 @@ class TestBadgeUploads(BadgrTestCase):
 
 
     @responses.activate
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_submit_basic_1_0_badge_image_png(self):
         setup_basic_1_0()
         setup_resources([
@@ -280,7 +280,7 @@ class TestBadgeUploads(BadgrTestCase):
         )
 
     @responses.activate
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_submit_baked_1_1_badge_preserves_metadata_roundtrip(self):
         assertion_metadata = {
             "@context": "https://w3id.org/openbadges/v1",
@@ -391,7 +391,7 @@ class TestBadgeUploads(BadgrTestCase):
             self.assertEqual(response.data.get(key), assertion_metadata.get(key))
 
     @responses.activate
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_submit_basic_1_0_badge_image_datauri_png(self):
         setup_basic_1_0()
         setup_resources([
@@ -418,7 +418,7 @@ class TestBadgeUploads(BadgrTestCase):
         # I think this test failure will be fixed by a badgecheck update to openbadges 1.0.1 as well
 
     @responses.activate
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_submit_basic_1_0_badge_assertion(self):
         setup_basic_1_0()
         setup_resources([
@@ -479,7 +479,7 @@ class TestBadgeUploads(BadgrTestCase):
     #     self.assertTrue('TEST@example.com' in [e.email for e in email.cached_variants()])
 
     @responses.activate
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_submit_basic_1_0_badge_with_inaccessible_badge_image(self):
         setup_basic_1_0(**{'exclude': ['http://a.com/badgeclass_image']})
         setup_resources([
@@ -501,7 +501,7 @@ class TestBadgeUploads(BadgrTestCase):
         )))
 
     @responses.activate
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_submit_basic_1_0_badge_missing_issuer(self):
         setup_basic_1_0(**{'exclude': ['http://a.com/issuer']})
         setup_resources([
@@ -523,7 +523,7 @@ class TestBadgeUploads(BadgrTestCase):
         )))
 
     @responses.activate
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_submit_basic_1_0_badge_missing_badge_prop(self):
         self.setup_user(email='test@example.com', authenticate=True)
 
@@ -574,7 +574,7 @@ class TestBadgeUploads(BadgrTestCase):
     #                      "The badge in our backpack should report its JSON-LD id as the original OpenBadgeId")
 
     @responses.activate
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_submit_0_5_badge_upload_by_assertion(self):
         setup_basic_0_5_0()
         setup_resources([
@@ -593,7 +593,7 @@ class TestBadgeUploads(BadgrTestCase):
         # TODO Update to support 0.5 badges
 
     @responses.activate
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_creating_no_duplicate_badgeclasses_and_issuers(self):
         setup_basic_1_0()
         setup_resources([
@@ -625,7 +625,7 @@ class TestBadgeUploads(BadgrTestCase):
         self.assertEqual(BadgeClass.objects.all().count(), badgeclass_count+1)
         self.assertEqual(Issuer.objects.all().count(), issuer_count+1)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_shouldnt_access_already_stored_badgeclass_for_validation(self):
         """
         TODO: If we already have a LocalBadgeClass saved for a URL,
@@ -633,7 +633,7 @@ class TestBadgeUploads(BadgrTestCase):
         """
         pass
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_should_recheck_stale_localbadgeclass_in_validation(self):
         """
         TODO: If it has been more than a month since we last examined a LocalBadgeClass,
@@ -643,7 +643,7 @@ class TestBadgeUploads(BadgrTestCase):
         pass
         # TODO: Re-evaluate badgecheck caching strategy
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     @responses.activate
     def test_submit_badge_assertion_with_bad_date(self):
         setup_basic_1_0()
@@ -666,7 +666,7 @@ class TestBadgeUploads(BadgrTestCase):
         self.assertEqual(response.data[1]['result'], u"<type 'exceptions.ValueError'> ['ValueError: day is out of range for month\\n']")
 
     @responses.activate
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_submit_badge_invalid_component_json(self):
         setup_basic_1_0(**{'exclude': ['http://a.com/issuer']})
         setup_resources([
@@ -690,7 +690,7 @@ class TestBadgeUploads(BadgrTestCase):
         )))
 
     @responses.activate
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_submit_badge_invalid_assertion_json(self):
         setup_resources([
             {'url': 'http://a.com/instance', 'filename': '1_0_basic_issuer_invalid_json.json'},
@@ -714,7 +714,7 @@ class TestBadgeUploads(BadgrTestCase):
         )))
 
     @responses.activate
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_submit_badges_with_intragraph_references(self):
         setup_resources([
             {'url': 'http://a.com/assertion-embedded1', 'filename': '2_0_assertion_embedded_badgeclass.json'},
@@ -741,7 +741,7 @@ class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
         super(TestExpandAssertions, self).__init__(*args, **kwargs)
         self.second_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:dd50e624-a4a5-4799-9b2c-648c2713b00c"
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_no_expands(self):
         '''Expect correct result if no expand parameters are passed in'''
 
@@ -762,7 +762,7 @@ class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
         response = self.client.get('/v2/backpack/assertions/{}'.format(fid))
         self.assertEqual(response.status_code, 200)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_expand_badgeclass_single_assertion_single_issuer(self):
         '''For a client with a single badge, attempting to expand the badgeclass without
         also expanding the issuer.'''
@@ -786,7 +786,7 @@ class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
 
         self.assertTrue(isinstance(response.data['result'][0]['badgeclass'], dict))
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_expand_issuer_single_assertion_single_issuer(self):
         '''For a client with a single badge, attempting to expand the issuer without
         also expanding the badgeclass should result in no expansion to the response.'''
@@ -805,7 +805,7 @@ class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
         self.assertEqual(responseTwo.status_code, 200)
         self.assertEqual(responseOne.data, responseTwo.data)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_expand_badgeclass_and_isser_single_assertion_single_issuer(self):
         '''For a client with a single badge, attempting to expand the badgeclass and issuer.'''
 
@@ -824,7 +824,7 @@ class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
         self.assertTrue(isinstance(response.data['result'][0]['badgeclass'], collections.OrderedDict))
         self.assertTrue(isinstance(response.data['result'][0]['badgeclass']['issuer'], collections.OrderedDict))
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_expand_badgeclass_mult_assertions_mult_issuers(self):
         '''For a client with multiple badges, attempting to expand the badgeclass without
         also expanding the issuer.'''
@@ -858,7 +858,7 @@ class TestExpandAssertions(BadgrTestCase, SetupIssuerHelper):
             self.assertTrue(isinstance(response.data['result'][i]['badgeclass'], collections.OrderedDict))
             self.assertTrue(not isinstance(response.data['result'][i]['badgeclass']['issuer'], collections.OrderedDict))
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_expand_badgeclass_and_issuer_mult_assertions_mult_issuers(self):
         '''For a client with multiple badges, attempting to expand the badgeclass and issuer.'''
         # define users and issuers
@@ -968,7 +968,7 @@ class TestCollections(BadgrTestCase):
             slug='new-collection'
         )
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_get_collection_list(self):
         self.client.force_authenticate(user=self.user)
 
@@ -976,14 +976,14 @@ class TestCollections(BadgrTestCase):
         self.assertEqual(len(response.data), 3)
         self.assertEqual(response.data[0]['badges'], [])
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_get_collection_detail(self):
         self.client.force_authenticate(user=self.user)
         response = self.client.get('/v1/earner/collections/fresh-badges')
 
         self.assertEqual(response.data['badges'], [])
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_define_collection(self):
         """
         Authorized user can create a new collection via API.
@@ -1005,7 +1005,7 @@ class TestCollections(BadgrTestCase):
 
         self.assertEqual([i['id'] for i in response.data.get('badges')], [self.local_badge_instance_1.entity_id, self.local_badge_instance_2.entity_id])
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_define_collection_serializer(self):
         """
         A new collection may be created directly via serializer.
@@ -1024,7 +1024,7 @@ class TestCollections(BadgrTestCase):
         self.assertEqual(collection.name, data['name'])
         self.assertEqual(collection.cached_badgeinstances().count(), 2)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_delete_collection(self):
         """
         Authorized user may delete one of their defined collections.
@@ -1036,7 +1036,7 @@ class TestCollections(BadgrTestCase):
 
         self.assertEqual(response.status_code, 204)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_publish_unpublish_collection_serializer(self):
         """
         The CollectionSerializer should be able to update/delete a collection's share hash
@@ -1065,7 +1065,7 @@ class TestCollections(BadgrTestCase):
         self.assertFalse(collection.published)
         self.assertIn(collection.share_url, ('', None))
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_publish_unpublish_collection_api_share_method(self):
         """
         The CollectionSerializer should be able to update/delete a collection's share hash
@@ -1088,7 +1088,7 @@ class TestCollections(BadgrTestCase):
 
         self.assertFalse(self.collection.published)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_add_remove_collection_badges_via_serializer(self):
         """
         The CollectionSerializer should be able to update an existing collection's badge list
@@ -1120,7 +1120,7 @@ class TestCollections(BadgrTestCase):
         self.assertEqual(collection.cached_badgeinstances().count(), 2)
         self.assertEqual([i.entity_id for i in collection.cached_badgeinstances()], [self.local_badge_instance_2.entity_id, self.local_badge_instance_3.entity_id])
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_add_remove_collection_badges_via_collection_detail_api(self):
         """
         A PUT request to the CollectionDetail view should be able to update the list of badges
@@ -1158,7 +1158,7 @@ class TestCollections(BadgrTestCase):
         self.assertEqual(collection.cached_badgeinstances().count(), 2)
         self.assertEqual([i.entity_id for i in collection.cached_badgeinstances()], [self.local_badge_instance_2.entity_id, self.local_badge_instance_3.entity_id])
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_add_remove_badges_via_collection_badge_detail_api(self):
         self.assertEqual(len(self.collection.cached_badgeinstances()), 0)
 
@@ -1190,7 +1190,7 @@ class TestCollections(BadgrTestCase):
         self.assertEqual(collection.cached_badgeinstances().count(), 1)
         self.assertEqual([i.entity_id for i in collection.cached_badgeinstances()], [self.local_badge_instance_2.entity_id])
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_add_remove_issuer_badges_via_api(self):
         self.assertEqual(len(self.collection.cached_badgeinstances()), 0)
 
@@ -1220,7 +1220,7 @@ class TestCollections(BadgrTestCase):
         )
         self.assertEqual(response.status_code, 204)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_api_handles_null_description_and_adds_badge(self):
         self.assertEqual(len(self.collection.cached_badgeinstances()), 0)
 
@@ -1238,7 +1238,7 @@ class TestCollections(BadgrTestCase):
         entry = self.collection.cached_collects().first()
         self.assertEqual(entry.badgeinstance_id, self.local_badge_instance_1.pk)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_add_remove_collection_badges_collection_badgelist_api(self):
         """
         A PUT request to the Collection BadgeList endpoint should update the list of badges
@@ -1296,7 +1296,7 @@ class TestCollections(BadgrTestCase):
         obj = BackpackCollectionBadgeInstance.objects.get(collection=self.collection, instance_id=self.local_badge_instance_1.pk)
         self.assertEqual(obj.description, 'A cool badge.')
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_badge_share_json(self):
         """
         Legacy Badge Share pages should redirect to public pages
@@ -1308,7 +1308,7 @@ class TestCollections(BadgrTestCase):
         self.assertEqual(response.status_code, 301)
         self.assertEqual(response.get('Location', None), self.local_badge_instance_1.public_url)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_badge_share_html(self):
         """
         Legacy Badge Share pages should redirect to public pages

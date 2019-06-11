@@ -7,7 +7,7 @@ from mainsite.tests import SetupIssuerHelper, BadgrTestCase
 
 class FindBadgeClassTests(SetupIssuerHelper, BadgrTestCase):
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_find_imported_badge_by_id(self):
         user = self.setup_user(authenticate=True)
         issuer = self.setup_issuer(owner=user)
@@ -26,7 +26,7 @@ class FindBadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         self.assertIn('slug', response.data)
         self.assertEqual(response.data['slug'], badgeclass.entity_id)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_find_issuer_badge_by_id(self):
         user = self.setup_user(authenticate=True)
         issuer = self.setup_issuer(owner=user)
@@ -42,7 +42,7 @@ class FindBadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         self.assertIn('slug', response.data)
         self.assertEqual(response.data['slug'], badgeclass.entity_id)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_find_issuer_badge_by_slug(self):
         user = self.setup_user(authenticate=True)
         issuer = self.setup_issuer(owner=user)

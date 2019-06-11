@@ -63,7 +63,7 @@ class TestEncryptedCursorPagination(TransactionTestCase):
         next_link = 'http://testserver/?{}'.format(urlencode({'cursor': next_cursor})) if next_cursor is not None else next_cursor
         self.assertEqual(self.paginator.next_link, next_link)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_paginate_malformed_cursor_raises_value_error(self):
         with self.assertRaises(ValueError):
             self.paginator.paginate_queryset(MockSet(), self._mock_get_request('/?cursor=foo'))
@@ -71,7 +71,7 @@ class TestEncryptedCursorPagination(TransactionTestCase):
         with self.assertRaises(ValueError):
             self.paginator.paginate_queryset(MockSet(), self._mock_get_request('/?cursor=foo:bar'))
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_paginate_disjoint(self):
         test_cases = [
             # url           input        output    has_prev  prev_cursor  has_next  next_cursor
@@ -85,7 +85,7 @@ class TestEncryptedCursorPagination(TransactionTestCase):
         for args in test_cases:
             self._do_paginate_queryset_asserts(*args)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_paginate_left_aligned(self):
         test_cases = [
             # url           input        output    has_prev  prev_cursor  has_next  next_cursor
@@ -97,7 +97,7 @@ class TestEncryptedCursorPagination(TransactionTestCase):
         for args in test_cases:
             self._do_paginate_queryset_asserts(*args)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_paginate_right_aligned(self):
         test_cases = [
             # url           input        output   has_prev  prev_cursor  has_next  next_cursor
@@ -108,7 +108,7 @@ class TestEncryptedCursorPagination(TransactionTestCase):
         for args in test_cases:
             self._do_paginate_queryset_asserts(*args)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_paginate_both_aligned(self):
         test_cases = [
             # url           input        output    has_prev  prev_cursor  has_next  next_cursor
@@ -120,7 +120,7 @@ class TestEncryptedCursorPagination(TransactionTestCase):
         for args in test_cases:
             self._do_paginate_queryset_asserts(*args)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_paginate_middle_aligned(self):
         test_cases = [
             # url           input         output     has_prev  prev_cursor  has_next  next_cursor
@@ -131,7 +131,7 @@ class TestEncryptedCursorPagination(TransactionTestCase):
         for args in test_cases:
             self._do_paginate_queryset_asserts(*args)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_paginate_undersized(self):
         test_cases = [
             # url            input   output     has_prev  prev_cursor  has_next  next_cursor
@@ -147,7 +147,7 @@ class TestEncryptedCursorPagination(TransactionTestCase):
         for args in test_cases:
             self._do_paginate_queryset_asserts(*args)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_missing_cursor_key(self):
         test_cases = [
             # url           input        output    has_prev  prev_cursor  has_next  next_cursor
@@ -158,7 +158,7 @@ class TestEncryptedCursorPagination(TransactionTestCase):
         for args in test_cases:
             self._do_paginate_queryset_asserts(*args)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_get_paginated_response(self):
         self.paginator.next_link = 'aaa'
         self.paginator.has_next = 'bbb'

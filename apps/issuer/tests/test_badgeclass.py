@@ -67,15 +67,15 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
             self.assertEqual(response.status_code, 200)
             return json.loads(response.content)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_create_badgeclass(self):
         self._create_badgeclass_for_issuer_authenticated(self.get_test_image_path())
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_create_badgeclass_with_svg(self):
         self._create_badgeclass_for_issuer_authenticated(self.get_test_svg_image_path())
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_create_badgeclass_scrubs_svg(self):
         with open(self.get_testfiles_path('hacked-svg-with-embedded-script-tags.svg'), 'r') as attack_badge_image:
 
@@ -101,7 +101,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
             badgeinstance = bc.issue(recipient_id='fakerecipient@email.test')
             self.assertIsNotNone(badgeinstance)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_when_creating_badgeclass_with_criteriatext_criteraurl_is_returned(self):
         """
         Ensure that when criteria text is submitted instead of a URL, the criteria address
@@ -128,7 +128,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
             })
             self.assertEqual(response.data.get('json').get('criteria'), expected_criterial_url)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_cannot_create_badgeclass_without_description(self):
         """
         Ensure that the API properly rejects badgeclass creation requests that do not include a description.
@@ -147,7 +147,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
             )
             self.assertEqual(response.status_code, 400)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_cannot_create_badgeclass_if_unauthenticated(self):
         test_user = self.setup_user(authenticate=False)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -155,7 +155,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         response = self.client.post('/v1/issuer/issuers/{slug}/badges'.format(slug=test_issuer.entity_id))
         self.assertIn(response.status_code, (401, 403))
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_get_badgeclass_list_if_authenticated(self):
         """
         Ensure that a logged-in user can get a list of their BadgeClasses
@@ -169,7 +169,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         self.assertIsInstance(response.data, list)
         self.assertEqual(len(response.data), len(test_badgeclasses))
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_cannot_get_badgeclass_list_if_unauthenticated(self):
         """
         Ensure that logged-out user can't GET the private API endpoint for badgeclass list
@@ -181,7 +181,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         response = self.client.get('/v1/issuer/issuers/{slug}/badges'.format(slug=test_issuer.entity_id))
         self.assertIn(response.status_code, (401, 403))
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_delete_unissued_badgeclass(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -195,7 +195,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
 
         self.assertFalse(BadgeClass.objects.filter(entity_id=test_badgeclass.entity_id).exists())
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_cannot_delete_already_issued_badgeclass(self):
         """
         A user should not be able to delete a badge class if it has been issued
@@ -244,7 +244,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
     #                                  r'badge_of_slugs_99/criteria$'
     #                                  )
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_cannot_create_badgeclass_with_invalid_markdown(self):
         with open(self.get_test_image_path(), 'r') as badge_image:
             badgeclass_props = {
@@ -264,7 +264,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
             )
             self.assertEqual(response.status_code, 400)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_create_badgeclass_with_valid_markdown(self):
         with open(self.get_test_image_path(), 'r') as badge_image:
             badgeclass_props = {
@@ -288,7 +288,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
             self.assertEqual(new_badgeclass.get('criteria_text', None), 'This is *valid* markdown mixed with raw document.write("and abusive html")')
             self.assertIn('slug', new_badgeclass)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_create_badgeclass_with_alignment(self):
         with open(self.get_test_image_path(), 'r') as badge_image:
             num_badgeclasses = BadgeClass.objects.count()
@@ -335,7 +335,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
 
             self.assertEqual(num_badgeclasses + 1, BadgeClass.objects.count())
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_new_badgeclass_updates_cached_issuer(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -356,7 +356,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
 
             self.assertEqual(len(list(test_user.cached_badgeclasses())), number_of_badgeclasses + 1)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_new_badgeclass_updates_cached_user_badgeclasses(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -384,7 +384,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         encoded = base64.b64encode(file.read())
         return "data:{};base64,{}".format(mime, encoded)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_badgeclass_put_image_data_uri(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -418,7 +418,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
             self.assertEqual(image_width, 450)
             self.assertEqual(image_height, 450)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_badgeclass_put_image_non_data_uri(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -448,7 +448,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(image_width, 300)
         self.assertEqual(image_height, 300)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_badgeclass_put_image_multipart(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -480,7 +480,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
             self.assertEqual(image_width, 450)
             self.assertEqual(image_height, 450)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_badgeclass_post_get_put_roundtrip(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
@@ -510,7 +510,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
 
         self.assertEqual(get_response.data, put_response.data)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_create_and_update_badgeclass_with_alignments_v1(self):
         # create a badgeclass with alignments
         alignments = [
@@ -567,7 +567,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, updated_badgeclass)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_create_and_update_badgeclass_with_alignments_v2(self):
         # create a badgeclass with alignments
         alignments = [
@@ -639,7 +639,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data.get('result')[0], updated_badgeclass)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_create_and_update_badgeclass_with_tags_v1(self):
         # create a badgeclass with tags
         tags = ["first", "second", "third"]
@@ -667,7 +667,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, updated_badgeclass)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_create_and_update_badgeclass_with_tags_v2(self):
         # create a badgeclass with tags
         tags = ["first", "second", "third"]
@@ -708,7 +708,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data.get('result')[0], updated_badgeclass)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_create_badgeclass_with_extensions(self):
         example_extensions = [{
             "extensions:originalCreator": {
@@ -719,9 +719,9 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         }]
 
         badgeclass = self._create_badgeclass_with_v2(extensions=example_extensions)
-        self.verify_badgeclass_extensions(badgeclass, example_extensions[0])
+        self.verify_badgeclass_extensions(badgeclass, example_extensions)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_can_update_badgeclass_with_extensions(self):
         example_extensions = [{
             "extensions:originalCreator": {
@@ -776,7 +776,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
             extension_data = extension[extension_name]
             self.assertDictEqual(public_json.get(extension_name), extension_data)
 
-    @unittest.skip('For debug speedup')
+    #@unittest.skip('For debug speedup')
     def test_null_description_not_serialized(self):
         test_user = self.setup_user(authenticate=True)
         test_issuer = self.setup_issuer(owner=test_user)
