@@ -110,10 +110,21 @@ urlpatterns = [
 
     # include theming endpoints
     url(r'v2/', include('theming.api_urls'), kwargs={'version':'v2'}),
-    
+
     # Accept Terms View
     url(r'^accept_terms/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', AcceptTermsView.as_view(), name='accept_terms'),
-    
+
+    #  include management endpoints
+    url(r'^management/', include('management.api_urls')),
+]
+
+urlpatterns += [
+    url(
+        r'^lti_app/(?P<app_slug>[A-Za-z0-9\-]+)/config/(?P<tenant_slug>[A-Za-z0-9\-]+)\.xml$',
+        base.lti_config,
+        name='lti-config'
+    ),
+    url(r'^lti_app/(?P<slug>[A-Za-z0-9\-]+)/?$', base.lti_launch)
 ]
 
 urlpatterns += [
