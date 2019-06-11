@@ -3,7 +3,7 @@ All notable changes to this project performed by the Edubadges team will be docu
 
 ## [1.0.3] - 2019-06-11
  - fixes all tests 
- - implements managament dashboard endpoints
+ - implements management dashboard endpoints
 
 ## [1.0.2] - 2019-02-19
   - added theming
