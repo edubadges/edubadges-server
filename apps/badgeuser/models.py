@@ -635,8 +635,12 @@ class TermsAgreement(BaseAuditedModel, cachemodel.CacheModel):
         unique_together = ('user', 'terms_version')
 
 
-Group.add_to_class('entity_id', models.CharField(max_length=254, null=True, default=None))
-Group.add_to_class('rank', models.PositiveIntegerField(null=True, default=None))
+# Group.add_to_class('entity_id', models.CharField(max_length=254, null=True, default=None))
+# Group.add_to_class('rank', models.PositiveIntegerField(null=True, default=None))
+class GroupEntity(models.Model):
+    group = models.OneToOneField(Group, on_delete=models.CASCADE, related_name='entity_rank')
+    entity_id = models.CharField(max_length=254, null=True, default=None)
+    rank = models.PositiveIntegerField(null=True, default=None)
 
 @receiver(post_save, sender=Group)
 def generate_entity_id(sender, instance, **kwargs):

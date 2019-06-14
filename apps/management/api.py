@@ -11,11 +11,14 @@ class GroupList(BaseEntityListView):
     permission_classes = (AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope)
     serializer_class = GroupSerializer
 
+
     def get_objects(self, request, **kwargs):
-        return Group.objects.filter(rank__gte=request.user.highest_group.rank)
+
+        return Group.objects.filter(entity_rank__rank__gte=request.user.highest_group.rank)
 
     def get(self, request, **kwargs):
         return super(GroupList, self).get(request, **kwargs)
+
 
 
 class FacultyStats(BaseEntityDetailView):
