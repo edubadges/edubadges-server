@@ -642,6 +642,9 @@ class GroupEntity(models.Model):
     entity_id = models.CharField(max_length=254, null=True, default=None)
     rank = models.PositiveIntegerField(null=True, default=None)
 
+    def __str__(self):
+        return self.group.name
+
 @receiver(post_save, sender=Group)
 def generate_entity_id(sender, instance, **kwargs):
     if instance.entity_id is None:

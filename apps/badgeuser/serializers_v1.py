@@ -224,7 +224,7 @@ class BadgeUserManagementSerializer(serializers.ModelSerializer):
         current_faculties = set(self.filter_faculties_by_user_scope([i for i in instance.faculty.all()]))
         current_groups = set(self.filter_groups_by_user_scope([i for i in instance.groups.all()]))
         new_faculties = set([Faculty.objects.get(entity_id=d['slug']) for d in validated_data['faculty']])
-        new_groups = set([Group.objects.get(entity_id=d['slug']) for d in validated_data['groups']])
+        new_groups = set([Group.objects.get(entity_rank__entity_id=d['slug']) for d in validated_data['groups']])
 
         faculties_to_remove = current_faculties.difference(new_faculties)
         faculties_to_add = new_faculties.difference(current_faculties)

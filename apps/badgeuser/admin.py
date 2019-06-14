@@ -5,7 +5,8 @@ from django.contrib.auth.models import Group
 from externaltools.models import ExternalToolUserActivation
 from mainsite.admin import badgr_admin, FilterByScopeMixin
 from .models import BadgeUser, EmailAddressVariant, TermsVersion, TermsAgreement, \
-                    CachedEmailAddress, BadgeUserProxy
+    CachedEmailAddress, BadgeUserProxy, GroupEntity
+
 
 class ExternalToolInline(TabularInline):
     model = ExternalToolUserActivation
@@ -141,9 +142,13 @@ class TermsVersionAdmin(ModelAdmin):
 badgr_admin.register(TermsVersion, TermsVersionAdmin)
 
 
-class GroupAdmin(GroupAdmin):
-    model = Group
-    fields = ('name', 'permissions', 'rank')
+# class GroupAdmin(GroupAdmin):
+#     model = Group
+#     fields = ('name', 'permissions')
 
-badgr_admin.unregister(Group)
-badgr_admin.register(Group, GroupAdmin)
+# badgr_admin.unregister(Group)
+# badgr_admin.register(Group, GroupAdmin)
+
+
+badgr_admin.register(GroupEntity)
+
