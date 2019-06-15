@@ -336,8 +336,8 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
 
     @property
     def highest_group(self):
-        groups = list(self.groups.filter(rank__gte=0))
-        groups.sort(key=lambda x: x.rank)
+        groups = list(self.groups.filter(entity_rank__rank__gte=0))
+        groups.sort(key=lambda x: x.entity_rank.rank)
         if groups:
             return groups[0]
         else:

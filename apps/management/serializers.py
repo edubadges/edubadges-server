@@ -5,7 +5,7 @@ from mainsite.serializers import StripTagsCharField
 
 class GroupSerializer(serializers.ModelSerializer):
     name = serializers.CharField(read_only=True, max_length=512)
-    slug = StripTagsCharField(max_length=255, read_only=True, source='entity_rank__entity_id')
+    slug = StripTagsCharField(max_length=255, source='entity_rank.entity_id')
 
     class Meta:
         model = Group

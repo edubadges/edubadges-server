@@ -1,12 +1,10 @@
 import json
 from collections import OrderedDict
-from django.conf import settings
 from django.contrib.auth.models import Permission, Group
 from rest_framework import serializers
 
 from institution.serializers_v1 import FacultySerializerV1
 from institution.models import Faculty
-from mainsite.models import BadgrApp
 from mainsite.serializers import StripTagsCharField
 from mainsite.validators import PasswordValidator
 from .models import BadgeUser, CachedEmailAddress, TermsVersion
@@ -192,10 +190,10 @@ class BadgeUserManagementSerializer(serializers.ModelSerializer):
         fields = ('first_name', 'last_name', 'slug', 'faculties', 'email', 'groups')
 
     def filter_groups_by_user_scope(self, groups):
-        highest_user_rank = self.context['request'].user.highest_group.rank
+        highest_user_rank = self.context['request'].user.highest_group.entity_rank.rank
         groups_within_scope = []
         for group in groups:
-            if group.rank >= highest_user_rank:
+            if group.entity_rank.rank >= highest_user_rank:
                 groups_within_scope.append(group)
         return groups_within_scope
 
@@ -209,7 +207,7 @@ class BadgeUserManagementSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super(BadgeUserManagementSerializer, self).to_representation(instance)
         faculties = [Faculty.objects.get(entity_id=faculty['slug']) for faculty in representation['faculties']]
-        groups = [Group.objects.get(entity_id=group['slug']) for group in representation['groups']]
+        groups = [Group.objects.get(entity_rank__entity_id=group['slug']) for group in representation['groups']]
         representation['faculties'] = [FacultySerializerV1().to_representation(faculty) for faculty in self.filter_faculties_by_user_scope(faculties)]
         representation['groups'] = [GroupSerializer().to_representation(group) for group in self.filter_groups_by_user_scope(groups)]
         return representation
@@ -238,7 +236,7 @@ class BadgeUserManagementSerializer(serializers.ModelSerializer):
 
         if groups_to_remove or groups_to_add:
             for group in groups_to_remove.union(groups_to_add):
-                if group.rank < self.context['request'].user.highest_group.rank:
+                if group.entity_rank.rank < self.context['request'].user.highest_group.entity_rank.rank:
                     raise serializers.ValidationError("Group outside scope.")
 
         if faculties_to_remove:

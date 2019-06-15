@@ -14,7 +14,7 @@ class GroupList(BaseEntityListView):
 
     def get_objects(self, request, **kwargs):
 
-        return Group.objects.filter(entity_rank__rank__gte=request.user.highest_group.rank)
+        return Group.objects.filter(entity_rank__rank__gte=request.user.highest_group.entity_rank.rank)
 
     def get(self, request, **kwargs):
         return super(GroupList, self).get(request, **kwargs)
