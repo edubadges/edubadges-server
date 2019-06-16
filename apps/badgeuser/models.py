@@ -17,6 +17,7 @@ from django.contrib.auth.models import AbstractUser, Permission, Group
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models, transaction
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
@@ -647,11 +648,12 @@ class GroupEntity(models.Model):
 
 @receiver(post_save, sender=Group)
 def generate_entity_id(sender, instance, **kwargs):
-    if instance.entity_id is None:
-        instance.entity_id = generate_entity_uri()
-        instance.save()
+    try:
+        instance.entity_rank
+    except ObjectDoesNotExist:
+        GroupEntity.objects.create(group=instance, entity_id=generate_entity_uri())
 
-@receiver(pre_save, sender=Group)
+@receiver(pre_save, sender=GroupEntity)
 def check_rank_uniqueness(sender, instance, **kwargs):
     if instance.rank is not None:
         instance_with_same_rank = sender.objects.filter(rank=instance.rank).first()
