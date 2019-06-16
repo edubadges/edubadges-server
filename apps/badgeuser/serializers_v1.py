@@ -190,11 +190,13 @@ class BadgeUserManagementSerializer(serializers.ModelSerializer):
         fields = ('first_name', 'last_name', 'slug', 'faculties', 'email', 'groups')
 
     def filter_groups_by_user_scope(self, groups):
-        highest_user_rank = self.context['request'].user.highest_group.entity_rank.rank
         groups_within_scope = []
-        for group in groups:
-            if group.entity_rank.rank >= highest_user_rank:
-                groups_within_scope.append(group)
+        highest_user_group = self.context['request'].user.highest_group
+        if highest_user_group:
+            highest_user_rank = highest_user_group.entity_rank.rank
+            for group in groups:
+                if group.entity_rank.rank >= highest_user_rank:
+                    groups_within_scope.append(group)
         return groups_within_scope
 
     def filter_faculties_by_user_scope(self, faculties):
