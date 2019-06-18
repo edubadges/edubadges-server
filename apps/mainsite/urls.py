@@ -114,7 +114,7 @@ urlpatterns = [
     # Accept Terms View
     url(r'^accept_terms/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', TermsAndConditionsView.as_view(), name='accept_terms'),
     
-    url(r'^accept_terms/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', AcceptTermsView.as_view(), name='accept_terms'),
+    # url(r'^accept_terms/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', AcceptTermsView.as_view(), name='accept_terms'),
 
     #  include management endpoints
     url(r'^management/', include('management.api_urls')),
