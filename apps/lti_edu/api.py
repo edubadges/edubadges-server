@@ -160,8 +160,12 @@ class CurrentContextView(BaseEntityDetailView):
         if not request.user.is_authenticated():
             response['loggedin'] = False
         else:
-            user_current_context_id = UserCurrentContextId.objects.get(badge_user=request.user)
+            try:
+                user_current_context_id = UserCurrentContextId.objects.get(badge_user=request.user)
+                response['lticontext'] = user_current_context_id.context_id
+            except Exception as e:
+                pass
 
-            response['lticontext'] = user_current_context_id.context_id
+
 
         return JsonResponse(response)

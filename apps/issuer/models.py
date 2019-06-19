@@ -649,6 +649,9 @@ class BadgeInstance(BaseAuditedModel,
 
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.CASCADE, related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
+    # timestamp_pending = models.BooleanField(default=True)
+    # timestamp_proof = models.CharField(max_length=258798798)
+
 
     RECIPIENT_TYPE_EMAIL = 'email'
     RECIPIENT_TYPE_ID = 'openBadgeId'
@@ -967,7 +970,7 @@ class BadgeInstance(BaseAuditedModel,
             pass
         return None
 
-    def get_json(self, obi_version=CURRENT_OBI_VERSION, expand_badgeclass=False, expand_issuer=False, include_extra=True, use_canonical_id=False):
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, expand_badgeclass=False, expand_issuer=False, include_extra=True, use_canonical_id=False, signed=False):
         obi_version, context_iri = get_obi_context(obi_version)
 
         json = OrderedDict([
