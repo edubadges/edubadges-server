@@ -94,4 +94,5 @@ class StudentsEnrolledSerializerWithRelations(serializers.ModelSerializer):
         ret = serializers.ModelSerializer.to_representation(self, instance)
         readable_date = str(datetime.strptime(ret['date_created'], '%Y-%m-%dT%H:%M:%S.%fZ').date())
         ret['date_created'] = readable_date
+        return ret
 
