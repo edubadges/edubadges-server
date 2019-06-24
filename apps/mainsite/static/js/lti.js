@@ -36,6 +36,9 @@ function Request() {
                                 },3000);
 
                     }
+                    else{
+                        $('#login-link').text('Login bij eduBadges')
+                    }
 
                 },
                 dataType: "json",

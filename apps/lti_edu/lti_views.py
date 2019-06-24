@@ -171,7 +171,7 @@ class LoginLtiStaff(LoginLti):
 
     def get_after_login(self, badgr_app):
         scheme = self.request.is_secure() and "https" or "http"
-        return '{}://{}/issuer?embedVersion=1&embedWidth=800&embedHeight=800'.format(scheme, badgr_app.cors)
+        return '{}://{}/lti-badges/staff?embedVersion=1&embedWidth=800&embedHeight=800'.format(scheme, badgr_app.cors)
 
     def get_check_login_url(self):
         return reverse('check-login-staff')
