@@ -33,7 +33,7 @@ function Request() {
                                 }
                                 window.location =$('#login-link').attr('next-url');
 
-                                },2000);
+                                },3000);
 
                     }
 
