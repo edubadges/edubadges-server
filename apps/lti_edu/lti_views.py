@@ -49,7 +49,7 @@ def login_user(request, user):
 def check_user_changed(request, user):
     lti_user_id = request.session.get('lti_user_id',None)
     lti_roles = request.session.get('lti_roles', None)
-    if request.session.get('lti_user_id',None) == request.POST['user_id'] and request.session.get('lti_roles', None) == request.POST['roles']:
+    if lti_user_id == request.POST['user_id'] and lti_roles == request.POST['roles']:
         return False
     """Log in a user without requiring credentials with user object"""
     return logout_badgr_user(request, user)
@@ -82,7 +82,7 @@ class LoginLti(TemplateView):
 
     ]
 
-    @method_decorator(xframe_options_exempt)
+    # @method_decorator(xframe_options_exempt)
     def dispatch(self, *args, **kwargs):
         response = super(LoginLti, self).dispatch(*args, **kwargs)
         response['X-Frame-Options'] = 'ALLOW-FROM {}'.format(kwargs['tenant'].lms_domain)
@@ -104,7 +104,7 @@ class LoginLti(TemplateView):
             ltibadgetennant = LtiBadgeUserTennant.objects.get(lti_tennant=kwargs['tenant'],
                                                               lti_user_id=self.request.POST['user_id'],
                                                               staff=self.staff)
-            #login_user(self.request, ltibadgetennant.badge_user)
+            # login_user(self.request, ltibadgetennant.badge_user)
 
         except Exception as e:
             pass
@@ -158,7 +158,7 @@ class LoginLti(TemplateView):
 
     def get_after_login_staff(self, badgr_app):
         scheme = self.request.is_secure() and "https" or "http"
-        return '{}://{}/issuer?embedVersion=1&embedWidth=800&embedHeight=800'.format(scheme, badgr_app.cors)
+        return '{}://{}/lti-badges/staff?embedVersion=1&embedWidth=800&embedHeight=800'.format(scheme, badgr_app.cors)
 
     def get_check_login_url_staff(self):
         return reverse('check-login-staff')
