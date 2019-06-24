@@ -4,7 +4,9 @@ from django.contrib.sessions.models import Session
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import TemplateView
 
 from badgrsocialauth.utils import set_session_badgr_app
@@ -80,6 +82,7 @@ class LoginLti(TemplateView):
 
     ]
 
+    @method_decorator(xframe_options_exempt)
     def dispatch(self, *args, **kwargs):
         response = super(LoginLti, self).dispatch(*args, **kwargs)
         response['X-Frame-Options'] = 'ALLOW-FROM {}'.format(kwargs['tenant'].lms_domain)
@@ -159,7 +162,6 @@ class LoginLti(TemplateView):
 
     def get_check_login_url_staff(self):
         return reverse('check-login-staff')
-
 
 class LoginLtiStaff(LoginLti):
     staff = True
