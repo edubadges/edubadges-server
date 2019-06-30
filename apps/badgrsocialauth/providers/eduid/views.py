@@ -76,7 +76,9 @@ def after_terms_agreement(request, **kwargs):
     '''
     badgr_app_pk, login_type, lti_context_id,lti_user_id,lti_roles, referer = json.loads(kwargs['state'])
     lti_data = request.session.get('lti_data', None);
-
+    if badgr_app_pk is None:
+        print('none here')
+        badgr_app_pk = settings.BADGR_APP_ID
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
     set_session_badgr_app(request, badgr_app)
 

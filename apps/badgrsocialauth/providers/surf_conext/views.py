@@ -72,8 +72,8 @@ def after_terms_agreement(request, **kwargs):
     
     headers = {'Authorization': 'bearer %s' % access_token}
     badgr_app_pk, login_type, process, auth_token, lti_context_id,lti_user_id,lti_roles, referer = json.loads(kwargs['state'])
-    if badgr_app_pk is None:
-        print('none here')
+    if not BadgrApp.objects.filter(pk=badgr_app_pk).exists():
+        badgr_app_pk = settings.BADGR_APP_ID
     set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app_pk))
 
     lti_data = request.session.get('lti_data', None)
