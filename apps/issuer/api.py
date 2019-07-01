@@ -349,7 +349,7 @@ class BatchAssertionsRevoke(VersionedObjectMixin, BaseEntityView):
 class BadgeInstanceList(UncachedPaginatedViewMixin, VersionedObjectMixin, BaseEntityListView):
     """
     GET a list of assertions for a single badgeclass
-    POST to issue a new assertion
+    POST to issue a new assertion, or multiple assertions
     """
     model = BadgeClass  # used by get_object()
     permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass, BadgrOAuthTokenHasEntityScope)
@@ -413,6 +413,7 @@ class BadgeInstanceList(UncachedPaginatedViewMixin, VersionedObjectMixin, BaseEn
         recipients = request.data.pop('recipients')
         if not self.has_object_permissions(request, badgeclass):
             return Response(status=HTTP_404_NOT_FOUND)
+        request.data['expires'] = datetime.datetime.strptime(request.data['expires_at'], '%d-%m-%Y') if request.data['expires_at'] else None
         for recipient in recipients:
             if recipient['selected']:
                 request.data['recipientprofile_name'] = recipient['recipient_name']

@@ -1,9 +1,13 @@
 # Changelog
 All notable changes to this project performed by the Edubadges team will be documented in this file.
 
+## [1.0.3] - tba
+ - adds expiration date to awarding
+
 ## [1.0.3] - 2019-06-11
  - fixes all tests 
  - implements management dashboard endpoints
+ - lti
 
 ## [1.0.2] - 2019-02-19
   - added theming
