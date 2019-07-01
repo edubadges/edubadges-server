@@ -47,8 +47,11 @@ def login(request):
     # the only thing set in state is the referer (frontend, or staff) , this is not the referer url.
     referer = json.dumps(urlparse(request.META['HTTP_REFERER']).path.split('/')[1:])
     badgr_app_pk = request.session.get('badgr_app_pk', None)
-    if badgr_app_pk is None:
-        print('badgr_app is none in login beofre after temrm agreement')
+    try:
+        badgr_app_pk = int(badgr_app_pk)
+    except:
+        badgr_app_pk = settings.BADGR_APP_ID
+
     lti_data = request.session.get('lti_data', None)
     lti_context_id = ''
     lti_user_id = ''
@@ -75,10 +78,8 @@ def after_terms_agreement(request, **kwargs):
     this is the second part of the callback, after consent has been given, or is user already exists
     '''
     badgr_app_pk, login_type, lti_context_id,lti_user_id,lti_roles, referer = json.loads(kwargs['state'])
-    lti_data = request.session.get('lti_data', None);
-    if badgr_app_pk is None:
-        print('none here')
-        badgr_app_pk = settings.BADGR_APP_ID
+    lti_data = request.session.get('lti_data', None)
+
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
     set_session_badgr_app(request, badgr_app)
 
@@ -123,6 +124,7 @@ def after_terms_agreement(request, **kwargs):
     provider = EduIDProvider(request)
     login = provider.sociallogin_from_response(request, userinfo_json)
     ret = complete_social_login(request, login)
+    set_session_badgr_app(request, badgr_app)
 
     #create lti_connection
     if lti_data is not None and 'lti_user_id' in lti_data:
@@ -139,6 +141,7 @@ def after_terms_agreement(request, **kwargs):
     request.session['lti_user_id'] = lti_user_id
     request.session['lti_roles'] = lti_roles
 
+
     # 4. Return the user to where she came from (ie the referer: public enrollment or main page)
     if 'public' in referer:
         if 'badges' in referer:
@@ -153,6 +156,8 @@ def after_terms_agreement(request, **kwargs):
 
 
 def callback(request):
+    print(request.__dict__)
+    print(request.__dict__['session'].__dict__)
     current_app = SocialApp.objects.get_current(provider='edu_id')
     #extract state of redirect
     state = json.loads(request.GET.get('state'))

@@ -59,11 +59,16 @@ def logout_badgr_user(request, user):
     if request.user.is_authenticated():
         if not hasattr(user, 'backend'):
             for backend in settings.AUTHENTICATION_BACKENDS:
-                if user == load_backend(backend).get_user(user.pk):
-                    user.backend = backend
-                    break
-        if hasattr(user, 'backend'):
-            return logout(request)
+                try:
+                    if user == load_backend(backend).get_user(user.pk):
+                        user.backend = backend
+
+                        logout(request)
+                except:
+                    pass
+        # if hasattr(user, 'backend'):
+        #     return logout(request)
+        # return logout(request)
     return False
 
 class LoginLti(TemplateView):
@@ -116,6 +121,7 @@ class LoginLti(TemplateView):
 
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated():
+            #logout_badgr_user(request, request.user)
             check_user_changed(request, request.user)
         post = request.POST
         user_id = post['user_id']
@@ -140,7 +146,7 @@ class LoginLti(TemplateView):
     def get_login_url(self):
         if self.staff:
             return self.get_login_url_staff()
-        return reverse('edu_id_login')
+        return  "{}?provider=edu_id".format(reverse('socialaccount_login'))
 
     def get_after_login(self, badgr_app):
         if self.staff:
@@ -154,7 +160,7 @@ class LoginLti(TemplateView):
         return reverse('check-login')
 
     def get_login_url_staff(self):
-        return reverse('surf_conext_login')
+        return "{}?provider=surf_conext".format(reverse('socialaccount_login'))
 
     def get_after_login_staff(self, badgr_app):
         scheme = self.request.is_secure() and "https" or "http"

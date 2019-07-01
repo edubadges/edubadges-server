@@ -41,8 +41,10 @@ def login(request):
     referer = request.META['HTTP_REFERER'].split('/')[3]
 
     badgr_app_pk = request.session.get('badgr_app_pk', None)
-    if badgr_app_pk is None:
-        print('none here')
+    try:
+        badgr_app_pk = int(badgr_app_pk)
+    except:
+        badgr_app_pk = settings.BADGR_APP_ID
     state = json.dumps([request.GET.get('process', 'login'),
                           get_session_authcode(request),
                           badgr_app_pk,
@@ -72,7 +74,9 @@ def after_terms_agreement(request, **kwargs):
     
     headers = {'Authorization': 'bearer %s' % access_token}
     badgr_app_pk, login_type, process, auth_token, lti_context_id,lti_user_id,lti_roles, referer = json.loads(kwargs['state'])
-    if not BadgrApp.objects.filter(pk=badgr_app_pk).exists():
+    try:
+        badgr_app_pk = int(badgr_app_pk)
+    except:
         badgr_app_pk = settings.BADGR_APP_ID
     set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app_pk))
 
@@ -132,7 +136,9 @@ def after_terms_agreement(request, **kwargs):
 
     request.session['lti_user_id'] = lti_user_id
     request.session['lti_roles'] = lti_roles
-
+    if not request.user.is_authenticated:
+        print(request.__dict__)
+        a = 1
     # override the response with a redirect to staff dashboard if the login came from there
     if referer == 'staff':
         return HttpResponseRedirect(reverse('admin:index'))
@@ -161,11 +167,14 @@ def callback(request):
     :return: Either renders authentication error, or completes the social login
     """
     # extract the state of the redirect
+    print(request.__dict__)
+    print(request.__dict__['session'].__dict__)
     process, auth_token, badgr_app_pk,lti_data,lti_user_id,lti_roles, referer = json.loads(request.GET.get('state'))
 
     if badgr_app_pk is None:
         print('none here')
     # check if code is given
+
     code = request.GET.get('code', None)
     if code is None:
         error = 'Server error: No userToken found in callback'
