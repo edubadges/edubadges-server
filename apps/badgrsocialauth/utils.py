@@ -76,7 +76,8 @@ def get_session_badgr_app(request):
 
 
 def set_session_badgr_app(request, badgr_app):
-    request.session['badgr_app_pk'] = badgr_app.pk
+    if badgr_app is not None:
+        request.session['badgr_app_pk'] = badgr_app.pk
 
 
 def get_session_authcode(request):

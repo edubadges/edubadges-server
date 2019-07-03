@@ -33,7 +33,7 @@ function Request() {
                                 }
                                 window.location =$('#login-link').attr('next-url');
 
-                                },3000);
+                                },10000);
 
                     }
                     else{
@@ -42,6 +42,9 @@ function Request() {
 
                 },
                 dataType: "json",
+                xhrFields: {
+                    withCredentials: true
+                },
                 complete: function () {
                     if (self.poll == false) {
                         clearTimeout(poll);

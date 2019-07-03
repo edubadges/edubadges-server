@@ -18,8 +18,10 @@ from mainsite.models import BadgrApp
 class BadgrSocialLogin(RedirectView):
     def get(self, request, *args, **kwargs):
         try:
-            # logout(request)
-            logout_badgr_user(request, request.user)
+            lti_data = request.session.get('lti_data', None)
+            logout(request)
+            #logout_badgr_user(request, request.user)
+            request.session['lti_data'] = lti_data
             return super(BadgrSocialLogin, self).get(request, *args, **kwargs)
         except ValidationError as e:
             return HttpResponseBadRequest(e.message)
