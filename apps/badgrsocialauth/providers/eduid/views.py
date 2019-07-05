@@ -12,6 +12,7 @@ from allauth.socialaccount.models import SocialApp
 
 from badgeuser.models import TermsVersion
 from badgrsocialauth.utils import set_session_badgr_app, get_social_account, update_user_params
+from ims.models import LTITenant
 from mainsite.models import BadgrApp
 from mainsite.views import TermsAndConditionsView
 from theming.models import Theme
@@ -126,10 +127,10 @@ def after_terms_agreement(request, **kwargs):
 
     provider = EduIDProvider(request)
     login = provider.sociallogin_from_response(request, userinfo_json)
-    check_agreed_term_and_conditions(login.user, badgr_app)
 
     ret = complete_social_login(request, login)
     set_session_badgr_app(request, badgr_app)
+    check_agreed_term_and_conditions(request.user, badgr_app)
 
     #create lti_connection
     if lti_data is not None and 'lti_user_id' in lti_data:

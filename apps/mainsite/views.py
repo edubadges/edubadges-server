@@ -10,6 +10,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseServerError, HttpResponseNotFound
 from django.shortcuts import redirect
 from django.template import loader, TemplateDoesNotExist, Context
+from django.utils import translation
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -20,6 +21,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from badgrsocialauth.utils import get_privacy_content
 from issuer.tasks import rebake_all_assertions, update_issuedon_all_assertions
 from mainsite.admin_actions import clear_cache
 from mainsite.models import EmailBlacklist, BadgrApp
@@ -174,13 +176,38 @@ class DocsAuthorizeRedirect(RedirectView):
 
 class TermsAndConditionsView(TemplateView):
     
-    template_name = 'terms_of_service/accept_terms.html'
+    template_name = 'terms_of_service/accept_terms_versioned.html'
     
     def get_context_data(self, **kwargs):
         context = super(TermsAndConditionsView, self).get_context_data(**kwargs)
         badgr_app_pk = json.loads(kwargs['state'])[0]
         badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
         login_type = json.loads(kwargs['state'])[1]
+        context['dutch_url'] = '{}?lang=nl'.format(self.request.build_absolute_uri('?'))
+        context['english_url'] = '{}?lang=en'.format(self.request.build_absolute_uri('?'))
+        lang_code = translation.get_language().lower()
+        lang_get = self.request.GET.get('lang', None)
+        if lang_get != 'en' and \
+                (lang_code in ['nl-nl', 'nl-be', 'nl'] or
+                 lang_get == 'nl'):
+            context['privacy_content'] = get_privacy_content('create_account_student_nl')
+            if login_type == 'surf_conext':
+                context['privacy_content'] = get_privacy_content('create_account_employee_nl')
+            context['other_lang_url'] = '{}?lang=en'.format(self.request.build_absolute_uri('?'))
+            context['other_lang'] = 'Go to english version'
+            context['consent_button'] = 'IK GEEF TOESTEMMING'
+            context['no_consent_button'] = 'IK GEEF GEEN TOESTEMMING'
+
+
+        else:
+            context['privacy_content'] = get_privacy_content('create_account_student_en')
+            if login_type == 'surf_conext':
+                context['privacy_content'] = get_privacy_content('create_account_employee_en')
+            context['other_lang_url'] = '{}?lang=nl'.format(self.request.build_absolute_uri('?'))
+            context['other_lang'] = 'Ga naar nederlands versie'
+            context['consent_button'] = 'I CONSENT'
+            context['no_consent_button'] = 'I DO NOT CONSENT'
+
         context['privacy_statement_url'] = badgr_app.public_pages_redirect + '/privacy-policy'
         if login_type == 'surf_conext':
             context['ui_login_redirect'] = badgr_app.ui_login_redirect.replace('login', 'staff-login')
@@ -188,11 +215,7 @@ class TermsAndConditionsView(TemplateView):
             context['ui_login_redirect'] = badgr_app.ui_login_redirect
         return context
 
-    def get_template_names(self):
-        theme = get_theme(self.request)
-        if theme is not None and theme.terms_and_conditions_template is not None:
-            return [theme.terms_and_conditions_template, self.template_name]
-        return [self.template_name, ]
+
 
 
 class AcceptTermsAndConditionsView(View):

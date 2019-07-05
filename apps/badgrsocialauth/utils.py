@@ -1,3 +1,4 @@
+import codecs
 import urllib, unicodedata
 import urlparse
 
@@ -117,3 +118,17 @@ def update_user_params(user, userinfo):
                                                     user = user)
 
 
+def get_privacy_content(name):
+    privacy_files = {
+        'consent_apply_badge_en': 'apps/privacy/consent-apply-badge-en.md',
+        'consent_apply_badge': 'apps/privacy/consent-apply-badge-nl.md',
+        'privacy_statement_en': 'apps/privacy/privacy-statement-en.md',
+        'privacy_statement': 'apps/privacy/privacy-statement-nl.md',
+        'create_account_employee_en': 'apps/consent-create-account-employee-en.md',
+        'create_account_employee_nl': 'apps/consent-create-account-employee-nl.md',
+        'create_account_student_en': 'apps/privacy/consent-create-account-student-en.md',
+        'create_account_student_nl': 'apps/privacy/consent-create-account-student-nl.md',
+    }
+    with codecs.open(privacy_files[name], "r", encoding='utf-8') as myfile:
+        data = myfile.read()
+    return data

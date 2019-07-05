@@ -130,7 +130,7 @@ class TermsVersionAdmin(ModelAdmin):
             'classes': ('collapse',)
         }),
         (None, {'fields': (
-            'latest_terms_version', 'is_active','version','teacher','short_description','content',
+            'latest_terms_version', 'is_active','version','teacher','short_description',
         )})
     )
 

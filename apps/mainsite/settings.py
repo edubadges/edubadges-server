@@ -63,7 +63,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE_CLASSES = [
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'oauth2_provider.middleware.OAuth2TokenMiddleware',
@@ -74,6 +73,9 @@ MIDDLEWARE_CLASSES = [
     'mainsite.middleware.MaintenanceMiddleware',
     'badgeuser.middleware.InactiveUserMiddleware',
     # 'mainsite.middleware.TrailingSlashMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.common.CommonMiddleware',
+
 ]
 
 ROOT_URLCONF = 'mainsite.urls'
@@ -393,7 +395,7 @@ CAIROSVG_VERSION_SUFFIX = "2"
 
 SITE_ID = 1
 
-USE_I18N = False
+USE_I18N = True
 USE_L10N = False
 USE_TZ = True
 

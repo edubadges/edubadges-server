@@ -617,11 +617,12 @@ class TermsVersionManager(cachemodel.CacheModelManager):
 class TermsVersion(IsActive, BaseAuditedModel, cachemodel.CacheModel):
     version = models.PositiveIntegerField(unique=True)
     short_description = models.TextField(blank=True)
-    content = models.TextField(blank=True)
+
     terms_and_conditions_template = models.CharField('Terms and conditions template',
                                                      null=True,
                                                      max_length=512
                                                      )
+    accepted_terms_and_conditions_hash = models.CharField('Term and conditions hash',max_length=32,null=True)
     teacher = models.BooleanField(default=False)
     cached = TermsVersionManager()
 
