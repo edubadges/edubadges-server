@@ -38,8 +38,6 @@ class ThemeSerializer(serializers.Serializer):
         """
         :type instance: Theme
         """
-
-
         theme = {
             'welcomeMessage': instance.welcome_message,
             'serviceName': instance.service_name,
@@ -57,7 +55,6 @@ class ThemeSerializer(serializers.Serializer):
             'privacy_statement_en':get_privacy_content('privacy_statement_en'),
             'language_detected':translation.get_language().lower(),
             'dutch_language_codes': ['nl-nl', 'nl-be', 'nl'],
-
 
         }
 

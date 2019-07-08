@@ -1,8 +1,7 @@
-import urllib, requests, json, logging, os
-from urlparse import urlparse, urlsplit
+import urllib, requests, json, logging
+from urlparse import urlparse
 from base64 import b64encode
 from django.conf import settings
-from django.contrib.sites.models import Site
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import redirect, get_object_or_404
@@ -10,12 +9,10 @@ from django.utils import timezone
 from allauth.socialaccount.helpers import render_authentication_error, complete_social_login
 from allauth.socialaccount.models import SocialApp
 
-from badgeuser.models import TermsVersion
-from badgrsocialauth.utils import set_session_badgr_app, get_social_account, update_user_params
+from badgrsocialauth.utils import set_session_badgr_app, get_social_account, update_user_params, \
+    check_agreed_term_and_conditions
 from ims.models import LTITenant
 from mainsite.models import BadgrApp
-from mainsite.views import TermsAndConditionsView
-from theming.models import Theme
 from .provider import EduIDProvider
 from lti_edu.models import StudentsEnrolled, LtiBadgeUserTennant, UserCurrentContextId
 from issuer.models import BadgeClass
@@ -130,7 +127,9 @@ def after_terms_agreement(request, **kwargs):
 
     ret = complete_social_login(request, login)
     set_session_badgr_app(request, badgr_app)
-    check_agreed_term_and_conditions(request.user, badgr_app)
+    resign = True
+    check_agreed_term_and_conditions(request.user, badgr_app, resign=resign)
+
 
     #create lti_connection
     if lti_data is not None and 'lti_user_id' in lti_data:
@@ -160,23 +159,6 @@ def after_terms_agreement(request, **kwargs):
     else:
         return ret
 
-def check_agreed_term_and_conditions(user, badgr_app):
-    latest_terms_and_conditions = TermsVersion.objects.filter(
-        terms_and_conditions_template__isnull=True).order_by('-version').all()[0]
-    if user.agreed_terms_version == 0:
-        try:
-            if TermsVersion.objects.filter(
-                    terms_and_conditions_template=badgr_app.theme.terms_and_conditions_template).exists():
-                latest_terms_and_conditions = TermsVersion.objects.filter(
-                    terms_and_conditions_template=badgr_app.theme.terms_and_conditions_template).order_by('-version').all()[0]
-        except Theme.DoesNotExist as e:
-            if TermsVersion.objects.filter(
-                terms_and_conditions_template=TermsAndConditionsView.template_name).order_by('-version').exists():
-                latest_terms_and_conditions = TermsVersion.objects.filter(
-                    terms_and_conditions_template=TermsAndConditionsView.template_name).order_by('-version').all()[0]
-
-        user.agreed_terms_version = latest_terms_and_conditions.version
-        user.save()
 
 def callback(request):
     print(request.__dict__)
@@ -222,5 +204,10 @@ def callback(request):
 
     if not get_social_account(userinfo_json['sub']):
         return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))
-    
+    social_account =  get_social_account(userinfo_json['sub'])
+
+    badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
+    if not check_agreed_term_and_conditions(social_account.user, badgr_app):
+        return HttpResponseRedirect(reverse('accept_terms_resign', kwargs=keyword_arguments))
+
     return after_terms_agreement(request, **keyword_arguments)

@@ -8,7 +8,8 @@ from django.http import HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 
-from badgrsocialauth.utils import set_session_badgr_app, get_session_authcode, get_verified_user, get_session_badgr_app, get_social_account
+from badgrsocialauth.utils import set_session_badgr_app, get_session_authcode, get_verified_user, get_session_badgr_app, \
+    get_social_account, check_agreed_term_and_conditions
 from ims.models import LTITenant
 from lti_edu.models import LtiBadgeUserTennant, UserCurrentContextId
 from mainsite.models import BadgrApp
@@ -122,6 +123,10 @@ def after_terms_agreement(request, **kwargs):
         institution, created = Institution.objects.get_or_create(name=institution_name)
         request.user.institution = institution
         request.user.save()
+    badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
+
+    resign = True
+    check_agreed_term_and_conditions(request.user, badgr_app, resign=resign)
 
     if lti_data is not None and 'lti_user_id' in lti_data:
         if not request.user.is_anonymous():
@@ -222,5 +227,11 @@ def callback(request):
      
     if not get_social_account(extra_data['sub']):
         return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))
+
+    social_account = get_social_account(extra_data['sub'])
+
+    badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
+    if not check_agreed_term_and_conditions(social_account.user, badgr_app):
+        return HttpResponseRedirect(reverse('accept_terms_resign', kwargs=keyword_arguments))
 
     return after_terms_agreement(request, **keyword_arguments)

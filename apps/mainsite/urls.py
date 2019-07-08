@@ -12,7 +12,8 @@ badgr_admin.autodiscover()
 
 from django.views.generic.base import RedirectView, TemplateView
 
-from mainsite.views import SitewideActionFormView, LoginAndObtainAuthToken, RedirectToUiLogin, DocsAuthorizeRedirect, TermsAndConditionsView
+from mainsite.views import SitewideActionFormView, LoginAndObtainAuthToken, RedirectToUiLogin, DocsAuthorizeRedirect, \
+    TermsAndConditionsView, TermsAndConditionsResignView, AcceptTermsAndConditionsView
 from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation, error404, error500
 
 
@@ -113,7 +114,9 @@ urlpatterns = [
 
     # Accept Terms View
     url(r'^accept_terms/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', TermsAndConditionsView.as_view(), name='accept_terms'),
-    
+    url(r'^accept_terms_resign/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', TermsAndConditionsResignView.as_view(), name='accept_terms_resign'),
+    url(r'^accept_terms_resign_accepted/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', AcceptTermsAndConditionsView.as_view(), name='accept_terms_resign_accepted'),
+
     # url(r'^accept_terms/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', AcceptTermsView.as_view(), name='accept_terms'),
 
     #  include management endpoints

@@ -431,7 +431,7 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     @cachemodel.cached_method(auto_publish=True)
     def cached_agreed_terms_version(self):
         try:
-            return self.termsagreement_set.all().order_by('-terms_version')[0]
+            return self.termsagreement_set.all().filter(valid=True).order_by('-terms_version')[0]
         except IndexError:
             pass
         return None
@@ -455,6 +455,7 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
                 if not self.pk:
                     self.save()
                 self.termsagreement_set.get_or_create(terms_version=value, defaults=dict(agreed=True))
+
 
     def replace_token(self):
         Token.objects.filter(user=self).delete()
@@ -635,6 +636,7 @@ class TermsAgreement(BaseAuditedModel, cachemodel.CacheModel):
     user = models.ForeignKey('badgeuser.BadgeUser')
     terms_version = models.PositiveIntegerField()
     agreed = models.BooleanField(default=True)
+    valid = models.BooleanField(default=True)
 
     class Meta:
         ordering = ('-terms_version',)

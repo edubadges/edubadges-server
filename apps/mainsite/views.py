@@ -197,8 +197,6 @@ class TermsAndConditionsView(TemplateView):
             context['other_lang'] = 'Go to english version'
             context['consent_button'] = 'IK GEEF TOESTEMMING'
             context['no_consent_button'] = 'IK GEEF GEEN TOESTEMMING'
-
-
         else:
             context['privacy_content'] = get_privacy_content('create_account_student_en')
             if login_type == 'surf_conext':
@@ -216,11 +214,15 @@ class TermsAndConditionsView(TemplateView):
         return context
 
 
-
+class TermsAndConditionsResignView(TermsAndConditionsView):
+    template_name = 'terms_of_service/accept_terms_resign.html'
 
 class AcceptTermsAndConditionsView(View):
 
     def post(self, request, **kwargs):
+        pass
+
+    def get(self, request, **kwargs):
         pass
 
 

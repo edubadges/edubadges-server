@@ -4,10 +4,14 @@ import urlparse
 
 from rest_framework.authentication import TokenAuthentication
 
+from badgeuser.models import TermsVersion
 from mainsite.models import BadgrApp
 
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.providers.base import ProviderAccount
+
+#from mainsite.views import TermsAndConditionsView
+from theming.models import Theme
 
 
 class BadgrSocialAuthProviderMixin:
@@ -124,11 +128,39 @@ def get_privacy_content(name):
         'consent_apply_badge': 'apps/privacy/consent-apply-badge-nl.md',
         'privacy_statement_en': 'apps/privacy/privacy-statement-en.md',
         'privacy_statement': 'apps/privacy/privacy-statement-nl.md',
-        'create_account_employee_en': 'apps/consent-create-account-employee-en.md',
-        'create_account_employee_nl': 'apps/consent-create-account-employee-nl.md',
+        'create_account_employee_en': 'apps/privacy/consent-create-account-employee-en.md',
+        'create_account_employee_nl': 'apps/privacy/consent-create-account-employee-nl.md',
         'create_account_student_en': 'apps/privacy/consent-create-account-student-en.md',
         'create_account_student_nl': 'apps/privacy/consent-create-account-student-nl.md',
     }
     with codecs.open(privacy_files[name], "r", encoding='utf-8') as myfile:
         data = myfile.read()
     return data
+
+
+def check_agreed_term_and_conditions(user, badgr_app, resign=False):
+    latest_terms_and_conditions = TermsVersion.objects.filter(
+        terms_and_conditions_template__isnull=True).order_by('-version').all()[0]
+    if user.agreed_terms_version == latest_terms_and_conditions.version:
+        return True
+    if user.agreed_terms_version != latest_terms_and_conditions.version and not resign:
+        for term_agreement in user.termsagreement_set.all():
+            term_agreement.valid = False
+            term_agreement.save()
+
+        return False
+    else:
+        try:
+            if TermsVersion.objects.filter(
+                    terms_and_conditions_template=badgr_app.theme.terms_and_conditions_template).exists():
+                latest_terms_and_conditions = TermsVersion.objects.filter(
+                    terms_and_conditions_template=badgr_app.theme.terms_and_conditions_template).order_by('-version').all()[0]
+        except Theme.DoesNotExist as e:
+            if TermsVersion.objects.filter(
+                terms_and_conditions_template='terms_of_service/accept_terms_versioned.html').order_by('-version').exists():
+                latest_terms_and_conditions = TermsVersion.objects.filter(
+                    terms_and_conditions_template='terms_of_service/accept_terms_versioned.html').order_by('-version').all()[0]
+
+        user.agreed_terms_version = latest_terms_and_conditions.version
+        user.save()
+        return True
