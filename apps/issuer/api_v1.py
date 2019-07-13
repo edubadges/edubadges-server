@@ -182,7 +182,7 @@ class IssuerStaffList(VersionedObjectMixin, APIView):
                 value = json_dumps({'issuer_pk': current_issuer.pk,
                                     'staff_pk': user_to_modify.pk,
                                     'role': role})
-                key = signing.dumps(obj=value, salt=settings.ACCOUNT_SALT)
+                key = signing.dumps(obj=value, salt=getattr(settings, 'ACCOUNT_SALT', 'salty_stuff'))
                 message = EmailMessageMaker.create_staff_member_addition_email(key, current_issuer, role)
                 user_to_modify.email_user(subject='You have been added to an Issuer',
                                         message=message)
@@ -225,7 +225,7 @@ class IssuerStaffConfirm(APIView):
     def _confirm_staff_member_addition(key):
         try:
             max_age = (60 * 60 * 24 * settings.STAFF_MEMBER_CONFIRMATION_EXPIRE_DAYS)
-            value = json_loads(signing.loads(key, max_age=max_age, salt=settings.ACCOUNT_SALT))
+            value = json_loads(signing.loads(key, max_age=max_age, salt=getattr(settings, 'ACCOUNT_SALT', 'salty_stuff')))
             issuer = Issuer.objects.get(pk=value['issuer_pk'])
             staff_member = BadgeUser.objects.get(pk=value['staff_pk'])
             role = value['role']
