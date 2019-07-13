@@ -1,6 +1,7 @@
 # encoding: utf-8
 from __future__ import unicode_literals
 from json import loads as json_loads
+from json import dumps as json_dumps
 from django.core import signing
 from django.contrib.auth import get_user_model
 from django.conf import settings
@@ -18,7 +19,7 @@ from issuer.serializers_v1 import BadgeClassSerializerV1, IssuerRoleActionSerial
 from issuer.utils import get_badgeclass_by_identifier
 from apispec_drf.decorators import apispec_list_operation, apispec_operation
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
-
+from mainsite.utils import EmailMessageMaker
 
 logger = badgrlog.BadgrLogger()
 
@@ -178,7 +179,13 @@ class IssuerStaffList(VersionedObjectMixin, APIView):
                 ).exists():
                 raise ValidationError("Could not add user to staff list. User already in staff list.")
             else:
-                current_issuer.ask_staff_member_confirmation(user_to_modify, role)
+                value = json_dumps({'issuer_pk': current_issuer.pk,
+                                    'staff_pk': user_to_modify.pk,
+                                    'role': role})
+                key = signing.dumps(obj=value, salt=settings.ACCOUNT_SALT)
+                message = EmailMessageMaker.create_staff_member_addition_email(key, current_issuer, role)
+                user_to_modify.email_user(subject='You have been added to an Issuer',
+                                        message=message)
                 return Response("Succesfully invited user to become staff member.", status=status.HTTP_200_OK)
 
         elif action == 'modify':
@@ -209,6 +216,7 @@ class IssuerStaffList(VersionedObjectMixin, APIView):
 
         return Response(IssuerStaffSerializerV1(staff_instance).data)
 
+
 class IssuerStaffConfirm(APIView):
     http_method_names = ['get']
     permission_classes = (permissions.AllowAny,)
@@ -232,7 +240,7 @@ class IssuerStaffConfirm(APIView):
             if created:
                 staff_member.gains_permission('view_issuer_tab', BadgeUser)
             if created is False:
-                raise ValidationError("You have already been added as ataff member to this issuer.")
+                raise ValidationError("You have already been added as staff member to this issuer.")
         except (signing.SignatureExpired,
                 signing.BadSignature,
                 BadgeUser.DoesNotExist,
@@ -244,6 +252,7 @@ class IssuerStaffConfirm(APIView):
         self._confirm_staff_member_addition(key)
         return Response('You have been added to {} as {}'.format('Issuer Name', 'Role'),
                         status=status.HTTP_200_OK)
+
 
 class FindBadgeClassDetail(APIView):
     """

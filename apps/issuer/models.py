@@ -13,7 +13,6 @@ from allauth.account.adapter import get_adapter
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core import signing
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -289,15 +288,6 @@ class Issuer(ResizeUploadedImage,
     @property
     def image_preview(self):
         return self.image
-
-    def ask_staff_member_confirmation(self, staff_member, role):
-        value = json_dumps({'issuer_pk': self.pk,
-                            'staff_pk': staff_member.pk,
-                            'role': role})
-        key = signing.dumps(obj=value, salt=settings.ACCOUNT_SALT)
-        message = reverse('v1_api_issuer_staff_confirm', kwargs={'key': key})
-        staff_member.email_user(subject='You have been added to an Issuer',
-                                message=message)
 
     def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True, use_canonical_id=False):
         obi_version, context_iri = get_obi_context(obi_version)

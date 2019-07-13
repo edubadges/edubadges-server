@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from lti_edu.models import StudentsEnrolled, BadgeClassLtiContext, UserCurrentContextId
-from lti_edu.utils import create_student_badge_request_email
+from mainsite.utils import EmailMessageMaker
 from lti_edu.serializers import StudentsEnrolledSerializer, StudentsEnrolledSerializerWithRelations, BadgeClassLtiContextSerializer
 from issuer.models import BadgeClass
 from entity.api import BaseEntityListView, BaseEntityDetailView
@@ -84,7 +84,7 @@ class StudentsEnrolledList(BaseEntityListView):
                                                         badge_class_id=badge_class.pk,
                                                         email=request.data['email'],
                                                         **defaults)
-            message = create_student_badge_request_email(badge_class)
+            message = EmailMessageMaker.create_student_badge_request_email(badge_class)
             request.user.email_user(subject='You have successfully requested a badge', message=message)
             return Response(data='enrolled', status=200)
         return Response({'error': 'Cannot enroll'}, status=400)

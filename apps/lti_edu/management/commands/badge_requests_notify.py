@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from lti_edu.models import StudentsEnrolled
-from lti_edu.utils import create_issuer_staff_badge_request_email
+from mainsite.utils import EmailMessageMaker
 from django.utils import timezone
 from datetime import timedelta
 
@@ -23,5 +23,5 @@ class Command(BaseCommand):
 
         for user in staff:
             relevant_badge_classes = [bc for bc in badge_classes if user in bc.issuer.staff.all()]
-            message = create_issuer_staff_badge_request_email(relevant_badge_classes)
+            message = EmailMessageMaker.create_issuer_staff_badge_request_email(relevant_badge_classes)
             user.email_user(subject='You have badge requests waiting for you.', message=message)

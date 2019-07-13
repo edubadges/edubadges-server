@@ -16,7 +16,7 @@ from django.apps import apps
 from django.conf import settings
 from django.core.cache import cache
 from django.core.files.storage import DefaultStorage
-from django.core.urlresolvers import get_callable
+from django.core.urlresolvers import get_callable, reverse
 from xml.etree import cElementTree as ET
 
 
@@ -152,3 +152,45 @@ def list_of(value):
     elif isinstance(value, list):
         return value
     return [value]
+
+
+class EmailMessageMaker:
+
+    @staticmethod
+    def create_student_badge_request_email(badge_class):
+        mail_template = 'Dear student, \n\n ' \
+                        '\tYou have successfully requested the following badge. \n\n' \
+                        '\t{}, {} \n\n' \
+                        '\tPlease wait for the issuer of this badge to accept your request. \n\n' \
+                        'Regards, \n\n' \
+                        'The Edubadges team'
+        return mail_template.format(badge_class.name, badge_class.public_url)
+
+    @staticmethod
+    def create_issuer_staff_badge_request_email(badge_classes):
+        badge_classes_string = ''.join(
+            ['\t- {name} (issuer: {issuer})\n\n'.format(issuer=badge_class.issuer.name, name=badge_class.name) for
+             badge_class in badge_classes])
+        mail_template = 'Dear staff member, \n\n ' \
+                        '\tYou have new badge requests for the following badge class{0}. \n\n' \
+                        '{1}' \
+                        '\tThese new requests have been made in the last 24 hours. \n\n' \
+                        'Regards, \n\n' \
+                        'The Edubadges team'
+        plural = 'es' if len(badge_classes) > 1 else ''
+        return mail_template.format(plural, badge_classes_string)
+
+    @staticmethod
+    def create_staff_member_addition_email(key, issuer, role):
+        url = settings.HTTP_ORIGIN + reverse('v1_api_issuer_staff_confirm', kwargs={'key': key})
+        mail_template = 'Dear Sir/Madam, \n\n' \
+                        'You have been asked to join the issuer {issuer_name} as staff member\n\n' \
+                        'with the role: {role}. If you accept please click on the link below. \n\n' \
+                        '{url} \n\n' \
+                        'If you do not want to accept, then ignore this email.' \
+                        '\n\n' \
+                        'Kind regards, \n\n' \
+                        'The Edubadges team'
+        return mail_template.format(**{'issuer_name': issuer.name,
+                                       'role': role,
+                                       'url': url})
