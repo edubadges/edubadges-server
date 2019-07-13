@@ -221,8 +221,8 @@ class IssuerStaffConfirm(APIView):
     http_method_names = ['get']
     permission_classes = (permissions.AllowAny,)
 
-    @staticmethod
-    def _confirm_staff_member_addition(key):
+    def get(self, request, **kwargs):
+        key = kwargs.get('key', None)
         try:
             max_age = (60 * 60 * 24 * settings.STAFF_MEMBER_CONFIRMATION_EXPIRE_DAYS)
             value = json_loads(signing.loads(key, max_age=max_age, salt=getattr(settings, 'ACCOUNT_SALT', 'salty_stuff')))
@@ -239,6 +239,8 @@ class IssuerStaffConfirm(APIView):
             )
             if created:
                 staff_member.gains_permission('view_issuer_tab', BadgeUser)
+                return Response('You have been added to the issuer {} with the following role: {}'.format(issuer.name, role),
+                        status=status.HTTP_200_OK)
             if created is False:
                 raise ValidationError("You have already been added as staff member to this issuer.")
         except (signing.SignatureExpired,
@@ -246,12 +248,6 @@ class IssuerStaffConfirm(APIView):
                 BadgeUser.DoesNotExist,
                 Issuer.DoesNotExist):
             raise ValidationError("Could not add user to staff list.")
-
-    def get(self, request, **kwargs):
-        key = kwargs.get('key', None)
-        self._confirm_staff_member_addition(key)
-        return Response('You have been added to {} as {}'.format('Issuer Name', 'Role'),
-                        status=status.HTTP_200_OK)
 
 
 class FindBadgeClassDetail(APIView):
