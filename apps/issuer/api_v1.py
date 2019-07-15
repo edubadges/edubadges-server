@@ -182,11 +182,11 @@ class IssuerStaffList(VersionedObjectMixin, APIView):
                 value = json_dumps({'issuer_pk': current_issuer.pk,
                                     'staff_pk': user_to_modify.pk,
                                     'role': role})
-                key = signing.dumps(obj=value, salt=getattr(settings, 'ACCOUNT_SALT', 'salty_stuff'))
-                url = user_to_modify.get_badgr_app().public_pages_redirect + '/accept-staff-membership?code=' + key
+                code = signing.dumps(obj=value, salt=getattr(settings, 'ACCOUNT_SALT', 'salty_stuff'))
+                url = user_to_modify.get_badgr_app().public_pages_redirect + '/accept-staff-membership/' + code
                 message = EmailMessageMaker.create_staff_member_addition_email(url, current_issuer, role)
                 user_to_modify.email_user(subject='You have been added to an Issuer',
-                                        message=message)
+                                          message=message)
                 return Response("Succesfully invited user to become staff member.", status=status.HTTP_200_OK)
 
         elif action == 'modify':
@@ -223,7 +223,7 @@ class IssuerStaffConfirm(APIView):
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request, **kwargs):
-        key = kwargs.get('key', None)
+        key = kwargs.get('code', None)
         try:
             max_age = (60 * 60 * 24 * settings.STAFF_MEMBER_CONFIRMATION_EXPIRE_DAYS)
             value = json_loads(signing.loads(key, max_age=max_age, salt=getattr(settings, 'ACCOUNT_SALT', 'salty_stuff')))
