@@ -1,6 +1,3 @@
 [submodule "apps/ims"]
 	path = apps/ims
 	url = https://github.com/edubadges/django_ims_toolbox.git
-[submodule "apps/privacy"]
-	path = apps/privacy
-	url = git@github.com:edubadges/privacy.git
