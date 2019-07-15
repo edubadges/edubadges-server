@@ -32,7 +32,7 @@ from backpack.models import BackpackCollection
 from entity.models import BaseVersionedEntity
 from issuer.models import Issuer, BadgeInstance, BaseAuditedModel
 from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager, EmailAddressCacheModelManager
-from mainsite.models import ApplicationInfo, EmailBlacklist
+from mainsite.models import ApplicationInfo, EmailBlacklist, BadgrApp
 from mainsite.utils import generate_entity_uri
 
 
@@ -200,6 +200,12 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
                 else:
                     return object.faculty in self.faculty.all()
         return False
+
+    def get_badgr_app(self):
+        if self.badgrapp:
+            return self.badgrapp
+        else:
+            return BadgrApp.objects.all().first()
 
     def get_full_name(self):
         return u"%s %s" % (self.first_name, self.last_name)

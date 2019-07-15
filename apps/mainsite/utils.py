@@ -181,8 +181,7 @@ class EmailMessageMaker:
         return mail_template.format(plural, badge_classes_string)
 
     @staticmethod
-    def create_staff_member_addition_email(key, issuer, role):
-        url = settings.HTTP_ORIGIN + reverse('v1_api_issuer_staff_confirm', kwargs={'key': key})
+    def create_staff_member_addition_email(url, issuer, role):
         mail_template = 'Dear Sir/Madam, \n\n' \
                         'You have been asked to join the issuer {issuer_name} as staff member\n\n' \
                         'with the role: {role}. If you accept please click on the link below. \n\n' \

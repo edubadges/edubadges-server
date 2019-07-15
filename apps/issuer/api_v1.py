@@ -183,7 +183,8 @@ class IssuerStaffList(VersionedObjectMixin, APIView):
                                     'staff_pk': user_to_modify.pk,
                                     'role': role})
                 key = signing.dumps(obj=value, salt=getattr(settings, 'ACCOUNT_SALT', 'salty_stuff'))
-                message = EmailMessageMaker.create_staff_member_addition_email(key, current_issuer, role)
+                url = user_to_modify.get_badgr_app().public_pages_redirect + '/accept-staff-membership?code=' + key
+                message = EmailMessageMaker.create_staff_member_addition_email(url, current_issuer, role)
                 user_to_modify.email_user(subject='You have been added to an Issuer',
                                         message=message)
                 return Response("Succesfully invited user to become staff member.", status=status.HTTP_200_OK)
