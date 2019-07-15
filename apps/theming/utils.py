@@ -1,4 +1,3 @@
-from django.contrib.sites.models import Site
 
 from mainsite.models import BadgrApp
 from theming.models import Theme

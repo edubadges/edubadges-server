@@ -197,6 +197,7 @@ class TermsAndConditionsView(TemplateView):
             context['other_lang'] = 'Go to english version'
             context['consent_button'] = 'IK GEEF TOESTEMMING'
             context['no_consent_button'] = 'IK GEEF GEEN TOESTEMMING'
+            context['resign_text'] = "De algemene voorwaarden zijn veranderd en dienen opnieuw getekend te worden"
         else:
             context['privacy_content'] = get_privacy_content('create_account_student_en')
             if login_type == 'surf_conext':
@@ -205,6 +206,7 @@ class TermsAndConditionsView(TemplateView):
             context['other_lang'] = 'Ga naar nederlands versie'
             context['consent_button'] = 'I CONSENT'
             context['no_consent_button'] = 'I DO NOT CONSENT'
+            context['resign_text'] = "The terms and conditions have changed please resign"
 
         context['privacy_statement_url'] = badgr_app.public_pages_redirect + '/privacy-policy'
         if login_type == 'surf_conext':
