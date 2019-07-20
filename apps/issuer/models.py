@@ -475,6 +475,13 @@ class BadgeClass(ResizeUploadedImage,
     def recipient_count(self):
         return self.badgeinstances.filter(revoked=False).count()
 
+    # @cachemodel.cached_method(auto_publish=True)
+    def enrollment_count(self):
+        from lti_edu.models import StudentsEnrolled
+        return StudentsEnrolled.objects.filter(badge_class=self,
+                                               denied=False,
+                                               date_awarded=None).count()
+
     def pathway_element_count(self):
         return len(self.cached_pathway_elements())
 
