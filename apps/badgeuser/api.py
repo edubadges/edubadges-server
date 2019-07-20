@@ -381,17 +381,9 @@ class BadgeUserEmailConfirm(BaseUserRecoveryView):
 
     def get(self, request, **kwargs):
         """
-        Confirm an email address with a token provided in an email
-        ---
-        parameters:
-            - name: token
-              type: string
-              paramType: form
-              description: The token received in the recovery email
-              required: true
+        Confirm an email address
         """
 
-        token = request.query_params.get('token')
         badgrapp_id = request.query_params.get('a', None)
         if badgrapp_id is None:
             badgrapp_id = getattr(settings, 'BADGR_APP_ID', 1)
@@ -409,43 +401,12 @@ class BadgeUserEmailConfirm(BaseUserRecoveryView):
         except CachedEmailAddress.DoesNotExist:
             return Response(status=HTTP_404_NOT_FOUND)
 
-        matches = re.search(r'([0-9A-Za-z]+)-(.*)', token)
-        if not matches:
-            return Response(status=HTTP_404_NOT_FOUND)
-        uidb36 = matches.group(1)
-        key = matches.group(2)
-        if not (uidb36 and key):
-            return Response(status=HTTP_404_NOT_FOUND)
-
-        user = self._get_user(uidb36)
-        if user is None or not default_token_generator.check_token(user, key):
-            return Response(status=HTTP_404_NOT_FOUND)
-
-        if email_address.user != user:
-            return Response(status=HTTP_404_NOT_FOUND)
-
-        old_primary = CachedEmailAddress.objects.get_primary(user)
-        if old_primary is None:
-            email_address.primary = True
         email_address.verified = True
         email_address.save()
 
         process_email_verification.delay(email_address.pk)
 
-        # get badgr_app url redirect
-        redirect_url = get_adapter().get_email_confirmation_redirect_url(request, badgr_app=badgrapp)
-
-        # generate an AccessToken for the user
-        accesstoken = BadgrAccessToken.objects.generate_new_token_for_user(
-            user,
-            application=badgrapp.oauth_application if badgrapp.oauth_application_id else None,
-            scope='rw:backpack rw:profile rw:issuer')
-
-        if badgrapp.use_auth_code_exchange:
-            authcode = authcode_for_accesstoken(accesstoken)
-            redirect_url = set_url_query_params(redirect_url, authCode=authcode)
-        else:
-            redirect_url = set_url_query_params(redirect_url, authToken=accesstoken.token)
+        redirect_url = badgrapp.ui_login_redirect
 
         return Response(status=HTTP_302_FOUND, headers={'Location': redirect_url})
 

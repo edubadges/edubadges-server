@@ -63,15 +63,11 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
 
     def get_email_confirmation_url(self, request, emailconfirmation):
         url_name = "v1_api_user_email_confirm"
-        temp_key = default_token_generator.make_token(emailconfirmation.email_address.user)
-        token = "{uidb36}-{key}".format(uidb36=user_pk_to_url_str(emailconfirmation.email_address.user),
-                                        key=temp_key)
         activate_url = OriginSetting.HTTP + reverse(url_name, kwargs={'confirm_id': emailconfirmation.key})
         badgrapp = BadgrApp.objects.get_current(request=request)
 
-        tokenized_activate_url = "{url}?token={token}&a={badgrapp}".format(
+        tokenized_activate_url = "{url}?a={badgrapp}".format(
             url=activate_url,
-            token=token,
             badgrapp=badgrapp.id
         )
         return tokenized_activate_url
