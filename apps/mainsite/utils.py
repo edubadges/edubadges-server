@@ -167,18 +167,27 @@ class EmailMessageMaker:
         return mail_template.format(badge_class.name, badge_class.public_url)
 
     @staticmethod
-    def create_issuer_staff_badge_request_email(badge_classes):
-        badge_classes_string = ''.join(
-            ['\t- {name} (issuer: {issuer})\n\n'.format(issuer=badge_class.issuer.name, name=badge_class.name) for
-             badge_class in badge_classes])
+    def create_issuer_staff_badge_request_email(badge_classes_new_enrollments, badge_classes_old_enrollments):
+
+        def create_string(badge_class_dict):
+            return ''.join(['\t- {name} (issuer: {issuer}), has {counter} badge request(s).\n\n'
+                           .format(name=badge_class.name,
+                                   counter=counter,
+                                   issuer=badge_class.issuer.name)
+                            for badge_class, counter in badge_class_dict.iteritems()])
+
+        plural = 'es' if len(badge_classes_new_enrollments) > 1 else ''
+        new_badge_classes_message = '\tIn the past 24 hours new badge requests have been made for the following badge class{0}. \n\n'.format(plural) + create_string(badge_classes_new_enrollments)
+        if badge_classes_old_enrollments:
+            old_badge_classes_message = '\tYou also have older unprocessed badge request(s) waiting for you. \n\n' + create_string(badge_classes_old_enrollments)
+        else:
+            old_badge_classes_message = ''
         mail_template = 'Dear staff member, \n\n ' \
-                        '\tYou have new badge requests for the following badge class{0}. \n\n' \
+                        '{0}' \
                         '{1}' \
-                        '\tThese new requests have been made in the last 24 hours. \n\n' \
                         'Regards, \n\n' \
                         'The Edubadges team'
-        plural = 'es' if len(badge_classes) > 1 else ''
-        return mail_template.format(plural, badge_classes_string)
+        return mail_template.format(new_badge_classes_message, old_badge_classes_message)
 
     @staticmethod
     def create_staff_member_addition_email(url, issuer, role):
