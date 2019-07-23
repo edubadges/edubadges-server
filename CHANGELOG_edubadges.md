@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project performed by the Edubadges team will be documented in this file.
 
-## [1.0.3] - tba
+## [1.0.3] - 2019-07-23
  - adds expiration date to awarding
  - multilugual terms and agreement 
  - terms versioning
