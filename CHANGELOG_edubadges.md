@@ -3,6 +3,11 @@ All notable changes to this project performed by the Edubadges team will be docu
 
 ## [1.0.3] - tba
  - adds expiration date to awarding
+ - multilugual terms and agreement 
+ - terms versioning
+ - multilingual pricavy policy 
+ - multilingual accept term on enrolment
+  
 
 ## [1.0.3] - 2019-06-11
  - fixes all tests 
