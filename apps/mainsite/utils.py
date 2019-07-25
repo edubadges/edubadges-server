@@ -190,15 +190,22 @@ class EmailMessageMaker:
         return mail_template.format(new_badge_classes_message, old_badge_classes_message)
 
     @staticmethod
-    def create_staff_member_addition_email(url, issuer, role):
+    def create_staff_member_addition_email(url, issuer, role, expiration=None):
         mail_template = 'Dear Sir/Madam, \n\n' \
                         'You have been asked to join the issuer {issuer_name} as staff member\n\n' \
                         'with the role: {role}. If you accept please click on the link below. \n\n' \
                         '{url} \n\n' \
+                        '{expires}' \
                         'If you do not want to accept, then ignore this email.' \
                         '\n\n' \
                         'Kind regards, \n\n' \
                         'The Edubadges team'
+        if expiration:
+            expires = 'This link expires in {} days \n'.format(expiration)
+        else:
+            expires = ''
+
         return mail_template.format(**{'issuer_name': issuer.name,
                                        'role': role,
-                                       'url': url})
+                                       'url': url,
+                                       'expires': expires})
