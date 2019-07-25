@@ -59,7 +59,7 @@ class StudentEnrollmentList(BaseEntityListView):
 
 class StudentsEnrolledList(BaseEntityListView):
     """
-    GET: get  list of enrollments for a badgeclass
+    GET: get  list of not-awarded enrollments for a badgeclass
     POST: to enroll student
     """
     permission_classes = (AuthenticatedWithVerifiedEmail, )
@@ -68,7 +68,8 @@ class StudentsEnrolledList(BaseEntityListView):
 
     def get_objects(self, request, **kwargs):
         badge_class = get_object_or_404(BadgeClass, entity_id=kwargs['badgeclass_slug'])
-        return StudentsEnrolled.objects.filter(badge_class_id=badge_class.pk)
+        return StudentsEnrolled.objects.filter(badge_class_id=badge_class.pk,
+                                               date_awarded=None)
 
     def post(self, request, **kwargs):
         for field in ['badgeclass_slug', 'edu_id']:
