@@ -91,7 +91,7 @@ def after_terms_agreement(request, **kwargs):
 
     # retrieved data in fields and ensure that email & sud are in extra_data
     extra_data = response.json()
-     
+
     if 'email' not in extra_data or 'sub' not in extra_data:
         error = 'Sorry, your account has no email attached from SURFconext, try another login method.'
         return render_authentication_error(request, SurfConextProvider.id, error)
@@ -220,17 +220,21 @@ def callback(request):
 
     # retrieved data in fields and ensure that email & sud are in extra_data
     extra_data = response.json()
-              
-    keyword_arguments = {'access_token':access_token, 
+
+    keyword_arguments = {'access_token': access_token,
                          'state': json.dumps([badgr_app_pk, 'surf_conext' ,process, auth_token,lti_data, lti_user_id,lti_roles,referer]),
                          'after_terms_agreement_url_name': 'surf_conext_terms_accepted_callback'}
      
     if not get_social_account(extra_data['sub']):
         return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))
-
     social_account = get_social_account(extra_data['sub'])
-
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
+
+    set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app.pk))
+    if 'student' in extra_data['edu_person_affiliations']:
+        error = 'Students are not allowed to log into the staff. Please login with EduID'
+        return render_authentication_error(request, SurfConextProvider.id, error)
+
     if not check_agreed_term_and_conditions(social_account.user, badgr_app):
         return HttpResponseRedirect(reverse('accept_terms_resign', kwargs=keyword_arguments))
 
