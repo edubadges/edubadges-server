@@ -8,6 +8,10 @@ Congratulations, you earned a badge!
 
 {{ badge_description }}
 
+{% if expiration_date %}
+This badge expires at {{ expiration_date }}
+
+{% endif %}
 ---------
 Issuer
 ---------
