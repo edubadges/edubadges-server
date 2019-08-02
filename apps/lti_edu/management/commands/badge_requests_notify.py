@@ -9,7 +9,7 @@ class Command(BaseCommand):
     help = 'Notifies users belonging to issuers of new badge requests within last 24 hours'
 
     def handle(self, *args, **options):
-        command_frequency = 500  # hours
+        command_frequency = 24  # hours
         new_enrollments = StudentsEnrolled.objects\
             .filter(date_created__gte=timezone.now()-timedelta(hours=command_frequency))\
             .filter(date_awarded=None)\
