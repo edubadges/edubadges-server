@@ -15,7 +15,7 @@ from lti_edu.models import LtiBadgeUserTennant, UserCurrentContextId
 from mainsite.models import BadgrApp
 from .provider import SurfConextProvider
 from institution.models import Institution
-
+from allauth.account.adapter import get_adapter as get_account_adapter
 
 def login(request):
     """
@@ -174,6 +174,10 @@ def callback(request):
     # extract the state of the redirect
     print(request.__dict__)
     print(request.__dict__['session'].__dict__)
+
+    if request.user.is_authenticated:
+        get_account_adapter(request).logout(request)  # logging in while being authenticated breaks the login procedure
+
     process, auth_token, badgr_app_pk,lti_data,lti_user_id,lti_roles, referer = json.loads(request.GET.get('state'))
 
     if badgr_app_pk is None:

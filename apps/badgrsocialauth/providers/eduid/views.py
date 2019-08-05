@@ -17,6 +17,7 @@ from .provider import EduIDProvider
 from lti_edu.models import StudentsEnrolled, LtiBadgeUserTennant, UserCurrentContextId
 from issuer.models import BadgeClass
 logger = logging.getLogger('Badgr.Debug')
+from allauth.account.adapter import get_adapter as get_account_adapter
 
 def enroll_student(user, edu_id, badgeclass_slug):
     badge_class = get_object_or_404(BadgeClass, entity_id=badgeclass_slug)
@@ -163,18 +164,20 @@ def after_terms_agreement(request, **kwargs):
 def callback(request):
     print(request.__dict__)
     print(request.__dict__['session'].__dict__)
+
+    if request.user.is_authenticated:
+        get_account_adapter(request).logout(request)  # logging in while being authenticated breaks the login procedure
+
     current_app = SocialApp.objects.get_current(provider='edu_id')
     #extract state of redirect
     state = json.loads(request.GET.get('state'))
     referer, badgr_app_pk, lti_context_id,lti_user_id,lti_roles = state
     lti_data = request.session.get('lti_data', None);
-
     code = request.GET.get('code', None)  # access codes to access user info endpoint
     if code is None: #check if code is given
         error = 'Server error: No userToken found in callback'
         logger.debug(error)
         return render_authentication_error(request, EduIDProvider.id, error=error)
-    
     # 1. Exchange callback Token for access token
     payload = {
      "grant_type": "authorization_code",
