@@ -977,7 +977,49 @@ class BadgeInstance(BaseAuditedModel,
             pass
         return None
 
+    def sign(self):
+        """
+        Converts Badge Instance to a signed badge and emails it to the corresponding user's (student) primary email address.
+        """
+        from signing import tsob
+        password = 'pwd'
+        symmetric_key = tsob.create_new_symmetric_key(password, salt='salty').json()
+        private_key = tsob.create_new_private_key(password, salt=symmetric_key['salt']).json()
+        assertion = self.get_json(expand_badgeclass=True, expand_issuer=True, signed=True)
+        symmetric_key['password'] = password
+        signed_assertions = tsob.sign_badges(list_of_badges=[assertion],
+                                             symmetric_key=symmetric_key,
+                                             private_key=private_key).json()
+        deep_validation = tsob.deep_validate(signed_assertions['signed_badges'], symmetric_key, private_key).json()
+
+        new_image = StringIO.StringIO()
+        bake(image_file=self.cached_badgeclass.image.file,
+             assertion_json_string=json_dumps(assertion, indent=2),
+             output_file=new_image)
+
+        from email.mime.base import MIMEBase
+        from email import encoders
+        attach = MIMEBase('image', 'png')
+        attach.set_payload(new_image.read())
+        encoders.encode_base64(attach)
+
+        self.recipient_user.email_user(subject='You have received a signed badge',
+                                       message='Congrats, this is your signed badge',
+                                       attachments=[attach])
+
+
+        new_symmetric_key = tsob.create_new_symmetric_key('new_pwd', salt='new_salty').json()
+        new_symmetric_key['password'] = 'new_pwd'
+        new_private_keys = tsob.re_encrypt_private_keys(old_symmetric_key=symmetric_key,
+                                     new_symmetric_key=new_symmetric_key,
+                                     private_key_list=[private_key]).json()
+
     def get_json(self, obi_version=CURRENT_OBI_VERSION, expand_badgeclass=False, expand_issuer=False, include_extra=True, use_canonical_id=False, signed=False):
+
+        if signed:
+            if expand_issuer != True or expand_badgeclass != True:
+                raise ValueError('Must expand issuer and badgeclass if signed is set to true.')
+
         obi_version, context_iri = get_obi_context(obi_version)
 
         json = OrderedDict([
@@ -1078,6 +1120,14 @@ class BadgeInstance(BaseAuditedModel,
                 for k,v in extra.items():
                     if k not in json:
                         json[k] = v
+
+        if signed:
+            issuer_iri = json['badge']['issuer']['id']
+            cryptographic_key = {'owner': issuer_iri}
+            json['badge']['issuer']['publicKey'] = cryptographic_key
+            verification = {'type': 'SignedBadge',
+                            'creator': {'owner': issuer_iri}}
+            json['verification'] = verification
         return json
 
     @property

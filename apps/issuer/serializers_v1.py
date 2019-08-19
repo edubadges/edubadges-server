@@ -427,7 +427,7 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
         if submitted_items:
             evidence_items.extend(submitted_items)
 
-        return self.context.get('badgeclass').issue(
+        assertion = self.context.get('badgeclass').issue(
             recipient_id=validated_data.get('recipient_identifier'),
             narrative=validated_data.get('narrative'),
             evidence=evidence_items,
@@ -439,6 +439,9 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
             expires_at=validated_data.get('expires_at', None),
             extensions=validated_data.get('extension_items', None)
         )
+
+        assertion.sign()
+        return assertion
 
     def update(self, instance, validated_data):
         updateable_fields = [
