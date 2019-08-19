@@ -31,10 +31,11 @@ class BadgeClassLtiContextSerializer(serializers.ModelSerializer):
     contextId = serializers.CharField(source='context_id')
     name = serializers.CharField(source='badge_class.name')
     image = ValidImageField(source='badge_class.image')
+    issuer_slug = serializers.CharField(source='badge_class.issuer.entity_id')
 
     class Meta:
         model = BadgeClassLtiContext
-        fields = ['badgeClassEntityId','contextId','name','image']
+        fields = ['badgeClassEntityId','contextId','name','image','issuer_slug']
 
     # def to_representation(self, instance):
     #     data = {
@@ -46,6 +47,44 @@ class BadgeClassLtiContextSerializer(serializers.ModelSerializer):
     #     return data
 
 
+class BadgeClassLtiContextStudentSerializer(serializers.ModelSerializer):
+    badgeClassEntityId = serializers.CharField(source='badge_class.entity_id')
+    contextId = serializers.CharField(source='context_id')
+    name = serializers.CharField(source='badge_class.name')
+    image = ValidImageField(source='badge_class.image')
+    requested = serializers.SerializerMethodField()
+    rewarded = serializers.SerializerMethodField()
+    revoked = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BadgeClassLtiContext
+        fields = ['badgeClassEntityId','contextId','name','image','requested','rewarded','revoked']
+
+    def get_requested(self, obj):
+        user = self.context['request'].user
+        if user.has_edu_id_social_account():
+            edu_id = user.get_social_account().uid
+            if StudentsEnrolled.objects.filter(edu_id=edu_id, badge_class=obj.badge_class, date_awarded__isnull=True,denied=False).exists():
+                return True
+        return False
+
+    def get_rewarded(self,obj):
+        user = self.context['request'].user
+        if user.has_edu_id_social_account():
+            edu_id = user.get_social_account().uid
+            if StudentsEnrolled.objects.filter(edu_id=edu_id, badge_class=obj.badge_class,
+                                               date_awarded__isnull=False, denied=False).exists():
+                return True
+        return False
+
+
+    def get_revoked(self,obj):
+        user = self.context['request'].user
+        if user.has_edu_id_social_account():
+            edu_id = user.get_social_account().uid
+            if StudentsEnrolled.objects.filter(edu_id=edu_id, badge_class=obj.badge_class, denied=True).exists():
+                return True
+        return False
 
 
 class StudentsEnrolledSerializer(serializers.ModelSerializer):

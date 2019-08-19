@@ -6,7 +6,8 @@ from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from lti_edu.models import StudentsEnrolled, BadgeClassLtiContext, UserCurrentContextId
 from mainsite.utils import EmailMessageMaker
-from lti_edu.serializers import StudentsEnrolledSerializer, StudentsEnrolledSerializerWithRelations, BadgeClassLtiContextSerializer
+from lti_edu.serializers import StudentsEnrolledSerializer, StudentsEnrolledSerializerWithRelations, \
+    BadgeClassLtiContextSerializer, BadgeClassLtiContextStudentSerializer
 from issuer.models import BadgeClass
 from entity.api import BaseEntityListView, BaseEntityDetailView
 
@@ -123,6 +124,20 @@ class BadgeClassLtiContextListView(BaseEntityListView):
     permission_classes = (AuthenticatedWithVerifiedEmail,)
     model = BadgeClassLtiContext
     serializer_class = BadgeClassLtiContextSerializer
+
+    def get_objects(self, request, **kwargs):
+
+        if 'lti_context_id' in kwargs:
+            lti_context_id = kwargs['lti_context_id']
+            badgeclasses_per_context_id = BadgeClassLtiContext.objects.filter(context_id=lti_context_id).all()
+            return badgeclasses_per_context_id
+        return []
+
+
+class BadgeClassLtiContextStudentListView(BaseEntityListView):
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    model = BadgeClassLtiContext
+    serializer_class = BadgeClassLtiContextStudentSerializer
 
     def get_objects(self, request, **kwargs):
 
