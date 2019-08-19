@@ -16,7 +16,7 @@ from django.apps import apps
 from django.conf import settings
 from django.core.cache import cache
 from django.core.files.storage import DefaultStorage
-from django.core.urlresolvers import get_callable
+from django.core.urlresolvers import get_callable, reverse
 from xml.etree import cElementTree as ET
 
 
@@ -152,3 +152,60 @@ def list_of(value):
     elif isinstance(value, list):
         return value
     return [value]
+
+
+class EmailMessageMaker:
+
+    @staticmethod
+    def create_student_badge_request_email(badge_class):
+        mail_template = 'Dear student, \n\n ' \
+                        '\tYou have successfully requested the following badge. \n\n' \
+                        '\t{}, {} \n\n' \
+                        '\tPlease wait for the issuer of this badge to accept your request. \n\n' \
+                        'Regards, \n\n' \
+                        'The Edubadges team'
+        return mail_template.format(badge_class.name, badge_class.public_url)
+
+    @staticmethod
+    def create_issuer_staff_badge_request_email(badge_classes_new_enrollments, badge_classes_old_enrollments):
+
+        def create_string(badge_class_dict):
+            return ''.join(['\t- {name} (issuer: {issuer}), has {counter} badge request(s).\n\n'
+                           .format(name=badge_class.name,
+                                   counter=counter,
+                                   issuer=badge_class.issuer.name)
+                            for badge_class, counter in badge_class_dict.iteritems()])
+
+        plural = 'es' if len(badge_classes_new_enrollments) > 1 else ''
+        new_badge_classes_message = '\tIn the past 24 hours new badge requests have been made for the following badge class{0}. \n\n'.format(plural) + create_string(badge_classes_new_enrollments)
+        if badge_classes_old_enrollments:
+            old_badge_classes_message = '\tYou also have older unprocessed badge request(s) waiting for you. \n\n' + create_string(badge_classes_old_enrollments)
+        else:
+            old_badge_classes_message = ''
+        mail_template = 'Dear staff member, \n\n ' \
+                        '{0}' \
+                        '{1}' \
+                        'Regards, \n\n' \
+                        'The Edubadges team'
+        return mail_template.format(new_badge_classes_message, old_badge_classes_message)
+
+    @staticmethod
+    def create_staff_member_addition_email(url, issuer, role, expiration=None):
+        mail_template = 'Dear Sir/Madam, \n\n' \
+                        'You have been asked to join the issuer {issuer_name} as staff member\n\n' \
+                        'with the role: {role}. If you accept please click on the link below. \n\n' \
+                        '{url} \n\n' \
+                        '{expires}' \
+                        'If you do not want to accept, then ignore this email.' \
+                        '\n\n' \
+                        'Kind regards, \n\n' \
+                        'The Edubadges team'
+        if expiration:
+            expires = 'This link expires in {} days \n'.format(expiration)
+        else:
+            expires = ''
+
+        return mail_template.format(**{'issuer_name': issuer.name,
+                                       'role': role,
+                                       'url': url,
+                                       'expires': expires})

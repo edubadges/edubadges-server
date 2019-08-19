@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from lti_edu.models import StudentsEnrolled, BadgeClassLtiContext, UserCurrentContextId
-
+from mainsite.utils import EmailMessageMaker
 from lti_edu.serializers import StudentsEnrolledSerializer, StudentsEnrolledSerializerWithRelations, BadgeClassLtiContextSerializer
 from issuer.models import BadgeClass
 from entity.api import BaseEntityListView, BaseEntityDetailView
@@ -59,7 +59,7 @@ class StudentEnrollmentList(BaseEntityListView):
 
 class StudentsEnrolledList(BaseEntityListView):
     """
-    GET: get  list of enrollments for a badgeclass
+    GET: get  list of not-awarded enrollments for a badgeclass
     POST: to enroll student
     """
     permission_classes = (AuthenticatedWithVerifiedEmail, )
@@ -68,7 +68,8 @@ class StudentsEnrolledList(BaseEntityListView):
 
     def get_objects(self, request, **kwargs):
         badge_class = get_object_or_404(BadgeClass, entity_id=kwargs['badgeclass_slug'])
-        return StudentsEnrolled.objects.filter(badge_class_id=badge_class.pk)
+        return StudentsEnrolled.objects.filter(badge_class_id=badge_class.pk,
+                                               date_awarded=None)
 
     def post(self, request, **kwargs):
         for field in ['badgeclass_slug', 'edu_id']:
@@ -84,6 +85,8 @@ class StudentsEnrolledList(BaseEntityListView):
                                                         badge_class_id=badge_class.pk,
                                                         email=request.data['email'],
                                                         **defaults)
+            message = EmailMessageMaker.create_student_badge_request_email(badge_class)
+            request.user.email_user(subject='You have successfully requested a badge', message=message)
             return Response(data='enrolled', status=200)
         return Response({'error': 'Cannot enroll'}, status=400)
 

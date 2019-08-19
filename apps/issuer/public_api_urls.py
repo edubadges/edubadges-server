@@ -11,7 +11,6 @@ json_patterns = [
     url(r'^issuers/(?P<entity_id>[^/.]+)/badges$', xframe_options_exempt(IssuerBadgesJson.as_view(slugToEntityIdRedirect=True)), name='issuer_badges_json'),
     url(r'^badges/(?P<entity_id>[^/.]+)$', xframe_options_exempt(BadgeClassJson.as_view(slugToEntityIdRedirect=True)), name='badgeclass_json'),
     url(r'^assertions/(?P<entity_id>[^/.]+)$', xframe_options_exempt(BadgeInstanceJson.as_view(slugToEntityIdRedirect=True)), name='badgeinstance_json'),
-
     url(r'^collections/(?P<entity_id>[^/.]+)$', xframe_options_exempt(BackpackCollectionJson.as_view(slugToEntityIdRedirect=True)), name='collection_json'),
 ]
 

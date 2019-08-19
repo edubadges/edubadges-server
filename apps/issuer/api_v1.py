@@ -1,29 +1,25 @@
 # encoding: utf-8
 from __future__ import unicode_literals
-import urlparse
-
-from django.apps import apps
+from json import loads as json_loads
+from json import dumps as json_dumps
+from django.core import signing
 from django.contrib.auth import get_user_model
-from django.core.files.uploadedfile import UploadedFile
-from rest_framework import status, authentication
+from django.conf import settings
+from rest_framework import status, authentication, permissions
 from rest_framework.exceptions import ValidationError, PermissionDenied, NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 import badgrlog
 from badgeuser.models import CachedEmailAddress, BadgeUser
-from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
-from issuer.models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
-from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
-                                IsEditor, IsStaff, IsOwnerOrStaff, ApprovedIssuersOnly)
-from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
-                                   BadgeInstanceSerializerV1, IssuerRoleActionSerializerV1,
-                                   IssuerStaffSerializerV1)
-from issuer.serializers_v2 import IssuerSerializerV2
+from entity.api import VersionedObjectMixin
+from issuer.models import Issuer, IssuerStaff
+from issuer.permissions import IsOwnerOrStaff
+from issuer.serializers_v1 import BadgeClassSerializerV1, IssuerRoleActionSerializerV1, IssuerStaffSerializerV1
 from issuer.utils import get_badgeclass_by_identifier
 from apispec_drf.decorators import apispec_list_operation, apispec_operation
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
-
+from mainsite.utils import EmailMessageMaker
 
 logger = badgrlog.BadgrLogger()
 
@@ -176,17 +172,22 @@ class IssuerStaffList(VersionedObjectMixin, APIView):
         action = serializer.validated_data.get('action')
         if action == 'add':
             role = serializer.validated_data.get('role')
-            staff_instance, created = IssuerStaff.objects.get_or_create(
-                user=user_to_modify,
-                issuer=current_issuer,
-                defaults={
-                    'role': role
-                }
-            )
-            if created:
-                user_to_modify.gains_permission('view_issuer_tab', BadgeUser)
-            if created is False:
+            if IssuerStaff.objects.filter(
+                    user=user_to_modify,
+                    issuer=current_issuer,
+                    role=role
+                ).exists():
                 raise ValidationError("Could not add user to staff list. User already in staff list.")
+            else:
+                value = json_dumps({'issuer_pk': current_issuer.pk,
+                                    'staff_pk': user_to_modify.pk,
+                                    'role': role})
+                code = signing.dumps(obj=value, salt=getattr(settings, 'ACCOUNT_SALT', 'salty_stuff'))
+                url = user_to_modify.get_badgr_app().public_pages_redirect + '/accept-staff-membership/' + code
+                message = EmailMessageMaker.create_staff_member_addition_email(url, current_issuer, role, expiration=settings.STAFF_MEMBER_CONFIRMATION_EXPIRE_DAYS)
+                user_to_modify.email_user(subject='You have been added to an Issuer',
+                                          message=message)
+                return Response("Succesfully invited user to become staff member.", status=status.HTTP_200_OK)
 
         elif action == 'modify':
             role = serializer.validated_data.get('role')
@@ -215,6 +216,39 @@ class IssuerStaffList(VersionedObjectMixin, APIView):
         user_to_modify.save()
 
         return Response(IssuerStaffSerializerV1(staff_instance).data)
+
+
+class IssuerStaffConfirm(APIView):
+    http_method_names = ['get']
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request, **kwargs):
+        key = kwargs.get('code', None)
+        try:
+            max_age = (60 * 60 * 24 * settings.STAFF_MEMBER_CONFIRMATION_EXPIRE_DAYS)
+            value = json_loads(signing.loads(key, max_age=max_age, salt=getattr(settings, 'ACCOUNT_SALT', 'salty_stuff')))
+            issuer = Issuer.objects.get(pk=value['issuer_pk'])
+            staff_member = BadgeUser.objects.get(pk=value['staff_pk'])
+            role = value['role']
+
+            staff_instance, created = IssuerStaff.objects.get_or_create(
+                user=staff_member,
+                issuer=issuer,
+                defaults={
+                    'role': role
+                }
+            )
+            if created:
+                staff_member.gains_permission('view_issuer_tab', BadgeUser)
+                return Response('You have been added to the issuer {} with the following role: {}'.format(issuer.name, role),
+                        status=status.HTTP_200_OK)
+            if created is False:
+                raise ValidationError("You have already been added as staff member to this issuer.")
+        except (signing.SignatureExpired,
+                signing.BadSignature,
+                BadgeUser.DoesNotExist,
+                Issuer.DoesNotExist):
+            raise ValidationError("Could not add user to staff list.")
 
 
 class FindBadgeClassDetail(APIView):

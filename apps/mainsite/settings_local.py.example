@@ -86,6 +86,10 @@ LOGS_DIR = TOP_DIR + '/logs'
 # Run celery tasks in same thread as webserver
 CELERY_ALWAYS_EAGER = True
 
+# needed for all email confirmations
+ACCOUNT_SALT ='salty stuff'
+
+STAFF_MEMBER_CONFIRMATION_EXPIRE_DAYS = 7
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # EMAIL_BACKEND = 'django_ses.SESBackend'

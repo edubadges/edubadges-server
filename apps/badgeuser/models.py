@@ -32,7 +32,7 @@ from backpack.models import BackpackCollection
 from entity.models import BaseVersionedEntity
 from issuer.models import Issuer, BadgeInstance, BaseAuditedModel
 from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager, EmailAddressCacheModelManager
-from mainsite.models import ApplicationInfo
+from mainsite.models import ApplicationInfo, EmailBlacklist, BadgrApp
 from mainsite.utils import generate_entity_uri
 
 
@@ -201,6 +201,12 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
                     return object.faculty in self.faculty.all()
         return False
 
+    def get_badgr_app(self):
+        if self.badgrapp:
+            return self.badgrapp
+        else:
+            return BadgrApp.objects.all().first()
+
     def get_full_name(self):
         return u"%s %s" % (self.first_name, self.last_name)
 
@@ -220,7 +226,14 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         """
         Sends an email to this User.
         """
-        send_mail(subject, message, from_email, [self.primary_email], **kwargs)
+        try:
+            EmailBlacklist.objects.get(email=self.primary_email)
+        except EmailBlacklist.DoesNotExist:
+            # Allow sending, as this email is not blacklisted.
+            send_mail(subject, message, from_email, [self.primary_email], **kwargs)
+        else:
+            return
+            # TODO: Report email non-delivery somewhere.
 
     def publish(self):
         super(BadgeUser, self).publish()
