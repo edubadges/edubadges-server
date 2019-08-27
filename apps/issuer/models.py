@@ -984,7 +984,7 @@ class BadgeInstance(BaseAuditedModel,
         from signing import tsob
         password = 'pwd'
         symmetric_key = tsob.create_new_symmetric_key(password, salt='salty').json()
-        private_key = tsob.create_new_private_key(password, salt=symmetric_key['salt']).json()
+        private_key = tsob.create_new_private_key(password, symmetric_key).json()
         assertion = self.get_json(expand_badgeclass=True, expand_issuer=True, signed=True)
         symmetric_key['password'] = password
         signed_assertions = tsob.sign_badges(list_of_badges=[assertion],

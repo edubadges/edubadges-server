@@ -17,15 +17,15 @@ def create_new_symmetric_key(password, salt, length=32, n=1048576, r=8, p=1):
                          headers={'content-type': 'application/json'})
 
 
-def create_new_private_key(password, salt, length=32, n=1048576, r=8, p=1):
+def create_new_private_key(password, symmmetric_key):
     return requests.post(TSOB_BASE_URL+'privatekey/',
                          data=json.dumps({
                              "password": password,
-                             "salt": salt,
-                             "length": length,
-                             "n": n,
-                             "r": r,
-                             "p": p
+                             "salt": symmmetric_key['salt'],
+                             "length": symmmetric_key['length'],
+                             "n": symmmetric_key['n'],
+                             "r": symmmetric_key['r'],
+                             "p": symmmetric_key['p']
                          }),
                          headers={'content-type': 'application/json'})
 
