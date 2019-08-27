@@ -13,6 +13,9 @@ class SymmetricKey(models.Model):
     p = models.IntegerField()
     current = models.BooleanField()
 
+    class Meta:
+        permissions = (('may_sign_assertions', 'User may sign assertions'),)
+
 
 class PrivateKey(models.Model):
     user = models.ForeignKey(AUTH_USER_MODEL)
