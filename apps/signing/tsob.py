@@ -4,7 +4,7 @@ import json
 TSOB_BASE_URL = 'http://127.0.0.1:3000/'
 
 
-def create_new_symmetric_key(password, salt, length=32, n=1048576, r=8, p=1):
+def create_new_symmetric_key(password, salt='salt', length=32, n=1048576, r=8, p=1):
     return requests.post(TSOB_BASE_URL+'symmetrickey/',
                          data=json.dumps({
                              "password": password,
