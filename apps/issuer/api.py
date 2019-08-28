@@ -419,7 +419,8 @@ class BadgeInstanceList(UncachedPaginatedViewMixin, VersionedObjectMixin, BaseEn
                 request.data['recipientprofile_name'] = recipient['recipient_name']
                 request.data['recipient_type'] = recipient['recipient_type']
                 request.data['recipient_identifier'] = recipient['recipient_identifier']
-                request.data['extensions'] = recipient['extensions']
+                if recipient.get('extensions', False):
+                    request.data['extensions'] = recipient['extensions']
                 response = super(BadgeInstanceList, self).post(request, **kwargs) 
                 if response.status_code == 201:
                     badge_class = get_object_or_404(BadgeClass, entity_id=request.data.get('badge_class', -1))
