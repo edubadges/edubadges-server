@@ -121,6 +121,10 @@ urlpatterns = [
 
     #  include management endpoints
     url(r'^management/', include('management.api_urls')),
+
+    #  include signing endpoints
+    url(r'^signing/', include('signing.api_urls')),
+
 ]
 
 urlpatterns += [
