@@ -1,6 +1,8 @@
 import uuid
-
 import os, json
+from email.mime.base import MIMEBase
+from email import encoders
+
 from django.apps import apps
 from django.core.urlresolvers import reverse
 from django.core.validators import URLValidator
@@ -346,6 +348,7 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
     revocation_reason = serializers.CharField(read_only=True)
 
     expires = serializers.DateTimeField(source='expires_at', required=False, allow_null=True)
+    issue_signed = serializers.BooleanField(required=False)
 
     create_notification = HumanReadableBooleanField(write_only=True, required=False, default=False)
 
@@ -439,8 +442,15 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
             expires_at=validated_data.get('expires_at', None),
             extensions=validated_data.get('extension_items', None)
         )
+        if validated_data.get('issue_signed', False):
+            signed_baked_assertion = assertion.get_signed_baked_image()
+            attach = MIMEBase('image', 'png')
+            attach.set_payload(signed_baked_assertion.read())
+            encoders.encode_base64(attach)
+            assertion.recipient_user.email_user(subject='You have received a signed badge',
+                                               message='Congrats, this is your signed badge',
+                                               attachments=[attach])
 
-        assertion.sign()
         return assertion
 
     def update(self, instance, validated_data):

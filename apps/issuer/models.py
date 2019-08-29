@@ -33,6 +33,7 @@ from mainsite.models import (BadgrApp, EmailBlacklist)
 from mainsite.utils import OriginSetting, generate_entity_uri
 from .utils import generate_sha256_hashstring, CURRENT_OBI_VERSION, get_obi_context, add_obi_version_ifneeded, \
     UNVERSIONED_BAKED_VERSION
+from signing import tsob
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 logger = logging.getLogger('Badgr.Debug')
@@ -977,11 +978,10 @@ class BadgeInstance(BaseAuditedModel,
             pass
         return None
 
-    def sign(self):
+    def get_signed_baked_image(self):
         """
         Converts Badge Instance to a signed badge and emails it to the corresponding user's (student) primary email address.
         """
-        from signing import tsob
         password = 'pwd'
         symmetric_key = tsob.create_new_symmetric_key(password, salt='salty').json()
         private_key = tsob.create_new_private_key(password, symmetric_key).json()
@@ -990,29 +990,23 @@ class BadgeInstance(BaseAuditedModel,
         signed_assertions = tsob.sign_badges(list_of_badges=[assertion],
                                              symmetric_key=symmetric_key,
                                              private_key=private_key).json()
-        deep_validation = tsob.deep_validate(signed_assertions['signed_badges'], symmetric_key, private_key).json()
+
+        signed_assertion = signed_assertions['signed_badges'][0]  # TODO: implement batch-wise signing
 
         new_image = StringIO.StringIO()
         bake(image_file=self.cached_badgeclass.image.file,
-             assertion_json_string=json_dumps(assertion, indent=2),
+             assertion_json_string=json_dumps(signed_assertion, indent=2),
              output_file=new_image)
 
-        from email.mime.base import MIMEBase
-        from email import encoders
-        attach = MIMEBase('image', 'png')
-        attach.set_payload(new_image.read())
-        encoders.encode_base64(attach)
+        # deep_validation = tsob.deep_validate(signed_assertions['signed_badges'], symmetric_key, private_key).json()
+        # new_symmetric_key = tsob.create_new_symmetric_key('new_pwd', salt='new_salty').json()
+        # new_symmetric_key['password'] = 'new_pwd'
+        # new_private_keys = tsob.re_encrypt_private_keys(old_symmetric_key=symmetric_key,
+        #                              new_symmetric_key=new_symmetric_key,
+        #                              private_key_list=[private_key]).json()
 
-        self.recipient_user.email_user(subject='You have received a signed badge',
-                                       message='Congrats, this is your signed badge',
-                                       attachments=[attach])
+        return new_image
 
-
-        new_symmetric_key = tsob.create_new_symmetric_key('new_pwd', salt='new_salty').json()
-        new_symmetric_key['password'] = 'new_pwd'
-        new_private_keys = tsob.re_encrypt_private_keys(old_symmetric_key=symmetric_key,
-                                     new_symmetric_key=new_symmetric_key,
-                                     private_key_list=[private_key]).json()
 
     def get_json(self, obi_version=CURRENT_OBI_VERSION, expand_badgeclass=False, expand_issuer=False, include_extra=True, use_canonical_id=False, signed=False):
 
