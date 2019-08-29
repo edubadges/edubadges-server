@@ -1,3 +1,4 @@
+import StringIO
 import uuid
 import os, json
 from email.mime.base import MIMEBase
@@ -8,6 +9,7 @@ from django.core.urlresolvers import reverse
 from django.core.validators import URLValidator
 from django.utils.html import strip_tags
 from rest_framework import serializers
+from openbadges_bakery import bake
 
 import utils
 from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserIdentifierFieldV1
@@ -20,6 +22,8 @@ from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, 
 from mainsite.utils import OriginSetting
 from mainsite.validators import ChoicesValidator, BadgeExtensionValidator
 from .models import Issuer, BadgeClass, IssuerStaff, BadgeInstance, BadgeClassExtension, IssuerExtension
+from signing import tsob
+from signing.models import SymmetricKey
 
 class ExtensionsSaverMixin(object):
     def remove_extensions(self, instance, extensions_to_remove):
@@ -349,6 +353,7 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
 
     expires = serializers.DateTimeField(source='expires_at', required=False, allow_null=True)
     issue_signed = serializers.BooleanField(required=False)
+    signing_password = serializers.CharField(max_length=1024, required=False)
 
     create_notification = HumanReadableBooleanField(write_only=True, required=False, default=False)
 
@@ -445,9 +450,23 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
         if validated_data.get('issue_signed', False):
             if not validated_data['created_by'].may_sign_assertions:
                 raise serializers.ValidationError('You do not have permission to sign badges.')
-            signed_baked_assertion = assertion.get_signed_baked_image()
+            if not validated_data['signing_password']:
+                raise serializers.ValidationError('Cannot sign badges: no password provided.')
+
+            symkey = SymmetricKey.objects.get(user=validated_data['created_by'], current=True)
+
+            signed_assertions = tsob.sign_badges(list_of_assertions=[assertion],
+                                                 password=validated_data['signing_password'],
+                                                 symmetric_key=symkey)
+            signed_assertion = signed_assertions[0]
+
+            new_image = StringIO.StringIO()
+            bake(image_file=assertion.cached_badgeclass.image.file,
+                 assertion_json_string=json.dumps(signed_assertion, indent=2),
+                 output_file=new_image)
+
             attach = MIMEBase('image', 'png')
-            attach.set_payload(signed_baked_assertion.read())
+            attach.set_payload(new_image.read())
             encoders.encode_base64(attach)
             assertion.recipient_user.email_user(subject='You have received a signed badge',
                                                message='Congrats, this is your signed badge',
