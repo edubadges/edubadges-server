@@ -8,9 +8,10 @@ from signing.serializers import SymmetricKeySerializer
 
 class SymmetricKeyView(BaseEntityListView):
     model = SymmetricKey
-    http_method_names = ['post']
+    http_method_names = ['get', 'post']
     permission_classes = (AuthenticatedWithVerifiedEmail, MaySignAssertions)
     serializer_class = SymmetricKeySerializer
+    serializer_class_v1 = SymmetricKeySerializer
 
     def post(self, request, **kwargs):
         """
@@ -20,3 +21,6 @@ class SymmetricKeyView(BaseEntityListView):
         if not password:
             raise serializers.ValidationError({"password": "field is required"})
         return super(SymmetricKeyView, self).post(request, **kwargs)
+
+    def get_objects(self, request, **kwargs):
+        return SymmetricKey.objects.filter(user=request.user, current=True)

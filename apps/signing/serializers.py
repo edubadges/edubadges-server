@@ -6,7 +6,7 @@ from signing import tsob
 
 class SymmetricKeySerializer(serializers.Serializer):
 
-    password = serializers.CharField()
+    password = serializers.CharField(required=False, allow_null=True)
 
     class Meta:
        model = SymmetricKey
@@ -33,5 +33,5 @@ class SymmetricKeySerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         representation = {}
-        representation['password_hash'] = instance.password_hash
+        representation['exists'] = True
         return representation
