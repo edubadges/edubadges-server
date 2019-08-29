@@ -443,6 +443,8 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
             extensions=validated_data.get('extension_items', None)
         )
         if validated_data.get('issue_signed', False):
+            if not validated_data['created_by'].may_sign_assertions:
+                raise serializers.ValidationError('You do not have permission to sign badges.')
             signed_baked_assertion = assertion.get_signed_baked_image()
             attach = MIMEBase('image', 'png')
             attach.set_payload(signed_baked_assertion.read())

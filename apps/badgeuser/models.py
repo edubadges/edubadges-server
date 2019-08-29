@@ -267,6 +267,10 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     def email_items(self):
         return self.cached_emails()
 
+    @property
+    def may_sign_assertions(self):
+        return self.has_perm('signing.may_sign_assertions')
+
     @email_items.setter
     def email_items(self, value):
         """
