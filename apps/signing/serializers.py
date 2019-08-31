@@ -7,10 +7,10 @@ from signing import tsob
 class SymmetricKeySerializer(serializers.Serializer):
 
     password = serializers.CharField(required=False, allow_null=True)
+    old_password = serializers.CharField(required=False, allow_null=True)
 
     class Meta:
-       model = SymmetricKey
-       fields = ('password_hash',)
+        model = SymmetricKey
 
     def create(self, validated_data, **kwargs):
         if SymmetricKey.objects.filter(user=validated_data['created_by']).exists():
@@ -29,9 +29,28 @@ class SymmetricKeySerializer(serializers.Serializer):
         return symkey
 
     def update(self, instance, validated_data):
-        raise NotImplementedError
+        new_symkey = tsob.create_new_symmetric_key(validated_data.get('password')).json()
+        new_symkey = SymmetricKey.objects.create(
+            password_hash=utils.hash_string(validated_data.get('password')),
+            salt=new_symkey['salt'],
+            length=new_symkey['length'],
+            n=new_symkey['n'],
+            r=new_symkey['r'],
+            p=new_symkey['p'],
+            current=False,
+            user=validated_data['updated_by']
+        )
+        try:
+            tsob.re_encrypt_private_keys(old_symmetric_key=instance,
+                                         new_symmetric_key=new_symkey,
+                                         old_password=validated_data.get('old_password'),
+                                         new_password=validated_data.get('password'))
+        except Exception as e:
+            raise serializers.ValidationError(e.message)
+        return new_symkey
 
     def to_representation(self, instance):
-        representation = {}
-        representation['exists'] = True
-        return representation
+        if instance:
+            return {'exists': True}
+        if not instance:
+            return {'exists': False}

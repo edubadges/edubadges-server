@@ -39,5 +39,6 @@ class PrivateKey(models.Model):
                 'encrypted_private_key': self.encrypted_private_key,
                 'tag': self.tag,
                 'associated_data': self.associated_data,
-                'hash_of_public_key': self.hash_of_public_key}
+                'hash_of_public_key': self.hash_of_public_key,
+                'time_created': self.time_created.strftime('%Y-%m-%dT%H:%M:%SZ')}
 
