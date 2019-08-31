@@ -455,9 +455,12 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
 
             symkey = SymmetricKey.objects.get(user=validated_data['created_by'], current=True)
 
-            signed_assertions = tsob.sign_badges(list_of_assertions=[assertion],
-                                                 password=validated_data['signing_password'],
-                                                 symmetric_key=symkey)
+            try:
+                signed_assertions = tsob.sign_badges(list_of_assertions=[assertion],
+                                                     password=validated_data['signing_password'],
+                                                     symmetric_key=symkey)
+            except ValueError as e:
+                raise serializers.ValidationError(e.message)
             signed_assertion = signed_assertions[0]
 
             new_image = StringIO.StringIO()

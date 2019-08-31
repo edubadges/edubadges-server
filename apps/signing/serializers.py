@@ -45,7 +45,7 @@ class SymmetricKeySerializer(serializers.Serializer):
                                          new_symmetric_key=new_symkey,
                                          old_password=validated_data.get('old_password'),
                                          new_password=validated_data.get('password'))
-        except Exception as e:
+        except ValueError as e:
             raise serializers.ValidationError(e.message)
         return new_symkey
 

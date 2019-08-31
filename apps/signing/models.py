@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.db import models
-AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 from signing import utils
+AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
+
 
 class SymmetricKey(models.Model):
     user = models.ForeignKey(AUTH_USER_MODEL)
@@ -21,7 +22,7 @@ class SymmetricKey(models.Model):
 
     def validate_password(self, password):
         if self.password_hash != utils.hash_string(password):
-            raise ValueError('Password does not match the one belonging to this Symmetric Key')
+            raise ValueError('Wrong password, please try again.')
 
 
 class PrivateKey(models.Model):
@@ -40,5 +41,6 @@ class PrivateKey(models.Model):
                 'tag': self.tag,
                 'associated_data': self.associated_data,
                 'hash_of_public_key': self.hash_of_public_key,
-                'time_created': self.time_created.strftime('%Y-%m-%dT%H:%M:%SZ')}
+                'time_created': self.time_created.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                }
 

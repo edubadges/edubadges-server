@@ -38,6 +38,7 @@ def create_new_private_key(password, symmetric_key):
         time_created=response['time_created'],
         hash_of_public_key=response['hash_of_public_key']
     )
+    private_key.refresh_from_db()  # must do this so time_created is not unicode, but datetime object
     return private_key
 
 
