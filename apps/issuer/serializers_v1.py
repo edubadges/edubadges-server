@@ -452,8 +452,10 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
                 raise serializers.ValidationError('You do not have permission to sign badges.')
             if not validated_data['signing_password']:
                 raise serializers.ValidationError('Cannot sign badges: no password provided.')
-
-            symkey = SymmetricKey.objects.get(user=validated_data['created_by'], current=True)
+            try:
+                symkey = SymmetricKey.objects.get(user=validated_data['created_by'], current=True)
+            except SymmetricKey.DoesNotExist:
+                raise serializers.ValidationError("You don't have a password set. Please set one first.")
 
             try:
                 signed_assertions = tsob.sign_badges(list_of_assertions=[assertion],
