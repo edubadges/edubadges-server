@@ -461,13 +461,13 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
                 signed_assertions = tsob.sign_badges(list_of_assertions=[assertion],
                                                      password=validated_data['signing_password'],
                                                      symmetric_key=symkey)
+                signed_assertion = signed_assertions[0]  # TODO: implementation of batch wise signing
             except ValueError as e:
                 raise serializers.ValidationError(e.message)
-            signed_assertion = signed_assertions[0]
 
             new_image = StringIO.StringIO()
             bake(image_file=assertion.cached_badgeclass.image.file,
-                 assertion_json_string=json.dumps(signed_assertion, indent=2),
+                 assertion_json_string=signed_assertion['signature'],
                  output_file=new_image)
 
             attach = MIMEBase('image', 'png')
