@@ -1,39 +1,36 @@
 from django.conf import settings
 from django.contrib.auth import login, load_backend, logout
-from django.contrib.sessions.models import Session
 from django.http import JsonResponse
-from django.shortcuts import redirect
 from django.urls import reverse
-from django.utils.decorators import method_decorator
 from django.views import View
-from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import TemplateView
 
 from badgrsocialauth.utils import set_session_badgr_app
-from lti_edu.models import LtiBadgeUserTennant, UserCurrentContextId
-from mainsite.models import BadgrApp
+from lti_edu.models import LtiBadgeUserTennant
 
 
 class CheckLogin(View):
 
-    def get(self,request):
+    def get(self, request):
 
-        response = {'loggedin':True}
+        response = {'loggedin': True}
         if not request.user.is_authenticated():
             response['loggedin'] = False
         elif not request.user.has_edu_id_social_account():
             response['loggedin'] = False
         return JsonResponse(response)
 
-class CheckLoginAdmin(View):
-    def get(self,request):
 
-        response = {'loggedin':True}
+class CheckLoginAdmin(View):
+    def get(self, request):
+
+        response = {'loggedin': True}
         if not request.user.is_authenticated():
             response['loggedin'] = False
         elif not request.user.has_surf_conext_social_account():
             response['loggedin'] = False
         return JsonResponse(response)
+
 
 def login_user(request, user):
     """Log in a user without requiring credentials with user object"""
@@ -46,8 +43,9 @@ def login_user(request, user):
     if hasattr(user, 'backend'):
         return login(request, user)
 
+
 def check_user_changed(request, user):
-    lti_user_id = request.session.get('lti_user_id',None)
+    lti_user_id = request.session.get('lti_user_id', None)
     lti_roles = request.session.get('lti_roles', None)
     if lti_user_id == request.POST['user_id'] and lti_roles == request.POST['roles']:
         return False
@@ -71,6 +69,7 @@ def logout_badgr_user(request, user):
         # return logout(request)
     return False
 
+
 class LoginLti(TemplateView):
     template_name = "lti/lti_login.html"
     staff = False
@@ -82,8 +81,6 @@ class LoginLti(TemplateView):
         'Instructor',
         'urn:lti:role:ims/lis/TeachingAssistant',
         'ContentDeveloper'
-
-
 
     ]
 
@@ -114,14 +111,13 @@ class LoginLti(TemplateView):
         except Exception as e:
             pass
 
-
         context_data['after_login'] = self.get_after_login(badgr_app)
         context_data['check_login'] = self.get_check_login_url()
         return context_data
 
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated():
-            #logout_badgr_user(request, request.user)
+            # logout_badgr_user(request, request.user)
             check_user_changed(request, request.user)
         post = request.POST
         user_id = post['user_id']
@@ -140,19 +136,18 @@ class LoginLti(TemplateView):
         lti_data['post_data'] = post
         request.session['lti_data'] = lti_data
 
-
         return self.get(request, *args, **kwargs)
 
     def get_login_url(self):
         if self.staff:
             return self.get_login_url_staff()
-        return  "{}?provider=edu_id".format(reverse('socialaccount_login'))
+        return "{}?provider=edu_id".format(reverse('socialaccount_login'))
 
     def get_after_login(self, badgr_app):
         if self.staff:
             return self.get_after_login_staff(badgr_app)
         scheme = self.request.is_secure() and "https" or "http"
-        return '{}://{}/lti-badges?embedVersion=1&embedWidth=800&embedHeight=800'.format(scheme,badgr_app.cors)
+        return '{}://{}/lti-badges?embedVersion=1&embedWidth=800&embedHeight=800'.format(scheme, badgr_app.cors)
 
     def get_check_login_url(self):
         if self.staff:
@@ -168,6 +163,7 @@ class LoginLti(TemplateView):
 
     def get_check_login_url_staff(self):
         return reverse('check-login-staff')
+
 
 class LoginLtiStaff(LoginLti):
     staff = True
