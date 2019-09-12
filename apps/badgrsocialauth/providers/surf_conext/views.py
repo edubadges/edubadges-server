@@ -235,7 +235,7 @@ def callback(request):
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
 
     # set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app.pk))
-    if extra_data['edu_person_affiliations'] not in ('employee', 'faculty'):
+    if not ('employee' in extra_data['edu_person_affiliations'] or 'faculty' in extra_data['edu_person_affiliations']):
         error = 'Must be employee or faculty member to login. If You are a student, please login with EduID'
         return render_authentication_error(request, SurfConextProvider.id, error)
 
