@@ -1,5 +1,5 @@
 # Django stuff
-Django==1.11.23
+Django==1.11.22
 semver==2.6.0
 pytz==2017.2
 # PIL support
@@ -23,7 +23,7 @@ django-object-actions==0.8.2
 
 python-memcached==1.58
 
-djangorestframework==3.9.1
+djangorestframework==3.6.2
 
 # Django Allauth
 django-allauth==0.37.1
@@ -91,7 +91,7 @@ more-itertools==2.5.0
 
 apispec==0.22.0
 
-apispec-djangorestframework==1.0.6
+apispec-djangorestframework==1.0.5
 responses==0.8.1
 django_mock_queries==2.0.0
 
