@@ -1,10 +1,11 @@
-from rest_framework import serializers
-
+from rest_framework import serializers, permissions
+from rest_framework.views import APIView
 from entity.api import BaseEntityListView, BaseEntityDetailView
-from signing.models import SymmetricKey
+from signing.models import SymmetricKey, PublicKey
 from signing.permissions import MaySignAssertions, OwnsSymmetricKey
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from signing.serializers import SymmetricKeySerializer
+from rest_framework.response import Response
 
 
 class SymmetricKeyListView(BaseEntityListView):
@@ -39,3 +40,20 @@ class SymmetricKeyDetailView(BaseEntityDetailView):
     def get_object(self, request, **kwargs):
         return SymmetricKey.objects.filter(user=request.user, current=True).first()
 
+
+class PublicKeyDetailView(APIView):
+    permission_classes = (permissions.AllowAny,)
+    http_method_names = ['get']
+    model = PublicKey
+
+    def get(self, request, **kwargs):
+        pubkey = PublicKey.objects.get(entity_id=kwargs['entity_id'])
+        return Response(
+            {
+                "@context": "https://w3id.org/openbadges/v2",
+                "type": "CryptographicKey",
+                "id": pubkey.public_url,
+                "owner": pubkey.issuer.public_url,
+                "publicKeyPem": pubkey.public_key_pem
+            }
+        )

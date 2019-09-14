@@ -1,7 +1,7 @@
 import requests
 import json
 from django.conf import settings
-from signing.models import PrivateKey
+from signing.models import PrivateKey, PublicKey
 
 
 def create_new_symmetric_key(password, salt='salt', length=32, n=1048576, r=8, p=1):
@@ -17,7 +17,7 @@ def create_new_symmetric_key(password, salt='salt', length=32, n=1048576, r=8, p
                          headers={'content-type': 'application/json'})
 
 
-def create_new_private_key(password, symmetric_key):
+def create_new_private_key(password, symmetric_key, issuer):
     response = requests.post(settings.TIME_STAMPED_OPEN_BADGES_BASE_URL + 'privatekey/',
                              data=json.dumps({
                                  "password": password,
@@ -28,6 +28,13 @@ def create_new_private_key(password, symmetric_key):
                                  "p": symmetric_key.p
                              }),
                              headers={'content-type': 'application/json'}).json()
+
+    public_key = PublicKey.objects.create(
+        public_key_pem=response['public_key'],
+        time_created=response['time_created'],
+        issuer=issuer
+    )
+
     private_key = PrivateKey.objects.create(
         user=symmetric_key.user,
         symmetric_key=symmetric_key,
@@ -36,7 +43,7 @@ def create_new_private_key(password, symmetric_key):
         tag=response['tag'],
         associated_data=response['associated_data'],
         time_created=response['time_created'],
-        hash_of_public_key=response['hash_of_public_key']
+        public_key=public_key
     )
     private_key.refresh_from_db()  # must do this so time_created is not unicode, but datetime object
     return private_key
@@ -91,24 +98,18 @@ def re_encrypt_private_keys(old_symmetric_key, new_symmetric_key, old_password, 
             raise ValueError(message)
 
 
-def sign_badges(list_of_assertions, password, symmetric_key):
-    symmetric_key.validate_password(password)
-    symkey_params = symmetric_key.get_params()
-    symkey_params['password'] = password
-    private_key = create_new_private_key(password, symmetric_key)
+def sign_badges(list_of_assertions, private_key, symmetric_key, password):
     private_key_params = private_key.get_params()
-    list_of_badges = []
-    for assertion in list_of_assertions:
-        list_of_badges.append(assertion.get_json(expand_badgeclass=True, expand_issuer=True, signed=True))
+    symmetric_key_params = symmetric_key.get_params()
+    symmetric_key_params['password'] = password
 
     response = requests.post(settings.TIME_STAMPED_OPEN_BADGES_BASE_URL + 'sign/',
                                       data=json.dumps({
-                                         "list_of_badges": list_of_badges,
-                                         "symmetric_key": symkey_params,
+                                         "list_of_badges": list_of_assertions,
+                                         "symmetric_key": symmetric_key_params,
                                          "private_key": private_key_params
                                       }),
                                       headers={'content-type': 'application/json'}).json()
-
     return response['signed_badges']
 
 

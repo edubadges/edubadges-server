@@ -25,6 +25,7 @@ from .models import Issuer, BadgeClass, IssuerStaff, BadgeInstance, BadgeClassEx
 from signing import tsob
 from signing.models import SymmetricKey
 
+
 class ExtensionsSaverMixin(object):
     def remove_extensions(self, instance, extensions_to_remove):
         extensions = instance.cached_extensions()
@@ -47,13 +48,13 @@ class ExtensionsSaverMixin(object):
         received_extensions = extension_items.keys()
         current_extension_names = instance.extension_items.keys()
         remove_these_extensions = set(current_extension_names) - set(received_extensions)
-        update_these_extensions =  set(current_extension_names).intersection(set(received_extensions))
+        update_these_extensions = set(current_extension_names).intersection(set(received_extensions))
         add_these_extensions = set(received_extensions) - set(current_extension_names)
         self.remove_extensions(instance, remove_these_extensions)
         self.update_extensions(instance, update_these_extensions, extension_items)
         self.add_extensions(instance, add_these_extensions, extension_items)
-  
-    
+
+
 class CachedListSerializer(serializers.ListSerializer):
     def to_representation(self, data):
         return [self.child.to_representation(item) for item in data]
@@ -94,7 +95,6 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
     class Meta:
         apispec_definition = ('Issuer', {})
 
-
     def validate_image(self, image):
         if image is not None:
             img_name, img_ext = os.path.splitext(image.name)
@@ -108,9 +108,9 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
             validated_data['faculty'] = faculty
         user = validated_data['created_by']
         potential_email = validated_data['email']
-#         if not user.is_email_verified(potential_email):
-#             raise serializers.ValidationError(
-#                 "Issuer email must be one of your verified addresses. Add this email to your profile and try again.")
+        #         if not user.is_email_verified(potential_email):
+        #             raise serializers.ValidationError(
+        #                 "Issuer email must be one of your verified addresses. Add this email to your profile and try again.")
 
         new_issuer = Issuer(**validated_data)
 
@@ -148,7 +148,8 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
         representation['json'] = obj.get_json(obi_version='1_1', use_canonical_id=True)
 
         if self.context.get('embed_badgeclasses', False):
-            representation['badgeclasses'] = BadgeClassSerializerV1(obj.badgeclasses.all(), many=True, context=self.context).data
+            representation['badgeclasses'] = BadgeClassSerializerV1(obj.badgeclasses.all(), many=True,
+                                                                    context=self.context).data
 
         representation['badgeClassCount'] = len(obj.cached_badgeclasses())
         representation['recipientGroupCount'] = len(obj.cached_recipient_groups())
@@ -156,13 +157,13 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
         representation['pathwayCount'] = len(obj.cached_pathways())
 
         return representation
-    
+
     def add_extensions(self, instance, add_these_extensions, extension_items):
         for extension_name in add_these_extensions:
-            original_json=extension_items[extension_name]
+            original_json = extension_items[extension_name]
             extension = IssuerExtension(name=extension_name,
-                                            original_json=json.dumps(original_json),
-                                            issuer_id=instance.pk)
+                                        original_json=json.dumps(original_json),
+                                        issuer_id=instance.pk)
             extension.save()
 
 
@@ -216,7 +217,8 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, 
 
     def to_representation(self, instance):
         representation = super(BadgeClassSerializerV1, self).to_representation(instance)
-        representation['issuer'] = OriginSetting.HTTP+reverse('issuer_json', kwargs={'entity_id': instance.cached_issuer.entity_id})
+        representation['issuer'] = OriginSetting.HTTP + reverse('issuer_json',
+                                                                kwargs={'entity_id': instance.cached_issuer.entity_id})
         representation['json'] = instance.get_json(obi_version='1_1', use_canonical_id=True)
         return representation
 
@@ -237,16 +239,15 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, 
             return criteria_url
         else:
             return None
-    
+
     def add_extensions(self, instance, add_these_extensions, extension_items):
         for extension_name in add_these_extensions:
-            original_json=extension_items[extension_name]
+            original_json = extension_items[extension_name]
             extension = BadgeClassExtension(name=extension_name,
                                             original_json=json.dumps(original_json),
                                             badgeclass_id=instance.pk)
             extension.save()
 
-    
     def update(self, instance, validated_data):
 
         new_name = validated_data.get('name')
@@ -306,8 +307,6 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, 
             if extension_name == 'languageExtension':
                 del extension_item['typedLanguage']
 
-
-
     def create(self, validated_data, **kwargs):
 
         if 'image' not in validated_data:
@@ -365,7 +364,7 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
 
     def get_recipient_email(self, obj):
         return obj.get_email_address()
-        
+
     def validate(self, data):
         if data.get('email') and not data.get('recipient_identifier'):
             data['recipient_identifier'] = data.get('email')
@@ -395,13 +394,17 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
         if self.context.get('include_issuer', False):
             representation['issuer'] = IssuerSerializerV1(instance.cached_badgeclass.cached_issuer).data
         else:
-            representation['issuer'] = OriginSetting.HTTP+reverse('issuer_json', kwargs={'entity_id': instance.cached_issuer.entity_id})
+            representation['issuer'] = OriginSetting.HTTP + reverse('issuer_json', kwargs={
+                'entity_id': instance.cached_issuer.entity_id})
         if self.context.get('include_badge_class', False):
-            representation['badge_class'] = BadgeClassSerializerV1(instance.cached_badgeclass, context=self.context).data
+            representation['badge_class'] = BadgeClassSerializerV1(instance.cached_badgeclass,
+                                                                   context=self.context).data
         else:
-            representation['badge_class'] = OriginSetting.HTTP+reverse('badgeclass_json', kwargs={'entity_id': instance.cached_badgeclass.entity_id})
+            representation['badge_class'] = OriginSetting.HTTP + reverse('badgeclass_json', kwargs={
+                'entity_id': instance.cached_badgeclass.entity_id})
 
-        representation['public_url'] = OriginSetting.HTTP+reverse('badgeinstance_json', kwargs={'entity_id': instance.entity_id})
+        representation['public_url'] = OriginSetting.HTTP + reverse('badgeinstance_json',
+                                                                    kwargs={'entity_id': instance.entity_id})
 
         if apps.is_installed('badgebook'):
             try:
@@ -456,12 +459,13 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
                 symkey = SymmetricKey.objects.get(user=validated_data['created_by'], current=True)
             except SymmetricKey.DoesNotExist:
                 raise serializers.ValidationError("You don't have a password set. Please set one first.")
-
             try:
-                signed_assertions = tsob.sign_badges(list_of_assertions=[assertion],
-                                                     password=validated_data['signing_password'],
-                                                     symmetric_key=symkey)
-                signed_assertion = signed_assertions[0]  # TODO: implementation of batch wise signing
+                password = validated_data['signing_password']
+                issuer = self.context.get('badgeclass').issuer
+                private_key = issuer.get_or_create_private_key(password, symkey)
+                assertion_json = assertion.get_json(expand_badgeclass=True, expand_issuer=True, signed=True)
+                signed_assertions = tsob.sign_badges([assertion_json], private_key, symkey, password)
+                signed_assertion = signed_assertions[0]  # TODO: batch-wise signing
             except ValueError as e:
                 raise serializers.ValidationError(e.message)
 
@@ -474,8 +478,8 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
             attach.set_payload(new_image.read())
             encoders.encode_base64(attach)
             assertion.recipient_user.email_user(subject='You have received a signed badge',
-                                               message='Congrats, this is your signed badge',
-                                               attachments=[attach])
+                                                message='Congrats, this is your signed badge',
+                                                attachments=[attach])
 
         return assertion
 

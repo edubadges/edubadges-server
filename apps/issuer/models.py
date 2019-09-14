@@ -13,7 +13,7 @@ from allauth.account.adapter import get_adapter
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.urlresolvers import reverse
@@ -31,12 +31,15 @@ from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage
 from mainsite.models import (BadgrApp, EmailBlacklist)
 from mainsite.utils import OriginSetting, generate_entity_uri
+from signing.models import PublicKey, PrivateKey
+from signing import tsob
 from .utils import generate_sha256_hashstring, CURRENT_OBI_VERSION, get_obi_context, add_obi_version_ifneeded, \
     UNVERSIONED_BAKED_VERSION
 
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 logger = logging.getLogger('Badgr.Debug')
+
 
 class BaseAuditedModel(cachemodel.CacheModel):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -208,6 +211,10 @@ class Issuer(ResizeUploadedImage,
         return None
 
     @property
+    def public_key(self):
+        return PublicKey.objects.get(issuer=self)
+
+    @property
     def public_url(self):
         return OriginSetting.HTTP+self.get_absolute_url()
 
@@ -290,7 +297,14 @@ class Issuer(ResizeUploadedImage,
     def image_preview(self):
         return self.image
 
-    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True, use_canonical_id=False):
+    def get_or_create_private_key(self, password, symmetric_key):
+        symmetric_key.validate_password(password)
+        try:
+            return self.public_key.private_key
+        except ObjectDoesNotExist:
+            return tsob.create_new_private_key(password, symmetric_key, self)
+
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True, use_canonical_id=False, signed=False):
         obi_version, context_iri = get_obi_context(obi_version)
 
         json = OrderedDict({'@context': context_iri})
@@ -332,6 +346,15 @@ class Issuer(ResizeUploadedImage,
                     if k not in json:
                         json[k] = v
 
+        try:
+            pubkey = PublicKey.objects.get(issuer=self)  # TODO: multiple private keys per issuer
+            if signed:
+                json['publicKey'] = pubkey.get_json()
+                json['verification'] = {"type": "SignedBadge", "creator": pubkey.public_url}
+            else:
+                json['publicKey'] = pubkey.public_url
+        except PublicKey.DoesNotExist:
+            pass
         return json
 
     @property
@@ -1005,7 +1028,7 @@ class BadgeInstance(BaseAuditedModel,
             json['badge'] = self.cached_badgeclass.get_json(obi_version=obi_version, include_extra=include_extra)
 
             if expand_issuer:
-                json['badge']['issuer'] = self.cached_issuer.get_json(obi_version=obi_version, include_extra=include_extra)
+                json['badge']['issuer'] = self.cached_issuer.get_json(obi_version=obi_version, include_extra=include_extra, signed=signed)
 
         if self.revoked:
             return OrderedDict([
@@ -1023,9 +1046,15 @@ class BadgeInstance(BaseAuditedModel,
                 "type": "hosted"
             }
         elif obi_version == '2_0':
-            json["verification"] = {
-                "type": "HostedBadge"
-            }
+            if signed:
+                json["verification"] = {
+                    "type": "SignedBadge",
+                    "creator": self.cached_issuer.public_key.public_url
+                }
+            else:
+                json["verification"] = {
+                    "type": "HostedBadge"
+                }
 
         # source url
         if self.source_url:
@@ -1085,13 +1114,6 @@ class BadgeInstance(BaseAuditedModel,
                     if k not in json:
                         json[k] = v
 
-        if signed:
-            issuer_iri = json['badge']['issuer']['id']
-            cryptographic_key = {'owner': issuer_iri}
-            json['badge']['issuer']['publicKey'] = cryptographic_key
-            verification = {'type': 'SignedBadge',
-                            'creator': {'owner': issuer_iri}}
-            json['verification'] = verification
         return json
 
     @property

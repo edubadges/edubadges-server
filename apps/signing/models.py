@@ -1,6 +1,11 @@
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.db import models
+
+from entity.models import BaseVersionedEntity
+from mainsite.utils import OriginSetting
 from signing import utils
+
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
@@ -33,14 +38,38 @@ class PrivateKey(models.Model):
     tag = models.CharField(max_length=255)
     associated_data = models.CharField(max_length=255)
     time_created = models.DateTimeField()
-    hash_of_public_key = models.CharField(max_length=255)
+    public_key = models.ForeignKey('signing.PublicKey')
 
     def get_params(self):
         return {'initialization_vector': self.initialization_vector,
                 'encrypted_private_key': self.encrypted_private_key,
                 'tag': self.tag,
                 'associated_data': self.associated_data,
-                'hash_of_public_key': self.hash_of_public_key,
                 'time_created': self.time_created.strftime('%Y-%m-%dT%H:%M:%SZ'),
                 }
 
+
+class PublicKey(BaseVersionedEntity, models.Model):
+    public_key_pem = models.TextField()
+    time_created = models.DateTimeField()
+    issuer = models.ForeignKey('issuer.Issuer')
+
+    def get_absolute_url(self):
+        return reverse('signing_public_key_json', kwargs={'entity_id': self.entity_id})
+
+    @property
+    def public_url(self):
+        return OriginSetting.HTTP + self.get_absolute_url()
+
+    @property
+    def private_key(self):
+        return PrivateKey.objects.get(public_key=self)
+
+    def get_json(self):
+        """Returns the json for in the signed assertion"""
+        return dict(
+            owner=self.issuer.public_url,
+            type="CryptographicKey",
+            id=self.public_url,
+            publicKeyPem=self.public_key_pem
+        )
