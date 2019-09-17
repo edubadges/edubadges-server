@@ -51,6 +51,11 @@
     ">
       {{ badge_name }}
     </h2>
+    {% if expiration_date %}
+    <h3 style="text-align: center;">
+      This badge expires at {{ expiration_date }}
+    </h3>
+    {% endif %}
   </td>
 </tr>
 <!-- Begin Buttons Row -->
