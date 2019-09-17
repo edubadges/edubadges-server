@@ -92,7 +92,7 @@ class StudentsEnrolledSerializerWithRelations(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = serializers.ModelSerializer.to_representation(self, instance)
-        readable_date = str(datetime.strptime(ret['date_created'], '%Y-%m-%dT%H:%M:%S.%fZ').date())
-        ret['date_created'] = readable_date
+        day_as_string = ret['date_created'].split('T')[0]
+        ret['date_created'] = day_as_string
         return ret
 
