@@ -235,9 +235,10 @@ def callback(request):
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
 
     # set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app.pk))
-    if not ('employee' in extra_data['edu_person_affiliations'] or 'faculty' in extra_data['edu_person_affiliations']):
-        error = 'Must be employee or faculty member to login. If You are a student, please login with EduID'
-        return render_authentication_error(request, SurfConextProvider.id, error)
+    if 'edu_person_affiliations' in extra_data:
+        if not ('employee' in extra_data['edu_person_affiliations'] or 'faculty' in extra_data['edu_person_affiliations']):
+            error = 'Must be employee or faculty member to login. If You are a student, please login with EduID'
+            return render_authentication_error(request, SurfConextProvider.id, error)
 
     if not check_agreed_term_and_conditions(social_account.user, badgr_app):
         return HttpResponseRedirect(reverse('accept_terms_resign', kwargs=keyword_arguments))
