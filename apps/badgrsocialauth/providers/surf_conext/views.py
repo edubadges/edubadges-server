@@ -234,7 +234,7 @@ def callback(request):
     social_account = get_social_account(extra_data['sub'])
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
 
-    # set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app.pk))
+    set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app.pk))
     if 'edu_person_affiliations' in extra_data:
         if not ('employee' in extra_data['edu_person_affiliations'] or 'faculty' in extra_data['edu_person_affiliations']):
             error = 'Must be employee or faculty member to login. If You are a student, please login with EduID'
