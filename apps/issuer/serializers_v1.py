@@ -64,6 +64,8 @@ class IssuerStaffSerializerV1(serializers.Serializer):
     """ A read_only serializer for staff roles """
     user = BadgeUserProfileSerializerV1(source='cached_user')
     role = serializers.CharField(validators=[ChoicesValidator(dict(IssuerStaff.ROLE_CHOICES).keys())])
+    is_signer = serializers.BooleanField()
+    may_become_signer = serializers.BooleanField()
 
     class Meta:
         list_serializer_class = CachedListSerializer
@@ -175,6 +177,7 @@ class IssuerRoleActionSerializerV1(serializers.Serializer):
     role = serializers.CharField(
         validators=[ChoicesValidator(dict(IssuerStaff.ROLE_CHOICES).keys())],
         default=IssuerStaff.ROLE_STAFF)
+    is_signer = serializers.BooleanField(required=False)
 
     def validate(self, attrs):
         if attrs.get('username') and attrs.get('email'):

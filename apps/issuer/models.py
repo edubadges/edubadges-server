@@ -31,7 +31,7 @@ from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage
 from mainsite.models import (BadgrApp, EmailBlacklist)
 from mainsite.utils import OriginSetting, generate_entity_uri
-from signing.models import PublicKey, PrivateKey
+from signing.models import PublicKey, SymmetricKey
 from signing import tsob
 from .utils import generate_sha256_hashstring, CURRENT_OBI_VERSION, get_obi_context, add_obi_version_ifneeded, \
     UNVERSIONED_BAKED_VERSION
@@ -385,6 +385,7 @@ class IssuerStaff(cachemodel.CacheModel):
     issuer = models.ForeignKey(Issuer)
     user = models.ForeignKey(AUTH_USER_MODEL)
     role = models.CharField(max_length=254, choices=ROLE_CHOICES, default=ROLE_STAFF)
+    is_signer = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('issuer', 'user')
@@ -400,6 +401,10 @@ class IssuerStaff(cachemodel.CacheModel):
         if publish_issuer:
             self.issuer.publish()
         self.user.publish()
+
+    @property
+    def may_become_signer(self):
+        return self.user.may_sign_assertions and SymmetricKey.objects.filter(user=self.user, current=True).exists()
 
     @property
     def cached_user(self):

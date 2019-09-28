@@ -46,6 +46,7 @@ class PrivateKey(models.Model):
                 'tag': self.tag,
                 'associated_data': self.associated_data,
                 'time_created': self.time_created.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                'public_key': self.public_key.public_key_pem
                 }
 
 

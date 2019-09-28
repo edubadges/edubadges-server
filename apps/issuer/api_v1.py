@@ -191,18 +191,28 @@ class IssuerStaffList(VersionedObjectMixin, APIView):
 
         elif action == 'modify':
             role = serializer.validated_data.get('role')
+            is_signer = serializer.validated_data.get('is_signer')
             try:
                 staff_instance = IssuerStaff.objects.get(
                     user=user_to_modify,
                     issuer=current_issuer
                 )
+                issuer_already_has_a_signer = any([staff.is_signer for staff in IssuerStaff.objects.filter(issuer=current_issuer)])
+                if is_signer and issuer_already_has_a_signer:
+                    raise ValidationError("Cannot have multiple signers for one issuer")
+                if is_signer and not staff_instance.may_become_signer:
+                    raise ValidationError("Staff member may not become signer, has he or she set a YubiKey password?")
                 staff_instance.role = role
-                staff_instance.save(update_fields=('role',))
+                staff_instance.is_signer = is_signer
+                staff_instance.save(update_fields=('role', 'is_signer'))
             except IssuerStaff.DoesNotExist:
                 raise ValidationError("Cannot modify staff record. Matching staff record does not exist.")
 
         elif action == 'remove':
-            IssuerStaff.objects.filter(user=user_to_modify, issuer=current_issuer).delete()
+            staff_instance = IssuerStaff.objects.get(user=user_to_modify, issuer=current_issuer)
+            if staff_instance.is_signer:
+                raise ValidationError("Cannot remove staff member who is a signer.")
+            staff_instance.delete()
             if not user_to_modify.staff_memberships():
                 user_to_modify.loses_permission('view_issuer_tab', BadgeUser)
                 user_to_modify.save()
