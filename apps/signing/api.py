@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 
 from badgeuser.models import CachedEmailAddress
 from entity.api import BaseEntityListView, BaseEntityDetailView
+from issuer.models import Issuer
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from signing import tsob
 from signing.models import SymmetricKey, PublicKey
@@ -58,8 +59,8 @@ class ChangeIssuerSignerView(APIView):
             raise CachedEmailAddress.DoesNotExist
         old_signer = old_signer_matching_email[0].user
         new_signer = new_signer_matching_email[0].user
-        old_signer_symkey = SymmetricKey.objects.get(user=old_signer)
-        new_signer_symkey = SymmetricKey.objects.get(user=new_signer)
+        old_signer_symkey = SymmetricKey.objects.get(user=old_signer, current=True)
+        new_signer_symkey = SymmetricKey.objects.get(user=new_signer, current=True)
         try:
             old_signer_symkey.validate_password(old_signer_password)
             new_signer_symkey.validate_password(new_signer_password)
