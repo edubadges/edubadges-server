@@ -36,7 +36,6 @@ def create_new_private_key(password, symmetric_key, issuer):
     )
 
     private_key = PrivateKey.objects.create(
-        user=symmetric_key.user,
         symmetric_key=symmetric_key,
         encrypted_private_key=response['encrypted_private_key'],
         initialization_vector=response['initialization_vector'],
@@ -73,7 +72,6 @@ def re_encrypt_private_keys(old_symmetric_key, new_symmetric_key, old_password, 
         for reencrypted_private_key in response.json():
             matching_previous_private_key = [pk for pk in private_key_list if pk.public_key.public_key_pem == reencrypted_private_key['public_key']][0]
             PrivateKey.objects.create(
-                user=new_symmetric_key.user,
                 symmetric_key=new_symmetric_key,
                 encrypted_private_key=reencrypted_private_key['encrypted_private_key'],
                 initialization_vector=reencrypted_private_key['initialization_vector'],

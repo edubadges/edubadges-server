@@ -118,7 +118,7 @@ class ChangeIssuerSignerView(APIView):
         previous_signer_staff_instance.save()
         new_signer_staff_instance.save()
 
-        return Response({'valid': True}, status=status.HTTP_200_OK)
+        return Response({}, status=status.HTTP_200_OK)
 
 
 class PublicKeyDetailView(APIView):
