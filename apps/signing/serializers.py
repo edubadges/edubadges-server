@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from signing.models import SymmetricKey
+from signing.models import SymmetricKey, PrivateKey
 from signing import utils
 from signing import tsob
 
@@ -41,10 +41,15 @@ class SymmetricKeySerializer(serializers.Serializer):
             user=validated_data['updated_by']
         )
         try:
-            tsob.re_encrypt_private_keys(old_symmetric_key=instance,
-                                         new_symmetric_key=new_symkey,
-                                         old_password=validated_data.get('old_password'),
-                                         new_password=validated_data.get('password'))
+            private_keys_to_reencrypt = list(PrivateKey.objects.filter(symmetric_key=instance))
+            if private_keys_to_reencrypt:
+                tsob.re_encrypt_private_keys(
+                    old_symmetric_key=instance,
+                    new_symmetric_key=new_symkey,
+                    old_password=validated_data.get('old_password'),
+                    new_password=validated_data.get('password'),
+                    private_key_list=private_keys_to_reencrypt
+                )
             instance.current = False
             instance.save()
             new_symkey.current = True

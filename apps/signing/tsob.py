@@ -49,28 +49,29 @@ def create_new_private_key(password, symmetric_key, issuer):
     return private_key
 
 
-def re_encrypt_private_keys(old_symmetric_key, new_symmetric_key, old_password, new_password):
-    private_keys_to_reencrypt = PrivateKey.objects.filter(symmetric_key=old_symmetric_key)
+def re_encrypt_private_keys(old_symmetric_key, new_symmetric_key, old_password, new_password, private_key_list):
+    for pk in private_key_list:
+        if pk.symmetric_key != old_symmetric_key:
+            raise ValueError('Private keys must belong to the symmetric key.')
 
-    if not private_keys_to_reencrypt:
-        return
+    if not private_key_list:
+        raise ValueError('No private keys passed to function.')
 
     old_symmetric_key_params = old_symmetric_key.get_params()
     old_symmetric_key_params['password'] = old_password
     new_symmetric_key_params = new_symmetric_key.get_params()
     new_symmetric_key_params['password'] = new_password
-    private_key_list = [pk.get_params() for pk in private_keys_to_reencrypt]
 
     response = requests.post(settings.TIME_STAMPED_OPEN_BADGES_BASE_URL + 'reencrypt/',
                          data=json.dumps({
                              "old_symmetric_key": old_symmetric_key_params,
                              "new_symmetric_key": new_symmetric_key_params,
-                             "private_key_list": private_key_list
+                             "private_key_list": [pk.get_params() for pk in private_key_list]
                          }),
                          headers={'content-type': 'application/json'})
     if response.status_code == 200:
         for reencrypted_private_key in response.json():
-            matching_previous_private_key = [pk for pk in private_keys_to_reencrypt if pk.public_key.public_key_pem == reencrypted_private_key['public_key']][0]
+            matching_previous_private_key = [pk for pk in private_key_list if pk.public_key.public_key_pem == reencrypted_private_key['public_key']][0]
             PrivateKey.objects.create(
                 user=new_symmetric_key.user,
                 symmetric_key=new_symmetric_key,
@@ -101,8 +102,13 @@ def sign_badges(list_of_assertions, private_key, symmetric_key, password):
                                          "symmetric_key": symmetric_key_params,
                                          "private_key": private_key_params
                                       }),
-                                      headers={'content-type': 'application/json'}).json()
-    return response['signed_badges']
+                                      headers={'content-type': 'application/json'})
+
+    if response.status_code == 200:
+        signed_badges_json = response.json()['signed_badges']
+        return signed_badges_json
+    else:
+        raise ValueError(response.json()['message'])
 
 
 def deep_validate(signed_badges, symmetric_key, private_key):
