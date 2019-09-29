@@ -31,7 +31,6 @@ class SymmetricKey(models.Model):
 
 
 class PrivateKey(models.Model):
-    user = models.ForeignKey(AUTH_USER_MODEL)
     symmetric_key = models.ForeignKey('signing.SymmetricKey')
     encrypted_private_key = models.TextField()
     initialization_vector = models.CharField(max_length=255)
@@ -48,6 +47,10 @@ class PrivateKey(models.Model):
                 'time_created': self.time_created.strftime('%Y-%m-%dT%H:%M:%SZ'),
                 'public_key': self.public_key.public_key_pem
                 }
+
+    @property
+    def user(self):
+        return self.symmetric_key.user
 
 
 class PublicKey(BaseVersionedEntity, models.Model):
