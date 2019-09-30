@@ -29,6 +29,10 @@ class SymmetricKeySerializer(serializers.Serializer):
         return symkey
 
     def update(self, instance, validated_data):
+        try:
+            instance.validate_password(validated_data.get('old_password'))
+        except ValueError as e:
+            raise serializers.ValidationError(e.message)
         new_symkey = tsob.create_new_symmetric_key(validated_data.get('password')).json()
         new_symkey = SymmetricKey.objects.create(
             password_hash=utils.hash_string(validated_data.get('password')),
