@@ -791,7 +791,10 @@ class BadgeInstance(BaseAuditedModel,
     @property
     def owners(self):
         return self.issuer.owners
-    
+
+    def create_random_uuid(self):
+        return uuid.uuid4().urn
+
     def get_email_address(self):
         '''
         uses self.recipient_identifier to get email adress to email an assertion to
@@ -1017,9 +1020,13 @@ class BadgeInstance(BaseAuditedModel,
         json = OrderedDict([
             ('@context', context_iri),
             ('type', 'Assertion'),
-            ('id', add_obi_version_ifneeded(self.jsonld_id, obi_version)),
             ('badge', add_obi_version_ifneeded(self.cached_badgeclass.jsonld_id, obi_version)),
         ])
+
+        if signed:
+            json['id'] = self.create_random_uuid()
+        else:
+            json['id'] = add_obi_version_ifneeded(self.jsonld_id, obi_version)
 
         image_url = OriginSetting.HTTP + reverse('badgeinstance_image', kwargs={'entity_id': self.entity_id})
         json['image'] = image_url
