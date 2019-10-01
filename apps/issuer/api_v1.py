@@ -202,7 +202,10 @@ class IssuerStaffList(VersionedObjectMixin, APIView):
                 raise ValidationError("Cannot modify staff record. Matching staff record does not exist.")
 
         elif action == 'remove':
-            IssuerStaff.objects.filter(user=user_to_modify, issuer=current_issuer).delete()
+            staff_instance = IssuerStaff.objects.get(user=user_to_modify, issuer=current_issuer)
+            if staff_instance.is_signer:
+                raise ValidationError("Cannot remove staff member who is a signer.")
+            staff_instance.delete()
             if not user_to_modify.staff_memberships():
                 user_to_modify.loses_permission('view_issuer_tab', BadgeUser)
                 user_to_modify.save()

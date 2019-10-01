@@ -129,6 +129,8 @@ SECRET_KEY = ''.join(random.choice(string.ascii_uppercase + string.digits) for _
 
 UNSUBSCRIBE_KEY = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(40))
 
+# Base url for time stamped open badges server
+TIME_STAMPED_OPEN_BADGES_BASE_URL = 'http://127.0.0.1:3000/'
 
 LOGS_DIR = os.path.join(TOP_DIR, 'logs')
 if not os.path.exists(LOGS_DIR):

@@ -222,7 +222,7 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         self.user_permissions.remove(permission)
         # you still need to reload user from db to refresh permission cache if you want effect to be immediate
 
-    def email_user(self, subject, message, from_email=None, **kwargs):
+    def email_user(self, subject, message, from_email=None, attachments=None, **kwargs):
         """
         Sends an email to this User.
         """
@@ -230,7 +230,16 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
             EmailBlacklist.objects.get(email=self.primary_email)
         except EmailBlacklist.DoesNotExist:
             # Allow sending, as this email is not blacklisted.
-            send_mail(subject, message, from_email, [self.primary_email], **kwargs)
+            if not attachments:
+                send_mail(subject, message, from_email, [self.primary_email], **kwargs)
+            else:
+                from django.core.mail import EmailMessage
+                email = EmailMessage(subject=subject,
+                                     body=message,
+                                     from_email=from_email,
+                                     to=[self.primary_email],
+                                     attachments=attachments)
+                email.send()
         else:
             return
             # TODO: Report email non-delivery somewhere.
@@ -257,6 +266,10 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     @property
     def email_items(self):
         return self.cached_emails()
+
+    @property
+    def may_sign_assertions(self):
+        return self.has_perm('signing.may_sign_assertions')
 
     @email_items.setter
     def email_items(self, value):

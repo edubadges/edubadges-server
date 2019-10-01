@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'externaltools',
     'lti_edu',
     'theming',
+    'signing',
 
     # api docs
     'apispec_drf',
