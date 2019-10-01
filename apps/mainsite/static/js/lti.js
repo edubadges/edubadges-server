@@ -67,7 +67,7 @@ $(document).ready(function () {
     $request.activatePoll();
     $('#login-link').click(function () {
 
-        loginWindow = window.open($('#login-link').attr('href'));
+        loginWindow = window.location($('#login-link').attr('href'));
         return false;
 
     })
