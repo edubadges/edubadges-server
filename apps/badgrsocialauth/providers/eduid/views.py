@@ -162,9 +162,6 @@ def after_terms_agreement(request, **kwargs):
 
 
 def callback(request):
-    print(request.__dict__)
-    print(request.__dict__['session'].__dict__)
-
     if request.user.is_authenticated:
         get_account_adapter(request).logout(request)  # logging in while being authenticated breaks the login procedure
 
