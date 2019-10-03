@@ -430,6 +430,14 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
         and badgeclass: issuer.models.BadgeClass.
         """
         evidence_items = []
+        issuer = self.context.get('badgeclass').issuer
+        if validated_data.get('issue_signed', False):
+            if not validated_data['created_by'].may_sign_assertions:
+                raise serializers.ValidationError('You do not have permission to sign badges.')
+            if not validated_data['created_by'] in [staff.user for staff in issuer.current_signers]:
+                raise serializers.ValidationError('You are not a signer for this issuer.')
+            if not validated_data['signing_password']:
+                raise serializers.ValidationError('Cannot sign badges: no password provided.')
 
         # ob1 evidence url
         evidence_url = validated_data.get('evidence')
@@ -454,17 +462,12 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
             extensions=validated_data.get('extension_items', None)
         )
         if validated_data.get('issue_signed', False):
-            if not validated_data['created_by'].may_sign_assertions:
-                raise serializers.ValidationError('You do not have permission to sign badges.')
-            if not validated_data['signing_password']:
-                raise serializers.ValidationError('Cannot sign badges: no password provided.')
             try:
                 symkey = SymmetricKey.objects.get(user=validated_data['created_by'], current=True)
             except SymmetricKey.DoesNotExist:
                 raise serializers.ValidationError("You don't have a password set. Please set one first.")
             try:
                 password = validated_data['signing_password']
-                issuer = self.context.get('badgeclass').issuer
                 private_key = issuer.get_or_create_private_key(password, symkey)
                 assertion_json = assertion.get_json(expand_badgeclass=True, expand_issuer=True, signed=True)
                 signed_assertions = tsob.sign_badges([assertion_json], private_key, symkey, password)

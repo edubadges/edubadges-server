@@ -237,6 +237,10 @@ class Issuer(ResizeUploadedImage,
         return IssuerStaff.objects.filter(issuer=self)
 
     @property
+    def current_signers(self):
+        return [staff for staff in self.staff_items if staff.is_signer]
+
+    @property
     def staff_items(self):
         return self.cached_issuerstaff()
 
