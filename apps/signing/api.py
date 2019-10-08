@@ -133,7 +133,7 @@ class PublicKeyDetailView(APIView):
                 "@context": "https://w3id.org/openbadges/v2",
                 "type": "CryptographicKey",
                 "id": pubkey.public_url,
-                "owner": pubkey.issuer.public_url,
+                "owner": pubkey.issuer.get_url_with_public_key(pubkey),
                 "publicKeyPem": pubkey.public_key_pem
             }
         )

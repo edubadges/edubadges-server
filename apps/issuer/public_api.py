@@ -22,6 +22,7 @@ from backpack.models import BackpackCollection
 from entity.api import VersionedObjectMixin
 from mainsite.models import BadgrApp
 from mainsite.utils import OriginSetting
+from signing.models import PublicKey
 from .models import Issuer, BadgeClass, BadgeInstance
 
 logger = badgrlog.BadgrLogger()
@@ -266,6 +267,21 @@ class IssuerJson(JSONComponentView):
         )
 
 
+class IssuerPublicKeyJson(IssuerJson):
+
+    def get(self, request, **kwargs):
+        self.current_object = self.get_object(request, **kwargs)
+        self.log(self.current_object)
+
+        if self.is_bot():
+            # if user agent matches a known bot, return a stub html with opengraph tags
+            return render_to_response(self.template_name, context=self.get_context_data())
+
+        pubkey = PublicKey.objects.get(entity_id=kwargs.get('public_key_id'))
+        issuer_json = self.get_json(request=request, signed=True, public_key=pubkey, expand_public_key=False)
+        return Response(issuer_json)
+
+
 class IssuerBadgesJson(JSONComponentView):
     permission_classes = (permissions.AllowAny,)
     model = Issuer
@@ -317,6 +333,20 @@ class BadgeClassJson(JSONComponentView):
             public_url=self.current_object.public_url,
             image_url=image_url
         )
+
+
+class BadgeClassPublicKeyJson(BadgeClassJson):
+
+    def get(self, request, **kwargs):
+        self.current_object = self.get_object(request, **kwargs)
+        self.log(self.current_object)
+        if self.is_bot():
+            # if user agent matches a known bot, return a stub html with opengraph tags
+            return render_to_response(self.template_name, context=self.get_context_data())
+
+        public_key = PublicKey.objects.get(entity_id=kwargs.get('public_key_id'))
+        json = self.current_object.get_json(signed=True, public_key=public_key)
+        return Response(json)
 
 
 class BadgeClassImage(ImagePropertyDetailView):

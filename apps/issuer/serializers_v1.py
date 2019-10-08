@@ -468,8 +468,8 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
                 raise serializers.ValidationError("You don't have a password set. Please set one first.")
             try:
                 password = validated_data['signing_password']
-                private_key = issuer.get_or_create_private_key(password, symkey)
-                assertion_json = assertion.get_json(expand_badgeclass=True, expand_issuer=True, signed=True)
+                private_key = issuer.create_private_key(password, symkey)
+                assertion_json = assertion.get_json(expand_badgeclass=True, expand_issuer=True, signed=True, public_key=private_key.public_key)
                 signed_assertions = tsob.sign_badges([assertion_json], private_key, symkey, password)
                 signed_assertion = signed_assertions[0]  # TODO: batch-wise signing
             except ValueError as e:

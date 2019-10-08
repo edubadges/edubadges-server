@@ -66,13 +66,17 @@ class PublicKey(BaseVersionedEntity, models.Model):
         return OriginSetting.HTTP + self.get_absolute_url()
 
     @property
+    def owner_public_url(self):
+        return self.issuer.get_url_with_public_key(self)
+
+    @property
     def private_key(self):
         return PrivateKey.objects.get(public_key=self)
 
     def get_json(self):
         """Returns the json for in the signed assertion"""
         return dict(
-            owner=self.issuer.public_url,
+            owner=self.owner_public_url,
             type="CryptographicKey",
             id=self.public_url,
             publicKeyPem=self.public_key_pem

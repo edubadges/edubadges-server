@@ -204,15 +204,16 @@ class Issuer(ResizeUploadedImage,
     def get_absolute_url(self):
         return reverse('issuer_json', kwargs={'entity_id': self.entity_id})
 
+    def get_url_with_public_key(self, public_key):
+        if public_key.issuer != self:
+            raise ValueError('Public key does not belong to this Issuer.')
+        return self.jsonld_id + '/pubkey/{}'.format(public_key.entity_id)
+
     @property
     def institution(self):
         if self.faculty:
             return self.faculty.institution
         return None
-
-    @property
-    def public_key(self):
-        return PublicKey.objects.get(issuer=self)
 
     @property
     def public_url(self):
@@ -301,24 +302,31 @@ class Issuer(ResizeUploadedImage,
     def image_preview(self):
         return self.image
 
-    def get_or_create_private_key(self, password, symmetric_key):
+    def create_private_key(self, password, symmetric_key):
         symmetric_key.validate_password(password)
-        try:
-            return self.public_key.private_key
-        except ObjectDoesNotExist:
-            return tsob.create_new_private_key(password, symmetric_key, self)
+        return tsob.create_new_private_key(password, symmetric_key, self)
 
-    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True, use_canonical_id=False, signed=False):
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True, use_canonical_id=False, signed=False,
+                 public_key=None, expand_public_key=False):
+        if signed and not public_key:
+            raise ValueError('Cannot return signed issuer json without knowing which public key is used.')
+        if public_key:
+            if public_key.issuer != self:
+                raise ValueError('Public key does not belong ot this issuer.')
         obi_version, context_iri = get_obi_context(obi_version)
 
         json = OrderedDict({'@context': context_iri})
         json.update(OrderedDict(
             type='Issuer',
-            id=self.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.jsonld_id, obi_version),
             name=self.name,
             url=self.url,
             email=self.email,
             description=self.description))
+        if not signed:
+            json['id'] = self.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.jsonld_id, obi_version)
+        elif signed:
+            json['id'] = self.get_url_with_public_key(public_key)
+
         if self.image:
             image_url = OriginSetting.HTTP + reverse('issuer_image', kwargs={'entity_id': self.entity_id})
             json['image'] = image_url
@@ -351,12 +359,12 @@ class Issuer(ResizeUploadedImage,
                         json[k] = v
 
         try:
-            pubkey = PublicKey.objects.get(issuer=self)  # TODO: multiple private keys per issuer
             if signed:
-                json['publicKey'] = pubkey.get_json()
-                json['verification'] = {"type": "SignedBadge", "creator": pubkey.public_url}
-            else:
-                json['publicKey'] = pubkey.public_url
+                json['verification'] = {"type": "SignedBadge", "creator": public_key.public_url}
+                if expand_public_key:
+                    json['publicKey'] = public_key.get_json()
+                else:
+                    json['publicKey'] = public_key.public_url
         except PublicKey.DoesNotExist:
             pass
         return json
@@ -468,6 +476,11 @@ class BadgeClass(ResizeUploadedImage,
 
     def get_absolute_url(self):
         return reverse('badgeclass_json', kwargs={'entity_id': self.entity_id})
+
+    def get_url_with_public_key(self, public_key):
+        if public_key.issuer != self.issuer:
+            raise ValueError('Public key does not belong to this Issuer.')
+        return self.jsonld_id + '/pubkey/{}'.format(public_key.entity_id)
 
     @property
     def public_url(self):
@@ -606,16 +619,25 @@ class BadgeClass(ResizeUploadedImage,
             **kwargs
         )
 
-    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True, use_canonical_id=False):
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True, use_canonical_id=False, signed=False, public_key=None):
+        if not public_key and signed:
+            raise ValueError('Cannot returned signed version of json without knowing which private key was used.')
         obi_version, context_iri = get_obi_context(obi_version)
         json = OrderedDict({'@context': context_iri})
         json.update(OrderedDict(
             type='BadgeClass',
-            id=self.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.jsonld_id, obi_version),
+
             name=self.name,
             description=self.description_nonnull,
-            issuer=self.cached_issuer.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.cached_issuer.jsonld_id, obi_version),
+
         ))
+
+        if not signed:
+            json['id'] = self.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.jsonld_id, obi_version)
+            json['issuer'] = self.cached_issuer.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.cached_issuer.jsonld_id, obi_version)
+        if signed:
+            json['id'] = self.get_url_with_public_key(public_key)
+            json['issuer'] = self.issuer.get_url_with_public_key(public_key)
 
         # image
         if self.image:
@@ -1013,24 +1035,29 @@ class BadgeInstance(BaseAuditedModel,
             pass
         return None
 
-    def get_json(self, obi_version=CURRENT_OBI_VERSION, expand_badgeclass=False, expand_issuer=False, include_extra=True, use_canonical_id=False, signed=False):
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, expand_badgeclass=False, expand_issuer=False,
+                 include_extra=True, use_canonical_id=False, signed=False, public_key=None):
 
         if signed:
             if expand_issuer != True or expand_badgeclass != True:
                 raise ValueError('Must expand issuer and badgeclass if signed is set to true.')
+            if not public_key:
+                raise ValueError('Must add public key if signed is set to true.')
+            if public_key.issuer != self.issuer:
+                raise ValueError('Public key issuer does not match assertion issuer')
 
         obi_version, context_iri = get_obi_context(obi_version)
 
         json = OrderedDict([
             ('@context', context_iri),
             ('type', 'Assertion'),
-            ('badge', add_obi_version_ifneeded(self.cached_badgeclass.jsonld_id, obi_version)),
         ])
 
         if signed:
             json['id'] = self.create_random_uuid()
         else:
             json['id'] = add_obi_version_ifneeded(self.jsonld_id, obi_version)
+            json['badge'] = add_obi_version_ifneeded(self.cached_badgeclass.jsonld_id, obi_version)
 
         image_url = OriginSetting.HTTP + reverse('badgeinstance_image', kwargs={'entity_id': self.entity_id})
         json['image'] = image_url
@@ -1042,9 +1069,11 @@ class BadgeInstance(BaseAuditedModel,
 
         if expand_badgeclass:
             json['badge'] = self.cached_badgeclass.get_json(obi_version=obi_version, include_extra=include_extra)
-
+            if signed:
+                json['badge']['id'] = self.cached_badgeclass.get_url_with_public_key(public_key)
             if expand_issuer:
-                json['badge']['issuer'] = self.cached_issuer.get_json(obi_version=obi_version, include_extra=include_extra, signed=signed)
+                json['badge']['issuer'] = self.cached_issuer.get_json(obi_version=obi_version, include_extra=include_extra, signed=signed,
+                                                                      expand_public_key=True, public_key=public_key)
 
         if self.revoked:
             return OrderedDict([
@@ -1065,7 +1094,7 @@ class BadgeInstance(BaseAuditedModel,
             if signed:
                 json["verification"] = {
                     "type": "SignedBadge",
-                    "creator": self.cached_issuer.public_key.public_url
+                    "creator": public_key.public_url
                 }
             else:
                 json["verification"] = {
