@@ -172,9 +172,6 @@ def callback(request):
     :return: Either renders authentication error, or completes the social login
     """
     # extract the state of the redirect
-    print(request.__dict__)
-    print(request.__dict__['session'].__dict__)
-
     if request.user.is_authenticated:
         get_account_adapter(request).logout(request)  # logging in while being authenticated breaks the login procedure
 
