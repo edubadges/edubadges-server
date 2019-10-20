@@ -46,25 +46,29 @@ class SymmetricKeyDetailView(BaseEntityDetailView):
     def get_object(self, request, **kwargs):
         return SymmetricKey.objects.filter(user=request.user, current=True).first()
 
+
 class SetIssuerSignerView(APIView):
     permission_classes = (AuthenticatedWithVerifiedEmail, MaySignAssertions, OwnsSymmetricKey)
     http_method_names = ['put']
 
     def put(self, request, **kwargs):
         issuer = Issuer.objects.get(entity_id=request.data['issuer_slug'])
-        if any([staff.is_signer for staff in IssuerStaff.objects.filter(issuer=issuer)]):
-            raise ValidationError("Cannot have multiple signers for one issuer")
-        new_signer_matching_email = [email for email in CachedEmailAddress.objects.filter(email=request.data['new_signer_email'], verified=True) if email.user.has_surf_conext_social_account()]
-        if not new_signer_matching_email:
+        remove = request.data.get('action') == 'remove'
+        add = request.data.get('action') == 'add'
+        signer_matching_email = [email for email in CachedEmailAddress.objects.filter(email=request.data['signer_email'], verified=True) if email.user.has_surf_conext_social_account()]
+        if not signer_matching_email:
             raise ValidationError('No matching email found')
-        if len(new_signer_matching_email) > 1:
+        if len(signer_matching_email) > 1:
             raise ValidationError('Multiple matching emails found')
-        new_signer = new_signer_matching_email[0].user
+        signer = signer_matching_email[0].user
         staff_instance = IssuerStaff.objects.get(
-            user=new_signer,
+            user=signer,
             issuer=issuer,
         )
-        staff_instance.is_signer = True
+        if add:
+            staff_instance.is_signer = True
+        if remove:
+            staff_instance.is_signer = False
         staff_instance.save()
         return Response({}, status=status.HTTP_200_OK)
 
