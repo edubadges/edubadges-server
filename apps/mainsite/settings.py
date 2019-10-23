@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django_object_actions',
+    # 'django_extensions',
     'markdownify',
     'badgeuser',
     'allauth',

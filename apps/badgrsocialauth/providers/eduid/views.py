@@ -21,15 +21,11 @@ from allauth.account.adapter import get_adapter as get_account_adapter
 
 def enroll_student(user, edu_id, badgeclass_slug):
     badge_class = get_object_or_404(BadgeClass, entity_id=badgeclass_slug)
-    # consent given wehen enrolling
-    defaults = {'date_consent_given': timezone.now(),
-                'first_name': user.first_name, 
-                'last_name': user.last_name}
     if user.may_enroll(badge_class):
-        StudentsEnrolled.objects.create(badge_class=badge_class, 
-                                        email=user.email, 
-                                        edu_id=edu_id, 
-                                        **defaults)
+        # consent given when enrolling
+        StudentsEnrolled.objects.create(badge_class=badge_class,
+                                        user=user,
+                                        date_consent_given=timezone.now())
     return 'enrolled'
     
 

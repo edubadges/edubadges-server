@@ -148,12 +148,9 @@ class SetupUserHelper(object):
                                                'recipient_type': 'id',
                                                'recipient_identifier': recipient.get_recipient_identifier(),
                                                'extensions': recipient_profile_extension}]}
-        defaults = {'date_consent_given': timezone.now(),
-                    'first_name': 'Piet',
-                    'last_name': 'Jonker'}
-        StudentsEnrolled.objects.create(edu_id=recipient.get_recipient_identifier(),
+        StudentsEnrolled.objects.create(user=recipient,
                                         badge_class_id=badgeclass.pk,
-                                        email="test@example.com", **defaults)
+                                        date_consent_given=timezone.now())
         return assertion_post_data
 
 

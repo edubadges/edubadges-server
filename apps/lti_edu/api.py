@@ -41,8 +41,7 @@ class StudentEnrollmentList(BaseEntityListView):
     serializer_class = StudentsEnrolledSerializerWithRelations
 
     def get_objects(self, request, **kwargs):
-        recipient_identifier = request.user.get_recipient_identifier()
-        return StudentsEnrolled.objects.filter(edu_id=recipient_identifier)
+        return StudentsEnrolled.objects.filter(user=request.user)
 
     def get(self, request, **kwargs):
         return super(StudentEnrollmentList, self).get(request, **kwargs)
@@ -51,7 +50,7 @@ class StudentEnrollmentList(BaseEntityListView):
         enrollment = StudentsEnrolled.objects.get(id=request.data['enrollmentID'])
         if enrollment.date_awarded:
             return Response(data='Awarded enrollments cannot be withdrawn', status=403)
-        if request.user.get_recipient_identifier() == enrollment.edu_id:
+        if request.user == enrollment.user:
             enrollment.delete()
             return Response(status=200)
         else:
@@ -77,15 +76,11 @@ class StudentsEnrolledList(BaseEntityListView):
             if field not in request.data:
                 return Response(data='field missing', status=401)
         badge_class = get_object_or_404(BadgeClass, entity_id=request.data['badgeclass_slug'])
-        # consent given when enrolling
-        defaults = {'date_consent_given': timezone.now(),
-                    'first_name': request.data.get('first_name', ''),
-                    'last_name': request.data.get('last_name', '')}
         if request.user.may_enroll(badge_class):
-            enrollment = StudentsEnrolled.objects.create(edu_id=request.data['edu_id'],
-                                                        badge_class_id=badge_class.pk,
-                                                        email=request.data['email'],
-                                                        **defaults)
+            # consent given when enrolling
+            enrollment = StudentsEnrolled.objects.create(badge_class_id=badge_class.pk,
+                                                         user=request.user,
+                                                         date_consent_given=timezone.now())
             message = EmailMessageMaker.create_student_badge_request_email(badge_class)
             request.user.email_user(subject='You have successfully requested a badge', message=message)
             return Response(data='enrolled', status=200)
@@ -112,7 +107,7 @@ class StudentsEnrolledDetail(BaseEntityDetailView):
             return Response(data= 'You do not have permission', status=HTTP_404_NOT_FOUND)
         if enrollment:
             enrollments_for_badgeclass = StudentsEnrolled.objects.filter(badge_class=current_badgeclass)
-            enrollment_object = enrollments_for_badgeclass.get(edu_id=enrollment['recipient_identifier'])
+            enrollment_object = enrollments_for_badgeclass.get(user__socialaccount__uid=enrollment['recipient_identifier'])
             enrollment_object.denied = enrollment['denied']
             enrollment_object.save()
             message = 'Succesfully updated enrollment of {}'.format(enrollment['recipient_name'].encode('utf-8'))

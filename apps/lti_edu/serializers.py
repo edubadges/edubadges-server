@@ -63,16 +63,14 @@ class BadgeClassLtiContextStudentSerializer(serializers.ModelSerializer):
     def get_requested(self, obj):
         user = self.context['request'].user
         if user.has_edu_id_social_account():
-            edu_id = user.get_social_account().uid
-            if StudentsEnrolled.objects.filter(edu_id=edu_id, badge_class=obj.badge_class, date_awarded__isnull=True,denied=False).exists():
+            if StudentsEnrolled.objects.filter(user=user, badge_class=obj.badge_class, date_awarded__isnull=True, denied=False).exists():
                 return True
         return False
 
     def get_rewarded(self,obj):
         user = self.context['request'].user
         if user.has_edu_id_social_account():
-            edu_id = user.get_social_account().uid
-            if StudentsEnrolled.objects.filter(edu_id=edu_id, badge_class=obj.badge_class,
+            if StudentsEnrolled.objects.filter(user=user, badge_class=obj.badge_class,
                                                date_awarded__isnull=False, denied=False).exists():
                 return True
         return False
@@ -81,8 +79,7 @@ class BadgeClassLtiContextStudentSerializer(serializers.ModelSerializer):
     def get_revoked(self,obj):
         user = self.context['request'].user
         if user.has_edu_id_social_account():
-            edu_id = user.get_social_account().uid
-            if StudentsEnrolled.objects.filter(edu_id=edu_id, badge_class=obj.badge_class, denied=True).exists():
+            if StudentsEnrolled.objects.filter(user=user, badge_class=obj.badge_class, denied=True).exists():
                 return True
         return False
 
@@ -91,6 +88,12 @@ class StudentsEnrolledSerializer(serializers.ModelSerializer):
     """
     Used by LTI
     """
+    email = serializers.ReadOnlyField()
+    first_name = serializers.ReadOnlyField()
+    last_name = serializers.ReadOnlyField()
+    edu_id = serializers.ReadOnlyField()
+
+
     class Meta:
         model = StudentsEnrolled
         fields = '__all__'

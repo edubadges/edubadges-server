@@ -79,6 +79,7 @@ class LtiClient(models.Model):
         self.validate_unique()
         super(LtiClient, self).save(*args, **kwargs)
 
+
 class ResourceLinkBadge(models.Model):
     # resource link is unique per placement, for each placement a unique badgeClass is created
     date_created = models.DateTimeField(default=timezone.now)
@@ -91,14 +92,8 @@ class ResourceLinkBadge(models.Model):
 class StudentsEnrolled(models.Model):
     badge_class = models.ForeignKey(BadgeClass, related_name='lti_students', on_delete=models.CASCADE)
     date_created = models.DateTimeField(default=timezone.now)
-    edu_id = models.CharField(max_length=400, default='', blank=True, null=True)
-
     date_consent_given = models.DateTimeField(default=None, blank=True, null=True)
-
-    email = models.EmailField()
-    first_name = models.CharField(max_length=400, default='', blank=True, null=True)
-    last_name = models.CharField(max_length=400, default='', blank=True, null=True)
-
+    user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE)
     assertion_slug = models.CharField(max_length=150, default='', blank=True, null=True)
     date_awarded = models.DateTimeField(default=None, blank=True, null=True)
     denied = models.BooleanField(default=False)
@@ -106,7 +101,27 @@ class StudentsEnrolled(models.Model):
 
     def __str__(self):
         return self.email
-    
+
+    @property
+    def email(self):
+        return self.user.primary_email
+
+    @property
+    def first_name(self):
+        return self.user.first_name
+
+    @property
+    def last_name(self):
+        return self.user.last_name
+
+    @property
+    def edu_id(self):
+        social_account = self.user.get_social_account()
+        if social_account.provider == 'edu_id':
+            return social_account.extra_data['sub']
+        else:
+            raise ValueError('User belonging to this enrollment has no eduid')
+
     @property
     def assertion(self):
         try:

@@ -500,8 +500,7 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         """
         social_account = self.get_social_account()
         if social_account.provider == 'edu_id':
-            edu_id = social_account.extra_data['sub']
-            enrollments = StudentsEnrolled.objects.filter(edu_id=edu_id, badge_class_id=badge_class.pk)
+            enrollments = StudentsEnrolled.objects.filter(user=social_account.user, badge_class_id=badge_class.pk)
             if not enrollments:
                 return True # no enrollments
             else:
