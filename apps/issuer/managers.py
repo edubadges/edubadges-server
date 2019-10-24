@@ -185,6 +185,7 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
         return badgeinstance, created
 
     def create(self,
+        public=False,
         evidence=None,
         extensions=None,
         notify=False,
@@ -211,6 +212,7 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
 
         # self.model would be a BadgeInstance
         new_instance = self.model(
+            public=False,
             recipient_identifier=recipient_identifier,
             badgeclass=badgeclass,
             issuer=issuer,

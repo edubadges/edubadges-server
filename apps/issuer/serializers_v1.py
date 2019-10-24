@@ -1,15 +1,11 @@
-import StringIO
 import uuid
 import os, json
-from email.mime.base import MIMEBase
-from email import encoders
 
 from django.apps import apps
 from django.core.urlresolvers import reverse
 from django.core.validators import URLValidator
 from django.utils.html import strip_tags
 from rest_framework import serializers
-from openbadges_bakery import bake
 
 import utils
 from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserIdentifierFieldV1
@@ -22,8 +18,6 @@ from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, 
 from mainsite.utils import OriginSetting
 from mainsite.validators import ChoicesValidator, BadgeExtensionValidator
 from .models import Issuer, BadgeClass, IssuerStaff, BadgeInstance, BadgeClassExtension, IssuerExtension
-from signing import tsob
-from signing.models import SymmetricKey
 
 
 class ExtensionsSaverMixin(object):
@@ -430,15 +424,6 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
         and badgeclass: issuer.models.BadgeClass.
         """
         evidence_items = []
-        issuer = self.context.get('badgeclass').issuer
-        if validated_data.get('issue_signed', False):
-            if not validated_data['created_by'].may_sign_assertions:
-                raise serializers.ValidationError('You do not have permission to sign badges.')
-            if not validated_data['created_by'] in [staff.user for staff in issuer.current_signers]:
-                raise serializers.ValidationError('You are not a signer for this issuer.')
-            if not validated_data['signing_password']:
-                raise serializers.ValidationError('Cannot sign badges: no password provided.')
-
         # ob1 evidence url
         evidence_url = validated_data.get('evidence')
         if evidence_url:
@@ -449,43 +434,35 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
         if submitted_items:
             evidence_items.extend(submitted_items)
 
-        assertion = self.context.get('badgeclass').issue(
-            recipient_id=validated_data.get('recipient_identifier'),
-            narrative=validated_data.get('narrative'),
-            evidence=evidence_items,
-            notify=validated_data.get('create_notification'),
-            created_by=self.context.get('request').user,
-            allow_uppercase=validated_data.get('allow_uppercase'),
-            recipient_type=validated_data.get('recipient_type', BadgeInstance.RECIPIENT_TYPE_EDUID),
-            badgr_app=BadgrApp.objects.get_current(self.context.get('request')),
-            expires_at=validated_data.get('expires_at', None),
-            extensions=validated_data.get('extension_items', None)
-        )
         if validated_data.get('issue_signed', False):
-            try:
-                symkey = SymmetricKey.objects.get(user=validated_data['created_by'], current=True)
-            except SymmetricKey.DoesNotExist:
-                raise serializers.ValidationError("You don't have a password set. Please set one first.")
-            try:
-                password = validated_data['signing_password']
-                private_key = issuer.create_private_key(password, symkey)
-                assertion_json = assertion.get_json(expand_badgeclass=True, expand_issuer=True, signed=True, public_key=private_key.public_key)
-                signed_assertions = tsob.sign_badges([assertion_json], private_key, symkey, password)
-                signed_assertion = signed_assertions[0]  # TODO: batch-wise signing
-            except ValueError as e:
-                raise serializers.ValidationError(e.message)
+            assertion = self.context.get('badgeclass').issue_signed(
+                recipient_id=validated_data.get('recipient_identifier'),
+                narrative=validated_data.get('narrative'),
+                evidence=evidence_items,
+                notify=validated_data.get('create_notification'),
+                created_by=self.context.get('request').user,
+                allow_uppercase=validated_data.get('allow_uppercase'),
+                recipient_type=validated_data.get('recipient_type', BadgeInstance.RECIPIENT_TYPE_EDUID),
+                badgr_app=BadgrApp.objects.get_current(self.context.get('request')),
+                expires_at=validated_data.get('expires_at', None),
+                extensions=validated_data.get('extension_items', None),
+                signer=validated_data.get('created_by'),
+                password=validated_data.get('signing_password')
+            )
+        else:
+            assertion = self.context.get('badgeclass').issue(
+                recipient_id=validated_data.get('recipient_identifier'),
+                narrative=validated_data.get('narrative'),
+                evidence=evidence_items,
+                notify=validated_data.get('create_notification'),
+                created_by=self.context.get('request').user,
+                allow_uppercase=validated_data.get('allow_uppercase'),
+                recipient_type=validated_data.get('recipient_type', BadgeInstance.RECIPIENT_TYPE_EDUID),
+                badgr_app=BadgrApp.objects.get_current(self.context.get('request')),
+                expires_at=validated_data.get('expires_at', None),
+                extensions=validated_data.get('extension_items', None)
+            )
 
-            new_image = StringIO.StringIO()
-            bake(image_file=assertion.cached_badgeclass.image.file,
-                 assertion_json_string=signed_assertion['signature'],
-                 output_file=new_image)
-
-            attach = MIMEBase('image', 'png')
-            attach.set_payload(new_image.read())
-            encoders.encode_base64(attach)
-            assertion.recipient_user.email_user(subject='You have received a signed badge',
-                                                message='Congrats, this is your signed badge',
-                                                attachments=[attach])
 
         return assertion
 

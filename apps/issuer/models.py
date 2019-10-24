@@ -6,6 +6,8 @@ import re
 import uuid
 import logging
 from collections import OrderedDict
+from email.mime.base import MIMEBase
+from email import encoders
 
 import cachemodel
 import os
@@ -13,7 +15,7 @@ from allauth.account.adapter import get_adapter
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.urlresolvers import reverse
@@ -24,6 +26,7 @@ from json import dumps as json_dumps
 from jsonfield import JSONField
 from openbadges_bakery import bake
 from django.utils import timezone
+from rest_framework import serializers
 
 from entity.models import BaseVersionedEntity
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager, BadgeInstanceEvidenceManager
@@ -619,6 +622,52 @@ class BadgeClass(ResizeUploadedImage,
             **kwargs
         )
 
+    def issue_signed(self, signer=None, password=None, recipient_id=None, evidence=None, narrative=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None, **kwargs):
+        if not signer.may_sign_assertions:
+            raise serializers.ValidationError('You do not have permission to sign badges.')
+        if not signer in [staff.user for staff in self.issuer.current_signers]:
+            raise serializers.ValidationError('You are not a signer for this issuer.')
+        if not password:
+            raise serializers.ValidationError('Cannot sign badges: no password provided.')
+        assertion = BadgeInstance.objects.create(
+            badgeclass=self, recipient_identifier=recipient_id, narrative=narrative, evidence=evidence,
+            notify=False,  # notify after signing
+            created_by=created_by, allow_uppercase=allow_uppercase,
+            badgr_app=badgr_app,
+            **kwargs
+        )
+        try:
+            symkey = SymmetricKey.objects.get(user=signer, current=True)
+        except SymmetricKey.DoesNotExist:
+            raise serializers.ValidationError("You don't have a password set. Please set one first.")
+        try:
+            private_key = self.issuer.create_private_key(password, symkey)
+            assertion_json = assertion.get_json(expand_badgeclass=True, expand_issuer=True, signed=True,
+                                                public_key=private_key.public_key)
+            signed_assertions = tsob.sign_badges([assertion_json], private_key, symkey, password)
+            signature = signed_assertions[0]['signature']  # TODO: batch-wise signing
+        except ValueError as e:
+            raise serializers.ValidationError(e.message)
+
+        new_image = StringIO.StringIO()
+        bake(image_file=assertion.cached_badgeclass.image.file,
+             assertion_json_string=signature,
+             output_file=new_image)
+        if notify:
+            attach = MIMEBase('image', 'png')
+            attach.set_payload(new_image.read())
+            encoders.encode_base64(attach)
+            assertion.recipient_user.email_user(subject='You have received a signed badge',
+                                                message='Congrats, this is your signed badge',
+                                                attachments=[attach])
+
+        assertion.signature = signature
+        assertion.save()
+        filename = os.path.basename(assertion.image.file.name)
+        assertion.image.delete()  # replace image
+        assertion.image.save(name=filename, content=new_image)
+        return assertion
+
     def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True, use_canonical_id=False, signed=False, public_key=None):
         if not public_key and signed:
             raise ValueError('Cannot returned signed version of json without knowing which private key was used.')
@@ -757,6 +806,10 @@ class BadgeInstance(BaseAuditedModel,
     narrative = models.TextField(blank=True, null=True, default=None)
 
     old_json = JSONField()
+
+    signature = models.TextField(blank=True, null=True, default=None)
+
+    public = models.BooleanField(default=False)
 
     objects = BadgeInstanceManager()
     cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
