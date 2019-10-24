@@ -84,6 +84,12 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
             else:
                 raise
 
+        try:
+            if not self.current_object.public:
+                raise Http404
+        except AttributeError:  # object does not have the public attribute
+            pass
+
         self.log(self.current_object)
 
         if self.is_bot():
@@ -383,7 +389,6 @@ class BadgeInstanceJson(JSONComponentView):
             expand_badgeclass=('badge' in expands),
             expand_issuer=('badge.issuer' in expands)
         )
-
         return json
 
     def get_context_data(self, **kwargs):
