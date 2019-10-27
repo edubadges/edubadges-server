@@ -116,7 +116,7 @@ class BackpackAssertionDetail(BaseEntityDetailView):
         tags=['Backpack']
     )
     def put(self, request, **kwargs):
-        fields_whitelist = ('acceptance',)
+        fields_whitelist = ('acceptance', 'public')
         data = {k: v for k, v in request.data.items() if k in fields_whitelist}
         return super(BackpackAssertionDetail, self).put(request, data=data, **kwargs)
 
