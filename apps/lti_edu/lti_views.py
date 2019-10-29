@@ -9,11 +9,12 @@ from badgeuser.authcode import authcode_for_accesstoken
 from badgeuser.models import BadgrAccessToken
 from badgrsocialauth.utils import set_session_badgr_app, get_session_badgr_app
 from lti_edu.models import LtiBadgeUserTennant
+from mainsite.models import BadgrApp
 
 
 class CheckLogin(View):
 
-    def get(self, request):
+    def get(self, request,badgr_app_id):
 
         response = {'loggedin': True, 'auth_token':''}
         if not request.user.is_authenticated():
@@ -21,8 +22,7 @@ class CheckLogin(View):
         elif not request.user.has_edu_id_social_account():
             response['loggedin'] = False
         if request.user.is_authenticated():
-            badgr_app = get_session_badgr_app(request)
-
+            badgr_app = BadgrApp.objects.get(id=badgr_app_id)
             if badgr_app is not None:
                 accesstoken = BadgrAccessToken.objects.generate_new_token_for_user(
                     request.user,
@@ -38,7 +38,7 @@ class CheckLogin(View):
 
 
 class CheckLoginAdmin(View):
-    def get(self, request):
+    def get(self, request,badgr_app_id):
 
         response = {'loggedin': True, 'auth_token':''}
         if not request.user.is_authenticated():
@@ -46,7 +46,7 @@ class CheckLoginAdmin(View):
         elif not request.user.has_surf_conext_social_account():
             response['loggedin'] = False
         if request.user.is_authenticated():
-            badgr_app = get_session_badgr_app(request)
+            badgr_app = BadgrApp.objects.get(id=badgr_app_id)
 
             if badgr_app is not None:
                 accesstoken = BadgrAccessToken.objects.generate_new_token_for_user(
@@ -142,7 +142,7 @@ class LoginLti(TemplateView):
             pass
 
         context_data['after_login'] = self.get_after_login(badgr_app)
-        context_data['check_login'] = self.get_check_login_url()
+        context_data['check_login'] = self.get_check_login_url(badgr_app)
         return context_data
 
     def post(self, request, *args, **kwargs):
@@ -179,10 +179,10 @@ class LoginLti(TemplateView):
         scheme = self.request.is_secure() and "https" or "http"
         return '{}://{}/lti-badges?embedVersion=1&embedWidth=800&embedHeight=800'.format(scheme, badgr_app.cors)
 
-    def get_check_login_url(self):
+    def get_check_login_url(self, badgr_app):
         if self.staff:
-            return self.get_check_login_url_staff()
-        return reverse('check-login')
+            return self.get_check_login_url_staff(badgr_app)
+        return reverse('check-login', kwargs={'badgr_app_id':badgr_app.id})
 
     def get_login_url_staff(self):
         return "{}?provider=surf_conext".format(reverse('socialaccount_login'))
@@ -191,8 +191,8 @@ class LoginLti(TemplateView):
         scheme = self.request.is_secure() and "https" or "http"
         return '{}://{}/lti-badges/staff?embedVersion=1&embedWidth=800&embedHeight=800'.format(scheme, badgr_app.cors)
 
-    def get_check_login_url_staff(self):
-        return reverse('check-login-staff')
+    def get_check_login_url_staff(self,badgr_app):
+        return reverse('check-login-staff', kwargs={'badgr_app_id':badgr_app.id})
 
 
 class LoginLtiStaff(LoginLti):

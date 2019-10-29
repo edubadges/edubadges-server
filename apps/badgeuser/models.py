@@ -529,10 +529,12 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
                     return
         return super(BadgeUser, self).save(*args, **kwargs)
 
+
 class BadgeUserProxy(BadgeUser):
     class Meta:
         proxy = True
         verbose_name = 'Badge User Interface for SuperUser'
+
 
 class BadgrAccessTokenManager(models.Manager):
 
