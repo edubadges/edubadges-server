@@ -31,9 +31,9 @@ function Request() {
                                 if(loginWindow != null) {
                                     loginWindow.close();
                                 }
-                                window.location =$('#login-link').attr('next-url');
+                                window.location =$('#login-link').attr('next-url')+'&authToken='+response['auth_token'];
 
-                                },1000);
+                                },3000);
 
                     }
                     else{

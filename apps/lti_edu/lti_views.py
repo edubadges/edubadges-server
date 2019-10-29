@@ -5,7 +5,9 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import TemplateView
 
-from badgrsocialauth.utils import set_session_badgr_app
+from badgeuser.authcode import authcode_for_accesstoken
+from badgeuser.models import BadgrAccessToken
+from badgrsocialauth.utils import set_session_badgr_app, get_session_badgr_app
 from lti_edu.models import LtiBadgeUserTennant
 
 
@@ -13,22 +15,50 @@ class CheckLogin(View):
 
     def get(self, request):
 
-        response = {'loggedin': True}
+        response = {'loggedin': True, 'auth_token':''}
         if not request.user.is_authenticated():
             response['loggedin'] = False
         elif not request.user.has_edu_id_social_account():
             response['loggedin'] = False
+        if request.user.is_authenticated():
+            badgr_app = get_session_badgr_app(request)
+
+            if badgr_app is not None:
+                accesstoken = BadgrAccessToken.objects.generate_new_token_for_user(
+                    request.user,
+                    application=badgr_app.oauth_application if badgr_app.oauth_application_id else None,
+                    scope='rw:backpack rw:profile rw:issuer')
+
+                if badgr_app.use_auth_code_exchange:
+                    authcode = authcode_for_accesstoken(accesstoken)
+                    response['auth_token'] = authcode
+                else:
+                    response['auth_token'] = accesstoken.token
         return JsonResponse(response)
 
 
 class CheckLoginAdmin(View):
     def get(self, request):
 
-        response = {'loggedin': True}
+        response = {'loggedin': True, 'auth_token':''}
         if not request.user.is_authenticated():
             response['loggedin'] = False
         elif not request.user.has_surf_conext_social_account():
             response['loggedin'] = False
+        if request.user.is_authenticated():
+            badgr_app = get_session_badgr_app(request)
+
+            if badgr_app is not None:
+                accesstoken = BadgrAccessToken.objects.generate_new_token_for_user(
+                    request.user,
+                    application=badgr_app.oauth_application if badgr_app.oauth_application_id else None,
+                    scope='rw:backpack rw:profile rw:issuer')
+
+                if badgr_app.use_auth_code_exchange:
+                    authcode = authcode_for_accesstoken(accesstoken)
+                    response['auth_token'] = authcode
+                else:
+                    response['auth_token'] = accesstoken.token
         return JsonResponse(response)
 
 
