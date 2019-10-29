@@ -33,7 +33,7 @@ function Request() {
                                 }
                                 window.location =$('#login-link').attr('next-url')+'&authToken='+response['auth_token'];
 
-                                },5000);
+                                },3000);
 
                     }
                     else{
