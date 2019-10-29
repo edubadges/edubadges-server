@@ -22,6 +22,7 @@ def forwards_func(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
+        ('socialaccount', '__first__'),
         ('lti_edu', '0016_studentsenrolled_user'),
     ]
 
