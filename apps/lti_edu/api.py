@@ -72,7 +72,7 @@ class StudentsEnrolledList(BaseEntityListView):
                                                date_awarded=None)
 
     def post(self, request, **kwargs):
-        for field in ['badgeclass_slug', 'edu_id']:
+        for field in ['badgeclass_slug']:
             if field not in request.data:
                 return Response(data='field missing', status=401)
         badge_class = get_object_or_404(BadgeClass, entity_id=request.data['badgeclass_slug'])
