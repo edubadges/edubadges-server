@@ -78,6 +78,10 @@ def after_terms_agreement(request, **kwargs):
     '''
     badgr_app_pk, login_type, lti_context_id,lti_user_id,lti_roles, referer = json.loads(kwargs['state'])
     lti_data = request.session.get('lti_data', None)
+    try:
+        badgr_app_pk = int(badgr_app_pk)
+    except:
+        badgr_app_pk = settings.BADGR_APP_ID
 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
     set_session_badgr_app(request, badgr_app)
@@ -208,3 +212,15 @@ def callback(request):
         return HttpResponseRedirect(reverse('accept_terms_resign', kwargs=keyword_arguments))
 
     return after_terms_agreement(request, **keyword_arguments)
+
+from django.contrib.auth.signals import user_logged_out, user_logged_in
+
+
+def print_logout_message(sender, user, request, **kwargs):
+    print('user logged out')
+
+def print_login_message(sender, user, request, **kwargs):
+    print('user logged in')
+
+user_logged_out.connect(print_logout_message)
+user_logged_in.connect(print_login_message)

@@ -26,14 +26,20 @@ function Request() {
                     console.log(response);
                     if(response['loggedin']){
                             self.disablePoll();
-                            setTimeout(function(){
-                                console.log('in timeout function');
-                                if(loginWindow != null) {
-                                    loginWindow.close();
-                                }
-                                window.location =$('#login-link').attr('next-url')+'&authToken='+response['auth_token'];
+                            if(loginWindow != null) {
+                                setTimeout(function () {
+                                    console.log('in timeout function');
+                                    if (loginWindow != null) {
+                                        loginWindow.close();
+                                    }
+                                    console.log(response['auth_token']);
+                                    window.location = $('#login-link').attr('next-url') + '&authToken=' + response['auth_token'];
 
-                                },3000);
+                                }, 3000);
+                            }
+                            else{
+                                window.location = $('#login-link').attr('next-url') + '&authToken=' + response['auth_token'];
+                            }
 
                     }
                     else{
