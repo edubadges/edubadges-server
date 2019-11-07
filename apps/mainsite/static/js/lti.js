@@ -35,7 +35,7 @@ function Request() {
                                     console.log(response['auth_token']);
                                     window.location = $('#login-link').attr('next-url') + '&authToken=' + response['auth_token'];
 
-                                }, 3000);
+                                }, 1000);
                             }
                             else{
                                 window.location = $('#login-link').attr('next-url') + '&authToken=' + response['auth_token'];
