@@ -24,10 +24,7 @@ class CheckLogin(View):
         if request.user.is_authenticated():
             badgr_app = BadgrApp.objects.get(id=badgr_app_id)
             if badgr_app is not None:
-                accesstoken = BadgrAccessToken.objects.generate_new_token_for_user(
-                    request.user,
-                    application=badgr_app.oauth_application if badgr_app.oauth_application_id else None,
-                    scope='rw:backpack rw:profile rw:issuer')
+                accesstoken = BadgrAccessToken.objects.filter(user=request.user).order_by('-created').all()[0]
 
                 if badgr_app.use_auth_code_exchange:
                     authcode = authcode_for_accesstoken(accesstoken)
@@ -49,10 +46,7 @@ class CheckLoginAdmin(View):
             badgr_app = BadgrApp.objects.get(id=badgr_app_id)
 
             if badgr_app is not None:
-                accesstoken = BadgrAccessToken.objects.generate_new_token_for_user(
-                    request.user,
-                    application=badgr_app.oauth_application if badgr_app.oauth_application_id else None,
-                    scope='rw:backpack rw:profile rw:issuer')
+                accesstoken = BadgrAccessToken.objects.filter(user=request.user).order_by('-created').all()[0]
 
                 if badgr_app.use_auth_code_exchange:
                     authcode = authcode_for_accesstoken(accesstoken)
@@ -177,7 +171,7 @@ class LoginLti(TemplateView):
         if self.staff:
             return self.get_after_login_staff(badgr_app)
         scheme = self.request.is_secure() and "https" or "http"
-        return '{}://{}/lti-badges?embedVersion=1&embedWidth=800&embedHeight=800'.format(scheme, badgr_app.cors)
+        return '{}://{}/auth/login?embedVersion=1&embedWidth=800&embedHeight=800&lti_student=true'.format(scheme, badgr_app.cors)
 
     def get_check_login_url(self, badgr_app):
         if self.staff:
@@ -189,7 +183,7 @@ class LoginLti(TemplateView):
 
     def get_after_login_staff(self, badgr_app):
         scheme = self.request.is_secure() and "https" or "http"
-        return '{}://{}/lti-badges/staff?embedVersion=1&embedWidth=800&embedHeight=800'.format(scheme, badgr_app.cors)
+        return '{}://{}/auth/login?embedVersion=1&embedWidth=800&embedHeight=800&lti_staff=true'.format(scheme, badgr_app.cors)
 
     def get_check_login_url_staff(self,badgr_app):
         return reverse('check-login-staff', kwargs={'badgr_app_id':badgr_app.id})
