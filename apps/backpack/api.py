@@ -108,6 +108,7 @@ class BackpackAssertionDetail(BaseEntityDetailView):
     def delete(self, request, **kwargs):
         obj = self.get_object(request, **kwargs)
         obj.acceptance = BadgeInstance.ACCEPTANCE_REJECTED
+        obj.public = False
         obj.save()
         return Response(status=HTTP_204_NO_CONTENT)
 
