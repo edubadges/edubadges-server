@@ -1,8 +1,11 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django.contrib.auth import login, load_backend, logout
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.http import JsonResponse
 from django.urls import reverse
+from django.utils.datetime_safe import datetime
 from django.views import View
 from django.views.generic import TemplateView
 
@@ -25,17 +28,30 @@ class CheckLogin(View):
         if request.user.is_authenticated():
             badgr_app = BadgrApp.objects.get(id=badgr_app_id)
             if badgr_app is not None:
-                accesstoken = BadgrAccessToken.objects.filter(user=request.user).order_by('-created').all()[0]
 
-                if badgr_app.use_auth_code_exchange:
-                    authcode = authcode_for_accesstoken(accesstoken)
-                    response['auth_token'] = authcode
-                else:
-                    response['auth_token'] = accesstoken.token
+                response['auth_token'] = self.get_access_token(badgr_app, request.user)
+
         return JsonResponse(response)
 
+    def get_access_token(self, badgr_app, user):
+        if BadgrAccessToken.objects.filter(user=user, expires__lt=datetime.now()).exists():
+            accesstoken = BadgrAccessToken.objects.filter(user=user).order_by('-created').all()[0]
+        else:
+            accesstoken = BadgrAccessToken.objects.generate_new_token_for_user(
+                user,
+                application=badgr_app.oauth_application if badgr_app.oauth_application_id else None,
+                scope='rw:backpack rw:profile rw:issuer')
 
-class CheckLoginAdmin(View):
+        if badgr_app.use_auth_code_exchange:
+            authcode = authcode_for_accesstoken(accesstoken)
+            return authcode
+        else:
+            return accesstoken.token
+
+
+
+
+class CheckLoginAdmin(CheckLogin):
     def get(self, request,badgr_app_id):
 
         response = {'loggedin': True, 'auth_token':''}
@@ -47,13 +63,7 @@ class CheckLoginAdmin(View):
             badgr_app = BadgrApp.objects.get(id=badgr_app_id)
 
             if badgr_app is not None:
-                accesstoken = BadgrAccessToken.objects.filter(user=request.user).order_by('-created').all()[0]
-
-                if badgr_app.use_auth_code_exchange:
-                    authcode = authcode_for_accesstoken(accesstoken)
-                    response['auth_token'] = authcode
-                else:
-                    response['auth_token'] = accesstoken.token
+                response['auth_token'] = self.get_access_token(badgr_app, request.user)
         return JsonResponse(response)
 
 
@@ -66,6 +76,7 @@ def login_user(request, user):
                 user.backend = backend
                 break
     if hasattr(user, 'backend'):
+
         return login(request, user)
 
 
@@ -132,7 +143,7 @@ class LoginLti(TemplateView):
             ltibadgetennant = LtiBadgeUserTennant.objects.get(lti_tennant=kwargs['tenant'],
                                                               lti_user_id=self.request.POST['user_id'],
                                                               staff=self.staff)
-            # login_user(self.request, ltibadgetennant.badge_user)
+            login_user(self.request, ltibadgetennant.badge_user)
 
         except Exception as e:
             pass
@@ -161,7 +172,6 @@ class LoginLti(TemplateView):
         lti_data['lti_tenant'] = kwargs['tenant'].client_key.hex
         lti_data['post_data'] = post
         request.session['lti_data'] = lti_data
-
         return self.get(request, *args, **kwargs)
 
     def get_login_url(self):

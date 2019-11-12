@@ -23,6 +23,7 @@ class LtiBadgeUserTennant(models.Model):
     token = models.CharField(max_length=512, null=True)
     current_lti_data = models.TextField(null=True, blank=True)
     staff= models.BooleanField(default=False)
+    expires = models.DateTimeField(null=True)
 
 
 class BadgeClassLtiContext(models.Model):
@@ -31,6 +32,7 @@ class BadgeClassLtiContext(models.Model):
 
     class Meta:
         unique_together = ('badge_class', 'context_id',)
+
 
 class UserCurrentContextId(models.Model):
     badge_user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE)

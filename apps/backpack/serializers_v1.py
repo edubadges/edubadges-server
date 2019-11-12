@@ -26,7 +26,7 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
     assertion = serializers.CharField(required=False, write_only=True)
     recipient_identifier = serializers.CharField(required=False, read_only=True)
     acceptance = serializers.CharField(default='Accepted')
-    public = serializers.BooleanField()
+    public = serializers.BooleanField(required=False, default=False)
     narrative = MarkdownCharField(required=False, read_only=True)
     evidence_items = EvidenceItemSerializer(many=True, required=False, read_only=True)
 
