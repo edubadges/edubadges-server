@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import login, load_backend, logout
+from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.http import JsonResponse
 from django.urls import reverse
 from django.views import View
@@ -120,6 +121,7 @@ class LoginLti(TemplateView):
         context_data['ltitest'] = 'yes lti test'
         badgr_app = kwargs['tenant'].badgr_app
         context_data['login_url'] = self.get_login_url()
+        context_data['login_image'] = self.get_login_image()
         if badgr_app is not None:
             set_session_badgr_app(self.request, badgr_app)
         else:
@@ -188,6 +190,13 @@ class LoginLti(TemplateView):
     def get_check_login_url_staff(self,badgr_app):
         return reverse('check-login-staff', kwargs={'badgr_app_id':badgr_app.id})
 
+    def get_login_image(self):
+        if self.staff:
+            return static('images/surf_conext_logo.png')
+        return static('images/edu_id_logo.png')
+
+
+
 
 class LoginLtiStaff(LoginLti):
     staff = True
@@ -201,3 +210,6 @@ class LoginLtiStaff(LoginLti):
 
     def get_check_login_url(self):
         return reverse('check-login-staff')
+
+    def get_login_image(self):
+        return static('images/surf_conext_logo.png')
