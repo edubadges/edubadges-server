@@ -63,9 +63,6 @@ def login(request):
 
     params = {
     "state": state,
-    "client_id": current_app.client_id,
-    "response_type": "code",
-    "scope": "openid",
     'redirect_uri': '%s/account/eduid/login/callback/' % settings.HTTP_ORIGIN,
 
     }

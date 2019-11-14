@@ -2,9 +2,9 @@ from allauth.socialaccount import providers
 from allauth.socialaccount.providers.base import Provider
 from badgrsocialauth.utils import BadgrSocialAuthProviderMixin
 
-class EduIDProvider(BadgrSocialAuthProviderMixin, Provider):
-    id = 'edu_id'
-    name = 'EduId'
-    package = 'badgrsocialauth.providers.eduid'
+class AlaProvider(BadgrSocialAuthProviderMixin, Provider):
+    id = 'ala'
+    name = 'Ala'
+    package = 'badgrsocialauth.providers.ala'
 
-providers.registry.register(EduIDProvider)
+providers.registry.register(AlaProvider)
