@@ -214,7 +214,7 @@ class BadgeClassDetail(BaseEntityDetailView):
 
 
 class TimestampedBadgeInstanceList(BaseEntityListView):
-    allowed_methods = ('GET',)
+    allowed_methods = ('GET', 'DELETE')
     permission_classes = (AuthenticatedWithVerifiedEmail, MaySignAssertions)
     serializer_class = BadgeInstanceSerializerV1
 
@@ -224,10 +224,17 @@ class TimestampedBadgeInstanceList(BaseEntityListView):
     def get_objects(self, request, **kwargs):
         return request.user.get_assertions_ready_for_signing()
 
+    def delete(self, request, **kwargs):
+        badge_instance_slug = request.data.get('badge_instance_slug')
+        badge_instance = BadgeInstance.objects.get(entity_id=badge_instance_slug)
+        badge_instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class BatchSignAssertions(BaseEntityListView):
     allowed_methods = ('POST',)
     permission_classes = (AuthenticatedWithVerifiedEmail, MaySignAssertions)
+    serializer_class = BadgeInstanceSerializerV1
 
     def post(self, request, **kwargs):
         # post assertions to be signed
@@ -244,9 +251,12 @@ class BatchSignAssertions(BaseEntityListView):
         batch_of_assertion_json = []
         for ass_slug in assertion_slugs:  # pun intended
             assertion_instance = BadgeInstance.objects.get(entity_id=ass_slug)
-            assertion_instances.append(assertion_instance)
             if not user in [staff.user for staff in assertion_instance.issuer.current_signers]:
                 raise ValidationError('You are not a signer for this issuer: {}'.format(assertion_instance.issuer.name))
+            if assertion_instance.signature:
+                raise ValidationError('Cannot sign Assertion for Badgeclass {} with recipient identifier {}. Assertion already signed.'.format(assertion_instance.badgeclass.name, assertion_instance.recipient_identifier))
+            assertion_instances.append(assertion_instance)
+
             timestamp = AssertionTimeStamp.objects.get(badge_instance=assertion_instance)
             js = timestamp.get_json_with_proof()
             batch_of_assertion_json.append(js)
@@ -277,8 +287,9 @@ class BatchSignAssertions(BaseEntityListView):
             AssertionTimeStamp.objects.get(badge_instance=matching_assertion).delete()
             matching_assertion.notify_earner(attach_image=True)
             successful_assertions.append(matching_assertion)
-
-        response = [assertion.slug for assertion in successful_assertions]
+        serializer_class = self.get_serializer_class()
+        serializer_instance = serializer_class()
+        response = [serializer_instance.to_representation(assertion) for assertion in successful_assertions]
         return Response(status=status.HTTP_201_CREATED, data=response)
 
 
@@ -495,7 +506,7 @@ class BadgeInstanceList(UncachedPaginatedViewMixin, VersionedObjectMixin, BaseEn
                     badge_class = get_object_or_404(BadgeClass, entity_id=request.data.get('badge_class', -1))
                     most_recent_enrollment = StudentsEnrolled.objects.filter(badge_class=badge_class, user__socialaccount__uid=recipient['recipient_identifier']).last()
                     most_recent_enrollment.date_awarded = timezone.now()
-                    most_recent_enrollment.assertion_slug = response.data.get('slug')
+                    most_recent_enrollment.badge_instance = BadgeInstance.objects.get(entity_id=response.data.get('slug'))
                     most_recent_enrollment.save()
         return response
 
