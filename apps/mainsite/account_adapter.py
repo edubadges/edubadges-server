@@ -21,12 +21,14 @@ from mainsite.utils import OriginSetting
 
 class BadgrAccountAdapter(DefaultAccountAdapter):
 
-    def send_mail(self, template_prefix, email, context):
+    def send_mail(self, template_prefix, email, context, attachment=None):
         context['STATIC_URL'] = getattr(settings, 'STATIC_URL')
         context['HTTP_ORIGIN'] = getattr(settings, 'HTTP_ORIGIN')
         context['unsubscribe_url'] = getattr(settings, 'HTTP_ORIGIN') + EmailBlacklist.generate_email_signature(email)
 
         msg = self.render_mail(template_prefix, email, context)
+        if attachment:
+            msg.attach(attachment.name, attachment.read())
         msg.send()
 
     def is_open_for_signup(self, request):

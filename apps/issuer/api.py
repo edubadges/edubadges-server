@@ -1,8 +1,7 @@
 from collections import OrderedDict
+import datetime
+import dateutil.parser
 
-import datetime, copy
-
-import dateutil.parser, json
 from django.db.models import Q
 from django.http import Http404
 from django.utils import timezone
@@ -30,10 +29,12 @@ from issuer.serializers_v2 import IssuerSerializerV2, BadgeClassSerializerV2, Ba
 from apispec_drf.decorators import apispec_get_operation, apispec_put_operation, \
     apispec_delete_operation, apispec_list_operation, apispec_post_operation
 from lti_edu.models import StudentsEnrolled
-from mainsite.pagination import EncryptedCursorPagination
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from badgeuser.permissions import BadgeUserHasSurfconextSocialAccount
 from mainsite.serializers import CursorPaginatedListSerializer
+from signing.permissions import MaySignAssertions
+from signing.models import AssertionTimeStamp
+from signing import tsob
 
 logger = badgrlog.BadgrLogger()
 
@@ -65,7 +66,6 @@ class IssuerList(BaseEntityListView):
         tags=["Issuers"],
     )
     def post(self, request, **kwargs):
-        mapExtensionsToDict(request)
         return super(IssuerList, self).post(request, **kwargs)
 
 
@@ -211,6 +211,75 @@ class BadgeClassDetail(BaseEntityDetailView):
     def put(self, request, **kwargs):
         mapExtensionsToDict(request)
         return super(BadgeClassDetail, self).put(request, **kwargs)
+
+
+class TimestampedBadgeInstanceList(BaseEntityListView):
+    allowed_methods = ('GET',)
+    permission_classes = (AuthenticatedWithVerifiedEmail, MaySignAssertions)
+    serializer_class = BadgeInstanceSerializerV1
+
+    def get(self, request, **kwargs):
+        return super(TimestampedBadgeInstanceList, self).get(request, **kwargs)
+
+    def get_objects(self, request, **kwargs):
+        return request.user.get_assertions_ready_for_signing()
+
+
+class BatchSignAssertions(BaseEntityListView):
+    allowed_methods = ('POST',)
+    permission_classes = (AuthenticatedWithVerifiedEmail, MaySignAssertions)
+
+    def post(self, request, **kwargs):
+        # post assertions to be signed
+        password = request.data.get('password')
+        assertion_slugs = [instance['slug'] for instance in request.data.get('badge_instances')]
+        user = request.user
+        if not password:
+            raise ValidationError('Cannot sign badges: no password provided.')
+        if not assertion_slugs:
+            raise ValidationError('No badges to sign.')
+        if not user.may_sign_assertions:
+            raise ValidationError('You do not have permission to sign badges.')
+        assertion_instances = []
+        batch_of_assertion_json = []
+        for ass_slug in assertion_slugs:  # pun intended
+            assertion_instance = BadgeInstance.objects.get(entity_id=ass_slug)
+            assertion_instances.append(assertion_instance)
+            if not user in [staff.user for staff in assertion_instance.issuer.current_signers]:
+                raise ValidationError('You are not a signer for this issuer: {}'.format(assertion_instance.issuer.name))
+            timestamp = AssertionTimeStamp.objects.get(badge_instance=assertion_instance)
+            js = timestamp.get_json_with_proof()
+            batch_of_assertion_json.append(js)
+        successful_assertions = []
+        user.current_symmetric_key.validate_password(password)
+        try:
+            private_key = tsob.create_new_private_key(password, user.current_symmetric_key)
+        except ValueError as e:
+            raise ValidationError(e.message)
+        try:
+            signed_badges = tsob.sign_badges(batch_of_assertion_json,
+                                             private_key,
+                                             user.current_symmetric_key,
+                                             password)
+        except ValueError as e:
+            raise ValidationError(e.message)
+        for signed_badge in signed_badges:
+            signature = signed_badge['signature']
+            matching_assertion = [ass for ass in assertion_instances if ass.identifier == signed_badge['plain_badge']['id']]
+            if len(matching_assertion) > 1:
+                raise ValidationError('Signing failed: Signed json could not be matched to a BadgeInstance')
+            matching_assertion = matching_assertion[0]
+            matching_assertion.rebake(signature=signature, replace_image=True, save=False)
+            matching_assertion.signature = signature
+            matching_assertion.public_key_issuer.public_key = private_key.public_key
+            matching_assertion.public_key_issuer.save()
+            matching_assertion.save()
+            AssertionTimeStamp.objects.get(badge_instance=matching_assertion).delete()
+            matching_assertion.notify_earner(attach_image=True)
+            successful_assertions.append(matching_assertion)
+
+        response = [assertion.slug for assertion in successful_assertions]
+        return Response(status=status.HTTP_201_CREATED, data=response)
 
 
 class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):

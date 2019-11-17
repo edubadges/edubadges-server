@@ -8,7 +8,7 @@ from badgeuser.models import CachedEmailAddress
 from entity.api import BaseEntityListView, BaseEntityDetailView
 from issuer.models import Issuer, IssuerStaff
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
-from signing.models import SymmetricKey, PublicKey
+from signing.models import SymmetricKey, PublicKeyIssuer
 from signing.permissions import MaySignAssertions, OwnsSymmetricKey
 from signing.serializers import SymmetricKeySerializer
 
@@ -72,19 +72,19 @@ class SetIssuerSignerView(APIView):
         return Response({}, status=status.HTTP_200_OK)
 
 
-class PublicKeyDetailView(APIView):
+class PublicKeyIssuerDetailView(APIView):
     permission_classes = (permissions.AllowAny,)
     http_method_names = ['get']
-    model = PublicKey
+    model = PublicKeyIssuer
 
     def get(self, request, **kwargs):
-        pubkey = PublicKey.objects.get(entity_id=kwargs['entity_id'])
+        pubkey_issuer = PublicKeyIssuer.objects.get(entity_id=kwargs['entity_id'])
         return Response(
             {
                 "@context": "https://w3id.org/openbadges/v2",
                 "type": "CryptographicKey",
-                "id": pubkey.public_url,
-                "owner": pubkey.issuer.get_url_with_public_key(pubkey),
-                "publicKeyPem": pubkey.public_key_pem
+                "id": pubkey_issuer.public_url,
+                "owner": pubkey_issuer.owner_public_url,
+                "publicKeyPem": pubkey_issuer.public_key.public_key_pem
             }
         )

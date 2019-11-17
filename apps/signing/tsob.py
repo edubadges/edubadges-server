@@ -1,11 +1,11 @@
 import requests
 import json
 from django.conf import settings
-from signing.models import PrivateKey, PublicKey
+from signing.models import PrivateKey, PublicKey, SymmetricKey
+from signing import utils
 
-
-def create_new_symmetric_key(password, salt='salt', length=32, n=1048576, r=8, p=1):
-    return requests.post(settings.TIME_STAMPED_OPEN_BADGES_BASE_URL+'symmetrickey/',
+def create_new_symmetric_key(password, user, salt='salt', length=32, n=1048576, r=8, p=1):
+    symkey_json = requests.post(settings.TIME_STAMPED_OPEN_BADGES_BASE_URL+'symmetrickey/',
                          data=json.dumps({
                              "password": password,
                              "salt": salt,
@@ -14,10 +14,21 @@ def create_new_symmetric_key(password, salt='salt', length=32, n=1048576, r=8, p
                              "r": r,
                              "p": p
                          }),
-                         headers={'content-type': 'application/json'})
+                         headers={'content-type': 'application/json'}).json()
+    new_symkey = SymmetricKey.objects.create(
+        password_hash=utils.hash_string(password),
+        salt=symkey_json['salt'],
+        length=symkey_json['length'],
+        n=symkey_json['n'],
+        r=symkey_json['r'],
+        p=symkey_json['p'],
+        current=False,
+        user=user
+    )
+    return new_symkey
 
 
-def create_new_private_key(password, symmetric_key, issuer):
+def create_new_private_key(password, symmetric_key):
     response = requests.post(settings.TIME_STAMPED_OPEN_BADGES_BASE_URL + 'privatekey/',
                              data=json.dumps({
                                  "password": password,
@@ -32,7 +43,6 @@ def create_new_private_key(password, symmetric_key, issuer):
     public_key = PublicKey.objects.create(
         public_key_pem=response['public_key'],
         time_created=response['time_created'],
-        issuer=issuer
     )
 
     private_key = PrivateKey.objects.create(
@@ -71,16 +81,14 @@ def re_encrypt_private_keys(old_symmetric_key, new_symmetric_key, old_password, 
     if response.status_code == 200:
         for reencrypted_private_key in response.json():
             matching_previous_private_key = [pk for pk in private_key_list if pk.public_key.public_key_pem == reencrypted_private_key['public_key']][0]
-            PrivateKey.objects.create(
-                symmetric_key=new_symmetric_key,
-                encrypted_private_key=reencrypted_private_key['encrypted_private_key'],
-                initialization_vector=reencrypted_private_key['initialization_vector'],
-                tag=reencrypted_private_key['tag'],
-                associated_data=reencrypted_private_key['associated_data'],
-                time_created=reencrypted_private_key['time_created'],
-                public_key=matching_previous_private_key.public_key
-            )
-            matching_previous_private_key.delete()
+            matching_previous_private_key.symmetric_key = new_symmetric_key
+            matching_previous_private_key.encrypted_private_key = reencrypted_private_key['encrypted_private_key']
+            matching_previous_private_key.initialization_vector=reencrypted_private_key['initialization_vector']
+            matching_previous_private_key.tag = reencrypted_private_key['tag']
+            matching_previous_private_key.associated_data = reencrypted_private_key['associated_data']
+            matching_previous_private_key.time_created = reencrypted_private_key['time_created'],
+            matching_previous_private_key.time_created = reencrypted_private_key['time_created']
+            matching_previous_private_key.save()
     else:
         message = response.json().get('message', '')
         if message == 'Encrypted key error: Not able to decrypted private key. - Derived tag invalid.':
@@ -117,5 +125,3 @@ def deep_validate(signed_badges, symmetric_key, private_key):
                       "private_key": private_key
                   }),
                   headers={'content-type': 'application/json'})
-
-

@@ -6,8 +6,6 @@ import re
 import uuid
 import logging
 from collections import OrderedDict
-from email.mime.base import MIMEBase
-from email import encoders
 
 import cachemodel
 import os
@@ -36,6 +34,7 @@ from mainsite.models import (BadgrApp, EmailBlacklist)
 from mainsite.utils import OriginSetting, generate_entity_uri
 from signing.models import PublicKey, SymmetricKey
 from signing import tsob
+from signing.models import AssertionTimeStamp, PublicKeyIssuer
 from .utils import generate_sha256_hashstring, CURRENT_OBI_VERSION, get_obi_context, add_obi_version_ifneeded, \
     UNVERSIONED_BAKED_VERSION
 
@@ -207,10 +206,19 @@ class Issuer(ResizeUploadedImage,
     def get_absolute_url(self):
         return reverse('issuer_json', kwargs={'entity_id': self.entity_id})
 
-    def get_url_with_public_key(self, public_key):
-        if public_key.issuer != self:
-            raise ValueError('Public key does not belong to this Issuer.')
-        return self.jsonld_id + '/pubkey/{}'.format(public_key.entity_id)
+    def get_url_with_public_key(self, public_key_issuer):
+        if public_key_issuer.issuer != self:
+            raise ValueError('Public key issuer does not belong to this Issuer.')
+        return self.jsonld_id + '/pubkey/{}'.format(public_key_issuer.entity_id)
+
+    def create_empty_key_address(self):
+        """
+        Creates a PublicKeyIssuer instance which has a public api url address. This address is needed at the time
+        of timestamping and filled with a PublicKey at the time of signing.
+        :return: PublicKeyIssuer instance
+        """
+        obj = PublicKeyIssuer.objects.create(issuer=self)
+        return obj
 
     @property
     def institution(self):
@@ -310,12 +318,12 @@ class Issuer(ResizeUploadedImage,
         return tsob.create_new_private_key(password, symmetric_key, self)
 
     def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True, use_canonical_id=False, signed=False,
-                 public_key=None, expand_public_key=False):
-        if signed and not public_key:
-            raise ValueError('Cannot return signed issuer json without knowing which public key is used.')
-        if public_key:
-            if public_key.issuer != self:
-                raise ValueError('Public key does not belong ot this issuer.')
+                 public_key_issuer=None, expand_public_key=False):
+        if signed and not public_key_issuer:
+            raise ValueError('Cannot return signed issuer json without knowing which public key address is going to be used.')
+        if public_key_issuer:
+            if public_key_issuer.issuer != self:
+                raise ValueError('Public key issuer does not belong to this issuer.')
         obi_version, context_iri = get_obi_context(obi_version)
 
         json = OrderedDict({'@context': context_iri})
@@ -328,7 +336,7 @@ class Issuer(ResizeUploadedImage,
         if not signed:
             json['id'] = self.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.jsonld_id, obi_version)
         elif signed:
-            json['id'] = self.get_url_with_public_key(public_key)
+            json['id'] = self.get_url_with_public_key(public_key_issuer)
 
         if self.image:
             image_url = OriginSetting.HTTP + reverse('issuer_image', kwargs={'entity_id': self.entity_id})
@@ -363,11 +371,11 @@ class Issuer(ResizeUploadedImage,
 
         try:
             if signed:
-                json['verification'] = {"type": "SignedBadge", "creator": public_key.public_url}
+                json['verification'] = {"type": "SignedBadge", "creator": public_key_issuer.public_url}
                 if expand_public_key:
-                    json['publicKey'] = public_key.get_json()
+                    json['publicKey'] = public_key_issuer.get_json()
                 else:
-                    json['publicKey'] = public_key.public_url
+                    json['publicKey'] = public_key_issuer.public_url
         except PublicKey.DoesNotExist:
             pass
         return json
@@ -480,10 +488,10 @@ class BadgeClass(ResizeUploadedImage,
     def get_absolute_url(self):
         return reverse('badgeclass_json', kwargs={'entity_id': self.entity_id})
 
-    def get_url_with_public_key(self, public_key):
-        if public_key.issuer != self.issuer:
-            raise ValueError('Public key does not belong to this Issuer.')
-        return self.jsonld_id + '/pubkey/{}'.format(public_key.entity_id)
+    def get_url_with_public_key(self, public_key_issuer):
+        if public_key_issuer.issuer != self.issuer:
+            raise ValueError('Public key issuer does not belong to this Issuer.')
+        return self.jsonld_id + '/pubkey/{}'.format(public_key_issuer.entity_id)
 
     @property
     def public_url(self):
@@ -622,13 +630,11 @@ class BadgeClass(ResizeUploadedImage,
             **kwargs
         )
 
-    def issue_signed(self, signer=None, password=None, recipient_id=None, evidence=None, narrative=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None, **kwargs):
+    def issue_signed(self, recipient_id=None, evidence=None, narrative=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None, signer=None, **kwargs):
         if not signer.may_sign_assertions:
             raise serializers.ValidationError('You do not have permission to sign badges.')
         if not signer in [staff.user for staff in self.issuer.current_signers]:
             raise serializers.ValidationError('You are not a signer for this issuer.')
-        if not password:
-            raise serializers.ValidationError('Cannot sign badges: no password provided.')
         assertion = BadgeInstance.objects.create(
             badgeclass=self, recipient_identifier=recipient_id, narrative=narrative, evidence=evidence,
             notify=False,  # notify after signing
@@ -636,41 +642,12 @@ class BadgeClass(ResizeUploadedImage,
             badgr_app=badgr_app,
             **kwargs
         )
-        try:
-            symkey = SymmetricKey.objects.get(user=signer, current=True)
-        except SymmetricKey.DoesNotExist:
-            raise serializers.ValidationError("You don't have a password set. Please set one first.")
-        try:
-            private_key = self.issuer.create_private_key(password, symkey)
-            assertion_json = assertion.get_json(expand_badgeclass=True, expand_issuer=True, signed=True,
-                                                public_key=private_key.public_key)
-            signed_assertions = tsob.sign_badges([assertion_json], private_key, symkey, password)
-            signature = signed_assertions[0]['signature']  # TODO: batch-wise signing
-        except ValueError as e:
-            raise serializers.ValidationError(e.message)
-
-        new_image = StringIO.StringIO()
-        bake(image_file=assertion.cached_badgeclass.image.file,
-             assertion_json_string=signature,
-             output_file=new_image)
-        if notify:
-            attach = MIMEBase('image', 'png')
-            attach.set_payload(new_image.read())
-            encoders.encode_base64(attach)
-            assertion.recipient_user.email_user(subject='You have received a signed badge',
-                                                message='Congrats, this is your signed badge',
-                                                attachments=[attach])
-
-        assertion.signature = signature
-        assertion.save()
-        filename = os.path.basename(assertion.image.file.name)
-        assertion.image.delete()  # replace image
-        assertion.image.save(name=filename, content=new_image)
+        assertion.submit_for_timestamping(signer=signer)
         return assertion
 
-    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True, use_canonical_id=False, signed=False, public_key=None):
-        if not public_key and signed:
-            raise ValueError('Cannot returned signed version of json without knowing which private key was used.')
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True, use_canonical_id=False, signed=False, public_key_issuer=None):
+        if not public_key_issuer and signed:
+            raise ValueError('Cannot returned signed version of json without knowing which public key address was used.')
         obi_version, context_iri = get_obi_context(obi_version)
         json = OrderedDict({'@context': context_iri})
         json.update(OrderedDict(
@@ -685,8 +662,8 @@ class BadgeClass(ResizeUploadedImage,
             json['id'] = self.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.jsonld_id, obi_version)
             json['issuer'] = self.cached_issuer.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.cached_issuer.jsonld_id, obi_version)
         if signed:
-            json['id'] = self.get_url_with_public_key(public_key)
-            json['issuer'] = self.issuer.get_url_with_public_key(public_key)
+            json['id'] = self.get_url_with_public_key(public_key_issuer)
+            json['issuer'] = self.issuer.get_url_with_public_key(public_key_issuer)
 
         # image
         if self.image:
@@ -756,6 +733,10 @@ class BadgeInstance(BaseAuditedModel,
     entity_class_name = 'Assertion'
 
     issued_on = models.DateTimeField(blank=False, null=False, default=timezone.now)
+
+    public_key_issuer = models.ForeignKey('signing.PublicKeyIssuer', null=True, default=None)
+
+    identifier = models.CharField(max_length=255, null=True, default=None)  # the uuid used to ID signed assertions
 
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.CASCADE, related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, blank=False, null=False)
@@ -871,8 +852,13 @@ class BadgeInstance(BaseAuditedModel,
     def owners(self):
         return self.issuer.owners
 
-    def create_random_uuid(self):
-        return uuid.uuid4().urn
+    @property
+    def signing_in_progress(self):
+        return not self.signature and self.public_key_issuer
+
+    def submit_for_timestamping(self, signer):
+        timestamp = AssertionTimeStamp.objects.create(badge_instance=self, signer=signer)
+        timestamp.submit_assertion()
 
     def get_email_address(self):
         '''
@@ -927,19 +913,31 @@ class BadgeInstance(BaseAuditedModel,
                                                       name=extension.name,
                                                       original_json=extension.original_json)
 
-    def rebake(self, obi_version=CURRENT_OBI_VERSION, save=True):
+    def rebake(self, obi_version=CURRENT_OBI_VERSION, save=True, signature=None, replace_image=False):
         if self.source_url:
             # dont rebake imported assertions
             return
 
         new_image = StringIO.StringIO()
-        bake(
-            image_file=self.cached_badgeclass.image.file,
-            assertion_json_string=json_dumps(self.get_json(obi_version=obi_version), indent=2),
-            output_file=new_image
-        )
+        if not signature:
+            bake(
+                image_file=self.cached_badgeclass.image.file,
+                assertion_json_string=json_dumps(self.get_json(obi_version=obi_version), indent=2),
+                output_file=new_image
+            )
+        else:
+            bake(
+                image_file=self.cached_badgeclass.image.file,
+                assertion_json_string=signature,
+                output_file=new_image
+            )
+
         new_name = default_storage.save(self.image.name, ContentFile(new_image.read()))
-        self.image.name = new_name
+        if not replace_image:
+            self.image.name = new_name
+        if replace_image:
+            self.image.delete()
+            self.image.name = new_name
         if save:
             self.save()
 
@@ -993,7 +991,7 @@ class BadgeInstance(BaseAuditedModel,
             except ImportError:
                 pass
 
-    def notify_earner(self, badgr_app=None):
+    def notify_earner(self, badgr_app=None, attach_image=False):
         """
         Sends an email notification to the badge earner.
         This process involves creating a badgeanalysis.models.OpenBadge
@@ -1060,7 +1058,11 @@ class BadgeInstance(BaseAuditedModel,
 
         adapter = get_adapter()
         try:
-            adapter.send_mail(template_name, email_address, context=email_context)
+            if not attach_image:
+                adapter.send_mail(template_name, email_address, context=email_context)
+            else:
+                adapter.send_mail(template_name, email_address, context=email_context, attachment=self.image)
+
         except Exception as e:
             logger.exception('Mail failure with error {} : {}'.format(type(e), e.message))      
 
@@ -1089,15 +1091,15 @@ class BadgeInstance(BaseAuditedModel,
         return None
 
     def get_json(self, obi_version=CURRENT_OBI_VERSION, expand_badgeclass=False, expand_issuer=False,
-                 include_extra=True, use_canonical_id=False, signed=False, public_key=None):
+                 include_extra=True, use_canonical_id=False, signed=False, public_key_issuer=None):
 
         if signed:
             if expand_issuer != True or expand_badgeclass != True:
                 raise ValueError('Must expand issuer and badgeclass if signed is set to true.')
-            if not public_key:
-                raise ValueError('Must add public key if signed is set to true.')
-            if public_key.issuer != self.issuer:
-                raise ValueError('Public key issuer does not match assertion issuer')
+            if not public_key_issuer:
+                raise ValueError('Must add a public key issuer object (address) if signed is set to true.')
+            if public_key_issuer.issuer != self.issuer:
+                raise ValueError('Public key issuer objects does not match assertion issuer')
 
         obi_version, context_iri = get_obi_context(obi_version)
 
@@ -1107,7 +1109,7 @@ class BadgeInstance(BaseAuditedModel,
         ])
 
         if signed:
-            json['id'] = self.create_random_uuid()
+            json['id'] = self.identifier
         else:
             json['id'] = add_obi_version_ifneeded(self.jsonld_id, obi_version)
             json['badge'] = add_obi_version_ifneeded(self.cached_badgeclass.jsonld_id, obi_version)
@@ -1123,10 +1125,10 @@ class BadgeInstance(BaseAuditedModel,
         if expand_badgeclass:
             json['badge'] = self.cached_badgeclass.get_json(obi_version=obi_version, include_extra=include_extra)
             if signed:
-                json['badge']['id'] = self.cached_badgeclass.get_url_with_public_key(public_key)
+                json['badge']['id'] = self.cached_badgeclass.get_url_with_public_key(public_key_issuer)
             if expand_issuer:
                 json['badge']['issuer'] = self.cached_issuer.get_json(obi_version=obi_version, include_extra=include_extra, signed=signed,
-                                                                      expand_public_key=True, public_key=public_key)
+                                                                      expand_public_key=False, public_key_issuer=public_key_issuer)
 
         if self.revoked:
             return OrderedDict([
@@ -1147,7 +1149,7 @@ class BadgeInstance(BaseAuditedModel,
             if signed:
                 json["verification"] = {
                     "type": "SignedBadge",
-                    "creator": public_key.public_url
+                    "creator": public_key_issuer.public_url
                 }
             else:
                 json["verification"] = {

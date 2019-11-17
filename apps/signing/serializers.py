@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from signing.models import SymmetricKey, PrivateKey
-from signing import utils
 from signing import tsob
 
 
@@ -15,17 +14,10 @@ class SymmetricKeySerializer(serializers.Serializer):
     def create(self, validated_data, **kwargs):
         if SymmetricKey.objects.filter(user=validated_data['created_by']).exists():
             raise serializers.ValidationError('User already has a SymmetricKey')
-        symkey = tsob.create_new_symmetric_key(validated_data.get('password')).json()
-        symkey = SymmetricKey.objects.create(
-            password_hash=utils.hash_string(validated_data.get('password')),
-            salt=symkey['salt'],
-            length=symkey['length'],
-            n=symkey['n'],
-            r=symkey['r'],
-            p=symkey['p'],
-            current=True,
-            user=validated_data['created_by']
-        )
+        symkey = tsob.create_new_symmetric_key(password=validated_data.get('password'),
+                                               user=validated_data['created_by'])
+        symkey.current = True
+        symkey.save()
         return symkey
 
     def update(self, instance, validated_data):
@@ -33,17 +25,8 @@ class SymmetricKeySerializer(serializers.Serializer):
             instance.validate_password(validated_data.get('old_password'))
         except ValueError as e:
             raise serializers.ValidationError(e.message)
-        new_symkey = tsob.create_new_symmetric_key(validated_data.get('password')).json()
-        new_symkey = SymmetricKey.objects.create(
-            password_hash=utils.hash_string(validated_data.get('password')),
-            salt=new_symkey['salt'],
-            length=new_symkey['length'],
-            n=new_symkey['n'],
-            r=new_symkey['r'],
-            p=new_symkey['p'],
-            current=False,
-            user=validated_data['updated_by']
-        )
+        new_symkey = tsob.create_new_symmetric_key(password=validated_data.get('password'),
+                                                   user=validated_data['updated_by'])
         try:
             private_keys_to_reencrypt = list(PrivateKey.objects.filter(symmetric_key=instance))
             if private_keys_to_reencrypt:

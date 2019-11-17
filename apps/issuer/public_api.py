@@ -13,7 +13,6 @@ from django.views.generic import RedirectView
 from rest_framework import status, permissions
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 
 import badgrlog
@@ -22,7 +21,7 @@ from backpack.models import BackpackCollection
 from entity.api import VersionedObjectMixin
 from mainsite.models import BadgrApp
 from mainsite.utils import OriginSetting
-from signing.models import PublicKey
+from signing.models import PublicKeyIssuer
 from .models import Issuer, BadgeClass, BadgeInstance
 
 logger = badgrlog.BadgrLogger()
@@ -283,8 +282,8 @@ class IssuerPublicKeyJson(IssuerJson):
             # if user agent matches a known bot, return a stub html with opengraph tags
             return render_to_response(self.template_name, context=self.get_context_data())
 
-        pubkey = PublicKey.objects.get(entity_id=kwargs.get('public_key_id'))
-        issuer_json = self.get_json(request=request, signed=True, public_key=pubkey, expand_public_key=False)
+        pubkey_issuer = PublicKeyIssuer.objects.get(entity_id=kwargs.get('public_key_id'))
+        issuer_json = self.get_json(request=request, signed=True, public_key_issuer=pubkey_issuer, expand_public_key=False)
         return Response(issuer_json)
 
 
@@ -350,8 +349,8 @@ class BadgeClassPublicKeyJson(BadgeClassJson):
             # if user agent matches a known bot, return a stub html with opengraph tags
             return render_to_response(self.template_name, context=self.get_context_data())
 
-        public_key = PublicKey.objects.get(entity_id=kwargs.get('public_key_id'))
-        json = self.current_object.get_json(signed=True, public_key=public_key)
+        public_key_issuer = PublicKeyIssuer.objects.get(entity_id=kwargs.get('public_key_id'))
+        json = self.current_object.get_json(signed=True, public_key_issuer=public_key_issuer)
         return Response(json)
 
 

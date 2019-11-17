@@ -31,6 +31,7 @@ from lti_edu.models import StudentsEnrolled
 from backpack.models import BackpackCollection
 from entity.models import BaseVersionedEntity
 from issuer.models import Issuer, BadgeInstance, BaseAuditedModel
+from signing.models import AssertionTimeStamp
 from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager, EmailAddressCacheModelManager
 from mainsite.models import ApplicationInfo, EmailBlacklist, BadgrApp
 from mainsite.utils import generate_entity_uri
@@ -271,6 +272,10 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     def may_sign_assertions(self):
         return self.has_perm('signing.may_sign_assertions')
 
+    @property
+    def current_symmetric_key(self):
+        return self.symmetrickey_set.get(current=True)
+
     @email_items.setter
     def email_items(self, value):
         """
@@ -412,6 +417,10 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
             return False
 
         return False
+
+    def get_assertions_ready_for_signing(self):
+        assertion_timestamps = AssertionTimeStamp.objects.filter(signer=self).exclude(proof='')
+        return [ts.badge_instance for ts in assertion_timestamps if ts.badge_instance.signature == None]
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):
