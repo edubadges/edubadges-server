@@ -147,7 +147,7 @@ class StudentsEnrolledSerializerWithRelations(serializers.ModelSerializer):
     revoked = serializers.SerializerMethodField('get_assertion_revokation')
     
     def get_assertion_revokation(self, enrollment):
-        badge_instance = BadgeInstance.objects.filter(entity_id=enrollment.assertion_slug).first()
+        badge_instance = enrollment.badge_instance
         if badge_instance:
             return badge_instance.revoked
         else:

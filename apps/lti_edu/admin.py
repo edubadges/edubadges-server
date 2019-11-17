@@ -23,7 +23,7 @@ badgr_admin.register(ResourceLinkBadge, ResourceLinkBadgeAdmin)
 
 @admin.register(StudentsEnrolled)
 class StudentsEnrolledAdmin(admin.ModelAdmin):
-    list_display = ['date_created', 'date_consent_given', 'date_awarded', 'assertion_slug', 'badge_class',
+    list_display = ['date_created', 'date_consent_given', 'date_awarded', 'badge_instance', 'badge_class',
                     'email', 'first_name', 'last_name']
 
 

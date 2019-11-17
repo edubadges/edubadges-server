@@ -514,7 +514,7 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
                 return True # no enrollments
             else:
                 for enrollment in enrollments:
-                    if not bool(enrollment.assertion_slug): # has never been awarded
+                    if not bool(enrollment.badge_instance): # has never been awarded
                         return False
                     else: #has been awarded
                         if not enrollment.assertion_is_revoked():

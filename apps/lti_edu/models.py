@@ -96,13 +96,17 @@ class StudentsEnrolled(models.Model):
     date_created = models.DateTimeField(default=timezone.now)
     date_consent_given = models.DateTimeField(default=None, blank=True, null=True)
     user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE)
-    assertion_slug = models.CharField(max_length=150, default='', blank=True, null=True)
+    badge_instance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE, null=True)
     date_awarded = models.DateTimeField(default=None, blank=True, null=True)
     denied = models.BooleanField(default=False)
     badge_class_lti_context = models.ForeignKey(BadgeClassLtiContext, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.email
+
+    @property
+    def assertion_slug(self):
+        return self.badge_instance.entity_id
 
     @property
     def email(self):
@@ -123,17 +127,9 @@ class StudentsEnrolled(models.Model):
             return social_account.extra_data['sub']
         else:
             raise ValueError('User belonging to this enrollment has no eduid')
-
-    @property
-    def assertion(self):
-        try:
-            return BadgeInstance.objects.get(entity_id=self.assertion_slug)
-        except BadgeInstance.DoesNotExist:
-            return None
         
     def assertion_is_revoked(self):
-        assertion = self.assertion
-        if assertion:
-            return assertion.revoked
+        if self.badge_instance:
+            return self.badge_instance.revoked
         else:
             return False    
