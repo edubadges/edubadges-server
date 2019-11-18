@@ -1,0 +1,1900 @@
+{
+    "info": {
+        "version": "v1", 
+        "description": null, 
+        "title": "v1 API Docs"
+    }, 
+    "paths": {
+        "/v1/earner/badges": {
+            "post": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:backpack"
+                        ]
+                    }
+                ], 
+                "summary": "Upload a new Assertion to the backpack", 
+                "responses": {
+                    "201": {
+                        "description": "Successfully created", 
+                        "schema": {
+                            "$ref": "#/definitions/Assertion"
+                        }
+                    }, 
+                    "400": {
+                        "description": "Validation error"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "schema": {
+                            "$ref": "#/definitions/Assertion"
+                        }, 
+                        "required": true, 
+                        "name": "body", 
+                        "in": "body"
+                    }
+                ], 
+                "tags": [
+                    "Backpack"
+                ]
+            }, 
+            "get": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "r:backpack", 
+                            "rw:backpack"
+                        ]
+                    }
+                ], 
+                "summary": "Get a list of Assertions in authenticated user's backpack ", 
+                "responses": {
+                    "200": {
+                        "description": "Successful operation", 
+                        "schema": {
+                            "items": {
+                                "$ref": "#/definitions/Assertion"
+                            }, 
+                            "type": "array"
+                        }
+                    }
+                }, 
+                "parameters": [], 
+                "tags": [
+                    "Backpack"
+                ]
+            }
+        }, 
+        "/v1/earner/badges/{slug}": {
+            "put": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:backpack"
+                        ]
+                    }
+                ], 
+                "summary": "Update acceptance of an Assertion in the user's Backpack", 
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated", 
+                        "schema": {
+                            "$ref": "#/definitions/Assertion"
+                        }
+                    }, 
+                    "400": {
+                        "description": "Validation error"
+                    }, 
+                    "404": {
+                        "description": "Assertion not found"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "schema": {
+                            "$ref": "#/definitions/Assertion"
+                        }, 
+                        "required": true, 
+                        "name": "body", 
+                        "in": "body"
+                    }
+                ], 
+                "tags": [
+                    "Backpack"
+                ]
+            }, 
+            "delete": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:backpack"
+                        ]
+                    }
+                ], 
+                "summary": "Remove an assertion from the backpack", 
+                "responses": {
+                    "204": {
+                        "description": "Assertion was deleted successfully."
+                    }, 
+                    "404": {
+                        "description": "Assertion not found"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }
+                ], 
+                "tags": [
+                    "Backpack"
+                ]
+            }, 
+            "get": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "r:backpack", 
+                            "rw:backpack"
+                        ]
+                    }
+                ], 
+                "summary": "Get detail on an Assertion in the user's Backpack", 
+                "responses": {
+                    "200": {
+                        "description": "Successful operation", 
+                        "schema": {
+                            "$ref": "#/definitions/Assertion"
+                        }
+                    }, 
+                    "404": {
+                        "description": "Assertion not found"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }
+                ], 
+                "tags": [
+                    "Backpack"
+                ]
+            }
+        }, 
+        "/v1/earner/collections": {
+            "post": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:backpack"
+                        ]
+                    }
+                ], 
+                "summary": "Create a new Collection", 
+                "responses": {
+                    "201": {
+                        "description": "Successfully created", 
+                        "schema": {
+                            "$ref": "#/definitions/Collection"
+                        }
+                    }, 
+                    "400": {
+                        "description": "Validation error"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "schema": {
+                            "$ref": "#/definitions/Collection"
+                        }, 
+                        "required": true, 
+                        "name": "body", 
+                        "in": "body"
+                    }
+                ], 
+                "tags": [
+                    "Backpack"
+                ]
+            }, 
+            "get": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "r:backpack", 
+                            "rw:backpack"
+                        ]
+                    }
+                ], 
+                "summary": "Get a list of Collections", 
+                "responses": {
+                    "200": {
+                        "description": "Successful operation", 
+                        "schema": {
+                            "$ref": "#/definitions/Collection"
+                        }
+                    }, 
+                    "404": {
+                        "description": "Collection not found"
+                    }
+                }, 
+                "parameters": [], 
+                "tags": [
+                    "Backpack"
+                ]
+            }
+        }, 
+        "/v1/earner/collections/{slug}": {
+            "put": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:backpack"
+                        ]
+                    }
+                ], 
+                "summary": "Update a Collection", 
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated", 
+                        "schema": {
+                            "$ref": "#/definitions/Collection"
+                        }
+                    }, 
+                    "400": {
+                        "description": "Validation error"
+                    }, 
+                    "404": {
+                        "description": "Collection not found"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "schema": {
+                            "$ref": "#/definitions/Collection"
+                        }, 
+                        "required": true, 
+                        "name": "body", 
+                        "in": "body"
+                    }
+                ], 
+                "tags": [
+                    "Backpack"
+                ]
+            }, 
+            "delete": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:backpack"
+                        ]
+                    }
+                ], 
+                "summary": "Delete a collection", 
+                "responses": {
+                    "204": {
+                        "description": "Collection was deleted successfully."
+                    }, 
+                    "404": {
+                        "description": "Collection not found"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }
+                ], 
+                "tags": [
+                    "Backpack"
+                ]
+            }, 
+            "get": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "r:backpack", 
+                            "rw:backpack"
+                        ]
+                    }
+                ], 
+                "summary": "Get a single Collection", 
+                "responses": {
+                    "200": {
+                        "description": "Successful operation", 
+                        "schema": {
+                            "$ref": "#/definitions/Collection"
+                        }
+                    }, 
+                    "404": {
+                        "description": "Collection not found"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }
+                ], 
+                "tags": [
+                    "Backpack"
+                ]
+            }
+        }, 
+        "/v1/issuer/all-badges": {
+            "post": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:issuer"
+                        ]
+                    }
+                ], 
+                "summary": "Create a new BadgeClass", 
+                "responses": {
+                    "201": {
+                        "description": "Successfully created", 
+                        "schema": {
+                            "$ref": "#/definitions/BadgeClass"
+                        }
+                    }, 
+                    "400": {
+                        "description": "Validation error"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "schema": {
+                            "$ref": "#/definitions/BadgeClass"
+                        }, 
+                        "required": true, 
+                        "name": "body", 
+                        "in": "body"
+                    }
+                ], 
+                "tags": [
+                    "BadgeClasses"
+                ]
+            }, 
+            "get": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:issuer"
+                        ]
+                    }
+                ], 
+                "summary": "Get a list of BadgeClasses for authenticated user", 
+                "responses": {
+                    "200": {
+                        "description": "Successful operation", 
+                        "schema": {
+                            "items": {
+                                "$ref": "#/definitions/BadgeClass"
+                            }, 
+                            "type": "array"
+                        }
+                    }
+                }, 
+                "parameters": [], 
+                "tags": [
+                    "BadgeClasses"
+                ]
+            }
+        }, 
+        "/v1/issuer/all-badges/find": {
+            "get": {
+                "security": [], 
+                "tags": [
+                    "BadgeClasses"
+                ], 
+                "parameters": [
+                    {
+                        "description": "The identifier of the badge possible values: JSONld identifier, BadgeClass.id, or BadgeClass.slug", 
+                        "required": true, 
+                        "name": "identifier", 
+                        "in": "query"
+                    }
+                ], 
+                "summary": "Get a specific BadgeClass by searching by identifier"
+            }
+        }, 
+        "/v1/issuer/issuers": {
+            "post": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:issuer"
+                        ]
+                    }
+                ], 
+                "summary": "Create a new Issuer", 
+                "responses": {
+                    "201": {
+                        "description": "Successfully created", 
+                        "schema": {
+                            "$ref": "#/definitions/Issuer"
+                        }
+                    }, 
+                    "400": {
+                        "description": "Validation error"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "schema": {
+                            "$ref": "#/definitions/Issuer"
+                        }, 
+                        "required": true, 
+                        "name": "body", 
+                        "in": "body"
+                    }
+                ], 
+                "tags": [
+                    "Issuers"
+                ]
+            }, 
+            "get": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:issuer"
+                        ]
+                    }
+                ], 
+                "summary": "Get a list of Issuers for authenticated user", 
+                "responses": {
+                    "200": {
+                        "description": "Successful operation", 
+                        "schema": {
+                            "items": {
+                                "$ref": "#/definitions/Issuer"
+                            }, 
+                            "type": "array"
+                        }
+                    }
+                }, 
+                "parameters": [], 
+                "tags": [
+                    "Issuers"
+                ]
+            }
+        }, 
+        "/v1/issuer/issuers/{issuerSlug}/badges/{badgeSlug}/assertions/{slug}": {
+            "put": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:issuer", 
+                            "rw:issuer:*"
+                        ]
+                    }
+                ], 
+                "summary": "Update an Assertion", 
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated", 
+                        "schema": {
+                            "$ref": "#/definitions/Assertion"
+                        }
+                    }, 
+                    "400": {
+                        "description": "Validation error"
+                    }, 
+                    "404": {
+                        "description": "Assertion not found"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "issuerSlug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "badgeSlug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "schema": {
+                            "$ref": "#/definitions/Assertion"
+                        }, 
+                        "required": true, 
+                        "name": "body", 
+                        "in": "body"
+                    }
+                ], 
+                "tags": [
+                    "Assertions"
+                ]
+            }, 
+            "delete": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:issuer", 
+                            "rw:issuer:*"
+                        ]
+                    }
+                ], 
+                "summary": "Revoke an Assertion", 
+                "responses": {
+                    "204": {
+                        "description": "Assertion was deleted successfully."
+                    }, 
+                    "404": {
+                        "description": "Assertion not found"
+                    }, 
+                    "400": {
+                        "description": "Assertion is already revoked"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "issuerSlug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "badgeSlug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }
+                ], 
+                "tags": [
+                    "Assertions"
+                ]
+            }, 
+            "get": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:issuer", 
+                            "rw:issuer:*"
+                        ]
+                    }
+                ], 
+                "summary": "Get a single Assertion", 
+                "responses": {
+                    "200": {
+                        "description": "Successful operation", 
+                        "schema": {
+                            "$ref": "#/definitions/Assertion"
+                        }
+                    }, 
+                    "404": {
+                        "description": "Assertion not found"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "issuerSlug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "badgeSlug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }
+                ], 
+                "tags": [
+                    "Assertions"
+                ]
+            }
+        }, 
+        "/v1/issuer/issuers/{issuerSlug}/badges/{slug}": {
+            "put": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:issuer", 
+                            "rw:issuer:*"
+                        ]
+                    }
+                ], 
+                "summary": "Update an existing BadgeClass.  Previously issued BadgeInstances will NOT be updated", 
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated", 
+                        "schema": {
+                            "$ref": "#/definitions/BadgeClass"
+                        }
+                    }, 
+                    "400": {
+                        "description": "Validation error"
+                    }, 
+                    "404": {
+                        "description": "BadgeClass not found"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "issuerSlug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "schema": {
+                            "$ref": "#/definitions/BadgeClass"
+                        }, 
+                        "required": true, 
+                        "name": "body", 
+                        "in": "body"
+                    }
+                ], 
+                "tags": [
+                    "BadgeClasses"
+                ]
+            }, 
+            "delete": {
+                "description": "Restricted to owners or editors (not staff) of the corresponding Issuer.", 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "issuerSlug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }
+                ], 
+                "tags": [
+                    "BadgeClasses"
+                ], 
+                "summary": "Delete a BadgeClass", 
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:issuer", 
+                            "rw:issuer:*"
+                        ]
+                    }
+                ], 
+                "responses": {
+                    "204": {
+                        "description": "BadgeClass was deleted successfully."
+                    }, 
+                    "404": {
+                        "description": "BadgeClass not found"
+                    }, 
+                    "400": {
+                        "description": "BadgeClass couldn't be deleted. It may have already been issued."
+                    }
+                }
+            }, 
+            "get": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:issuer", 
+                            "rw:issuer:*"
+                        ]
+                    }
+                ], 
+                "summary": "Get a single BadgeClass", 
+                "responses": {
+                    "200": {
+                        "description": "Successful operation", 
+                        "schema": {
+                            "$ref": "#/definitions/BadgeClass"
+                        }
+                    }, 
+                    "404": {
+                        "description": "BadgeClass not found"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "issuerSlug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }
+                ], 
+                "tags": [
+                    "BadgeClasses"
+                ]
+            }
+        }, 
+        "/v1/issuer/issuers/{issuerSlug}/badges/{slug}/assertions": {
+            "post": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:issuer", 
+                            "rw:issuer:*"
+                        ]
+                    }
+                ], 
+                "summary": "Issue an Assertion to a single recipient", 
+                "responses": {
+                    "201": {
+                        "description": "Successfully created", 
+                        "schema": {
+                            "$ref": "#/definitions/Assertion"
+                        }
+                    }, 
+                    "400": {
+                        "description": "Validation error"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "issuerSlug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "schema": {
+                            "$ref": "#/definitions/Assertion"
+                        }, 
+                        "required": true, 
+                        "name": "body", 
+                        "in": "body"
+                    }
+                ], 
+                "tags": [
+                    "Assertions", 
+                    "BadgeClasses"
+                ]
+            }, 
+            "get": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:issuer", 
+                            "rw:issuer:*"
+                        ]
+                    }
+                ], 
+                "summary": "Get a list of Assertions for a single BadgeClass", 
+                "responses": {
+                    "200": {
+                        "description": "Successful operation", 
+                        "schema": {
+                            "items": {
+                                "$ref": "#/definitions/Assertion"
+                            }, 
+                            "type": "array"
+                        }
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "issuerSlug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "description": "A recipient identifier to filter by", 
+                        "type": "string", 
+                        "name": "recipient", 
+                        "in": "query"
+                    }, 
+                    {
+                        "description": "Request pagination of results", 
+                        "type": "string", 
+                        "name": "num", 
+                        "in": "query"
+                    }
+                ], 
+                "tags": [
+                    "Assertions", 
+                    "BadgeClasses"
+                ]
+            }
+        }, 
+        "/v1/issuer/issuers/{issuerSlug}/badges/{slug}/batchAssertions": {
+            "post": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:issuer", 
+                            "rw:issuer:*"
+                        ]
+                    }
+                ], 
+                "summary": "Issue multiple copies of the same BadgeClass to multiple recipients", 
+                "responses": {
+                    "201": {
+                        "description": "Successfully created", 
+                        "schema": {
+                            "$ref": "#/definitions/Assertion"
+                        }
+                    }, 
+                    "400": {
+                        "description": "Validation error"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "issuerSlug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "schema": {
+                            "$ref": "#/definitions/Assertion"
+                        }, 
+                        "required": true, 
+                        "name": "body", 
+                        "in": "body"
+                    }, 
+                    {
+                        "schema": {
+                            "items": {
+                                "$ref": "#/definitions/Assertion"
+                            }, 
+                            "type": "array"
+                        }, 
+                        "required": true, 
+                        "name": "body", 
+                        "in": "body"
+                    }
+                ], 
+                "tags": [
+                    "Assertions"
+                ]
+            }
+        }, 
+        "/v1/issuer/issuers/{slug}": {
+            "put": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:issuer", 
+                            "rw:issuer:*"
+                        ]
+                    }
+                ], 
+                "summary": "Update a single Issuer", 
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated", 
+                        "schema": {
+                            "$ref": "#/definitions/Issuer"
+                        }
+                    }, 
+                    "400": {
+                        "description": "Validation error"
+                    }, 
+                    "404": {
+                        "description": "Issuer not found"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "schema": {
+                            "$ref": "#/definitions/Issuer"
+                        }, 
+                        "required": true, 
+                        "name": "body", 
+                        "in": "body"
+                    }
+                ], 
+                "tags": [
+                    "Issuers"
+                ]
+            }, 
+            "delete": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:issuer", 
+                            "rw:issuer:*"
+                        ]
+                    }
+                ], 
+                "summary": "Delete a single Issuer", 
+                "responses": {
+                    "204": {
+                        "description": "Issuer was deleted successfully."
+                    }, 
+                    "404": {
+                        "description": "Issuer not found"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }
+                ], 
+                "tags": [
+                    "Issuers"
+                ]
+            }, 
+            "get": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:issuer", 
+                            "rw:issuer:*"
+                        ]
+                    }
+                ], 
+                "summary": "Get a single Issuer", 
+                "responses": {
+                    "200": {
+                        "description": "Successful operation", 
+                        "schema": {
+                            "$ref": "#/definitions/Issuer"
+                        }
+                    }, 
+                    "404": {
+                        "description": "Issuer not found"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }
+                ], 
+                "tags": [
+                    "Issuers"
+                ]
+            }
+        }, 
+        "/v1/issuer/issuers/{slug}/assertions": {
+            "post": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:issuer", 
+                            "rw:issuer:*"
+                        ]
+                    }
+                ], 
+                "summary": "Issue a new Assertion to a recipient", 
+                "responses": {
+                    "201": {
+                        "description": "Successfully created", 
+                        "schema": {
+                            "$ref": "#/definitions/Assertion"
+                        }
+                    }, 
+                    "400": {
+                        "description": "Validation error"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "schema": {
+                            "$ref": "#/definitions/Assertion"
+                        }, 
+                        "required": true, 
+                        "name": "body", 
+                        "in": "body"
+                    }
+                ], 
+                "tags": [
+                    "Assertions", 
+                    "Issuers"
+                ]
+            }, 
+            "get": {
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:issuer", 
+                            "rw:issuer:*"
+                        ]
+                    }
+                ], 
+                "summary": "Get a list of Assertions for a single Issuer", 
+                "responses": {
+                    "200": {
+                        "description": "Successful operation", 
+                        "schema": {
+                            "items": {
+                                "$ref": "#/definitions/Assertion"
+                            }, 
+                            "type": "array"
+                        }
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "description": "A recipient identifier to filter by", 
+                        "type": "string", 
+                        "name": "recipient", 
+                        "in": "query"
+                    }, 
+                    {
+                        "description": "Request pagination of results", 
+                        "type": "string", 
+                        "name": "num", 
+                        "in": "query"
+                    }
+                ], 
+                "tags": [
+                    "Assertions", 
+                    "Issuers"
+                ]
+            }
+        }, 
+        "/v1/issuer/issuers/{slug}/badges": {
+            "post": {
+                "description": "Authenticated user must have owner, editor, or staff status on the Issuer", 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }, 
+                    {
+                        "schema": {
+                            "$ref": "#/definitions/BadgeClass"
+                        }, 
+                        "required": true, 
+                        "name": "body", 
+                        "in": "body"
+                    }
+                ], 
+                "tags": [
+                    "Issuers", 
+                    "BadgeClasses"
+                ], 
+                "summary": "Create a new BadgeClass associated with an Issuer", 
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:issuer", 
+                            "rw:issuer:*"
+                        ]
+                    }
+                ], 
+                "responses": {
+                    "201": {
+                        "description": "Successfully created", 
+                        "schema": {
+                            "$ref": "#/definitions/BadgeClass"
+                        }
+                    }, 
+                    "400": {
+                        "description": "Validation error"
+                    }
+                }
+            }, 
+            "get": {
+                "description": "Authenticated user must have owner, editor, or staff status on the Issuer", 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }
+                ], 
+                "tags": [
+                    "Issuers", 
+                    "BadgeClasses"
+                ], 
+                "summary": "Get a list of BadgeClasses for a single Issuer", 
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:issuer", 
+                            "rw:issuer:*"
+                        ]
+                    }
+                ], 
+                "responses": {
+                    "200": {
+                        "description": "Successful operation", 
+                        "schema": {
+                            "items": {
+                                "$ref": "#/definitions/BadgeClass"
+                            }, 
+                            "type": "array"
+                        }
+                    }
+                }
+            }
+        }, 
+        "/v1/issuer/issuers/{slug}/staff": {
+            "post": {
+                "security": [], 
+                "summary": "Add or remove a user from a role on an issuer. Limited to Owner users only", 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }
+                ], 
+                "tags": [
+                    "Issuers"
+                ]
+            }, 
+            "get": {
+                "security": [], 
+                "tags": [
+                    "Issuers"
+                ], 
+                "responses": {
+                    "200": {
+                        "description": "Successful operation", 
+                        "schema": {
+                            "items": {
+                                "$ref": "#/definitions/IssuerStaff"
+                            }, 
+                            "type": "array"
+                        }
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "slug", 
+                        "in": "path"
+                    }
+                ], 
+                "summary": "Get a list of users associated with a role on an Issuer"
+            }
+        }, 
+        "/v1/user/emails": {
+            "post": {
+                "security": [], 
+                "tags": [
+                    "BadgeUsers"
+                ], 
+                "properties": [
+                    {
+                        "description": "The email to register", 
+                        "format": "email", 
+                        "type": "string", 
+                        "name": "email", 
+                        "in": "formData"
+                    }
+                ], 
+                "parameters": [], 
+                "summary": "Register a new unverified email"
+            }, 
+            "get": {
+                "security": [], 
+                "summary": "Get a list of user's registered emails", 
+                "responses": {
+                    "200": {
+                        "description": "Successful operation", 
+                        "schema": {
+                            "items": {
+                                "$ref": "#/definitions/BadgeUserEmail"
+                            }, 
+                            "type": "array"
+                        }
+                    }
+                }, 
+                "parameters": [], 
+                "tags": [
+                    "BadgeUsers"
+                ]
+            }
+        }, 
+        "/v1/user/emails/{id}": {
+            "put": {
+                "security": [], 
+                "summary": "Update a registered email for the current user", 
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated", 
+                        "schema": {
+                            "$ref": "#/definitions/BadgeUserEmail"
+                        }
+                    }, 
+                    "400": {
+                        "description": "Validation error"
+                    }, 
+                    "404": {
+                        "description": "BadgeUserEmail not found"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "id", 
+                        "in": "path"
+                    }, 
+                    {
+                        "schema": {
+                            "$ref": "#/definitions/BadgeUserEmail"
+                        }, 
+                        "required": true, 
+                        "name": "body", 
+                        "in": "body"
+                    }
+                ], 
+                "tags": [
+                    "BadgeUsers"
+                ]
+            }, 
+            "delete": {
+                "security": [], 
+                "summary": "Remove a registered email for the current user", 
+                "responses": {
+                    "204": {
+                        "description": "BadgeUserEmail was deleted successfully."
+                    }, 
+                    "404": {
+                        "description": "BadgeUserEmail not found"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "id", 
+                        "in": "path"
+                    }
+                ], 
+                "tags": [
+                    "BadgeUsers"
+                ]
+            }, 
+            "get": {
+                "security": [], 
+                "summary": "Get detail for one registered email", 
+                "responses": {
+                    "200": {
+                        "description": "Successful operation", 
+                        "schema": {
+                            "$ref": "#/definitions/BadgeUserEmail"
+                        }
+                    }, 
+                    "404": {
+                        "description": "BadgeUserEmail not found"
+                    }
+                }, 
+                "parameters": [
+                    {
+                        "required": true, 
+                        "type": "string", 
+                        "name": "id", 
+                        "in": "path"
+                    }
+                ], 
+                "tags": [
+                    "BadgeUsers"
+                ]
+            }
+        }, 
+        "/v1/user/faculties": {
+            "get": {
+                "security": [], 
+                "summary": "Get a list of user's faculties", 
+                "responses": {
+                    "200": {
+                        "description": "Successful operation", 
+                        "schema": {
+                            "items": {
+                                "$ref": "#/definitions/BadgeUserFaculty"
+                            }, 
+                            "type": "array"
+                        }
+                    }
+                }, 
+                "parameters": [], 
+                "tags": [
+                    "BadgeUsers"
+                ]
+            }
+        }, 
+        "/v1/user/forgot-password": {
+            "put": {
+                "security": [], 
+                "tags": [
+                    "Authentication"
+                ], 
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "object", 
+                            "properties": {
+                                "token": {
+                                    "required": true, 
+                                    "type": "string", 
+                                    "description": "The token recieved in the recovery email", 
+                                    "format": "string"
+                                }, 
+                                "password": {
+                                    "required": true, 
+                                    "type": "string", 
+                                    "description": "The new password to use"
+                                }
+                            }
+                        }, 
+                        "required": true, 
+                        "name": "body", 
+                        "in": "body"
+                    }
+                ], 
+                "summary": "Recover an account and set a new password"
+            }, 
+            "post": {
+                "security": [], 
+                "tags": [
+                    "Authentication"
+                ], 
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "object", 
+                            "properties": {
+                                "email": {
+                                    "type": "string", 
+                                    "description": "The email address on file to send recovery email to", 
+                                    "format": "email"
+                                }
+                            }
+                        }, 
+                        "required": true, 
+                        "name": "body", 
+                        "in": "body"
+                    }
+                ], 
+                "summary": "Request an account recovery email"
+            }
+        }, 
+        "/v1/user/profile": {
+            "put": {
+                "description": "Use the entityId 'self' to update the authenticated user's profile", 
+                "parameters": [
+                    {
+                        "schema": {
+                            "$ref": "#/definitions/BadgeUser"
+                        }, 
+                        "required": true, 
+                        "name": "body", 
+                        "in": "body"
+                    }
+                ], 
+                "tags": [
+                    "BadgeUsers"
+                ], 
+                "summary": "Update a BadgeUser", 
+                "security": [
+                    {
+                        "oauth2": [
+                            "rw:profile"
+                        ]
+                    }
+                ], 
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated", 
+                        "schema": {
+                            "$ref": "#/definitions/BadgeUser"
+                        }
+                    }, 
+                    "400": {
+                        "description": "Validation error"
+                    }, 
+                    "404": {
+                        "description": "BadgeUser not found"
+                    }
+                }
+            }, 
+            "get": {
+                "description": "Use the entityId 'self' to retrieve the authenticated user's profile", 
+                "parameters": [], 
+                "tags": [
+                    "BadgeUsers"
+                ], 
+                "summary": "Get a single BadgeUser profile", 
+                "security": [
+                    {
+                        "oauth2": [
+                            "r:profile", 
+                            "rw:profile"
+                        ]
+                    }
+                ], 
+                "responses": {
+                    "200": {
+                        "description": "Successful operation", 
+                        "schema": {
+                            "$ref": "#/definitions/BadgeUser"
+                        }
+                    }, 
+                    "404": {
+                        "description": "BadgeUser not found"
+                    }
+                }
+            }
+        }
+    }, 
+    "parameters": {}, 
+    "tags": [], 
+    "definitions": {
+        "Assertion": {
+            "required": [], 
+            "properties": {
+                "created_at": {
+                    "type": "string", 
+                    "format": "DateTimeField"
+                }, 
+                "created_by": {
+                    "type": "string", 
+                    "format": "BadgeUserIdentifierFieldV1"
+                }, 
+                "slug": {
+                    "type": "string", 
+                    "format": "CharField"
+                }, 
+                "image": {
+                    "type": "string", 
+                    "format": "FileField"
+                }, 
+                "recipient_identifier": {
+                    "type": "string", 
+                    "format": "CharField"
+                }, 
+                "recipient_email": {
+                    "type": "string", 
+                    "format": "SerializerMethodField"
+                }, 
+                "recipient_type": {
+                    "type": "string", 
+                    "format": "CharField"
+                }, 
+                "narrative": {
+                    "type": "string", 
+                    "format": "MarkdownCharField"
+                }, 
+                "evidence_items": {
+                    "items": {
+                        "$ref": "#/definitions/AssertionEvidence"
+                    }, 
+                    "type": "array"
+                }, 
+                "revoked": {
+                    "type": "string", 
+                    "format": "HumanReadableBooleanField"
+                }, 
+                "revocation_reason": {
+                    "type": "string", 
+                    "format": "CharField"
+                }, 
+                "expires": {
+                    "type": "string", 
+                    "format": "DateTimeField"
+                }, 
+                "hashed": {
+                    "type": "string", 
+                    "format": "NullBooleanField"
+                }, 
+                "extensions": {
+                    "type": "string", 
+                    "format": "DictField"
+                }
+            }
+        }, 
+        "AssertionEvidence": {
+            "required": [], 
+            "properties": {
+                "evidence_url": {
+                    "type": "string", 
+                    "format": "URLField"
+                }, 
+                "narrative": {
+                    "type": "string", 
+                    "format": "MarkdownCharField"
+                }
+            }
+        }, 
+        "BadgeClass": {
+            "required": [
+                "name", 
+                "description"
+            ], 
+            "properties": {
+                "created_at": {
+                    "type": "string", 
+                    "format": "DateTimeField"
+                }, 
+                "created_by": {
+                    "type": "string", 
+                    "format": "BadgeUserIdentifierFieldV1"
+                }, 
+                "id": {
+                    "type": "string", 
+                    "format": "IntegerField"
+                }, 
+                "name": {
+                    "type": "string", 
+                    "format": "StripTagsCharField"
+                }, 
+                "image": {
+                    "type": "string", 
+                    "format": "ValidImageField"
+                }, 
+                "slug": {
+                    "type": "string", 
+                    "format": "StripTagsCharField"
+                }, 
+                "criteria_text": {
+                    "type": "string", 
+                    "format": "MarkdownCharField"
+                }, 
+                "criteria_url": {
+                    "type": "string", 
+                    "format": "StripTagsCharField"
+                }, 
+                "recipient_count": {
+                    "type": "string", 
+                    "format": "IntegerField"
+                }, 
+                "enrollment_count": {
+                    "type": "string", 
+                    "format": "IntegerField"
+                }, 
+                "pathway_element_count": {
+                    "type": "string", 
+                    "format": "IntegerField"
+                }, 
+                "description": {
+                    "type": "string", 
+                    "format": "StripTagsCharField"
+                }, 
+                "alignment": {
+                    "items": {
+                        "$ref": "#/definitions/BadgeClassAlignment"
+                    }, 
+                    "type": "array"
+                }, 
+                "tags": {
+                    "type": "string", 
+                    "format": "ListField"
+                }, 
+                "extensions": {
+                    "type": "string", 
+                    "format": "DictField"
+                }
+            }
+        }, 
+        "BadgeClassAlignment": {
+            "required": [
+                "target_name", 
+                "target_url"
+            ], 
+            "properties": {
+                "target_name": {
+                    "type": "string", 
+                    "format": "StripTagsCharField"
+                }, 
+                "target_url": {
+                    "type": "string", 
+                    "format": "URLField"
+                }, 
+                "target_description": {
+                    "type": "string", 
+                    "format": "StripTagsCharField"
+                }, 
+                "target_framework": {
+                    "type": "string", 
+                    "format": "StripTagsCharField"
+                }, 
+                "target_code": {
+                    "type": "string", 
+                    "format": "StripTagsCharField"
+                }
+            }
+        }, 
+        "BadgeUser": {
+            "required": [
+                "first_name", 
+                "last_name", 
+                "faculty"
+            ], 
+            "properties": {
+                "first_name": {
+                    "type": "string", 
+                    "format": "StripTagsCharField"
+                }, 
+                "last_name": {
+                    "type": "string", 
+                    "format": "StripTagsCharField"
+                }, 
+                "email": {
+                    "type": "string", 
+                    "format": "EmailField"
+                }, 
+                "slug": {
+                    "type": "string", 
+                    "format": "CharField"
+                }, 
+                "agreed_terms_version": {
+                    "type": "string", 
+                    "format": "IntegerField"
+                }, 
+                "marketing_opt_in": {
+                    "type": "string", 
+                    "format": "BooleanField"
+                }, 
+                "user_permissions": {
+                    "type": "string", 
+                    "format": "SerializerMethodField"
+                }, 
+                "faculty": {
+                    "items": {
+                        "$ref": "#/definitions/FacultySerializerV1"
+                    }, 
+                    "type": "array"
+                }
+            }
+        }, 
+        "BadgeUserEmail": {
+            "required": [
+                "email"
+            ], 
+            "properties": {
+                "id": {
+                    "type": "string", 
+                    "format": "IntegerField"
+                }, 
+                "email": {
+                    "type": "string", 
+                    "format": "EmailField"
+                }, 
+                "verified": {
+                    "type": "string", 
+                    "format": "BooleanField"
+                }, 
+                "primary": {
+                    "type": "string", 
+                    "format": "BooleanField"
+                }, 
+                "variants": {
+                    "type": "string", 
+                    "format": "ListField"
+                }
+            }
+        }, 
+        "BadgeUserToken": {
+            "required": []
+        }, 
+        "Collection": {
+            "required": [
+                "name"
+            ], 
+            "properties": {
+                "name": {
+                    "type": "string", 
+                    "format": "StripTagsCharField"
+                }, 
+                "slug": {
+                    "type": "string", 
+                    "format": "StripTagsCharField"
+                }, 
+                "description": {
+                    "type": "string", 
+                    "format": "StripTagsCharField"
+                }, 
+                "share_hash": {
+                    "type": "string", 
+                    "format": "CharField"
+                }, 
+                "share_url": {
+                    "type": "string", 
+                    "format": "CharField"
+                }, 
+                "badges": {
+                    "items": {
+                        "$ref": "#/definitions/CollectionBadgeSerializerV1"
+                    }, 
+                    "type": "array"
+                }, 
+                "published": {
+                    "type": "string", 
+                    "format": "BooleanField"
+                }
+            }
+        }, 
+        "CollectionBadgeSerializerV1": {
+            "required": [
+                "id", 
+                "badgeinstance"
+            ], 
+            "properties": {
+                "id": {
+                    "type": "string", 
+                    "format": "RelatedField"
+                }, 
+                "badgeinstance": {
+                    "type": "string", 
+                    "format": "PrimaryKeyRelatedField"
+                }
+            }
+        }, 
+        "Issuer": {
+            "required": [
+                "name", 
+                "email", 
+                "url"
+            ], 
+            "properties": {
+                "created_at": {
+                    "type": "string", 
+                    "format": "DateTimeField"
+                }, 
+                "created_by": {
+                    "type": "string", 
+                    "format": "BadgeUserIdentifierFieldV1"
+                }, 
+                "name": {
+                    "type": "string", 
+                    "format": "StripTagsCharField"
+                }, 
+                "slug": {
+                    "type": "string", 
+                    "format": "StripTagsCharField"
+                }, 
+                "image": {
+                    "type": "string", 
+                    "format": "ValidImageField"
+                }, 
+                "email": {
+                    "type": "string", 
+                    "format": "EmailField"
+                }, 
+                "description": {
+                    "type": "string", 
+                    "format": "StripTagsCharField"
+                }, 
+                "url": {
+                    "type": "string", 
+                    "format": "URLField"
+                }, 
+                "staff": {
+                    "items": {
+                        "$ref": "#/definitions/IssuerStaff"
+                    }, 
+                    "type": "array"
+                }, 
+                "faculty": {
+                    "type": "string", 
+                    "format": "FacultySerializerV1"
+                }, 
+                "extensions": {
+                    "type": "string", 
+                    "format": "DictField"
+                }
+            }
+        }, 
+        "IssuerStaff": {
+            "required": [
+                "user", 
+                "role"
+            ], 
+            "properties": {
+                "user": {
+                    "type": "string", 
+                    "format": "BadgeUser"
+                }, 
+                "role": {
+                    "enum": [
+                        "staff", 
+                        "editor", 
+                        "owner"
+                    ], 
+                    "type": "string"
+                }
+            }
+        }
+    }, 
+    "security": [], 
+    "swagger": "2.0"
+}
