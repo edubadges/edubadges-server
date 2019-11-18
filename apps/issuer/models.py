@@ -630,7 +630,7 @@ class BadgeClass(ResizeUploadedImage,
             **kwargs
         )
 
-    def issue_signed(self, recipient_id=None, evidence=None, narrative=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None, signer=None, **kwargs):
+    def issue_signed(self, recipient_id=None, evidence=None, narrative=None, created_by=None, allow_uppercase=False, badgr_app=None, signer=None, **kwargs):
         if not signer.may_sign_assertions:
             raise serializers.ValidationError('You do not have permission to sign badges.')
         if not signer in [staff.user for staff in self.issuer.current_signers]:

@@ -439,7 +439,6 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
                 recipient_id=validated_data.get('recipient_identifier'),
                 narrative=validated_data.get('narrative'),
                 evidence=evidence_items,
-                notify=validated_data.get('create_notification'),
                 created_by=self.context.get('request').user,
                 allow_uppercase=validated_data.get('allow_uppercase'),
                 recipient_type=validated_data.get('recipient_type', BadgeInstance.RECIPIENT_TYPE_EDUID),
