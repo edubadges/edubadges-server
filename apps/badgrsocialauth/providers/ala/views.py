@@ -13,7 +13,7 @@ from badgrsocialauth.utils import set_session_badgr_app, get_social_account, upd
     check_agreed_term_and_conditions
 from ims.models import LTITenant
 from mainsite.models import BadgrApp
-from .provider import EduIDProvider
+from .provider import AlaProvider
 from lti_edu.models import StudentsEnrolled, LtiBadgeUserTennant, UserCurrentContextId
 from issuer.models import BadgeClass
 logger = logging.getLogger('Badgr.Debug')
@@ -63,10 +63,10 @@ def login(request):
 
     params = {
     "state": state,
-    'redirect_uri': '%s/account/eduid/login/callback/' % settings.HTTP_ORIGIN,
+    'redirect_uri': '%s/account/ala/login/callback/' % settings.HTTP_ORIGIN,
 
     }
-    return redirect("{}/login?{}".format(settings.EDUID_PROVIDER_URL, urllib.parse.urlencode(params)))
+    return redirect("{}?{}".format(settings.ALA_PROVIDER_URL, urllib.parse.urlencode(params)))
 
 
 def after_terms_agreement(request, **kwargs):
@@ -86,20 +86,20 @@ def after_terms_agreement(request, **kwargs):
     access_token = kwargs.get('access_token', None)
     if not access_token:
         error = 'Sorry, we could not find your eduID credentials.'
-        return render_authentication_error(request, EduIDProvider.id, error)
+        return render_authentication_error(request, AlaProvider.id, error)
     
     headers = {"Authorization": "Bearer " + access_token }
-    response = requests.get("{}/userinfo".format(settings.EDUID_PROVIDER_URL), headers=headers)
+    response = requests.get("{}/userinfo".format(settings.ALA_PROVIDER_URL), headers=headers)
     if response.status_code != 200:
         error = 'Server error: User info endpoint error (http %s). Try alternative login methods' % response.status_code
         logger.debug(error)
-        return render_authentication_error(request, EduIDProvider.id, error=error)
+        return render_authentication_error(request, AlaProvider.id, error=error)
     userinfo_json = response.json()
     
     if 'sub' not in userinfo_json:
         error = 'Sorry, your eduID account has no identifier.'
         logger.debug(error)
-        return render_authentication_error(request, EduIDProvider.id, error)
+        return render_authentication_error(request, AlaProvider.id, error)
 
     social_account = get_social_account(userinfo_json['sub']) 
     if not social_account: # user does not exist
@@ -107,21 +107,21 @@ def after_terms_agreement(request, **kwargs):
         if 'email' not in userinfo_json:
             error = 'Sorry, your eduID account does not have your institution mail. Login to eduID and link your institution account, then try again.'
             logger.debug(error)
-            return render_authentication_error(request, EduIDProvider.id, error)
+            return render_authentication_error(request, AlaProvider.id, error)
         if 'family_name' not in userinfo_json:
             error = 'Sorry, your eduID account has no family_name attached from SURFconext. Login to eduID and link your institution account, then try again.'
             logger.debug(error)
-            return render_authentication_error(request, EduIDProvider.id, error)
+            return render_authentication_error(request, AlaProvider.id, error)
         if 'given_name' not in userinfo_json:
             error = 'Sorry, your eduID account has no first_name attached from SURFconext. Login to eduID and link your institution account, then try again.'
             logger.debug(error)
-            return render_authentication_error(request, EduIDProvider.id, error)
+            return render_authentication_error(request, AlaProvider.id, error)
     else: # user already exists
         update_user_params(social_account.user, userinfo_json)
     
     # 3. Complete social login 
 
-    provider = EduIDProvider(request)
+    provider = AlaProvider(request)
     login = provider.sociallogin_from_response(request, userinfo_json)
 
     ret = complete_social_login(request, login)
@@ -168,15 +168,15 @@ def callback(request):
     state = json.loads(request.GET.get('state'))
     referer, badgr_app_pk, lti_context_id,lti_user_id,lti_roles = state
     lti_data = request.session.get('lti_data', None);
-    code = request.GET.get('code', None)  # access codes to access user info endpoint
+    code = request.GET.get('token', None)  # access codes to access user info endpoint
     if code is None: #check if code is given
         error = 'Server error: No userToken found in callback'
         logger.debug(error)
-        return render_authentication_error(request, EduIDProvider.id, error=error)
+        return render_authentication_error(request, AlaProvider.id, error=error)
     # 1. Exchange callback Token for access token
     payload = {
      "grant_type": "authorization_code",
-     "redirect_uri": '%s/account/eduid/login/callback/' % settings.HTTP_ORIGIN,
+     "redirect_uri": '%s/account/ala/login/callback/' % settings.HTTP_ORIGIN,
      "code": code,
      "client_id": current_app.client_id,
      "client_secret": current_app.secret,
@@ -184,21 +184,21 @@ def callback(request):
     headers = {'Content-Type': "application/x-www-form-urlencoded",
                'Cache-Control': "no-cache"
     }
-    response = requests.post("{}/token".format(settings.EDUID_PROVIDER_URL), data=urllib.parse.urlencode(payload), headers=headers)
+    response = requests.post("{}/token".format(settings.ALA_PROVIDER_URL), data=urllib.parse.urlencode(payload), headers=headers)
     token_json = response.json()
     
     # 2. now with access token we can request userinfo
     headers = {"Authorization": "Bearer " + token_json['access_token'] }
-    response = requests.get("{}/userinfo".format(settings.EDUID_PROVIDER_URL), headers=headers)
+    response = requests.get("{}/userinfo".format(settings.ALA_PROVIDER_URL), headers=headers)
     if response.status_code != 200:
         error = 'Server error: User info endpoint error (http %s). Try alternative login methods' % response.status_code
         logger.debug(error)
-        return render_authentication_error(request, EduIDProvider.id, error=error)
+        return render_authentication_error(request, AlaProvider.id, error=error)
     userinfo_json = response.json()
     
     keyword_arguments = {'access_token':token_json['access_token'], 
-                        'state': json.dumps([str(badgr_app_pk), 'edu_id', lti_context_id,lti_user_id,lti_roles]+ [json.loads(referer)]),
-                         'after_terms_agreement_url_name': 'eduid_terms_accepted_callback'}
+                        'state': json.dumps([str(badgr_app_pk), 'ala', lti_context_id,lti_user_id,lti_roles]+ [json.loads(referer)]),
+                         'after_terms_agreement_url_name': 'ala_terms_accepted_callback'}
 
     if not get_social_account(userinfo_json['sub']):
         return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))
