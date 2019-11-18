@@ -3,7 +3,7 @@ from collections import OrderedDict
 from django.contrib.auth.models import Permission, Group
 from rest_framework import serializers
 
-from institution.serializers_v1 import FacultySerializerV1
+from institution.serializers_v1 import FacultySerializerV1, InstitutionSerializerV1
 from institution.models import Faculty
 from mainsite.serializers import StripTagsCharField
 from mainsite.validators import PasswordValidator
@@ -48,6 +48,7 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
     marketing_opt_in = serializers.BooleanField(required=False)
     user_permissions = serializers.SerializerMethodField(required=False)
     faculty = FacultySerializerV1(many=True,  allow_null=True)
+    institution = InstitutionSerializerV1(read_only=True)
 
     class Meta:
         apispec_definition = ('BadgeUser', {})

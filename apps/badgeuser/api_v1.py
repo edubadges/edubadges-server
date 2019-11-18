@@ -27,7 +27,7 @@ class BadgeUserFacultyList(APIView):
             instances = instances | Faculty.objects.filter(institution = request.user.institution)
         serializer = FacultySerializerV1(instances, many=True, context={'request': request})
         return Response(serializer.data)
-    
+
 
 RATE_LIMIT_DELTA = datetime.timedelta(minutes=5)
 
