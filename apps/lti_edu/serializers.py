@@ -81,7 +81,8 @@ class BadgeClassLtiContextStudentSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         if user.has_edu_id_social_account():
             if StudentsEnrolled.objects.filter(user=user, badge_class=obj.badge_class,
-                                               date_awarded__isnull=False, denied=False).exists():
+                                               date_awarded__isnull=False, denied=False).exists() \
+                    and not self.get_revoked(obj):
                 return True
         return False
 
