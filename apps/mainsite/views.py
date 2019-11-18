@@ -183,8 +183,10 @@ class TermsAndConditionsView(TemplateView):
         badgr_app_pk = json.loads(kwargs['state'])[0]
         badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
         login_type = json.loads(kwargs['state'])[1]
+        context['home_url'] = badgr_app.ui_login_redirect
         context['dutch_url'] = '{}?lang=nl'.format(self.request.build_absolute_uri('?'))
         context['english_url'] = '{}?lang=en'.format(self.request.build_absolute_uri('?'))
+
         lang_code = translation.get_language().lower()
         lang_get = self.request.GET.get('lang', None)
         if lang_get != 'en' and \
