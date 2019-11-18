@@ -143,7 +143,7 @@ class LoginLti(TemplateView):
             ltibadgetennant = LtiBadgeUserTennant.objects.get(lti_tennant=kwargs['tenant'],
                                                               lti_user_id=self.request.POST['user_id'],
                                                               staff=self.staff)
-            login_user(self.request, ltibadgetennant.badge_user)
+            # login_user(self.request, ltibadgetennant.badge_user)
 
         except Exception as e:
             pass

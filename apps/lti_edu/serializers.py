@@ -62,15 +62,17 @@ class BadgeClassLtiContextStudentSerializer(serializers.ModelSerializer):
     image = ValidImageField(source='badge_class.image')
     requested = serializers.SerializerMethodField()
     rewarded = serializers.SerializerMethodField()
+    denied = serializers.SerializerMethodField()
     revoked = serializers.SerializerMethodField()
+
 
     class Meta:
         model = BadgeClassLtiContext
-        fields = ['badgeClassEntityId','contextId','name','image','requested','rewarded','revoked']
+        fields = ['badgeClassEntityId','contextId','name','image','requested','rewarded','denied','revoked']
 
     def get_requested(self, obj):
         user = self.context['request'].user
-        if user.has_edu_id_social_account():
+        if user.has_edu_id_social_account() and not self.get_revoked(obj):
             if StudentsEnrolled.objects.filter(user=user, badge_class=obj.badge_class, date_awarded__isnull=True, denied=False).exists():
                 return True
         return False
@@ -83,13 +85,27 @@ class BadgeClassLtiContextStudentSerializer(serializers.ModelSerializer):
                 return True
         return False
 
-
-    def get_revoked(self,obj):
+    def get_denied(self,obj):
         user = self.context['request'].user
         if user.has_edu_id_social_account():
             if StudentsEnrolled.objects.filter(user=user, badge_class=obj.badge_class, denied=True).exists():
                 return True
         return False
+
+    def get_revoked(self,obj):
+        user = self.context['request'].user
+        if user.has_edu_id_social_account():
+
+            assertions = StudentsEnrolled.objects.filter(user=user, badge_class=obj.badge_class).all()
+            if len(assertions) > 0:
+                assertion = assertions[0]
+            else:
+                return False
+            if assertion.assertion_is_revoked():
+                return True
+        return False
+
+
 
 
 class StudentsEnrolledSerializer(serializers.ModelSerializer):
