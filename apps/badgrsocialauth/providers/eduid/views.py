@@ -213,6 +213,7 @@ def callback(request):
 
     return after_terms_agreement(request, **keyword_arguments)
 
+
 from django.contrib.auth.signals import user_logged_out, user_logged_in
 
 

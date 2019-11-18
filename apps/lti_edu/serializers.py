@@ -1,6 +1,6 @@
 from datetime import datetime
 from rest_framework import serializers
-from issuer.models import BadgeClass, Issuer, BadgeInstance
+from issuer.models import BadgeClass, Issuer, BadgeInstance, IssuerStaff
 from lti_edu.models import StudentsEnrolled, BadgeClassLtiContext
 
 from mainsite.drf_fields import ValidImageField
@@ -32,11 +32,19 @@ class BadgeClassLtiContextSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='badge_class.name')
     image = ValidImageField(source='badge_class.image')
     issuer_slug = serializers.CharField(source='badge_class.issuer.entity_id')
+    can_award = serializers.SerializerMethodField()
 
     class Meta:
         model = BadgeClassLtiContext
-        fields = ['badgeClassEntityId','contextId','name','image','issuer_slug']
+        fields = ['badgeClassEntityId','contextId','name','image','issuer_slug','can_award']
 
+    def get_can_award(self,obj):
+        user = self.context['request'].user
+        if user in obj.badge_class.issuer.staff.all():
+            if IssuerStaff.objects.filter(user=user,issuer=obj.badge_class.issuer).all()[0].role in \
+                    [IssuerStaff.ROLE_OWNER ,IssuerStaff.ROLE_EDITOR,IssuerStaff.ROLE_STAFF]:
+                return True
+        return False
     # def to_representation(self, instance):
     #     data = {
     #         'badgeClassEntityId': instance.badge_class.entity_id,
