@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  db:
+    container_name: db
+    build: ./mysql
+    image: mysql-57-centos7-healthcheck
+    volumes:
+      - dbdata:/var/lib/mysql
+      - dbbackup:/backup
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: <MYSQL_ROOT_PASSWORD>
+      MYSQL_DATABASE: <MYSQL_DATABASE>
+      MYSQL_USER: <MYSQL_USER>
+      MYSQL_PASSWORD: <MYSQL_PASSWORD>
+      MYSQL_PORT: 3306
+    healthcheck:
+      test: "bash /var/opt/healthcheck.sh"
+      interval: 5s
+      retries: 15
+
+  web:
+    container_name: web
+    build: ./badgr-server/
+    hostname: <HOSTNAME>
+    domainname: <DOMAINNAME>
+    volumes:
+      - .:/code
+      - mediadata:/var/badgr/code/mediafiles
+    ports:
+      - "80:80"
+      - "443:443"
+      - "5678:5678"
+    restart: unless-stopped
+    environment:
+      SERVER_NAME: <SERVERNAME=HOSTNAME+DOMAINNAME>
+      SERVER_PROTOCOL: "https://"
+      BADGR_DB_NAME: <BADGR_DB_NAME>
+      BADGR_DB_HOST: db
+      BADGR_DB_PORT: 3306
+      BADGR_DB_USER: <BADGR_DB_USER>
+      BADGR_DB_PASSWORD: <BADGR_DB_PASSWORD>
+    depends_on:
+      - db
+
+volumes:
+    dbdata:
+    dbbackup:
+    mediadata:
