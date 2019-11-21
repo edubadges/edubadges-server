@@ -125,7 +125,6 @@ class AllBadgeClassesList(BaseEntityListView):
         tags=["BadgeClasses"],
     )
     def post(self, request, **kwargs):
-        mapExtensionsToDict(request)
         return super(AllBadgeClassesList, self).post(request, **kwargs)
 
 
@@ -165,7 +164,6 @@ class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
     )
     def post(self, request, **kwargs):
         issuer = self.get_object(request, **kwargs)  # trigger a has_object_permissions() check
-        mapExtensionsToDict(request)
         return super(IssuerBadgeClassList, self).post(request, **kwargs)
 
 
@@ -209,7 +207,6 @@ class BadgeClassDetail(BaseEntityDetailView):
         tags=['BadgeClasses'],
     )
     def put(self, request, **kwargs):
-        mapExtensionsToDict(request)
         return super(BadgeClassDetail, self).put(request, **kwargs)
 
 
