@@ -39,7 +39,7 @@ Example directory structure to build the edubadges server (backend) Docker conta
     │   ├── config
     │   ├── Dockerfile
     │   └── entrypoint
-    └── update_code.sh
+    └── example-build-script.sh
 
 
 ## The config directory layout
