@@ -208,7 +208,7 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, 
     alignment = AlignmentItemSerializerV1(many=True, source='alignment_items', required=False)
     tags = serializers.ListField(child=StripTagsCharField(max_length=1024), source='tag_items', required=False)
     extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
-    type = serializers.CharField(required=True)
+    category = serializers.CharField(required=True)
 
     class Meta:
         apispec_definition = ('BadgeClass', {})

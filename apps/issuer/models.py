@@ -471,7 +471,7 @@ class BadgeClass(ResizeUploadedImage,
         (BADGECLASS_TYPE_NON_FORMAL, 'non-formal')
     )
 
-    type = models.CharField(max_length=255, choices=BADGECLASS_TYPE_CHOICES, default=BADGECLASS_TYPE_FORMAL, blank=False, null=False)
+    category = models.CharField(max_length=255, choices=BADGECLASS_TYPE_CHOICES, default=BADGECLASS_TYPE_FORMAL, blank=False, null=False)
 
     class Meta:
         verbose_name_plural = "Badge classes"
