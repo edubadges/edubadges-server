@@ -382,12 +382,15 @@ class BadgeInstanceJson(JSONComponentView):
     model = BadgeInstance
 
     def get_json(self, request):
-        expands = request.GET.getlist('expand', [])
-        json = super(BadgeInstanceJson, self).get_json(
-            request,
-            expand_badgeclass=('badge' in expands),
-            expand_issuer=('badge.issuer' in expands)
-        )
+        if self.object.signature:
+            json = self.object.signature  # return signature in stead of json for signed badges
+        else:
+            expands = request.GET.getlist('expand', [])
+            json = super(BadgeInstanceJson, self).get_json(
+                request,
+                expand_badgeclass=('badge' in expands),
+                expand_issuer=('badge.issuer' in expands)
+            )
         return json
 
     def get_context_data(self, **kwargs):
