@@ -32,10 +32,6 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
 
     extensions = serializers.DictField(source='extension_items', read_only=True)
 
-    # Reinstantiation using fields from badge instance when returned by .create
-    # id = serializers.IntegerField(read_only=True)
-    # json = V1InstanceSerializer(read_only=True)
-
     def to_representation(self, obj):
         """
         If the APIView initialized the serializer with the extra context
@@ -45,14 +41,6 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
         if self.context.get('format', 'v1') == 'plain':
             self.fields.json = serializers.DictField(read_only=True)
         representation = super(LocalBadgeInstanceUploadSerializerV1, self).to_representation(obj)
-
-        # if isinstance(obj, LocalBadgeInstance):
-        #     representation['json'] = V1InstanceSerializer(obj.json, context=self.context).data
-        #     representation['imagePreview'] = {
-        #         "type": "image",
-        #         "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('localbadgeinstance_image', kwargs={'slug': obj.slug}))
-        #     }
-        # if isinstance(obj, BadgeInstance):
 
         representation['id'] = obj.entity_id
         representation['json'] = V1BadgeInstanceSerializer(obj, context=self.context).data
@@ -74,16 +62,6 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
 
         return representation
 
-    # def validate_recipient_identifier(self, data):
-    #     user = self.context.get('request').user
-    #     current_emails = [e.email for e in user.cached_emails()] + [e.email for e in user.cached_email_variants()]
-    #
-    #     if data in current_emails:
-    #         return None
-    #     if user.can_add_variant(data):
-    #         return data
-    #     raise serializers.ValidationError("Requested recipient ID {} is not one of your verified email addresses.")
-    #
     def validate(self, data):
         """
         Ensure only one assertion input field given.
