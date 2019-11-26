@@ -224,6 +224,9 @@ class TimestampedBadgeInstanceList(BaseEntityListView):
     def delete(self, request, **kwargs):
         badge_instance_slug = request.data.get('badge_instance_slug')
         badge_instance = BadgeInstance.objects.get(entity_id=badge_instance_slug)
+        assertion_timestamp = AssertionTimeStamp.objects.get(badge_instance=badge_instance)
+        if assertion_timestamp.signer != request.user:
+            raise ValidationError('You can only delete your own timestamped badges.')
         badge_instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
