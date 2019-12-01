@@ -1,5 +1,5 @@
 # Django stuff
-Django==1.11.23
+Django==2.2.7
 semver==2.6.0
 pytz==2017.2
 # PIL support
@@ -7,17 +7,18 @@ Pillow==6.2.0
 python-dateutil==2.6.1
 
 # mysql database
-MySQL-python==1.2.5
+
+# MySQL-python==1.2.5 # python3 incompatible
 
 django-storages==1.7
 
 
+python-resize-image==1.1.19
 
-python-resize-image==1.1.10
-
-# CSky models
-django-cachemodel==2.1.7
-django-basic-models==3.0.4
+# CSky
+# django-cachemodel==2.1.7  # python3 incompatible
+# django-basic-models==3.0.4 # python3 incompatible
+# apispec-djangorestframework==1.0.6 # python3 incompatible
 
 django-object-actions==0.8.2
 
@@ -39,7 +40,7 @@ django-oauth-toolkit==1.1.2
 # Some extras
 django-cors-headers==1.1.0
 django-autoslug==1.9.3
-wsgiref==0.1.2
+# wsgiref==0.1.2 # python3 incompatible
 sqlparse==0.1.14
 netaddr
 django-extensions==2.0.7
@@ -70,7 +71,7 @@ python-json-logger==0.1.2
 # SSL Support
 cffi==1.11.5
 cryptography==2.3
-enum34==1.0.4
+enum34==1.1.6
 idna==2.5
 ipaddress==1.0.16
 pyasn1==0.1.9
@@ -91,7 +92,6 @@ more-itertools==2.5.0
 
 apispec==0.22.0
 
-apispec-djangorestframework==1.0.6
 responses==0.8.1
 django_mock_queries==2.0.0
 
