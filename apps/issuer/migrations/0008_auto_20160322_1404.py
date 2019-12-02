@@ -14,13 +14,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='badgeclass',
             name='issuer',
-            field=models.ForeignKey(related_name='badgeclasses', to='issuer.Issuer'),
+            field=models.ForeignKey(related_name='badgeclasses', to='issuer.Issuer', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterField(
             model_name='badgeinstance',
             name='badgeclass',
-            field=models.ForeignKey(related_name='badgeinstances', to='issuer.BadgeClass'),
+            field=models.ForeignKey(related_name='badgeinstances', to='issuer.BadgeClass', on_delete=models.PROTECT),
             preserve_default=True,
         ),
     ]

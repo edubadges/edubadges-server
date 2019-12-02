@@ -15,19 +15,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='localbadgeinstancecollection',
             name='issuer_instance',
-            field=models.ForeignKey(to='issuer.BadgeInstance', null=True),
+            field=models.ForeignKey(to='issuer.BadgeInstance', null=True, on_delete=models.SET_NULL),
             preserve_default=True,
         ),
         migrations.AlterField(
             model_name='localbadgeinstancecollection',
             name='collection',
-            field=models.ForeignKey(related_name='badges', to='composition.Collection'),
+            field=models.ForeignKey(related_name='badges', to='composition.Collection', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterField(
             model_name='localbadgeinstancecollection',
             name='instance',
-            field=models.ForeignKey(to='composition.LocalBadgeInstance', null=True),
+            field=models.ForeignKey(to='composition.LocalBadgeInstance', null=True, on_delete=models.SET_NULL),
             preserve_default=True,
         ),
         migrations.AlterUniqueTogether(

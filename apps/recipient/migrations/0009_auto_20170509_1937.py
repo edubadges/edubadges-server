@@ -23,6 +23,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='recipientgroup',
             name='created_by',
-            field=models.ForeignKey(related_name='+', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='+', blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL),
         ),
     ]

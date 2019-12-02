@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 ('slug', autoslug.fields.AutoSlugField(unique=True, max_length=255)),
                 ('criteria_text', models.TextField(null=True, blank=True)),
                 ('image', models.ImageField(upload_to=b'uploads/badges', blank=True)),
-                ('created_by', models.ForeignKey(related_name='+', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='+', blank=True, to=settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)),
             ],
             options={
                 'abstract': False,
@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
                 ('revoked', models.BooleanField(default=False)),
                 ('revocation_reason', models.CharField(default=None, max_length=255, null=True, blank=True)),
                 ('badgeclass', models.ForeignKey(related_name='assertions', on_delete=django.db.models.deletion.PROTECT, to='issuer.BadgeClass')),
-                ('created_by', models.ForeignKey(related_name='+', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='+', blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)),
             ],
             options={
                 'abstract': False,
@@ -60,7 +60,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=1024)),
                 ('slug', autoslug.fields.AutoSlugField(unique=True, max_length=255)),
                 ('image', models.ImageField(upload_to=b'uploads/issuers', blank=True)),
-                ('created_by', models.ForeignKey(related_name='+', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='+', blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)),
                 ('owner', models.ForeignKey(related_name='owner', on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
             ],
             options={
@@ -73,8 +73,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('editor', models.BooleanField(default=False)),
-                ('badgeuser', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
-                ('issuer', models.ForeignKey(to='issuer.Issuer')),
+                ('badgeuser', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
+                ('issuer', models.ForeignKey(to='issuer.Issuer', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -89,7 +89,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='badgeinstance',
             name='issuer',
-            field=models.ForeignKey(related_name='assertions', to='issuer.Issuer'),
+            field=models.ForeignKey(related_name='assertions', to='issuer.Issuer', on_delete=models.PROTECT),
             preserve_default=True,
         ),
         migrations.AddField(

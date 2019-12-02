@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('description', models.CharField(max_length=255, blank=True)),
                 ('share_hash', models.CharField(max_length=255, blank=True)),
                 ('slug', models.CharField(default=None, max_length=254, null=True, blank=True)),
-                ('created_by', models.ForeignKey(related_name='+', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='+', blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)),
             ],
             options={
                 'abstract': False,
@@ -34,8 +34,8 @@ class Migration(migrations.Migration):
             name='BackpackCollectionBadgeInstance',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('badgeinstance', models.ForeignKey(to='issuer.BadgeInstance')),
-                ('collection', models.ForeignKey(to='backpack.BackpackCollection')),
+                ('badgeinstance', models.ForeignKey(to='issuer.BadgeInstance', on_delete=models.CASCADE)),
+                ('collection', models.ForeignKey(to='backpack.BackpackCollection', on_delete=models.CASCADE)),
             ],
             options={
                 'abstract': False,
@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('provider', models.CharField(max_length=254, choices=[(b'facebook', b'Facebook'), (b'linkedin', b'LinkedIn')])),
-                ('badgeinstance', models.ForeignKey(to='issuer.BadgeInstance', null=True)),
+                ('badgeinstance', models.ForeignKey(to='issuer.BadgeInstance', null=True, on_delete=models.CASCADE)),
             ],
             options={
                 'abstract': False,
@@ -61,7 +61,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('provider', models.CharField(max_length=254, choices=[(b'facebook', b'Facebook'), (b'linkedin', b'LinkedIn')])),
-                ('collection', models.ForeignKey(to='backpack.BackpackCollection')),
+                ('collection', models.ForeignKey(to='backpack.BackpackCollection', on_delete=models.CASCADE)),
             ],
             options={
                 'abstract': False,
