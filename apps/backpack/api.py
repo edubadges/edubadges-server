@@ -33,10 +33,9 @@ class BackpackAssertionList(LogPermissionsFailMixin, BaseEntityListView):
     }
 
     def get_objects(self, request, **kwargs):
-        return filter(lambda a: (not a.revoked)
+        return [a for a in self.request.user.cached_badgeinstances() if (not a.revoked)
                                 and a.acceptance != BadgeInstance.ACCEPTANCE_REJECTED
-                                and not a.signing_in_progress,
-                      self.request.user.cached_badgeinstances())
+                                and not a.signing_in_progress]
 
     @apispec_list_operation('Assertion',
         summary="Get a list of Assertions in authenticated user's backpack ",
