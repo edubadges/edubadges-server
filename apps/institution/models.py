@@ -17,7 +17,7 @@ class Faculty(BaseVersionedEntity, models.Model):
         return self.name
 
     def __unicode__(self):
-        return u'{}'.format(self.name)
+        return '{}'.format(self.name)
 
     class Meta:
         verbose_name_plural = 'faculties'

@@ -1,6 +1,6 @@
 import logging
-import urllib
-import urlparse
+import urllib.request, urllib.parse, urllib.error
+import urllib.parse
 
 from allauth.account.utils import user_pk_to_url_str
 from django.conf import settings
@@ -52,15 +52,16 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
             email_address = CachedEmailAddress.objects.get(pk=confirmation.email_address.pk)
             email_address.save()
 
-            redirect_url = urlparse.urljoin(
+            redirect_url = urllib.parse.urljoin(
                 badgr_app.email_confirmation_redirect.rstrip('/') + '/',
-                urllib.quote(email_address.user.first_name.encode('utf8'))
+                urllib.parse.quote(email_address.user.first_name.encode('utf8'))
             )
             redirect_url = set_url_query_params(redirect_url, email=email_address.email.encode('utf8'))
 
             return redirect_url
 
-        except Resolver404, EmailConfirmation.DoesNotExist:
+        except Resolver404 as xxx_todo_changeme:
+            EmailConfirmation.DoesNotExist = xxx_todo_changeme
             return badgr_app.email_confirmation_redirect
 
     def get_email_confirmation_url(self, request, emailconfirmation):
@@ -131,7 +132,7 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
 
         if badgr_app is None:
             url = request.build_absolute_uri()
-            print('Badgr app is none in login {}'.format(url))
+            print(('Badgr app is none in login {}'.format(url)))
         ret = super(BadgrAccountAdapter, self).login(request, user)
         set_session_badgr_app(request, badgr_app)
         return ret

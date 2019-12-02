@@ -205,7 +205,7 @@ class EncryptedCursorPagination(BasePagination):
 
         extra_elem = None
         try:
-            extra_elem = iterator.next()
+            extra_elem = next(iterator)
         except StopIteration:
             pass
 

@@ -1,5 +1,5 @@
 # encoding: utf-8
-from __future__ import unicode_literals
+
 
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import RegexValidator

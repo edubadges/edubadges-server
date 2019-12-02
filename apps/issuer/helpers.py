@@ -1,5 +1,5 @@
 # encoding: utf-8
-from __future__ import unicode_literals
+
 
 import uuid
 from collections import MutableMapping
@@ -142,7 +142,7 @@ class BadgeCheckHelper(object):
 
         # distill 3 optional arguments into one query argument
         query = (url, imagefile, assertion)
-        query = filter(lambda v: v is not None, query)
+        query = [v for v in query if v is not None]
         if len(query) != 1:
             raise ValueError("Must provide only 1 of: url, imagefile or assertion_obo")
         query = query[0]

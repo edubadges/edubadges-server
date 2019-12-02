@@ -64,10 +64,10 @@ class BadgeUserAdmin(FilterByScopeMixin, UserAdmin):
         form_field = super(BadgeUserAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
         if db_field.attname == 'faculty':
             if not request.user.is_superuser:
-                if request.user.has_perm(u'badgeuser.has_institution_scope'):
+                if request.user.has_perm('badgeuser.has_institution_scope'):
                     institution_id = request.user.institution.id
                     form_field.queryset = form_field.queryset.filter(institution_id=institution_id)
-                elif request.user.has_perm(u'badgeuser.has_faculty_scope'):
+                elif request.user.has_perm('badgeuser.has_faculty_scope'):
                     list_of_faculty_ids = request.user.faculty.all().values_list('id')
                     form_field.queryset = form_field.queryset.filter(id__in=list_of_faculty_ids)
                 else:
@@ -76,9 +76,9 @@ class BadgeUserAdmin(FilterByScopeMixin, UserAdmin):
         elif db_field.attname == 'groups':
             if not request.user.is_superuser:
                 form_field.queryset = form_field.queryset.exclude(name='Superuser')
-                if not request.user.has_perm(u'badgeuser.has_institution_scope'):
+                if not request.user.has_perm('badgeuser.has_institution_scope'):
                     form_field.queryset = form_field.queryset.exclude(name='Instellings Admin')
-                    if not request.user.has_perm(u'badgeuser.has_faculty_scope'):
+                    if not request.user.has_perm('badgeuser.has_faculty_scope'):
                         form_field.queryset = form_field.queryset.exclude(name='Faculteits Admin')
         return form_field
      

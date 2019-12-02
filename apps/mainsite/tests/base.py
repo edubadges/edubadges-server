@@ -1,5 +1,5 @@
 # encoding: utf-8
-from __future__ import unicode_literals
+
 
 from datetime import timedelta
 import os
@@ -258,7 +258,7 @@ class BadgrTestCase(SetupUserHelper, APITransactionTestCase, CachingTestCase):
                 name='test cors',
                 cors='localhost:8000')
 
-        self.assertEquals(self.badgr_app.pk, badgr_app_id)
+        self.assertEqual(self.badgr_app.pk, badgr_app_id)
 
 def add_student_social_account_to_user(user, email, eduid=None):
     extra_data = {"family_name": "Neci",

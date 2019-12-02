@@ -90,7 +90,7 @@ def resave_all_elements():
         try:
             el.save(update_badges=True)
         except ValidationError as e:
-            print("ERROR on {}: {}".format(el.pk, e.message))
+            print(("ERROR on {}: {}".format(el.pk, e.message)))
             pass
 
 

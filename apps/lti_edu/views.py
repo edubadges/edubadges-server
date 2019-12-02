@@ -1,5 +1,5 @@
 import os
-from urllib import urlencode
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.http import HttpResponse
@@ -43,8 +43,8 @@ class LtiViewSet(mixins.CreateModelMixin,
         # show data, only in debug
         if settings.DEBUG:
             print('>> Request data')
-            for key, item in request.data.items():
-                print('-- %s > %s' % (key, item))
+            for key, item in list(request.data.items()):
+                print(('-- %s > %s' % (key, item)))
 
         # - oauth_consumer_key should match user
         try:
@@ -139,7 +139,7 @@ class LtiViewSet(mixins.CreateModelMixin,
         res['Location'] = location
 
         if settings.DEBUG:
-            print('---> redirecting to location: %s' % location)
+            print(('---> redirecting to location: %s' % location))
         return res
 
     @list_route(methods=['POST'], permission_classes=[AllowAny])

@@ -272,7 +272,7 @@ class PathwayElement(cachemodel.CacheModel, CreatedUpdatedAt, CreatedUpdatedBy, 
                 order += 1
                 pathway_badge.save()
             if len(_idx):
-                for badge in _idx.values():
+                for badge in list(_idx.values()):
                     badge.delete()
             self.publish()
 

@@ -199,7 +199,7 @@ class TestBadgeUploads(BadgrTestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(
             response.data.get('json').get('badge').get('description'),
-            u'Basic as it gets. v1.0'
+            'Basic as it gets. v1.0'
         )
 
     # @responses.activate
@@ -663,7 +663,7 @@ class TestBadgeUploads(BadgrTestCase):
 
         self.assertEqual(response.status_code, 400)
 
-        self.assertEqual(response.data[1]['result'], u"<type 'exceptions.ValueError'> ['ValueError: day is out of range for month\\n']")
+        self.assertEqual(response.data[1]['result'], "<type 'exceptions.ValueError'> ['ValueError: day is out of range for month\\n']")
 
     @responses.activate
     #@unittest.skip('For debug speedup')

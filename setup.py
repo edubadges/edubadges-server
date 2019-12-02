@@ -10,7 +10,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
     README = readme.read()
 
 # execute version.py in the local namespace, but dont import the module.
-execfile(os.path.join(os.path.dirname(__file__), 'apps/mainsite/version.py'))
+exec(compile(open(os.path.join(os.path.dirname(__file__), 'apps/mainsite/version.py'), "rb").read(), os.path.join(os.path.dirname(__file__), 'apps/mainsite/version.py'), 'exec'))
 version = ".".join(map(str, VERSION))
 
 

@@ -44,10 +44,10 @@ class LtiClientAdmin(FilterByScopeMixin, admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "issuer":
             if not request.user.is_superuser:
-                if request.user.has_perm(u'badgeuser.has_institution_scope'):
+                if request.user.has_perm('badgeuser.has_institution_scope'):
                     institution_id = request.user.institution.id
                     kwargs["queryset"] = Issuer.objects.filter(faculty__institution_id=institution_id)
-                elif request.user.has_perm(u'badgeuser.has_faculty_scope'):
+                elif request.user.has_perm('badgeuser.has_faculty_scope'):
                     kwargs["queryset"] = Issuer.objects.filter(faculty__in=request.user.faculty.all()).distinct()
                 else:
                     kwargs["queryset"] = Issuer.objects.none()

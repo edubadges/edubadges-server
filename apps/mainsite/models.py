@@ -1,9 +1,9 @@
-import StringIO
+import io
 import abc
 import base64
 import os
 import re
-import urlparse
+import urllib.parse
 
 import basic_models
 from datetime import datetime, timedelta
@@ -79,7 +79,7 @@ class BadgrAppManager(Manager):
             existing_session_app_id = request.session.get('badgr_app_pk', None)
 
         if origin:
-            url = urlparse.urlparse(origin)
+            url = urllib.parse.urlparse(origin)
             try:
                 return self.get(cors=url.netloc)
             except self.model.DoesNotExist:

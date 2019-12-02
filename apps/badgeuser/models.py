@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+
 
 import base64
 import random
@@ -188,7 +188,7 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
                      )
 
     def __unicode__(self):
-        return u"{} <{}>".format(self.get_full_name(), self.email)
+        return "{} <{}>".format(self.get_full_name(), self.email)
 
 
     def within_scope(self, object):
@@ -209,7 +209,7 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
             return BadgrApp.objects.all().first()
 
     def get_full_name(self):
-        return u"%s %s" % (self.first_name, self.last_name)
+        return "%s %s" % (self.first_name, self.last_name)
 
     def gains_permission(self, permission_codename, model):
         content_type = ContentType.objects.get_for_model(model)
@@ -342,14 +342,14 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
 
     @property
     def primary_email(self):
-        primaries = filter(lambda e: e.primary, self.cached_emails())
+        primaries = [e for e in self.cached_emails() if e.primary]
         if len(primaries) > 0:
             return primaries[0].email
         return self.email
 
     @property
     def verified_emails(self):
-        return filter(lambda e: e.verified, self.cached_emails())
+        return [e for e in self.cached_emails() if e.verified]
 
     @property
     def verified(self):
@@ -428,11 +428,11 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         Creates a list of issuers belonging to the user's scope
         '''
         queryset = Issuer.objects.filter(staff__id=self.id) # personal issuers
-        if self.has_perm(u'badgeuser.has_institution_scope'):
+        if self.has_perm('badgeuser.has_institution_scope'):
             institution = self.institution
             if institution:
                 queryset = queryset | Issuer.objects.filter(faculty__institution=institution) # add insitution issuers
-        elif self.has_perm(u'badgeuser.has_faculty_scope'):
+        elif self.has_perm('badgeuser.has_faculty_scope'):
             faculties = self.faculty.all()
             if faculties:
                 queryset = queryset | Issuer.objects.filter(faculty__in=self.faculty.all()) # add faculty issuers

@@ -1,7 +1,7 @@
 # encoding: utf-8
-from __future__ import unicode_literals
 
-import urllib
+
+import urllib.request, urllib.parse, urllib.error
 
 import cachemodel
 import lti
@@ -130,9 +130,9 @@ class ExternalToolLaunchpoint(cachemodel.CacheModel):
         if user is not None:
             params.update(dict(
                 custom_badgr_user_id=user.entity_id,
-                lis_person_name_family=urllib.quote_plus(user.last_name.encode('utf-8')),
-                lis_person_name_given=urllib.quote_plus(user.first_name.encode('utf-8')),
-                lis_person_contact_email_primary=urllib.quote_plus(user.primary_email.encode('utf-8'))
+                lis_person_name_family=urllib.parse.quote_plus(user.last_name.encode('utf-8')),
+                lis_person_name_given=urllib.parse.quote_plus(user.first_name.encode('utf-8')),
+                lis_person_contact_email_primary=urllib.parse.quote_plus(user.primary_email.encode('utf-8'))
             ))
         if context_id is not None:
             params['custom_context_id'] = context_id

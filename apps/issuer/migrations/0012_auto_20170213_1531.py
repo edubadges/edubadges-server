@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.core.urlresolvers import reverse
 from django.db import migrations, models
@@ -38,7 +38,7 @@ def deserialize_badgeinstance_json(apps, schema_editor):
     BadgeInstance = apps.get_model('issuer', 'BadgeInstance')
     for instance in BadgeInstance.objects.all():
         recipient = instance.old_json.get('recipient')
-        if not isinstance(recipient, basestring) and 'salt' in recipient:
+        if not isinstance(recipient, str) and 'salt' in recipient:
             instance.salt = recipient.get('salt')
 
         evidence = instance.old_json.get('evidence')

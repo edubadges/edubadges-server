@@ -39,8 +39,8 @@ class Command(BaseCommand):
 
         # filter the results per staff member
         for user in staff:
-            badge_classes_new_enrollments = dict((badge_class, counter) for badge_class, counter in badge_classes.iteritems() if user in badge_class.issuer.staff.all())
-            badge_classes_old_enrollments = dict((badge_class, counter) for badge_class, counter in old_badge_classes.iteritems() if user in badge_class.issuer.staff.all())
+            badge_classes_new_enrollments = dict((badge_class, counter) for badge_class, counter in badge_classes.items() if user in badge_class.issuer.staff.all())
+            badge_classes_old_enrollments = dict((badge_class, counter) for badge_class, counter in old_badge_classes.items() if user in badge_class.issuer.staff.all())
             message = EmailMessageMaker.create_issuer_staff_badge_request_email(badge_classes_new_enrollments,
                                                                                 badge_classes_old_enrollments)
             user.email_user(subject='You have badge requests waiting for you.', message=message)

@@ -1,5 +1,5 @@
 # encoding: utf-8
-from __future__ import unicode_literals
+
 
 from rest_framework import permissions
 from rest_framework.exceptions import ValidationError
@@ -120,7 +120,7 @@ class BackpackAssertionDetail(BaseEntityDetailView):
     )
     def put(self, request, **kwargs):
         fields_whitelist = ('acceptance', 'public')
-        data = {k: v for k, v in request.data.items() if k in fields_whitelist}
+        data = {k: v for k, v in list(request.data.items()) if k in fields_whitelist}
         return super(BackpackAssertionDetail, self).put(request, data=data, **kwargs)
 
 

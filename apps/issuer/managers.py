@@ -1,8 +1,8 @@
 # encoding: utf-8
-from __future__ import unicode_literals
+
 
 import json
-import urlparse
+import urllib.parse
 
 from django.conf import settings
 import dateutil.parser
@@ -17,7 +17,7 @@ from pathway.tasks import award_badges_for_pathway_completion
 def resolve_source_url_referencing_local_object(source_url):
     if source_url.startswith(OriginSetting.HTTP):
         try:
-            match = resolve(urlparse.urlparse(source_url).path)
+            match = resolve(urllib.parse.urlparse(source_url).path)
             return match
         except Resolver404 as e:
             pass
@@ -85,7 +85,7 @@ class BadgeClassManager(BaseOpenBadgeObjectManager):
         criteria_url = None
         criteria_text = None
         criteria = badgeclass_obo.get('criteria', None)
-        if isinstance(criteria, basestring):
+        if isinstance(criteria, str):
             criteria_text = criteria
         elif criteria.get('type', 'Criteria') == 'Criteria':
             criteria_url = criteria.get('id', None)
@@ -172,7 +172,7 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
             if evidence:
                 from issuer.models import BadgeInstanceEvidence
                 for evidence_item in evidence:
-                    if isinstance(evidence_item, basestring):
+                    if isinstance(evidence_item, str):
                         # we got an IRI as 'evidence' value
                         BadgeInstanceEvidence.objects.create(
                             badgeinstance=badgeinstance,
@@ -233,7 +233,7 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
                     new_evidence.save()
 
             if extensions is not None:
-                for name, ext in extensions.items():
+                for name, ext in list(extensions.items()):
                     new_instance.badgeinstanceextension_set.create(
                         name=name,
                         original_json=json.dumps(ext)

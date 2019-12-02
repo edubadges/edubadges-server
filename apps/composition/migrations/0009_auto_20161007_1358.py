@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.db import migrations
 
@@ -18,9 +18,9 @@ def migrate_duplicate_collection_badges(apps, schema_editor):
                 entry.issuer_instance = issuer_instance
                 entry.instance = None
 
-                print("Migrating duplicate badge Collection.pk={}: LocalBadgeInstance.pk={} -> BadgeInstance.slug={}".format(
+                print(("Migrating duplicate badge Collection.pk={}: LocalBadgeInstance.pk={} -> BadgeInstance.slug={}".format(
                     entry.collection_id, old_instance_id, issuer_instance.slug
-                ))
+                )))
                 entry.save()
 
 

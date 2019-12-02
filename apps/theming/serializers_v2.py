@@ -5,7 +5,7 @@ from django.utils import translation
 from rest_framework import serializers
 
 from badgrsocialauth.utils import get_privacy_content
-from models import Theme
+from .models import Theme
 import markdown
 
 """

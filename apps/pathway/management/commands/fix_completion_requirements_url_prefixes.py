@@ -55,7 +55,7 @@ class Command(BaseCommand):
         urls = completion_requirements.get(property_name, None)
 
         if urls is not None:
-            non_matching_urls = filter(lambda url: self._unexpected_url_prefix(url, expected_prefix), urls)
+            non_matching_urls = [url for url in urls if self._unexpected_url_prefix(url, expected_prefix)]
             return non_matching_urls
         else:
             return []
@@ -106,9 +106,9 @@ class Command(BaseCommand):
 
         logger.debug('UNEXPECTED BADGE URLs (pk, urls):')
 
-        for pk, urls in self.unexpected_badge_urls.items():
+        for pk, urls in list(self.unexpected_badge_urls.items()):
             logger.debug('    {}, {}'.format(pk, urls))
 
         logger.debug('UNEXPECTED ELEMENT URLs (pk, urls):')
-        for pk, urls in self.unexpected_element_urls.items():
+        for pk, urls in list(self.unexpected_element_urls.items()):
             logger.debug('    {}, {}'.format(pk, urls))
