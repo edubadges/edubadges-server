@@ -174,7 +174,7 @@ class EmailMessageMaker:
                            .format(name=badge_class.name,
                                    counter=counter,
                                    issuer=badge_class.issuer.name)
-                            for badge_class, counter in badge_class_dict.items()])
+                            for badge_class, counter in list(badge_class_dict.items())])
 
         plural = 'es' if len(badge_classes_new_enrollments) > 1 else ''
         new_badge_classes_message = '\tIn the past 24 hours new badge requests have been made for the following badge class{0}. \n\n'.format(plural) + create_string(badge_classes_new_enrollments)
