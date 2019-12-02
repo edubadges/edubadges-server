@@ -747,7 +747,7 @@ class BadgeInstance(BaseAuditedModel,
 
     identifier = models.CharField(max_length=255, null=True, default=None)  # the uuid used to ID signed assertions
 
-    badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.CASCADE, related_name='badgeinstances')
+    badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.PROTECT, related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, on_delete=models.PROTECT, blank=False, null=False)
     # timestamp_pending = models.BooleanField(default=True)
     # timestamp_proof = models.CharField(max_length=258798798)

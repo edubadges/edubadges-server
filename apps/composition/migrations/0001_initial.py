@@ -33,8 +33,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('can_write', models.BooleanField(default=False)),
-                ('collection', models.ForeignKey(to='composition.Collection')),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('collection', models.ForeignKey(to='composition.Collection', on_delete=models.CASCADE)),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                 ('image', models.ImageField(upload_to=b'uploads/badges', blank=True)),
                 ('name', models.CharField(max_length=255)),
                 ('slug', autoslug.fields.AutoSlugField(unique=True, max_length=255)),
-                ('created_by', models.ForeignKey(related_name='+', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='+', blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)),
             ],
             options={
                 'abstract': False,
@@ -70,7 +70,7 @@ class Migration(migrations.Migration):
                 ('revoked', models.BooleanField(default=False)),
                 ('revocation_reason', models.CharField(default=None, max_length=255, null=True, blank=True)),
                 ('badgeclass', models.ForeignKey(related_name='badgeinstances', on_delete=django.db.models.deletion.PROTECT, to='composition.LocalBadgeClass', null=True)),
-                ('created_by', models.ForeignKey(related_name='+', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='+', blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)),
             ],
             options={
                 'abstract': False,
@@ -82,8 +82,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('description', models.TextField(blank=True)),
-                ('collection', models.ForeignKey(to='composition.Collection')),
-                ('instance', models.ForeignKey(to='composition.LocalBadgeInstance')),
+                ('collection', models.ForeignKey(to='composition.Collection', on_delete=models.CASCADE)),
+                ('instance', models.ForeignKey(to='composition.LocalBadgeInstance', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -98,7 +98,7 @@ class Migration(migrations.Migration):
                 ('image', models.ImageField(upload_to=b'uploads/issuers', blank=True)),
                 ('name', models.CharField(max_length=1024)),
                 ('slug', autoslug.fields.AutoSlugField(unique=True, max_length=255)),
-                ('created_by', models.ForeignKey(related_name='+', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('created_by', models.ForeignKey(related_name='+', blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)),
             ],
             options={
                 'abstract': False,
@@ -112,13 +112,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='localbadgeinstance',
             name='issuer',
-            field=models.ForeignKey(to='composition.LocalIssuer', null=True),
+            field=models.ForeignKey(to='composition.LocalIssuer', null=True, on_delete=models.SET_NULL),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='localbadgeinstance',
             name='recipient_user',
-            field=models.ForeignKey(to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -140,7 +140,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='collection',
             name='owner',
-            field=models.ForeignKey(to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(

@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='localbadgeinstance',
             name='issuer_badgeclass',
-            field=models.ForeignKey(blank=True, to='issuer.BadgeClass', null=True),
+            field=models.ForeignKey(blank=True, to='issuer.BadgeClass', null=True, on_delete=models.SET_NULL),
             preserve_default=True,
         ),
     ]

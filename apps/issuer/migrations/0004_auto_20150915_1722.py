@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='badgeinstance',
             name='issuer',
-            field=models.ForeignKey(to='issuer.Issuer'),
+            field=models.ForeignKey(to='issuer.Issuer', on_delete=models.PROTECT),
             preserve_default=True,
         ),
         migrations.AlterField(
