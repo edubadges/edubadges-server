@@ -2,7 +2,7 @@ import uuid
 import os, json
 
 from django.apps import apps
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.validators import URLValidator
 from django.utils.html import strip_tags
 from rest_framework import serializers

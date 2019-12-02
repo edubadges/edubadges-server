@@ -1,7 +1,7 @@
 # Created by wiggins@concentricsky.com on 4/18/16.
 import cachemodel
 from django.conf import settings
-from django.core.urlresolvers import resolve, Resolver404
+from django.urls import resolve, Resolver404
 
 from mainsite.utils import OriginSetting
 

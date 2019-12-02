@@ -2,7 +2,7 @@
 from collections import OrderedDict
 
 from django.conf import settings
-from django.core.urlresolvers import reverse, resolve, Resolver404
+from django.urls import reverse, resolve, Resolver404
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 

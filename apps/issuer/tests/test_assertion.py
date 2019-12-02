@@ -11,7 +11,7 @@ import png
 import pytz
 from django.apps import apps
 from django.core import mail
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils import timezone
 
 from mainsite.tests import BadgrTestCase, SetupIssuerHelper

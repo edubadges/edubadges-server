@@ -16,7 +16,7 @@ from django.apps import apps
 from django.conf import settings
 from django.core.cache import cache
 from django.core.files.storage import DefaultStorage
-from django.core.urlresolvers import get_callable, reverse
+from django.urls import get_callable, reverse
 from xml.etree import cElementTree as ET
 
 

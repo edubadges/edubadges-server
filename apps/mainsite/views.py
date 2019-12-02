@@ -5,7 +5,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponseForbidden
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseServerError, HttpResponseNotFound
 from django.shortcuts import redirect

@@ -6,7 +6,7 @@ import cairosvg
 from PIL import Image
 from django.conf import settings
 from django.core.files.storage import DefaultStorage
-from django.core.urlresolvers import resolve, reverse, Resolver404, NoReverseMatch
+from django.urls import resolve, reverse, Resolver404, NoReverseMatch
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import redirect, render_to_response
 from django.views.generic import RedirectView

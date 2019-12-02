@@ -6,7 +6,7 @@ from django.contrib.auth import SESSION_KEY
 from django.core import mail
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import override_settings
 from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
