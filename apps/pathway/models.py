@@ -18,9 +18,9 @@ from mainsite.utils import OriginSetting
 
 
 class Pathway(cachemodel.CacheModel, IsActive):
-    issuer = models.ForeignKey('issuer.Issuer')
+    issuer = models.ForeignKey('issuer.Issuer', on_delete=models.CASCADE)
     slug = AutoSlugField(max_length=254, populate_from='populate_slug', unique=True, blank=False)
-    root_element = models.OneToOneField('pathway.PathwayElement', related_name='toplevel_pathway', null=True)
+    root_element = models.OneToOneField('pathway.PathwayElement', on_delete=models.SET_NULL, related_name='toplevel_pathway', null=True)
     # recipient_groups = reverse M2M relation to subscribed instances of recipient.RecipientGroup
 
     cached = SlugOrJsonIdCacheModelManager('pathway_slug')
@@ -145,13 +145,13 @@ class PathwayElement(cachemodel.CacheModel, CreatedUpdatedAt, CreatedUpdatedBy, 
     PathwayElementUrl = '/v2/issuers/{issuer_slug}/pathways/{pathway_slug}/elements/{element_slug}'
 
     slug = AutoSlugField(max_length=254, populate_from='name', unique=True, blank=False)
-    pathway = models.ForeignKey('pathway.Pathway')
-    parent_element = models.ForeignKey('pathway.PathwayElement', blank=True, null=True)
+    pathway = models.ForeignKey('pathway.Pathway', on_delete=models.CASCADE)
+    parent_element = models.ForeignKey('pathway.PathwayElement', on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=254)
     ordering = models.IntegerField(default=99)
     description = models.TextField()
     alignment_url = models.URLField(blank=True, null=True)
-    completion_badgeclass = models.ForeignKey('issuer.BadgeClass', blank=True, null=True, related_name='completion_elements')
+    completion_badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.SET_NULL, blank=True, null=True, related_name='completion_elements')
     completion_requirements = JSONField(blank=True, null=True)
     cached = SlugOrJsonIdCacheModelManager('element_slug')
 
@@ -278,9 +278,9 @@ class PathwayElement(cachemodel.CacheModel, CreatedUpdatedAt, CreatedUpdatedBy, 
 
 
 class PathwayElementBadge(cachemodel.CacheModel):
-    pathway = models.ForeignKey('pathway.Pathway')
-    element = models.ForeignKey('pathway.PathwayElement')
-    badgeclass = models.ForeignKey('issuer.BadgeClass')
+    pathway = models.ForeignKey('pathway.Pathway', on_delete=models.CASCADE)
+    element = models.ForeignKey('pathway.PathwayElement', on_delete=models.CASCADE)
+    badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
     ordering = models.IntegerField(default=99)
 
     class Meta:

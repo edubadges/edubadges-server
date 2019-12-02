@@ -24,7 +24,7 @@ class Faculty(BaseVersionedEntity, models.Model):
         unique_together = ('name', 'institution')
 
     name = models.CharField(max_length=512)
-    institution = models.ForeignKey(Institution, blank=False, null=False)
+    institution = models.ForeignKey(Institution, on_delete=models.CASCADE, blank=False, null=False)
 
     # needed for the within_scope method of user
     @property

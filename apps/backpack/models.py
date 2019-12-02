@@ -139,9 +139,9 @@ class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
 
 
 class BackpackCollectionBadgeInstance(cachemodel.CacheModel):
-    collection = models.ForeignKey('backpack.BackpackCollection')
-    badgeuser = models.ForeignKey('badgeuser.BadgeUser', null=True, default=None)
-    badgeinstance = models.ForeignKey('issuer.BadgeInstance')
+    collection = models.ForeignKey('backpack.BackpackCollection', on_delete=models.CASCADE)
+    badgeuser = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, null=True, default=None)
+    badgeinstance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE)
 
     def publish(self):
         super(BackpackCollectionBadgeInstance, self).publish()
@@ -173,14 +173,14 @@ class BaseSharedModel(cachemodel.CacheModel, CreatedUpdatedAt):
 
 
 class BackpackBadgeShare(BaseSharedModel):
-    badgeinstance = models.ForeignKey("issuer.BadgeInstance", null=True)
+    badgeinstance = models.ForeignKey("issuer.BadgeInstance",  on_delete=models.CASCADE, null=True)
 
     def get_share_url(self, provider, **kwargs):
         return SharingManager.share_url(provider, self.badgeinstance, **kwargs)
 
 
 class BackpackCollectionShare(BaseSharedModel):
-    collection = models.ForeignKey('backpack.BackpackCollection', null=False)
+    collection = models.ForeignKey('backpack.BackpackCollection', on_delete=models.CASCADE, null=False)
 
     def get_share_url(self, provider, **kwargs):
         return SharingManager.share_url(provider, self.collection, **kwargs)

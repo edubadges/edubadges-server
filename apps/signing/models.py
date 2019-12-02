@@ -13,7 +13,7 @@ AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
 class SymmetricKey(models.Model):
-    user = models.ForeignKey(AUTH_USER_MODEL, null=True, default=None)
+    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, default=None)
     password_hash = models.CharField(max_length=255)
     salt = models.CharField(max_length=255)
     length = models.IntegerField()
@@ -39,13 +39,13 @@ class SymmetricKey(models.Model):
 
 
 class PrivateKey(models.Model):
-    symmetric_key = models.ForeignKey('signing.SymmetricKey')
+    symmetric_key = models.ForeignKey('signing.SymmetricKey', on_delete=models.PROTECT)
     encrypted_private_key = models.TextField()
     initialization_vector = models.CharField(max_length=255)
     tag = models.CharField(max_length=255)
     associated_data = models.CharField(max_length=255)
     time_created = models.DateTimeField()
-    public_key = models.ForeignKey('signing.PublicKey')
+    public_key = models.ForeignKey('signing.PublicKey', on_delete=models.PROTECT)
 
     def get_params(self):
         return {'initialization_vector': self.initialization_vector,
@@ -129,7 +129,7 @@ class PublicKeyIssuer(BaseVersionedEntity, models.Model):
     """
     Class made for the purpose of creating a temporary address that points to a public key that wil be filled later.
     """
-    issuer = models.ForeignKey('issuer.Issuer')
+    issuer = models.ForeignKey('issuer.Issuer', on_delete=models.PROTECT)
     public_key = models.ForeignKey('signing.PublicKey', null=True, default=None)
 
     def get_absolute_url(self):

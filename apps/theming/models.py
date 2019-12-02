@@ -40,8 +40,8 @@ class Theme(models.Model):
     privacy_policy_link = models.CharField('privacyPolicyLink', max_length=512)
     logo_small = models.FileField('logoImg.small', upload_to='themes')
     logo_desktop = models.FileField('logoImg.desktop', upload_to='themes')
-    badgr_app = models.OneToOneField(BadgrApp, null=True, related_name='theme')
-    institution = models.ForeignKey(Institution, related_name='theme')
+    badgr_app = models.OneToOneField(BadgrApp, on_delete=models.SET_NULL, null=True, related_name='theme')
+    institution = models.ForeignKey(Institution, on_delete=models.CASCADE, related_name='theme')
     changed_on = models.DateTimeField(auto_now=True)
     terms_and_conditions_template = models.CharField('Terms and conditions template',
                                                      null=True,
