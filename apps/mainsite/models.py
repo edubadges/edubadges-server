@@ -108,7 +108,7 @@ class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive, cachemodel.CacheMod
     public_pages_redirect = models.URLField(null=True)
     oauth_authorization_redirect = models.URLField(null=True)
     use_auth_code_exchange = models.BooleanField(default=False)
-    oauth_application = models.ForeignKey("oauth2_provider.Application", null=True, blank=True)
+    oauth_application = models.ForeignKey("oauth2_provider.Application", on_delete=models.PROTECT, null=True, blank=True)
 
     objects = BadgrAppManager()
 
@@ -133,7 +133,7 @@ class DefinedScopesValidator(object):
 
 
 class ApplicationInfo(cachemodel.CacheModel):
-    application = models.OneToOneField('oauth2_provider.Application')
+    application = models.OneToOneField('oauth2_provider.Application', on_delete=models.CASCADE)
     icon = models.FileField(blank=True, null=True)
     name = models.CharField(max_length=254, blank=True, null=True, default=None)
     website_url = models.URLField(blank=True, null=True, default=None)
