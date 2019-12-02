@@ -119,7 +119,7 @@ class ProxyEmailConfirmation(EmailConfirmation):
 
 class EmailAddressVariant(models.Model):
     email = models.EmailField(blank=False)
-    canonical_email = models.ForeignKey(CachedEmailAddress, blank=False)
+    canonical_email = models.ForeignKey(CachedEmailAddress, on_delete=models.CASCADE, blank=False)
 
     def save(self, *args, **kwargs):
         self.is_valid(raise_exception=True)
@@ -160,9 +160,9 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     """
     entity_class_name = 'BadgeUser'
 
-    badgrapp = models.ForeignKey('mainsite.BadgrApp', blank=True, null=True, default=None)
+    badgrapp = models.ForeignKey('mainsite.BadgrApp', on_delete=models.SET_NULL, blank=True, null=True, default=None)
     faculty = models.ManyToManyField('institution.Faculty', blank=True)
-    institution = models.ForeignKey('institution.Institution', blank=True, null=True, default=None)
+    institution = models.ForeignKey('institution.Institution', on_delete=models.SET_NULL, blank=True, null=True, default=None)
     is_staff = models.BooleanField(
         _('Backend-staff member'),
         default=False,
@@ -669,7 +669,7 @@ class TermsVersion(IsActive, BaseAuditedModel, cachemodel.CacheModel):
 
 
 class TermsAgreement(BaseAuditedModel, cachemodel.CacheModel):
-    user = models.ForeignKey('badgeuser.BadgeUser')
+    user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE)
     terms_version = models.PositiveIntegerField()
     agreed = models.BooleanField(default=True)
     valid = models.BooleanField(default=True)

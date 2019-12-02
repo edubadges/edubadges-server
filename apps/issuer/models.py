@@ -45,9 +45,9 @@ logger = logging.getLogger('Badgr.Debug')
 
 class BaseAuditedModel(cachemodel.CacheModel):
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey('badgeuser.BadgeUser', blank=True, null=True, related_name="+")
+    created_by = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
     updated_at = models.DateTimeField(auto_now=True)
-    updated_by = models.ForeignKey('badgeuser.BadgeUser', blank=True, null=True, related_name="+")
+    updated_by = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
 
     class Meta:
         abstract = True
@@ -148,7 +148,7 @@ class Issuer(ResizeUploadedImage,
     slug = models.CharField(max_length=255, blank=True, null=True, default=None)
     #slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
 
-    badgrapp = models.ForeignKey('mainsite.BadgrApp', blank=True, null=True, default=None)
+    badgrapp = models.ForeignKey('mainsite.BadgrApp', on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
     name = models.CharField(max_length=1024)
     image = models.FileField(upload_to='uploads/issuers', blank=True, null=True)
@@ -159,7 +159,7 @@ class Issuer(ResizeUploadedImage,
 
     objects = IssuerManager()
     cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
-    faculty = models.ForeignKey('institution.Faculty', blank=True, null=True, default=None)
+    faculty = models.ForeignKey('institution.Faculty', on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
     def publish(self, *args, **kwargs):
         super(Issuer, self).publish(*args, **kwargs)
@@ -405,8 +405,8 @@ class IssuerStaff(cachemodel.CacheModel):
         (ROLE_EDITOR, 'Editor'),
         (ROLE_STAFF, 'Staff'),
     )
-    issuer = models.ForeignKey(Issuer)
-    user = models.ForeignKey(AUTH_USER_MODEL)
+    issuer = models.ForeignKey(Issuer, on_delete=models.CASCADE)
+    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
     role = models.CharField(max_length=254, choices=ROLE_CHOICES, default=ROLE_STAFF)
     is_signer = models.BooleanField(default=False)
 
@@ -748,7 +748,7 @@ class BadgeInstance(BaseAuditedModel,
     identifier = models.CharField(max_length=255, null=True, default=None)  # the uuid used to ID signed assertions
 
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.CASCADE, related_name='badgeinstances')
-    issuer = models.ForeignKey(Issuer, blank=False, null=False)
+    issuer = models.ForeignKey(Issuer, on_delete=models.PROTECT, blank=False, null=False)
     # timestamp_pending = models.BooleanField(default=True)
     # timestamp_proof = models.CharField(max_length=258798798)
 
@@ -1325,7 +1325,7 @@ def _baked_badge_instance_filename_generator(instance, filename):
 
 
 class BadgeInstanceBakedImage(cachemodel.CacheModel):
-    badgeinstance = models.ForeignKey('issuer.BadgeInstance')
+    badgeinstance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE)
     obi_version = models.CharField(max_length=254)
     image = models.FileField(upload_to=_baked_badge_instance_filename_generator, blank=True)
 
@@ -1339,7 +1339,7 @@ class BadgeInstanceBakedImage(cachemodel.CacheModel):
 
 
 class BadgeInstanceEvidence(OriginalJsonMixin, cachemodel.CacheModel):
-    badgeinstance = models.ForeignKey('issuer.BadgeInstance')
+    badgeinstance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE)
     evidence_url = models.CharField(max_length=2083, blank=True, null=True, default=None)
     narrative = models.TextField(blank=True, null=True, default=None)
 
@@ -1370,7 +1370,7 @@ class BadgeInstanceEvidence(OriginalJsonMixin, cachemodel.CacheModel):
 
 
 class BadgeClassAlignment(OriginalJsonMixin, cachemodel.CacheModel):
-    badgeclass = models.ForeignKey('issuer.BadgeClass')
+    badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
     target_name = models.TextField()
     target_url = models.CharField(max_length=2083)
     target_description = models.TextField(blank=True, null=True, default=None)
@@ -1404,7 +1404,7 @@ class BadgeClassAlignment(OriginalJsonMixin, cachemodel.CacheModel):
 
 
 class BadgeClassTag(cachemodel.CacheModel):
-    badgeclass = models.ForeignKey('issuer.BadgeClass')
+    badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
     name = models.CharField(max_length=254, db_index=True)
 
     def __unicode__(self):
@@ -1420,7 +1420,7 @@ class BadgeClassTag(cachemodel.CacheModel):
 
 
 class IssuerExtension(BaseOpenBadgeExtension):
-    issuer = models.ForeignKey('issuer.Issuer')
+    issuer = models.ForeignKey('issuer.Issuer', on_delete=models.CASCADE)
 
     def publish(self):
         super(IssuerExtension, self).publish()
@@ -1432,7 +1432,7 @@ class IssuerExtension(BaseOpenBadgeExtension):
 
 
 class BadgeClassExtension(BaseOpenBadgeExtension):
-    badgeclass = models.ForeignKey('issuer.BadgeClass')
+    badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
 
     def publish(self):
         super(BadgeClassExtension, self).publish()
@@ -1444,7 +1444,7 @@ class BadgeClassExtension(BaseOpenBadgeExtension):
 
 
 class BadgeInstanceExtension(BaseOpenBadgeExtension):
-    badgeinstance = models.ForeignKey('issuer.BadgeInstance')
+    badgeinstance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE)
 
     def publish(self):
         super(BadgeInstanceExtension, self).publish()
