@@ -37,7 +37,7 @@ from theming.utils import get_theme
 
 
 @xframe_options_exempt
-def error404(request):
+def error404(request, exception):
     try:
         template = loader.get_template('error/404.html')
     except TemplateDoesNotExist:
