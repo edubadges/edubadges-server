@@ -9,6 +9,7 @@ python-dateutil==2.6.1
 # mysql database
 
 # MySQL-python==1.2.5 # python3 incompatible
+mysqlclient==1.4.6
 
 django-storages==1.7
 
@@ -21,6 +22,8 @@ python-resize-image==1.1.19
 # django-basic-models==3.0.4 # python3 incompatible
 -e git://github.com/concentricsky/django-basic-models.git@feature/python3#egg=django-basic-models
 # apispec-djangorestframework==1.0.6 # python3 incompatible
+-e git://github.com/edubadges/apispec-djangorestframework.git@python3#egg=apispec_drf
+
 
 django-object-actions==2.0.0
 
