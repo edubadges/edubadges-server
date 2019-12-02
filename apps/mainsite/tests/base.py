@@ -264,8 +264,8 @@ def add_student_social_account_to_user(user, email, eduid=None):
     extra_data = {"family_name": "Neci",
                   "sub": "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18" if not eduid else eduid,
                   "email": email,
-                  "name": "Er\u00f4ss Neci",
-                  "given_name": "Er\u00f4ss"}
+                  "name": "Er\\u00f4ss Neci",
+                  "given_name": "Er\\u00f4ss"}
 
     socialaccount = SocialAccount(extra_data=extra_data,
                                   uid="urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18" if not eduid else eduid,
@@ -277,8 +277,8 @@ def add_teacher_social_account_to_user(user, email, surfconext_id=None):
     extra_data = {"family_name": "Teacher",
                   "sub": "7980e81d94c0c5a201bf6809c51e5edc8c7d2600" if not surfconext_id else surfconext_id,
                   "email": email,
-                  "name": "Er\u00f4ss Neci",
-                  "given_name": "Er\u00f4ss"}
+                  "name": "Er\\u00f4ss Neci",
+                  "given_name": "Er\\u00f4ss"}
 
     socialaccount = SocialAccount(extra_data=extra_data,
                                   uid="7980e81d94c0c5a201bf6809c51e5edc8c7d2600" if not surfconext_id else surfconext_id,
