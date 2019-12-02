@@ -41,7 +41,7 @@ urlpatterns = [
 
     # Admin URLs
     url(r'^staff/sidewide-actions$', SitewideActionFormView.as_view(), name='badgr_admin_sitewide_actions'),
-    url(r'^staff/', include(badgr_admin.urls)),
+    url(r'^staff/', badgr_admin.urls),
     url(r'^staff/superlogin', auth_views.LoginView.as_view(), name ='badgr_admin_super_login'),
 
     # Service health endpoint
