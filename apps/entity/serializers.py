@@ -1,5 +1,5 @@
 # encoding: utf-8
-from __future__ import unicode_literals
+
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -117,7 +117,7 @@ class DetailSerializerV2(BaseSerializerV2):
             return new_instance
 
     def update(self, instance, validated_data):
-        for field_name, value in validated_data.items():
+        for field_name, value in list(validated_data.items()):
             setattr(instance, field_name, value)
         instance.save()
         return instance

@@ -1,6 +1,6 @@
 # Created by wiggins@concentricsky.com on 8/24/15.
 
-from __future__ import absolute_import
+
 
 from django.conf import settings
 from celery import Celery

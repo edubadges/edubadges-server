@@ -1,5 +1,5 @@
 # encoding: utf-8
-from __future__ import unicode_literals
+
 import unittest
 from django.core.urlresolvers import reverse
 from mainsite.tests import SetupIssuerHelper, BadgrTestCase

@@ -276,7 +276,7 @@ class RecipientCompletionSerializer(serializers.Serializer):
                     'slug': node['element'].slug
                 }
             if 'children' in node:
-                for child in node['children'].values():
+                for child in list(node['children'].values()):
                     _walk(child)
         for completion in instance['completions']:
             _walk(completion)

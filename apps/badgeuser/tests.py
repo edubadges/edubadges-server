@@ -36,7 +36,7 @@ class AuthTokenTests(BadgrTestCase):
         response = self.client.get('/v1/user/auth-token')
         self.assertEqual(response.status_code, 200)
         token = response.data.get('token')
-        self.assertRegexpMatches(token, r'[\da-f]{40}')
+        self.assertRegex(token, r'[\da-f]{40}')
 
         second_response = self.client.get('/v1/user/auth-token')
         self.assertEqual(token, second_response.data.get('token'))
@@ -52,7 +52,7 @@ class AuthTokenTests(BadgrTestCase):
         response = self.client.get('/v1/user/auth-token')
         self.assertEqual(response.status_code, 200)
         token = response.data.get('token')
-        self.assertRegexpMatches(token, r'[\da-f]{40}')
+        self.assertRegex(token, r'[\da-f]{40}')
 
         # Ensure that token has changed.
         second_response = self.client.put('/v1/user/auth-token')
@@ -248,9 +248,9 @@ class UserUnitTests(BadgrTestCase):
     def test_user_can_have_unicode_characters_in_name(self):
         user = BadgeUser(
             username='abc', email='abc@example.com',
-            first_name=u'\xe2', last_name=u'Bowie')
+            first_name='\xe2', last_name='Bowie')
 
-        self.assertEqual(user.get_full_name(), u'\xe2 Bowie')
+        self.assertEqual(user.get_full_name(), '\xe2 Bowie')
 
 
 @override_settings(
@@ -354,8 +354,8 @@ class UserEmailTests(BadgrTestCase):
         response = self.client.get('/v1/user/emails')
         self.assertEqual(response.status_code, 200)
 
-        not_primary = random.choice(filter(lambda e: e['verified'] and not e['primary'], response.data))
-        primary = random.choice(filter(lambda e: e['primary'], response.data))
+        not_primary = random.choice([e for e in response.data if e['verified'] and not e['primary']])
+        primary = random.choice([e for e in response.data if e['primary']])
 
         # cant remove primary email
         response = self.client.delete('/v1/user/emails/{}'.format(primary.get('id')))
@@ -376,7 +376,7 @@ class UserEmailTests(BadgrTestCase):
 
         self.assertGreater(len(response.data), 0)
 
-        not_primary = random.choice(filter(lambda e: e['verified'] and not e['primary'], response.data))
+        not_primary = random.choice([e for e in response.data if e['verified'] and not e['primary']])
 
         # set a non primary email to primary
         response = self.client.put('/v1/user/emails/{}'.format(not_primary.get('id')), {
@@ -404,8 +404,8 @@ class UserEmailTests(BadgrTestCase):
 
         response = self.client.get('/v1/user/emails')
         self.assertEqual(response.status_code, 200)
-        not_verified = random.choice(filter(lambda e: not e['verified'], response.data))
-        verified = random.choice(filter(lambda e: e['verified'], response.data))
+        not_verified = random.choice([e for e in response.data if not e['verified']])
+        verified = random.choice([e for e in response.data if e['verified']])
 
         # dont resend verification email if already verified
         response = self.client.put('/v1/user/emails/{}'.format(verified.get('id')), {

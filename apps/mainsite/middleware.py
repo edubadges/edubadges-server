@@ -15,7 +15,7 @@ class TrailingSlashMiddleware(object):
     def process_request(self, request):
         """Removes the slash from urls, or adds a slash for the admin urls"""
         exceptions = ['/staff', '/__debug__']
-        if filter(request.path.startswith, exceptions):
+        if list(filter(request.path.startswith, exceptions)):
             if request.path[-1] != '/':
                 return http.HttpResponsePermanentRedirect(request.path+"/")
         else:

@@ -11,8 +11,8 @@ from django.db import connection, DatabaseError
 from django.http import JsonResponse
 
 
-OK = u'OK'
-UNAVAILABLE = u'UNAVAILABLE'
+OK = 'OK'
+UNAVAILABLE = 'UNAVAILABLE'
 
 
 def health(req):

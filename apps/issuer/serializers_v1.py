@@ -7,7 +7,7 @@ from django.core.validators import URLValidator
 from django.utils.html import strip_tags
 from rest_framework import serializers
 
-import utils
+from . import utils
 from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserIdentifierFieldV1
 from institution.serializers_v1 import FacultySerializerV1
 from institution.models import Faculty
@@ -39,8 +39,8 @@ class ExtensionsSaverMixin(object):
         extension_items = validated_data.get('extension_items')
         if extension_items.get('LanguageExtension'):
             del extension_items['LanguageExtension']['typedLanguage']
-        received_extensions = extension_items.keys()
-        current_extension_names = instance.extension_items.keys()
+        received_extensions = list(extension_items.keys())
+        current_extension_names = list(instance.extension_items.keys())
         remove_these_extensions = set(current_extension_names) - set(received_extensions)
         update_these_extensions = set(current_extension_names).intersection(set(received_extensions))
         add_these_extensions = set(received_extensions) - set(current_extension_names)
@@ -57,7 +57,7 @@ class CachedListSerializer(serializers.ListSerializer):
 class IssuerStaffSerializerV1(serializers.Serializer):
     """ A read_only serializer for staff roles """
     user = BadgeUserProfileSerializerV1(source='cached_user')
-    role = serializers.CharField(validators=[ChoicesValidator(dict(IssuerStaff.ROLE_CHOICES).keys())])
+    role = serializers.CharField(validators=[ChoicesValidator(list(dict(IssuerStaff.ROLE_CHOICES).keys()))])
     is_signer = serializers.BooleanField()
     may_become_signer = serializers.BooleanField()
 
@@ -169,7 +169,7 @@ class IssuerRoleActionSerializerV1(serializers.Serializer):
     username = serializers.CharField(allow_blank=True, required=False)
     email = serializers.EmailField(allow_blank=True, required=False)
     role = serializers.CharField(
-        validators=[ChoicesValidator(dict(IssuerStaff.ROLE_CHOICES).keys())],
+        validators=[ChoicesValidator(list(dict(IssuerStaff.ROLE_CHOICES).keys()))],
         default=IssuerStaff.ROLE_STAFF)
     is_signer = serializers.BooleanField(required=False)
 
@@ -283,7 +283,7 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, 
 
             if utils.is_probable_url(data.get('criteria')):
                 data['criteria_url'] = data.pop('criteria')
-            elif not isinstance(data.get('criteria'), (str, unicode)):
+            elif not isinstance(data.get('criteria'), str):
                 raise serializers.ValidationError(
                     "Provided criteria text could not be properly processed as URL or plain text."
                 )
@@ -300,7 +300,7 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, 
 
     def filter_extensions(self, validated_data):
         extension_items = validated_data['extension_items']
-        for extension_name in extension_items.keys():
+        for extension_name in list(extension_items.keys()):
             extension_item = extension_items[extension_name]
             if extension_name == 'languageExtension':
                 del extension_item['typedLanguage']

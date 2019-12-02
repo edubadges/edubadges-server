@@ -18,7 +18,7 @@ class RecipientProfileSerializerV1(serializers.Serializer):
     def to_representation(self, instance):
         representation = super(RecipientProfileSerializerV1, self).to_representation(instance)
         representation.update([
-            ('@id', u"mailto:{}".format(instance.recipient_identifier)),
+            ('@id', "mailto:{}".format(instance.recipient_identifier)),
             ('@type', "RecipientProfile"),
             ('slug', instance.entity_id),
             ('name', instance.display_name),

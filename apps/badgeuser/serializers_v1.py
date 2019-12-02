@@ -57,9 +57,9 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
         perms = obj.user_permissions.all() | Permission.objects.filter(group__user=obj)
         perms = list(x.codename for x in perms)
         if obj.is_staff:
-            perms.insert(0, u'is_staff')
+            perms.insert(0, 'is_staff')
         if obj.is_superuser:
-            perms.insert(0,u'is_superuser')
+            perms.insert(0,'is_superuser')
         return json.dumps(perms)
 
     def create(self, validated_data):

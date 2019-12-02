@@ -1,5 +1,5 @@
 # encoding: utf-8
-from __future__ import unicode_literals
+
 from json import loads as json_loads
 from json import dumps as json_dumps
 from django.core import signing

@@ -1,4 +1,4 @@
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from allauth.account.utils import user_email
 from allauth.exceptions import ImmediateHttpResponse
@@ -19,7 +19,7 @@ class BadgrSocialAccountAdapter(DefaultSocialAccountAdapter):
         badgr_app = get_session_badgr_app(self.request)
         redirect_url = "{url}?authError={message}".format(
             url=badgr_app.ui_login_redirect,
-            message=urllib.quote("Authentication error. "+error))
+            message=urllib.parse.quote("Authentication error. "+error))
         raise ImmediateHttpResponse(HttpResponseRedirect(redirect_to=redirect_url))
 
     def _update_session(self, request, sociallogin):
@@ -52,7 +52,7 @@ class BadgrSocialAccountAdapter(DefaultSocialAccountAdapter):
                     badgr_app = get_session_badgr_app(self.request)
                     redirect_url = "{url}?authError={message}".format(
                         url=badgr_app.ui_connect_success_redirect,
-                        message=urllib.quote("Could not add social login. This account is already associated with a user."))
+                        message=urllib.parse.quote("Could not add social login. This account is already associated with a user."))
                     raise ImmediateHttpResponse(HttpResponseRedirect(redirect_to=redirect_url))
         except AuthenticationFailed as e:
             raise ImmediateHttpResponse(HttpResponseForbidden(e.detail))

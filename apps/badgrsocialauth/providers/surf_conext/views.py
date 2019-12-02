@@ -1,4 +1,4 @@
-import urllib, json
+import urllib.request, urllib.parse, urllib.error, json
 
 import requests
 from allauth.socialaccount.helpers import render_authentication_error, complete_social_login
@@ -62,7 +62,7 @@ def login(request):
             'state': state
             }
             
-    redirect_url = settings.SURFCONEXT_DOMAIN_URL + '/authorize?%s' %  (urllib.urlencode(data))
+    redirect_url = settings.SURFCONEXT_DOMAIN_URL + '/authorize?%s' %  (urllib.parse.urlencode(data))
 
     return HttpResponseRedirect(redirect_url)
 
@@ -142,7 +142,7 @@ def after_terms_agreement(request, **kwargs):
     request.session['lti_user_id'] = lti_user_id
     request.session['lti_roles'] = lti_roles
     if not request.user.is_authenticated:
-        print(request.__dict__)
+        print((request.__dict__))
         a = 1
     # override the response with a redirect to staff dashboard if the login came from there
     if referer == 'staff':
@@ -195,7 +195,7 @@ def callback(request):
             'grant_type': 'authorization_code',
             'code': code}
 
-    url =  settings.SURFCONEXT_DOMAIN_URL + '/token?%s' % (urllib.urlencode(data))
+    url =  settings.SURFCONEXT_DOMAIN_URL + '/token?%s' % (urllib.parse.urlencode(data))
 
     response = requests.post(url)
 

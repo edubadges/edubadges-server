@@ -1,5 +1,5 @@
 # encoding: utf-8
-from __future__ import unicode_literals
+
 
 import io
 import json
@@ -228,7 +228,7 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
         response = self.client.get('/public/assertions/{}/image'.format(assertion.entity_id), follow=True)
         self.verify_baked_image_response(assertion, response, obi_version=UNVERSIONED_BAKED_VERSION)
 
-        for obi_version in OBI_VERSION_CONTEXT_IRIS.keys():
+        for obi_version in list(OBI_VERSION_CONTEXT_IRIS.keys()):
             response = self.client.get('/public/assertions/{assertion}/baked?v={version}'.format(
                 assertion=assertion.entity_id,
                 version=obi_version

@@ -1,6 +1,6 @@
 import logging
 import re
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from collections import defaultdict
 from django.core.exceptions import FieldError
@@ -132,10 +132,10 @@ class Command(BaseCommand):
                 logger.debug('    no url changes, skipping save')
 
         logger.debug('UNRECOGNIZED BADGE URLs (pk, urls):')
-        for pk, urls in self.unrecognized_badge_urls.items():
+        for pk, urls in list(self.unrecognized_badge_urls.items()):
             logger.debug('    {}, {}'.format(pk, urls))
         logger.debug('UNRECOGNIZED ELEMENT URLs (pk, urls):')
-        for pk, urls in self.unrecognized_element_urls.items():
+        for pk, urls in list(self.unrecognized_element_urls.items()):
             logger.debug('    {}, {}'.format(pk, urls))
 
         logger.debug('Badge updates: {}, Element updates: {}'.format(badge_updates, element_updates))

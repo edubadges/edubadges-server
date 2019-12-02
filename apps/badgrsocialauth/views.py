@@ -1,5 +1,5 @@
-import urllib
-import urlparse
+import urllib.request, urllib.parse, urllib.error
+import urllib.parse
 
 from allauth.socialaccount.providers.base import AuthProcess
 from django.contrib.auth import logout
@@ -73,12 +73,12 @@ class BadgrSocialAccountVerifyEmail(RedirectView):
         verification_email = get_session_verification_email(self.request)
 
         if verification_email is not None:
-            verification_email = urllib.quote(verification_email.encode('utf-8'))
+            verification_email = urllib.parse.quote(verification_email.encode('utf-8'))
         else:
             verification_email = ''
 
         if badgr_app is not None:
-            return urlparse.urljoin(badgr_app.ui_signup_success_redirect.rstrip('/') + '/', verification_email)
+            return urllib.parse.urljoin(badgr_app.ui_signup_success_redirect.rstrip('/') + '/', verification_email)
 
 
 class BadgrAccountConnected(RedirectView):

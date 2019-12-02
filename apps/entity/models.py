@@ -1,5 +1,5 @@
 # encoding: utf-8
-from __future__ import unicode_literals
+
 
 import cachemodel
 from django.db import models
@@ -64,6 +64,6 @@ class BaseVersionedEntity(_AbstractVersionedEntity):
 
     def __unicode__(self):
         try:
-            return u'{}{}'.format(type(self)._meta.object_name, self.entity_id)
+            return '{}{}'.format(type(self)._meta.object_name, self.entity_id)
         except AttributeError:
             return self.entity_id

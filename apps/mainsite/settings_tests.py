@@ -1,9 +1,9 @@
 # encoding: utf-8
-from __future__ import unicode_literals
+
 
 from cryptography.fernet import Fernet
 
-from settings import *
+from .settings import *
 
 # disable logging for tests
 LOGGING = {}

@@ -1,5 +1,5 @@
 # encoding: utf-8
-from __future__ import unicode_literals
+
 
 import json
 import unittest
@@ -86,7 +86,7 @@ class PublicAPITests(SetupOAuth2ApplicationHelper, SetupIssuerHelper, BadgrTestC
         issuer_tokens = {r.get('issuer'): r.get('token') for r in result.get('result')}
         self.assertEqual(set(issuer_tokens.keys()), set(issuer_ids))
 
-        access_tokens = [BadgrAccessToken.objects.get(token=t) for t in issuer_tokens.values()]
+        access_tokens = [BadgrAccessToken.objects.get(token=t) for t in list(issuer_tokens.values())]
         self.assertEqual(len(access_tokens), len(issuer_tokens))
 
         # We don't use V2
