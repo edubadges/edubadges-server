@@ -13,7 +13,7 @@ from pathway.completionspec import CompletionRequirementSpecFactory, ElementJunc
 
 
 class RecipientProfile(BaseVersionedEntity, CreatedUpdatedAt, CreatedUpdatedBy, IsActive):
-    badge_user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE, null=True, blank=True)
+    badge_user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, null=True, blank=True)
     recipient_identifier = models.EmailField(max_length=1024)
     public = models.BooleanField(default=False)
     display_name = models.CharField(max_length=254)

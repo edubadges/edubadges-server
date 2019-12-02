@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('email', models.EmailField(max_length=75)),
-                ('canonical_email', models.ForeignKey(to='badgeuser.CachedEmailAddress')),
+                ('canonical_email', models.ForeignKey(to='badgeuser.CachedEmailAddress', on_delete=models.CASCADE)),
             ],
             options={
             },

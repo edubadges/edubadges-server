@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=254)),
                 ('description', models.TextField(null=True, blank=True)),
                 ('created_by', models.ForeignKey(related_name='recipientgroup_created', on_delete=django.db.models.deletion.SET_NULL, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('issuer', models.ForeignKey(to='issuer.Issuer')),
+                ('issuer', models.ForeignKey(to='issuer.Issuer', on_delete=models.CASCADE)),
             ],
             options={
                 'abstract': False,
@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('membership_name', models.CharField(max_length=254)),
-                ('recipient_group', models.ForeignKey(to='recipient.RecipientGroup')),
+                ('recipient_group', models.ForeignKey(to='recipient.RecipientGroup', on_delete=models.CASCADE)),
             ],
             options={
                 'abstract': False,
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                 ('recipient_identifier', models.EmailField(max_length=1024)),
                 ('public', models.BooleanField(default=False)),
                 ('display_name', models.CharField(max_length=254)),
-                ('badge_user', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('badge_user', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)),
             ],
             options={
                 'abstract': False,
@@ -60,7 +60,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='recipientgroupmembership',
             name='recipient_profile',
-            field=models.ForeignKey(to='recipient.RecipientProfile'),
+            field=models.ForeignKey(to='recipient.RecipientProfile', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
