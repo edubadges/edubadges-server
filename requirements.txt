@@ -22,7 +22,7 @@ python-resize-image==1.1.19
 -e git://github.com/concentricsky/django-basic-models.git@feature/python3#egg=django-basic-models
 # apispec-djangorestframework==1.0.6 # python3 incompatible
 
-django-object-actions==0.8.2
+django-object-actions==2.0.0
 
 python-memcached==1.58
 
@@ -41,7 +41,7 @@ django-oauth-toolkit==1.1.2
 
 # Some extras
 django-cors-headers==1.1.0
-django-autoslug==1.9.3
+django-autoslug==1.9.6
 # wsgiref==0.1.2 # python3 incompatible
 sqlparse==0.1.14
 netaddr
