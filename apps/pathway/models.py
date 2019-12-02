@@ -8,7 +8,7 @@ from autoslug import AutoSlugField
 from basic_models.models import IsActive, CreatedUpdatedAt, CreatedUpdatedBy
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse, resolve, Resolver404
+from django.urls import reverse, resolve, Resolver404
 from django.db import models
 from jsonfield import JSONField
 

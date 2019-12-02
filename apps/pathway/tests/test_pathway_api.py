@@ -4,7 +4,7 @@
 # import os
 # from django.contrib.auth.models import Permission
 # from django.core.cache import cache
-# from django.core.urlresolvers import reverse
+# from django.urls import reverse
 # from django.test import override_settings
 # from mainsite import TOP_DIR
 # from rest_framework import status

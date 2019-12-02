@@ -1,7 +1,7 @@
 
 
 from django.contrib.admin import ModelAdmin, StackedInline, TabularInline
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 
 from django_object_actions import DjangoObjectActions

@@ -13,7 +13,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ValidationError as DjangoValidationError
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import Http404
 from django.utils import timezone
 from rest_framework import permissions, serializers, status

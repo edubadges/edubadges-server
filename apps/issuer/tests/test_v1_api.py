@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 import unittest
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from mainsite.tests import SetupIssuerHelper, BadgrTestCase
 
 
