@@ -51,7 +51,7 @@ class BadgeUserAdmin(FilterByScopeMixin, UserAdmin):
     def filter_queryset_institution(self, queryset, request):
         institution_id = request.user.institution.id
         return queryset.filter(institution_id=institution_id).distinct()
-    
+
     def filter_queryset_faculty(self, queryset, request):
         return queryset.filter(faculty__in=request.user.faculty.all()).distinct()
 
@@ -71,7 +71,7 @@ class BadgeUserAdmin(FilterByScopeMixin, UserAdmin):
                     list_of_faculty_ids = request.user.faculty.all().values_list('id')
                     form_field.queryset = form_field.queryset.filter(id__in=list_of_faculty_ids)
                 else:
-                    form_field.queryset = form_field.queryset.none() 
+                    form_field.queryset = form_field.queryset.none()
 
         elif db_field.attname == 'groups':
             if not request.user.is_superuser:
@@ -88,28 +88,29 @@ class BadgeUserAdmin(FilterByScopeMixin, UserAdmin):
 badgr_admin.register(BadgeUser, BadgeUserAdmin)
 
 
-class BadgeUserProxyAdmin(BadgeUserAdmin):
-    actions = ['delete_selected']
-    readonly_fields = ('entity_id', 'date_joined', 'last_login', 'username', 'entity_id', 'agreed_terms_version')
-    list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'entity_id', 'date_joined', 'faculties')
-    list_filter = ('is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')
-    fieldsets = (
-        ('Metadata', {'fields': ('entity_id', 'username', 'date_joined',), 'classes': ('collapse',)}),
-        (None, {'fields': ('email', 'first_name', 'last_name', 'badgrapp', 'agreed_terms_version', 'marketing_opt_in')}),
-        ('Access', {'fields': ('is_active', 'is_staff', 'is_superuser', 'password')}),
-        ('Permissions', {'fields': ('groups', 'user_permissions')}),
-        ('Faculties', {'fields': ('faculty',) }),
-    )
-    inlines = [
-        EmailAddressInline,
-        ExternalToolInline,
-        TermsAgreementInline,
-    ]
-
-    def faculties(self, obj):
-        return [f.name for f in obj.faculty.all()]
-
-badgr_admin.register(BadgeUserProxy, BadgeUserProxyAdmin)
+# TODO: python3
+# class BadgeUserProxyAdmin(BadgeUserAdmin):
+#     actions = ['delete_selected']
+#     readonly_fields = ('entity_id', 'date_joined', 'last_login', 'username', 'entity_id', 'agreed_terms_version')
+#     list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'entity_id', 'date_joined', 'faculties')
+#     list_filter = ('is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')
+#     fieldsets = (
+#         ('Metadata', {'fields': ('entity_id', 'username', 'date_joined',), 'classes': ('collapse',)}),
+#         (None, {'fields': ('email', 'first_name', 'last_name', 'badgrapp', 'agreed_terms_version', 'marketing_opt_in')}),
+#         ('Access', {'fields': ('is_active', 'is_staff', 'is_superuser', 'password')}),
+#         ('Permissions', {'fields': ('groups', 'user_permissions')}),
+#         ('Faculties', {'fields': ('faculty',) }),
+#     )
+#     inlines = [
+#         EmailAddressInline,
+#         ExternalToolInline,
+#         TermsAgreementInline,
+#     ]
+#
+#     def faculties(self, obj):
+#         return [f.name for f in obj.faculty.all()]
+#
+# badgr_admin.register(BadgeUserProxy, BadgeUserProxyAdmin)
 
 
 
