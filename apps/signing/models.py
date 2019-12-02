@@ -71,12 +71,12 @@ class PublicKey(BaseVersionedEntity, models.Model):
 
 
 class AssertionTimeStamp(models.Model):
-    badge_instance = models.ForeignKey('issuer.BadgeInstance')
+    badge_instance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE)
     hash = models.CharField(max_length=64)
     original_json = models.TextField()
     hash_id_nodes = models.TextField(null=True, default=None)
     proof = models.TextField()
-    signer = models.ForeignKey(AUTH_USER_MODEL)
+    signer = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT)
 
     def proof_is_ready(self):
         return self.proof != ''
@@ -130,7 +130,7 @@ class PublicKeyIssuer(BaseVersionedEntity, models.Model):
     Class made for the purpose of creating a temporary address that points to a public key that wil be filled later.
     """
     issuer = models.ForeignKey('issuer.Issuer', on_delete=models.PROTECT)
-    public_key = models.ForeignKey('signing.PublicKey', null=True, default=None)
+    public_key = models.ForeignKey('signing.PublicKey', on_delete=models.SET_NULL, null=True, default=None)
 
     def get_absolute_url(self):
         return reverse('signing_public_key_json', kwargs={'entity_id': self.entity_id})

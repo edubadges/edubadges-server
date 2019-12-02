@@ -13,7 +13,7 @@ from pathway.completionspec import CompletionRequirementSpecFactory, ElementJunc
 
 
 class RecipientProfile(BaseVersionedEntity, CreatedUpdatedAt, CreatedUpdatedBy, IsActive):
-    badge_user = models.ForeignKey('badgeuser.BadgeUser', null=True, blank=True)
+    badge_user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE, null=True, blank=True)
     recipient_identifier = models.EmailField(max_length=1024)
     public = models.BooleanField(default=False)
     display_name = models.CharField(max_length=254)
@@ -67,7 +67,7 @@ class RecipientProfile(BaseVersionedEntity, CreatedUpdatedAt, CreatedUpdatedBy, 
 
 
 class RecipientGroup(BaseAuditedModel, BaseVersionedEntity, IsActive):
-    issuer = models.ForeignKey('issuer.Issuer')
+    issuer = models.ForeignKey('issuer.Issuer', on_delete=models.CASCADE)
     name = models.CharField(max_length=254)
     description = models.TextField(blank=True, null=True)
     members = models.ManyToManyField('RecipientProfile', through='recipient.RecipientGroupMembership')
@@ -150,8 +150,8 @@ class RecipientGroup(BaseAuditedModel, BaseVersionedEntity, IsActive):
 
 
 class RecipientGroupMembership(BaseVersionedEntity):
-    recipient_profile = models.ForeignKey('recipient.RecipientProfile')
-    recipient_group = models.ForeignKey('recipient.RecipientGroup')
+    recipient_profile = models.ForeignKey('recipient.RecipientProfile', on_delete=models.CASCADE)
+    recipient_group = models.ForeignKey('recipient.RecipientGroup', on_delete=models.CASCADE)
     membership_name = models.CharField(max_length=254)
 
     # slug has been deprecated for now, but preserve existing values

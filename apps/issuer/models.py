@@ -743,7 +743,7 @@ class BadgeInstance(BaseAuditedModel,
 
     issued_on = models.DateTimeField(blank=False, null=False, default=timezone.now)
 
-    public_key_issuer = models.ForeignKey('signing.PublicKeyIssuer', null=True, default=None)
+    public_key_issuer = models.ForeignKey('signing.PublicKeyIssuer', on_delete=models.PROTECT, null=True, default=None)
 
     identifier = models.CharField(max_length=255, null=True, default=None)  # the uuid used to ID signed assertions
 
