@@ -11,7 +11,7 @@ from badgeuser.models import CachedEmailAddress, ProxyEmailConfirmation
 from mainsite.admin_actions import delete_selected
 from mainsite.models import BadgrApp, EmailBlacklist, ApplicationInfo, AccessTokenProxy, LegacyTokenProxy
 from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 badgrlogger = badgrlog.BadgrLogger()
 

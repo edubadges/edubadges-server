@@ -7,7 +7,7 @@ from collections import OrderedDict
 import cachemodel
 from basic_models.models import CreatedUpdatedAt
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import models, transaction
 
 from entity.models import BaseVersionedEntity

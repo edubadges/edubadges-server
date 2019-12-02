@@ -2,7 +2,7 @@ import datetime
 from collections import OrderedDict
 
 from django.core.exceptions import ValidationError as DjangoValidationError
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.dateparse import parse_datetime, parse_date
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError as RestframeworkValidationError

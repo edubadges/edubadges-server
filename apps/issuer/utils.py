@@ -4,7 +4,7 @@ import re
 
 from django.apps import apps
 from django.conf import settings
-from django.core.urlresolvers import resolve, Resolver404
+from django.urls import resolve, Resolver404
 
 from mainsite.utils import OriginSetting
 

@@ -5,7 +5,7 @@ import base64
 import json
 import unittest
 from django.core.files.images import get_image_dimensions
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from issuer.models import BadgeClass
 from mainsite.tests import BadgrTestCase, SetupIssuerHelper
