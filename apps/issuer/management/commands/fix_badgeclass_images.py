@@ -1,5 +1,5 @@
 # encoding: utf-8
-from __future__ import unicode_literals
+
 
 import json
 import os
@@ -46,7 +46,7 @@ class Command(BaseCommand):
                         status_code, image = fetch_remote_file_to_storage(remote_image_url, upload_to=badgeclass.image.field.upload_to)
                     except IOError as e:
                         self.stdout.write("IOError fetching '{}': {}".format(remote_image_url, e.message))
-                        report['ioerrors'].append((remote_image_url, unicode(e.message)))
+                        report['ioerrors'].append((remote_image_url, str(e.message)))
                     else:
                         report['status_codes'][status_code] = report['status_codes'].get(status_code, []) + [remote_image_url]
                         if status_code == 200:

@@ -1,13 +1,13 @@
 """
 Utility functions and constants that might be used across the project.
 """
-from __future__ import unicode_literals
 
-import StringIO
+
+import io
 import base64
 import hashlib
 import re
-import urlparse
+import urllib.parse
 import uuid
 
 import os
@@ -64,7 +64,7 @@ class OriginSettingsObject(object):
 
     @property
     def DEFAULT_HTTP_PROTOCOL(self):
-        parsed = urlparse.urlparse(self.HTTP)
+        parsed = urllib.parse.urlparse(self.HTTP)
         return parsed.scheme
 
     @property
@@ -107,13 +107,13 @@ def fetch_remote_file_to_storage(remote_url, upload_to=''):
     store = DefaultStorage()
     r = requests.get(remote_url, stream=True)
     if r.status_code == 200:
-        name, ext = os.path.splitext(urlparse.urlparse(r.url).path)
+        name, ext = os.path.splitext(urllib.parse.urlparse(r.url).path)
         storage_name = '{upload_to}/cached/{filename}{ext}'.format(
             upload_to=upload_to,
             filename=hashlib.md5(remote_url).hexdigest(),
             ext=ext)
         if not store.exists(storage_name):
-            buf = StringIO.StringIO(r.content)
+            buf = io.StringIO(r.content)
             store.save(storage_name, buf)
         return r.status_code, storage_name
     return r.status_code, None
@@ -132,7 +132,7 @@ def generate_entity_uri():
 def first_node_match(graph, condition):
     """return the first dict in a list of dicts that matches condition dict"""
     for node in graph:
-        if all(item in node.items() for item in condition.items()):
+        if all(item in list(node.items()) for item in list(condition.items())):
             return node
 
 
@@ -174,7 +174,7 @@ class EmailMessageMaker:
                            .format(name=badge_class.name,
                                    counter=counter,
                                    issuer=badge_class.issuer.name)
-                            for badge_class, counter in badge_class_dict.iteritems()])
+                            for badge_class, counter in badge_class_dict.items()])
 
         plural = 'es' if len(badge_classes_new_enrollments) > 1 else ''
         new_badge_classes_message = '\tIn the past 24 hours new badge requests have been made for the following badge class{0}. \n\n'.format(plural) + create_string(badge_classes_new_enrollments)

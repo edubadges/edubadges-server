@@ -301,7 +301,7 @@ class VerifierBadgeDateTimeField(BadgePotentiallyEmptyField, serializers.Field):
     }
 
     def to_internal_value(self, value):
-        if isinstance(value, (str, unicode)):
+        if isinstance(value, str):
             try:
                 return datetime.datetime.utcfromtimestamp(float(value))
             except ValueError:
@@ -325,7 +325,7 @@ class VerifierBadgeDateTimeField(BadgePotentiallyEmptyField, serializers.Field):
             self.fail('not_int_or_str')
 
     def to_representation(self, string_value):
-        if isinstance(string_value, (str, unicode, int, float)):
+        if isinstance(string_value, (str, int, float)):
             value = self.to_internal_value(string_value)
         else:
             value = string_value

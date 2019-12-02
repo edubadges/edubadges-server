@@ -1,5 +1,5 @@
 # encoding: utf-8
-from __future__ import unicode_literals
+
 
 import json
 import unittest
@@ -37,7 +37,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         v1_data = json.loads(str(unbake(test_assertion.image)))
 
         self.assertDictContainsSubset({
-            '@context': u'https://w3id.org/openbadges/v1'
+            '@context': 'https://w3id.org/openbadges/v1'
         }, v1_data)
 
         original_image_url = test_assertion.image_url()
@@ -48,7 +48,7 @@ class AssertionTests(SetupIssuerHelper, BadgrTestCase):
         self.assertTrue(v2_datastr)
         v2_data = json.loads(v2_datastr)
         self.assertDictContainsSubset({
-            '@context': u'https://w3id.org/openbadges/v2'
+            '@context': 'https://w3id.org/openbadges/v2'
         }, v2_data)
 
     #@unittest.skip('For debug speedup')

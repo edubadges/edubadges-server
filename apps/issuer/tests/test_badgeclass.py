@@ -1,5 +1,5 @@
 # encoding: utf-8
-from __future__ import unicode_literals
+
 
 import base64
 import json
@@ -321,14 +321,14 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
             self.assertEqual(response.status_code, 201)
             self.assertIsNotNone(response.data)
             new_badgeclass = response.data['result'][0]
-            self.assertIn('alignments', new_badgeclass.keys())
+            self.assertIn('alignments', list(new_badgeclass.keys()))
             self.assertEqual(len(new_badgeclass['alignments']), 2)
             self.assertEqual(
                 new_badgeclass['alignments'][0]['targetName'], badgeclass_props['alignments'][0]['targetName'])
 
             # verify that public page renders markdown as html
             response = self.client.get('/public/badges/{}?v=2_0'.format(new_badgeclass.get('entityId')))
-            self.assertIn('alignment', response.data.keys())
+            self.assertIn('alignment', list(response.data.keys()))
             self.assertEqual(len(response.data['alignment']), 2)
             self.assertEqual(
                 response.data['alignment'][0]['targetName'], badgeclass_props['alignments'][0]['targetName'])
@@ -754,7 +754,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
 
     def match_extensions(self, badgeclass, example_extensions):
         for extension in example_extensions:
-            extension_name = extension.keys()[0]
+            extension_name = list(extension.keys())[0]
             self.assertDictEqual(badgeclass.get('extensions')[extension_name], extension[extension_name])
 
     def verify_badgeclass_extensions(self, badgeclass, example_extensions):
@@ -772,7 +772,7 @@ class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
         self.assertEqual(response.status_code, 200)
         public_json = json.loads(response.content)
         for extension in example_extensions:
-            extension_name = extension.keys()[0]
+            extension_name = list(extension.keys())[0]
             extension_data = extension[extension_name]
             self.assertDictEqual(public_json.get(extension_name), extension_data)
 

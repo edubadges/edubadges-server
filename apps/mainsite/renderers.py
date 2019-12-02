@@ -1,5 +1,5 @@
 from backports import csv
-import StringIO
+import io
 
 from rest_framework import renderers
 
@@ -34,7 +34,7 @@ class CSVDictRenderer(renderers.BaseRenderer):
             fieldnames = data['fieldnames']
             rows = data['rowdicts']
 
-        buff = StringIO.StringIO()
+        buff = io.StringIO()
         writer = csv.DictWriter(buff, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)

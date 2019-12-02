@@ -32,7 +32,7 @@ class IssuerAccessTokenSerializerV2(BaseSerializerV2):
 
 class IssuerStaffSerializerV2(DetailSerializerV2):
     user = EntityRelatedFieldV2(source='cached_user', queryset=BadgeUser.cached)
-    role = serializers.CharField(validators=[ChoicesValidator(dict(IssuerStaff.ROLE_CHOICES).keys())])
+    role = serializers.CharField(validators=[ChoicesValidator(list(dict(IssuerStaff.ROLE_CHOICES).keys()))])
 
     class Meta(DetailSerializerV2.Meta):
         apispec_definition = ('IssuerStaff', {

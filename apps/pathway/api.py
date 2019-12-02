@@ -368,7 +368,7 @@ class PathwayCompletionDetail(PathwayElementAPIEndpoint):
             try:
                 recipients.append(RecipientProfile.cached.get(entity_id=s))
             except RecipientProfile.DoesNotExist:
-                return Response(u"Invalid Recipient '{}'".format(s), status=status.HTTP_400_BAD_REQUEST)
+                return Response("Invalid Recipient '{}'".format(s), status=status.HTTP_400_BAD_REQUEST)
 
         group_slugs = request.query_params.getlist('recipientGroup[]')
         groups = []
@@ -376,7 +376,7 @@ class PathwayCompletionDetail(PathwayElementAPIEndpoint):
             try:
                 groups.append(RecipientGroup.cached.get(entity_id=s))
             except RecipientGroup.DoesNotExist:
-                return Response(u"Invalid Recipient Group '{}'".format(s), status=status.HTTP_400_BAD_REQUEST)
+                return Response("Invalid Recipient Group '{}'".format(s), status=status.HTTP_400_BAD_REQUEST)
 
         for group in groups:
             recipients.extend([member.recipient_profile for member in group.cached_members()])

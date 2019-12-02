@@ -11,7 +11,7 @@ from mainsite.pagination import EncryptedCursorPagination
 from rest_framework.test import APIRequestFactory
 from rest_framework.request import Request
 
-from urllib import urlencode
+from urllib.parse import urlencode
 
 
 class DecryptedCursorPagination(EncryptedCursorPagination):

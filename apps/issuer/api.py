@@ -335,7 +335,7 @@ class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):
         def _include_create_notification(a):
             a['create_notification'] = create_notification
             return a
-        assertions = map(_include_create_notification, request.data.get('assertions'))
+        assertions = list(map(_include_create_notification, request.data.get('assertions')))
 
         # save serializers
         context = self.get_context_data(**kwargs)

@@ -129,9 +129,9 @@ class FilterByScopeMixin(object):
         """
         queryset = self.model._default_manager.get_queryset()
         if not request.user.is_superuser:
-            if request.user.has_perm(u'badgeuser.has_institution_scope'):
+            if request.user.has_perm('badgeuser.has_institution_scope'):
                 queryset = self.filter_queryset_institution(queryset, request)
-            elif request.user.has_perm(u'badgeuser.has_faculty_scope'):
+            elif request.user.has_perm('badgeuser.has_faculty_scope'):
                 queryset = self.filter_queryset_faculty(queryset, request)
             else:
                 queryset = self.model.objects.none()

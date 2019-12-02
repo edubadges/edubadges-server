@@ -12,7 +12,7 @@ ENV_DIR = os.path.join(OUR_DIR, '..', 'env')
 
 # activate the virtualenv
 activate_this = os.path.join(ENV_DIR, 'bin', 'activate_this.py')
-execfile(activate_this, dict(__file__=activate_this))
+exec(compile(open(activate_this, "rb").read(), activate_this, 'exec'), dict(__file__=activate_this))
 
 # add the apps directory to the python path
 sys.path.insert(0, APPS_DIR)

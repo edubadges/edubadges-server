@@ -20,7 +20,7 @@ class BadgrRequestValidator(OAuth2Validator):
         if not (request.client_id and request.grant_type and request.client_secret):
             request.grant_type = 'password'
             request.client_id = getattr(settings, 'OAUTH2_DEFAULT_CLIENT_ID', 'public')
-            request.client_secret = u''
+            request.client_secret = ''
             request.scopes = ['rw:profile', 'rw:issuer', 'rw:backpack']
         return super(BadgrRequestValidator, self).authenticate_client(request, *args, **kwargs)
 

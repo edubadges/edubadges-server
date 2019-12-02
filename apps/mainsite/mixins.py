@@ -1,4 +1,4 @@
-import StringIO
+import io
 
 from PIL import Image
 from django.conf import settings
@@ -39,7 +39,7 @@ class ResizeUploadedImage(object):
 
                 new_image = resize_contain(image, (max_square, max_square))
 
-                byte_string = StringIO.StringIO()
+                byte_string = io.StringIO()
                 new_image.save(byte_string, 'PNG')
 
                 self.image = InMemoryUploadedFile(byte_string, None,
@@ -79,7 +79,7 @@ class ScrubUploadedSvgImage(object):
                         del el.attrib[attrib_name]
 
             # write out scrubbed svg
-            buf = StringIO.StringIO()
+            buf = io.StringIO()
             tree.write(buf)
             self.image = InMemoryUploadedFile(buf, 'image', self.image.name, 'image/svg+xml', buf.len, 'utf8')
         return super(ScrubUploadedSvgImage, self).save(*args, **kwargs)

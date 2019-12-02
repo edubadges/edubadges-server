@@ -50,4 +50,4 @@ class Command(BaseCommand):
             cursor.execute("CALL convert_to_unicode('{}')".format(settings.DATABASES['default']['NAME']))
 
             for row in cursor.fetchall():
-                print row
+                print(row)

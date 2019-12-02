@@ -1,5 +1,5 @@
 # encoding: utf-8
-from __future__ import unicode_literals
+
 
 import datetime
 import json
@@ -197,7 +197,7 @@ class TokenView(OAuth2ProviderTokenView):
 
             # handle rw:issuer:* scopes
             if 'rw:issuer:*' in allowed_scopes:
-                issuer_scopes = filter(lambda x: x.startswith(r'rw:issuer:'), requested_scopes)
+                issuer_scopes = [x for x in requested_scopes if x.startswith(r'rw:issuer:')]
                 allowed_scopes.extend(issuer_scopes)
 
             filtered_scopes = set(allowed_scopes) & set(requested_scopes)

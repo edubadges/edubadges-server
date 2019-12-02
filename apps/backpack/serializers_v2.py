@@ -1,5 +1,5 @@
 # encoding: utf-8
-from __future__ import unicode_literals
+
 
 from collections import OrderedDict
 
@@ -129,7 +129,7 @@ class BackpackImportSerializerV2(DetailSerializerV2):
     assertion = serializers.DictField(required=False)
 
     def validate(self, attrs):
-        if sum(1 if v else 0 for v in attrs.values()) != 1:
+        if sum(1 if v else 0 for v in list(attrs.values())) != 1:
             raise serializers.ValidationError("Must provide only one of 'url', 'image' or 'assertion'.")
         return attrs
 
