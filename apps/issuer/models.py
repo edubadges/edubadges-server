@@ -917,6 +917,12 @@ class BadgeInstance(BaseAuditedModel,
 
         super(BadgeInstance, self).save(*args, **kwargs)
 
+        if created:
+            for extension in self.badgeclass.badgeclassextension_set.all():
+                BadgeInstanceExtension.objects.create(badgeinstance=self,
+                                                      name=extension.name,
+                                                      original_json=extension.original_json)
+
     def rebake(self, obi_version=CURRENT_OBI_VERSION, save=True, signature=None, replace_image=False):
         if self.source_url:
             # dont rebake imported assertions
