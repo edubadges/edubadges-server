@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lti_edu', '0022_remove_studentsenrolled_assertion_slug'),
+        ('lti_edu', '0019_auto_20191023_0507'),
     ]
 
     operations = [

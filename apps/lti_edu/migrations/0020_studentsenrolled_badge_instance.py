@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('issuer', '0051_badgeinstance_public_key_issuer'),
-        ('lti_edu', '0019_auto_20191023_0507'),
+        ('lti_edu', '0020_ltibadgeusertennant_expires'),
     ]
 
     operations = [
