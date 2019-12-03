@@ -17,6 +17,7 @@ from .provider import SurfconextAlaProvider
 from institution.models import Institution
 from allauth.account.adapter import get_adapter as get_account_adapter
 
+
 def login(request):
     """
     Redirect to login page of SURFconext openID, this is "Where are you from" page
@@ -62,7 +63,7 @@ def login(request):
             'state': state
             }
             
-    redirect_url = settings.SURFCONEXT_DOMAIN_URL + '/authorize?%s' %  (urllib.urlencode(data))
+    redirect_url = settings.SURFCONEXT_ALA_DOMAIN_URL + '/oidc/authorize?%s' %  (urllib.urlencode(data))
 
     return HttpResponseRedirect(redirect_url)
 
@@ -73,7 +74,7 @@ def after_terms_agreement(request, **kwargs):
         error = 'Sorry, we could not find you SURFconext credentials.'
         return render_authentication_error(request, SurfconextAlaProvider.id, error)
     
-    headers = {'Authorization': 'bearer %s' % access_token}
+    headers = {'Authorization': 'Bearer %s' % access_token}
     badgr_app_pk, login_type, process, auth_token, lti_context_id,lti_user_id,lti_roles, referer = json.loads(kwargs['state'])
     try:
         badgr_app_pk = int(badgr_app_pk)
@@ -82,7 +83,7 @@ def after_terms_agreement(request, **kwargs):
     set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app_pk))
 
     lti_data = request.session.get('lti_data', None)
-    url = settings.SURFCONEXT_DOMAIN_URL + '/userinfo'
+    url = settings.SURFCONEXT_ALA_DOMAIN_URL + '/oidc/userinfo'
 
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
@@ -185,17 +186,30 @@ def callback(request):
         return render_authentication_error(request, SurfconextAlaProvider.id, error=error)
 
     # 1. Exchange callback Token for access token
-    _current_app = SocialApp.objects.get_current(provider='surf_conext')
-    data = {'redirect_uri': '%s/account/openid/login/callback/' % settings.HTTP_ORIGIN,
+    _current_app = SocialApp.objects.get_current(provider='surfconext_ala')
+    data = {'redirect_uri': '%s/account/surfconext_ala/login/callback/' % settings.HTTP_ORIGIN,
             'client_id': _current_app.client_id,
             'client_secret': _current_app.secret,
             'scope': 'openid',
             'grant_type': 'authorization_code',
             'code': code}
 
-    url = settings.SURFCONEXT_DOMAIN_URL + '/token?%s' % (urllib.urlencode(data))
+    # data = {
+    #   "issuer": "https://connect.test.surfconext.nl",
+    #   "authorization_endpoint": "https://connect.test.surfconext.nl/oidc/authorize",
+    #   "userinfo_endpoint": "https://connect.test.surfconext.nl/oidc/userinfo",
+    #   "token_endpoint": "https://connect.test.surfconext.nl/oidc/token",
+    #   "redirect_uri": '%s/account/openid_ala/login/callback/' % settings.HTTP_ORIGIN,
+    #   "guest": {
+    #     "client_id": _current_app.client_id,
+    #     "client_secret":  _current_app.secret
+    #   }
+    # }
 
-    response = requests.post(url)
+    url = settings.SURFCONEXT_ALA_DOMAIN_URL + '/oidc/token?%s' % (urllib.urlencode(data))
+    # url = settings.SURFCONEXT_ALA_DOMAIN_URL + '/oidc/token'
+    headers = {'Content-type': 'application/x-www-form-urlencoded'}
+    response = requests.post(url, json=data, headers=headers)
 
     if response.status_code != 200:
         error = 'Server error: Token endpoint error (http %s) try alternative login methods' % response.status_code
@@ -208,9 +222,10 @@ def callback(request):
         return render_authentication_error(request, SurfconextAlaProvider.id, error=error)
 
     # 2. Retrieve user information with the access token
-    headers = {'Authorization': 'bearer %s' % data['access_token']}
+    headers = {'Authorization': 'Bearer %s' % data['access_token']}
 
-    url = settings.SURFCONEXT_DOMAIN_URL + '/userinfo'
+    url = settings.SURFCONEXT_ALA_DOMAIN_URL + '/oidc/userinfo'
+
 
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
@@ -219,10 +234,13 @@ def callback(request):
 
     # retrieved data in fields and ensure that email & sud are in extra_data
     extra_data = response.json()
-
+    if 'eduperson_entitlement' not in extra_data or \
+            extra_data['eduperson_entitlement'][0] != 'urn:mace:eduid.nl:entitlement:verified-by-institution':
+        url = settings.ALA_RELYING_URL + "?redirect_uri={}://{}{}".format(request.scheme, request.META['HTTP_HOST'], reverse('surfconext_ala_login'))
+        return HttpResponseRedirect(url)
     keyword_arguments = {'access_token': access_token,
                          'state': json.dumps([badgr_app_pk, 'surf_conext' ,process, auth_token,lti_data, lti_user_id,lti_roles,referer]),
-                         'after_terms_agreement_url_name': 'surf_conext_terms_accepted_callback'}
+                         'after_terms_agreement_url_name': 'ala_terms_accepted_callback'}
      
     if not get_social_account(extra_data['sub']):
         return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))

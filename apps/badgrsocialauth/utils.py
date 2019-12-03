@@ -43,6 +43,7 @@ class BadgrSocialAuthProviderMixin:
                     last_name=data.get('family_name', None)
                     )
 
+
 def get_social_account(sociallogin_identifier):
     from allauth.socialaccount.models import SocialAccount
     try:

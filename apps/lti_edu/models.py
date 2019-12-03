@@ -125,6 +125,8 @@ class StudentsEnrolled(models.Model):
         social_account = self.user.get_social_account()
         if social_account.provider == 'edu_id':
             return social_account.extra_data['sub']
+        elif social_account.provider == 'surfconext_ala':
+            return social_account.extra_data['sub']
         else:
             raise ValueError('User belonging to this enrollment has no eduid')
         

@@ -77,7 +77,7 @@ def after_terms_agreement(request, **kwargs):
         error = 'Sorry, we could not find you SURFconext credentials.'
         return render_authentication_error(request, SurfConextProvider.id, error)
     
-    headers = {'Authorization': 'bearer %s' % access_token}
+    headers = {'Authorization': 'Bearer %s' % access_token}
     badgr_app_pk, login_type, process, auth_token, lti_context_id,lti_user_id,lti_roles, referer = json.loads(kwargs['state'])
     try:
         badgr_app_pk = int(badgr_app_pk)

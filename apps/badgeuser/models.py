@@ -392,7 +392,7 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
 
     def has_edu_id_social_account(self):
         social_account = self.get_social_account()
-        return social_account.provider == 'edu_id'
+        return social_account.provider == 'edu_id' or social_account.provider == 'surfconext_ala'
 
     def has_surf_conext_social_account(self):
         social_account = self.get_social_account()
@@ -507,7 +507,7 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
             All revoked: May enroll 
         """
         social_account = self.get_social_account()
-        if social_account.provider == 'edu_id':
+        if social_account.provider == 'edu_id' or social_account.provider == 'surfconext_ala':
             enrollments = StudentsEnrolled.objects.filter(user=social_account.user, badge_class_id=badge_class.pk)
             if not enrollments:
                 return True # no enrollments
