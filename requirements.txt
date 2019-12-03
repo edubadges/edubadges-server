@@ -45,6 +45,10 @@ django-oauth-toolkit==1.1.2
 # Some extras
 django-cors-headers==1.1.0
 django-cors-middleware==1.4.0
+<<<<<<< HEAD
+=======
+
+>>>>>>> fixes cors middlware
 django-autoslug==1.9.6
 
 # wsgiref==0.1.2 # python3 incompatible
