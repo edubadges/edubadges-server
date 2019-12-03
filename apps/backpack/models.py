@@ -140,7 +140,7 @@ class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
 
 class BackpackCollectionBadgeInstance(cachemodel.CacheModel):
     collection = models.ForeignKey('backpack.BackpackCollection', on_delete=models.CASCADE)
-    badgeuser = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, null=True, default=None)
+    badgeuser = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE, null=True, default=None)
     badgeinstance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE)
 
     def publish(self):
