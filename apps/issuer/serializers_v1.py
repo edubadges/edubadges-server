@@ -117,7 +117,7 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
         return new_issuer
 
     def update(self, instance, validated_data):
-        if self.context['request'].data['faculty']:
+        if self.context['request'].data.get('faculty', ''):
             faculty_id = self.context['request'].data['faculty']['id']
             faculty = Faculty.objects.get(pk=faculty_id)
             validated_data['faculty'] = faculty
