@@ -21,11 +21,11 @@ class CheckLogin(View):
     def get(self, request,badgr_app_id):
 
         response = {'loggedin': True, 'auth_token':''}
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             response['loggedin'] = False
         elif not request.user.has_edu_id_social_account():
             response['loggedin'] = False
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             badgr_app = BadgrApp.objects.get(id=badgr_app_id)
             if badgr_app is not None:
 
@@ -55,11 +55,11 @@ class CheckLoginAdmin(CheckLogin):
     def get(self, request,badgr_app_id):
 
         response = {'loggedin': True, 'auth_token':''}
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             response['loggedin'] = False
         elif not request.user.has_surf_conext_social_account():
             response['loggedin'] = False
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             badgr_app = BadgrApp.objects.get(id=badgr_app_id)
 
             if badgr_app is not None:
@@ -90,7 +90,7 @@ def check_user_changed(request, user):
 
 
 def logout_badgr_user(request, user):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         if not hasattr(user, 'backend'):
             for backend in settings.AUTHENTICATION_BACKENDS:
                 try:
@@ -153,7 +153,7 @@ class LoginLti(TemplateView):
         return context_data
 
     def post(self, request, *args, **kwargs):
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             # logout_badgr_user(request, request.user)
             check_user_changed(request, request.user)
         post = request.POST

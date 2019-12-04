@@ -133,7 +133,7 @@ class BadgeUserDetail(BaseEntityDetailView):
             else:
                 return self.object
         elif version == 'v1':
-            if request.user.is_authenticated():
+            if request.user.is_authenticated:
                 self.object = request.user
                 return self.object
         raise Http404
