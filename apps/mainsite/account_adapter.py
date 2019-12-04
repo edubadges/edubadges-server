@@ -105,7 +105,7 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
         """
         If successfully logged in, redirect to the front-end, including an authToken query parameter.
         """
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             badgr_app = get_session_badgr_app(request)
 
             if badgr_app is not None:
