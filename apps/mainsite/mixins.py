@@ -44,7 +44,7 @@ class ResizeUploadedImage(object):
 
                 self.image = InMemoryUploadedFile(byte_string, None,
                                                   self.image.name, 'image/png',
-                                                  byte_string.len, None)
+                                                  byte_string.getvalue().__len__(), None)
 
         return super(ResizeUploadedImage, self).save(*args, **kwargs)
 
