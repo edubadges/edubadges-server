@@ -135,7 +135,7 @@ def after_terms_agreement(request, **kwargs):
 
     #create lti_connection
     if lti_data is not None and 'lti_user_id' in lti_data:
-        if not request.user.is_anonymous():
+        if not request.user.is_anonymous:
             tenant = LTITenant.objects.get(client_key=lti_data['lti_tenant'])
             badgeuser_tennant, _ = LtiBadgeUserTennant.objects.get_or_create(lti_user_id=lti_data['lti_user_id'],
                                                                              badge_user=request.user,
