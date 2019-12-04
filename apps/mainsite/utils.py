@@ -125,8 +125,8 @@ def generate_entity_uri():
     """
     entity_uuid = uuid.uuid4()
     b64_string = base64.urlsafe_b64encode(entity_uuid.bytes)
-    b64_trimmed = re.sub(r'=+$', '', b64_string)
-    return b64_trimmed
+    b64_trimmed = re.sub(b'=+$', b'', b64_string)
+    return b64_trimmed.decode()
 
 
 def first_node_match(graph, condition):
