@@ -894,7 +894,7 @@ class BadgeInstance(BaseAuditedModel,
 
             if not self.image:
                 badgeclass_name, ext = os.path.splitext(self.badgeclass.image.file.name)
-                new_image = io.StringIO()
+                new_image = io.BytesIO()
                 bake(image_file=self.cached_badgeclass.image.file,
                      assertion_json_string=json_dumps(self.get_json(obi_version=UNVERSIONED_BAKED_VERSION), indent=2),
                      output_file=new_image)
