@@ -49,8 +49,8 @@ class EmailBlacklist(models.Model):
         expiration = datetime.utcnow() + timedelta(days=7)  # In one week.
         timestamp = int((expiration - datetime(1970, 1, 1)).total_seconds())
 
-        email_encoded = base64.b64encode(email)
-        hashed = hmac.new(secret_key, email_encoded + str(timestamp), sha1)
+        email_encoded = base64.b64encode(email.encode('utf-8'))
+        hashed = hmac.new(secret_key.encode('utf-8'), email_encoded + bytes(str(timestamp), 'utf-8'), sha1)
 
         return reverse('unsubscribe', kwargs={
             'email_encoded': email_encoded,
