@@ -182,7 +182,7 @@ class EncryptedCursorPagination(BasePagination):
 
     def _encrypt_cursor(self, decrypted):
         if decrypted is not None:
-            return self.crypto.encrypt(decrypted)
+            return self.crypto.encrypt(bytes(decrypted, encoding='utf8'))
         else:
             return decrypted
 
