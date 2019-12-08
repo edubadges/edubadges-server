@@ -18,7 +18,7 @@ def canonicalize_json(json_object):
         json_object,
         sort_keys=True,
         separators=(',', ':'),
-    ).encode()
+    )
 
 
 def submit_hash(hash256):
@@ -62,6 +62,6 @@ def verify_proof(node_hash_id):
 
 def submit_json_for_timestamping(json_object):
     canonicalized_json = canonicalize_json(json_object)
-    hashed_json = hash_string(canonicalized_json)
+    hashed_json = hash_string(canonicalized_json.encode())
     node_hash_ids = submit_hash(hashed_json)
     return canonicalized_json, hashed_json, node_hash_ids

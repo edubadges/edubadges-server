@@ -94,7 +94,7 @@ class AssertionTimeStamp(models.Model):
         self.save()
 
     def resubmit_json(self):
-        canonicalized_json, hashed_json, hash_id_nodes = timestamping.submit_json_for_timestamping(json.loads(self.original_json))
+        canonicalized_json, hashed_json, hash_id_nodes = timestamping.submit_json_for_timestamping(self.original_json)
         self.hash_id_nodes = json.dumps(hash_id_nodes)
         self.hash = hashed_json
         self.save()
