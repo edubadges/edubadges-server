@@ -29,7 +29,7 @@ class SymmetricKey(models.Model):
         return {'salt': self.salt, 'length': self.length, 'n': self.n, 'r': self.r, 'p': self.p}
 
     def validate_password(self, password):
-        if self.password_hash != utils.hash_string(password):
+        if self.password_hash != utils.hash_string(password.encode()):
             raise ValueError('Wrong password, please try again.')
 
     def create_private_key(self, password):

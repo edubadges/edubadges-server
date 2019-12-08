@@ -928,7 +928,7 @@ class BadgeInstance(BaseAuditedModel,
             # dont rebake imported assertions
             return
 
-        new_image = StringIO.StringIO()
+        new_image = io.BytesIO()
         if not signature:
             bake(
                 image_file=self.cached_badgeclass.image.file,
