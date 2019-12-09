@@ -1,6 +1,12 @@
 import json
-import subprocess
 from signing.utils import hash_string
+from subprocess import Popen, PIPE, STDOUT
+
+
+def run_chp_command(command):
+    proc = Popen(command, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
+    outputs_raw, errs = proc.communicate()
+    return outputs_raw
 
 
 def canonicalize_json(json_object):
@@ -21,7 +27,7 @@ def submit_hash(hash256):
     :return: a list of node_hash_ids
     """
     node_hash_ids = []
-    outputs_raw = subprocess.check_output(['chp', 'submit', hash256])
+    outputs_raw = outputs_raw = run_chp_command(['chp', 'submit', hash256])
     outputs = outputs_raw.split('\n')
     for output in outputs:
         try:
@@ -38,7 +44,7 @@ def retrieve_proof(node_hash_id):
     :param node_hash_id: a node_hash_id
     :return: proof as canonicalized json
     """
-    shown_proof = subprocess.check_output(['chp', 'show', node_hash_id])
+    shown_proof = run_chp_command(['chp', 'show', node_hash_id])
     try:
         return json.loads(shown_proof)
     except ValueError:
@@ -50,7 +56,7 @@ def verify_proof(node_hash_id):
     :param node_hash_id: the id for the proof
     :return: verification object
     """
-    verification = subprocess.check_output(['chp', 'verify', node_hash_id])
+    verification = run_chp_command(['chp', 'verify', node_hash_id])
     return verification.split(' | ')
 
 
