@@ -6,7 +6,7 @@ from subprocess import Popen, PIPE, STDOUT
 def run_chp_command(command):
     proc = Popen(command, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
     outputs_raw, errs = proc.communicate()
-    return outputs_raw
+    return outputs_raw.decode()
 
 
 def canonicalize_json(json_object):
