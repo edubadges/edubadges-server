@@ -378,6 +378,10 @@ class BadgeClassCriteria(RedirectView, SlugToEntityIdRedirectMixin):
 
 
 class BadgeInstanceJson(JSONComponentView):
+    """
+    ## You might see this screen because the badge you are looking for is <span style="color:red">*set to private*</span>.
+    ## Ask the recipient to set the badge to public, then try again.
+    """
     permission_classes = (permissions.AllowAny,)
     model = BadgeInstance
 
