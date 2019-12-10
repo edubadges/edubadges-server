@@ -1,5 +1,5 @@
 import urllib, requests, json, logging
-from urlparse import urlparse
+from urllib.parse import urlparse
 from base64 import b64encode
 from django.conf import settings
 from django.http import HttpResponseRedirect

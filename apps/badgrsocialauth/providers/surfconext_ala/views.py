@@ -63,7 +63,7 @@ def login(request):
             'state': state
             }
             
-    redirect_url = settings.SURFCONEXT_ALA_DOMAIN_URL + '/oidc/authorize?%s' %  (urllib.urlencode(data))
+    redirect_url = settings.SURFCONEXT_ALA_DOMAIN_URL + '/oidc/authorize?%s' % (urllib.parse.urlencode(data))
 
     return HttpResponseRedirect(redirect_url)
 
@@ -119,7 +119,7 @@ def after_terms_agreement(request, **kwargs):
         request.user = get_verified_user(auth_token=auth_token)
       
     ret = complete_social_login(request, login)
-    if not request.user.is_anonymous(): # the social login succeeded
+    if not request.user.is_anonymous: # the social login succeeded
         institution_name = extra_data['schac_home_organization']
         institution, created = Institution.objects.get_or_create(name=institution_name)
         request.user.institution = institution
@@ -130,7 +130,7 @@ def after_terms_agreement(request, **kwargs):
     check_agreed_term_and_conditions(request.user, badgr_app, resign=resign)
 
     if lti_data is not None and 'lti_user_id' in lti_data:
-        if not request.user.is_anonymous():
+        if not request.user.is_anonymous:
             tenant = LTITenant.objects.get(client_key=lti_data['lti_tenant'])
             badgeuser_tennant, _ = LtiBadgeUserTennant.objects.get_or_create(lti_user_id=lti_data['lti_user_id'],
                                                                             badge_user=request.user,
@@ -206,7 +206,7 @@ def callback(request):
     #   }
     # }
 
-    url = settings.SURFCONEXT_ALA_DOMAIN_URL + '/oidc/token?%s' % (urllib.urlencode(data))
+    url = settings.SURFCONEXT_ALA_DOMAIN_URL + '/oidc/token?%s' % (urllib.parse.urlencode(data))
     # url = settings.SURFCONEXT_ALA_DOMAIN_URL + '/oidc/token'
     headers = {'Content-type': 'application/x-www-form-urlencoded'}
     response = requests.post(url, json=data, headers=headers)
