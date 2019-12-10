@@ -180,70 +180,69 @@ class BadgeInstanceExtensionInline(TabularInline):
     extra = 0
     fields = ('name', 'original_json')
 
-# TODO: python3
-# class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
-#     readonly_fields = ('created_at', 'created_by', 'updated_at','updated_by', 'image', 'entity_id', 'old_json', 'salt', 'entity_id', 'slug', 'source', 'source_url')
-#     list_display = ('badge_image', 'recipient_identifier', 'entity_id', 'badgeclass', 'issuer')
-#     list_display_links = ('badge_image', 'recipient_identifier', )
-#     list_filter = ('created_at',)
-#     search_fields = ('recipient_identifier', 'entity_id', 'badgeclass__name', 'issuer__name')
-#     raw_id_fields = ('badgeclass', 'issuer')
-#     fieldsets = (
-#         ('Metadata', {
-#             'fields': ('source', 'source_url', 'created_by', 'created_at', 'updated_by','updated_at', 'entity_id', 'slug', 'salt'),
-#             'classes': ("collapse",)
-#         }),
-#         ('Badgeclass', {
-#             'fields': ('badgeclass', 'issuer')
-#         }),
-#         ('Assertion', {
-#             'fields': ('entity_id', 'acceptance', 'recipient_type', 'recipient_identifier', 'image', 'issued_on', 'expires_at', 'narrative')
-#         }),
-#         ('Revocation', {
-#             'fields': ('revoked', 'revocation_reason')
-#         }),
-#         ('JSON', {
-#             'fields': ('old_json',)
-#         }),
-#     )
-#     actions = ['rebake']
-#     change_actions = ['redirect_issuer', 'redirect_badgeclass']
-#     inlines = [
-#         BadgeEvidenceInline,
-#         BadgeInstanceExtensionInline
-#     ]
-#
-#     def rebake(self, request, queryset):
-#         for obj in queryset:
-#             obj.rebake(save=True)
-#     rebake.short_description = "Rebake selected badge instances"
-#
-#     def badge_image(self, obj):
-#         try:
-#             return '<img src="{}" width="32"/>'.format(obj.image.url)
-#         except ValueError:
-#             return obj.image
-#     badge_image.short_description = 'Badge'
-#     badge_image.allow_tags = True
-#
-#     def has_add_permission(self, request):
-#         return False
-#
-#     def redirect_badgeclass(self, request, obj):
-#         return HttpResponseRedirect(
-#             reverse('admin:issuer_badgeclass_change', args=(obj.badgeclass.id,))
-#         )
-#     redirect_badgeclass.label = "BadgeClass"
-#     redirect_badgeclass.short_description = "See this BadgeClass"
-#
-#     def redirect_issuer(self, request, obj):
-#         return HttpResponseRedirect(
-#             reverse('admin:issuer_issuer_change', args=(obj.issuer.id,))
-#         )
-#     redirect_issuer.label = "Issuer"
-#     redirect_issuer.short_description = "See this Issuer"
-#
-# badgr_admin.register(BadgeInstance, BadgeInstanceAdmin)
+class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
+    readonly_fields = ('created_at', 'created_by', 'updated_at','updated_by', 'image', 'entity_id', 'old_json', 'salt', 'entity_id', 'slug', 'source', 'source_url')
+    list_display = ('badge_image', 'recipient_identifier', 'entity_id', 'badgeclass', 'issuer')
+    list_display_links = ('badge_image', 'recipient_identifier', )
+    list_filter = ('created_at',)
+    search_fields = ('recipient_identifier', 'entity_id', 'badgeclass__name', 'issuer__name')
+    raw_id_fields = ('badgeclass', 'issuer')
+    fieldsets = (
+        ('Metadata', {
+            'fields': ('source', 'source_url', 'created_by', 'created_at', 'updated_by','updated_at', 'entity_id', 'slug', 'salt'),
+            'classes': ("collapse",)
+        }),
+        ('Badgeclass', {
+            'fields': ('badgeclass', 'issuer')
+        }),
+        ('Assertion', {
+            'fields': ('acceptance', 'recipient_type', 'recipient_identifier', 'image', 'issued_on', 'expires_at', 'narrative')
+        }),
+        ('Revocation', {
+            'fields': ('revoked', 'revocation_reason')
+        }),
+        ('JSON', {
+            'fields': ('old_json',)
+        }),
+    )
+    actions = ['rebake']
+    change_actions = ['redirect_issuer', 'redirect_badgeclass']
+    inlines = [
+        BadgeEvidenceInline,
+        BadgeInstanceExtensionInline
+    ]
+
+    def rebake(self, request, queryset):
+        for obj in queryset:
+            obj.rebake(save=True)
+    rebake.short_description = "Rebake selected badge instances"
+
+    def badge_image(self, obj):
+        try:
+            return '<img src="{}" width="32"/>'.format(obj.image.url)
+        except ValueError:
+            return obj.image
+    badge_image.short_description = 'Badge'
+    badge_image.allow_tags = True
+
+    def has_add_permission(self, request):
+        return False
+
+    def redirect_badgeclass(self, request, obj):
+        return HttpResponseRedirect(
+            reverse('admin:issuer_badgeclass_change', args=(obj.badgeclass.id,))
+        )
+    redirect_badgeclass.label = "BadgeClass"
+    redirect_badgeclass.short_description = "See this BadgeClass"
+
+    def redirect_issuer(self, request, obj):
+        return HttpResponseRedirect(
+            reverse('admin:issuer_issuer_change', args=(obj.issuer.id,))
+        )
+    redirect_issuer.label = "Issuer"
+    redirect_issuer.short_description = "See this Issuer"
+
+badgr_admin.register(BadgeInstance, BadgeInstanceAdmin)
 
 
 class ExtensionAdmin(ModelAdmin):

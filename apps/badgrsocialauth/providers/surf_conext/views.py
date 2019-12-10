@@ -114,11 +114,11 @@ def after_terms_agreement(request, **kwargs):
     login.state = {'process': process}
   
     # login for connect because socialLogin can only connect to request.user
-    if process == 'connect' and request.user.is_anonymous() and auth_token:
+    if process == 'connect' and request.user.is_anonymous and auth_token:
         request.user = get_verified_user(auth_token=auth_token)
       
     ret = complete_social_login(request, login)
-    if not request.user.is_anonymous(): # the social login succeeded
+    if not request.user.is_anonymous: # the social login succeeded
         institution_name = extra_data['schac_home_organization']
         institution, created = Institution.objects.get_or_create(name=institution_name)
         request.user.institution = institution
@@ -129,7 +129,7 @@ def after_terms_agreement(request, **kwargs):
     check_agreed_term_and_conditions(request.user, badgr_app, resign=resign)
 
     if lti_data is not None and 'lti_user_id' in lti_data:
-        if not request.user.is_anonymous():
+        if not request.user.is_anonymous:
             tenant = LTITenant.objects.get(client_key=lti_data['lti_tenant'])
             badgeuser_tennant, _ = LtiBadgeUserTennant.objects.get_or_create(lti_user_id=lti_data['lti_user_id'],
                                                                             badge_user=request.user,

@@ -110,10 +110,10 @@ def fetch_remote_file_to_storage(remote_url, upload_to=''):
         name, ext = os.path.splitext(urllib.parse.urlparse(r.url).path)
         storage_name = '{upload_to}/cached/{filename}{ext}'.format(
             upload_to=upload_to,
-            filename=hashlib.md5(remote_url).hexdigest(),
+            filename=hashlib.md5(remote_url.encode()).hexdigest(),
             ext=ext)
         if not store.exists(storage_name):
-            buf = io.StringIO(r.content)
+            buf = io.BytesIO(r.content)
             store.save(storage_name, buf)
         return r.status_code, storage_name
     return r.status_code, None
@@ -125,8 +125,8 @@ def generate_entity_uri():
     """
     entity_uuid = uuid.uuid4()
     b64_string = base64.urlsafe_b64encode(entity_uuid.bytes)
-    b64_trimmed = re.sub(r'=+$', '', b64_string)
-    return b64_trimmed
+    b64_trimmed = re.sub(b'=+$', b'', b64_string)
+    return b64_trimmed.decode()
 
 
 def first_node_match(graph, condition):

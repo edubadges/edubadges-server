@@ -39,12 +39,12 @@ class ResizeUploadedImage(object):
 
                 new_image = resize_contain(image, (max_square, max_square))
 
-                byte_string = io.StringIO()
+                byte_string = io.BytesIO()
                 new_image.save(byte_string, 'PNG')
 
                 self.image = InMemoryUploadedFile(byte_string, None,
                                                   self.image.name, 'image/png',
-                                                  byte_string.len, None)
+                                                  byte_string.getvalue().__len__(), None)
 
         return super(ResizeUploadedImage, self).save(*args, **kwargs)
 

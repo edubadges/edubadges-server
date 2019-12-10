@@ -69,7 +69,7 @@ class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
     @published.setter
     def published(self, value):
         if value and not self.share_hash:
-            self.share_hash = os.urandom(16).encode('hex')
+            self.share_hash = os.urandom(16).hex()
         elif not value and self.share_hash:
             self.publish_delete('share_hash')
             self.share_hash = ''

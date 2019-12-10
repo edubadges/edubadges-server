@@ -29,7 +29,7 @@ class SymmetricKey(models.Model):
         return {'salt': self.salt, 'length': self.length, 'n': self.n, 'r': self.r, 'p': self.p}
 
     def validate_password(self, password):
-        if self.password_hash != utils.hash_string(password):
+        if self.password_hash != utils.hash_string(password.encode()):
             raise ValueError('Wrong password, please try again.')
 
     def create_private_key(self, password):
@@ -94,7 +94,7 @@ class AssertionTimeStamp(models.Model):
         self.save()
 
     def resubmit_json(self):
-        canonicalized_json, hashed_json, hash_id_nodes = timestamping.submit_json_for_timestamping(json.loads(self.original_json))
+        canonicalized_json, hashed_json, hash_id_nodes = timestamping.submit_json_for_timestamping(self.original_json)
         self.hash_id_nodes = json.dumps(hash_id_nodes)
         self.hash = hashed_json
         self.save()

@@ -894,7 +894,7 @@ class BadgeInstance(BaseAuditedModel,
 
             if not self.image:
                 badgeclass_name, ext = os.path.splitext(self.badgeclass.image.file.name)
-                new_image = io.StringIO()
+                new_image = io.BytesIO()
                 bake(image_file=self.cached_badgeclass.image.file,
                      assertion_json_string=json_dumps(self.get_json(obi_version=UNVERSIONED_BAKED_VERSION), indent=2),
                      output_file=new_image)
@@ -917,12 +917,18 @@ class BadgeInstance(BaseAuditedModel,
 
         super(BadgeInstance, self).save(*args, **kwargs)
 
+        if created:
+            for extension in self.badgeclass.badgeclassextension_set.all():
+                BadgeInstanceExtension.objects.create(badgeinstance=self,
+                                                      name=extension.name,
+                                                      original_json=extension.original_json)
+
     def rebake(self, obi_version=CURRENT_OBI_VERSION, save=True, signature=None, replace_image=False):
         if self.source_url:
             # dont rebake imported assertions
             return
 
-        new_image = StringIO.StringIO()
+        new_image = io.BytesIO()
         if not signature:
             bake(
                 image_file=self.cached_badgeclass.image.file,

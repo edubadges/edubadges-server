@@ -170,7 +170,7 @@ class CurrentContextView(BaseEntityDetailView):
     def get(self, request,**kwargs):
         response = {'loggedin': True,
                     'lticontext': None}
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             response['loggedin'] = False
         else:
             try:
