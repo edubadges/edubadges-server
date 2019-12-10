@@ -3,17 +3,16 @@
 
 from collections import OrderedDict
 
-from django.core.exceptions import ValidationError as DjangoValidationError
-from rest_framework import serializers
-from rest_framework.exceptions import ValidationError as RestframeworkValidationError
-
 from backpack.models import BackpackCollection
+from django.core.exceptions import ValidationError as DjangoValidationError
 from entity.serializers import DetailSerializerV2, EntityRelatedFieldV2
 from issuer.helpers import BadgeCheckHelper
 from issuer.models import BadgeInstance, BadgeClass, Issuer
 from issuer.serializers_v2 import BadgeRecipientSerializerV2, EvidenceItemSerializerV2
 from mainsite.drf_fields import ValidImageField
 from mainsite.serializers import MarkdownCharField, HumanReadableBooleanField, OriginalJsonSerializerMixin
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 
 
 class BackpackAssertionSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):

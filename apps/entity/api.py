@@ -1,8 +1,9 @@
 # encoding: utf-8
 
 
-import badgrlog
 import logging
+
+import badgrlog
 from django.core.exceptions import FieldError
 from django.http import Http404
 from mainsite.pagination import EncryptedCursorPagination
