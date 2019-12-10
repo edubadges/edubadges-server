@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from django.db import models, migrations
-from allauth.account.adapter import get_adapter
-from allauth.account.models import EmailConfirmation
+from django.db import migrations
 
 
 def do_nothing(apps, schema_editor):

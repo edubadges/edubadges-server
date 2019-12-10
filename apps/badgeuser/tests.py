@@ -1,23 +1,20 @@
+import os
 import random
 import re
-import unittest
-import os
+
+from badgeuser.models import BadgeUser
+from badgeuser.models import EmailAddressVariant, CachedEmailAddress
 from django.contrib.auth import SESSION_KEY
 from django.core import mail
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.urls import reverse
 from django.test import override_settings
-from oauthlib.common import generate_token
-
-from mainsite import TOP_DIR
-from rest_framework.authtoken.models import Token
-
-from badgeuser.models import BadgeUser, BadgrAccessToken
-from badgeuser.models import EmailAddressVariant, CachedEmailAddress
+from django.urls import reverse
 from issuer.models import BadgeClass, Issuer
+from mainsite import TOP_DIR
 from mainsite.models import BadgrApp
 from mainsite.tests.base import BadgrTestCase
+from rest_framework.authtoken.models import Token
 
 
 class AuthTokenTests(BadgrTestCase):

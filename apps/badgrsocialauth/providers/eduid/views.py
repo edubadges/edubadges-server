@@ -1,12 +1,12 @@
 import json
 import logging
-import requests
 import urllib.error
 import urllib.parse
 import urllib.request
 from base64 import b64encode
 from urllib.parse import urlparse
 
+import requests
 from allauth.socialaccount.helpers import render_authentication_error, complete_social_login
 from allauth.socialaccount.models import SocialApp
 from badgrsocialauth.utils import set_session_badgr_app, get_social_account, update_user_params, \
