@@ -1,4 +1,5 @@
 from mainsite.utils import client_ip_from_request
+
 from .base import BaseBadgrEvent
 
 

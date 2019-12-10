@@ -1,13 +1,12 @@
 import io
+from xml.etree import cElementTree as ET
 
 from PIL import Image
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from resizeimage.resizeimage import resize_contain
-from xml.etree import cElementTree as ET
-
 from mainsite.utils import verify_svg
+from resizeimage.resizeimage import resize_contain
 
 
 def _decompression_bomb_check(image, max_pixels=Image.MAX_IMAGE_PIXELS):

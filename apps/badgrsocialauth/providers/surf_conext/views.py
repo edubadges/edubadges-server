@@ -1,21 +1,25 @@
-import urllib.request, urllib.parse, urllib.error, json
+import json
+import urllib.error
+import urllib.parse
+import urllib.request
 
 import requests
+from allauth.account.adapter import get_adapter as get_account_adapter
 from allauth.socialaccount.helpers import render_authentication_error, complete_social_login
 from allauth.socialaccount.models import SocialApp
+from badgrsocialauth.utils import set_session_badgr_app, get_session_authcode, get_verified_user, get_social_account, \
+    check_agreed_term_and_conditions
 from django.conf import settings
 from django.http import HttpResponseRedirect
-from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
-
-from badgrsocialauth.utils import set_session_badgr_app, get_session_authcode, get_verified_user, get_session_badgr_app, \
-    get_social_account, check_agreed_term_and_conditions
+from django.views.decorators.csrf import csrf_exempt
 from ims.models import LTITenant
+from institution.models import Institution
 from lti_edu.models import LtiBadgeUserTennant, UserCurrentContextId
 from mainsite.models import BadgrApp
+
 from .provider import SurfConextProvider
-from institution.models import Institution
-from allauth.account.adapter import get_adapter as get_account_adapter
+
 
 def login(request):
     """

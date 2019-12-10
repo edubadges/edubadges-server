@@ -1,16 +1,15 @@
 import codecs
-import urllib.request, urllib.parse, urllib.error, unicodedata
+import urllib.error
 import urllib.parse
-
-from rest_framework.authentication import TokenAuthentication
-
-from badgeuser.models import TermsVersion
-from mainsite.models import BadgrApp
+import urllib.parse
+import urllib.request
 
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.providers.base import ProviderAccount
-
-#from mainsite.views import TermsAndConditionsView
+from badgeuser.models import TermsVersion
+from mainsite.models import BadgrApp
+from rest_framework.authentication import TokenAuthentication
+# from mainsite.views import TermsAndConditionsView
 from theming.models import Theme
 
 

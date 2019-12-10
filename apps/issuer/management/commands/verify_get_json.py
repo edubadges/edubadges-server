@@ -4,7 +4,6 @@
 from collections import OrderedDict
 
 from django.core.management import BaseCommand
-
 from issuer.models import Issuer, BadgeClass, BadgeInstance
 
 

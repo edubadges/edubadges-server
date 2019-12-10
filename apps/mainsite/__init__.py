@@ -1,9 +1,9 @@
 
 
-import sys
 import os
-import semver
+import sys
 
+import semver
 
 __all__ = ['APPS_DIR', 'TOP_DIR', 'get_version']
 

@@ -1,17 +1,12 @@
 import json
-import unittest
-from django.test import TestCase, TransactionTestCase
-
-from django_mock_queries.query import MockSet, MockModel
-
-from rest_framework.renderers import JSONRenderer
-
-from mainsite.pagination import EncryptedCursorPagination
-
-from rest_framework.test import APIRequestFactory
-from rest_framework.request import Request
-
 from urllib.parse import urlencode
+
+from django.test import TransactionTestCase
+from django_mock_queries.query import MockSet, MockModel
+from mainsite.pagination import EncryptedCursorPagination
+from rest_framework.renderers import JSONRenderer
+from rest_framework.request import Request
+from rest_framework.test import APIRequestFactory
 
 
 class DecryptedCursorPagination(EncryptedCursorPagination):

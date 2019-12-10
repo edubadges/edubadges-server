@@ -3,7 +3,6 @@ import os
 from django.contrib.staticfiles.management.commands.runserver import Command as RunserverCommand
 from django.core.management import call_command
 from django.test.runner import setup_databases
-
 from mainsite import TOP_DIR
 
 

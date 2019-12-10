@@ -1,10 +1,14 @@
 import os
 from urllib.parse import urlencode
 
+from badgeuser.models import BadgeUser, EmailAddress
 from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from issuer.models import Issuer, IssuerStaff, BadgeClass
+from lti_edu.models import LtiPayload, StudentsEnrolled, LtiClient, ResourceLinkBadge
+from lti_edu.serializers import StudentsEnrolledSerializer, LTIrequestSerializer, BadgeClassSerializer
 from rest_framework import mixins
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
@@ -12,11 +16,6 @@ from rest_framework.decorators import list_route
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-
-from badgeuser.models import BadgeUser, EmailAddress
-from issuer.models import Issuer, IssuerStaff, BadgeClass
-from lti_edu.models import LtiPayload, StudentsEnrolled, LtiClient, ResourceLinkBadge
-from lti_edu.serializers import StudentsEnrolledSerializer, LTIrequestSerializer, BadgeClassSerializer
 
 # you can override the lti frontend if required
 LTI_FRONTEND_URL = os.environ.get('LTI_FRONTEND_URL', 'http://159.65.195.36')

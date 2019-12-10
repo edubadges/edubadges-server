@@ -3,7 +3,6 @@
 
 
 from django.db import migrations
-from django.db import migrations
 from mainsite.utils import generate_entity_uri
 
 

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 
-from django.db import migrations, models
 import badgeuser.managers
+from django.db import migrations
 
 
 class Migration(migrations.Migration):

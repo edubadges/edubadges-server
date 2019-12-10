@@ -1,21 +1,28 @@
-import urllib.request, urllib.parse, urllib.error, requests, json, logging
-from urllib.parse import urlparse
+import json
+import logging
+import requests
+import urllib.error
+import urllib.parse
+import urllib.request
 from base64 import b64encode
-from django.conf import settings
-from django.http import HttpResponseRedirect
-from django.urls import reverse
-from django.shortcuts import redirect, get_object_or_404
-from django.utils import timezone
+from urllib.parse import urlparse
+
 from allauth.socialaccount.helpers import render_authentication_error, complete_social_login
 from allauth.socialaccount.models import SocialApp
-
 from badgrsocialauth.utils import set_session_badgr_app, get_social_account, update_user_params, \
     check_agreed_term_and_conditions
+from django.conf import settings
+from django.http import HttpResponseRedirect
+from django.shortcuts import redirect, get_object_or_404
+from django.urls import reverse
+from django.utils import timezone
 from ims.models import LTITenant
-from mainsite.models import BadgrApp
-from .provider import EduIDProvider
-from lti_edu.models import StudentsEnrolled, LtiBadgeUserTennant, UserCurrentContextId
 from issuer.models import BadgeClass
+from lti_edu.models import StudentsEnrolled, LtiBadgeUserTennant, UserCurrentContextId
+from mainsite.models import BadgrApp
+
+from .provider import EduIDProvider
+
 logger = logging.getLogger('Badgr.Debug')
 from allauth.account.adapter import get_adapter as get_account_adapter
 

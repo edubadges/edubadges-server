@@ -3,20 +3,19 @@
 
 import io
 import json
-import unittest
-import responses
-from django.urls import reverse
-from openbadges.verifier.openbadges_context import OPENBADGES_CONTEXT_V1_URI, OPENBADGES_CONTEXT_V2_URI, \
-    OPENBADGES_CONTEXT_V2_DICT
-from openbadges_bakery import unbake
 
+import responses
 from backpack.models import BackpackCollection, BackpackCollectionBadgeInstance
 from backpack.tests import setup_resources, setup_basic_1_0
+from django.urls import reverse
 from issuer.models import Issuer, BadgeInstance
-from issuer.utils import CURRENT_OBI_VERSION, OBI_VERSION_CONTEXT_IRIS, UNVERSIONED_BAKED_VERSION
+from issuer.utils import OBI_VERSION_CONTEXT_IRIS, UNVERSIONED_BAKED_VERSION
 from mainsite.models import BadgrApp
 from mainsite.tests import BadgrTestCase, SetupIssuerHelper
 from mainsite.utils import OriginSetting
+from openbadges.verifier.openbadges_context import OPENBADGES_CONTEXT_V1_URI, OPENBADGES_CONTEXT_V2_URI, \
+    OPENBADGES_CONTEXT_V2_DICT
+from openbadges_bakery import unbake
 
 
 class PublicAPITests(SetupIssuerHelper, BadgrTestCase):

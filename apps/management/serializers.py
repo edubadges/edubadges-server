@@ -1,6 +1,6 @@
 from django.contrib.auth.models import Group
-from rest_framework import serializers
 from mainsite.serializers import StripTagsCharField
+from rest_framework import serializers
 
 
 class GroupSerializer(serializers.ModelSerializer):

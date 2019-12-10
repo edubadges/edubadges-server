@@ -14,7 +14,6 @@ from issuer.models import BadgeInstance, BadgeClass, Issuer
 from issuer.serializers_v2 import BadgeRecipientSerializerV2, EvidenceItemSerializerV2
 from mainsite.drf_fields import ValidImageField
 from mainsite.serializers import MarkdownCharField, HumanReadableBooleanField, OriginalJsonSerializerMixin
-from issuer.utils import generate_sha256_hashstring, CURRENT_OBI_VERSION
 
 
 class BackpackAssertionSerializerV2(DetailSerializerV2, OriginalJsonSerializerMixin):

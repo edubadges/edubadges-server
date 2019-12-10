@@ -1,5 +1,6 @@
-from datetime import timedelta
-
+from badgeuser.authcode import authcode_for_accesstoken
+from badgeuser.models import BadgrAccessToken
+from badgrsocialauth.utils import set_session_badgr_app
 from django.conf import settings
 from django.contrib.auth import login, load_backend, logout
 from django.contrib.staticfiles.templatetags.staticfiles import static
@@ -8,10 +9,6 @@ from django.urls import reverse
 from django.utils.datetime_safe import datetime
 from django.views import View
 from django.views.generic import TemplateView
-
-from badgeuser.authcode import authcode_for_accesstoken
-from badgeuser.models import BadgrAccessToken
-from badgrsocialauth.utils import set_session_badgr_app, get_session_badgr_app
 from lti_edu.models import LtiBadgeUserTennant
 from mainsite.models import BadgrApp
 

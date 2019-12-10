@@ -1,14 +1,15 @@
 
 
-import io
 import datetime
-import re
-import uuid
+import io
 import logging
+import os
+import uuid
 from collections import OrderedDict
+from json import dumps as json_dumps
+from json import loads as json_loads
 
 import cachemodel
-import os
 from allauth.account.adapter import get_adapter
 from django.apps import apps
 from django.conf import settings
@@ -16,28 +17,25 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from django.urls import reverse
 from django.db import models, transaction
 from django.db.models import ProtectedError
-from json import loads as json_loads
-from json import dumps as json_dumps
-from jsonfield import JSONField
-from openbadges_bakery import bake
+from django.urls import reverse
 from django.utils import timezone
-from rest_framework import serializers
-
 from entity.models import BaseVersionedEntity
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager, BadgeInstanceEvidenceManager
+from jsonfield import JSONField
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage
 from mainsite.models import (BadgrApp, EmailBlacklist)
 from mainsite.utils import OriginSetting, generate_entity_uri
-from signing.models import PublicKey, SymmetricKey
+from openbadges_bakery import bake
+from rest_framework import serializers
 from signing import tsob
 from signing.models import AssertionTimeStamp, PublicKeyIssuer
+from signing.models import PublicKey, SymmetricKey
+
 from .utils import generate_sha256_hashstring, CURRENT_OBI_VERSION, get_obi_context, add_obi_version_ifneeded, \
     UNVERSIONED_BAKED_VERSION
-
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 logger = logging.getLogger('Badgr.Debug')

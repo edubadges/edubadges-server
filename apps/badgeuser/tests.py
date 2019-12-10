@@ -8,17 +8,15 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.test import override_settings
-from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
 
-from badgeuser.authcode import encrypt_authcode, decrypt_authcode, authcode_for_accesstoken
 from mainsite import TOP_DIR
 from rest_framework.authtoken.models import Token
 
 from badgeuser.models import BadgeUser, BadgrAccessToken
 from badgeuser.models import EmailAddressVariant, CachedEmailAddress
 from issuer.models import BadgeClass, Issuer
-from mainsite.models import BadgrApp, ApplicationInfo
+from mainsite.models import BadgrApp
 from mainsite.tests.base import BadgrTestCase
 
 

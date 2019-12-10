@@ -1,39 +1,39 @@
 import base64
-import time, json
+import json
+import time
 
+from badgrsocialauth.utils import get_privacy_content
 from django import forms
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
-from django.http import HttpResponseForbidden
-from django.urls import reverse_lazy
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseServerError, HttpResponseNotFound
+from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
-from django.template import loader, TemplateDoesNotExist, Context
+from django.template import loader, TemplateDoesNotExist
+from django.urls import reverse_lazy
 from django.utils import translation
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.clickjacking import xframe_options_exempt
-from django.views.generic import FormView, RedirectView, TemplateView, DeleteView
+from django.views.generic import FormView, RedirectView, TemplateView
+from issuer.tasks import rebake_all_assertions, update_issuedon_all_assertions
+from mainsite.admin_actions import clear_cache
+from mainsite.models import EmailBlacklist, BadgrApp
+from mainsite.serializers import VerifiedAuthTokenSerializer
+from pathway.tasks import resave_all_elements
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import AllowAny
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from badgrsocialauth.utils import get_privacy_content
-from issuer.tasks import rebake_all_assertions, update_issuedon_all_assertions
-from mainsite.admin_actions import clear_cache
-from mainsite.models import EmailBlacklist, BadgrApp
-from mainsite.serializers import VerifiedAuthTokenSerializer
-from pathway.tasks import resave_all_elements
 
 ##
 #
 #  Error Handler Views
 #
 ##
-from theming.utils import get_theme
 
 
 @xframe_options_exempt

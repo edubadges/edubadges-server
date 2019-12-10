@@ -1,5 +1,4 @@
 # Created by wiggins@concentricsky.com on 5/11/16.
-import basic_models
 from django.contrib.admin import ModelAdmin, TabularInline
 from mainsite.admin import badgr_admin
 from recipient.models import RecipientGroup, RecipientProfile, RecipientGroupMembership

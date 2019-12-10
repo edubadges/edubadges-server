@@ -1,16 +1,17 @@
-import urllib.request, urllib.parse, urllib.error
+import urllib.error
+import urllib.parse
+import urllib.request
 
 from allauth.account.utils import user_email
 from allauth.exceptions import ImmediateHttpResponse
 from allauth.socialaccount import app_settings
-from django.conf import settings
-from allauth.utils import email_address_exists
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
-from django.http import HttpResponseForbidden, HttpResponseRedirect
-from rest_framework.exceptions import AuthenticationFailed
-
+from allauth.utils import email_address_exists
 from badgeuser.authcode import accesstoken_for_authcode
 from badgrsocialauth.utils import set_session_verification_email, get_session_badgr_app, get_session_authcode
+from django.conf import settings
+from django.http import HttpResponseForbidden, HttpResponseRedirect
+from rest_framework.exceptions import AuthenticationFailed
 
 
 class BadgrSocialAccountAdapter(DefaultSocialAccountAdapter):

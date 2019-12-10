@@ -5,10 +5,15 @@ import datetime
 import json
 import re
 
+import badgrlog
+from badgeuser.authcode import accesstoken_for_authcode
 from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpResponse
 from django.utils import timezone
+from mainsite.models import ApplicationInfo
+from mainsite.oauth_validator import BadgrRequestValidator, BadgrOauthServer
+from mainsite.utils import client_ip_from_request
 from oauth2_provider.exceptions import OAuthToolkitError
 from oauth2_provider.models import get_application_model, get_access_token_model, Application
 from oauth2_provider.scopes import get_scopes_backend
@@ -20,12 +25,6 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_200_OK
 from rest_framework.views import APIView
-
-import badgrlog
-from badgeuser.authcode import accesstoken_for_authcode
-from mainsite.models import ApplicationInfo
-from mainsite.oauth_validator import BadgrRequestValidator, BadgrOauthServer
-from mainsite.utils import client_ip_from_request
 
 badgrlogger = badgrlog.BadgrLogger()
 

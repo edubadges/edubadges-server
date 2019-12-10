@@ -1,10 +1,10 @@
+import random
+
+from django.contrib.auth import user_logged_out
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth import user_logged_out
 from ims.models import LTITenant
-from issuer.models import BadgeClass, Issuer, BadgeInstance
-
-import random
+from issuer.models import BadgeClass, Issuer
 
 
 def get_uuid():

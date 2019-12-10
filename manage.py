@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-import sys
 import os
+import sys
 
 # assume 'apps' is a directory with same parent directory as us 
 APPS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), 'apps'))

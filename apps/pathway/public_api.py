@@ -1,15 +1,14 @@
 # encoding: utf-8
 
 
-from rest_framework import status
-from rest_framework.renderers import JSONRenderer
-from rest_framework.response import Response
-
 import badgrlog
 from issuer.public_api import JSONComponentView
 from pathway.models import PathwayElement
 from pathway.renderers import PathwayElementHTMLRenderer
 from pathway.serializers import PathwayElementSerializer
+from rest_framework import status
+from rest_framework.renderers import JSONRenderer
+from rest_framework.response import Response
 
 logger = badgrlog.BadgrLogger()
 

@@ -1,10 +1,8 @@
 # Created by wiggins@concentricsky.com on 3/31/16.
-import basic_models
 import cachemodel
 from basic_models.models import CreatedUpdatedAt, IsActive, CreatedUpdatedBy
-from django.urls import reverse
 from django.db import models, transaction
-
+from django.urls import reverse
 from entity.models import BaseVersionedEntity
 from issuer.models import BadgeInstance, BaseAuditedModel, Issuer
 from mainsite.managers import SlugOrJsonIdCacheModelManager

@@ -1,18 +1,14 @@
 import io
-import abc
 import base64
-import os
 import re
 import urllib.parse
 
 import basic_models
 from datetime import datetime, timedelta
-from hashlib import sha1, md5
+from hashlib import sha1
 import hmac
-import uuid
 
 import requests
-from basic_models.managers import ActiveObjectsManager
 from basic_models.models import CreatedUpdatedBy, CreatedUpdatedAt, IsActive
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ValidationError
@@ -20,17 +16,12 @@ from django.core.files.storage import DefaultStorage
 from django.urls import reverse
 from django.db import models
 
-from autoslug import AutoSlugField
 import cachemodel
 from django.db.models import Manager
 from django.utils.deconstruct import deconstructible
 from jsonfield import JSONField
 from oauth2_provider.models import AccessToken
 from rest_framework.authtoken.models import Token
-
-from mainsite.utils import OriginSetting, fetch_remote_file_to_storage
-from .mixins import ResizeUploadedImage
-
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 

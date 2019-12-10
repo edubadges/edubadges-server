@@ -3,13 +3,13 @@
 
 import base64
 import json
-import unittest
+
 from django.core.files.images import get_image_dimensions
 from django.urls import reverse
-
 from issuer.models import BadgeClass
 from mainsite.tests import BadgrTestCase, SetupIssuerHelper
 from mainsite.utils import OriginSetting
+
 
 class BadgeClassTests(SetupIssuerHelper, BadgrTestCase):
     def _create_badgeclass_with_v2(self, image_path=None, **kwargs):

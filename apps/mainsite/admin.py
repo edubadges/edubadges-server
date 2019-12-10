@@ -1,17 +1,15 @@
 # Created by wiggins@concentricsky.com on 10/8/15.
-from allauth.socialaccount.models import SocialToken, SocialAccount
-from django.contrib.admin import AdminSite, ModelAdmin, StackedInline
-from django.utils.module_loading import autodiscover_modules
-from django.utils.translation import ugettext_lazy
-from oauth2_provider.models import get_application_model, get_grant_model, get_access_token_model, \
-    get_refresh_token_model
-
 import badgrlog
+from allauth.socialaccount.models import SocialToken, SocialAccount
 from badgeuser.models import CachedEmailAddress, ProxyEmailConfirmation
-from mainsite.admin_actions import delete_selected
-from mainsite.models import BadgrApp, EmailBlacklist, ApplicationInfo, AccessTokenProxy, LegacyTokenProxy
+from django.contrib.admin import AdminSite, ModelAdmin, StackedInline
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.utils.module_loading import autodiscover_modules
+from django.utils.translation import ugettext_lazy
+from mainsite.models import BadgrApp, EmailBlacklist, ApplicationInfo, AccessTokenProxy, LegacyTokenProxy
+from oauth2_provider.models import get_application_model, get_grant_model, get_access_token_model, \
+    get_refresh_token_model
 
 badgrlogger = badgrlog.BadgrLogger()
 

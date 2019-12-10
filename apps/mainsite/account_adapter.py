@@ -1,20 +1,17 @@
 import logging
-import urllib.request, urllib.parse, urllib.error
+import urllib.error
 import urllib.parse
-
-from allauth.account.utils import user_pk_to_url_str
-from django.conf import settings
-from django.contrib.auth import logout
-from django.contrib.auth.tokens import default_token_generator
-from django.contrib.sites.shortcuts import get_current_site
-from django.urls import resolve, Resolver404, reverse
+import urllib.parse
+import urllib.request
 
 from allauth.account.adapter import DefaultAccountAdapter, get_adapter
 from allauth.account.models import EmailConfirmation, EmailConfirmationHMAC
-
 from badgeuser.authcode import authcode_for_accesstoken
 from badgeuser.models import CachedEmailAddress, BadgrAccessToken
 from badgrsocialauth.utils import set_url_query_params, get_session_badgr_app, set_session_badgr_app
+from django.conf import settings
+from django.contrib.sites.shortcuts import get_current_site
+from django.urls import resolve, Resolver404, reverse
 from mainsite.models import BadgrApp, EmailBlacklist
 from mainsite.utils import OriginSetting
 

@@ -1,6 +1,7 @@
 
 
 import base64
+import datetime
 import random
 import re
 import string
@@ -8,33 +9,31 @@ from hashlib import md5
 from itertools import chain
 
 import cachemodel
-import datetime
 from allauth.account.models import EmailAddress, EmailConfirmation
+from backpack.models import BackpackCollection
+from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager, EmailAddressCacheModelManager
 from basic_models.models import IsActive
-from django.core.cache import cache
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, Permission, Group
 from django.contrib.contenttypes.models import ContentType
+from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
-from django.core.exceptions import ObjectDoesNotExist
 from django.db import models, transaction
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from entity.models import BaseVersionedEntity
+from issuer.models import Issuer, BadgeInstance, BaseAuditedModel
+from lti_edu.models import StudentsEnrolled
+from mainsite.models import ApplicationInfo, EmailBlacklist, BadgrApp
+from mainsite.utils import generate_entity_uri
 from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
 from rest_framework.authtoken.models import Token
-from lti_edu.models import StudentsEnrolled
-
-from backpack.models import BackpackCollection
-from entity.models import BaseVersionedEntity
-from issuer.models import Issuer, BadgeInstance, BaseAuditedModel
 from signing.models import AssertionTimeStamp
-from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager, EmailAddressCacheModelManager
-from mainsite.models import ApplicationInfo, EmailBlacklist, BadgrApp
-from mainsite.utils import generate_entity_uri
 
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):

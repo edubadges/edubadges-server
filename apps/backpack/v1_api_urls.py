@@ -1,9 +1,8 @@
-from django.conf.urls import url
-
 from backpack.api import BackpackAssertionList, BackpackAssertionDetail, BackpackAssertionDetailImage, \
     BackpackCollectionList, BackpackCollectionDetail, ShareBackpackAssertion, ShareBackpackCollection
 from backpack.api_v1 import CollectionLocalBadgeInstanceList, CollectionLocalBadgeInstanceDetail, \
     CollectionGenerateShare
+from django.conf.urls import url
 
 urlpatterns = [
 

@@ -6,7 +6,6 @@ import os
 
 from django.core.files.storage import DefaultStorage
 from django.core.management import BaseCommand
-
 from issuer.models import BadgeClass
 from mainsite import TOP_DIR
 from mainsite.utils import fetch_remote_file_to_storage

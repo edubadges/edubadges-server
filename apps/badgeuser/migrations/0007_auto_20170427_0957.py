@@ -4,7 +4,6 @@
 from django.db import models, migrations
 
 from entity.db.migrations import PopulateEntityIdsMigration
-from mainsite.utils import generate_entity_uri
 
 
 class Migration(migrations.Migration):

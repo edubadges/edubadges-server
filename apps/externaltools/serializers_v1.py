@@ -2,10 +2,9 @@
 
 
 from django.urls import reverse
-from rest_framework import serializers
-
 from mainsite.serializers import StripTagsCharField
 from mainsite.utils import OriginSetting
+from rest_framework import serializers
 
 
 class ExternalToolSerializerV1(serializers.Serializer):

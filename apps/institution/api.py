@@ -1,8 +1,9 @@
 from entity.api import BaseEntityListView, BaseEntityDetailView
 from institution.models import Faculty
+from institution.permissions import UserHasInstitutionScope
 from institution.serializers_v1 import FacultySerializerV1
 from mainsite.permissions import AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope
-from institution.permissions import UserHasInstitutionScope
+
 
 class FacultyList(BaseEntityListView):
     """

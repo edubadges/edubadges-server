@@ -1,8 +1,10 @@
-import requests
 import json
+
+import requests
 from django.conf import settings
-from signing.models import PrivateKey, PublicKey, SymmetricKey
 from signing import utils
+from signing.models import PrivateKey, PublicKey, SymmetricKey
+
 
 def create_new_symmetric_key(password, user, salt='salt', length=32, n=1048576, r=8, p=1):
     symkey_json = requests.post(settings.TIME_STAMPED_OPEN_BADGES_BASE_URL+'symmetrickey/',

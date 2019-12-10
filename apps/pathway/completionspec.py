@@ -2,11 +2,6 @@
 import json
 from collections import OrderedDict
 
-from django.conf import settings
-from django.urls import reverse
-
-from pathway.models import PathwayElement
-
 
 class CompletionRequirementSpec(object):
     def __init__(self, completion_type=None, junction_type=None, required_number=None):

@@ -1,14 +1,14 @@
 # encoding: utf-8
 
 
+import badgrlog
+import logging
 from django.core.exceptions import FieldError
 from django.http import Http404
-from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
-from rest_framework.views import APIView
-
-import badgrlog, logging
 from mainsite.pagination import EncryptedCursorPagination
+from rest_framework.response import Response
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
+from rest_framework.views import APIView
 
 logger=logging.getLogger('Badgr.Debug')
 

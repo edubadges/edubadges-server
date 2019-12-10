@@ -9,10 +9,9 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from requests_cache.backends import BaseCache
-
 from issuer.models import Issuer, BadgeClass, BadgeInstance
 from mainsite.utils import first_node_match
+from requests_cache.backends import BaseCache
 
 
 class DjangoCacheDict(MutableMapping):

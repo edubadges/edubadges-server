@@ -1,11 +1,9 @@
-from rest_framework import permissions, status, serializers
-from rest_framework.response import Response
-from rest_framework.views import APIView
-
 from backpack.models import BackpackCollectionBadgeInstance, BackpackCollection
 from backpack.serializers_v1 import CollectionBadgeSerializerV1
 from issuer.models import BadgeInstance
-from mainsite.permissions import IsOwner
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 
 class CollectionLocalBadgeInstanceList(APIView):

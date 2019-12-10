@@ -1,9 +1,11 @@
 import json
+
 from allauth.socialaccount import app_settings
 from allauth.socialaccount.providers.oauth.client import OAuth
 from allauth.socialaccount.providers.oauth.views import (OAuthAdapter,
                                                          OAuthLoginView,
                                                          OAuthCallbackView)
+
 from .provider import KonyProvider
 
 

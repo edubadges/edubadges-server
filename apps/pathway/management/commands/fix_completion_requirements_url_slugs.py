@@ -1,12 +1,10 @@
 import logging
-import re
+from collections import defaultdict
 from urllib.parse import urlparse
 
-from collections import defaultdict
 from django.core.exceptions import FieldError
 from django.core.management.base import BaseCommand
 from django.urls import resolve
-
 from issuer.models import BadgeClass
 from pathway.models import PathwayElement, PathwayElementBadge
 

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 
-from django.db import models, migrations
-import autoslug.fields
+from django.db import migrations
+
 
 def noop(apps, schema_editor):
     pass

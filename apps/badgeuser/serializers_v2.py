@@ -1,7 +1,4 @@
-import base64
 from collections import OrderedDict
-
-from rest_framework import serializers
 
 from badgeuser.models import BadgeUser, TermsVersion
 from badgeuser.utils import notify_on_password_change
@@ -9,6 +6,7 @@ from entity.serializers import DetailSerializerV2, BaseSerializerV2
 from mainsite.models import BadgrApp
 from mainsite.serializers import StripTagsCharField
 from mainsite.validators import PasswordValidator
+from rest_framework import serializers
 
 
 class BadgeUserEmailSerializerV2(DetailSerializerV2):

@@ -2,9 +2,10 @@
 
 
 
-from django.conf import settings
-from celery import Celery
 import os
+
+from celery import Celery
+from django.conf import settings
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mainsite.settings_local')
 app = Celery('mainsite')

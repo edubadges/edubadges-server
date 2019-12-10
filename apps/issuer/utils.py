@@ -2,12 +2,8 @@
 import hashlib
 import re
 
-from django.apps import apps
-from django.conf import settings
 from django.urls import resolve, Resolver404
-
 from mainsite.utils import OriginSetting
-
 
 OBI_VERSION_CONTEXT_IRIS = {
     '1_1': 'https://w3id.org/openbadges/v1',

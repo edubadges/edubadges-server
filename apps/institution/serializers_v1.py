@@ -1,7 +1,8 @@
 from django.db import IntegrityError
-from rest_framework import serializers
-from .models import Faculty, Institution
 from mainsite.serializers import StripTagsCharField
+from rest_framework import serializers
+
+from .models import Faculty, Institution
 
 
 class InstitutionSerializerV1(serializers.Serializer):

@@ -1,8 +1,8 @@
-from django.contrib import admin
 from django import forms
+from django.contrib import admin
+from mainsite.admin import badgr_admin
 
 from .models import Theme, get_current_templates
-from mainsite.admin import badgr_admin
 
 
 class ThemeForm(forms.ModelForm):

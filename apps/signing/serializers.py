@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from signing.models import SymmetricKey, PrivateKey
 from signing import tsob
+from signing.models import SymmetricKey, PrivateKey
 
 
 class SymmetricKeySerializer(serializers.Serializer):

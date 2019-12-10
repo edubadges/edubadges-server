@@ -1,8 +1,7 @@
 from django.contrib import admin
-
+from issuer.models import Issuer
 from lti_edu.models import LtiPayload, StudentsEnrolled, LtiClient, ResourceLinkBadge
 from mainsite.admin import badgr_admin, FilterByScopeMixin
-from issuer.models import Issuer
 
 
 @admin.register(LtiPayload)

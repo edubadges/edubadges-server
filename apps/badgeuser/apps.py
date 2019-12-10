@@ -1,6 +1,5 @@
-from django.apps import AppConfig
-
 from allauth.account.signals import user_signed_up, email_confirmed
+from django.apps import AppConfig
 
 from .signals import log_user_signed_up, log_email_confirmed
 

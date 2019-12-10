@@ -1,15 +1,15 @@
 from django.http import JsonResponse
-from django.utils import timezone
 from django.shortcuts import get_object_or_404
-from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
-from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from django.utils import timezone
+from entity.api import BaseEntityListView, BaseEntityDetailView
+from issuer.models import BadgeClass
 from lti_edu.models import StudentsEnrolled, BadgeClassLtiContext, UserCurrentContextId
-from mainsite.utils import EmailMessageMaker
 from lti_edu.serializers import StudentsEnrolledSerializer, StudentsEnrolledSerializerWithRelations, \
     BadgeClassLtiContextSerializer, BadgeClassLtiContextStudentSerializer
-from issuer.models import BadgeClass
-from entity.api import BaseEntityListView, BaseEntityDetailView
+from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from mainsite.utils import EmailMessageMaker
+from rest_framework.response import Response
+from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
 
 
 class CheckIfStudentIsEnrolled(BaseEntityListView):

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 
-from django.db import models, migrations
-from mainsite.utils import fetch_remote_file_to_storage
-
 import json
+
+from django.db import migrations
+from mainsite.utils import fetch_remote_file_to_storage
 
 
 def noop(apps, schema_editor):

@@ -2,12 +2,11 @@
 
 
 from django.urls import reverse
-from rest_framework import serializers
-
 from entity.serializers import DetailSerializerV2
 from externaltools.models import ExternalTool
 from mainsite.serializers import StripTagsCharField
 from mainsite.utils import OriginSetting
+from rest_framework import serializers
 
 
 class ExternalToolSerializerV2(DetailSerializerV2):

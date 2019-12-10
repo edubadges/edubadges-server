@@ -1,13 +1,12 @@
 # Created by notto@concentricsky and wiggins@concentricsky.com on 5/25/16.
 import itertools
+
+import badgrlog
 from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
-
-import badgrlog
 from mainsite.celery import app
-
 
 logger = get_task_logger(__name__)
 badgrLogger = badgrlog.BadgrLogger()

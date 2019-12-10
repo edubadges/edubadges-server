@@ -1,12 +1,11 @@
 # encoding: utf-8
 
 
+import openbadges.verifier
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import RegexValidator
-from rest_framework.exceptions import ValidationError
-
 from mainsite.utils import verify_svg
-import openbadges.verifier
+from rest_framework.exceptions import ValidationError
 
 
 class ValidImageValidator(object):

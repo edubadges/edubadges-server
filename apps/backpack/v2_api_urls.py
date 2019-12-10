@@ -1,11 +1,10 @@
 # encoding: utf-8
 
 
-from django.conf.urls import url
-
 from backpack.api import BackpackAssertionList, BackpackAssertionDetail, BackpackCollectionList, \
     BackpackCollectionDetail, BackpackAssertionDetailImage, BackpackImportBadge, ShareBackpackCollection, \
     ShareBackpackAssertion
+from django.conf.urls import url
 
 urlpatterns = [
     url(r'^import$', BackpackImportBadge.as_view(), name='v2_api_backpack_import_badge'),
