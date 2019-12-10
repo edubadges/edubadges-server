@@ -1,3 +1,6 @@
+from django.utils.decorators import method_decorator
+from django.views.decorators.clickjacking import xframe_options_exempt
+
 from badgeuser.authcode import authcode_for_accesstoken
 from badgeuser.models import BadgrAccessToken
 from badgrsocialauth.utils import set_session_badgr_app

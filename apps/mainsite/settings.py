@@ -68,7 +68,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # 'mainsite.middleware.MaintenanceMiddleware',
     'badgeuser.middleware.InactiveUserMiddleware',
     # 'mainsite.middleware.TrailingSlashMiddleware',
@@ -84,7 +84,7 @@ ROOT_URLCONF = 'mainsite.urls'
 
 ALLOWED_HOSTS = ['*', ] # ['<your badgr server domain>', ]
 #X_FRAME_OPTIONS = 'ALLOW-FROM http://canvas.edubadges.nl/, https://canvas.edubadges.nl'
-#X_FRAME_OPTIONS = 'ALLOW-FROM https://canvas.edubadges.nl'
+# X_FRAME_OPTIONS = 'ALLOW-FROM https://canvas.edubadges.nl'
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -489,3 +489,4 @@ AUTHCODE_SECRET_KEY = Fernet.generate_key()
 
 AUTHCODE_EXPIRES_SECONDS = 600  # needs to be long enough to fetch information from socialauth providers
 
+SESSION_COOKIE_SAMESITE = None
