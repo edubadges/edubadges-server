@@ -1,6 +1,5 @@
-from django.conf.urls import url
-
 from badgrsocialauth.api import BadgrSocialAccountList, BadgrSocialAccountDetail, BadgrSocialAccountConnect
+from django.conf.urls import url
 
 urlpatterns = [
     url(r'^socialaccounts$', BadgrSocialAccountList.as_view(), name='v1_api_user_socialaccount_list'),

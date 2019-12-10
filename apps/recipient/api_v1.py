@@ -2,15 +2,14 @@
 
 
 from django.core.exceptions import PermissionDenied
-from rest_framework import status
-from rest_framework.exceptions import PermissionDenied
-from rest_framework.response import Response
-
 from issuer.api_v1 import AbstractIssuerAPIEndpoint
 from issuer.models import Issuer
 from recipient.models import RecipientGroup, RecipientProfile, RecipientGroupMembership
 from recipient.serializers_v1 import RecipientGroupMembershipListSerializerV1, \
     RecipientGroupMembershipSerializerV1
+from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
 
 
 class RecipientGroupAPIEndpoint(AbstractIssuerAPIEndpoint):

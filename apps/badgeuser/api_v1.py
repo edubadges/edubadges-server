@@ -3,16 +3,16 @@
 
 import datetime
 
+from apispec_drf.decorators import apispec_list_operation, apispec_operation, \
+    apispec_get_operation, apispec_delete_operation, apispec_put_operation
+from badgeuser.models import CachedEmailAddress
+from badgeuser.serializers_v1 import EmailSerializerV1
+from institution.models import Faculty
+from institution.serializers_v1 import FacultySerializerV1
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from badgeuser.models import CachedEmailAddress
-from badgeuser.serializers_v1 import EmailSerializerV1
-from institution.serializers_v1 import FacultySerializerV1
-from institution.models import Faculty
-from apispec_drf.decorators import apispec_list_operation, apispec_post_operation, apispec_operation, \
-    apispec_get_operation, apispec_delete_operation, apispec_put_operation
 
 class BadgeUserFacultyList(APIView):
     permission_classes = (permissions.IsAuthenticated,)

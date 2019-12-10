@@ -1,7 +1,7 @@
-from institution.models import Faculty
-from entity.api import BaseEntityListView, BaseEntityDetailView
-from mainsite.permissions import AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope
 from django.contrib.auth.models import Group
+from entity.api import BaseEntityListView, BaseEntityDetailView
+from institution.models import Faculty
+from mainsite.permissions import AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope
 from management.serializers import GroupSerializer, FacultySerializerStatistics
 
 

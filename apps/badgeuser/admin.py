@@ -1,9 +1,8 @@
 from django.contrib.admin import ModelAdmin, TabularInline
-from django.contrib.auth.admin import UserAdmin, GroupAdmin
-from django.contrib.auth.models import Group
-
+from django.contrib.auth.admin import UserAdmin
 from externaltools.models import ExternalToolUserActivation
 from mainsite.admin import badgr_admin, FilterByScopeMixin
+
 from .models import BadgeUser, EmailAddressVariant, TermsVersion, TermsAgreement, \
     CachedEmailAddress, BadgeUserProxy, GroupEntity
 

@@ -1,24 +1,21 @@
 # encoding: utf-8
 
 
+import datetime
 import json
-import unittest
 from unittest import skip
 
-import datetime
 import dateutil.parser
 import png
 import pytz
-from django.apps import apps
 from django.core import mail
 from django.urls import reverse
 from django.utils import timezone
-
+from issuer.models import BadgeInstance, IssuerStaff, BadgeClass
 from mainsite.tests import BadgrTestCase, SetupIssuerHelper
+from mainsite.utils import OriginSetting
 from openbadges_bakery import unbake
 
-from issuer.models import BadgeInstance, IssuerStaff, BadgeClass
-from mainsite.utils import OriginSetting
 
 class AssertionTests(SetupIssuerHelper, BadgrTestCase):
 

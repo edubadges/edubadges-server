@@ -1,6 +1,4 @@
 from django.db import models
-from autoslug import AutoSlugField
-from mainsite.utils import generate_entity_uri
 from entity.models import BaseVersionedEntity
 
 class Institution(models.Model):

@@ -1,6 +1,6 @@
-from backports import csv
 import io
 
+from backports import csv
 from rest_framework import renderers
 
 

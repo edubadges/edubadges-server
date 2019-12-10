@@ -1,9 +1,7 @@
-import sys
 import os
+import sys
 
 from mainsite import TOP_DIR
-import logging
-
 
 ##
 #

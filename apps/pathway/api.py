@@ -1,9 +1,4 @@
 # Created by wiggins@concentricsky.com on 3/30/16.
-from rest_framework import status
-from rest_framework.exceptions import PermissionDenied
-from rest_framework.response import Response
-from rest_framework.status import HTTP_201_CREATED
-
 from issuer.api_v1 import AbstractIssuerAPIEndpoint
 from issuer.models import Issuer
 from mainsite.utils import ObjectView
@@ -11,6 +6,10 @@ from pathway.models import Pathway, PathwayElement
 from pathway.serializers import PathwaySerializer, PathwayListSerializer, PathwayElementSerializer, \
     PathwayElementCompletionSerializer
 from recipient.models import RecipientGroup, RecipientProfile
+from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
+from rest_framework.status import HTTP_201_CREATED
 
 
 class PathwayList(AbstractIssuerAPIEndpoint):

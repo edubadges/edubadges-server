@@ -1,26 +1,26 @@
 # encoding: utf-8
 
 
-from datetime import timedelta
 import os
 import random
 import time
+from datetime import timedelta
 
+from allauth.socialaccount.models import SocialAccount
+from badgeuser.models import BadgeUser, TermsVersion
+from django.contrib.auth.models import Group, Permission
 from django.core.cache import cache
 from django.core.cache.backends.filebased import FileBasedCache
 from django.test import override_settings, TransactionTestCase
 from django.utils import timezone
+from institution.models import Institution, Faculty
+from issuer.models import Issuer, BadgeClass
+from lti_edu.models import StudentsEnrolled
+from mainsite import TOP_DIR
+from mainsite.models import BadgrApp, ApplicationInfo
 from oauth2_provider.models import AccessToken, Application
 from rest_framework.test import APITransactionTestCase
 
-from badgeuser.models import BadgeUser, TermsVersion
-from issuer.models import Issuer, BadgeClass
-from institution.models import Institution, Faculty
-from django.contrib.auth.models import Group, Permission
-from mainsite import TOP_DIR
-from mainsite.models import BadgrApp, ApplicationInfo
-from allauth.socialaccount.models import SocialAccount
-from lti_edu.models import StudentsEnrolled
 
 class SetupOAuth2ApplicationHelper(object):
     def setup_oauth2_application(self,

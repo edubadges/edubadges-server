@@ -1,8 +1,7 @@
-from celery.utils.log import get_task_logger
-from django.conf import settings
-
 import badgrlog
 from badgeuser.models import CachedEmailAddress
+from celery.utils.log import get_task_logger
+from django.conf import settings
 from mainsite.celery import app
 
 logger = get_task_logger(__name__)

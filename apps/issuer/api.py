@@ -1,23 +1,18 @@
-from collections import OrderedDict
 import datetime
-import dateutil.parser
-
-from django.db.models import Q
-from django.http import Http404
-from django.utils import timezone
-from django.shortcuts import get_object_or_404
-from oauth2_provider.models import AccessToken
-from oauthlib.oauth2.rfc6749.tokens import random_token_generator
-from rest_framework import status, serializers
-from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
+from collections import OrderedDict
 
 import badgrlog
+import dateutil.parser
+from apispec_drf.decorators import apispec_get_operation, apispec_put_operation, \
+    apispec_delete_operation, apispec_list_operation, apispec_post_operation
+from badgeuser.permissions import BadgeUserHasSurfconextSocialAccount
+from django.db.models import Q
+from django.http import Http404
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView, \
     UncachedPaginatedViewMixin
 from entity.serializers import BaseSerializerV2, V2ErrorSerializer
-from issuer.utils import mapExtensionsToDict
 from issuer.models import Issuer, BadgeClass, BadgeInstance, IssuerStaff
 from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
                                 IsEditor, IsStaff, ApprovedIssuersOnly, BadgrOAuthTokenHasScope,
@@ -26,15 +21,19 @@ from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    BadgeInstanceSerializerV1)
 from issuer.serializers_v2 import IssuerSerializerV2, BadgeClassSerializerV2, BadgeInstanceSerializerV2, \
     IssuerAccessTokenSerializerV2
-from apispec_drf.decorators import apispec_get_operation, apispec_put_operation, \
-    apispec_delete_operation, apispec_list_operation, apispec_post_operation
+from issuer.utils import mapExtensionsToDict
 from lti_edu.models import StudentsEnrolled
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
-from badgeuser.permissions import BadgeUserHasSurfconextSocialAccount
 from mainsite.serializers import CursorPaginatedListSerializer
-from signing.permissions import MaySignAssertions
-from signing.models import AssertionTimeStamp
+from oauth2_provider.models import AccessToken
+from oauthlib.oauth2.rfc6749.tokens import random_token_generator
+from rest_framework import status, serializers
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 from signing import tsob
+from signing.models import AssertionTimeStamp
+from signing.permissions import MaySignAssertions
 
 logger = badgrlog.BadgrLogger()
 

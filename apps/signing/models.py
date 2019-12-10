@@ -1,13 +1,12 @@
 import json
 
 from django.conf import settings
-from django.urls import reverse
 from django.db import models
-
+from django.urls import reverse
 from entity.models import BaseVersionedEntity
 from mainsite.utils import OriginSetting
-from signing import utils
 from signing import timestamping
+from signing import utils
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 

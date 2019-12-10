@@ -1,22 +1,23 @@
+import json
+import os
 import uuid
-import os, json
 
-from django.apps import apps
-from django.urls import reverse
-from django.core.validators import URLValidator
-from django.utils.html import strip_tags
-from rest_framework import serializers
-
-from . import utils
 from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserIdentifierFieldV1
-from institution.serializers_v1 import FacultySerializerV1
+from django.apps import apps
+from django.core.validators import URLValidator
+from django.urls import reverse
+from django.utils.html import strip_tags
 from institution.models import Faculty
+from institution.serializers_v1 import FacultySerializerV1
 from mainsite.drf_fields import ValidImageField
 from mainsite.models import BadgrApp
 from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField, \
     OriginalJsonSerializerMixin
 from mainsite.utils import OriginSetting
 from mainsite.validators import ChoicesValidator, BadgeExtensionValidator
+from rest_framework import serializers
+
+from . import utils
 from .models import Issuer, BadgeClass, IssuerStaff, BadgeInstance, BadgeClassExtension, IssuerExtension
 
 

@@ -1,16 +1,14 @@
 
 
 from django.contrib.admin import ModelAdmin, StackedInline, TabularInline
-from django.urls import reverse
 from django.http import HttpResponseRedirect
-
+from django.urls import reverse
 from django_object_actions import DjangoObjectActions
-
+from institution.models import Faculty
 from mainsite.admin import badgr_admin, FilterByScopeMixin
 
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceEvidence, BadgeClassAlignment, BadgeClassTag, \
     BadgeClassExtension, IssuerExtension, BadgeInstanceExtension
-from institution.models import Faculty
 
 
 class IssuerStaffInline(TabularInline):

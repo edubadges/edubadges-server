@@ -1,18 +1,16 @@
 # Created by wiggins@concentricsky.com on 3/30/16.
 from collections import OrderedDict
 
-from django.conf import settings
 from django.urls import reverse, resolve, Resolver404
-from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
-
 from issuer.models import Issuer, BadgeClass
 from mainsite.serializers import JSONDictField, LinkedDataReferenceField, LinkedDataEntitySerializer, \
     LinkedDataReferenceList, StripTagsCharField
-from mainsite.utils import ObjectView, OriginSetting
+from mainsite.utils import OriginSetting
 from pathway.completionspec import CompletionRequirementSpecFactory
 from pathway.models import Pathway, PathwayElement
 from recipient.models import RecipientGroup, RecipientProfile
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 
 class PathwayListSerializer(serializers.Serializer):

@@ -2,7 +2,6 @@ import logging
 import re
 
 from django.core.management.base import BaseCommand
-
 from pathway.models import PathwayElement
 
 logger = logging.getLogger('command')

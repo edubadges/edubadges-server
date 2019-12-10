@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 
-from django.db import models, migrations
 import django.db.models.deletion
 import jsonfield.fields
 from django.conf import settings
+from django.db import models, migrations
 
 
 class Migration(migrations.Migration):

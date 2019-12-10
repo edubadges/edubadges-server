@@ -1,21 +1,12 @@
 import json
 from collections import OrderedDict
-import collections
 
-import rest_framework
-from django.conf import settings
-from django.http import Http404
 from django.utils.html import strip_tags
-from rest_framework import serializers
-from rest_framework import status, exceptions
-from rest_framework.authtoken.serializers import AuthTokenSerializer
-from rest_framework.exceptions import ValidationError, PermissionDenied
-from rest_framework.response import Response
-from rest_framework.serializers import ListSerializer
-from six import string_types
-
 from entity.serializers import BaseSerializerV2
 from mainsite.pagination import EncryptedCursorPagination
+from rest_framework import serializers
+from rest_framework.authtoken.serializers import AuthTokenSerializer
+from rest_framework.exceptions import ValidationError
 
 
 class HumanReadableBooleanField(serializers.BooleanField):

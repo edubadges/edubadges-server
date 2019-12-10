@@ -1,6 +1,6 @@
 from django.contrib.admin import ModelAdmin, TabularInline
-
 from mainsite.admin import badgr_admin
+
 from .models import (BackpackCollection, )
 
 

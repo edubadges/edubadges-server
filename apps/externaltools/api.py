@@ -1,14 +1,12 @@
 # encoding: utf-8
 
 
-from apispec_drf.decorators import apispec_list_operation
-from rest_framework.exceptions import ValidationError
-
 from entity.api import BaseEntityListView, BaseEntityDetailView
 from externaltools.models import ExternalTool, ExternalToolLaunchpoint
 from externaltools.serializers_v1 import ExternalToolSerializerV1, ExternalToolLaunchSerializerV1
 from externaltools.serializers_v2 import ExternalToolSerializerV2, ExternalToolLaunchSerializerV2
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from rest_framework.exceptions import ValidationError
 
 
 class ExternalToolList(BaseEntityListView):

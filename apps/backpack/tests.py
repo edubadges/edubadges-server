@@ -4,12 +4,9 @@ import json
 import os
 
 import collections
-import unittest
 
-import datetime
 import dateutil.parser
 from django.urls import reverse
-from django.utils import timezone
 from openbadges.verifier.openbadges_context import (OPENBADGES_CONTEXT_V2_URI, OPENBADGES_CONTEXT_V1_URI,
                                                     OPENBADGES_CONTEXT_V2_DICT)
 import responses
@@ -22,9 +19,7 @@ from mainsite.tests.base import BadgrTestCase, SetupIssuerHelper
 from backpack.models import BackpackCollection, BackpackCollectionBadgeInstance
 from backpack.serializers_v1 import (CollectionSerializerV1)
 from mainsite.utils import first_node_match, OriginSetting
-from mainsite.tests.base import add_student_social_account_to_user, add_teacher_social_account_to_user
-from issuer.utils import generate_sha256_hashstring, CURRENT_OBI_VERSION
-
+from mainsite.tests.base import add_student_social_account_to_user
 
 dir = os.path.dirname(__file__)
 

@@ -1,13 +1,10 @@
-from collections import OrderedDict
 import os
-import re
 import uuid
-
-from django.core.exceptions import ValidationError as DjangoValidationError
-from django.core.validators import URLValidator, EmailValidator, RegexValidator
-from rest_framework import serializers
+from collections import OrderedDict
 
 from badgeuser.models import BadgeUser
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.validators import URLValidator, EmailValidator
 from entity.serializers import DetailSerializerV2, EntityRelatedFieldV2, BaseSerializerV2
 from issuer.models import Issuer, IssuerStaff, BadgeClass, BadgeInstance
 from issuer.utils import generate_sha256_hashstring
@@ -16,6 +13,7 @@ from mainsite.models import BadgrApp
 from mainsite.serializers import (CachedUrlHyperlinkedRelatedField, StripTagsCharField, MarkdownCharField,
                                   HumanReadableBooleanField, OriginalJsonSerializerMixin)
 from mainsite.validators import ChoicesValidator, TelephoneValidator, BadgeExtensionValidator
+from rest_framework import serializers
 
 
 class IssuerAccessTokenSerializerV2(BaseSerializerV2):

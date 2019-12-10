@@ -1,18 +1,18 @@
-import re
-import urllib.request, urllib.parse, urllib.error
-import urllib.parse
-import warnings
-import unittest
 import os
-from allauth.account.models import EmailConfirmation
+import re
+import urllib.error
+import urllib.parse
+import urllib.parse
+import urllib.request
+import warnings
+
+from badgeuser.models import BadgeUser, CachedEmailAddress
 from django.core import mail
 from django.core.cache import cache, CacheKeyWarning
 from django.core.management import call_command
 from django.test import override_settings, TransactionTestCase
-
-from badgeuser.models import BadgeUser, CachedEmailAddress
-from mainsite.models import BadgrApp
 from mainsite import TOP_DIR
+from mainsite.models import BadgrApp
 from mainsite.tests.base import BadgrTestCase
 
 

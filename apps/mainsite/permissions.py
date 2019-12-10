@@ -1,9 +1,8 @@
+import logging
+
 from rest_framework import permissions
 
-from badgeuser.models import CachedEmailAddress
-
-import logging
-logger=logging.getLogger('Badgr.Debug')            
+logger=logging.getLogger('Badgr.Debug')
 
 class IsOwner(permissions.BasePermission):
     """

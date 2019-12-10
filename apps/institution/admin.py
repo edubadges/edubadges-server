@@ -1,6 +1,8 @@
 from django.contrib import admin
-from .models import Institution, Faculty
 from mainsite.admin import badgr_admin, FilterByScopeMixin
+
+from .models import Institution, Faculty
+
 
 class InstitutionAdmin(admin.ModelAdmin):
     pass

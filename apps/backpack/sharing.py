@@ -1,7 +1,8 @@
-import urllib.request, urllib.parse, urllib.error
+import urllib.error
+import urllib.parse
+import urllib.request
 
 from django.conf import settings
-
 from issuer.models import BadgeInstance
 
 

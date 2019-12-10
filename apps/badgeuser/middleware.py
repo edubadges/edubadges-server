@@ -1,6 +1,6 @@
 from django.core.exceptions import ImproperlyConfigured
-from django.urls import reverse
 from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 
 class InactiveUserMiddleware(object):

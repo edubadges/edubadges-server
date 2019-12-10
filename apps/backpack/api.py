@@ -1,13 +1,8 @@
 # encoding: utf-8
 
 
-from rest_framework import permissions
-from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_302_FOUND, \
-    HTTP_204_NO_CONTENT
-from rest_framework.views import APIView
-
+from apispec_drf.decorators import apispec_list_operation, apispec_post_operation, apispec_get_operation, \
+    apispec_delete_operation, apispec_put_operation, apispec_operation
 from backpack.models import BackpackCollection, BackpackBadgeShare, BackpackCollectionShare
 from backpack.serializers_v1 import CollectionSerializerV1, LocalBadgeInstanceUploadSerializerV1
 from backpack.serializers_v2 import BackpackAssertionSerializerV2, BackpackCollectionSerializerV2, \
@@ -16,9 +11,11 @@ from entity.api import BaseEntityListView, BaseEntityDetailView, LogPermissionsF
 from issuer.models import BadgeInstance
 from issuer.permissions import AuditedModelOwner, RecipientIdentifiersMatch, BadgrOAuthTokenHasScope
 from issuer.public_api import ImagePropertyDetailView
-from apispec_drf.decorators import apispec_list_operation, apispec_post_operation, apispec_get_operation, \
-    apispec_delete_operation, apispec_put_operation, apispec_operation
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from rest_framework import permissions
+from rest_framework.response import Response
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_302_FOUND, \
+    HTTP_204_NO_CONTENT
 
 
 class BackpackAssertionList(LogPermissionsFailMixin, BaseEntityListView):

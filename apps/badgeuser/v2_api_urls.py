@@ -1,10 +1,9 @@
 # encoding: utf-8
 
 
-from django.conf.urls import url
-
 from badgeuser.api import BadgeUserToken, BadgeUserForgotPassword, BadgeUserEmailConfirm, BadgeUserDetail, \
     AccessTokenList, AccessTokenDetail
+from django.conf.urls import url
 
 urlpatterns = [
 

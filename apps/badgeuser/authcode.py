@@ -4,13 +4,12 @@
 import datetime
 import json
 
-import dateutil
 import cryptography.fernet
+import dateutil
+from badgeuser.models import BadgrAccessToken
 from django.conf import settings
 from django.utils import timezone
 from oauth2_provider.models import AccessToken
-
-from badgeuser.models import BadgrAccessToken
 
 
 def authcode_for_accesstoken(accesstoken, expires_seconds=None, secret_key=None):

@@ -2,15 +2,14 @@
 from collections import OrderedDict
 
 from django.urls import reverse
-from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
-
 from issuer.models import Issuer
 from mainsite.serializers import LinkedDataReferenceField, LinkedDataEntitySerializer, LinkedDataReferenceList, \
     StripTagsCharField
 from mainsite.utils import OriginSetting
 from pathway.models import Pathway
 from recipient.models import RecipientGroup, RecipientGroupMembership, RecipientProfile
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 
 class RecipientProfileSerializerV1(serializers.Serializer):

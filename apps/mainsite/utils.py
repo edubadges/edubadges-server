@@ -3,21 +3,21 @@ Utility functions and constants that might be used across the project.
 """
 
 
-import io
 import base64
 import hashlib
+import io
+import os
 import re
 import urllib.parse
 import uuid
+from xml.etree import cElementTree as ET
 
-import os
 import requests
 from django.apps import apps
 from django.conf import settings
 from django.core.cache import cache
 from django.core.files.storage import DefaultStorage
-from django.urls import get_callable, reverse
-from xml.etree import cElementTree as ET
+from django.urls import get_callable
 
 
 class ObjectView(object):

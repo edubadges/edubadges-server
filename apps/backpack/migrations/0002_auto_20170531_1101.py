@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from django.db import migrations, models
+from django.db import migrations
 
 from mainsite.utils import generate_entity_uri
 

@@ -2,11 +2,9 @@
 
 
 import json
-import unittest
-
-from django.urls import reverse
 
 from badgeuser.models import BadgrAccessToken
+from django.urls import reverse
 from mainsite.tests import SetupIssuerHelper, BadgrTestCase, SetupOAuth2ApplicationHelper
 
 

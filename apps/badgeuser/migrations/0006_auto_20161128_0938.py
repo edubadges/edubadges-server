@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
 
-from django.db import models, migrations, IntegrityError, transaction
+from django.db import models, migrations
 from allauth.account.adapter import get_adapter
 from allauth.account.models import EmailConfirmation
-
-from badgeuser.models import CachedEmailAddress, BadgeUser, EmailConfirmation
 
 
 def do_nothing(apps, schema_editor):

@@ -1,9 +1,8 @@
 # encoding: utf-8
 
 
-from rest_framework.permissions import BasePermission
-
 from badgeuser.models import BadgeUser
+from rest_framework.permissions import BasePermission
 
 
 class BadgeUserIsAuthenticatedUser(BasePermission):

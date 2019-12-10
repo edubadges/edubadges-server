@@ -1,12 +1,9 @@
 from smtplib import SMTPException
 
+from allauth.account.models import EmailConfirmation
+from badgeuser.models import BadgeUser, CachedEmailAddress
 from django.core.management.base import BaseCommand
 from django.db import IntegrityError
-
-from allauth.account.models import EmailConfirmation
-
-from badgeuser.models import BadgeUser, CachedEmailAddress
-
 
 
 class Command(BaseCommand):

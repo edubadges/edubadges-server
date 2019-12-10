@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from django.db import models, migrations
+from django.db import migrations
 
 
 def copy_email_into_recipient_identifier(apps, schema_editor):

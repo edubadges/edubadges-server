@@ -1,16 +1,13 @@
 # encoding: utf-8
 
 
+import json
 import os
 import os.path
-import json
-import unittest
-from django.core.files.images import get_image_dimensions
-from oauth2_provider.models import Application
 
 from badgeuser.models import CachedEmailAddress
+from django.core.files.images import get_image_dimensions
 from issuer.models import Issuer, BadgeClass
-from mainsite.models import ApplicationInfo
 from mainsite.tests.base import BadgrTestCase, SetupIssuerHelper, SetupInstitutionHelper, SetupPermissionHelper
 
 

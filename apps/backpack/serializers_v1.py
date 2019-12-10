@@ -1,21 +1,20 @@
 import datetime
 from collections import OrderedDict
 
+import badgrlog
+from backpack.models import BackpackCollection, BackpackCollectionBadgeInstance
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.urls import reverse
 from django.utils.dateparse import parse_datetime, parse_date
-from rest_framework import serializers
-from rest_framework.exceptions import ValidationError as RestframeworkValidationError
-from rest_framework.fields import SkipField
-
-import badgrlog
-from backpack.models import BackpackCollection, BackpackCollectionBadgeInstance
 from issuer.helpers import BadgeCheckHelper
 from issuer.models import BadgeInstance
 from issuer.serializers_v1 import EvidenceItemSerializer
 from mainsite.drf_fields import Base64FileField
 from mainsite.serializers import StripTagsCharField, MarkdownCharField
 from mainsite.utils import OriginSetting
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError as RestframeworkValidationError
+from rest_framework.fields import SkipField
 
 logger = badgrlog.BadgrLogger()
 

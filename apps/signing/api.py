@@ -1,13 +1,12 @@
-from rest_framework import serializers, permissions
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.exceptions import ValidationError
-
 from badgeuser.models import CachedEmailAddress
 from entity.api import BaseEntityListView, BaseEntityDetailView
 from issuer.models import Issuer, IssuerStaff
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from rest_framework import serializers, permissions
+from rest_framework import status
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from signing.models import SymmetricKey, PublicKeyIssuer
 from signing.permissions import MaySignAssertions, OwnsSymmetricKey
 from signing.serializers import SymmetricKeySerializer

@@ -1,18 +1,15 @@
 # Created by wiggins@concentricsky.com on 3/30/16.
+import itertools
 import uuid
 
 import cachemodel
-import basic_models
-import itertools
 from autoslug import AutoSlugField
 from basic_models.models import IsActive, CreatedUpdatedAt, CreatedUpdatedBy
-from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.urls import reverse, resolve, Resolver404
 from django.db import models
-from jsonfield import JSONField
-
+from django.urls import reverse
 from issuer.models import BadgeClass, Issuer
+from jsonfield import JSONField
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.utils import OriginSetting
 

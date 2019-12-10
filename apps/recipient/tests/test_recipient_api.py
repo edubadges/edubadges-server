@@ -1,4 +1,3 @@
-import unittest
 from mainsite.tests.base import BadgrTestCase, SetupIssuerHelper
 from recipient.models import RecipientGroup, RecipientProfile
 

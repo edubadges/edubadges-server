@@ -1,8 +1,7 @@
 from allauth.account.managers import EmailAddressManager
+from cachemodel.managers import CacheModelManager
 from django.contrib.auth.models import UserManager
 from django.core.exceptions import ValidationError
-from cachemodel.managers import CacheModelManager
-
 from mainsite.models import BadgrApp
 
 

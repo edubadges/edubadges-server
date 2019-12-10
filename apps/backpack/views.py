@@ -1,8 +1,7 @@
-from django.urls import reverse
-from django.http import Http404
-from django.views.generic import RedirectView
-
 from backpack.models import BackpackCollection
+from django.http import Http404
+from django.urls import reverse
+from django.views.generic import RedirectView
 from issuer.models import BadgeInstance
 
 

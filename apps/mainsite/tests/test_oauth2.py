@@ -1,14 +1,12 @@
-import unittest
 import json
-
-from django.urls import reverse
-from oauth2_provider.models import AccessToken, Application
 
 from badgeuser.authcode import encrypt_authcode, decrypt_authcode, authcode_for_accesstoken
 from badgeuser.models import BadgrAccessToken
+from django.urls import reverse
 from mainsite.models import ApplicationInfo
 from mainsite.tests import BadgrTestCase
 from mainsite.tests.base import SetupPermissionHelper
+from oauth2_provider.models import AccessToken, Application
 
 
 class OAuth2TokenTests(SetupPermissionHelper, BadgrTestCase):

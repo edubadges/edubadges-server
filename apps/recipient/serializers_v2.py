@@ -1,13 +1,12 @@
 # encoding: utf-8
 
 
-from rest_framework import serializers
-
 from entity.serializers import DetailSerializerV2, EntityRelatedFieldV2
 from issuer.serializers_v2 import BadgeRecipientSerializerV2
 from mainsite.serializers import StripTagsCharField
 from pathway.models import Pathway
-from recipient.models import RecipientGroup, RecipientProfile
+from recipient.models import RecipientGroup
+from rest_framework import serializers
 
 
 class RecipientGroupMembershipSerializerV2(DetailSerializerV2):

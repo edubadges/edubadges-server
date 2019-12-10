@@ -1,25 +1,25 @@
 # encoding: utf-8
 
-from json import loads as json_loads
 from json import dumps as json_dumps
-from django.core import signing
-from django.contrib.auth import get_user_model
-from django.conf import settings
-from rest_framework import status, authentication, permissions
-from rest_framework.exceptions import ValidationError, PermissionDenied, NotFound
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from json import loads as json_loads
 
 import badgrlog
+from apispec_drf.decorators import apispec_list_operation, apispec_operation
 from badgeuser.models import CachedEmailAddress, BadgeUser
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.core import signing
 from entity.api import VersionedObjectMixin
 from issuer.models import Issuer, IssuerStaff
 from issuer.permissions import IsOwnerOrStaff
 from issuer.serializers_v1 import BadgeClassSerializerV1, IssuerRoleActionSerializerV1, IssuerStaffSerializerV1
 from issuer.utils import get_badgeclass_by_identifier
-from apispec_drf.decorators import apispec_list_operation, apispec_operation
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from mainsite.utils import EmailMessageMaker
+from rest_framework import status, authentication, permissions
+from rest_framework.exceptions import ValidationError, PermissionDenied, NotFound
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 logger = badgrlog.BadgrLogger()
 

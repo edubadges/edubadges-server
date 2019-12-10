@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
 
-from django.urls import reverse
 from django.db import migrations, models
-
+from django.urls import reverse
 from mainsite.utils import OriginSetting
 
 

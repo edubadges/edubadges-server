@@ -2,26 +2,26 @@ import io
 import os
 import re
 
+import badgrlog
 import cairosvg
 from PIL import Image
+from backpack.models import BackpackCollection
 from django.conf import settings
 from django.core.files.storage import DefaultStorage
-from django.urls import resolve, reverse, Resolver404, NoReverseMatch
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import redirect, render_to_response
+from django.urls import resolve, reverse, Resolver404, NoReverseMatch
 from django.views.generic import RedirectView
+from entity.api import VersionedObjectMixin
+from mainsite.models import BadgrApp
+from mainsite.utils import OriginSetting
 from rest_framework import status, permissions
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-import badgrlog
-from . import utils
-from backpack.models import BackpackCollection
-from entity.api import VersionedObjectMixin
-from mainsite.models import BadgrApp
-from mainsite.utils import OriginSetting
 from signing.models import PublicKeyIssuer
+
+from . import utils
 from .models import Issuer, BadgeClass, BadgeInstance
 
 logger = badgrlog.BadgrLogger()

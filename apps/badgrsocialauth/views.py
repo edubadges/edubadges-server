@@ -1,18 +1,18 @@
-import urllib.request, urllib.parse, urllib.error
+import urllib.error
 import urllib.parse
+import urllib.parse
+import urllib.request
 
 from allauth.socialaccount.providers.base import AuthProcess
-from django.contrib.auth import logout
-from django.core.exceptions import ValidationError
-from django.urls import reverse, NoReverseMatch
-from django.http import HttpResponseBadRequest, HttpResponseForbidden
-from django.views.generic import RedirectView
-from rest_framework.exceptions import AuthenticationFailed
-
 from badgrsocialauth.utils import set_url_query_params, set_session_badgr_app, get_session_badgr_app, \
     get_session_verification_email, set_session_authcode
-from lti_edu.lti_views import logout_badgr_user
+from django.contrib.auth import logout
+from django.core.exceptions import ValidationError
+from django.http import HttpResponseBadRequest, HttpResponseForbidden
+from django.urls import reverse, NoReverseMatch
+from django.views.generic import RedirectView
 from mainsite.models import BadgrApp
+from rest_framework.exceptions import AuthenticationFailed
 
 
 class BadgrSocialLogin(RedirectView):

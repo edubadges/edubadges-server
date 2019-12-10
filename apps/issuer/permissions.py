@@ -1,12 +1,10 @@
-import oauth2_provider
-import rest_framework
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
-from rest_framework import permissions
-import rules
 import logging
 
+import oauth2_provider
+import rules
+from django.conf import settings
 from issuer.models import IssuerStaff
+from rest_framework import permissions
 
 logger=logging.getLogger('Badgr.Debug')
 SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']

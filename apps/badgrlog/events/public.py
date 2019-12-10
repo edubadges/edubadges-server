@@ -1,6 +1,7 @@
 # Created by wiggins@concentricsky.com on 8/27/15.
-from .base import BaseBadgrEvent
 from mainsite.utils import client_ip_from_request
+
+from .base import BaseBadgrEvent
 
 
 class BaseBadgeAssertionEvent(BaseBadgrEvent):

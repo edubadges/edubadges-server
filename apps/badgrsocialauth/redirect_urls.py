@@ -1,10 +1,9 @@
 import importlib
 
 from allauth.socialaccount import providers
-from django.conf.urls import url
-
 from badgrsocialauth.views import BadgrSocialLogin, BadgrSocialEmailExists, BadgrSocialAccountVerifyEmail, \
     BadgrSocialLoginCancel, BadgrAccountConnected
+from django.conf.urls import url
 
 urlpatterns = [
     url(r'^sociallogin', BadgrSocialLogin.as_view(permanent=False), name='socialaccount_login'),

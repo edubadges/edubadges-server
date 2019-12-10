@@ -5,14 +5,13 @@ import os
 from collections import OrderedDict
 
 import cachemodel
+from backpack.sharing import SharingManager
 from basic_models.models import CreatedUpdatedAt
 from django.conf import settings
-from django.urls import reverse
 from django.db import models, transaction
-
+from django.urls import reverse
 from entity.models import BaseVersionedEntity
 from issuer.models import BaseAuditedModel, BadgeInstance
-from backpack.sharing import SharingManager
 from issuer.utils import CURRENT_OBI_VERSION, get_obi_context, add_obi_version_ifneeded
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.models import BadgrApp

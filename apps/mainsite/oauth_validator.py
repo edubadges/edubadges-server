@@ -1,5 +1,5 @@
 from django.conf import settings
-from oauth2_provider.oauth2_validators import OAuth2Validator, AccessToken, RefreshToken
+from oauth2_provider.oauth2_validators import OAuth2Validator
 from oauth2_provider.scopes import get_scopes_backend
 from oauthlib.oauth2 import Server
 

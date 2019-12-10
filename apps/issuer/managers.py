@@ -4,12 +4,11 @@
 import json
 import urllib.parse
 
-from django.conf import settings
 import dateutil.parser
+from django.conf import settings
 from django.core.files.storage import DefaultStorage
 from django.db import models, transaction
 from django.urls import resolve, Resolver404
-
 from mainsite.utils import fetch_remote_file_to_storage, list_of, OriginSetting
 from pathway.tasks import award_badges_for_pathway_completion
 

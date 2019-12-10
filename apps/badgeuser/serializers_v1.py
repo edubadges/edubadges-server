@@ -1,15 +1,17 @@
 import json
 from collections import OrderedDict
-from django.contrib.auth.models import Permission, Group
-from rest_framework import serializers
 
-from institution.serializers_v1 import FacultySerializerV1, InstitutionSerializerV1
+from django.contrib.auth.models import Permission, Group
 from institution.models import Faculty
+from institution.serializers_v1 import FacultySerializerV1, InstitutionSerializerV1
 from mainsite.serializers import StripTagsCharField
 from mainsite.validators import PasswordValidator
+from management.serializers import GroupSerializer
+from rest_framework import serializers
+
 from .models import BadgeUser, CachedEmailAddress, TermsVersion
 from .utils import notify_on_password_change
-from management.serializers import GroupSerializer
+
 
 class BadgeUserTokenSerializerV1(serializers.Serializer):
     class Meta:

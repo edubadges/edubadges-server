@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from django.db import models, migrations
+from django.db import migrations
 
 from entity.db.migrations import PopulateEntityIdsMigration
 

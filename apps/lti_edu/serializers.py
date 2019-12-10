@@ -1,9 +1,8 @@
-from datetime import datetime
 from rest_framework import serializers
-from issuer.models import BadgeClass, Issuer, BadgeInstance, IssuerStaff
+from issuer.models import BadgeClass, Issuer, IssuerStaff
 from lti_edu.models import StudentsEnrolled, BadgeClassLtiContext
-
 from mainsite.drf_fields import ValidImageField
+from rest_framework import serializers
 
 
 class LTIrequestSerializer(serializers.Serializer):

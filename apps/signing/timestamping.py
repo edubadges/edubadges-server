@@ -1,6 +1,7 @@
 import json
-from signing.utils import hash_string
 from subprocess import Popen, PIPE, STDOUT
+
+from signing.utils import hash_string
 
 
 def run_chp_command(command):
