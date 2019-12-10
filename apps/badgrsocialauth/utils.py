@@ -141,7 +141,7 @@ def get_privacy_content(name):
 def check_agreed_term_and_conditions(user, badgr_app, resign=False):
     latest_terms_and_conditions = TermsVersion.objects.filter(
         terms_and_conditions_template__isnull=True).order_by('-version').all()[0]
-    if user.is_anonymous():
+    if user.is_anonymous:
         return False
     if user.agreed_terms_version == latest_terms_and_conditions.version:
         return True
