@@ -18,7 +18,7 @@ def create_new_symmetric_key(password, user, salt='salt', length=32, n=1048576, 
                          }),
                          headers={'content-type': 'application/json'}).json()
     new_symkey = SymmetricKey.objects.create(
-        password_hash=utils.hash_string(password),
+        password_hash=utils.hash_string(password.encode()),
         salt=symkey_json['salt'],
         length=symkey_json['length'],
         n=symkey_json['n'],
