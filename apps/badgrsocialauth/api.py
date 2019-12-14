@@ -77,7 +77,7 @@ class BadgrSocialAccountDetail(BaseEntityDetailView):
             user_social_accounts = SocialAccount.objects.filter(user=request.user)
             get_adapter().validate_disconnect(social_account, user_social_accounts)
         except ValidationError as e:
-            return Response(e.message, status=HTTP_403_FORBIDDEN)
+            return Response(str(e), status=HTTP_403_FORBIDDEN)
 
         social_account.delete()
 

@@ -24,7 +24,7 @@ class BadgrSocialLogin(RedirectView):
             request.session['lti_data'] = lti_data
             return super(BadgrSocialLogin, self).get(request, *args, **kwargs)
         except ValidationError as e:
-            return HttpResponseBadRequest(e.message)
+            return HttpResponseBadRequest(str(e))
         except AuthenticationFailed as e:
             return HttpResponseForbidden(e.detail)
 

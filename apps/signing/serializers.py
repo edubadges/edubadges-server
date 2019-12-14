@@ -24,7 +24,7 @@ class SymmetricKeySerializer(serializers.Serializer):
         try:
             instance.validate_password(validated_data.get('old_password'))
         except ValueError as e:
-            raise serializers.ValidationError(e.message)
+            raise serializers.ValidationError(str(e))
         new_symkey = tsob.create_new_symmetric_key(password=validated_data.get('password'),
                                                    user=validated_data['updated_by'])
         try:
@@ -43,7 +43,7 @@ class SymmetricKeySerializer(serializers.Serializer):
             new_symkey.save()
         except ValueError as e:
             new_symkey.delete()
-            raise serializers.ValidationError(e.message)
+            raise serializers.ValidationError(str(e))
         return new_symkey
 
     def to_representation(self, instance):
