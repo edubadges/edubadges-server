@@ -8,11 +8,13 @@ OUR_DIR = os.path.abspath(os.path.dirname(__file__))
 APPS_DIR = os.path.join(OUR_DIR, '..', 'code', 'apps')
 
 # the env dir is one level above us
-ENV_DIR = os.path.join(OUR_DIR, '..', 'env')
+ENV_DIR = os.path.join(OUR_DIR, '..')
+# remove virtual env
+#, 'env')
 
 # activate the virtualenv
-activate_this = os.path.join(ENV_DIR, 'bin', 'activate_this.py')
-exec(compile(open(activate_this, "rb").read(), activate_this, 'exec'), dict(__file__=activate_this))
+# activate_this = os.path.join(ENV_DIR, 'bin', 'activate_this.py')
+# exec(compile(open(activate_this, "rb").read(), activate_this, 'exec'), dict(__file__=activate_this))
 
 # add the apps directory to the python path
 sys.path.insert(0, APPS_DIR)
