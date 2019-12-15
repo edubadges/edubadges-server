@@ -182,7 +182,7 @@ class PathwayElementSerializer(LinkedDataEntitySerializer):
             try:
                 completion_requirements = CompletionRequirementSpecFactory.parse(requirement_string).serialize()
             except ValueError as e:
-                raise ValidationError("Invalid completion spec: {}".format(e.message))
+                raise ValidationError("Invalid completion spec: {}".format(str(e)))
 
         element = PathwayElement(pathway=pathway,
                                  parent_element=parent_element,

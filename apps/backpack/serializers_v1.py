@@ -230,6 +230,11 @@ class CollectionSerializerV1(serializers.Serializer):
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
         instance.description = validated_data.get('description', instance.description)
+
+        if instance.published == False and validated_data['published'] == True:
+            for badge in instance.badge_items:
+                badge.public = True
+                badge.save()
         instance.published = validated_data.get('published', instance.published)
 
         if 'cached_collects' in validated_data\

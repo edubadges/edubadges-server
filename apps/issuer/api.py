@@ -264,14 +264,14 @@ class BatchSignAssertions(BaseEntityListView):
         try:
             private_key = tsob.create_new_private_key(password, user.current_symmetric_key)
         except ValueError as e:
-            raise ValidationError(e.message)
+            raise ValidationError(str(e))
         try:
             signed_badges = tsob.sign_badges(batch_of_assertion_json,
                                              private_key,
                                              user.current_symmetric_key,
                                              password)
         except ValueError as e:
-            raise ValidationError(e.message)
+            raise ValidationError(str(e))
         for signed_badge in signed_badges:
             signature = signed_badge['signature']
             matching_assertion = [ass for ass in assertion_instances if ass.identifier == signed_badge['plain_badge']['id']]
@@ -395,7 +395,7 @@ class BatchAssertionsRevoke(VersionedObjectMixin, BaseEntityView):
         try:
             assertion.revoke(revocation_reason)
         except Exception as e:
-            return dict(response, reason=e.message)
+            return dict(response, reason=str(e))
 
         return dict(response, revoked=True)
 
