@@ -874,6 +874,11 @@ class BadgeInstance(BaseAuditedModel,
     def create_random_uuid(self):
         return uuid.uuid4().urn
 
+    def get_recipient_name(self):
+        from allauth.socialaccount.models import SocialAccount
+        account = SocialAccount.objects.get(uid=self.recipient_identifier)
+        return account.user.get_full_name()
+
     def get_email_address(self):
         '''
         uses self.recipient_identifier to get email adress to email an assertion to
