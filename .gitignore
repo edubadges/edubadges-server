@@ -30,6 +30,8 @@ dist/
 htmlcov/
 api_spec_v1.json
 api_spec_v2.json
+api_docs_v1.json
+api_docs_v2.json
 
 #eclipse
 .project
