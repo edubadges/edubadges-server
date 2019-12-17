@@ -864,7 +864,7 @@ class BadgeInstance(BaseAuditedModel,
         return not self.signature and self.public_key_issuer
 
     def submit_for_timestamping(self, signer):
-        timestamp = AssertionTimeStamp.objects.create(badge_instance=self, signer=signer)
+        timestamp = AssertionTimeStamp(badge_instance=self, signer=signer)
         timestamp.submit_assertion()
 
     def get_email_address(self):
