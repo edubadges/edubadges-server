@@ -38,8 +38,6 @@ class ExtensionsSaverMixin(object):
 
     def save_extensions(self, validated_data, instance):
         extension_items = validated_data.get('extension_items')
-        if extension_items.get('LanguageExtension'):
-            del extension_items['LanguageExtension']['typedLanguage']
         received_extensions = list(extension_items.keys())
         current_extension_names = list(instance.extension_items.keys())
         remove_these_extensions = set(current_extension_names) - set(received_extensions)
@@ -299,22 +297,11 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, 
 
         return data
 
-    def filter_extensions(self, validated_data):
-        extension_items = validated_data['extension_items']
-        for extension_name in list(extension_items.keys()):
-            extension_item = extension_items[extension_name]
-            if extension_name == 'languageExtension':
-                del extension_item['typedLanguage']
-
     def create(self, validated_data, **kwargs):
-
         if 'image' not in validated_data:
             raise serializers.ValidationError({"image": ["This field is required"]})
-
         if 'issuer' in self.context:
             validated_data['issuer'] = self.context.get('issuer')
-
-        self.filter_extensions(validated_data)
         new_badgeclass = BadgeClass.objects.create(**validated_data)
         return new_badgeclass
 
