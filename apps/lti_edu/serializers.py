@@ -1,6 +1,7 @@
 from issuer.models import BadgeClass, Issuer, IssuerStaff
 from lti_edu.models import StudentsEnrolled, BadgeClassLtiContext
 from mainsite.drf_fields import ValidImageField
+from mainsite.serializers import StripTagsCharField
 from rest_framework import serializers
 
 
@@ -115,6 +116,7 @@ class StudentsEnrolledSerializer(serializers.ModelSerializer):
     first_name = serializers.ReadOnlyField()
     last_name = serializers.ReadOnlyField()
     edu_id = serializers.ReadOnlyField()
+    slug = StripTagsCharField(max_length=255, read_only=True, source='entity_id')
 
 
     class Meta:

@@ -106,8 +106,7 @@ class StudentsEnrolledDetail(BaseEntityDetailView):
         if not self.has_object_permissions(request, current_badgeclass):
             return Response(data= 'You do not have permission', status=HTTP_404_NOT_FOUND)
         if enrollment:
-            enrollments_for_badgeclass = StudentsEnrolled.objects.filter(badge_class=current_badgeclass)
-            enrollment_object = enrollments_for_badgeclass.get(user__socialaccount__uid=enrollment['recipient_identifier'])
+            enrollment_object = StudentsEnrolled.objects.get(entity_id=enrollment['enrollment_slug'])
             enrollment_object.denied = enrollment['denied']
             enrollment_object.save()
             message = 'Succesfully updated enrollment of {}'.format(enrollment['recipient_name'].encode('utf-8'))

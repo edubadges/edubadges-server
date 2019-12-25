@@ -8,7 +8,6 @@ from apispec_drf.decorators import apispec_get_operation, apispec_put_operation,
 from badgeuser.permissions import BadgeUserHasSurfconextSocialAccount
 from django.db.models import Q
 from django.http import Http404
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView, \
     UncachedPaginatedViewMixin
@@ -22,7 +21,6 @@ from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
 from issuer.serializers_v2 import IssuerSerializerV2, BadgeClassSerializerV2, BadgeInstanceSerializerV2, \
     IssuerAccessTokenSerializerV2
 from issuer.utils import mapExtensionsToDict
-from lti_edu.models import StudentsEnrolled
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from mainsite.serializers import CursorPaginatedListSerializer
 from oauth2_provider.models import AccessToken
@@ -331,15 +329,17 @@ class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):
             return Response(status=HTTP_400_BAD_REQUEST)
 
         # update passed in assertions to include create_notification
-        def _include_create_notification(a):
+        def _include_extras(a):
             a['create_notification'] = create_notification
+            if request.data.get('expires_at'):  # include expiry too
+                a['expires'] = datetime.datetime.strptime(request.data['expires_at'], '%d/%m/%Y')
             return a
-        assertions = list(map(_include_create_notification, request.data.get('assertions')))
+        recipients = list(map(_include_extras, request.data.get('recipients')))
 
         # save serializers
         context = self.get_context_data(**kwargs)
         serializer_class = self.get_serializer_class()
-        serializer = serializer_class(many=True, data=assertions, context=context)
+        serializer = serializer_class(many=True, data=recipients, context=context)
         if not serializer.is_valid(raise_exception=False):
             serializer = V2ErrorSerializer(instance={},
                                            success=False,
@@ -436,6 +436,7 @@ class BadgeInstanceList(UncachedPaginatedViewMixin, VersionedObjectMixin, BaseEn
     v2_serializer_class = BadgeInstanceSerializerV2
     create_event = badgrlog.BadgeInstanceCreatedEvent
     valid_scopes = ["rw:issuer", "rw:issuer:*"]
+    http_method_names = ['get']
 
     def get_queryset(self, request=None, **kwargs):
         badgeclass = self.get_object(request, **kwargs)
@@ -479,35 +480,6 @@ class BadgeInstanceList(UncachedPaginatedViewMixin, VersionedObjectMixin, BaseEn
             return Response(status=HTTP_404_NOT_FOUND)
 
         return super(BadgeInstanceList, self).get(request, **kwargs)
-
-    @apispec_post_operation('Assertion',
-        summary="Issue an Assertion to a single recipient",
-        tags=['Assertions', 'BadgeClasses'],
-    )
-    def post(self, request, **kwargs):
-        # verify the user has permission to the badgeclass
-        badgeclass = self.get_object(request, **kwargs)
-        if not self.has_object_permissions(request, badgeclass):
-            return Response(status=HTTP_404_NOT_FOUND)
-        recipients = request.data.pop('recipients')
-        if not self.has_object_permissions(request, badgeclass):
-            return Response(status=HTTP_404_NOT_FOUND)
-        request.data['expires'] = datetime.datetime.strptime(request.data['expires_at'], '%d/%m/%Y') if request.data['expires_at'] else None
-        for recipient in recipients:
-            if recipient['selected']:
-                request.data['recipientprofile_name'] = recipient['recipient_name']
-                request.data['recipient_type'] = recipient['recipient_type']
-                request.data['recipient_identifier'] = recipient['recipient_identifier']
-                if recipient.get('extensions', False):
-                    request.data['extensions'] = recipient['extensions']
-                response = super(BadgeInstanceList, self).post(request, **kwargs) 
-                if response.status_code == 201:
-                    badge_class = get_object_or_404(BadgeClass, entity_id=request.data.get('badge_class', -1))
-                    most_recent_enrollment = StudentsEnrolled.objects.filter(badge_class=badge_class, user__socialaccount__uid=recipient['recipient_identifier']).last()
-                    most_recent_enrollment.date_awarded = timezone.now()
-                    most_recent_enrollment.badge_instance = BadgeInstance.objects.get(entity_id=response.data.get('slug'))
-                    most_recent_enrollment.save()
-        return response
 
 
 class IssuerBadgeInstanceList(UncachedPaginatedViewMixin, VersionedObjectMixin, BaseEntityListView):

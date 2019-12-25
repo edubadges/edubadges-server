@@ -6,9 +6,12 @@ from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserIden
 from django.apps import apps
 from django.core.validators import URLValidator
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.html import strip_tags
+from django.shortcuts import get_object_or_404
 from institution.models import Faculty
 from institution.serializers_v1 import FacultySerializerV1
+from lti_edu.models import StudentsEnrolled
 from mainsite.drf_fields import ValidImageField
 from mainsite.models import BadgrApp
 from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField, \
@@ -340,6 +343,7 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
     expires = serializers.DateTimeField(source='expires_at', required=False, allow_null=True)
     issue_signed = serializers.BooleanField(required=False)
     signing_password = serializers.CharField(max_length=1024, required=False)
+    enrollment_slug = serializers.CharField(max_length=1024, required=False)
 
     create_notification = HumanReadableBooleanField(write_only=True, required=False, default=False)
 
@@ -455,6 +459,10 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
                 extensions=validated_data.get('extension_items', None)
             )
 
+        related_enrollment = StudentsEnrolled.objects.get(entity_id=validated_data.get('enrollment_slug'))
+        related_enrollment.date_awarded = timezone.now()
+        related_enrollment.badge_instance = assertion
+        related_enrollment.save()
 
         return assertion
 
