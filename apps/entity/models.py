@@ -56,6 +56,19 @@ class _MigratingToBaseVersionedEntity(_AbstractVersionedEntity):
         abstract = True
 
 
+class BaseEntity(cachemodel.CacheModel):
+
+    class Meta:
+        abstract = True
+
+    entity_id = models.CharField(max_length=254, unique=True, default=None)  # default=None is required
+
+    def save(self, *args, **kwargs):
+        if self.entity_id is None:
+            self.entity_id = generate_entity_uri()
+        return super(BaseEntity, self).save(*args, **kwargs)
+
+
 class BaseVersionedEntity(_AbstractVersionedEntity):
     entity_id = models.CharField(max_length=254, unique=True, default=None)  # default=None is required
 

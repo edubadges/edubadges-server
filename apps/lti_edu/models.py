@@ -3,6 +3,7 @@ import random
 from django.contrib.auth import user_logged_out
 from django.db import models
 from django.utils import timezone
+from entity.models import BaseEntity
 from ims.models import LTITenant
 from issuer.models import BadgeClass, Issuer
 
@@ -91,7 +92,7 @@ class ResourceLinkBadge(models.Model):
     badge_class = models.ForeignKey(BadgeClass, related_name='lti_resource_link', on_delete=models.CASCADE)
 
 
-class StudentsEnrolled(models.Model):
+class StudentsEnrolled(BaseEntity, models.Model):
     badge_class = models.ForeignKey(BadgeClass, related_name='lti_students', on_delete=models.CASCADE)
     date_created = models.DateTimeField(default=timezone.now)
     date_consent_given = models.DateTimeField(default=None, blank=True, null=True)
