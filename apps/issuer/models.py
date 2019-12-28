@@ -874,9 +874,10 @@ class BadgeInstance(BaseAuditedModel,
         timestamp.submit_assertion()
 
     def get_recipient_name(self):
-        from allauth.socialaccount.models import SocialAccount
-        account = SocialAccount.objects.get(uid=self.recipient_identifier)
-        return account.user.get_full_name()
+        if self.user:
+            return self.user.get_full_name()
+        else:
+            return None
 
     def get_email_address(self):
         if self.user:
