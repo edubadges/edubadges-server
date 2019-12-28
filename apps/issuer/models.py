@@ -879,16 +879,10 @@ class BadgeInstance(BaseAuditedModel,
         return account.user.get_full_name()
 
     def get_email_address(self):
-        '''
-        uses self.recipient_identifier to get email address of the recipient
-        the recipient_identifier can be either the email address or it can be an edu_id
-        '''
-        from allauth.socialaccount.models import SocialAccount
-        if self.recipient_identifier.startswith('urn:mace:eduid'): # is EduID
-            account = SocialAccount.objects.get(uid=self.recipient_identifier)
-            return account.user.primary_email
-        else: # recipient identifier is an email
-            return self.recipient_identifier
+        if self.user:
+            return self.user.primary_email
+        else:
+            return None
 
     def save(self, *args, **kwargs):
         created = False
