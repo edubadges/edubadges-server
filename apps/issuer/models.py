@@ -1,5 +1,3 @@
-
-
 import datetime
 import io
 import logging
@@ -12,6 +10,7 @@ from json import loads as json_loads
 
 import cachemodel
 from allauth.account.adapter import get_adapter
+from allauth.socialaccount.models import SocialAccount
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -35,12 +34,20 @@ from signing import tsob
 from signing.models import AssertionTimeStamp, PublicKeyIssuer
 from signing.models import PublicKey, SymmetricKey
 
+
 from .utils import generate_sha256_hashstring, CURRENT_OBI_VERSION, get_obi_context, add_obi_version_ifneeded, \
     UNVERSIONED_BAKED_VERSION
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 logger = logging.getLogger('Badgr.Debug')
 
+
+def get_user_or_none(recipient_identifier):
+    try:
+        soc_acc = SocialAccount.objects.get(uid=recipient_identifier)
+        return soc_acc.user
+    except SocialAccount.DoesNotExist:
+        return None
 
 class BaseAuditedModel(cachemodel.CacheModel):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -634,7 +641,7 @@ class BadgeClass(ResizeUploadedImage,
         return BadgeInstance.objects.create(
             badgeclass=self, recipient_identifier=recipient_id, narrative=narrative, evidence=evidence,
             notify=notify, created_by=created_by, allow_uppercase=allow_uppercase,
-            badgr_app=badgr_app,
+            badgr_app=badgr_app, user=get_user_or_none(recipient_id),
             **kwargs
         )
 
@@ -647,7 +654,7 @@ class BadgeClass(ResizeUploadedImage,
             badgeclass=self, recipient_identifier=recipient_id, narrative=narrative, evidence=evidence,
             notify=False,  # notify after signing
             created_by=created_by, allow_uppercase=allow_uppercase,
-            badgr_app=badgr_app,
+            badgr_app=badgr_app, user=get_user_or_none(recipient_id),
             **kwargs
         )
         assertion.submit_for_timestamping(signer=signer)
