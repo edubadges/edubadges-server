@@ -10,7 +10,6 @@ from json import loads as json_loads
 
 import cachemodel
 from allauth.account.adapter import get_adapter
-from allauth.socialaccount.models import SocialAccount
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -43,6 +42,7 @@ logger = logging.getLogger('Badgr.Debug')
 
 
 def get_user_or_none(recipient_identifier):
+    from allauth.socialaccount.models import SocialAccount
     try:
         soc_acc = SocialAccount.objects.get(uid=recipient_identifier)
         return soc_acc.user
@@ -959,8 +959,8 @@ class BadgeInstance(BaseAuditedModel,
         self.badgeclass.publish()
         if self.cached_recipient_profile:
             self.cached_recipient_profile.publish()
-        if self.recipient_user:
-            self.recipient_user.publish()
+        if self.user:
+            self.user.publish()
 
         # publish all collections this instance was in
         for collection in self.backpackcollection_set.all():
@@ -975,8 +975,8 @@ class BadgeInstance(BaseAuditedModel,
         badgeclass.publish()
         if recipient_profile:
             recipient_profile.publish()
-        if self.recipient_user:
-            self.recipient_user.publish()
+        if self.user:
+            self.user.publish()
         self.publish_delete('entity_id', 'revoked')
 
     def revoke(self, revocation_reason):
@@ -1091,17 +1091,6 @@ class BadgeInstance(BaseAuditedModel,
             return RecipientProfile.objects.filter(recipient_identifier=self.recipient_identifier).first()
         except RecipientProfile.DoesNotExist:
             return None
-
-    @property
-    def recipient_user(self):
-        from badgeuser.models import CachedEmailAddress
-        try:
-            email_address = CachedEmailAddress.cached.get_student_email(self.get_email_address())
-            if email_address.verified:
-                return email_address.user
-        except CachedEmailAddress.DoesNotExist:
-            pass
-        return None
 
     def get_json(self, obi_version=CURRENT_OBI_VERSION, expand_badgeclass=False, expand_issuer=False,
                  include_extra=True, use_canonical_id=False, signed=False, public_key_issuer=None):
