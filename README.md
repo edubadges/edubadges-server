@@ -1,13 +1,83 @@
-# Badgr Server
+![Edubadges](logo.png)
+# Edubadges Server (Backend)
+
 *Digital badge management for issuers, earners, and consumers*
 
-Badgr-server is the Python/Django API backend for issuing [Open Badges](http://openbadges.org). In addition to a powerful Issuer API and browser-based user interface for issuing, Badgr offers integrated badge management and sharing for badge earners. Free accounts are hosted by Concentric Sky at [Badgr.io](http://info.badgr.io), but for complete control over your own issuing environment, Badgr Server is available open source as a Python/Django application.
+EduBadges server is the Python/Django API backend for issuing [Open Badges](http://openbadges.org). In addition to a powerful Issuer API and browser-based user interface for issuing, edubadges offers integrated badge management and sharing for badge earners. 
 
-See also [badgr-ui](https://github.com/concentricsky/badgr-ui), the Angular front end that serves as users' interface for this project.
+See also [edubadges-ui](https://github.com/edubadges/badgr-ui), the Angular front end that serves as users' interface for this project.
+
+This software is based on the Badgr software from [Concentric Sky](https://github.com/concentricsky/).
+
+## Edubadges and microcredentialing
+Institutions are looking into the possibilities of using digital certification for (partial) results obtained by their students. In 2019, SURF will work with various institutions to continue to build a digital infrastructure with the purpose to be able to issue such digital certificates, or 'edubadges'.
+
+## Edubadges: tool for flexible education
+An increasing number of students have − whether previously or elsewhere − acquired skills and knowledge relevant to their study, and they wish to receive recognition or exemption for this in their study programme. A number of institutions are looking into the possibility of providing courses in accredited units that are smaller than a diploma (micro-credentials). Digital badges are the tools to achieve this. As these badges are issued in an educational context, they are called 'edubadges'.
+Read more on [edubadges.nl](https://www.surf.nl/en/edubadges-national-approach-to-badges-in-education).
 
 ### About the Badgr Project
 Badgr was developed by [Concentric Sky](https://concentricsky.com), starting in 2015 to serve as an open source reference implementation of the Open Badges Specification. It provides functionality to issue portable, verifiable Open Badges as well as to allow users to manage badges they have been awarded by any issuer that uses this open data standard. Since 2015, Badgr has grown to be used by hundreds of educational institutions and other people and organizations worldwide. See [Project Homepage](https://badgr.org) for more details about contributing to and integrating with Badgr.
 
+# Edubadges Install Instructions (Backend Docker and Database containers on CentOS 7)
+These sample instructions will build 2 Docker images: 
+* the edubadges backend django web container
+* the MySQL database container
+
+Example directory structure to build the edubadges server (backend) Docker containers:
+
+    /var/docker/edubadges/
+    .
+    ├── badgr-server
+    │   ├── badgr
+    │   ├── config
+    │   ├── Dockerfile
+    │   └── entrypoint
+    ├── docker-compose.yml
+    ├── first_build.sh
+    ├── mysql
+    │   ├── config
+    │   ├── Dockerfile
+    │   └── entrypoint
+    └── example-build-script.sh
+
+
+## The config directory layout
+Create a directory to store the local config files. I.e.:
+
+    /var/docker/edubadges/badgr-server/config
+    .
+    ├── badgr
+    │   ├── index.html
+    │   ├── settings_local.py
+    │   └── settings.py
+    ├── mysql
+    │   ├── config_mysql.sh
+    │   ├── create.sql
+    │   ├── init-mysql.sh
+    │   └── my.cnf
+    └── nginx
+        ├── certs
+        │   ├── <yourhost>.pem
+        │   └── <yourhost>.key
+        ├── nginx_badgr.conf
+        └── nginx.conf
+	
+
+## Build the Docker container
+Example build routine using the included Dockerfile, docker-compose.yml and first_build.sh script:
+
+    $ cd /var/docker/edubadges/badgr-server/badgr
+    $ git clone --single-branch -b master https://github.com/edubadges/badgr-server
+    $ cd /var/docker/edubadges/badgr-server/badgr/badgr-server
+    $ git submodule init
+    $ git submodule update
+    $ cd /var/docker/edubadges
+    $ sh first_build.sh
+    $ docker-compose up -d
+
+
+# Original Badgr installation instructions
 ## How to get started on your local development environment.
 Prerequisites:
 
