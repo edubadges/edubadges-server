@@ -748,9 +748,7 @@ class BadgeInstance(BaseAuditedModel,
 
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.PROTECT, related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, on_delete=models.PROTECT, blank=False, null=False)
-    # timestamp_pending = models.BooleanField(default=True)
-    # timestamp_proof = models.CharField(max_length=258798798)
-
+    user = models.ForeignKey('badgeuser.BadgeUser', blank=True, null=True, on_delete=models.SET_NULL)
 
     RECIPIENT_TYPE_EMAIL = 'email'
     RECIPIENT_TYPE_ID = 'openBadgeId'
@@ -875,7 +873,7 @@ class BadgeInstance(BaseAuditedModel,
 
     def get_email_address(self):
         '''
-        uses self.recipient_identifier to get email adress to email an assertion to
+        uses self.recipient_identifier to get email address of the recipient
         the recipient_identifier can be either the email address or it can be an edu_id
         '''
         from allauth.socialaccount.models import SocialAccount
