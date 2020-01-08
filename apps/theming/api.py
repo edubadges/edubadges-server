@@ -7,7 +7,7 @@ from theming.utils import get_theme
 
 class GetTheme(BaseEntityDetailView):
 
-    v2_serializer_class = ThemeSerializer
+    v1_serializer_class = ThemeSerializer
 
     def get_object(self, request, **kwargs):
         return get_theme(request)

@@ -110,7 +110,7 @@ urlpatterns = [
     url(r'^institution/', include('institution.api_urls')),
 
     # include theming endpoints
-    url(r'v2/', include('theming.api_urls'), kwargs={'version':'v2'}),
+    url(r'v1/', include('theming.api_urls'), kwargs={'version': 'v1'}),
 
     # Accept Terms View
     url(r'^accept_terms/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', TermsAndConditionsView.as_view(), name='accept_terms'),
