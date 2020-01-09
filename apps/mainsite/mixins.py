@@ -78,7 +78,7 @@ class ScrubUploadedSvgImage(object):
                         del el.attrib[attrib_name]
 
             # write out scrubbed svg
-            buf = io.StringIO()
+            buf = io.BytesIO()
             tree.write(buf)
             self.image = InMemoryUploadedFile(buf, 'image', self.image.name, 'image/svg+xml', buf.len, 'utf8')
         return super(ScrubUploadedSvgImage, self).save(*args, **kwargs)
