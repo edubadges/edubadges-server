@@ -5,8 +5,8 @@ from apispec_drf.decorators import apispec_list_operation, apispec_post_operatio
     apispec_delete_operation, apispec_put_operation, apispec_operation
 from backpack.models import BackpackCollection, BackpackBadgeShare, BackpackCollectionShare
 from backpack.serializers_v1 import CollectionSerializerV1, LocalBadgeInstanceUploadSerializerV1
-from backpack.serializers_v2 import BackpackAssertionSerializerV2, BackpackCollectionSerializerV2, \
-    BackpackImportSerializerV2
+# from backpack.serializers_v2 import BackpackAssertionSerializerV2, BackpackCollectionSerializerV2, \
+#     BackpackImportSerializerV2
 from entity.api import BaseEntityListView, BaseEntityDetailView, LogPermissionsFailMixin
 from issuer.models import BadgeInstance
 from issuer.permissions import AuditedModelOwner, RecipientIdentifiersMatch, BadgrOAuthTokenHasScope
@@ -21,7 +21,7 @@ from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP
 class BackpackAssertionList(LogPermissionsFailMixin, BaseEntityListView):
     model = BadgeInstance
     v1_serializer_class = LocalBadgeInstanceUploadSerializerV1
-    v2_serializer_class = BackpackAssertionSerializerV2
+    # v2_serializer_class = BackpackAssertionSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, RecipientIdentifiersMatch, BadgrOAuthTokenHasScope)
     http_method_names = ('get', 'post')
     valid_scopes = {
@@ -69,7 +69,7 @@ class BackpackAssertionList(LogPermissionsFailMixin, BaseEntityListView):
 class BackpackAssertionDetail(BaseEntityDetailView):
     model = BadgeInstance
     v1_serializer_class = LocalBadgeInstanceUploadSerializerV1
-    v2_serializer_class = BackpackAssertionSerializerV2
+    # v2_serializer_class = BackpackAssertionSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, RecipientIdentifiersMatch, BadgrOAuthTokenHasScope)
     http_method_names = ('get', 'delete', 'put')
     valid_scopes = {
@@ -129,7 +129,7 @@ class BackpackAssertionDetailImage(ImagePropertyDetailView, BadgrOAuthTokenHasSc
 class BackpackCollectionList(BaseEntityListView):
     model = BackpackCollection
     v1_serializer_class = CollectionSerializerV1
-    v2_serializer_class = BackpackCollectionSerializerV2
+    # v2_serializer_class = BackpackCollectionSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, AuditedModelOwner, BadgrOAuthTokenHasScope)
     valid_scopes = {
         'get': ['r:backpack', 'rw:backpack'],
@@ -157,7 +157,7 @@ class BackpackCollectionList(BaseEntityListView):
 class BackpackCollectionDetail(BaseEntityDetailView):
     model = BackpackCollection
     v1_serializer_class = CollectionSerializerV1
-    v2_serializer_class = BackpackCollectionSerializerV2
+    # v2_serializer_class = BackpackCollectionSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, AuditedModelOwner, BadgrOAuthTokenHasScope)
     valid_scopes = {
         'get': ['r:backpack', 'rw:backpack'],
@@ -187,48 +187,48 @@ class BackpackCollectionDetail(BaseEntityDetailView):
     def delete(self, request, **kwargs):
         return super(BackpackCollectionDetail, self).delete(request, **kwargs)
 
-
-class BackpackImportBadge(BaseEntityListView):
-    v2_serializer_class = BackpackImportSerializerV2
-    permission_classes = (AuthenticatedWithVerifiedEmail,BadgrOAuthTokenHasScope)
-    http_method_names = ('post',)
-    valid_scopes = ['rw:backpack']
-
-    @apispec_operation(
-        summary="Import a new Assertion to the backpack",
-        tags=['Backpack'],
-        parameters=[
-            {
-                "in": "body",
-                "name": "body",
-                "required": True,
-                "schema": {
-                    "type": "object",
-                    "properties": {
-                        "url": {
-                            "type": "string",
-                            "format": "url",
-                            "description": "URL to an OpenBadge compliant badge",
-                            'required': False
-                        },
-                        "image": {
-                            'type': "string",
-                            'format': "data:image/png;base64",
-                            'description': "base64 encoded Baked OpenBadge image",
-                            'required': False
-                        },
-                        "assertion": {
-                            'type': "json",
-                            'description': "OpenBadge compliant json",
-                            'required': False
-                        },
-                    }
-                },
-            }
-        ]
-    )
-    def post(self, request, **kwargs):
-        return super(BackpackImportBadge, self).post(request, **kwargs)
+#
+# class BackpackImportBadge(BaseEntityListView):
+#     v2_serializer_class = BackpackImportSerializerV2
+#     permission_classes = (AuthenticatedWithVerifiedEmail,BadgrOAuthTokenHasScope)
+#     http_method_names = ('post',)
+#     valid_scopes = ['rw:backpack']
+#
+#     @apispec_operation(
+#         summary="Import a new Assertion to the backpack",
+#         tags=['Backpack'],
+#         parameters=[
+#             {
+#                 "in": "body",
+#                 "name": "body",
+#                 "required": True,
+#                 "schema": {
+#                     "type": "object",
+#                     "properties": {
+#                         "url": {
+#                             "type": "string",
+#                             "format": "url",
+#                             "description": "URL to an OpenBadge compliant badge",
+#                             'required': False
+#                         },
+#                         "image": {
+#                             'type': "string",
+#                             'format': "data:image/png;base64",
+#                             'description': "base64 encoded Baked OpenBadge image",
+#                             'required': False
+#                         },
+#                         "assertion": {
+#                             'type': "json",
+#                             'description': "OpenBadge compliant json",
+#                             'required': False
+#                         },
+#                     }
+#                 },
+#             }
+#         ]
+#     )
+#     def post(self, request, **kwargs):
+#         return super(BackpackImportBadge, self).post(request, **kwargs)
 
 
 class ShareBackpackAssertion(BaseEntityDetailView):

@@ -5,7 +5,7 @@ from issuer.permissions import IsEditor, IsIssuerEditor
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from recipient.models import RecipientGroup
 from recipient.serializers_v1 import RecipientGroupSerializerV1, IssuerRecipientGroupListSerializerV1
-from recipient.serializers_v2 import RecipientGroupSerializerV2
+# from recipient.serializers_v2 import RecipientGroupSerializerV2
 from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND
 
@@ -25,7 +25,7 @@ class IssuerRecipientGroupList(VersionedObjectMixin, BaseEntityListView):
     model = Issuer  # used by get_object()
     permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor)
     v1_serializer_class = RecipientGroupSerializerV1
-    v2_serializer_class = RecipientGroupSerializerV2
+    # v2_serializer_class = RecipientGroupSerializerV2
 
     def get_objects(self, request, **kwargs):
         issuer = self.get_object(request, **kwargs)
@@ -72,7 +72,7 @@ class RecipientGroupDetail(BaseEntityDetailView):
     model = RecipientGroup
     permission_classes = (AuthenticatedWithVerifiedEmail, IsIssuerEditor)
     v1_serializer_class = RecipientGroupSerializerV1
-    v2_serializer_class = RecipientGroupSerializerV2
+    # v2_serializer_class = RecipientGroupSerializerV2
 
     def get_context_data(self, **kwargs):
         context = super(RecipientGroupDetail, self).get_context_data(**kwargs)

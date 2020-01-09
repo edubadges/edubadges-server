@@ -2,13 +2,13 @@ import datetime
 from collections import OrderedDict
 
 import badgrlog
-import dateutil.parser
+# import dateutil.parser
 from apispec_drf.decorators import apispec_get_operation, apispec_put_operation, \
     apispec_delete_operation, apispec_list_operation, apispec_post_operation
 from badgeuser.permissions import BadgeUserHasSurfconextSocialAccount
-from django.db.models import Q
+# from django.db.models import Q
 from django.http import Http404
-from django.utils import timezone
+# from django.utils import timezone
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView, \
     UncachedPaginatedViewMixin
 from entity.serializers import BaseSerializerV2, V2ErrorSerializer
@@ -18,17 +18,17 @@ from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
                                 BadgrOAuthTokenHasEntityScope)
 from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    BadgeInstanceSerializerV1)
-from issuer.serializers_v2 import IssuerSerializerV2, BadgeClassSerializerV2, BadgeInstanceSerializerV2, \
-    IssuerAccessTokenSerializerV2
+# from issuer.serializers_v2 import IssuerSerializerV2, BadgeClassSerializerV2, BadgeInstanceSerializerV2, \
+#     IssuerAccessTokenSerializerV2
 from issuer.utils import mapExtensionsToDict
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
-from mainsite.serializers import CursorPaginatedListSerializer
-from oauth2_provider.models import AccessToken
-from oauthlib.oauth2.rfc6749.tokens import random_token_generator
-from rest_framework import status, serializers
+# from mainsite.serializers import CursorPaginatedListSerializer
+# from oauth2_provider.models import AccessToken
+# from oauthlib.oauth2.rfc6749.tokens import random_token_generator
+from rest_framework import status #, serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST # , HTTP_403_FORBIDDEN
 from signing import tsob
 from signing.models import AssertionTimeStamp
 from signing.permissions import MaySignAssertions
@@ -42,7 +42,7 @@ class IssuerList(BaseEntityListView):
     """
     model = Issuer
     v1_serializer_class = IssuerSerializerV1
-    v2_serializer_class = IssuerSerializerV2
+    # v2_serializer_class = IssuerSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, ApprovedIssuersOnly, BadgrOAuthTokenHasScope, BadgeUserHasSurfconextSocialAccount)
     valid_scopes = ["rw:issuer"]
 
@@ -69,7 +69,7 @@ class IssuerList(BaseEntityListView):
 class IssuerDetail(BaseEntityDetailView):
     model = Issuer
     v1_serializer_class = IssuerSerializerV1
-    v2_serializer_class = IssuerSerializerV2
+    # v2_serializer_class = IssuerSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, BadgrOAuthTokenHasEntityScope, BadgeUserHasSurfconextSocialAccount)
     valid_scopes = ["rw:issuer", "rw:issuer:*"]
 
@@ -104,7 +104,7 @@ class AllBadgeClassesList(BaseEntityListView):
     model = BadgeClass
     permission_classes = (AuthenticatedWithVerifiedEmail, BadgrOAuthTokenHasScope)
     v1_serializer_class = BadgeClassSerializerV1
-    v2_serializer_class = BadgeClassSerializerV2
+    # v2_serializer_class = BadgeClassSerializerV2
     valid_scopes = ["rw:issuer"]
 
     def get_objects(self, request, **kwargs):
@@ -133,7 +133,7 @@ class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
     model = Issuer  # used by get_object()
     permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, BadgrOAuthTokenHasEntityScope)
     v1_serializer_class = BadgeClassSerializerV1
-    v2_serializer_class = BadgeClassSerializerV2
+    # v2_serializer_class = BadgeClassSerializerV2
     create_event = badgrlog.BadgeClassCreatedEvent
     valid_scopes = ["rw:issuer", "rw:issuer:*"]
 
@@ -172,7 +172,7 @@ class BadgeClassDetail(BaseEntityDetailView):
     model = BadgeClass
     permission_classes = (AuthenticatedWithVerifiedEmail, MayEditBadgeClass, BadgrOAuthTokenHasEntityScope)
     v1_serializer_class = BadgeClassSerializerV1
-    v2_serializer_class = BadgeClassSerializerV2
+    # v2_serializer_class = BadgeClassSerializerV2
 
     valid_scopes = ["rw:issuer", "rw:issuer:*"]
 
@@ -294,7 +294,7 @@ class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):
     model = BadgeClass  # used by .get_object()
     permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass, BadgrOAuthTokenHasEntityScope)
     v1_serializer_class = BadgeInstanceSerializerV1
-    v2_serializer_class = BadgeInstanceSerializerV2
+    # v2_serializer_class = BadgeInstanceSerializerV2
     valid_scopes = ["rw:issuer", "rw:issuer:*"]
 
     def get_context_data(self, **kwargs):
@@ -357,7 +357,7 @@ class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):
 class BatchAssertionsRevoke(VersionedObjectMixin, BaseEntityView):
     model = BadgeInstance
     permission_classes = (AuthenticatedWithVerifiedEmail, BadgrOAuthTokenHasEntityScope)
-    v2_serializer_class = BadgeInstanceSerializerV2
+    # v2_serializer_class = BadgeInstanceSerializerV2
     valid_scopes = ["rw:issuer", "rw:issuer:*"]
 
     def get_context_data(self, **kwargs):
@@ -433,7 +433,7 @@ class BadgeInstanceList(UncachedPaginatedViewMixin, VersionedObjectMixin, BaseEn
     model = BadgeClass  # used by get_object()
     permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass, BadgrOAuthTokenHasEntityScope)
     v1_serializer_class = BadgeInstanceSerializerV1
-    v2_serializer_class = BadgeInstanceSerializerV2
+    # v2_serializer_class = BadgeInstanceSerializerV2
     create_event = badgrlog.BadgeInstanceCreatedEvent
     valid_scopes = ["rw:issuer", "rw:issuer:*"]
     http_method_names = ['get']
@@ -489,7 +489,7 @@ class IssuerBadgeInstanceList(UncachedPaginatedViewMixin, VersionedObjectMixin, 
     model = Issuer  # used by get_object()
     permission_classes = (AuthenticatedWithVerifiedEmail, IsStaff, BadgrOAuthTokenHasEntityScope)
     v1_serializer_class = BadgeInstanceSerializerV1
-    v2_serializer_class = BadgeInstanceSerializerV2
+    # v2_serializer_class = BadgeInstanceSerializerV2
     create_event = badgrlog.BadgeInstanceCreatedEvent
     valid_scopes = ["rw:issuer", "rw:issuer:*"]
 
@@ -542,7 +542,7 @@ class BadgeInstanceDetail(BaseEntityDetailView):
     model = BadgeInstance
     permission_classes = (AuthenticatedWithVerifiedEmail, MayEditBadgeClass, BadgrOAuthTokenHasEntityScope)
     v1_serializer_class = BadgeInstanceSerializerV1
-    v2_serializer_class = BadgeInstanceSerializerV2
+    # v2_serializer_class = BadgeInstanceSerializerV2
     valid_scopes = ["rw:issuer", "rw:issuer:*"]
 
     @apispec_get_operation('Assertion',
@@ -586,139 +586,139 @@ class BadgeInstanceDetail(BaseEntityDetailView):
         return super(BadgeInstanceDetail, self).put(request, **kwargs)
 
 
-class IssuerTokensList(BaseEntityListView):
-    model = AccessToken
-    permission_classes = (AuthenticatedWithVerifiedEmail, BadgrOAuthTokenHasScope)
-    v2_serializer_class = IssuerAccessTokenSerializerV2
-    valid_scopes = ["rw:issuer"]
-
-    @apispec_post_operation('AccessToken',
-        summary="Retrieve issuer tokens",
-        tags=["Issuers"],
-    )
-    def post(self, request, **kwargs):
-        if not isinstance(request.auth, AccessToken):
-            # need to use a oauth2 bearer token to authorize
-            error_response = BaseSerializerV2.response_envelope(result=[], success=False, description="Invalid token")
-            return Response(error_response, status=HTTP_403_FORBIDDEN)
-
-        issuer_entityids = request.data.get('issuers', None)
-        if not issuer_entityids:
-            raise serializers.ValidationError({"issuers": "field is required"})
-
-        issuers = []
-        for issuer_entityid in issuer_entityids:
-            try:
-                issuer = Issuer.cached.get(entity_id=issuer_entityid)
-                self.check_object_permissions(request, issuer)
-            except Issuer.DoesNotExist as e:
-                raise serializers.ValidationError({"issuers": "unknown issuer"})
-            else:
-                issuers.append(issuer)
-
-        tokens = []
-        expires = timezone.now() + datetime.timedelta(weeks=5200)
-        for issuer in issuers:
-            scope = "rw:issuer:{}".format(issuer.entity_id)
-
-            # grant application user staff access to issuer if needed
-            staff, staff_created = IssuerStaff.cached.get_or_create(
-                issuer=issuer,
-                user=request.auth.application.user,
-                defaults=dict(
-                    role=IssuerStaff.ROLE_STAFF
-                )
-            )
-
-            accesstoken, created = AccessToken.objects.get_or_create(
-                user=request.auth.application.user,
-                application=request.auth.application,
-                scope=scope,
-                defaults=dict(
-                    expires=expires,
-                    token=random_token_generator(request)
-                )
-            )
-            tokens.append({
-                'issuer': issuer.entity_id,
-                'token': accesstoken.token,
-                'expires': accesstoken.expires,
-            })
-
-        serializer = IssuerAccessTokenSerializerV2(data=tokens, many=True, context=dict(
-            request=request,
-            kwargs=kwargs
-        ))
-        serializer.is_valid(raise_exception=True)
-        return Response(serializer.data)
-
-
-class PaginatedAssertionsSinceSerializer(CursorPaginatedListSerializer):
-    child = BadgeInstanceSerializerV2()
-
-    def __init__(self, *args, **kwargs):
-        self.timestamp = timezone.now()  # take timestamp now before SQL query is run in super.__init__
-        super(PaginatedAssertionsSinceSerializer, self).__init__(*args, **kwargs)
-
-    def to_representation(self, data):
-        representation = super(PaginatedAssertionsSinceSerializer, self).to_representation(data)
-        representation['timestamp'] = self.timestamp.isoformat()
-        return representation
+# class IssuerTokensList(BaseEntityListView):
+#     model = AccessToken
+#     permission_classes = (AuthenticatedWithVerifiedEmail, BadgrOAuthTokenHasScope)
+#     v2_serializer_class = IssuerAccessTokenSerializerV2
+#     valid_scopes = ["rw:issuer"]
+#
+#     @apispec_post_operation('AccessToken',
+#         summary="Retrieve issuer tokens",
+#         tags=["Issuers"],
+#     )
+#     def post(self, request, **kwargs):
+#         if not isinstance(request.auth, AccessToken):
+#             # need to use a oauth2 bearer token to authorize
+#             error_response = BaseSerializerV2.response_envelope(result=[], success=False, description="Invalid token")
+#             return Response(error_response, status=HTTP_403_FORBIDDEN)
+#
+#         issuer_entityids = request.data.get('issuers', None)
+#         if not issuer_entityids:
+#             raise serializers.ValidationError({"issuers": "field is required"})
+#
+#         issuers = []
+#         for issuer_entityid in issuer_entityids:
+#             try:
+#                 issuer = Issuer.cached.get(entity_id=issuer_entityid)
+#                 self.check_object_permissions(request, issuer)
+#             except Issuer.DoesNotExist as e:
+#                 raise serializers.ValidationError({"issuers": "unknown issuer"})
+#             else:
+#                 issuers.append(issuer)
+#
+#         tokens = []
+#         expires = timezone.now() + datetime.timedelta(weeks=5200)
+#         for issuer in issuers:
+#             scope = "rw:issuer:{}".format(issuer.entity_id)
+#
+#             # grant application user staff access to issuer if needed
+#             staff, staff_created = IssuerStaff.cached.get_or_create(
+#                 issuer=issuer,
+#                 user=request.auth.application.user,
+#                 defaults=dict(
+#                     role=IssuerStaff.ROLE_STAFF
+#                 )
+#             )
+#
+#             accesstoken, created = AccessToken.objects.get_or_create(
+#                 user=request.auth.application.user,
+#                 application=request.auth.application,
+#                 scope=scope,
+#                 defaults=dict(
+#                     expires=expires,
+#                     token=random_token_generator(request)
+#                 )
+#             )
+#             tokens.append({
+#                 'issuer': issuer.entity_id,
+#                 'token': accesstoken.token,
+#                 'expires': accesstoken.expires,
+#             })
+#
+#         serializer = IssuerAccessTokenSerializerV2(data=tokens, many=True, context=dict(
+#             request=request,
+#             kwargs=kwargs
+#         ))
+#         serializer.is_valid(raise_exception=True)
+#         return Response(serializer.data)
 
 
-class AssertionsChangedSince(BaseEntityView):
-    permission_classes = (BadgrOAuthTokenHasScope,)
-    valid_scopes = ["r:assertions"]
+# class PaginatedAssertionsSinceSerializer(CursorPaginatedListSerializer):
+#     child = BadgeInstanceSerializerV2()
+#
+#     def __init__(self, *args, **kwargs):
+#         self.timestamp = timezone.now()  # take timestamp now before SQL query is run in super.__init__
+#         super(PaginatedAssertionsSinceSerializer, self).__init__(*args, **kwargs)
+#
+#     def to_representation(self, data):
+#         representation = super(PaginatedAssertionsSinceSerializer, self).to_representation(data)
+#         representation['timestamp'] = self.timestamp.isoformat()
+#         return representation
 
-    def get_user(self, request):
-        if request.user:
-            return request.user
-        if request.auth:
-            return request.auth.application.user
 
-    def get_queryset(self, request, since=None):
-        user = self.get_user(request)
-        issuer_ids = [i.id for i in user.cached_issuers()]
-
-        authorized_badgeusers = request.auth.application.accesstoken_set.all()
-        user_ids = [u.id for u in authorized_badgeusers]
-
-        # select badgeinstance.* where
-        #   (
-        #     badgeinstance.issuer_id in (:issuer_ids)
-        #     OR
-        #     backpackcollectionbadgeinstance.badgeuser_id in (:user_ids)
-        #   )
-        #   AND
-        #   badgeinstance.updated_at >= since
-
-        expr = Q(issuer_id__in=issuer_ids) | Q(backpackcollectionbadgeinstance__badgeuser_id__in=user_ids)
-
-        if since is not None:
-            expr &= Q(updated_at__gt=since)
-
-        qs = BadgeInstance.objects.filter(expr)
-        return qs
-
-    def get(self, request, **kwargs):
-        since = request.GET.get('since', None)
-        if since is not None:
-            try:
-                since = dateutil.parser.parse(since)
-            except ValueError as e:
-                err = V2ErrorSerializer(data={}, field_errors={'since': ["must be iso8601 format"]}, validation_errors=[])
-                err._success = False
-                err._description = "bad request"
-                err.is_valid(raise_exception=False)
-                return Response(err.data, status=HTTP_400_BAD_REQUEST)
-
-        queryset = self.get_queryset(request, since=since)
-        context = self.get_context_data(**kwargs)
-        serializer = PaginatedAssertionsSinceSerializer(
-            queryset=queryset,
-            request=request,
-            context=context)
-        serializer.is_valid()
-        return Response(serializer.data)
-
-        # return super(AssertionsChangedSince, self).get(request, **kwargs)
+# class AssertionsChangedSince(BaseEntityView):
+#     permission_classes = (BadgrOAuthTokenHasScope,)
+#     valid_scopes = ["r:assertions"]
+#
+#     def get_user(self, request):
+#         if request.user:
+#             return request.user
+#         if request.auth:
+#             return request.auth.application.user
+#
+#     def get_queryset(self, request, since=None):
+#         user = self.get_user(request)
+#         issuer_ids = [i.id for i in user.cached_issuers()]
+#
+#         authorized_badgeusers = request.auth.application.accesstoken_set.all()
+#         user_ids = [u.id for u in authorized_badgeusers]
+#
+#         # select badgeinstance.* where
+#         #   (
+#         #     badgeinstance.issuer_id in (:issuer_ids)
+#         #     OR
+#         #     backpackcollectionbadgeinstance.badgeuser_id in (:user_ids)
+#         #   )
+#         #   AND
+#         #   badgeinstance.updated_at >= since
+#
+#         expr = Q(issuer_id__in=issuer_ids) | Q(backpackcollectionbadgeinstance__badgeuser_id__in=user_ids)
+#
+#         if since is not None:
+#             expr &= Q(updated_at__gt=since)
+#
+#         qs = BadgeInstance.objects.filter(expr)
+#         return qs
+#
+#     def get(self, request, **kwargs):
+#         since = request.GET.get('since', None)
+#         if since is not None:
+#             try:
+#                 since = dateutil.parser.parse(since)
+#             except ValueError as e:
+#                 err = V2ErrorSerializer(data={}, field_errors={'since': ["must be iso8601 format"]}, validation_errors=[])
+#                 err._success = False
+#                 err._description = "bad request"
+#                 err.is_valid(raise_exception=False)
+#                 return Response(err.data, status=HTTP_400_BAD_REQUEST)
+#
+#         queryset = self.get_queryset(request, since=since)
+#         context = self.get_context_data(**kwargs)
+#         serializer = PaginatedAssertionsSinceSerializer(
+#             queryset=queryset,
+#             request=request,
+#             context=context)
+#         serializer.is_valid()
+#         return Response(serializer.data)
+#
+#         # return super(AssertionsChangedSince, self).get(request, **kwargs)

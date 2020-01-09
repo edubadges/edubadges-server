@@ -88,15 +88,15 @@ urlpatterns = [
     # url(r'^v2/', include('recipient.v2_api_urls'), kwargs={'version': 'v2'}),
 
 
-    # v2 API endpoints
-    url(r'^v2/', include('issuer.v2_api_urls'), kwargs={'version': 'v2'}),
-    url(r'^v2/', include('badgeuser.v2_api_urls'), kwargs={'version': 'v2'}),
-    url(r'^v2/backpack/', include('backpack.v2_api_urls'), kwargs={'version': 'v2'}),
+    # # v2 API endpoints
+    # url(r'^v2/', include('issuer.v2_api_urls'), kwargs={'version': 'v2'}),
+    # url(r'^v2/', include('badgeuser.v2_api_urls'), kwargs={'version': 'v2'}),
+    # url(r'^v2/backpack/', include('backpack.v2_api_urls'), kwargs={'version': 'v2'}),
 
 
     # External Tools
     url(r'^v1/externaltools/', include('externaltools.v1_api_urls'), kwargs={'version': 'v1'}),
-    url(r'^v2/externaltools/', include('externaltools.v2_api_urls'), kwargs={'version': 'v2'}),
+    # url(r'^v2/externaltools/', include('externaltools.v2_api_urls'), kwargs={'version': 'v2'}),
 
     # include LTI endpoints
     # url(r'^v2/', include('lti_edu.urls'), kwargs={'version': 'v2'}),

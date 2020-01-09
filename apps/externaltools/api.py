@@ -4,7 +4,7 @@
 from entity.api import BaseEntityListView, BaseEntityDetailView
 from externaltools.models import ExternalTool, ExternalToolLaunchpoint
 from externaltools.serializers_v1 import ExternalToolSerializerV1, ExternalToolLaunchSerializerV1
-from externaltools.serializers_v2 import ExternalToolSerializerV2, ExternalToolLaunchSerializerV2
+# from externaltools.serializers_v2 import ExternalToolSerializerV2, ExternalToolLaunchSerializerV2
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from rest_framework.exceptions import ValidationError
 
@@ -12,7 +12,7 @@ from rest_framework.exceptions import ValidationError
 class ExternalToolList(BaseEntityListView):
     model = ExternalTool
     v1_serializer_class = ExternalToolSerializerV1
-    v2_serializer_class = ExternalToolSerializerV2
+    # v2_serializer_class = ExternalToolSerializerV2
     permission_classes = ()
     http_method_names = ['get']
 
@@ -34,7 +34,7 @@ class ExternalToolList(BaseEntityListView):
 class ExternalToolLaunch(BaseEntityDetailView):
     model = ExternalTool  # used by VersionedObjectMixin
     v1_serializer_class = ExternalToolLaunchSerializerV1
-    v2_serializer_class = ExternalToolLaunchSerializerV2
+    # v2_serializer_class = ExternalToolLaunchSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail,)
     http_method_names = ['get']
 
