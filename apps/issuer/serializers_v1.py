@@ -8,7 +8,6 @@ from django.core.validators import URLValidator
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import strip_tags
-from django.shortcuts import get_object_or_404
 from institution.models import Faculty
 from institution.serializers_v1 import FacultySerializerV1
 from lti_edu.models import StudentsEnrolled
@@ -17,7 +16,7 @@ from mainsite.models import BadgrApp
 from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField, \
     OriginalJsonSerializerMixin
 from mainsite.utils import OriginSetting
-from mainsite.validators import ChoicesValidator, BadgeExtensionValidator
+from mainsite.validators import ChoicesValidator
 from rest_framework import serializers
 
 from . import utils
@@ -88,7 +87,7 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
     url = serializers.URLField(max_length=1024, required=True)
     staff = IssuerStaffSerializerV1(read_only=True, source='cached_issuerstaff', many=True)
     faculty = FacultySerializerV1(required=False, allow_null=True)
-    extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
+    extensions = serializers.DictField(source='extension_items', required=False)
 
     class Meta:
         apispec_definition = ('Issuer', {})
@@ -209,7 +208,7 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, 
     description = StripTagsCharField(max_length=16384, required=True, convert_null=True)
     alignment = AlignmentItemSerializerV1(many=True, source='alignment_items', required=False)
     tags = serializers.ListField(child=StripTagsCharField(max_length=1024), source='tag_items', required=False)
-    extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
+    extensions = serializers.DictField(source='extension_items', required=False)
     category = serializers.CharField(required=True)
 
     class Meta:
@@ -348,7 +347,7 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
     create_notification = HumanReadableBooleanField(write_only=True, required=False, default=False)
 
     hashed = serializers.NullBooleanField(default=None, required=False)
-    extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
+    extensions = serializers.DictField(source='extension_items', required=False)
 
     class Meta:
         apispec_definition = ('Assertion', {})
