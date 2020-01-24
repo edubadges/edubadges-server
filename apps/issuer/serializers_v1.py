@@ -430,7 +430,7 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
         if submitted_items:
             evidence_items.extend(submitted_items)
 
-        if validated_data.get('issue_signed', False):
+        if self.context['request'].data.get('issue_signed', False):
             assertion = self.context.get('badgeclass').issue_signed(
                 recipient_id=validated_data.get('recipient_identifier'),
                 narrative=validated_data.get('narrative'),
