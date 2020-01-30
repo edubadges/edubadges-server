@@ -133,6 +133,13 @@ badgr
 * `./manage.py dist` - generate docs swagger file(s)
 * `./manage.py createsuperuser` - follow prompts to create your first admin user account
 
+
+### Prvovision database
+* Login the admin interface of the server and: 
+1) Add a badgeuser_termsversion
+2) Add a socialaccount_socialapp for edu_id and surf_conext (with these names)
+- Make sure the SITE_ID defined in your settings file (SITE_ID = 1) matches yours in the database
+
 ### Install and run Badgr UI {#badgr-ui}
 Start in your `badgr` directory and clone badgr-ui source code: `git clone https://github.com/edubadges/badgr-ui.git badgr-ui`
 
