@@ -19,6 +19,9 @@ LANGUAGE_CODE = 'en-us'
 #MEDIA_URL = 'http://azureaccountname.blob.core.windows.net/'
 #AZURE_CONTAINER = 'mediafiles'
 
+# If set to true, you can impersonate users
+LOCAL_DEVELOPMENT_MODE = False
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.

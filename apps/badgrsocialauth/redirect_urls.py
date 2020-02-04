@@ -2,7 +2,7 @@ import importlib
 
 from allauth.socialaccount import providers
 from badgrsocialauth.views import BadgrSocialLogin, BadgrSocialEmailExists, BadgrSocialAccountVerifyEmail, \
-    BadgrSocialLoginCancel, BadgrAccountConnected
+    BadgrSocialLoginCancel, BadgrAccountConnected, ImpersonateUser
 from django.conf.urls import url
 
 urlpatterns = [
@@ -19,6 +19,9 @@ urlpatterns = [
 
     # Intercept allauth connections view (attached a new social account)
     url(r'^connected', BadgrAccountConnected.as_view(permanent=False), name='socialaccount_connections'),
+
+    url(r'^impersonate/(?P<id>[^/]+)$', ImpersonateUser.as_view(), name='impersonate_user'),
+
 ]
 
 
