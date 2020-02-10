@@ -470,15 +470,6 @@ class BadgeClass(ResizeUploadedImage,
     objects = BadgeClassManager()
     cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
 
-    BADGECLASS_TYPE_FORMAL = 'formal'
-    BADGECLASS_TYPE_NON_FORMAL = 'non-formal'
-    BADGECLASS_TYPE_CHOICES = (
-        (BADGECLASS_TYPE_FORMAL, 'formal'),
-        (BADGECLASS_TYPE_NON_FORMAL, 'non-formal')
-    )
-
-    category = models.CharField(max_length=255, choices=BADGECLASS_TYPE_CHOICES, default=BADGECLASS_TYPE_FORMAL, blank=False, null=False)
-
     class Meta:
         verbose_name_plural = "Badge classes"
 

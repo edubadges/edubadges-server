@@ -43,7 +43,6 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
 
         representation['id'] = obj.entity_id
         representation['json'] = V1BadgeInstanceSerializer(obj, context=self.context).data
-        representation['json']['badge']['category'] = obj.cached_badgeclass.category
         representation['imagePreview'] = {
             "type": "image",
             "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('badgeclass_image', kwargs={'entity_id': obj.cached_badgeclass.entity_id}))
