@@ -3,6 +3,9 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib.auth import views as auth_views
 
+from django.urls import path
+from graphene_django.views import GraphQLView
+
 from ims.views import base
 from mainsite.admin import badgr_admin
 from mainsite.oauth2_api import AuthorizationApiView, TokenView, AuthCodeExchange
@@ -18,6 +21,8 @@ from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation
 
 
 urlpatterns = [
+    path("graphql", GraphQLView.as_view(graphiql=True)),
+
     # Backup URLs in case the server isn't serving these directly
     url(r'^favicon\.png[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL, permanent=True)),
     url(r'^favicon\.ico[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL, permanent=True)),
