@@ -2,8 +2,9 @@ from django.apps import apps
 from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib.auth import views as auth_views
-
+from django.views.decorators.csrf import csrf_exempt
 from django.urls import path
+
 from graphene_django.views import GraphQLView
 
 from ims.views import base
@@ -21,7 +22,7 @@ from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation
 
 
 urlpatterns = [
-    path("graphql", GraphQLView.as_view(graphiql=True)),
+    path("graphql", csrf_exempt(GraphQLView.as_view(graphiql=True))),
 
     # Backup URLs in case the server isn't serving these directly
     url(r'^favicon\.png[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL, permanent=True)),
