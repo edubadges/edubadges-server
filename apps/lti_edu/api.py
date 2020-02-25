@@ -52,7 +52,7 @@ class StudentEnrollmentList(BaseEntityListView):
             return Response(data='Awarded enrollments cannot be withdrawn', status=403)
         if request.user == enrollment.user:
             enrollment.delete()
-            return Response(data='Enrollment successfully withdrawn', status=200)
+            return Response(status=200)
         else:
             return Response(data='Users can only withdraw their own enrollments', status=403)
 

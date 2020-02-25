@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'lti_edu',
     'theming',
     'signing',
+    'staff',
 
     # api docs
     'apispec_drf',

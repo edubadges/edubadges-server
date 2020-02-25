@@ -106,6 +106,9 @@ urlpatterns = [
     url(r'^institution/', include('institution.api_urls')),
     url(r'^lti_issuer/', include('lti_edu.lti_urls')),
 
+    # include Institution endpoints
+    url(r'^institution/', include('institution.api_urls')),
+
     # include theming endpoints
     url(r'v1/', include('theming.api_urls'), kwargs={'version': 'v1'}),
 
@@ -121,6 +124,9 @@ urlpatterns = [
 
     #  include signing endpoints
     url(r'^signing/', include('signing.api_urls')),
+
+    # include staff endpoints
+    url(r'^staff/', include('staff.api_urls')),
 
 ]
 

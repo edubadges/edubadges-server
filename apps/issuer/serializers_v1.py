@@ -20,7 +20,7 @@ from mainsite.validators import ChoicesValidator
 from rest_framework import serializers
 
 from . import utils
-from .models import Issuer, BadgeClass, IssuerStaff, BadgeInstance, BadgeClassExtension, IssuerExtension
+from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension  #, IssuerStaff
 
 
 class ExtensionsSaverMixin(object):
@@ -58,7 +58,7 @@ class CachedListSerializer(serializers.ListSerializer):
 class IssuerStaffSerializerV1(serializers.Serializer):
     """ A read_only serializer for staff roles """
     user = BadgeUserProfileSerializerV1(source='cached_user')
-    role = serializers.CharField(validators=[ChoicesValidator(list(dict(IssuerStaff.ROLE_CHOICES).keys()))])
+    # role = serializers.CharField(validators=[ChoicesValidator(list(dict(IssuerStaff.ROLE_CHOICES).keys()))])
     is_signer = serializers.BooleanField()
     may_become_signer = serializers.BooleanField()
 
@@ -169,9 +169,9 @@ class IssuerRoleActionSerializerV1(serializers.Serializer):
     action = serializers.ChoiceField(('add', 'modify', 'remove'), allow_blank=True)
     username = serializers.CharField(allow_blank=True, required=False)
     email = serializers.EmailField(allow_blank=True, required=False)
-    role = serializers.CharField(
-        validators=[ChoicesValidator(list(dict(IssuerStaff.ROLE_CHOICES).keys()))],
-        default=IssuerStaff.ROLE_STAFF)
+    # role = serializers.CharField(
+    #     validators=[ChoicesValidator(list(dict(IssuerStaff.ROLE_CHOICES).keys()))],
+    #     default=IssuerStaff.ROLE_STAFF)
     is_signer = serializers.BooleanField(required=False)
 
     def validate(self, attrs):
