@@ -21,12 +21,12 @@ class BadgeClassType(DjangoObjectType):
 
 
 class Query(object):
-    all_issuers = graphene.List(IssuerType)
-    all_badge_classes = graphene.List(BadgeClassType)
+    issuers = graphene.List(IssuerType)
+    badge_classes = graphene.List(BadgeClassType)
     issuer = graphene.Field(IssuerType, id=graphene.ID())
     badge_class = graphene.Field(BadgeClassType, id=graphene.ID())
 
-    def resolve_all_issuers(self, info, **kwargs):
+    def resolve_issuers(self, info, **kwargs):
         return [issuer for issuer in Issuer.objects.all() if issuer.has_permissions(info.context.user, ['read'])]
 
     def resolve_issuer(self, info, **kwargs):
@@ -36,7 +36,7 @@ class Query(object):
             if issuer.has_permissions(info.context.user, ['read']):
                 return issuer
 
-    def resolve_all_badge_classes(self, info, **kwargs):
+    def resolve_badge_classes(self, info, **kwargs):
         return [bc for bc in BadgeClass.objects.all() if bc.has_permissions(info.context.user, ['read'])]
 
 

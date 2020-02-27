@@ -29,12 +29,12 @@ class InstitutionType(DjangoObjectType):
 
 
 class Query(object):
-    all_institutions = graphene.List(InstitutionType)
-    all_faculties = graphene.List(FacultyType)
+    institutions = graphene.List(InstitutionType)
+    faculties = graphene.List(FacultyType)
     institution = graphene.Field(InstitutionType, id=graphene.ID())
     faculty = graphene.Field(FacultyType, id=graphene.ID())
 
-    def resolve_all_institutions(self, info, **kwargs):
+    def resolve_institutions(self, info, **kwargs):
         return [inst for inst in Institution.objects.all() if inst.has_permissions(info.context.user, ['read'])]
 
     def resolve_institution(self, info, **kwargs):
@@ -44,7 +44,7 @@ class Query(object):
             if institution.has_permissions(info.context.user, ['read']):
                 return institution
 
-    def resolve_all_faculties(self, info, **kwargs):
+    def resolve_faculties(self, info, **kwargs):
         return [fac for fac in Faculty.objects.all() if fac.has_permissions(info.context.user, ['read'])]
 
     def resolve_faculty(self, info, **kwargs):
