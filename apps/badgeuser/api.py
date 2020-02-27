@@ -10,7 +10,6 @@ from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
 from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserTokenSerializerV1, \
     BadgeUserManagementSerializer
-# from badgeuser.serializers_v2 import BadgeUserTokenSerializerV2, BadgeUserSerializerV2, AccessTokenSerializerV2
 from badgeuser.tasks import process_email_verification
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -22,7 +21,6 @@ from django.http import Http404
 from django.urls import reverse
 from django.utils import timezone
 from entity.api import BaseEntityDetailView, BaseEntityListView
-# from entity.serializers import BaseSerializerV2
 from issuer.permissions import BadgrOAuthTokenHasScope
 from mainsite.models import BadgrApp
 from mainsite.permissions import AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope
@@ -73,7 +71,6 @@ class BadgeUserManagementDetail(BaseEntityDetailView):
 class BadgeUserDetail(BaseEntityDetailView):
     model = BadgeUser
     v1_serializer_class = BadgeUserProfileSerializerV1
-    # v2_serializer_class = BadgeUserSerializerV2
     permission_classes = (permissions.AllowAny, BadgrOAuthTokenHasScope)
     valid_scopes = {
         "post": ["*"],
@@ -164,7 +161,6 @@ class BadgeUserToken(BaseEntityDetailView):
     model = BadgeUser
     permission_classes = (BadgeUserIsAuthenticatedUser,)
     v1_serializer_class = BadgeUserTokenSerializerV1
-    # v2_serializer_class = BadgeUserTokenSerializerV2
 
     def get_object(self, request, **kwargs):
         return request.user
@@ -214,7 +210,6 @@ class BadgeUserForgotPassword(BaseUserRecoveryView):
     authentication_classes = ()
     permission_classes = (permissions.AllowAny,)
     v1_serializer_class = serializers.Serializer
-    # v2_serializer_class = BaseSerializerV2
 
     def get(self, request, *args, **kwargs):
         badgr_app = None
@@ -373,7 +368,6 @@ class BadgeUserForgotPassword(BaseUserRecoveryView):
 class BadgeUserEmailConfirm(BaseUserRecoveryView):
     permission_classes = (permissions.AllowAny,)
     v1_serializer_class = BaseSerializer
-    # v2_serializer_class = BaseSerializerV2
 
     def get(self, request, **kwargs):
         """
@@ -409,7 +403,6 @@ class BadgeUserEmailConfirm(BaseUserRecoveryView):
 
 class AccessTokenList(BaseEntityListView):
     model = BadgrAccessToken
-    # v2_serializer_class = AccessTokenSerializerV2
     permission_classes = (permissions.IsAuthenticated, BadgrOAuthTokenHasScope)
     valid_scopes = ['rw:profile']
 
@@ -426,7 +419,6 @@ class AccessTokenList(BaseEntityListView):
 
 class AccessTokenDetail(BaseEntityDetailView):
     model = BadgrAccessToken
-    # v2_serializer_class = AccessTokenSerializerV2
     permission_classes = (permissions.IsAuthenticated, BadgrOAuthTokenHasScope)
     valid_scopes = ['rw:profile']
 
