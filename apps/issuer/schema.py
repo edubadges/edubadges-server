@@ -37,6 +37,7 @@ class Query(object):
     def resolve_all_badge_classes(self, info, **kwargs):
         return [bc for bc in BadgeClass.objects.all() if bc.has_permissions(info.context.user, ['read'])]
 
+
     def resolve_badge_class(self, info, **kwargs):
         id =  kwargs.get('id')
         if id is not None:

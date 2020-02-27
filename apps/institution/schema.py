@@ -27,7 +27,6 @@ class InstitutionType(DjangoObjectType):
 
 
 class Query(object):
-
     all_institutions = graphene.List(InstitutionType)
     all_faculties = graphene.List(FacultyType)
     institution = graphene.Field(InstitutionType, id=graphene.ID())
