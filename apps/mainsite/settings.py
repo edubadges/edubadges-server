@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django_object_actions',
     # 'django_extensions',
+    'graphene_django',
     'markdownify',
     'badgeuser',
     'allauth',
@@ -492,3 +493,7 @@ AUTHCODE_SECRET_KEY = Fernet.generate_key()
 AUTHCODE_EXPIRES_SECONDS = 600  # needs to be long enough to fetch information from socialauth providers
 
 SESSION_COOKIE_SAMESITE = None
+
+GRAPHENE = {
+    'SCHEMA': 'apps.mainsite.schema.schema'
+}

@@ -4,14 +4,17 @@ from entity.models import BaseVersionedEntity
 from staff.mixins import PermissionedModelMixin
 from staff.models import FacultyStaff, InstitutionStaff
 
+
 class Institution(PermissionedModelMixin, cachemodel.CacheModel):
     
     def __str__(self):
         return self.name
     
     name = models.CharField(max_length=512)
-
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.InstitutionStaff")
+
+    def get_faculties(self, user, permissions):
+        return [fac for fac in self.cached_faculties() if fac.has_permissions(user, permissions)]
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_staff(self):
@@ -50,8 +53,10 @@ class Faculty(PermissionedModelMixin, BaseVersionedEntity, cachemodel.CacheModel
 
     name = models.CharField(max_length=512)
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, blank=False, null=False)
-
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.FacultyStaff")
+
+    def get_issuers(self, user, permissions):
+        return [issuer for issuer in self.cached_issuers() if issuer.has_permissions(user, permissions)]
 
     @property
     def parent(self):
@@ -69,7 +74,7 @@ class Faculty(PermissionedModelMixin, BaseVersionedEntity, cachemodel.CacheModel
     def cached_badgeclasses(self):
         r = []
         for issuer in self.cached_issuers():
-            r.append(issuer.cached_badgeclasses)
+            r.append(issuer.cached_badgeclasses())
         return r
 
     # needed for the within_scope method of user
