@@ -11,8 +11,8 @@ class BadgeClassType(DjangoObjectType):
         model = BadgeClass
 
 class Query(object):
-    all_issuers = graphene.List(IssuerType)
-    def resolve_all_issuers(self, info, **kwargs):
+    issuers = graphene.List(IssuerType)
+    def resolve_issuers(self, info, **kwargs):
         return Issuer.objects.all()
 
     issuer = graphene.Field(IssuerType, id=graphene.ID())
@@ -24,8 +24,8 @@ class Query(object):
 
         return None
 
-    all_badge_classes = graphene.List(BadgeClassType)
-    def resolve_all_badge_classes(self, info, **kwargs):
+    badge_classes = graphene.List(BadgeClassType)
+    def resolve_badge_classes(self, info, **kwargs):
         return BadgeClass.objects.all()
 
     badge_class = graphene.Field(BadgeClassType, id=graphene.ID())

@@ -11,8 +11,8 @@ class FacultyType(DjangoObjectType):
         model = Faculty
 
 class Query(object):
-    all_institutions = graphene.List(InstitutionType)
-    def resolve_all_institutions(self, info, **kwargs):
+    institutions = graphene.List(InstitutionType)
+    def resolve_institutions(self, info, **kwargs):
         return Institution.objects.all()
 
     institution = graphene.Field(InstitutionType, id=graphene.ID())
@@ -24,8 +24,8 @@ class Query(object):
 
         return None
 
-    all_faculties = graphene.List(FacultyType)
-    def resolve_all_faculties(self, info, **kwargs):
+    faculties = graphene.List(FacultyType)
+    def resolve_faculties(self, info, **kwargs):
         return Faculty.objects.all()
 
     faculty = graphene.Field(FacultyType, id=graphene.ID())
