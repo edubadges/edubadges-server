@@ -8,6 +8,7 @@ class FacultyType(DjangoObjectType):
 
     class Meta:
         model = Faculty
+        exclude = ('id',)
 
     issuers = graphene.List(IssuerType)
 
@@ -19,6 +20,7 @@ class InstitutionType(DjangoObjectType):
 
     class Meta:
         model = Institution
+        exclude = ('id',)
 
     faculties = graphene.List(FacultyType)
 

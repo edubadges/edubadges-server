@@ -7,6 +7,7 @@ class IssuerType(DjangoObjectType):
 
     class Meta:
         model = Issuer
+        exclude = ('id',)
 
     def resolve_badgeclasses(self, info):
         return self.get_badgeclasses(info.context.user, ['read'])
@@ -16,6 +17,7 @@ class BadgeClassType(DjangoObjectType):
 
     class Meta:
         model = BadgeClass
+        exclude = ('id',)
 
 
 class Query(object):
