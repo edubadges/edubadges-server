@@ -176,6 +176,9 @@ class Issuer(PermissionedModelMixin,
     def cached_staff(self):
         return list(IssuerStaff.objects.filter(issuer=self))
 
+    def get_badgeclasses(self, user, permissions):
+        return [bc for bc in self.cached_badgeclasses() if bc.has_permissions(user, permissions)]
+
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeclasses(self):
         return list(self.badgeclasses.all())
@@ -417,7 +420,8 @@ class Issuer(PermissionedModelMixin,
         return self.name
 
 
-class BadgeClass(ResizeUploadedImage,
+class BadgeClass(PermissionedModelMixin,
+                 ResizeUploadedImage,
                  ScrubUploadedSvgImage,
                  BaseAuditedModel,
                  BaseVersionedEntity,

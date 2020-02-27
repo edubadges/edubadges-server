@@ -36,6 +36,24 @@ class PermissionedModelMixin(object):
         except AttributeError:  # recursive base case
             return self._get_local_permissions(user)
 
+    def has_permissions(self, user, permissions):
+        """
+        :param user: BadgeUser (teacher)
+        :param permissions: a list of strings
+        :return: True if user has all the permissions
+        """
+        user_perms = self.get_permissions(user)
+        perm_count = 0
+        if not user_perms:
+            return False
+        else:
+            for perm in permissions:
+                if not user_perms[perm]:
+                    return False
+                else:
+                    perm_count += 1
+            return len(permissions) == perm_count
+
     @property
     def staff_items(self):
         return self.cached_staff()

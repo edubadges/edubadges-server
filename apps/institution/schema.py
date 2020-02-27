@@ -1,38 +1,54 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 from .models import Institution, Faculty
+from issuer.schema import IssuerType
 
-class InstitutionType(DjangoObjectType):
-    class Meta:
-        model = Institution
 
 class FacultyType(DjangoObjectType):
+
     class Meta:
         model = Faculty
 
-class Query(object):
-    all_institutions = graphene.List(InstitutionType)
-    def resolve_all_institutions(self, info, **kwargs):
-        return Institution.objects.all()
+    issuers = graphene.List(IssuerType)
 
+    def resolve_issuers(self, info):
+        return self.get_issuers(info.context.user, ['read'])
+
+
+class InstitutionType(DjangoObjectType):
+
+    class Meta:
+        model = Institution
+
+    faculties = graphene.List(FacultyType)
+
+    def resolve_faculties(self, info):
+        return self.get_faculties(info.context.user, ['read'])
+
+
+class Query(object):
+
+    all_institutions = graphene.List(InstitutionType)
+    all_faculties = graphene.List(FacultyType)
     institution = graphene.Field(InstitutionType, id=graphene.ID())
+    faculty = graphene.Field(FacultyType, id=graphene.ID())
+
+    def resolve_all_institutions(self, info, **kwargs):
+        return [inst for inst in Institution.objects.all() if inst.has_permissions(info.context.user, ['read'])]
+
     def resolve_institution(self, info, **kwargs):
         id = kwargs.get('id')
-
         if id is not None:
-            return Institution.objects.get(id=id)
+            institution = Institution.objects.get(id=id)
+            if institution.has_permissions(info.context.user, ['read']):
+                return institution
 
-        return None
-
-    all_faculties = graphene.List(FacultyType)
     def resolve_all_faculties(self, info, **kwargs):
-        return Faculty.objects.all()
+        return [fac for fac in Faculty.objects.all() if fac.has_permissions(info.context.user, ['read'])]
 
-    faculty = graphene.Field(FacultyType, id=graphene.ID())
     def resolve_faculty(self, info, **kwargs):
-        id =  kwargs.get('id')
-
+        id = kwargs.get('id')
         if id is not None:
-            return Faculty.objects.get(id=id)
-
-        return None
+            faculty = Faculty.objects.get(id=id)
+            if faculty.has_permissions(info.context.user, ['read']):
+                return faculty
