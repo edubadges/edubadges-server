@@ -19,6 +19,9 @@ class BadgeClassType(DjangoObjectType):
         model = BadgeClass
         exclude = ('id',)
 
+    def resolve_image(self, info):
+        return self.image_url()
+
 
 class Query(object):
     issuers = graphene.List(IssuerType)

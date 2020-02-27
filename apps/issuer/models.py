@@ -718,6 +718,13 @@ class BadgeClass(PermissionedModelMixin,
     def cached_badgrapp(self):
         return self.cached_issuer.cached_badgrapp
 
+    def image_url(self):
+        if getattr(settings, 'MEDIA_URL').startswith('http'):
+            return default_storage.url(self.image.name)
+        else:
+            return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
+
+
 
 class BadgeInstance(BaseAuditedModel,
                     BaseVersionedEntity,
