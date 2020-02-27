@@ -1,5 +1,4 @@
-from badgeuser.api import BadgeUserToken, BadgeUserForgotPassword, BadgeUserEmailConfirm, BadgeUserDetail, \
-    BadgeUserList, BadgeUserManagementDetail
+from badgeuser.api import BadgeUserToken, BadgeUserForgotPassword, BadgeUserEmailConfirm, BadgeUserDetail  #, BadgeUserManagementDetail, BadgeUserList
 from badgeuser.api_v1 import BadgeUserEmailList, BadgeUserEmailDetail, BadgeUserFacultyList
 from django.conf.urls import url
 
@@ -12,6 +11,6 @@ urlpatterns = [
     url(r'^emails/(?P<id>[^/]+)$', BadgeUserEmailDetail.as_view(), name='v1_api_user_email_detail'),
     url(r'^legacyconfirmemail/(?P<confirm_id>[^/]+)$', BadgeUserEmailConfirm.as_view(), name='legacy_user_email_confirm'),
     url(r'^confirmemail/(?P<confirm_id>[^/]+)$', BadgeUserEmailConfirm.as_view(), name='v1_api_user_email_confirm'),
-    url(r'^users$', BadgeUserList.as_view(), name='v1_api_user_list'),
-    url(r'^users/(?P<slug>[^/]+)$', BadgeUserManagementDetail.as_view(), name='v1_api_user_management_detail'),
+    # url(r'^users$', BadgeUserList.as_view(), name='v1_api_user_list'),
+    # url(r'^users/(?P<slug>[^/]+)$', BadgeUserManagementDetail.as_view(), name='v1_api_user_management_detail'),
 ]
