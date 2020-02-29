@@ -3,7 +3,7 @@ from django.conf.urls import url
 from issuer.api import (IssuerList, IssuerDetail, IssuerBadgeClassList, BadgeClassDetail, BadgeInstanceList,
                         BadgeInstanceDetail, IssuerBadgeInstanceList, AllBadgeClassesList, BatchAssertionsIssue,
                         TimestampedBadgeInstanceList, BatchSignAssertions)
-from issuer.api_v1 import FindBadgeClassDetail, IssuerStaffList, IssuerStaffConfirm
+from issuer.api_v1 import FindBadgeClassDetail # , IssuerStaffList, IssuerStaffConfirm
 
 urlpatterns = [
     url(r'^all-badges$', AllBadgeClassesList.as_view(), name='v1_api_issuer_all_badges_list'),
@@ -11,8 +11,8 @@ urlpatterns = [
 
     url(r'^issuers$', IssuerList.as_view(), name='v1_api_issuer_list'),
     url(r'^issuers/(?P<slug>[^/]+)$', IssuerDetail.as_view(), name='v1_api_issuer_detail'),
-    url(r'^issuers/(?P<slug>[^/]+)/staff$', IssuerStaffList.as_view(), name='v1_api_issuer_staff'),
-    url(r'^issuers-staff-confirm/(?P<code>[^/]+)$', IssuerStaffConfirm.as_view(), name='v1_api_issuer_staff_confirm'),
+    # url(r'^issuers/(?P<slug>[^/]+)/staff$', IssuerStaffList.as_view(), name='v1_api_issuer_staff'),
+    # url(r'^issuers-staff-confirm/(?P<code>[^/]+)$', IssuerStaffConfirm.as_view(), name='v1_api_issuer_staff_confirm'),
 
     url(r'^issuers/(?P<slug>[^/]+)/badges$', IssuerBadgeClassList.as_view(), name='v1_api_badgeclass_list'),
     url(r'^issuers/(?P<issuerSlug>[^/]+)/badges/(?P<slug>[^/]+)$', BadgeClassDetail.as_view(), name='v1_api_badgeclass_detail'),
