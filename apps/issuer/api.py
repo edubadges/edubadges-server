@@ -29,6 +29,7 @@ from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_
 from signing import tsob
 from signing.models import AssertionTimeStamp
 from signing.permissions import MaySignAssertions
+from staff.permissions import HasObjectPermission
 
 logger = badgrlog.BadgrLogger()
 
@@ -126,7 +127,7 @@ class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
     POST to create a new badgeclass within the issuer context
     """
     model = Issuer  # used by get_object()
-    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, BadgrOAuthTokenHasEntityScope)
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     v1_serializer_class = BadgeClassSerializerV1
     create_event = badgrlog.BadgeClassCreatedEvent
     valid_scopes = ["rw:issuer", "rw:issuer:*"]
