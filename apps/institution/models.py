@@ -10,7 +10,7 @@ class Institution(PermissionedModelMixin, cachemodel.CacheModel):
     def __str__(self):
         return self.name
     
-    name = models.CharField(max_length=512)
+    name = models.CharField(max_length=255, unique=True)
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.InstitutionStaff")
 
     def get_faculties(self, user, permissions):
