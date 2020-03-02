@@ -51,6 +51,15 @@ def get_user_or_none(recipient_identifier):
     except SocialAccount.DoesNotExist:
         return None
 
+
+class ImageUrlGetterMixin(object):
+
+    def image_url(self):
+        if getattr(settings, 'MEDIA_URL').startswith('http'):
+            return default_storage.url(self.image.name)
+        else:
+            return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
+
 class BaseAuditedModel(cachemodel.CacheModel):
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
@@ -142,6 +151,7 @@ class BaseOpenBadgeExtension(cachemodel.CacheModel):
 
 
 class Issuer(PermissionedModelMixin,
+             ImageUrlGetterMixin,
              ResizeUploadedImage,
              ScrubUploadedSvgImage,
              BaseAuditedModel,
@@ -419,8 +429,8 @@ class Issuer(PermissionedModelMixin,
     def __unicode__(self):
         return self.name
 
-
 class BadgeClass(PermissionedModelMixin,
+                 ImageUrlGetterMixin,
                  ResizeUploadedImage,
                  ScrubUploadedSvgImage,
                  BaseAuditedModel,
@@ -718,15 +728,9 @@ class BadgeClass(PermissionedModelMixin,
     def cached_badgrapp(self):
         return self.cached_issuer.cached_badgrapp
 
-    def image_url(self):
-        if getattr(settings, 'MEDIA_URL').startswith('http'):
-            return default_storage.url(self.image.name)
-        else:
-            return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
-
-
 
 class BadgeInstance(BaseAuditedModel,
+                    ImageUrlGetterMixin,
                     BaseVersionedEntity,
                     BaseOpenBadgeObjectModel):
     entity_class_name = 'Assertion'
@@ -804,12 +808,6 @@ class BadgeInstance(BaseAuditedModel,
         extended_json['badge']['issuer'] = self.issuer.json
 
         return extended_json
-
-    def image_url(self):
-        if getattr(settings, 'MEDIA_URL').startswith('http'):
-            return default_storage.url(self.image.name)
-        else:
-            return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
 
     @property
     def share_url(self):
