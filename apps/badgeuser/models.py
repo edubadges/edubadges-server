@@ -560,7 +560,7 @@ class BadgeUser(AdministrateOtherUsersMixin, UserCachedObjectGetterMixin, UserPe
         from allauth.socialaccount.models import SocialAccount
         try:
             account = SocialAccount.objects.get(user=self.pk)
-            return account.extra_data['sub']
+            return account.uid
         except SocialAccount.DoesNotExist:
             return None
 
