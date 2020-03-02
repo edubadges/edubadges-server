@@ -161,10 +161,6 @@ class Issuer(PermissionedModelMixin,
 
     staff = models.ManyToManyField('badgeuser.BadgeUser', through='staff.IssuerStaff')
 
-    # slug has been deprecated for now, but preserve existing values
-    slug = models.CharField(max_length=255, blank=True, null=True, default=None)
-    #slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
-
     badgrapp = models.ForeignKey('mainsite.BadgrApp', on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
     name = models.CharField(max_length=1024)
