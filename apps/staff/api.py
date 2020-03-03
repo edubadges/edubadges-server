@@ -7,8 +7,8 @@ from staff.permissions import HasObjectPermission
 
 
 class StaffListViewMixin(object):
-    allowed_methods = ('POST', 'GET')
-    permission_map = {'GET': 'administrate_users', 'POST': 'administrate_users'}
+    allowed_methods = ('POST',)
+    permission_map = {'POST': 'administrate_users'}
     serializer_class = StaffSerializer
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
 
