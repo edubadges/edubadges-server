@@ -153,22 +153,6 @@ class EmailAddressVariant(models.Model):
         return True
 
 
-class AdministrateOtherUsersMixin(object):
-    """
-    Base class to group all administrate functionality for users, purely for readability
-    """
-    def get_administrable_staff(self):
-        """
-        :return: all staff memberships related to the object where user is staff, except for user's own staff memeberships
-        """
-        admin_staff_memberships = self.get_staff(['administrate_users'])
-        all_related_staff_memberships = []
-        for staff in admin_staff_memberships:
-            related_staffs = staff.object.staff_items
-            all_related_staff_memberships.append([staff for staff in related_staffs if staff.user is not self])
-        return all_related_staff_memberships
-
-
 class UserCachedObjectGetterMixin(object):
     """
     Base class to group all cached object-getter functionality of user, purely for readability
@@ -375,7 +359,7 @@ class UserPermissionsMixin(object):
     #     return False
 
 
-class BadgeUser(AdministrateOtherUsersMixin, UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
+class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     """
     A full-featured user model that can be an Earner, Issuer, or Consumer of Open Badges
     """

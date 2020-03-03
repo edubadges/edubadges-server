@@ -12,13 +12,6 @@ class StaffListViewMixin(object):
     serializer_class = StaffSerializer
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
 
-    def get_objects(self, request, **kwargs):
-        """
-        get users you may administrate
-        """
-        obj = self.get_object(request, **kwargs)
-        return obj.get_administrable_staff(request.user)
-
     def post(self, request, **kwargs):
         """
         create a new staff membership
@@ -49,17 +42,3 @@ class BadgeClassStaffList(StaffListViewMixin, BaseEntityListView):
     Post to add a new staff member within Issuer context
     """
     model = BadgeClass  # used by get_object()
-
-
-# class StaffList(StaffListViewMixin, BaseEntityListView):
-#     """
-#     Get all staff members you may administrate
-#     """
-#     allowed_methods = ('GET',)
-#     permission_classes = (AuthenticatedWithVerifiedEmail,)
-#
-#     def get_objects(self, request, **kwargs):
-#         """
-#         Get users you may administrate
-#         """
-#         return request.user.get_administrable_staff()
