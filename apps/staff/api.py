@@ -24,7 +24,7 @@ class StaffListViewMixin(object):
         create a new staff membership
         """
         self.get_object(request, **kwargs)  # trigger a has_object_permissions() check
-        return super(StaffList, self).post(request, **kwargs)
+        return super(StaffListViewMixin, self).post(request, **kwargs)
 
 
 class FacultyStaffList(StaffListViewMixin, BaseEntityListView):
@@ -51,15 +51,15 @@ class BadgeClassStaffList(StaffListViewMixin, BaseEntityListView):
     model = BadgeClass  # used by get_object()
 
 
-class StaffList(StaffListViewMixin, BaseEntityListView):
-    """
-    Get all staff members you may administrate
-    """
-    allowed_methods = ('GET',)
-    permission_classes = (AuthenticatedWithVerifiedEmail,)
-
-    def get_objects(self, request, **kwargs):
-        """
-        Get users you may administrate
-        """
-        return request.user.get_administrable_staff()
+# class StaffList(StaffListViewMixin, BaseEntityListView):
+#     """
+#     Get all staff members you may administrate
+#     """
+#     allowed_methods = ('GET',)
+#     permission_classes = (AuthenticatedWithVerifiedEmail,)
+#
+#     def get_objects(self, request, **kwargs):
+#         """
+#         Get users you may administrate
+#         """
+#         return request.user.get_administrable_staff()
