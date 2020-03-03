@@ -1,7 +1,8 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 from .models import Issuer, BadgeClass
-
+from mainsite.mixins import StaffResolverMixin
+from staff.schema import IssuerStaffType, BadgeClassStaffType
 
 class ImageResolverMixin(object):
 
@@ -9,23 +10,28 @@ class ImageResolverMixin(object):
         return self.image_url()
 
 
-class IssuerType(ImageResolverMixin, DjangoObjectType):
+class IssuerType(StaffResolverMixin, ImageResolverMixin, DjangoObjectType):
 
     class Meta:
         model = Issuer
         fields = ('name', 'entity_id', 'badgeclasses', 'faculty',
-                  'image', 'description', 'url', 'email', )
+                  'image', 'description', 'url', 'email', 'staff')
+
+    staff = graphene.List(IssuerStaffType)
 
     def resolve_badgeclasses(self, info):
         return self.get_badgeclasses(info.context.user, ['read'])
 
 
-class BadgeClassType(ImageResolverMixin, DjangoObjectType):
+
+class BadgeClassType(StaffResolverMixin, ImageResolverMixin, DjangoObjectType):
 
     class Meta:
         model = BadgeClass
-        fields = ('name', 'entity_id', 'issuer', 'image',
+        fields = ('name', 'entity_id', 'issuer', 'image', 'staff',
                   'description', 'criteria_url', 'criteria_text',)
+
+    staff = graphene.List(BadgeClassStaffType)
 
 
 class Query(object):
