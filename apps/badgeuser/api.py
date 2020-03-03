@@ -8,9 +8,7 @@ from apispec_drf.decorators import apispec_get_operation, apispec_put_operation,
     apispec_delete_operation, apispec_list_operation
 from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
-from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserTokenSerializerV1, \
-    BadgeUserManagementSerializer
-# from badgeuser.serializers_v2 import BadgeUserTokenSerializerV2, BadgeUserSerializerV2, AccessTokenSerializerV2
+from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserTokenSerializerV1 #, BadgeUserManagementSerializer
 from badgeuser.tasks import process_email_verification
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -22,10 +20,9 @@ from django.http import Http404
 from django.urls import reverse
 from django.utils import timezone
 from entity.api import BaseEntityDetailView, BaseEntityListView
-# from entity.serializers import BaseSerializerV2
 from issuer.permissions import BadgrOAuthTokenHasScope
 from mainsite.models import BadgrApp
-from mainsite.permissions import AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope
+# from mainsite.permissions import AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope
 from mainsite.utils import OriginSetting
 from rest_framework import permissions, serializers, status
 from rest_framework.exceptions import ValidationError as RestframeworkValidationError
@@ -37,43 +34,42 @@ from rest_framework.status import HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUN
 RATE_LIMIT_DELTA = datetime.timedelta(minutes=5)
 
 
-class BadgeUserList(BaseEntityListView):
-    """
-    GET user list within user scope for management console
-    """
-    model = BadgeUser
-    http_method_names = ['get']
-    permission_classes = (AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope)
-    serializer_class = BadgeUserManagementSerializer
+# class BadgeUserList(BaseEntityListView):
+#     """
+#     GET user list within user scope for management console
+#     """
+#     model = BadgeUser
+#     http_method_names = ['get']
+#     permission_classes = (AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope)
+#     serializer_class = BadgeUserManagementSerializer
+#
+#     def get_objects(self, request, **kwargs):
+#         if request.user.has_perm('badgeuser.has_institution_scope'):
+#             institution_id = request.user.institution.id
+#             return BadgeUser.objects.filter(institution_id=institution_id)
+#         elif request.user.has_perm('badgeuser.has_faculty_scope'):
+#             return BadgeUser.objects.filter(faculty__in=request.user.faculty.all()).distinct()
+#         return BadgeUser.objects.none()
 
-    def get_objects(self, request, **kwargs):
-        if request.user.has_perm('badgeuser.has_institution_scope'):
-            institution_id = request.user.institution.id
-            return BadgeUser.objects.filter(institution_id=institution_id)
-        elif request.user.has_perm('badgeuser.has_faculty_scope'):
-            return BadgeUser.objects.filter(faculty__in=request.user.faculty.all()).distinct()
-        return BadgeUser.objects.none()
-
-class BadgeUserManagementDetail(BaseEntityDetailView):
-    """
-    GET user for mananagement console
-    put to change user
-    """
-    model = BadgeUser
-    http_method_names = ['get', 'put']
-    permission_classes = (AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope)
-    serializer_class = BadgeUserManagementSerializer
-
-    def put(self, request, **kwargs):
-        return super(BadgeUserManagementDetail, self).put(request, **kwargs)
-
-    def get(self, request, **kwargs):
-        return super(BadgeUserManagementDetail, self).get(request, **kwargs)
+# class BadgeUserManagementDetail(BaseEntityDetailView):
+#     """
+#     GET user for mananagement console
+#     put to change user
+#     """
+#     model = BadgeUser
+#     http_method_names = ['get', 'put']
+#     permission_classes = (AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope)
+#     serializer_class = BadgeUserManagementSerializer
+#
+#     def put(self, request, **kwargs):
+#         return super(BadgeUserManagementDetail, self).put(request, **kwargs)
+#
+#     def get(self, request, **kwargs):
+#         return super(BadgeUserManagementDetail, self).get(request, **kwargs)
 
 class BadgeUserDetail(BaseEntityDetailView):
     model = BadgeUser
     v1_serializer_class = BadgeUserProfileSerializerV1
-    # v2_serializer_class = BadgeUserSerializerV2
     permission_classes = (permissions.AllowAny, BadgrOAuthTokenHasScope)
     valid_scopes = {
         "post": ["*"],
@@ -164,7 +160,6 @@ class BadgeUserToken(BaseEntityDetailView):
     model = BadgeUser
     permission_classes = (BadgeUserIsAuthenticatedUser,)
     v1_serializer_class = BadgeUserTokenSerializerV1
-    # v2_serializer_class = BadgeUserTokenSerializerV2
 
     def get_object(self, request, **kwargs):
         return request.user
@@ -214,7 +209,6 @@ class BadgeUserForgotPassword(BaseUserRecoveryView):
     authentication_classes = ()
     permission_classes = (permissions.AllowAny,)
     v1_serializer_class = serializers.Serializer
-    # v2_serializer_class = BaseSerializerV2
 
     def get(self, request, *args, **kwargs):
         badgr_app = None
@@ -373,7 +367,6 @@ class BadgeUserForgotPassword(BaseUserRecoveryView):
 class BadgeUserEmailConfirm(BaseUserRecoveryView):
     permission_classes = (permissions.AllowAny,)
     v1_serializer_class = BaseSerializer
-    # v2_serializer_class = BaseSerializerV2
 
     def get(self, request, **kwargs):
         """
@@ -409,7 +402,6 @@ class BadgeUserEmailConfirm(BaseUserRecoveryView):
 
 class AccessTokenList(BaseEntityListView):
     model = BadgrAccessToken
-    # v2_serializer_class = AccessTokenSerializerV2
     permission_classes = (permissions.IsAuthenticated, BadgrOAuthTokenHasScope)
     valid_scopes = ['rw:profile']
 
@@ -426,7 +418,6 @@ class AccessTokenList(BaseEntityListView):
 
 class AccessTokenDetail(BaseEntityDetailView):
     model = BadgrAccessToken
-    # v2_serializer_class = AccessTokenSerializerV2
     permission_classes = (permissions.IsAuthenticated, BadgrOAuthTokenHasScope)
     valid_scopes = ['rw:profile']
 

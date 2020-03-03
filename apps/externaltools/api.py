@@ -12,7 +12,6 @@ from rest_framework.exceptions import ValidationError
 class ExternalToolList(BaseEntityListView):
     model = ExternalTool
     v1_serializer_class = ExternalToolSerializerV1
-    # v2_serializer_class = ExternalToolSerializerV2
     permission_classes = ()
     http_method_names = ['get']
 
@@ -34,7 +33,6 @@ class ExternalToolList(BaseEntityListView):
 class ExternalToolLaunch(BaseEntityDetailView):
     model = ExternalTool  # used by VersionedObjectMixin
     v1_serializer_class = ExternalToolLaunchSerializerV1
-    # v2_serializer_class = ExternalToolLaunchSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail,)
     http_method_names = ['get']
 

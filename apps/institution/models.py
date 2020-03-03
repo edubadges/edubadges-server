@@ -10,7 +10,7 @@ class Institution(PermissionedModelMixin, cachemodel.CacheModel):
     def __str__(self):
         return self.name
     
-    name = models.CharField(max_length=512)
+    name = models.CharField(max_length=255, unique=True)
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.InstitutionStaff")
 
     def get_faculties(self, user, permissions):
@@ -77,7 +77,7 @@ class Faculty(PermissionedModelMixin, BaseVersionedEntity, cachemodel.CacheModel
             r.append(issuer.cached_badgeclasses())
         return r
 
-    # needed for the within_scope method of user
-    @property
-    def faculty(self):
-        return self
+    # # needed for the within_scope method of user
+    # @property
+    # def faculty(self):
+    #     return self

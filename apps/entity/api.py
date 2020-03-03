@@ -30,6 +30,8 @@ class LogPermissionsFailMixin():
 class BaseEntityView(APIView):
     create_event = None
     logger = None
+    permission_map = {'GET': 'read', 'POST': 'create',
+                      'PUT': 'update', 'DELETE': 'delete'}
 
     def get_context_data(self, **kwargs):
         return {
@@ -40,8 +42,8 @@ class BaseEntityView(APIView):
     def get_serializer_class(self):
         if self.request.version == 'v1' and hasattr(self, 'v1_serializer_class'):
             return self.v1_serializer_class
-        elif self.request.version == 'v2' and hasattr(self, 'v2_serializer_class'):
-            return self.v2_serializer_class
+        # elif self.request.version == 'v2' and hasattr(self, 'v2_serializer_class'):
+        #     return self.v2_serializer_class
         return getattr(self, 'serializer_class', None)
 
     def get_logger(self):

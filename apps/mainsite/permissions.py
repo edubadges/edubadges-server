@@ -43,13 +43,13 @@ class MayUseManagementDashboard(permissions.BasePermission):
 
 
 
-class ObjectWithinUserScope(permissions.BasePermission):
-    """
-    Checks to see if object is within user's scope
-    """
-
-    def has_object_permission(self, request, view, obj):
-        return request.user.within_scope(obj)
+# class ObjectWithinUserScope(permissions.BasePermission):
+#     """
+#     Checks to see if object is within user's scope
+#     """
+#
+#     def has_object_permission(self, request, view, obj):
+#         return request.user.within_scope(obj)
 
 
 class LocalDevelopModePermissionMixin(PermissionRequiredMixin):

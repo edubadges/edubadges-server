@@ -363,16 +363,16 @@ class UserPermissionsMixin(object):
         """
         return Issuer.objects.filter(staff__id=self.id)
 
-    def within_scope(self, object):
-        if object:
-            if self.has_perm('badgeuser.has_institution_scope'):
-                return object.institution == self.institution
-            if self.has_perm('badgeuser.has_faculty_scope'):
-                if object.faculty.__class__.__name__ == 'ManyRelatedManager':
-                    return bool(set(object.faculty.all()).intersection(set(self.faculty.all())))
-                else:
-                    return object.faculty in self.faculty.all()
-        return False
+    # def within_scope(self, object):
+    #     if object:
+    #         if self.has_perm('badgeuser.has_institution_scope'):
+    #             return object.institution == self.institution
+    #         if self.has_perm('badgeuser.has_faculty_scope'):
+    #             if object.faculty.__class__.__name__ == 'ManyRelatedManager':
+    #                 return bool(set(object.faculty.all()).intersection(set(self.faculty.all())))
+    #             else:
+    #                 return object.faculty in self.faculty.all()
+    #     return False
 
 
 class BadgeUser(AdministrateOtherUsersMixin, UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):

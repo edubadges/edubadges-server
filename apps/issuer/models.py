@@ -51,6 +51,15 @@ def get_user_or_none(recipient_identifier):
     except SocialAccount.DoesNotExist:
         return None
 
+
+class ImageUrlGetterMixin(object):
+
+    def image_url(self):
+        if getattr(settings, 'MEDIA_URL').startswith('http'):
+            return default_storage.url(self.image.name)
+        else:
+            return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
+
 class BaseAuditedModel(cachemodel.CacheModel):
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
@@ -142,6 +151,7 @@ class BaseOpenBadgeExtension(cachemodel.CacheModel):
 
 
 class Issuer(PermissionedModelMixin,
+             ImageUrlGetterMixin,
              ResizeUploadedImage,
              ScrubUploadedSvgImage,
              BaseAuditedModel,
@@ -150,10 +160,6 @@ class Issuer(PermissionedModelMixin,
     entity_class_name = 'Issuer'
 
     staff = models.ManyToManyField('badgeuser.BadgeUser', through='staff.IssuerStaff')
-
-    # slug has been deprecated for now, but preserve existing values
-    slug = models.CharField(max_length=255, blank=True, null=True, default=None)
-    #slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
 
     badgrapp = models.ForeignKey('mainsite.BadgrApp', on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
@@ -216,14 +222,14 @@ class Issuer(PermissionedModelMixin,
 
         return ret
 
-    def save(self, *args, **kwargs):
-        ret = super(Issuer, self).save(*args, **kwargs)
-
-        # if no owner staff records exist, create one for created_by
-        if len(self.owners) < 1 and self.created_by_id:
-            IssuerStaff.objects.create(issuer=self, user=self.created_by, role=IssuerStaff.ROLE_OWNER)
-
-        return ret
+    # def save(self, *args, **kwargs):
+    #     ret = super(Issuer, self).save(*args, **kwargs)
+    #
+    #     # if no owner staff records exist, create one for created_by
+    #     if len(self.owners) < 1 and self.created_by_id:
+    #         IssuerStaff.objects.create(issuer=self, user=self.created_by, role=IssuerStaff.ROLE_OWNER)
+    #
+    #     return ret
 
     def get_absolute_url(self):
         return reverse('issuer_json', kwargs={'entity_id': self.entity_id})
@@ -258,10 +264,10 @@ class Issuer(PermissionedModelMixin,
             return self.source_url
         return OriginSetting.HTTP + self.get_absolute_url()
 
-    @property
-    def editors(self):
-        return self.staff.filter(issuerstaff__role__in=(IssuerStaff.ROLE_EDITOR, IssuerStaff.ROLE_OWNER))
-
+    # @property
+    # def editors(self):
+    #     return self.staff.filter(issuerstaff__role__in=(IssuerStaff.ROLE_EDITOR, IssuerStaff.ROLE_OWNER))
+    #
     @property
     def owners(self):
         return self.get_local_staff_members(['create', 'read', 'update', 'destroy', 'award', 'administrate_users'])
@@ -275,37 +281,37 @@ class Issuer(PermissionedModelMixin,
     def current_signers(self):
         return [staff for staff in self.staff_items if staff.is_signer]
 
-    @property
-    def staff_items(self):
-        return self.cached_issuerstaff()
-
-    @staff_items.setter
-    def staff_items(self, value):
-        """
-        Update this issuers IssuerStaff from a list of IssuerStaffSerializerV2 data
-        """
-        existing_staff_idx = {s.cached_user: s for s in self.staff_items}
-        new_staff_idx = {s['cached_user']: s for s in value}
-
-        with transaction.atomic():
-            # add missing staff records
-            for staff_data in value:
-                if staff_data['cached_user'] not in existing_staff_idx:
-                    staff_record, created = IssuerStaff.cached.get_or_create(
-                        issuer=self,
-                        user=staff_data['cached_user'],
-                        defaults={
-                            'role': staff_data['role']
-                        })
-                    if not created:
-                        staff_record.role = staff_data['role']
-                        staff_record.save()
-
-            # remove old staff records -- but never remove the only OWNER role
-            for staff_record in self.staff_items:
-                if staff_record.cached_user not in new_staff_idx:
-                    if staff_record.role != IssuerStaff.ROLE_OWNER or len(self.owners) > 1:
-                        staff_record.delete()
+    # @property
+    # def staff_items(self):
+    #     return self.cached_issuerstaff()
+    #
+    # @staff_items.setter
+    # def staff_items(self, value):
+    #     """
+    #     Update this issuers IssuerStaff from a list of IssuerStaffSerializerV2 data
+    #     """
+    #     existing_staff_idx = {s.cached_user: s for s in self.staff_items}
+    #     new_staff_idx = {s['cached_user']: s for s in value}
+    #
+    #     with transaction.atomic():
+    #         # add missing staff records
+    #         for staff_data in value:
+    #             if staff_data['cached_user'] not in existing_staff_idx:
+    #                 staff_record, created = IssuerStaff.cached.get_or_create(
+    #                     issuer=self,
+    #                     user=staff_data['cached_user'],
+    #                     defaults={
+    #                         'role': staff_data['role']
+    #                     })
+    #                 if not created:
+    #                     staff_record.role = staff_data['role']
+    #                     staff_record.save()
+    #
+    #         # remove old staff records -- but never remove the only OWNER role
+    #         for staff_record in self.staff_items:
+    #             if staff_record.cached_user not in new_staff_idx:
+    #                 if staff_record.role != IssuerStaff.ROLE_OWNER or len(self.owners) > 1:
+    #                     staff_record.delete()
 
     def get_extensions_manager(self):
         return self.issuerextension_set
@@ -419,8 +425,8 @@ class Issuer(PermissionedModelMixin,
     def __unicode__(self):
         return self.name
 
-
 class BadgeClass(PermissionedModelMixin,
+                 ImageUrlGetterMixin,
                  ResizeUploadedImage,
                  ScrubUploadedSvgImage,
                  BaseAuditedModel,
@@ -512,9 +518,9 @@ class BadgeClass(PermissionedModelMixin,
     def description_nonnull(self, value):
         self.description = value
 
-    @property
-    def owners(self):
-        return self.cached_issuer.owners
+    # @property
+    # def owners(self):
+    #     return self.cached_issuer.owners
 
     @property
     def cached_issuer(self):
@@ -718,15 +724,9 @@ class BadgeClass(PermissionedModelMixin,
     def cached_badgrapp(self):
         return self.cached_issuer.cached_badgrapp
 
-    def image_url(self):
-        if getattr(settings, 'MEDIA_URL').startswith('http'):
-            return default_storage.url(self.image.name)
-        else:
-            return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
-
-
 
 class BadgeInstance(BaseAuditedModel,
+                    ImageUrlGetterMixin,
                     BaseVersionedEntity,
                     BaseOpenBadgeObjectModel):
     entity_class_name = 'Assertion'
@@ -805,12 +805,6 @@ class BadgeInstance(BaseAuditedModel,
 
         return extended_json
 
-    def image_url(self):
-        if getattr(settings, 'MEDIA_URL').startswith('http'):
-            return default_storage.url(self.image.name)
-        else:
-            return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
-
     @property
     def share_url(self):
         return self.public_url
@@ -845,9 +839,9 @@ class BadgeInstance(BaseAuditedModel,
     def public_url(self):
         return OriginSetting.HTTP+self.get_absolute_url()
 
-    @property
-    def owners(self):
-        return self.issuer.owners
+    # @property
+    # def owners(self):
+    #     return self.issuer.owners
 
     @property
     def signing_in_progress(self):

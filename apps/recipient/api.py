@@ -25,7 +25,6 @@ class IssuerRecipientGroupList(VersionedObjectMixin, BaseEntityListView):
     model = Issuer  # used by get_object()
     permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor)
     v1_serializer_class = RecipientGroupSerializerV1
-    # v2_serializer_class = RecipientGroupSerializerV2
 
     def get_objects(self, request, **kwargs):
         issuer = self.get_object(request, **kwargs)
@@ -72,7 +71,6 @@ class RecipientGroupDetail(BaseEntityDetailView):
     model = RecipientGroup
     permission_classes = (AuthenticatedWithVerifiedEmail, IsIssuerEditor)
     v1_serializer_class = RecipientGroupSerializerV1
-    # v2_serializer_class = RecipientGroupSerializerV2
 
     def get_context_data(self, **kwargs):
         context = super(RecipientGroupDetail, self).get_context_data(**kwargs)

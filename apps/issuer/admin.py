@@ -32,14 +32,14 @@ class IssuerAdmin(DjangoObjectActions, FilterByScopeMixin, ModelAdmin):
     def filter_queryset_faculty(self, queryset, request):
         return queryset.filter(faculty__in=request.user.faculty.all()).distinct()
     
-    readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id', 'slug')
+    readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id')
     list_display = ('img', 'name', 'entity_id', 'created_by', 'created_at', 'faculty')
     list_display_links = ('img', 'name')
     list_filter = ('created_at',)
     search_fields = ('name', 'entity_id')
     fieldsets = (
         ('Metadata', {
-            'fields': ('created_by', 'created_at', 'source', 'source_url', 'entity_id', 'slug'),
+            'fields': ('created_by', 'created_at', 'source', 'source_url', 'entity_id'),
             'classes': ("collapse",)
         }),
         (None, {

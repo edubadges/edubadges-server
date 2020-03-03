@@ -3,24 +3,29 @@ from graphene_django.types import DjangoObjectType
 from .models import Issuer, BadgeClass
 
 
-class IssuerType(DjangoObjectType):
+class ImageResolverMixin(object):
+
+    def resolve_image(self, info):
+        return self.image_url()
+
+
+class IssuerType(ImageResolverMixin, DjangoObjectType):
 
     class Meta:
         model = Issuer
-        exclude = ('id',)
+        fields = ('name', 'entity_id', 'badgeclasses', 'faculty',
+                  'image', 'description', 'url', 'email', )
 
     def resolve_badgeclasses(self, info):
         return self.get_badgeclasses(info.context.user, ['read'])
 
 
-class BadgeClassType(DjangoObjectType):
+class BadgeClassType(ImageResolverMixin, DjangoObjectType):
 
     class Meta:
         model = BadgeClass
-        exclude = ('id',)
-
-    def resolve_image(self, info):
-        return self.image_url()
+        fields = ('name', 'entity_id', 'issuer', 'image',
+                  'description', 'criteria_url', 'criteria_text',)
 
 
 class Query(object):
@@ -42,9 +47,8 @@ class Query(object):
     def resolve_badge_classes(self, info, **kwargs):
         return [bc for bc in BadgeClass.objects.all() if bc.has_permissions(info.context.user, ['read'])]
 
-
     def resolve_badge_class(self, info, **kwargs):
-        id =  kwargs.get('id')
+        id = kwargs.get('id')
         if id is not None:
             bc = BadgeClass.objects.get(id=id)
             if bc.has_permissions(info.context.user, ['read']):

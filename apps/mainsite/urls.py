@@ -108,12 +108,11 @@ urlpatterns = [
     # url(r'^v2/', include('lti_edu.urls'), kwargs={'version': 'v2'}),
     url(r'^lti_edu/', include('lti_edu.api_urls')),
 
-    # include Institution endpoints
+    # # include Institution endpoints
     url(r'^institution/', include('institution.api_urls')),
+
     url(r'^lti_issuer/', include('lti_edu.lti_urls')),
 
-    # include Institution endpoints
-    url(r'^institution/', include('institution.api_urls')),
 
     # include theming endpoints
     url(r'v1/', include('theming.api_urls'), kwargs={'version': 'v1'}),
@@ -125,8 +124,8 @@ urlpatterns = [
 
     # url(r'^accept_terms/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', AcceptTermsView.as_view(), name='accept_terms'),
 
-    #  include management endpoints
-    url(r'^management/', include('management.api_urls')),
+    # #  include management endpoints
+    # url(r'^management/', include('management.api_urls')),
 
     #  include signing endpoints
     url(r'^signing/', include('signing.api_urls')),
