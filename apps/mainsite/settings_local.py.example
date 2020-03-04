@@ -197,3 +197,6 @@ LOGGING = {
     },
 }
 
+ALLOW_SEEDS = False
+EDU_ID_SECRET = "secret"
+SURF_CONEXT_SECRET = "secret"

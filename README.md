@@ -133,8 +133,12 @@ badgr
 * `./manage.py dist` - generate docs swagger file(s)
 * `./manage.py createsuperuser` - follow prompts to create your first admin user account
 
+### Seed database
+* set `ALLOW_SEEDS = True` in settings_local.py
+* set `EDU_ID_SECRET` and `SURF_CONEXT_SECRET` to appropriate values in settings_local.py
+* `./manage.py seed` - truncate tables and refill with seed data
 
-### Prvovision database
+### Provision database
 * Login the admin interface of the server and: 
 1) Add a badgeuser_termsversion
 2) Add a socialaccount_socialapp for edu_id and surf_conext (with these names)
