@@ -174,6 +174,9 @@ class Issuer(PermissionedModelMixin,
     cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
     faculty = models.ForeignKey('institution.Faculty', on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
+    class Meta:
+        unique_together = ('name', 'faculty')
+
     @property
     def parent(self):
         return self.faculty
