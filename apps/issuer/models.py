@@ -278,46 +278,8 @@ class Issuer(PermissionedModelMixin,
     def current_signers(self):
         return [staff for staff in self.staff_items if staff.is_signer]
 
-    # @property
-    # def staff_items(self):
-    #     return self.cached_issuerstaff()
-    #
-    # @staff_items.setter
-    # def staff_items(self, value):
-    #     """
-    #     Update this issuers IssuerStaff from a list of IssuerStaffSerializerV2 data
-    #     """
-    #     existing_staff_idx = {s.cached_user: s for s in self.staff_items}
-    #     new_staff_idx = {s['cached_user']: s for s in value}
-    #
-    #     with transaction.atomic():
-    #         # add missing staff records
-    #         for staff_data in value:
-    #             if staff_data['cached_user'] not in existing_staff_idx:
-    #                 staff_record, created = IssuerStaff.cached.get_or_create(
-    #                     issuer=self,
-    #                     user=staff_data['cached_user'],
-    #                     defaults={
-    #                         'role': staff_data['role']
-    #                     })
-    #                 if not created:
-    #                     staff_record.role = staff_data['role']
-    #                     staff_record.save()
-    #
-    #         # remove old staff records -- but never remove the only OWNER role
-    #         for staff_record in self.staff_items:
-    #             if staff_record.cached_user not in new_staff_idx:
-    #                 if staff_record.role != IssuerStaff.ROLE_OWNER or len(self.owners) > 1:
-    #                     staff_record.delete()
-
     def get_extensions_manager(self):
         return self.issuerextension_set
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_editors(self):
-        # UserModel = get_user_model()
-        # return UserModel.objects.filter(issuerstaff__issuer=self, issuerstaff__role=IssuerStaff.ROLE_EDITOR)
-        self.get_local_staff_members(['may_read', 'may_update', 'may_award'])
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeclasses(self):
@@ -514,10 +476,6 @@ class BadgeClass(PermissionedModelMixin,
     @description_nonnull.setter
     def description_nonnull(self, value):
         self.description = value
-
-    # @property
-    # def owners(self):
-    #     return self.cached_issuer.owners
 
     @property
     def cached_issuer(self):
