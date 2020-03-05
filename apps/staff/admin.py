@@ -4,23 +4,23 @@ from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClass
 
 class InstitutionStaffAdmin(ModelAdmin):
 
-    list_display = ('user', 'institution', 'create', 'read', 'update',
-                    'destroy', 'award', 'sign', 'administrate_users')
+    list_display = ('user', 'institution', 'may_create', 'may_read', 'may_update',
+                    'may_delete', 'may_award', 'may_sign', 'may_administrate_users')
 
 class FacultyStaffAdmin(ModelAdmin):
 
-    list_display = ('user', 'faculty', 'create', 'read', 'update',
-                    'destroy', 'award', 'sign', 'administrate_users')
+    list_display = ('user', 'faculty', 'may_create', 'may_read', 'may_update',
+                    'may_delete', 'may_award', 'may_sign', 'may_administrate_users')
 
 class IssuerStaffAdmin(ModelAdmin):
 
-    list_display = ('user', 'issuer', 'create', 'read', 'update',
-                    'destroy', 'award', 'sign', 'administrate_users')
+    list_display = ('user', 'issuer', 'may_create', 'may_read', 'may_update',
+                    'may_delete', 'may_award', 'may_sign', 'may_administrate_users')
 
 class BadgeclassStaffAdmin(ModelAdmin):
 
-    list_display = ('user', 'badgeclass', 'create', 'read', 'update',
-                    'destroy', 'award', 'sign', 'administrate_users')
+    list_display = ('user', 'badgeclass', 'may_create', 'may_read', 'may_update',
+                    'may_delete', 'may_award', 'may_sign', 'may_administrate_users')
 
 badgr_admin.register(InstitutionStaff, InstitutionStaffAdmin)
 badgr_admin.register(FacultyStaff, FacultyStaffAdmin)
