@@ -51,7 +51,6 @@ INSTALLED_APPS = [
     'backpack',
     'pathway',
     'recipient',
-    'externaltools',
     'lti_edu',
     'theming',
     'signing',

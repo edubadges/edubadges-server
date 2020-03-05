@@ -1,17 +1,8 @@
 from django.contrib.admin import ModelAdmin, TabularInline
 from django.contrib.auth.admin import UserAdmin
-from externaltools.models import ExternalToolUserActivation
 from mainsite.admin import badgr_admin, FilterByScopeMixin
-
 from .models import BadgeUser, EmailAddressVariant, TermsVersion, TermsAgreement, \
     CachedEmailAddress, BadgeUserProxy, GroupEntity
-
-
-class ExternalToolInline(TabularInline):
-    model = ExternalToolUserActivation
-    fk_name = 'user'
-    fields = ('externaltool',)
-    extra = 0
 
 
 class TermsAgreementInline(TabularInline):
@@ -47,43 +38,6 @@ class BadgeUserAdmin(FilterByScopeMixin, UserAdmin):
     )
     filter_horizontal = ( 'groups', 'user_permissions')
 
-    # def filter_queryset_institution(self, queryset, request):
-    #     institution_id = request.user.institution.id
-    #     return queryset.filter(institution_id=institution_id).distinct()
-    #
-    # def filter_queryset_faculty(self, queryset, request):
-    #     return queryset.filter(faculty__in=request.user.faculty.all()).distinct()
-    #
-    # def formfield_for_manytomany(self, db_field, request, **kwargs):
-    #     '''
-    #     Overrides super.formfield_for_manytomany to filter:
-    #         1) the faculty list according to user scope
-    #         2) the group list according to group membership
-    #     '''
-    #     form_field = super(BadgeUserAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
-    #     if db_field.attname == 'faculty':
-    #         if not request.user.is_superuser:
-    #             if request.user.has_perm('badgeuser.has_institution_scope'):
-    #                 institution_id = request.user.institution.id
-    #                 form_field.queryset = form_field.queryset.filter(institution_id=institution_id)
-    #             elif request.user.has_perm('badgeuser.has_faculty_scope'):
-    #                 list_of_faculty_ids = request.user.faculty.all().values_list('id')
-    #                 form_field.queryset = form_field.queryset.filter(id__in=list_of_faculty_ids)
-    #             else:
-    #                 form_field.queryset = form_field.queryset.none()
-    #
-    #     elif db_field.attname == 'groups':
-    #         if not request.user.is_superuser:
-    #             form_field.queryset = form_field.queryset.exclude(name='Superuser')
-    #             if not request.user.has_perm('badgeuser.has_institution_scope'):
-    #                 form_field.queryset = form_field.queryset.exclude(name='Instellings Admin')
-    #                 if not request.user.has_perm('badgeuser.has_faculty_scope'):
-    #                     form_field.queryset = form_field.queryset.exclude(name='Faculteits Admin')
-    #     return form_field
-    #
-    # def faculties(self, obj):
-    #     return [f.name for f in obj.faculty.all()]
-
 badgr_admin.register(BadgeUser, BadgeUserAdmin)
 
 
@@ -102,7 +56,7 @@ class BadgeUserProxyAdmin(BadgeUserAdmin):
     filter_horizontal = ('faculty',)
     inlines = [
         EmailAddressInline,
-        ExternalToolInline,
+        # ExternalToolInline,
         TermsAgreementInline,
     ]
 
@@ -140,14 +94,6 @@ class TermsVersionAdmin(ModelAdmin):
     latest_terms_version.short_description = "Current Terms Version"
 
 badgr_admin.register(TermsVersion, TermsVersionAdmin)
-
-
-# class GroupAdmin(GroupAdmin):
-#     model = Group
-#     fields = ('name', 'permissions')
-
-# badgr_admin.unregister(Group)
-# badgr_admin.register(Group, GroupAdmin)
 
 
 badgr_admin.register(GroupEntity)
