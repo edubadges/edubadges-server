@@ -2,66 +2,30 @@ import datetime
 from collections import OrderedDict
 
 import badgrlog
-# import dateutil.parser
 from apispec_drf.decorators import apispec_get_operation, apispec_put_operation, \
     apispec_delete_operation, apispec_list_operation, apispec_post_operation
 from badgeuser.permissions import BadgeUserHasSurfconextSocialAccount
-# from django.db.models import Q
 from django.http import Http404
-# from django.utils import timezone
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView, \
     UncachedPaginatedViewMixin
 from entity.serializers import BaseSerializerV2, V2ErrorSerializer
-from issuer.models import Issuer, BadgeClass, BadgeInstance, IssuerStaff
+from issuer.models import Issuer, BadgeClass, BadgeInstance
 from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
-                                IsEditor, IsStaff, ApprovedIssuersOnly, BadgrOAuthTokenHasScope,
+                                IsEditor, IsStaff,
                                 BadgrOAuthTokenHasEntityScope)
 from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    BadgeInstanceSerializerV1)
-# from issuer.serializers_v2 import IssuerSerializerV2, BadgeClassSerializerV2, BadgeInstanceSerializerV2, \
-#     IssuerAccessTokenSerializerV2
 from issuer.utils import mapExtensionsToDict
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
-from rest_framework import status #, serializers
+from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST # , HTTP_403_FORBIDDEN
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST
 from signing import tsob
 from signing.models import AssertionTimeStamp
 from signing.permissions import MaySignAssertions
-from staff.permissions import HasObjectPermission
 
 logger = badgrlog.BadgrLogger()
-
-
-# class IssuerList(BaseEntityListView):
-#     """
-#     GET a list of all readable Issuers
-#     POST to create a new Issuer
-#     """
-#     model = Issuer
-#     v1_serializer_class = IssuerSerializerV1
-#     permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, ApprovedIssuersOnly, BadgrOAuthTokenHasScope, BadgeUserHasSurfconextSocialAccount)
-#     valid_scopes = ["rw:issuer"]
-#
-#     create_event = badgrlog.IssuerCreatedEvent
-#
-#     def get_objects(self, request, **kwargs):
-#         return self.request.user.get_issuers(['read'])
-#
-#     @apispec_list_operation('Issuer',
-#         summary="Get a list of Issuers for authenticated user",
-#         tags=["Issuers"],
-#     )
-#     def get(self, request, **kwargs):
-#         return super(IssuerList, self).get(request, **kwargs)
-#
-#     @apispec_post_operation('Issuer',
-#         summary="Create a new Issuer",
-#         tags=["Issuers"],
-#     )
-#     def post(self, request, **kwargs):
-#         return super(IssuerList, self).post(request, **kwargs)
 
 
 class IssuerDetail(BaseEntityDetailView):
@@ -91,72 +55,6 @@ class IssuerDetail(BaseEntityDetailView):
     )
     def delete(self, request, **kwargs):
         return super(IssuerDetail, self).delete(request, **kwargs)
-
-
-# class AllBadgeClassesList(BaseEntityListView):
-#     """
-#     GET a list of all readable badgeclasses
-#     """
-#     model = BadgeClass
-#     allowed_methods = ('GET',)
-#     permission_classes = (AuthenticatedWithVerifiedEmail, BadgrOAuthTokenHasScope)
-#     v1_serializer_class = BadgeClassSerializerV1
-#     valid_scopes = ["rw:issuer"]
-#
-#     def get_objects(self, request, **kwargs):
-#         return request.user.get_badgeclasses(['read'])
-#
-#     @apispec_list_operation('BadgeClass',
-#         summary="Get a list of BadgeClasses for authenticated user",
-#         tags=["BadgeClasses"],
-#     )
-#     def get(self, request, **kwargs):
-#         return super(AllBadgeClassesList, self).get(request, **kwargs)
-#
-#     # @apispec_post_operation('BadgeClass',
-#     #     summary="Create a new BadgeClass",
-#     #     tags=["BadgeClasses"],
-#     # )
-#     # def post(self, request, **kwargs):
-#     #     return super(AllBadgeClassesList, self).post(request, **kwargs)
-
-
-class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
-    """
-    GET a list of badgeclasses within one issuer context or
-    POST to create a new badgeclass within the issuer context
-    """
-    model = Issuer  # used by get_object()
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
-    v1_serializer_class = BadgeClassSerializerV1
-    create_event = badgrlog.BadgeClassCreatedEvent
-    valid_scopes = ["rw:issuer", "rw:issuer:*"]
-
-    def get_objects(self, request, **kwargs):
-        issuer = self.get_object(request, **kwargs)
-        return issuer.cached_badgeclasses()
-
-    def get_context_data(self, **kwargs):
-        context = super(IssuerBadgeClassList, self).get_context_data(**kwargs)
-        context['issuer'] = self.get_object(self.request, **kwargs)
-        return context
-
-    @apispec_list_operation('BadgeClass',
-        summary="Get a list of BadgeClasses for a single Issuer",
-        description="Authenticated user must have owner, editor, or staff status on the Issuer",
-        tags=["Issuers", "BadgeClasses"],
-    )
-    def get(self, request, **kwargs):
-        return super(IssuerBadgeClassList, self).get(request, **kwargs)
-
-    @apispec_post_operation('BadgeClass',
-        summary="Create a new BadgeClass associated with an Issuer",
-        description="Authenticated user must have owner, editor, or staff status on the Issuer",
-        tags=["Issuers", "BadgeClasses"],
-    )
-    def post(self, request, **kwargs):
-        issuer = self.get_object(request, **kwargs)  # trigger a has_object_permissions() check
-        return super(IssuerBadgeClassList, self).post(request, **kwargs)
 
 
 class BadgeClassDetail(BaseEntityDetailView):
