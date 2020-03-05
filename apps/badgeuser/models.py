@@ -249,30 +249,9 @@ class UserPermissionsMixin(object):
         """
         return obj.get_permissions(self)
 
-    def gains_permission(self, permission_codename, model):
-        content_type = ContentType.objects.get_for_model(model)
-        permission = Permission.objects.get(codename=permission_codename, content_type=content_type)
-        self.user_permissions.add(permission)
-        # you still need to reload user from db to refresh permission cache if you want effect to be immediate
-
-    def loses_permission(self, permission_codename, model):
-        content_type = ContentType.objects.get_for_model(model)
-        permission = Permission.objects.get(codename=permission_codename, content_type=content_type)
-        self.user_permissions.remove(permission)
-        # you still need to reload user from db to refresh permission cache if you want effect to be immediate
-
     @property
     def may_sign_assertions(self):
         return self.has_perm('signing.may_sign_assertions')
-
-    @property
-    def highest_group(self):
-        groups = list(self.groups.filter(entity_rank__rank__gte=0))
-        groups.sort(key=lambda x: x.entity_rank.rank)
-        if groups:
-            return groups[0]
-        else:
-            return None
 
     def may_enroll(self, badge_class):
         """
@@ -289,31 +268,14 @@ class UserPermissionsMixin(object):
                 return True # no enrollments
             else:
                 for enrollment in enrollments:
-                    if not bool(enrollment.badge_instance): # has never been awarded
+                    if not bool(enrollment.badge_instance):  # has never been awarded
                         return False
-                    else: #has been awarded
+                    else:  # has been awarded
                         if not enrollment.assertion_is_revoked():
                             return False
-                return True # all have been awarded and revoked
-        else: # no eduID
+                return True  # all have been awarded and revoked
+        else:  # no eduID
             return False
-
-    def staff_memberships(self):
-        """
-        Returns all staff memberships
-        """
-        return Issuer.objects.filter(staff__id=self.id)
-
-    # def within_scope(self, object):
-    #     if object:
-    #         if self.has_perm('badgeuser.has_institution_scope'):
-    #             return object.institution == self.institution
-    #         if self.has_perm('badgeuser.has_faculty_scope'):
-    #             if object.faculty.__class__.__name__ == 'ManyRelatedManager':
-    #                 return bool(set(object.faculty.all()).intersection(set(self.faculty.all())))
-    #             else:
-    #                 return object.faculty in self.faculty.all()
-    #     return False
 
 
 class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
@@ -539,15 +501,6 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
         return [ts.badge_instance for ts in assertion_timestamps if ts.badge_instance.signature == None]
 
     @property
-    def peers(self):
-        """
-        a BadgeUser is a Peer of another BadgeUser if they appear in an IssuerStaff together
-        """
-        # cached_issuers should become get_issuers
-        # return set(chain(*[[s.cached_user for s in i.cached_issuerstaff()] for i in self.cached_issuers()]))
-        raise NotImplementedError
-
-    @property
     def agreed_terms_version(self):
         v = self.cached_agreed_terms_version()
         if v is None:
@@ -567,14 +520,12 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
                     self.save()
                 self.termsagreement_set.get_or_create(terms_version=value, defaults=dict(agreed=True))
 
-
     def replace_token(self):
         Token.objects.filter(user=self).delete()
         # user_token, created = \
         #         Token.objects.get_or_create(user=self)
         self.save()
         return self.cached_token()
-
 
     def save(self, *args, **kwargs):
         if not self.username:
