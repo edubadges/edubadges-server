@@ -14,4 +14,4 @@ class BadgeUserIsAuthenticatedUser(BasePermission):
 
 class BadgeUserHasSurfconextSocialAccount(BasePermission):
     def has_permission(self, request, view):
-        return request.user.has_surf_conext_social_account()
+        return request.user.is_teacher()

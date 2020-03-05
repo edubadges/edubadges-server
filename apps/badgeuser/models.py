@@ -475,11 +475,11 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
         except SocialAccount.DoesNotExist:
             return None
 
-    def has_edu_id_social_account(self):
+    def is_student(self):
         social_account = self.get_social_account()
         return social_account.provider == 'edu_id' or social_account.provider == 'surfconext_ala'
 
-    def has_surf_conext_social_account(self):
+    def is_teacher(self):
         social_account = self.get_social_account()
         return social_account.provider == 'surf_conext'
 
