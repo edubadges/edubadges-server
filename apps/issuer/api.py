@@ -34,34 +34,34 @@ from staff.permissions import HasObjectPermission
 logger = badgrlog.BadgrLogger()
 
 
-class IssuerList(BaseEntityListView):
-    """
-    GET a list of all readable Isssers
-    POST to create a new Issuer
-    """
-    model = Issuer
-    v1_serializer_class = IssuerSerializerV1
-    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, ApprovedIssuersOnly, BadgrOAuthTokenHasScope, BadgeUserHasSurfconextSocialAccount)
-    valid_scopes = ["rw:issuer"]
-
-    create_event = badgrlog.IssuerCreatedEvent
-
-    def get_objects(self, request, **kwargs):
-        return self.request.user.get_issuers(['read'])
-
-    @apispec_list_operation('Issuer',
-        summary="Get a list of Issuers for authenticated user",
-        tags=["Issuers"],
-    )
-    def get(self, request, **kwargs):
-        return super(IssuerList, self).get(request, **kwargs)
-
-    @apispec_post_operation('Issuer',
-        summary="Create a new Issuer",
-        tags=["Issuers"],
-    )
-    def post(self, request, **kwargs):
-        return super(IssuerList, self).post(request, **kwargs)
+# class IssuerList(BaseEntityListView):
+#     """
+#     GET a list of all readable Issuers
+#     POST to create a new Issuer
+#     """
+#     model = Issuer
+#     v1_serializer_class = IssuerSerializerV1
+#     permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, ApprovedIssuersOnly, BadgrOAuthTokenHasScope, BadgeUserHasSurfconextSocialAccount)
+#     valid_scopes = ["rw:issuer"]
+#
+#     create_event = badgrlog.IssuerCreatedEvent
+#
+#     def get_objects(self, request, **kwargs):
+#         return self.request.user.get_issuers(['read'])
+#
+#     @apispec_list_operation('Issuer',
+#         summary="Get a list of Issuers for authenticated user",
+#         tags=["Issuers"],
+#     )
+#     def get(self, request, **kwargs):
+#         return super(IssuerList, self).get(request, **kwargs)
+#
+#     @apispec_post_operation('Issuer',
+#         summary="Create a new Issuer",
+#         tags=["Issuers"],
+#     )
+#     def post(self, request, **kwargs):
+#         return super(IssuerList, self).post(request, **kwargs)
 
 
 class IssuerDetail(BaseEntityDetailView):
@@ -93,32 +93,32 @@ class IssuerDetail(BaseEntityDetailView):
         return super(IssuerDetail, self).delete(request, **kwargs)
 
 
-class AllBadgeClassesList(BaseEntityListView):
-    """
-    GET a list of all readable badgeclasses
-    """
-    model = BadgeClass
-    allowed_methods = ('GET',)
-    permission_classes = (AuthenticatedWithVerifiedEmail, BadgrOAuthTokenHasScope)
-    v1_serializer_class = BadgeClassSerializerV1
-    valid_scopes = ["rw:issuer"]
-
-    def get_objects(self, request, **kwargs):
-        return request.user.get_badgeclasses(['read'])
-
-    @apispec_list_operation('BadgeClass',
-        summary="Get a list of BadgeClasses for authenticated user",
-        tags=["BadgeClasses"],
-    )
-    def get(self, request, **kwargs):
-        return super(AllBadgeClassesList, self).get(request, **kwargs)
-
-    # @apispec_post_operation('BadgeClass',
-    #     summary="Create a new BadgeClass",
-    #     tags=["BadgeClasses"],
-    # )
-    # def post(self, request, **kwargs):
-    #     return super(AllBadgeClassesList, self).post(request, **kwargs)
+# class AllBadgeClassesList(BaseEntityListView):
+#     """
+#     GET a list of all readable badgeclasses
+#     """
+#     model = BadgeClass
+#     allowed_methods = ('GET',)
+#     permission_classes = (AuthenticatedWithVerifiedEmail, BadgrOAuthTokenHasScope)
+#     v1_serializer_class = BadgeClassSerializerV1
+#     valid_scopes = ["rw:issuer"]
+#
+#     def get_objects(self, request, **kwargs):
+#         return request.user.get_badgeclasses(['read'])
+#
+#     @apispec_list_operation('BadgeClass',
+#         summary="Get a list of BadgeClasses for authenticated user",
+#         tags=["BadgeClasses"],
+#     )
+#     def get(self, request, **kwargs):
+#         return super(AllBadgeClassesList, self).get(request, **kwargs)
+#
+#     # @apispec_post_operation('BadgeClass',
+#     #     summary="Create a new BadgeClass",
+#     #     tags=["BadgeClasses"],
+#     # )
+#     # def post(self, request, **kwargs):
+#     #     return super(AllBadgeClassesList, self).post(request, **kwargs)
 
 
 class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
