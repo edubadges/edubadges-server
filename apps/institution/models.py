@@ -84,8 +84,3 @@ class Faculty(PermissionedModelMixin, BaseVersionedEntity, cachemodel.CacheModel
         for issuer in self.cached_issuers():
             r.append(issuer.cached_badgeclasses())
         return r
-
-    # # needed for the within_scope method of user
-    # @property
-    # def faculty(self):
-    #     return self
