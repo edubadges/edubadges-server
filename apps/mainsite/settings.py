@@ -49,8 +49,6 @@ INSTALLED_APPS = [
     'institution',
     'issuer',
     'backpack',
-    'pathway',
-    'recipient',
     'lti_edu',
     'theming',
     'signing',
