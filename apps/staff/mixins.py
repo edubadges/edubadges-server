@@ -15,6 +15,22 @@ class PermissionedModelMixin(object):
         else:
             return None
 
+    def check_local_permissions(self, user, required_permissions):
+        """
+        This checks if user has all the given permissions on this object
+        :param user: BadgeUser (teacher)
+        :param required_permissions: a list of strings
+        :return: Boolean
+        """
+        user_permissions = self._get_local_permissions(user)
+        if user_permissions:
+            perm_count = 0
+            for perm in required_permissions:
+                if user_permissions[perm]:
+                    perm_count += 1
+            return perm_count == len(required_permissions)
+        return False
+
     def get_permissions(self, user):
         """
         This method returns (inherited or local) permissions for the instance by climbing the permission tree.
@@ -38,6 +54,7 @@ class PermissionedModelMixin(object):
 
     def has_permissions(self, user, permissions):
         """
+        This method checks to see if a user has all the given permissions on an object
         :param user: BadgeUser (teacher)
         :param permissions: a list of strings
         :return: True if user has all the permissions
