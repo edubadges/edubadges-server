@@ -106,7 +106,7 @@ class BadgeClassExtensionInline(TabularInline):
 
 
 class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
-    readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id', 'slug')
+    readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id')
     list_display = ('badge_image', 'name', 'entity_id', 'issuer_link', 'recipient_count')
     list_display_links = ('badge_image', 'name',)
     list_filter = ('created_at',)
@@ -114,7 +114,7 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
     raw_id_fields = ('issuer',)
     fieldsets = (
         ('Metadata', {
-            'fields': ('created_by', 'created_at', 'source', 'source_url', 'entity_id', 'slug'),
+            'fields': ('created_by', 'created_at', 'source', 'source_url', 'entity_id'),
             'classes': ("collapse",)
         }),
         (None, {
@@ -179,7 +179,7 @@ class BadgeInstanceExtensionInline(TabularInline):
     fields = ('name', 'original_json')
 
 class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
-    readonly_fields = ('created_at', 'created_by', 'updated_at','updated_by', 'image', 'entity_id', 'old_json', 'salt', 'entity_id', 'slug', 'source', 'source_url')
+    readonly_fields = ('created_at', 'created_by', 'updated_at','updated_by', 'image', 'entity_id', 'old_json', 'salt', 'entity_id', 'source', 'source_url')
     list_display = ('badge_image', 'recipient_identifier', 'entity_id', 'badgeclass', 'issuer')
     list_display_links = ('badge_image', 'recipient_identifier', )
     list_filter = ('created_at',)
@@ -187,7 +187,7 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
     raw_id_fields = ('badgeclass', 'issuer')
     fieldsets = (
         ('Metadata', {
-            'fields': ('source', 'source_url', 'created_by', 'created_at', 'updated_by','updated_at', 'entity_id', 'slug', 'salt'),
+            'fields': ('source', 'source_url', 'created_by', 'created_at', 'updated_by','updated_at', 'entity_id','salt'),
             'classes': ("collapse",)
         }),
         ('Badgeclass', {

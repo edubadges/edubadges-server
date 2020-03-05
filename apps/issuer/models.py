@@ -395,10 +395,6 @@ class BadgeClass(PermissionedModelMixin,
 
     issuer = models.ForeignKey(Issuer, blank=False, null=False, on_delete=models.CASCADE, related_name="badgeclasses")
 
-    # slug has been deprecated for now, but preserve existing values
-    slug = models.CharField(max_length=255, blank=True, null=True, default=None)
-    #slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
-
     name = models.CharField(max_length=255)
     image = models.FileField(upload_to='uploads/badges', blank=True)
     description = models.TextField(blank=True, null=True, default=None)
@@ -713,10 +709,6 @@ class BadgeInstance(BaseAuditedModel,
     recipient_type = models.CharField(max_length=255, choices=RECIPIENT_TYPE_CHOICES, default=RECIPIENT_TYPE_EDUID, blank=False, null=False)
 
     image = models.FileField(upload_to='uploads/badges', blank=True)
-
-    # slug has been deprecated for now, but preserve existing values
-    slug = models.CharField(max_length=255, blank=True, null=True, default=None)
-    #slug = AutoSlugField(max_length=255, populate_from='get_new_slug', unique=True, blank=False, editable=False)
 
     revoked = models.BooleanField(default=False)
     revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
