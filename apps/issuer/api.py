@@ -134,12 +134,12 @@ class BatchSignAssertions(BaseEntityListView):
             raise ValidationError('Cannot sign badges: no password provided.')
         if not assertion_slugs:
             raise ValidationError('No badges to sign.')
-        if not user.may_sign_assertions:
-            raise ValidationError('You do not have permission to sign badges.')
         assertion_instances = []
         batch_of_assertion_json = []
         for ass_slug in assertion_slugs:  # pun intended
             assertion_instance = BadgeInstance.objects.get(entity_id=ass_slug)
+            if not user.may_sign_assertion(assertion_instance):
+                raise ValidationError('You do not have permission to sign this badge.')
             if not user in [staff.user for staff in assertion_instance.issuer.current_signers]:
                 raise ValidationError('You are not a signer for this issuer: {}'.format(assertion_instance.issuer.name))
             if assertion_instance.signature:
