@@ -163,7 +163,7 @@ class Issuer(PermissionedModelMixin,
 
     badgrapp = models.ForeignKey('mainsite.BadgrApp', on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
-    name = models.CharField(max_length=1024)
+    name = models.CharField(max_length=512)
     image = models.FileField(upload_to='uploads/issuers', blank=True, null=True)
     description = models.TextField(blank=True, null=True, default=None)
     url = models.CharField(max_length=254, blank=True, null=True, default=None)
@@ -177,6 +177,10 @@ class Issuer(PermissionedModelMixin,
     @property
     def parent(self):
         return self.faculty
+
+    @property
+    def children(self):
+        return self.cached_badgeclasses()
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_staff(self):
@@ -270,7 +274,7 @@ class Issuer(PermissionedModelMixin,
     #
     @property
     def owners(self):
-        return self.get_local_staff_members(['create', 'read', 'update', 'destroy', 'award', 'administrate_users'])
+        return self.get_local_staff_members(['may_create', 'may_read', 'may_update', 'may_delete', 'may_award', 'may_administrate_users'])
         # return self.staff.filter(issuerstaff__role=IssuerStaff.ROLE_OWNER)
 
     @cachemodel.cached_method(auto_publish=True)
@@ -320,7 +324,7 @@ class Issuer(PermissionedModelMixin,
     def cached_editors(self):
         # UserModel = get_user_model()
         # return UserModel.objects.filter(issuerstaff__issuer=self, issuerstaff__role=IssuerStaff.ROLE_EDITOR)
-        self.get_local_staff_members(['read', 'update', 'award'])
+        self.get_local_staff_members(['may_read', 'may_update', 'may_award'])
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeclasses(self):

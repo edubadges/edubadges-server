@@ -30,8 +30,8 @@ class LogPermissionsFailMixin():
 class BaseEntityView(APIView):
     create_event = None
     logger = None
-    permission_map = {'GET': 'read', 'POST': 'create',
-                      'PUT': 'update', 'DELETE': 'delete'}
+    permission_map = {'GET': 'may_read', 'POST': 'may_create',
+                      'PUT': 'may_update', 'DELETE': 'may_delete'}
 
     def get_context_data(self, **kwargs):
         return {
