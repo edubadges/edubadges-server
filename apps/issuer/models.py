@@ -580,10 +580,9 @@ class BadgeClass(PermissionedModelMixin,
         )
 
     def issue_signed(self, recipient_id=None, evidence=None, narrative=None, created_by=None, allow_uppercase=False, badgr_app=None, signer=None, **kwargs):
-        if not signer.may_sign_assertions:
-            raise serializers.ValidationError('You do not have permission to sign badges.')
-        if not signer in [staff.user for staff in self.issuer.current_signers]:
-            raise serializers.ValidationError('You are not a signer for this issuer.')
+        perms = self.get_permissions(signer)
+        if not perms['may_sign']:
+            raise serializers.ValidationError('You do not have permission to sign badges for this badgeclass.')
         assertion = BadgeInstance.objects.create(
             badgeclass=self, recipient_identifier=recipient_id, narrative=narrative, evidence=evidence,
             notify=False,  # notify after signing

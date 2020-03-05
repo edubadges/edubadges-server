@@ -250,8 +250,12 @@ class UserPermissionsMixin(object):
         return obj.get_permissions(self)
 
     @property
-    def may_sign_assertions(self):
-        return self.has_perm('signing.may_sign_assertions')
+    def may_sign_assertion(self, badgeinstance):
+        """
+        Method to check if user may sign the assertion
+        """
+        perms = badgeinstance.badgeclass.get_permissions(self)
+        return perms['may_sign']
 
     def may_enroll(self, badge_class):
         """
@@ -457,7 +461,6 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
     @property
     def all_recipient_identifiers(self):
         return [self.get_recipient_identifier()]
-#         return [e.email for e in self.cached_emails() if e.verified] + [e.email for e in self.cached_email_variants()]
 
     def get_recipient_identifier(self):
         from allauth.socialaccount.models import SocialAccount
