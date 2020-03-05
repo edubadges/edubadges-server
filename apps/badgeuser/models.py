@@ -157,35 +157,6 @@ class UserCachedObjectGetterMixin(object):
     """
     Base class to group all cached object-getter functionality of user, purely for readability
     """
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_institution_staff(self):
-        return list(self.institutionstaff_set.all())
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_faculty_staff(self):
-        return list(self.facultystaff_set.all())
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_issuer_staff(self):
-        return list(self.issuerstaff_set.all())
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_badgeclass_staff(self):
-        return list(self.badgeclassstaff_set.all())
-
-    def get_staff(self, permissions):
-        """
-        get user's staff memberships where user has all these permissions
-        :param permission: list of strings
-        :return: list of unique staff memberships
-        """
-        institution_staff = self.cached_institution_staff()
-        faculty_staff = self.cached_faculty_staff()
-        issuer_staff = self.cached_issuer_staff()
-        badgeclass_staff = self.cached_badgeclass_staff()
-        all_staffs = institution_staff + faculty_staff + issuer_staff + badgeclass_staff
-        return [staff for staff in all_staffs if staff.has_permissions(permissions)]
-
     def _get_objects_with_permissions(self, permissions, type=None):
         """
         :param permission: list of strings representing permissions
@@ -217,7 +188,6 @@ class UserCachedObjectGetterMixin(object):
 
     def get_all_objects_with_permissions(self, permissions):
         return self._get_objects(permissions)
-
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeinstances(self):
