@@ -12,7 +12,6 @@ import cachemodel
 from allauth.account.adapter import get_adapter
 from django.apps import apps
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -228,15 +227,6 @@ class Issuer(PermissionedModelMixin,
                 pass
 
         return ret
-
-    # def save(self, *args, **kwargs):
-    #     ret = super(Issuer, self).save(*args, **kwargs)
-    #
-    #     # if no owner staff records exist, create one for created_by
-    #     if len(self.owners) < 1 and self.created_by_id:
-    #         IssuerStaff.objects.create(issuer=self, user=self.created_by, role=IssuerStaff.ROLE_OWNER)
-    #
-    #     return ret
 
     def get_absolute_url(self):
         return reverse('issuer_json', kwargs={'entity_id': self.entity_id})
