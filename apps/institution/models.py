@@ -58,6 +58,12 @@ class Faculty(PermissionedModelMixin, BaseVersionedEntity, cachemodel.CacheModel
     def get_issuers(self, user, permissions):
         return [issuer for issuer in self.cached_issuers() if issuer.has_permissions(user, permissions)]
 
+    def get_badgeclasses_count(self, user, permissions):
+        count = 0
+        for issuer in self.get_issuers(user, permissions):
+            count += len(issuer.get_badgeclasses(user, permissions))
+        return count
+
     @property
     def parent(self):
         return self.institution

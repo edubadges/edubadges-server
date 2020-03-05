@@ -11,9 +11,13 @@ class FacultyType(DjangoObjectType):
         fields = ('name', 'entity_id', 'institution')
 
     issuers = graphene.List(IssuerType)
+    badgeclasses_count = graphene.Int()
 
     def resolve_issuers(self, info):
         return self.get_issuers(info.context.user, ['read'])
+
+    def resolve_badgeclasses_count(self, info):
+        return self.get_badgeclasses_count(info.context.user, ['read'])
 
 
 class InstitutionType(DjangoObjectType):
