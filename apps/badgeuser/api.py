@@ -8,7 +8,7 @@ from apispec_drf.decorators import apispec_get_operation, apispec_put_operation,
     apispec_delete_operation, apispec_list_operation
 from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
-from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserTokenSerializerV1 #, BadgeUserManagementSerializer
+from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserTokenSerializerV1
 from badgeuser.tasks import process_email_verification
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -22,7 +22,6 @@ from django.utils import timezone
 from entity.api import BaseEntityDetailView, BaseEntityListView
 from issuer.permissions import BadgrOAuthTokenHasScope
 from mainsite.models import BadgrApp
-# from mainsite.permissions import AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope
 from mainsite.utils import OriginSetting
 from rest_framework import permissions, serializers, status
 from rest_framework.exceptions import ValidationError as RestframeworkValidationError
@@ -33,39 +32,6 @@ from rest_framework.status import HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUN
 
 RATE_LIMIT_DELTA = datetime.timedelta(minutes=5)
 
-
-# class BadgeUserList(BaseEntityListView):
-#     """
-#     GET user list within user scope for management console
-#     """
-#     model = BadgeUser
-#     http_method_names = ['get']
-#     permission_classes = (AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope)
-#     serializer_class = BadgeUserManagementSerializer
-#
-#     def get_objects(self, request, **kwargs):
-#         if request.user.has_perm('badgeuser.has_institution_scope'):
-#             institution_id = request.user.institution.id
-#             return BadgeUser.objects.filter(institution_id=institution_id)
-#         elif request.user.has_perm('badgeuser.has_faculty_scope'):
-#             return BadgeUser.objects.filter(faculty__in=request.user.faculty.all()).distinct()
-#         return BadgeUser.objects.none()
-
-# class BadgeUserManagementDetail(BaseEntityDetailView):
-#     """
-#     GET user for mananagement console
-#     put to change user
-#     """
-#     model = BadgeUser
-#     http_method_names = ['get', 'put']
-#     permission_classes = (AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope)
-#     serializer_class = BadgeUserManagementSerializer
-#
-#     def put(self, request, **kwargs):
-#         return super(BadgeUserManagementDetail, self).put(request, **kwargs)
-#
-#     def get(self, request, **kwargs):
-#         return super(BadgeUserManagementDetail, self).get(request, **kwargs)
 
 class BadgeUserDetail(BaseEntityDetailView):
     model = BadgeUser
@@ -141,9 +107,10 @@ class BadgeUserDetail(BaseEntityDetailView):
                 if request.user.id == obj.id:
                     # always have access to your own user
                     return True
-                if obj in request.user.peers:
-                    # you can see some info about users you know about
-                    return True
+                # peers is obsolete
+                # if obj in request.user.peers:
+                #     # you can see some info about users you know about
+                #     return True
 
             if method == 'put':
                 # only current user can update their own profile

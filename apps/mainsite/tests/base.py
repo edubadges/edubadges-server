@@ -84,12 +84,12 @@ class SetupUserHelper(object):
                                         create_email_address=create_email_address,
                                         send_confirmation=send_confirmation)
 
-        if groups:
-            for group in groups:
-                user.groups.add(group)
-                for perm in group.permissions.all():
-                    user.gains_permission(perm.codename, perm.content_type.model_class())
-            user.save()
+        # if groups:
+        #     for group in groups:
+        #         user.groups.add(group)
+        #         for perm in group.permissions.all():
+        #             user.gains_permission(perm.codename, perm.content_type.model_class())
+        #     user.save()
 
         if terms_version is not None:
             # ensure there are terms and the user agrees to them to ensure there are no cache misses during tests
