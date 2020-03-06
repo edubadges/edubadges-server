@@ -4,7 +4,8 @@ from django.conf import settings
 from rest_framework import permissions
 from django.contrib.auth.mixins import PermissionRequiredMixin
 
-logger=logging.getLogger('Badgr.Debug')
+logger = logging.getLogger('Badgr.Debug')
+
 
 class IsOwner(permissions.BasePermission):
     """
@@ -40,16 +41,6 @@ class MayUseManagementDashboard(permissions.BasePermission):
     
     def has_permission(selfs, request, view):
         return request.user.has_perm('badgeuser.view_management_tab')
-
-
-
-# class ObjectWithinUserScope(permissions.BasePermission):
-#     """
-#     Checks to see if object is within user's scope
-#     """
-#
-#     def has_object_permission(self, request, view, obj):
-#         return request.user.within_scope(obj)
 
 
 class LocalDevelopModePermissionMixin(PermissionRequiredMixin):

@@ -1,10 +1,7 @@
-
-
 from django.contrib.admin import ModelAdmin, StackedInline, TabularInline
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django_object_actions import DjangoObjectActions
-from institution.models import Faculty
 from mainsite.admin import badgr_admin
 
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceEvidence, BadgeClassAlignment, BadgeClassTag, \
@@ -65,17 +62,7 @@ class IssuerAdmin(DjangoObjectActions, ModelAdmin):
         )
     redirect_badgeclasses.label = "BadgeClasses"
     redirect_badgeclasses.short_description = "See this issuer's defined BadgeClasses"
-    
-    # def formfield_for_foreignkey(self, db_field, request, **kwargs):
-    #     if db_field.name == "faculty":
-    #         if not request.user.is_superuser:
-    #             if request.user.has_perm('badgeuser.has_institution_scope'):
-    #                 kwargs["queryset"] = Faculty.objects.filter(institution=request.user.institution)
-    #             elif request.user.has_perm('badgeuser.has_faculty_scope'):
-    #                 kwargs["queryset"] = request.user.faculty.get_queryset()
-    #             else:
-    #                 kwargs["queryset"] = Faculty.objects.none()
-    #     return super(IssuerAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 badgr_admin.register(Issuer, IssuerAdmin)
 
