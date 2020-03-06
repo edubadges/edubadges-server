@@ -112,55 +112,6 @@ class ApplicationInfoAdmin(ApplicationAdmin):
         ApplicationInfoInline
     ]
 badgr_admin.register(Application, ApplicationInfoAdmin)
-# badgr_admin.register(Grant, GrantAdmin)
-# badgr_admin.register(RefreshToken, RefreshTokenAdmin)
-
-class FilterByScopeMixin(object):
-    
-    """
-    This class uses the get_queryset method to determine permissions for the change, delete and history view.
-    To use, create a filter_queryset_institution() filter_queryset_faculty() methods in the Admin class 
-    """
-    def get_queryset(self, request):
-        """
-        Override filtering in Admin page
-        """
-        queryset = self.model._default_manager.get_queryset()
-        if not request.user.is_superuser:
-            if request.user.has_perm('badgeuser.has_institution_scope'):
-                queryset = self.filter_queryset_institution(queryset, request)
-            elif request.user.has_perm('badgeuser.has_faculty_scope'):
-                queryset = self.filter_queryset_faculty(queryset, request)
-            else:
-                queryset = self.model.objects.none()
-        ordering = self.get_ordering(request)
-        if ordering:
-            queryset = queryset.order_by(*ordering)
-        return queryset
-    
-    def change_view(self, request, object_id, form_url='', extra_context=None):
-        '''
-        Overrides super.change_view to add a check to see if this object is in the request.user's scope
-        '''
-        if not self.get_queryset(request).filter(id=object_id).exists():
-            return HttpResponseRedirect(reverse('admin:{}_{}_changelist'.format(self.model._meta.app_label, self.model._meta.model_name)))
-        return super(FilterByScopeMixin, self).change_view(request, object_id, form_url, extra_context)
-
-    def delete_view(self, request, object_id, form_url='', extra_context=None):
-        '''
-        Overrides super.delete_view to add a check to see if this object is in the request.user's scope
-        '''
-        if not self.get_queryset(request).filter(id=object_id).exists():
-            return HttpResponseRedirect(reverse('admin:{}_{}_changelist'.format(self.model._meta.app_label, self.model._meta.model_name)))
-        return super(FilterByScopeMixin, self).delete_view(request, object_id, extra_context)
-
-    def history_view(self, request, object_id, form_url='', extra_context=None):
-        '''
-        Overrides super.history_view to add a check to see if this object is in the request.user's scope
-        '''
-        if not self.get_queryset(request).filter(id=object_id).exists():
-            return HttpResponseRedirect(reverse('admin:{}_{}_changelist'.format(self.model._meta.app_label, self.model._meta.model_name)))
-        return super(FilterByScopeMixin, self).history_view(request, object_id, extra_context)
 
 
 class SecuredAccessTokenAdmin(AccessTokenAdmin):
@@ -168,6 +119,7 @@ class SecuredAccessTokenAdmin(AccessTokenAdmin):
     raw_id_fields = ('user','application')
     fields = ('obscured_token','user','application','expires','scope',)
     readonly_fields = ('obscured_token',)
+
 badgr_admin.register(AccessTokenProxy, SecuredAccessTokenAdmin)
 
 
