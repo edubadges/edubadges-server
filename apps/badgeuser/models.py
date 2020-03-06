@@ -677,28 +677,3 @@ class TermsAgreement(BaseAuditedModel, cachemodel.CacheModel):
     class Meta:
         ordering = ('-terms_version',)
         unique_together = ('user', 'terms_version')
-
-
-# Group.add_to_class('entity_id', models.CharField(max_length=254, null=True, default=None))
-# Group.add_to_class('rank', models.PositiveIntegerField(null=True, default=None))
-class GroupEntity(models.Model):
-    group = models.OneToOneField(Group, on_delete=models.CASCADE, related_name='entity_rank')
-    entity_id = models.CharField(max_length=254, null=True, default=None)
-    rank = models.PositiveIntegerField(null=True, default=None)
-
-    def __str__(self):
-        return self.group.name
-
-@receiver(post_save, sender=Group)
-def generate_entity_id(sender, instance, **kwargs):
-    try:
-        instance.entity_rank
-    except ObjectDoesNotExist:
-        GroupEntity.objects.create(group=instance, entity_id=generate_entity_uri())
-
-@receiver(pre_save, sender=GroupEntity)
-def check_rank_uniqueness(sender, instance, **kwargs):
-    if instance.rank is not None:
-        instance_with_same_rank = sender.objects.filter(rank=instance.rank).first()
-        if bool(instance_with_same_rank) and instance_with_same_rank != instance:
-            raise ValidationError("Group rank already ascribed, choose another")
