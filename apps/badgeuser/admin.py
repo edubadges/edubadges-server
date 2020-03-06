@@ -2,7 +2,7 @@ from django.contrib.admin import ModelAdmin, TabularInline
 from django.contrib.auth.admin import UserAdmin
 from mainsite.admin import badgr_admin
 from .models import BadgeUser, EmailAddressVariant, TermsVersion, TermsAgreement, \
-    CachedEmailAddress, GroupEntity
+    CachedEmailAddress
 
 
 class TermsAgreementInline(TabularInline):
@@ -69,6 +69,4 @@ class TermsVersionAdmin(ModelAdmin):
 
 badgr_admin.register(TermsVersion, TermsVersionAdmin)
 
-
-badgr_admin.register(GroupEntity)
 
