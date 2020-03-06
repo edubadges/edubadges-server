@@ -1,34 +1,25 @@
 import datetime
-import re
 
-from allauth.account.adapter import get_adapter
 from allauth.account.models import EmailConfirmationHMAC
-from allauth.account.utils import user_pk_to_url_str, url_str_to_user_pk
-from apispec_drf.decorators import apispec_get_operation, apispec_put_operation, apispec_operation, \
-    apispec_delete_operation, apispec_list_operation
+from allauth.account.utils import url_str_to_user_pk
+from apispec_drf.decorators import apispec_get_operation, apispec_put_operation, apispec_delete_operation, apispec_list_operation
 from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
 from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserTokenSerializerV1
 from badgeuser.tasks import process_email_verification
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth.tokens import default_token_generator
-from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.http import Http404
-from django.urls import reverse
 from django.utils import timezone
 from entity.api import BaseEntityDetailView, BaseEntityListView
 from issuer.permissions import BadgrOAuthTokenHasScope
 from mainsite.models import BadgrApp
-from mainsite.utils import OriginSetting
-from rest_framework import permissions, serializers, status
+from rest_framework import permissions
 from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
-from rest_framework.status import HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, \
-    HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED
 
 RATE_LIMIT_DELTA = datetime.timedelta(minutes=5)
 
@@ -170,165 +161,6 @@ class BaseUserRecoveryView(BaseEntityDetailView):
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(obj, context=context)
         return Response(serializer.data, status=status)
-
-
-class BadgeUserForgotPassword(BaseUserRecoveryView):
-    authentication_classes = ()
-    permission_classes = (permissions.AllowAny,)
-    v1_serializer_class = serializers.Serializer
-
-    def get(self, request, *args, **kwargs):
-        badgr_app = None
-        badgrapp_id = self.request.GET.get('a', None)
-        if badgrapp_id is not None:
-            try:
-                badgr_app = BadgrApp.objects.get(id=badgrapp_id)
-            except BadgrApp.DoesNotExist:
-                pass
-        if not badgr_app:
-            badgr_app = BadgrApp.objects.get_current(request)
-        redirect_url = badgr_app.forgot_password_redirect
-        token = request.GET.get('token', '')
-        tokenized_url = "{}{}".format(redirect_url, token)
-        return Response(status=HTTP_302_FOUND, headers={'Location': tokenized_url})
-
-    @apispec_operation(
-        summary="Request an account recovery email",
-        tags=["Authentication"],
-        parameters=[
-            {
-                "in": "body",
-                "name": "body",
-                "required": True,
-                "schema": {
-                    "type": "object",
-                    "properties": {
-                        "email": {
-                            "type": "string",
-                            "format": "email",
-                            "description": "The email address on file to send recovery email to"
-                        }
-                    }
-                },
-            }
-        ]
-    )
-    def post(self, request, **kwargs):
-        email = request.data.get('email')
-        try:
-            email_address = CachedEmailAddress.cached.get(email=email)
-        except CachedEmailAddress.DoesNotExist:
-            # return 200 here because we don't want to expose information about which emails we know about
-            return self.get_response()
-
-        # email rate limiting
-        send_email = False
-        current_time = datetime.datetime.now()
-        last_request_time = email_address.get_last_forgot_password_sent_time()
-
-        if last_request_time is None:
-            send_email = True
-        else:
-            time_delta = current_time - last_request_time
-            if time_delta > RATE_LIMIT_DELTA:
-                send_email = True
-
-        if not send_email:
-            return Response("Forgot password request limit exceeded. Please check your"
-                + " inbox for an existing message or wait to retry.",
-                status=status.HTTP_429_TOO_MANY_REQUESTS)
-
-        email_address.set_last_forgot_password_sent_time(datetime.datetime.now())
-
-        #
-        # taken from allauth.account.forms.ResetPasswordForm
-        #
-
-        # fetch user from database directly to avoid cache
-        UserCls = get_user_model()
-        try:
-            user = UserCls.objects.get(pk=email_address.user_id)
-        except UserCls.DoesNotExist:
-            return self.get_response()
-
-        temp_key = default_token_generator.make_token(user)
-        token = "{uidb36}-{key}".format(uidb36=user_pk_to_url_str(user),
-                                        key=temp_key)
-
-        badgrapp = BadgrApp.objects.get_current(request=request)
-
-        api_path = reverse('{version}_api_auth_forgot_password'.format(version=request.version))
-        reset_url = "{origin}{path}?token={token}&a={badgrapp}".format(
-            origin=OriginSetting.HTTP,
-            path=api_path,
-            token=token,
-            badgrapp=badgrapp.id
-        )
-
-        email_context = {
-            "site": get_current_site(request),
-            "user": user,
-            "password_reset_url": reset_url,
-            'badgr_app': badgrapp
-        }
-        get_adapter().send_mail('account/email/password_reset_key', email, email_context)
-
-        return self.get_response()
-
-    @apispec_operation(
-        summary="Recover an account and set a new password",
-        tags=["Authentication"],
-        parameters=[
-            {
-                "in": "body",
-                "name": "body",
-                "required": True,
-                "schema": {
-                    "type": "object",
-                    "properties": {
-                        "token": {
-                            "type": "string",
-                            "format": "string",
-                            "description": "The token recieved in the recovery email",
-                            'required': True
-                        },
-                        "password": {
-                            'type': "string",
-                            'description': "The new password to use",
-                            'required': True
-                        }
-                    }
-                },
-            }
-        ]
-    )
-    def put(self, request, **kwargs):
-        token = request.data.get('token')
-        password = request.data.get('password')
-
-        matches = re.search(r'([0-9A-Za-z]+)-(.*)', token)
-        if not matches:
-            return Response(status=HTTP_404_NOT_FOUND)
-        uidb36 = matches.group(1)
-        key = matches.group(2)
-        if not (uidb36 and key):
-            return Response(status=HTTP_404_NOT_FOUND)
-
-        user = self._get_user(uidb36)
-        if user is None:
-            return Response(status=HTTP_404_NOT_FOUND)
-
-        if not default_token_generator.check_token(user, key):
-            return Response(status=HTTP_404_NOT_FOUND)
-
-        try:
-            validate_password(password)
-        except DjangoValidationError as e:
-            return Response(dict(password=e.messages), status=HTTP_400_BAD_REQUEST)
-
-        user.set_password(password)
-        user.save()
-        return self.get_response()
 
 
 class BadgeUserEmailConfirm(BaseUserRecoveryView):
