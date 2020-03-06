@@ -1,8 +1,8 @@
 from django.contrib.admin import ModelAdmin, TabularInline
 from django.contrib.auth.admin import UserAdmin
-from mainsite.admin import badgr_admin, FilterByScopeMixin
+from mainsite.admin import badgr_admin
 from .models import BadgeUser, EmailAddressVariant, TermsVersion, TermsAgreement, \
-    CachedEmailAddress, BadgeUserProxy, GroupEntity
+    CachedEmailAddress, GroupEntity
 
 
 class TermsAgreementInline(TabularInline):
@@ -19,53 +19,27 @@ class EmailAddressInline(TabularInline):
     model = CachedEmailAddress
     fk_name = 'user'
     extra = 0
-    fields = ('email','verified','primary')
+    fields = ('email', 'verified', 'primary')
 
 
-class BadgeUserAdmin(FilterByScopeMixin, UserAdmin):
-    
-    actions = None
+class BadgeUserAdmin(UserAdmin):
     readonly_fields = ('email', 'first_name', 'last_name', 'entity_id', 'date_joined', 'last_login', 'username', 'entity_id', 'agreed_terms_version')
     list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'date_joined', 'institution')
-    list_filter = ('is_active', 'is_staff', 'date_joined', 'last_login')
+    list_filter = ('is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')
     search_fields = ('email', 'first_name', 'last_name', 'username', 'entity_id')
     fieldsets = (
         ('Metadata', {'fields': ('entity_id', 'username', 'date_joined',), 'classes': ('collapse',)}),
         (None, {'fields': ('email', 'first_name', 'last_name')}),
         ('Access', {'fields': ('is_active', 'is_staff', 'password')}),
         ('Permissions', {'fields': ('groups',)}),
-        # ('Faculties', {'fields': ('faculty',) }),
     )
-    filter_horizontal = ( 'groups', 'user_permissions')
-
-badgr_admin.register(BadgeUser, BadgeUserAdmin)
-
-
-class BadgeUserProxyAdmin(BadgeUserAdmin):
-    actions = UserAdmin.actions
-    readonly_fields = ('entity_id', 'date_joined', 'last_login', 'username', 'entity_id', 'agreed_terms_version')
-    list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'entity_id', 'date_joined', 'faculties')
-    list_filter = ('is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')
-    fieldsets = (
-        ('Metadata', {'fields': ('entity_id', 'username', 'date_joined',), 'classes': ('collapse',)}),
-        (None, {'fields': ('email', 'first_name', 'last_name', 'badgrapp', 'agreed_terms_version', 'marketing_opt_in')}),
-        ('Access', {'fields': ('is_active', 'is_staff', 'is_superuser', 'password')}),
-        # ('Permissions', {'fields': ('groups', 'user_permissions')}),
-        # ('Faculties', {'fields': ('faculties',) }),
-    )
-    filter_horizontal = ('faculty',)
+    filter_horizontal = ('groups', 'user_permissions', 'faculty',)
     inlines = [
         EmailAddressInline,
-        # ExternalToolInline,
         TermsAgreementInline,
     ]
 
-    def faculties(self, obj):
-        return [f.name for f in obj.faculty_set.all()]
-
-badgr_admin.register(BadgeUserProxy, BadgeUserProxyAdmin)
-
-
+badgr_admin.register(BadgeUser, BadgeUserAdmin)
 
 class EmailAddressVariantAdmin(ModelAdmin):
     search_fields = ('canonical_email', 'email',)

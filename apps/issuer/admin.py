@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django_object_actions import DjangoObjectActions
 from institution.models import Faculty
-from mainsite.admin import badgr_admin, FilterByScopeMixin
+from mainsite.admin import badgr_admin
 
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceEvidence, BadgeClassAlignment, BadgeClassTag, \
     BadgeClassExtension, IssuerExtension, BadgeInstanceExtension
@@ -23,15 +23,8 @@ class IssuerExtensionInline(TabularInline):
     fields = ('name', 'original_json')
 
 
-class IssuerAdmin(DjangoObjectActions, FilterByScopeMixin, ModelAdmin):
-    
-    def filter_queryset_institution(self, queryset, request):
-        institution_id = request.user.institution.id
-        return queryset.filter(faculty__institution_id=institution_id).distinct()
-    
-    def filter_queryset_faculty(self, queryset, request):
-        return queryset.filter(faculty__in=request.user.faculty.all()).distinct()
-    
+class IssuerAdmin(DjangoObjectActions, ModelAdmin):
+
     readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id')
     list_display = ('img', 'name', 'entity_id', 'created_by', 'created_at', 'faculty')
     list_display_links = ('img', 'name')
@@ -73,16 +66,16 @@ class IssuerAdmin(DjangoObjectActions, FilterByScopeMixin, ModelAdmin):
     redirect_badgeclasses.label = "BadgeClasses"
     redirect_badgeclasses.short_description = "See this issuer's defined BadgeClasses"
     
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "faculty":
-            if not request.user.is_superuser:
-                if request.user.has_perm('badgeuser.has_institution_scope'):
-                    kwargs["queryset"] = Faculty.objects.filter(institution=request.user.institution)
-                elif request.user.has_perm('badgeuser.has_faculty_scope'):
-                    kwargs["queryset"] = request.user.faculty.get_queryset()
-                else:
-                    kwargs["queryset"] = Faculty.objects.none()              
-        return super(IssuerAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)    
+    # def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    #     if db_field.name == "faculty":
+    #         if not request.user.is_superuser:
+    #             if request.user.has_perm('badgeuser.has_institution_scope'):
+    #                 kwargs["queryset"] = Faculty.objects.filter(institution=request.user.institution)
+    #             elif request.user.has_perm('badgeuser.has_faculty_scope'):
+    #                 kwargs["queryset"] = request.user.faculty.get_queryset()
+    #             else:
+    #                 kwargs["queryset"] = Faculty.objects.none()
+    #     return super(IssuerAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 badgr_admin.register(Issuer, IssuerAdmin)
 

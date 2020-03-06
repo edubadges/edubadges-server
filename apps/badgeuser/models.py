@@ -545,13 +545,6 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
                     return
         return super(BadgeUser, self).save(*args, **kwargs)
 
-
-class BadgeUserProxy(BadgeUser):
-    class Meta:
-        proxy = True
-        verbose_name = 'Badge User Interface for SuperUser'
-
-
 class BadgrAccessTokenManager(models.Manager):
 
     def generate_new_token_for_user(self, user, scope='r:profile', application=None, expires=None, refresh_token=False):
