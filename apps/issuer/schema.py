@@ -16,9 +16,13 @@ class IssuerType(ImageResolverMixin, DjangoObjectType):
         fields = ('name', 'entity_id', 'badgeclasses', 'faculty',
                   'image', 'description', 'url', 'email', )
 
+    badgeclasses_count = graphene.Int()
+
     def resolve_badgeclasses(self, info):
         return self.get_badgeclasses(info.context.user, ['read'])
 
+    def resolve_badgeclasses_count(self, info):
+        return len(self.get_badgeclasses(info.context.user, ['read']))
 
 class BadgeClassType(ImageResolverMixin, DjangoObjectType):
 
