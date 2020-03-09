@@ -23,7 +23,7 @@ class CheckLogin(View):
         response = {'loggedin': True, 'auth_token':''}
         if not request.user.is_authenticated:
             response['loggedin'] = False
-        elif not request.user.has_edu_id_social_account():
+        elif not request.user.is_student():
             response['loggedin'] = False
         if request.user.is_authenticated:
             badgr_app = BadgrApp.objects.get(id=badgr_app_id)
@@ -57,7 +57,7 @@ class CheckLoginAdmin(CheckLogin):
         response = {'loggedin': True, 'auth_token':''}
         if not request.user.is_authenticated:
             response['loggedin'] = False
-        elif not request.user.has_surf_conext_social_account():
+        elif not request.user.is_teacher():
             response['loggedin'] = False
         if request.user.is_authenticated:
             badgr_app = BadgrApp.objects.get(id=badgr_app_id)

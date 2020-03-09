@@ -12,7 +12,6 @@ import cachemodel
 from allauth.account.adapter import get_adapter
 from django.apps import apps
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -174,6 +173,9 @@ class Issuer(PermissionedModelMixin,
     cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
     faculty = models.ForeignKey('institution.Faculty', on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
+    class Meta:
+        unique_together = ('name', 'faculty')
+
     @property
     def parent(self):
         return self.faculty
@@ -226,15 +228,6 @@ class Issuer(PermissionedModelMixin,
 
         return ret
 
-    # def save(self, *args, **kwargs):
-    #     ret = super(Issuer, self).save(*args, **kwargs)
-    #
-    #     # if no owner staff records exist, create one for created_by
-    #     if len(self.owners) < 1 and self.created_by_id:
-    #         IssuerStaff.objects.create(issuer=self, user=self.created_by, role=IssuerStaff.ROLE_OWNER)
-    #
-    #     return ret
-
     def get_absolute_url(self):
         return reverse('issuer_json', kwargs={'entity_id': self.entity_id})
 
@@ -285,46 +278,8 @@ class Issuer(PermissionedModelMixin,
     def current_signers(self):
         return [staff for staff in self.staff_items if staff.is_signer]
 
-    # @property
-    # def staff_items(self):
-    #     return self.cached_issuerstaff()
-    #
-    # @staff_items.setter
-    # def staff_items(self, value):
-    #     """
-    #     Update this issuers IssuerStaff from a list of IssuerStaffSerializerV2 data
-    #     """
-    #     existing_staff_idx = {s.cached_user: s for s in self.staff_items}
-    #     new_staff_idx = {s['cached_user']: s for s in value}
-    #
-    #     with transaction.atomic():
-    #         # add missing staff records
-    #         for staff_data in value:
-    #             if staff_data['cached_user'] not in existing_staff_idx:
-    #                 staff_record, created = IssuerStaff.cached.get_or_create(
-    #                     issuer=self,
-    #                     user=staff_data['cached_user'],
-    #                     defaults={
-    #                         'role': staff_data['role']
-    #                     })
-    #                 if not created:
-    #                     staff_record.role = staff_data['role']
-    #                     staff_record.save()
-    #
-    #         # remove old staff records -- but never remove the only OWNER role
-    #         for staff_record in self.staff_items:
-    #             if staff_record.cached_user not in new_staff_idx:
-    #                 if staff_record.role != IssuerStaff.ROLE_OWNER or len(self.owners) > 1:
-    #                     staff_record.delete()
-
     def get_extensions_manager(self):
         return self.issuerextension_set
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_editors(self):
-        # UserModel = get_user_model()
-        # return UserModel.objects.filter(issuerstaff__issuer=self, issuerstaff__role=IssuerStaff.ROLE_EDITOR)
-        self.get_local_staff_members(['may_read', 'may_update', 'may_award'])
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeclasses(self):
@@ -440,10 +395,6 @@ class BadgeClass(PermissionedModelMixin,
 
     issuer = models.ForeignKey(Issuer, blank=False, null=False, on_delete=models.CASCADE, related_name="badgeclasses")
 
-    # slug has been deprecated for now, but preserve existing values
-    slug = models.CharField(max_length=255, blank=True, null=True, default=None)
-    #slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
-
     name = models.CharField(max_length=255)
     image = models.FileField(upload_to='uploads/badges', blank=True)
     description = models.TextField(blank=True, null=True, default=None)
@@ -521,10 +472,6 @@ class BadgeClass(PermissionedModelMixin,
     @description_nonnull.setter
     def description_nonnull(self, value):
         self.description = value
-
-    # @property
-    # def owners(self):
-    #     return self.cached_issuer.owners
 
     @property
     def cached_issuer(self):
@@ -633,10 +580,9 @@ class BadgeClass(PermissionedModelMixin,
         )
 
     def issue_signed(self, recipient_id=None, evidence=None, narrative=None, created_by=None, allow_uppercase=False, badgr_app=None, signer=None, **kwargs):
-        if not signer.may_sign_assertions:
-            raise serializers.ValidationError('You do not have permission to sign badges.')
-        if not signer in [staff.user for staff in self.issuer.current_signers]:
-            raise serializers.ValidationError('You are not a signer for this issuer.')
+        perms = self.get_permissions(signer)
+        if not perms['may_sign']:
+            raise serializers.ValidationError('You do not have permission to sign badges for this badgeclass.')
         assertion = BadgeInstance.objects.create(
             badgeclass=self, recipient_identifier=recipient_id, narrative=narrative, evidence=evidence,
             notify=False,  # notify after signing
@@ -762,10 +708,6 @@ class BadgeInstance(BaseAuditedModel,
     recipient_type = models.CharField(max_length=255, choices=RECIPIENT_TYPE_CHOICES, default=RECIPIENT_TYPE_EDUID, blank=False, null=False)
 
     image = models.FileField(upload_to='uploads/badges', blank=True)
-
-    # slug has been deprecated for now, but preserve existing values
-    slug = models.CharField(max_length=255, blank=True, null=True, default=None)
-    #slug = AutoSlugField(max_length=255, populate_from='get_new_slug', unique=True, blank=False, editable=False)
 
     revoked = models.BooleanField(default=False)
     revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)

@@ -157,35 +157,6 @@ class UserCachedObjectGetterMixin(object):
     """
     Base class to group all cached object-getter functionality of user, purely for readability
     """
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_institution_staff(self):
-        return list(self.institutionstaff_set.all())
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_faculty_staff(self):
-        return list(self.facultystaff_set.all())
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_issuer_staff(self):
-        return list(self.issuerstaff_set.all())
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_badgeclass_staff(self):
-        return list(self.badgeclassstaff_set.all())
-
-    def get_staff(self, permissions):
-        """
-        get user's staff memberships where user has all these permissions
-        :param permission: list of strings
-        :return: list of unique staff memberships
-        """
-        institution_staff = self.cached_institution_staff()
-        faculty_staff = self.cached_faculty_staff()
-        issuer_staff = self.cached_issuer_staff()
-        badgeclass_staff = self.cached_badgeclass_staff()
-        all_staffs = institution_staff + faculty_staff + issuer_staff + badgeclass_staff
-        return [staff for staff in all_staffs if staff.has_permissions(permissions)]
-
     def _get_objects_with_permissions(self, permissions, type=None):
         """
         :param permission: list of strings representing permissions
@@ -217,7 +188,6 @@ class UserCachedObjectGetterMixin(object):
 
     def get_all_objects_with_permissions(self, permissions):
         return self._get_objects(permissions)
-
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeinstances(self):
@@ -279,30 +249,13 @@ class UserPermissionsMixin(object):
         """
         return obj.get_permissions(self)
 
-    def gains_permission(self, permission_codename, model):
-        content_type = ContentType.objects.get_for_model(model)
-        permission = Permission.objects.get(codename=permission_codename, content_type=content_type)
-        self.user_permissions.add(permission)
-        # you still need to reload user from db to refresh permission cache if you want effect to be immediate
-
-    def loses_permission(self, permission_codename, model):
-        content_type = ContentType.objects.get_for_model(model)
-        permission = Permission.objects.get(codename=permission_codename, content_type=content_type)
-        self.user_permissions.remove(permission)
-        # you still need to reload user from db to refresh permission cache if you want effect to be immediate
-
     @property
-    def may_sign_assertions(self):
-        return self.has_perm('signing.may_sign_assertions')
-
-    @property
-    def highest_group(self):
-        groups = list(self.groups.filter(entity_rank__rank__gte=0))
-        groups.sort(key=lambda x: x.entity_rank.rank)
-        if groups:
-            return groups[0]
-        else:
-            return None
+    def may_sign_assertion(self, badgeinstance):
+        """
+        Method to check if user may sign the assertion
+        """
+        perms = badgeinstance.badgeclass.get_permissions(self)
+        return perms['may_sign']
 
     def may_enroll(self, badge_class):
         """
@@ -319,31 +272,14 @@ class UserPermissionsMixin(object):
                 return True # no enrollments
             else:
                 for enrollment in enrollments:
-                    if not bool(enrollment.badge_instance): # has never been awarded
+                    if not bool(enrollment.badge_instance):  # has never been awarded
                         return False
-                    else: #has been awarded
+                    else:  # has been awarded
                         if not enrollment.assertion_is_revoked():
                             return False
-                return True # all have been awarded and revoked
-        else: # no eduID
+                return True  # all have been awarded and revoked
+        else:  # no eduID
             return False
-
-    def staff_memberships(self):
-        """
-        Returns all staff memberships
-        """
-        return Issuer.objects.filter(staff__id=self.id)
-
-    # def within_scope(self, object):
-    #     if object:
-    #         if self.has_perm('badgeuser.has_institution_scope'):
-    #             return object.institution == self.institution
-    #         if self.has_perm('badgeuser.has_faculty_scope'):
-    #             if object.faculty.__class__.__name__ == 'ManyRelatedManager':
-    #                 return bool(set(object.faculty.all()).intersection(set(self.faculty.all())))
-    #             else:
-    #                 return object.faculty in self.faculty.all()
-    #     return False
 
 
 class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
@@ -525,7 +461,6 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
     @property
     def all_recipient_identifiers(self):
         return [self.get_recipient_identifier()]
-#         return [e.email for e in self.cached_emails() if e.verified] + [e.email for e in self.cached_email_variants()]
 
     def get_recipient_identifier(self):
         from allauth.socialaccount.models import SocialAccount
@@ -543,11 +478,11 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
         except SocialAccount.DoesNotExist:
             return None
 
-    def has_edu_id_social_account(self):
+    def is_student(self):
         social_account = self.get_social_account()
         return social_account.provider == 'edu_id' or social_account.provider == 'surfconext_ala'
 
-    def has_surf_conext_social_account(self):
+    def is_teacher(self):
         social_account = self.get_social_account()
         return social_account.provider == 'surf_conext'
 
@@ -569,15 +504,6 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
         return [ts.badge_instance for ts in assertion_timestamps if ts.badge_instance.signature == None]
 
     @property
-    def peers(self):
-        """
-        a BadgeUser is a Peer of another BadgeUser if they appear in an IssuerStaff together
-        """
-        # cached_issuers should become get_issuers
-        # return set(chain(*[[s.cached_user for s in i.cached_issuerstaff()] for i in self.cached_issuers()]))
-        raise NotImplementedError
-
-    @property
     def agreed_terms_version(self):
         v = self.cached_agreed_terms_version()
         if v is None:
@@ -597,14 +523,12 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
                     self.save()
                 self.termsagreement_set.get_or_create(terms_version=value, defaults=dict(agreed=True))
 
-
     def replace_token(self):
         Token.objects.filter(user=self).delete()
         # user_token, created = \
         #         Token.objects.get_or_create(user=self)
         self.save()
         return self.cached_token()
-
 
     def save(self, *args, **kwargs):
         if not self.username:
@@ -620,13 +544,6 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
                     # nothing to do, abort so we dont call .publish()
                     return
         return super(BadgeUser, self).save(*args, **kwargs)
-
-
-class BadgeUserProxy(BadgeUser):
-    class Meta:
-        proxy = True
-        verbose_name = 'Badge User Interface for SuperUser'
-
 
 class BadgrAccessTokenManager(models.Manager):
 
@@ -760,28 +677,3 @@ class TermsAgreement(BaseAuditedModel, cachemodel.CacheModel):
     class Meta:
         ordering = ('-terms_version',)
         unique_together = ('user', 'terms_version')
-
-
-# Group.add_to_class('entity_id', models.CharField(max_length=254, null=True, default=None))
-# Group.add_to_class('rank', models.PositiveIntegerField(null=True, default=None))
-class GroupEntity(models.Model):
-    group = models.OneToOneField(Group, on_delete=models.CASCADE, related_name='entity_rank')
-    entity_id = models.CharField(max_length=254, null=True, default=None)
-    rank = models.PositiveIntegerField(null=True, default=None)
-
-    def __str__(self):
-        return self.group.name
-
-@receiver(post_save, sender=Group)
-def generate_entity_id(sender, instance, **kwargs):
-    try:
-        instance.entity_rank
-    except ObjectDoesNotExist:
-        GroupEntity.objects.create(group=instance, entity_id=generate_entity_uri())
-
-@receiver(pre_save, sender=GroupEntity)
-def check_rank_uniqueness(sender, instance, **kwargs):
-    if instance.rank is not None:
-        instance_with_same_rank = sender.objects.filter(rank=instance.rank).first()
-        if bool(instance_with_same_rank) and instance_with_same_rank != instance:
-            raise ValidationError("Group rank already ascribed, choose another")

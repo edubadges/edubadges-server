@@ -98,7 +98,8 @@ class IssuerStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
 
     @property
     def may_become_signer(self):
-        return self.user.may_sign_assertions and SymmetricKey.objects.filter(user=self.user, current=True).exists()
+        # return self.user.may_sign_assertions and SymmetricKey.objects.filter(user=self.user, current=True).exists()
+        return SymmetricKey.objects.filter(user=self.user, current=True).exists()
 
     @property
     def is_signer(self):

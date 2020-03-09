@@ -1,16 +1,12 @@
 # encoding: utf-8
-
-
 import json
 import urllib.parse
-
 import dateutil.parser
 from django.conf import settings
 from django.core.files.storage import DefaultStorage
 from django.db import models, transaction
 from django.urls import resolve, Resolver404
 from mainsite.utils import fetch_remote_file_to_storage, list_of, OriginSetting
-from pathway.tasks import award_badges_for_pathway_completion
 
 
 def resolve_source_url_referencing_local_object(source_url):
@@ -237,9 +233,6 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
                         name=name,
                         original_json=json.dumps(ext)
                     )
-
-        if check_completions:
-            award_badges_for_pathway_completion.delay(badgeinstance_pk=new_instance.pk)
 
         if not notify:
             # always notify if this is the first time issuing to a recipient

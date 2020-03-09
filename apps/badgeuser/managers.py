@@ -83,7 +83,7 @@ class EmailAddressCacheModelManager(CacheModelManager):
     def get_student_email(self, email_address):
         from badgeuser.models import CachedEmailAddress
         all_matching_emails = CachedEmailAddress.cached.filter(email=email_address)
-        student_email = [email for email in all_matching_emails if email.user.has_edu_id_social_account()]
+        student_email = [email for email in all_matching_emails if email.user.is_student()]
         if not student_email:
             raise CachedEmailAddress.DoesNotExist
         if len(student_email) > 1:

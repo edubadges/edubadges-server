@@ -21,7 +21,6 @@ from issuer.tasks import rebake_all_assertions, update_issuedon_all_assertions
 from mainsite.admin_actions import clear_cache
 from mainsite.models import EmailBlacklist, BadgrApp
 from mainsite.serializers import VerifiedAuthTokenSerializer
-from pathway.tasks import resave_all_elements
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import AllowAny
 from rest_framework.renderers import JSONRenderer
@@ -114,7 +113,6 @@ class SitewideActionForm(forms.Form):
 
     ACTIONS = {
         ACTION_CLEAR_CACHE: clear_cache,
-        ACTION_RESAVE_ELEMENTS: resave_all_elements,
         ACTION_REBAKE_ALL_ASSERTIONS: rebake_all_assertions,
         ACTION_FIX_ISSUEDON: update_issuedon_all_assertions,
     }
