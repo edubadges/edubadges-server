@@ -71,14 +71,14 @@ class BadgeClassLtiContextStudentSerializer(serializers.ModelSerializer):
 
     def get_requested(self, obj):
         user = self.context['request'].user
-        if user.has_edu_id_social_account() and not self.get_revoked(obj):
+        if user.is_student() and not self.get_revoked(obj):
             if StudentsEnrolled.objects.filter(user=user, badge_class=obj.badge_class, date_awarded__isnull=True, denied=False).exists():
                 return True
         return False
 
     def get_rewarded(self,obj):
         user = self.context['request'].user
-        if user.has_edu_id_social_account():
+        if user.is_student():
             if StudentsEnrolled.objects.filter(user=user, badge_class=obj.badge_class,
                                                date_awarded__isnull=False, denied=False).exists() \
                     and not self.get_revoked(obj):
@@ -87,14 +87,14 @@ class BadgeClassLtiContextStudentSerializer(serializers.ModelSerializer):
 
     def get_denied(self,obj):
         user = self.context['request'].user
-        if user.has_edu_id_social_account():
+        if user.is_student():
             if StudentsEnrolled.objects.filter(user=user, badge_class=obj.badge_class, denied=True).exists():
                 return True
         return False
 
     def get_revoked(self,obj):
         user = self.context['request'].user
-        if user.has_edu_id_social_account():
+        if user.is_student():
 
             assertions = StudentsEnrolled.objects.filter(user=user, badge_class=obj.badge_class).all()
             if len(assertions) > 0:

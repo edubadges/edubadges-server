@@ -9,21 +9,25 @@ class PermissionedRelationshipMixin(models.Model):
     Abstract base class used for inheritance in all the Staff Many2Many relationship models
     """
     user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE)
-    create = models.BooleanField(default=False)
-    read = models.BooleanField(default=False)
-    update = models.BooleanField(default=False)
-    destroy = models.BooleanField(default=False)
-    award = models.BooleanField(default=False)
-    sign = models.BooleanField(default=False)
-    administrate_users = models.BooleanField(default=False)
+    may_create = models.BooleanField(default=False)
+    may_read = models.BooleanField(default=False)
+    may_update = models.BooleanField(default=False)
+    may_delete = models.BooleanField(default=False)
+    may_award = models.BooleanField(default=False)
+    may_sign = models.BooleanField(default=False)
+    may_administrate_users = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
 
     @property
     def permissions(self):
-        return model_to_dict(self, fields = ['create', 'read', 'update',
-                                            'destroy', 'award', 'administrate_users'])
+        return model_to_dict(self, fields = ['may_create',
+                                             'may_read',
+                                             'may_update',
+                                             'may_delete',
+                                             'may_award',
+                                             'may_administrate_users'])
 
     def has_permissions(self, permissions):
         """
@@ -55,11 +59,6 @@ class InstitutionStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
     def object(self):
         return self.institution
 
-    @property
-    def serializer_class(self):
-        from staff.serializers import InstitutionStaffSerializer
-        return InstitutionStaffSerializer
-
 
 class FacultyStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
     """
@@ -71,18 +70,12 @@ class FacultyStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
     def object(self):
         return self.faculty
 
-    @property
-    def serializer_class(self):
-        from staff.serializers import FacultyStaffSerializer
-        return FacultyStaffSerializer
-
 
 class IssuerStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
     """
     Many2Many realtionship between Issuer and users, with permissions added to the relationship
     """
     issuer = models.ForeignKey('issuer.Issuer', on_delete=models.CASCADE)
-    # role = models.CharField(max_length=254, choices=ROLE_CHOICES, default=ROLE_STAFF)
 
     class Meta:
         unique_together = ('issuer', 'user')
@@ -90,11 +83,6 @@ class IssuerStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
     @property
     def object(self):
         return self.issuer
-
-    @property
-    def serializer_class(self):
-        from staff.serializers import IssuerStaffSerializer
-        return IssuerStaffSerializer
 
     def publish(self):
         super(IssuerStaff, self).publish()
@@ -110,7 +98,8 @@ class IssuerStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
 
     @property
     def may_become_signer(self):
-        return self.user.may_sign_assertions and SymmetricKey.objects.filter(user=self.user, current=True).exists()
+        # return self.user.may_sign_assertions and SymmetricKey.objects.filter(user=self.user, current=True).exists()
+        return SymmetricKey.objects.filter(user=self.user, current=True).exists()
 
     @property
     def is_signer(self):
@@ -134,8 +123,3 @@ class BadgeClassStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
     @property
     def object(self):
         return self.badgeclass
-
-    @property
-    def serializer_class(self):
-        from staff.serializers import BadgeClassStaffSerializer
-        return BadgeClassStaffSerializer
