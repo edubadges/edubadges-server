@@ -38,7 +38,7 @@ class Query(object):
         return [inst for inst in Institution.objects.all() if inst.has_permissions(info.context.user, ['read'])]
 
     def resolve_institution(self, info, **kwargs):
-        return [inst for inst in Institution.objects.all() if inst.has_permissions(info.context.user, ['read'])][0]
+        return info.context.user.institution
 
     def resolve_faculties(self, info, **kwargs):
         return [fac for fac in Faculty.objects.all() if fac.has_permissions(info.context.user, ['read'])]
