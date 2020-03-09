@@ -181,13 +181,17 @@ class UserCachedObjectGetterMixin(object):
                     object_tree_walker(child, permissions, looking_for, override_permissions)
             except AttributeError:  # no more kids
                 pass
-
+        if not self.is_teacher():
+            raise ValueError('User must be teacher to walk the permission tree')
         tree_root = self.institution
         object_tree_walker(tree_root, permissions)
         return permissioned_objects
 
     def get_all_objects_with_permissions(self, permissions):
         return self._get_objects(permissions)
+
+    def get_all_badgeclasses_with_permissions(self, permissions):
+        return self._get_objects_with_permissions(permissions, 'BadgeClass')
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeinstances(self):
