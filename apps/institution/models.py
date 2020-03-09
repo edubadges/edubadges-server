@@ -5,13 +5,17 @@ from staff.mixins import PermissionedModelMixin
 from staff.models import FacultyStaff, InstitutionStaff
 
 
-class Institution(PermissionedModelMixin, cachemodel.CacheModel):
+class Institution(PermissionedModelMixin, BaseVersionedEntity, cachemodel.CacheModel):
     
     def __str__(self):
         return self.name
     
     name = models.CharField(max_length=255, unique=True)
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.InstitutionStaff")
+
+    @property
+    def children(self):
+        return self.cached_faculties()
 
     def get_faculties(self, user, permissions):
         return [fac for fac in self.cached_faculties() if fac.has_permissions(user, permissions)]
@@ -61,6 +65,10 @@ class Faculty(PermissionedModelMixin, BaseVersionedEntity, cachemodel.CacheModel
     @property
     def parent(self):
         return self.institution
+
+    @property
+    def children(self):
+        return self.cached_issuers()
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_staff(self):

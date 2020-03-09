@@ -153,22 +153,6 @@ class EmailAddressVariant(models.Model):
         return True
 
 
-class AdministrateOtherUsersMixin(object):
-    """
-    Base class to group all administrate functionality for users, purely for readability
-    """
-    def get_administrable_staff(self):
-        """
-        :return: all staff memberships related to the object where user is staff, except for user's own staff memeberships
-        """
-        admin_staff_memberships = self.get_staff(['administrate_users'])
-        all_related_staff_memberships = []
-        for staff in admin_staff_memberships:
-            related_staffs = staff.object.staff_items
-            all_related_staff_memberships.append([staff for staff in related_staffs if staff.user is not self])
-        return all_related_staff_memberships
-
-
 class UserCachedObjectGetterMixin(object):
     """
     Base class to group all cached object-getter functionality of user, purely for readability
@@ -202,62 +186,38 @@ class UserCachedObjectGetterMixin(object):
         all_staffs = institution_staff + faculty_staff + issuer_staff + badgeclass_staff
         return [staff for staff in all_staffs if staff.has_permissions(permissions)]
 
-    def get_faculties(self, permissions):
+    def _get_objects_with_permissions(self, permissions, type=None):
         """
-        get faculties where user has all these permissions for
-        :param permission: list of strings
-        :return: list of faculties
+        :param permission: list of strings representing permissions
+        :param type: string that represent class.__name__ ('Institution', 'Faculty', 'Issuer', 'BadgeClass' or None)
+        :return: list of objects for which this user has the given permissions for.
         """
-        institution_staff = self.cached_institution_staff()
-        faculty_staff = self.cached_faculty_staff()
-        staff_memberships = institution_staff+faculty_staff
-        faculties = []
-        for staff_membership in staff_memberships:
-            if staff_membership.has_permissions(permissions):
-                if staff_membership.__class__.__name__ is not 'FacultyStaff':
-                    faculties += staff_membership.object.cached_faculties()
-                else:
-                    faculties += [staff_membership.object]
-        return list(set(faculties))
+        permissioned_objects = []
 
-    def get_issuers(self, permissions):
-        """
-        get issuers where user has all these permissions for
-        :param permission: list of strings
-        :return: list of issuers
-        """
-        institution_staff = self.cached_institution_staff()
-        faculty_staff = self.cached_faculty_staff()
-        issuer_staff = self.cached_issuer_staff()
-        staff_memberships = institution_staff + faculty_staff + issuer_staff
-        issuers = []
-        for staff_membership in staff_memberships:
-            if staff_membership.has_permissions(permissions):
-                if staff_membership.__class__.__name__ is not 'IssuerStaff':
-                    issuers += staff_membership.object.cached_issuers()
+        def object_tree_walker(obj, permissions, looking_for=type, override_permissions=False):
+            """
+            Recursively walks the object tree to find objects of which the user has all the given permissions for.
+            """
+            if obj.check_local_permissions(self, permissions) or override_permissions:
+                if looking_for:
+                    if obj.__class__.__name__ == looking_for:
+                        permissioned_objects.append(obj)
                 else:
-                    issuers += [staff_membership.object]
-        return list(set(issuers))
+                    permissioned_objects.append(obj)
+                override_permissions = True
+            try:
+                for child in obj.children:
+                    object_tree_walker(child, permissions, looking_for, override_permissions)
+            except AttributeError:  # no more kids
+                pass
 
-    def get_badgeclasses(self, permissions):
-        """
-        get badgeclasses where user has all these permissions for
-        :param permission: list of strings
-        :return: list of badgeclasses
-        """
-        institution_staff = self.cached_institution_staff()
-        faculty_staff = self.cached_faculty_staff()
-        issuer_staff = self.cached_issuer_staff()
-        badgeclass_staff = self.cached_badgeclass_staff()
-        all_staff_memberships = institution_staff+faculty_staff+issuer_staff+badgeclass_staff
-        badgeclasses = []
-        for staff_membership in all_staff_memberships:
-            if staff_membership.has_permissions(permissions):
-                if staff_membership.__class__.__name__ is not 'BadgeClassStaff':
-                    badgeclasses += staff_membership.object.cached_badgeclasses()
-                else:
-                    badgeclasses += [staff_membership.object]
-        return list(set(badgeclasses))
+        tree_root = self.institution
+        object_tree_walker(tree_root, permissions)
+        return permissioned_objects
+
+    def get_all_objects_with_permissions(self, permissions):
+        return self._get_objects(permissions)
+
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeinstances(self):
@@ -300,6 +260,17 @@ class UserPermissionsMixin(object):
     """
     Base class to group all permission functionality of user, purely for readability
     """
+    def may_administrate_other(self, user):
+        """
+        See if user may administrate (add/remove/change as staff member) other user. i.e. is the other user in his/her scope.
+        """
+        all_administrable_objects = self.get_all_objects_with_permissions(['may_administrate_users'])
+        for obj in all_administrable_objects:
+            for staff in obj.staff_items:
+                if user == staff.user:
+                    return True  # user is administrable
+        return False
+
     def get_permissions(self, obj):
         """
         Convenience method to get permissions for this user & object combination
@@ -375,7 +346,7 @@ class UserPermissionsMixin(object):
     #     return False
 
 
-class BadgeUser(AdministrateOtherUsersMixin, UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
+class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     """
     A full-featured user model that can be an Earner, Issuer, or Consumer of Open Badges
     """

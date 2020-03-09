@@ -82,3 +82,12 @@ class ScrubUploadedSvgImage(object):
             tree.write(buf)
             self.image = InMemoryUploadedFile(buf, 'image', self.image.name, 'image/svg+xml', buf.len, 'utf8')
         return super(ScrubUploadedSvgImage, self).save(*args, **kwargs)
+
+
+class StaffResolverMixin(object):
+
+    def resolve_staff(self, info):
+        if self.has_permissions(info.context.user, ['administrate_users']):
+            return self.staff_items
+        else:
+            return []
