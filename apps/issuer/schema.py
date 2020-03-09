@@ -1,8 +1,9 @@
 import graphene
 from graphene_django.types import DjangoObjectType
-from .models import Issuer, BadgeClass
+from .models import Issuer, BadgeClass, BadgeInstance
 from mainsite.mixins import StaffResolverMixin
 from staff.schema import IssuerStaffType, BadgeClassStaffType
+
 
 class ImageResolverMixin(object):
 
@@ -38,11 +39,25 @@ class BadgeClassType(StaffResolverMixin, ImageResolverMixin, DjangoObjectType):
     staff = graphene.List(BadgeClassStaffType)
 
 
+class BadgeInstanceType(ImageResolverMixin, DjangoObjectType):
+
+    share_url = graphene.String()
+
+    class Meta:
+        model = BadgeInstance
+        fields = ('entity_id', 'badgeclass', 'identifier', 'image',
+                  'recipient_identifier', 'recipient_type', 'revoked',
+                  'revocation_reason', 'expires_at', 'acceptance',
+                  'narrative', 'public', 'share_url')
+
+
 class Query(object):
     issuers = graphene.List(IssuerType)
     badge_classes = graphene.List(BadgeClassType)
+    badge_instances = graphene.List(BadgeInstanceType)
     issuer = graphene.Field(IssuerType, id=graphene.ID())
     badge_class = graphene.Field(BadgeClassType, id=graphene.ID())
+    badge_instance = graphene.Field(BadgeInstanceType, id=graphene.ID())
 
     def resolve_issuers(self, info, **kwargs):
         return [issuer for issuer in Issuer.objects.all() if issuer.has_permissions(info.context.user, ['may_read'])]
@@ -63,3 +78,6 @@ class Query(object):
             bc = BadgeClass.objects.get(id=id)
             if bc.has_permissions(info.context.user, ['may_read']):
                 return bc
+
+    def resolve_badge_instances(self, info, **kwargs):
+        return list(info.context.user.cached_badgeinstances())
