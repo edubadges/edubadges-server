@@ -50,7 +50,6 @@ class InstitutionStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
     institution = models.ForeignKey('institution.Institution', on_delete=models.CASCADE)
 
     class Meta:
-        # For now only one institution per user
         constraints = [
             models.UniqueConstraint(fields=['user', 'institution'], name='unique_institution_staff_membership')
         ]
