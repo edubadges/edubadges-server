@@ -24,6 +24,7 @@ from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_
 from signing import tsob
 from signing.models import AssertionTimeStamp
 from signing.permissions import MaySignAssertions
+from staff.permissions import HasObjectPermission
 
 logger = badgrlog.BadgrLogger()
 
@@ -184,9 +185,10 @@ class BatchSignAssertions(BaseEntityListView):
 
 class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):
     model = BadgeClass  # used by .get_object()
-    permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass, BadgrOAuthTokenHasEntityScope)
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     v1_serializer_class = BadgeInstanceSerializerV1
-    valid_scopes = ["rw:issuer", "rw:issuer:*"]
+    allowed_methods = ('POST',)
+    permission_map = {'POST': 'may_award'}
 
     def get_context_data(self, **kwargs):
         context = super(BatchAssertionsIssue, self).get_context_data(**kwargs)
