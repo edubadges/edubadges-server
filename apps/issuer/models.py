@@ -285,15 +285,6 @@ class Issuer(PermissionedModelMixin,
     def cached_badgeclasses(self):
         return self.badgeclasses.all()
 
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_pathways(self):
-        return self.pathway_set.filter(is_active=True)
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_recipient_groups(self):
-        return self.recipientgroup_set.all()
-
     @property
     def recipient_count(self):
         return sum(bc.recipient_count() for bc in self.cached_badgeclasses())
@@ -431,9 +422,6 @@ class BadgeClass(PermissionedModelMixin,
         if self.pathway_element_count() > 0:
             raise ProtectedError("BadgeClass may only be deleted if all PathwayElementBadge have been removed.", self)
 
-        if len(self.cached_completion_elements()) > 0:
-            raise ProtectedError("Badge could not be deleted. It is being used as a pathway completion badge.", self)
-
         issuer = self.issuer
         super(BadgeClass, self).delete(*args, **kwargs)
         issuer.publish()
@@ -567,14 +555,6 @@ class BadgeClass(PermissionedModelMixin,
 
     def get_extensions_manager(self):
         return self.badgeclassextension_set
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_pathway_elements(self):
-        return [peb.element for peb in self.pathwayelementbadge_set.all()]
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_completion_elements(self):
-        return [pce for pce in self.completion_elements.all()]
 
     def issue(self, recipient_id=None, evidence=None, narrative=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None, **kwargs):
         return BadgeInstance.objects.create(
@@ -881,8 +861,6 @@ class BadgeInstance(BaseAuditedModel,
     def publish(self):
         super(BadgeInstance, self).publish()
         self.badgeclass.publish()
-        if self.cached_recipient_profile:
-            self.cached_recipient_profile.publish()
         if self.user:
             self.user.publish()
 
@@ -1005,16 +983,6 @@ class BadgeInstance(BaseAuditedModel,
 
     def get_extensions_manager(self):
         return self.badgeinstanceextension_set
-
-    @property
-    def cached_recipient_profile(self):
-        from recipient.models import RecipientProfile
-        try:
-            return RecipientProfile.cached.get(recipient_identifier=self.recipient_identifier)
-        except RecipientProfile.MultipleObjectsReturned:
-            return RecipientProfile.objects.filter(recipient_identifier=self.recipient_identifier).first()
-        except RecipientProfile.DoesNotExist:
-            return None
 
     def get_json(self, obi_version=CURRENT_OBI_VERSION, expand_badgeclass=False, expand_issuer=False,
                  include_extra=True, use_canonical_id=False, signed=False, public_key_issuer=None):
