@@ -265,17 +265,17 @@ class UserPermissionsMixin(object):
         if social_account.provider == 'edu_id' or social_account.provider == 'surfconext_ala':
             enrollments = StudentsEnrolled.objects.filter(user=social_account.user, badge_class_id=badge_class.pk)
             if not enrollments:
-                return True # no enrollments
+                return {'success': True}  # no enrollments
             else:
                 for enrollment in enrollments:
                     if not bool(enrollment.badge_instance):  # has never been awarded
-                        return False
+                        return {'success': False, 'reason': 'user already requested badge'}
                     else:  # has been awarded
                         if not enrollment.assertion_is_revoked():
-                            return False
-                return True  # all have been awarded and revoked
+                            return {'success': False, 'reason': 'user already owns badge'}
+                return {'success': True}  # all have been awarded and revoked
         else:  # no eduID
-            return False
+            return {'success': False}
 
 
 class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):

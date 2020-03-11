@@ -23,7 +23,7 @@ class CheckIfStudentIsEnrolled(BaseEntityListView):
     def post(self, request, **kwargs):
         badge_class = get_object_or_404(BadgeClass, entity_id=request.data['badgeclass_slug'])
         if request.data.get('edu_id'):
-            if request.user.may_enroll(badge_class):
+            if request.user.may_enroll(badge_class)['success']:
                 return Response(data='notEnrolled', status=200)
             else:
                 return Response(data='enrolled', status=200)
@@ -76,7 +76,8 @@ class StudentsEnrolledList(BaseEntityListView):
             if field not in request.data:
                 return Response(data='field missing', status=401)
         badge_class = get_object_or_404(BadgeClass, entity_id=request.data['badgeclass_slug'])
-        if request.user.may_enroll(badge_class):
+        user_may_enroll = request.user.may_enroll(badge_class)
+        if user_may_enroll['success']:
             # consent given when enrolling
             enrollment = StudentsEnrolled.objects.create(badge_class_id=badge_class.pk,
                                                          user=request.user,
@@ -84,7 +85,7 @@ class StudentsEnrolledList(BaseEntityListView):
             message = EmailMessageMaker.create_student_badge_request_email(badge_class)
             request.user.email_user(subject='You have successfully requested a badge', message=message)
             return Response(data='enrolled', status=200)
-        return Response({'error': 'Cannot enroll'}, status=400)
+        return Response({'error': user_may_enroll['reason']}, status=400)
 
     def get(self, request, **kwargs):
         if 'badgeclass_slug' not in kwargs:

@@ -22,7 +22,7 @@ from allauth.account.adapter import get_adapter as get_account_adapter
 def enroll_student(user, edu_id, badgeclass_slug):
     badge_class = get_object_or_404(BadgeClass, entity_id=badgeclass_slug)
     # consent given wehen enrolling
-    if user.may_enroll(badge_class):
+    if user.may_enroll(badge_class)['success']:
         # consent given when enrolling
         StudentsEnrolled.objects.create(badge_class=badge_class,
                                         user=user,
