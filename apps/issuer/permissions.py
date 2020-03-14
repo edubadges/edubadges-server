@@ -79,18 +79,6 @@ class MayEditBadgeClass(permissions.BasePermission):
             return request.user.has_perm('issuer.can_edit_badgeclass', badgeclass)
 
 
-class IsOwnerOrStaff(permissions.BasePermission):
-    """
-    Ensures request user is owner for unsafe operations, or at least
-    staff for safe operations.
-    """
-    def has_object_permission(self, request, view, issuer):
-        if request.method in SAFE_METHODS:
-            return request.user.has_perm('issuer.is_staff', issuer)
-        else:
-            return request.user.has_perm('issuer.is_owner', issuer)
-
-
 class IsEditor(permissions.BasePermission):
     """
     Request.user is authorized to perform safe operations if they are staff or
@@ -104,40 +92,6 @@ class IsEditor(permissions.BasePermission):
             return request.user.has_perm('issuer.is_staff', issuer)
         else:
             return request.user.has_perm('issuer.is_editor', issuer)
-
-
-class IsStaff(permissions.BasePermission):
-    """
-    Request user is authorized to perform operations if they are owner or on staff
-    of an Issuer.
-    ---
-    model: Issuer
-    """
-    def has_object_permission(self, request, view, issuer):
-        return request.user.has_perm('issuer.is_staff', issuer)
-
-
-class ApprovedIssuersOnly(permissions.BasePermission):
-    def has_permission(self, request, view):
-        if request.method == 'POST' and getattr(settings, 'BADGR_APPROVED_ISSUERS_ONLY', False):
-            return request.user.has_perm('badgeuser.ui_issuer_add')
-        return True
-
-
-class IsIssuerEditor(IsEditor):
-    """
-    Used as a proxy permission for objects that have a .cached_issuer property and want to delegate permissions to issuer
-    """
-    def has_object_permission(self, request, view, recipient_group):
-        return super(IsIssuerEditor, self).has_object_permission(request, view, recipient_group.cached_issuer)
-
-
-class IsIssuerStaff(IsStaff):
-    """
-    Used as a proxy permission for objects that have a .cached_issuer property and want to delegate permissions to issuer
-    """
-    def has_object_permission(self, request, view, recipient_group):
-        return super(IsIssuerStaff, self).has_object_permission(request, view, recipient_group.cached_issuer)
 
 
 class AuditedModelOwner(permissions.BasePermission):
