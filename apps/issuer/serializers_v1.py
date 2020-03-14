@@ -55,27 +55,6 @@ class CachedListSerializer(serializers.ListSerializer):
         return [self.child.to_representation(item) for item in data]
 
 
-class IssuerStaffSerializerV1(serializers.Serializer):
-    """ A read_only serializer for staff roles """
-    user = BadgeUserProfileSerializerV1(source='cached_user')
-    # role = serializers.CharField(validators=[ChoicesValidator(list(dict(IssuerStaff.ROLE_CHOICES).keys()))])
-    is_signer = serializers.BooleanField()
-    may_become_signer = serializers.BooleanField()
-
-    class Meta:
-        list_serializer_class = CachedListSerializer
-
-        apispec_definition = ('IssuerStaff', {
-            'properties': {
-                'role': {
-                    'type': "string",
-                    'enum': ["staff", "editor", "owner"]
-
-                }
-            }
-        })
-
-
 class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1()
@@ -85,7 +64,6 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
     email = serializers.EmailField(max_length=255, required=True)
     description = StripTagsCharField(max_length=16384, required=False)
     url = serializers.URLField(max_length=1024, required=True)
-    staff = IssuerStaffSerializerV1(read_only=True, source='cached_issuerstaff', many=True)
     faculty = FacultySerializerV1(required=False, allow_null=True)
     extensions = serializers.DictField(source='extension_items', required=False)
 
@@ -147,12 +125,6 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
         if self.context.get('embed_badgeclasses', False):
             representation['badgeclasses'] = BadgeClassSerializerV1(obj.badgeclasses.all(), many=True,
                                                                     context=self.context).data
-
-        representation['badgeClassCount'] = len(obj.cached_badgeclasses())
-        representation['recipientGroupCount'] = len(obj.cached_recipient_groups())
-        representation['recipientCount'] = sum(g.member_count() for g in obj.cached_recipient_groups())
-        representation['pathwayCount'] = len(obj.cached_pathways())
-
         return representation
 
     def add_extensions(self, instance, add_these_extensions, extension_items):
