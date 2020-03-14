@@ -556,21 +556,20 @@ class BadgeClass(PermissionedModelMixin,
     def get_extensions_manager(self):
         return self.badgeclassextension_set
 
-    def issue(self, recipient_id=None, evidence=None, narrative=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None, **kwargs):
+    def issue(self, recipient_id=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None, **kwargs):
         return BadgeInstance.objects.create(
-            badgeclass=self, recipient_identifier=recipient_id, narrative=narrative, evidence=evidence,
+            badgeclass=self, recipient_identifier=recipient_id,
             notify=notify, created_by=created_by, allow_uppercase=allow_uppercase,
             badgr_app=badgr_app, user=get_user_or_none(recipient_id),
             **kwargs
         )
 
-    def issue_signed(self, recipient_id=None, evidence=None, narrative=None, created_by=None, allow_uppercase=False, badgr_app=None, signer=None, **kwargs):
+    def issue_signed(self, recipient_id=None, created_by=None, allow_uppercase=False, badgr_app=None, signer=None, **kwargs):
         perms = self.get_permissions(signer)
         if not perms['may_sign']:
             raise serializers.ValidationError('You do not have permission to sign badges for this badgeclass.')
         assertion = BadgeInstance.objects.create(
-            badgeclass=self, recipient_identifier=recipient_id, narrative=narrative, evidence=evidence,
-            notify=False,  # notify after signing
+            badgeclass=self, recipient_identifier=recipient_id, notify=False,  # notify after signing
             created_by=created_by, allow_uppercase=allow_uppercase,
             badgr_app=badgr_app, user=get_user_or_none(recipient_id),
             **kwargs
@@ -711,8 +710,6 @@ class BadgeInstance(BaseAuditedModel,
 
     hashed = models.BooleanField(default=True)
     salt = models.CharField(max_length=254, blank=True, null=True, default=None)
-
-    narrative = models.TextField(blank=True, null=True, default=None)
 
     old_json = JSONField()
 
@@ -1059,19 +1056,6 @@ class BadgeInstance(BaseAuditedModel,
                 json["sourceUrl"] = self.source_url
                 json["hostedUrl"] = OriginSetting.HTTP + self.get_absolute_url()
 
-        # evidence
-        if self.evidence_url:
-            if obi_version == '1_1':
-                # obi v1 single evidence url
-                json['evidence'] = self.evidence_url
-            elif obi_version == '2_0':
-                # obi v2 multiple evidence
-                json['evidence'] = [e.get_json(obi_version) for e in self.cached_evidence()]
-
-        # narrative
-        if self.narrative and obi_version == '2_0':
-            json['narrative'] = self.narrative
-
         # issuedOn / expires
         json['issuedOn'] = self.issued_on.isoformat()
         if self.expires_at:
@@ -1114,7 +1098,7 @@ class BadgeInstance(BaseAuditedModel,
     def json(self):
         return self.get_json()
 
-    def get_filtered_json(self, excluded_fields=('@context', 'id', 'type', 'uid', 'recipient', 'badge', 'issuedOn', 'image', 'evidence', 'narrative', 'revoked', 'revocationReason', 'verify', 'verification')):
+    def get_filtered_json(self, excluded_fields=('@context', 'id', 'type', 'uid', 'recipient', 'badge', 'issuedOn', 'image', 'revoked', 'revocationReason', 'verify', 'verification')):
         return super(BadgeInstance, self).get_filtered_json(excluded_fields=excluded_fields)
 
     @property

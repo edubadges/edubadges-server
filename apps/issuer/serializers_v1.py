@@ -261,8 +261,6 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
     recipient_name = serializers.SerializerMethodField()
     recipient_type = serializers.CharField(default=BadgeInstance.RECIPIENT_TYPE_EDUID)
     allow_uppercase = serializers.BooleanField(default=False, required=False, write_only=True)
-    evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
-    narrative = MarkdownCharField(required=False, allow_blank=True, allow_null=True)
 
     revoked = HumanReadableBooleanField(read_only=True)
     revocation_reason = serializers.CharField(read_only=True)
@@ -347,22 +345,10 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
         Requires self.context to include request (with authenticated request.user)
         and badgeclass: issuer.models.BadgeClass.
         """
-        evidence_items = []
-        # ob1 evidence url
-        evidence_url = validated_data.get('evidence')
-        if evidence_url:
-            evidence_items.append({'evidence_url': evidence_url})
-
         # ob2 evidence items
-        submitted_items = validated_data.get('evidence_items')
-        if submitted_items:
-            evidence_items.extend(submitted_items)
-
         if self.context['request'].data.get('issue_signed', False):
             assertion = self.context.get('badgeclass').issue_signed(
                 recipient_id=validated_data.get('recipient_identifier'),
-                narrative=validated_data.get('narrative'),
-                evidence=evidence_items,
                 created_by=self.context.get('request').user,
                 allow_uppercase=validated_data.get('allow_uppercase'),
                 recipient_type=validated_data.get('recipient_type', BadgeInstance.RECIPIENT_TYPE_EDUID),
@@ -375,8 +361,6 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
         else:
             assertion = self.context.get('badgeclass').issue(
                 recipient_id=validated_data.get('recipient_identifier'),
-                narrative=validated_data.get('narrative'),
-                evidence=evidence_items,
                 notify=validated_data.get('create_notification'),
                 created_by=self.context.get('request').user,
                 allow_uppercase=validated_data.get('allow_uppercase'),
@@ -400,7 +384,6 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
             'extension_items',
             'hashed',
             'issued_on',
-            'narrative',
             'recipient_identifier',
             'recipient_type'
         ]
