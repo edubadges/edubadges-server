@@ -10,3 +10,4 @@ class BadgeUserIsAuthenticatedUser(BasePermission):
         if isinstance(obj, BadgeUser):
             return request.user.pk == obj.pk
         return False
+

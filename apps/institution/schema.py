@@ -10,7 +10,7 @@ class FacultyType(StaffResolverMixin, DjangoObjectType):
 
     class Meta:
         model = Faculty
-        fields = ('name', 'entity_id', 'institution')
+        fields = ('name', 'entity_id', 'institution', 'staff')
 
     issuers = graphene.List(IssuerType)
     staff = graphene.List(FacultyStaffType)
@@ -23,7 +23,7 @@ class InstitutionType(StaffResolverMixin, DjangoObjectType):
 
     class Meta:
         model = Institution
-        fields = ('name',)
+        fields = ('name', 'staff')
 
     faculties = graphene.List(FacultyType)
     staff = graphene.List(InstitutionStaffType)
@@ -35,18 +35,10 @@ class InstitutionType(StaffResolverMixin, DjangoObjectType):
 class Query(object):
     institutions = graphene.List(InstitutionType)
     faculties = graphene.List(FacultyType)
-    institution = graphene.Field(InstitutionType, id=graphene.ID())
     faculty = graphene.Field(FacultyType, id=graphene.ID())
 
     def resolve_institutions(self, info, **kwargs):
         return [inst for inst in Institution.objects.all() if inst.has_permissions(info.context.user, ['may_read'])]
-
-    def resolve_institution(self, info, **kwargs):
-        id = kwargs.get('id')
-        if id is not None:
-            institution = Institution.objects.get(id=id)
-            if institution.has_permissions(info.context.user, ['may_read']):
-                return institution
 
     def resolve_faculties(self, info, **kwargs):
         return [fac for fac in Faculty.objects.all() if fac.has_permissions(info.context.user, ['may_read'])]

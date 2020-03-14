@@ -2,12 +2,13 @@ import datetime
 from collections import OrderedDict
 
 import badgrlog
+from issuer.permissions import IssuedAssertionsBlock
 from apispec_drf.decorators import apispec_put_operation, apispec_delete_operation, apispec_post_operation
 from django.http import Http404
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
 from issuer.models import Issuer, BadgeClass, BadgeInstance
-from issuer.permissions import IssuedAssertionsBlock
-from issuer.serializers_v1 import IssuerSerializerV1, BadgeClassSerializerV1, BadgeInstanceSerializerV1
+from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
+                                   BadgeInstanceSerializerV1)
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from rest_framework import status
 from rest_framework.exceptions import ValidationError

@@ -75,7 +75,7 @@ class BadgeClassType(StaffResolverMixin, ImageResolverMixin, ExtensionResolverMi
 
     class Meta:
         model = BadgeClass
-        fields = ('name', 'entity_id', 'issuer', 'image',
+        fields = ('name', 'entity_id', 'issuer', 'image', 'staff',
                   'description', 'criteria_url', 'criteria_text',)
 
     staff = graphene.List(BadgeClassStaffType)
