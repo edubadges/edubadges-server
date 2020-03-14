@@ -8,7 +8,6 @@ from django.urls import reverse
 from django.utils.dateparse import parse_datetime, parse_date
 from issuer.helpers import BadgeCheckHelper
 from issuer.models import BadgeInstance
-from issuer.serializers_v1 import EvidenceItemSerializer
 from mainsite.drf_fields import Base64FileField
 from mainsite.serializers import StripTagsCharField, MarkdownCharField
 from mainsite.utils import OriginSetting
@@ -27,7 +26,6 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
     acceptance = serializers.CharField(default='Accepted')
     public = serializers.BooleanField(required=False, default=False)
     narrative = MarkdownCharField(required=False, read_only=True)
-    evidence_items = EvidenceItemSerializer(many=True, required=False, read_only=True)
 
     extensions = serializers.DictField(source='extension_items', read_only=True)
 

@@ -1117,54 +1117,6 @@ class BadgeInstance(BaseAuditedModel,
     def get_filtered_json(self, excluded_fields=('@context', 'id', 'type', 'uid', 'recipient', 'badge', 'issuedOn', 'image', 'evidence', 'narrative', 'revoked', 'revocationReason', 'verify', 'verification')):
         return super(BadgeInstance, self).get_filtered_json(excluded_fields=excluded_fields)
 
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_evidence(self):
-        return self.badgeinstanceevidence_set.all()
-
-
-    @property
-    def evidence_url(self):
-        """Exists for compliance with ob1.x badges"""
-        evidence_list = self.cached_evidence()
-        if len(evidence_list) > 1:
-            return self.public_url
-        if len(evidence_list) == 1 and evidence_list[0].evidence_url:
-            return evidence_list[0].evidence_url
-        elif len(evidence_list) == 1:
-            return self.public_url
-
-    @property
-    def evidence_items(self):
-        """exists to cajole EvidenceItemSerializer"""
-        return self.cached_evidence()
-
-    @evidence_items.setter
-    def evidence_items(self, value):
-        def _key(narrative, url):
-            return '{}-{}'.format(narrative, url)
-        existing_evidence_idx = {_key(e.narrative, e.evidence_url): e for e in self.evidence_items}
-        new_evidence_idx = {_key(v.get('narrative',''), v.get('evidence_url','')): v for v in value}
-
-        with transaction.atomic():
-            if not self.pk:
-                self.save()
-
-            # add missing
-            for evidence_data in value:
-                key = _key(evidence_data.get('narrative',''), evidence_data.get('evidence_url',''))
-                if key not in existing_evidence_idx:
-                    evidence_record, created = BadgeInstanceEvidence.cached.get_or_create(
-                        badgeinstance=self,
-                        narrative=evidence_data.get('narrative', None),
-                        evidence_url=evidence_data.get('evidence_url', None)
-                    )
-
-            # remove old
-            for evidence_record in self.evidence_items:
-                key = _key(evidence_record.narrative or '', evidence_record.evidence_url or '')
-                if key not in new_evidence_idx:
-                    evidence_record.delete()
-
     @property
     def cached_badgrapp(self):
         return self.cached_issuer.cached_badgrapp

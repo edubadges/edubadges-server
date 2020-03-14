@@ -250,19 +250,6 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, 
         return new_badgeclass
 
 
-class EvidenceItemSerializer(serializers.Serializer):
-    evidence_url = serializers.URLField(max_length=1024, required=False, allow_blank=True)
-    narrative = MarkdownCharField(required=False, allow_blank=True)
-
-    class Meta:
-        apispec_definition = ('AssertionEvidence', {})
-
-    def validate(self, attrs):
-        if not (attrs.get('evidence_url', None) or attrs.get('narrative', None)):
-            raise serializers.ValidationError("Either url or narrative is required")
-        return attrs
-
-
 class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1(read_only=True)
@@ -276,7 +263,6 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
     allow_uppercase = serializers.BooleanField(default=False, required=False, write_only=True)
     evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
     narrative = MarkdownCharField(required=False, allow_blank=True, allow_null=True)
-    evidence_items = EvidenceItemSerializer(many=True, required=False)
 
     revoked = HumanReadableBooleanField(read_only=True)
     revocation_reason = serializers.CharField(read_only=True)
