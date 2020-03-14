@@ -869,11 +869,8 @@ class BadgeInstance(BaseAuditedModel,
 
     def delete(self, *args, **kwargs):
         badgeclass = self.badgeclass
-        recipient_profile = self.cached_recipient_profile
         super(BadgeInstance, self).delete(*args, **kwargs)
         badgeclass.publish()
-        if recipient_profile:
-            recipient_profile.publish()
         if self.user:
             self.user.publish()
         self.publish_delete('entity_id', 'revoked')
