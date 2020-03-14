@@ -58,6 +58,30 @@ class IssuerDetail(BaseEntityDetailView):
         return super(IssuerDetail, self).delete(request, **kwargs)
 
 
+class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
+    """
+    POST to create a new badgeclass within the issuer context
+    """
+    model = Issuer  # used by get_object()
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
+    v1_serializer_class = BadgeClassSerializerV1
+    allowed_methods = ('POST',)
+
+    def get_context_data(self, **kwargs):
+        context = super(IssuerBadgeClassList, self).get_context_data(**kwargs)
+        context['issuer'] = self.get_object(self.request, **kwargs)
+        return context
+
+    @apispec_post_operation('BadgeClass',
+        summary="Create a new BadgeClass associated with an Issuer",
+        description="Authenticated user must have owner, editor, or staff status on the Issuer",
+        tags=["Issuers", "BadgeClasses"],
+    )
+    def post(self, request, **kwargs):
+        issuer = self.get_object(request, **kwargs)  # trigger a has_object_permissions() check
+        return super(IssuerBadgeClassList, self).post(request, **kwargs)
+
+
 class BadgeClassDetail(BaseEntityDetailView):
     """
     GET details on one BadgeClass.
