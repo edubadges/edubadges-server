@@ -128,23 +128,6 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
             extension.save()
 
 
-class IssuerRoleActionSerializerV1(serializers.Serializer):
-    """ A serializer used for validating user role change POSTS """
-    action = serializers.ChoiceField(('add', 'modify', 'remove'), allow_blank=True)
-    username = serializers.CharField(allow_blank=True, required=False)
-    email = serializers.EmailField(allow_blank=True, required=False)
-    # role = serializers.CharField(
-    #     validators=[ChoicesValidator(list(dict(IssuerStaff.ROLE_CHOICES).keys()))],
-    #     default=IssuerStaff.ROLE_STAFF)
-    is_signer = serializers.BooleanField(required=False)
-
-    def validate(self, attrs):
-        if attrs.get('username') and attrs.get('email'):
-            raise serializers.ValidationError(
-                'Either a username or email address must be provided, not both.')
-        return attrs
-
-
 class AlignmentItemSerializerV1(serializers.Serializer):
     target_name = StripTagsCharField()
     target_url = serializers.URLField()
