@@ -24,6 +24,7 @@ class InstitutionFacultyList(VersionedObjectMixin, BaseEntityListView):
     """
     POST to create a Faculty within the Institution context
     """
+    # no need to declare model here
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     v1_serializer_class = FacultySerializerV1
     allowed_methods = ('POST',)
