@@ -20,7 +20,7 @@ from django.db.models import ProtectedError
 from django.urls import reverse
 from django.utils import timezone
 from entity.models import BaseVersionedEntity
-from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager, BadgeInstanceEvidenceManager
+from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager
 from jsonfield import JSONField
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage
@@ -1172,37 +1172,6 @@ class BadgeInstanceBakedImage(cachemodel.CacheModel):
     def delete(self, *args, **kwargs):
         self.publish_delete('badgeinstance', 'obi_version')
         return super(BadgeInstanceBakedImage, self).delete(*args, **kwargs)
-
-
-class BadgeInstanceEvidence(OriginalJsonMixin, cachemodel.CacheModel):
-    badgeinstance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE)
-    evidence_url = models.CharField(max_length=2083, blank=True, null=True, default=None)
-    narrative = models.TextField(blank=True, null=True, default=None)
-
-    objects = BadgeInstanceEvidenceManager()
-
-    def publish(self):
-        super(BadgeInstanceEvidence, self).publish()
-        self.badgeinstance.publish()
-
-    def delete(self, *args, **kwargs):
-        badgeinstance = self.badgeinstance
-        ret = super(BadgeInstanceEvidence, self).delete(*args, **kwargs)
-        badgeinstance.publish()
-        return ret
-
-    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_context=False):
-        json = OrderedDict()
-        if include_context:
-            obi_version, context_iri = get_obi_context(obi_version)
-            json['@context'] = context_iri
-
-        json['type'] = 'Evidence'
-        if self.evidence_url:
-            json['id'] = self.evidence_url
-        if self.narrative:
-            json['narrative'] = self.narrative
-        return json
 
 
 class BadgeClassAlignment(OriginalJsonMixin, cachemodel.CacheModel):
