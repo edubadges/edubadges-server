@@ -11,10 +11,9 @@ from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObject
 from entity.serializers import BaseSerializerV2, V2ErrorSerializer
 from issuer.models import Issuer, BadgeClass, BadgeInstance
 from issuer.permissions import (MayEditBadgeClass, IsEditor,
-                                BadgrOAuthTokenHasEntityScope)
+                                BadgrOAuthTokenHasEntityScope, IssuedAssertionsBlock)
 from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    BadgeInstanceSerializerV1)
-from issuer.utils import mapExtensionsToDict
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -31,22 +30,14 @@ logger = badgrlog.BadgrLogger()
 class IssuerDetail(BaseEntityDetailView):
     model = Issuer
     v1_serializer_class = IssuerSerializerV1
-    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, BadgrOAuthTokenHasEntityScope, BadgeUserHasSurfconextSocialAccount)
-    valid_scopes = ["rw:issuer", "rw:issuer:*"]
-
-    @apispec_get_operation('Issuer',
-        summary="Get a single Issuer",
-        tags=["Issuers"],
-    )
-    def get(self, request, **kwargs):
-        return super(IssuerDetail, self).get(request, **kwargs)
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, IssuedAssertionsBlock)
+    allowed_methods = ('PUT', 'DELETE')
 
     @apispec_put_operation('Issuer',
        summary="Update a single Issuer",
        tags=["Issuers"],
    )
     def put(self, request, **kwargs):
-        mapExtensionsToDict(request)
         return super(IssuerDetail, self).put(request, **kwargs)
 
     @apispec_delete_operation('Issuer',
@@ -84,20 +75,13 @@ class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
 class BadgeClassDetail(BaseEntityDetailView):
     """
     GET details on one BadgeClass.
-    PUT and DELETE should be restricted to BadgeClasses that haven't been issued yet.
+    PUT and DELETE are blocked if assertions have been issued
     """
     model = BadgeClass
-    permission_classes = (AuthenticatedWithVerifiedEmail, MayEditBadgeClass, BadgrOAuthTokenHasEntityScope)
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, IssuedAssertionsBlock)
     v1_serializer_class = BadgeClassSerializerV1
+    allowed_methods = ('PUT', 'DELETE')
 
-    valid_scopes = ["rw:issuer", "rw:issuer:*"]
-
-    @apispec_get_operation('BadgeClass',
-        summary='Get a single BadgeClass',
-        tags=['BadgeClasses'],
-    )
-    def get(self, request, **kwargs):
-        return super(BadgeClassDetail, self).get(request, **kwargs)
 
     @apispec_delete_operation('BadgeClass',
         summary="Delete a BadgeClass",
@@ -111,8 +95,6 @@ class BadgeClassDetail(BaseEntityDetailView):
         ])
     )
     def delete(self, request, **kwargs):
-        # TODO: log delete methods
-        # logger.event(badgrlog.BadgeClassDeletedEvent(old_badgeclass, request.user))
         return super(BadgeClassDetail, self).delete(request, **kwargs)
 
     @apispec_put_operation('BadgeClass',

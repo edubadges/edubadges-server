@@ -195,3 +195,10 @@ class BadgrOAuthTokenHasEntityScope(permissions.BasePermission):
 
     def _get_valid_scopes(self, request, view):
         return getattr(view, "valid_scopes")
+
+
+class IssuedAssertionsBlock(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if obj.assertions:
+            return False
+        return True

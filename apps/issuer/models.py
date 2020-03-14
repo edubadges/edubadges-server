@@ -184,6 +184,13 @@ class Issuer(PermissionedModelMixin,
     def children(self):
         return self.cached_badgeclasses()
 
+    @property
+    def assertions(self):
+        assertions = []
+        for bc in self.badgeclasses.all():
+            assertions += bc.assertions
+        return assertions
+
     @cachemodel.cached_method(auto_publish=True)
     def cached_staff(self):
         return list(IssuerStaff.objects.filter(issuer=self))
@@ -410,6 +417,10 @@ class BadgeClass(PermissionedModelMixin,
     @cachemodel.cached_method(auto_publish=True)
     def cached_staff(self):
         return BadgeClassStaff.objects.filter(badgeclass=self)
+
+    @property
+    def assertions(self):
+        return list(self.badgeinstances.all())
 
     def publish(self):
         super(BadgeClass, self).publish()
