@@ -10,8 +10,7 @@ from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObject
     UncachedPaginatedViewMixin
 from entity.serializers import BaseSerializerV2, V2ErrorSerializer
 from issuer.models import Issuer, BadgeClass, BadgeInstance
-from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
-                                IsEditor, IsStaff,
+from issuer.permissions import (MayEditBadgeClass, IsEditor, IsStaff,
                                 BadgrOAuthTokenHasEntityScope)
 from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    BadgeInstanceSerializerV1)

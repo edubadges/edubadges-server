@@ -63,18 +63,6 @@ rules.add_perm('issuer.can_issue_badge', can_issue_badgeclass)
 rules.add_perm('issuer.can_edit_badgeclass', can_edit_badgeclass)
 
 
-class MayIssueBadgeClass(permissions.BasePermission):
-    """
-    Allows those who have been given permission to issue badges on an Issuer to create
-    IssuerAssertions from its IssuerBadgeClasses
-    ---
-    model: BadgeClass
-    """
-
-    def has_object_permission(self, request, view, badgeclass):
-        return request.user.has_perm('issuer.can_issue_badge', badgeclass)
-
-
 class MayEditBadgeClass(permissions.BasePermission):
     """
     Request.user is authorized to perform safe operations on a BadgeClass
