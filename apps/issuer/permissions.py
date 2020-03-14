@@ -1,82 +1,10 @@
 import logging
 
 import oauth2_provider
-import rules
-from django.conf import settings
-from issuer.models import IssuerStaff
 from rest_framework import permissions
 
-logger=logging.getLogger('Badgr.Debug')
+logger = logging.getLogger('Badgr.Debug')
 SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
-
-
-@rules.predicate
-def is_owner(user, issuer):
-    for staff_record in issuer.cached_issuerstaff():
-        if staff_record.user_id == user.id and staff_record.role == IssuerStaff.ROLE_OWNER:
-            return True
-    return False
-
-
-@rules.predicate
-def is_editor(user, issuer):
-    for staff_record in issuer.cached_issuerstaff():
-        if staff_record.user_id == user.id and staff_record.role in (IssuerStaff.ROLE_OWNER, IssuerStaff.ROLE_EDITOR):
-            return True
-    return False
-
-
-@rules.predicate
-def is_staff(user, issuer):
-    for staff_record in issuer.cached_issuerstaff():
-        if staff_record.user_id == user.id:
-            return True
-    return False
-
-
-is_on_staff = is_owner | is_staff
-is_staff_editor = is_owner | is_editor
-
-rules.add_perm('issuer.is_owner', is_owner)
-rules.add_perm('issuer.is_editor', is_staff_editor)
-rules.add_perm('issuer.is_staff', is_on_staff)
-
-
-@rules.predicate
-def is_badgeclass_owner(user, badgeclass):
-    return any(staff.role == IssuerStaff.ROLE_OWNER for staff in badgeclass.cached_issuer.cached_issuerstaff() if staff.user_id == user.id)
-
-
-@rules.predicate
-def is_badgeclass_editor(user, badgeclass):
-    return any(staff.role in [IssuerStaff.ROLE_EDITOR, IssuerStaff.ROLE_OWNER] for staff in badgeclass.cached_issuer.cached_issuerstaff() if staff.user_id == user.id)
-
-
-@rules.predicate
-def is_badgeclass_staff(user, badgeclass):
-    return any(staff.user_id == user.id for staff in badgeclass.cached_issuer.cached_issuerstaff())
-
-can_issue_badgeclass = is_badgeclass_owner | is_badgeclass_staff
-can_edit_badgeclass = is_badgeclass_owner | is_badgeclass_editor
-
-rules.add_perm('issuer.can_issue_badge', can_issue_badgeclass)
-rules.add_perm('issuer.can_edit_badgeclass', can_edit_badgeclass)
-
-
-class MayEditBadgeClass(permissions.BasePermission):
-    """
-    Request.user is authorized to perform safe operations on a BadgeClass
-    if they are on its issuer's staff. They may perform unsafe operations
-    on a BadgeClass if they are among its issuers' editors.
-    ---
-    model: BadgeClass
-    """
-
-    def has_object_permission(self, request, view, badgeclass):
-        if request.method in SAFE_METHODS:
-            return request.user.has_perm('issuer.can_issue_badge', badgeclass)
-        else:
-            return request.user.has_perm('issuer.can_edit_badgeclass', badgeclass)
 
 
 class AuditedModelOwner(permissions.BasePermission):
@@ -146,40 +74,6 @@ class BadgrOAuthTokenHasScope(permissions.BasePermission):
             return []
 
         return valid_scopes
-
-
-class BadgrOAuthTokenHasEntityScope(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        token = request.auth
-
-        # Do not apply scope if using a non-oauth tokens
-        if not isinstance(token, oauth2_provider.models.AccessToken):
-            return True
-
-        if not token:
-            return False
-
-        # badgeclass/assertion objects defer to the issuer for permissions
-        if hasattr(obj, 'cached_issuer'):
-            entity_id = obj.cached_issuer.entity_id
-        else:
-            entity_id = obj.entity_id
-
-        valid_scopes = self._get_valid_scopes(request, view)
-        valid_scopes = set([self._resolve_wildcard(scope, entity_id) for scope in valid_scopes])
-        token_scopes = set(token.scope.split())
-
-        return not token.is_expired() and len(valid_scopes.intersection(token_scopes)) > 0
-
-    def _resolve_wildcard(self, scope, entity_id):
-        if scope.endswith(':*'):
-            base_scope, _ = scope.rsplit(':*', 1)
-            return ':'.join([base_scope, entity_id])
-        else:
-            return scope
-
-    def _get_valid_scopes(self, request, view):
-        return getattr(view, "valid_scopes")
 
 
 class IssuedAssertionsBlock(permissions.BasePermission):

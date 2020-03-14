@@ -2,17 +2,12 @@ import datetime
 from collections import OrderedDict
 
 import badgrlog
-from apispec_drf.decorators import apispec_get_operation, apispec_put_operation, \
-    apispec_delete_operation, apispec_list_operation, apispec_post_operation
-from badgeuser.permissions import BadgeUserHasSurfconextSocialAccount
+from apispec_drf.decorators import apispec_put_operation, apispec_delete_operation, apispec_post_operation
 from django.http import Http404
-from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView, \
-    UncachedPaginatedViewMixin
-from entity.serializers import BaseSerializerV2, V2ErrorSerializer
+from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
 from issuer.models import Issuer, BadgeClass, BadgeInstance
-from issuer.permissions import (MayEditBadgeClass, BadgrOAuthTokenHasEntityScope, IssuedAssertionsBlock)
-from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
-                                   BadgeInstanceSerializerV1)
+from issuer.permissions import IssuedAssertionsBlock
+from issuer.serializers_v1 import IssuerSerializerV1, BadgeClassSerializerV1, BadgeInstanceSerializerV1
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -238,87 +233,12 @@ class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(many=True, data=recipients, context=context)
         if not serializer.is_valid(raise_exception=False):
-            serializer = V2ErrorSerializer(instance={},
-                                           success=False,
-                                           description="bad request",
-                                           field_errors=serializer._errors,
-                                           validation_errors=[])
-            return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         new_instances = serializer.save(created_by=request.user)
         for new_instance in new_instances:
             self.log_create(new_instance)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-class BatchAssertionsRevoke(VersionedObjectMixin, BaseEntityView):
-    model = BadgeInstance
-    permission_classes = (AuthenticatedWithVerifiedEmail, BadgrOAuthTokenHasEntityScope)
-    valid_scopes = ["rw:issuer", "rw:issuer:*"]
-
-    def get_context_data(self, **kwargs):
-        context = super(BatchAssertionsRevoke, self).get_context_data(**kwargs)
-        context['badgeclass'] = self.get_object(self.request, **kwargs)
-        return context
-
-    def _process_revoke(self, request, revocation):
-        response = {
-            "revoked": False,
-        }
-
-        entity_id = revocation.get("entityId", None)
-        revocation_reason = revocation.get("revocationReason", None)
-
-        if entity_id is None:
-            return dict(response, reason="entityId is required")
-
-        response["entityId"] = entity_id
-
-        if revocation_reason is None:
-            return dict(response, reason="revocationReason is required")
-
-        response["revocationReason"] = revocation_reason
-
-        try:
-            assertion = self.get_object(request, entity_id=entity_id)
-        except Http404:
-            return dict(response, reason="permission denied or object not found")
-
-        if not self.has_object_permissions(request, assertion):
-            dict(response, reason="permission denied or object not found")
-
-
-        try:
-            assertion.revoke(revocation_reason)
-        except Exception as e:
-            return dict(response, reason=str(e))
-
-        return dict(response, revoked=True)
-
-    @apispec_post_operation('Assertion',
-        summary='Revoke multiple Assertions',
-        tags=['Assertions'],
-        parameters=[
-            {
-                "in": "body",
-                "name": "body",
-                "required": True,
-                'schema': {
-                    "type": "array",
-                    'items': { '$ref': '#/definitions/Assertion' }
-                },
-            }
-        ]
-    )
-    def post(self, request, **kwargs):
-        result = [
-            self._process_revoke(request, revocation)
-            for revocation in self.request.data
-        ]
-
-        response_data = BaseSerializerV2.response_envelope(result=result, success=True, description="revoked badges")
-
-        return Response(status=HTTP_200_OK, data=response_data)
 
 
 class BadgeInstanceDetail(BaseEntityDetailView):
