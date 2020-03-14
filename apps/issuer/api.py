@@ -10,8 +10,7 @@ from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObject
     UncachedPaginatedViewMixin
 from entity.serializers import BaseSerializerV2, V2ErrorSerializer
 from issuer.models import Issuer, BadgeClass, BadgeInstance
-from issuer.permissions import (MayEditBadgeClass, IsEditor,
-                                BadgrOAuthTokenHasEntityScope, IssuedAssertionsBlock)
+from issuer.permissions import (MayEditBadgeClass, BadgrOAuthTokenHasEntityScope, IssuedAssertionsBlock)
 from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    BadgeInstanceSerializerV1)
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
@@ -327,16 +326,10 @@ class BadgeInstanceDetail(BaseEntityDetailView):
     Endpoints for (GET)ting a single assertion or revoking a badge (DELETE)
     """
     model = BadgeInstance
-    permission_classes = (AuthenticatedWithVerifiedEmail, MayEditBadgeClass, BadgrOAuthTokenHasEntityScope)
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     v1_serializer_class = BadgeInstanceSerializerV1
-    valid_scopes = ["rw:issuer", "rw:issuer:*"]
-
-    @apispec_get_operation('Assertion',
-        summary="Get a single Assertion",
-        tags=['Assertions']
-    )
-    def get(self, request, **kwargs):
-        return super(BadgeInstanceDetail, self).get(request, **kwargs)
+    allowed_methods = ('DELETE',)
+    permission_map = {'DELETE': 'may_award'}
 
     @apispec_delete_operation('Assertion',
         summary="Revoke an Assertion",
@@ -363,10 +356,3 @@ class BadgeInstanceDetail(BaseEntityDetailView):
 
         # logger.event(badgrlog.BadgeAssertionRevokedEvent(current_assertion, request.user))
         return Response(status=HTTP_200_OK)
-
-    @apispec_put_operation('Assertion',
-        summary="Update an Assertion",
-        tags=['Assertions'],
-    )
-    def put(self, request, **kwargs):
-        return super(BadgeInstanceDetail, self).put(request, **kwargs)

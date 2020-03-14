@@ -79,21 +79,6 @@ class MayEditBadgeClass(permissions.BasePermission):
             return request.user.has_perm('issuer.can_edit_badgeclass', badgeclass)
 
 
-class IsEditor(permissions.BasePermission):
-    """
-    Request.user is authorized to perform safe operations if they are staff or
-    perform unsafe operations if they are owner or editor of an issuer.
-    ---
-    model: Issuer
-    """
-
-    def has_object_permission(self, request, view, issuer):
-        if request.method in SAFE_METHODS:
-            return request.user.has_perm('issuer.is_staff', issuer)
-        else:
-            return request.user.has_perm('issuer.is_editor', issuer)
-
-
 class AuditedModelOwner(permissions.BasePermission):
     """
     Request user matches .created_by

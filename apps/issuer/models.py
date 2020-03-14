@@ -760,6 +760,13 @@ class BadgeInstance(BaseAuditedModel,
     def get_absolute_url(self):
         return reverse('badgeinstance_json', kwargs={'entity_id': self.entity_id})
 
+    def get_permissions(self, user):
+        """
+        Function that equates permission for this BadgeInstance to that of the BadgeClass it belongs to.
+        Used in HasObjectPermission
+        """
+        return self.badgeclass.get_permissions(user)
+
     @property
     def jsonld_id(self):
         if self.source_url:
