@@ -81,17 +81,9 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
             faculty_id = self.context['request'].data['faculty']['id']
             faculty = Faculty.objects.get(pk=faculty_id)
             validated_data['faculty'] = faculty
-        user = validated_data['created_by']
-        potential_email = validated_data['email']
-        #         if not user.is_email_verified(potential_email):
-        #             raise serializers.ValidationError(
-        #                 "Issuer email must be one of your verified addresses. Add this email to your profile and try again.")
-
         new_issuer = Issuer(**validated_data)
-
         # set badgrapp
         new_issuer.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
-
         new_issuer.save()
         return new_issuer
 
