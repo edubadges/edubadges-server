@@ -285,15 +285,6 @@ class Issuer(PermissionedModelMixin,
     def cached_badgeclasses(self):
         return self.badgeclasses.all()
 
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_pathways(self):
-        return self.pathway_set.filter(is_active=True)
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_recipient_groups(self):
-        return self.recipientgroup_set.all()
-
     @property
     def recipient_count(self):
         return sum(bc.recipient_count() for bc in self.cached_badgeclasses())
@@ -562,14 +553,6 @@ class BadgeClass(PermissionedModelMixin,
 
     def get_extensions_manager(self):
         return self.badgeclassextension_set
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_pathway_elements(self):
-        return [peb.element for peb in self.pathwayelementbadge_set.all()]
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_completion_elements(self):
-        return [pce for pce in self.completion_elements.all()]
 
     def issue(self, recipient_id=None, evidence=None, narrative=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None, **kwargs):
         return BadgeInstance.objects.create(
