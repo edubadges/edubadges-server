@@ -192,17 +192,10 @@ class BadgeUserEmailConfirm(BaseUserRecoveryView):
         # We allow multiple users to add the same (unverified) email address.
         # A user can claim the address by verifying it.
         # If a user verifies an email address, all other users who had added that address will have that address deleted
-        # same_email_addresses = CachedEmailAddress.objects\  TODO: refactor db to include variants
-        #     .filter(email=emailconfirmation.email_address.email)\  TODO: refactor db to include variants
-        #     .exclude(pk=emailconfirmation.email_address.pk)  TODO: refactor db to include variants
-        all_email_addresses = CachedEmailAddress.objects.all()
-        invalid_claimants_email_addresses = [
-            ea for ea in all_email_addresses
-            if ea.email.lower() == email_address.email.lower()
-            and ea.pk != emailconfirmation.email_address.pk
-        ]
-        for _email_address in invalid_claimants_email_addresses:
-            _email_address.delete()
+        CachedEmailAddress.objects\
+            .filter(email__iexact=emailconfirmation.email_address.email)\
+            .exclude(pk=emailconfirmation.email_address.pk)\
+            .delete()
 
         email_address.verified = True
         email_address.save()
