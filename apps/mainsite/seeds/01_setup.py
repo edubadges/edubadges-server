@@ -23,7 +23,6 @@ BadgrApp(
 
 # Site
 Site(domain="127.0.0.1", name="127.0.0.1").save()
-Site(domain="localhost", name="localhost").save()
 
 
 # SocialApp
@@ -44,9 +43,7 @@ SocialApp(
     secret=surf_conext_secret
 ).save()
 
-SocialApp.objects.get(name="edu_id").sites.add(Site.objects.get(name="localhost"))
 SocialApp.objects.get(name="edu_id").sites.add(Site.objects.get(name="127.0.0.1"))
-SocialApp.objects.get(name="surf_conext").sites.add(Site.objects.get(name="localhost"))
 SocialApp.objects.get(name="surf_conext").sites.add(Site.objects.get(name="127.0.0.1"))
 
 
