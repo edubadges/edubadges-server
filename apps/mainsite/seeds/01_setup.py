@@ -52,10 +52,11 @@ TermsVersion(version=1, is_active=1).save()
 
 
 # Superuser
-BadgeUser(
+superuser = BadgeUser(
     is_superuser=1,
     username="superuser",
     email="superuser@example.com",
-    is_staff=1,
-    password="pbkdf2_sha256$150000$8rCLKHezsCgi$+1kVA4JdqyR1nMa0C3pnjYYp01h3dlNSR53K1GqRAIk="
-).save()
+    is_staff=1
+)
+superuser.set_password("secret")
+superuser.save()
