@@ -189,6 +189,15 @@ class BadgeUserEmailConfirm(BaseUserRecoveryView):
         except CachedEmailAddress.DoesNotExist:
             return Response(status=HTTP_404_NOT_FOUND)
 
+        # We allow multiple users to add the same (unverified) email address.
+        # A user can claim the address by verifying it.
+        # If a user verifies an email address, all other users who had added that address will have that address deleted
+        same_email_addresses = CachedEmailAddress.objects\
+            .filter(email=emailconfirmation.email_address.email)\
+            .exclude(pk=emailconfirmation.email_address.pk)
+        for _email_address in same_email_addresses:
+            _email_address.delete()
+
         email_address.verified = True
         email_address.save()
 
