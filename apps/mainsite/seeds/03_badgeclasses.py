@@ -4,12 +4,12 @@ from issuer.models import Issuer, BadgeClass
 
 # Faculty
 for ins in Institution.objects.all():
-    law = Faculty(name="Law", institution=ins).save()
-    business = Faculty(name="Business", institution=ins).save()
-    humanities = Faculty(name="Humanities", institution=ins).save()
-    medicine = Faculty(name="Medicine", institution=ins).save()
-    science = Faculty(name="Science", institution=ins).save()
-    social = Faculty(name="Social and Behavioural Science", institution=ins).save()
+    Faculty.objects.get_or_create(name="Law", institution=ins)
+    Faculty.objects.get_or_create(name="Business", institution=ins)
+    Faculty.objects.get_or_create(name="Humanities", institution=ins)
+    Faculty.objects.get_or_create(name="Medicine", institution=ins)
+    Faculty.objects.get_or_create(name="Science", institution=ins)
+    Faculty.objects.get_or_create(name="Social and Behavioural Science", institution=ins)
 
 
 # Issuer
@@ -23,33 +23,33 @@ issuers = {
 }
 
 for fac in Faculty.objects.all():
-    [Issuer(name=issuer, faculty=fac, old_json="{}").save() for issuer in issuers[fac.name]]
+    [Issuer.objects.get_or_create(name=issuer, faculty=fac, old_json="{}") for issuer in issuers[fac.name]]
 
 
 # BadgeClass
 ## Faculty: Social and Behavioural Science ## Issuer: Psychology
 for iss in Issuer.objects.filter(name="Psychology"):
-    [BadgeClass(
+    [BadgeClass.objects.get_or_create(
         name=bc,
         issuer=iss,
         description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
         old_json="{}",
-    ).save() for bc in ['Introduction to Psychology', 'Cognitive Psychology', 'Psychometrics', 'Group Dynamics']]
+    ) for bc in ['Introduction to Psychology', 'Cognitive Psychology', 'Psychometrics', 'Group Dynamics']]
 
 ## Faculty: Social and Behavioural Science ## Issuer: Political Science
 for iss in Issuer.objects.filter(name="Political Science"):
-    [BadgeClass(
+    [BadgeClass.objects.get_or_create(
         name=bc,
         issuer=iss,
         description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
         old_json="{}",
-    ).save() for bc in ['Introduction to Political Science', 'Law and Politics', 'History of Political Thought', 'Research Methods']]
+    ) for bc in ['Introduction to Political Science', 'Law and Politics', 'History of Political Thought', 'Research Methods']]
 
 ## Faculty: Medicine ## Issuer: Medicine
 for iss in Issuer.objects.filter(name="Medicine"):
-    [BadgeClass(
+    [BadgeClass.objects.get_or_create(
         name=bc,
         issuer=iss,
         description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
         old_json="{}",
-    ).save() for bc in ['Growth and Development', 'Circulation and Breathing', 'Regulation and Integration', 'Digestion and Defense']]
+    ) for bc in ['Growth and Development', 'Circulation and Breathing', 'Regulation and Integration', 'Digestion and Defense']]

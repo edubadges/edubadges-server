@@ -7,9 +7,13 @@ from django.conf import settings
 
 
 class Command(BaseCommand):
+    def add_arguments(self, parser):
+        parser.add_argument('-c', '--clean', action="store_true")
+
     def handle(self, *args, **options):
         if settings.ALLOW_SEEDS:
-            clear_data()
+            if options['clean']:
+                clear_data()
             run_seeds()
 
 

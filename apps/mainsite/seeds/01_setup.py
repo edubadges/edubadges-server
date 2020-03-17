@@ -5,7 +5,7 @@ from django.contrib.sites.models import Site
 from badgeuser.models import TermsVersion, BadgeUser
 
 # BadgrApp
-BadgrApp(
+BadgrApp.objects.get_or_create(
     is_active=1,
     cors="localhost:4000",
     email_confirmation_redirect="http://127.0.0.1:4000/login/",
@@ -18,47 +18,40 @@ BadgrApp(
     public_pages_redirect="http://127.0.0.1:4000/public/",
     oauth_authorization_redirect="http://127.0.0.1:4000/oauth/",
     use_auth_code_exchange=0
-).save()
-
+)
 
 # Site
-Site(domain="127.0.0.1", name="127.0.0.1").save()
-Site(domain="localhost", name="localhost").save()
-
+site, _ = Site.objects.get_or_create(domain="127.0.0.1", name="127.0.0.1")
 
 # SocialApp
 edu_id_secret = settings.EDU_ID_SECRET
-SocialApp(
+edu_id_app, _ = SocialApp.objects.get_or_create(
     provider="edu_id",
     name="edu_id",
     client_id="edubadges",
     secret=edu_id_secret
-).save()
-
+)
 
 surf_conext_secret = settings.SURF_CONEXT_SECRET
-SocialApp(
+surf_conext_app, _ = SocialApp.objects.get_or_create(
     provider="surf_conext",
     name="surf_conext",
     client_id="http@//localhost.edubadges.nl",
     secret=surf_conext_secret
-).save()
+)
 
-SocialApp.objects.get(name="edu_id").sites.add(Site.objects.get(name="localhost"))
-SocialApp.objects.get(name="edu_id").sites.add(Site.objects.get(name="127.0.0.1"))
-SocialApp.objects.get(name="surf_conext").sites.add(Site.objects.get(name="localhost"))
-SocialApp.objects.get(name="surf_conext").sites.add(Site.objects.get(name="127.0.0.1"))
-
+edu_id_app.sites.add(site)
+surf_conext_app.sites.add(site)
 
 # TermsVersion
-TermsVersion(version=1, is_active=1).save()
-
+TermsVersion.objects.get_or_create(version=1, is_active=1)
 
 # Superuser
-BadgeUser(
+superuser, _ = BadgeUser.objects.get_or_create(
     is_superuser=1,
     username="superuser",
     email="superuser@example.com",
-    is_staff=1,
-    password="pbkdf2_sha256$150000$8rCLKHezsCgi$+1kVA4JdqyR1nMa0C3pnjYYp01h3dlNSR53K1GqRAIk="
-).save()
+    is_staff=1
+)
+superuser.set_password("secret")
+superuser.save()

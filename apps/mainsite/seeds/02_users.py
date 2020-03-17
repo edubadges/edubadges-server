@@ -7,7 +7,7 @@ from staff.models import InstitutionStaff
 
 # Institution
 [
-    Institution(name=ins).save() for ins in [
+    Institution.objects.get_or_create(name=ins) for ins in [
         'university-example.org',
         'diy.surfconext.nl'
     ]
@@ -27,11 +27,10 @@ all_perms = {
 
 
 def create_teacher(username, email, institution_name, uid, perms = all_perms):
-    BadgeUser(is_staff=1, username=username, email=email).save()
+    user, _ = BadgeUser.objects.get_or_create(is_staff=1, username=username, email=email)
 
-    user = BadgeUser.objects.get(username=username, email=email)
-    EmailAddress(verified=1, primary=1, email=email, user=user).save()
-    SocialAccount(provider='surf_conext', uid=uid, user=user).save()
+    EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)
+    SocialAccount.objects.get_or_create(provider='surf_conext', uid=uid, user=user)
 
     institution = Institution.objects.get(name=institution_name)
     user.institution = institution
@@ -52,11 +51,9 @@ teachers = [
 
 # Users - Students
 def create_student(username, email, uid):
-    BadgeUser(username=username, email=email).save()
-
-    user = BadgeUser.objects.get(username=username, email=email)
-    EmailAddress(verified=1, primary=1, email=email, user=user).save()
-    SocialAccount(provider='edu_id', uid=uid, user=user).save()
+    user, _ = BadgeUser.objects.get_or_create(username=username, email=email)
+    EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)
+    SocialAccount.objects.get_or_create(provider='edu_id', uid=uid, user=user)
 
 
 students = [
