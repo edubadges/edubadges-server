@@ -2,20 +2,13 @@ import datetime
 from collections import OrderedDict
 
 import badgrlog
-from apispec_drf.decorators import apispec_get_operation, apispec_put_operation, \
-    apispec_delete_operation, apispec_list_operation, apispec_post_operation
-from badgeuser.permissions import BadgeUserHasSurfconextSocialAccount
+from issuer.permissions import IssuedAssertionsBlock
+from apispec_drf.decorators import apispec_put_operation, apispec_delete_operation, apispec_post_operation
 from django.http import Http404
-from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView, \
-    UncachedPaginatedViewMixin
-from entity.serializers import BaseSerializerV2, V2ErrorSerializer
+from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
 from issuer.models import Issuer, BadgeClass, BadgeInstance
-from issuer.permissions import (MayIssueBadgeClass, MayEditBadgeClass,
-                                IsEditor, IsStaff,
-                                BadgrOAuthTokenHasEntityScope)
 from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    BadgeInstanceSerializerV1)
-from issuer.utils import mapExtensionsToDict
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -24,6 +17,7 @@ from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_
 from signing import tsob
 from signing.models import AssertionTimeStamp
 from signing.permissions import MaySignAssertions
+from staff.permissions import HasObjectPermission
 
 logger = badgrlog.BadgrLogger()
 
@@ -31,22 +25,14 @@ logger = badgrlog.BadgrLogger()
 class IssuerDetail(BaseEntityDetailView):
     model = Issuer
     v1_serializer_class = IssuerSerializerV1
-    permission_classes = (AuthenticatedWithVerifiedEmail, IsEditor, BadgrOAuthTokenHasEntityScope, BadgeUserHasSurfconextSocialAccount)
-    valid_scopes = ["rw:issuer", "rw:issuer:*"]
-
-    @apispec_get_operation('Issuer',
-        summary="Get a single Issuer",
-        tags=["Issuers"],
-    )
-    def get(self, request, **kwargs):
-        return super(IssuerDetail, self).get(request, **kwargs)
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, IssuedAssertionsBlock)
+    allowed_methods = ('PUT', 'DELETE')
 
     @apispec_put_operation('Issuer',
        summary="Update a single Issuer",
        tags=["Issuers"],
    )
     def put(self, request, **kwargs):
-        mapExtensionsToDict(request)
         return super(IssuerDetail, self).put(request, **kwargs)
 
     @apispec_delete_operation('Issuer',
@@ -57,23 +43,40 @@ class IssuerDetail(BaseEntityDetailView):
         return super(IssuerDetail, self).delete(request, **kwargs)
 
 
+class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
+    """
+    POST to create a new badgeclass within the issuer context
+    """
+    model = Issuer  # used by get_object()
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
+    v1_serializer_class = BadgeClassSerializerV1
+    allowed_methods = ('POST',)
+
+    def get_context_data(self, **kwargs):
+        context = super(IssuerBadgeClassList, self).get_context_data(**kwargs)
+        context['issuer'] = self.get_object(self.request, **kwargs)
+        return context
+
+    @apispec_post_operation('BadgeClass',
+        summary="Create a new BadgeClass associated with an Issuer",
+        description="Authenticated user must have owner, editor, or staff status on the Issuer",
+        tags=["Issuers", "BadgeClasses"],
+    )
+    def post(self, request, **kwargs):
+        issuer = self.get_object(request, **kwargs)  # trigger a has_object_permissions() check
+        return super(IssuerBadgeClassList, self).post(request, **kwargs)
+
+
 class BadgeClassDetail(BaseEntityDetailView):
     """
     GET details on one BadgeClass.
-    PUT and DELETE should be restricted to BadgeClasses that haven't been issued yet.
+    PUT and DELETE are blocked if assertions have been issued
     """
     model = BadgeClass
-    permission_classes = (AuthenticatedWithVerifiedEmail, MayEditBadgeClass, BadgrOAuthTokenHasEntityScope)
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, IssuedAssertionsBlock)
     v1_serializer_class = BadgeClassSerializerV1
+    allowed_methods = ('PUT', 'DELETE')
 
-    valid_scopes = ["rw:issuer", "rw:issuer:*"]
-
-    @apispec_get_operation('BadgeClass',
-        summary='Get a single BadgeClass',
-        tags=['BadgeClasses'],
-    )
-    def get(self, request, **kwargs):
-        return super(BadgeClassDetail, self).get(request, **kwargs)
 
     @apispec_delete_operation('BadgeClass',
         summary="Delete a BadgeClass",
@@ -87,8 +90,6 @@ class BadgeClassDetail(BaseEntityDetailView):
         ])
     )
     def delete(self, request, **kwargs):
-        # TODO: log delete methods
-        # logger.event(badgrlog.BadgeClassDeletedEvent(old_badgeclass, request.user))
         return super(BadgeClassDetail, self).delete(request, **kwargs)
 
     @apispec_put_operation('BadgeClass',
@@ -184,9 +185,10 @@ class BatchSignAssertions(BaseEntityListView):
 
 class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):
     model = BadgeClass  # used by .get_object()
-    permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass, BadgrOAuthTokenHasEntityScope)
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     v1_serializer_class = BadgeInstanceSerializerV1
-    valid_scopes = ["rw:issuer", "rw:issuer:*"]
+    allowed_methods = ('POST',)
+    permission_map = {'POST': 'may_award'}
 
     def get_context_data(self, **kwargs):
         context = super(BatchAssertionsIssue, self).get_context_data(**kwargs)
@@ -232,12 +234,7 @@ class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(many=True, data=recipients, context=context)
         if not serializer.is_valid(raise_exception=False):
-            serializer = V2ErrorSerializer(instance={},
-                                           success=False,
-                                           description="bad request",
-                                           field_errors=serializer._errors,
-                                           validation_errors=[])
-            return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         new_instances = serializer.save(created_by=request.user)
         for new_instance in new_instances:
             self.log_create(new_instance)
@@ -245,199 +242,15 @@ class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class BatchAssertionsRevoke(VersionedObjectMixin, BaseEntityView):
-    model = BadgeInstance
-    permission_classes = (AuthenticatedWithVerifiedEmail, BadgrOAuthTokenHasEntityScope)
-    valid_scopes = ["rw:issuer", "rw:issuer:*"]
-
-    def get_context_data(self, **kwargs):
-        context = super(BatchAssertionsRevoke, self).get_context_data(**kwargs)
-        context['badgeclass'] = self.get_object(self.request, **kwargs)
-        return context
-
-    def _process_revoke(self, request, revocation):
-        response = {
-            "revoked": False,
-        }
-
-        entity_id = revocation.get("entityId", None)
-        revocation_reason = revocation.get("revocationReason", None)
-
-        if entity_id is None:
-            return dict(response, reason="entityId is required")
-
-        response["entityId"] = entity_id
-
-        if revocation_reason is None:
-            return dict(response, reason="revocationReason is required")
-
-        response["revocationReason"] = revocation_reason
-
-        try:
-            assertion = self.get_object(request, entity_id=entity_id)
-        except Http404:
-            return dict(response, reason="permission denied or object not found")
-
-        if not self.has_object_permissions(request, assertion):
-            dict(response, reason="permission denied or object not found")
-
-
-        try:
-            assertion.revoke(revocation_reason)
-        except Exception as e:
-            return dict(response, reason=str(e))
-
-        return dict(response, revoked=True)
-
-    @apispec_post_operation('Assertion',
-        summary='Revoke multiple Assertions',
-        tags=['Assertions'],
-        parameters=[
-            {
-                "in": "body",
-                "name": "body",
-                "required": True,
-                'schema': {
-                    "type": "array",
-                    'items': { '$ref': '#/definitions/Assertion' }
-                },
-            }
-        ]
-    )
-    def post(self, request, **kwargs):
-        result = [
-            self._process_revoke(request, revocation)
-            for revocation in self.request.data
-        ]
-
-        response_data = BaseSerializerV2.response_envelope(result=result, success=True, description="revoked badges")
-
-        return Response(status=HTTP_200_OK, data=response_data)
-
-
-class BadgeInstanceList(UncachedPaginatedViewMixin, VersionedObjectMixin, BaseEntityListView):
-    """
-    GET a list of assertions for a single badgeclass
-    POST to issue a new assertion, or multiple assertions
-    """
-    model = BadgeClass  # used by get_object()
-    permission_classes = (AuthenticatedWithVerifiedEmail, MayIssueBadgeClass, BadgrOAuthTokenHasEntityScope)
-    v1_serializer_class = BadgeInstanceSerializerV1
-    create_event = badgrlog.BadgeInstanceCreatedEvent
-    valid_scopes = ["rw:issuer", "rw:issuer:*"]
-    http_method_names = ['get']
-
-    def get_queryset(self, request=None, **kwargs):
-        badgeclass = self.get_object(request, **kwargs)
-        queryset = BadgeInstance.objects.filter(
-            badgeclass=badgeclass,
-            revoked=False
-        )
-
-        if 'recipient' in request.query_params:
-            recipient_id = request.query_params.get('recipient').lower()
-            queryset = queryset.filter(recipient_identifier=recipient_id)
-        return queryset
-
-    def get_context_data(self, **kwargs):
-        context = super(BadgeInstanceList, self).get_context_data(**kwargs)
-        context['badgeclass'] = self.get_object(self.request, **kwargs)
-        return context
-
-    @apispec_list_operation('Assertion',
-        summary="Get a list of Assertions for a single BadgeClass",
-        tags=['Assertions', 'BadgeClasses'],
-        parameters=[
-            {
-                'in': 'query',
-                'name': "recipient",
-                'type': "string",
-                'description': 'A recipient identifier to filter by'
-            },
-            {
-                'in': 'query',
-                'name': "num",
-                'type': "string",
-                'description': 'Request pagination of results'
-            }
-        ]
-    )
-    def get(self, request, **kwargs):
-        # verify the user has permission to the badgeclass
-        badgeclass = self.get_object(request, **kwargs)
-        if not self.has_object_permissions(request, badgeclass):
-            return Response(status=HTTP_404_NOT_FOUND)
-
-        return super(BadgeInstanceList, self).get(request, **kwargs)
-
-
-class IssuerBadgeInstanceList(UncachedPaginatedViewMixin, VersionedObjectMixin, BaseEntityListView):
-    """
-    Retrieve all assertions within one issuer
-    """
-    model = Issuer  # used by get_object()
-    permission_classes = (AuthenticatedWithVerifiedEmail, IsStaff, BadgrOAuthTokenHasEntityScope)
-    v1_serializer_class = BadgeInstanceSerializerV1
-    create_event = badgrlog.BadgeInstanceCreatedEvent
-    valid_scopes = ["rw:issuer", "rw:issuer:*"]
-
-    def get_queryset(self, request=None, **kwargs):
-        issuer = self.get_object(request, **kwargs)
-        queryset = BadgeInstance.objects.filter(
-            issuer=issuer,
-            revoked=False
-        )
-
-        if 'recipient' in request.query_params:
-            recipient_id = request.query_params.get('recipient').lower()
-            queryset = queryset.filter(recipient_identifier=recipient_id)
-        return queryset
-
-    @apispec_list_operation('Assertion',
-        summary='Get a list of Assertions for a single Issuer',
-        tags=['Assertions', 'Issuers'],
-        parameters=[
-            {
-                'in': 'query',
-                'name': "recipient",
-                'type': "string",
-                'description': 'A recipient identifier to filter by'
-            },
-            {
-                'in': 'query',
-                'name': "num",
-                'type': "string",
-                'description': 'Request pagination of results'
-            }
-        ]
-    )
-    def get(self, request, **kwargs):
-        return super(IssuerBadgeInstanceList, self).get(request, **kwargs)
-
-    @apispec_post_operation('Assertion',
-        summary="Issue a new Assertion to a recipient",
-        tags=['Assertions', 'Issuers']
-    )
-    def post(self, request, **kwargs):
-        kwargs['issuer'] = self.get_object(request, **kwargs)  # trigger a has_object_permissions() check
-        return super(IssuerBadgeInstanceList, self).post(request, **kwargs)
-
-
 class BadgeInstanceDetail(BaseEntityDetailView):
     """
     Endpoints for (GET)ting a single assertion or revoking a badge (DELETE)
     """
     model = BadgeInstance
-    permission_classes = (AuthenticatedWithVerifiedEmail, MayEditBadgeClass, BadgrOAuthTokenHasEntityScope)
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     v1_serializer_class = BadgeInstanceSerializerV1
-    valid_scopes = ["rw:issuer", "rw:issuer:*"]
-
-    @apispec_get_operation('Assertion',
-        summary="Get a single Assertion",
-        tags=['Assertions']
-    )
-    def get(self, request, **kwargs):
-        return super(BadgeInstanceDetail, self).get(request, **kwargs)
+    allowed_methods = ('DELETE',)
+    permission_map = {'DELETE': 'may_award'}
 
     @apispec_delete_operation('Assertion',
         summary="Revoke an Assertion",
@@ -464,10 +277,3 @@ class BadgeInstanceDetail(BaseEntityDetailView):
 
         # logger.event(badgrlog.BadgeAssertionRevokedEvent(current_assertion, request.user))
         return Response(status=HTTP_200_OK)
-
-    @apispec_put_operation('Assertion',
-        summary="Update an Assertion",
-        tags=['Assertions'],
-    )
-    def put(self, request, **kwargs):
-        return super(BadgeInstanceDetail, self).put(request, **kwargs)

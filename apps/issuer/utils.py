@@ -104,14 +104,3 @@ def get_badgeclass_by_identifier(identifier):
     # nothing found
     return None
 
-
-def mapExtensionsToDict(request):
-    if request.data.get('extensions', None):
-        d = {}
-        for ext in request.data['extensions']:
-            key = list(ext.keys())[0]
-            d[key] = ext[key]
-        request.data['extensions'] = d
-    else:
-        request.data['extensions'] = {}
-            

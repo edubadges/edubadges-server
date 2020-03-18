@@ -4,7 +4,7 @@ from django.urls import reverse
 from django_object_actions import DjangoObjectActions
 from mainsite.admin import badgr_admin
 
-from .models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceEvidence, BadgeClassAlignment, BadgeClassTag, \
+from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassAlignment, BadgeClassTag, \
     BadgeClassExtension, IssuerExtension, BadgeInstanceExtension
 
 
@@ -147,12 +147,6 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
 badgr_admin.register(BadgeClass, BadgeClassAdmin)
 
 
-class BadgeEvidenceInline(StackedInline):
-    model = BadgeInstanceEvidence
-    fields = ('evidence_url', 'narrative',)
-    extra = 0
-
-
 class BadgeInstanceExtensionInline(TabularInline):
     model = BadgeInstanceExtension
     extra = 0
@@ -186,7 +180,6 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
     actions = ['rebake']
     change_actions = ['redirect_issuer', 'redirect_badgeclass']
     inlines = [
-        BadgeEvidenceInline,
         BadgeInstanceExtensionInline
     ]
 

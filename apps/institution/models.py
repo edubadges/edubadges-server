@@ -70,13 +70,24 @@ class Faculty(PermissionedModelMixin, BaseVersionedEntity, cachemodel.CacheModel
     def children(self):
         return self.cached_issuers()
 
+    @property
+    def assertions(self):
+        assertions = []
+        for issuer in self.issuers:
+            assertions += issuer.assertions
+        return assertions
+
+    @property
+    def issuers(self):
+        return self.issuer_set.all()
+
     @cachemodel.cached_method(auto_publish=True)
     def cached_staff(self):
         return FacultyStaff.objects.filter(faculty=self)
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):
-        return list(self.issuer_set.all())
+        return self.issuers
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeclasses(self):

@@ -87,7 +87,7 @@ class ScrubUploadedSvgImage(object):
 class StaffResolverMixin(object):
 
     def resolve_staff(self, info):
-        if self.has_permissions(info.context.user, ['administrate_users']):
+        if self.has_permissions(info.context.user, ['may_administrate_users']):
             return self.staff_items
         else:
             return []

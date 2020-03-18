@@ -55,27 +55,6 @@ class CachedListSerializer(serializers.ListSerializer):
         return [self.child.to_representation(item) for item in data]
 
 
-class IssuerStaffSerializerV1(serializers.Serializer):
-    """ A read_only serializer for staff roles """
-    user = BadgeUserProfileSerializerV1(source='cached_user')
-    # role = serializers.CharField(validators=[ChoicesValidator(list(dict(IssuerStaff.ROLE_CHOICES).keys()))])
-    is_signer = serializers.BooleanField()
-    may_become_signer = serializers.BooleanField()
-
-    class Meta:
-        list_serializer_class = CachedListSerializer
-
-        apispec_definition = ('IssuerStaff', {
-            'properties': {
-                'role': {
-                    'type': "string",
-                    'enum': ["staff", "editor", "owner"]
-
-                }
-            }
-        })
-
-
 class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1()
@@ -85,7 +64,6 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
     email = serializers.EmailField(max_length=255, required=True)
     description = StripTagsCharField(max_length=16384, required=False)
     url = serializers.URLField(max_length=1024, required=True)
-    staff = IssuerStaffSerializerV1(read_only=True, source='cached_issuerstaff', many=True)
     faculty = FacultySerializerV1(required=False, allow_null=True)
     extensions = serializers.DictField(source='extension_items', required=False)
 
@@ -103,17 +81,9 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
             faculty_id = self.context['request'].data['faculty']['id']
             faculty = Faculty.objects.get(pk=faculty_id)
             validated_data['faculty'] = faculty
-        user = validated_data['created_by']
-        potential_email = validated_data['email']
-        #         if not user.is_email_verified(potential_email):
-        #             raise serializers.ValidationError(
-        #                 "Issuer email must be one of your verified addresses. Add this email to your profile and try again.")
-
         new_issuer = Issuer(**validated_data)
-
         # set badgrapp
         new_issuer.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
-
         new_issuer.save()
         return new_issuer
 
@@ -147,12 +117,6 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
         if self.context.get('embed_badgeclasses', False):
             representation['badgeclasses'] = BadgeClassSerializerV1(obj.badgeclasses.all(), many=True,
                                                                     context=self.context).data
-
-        representation['badgeClassCount'] = len(obj.cached_badgeclasses())
-        representation['recipientGroupCount'] = len(obj.cached_recipient_groups())
-        representation['recipientCount'] = sum(g.member_count() for g in obj.cached_recipient_groups())
-        representation['pathwayCount'] = len(obj.cached_pathways())
-
         return representation
 
     def add_extensions(self, instance, add_these_extensions, extension_items):
@@ -162,23 +126,6 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
                                         original_json=json.dumps(original_json),
                                         issuer_id=instance.pk)
             extension.save()
-
-
-class IssuerRoleActionSerializerV1(serializers.Serializer):
-    """ A serializer used for validating user role change POSTS """
-    action = serializers.ChoiceField(('add', 'modify', 'remove'), allow_blank=True)
-    username = serializers.CharField(allow_blank=True, required=False)
-    email = serializers.EmailField(allow_blank=True, required=False)
-    # role = serializers.CharField(
-    #     validators=[ChoicesValidator(list(dict(IssuerStaff.ROLE_CHOICES).keys()))],
-    #     default=IssuerStaff.ROLE_STAFF)
-    is_signer = serializers.BooleanField(required=False)
-
-    def validate(self, attrs):
-        if attrs.get('username') and attrs.get('email'):
-            raise serializers.ValidationError(
-                'Either a username or email address must be provided, not both.')
-        return attrs
 
 
 class AlignmentItemSerializerV1(serializers.Serializer):
@@ -198,13 +145,9 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, 
     id = serializers.IntegerField(required=False, read_only=True)
     name = StripTagsCharField(max_length=255)
     image = ValidImageField(required=False)
-    slug = StripTagsCharField(max_length=255, read_only=True, source='entity_id')
     criteria = MarkdownCharField(allow_blank=True, required=False, write_only=True)
     criteria_text = MarkdownCharField(required=False, allow_null=True, allow_blank=True)
     criteria_url = StripTagsCharField(required=False, allow_blank=True, allow_null=True, validators=[URLValidator()])
-    recipient_count = serializers.IntegerField(required=False, read_only=True)
-    enrollment_count = serializers.IntegerField(required=False, read_only=True)
-    pathway_element_count = serializers.IntegerField(required=False, read_only=True)
     description = StripTagsCharField(max_length=16384, required=True, convert_null=True)
     alignment = AlignmentItemSerializerV1(many=True, source='alignment_items', required=False)
     tags = serializers.ListField(child=StripTagsCharField(max_length=1024), source='tag_items', required=False)
@@ -307,19 +250,6 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, 
         return new_badgeclass
 
 
-class EvidenceItemSerializer(serializers.Serializer):
-    evidence_url = serializers.URLField(max_length=1024, required=False, allow_blank=True)
-    narrative = MarkdownCharField(required=False, allow_blank=True)
-
-    class Meta:
-        apispec_definition = ('AssertionEvidence', {})
-
-    def validate(self, attrs):
-        if not (attrs.get('evidence_url', None) or attrs.get('narrative', None)):
-            raise serializers.ValidationError("Either url or narrative is required")
-        return attrs
-
-
 class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1(read_only=True)
@@ -331,9 +261,6 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
     recipient_name = serializers.SerializerMethodField()
     recipient_type = serializers.CharField(default=BadgeInstance.RECIPIENT_TYPE_EDUID)
     allow_uppercase = serializers.BooleanField(default=False, required=False, write_only=True)
-    evidence = serializers.URLField(write_only=True, required=False, allow_blank=True, max_length=1024)
-    narrative = MarkdownCharField(required=False, allow_blank=True, allow_null=True)
-    evidence_items = EvidenceItemSerializer(many=True, required=False)
 
     revoked = HumanReadableBooleanField(read_only=True)
     revocation_reason = serializers.CharField(read_only=True)
@@ -418,22 +345,10 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
         Requires self.context to include request (with authenticated request.user)
         and badgeclass: issuer.models.BadgeClass.
         """
-        evidence_items = []
-        # ob1 evidence url
-        evidence_url = validated_data.get('evidence')
-        if evidence_url:
-            evidence_items.append({'evidence_url': evidence_url})
-
         # ob2 evidence items
-        submitted_items = validated_data.get('evidence_items')
-        if submitted_items:
-            evidence_items.extend(submitted_items)
-
         if self.context['request'].data.get('issue_signed', False):
             assertion = self.context.get('badgeclass').issue_signed(
                 recipient_id=validated_data.get('recipient_identifier'),
-                narrative=validated_data.get('narrative'),
-                evidence=evidence_items,
                 created_by=self.context.get('request').user,
                 allow_uppercase=validated_data.get('allow_uppercase'),
                 recipient_type=validated_data.get('recipient_type', BadgeInstance.RECIPIENT_TYPE_EDUID),
@@ -446,8 +361,6 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
         else:
             assertion = self.context.get('badgeclass').issue(
                 recipient_id=validated_data.get('recipient_identifier'),
-                narrative=validated_data.get('narrative'),
-                evidence=evidence_items,
                 notify=validated_data.get('create_notification'),
                 created_by=self.context.get('request').user,
                 allow_uppercase=validated_data.get('allow_uppercase'),
@@ -471,7 +384,6 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
             'extension_items',
             'hashed',
             'issued_on',
-            'narrative',
             'recipient_identifier',
             'recipient_type'
         ]

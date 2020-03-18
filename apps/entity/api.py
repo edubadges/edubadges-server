@@ -1,31 +1,13 @@
 # encoding: utf-8
 
 
-import logging
-
 import badgrlog
 from django.core.exceptions import FieldError
 from django.http import Http404
-from mainsite.pagination import EncryptedCursorPagination
 from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from rest_framework.views import APIView
 
-logger=logging.getLogger('Badgr.Debug')
-
-class LogPermissionsFailMixin():
-    def check_permissions(self, request):
-        """
-        Overrides check permissions to log when permission fails
-        """
-        for permission in self.get_permissions():
-            if not permission.has_permission(request, self):
-                logger.error({'permission.message':permission.message,
-                              "request.path": request.path})
-                self.permission_denied(
-                    request, message=getattr(permission, 'message', None)
-                )
-    
 
 class BaseEntityView(APIView):
     create_event = None
@@ -184,33 +166,3 @@ class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
             return Response(status=HTTP_404_NOT_FOUND)
         obj.delete()
         return Response(status=HTTP_204_NO_CONTENT)
-
-
-class UncachedPaginatedViewMixin(object):
-    min_per_page = 1
-    max_per_page = 500
-    default_per_page = None  # dont paginate by default
-    per_page_query_parameter_name = 'num'
-
-    def get_queryset(self, request, **kwargs):
-        raise NotImplementedError
-
-    def get_objects(self, request, **kwargs):
-        queryset = self.get_queryset(request=request, **kwargs)
-
-        try:
-            per_page = int(request.query_params.get(self.per_page_query_parameter_name, self.default_per_page))
-            per_page = max(self.min_per_page, per_page)
-            per_page = min(self.max_per_page, per_page)
-        except (TypeError, ValueError):
-            per_page = None
-
-        # only paginate on request
-        if per_page:
-            self.paginator = EncryptedCursorPagination()
-            self.paginator.page_size = per_page
-            page = self.paginator.paginate_queryset(queryset, request=request)
-        else:
-            page = list(queryset)
-
-        return page

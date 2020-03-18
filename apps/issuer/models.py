@@ -20,7 +20,7 @@ from django.db.models import ProtectedError
 from django.urls import reverse
 from django.utils import timezone
 from entity.models import BaseVersionedEntity
-from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager, BadgeInstanceEvidenceManager
+from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager
 from jsonfield import JSONField
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage
@@ -183,6 +183,13 @@ class Issuer(PermissionedModelMixin,
     @property
     def children(self):
         return self.cached_badgeclasses()
+
+    @property
+    def assertions(self):
+        assertions = []
+        for bc in self.badgeclasses.all():
+            assertions += bc.assertions
+        return assertions
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_staff(self):
@@ -411,6 +418,10 @@ class BadgeClass(PermissionedModelMixin,
     def cached_staff(self):
         return BadgeClassStaff.objects.filter(badgeclass=self)
 
+    @property
+    def assertions(self):
+        return list(self.badgeinstances.all())
+
     def publish(self):
         super(BadgeClass, self).publish()
         self.issuer.publish()
@@ -421,9 +432,6 @@ class BadgeClass(PermissionedModelMixin,
 
         if self.pathway_element_count() > 0:
             raise ProtectedError("BadgeClass may only be deleted if all PathwayElementBadge have been removed.", self)
-
-        if len(self.cached_completion_elements()) > 0:
-            raise ProtectedError("Badge could not be deleted. It is being used as a pathway completion badge.", self)
 
         issuer = self.issuer
         super(BadgeClass, self).delete(*args, **kwargs)
@@ -472,7 +480,12 @@ class BadgeClass(PermissionedModelMixin,
     def recipient_count(self):
         return self.badgeinstances.filter(revoked=False).count()
 
-    # @cachemodel.cached_method(auto_publish=True)
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_enrollments(self):
+        from lti_edu.models import StudentsEnrolled
+        return StudentsEnrolled.objects.filter(badge_class=self)
+
     def enrollment_count(self):
         from lti_edu.models import StudentsEnrolled
         return StudentsEnrolled.objects.filter(badge_class=self,
@@ -554,21 +567,20 @@ class BadgeClass(PermissionedModelMixin,
     def get_extensions_manager(self):
         return self.badgeclassextension_set
 
-    def issue(self, recipient_id=None, evidence=None, narrative=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None, **kwargs):
+    def issue(self, recipient_id=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None, **kwargs):
         return BadgeInstance.objects.create(
-            badgeclass=self, recipient_identifier=recipient_id, narrative=narrative, evidence=evidence,
+            badgeclass=self, recipient_identifier=recipient_id,
             notify=notify, created_by=created_by, allow_uppercase=allow_uppercase,
             badgr_app=badgr_app, user=get_user_or_none(recipient_id),
             **kwargs
         )
 
-    def issue_signed(self, recipient_id=None, evidence=None, narrative=None, created_by=None, allow_uppercase=False, badgr_app=None, signer=None, **kwargs):
+    def issue_signed(self, recipient_id=None, created_by=None, allow_uppercase=False, badgr_app=None, signer=None, **kwargs):
         perms = self.get_permissions(signer)
         if not perms['may_sign']:
             raise serializers.ValidationError('You do not have permission to sign badges for this badgeclass.')
         assertion = BadgeInstance.objects.create(
-            badgeclass=self, recipient_identifier=recipient_id, narrative=narrative, evidence=evidence,
-            notify=False,  # notify after signing
+            badgeclass=self, recipient_identifier=recipient_id, notify=False,  # notify after signing
             created_by=created_by, allow_uppercase=allow_uppercase,
             badgr_app=badgr_app, user=get_user_or_none(recipient_id),
             **kwargs
@@ -710,8 +722,6 @@ class BadgeInstance(BaseAuditedModel,
     hashed = models.BooleanField(default=True)
     salt = models.CharField(max_length=254, blank=True, null=True, default=None)
 
-    narrative = models.TextField(blank=True, null=True, default=None)
-
     old_json = JSONField()
 
     signature = models.TextField(blank=True, null=True, default=None)
@@ -749,6 +759,13 @@ class BadgeInstance(BaseAuditedModel,
 
     def get_absolute_url(self):
         return reverse('badgeinstance_json', kwargs={'entity_id': self.entity_id})
+
+    def get_permissions(self, user):
+        """
+        Function that equates permission for this BadgeInstance to that of the BadgeClass it belongs to.
+        Used in HasObjectPermission
+        """
+        return self.badgeclass.get_permissions(user)
 
     @property
     def jsonld_id(self):
@@ -859,8 +876,6 @@ class BadgeInstance(BaseAuditedModel,
     def publish(self):
         super(BadgeInstance, self).publish()
         self.badgeclass.publish()
-        if self.cached_recipient_profile:
-            self.cached_recipient_profile.publish()
         if self.user:
             self.user.publish()
 
@@ -872,11 +887,8 @@ class BadgeInstance(BaseAuditedModel,
 
     def delete(self, *args, **kwargs):
         badgeclass = self.badgeclass
-        recipient_profile = self.cached_recipient_profile
         super(BadgeInstance, self).delete(*args, **kwargs)
         badgeclass.publish()
-        if recipient_profile:
-            recipient_profile.publish()
         if self.user:
             self.user.publish()
         self.publish_delete('entity_id', 'revoked')
@@ -984,16 +996,6 @@ class BadgeInstance(BaseAuditedModel,
     def get_extensions_manager(self):
         return self.badgeinstanceextension_set
 
-    @property
-    def cached_recipient_profile(self):
-        from recipient.models import RecipientProfile
-        try:
-            return RecipientProfile.cached.get(recipient_identifier=self.recipient_identifier)
-        except RecipientProfile.MultipleObjectsReturned:
-            return RecipientProfile.objects.filter(recipient_identifier=self.recipient_identifier).first()
-        except RecipientProfile.DoesNotExist:
-            return None
-
     def get_json(self, obi_version=CURRENT_OBI_VERSION, expand_badgeclass=False, expand_issuer=False,
                  include_extra=True, use_canonical_id=False, signed=False, public_key_issuer=None):
 
@@ -1069,19 +1071,6 @@ class BadgeInstance(BaseAuditedModel,
                 json["sourceUrl"] = self.source_url
                 json["hostedUrl"] = OriginSetting.HTTP + self.get_absolute_url()
 
-        # evidence
-        if self.evidence_url:
-            if obi_version == '1_1':
-                # obi v1 single evidence url
-                json['evidence'] = self.evidence_url
-            elif obi_version == '2_0':
-                # obi v2 multiple evidence
-                json['evidence'] = [e.get_json(obi_version) for e in self.cached_evidence()]
-
-        # narrative
-        if self.narrative and obi_version == '2_0':
-            json['narrative'] = self.narrative
-
         # issuedOn / expires
         json['issuedOn'] = self.issued_on.isoformat()
         if self.expires_at:
@@ -1124,56 +1113,8 @@ class BadgeInstance(BaseAuditedModel,
     def json(self):
         return self.get_json()
 
-    def get_filtered_json(self, excluded_fields=('@context', 'id', 'type', 'uid', 'recipient', 'badge', 'issuedOn', 'image', 'evidence', 'narrative', 'revoked', 'revocationReason', 'verify', 'verification')):
+    def get_filtered_json(self, excluded_fields=('@context', 'id', 'type', 'uid', 'recipient', 'badge', 'issuedOn', 'image', 'revoked', 'revocationReason', 'verify', 'verification')):
         return super(BadgeInstance, self).get_filtered_json(excluded_fields=excluded_fields)
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_evidence(self):
-        return self.badgeinstanceevidence_set.all()
-
-
-    @property
-    def evidence_url(self):
-        """Exists for compliance with ob1.x badges"""
-        evidence_list = self.cached_evidence()
-        if len(evidence_list) > 1:
-            return self.public_url
-        if len(evidence_list) == 1 and evidence_list[0].evidence_url:
-            return evidence_list[0].evidence_url
-        elif len(evidence_list) == 1:
-            return self.public_url
-
-    @property
-    def evidence_items(self):
-        """exists to cajole EvidenceItemSerializer"""
-        return self.cached_evidence()
-
-    @evidence_items.setter
-    def evidence_items(self, value):
-        def _key(narrative, url):
-            return '{}-{}'.format(narrative, url)
-        existing_evidence_idx = {_key(e.narrative, e.evidence_url): e for e in self.evidence_items}
-        new_evidence_idx = {_key(v.get('narrative',''), v.get('evidence_url','')): v for v in value}
-
-        with transaction.atomic():
-            if not self.pk:
-                self.save()
-
-            # add missing
-            for evidence_data in value:
-                key = _key(evidence_data.get('narrative',''), evidence_data.get('evidence_url',''))
-                if key not in existing_evidence_idx:
-                    evidence_record, created = BadgeInstanceEvidence.cached.get_or_create(
-                        badgeinstance=self,
-                        narrative=evidence_data.get('narrative', None),
-                        evidence_url=evidence_data.get('evidence_url', None)
-                    )
-
-            # remove old
-            for evidence_record in self.evidence_items:
-                key = _key(evidence_record.narrative or '', evidence_record.evidence_url or '')
-                if key not in new_evidence_idx:
-                    evidence_record.delete()
 
     @property
     def cached_badgrapp(self):
@@ -1230,37 +1171,6 @@ class BadgeInstanceBakedImage(cachemodel.CacheModel):
     def delete(self, *args, **kwargs):
         self.publish_delete('badgeinstance', 'obi_version')
         return super(BadgeInstanceBakedImage, self).delete(*args, **kwargs)
-
-
-class BadgeInstanceEvidence(OriginalJsonMixin, cachemodel.CacheModel):
-    badgeinstance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE)
-    evidence_url = models.CharField(max_length=2083, blank=True, null=True, default=None)
-    narrative = models.TextField(blank=True, null=True, default=None)
-
-    objects = BadgeInstanceEvidenceManager()
-
-    def publish(self):
-        super(BadgeInstanceEvidence, self).publish()
-        self.badgeinstance.publish()
-
-    def delete(self, *args, **kwargs):
-        badgeinstance = self.badgeinstance
-        ret = super(BadgeInstanceEvidence, self).delete(*args, **kwargs)
-        badgeinstance.publish()
-        return ret
-
-    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_context=False):
-        json = OrderedDict()
-        if include_context:
-            obi_version, context_iri = get_obi_context(obi_version)
-            json['@context'] = context_iri
-
-        json['type'] = 'Evidence'
-        if self.evidence_url:
-            json['id'] = self.evidence_url
-        if self.narrative:
-            json['narrative'] = self.narrative
-        return json
 
 
 class BadgeClassAlignment(OriginalJsonMixin, cachemodel.CacheModel):

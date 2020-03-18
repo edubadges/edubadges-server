@@ -24,9 +24,6 @@ class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
     description = models.CharField(max_length=255, blank=True)
     share_hash = models.CharField(max_length=255, null=False, blank=True)
 
-    # slug has been deprecated, but keep for legacy collections redirects
-    slug = models.CharField(max_length=254, blank=True, null=True, default=None)
-
     assertions = models.ManyToManyField('issuer.BadgeInstance', blank=True, through='backpack.BackpackCollectionBadgeInstance')
 
     cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
