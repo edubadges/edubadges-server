@@ -141,8 +141,6 @@ class EmailSerializerV1(serializers.ModelSerializer):
             created = True
         else:
             if not email.verified:
-                # Clear out a previous attempt and let the current user try
-                email.delete()
                 email = super(EmailSerializerV1, self).create(validated_data)
                 created = True
             elif email.user != self.context.get('request').user:
