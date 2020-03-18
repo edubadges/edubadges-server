@@ -16,13 +16,13 @@ from staff.models import InstitutionStaff
 
 # Users - Teachers
 all_perms = {
-    'create': True,
-    'read': True,
-    'update': True,
-    'destroy': True,
-    'award': True,
-    'sign': True,
-    'administrate_users': True
+    'may_create': True,
+    'may_read': True,
+    'may_update': True,
+    'may_delete': True,
+    'may_award': True,
+    'may_sign': True,
+    'may_administrate_users': True
 }
 
 
@@ -34,7 +34,8 @@ def create_teacher(username, email, institution_name, uid, perms = all_perms):
     SocialAccount(provider='surf_conext', uid=uid, user=user).save()
 
     institution = Institution.objects.get(name=institution_name)
-    InstitutionStaff(**perms, user=user, institution=institution).save()
+    user.institution = institution
+    InstitutionStaff.objects.filter(user=user, institution=institution).update(**perms)
 
 
 teachers = [

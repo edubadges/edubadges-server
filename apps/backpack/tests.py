@@ -196,7 +196,7 @@ class TestBadgeUploads(BadgrTestCase):
     # @responses.activate
     # def test_submit_basic_1_0_badge_via_url_bad_email(self):
     #     setup_basic_1_0()
-    #     setup_resources([
+    #     setup_resources([<<
     #         {'url': OPENBADGES_CONTEXT_V1_URI, 'filename': 'v1_context.json'},
     #         {'url': OPENBADGES_CONTEXT_V2_URI, 'response_body': json.dumps(OPENBADGES_CONTEXT_V2_DICT)}
     #     ])

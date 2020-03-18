@@ -2,7 +2,7 @@ from django.conf import settings
 from mainsite.models import BadgrApp
 from allauth.socialaccount.models import SocialApp
 from django.contrib.sites.models import Site
-from badgeuser.models import TermsVersion
+from badgeuser.models import TermsVersion, BadgeUser
 
 # BadgrApp
 BadgrApp(
@@ -52,3 +52,13 @@ SocialApp.objects.get(name="surf_conext").sites.add(Site.objects.get(name="127.0
 
 # TermsVersion
 TermsVersion(version=1, is_active=1).save()
+
+
+# Superuser
+BadgeUser(
+    is_superuser=1,
+    username="superuser",
+    email="superuser@example.com",
+    is_staff=1,
+    password="pbkdf2_sha256$150000$8rCLKHezsCgi$+1kVA4JdqyR1nMa0C3pnjYYp01h3dlNSR53K1GqRAIk="
+).save()
