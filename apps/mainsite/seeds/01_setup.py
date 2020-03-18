@@ -7,28 +7,26 @@ from badgeuser.models import TermsVersion, BadgeUser
 # BadgrApp
 BadgrApp.objects.get_or_create(
     is_active=1,
-    cors="localhost:4000",
-    email_confirmation_redirect="http://127.0.0.1:4000/login/",
-    forgot_password_redirect="http://127.0.0.1:4000/change-password/",
-    name="localhost",
-    signup_redirect="http://127.0.0.1:4000/signup/",
-    ui_login_redirect="http://127.0.0.1:4000/auth/login/",
-    ui_signup_success_redirect="http://127.0.0.1:4000/signup/success/",
-    ui_connect_success_redirect="http://127.0.0.1:4000/profile/",
-    public_pages_redirect="http://127.0.0.1:4000/public/",
-    oauth_authorization_redirect="http://127.0.0.1:4000/oauth/",
+    email_confirmation_redirect="{}/login/".format(settings.UI_URL),
+    forgot_password_redirect="{}/change-password/".format(settings.UI_URL),
+    signup_redirect="{}/signup/".format(settings.UI_URL),
+    ui_login_redirect="{}/auth/login/".format(settings.UI_URL),
+    ui_signup_success_redirect="{}/signup/success/".format(settings.UI_URL),
+    ui_connect_success_redirect="{}/profile/".format(settings.UI_URL),
+    public_pages_redirect="{}/public/".format(settings.UI_URL),
+    oauth_authorization_redirect="{}/oauth/".format(settings.UI_URL),
     use_auth_code_exchange=0
 )
 
 # Site
-site, _ = Site.objects.get_or_create(domain="127.0.0.1", name="127.0.0.1")
+site, _ = Site.objects.get_or_create(domain=settings.DOMAIN, name=settings.DOMAIN)
 
 # SocialApp
 edu_id_secret = settings.EDU_ID_SECRET
 edu_id_app, _ = SocialApp.objects.get_or_create(
     provider="edu_id",
     name="edu_id",
-    client_id="edubadges",
+    client_id=settings.EDU_ID_CLIENT,
     secret=edu_id_secret
 )
 
@@ -36,7 +34,7 @@ surf_conext_secret = settings.SURF_CONEXT_SECRET
 surf_conext_app, _ = SocialApp.objects.get_or_create(
     provider="surf_conext",
     name="surf_conext",
-    client_id="http@//localhost.edubadges.nl",
+    client_id=settings.SURF_CONEXT_CLIENT,
     secret=surf_conext_secret
 )
 
@@ -49,9 +47,9 @@ TermsVersion.objects.get_or_create(version=1, is_active=1)
 # Superuser
 superuser, _ = BadgeUser.objects.get_or_create(
     is_superuser=1,
-    username="superuser",
-    email="superuser@example.com",
+    username=settings.SUPERUSER_NAME,
+    email=settings.SUPERUSER_EMAIL,
     is_staff=1
 )
-superuser.set_password("secret")
+superuser.set_password(settings.SUPERUSER_PWD)
 superuser.save()
