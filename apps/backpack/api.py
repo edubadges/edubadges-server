@@ -9,11 +9,11 @@ from entity.api import BaseEntityListView, BaseEntityDetailView
 from issuer.models import BadgeInstance
 from issuer.permissions import AuditedModelOwner, RecipientIdentifiersMatch, BadgrOAuthTokenHasScope
 from issuer.public_api import ImagePropertyDetailView
+from mainsite.exceptions import BadgrApiException400
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from rest_framework import permissions
 from rest_framework.response import Response
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_302_FOUND, \
-    HTTP_204_NO_CONTENT
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_302_FOUND, HTTP_204_NO_CONTENT
 
 
 class BackpackAssertionList(BaseEntityListView):
@@ -203,7 +203,7 @@ class ShareBackpackAssertion(BaseEntityDetailView):
 
         provider = request.query_params.get('provider')
         if not provider:
-            return Response({'error': "unspecified share provider"}, status=HTTP_400_BAD_REQUEST)
+            raise BadgrApiException400("unspecified share provider")
         provider = provider.lower()
 
         source = request.query_params.get('source', 'unknown')
@@ -215,7 +215,7 @@ class ShareBackpackAssertion(BaseEntityDetailView):
         share = BackpackBadgeShare(provider=provider, badgeinstance=badge, source=source)
         share_url = share.get_share_url(provider)
         if not share_url:
-            return Response({'error': "invalid share provider"}, status=HTTP_400_BAD_REQUEST)
+            raise BadgrApiException400("invalid share provider")
 
         share.save()
 
@@ -247,7 +247,7 @@ class ShareBackpackCollection(BaseEntityDetailView):
 
         provider = request.query_params.get('provider')
         if not provider:
-            return Response({'error': "unspecified share provider"}, status=HTTP_400_BAD_REQUEST)
+            raise BadgrApiException400("unspecified share provider")
         provider = provider.lower()
 
         source = request.query_params.get('source', 'unknown')
@@ -259,7 +259,7 @@ class ShareBackpackCollection(BaseEntityDetailView):
         share = BackpackCollectionShare(provider=provider, collection=collection, source=source)
         share_url = share.get_share_url(provider, title=collection.name, summary=collection.description)
         if not share_url:
-            return Response({'error': "invalid share provider"}, status=HTTP_400_BAD_REQUEST)
+            raise BadgrApiException400("invalid share provider")
 
         share.save()
 

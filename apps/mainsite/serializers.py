@@ -6,11 +6,21 @@ from mainsite.pagination import EncryptedCursorPagination
 from rest_framework import serializers
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.exceptions import ValidationError
+from mainsite.exceptions import BadgrValidationError
 
 
 class HumanReadableBooleanField(serializers.BooleanField):
     TRUE_VALUES = serializers.BooleanField.TRUE_VALUES | set(('on', 'On', 'ON'))
     FALSE_VALUES = serializers.BooleanField.FALSE_VALUES | set(('off', 'Off', 'OFF'))
+
+
+class BadgrBaseModelSerializer(serializers.ModelSerializer):
+
+    def is_valid(self, raise_exception=False):
+        try:
+            return super(BadgrBaseModelSerializer, self).is_valid(raise_exception)
+        except ValidationError as e:
+            raise BadgrValidationError(fields=e.detail)
 
 
 class ReadOnlyJSONField(serializers.CharField):

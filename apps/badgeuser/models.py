@@ -14,22 +14,18 @@ from backpack.models import BackpackCollection
 from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager, EmailAddressCacheModelManager
 from basic_models.models import IsActive
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser, Permission, Group
-from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models, transaction
-from django.db.models.signals import post_save, pre_save
-from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from entity.models import BaseVersionedEntity
-from issuer.models import Issuer, BadgeInstance, BaseAuditedModel
+from issuer.models import BadgeInstance, BaseAuditedModel
 from lti_edu.models import StudentsEnrolled
+from mainsite.exceptions import BadgrApiException400
 from mainsite.models import ApplicationInfo, EmailBlacklist, BadgrApp
-from mainsite.utils import generate_entity_uri
 from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
 from rest_framework.authtoken.models import Token
@@ -257,7 +253,7 @@ class UserPermissionsMixin(object):
         perms = badgeinstance.badgeclass.get_permissions(self)
         return perms['may_sign']
 
-    def may_enroll(self, badge_class):
+    def may_enroll(self, badge_class, raise_exception=False):
         """
         Checks to see if user may enroll
             no enrollments: May enroll
@@ -269,16 +265,22 @@ class UserPermissionsMixin(object):
         if social_account.provider == 'edu_id' or social_account.provider == 'surfconext_ala':
             enrollments = StudentsEnrolled.objects.filter(user=social_account.user, badge_class_id=badge_class.pk)
             if not enrollments:
-                return True # no enrollments
+                return True  # no enrollments
             else:
                 for enrollment in enrollments:
                     if not bool(enrollment.badge_instance):  # has never been awarded
+                        if raise_exception:
+                            raise BadgrApiException400('May not enroll: already enrolled')
                         return False
                     else:  # has been awarded
                         if not enrollment.assertion_is_revoked():
+                            if raise_exception:
+                                raise BadgrApiException400('May not enroll: you already have been awarded this badge')
                             return False
                 return True  # all have been awarded and revoked
         else:  # no eduID
+            if raise_exception:
+                raise BadgrApiException400("May not enroll: you don't have a student account")
             return False
 
 

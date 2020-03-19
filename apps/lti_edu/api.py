@@ -6,6 +6,7 @@ from issuer.models import BadgeClass
 from lti_edu.models import StudentsEnrolled, BadgeClassLtiContext, UserCurrentContextId
 from lti_edu.serializers import StudentsEnrolledSerializer, StudentsEnrolledSerializerWithRelations, \
     BadgeClassLtiContextSerializer, BadgeClassLtiContextStudentSerializer
+from mainsite.exceptions import BadgrApiException400
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from mainsite.utils import EmailMessageMaker
 from rest_framework.response import Response
@@ -76,15 +77,14 @@ class StudentsEnrolledList(BaseEntityListView):
             if field not in request.data:
                 return Response(data='field missing', status=401)
         badge_class = get_object_or_404(BadgeClass, entity_id=request.data['badgeclass_slug'])
-        if request.user.may_enroll(badge_class):
-            # consent given when enrolling
+        if request.user.may_enroll(badge_class, raise_exception=True):
             enrollment = StudentsEnrolled.objects.create(badge_class_id=badge_class.pk,
                                                          user=request.user,
                                                          date_consent_given=timezone.now())
             message = EmailMessageMaker.create_student_badge_request_email(badge_class)
             request.user.email_user(subject='You have successfully requested a badge', message=message)
             return Response(data='enrolled', status=200)
-        return Response({'error': 'Cannot enroll'}, status=400)
+        raise BadgrApiException400('Cannot enroll')
 
     def get(self, request, **kwargs):
         if 'badgeclass_slug' not in kwargs:
