@@ -100,7 +100,7 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
         fields = ('entity_id', 'badgeclass', 'identifier', 'image',
                   'recipient_identifier', 'recipient_type', 'revoked',
                   'revocation_reason', 'expires_at', 'acceptance',
-                  'narrative', 'public')
+                   'public')
 
 
 class Query(object):
