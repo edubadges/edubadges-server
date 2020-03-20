@@ -41,21 +41,11 @@ def generate_sha256_hashstring(identifier, salt=None):
     return 'sha256$' + hashlib.sha256(key.encode('utf-8')).hexdigest()
 
 
-def generate_md5_hashstring(identifier, salt=None):
-    key = '{}{}'.format(identifier, salt if salt is not None else "")
-    return 'md5$' + hashlib.md5(key).hexdigest()
-
-
 def is_probable_url(string):
     earl = re.compile(r'^https?')
     if string is None:
         return False
     return earl.match(string)
 
-
-def obscure_email_address(email):
-    charlist = list(email)
-
-    return ''.join(letter if letter in ('@', '.',) else '*' for letter in charlist)
 
 
