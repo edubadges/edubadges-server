@@ -3,8 +3,6 @@ from django.conf.urls import url
 from issuer.api import (IssuerDetail, BadgeClassDetail, BadgeInstanceDetail, BatchAssertionsIssue,
                         TimestampedBadgeInstanceList, BatchSignAssertions, IssuerBadgeClassList)
 
-from issuer.api_v1 import FindBadgeClassDetail
-
 urlpatterns = [
     # url(r'^all-badges$', AllBadgeClassesList.as_view(), name='v1_api_issuer_all_badges_list'),
     # url(r'^all-badges/find$', FindBadgeClassDetail.as_view(), name='v1_api_find_badgeclass_by_identifier'),
