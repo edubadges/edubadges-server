@@ -75,14 +75,6 @@ class LinkedDataReferenceField(serializers.Serializer):
                 "manager that implements get_by_id method."
             )
 
-class LinkedDataReferenceList(serializers.ListField):
-    # child must be declared in implementation.
-    def get_value(self, dictionary):
-        try:
-            return dictionary.getlist(self.field_name, serializers.empty)
-        except AttributeError:
-            return dictionary.get(self.field_name, serializers.empty)
-
 
 class JSONDictField(serializers.DictField):
     """
@@ -95,15 +87,6 @@ class JSONDictField(serializers.DictField):
             pass
 
         return super(JSONDictField, self).to_internal_value(data)
-
-
-class CachedUrlHyperlinkedRelatedField(serializers.HyperlinkedRelatedField):
-    def get_url(self, obj, view_name, request, format):
-        """
-        The value of this field is driven by a source argument that returns the actual URL,
-        so no need to reverse it from a value.
-        """
-        return obj
 
 
 class StripTagsCharField(serializers.CharField):
