@@ -7,7 +7,7 @@ from issuer.api_v1 import FindBadgeClassDetail
 
 urlpatterns = [
     # url(r'^all-badges$', AllBadgeClassesList.as_view(), name='v1_api_issuer_all_badges_list'),
-    url(r'^all-badges/find$', FindBadgeClassDetail.as_view(), name='v1_api_find_badgeclass_by_identifier'),
+    # url(r'^all-badges/find$', FindBadgeClassDetail.as_view(), name='v1_api_find_badgeclass_by_identifier'),
 
     # url(r'^issuers$', IssuerList.as_view(), name='v1_api_issuer_list'),
     url(r'^issuers/(?P<slug>[^/]+)$', IssuerDetail.as_view(), name='v1_api_issuer_detail'),
