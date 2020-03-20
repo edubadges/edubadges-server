@@ -29,14 +29,6 @@ class BadgeUserTokenSerializerV1(serializers.Serializer):
         return instance
 
 
-class VerifiedEmailsField(serializers.Field):
-    def to_representation(self, obj):
-        addresses = []
-        for emailaddress in obj.all():
-            addresses.append(emailaddress.email)
-        return addresses
-
-
 class BadgeUserProfileSerializerV1(serializers.Serializer):
     first_name = StripTagsCharField(max_length=30, allow_blank=True)
     last_name = StripTagsCharField(max_length=30, allow_blank=True)

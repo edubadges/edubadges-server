@@ -388,12 +388,6 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
     def current_symmetric_key(self):
         return self.symmetrickey_set.get(current=True)
 
-    def get_badgr_app(self):
-        if self.badgrapp:
-            return self.badgrapp
-        else:
-            return BadgrApp.objects.all().first()
-
     def get_full_name(self):
         return "%s %s" % (self.first_name, self.last_name)
 
@@ -488,18 +482,6 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
         social_account = self.get_social_account()
         return social_account.provider == 'surf_conext'
 
-    def is_email_verified(self, email):
-        if email in [e.email for e in self.verified_emails]:
-            return True
-
-        try:
-            app_infos = ApplicationInfo.objects.filter(application__user=self)
-            if any(app_info.trust_email_verification for app_info in app_infos):
-                return True
-        except ApplicationInfo.DoesNotExist:
-            return False
-
-        return False
 
     def get_assertions_ready_for_signing(self):
         assertion_timestamps = AssertionTimeStamp.objects.filter(signer=self).exclude(proof='')
