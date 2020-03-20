@@ -30,8 +30,6 @@ INSTALLED_APPS = [
     'badgrsocialauth.providers.eduid',
     'badgrsocialauth.providers.surf_conext',
     'badgrsocialauth.providers.surfconext_ala',
-    'badgrsocialauth.providers.kony',
-    'badgrsocialauth.providers.google',
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.azure',
     'allauth.socialaccount.providers.linkedin_oauth2',
@@ -184,11 +182,7 @@ ACCOUNT_SIGNUP_FORM_CLASS = 'badgeuser.forms.BadgeUserCreationForm'
 
 
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-SOCIALACCOUNT_PROVIDERS = {
-    'kony': {
-        'environment': 'dev'
-    }
-}
+
 SOCIALACCOUNT_ADAPTER = 'badgrsocialauth.adapter.BadgrSocialAccountAdapter'
 
 # Added property to allow auto signup on existing email address
