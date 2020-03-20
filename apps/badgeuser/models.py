@@ -2,10 +2,7 @@
 
 import base64
 import datetime
-import random
 import re
-import string
-from hashlib import md5
 from itertools import chain
 
 import cachemodel
@@ -25,11 +22,12 @@ from entity.models import BaseVersionedEntity
 from issuer.models import BadgeInstance, BaseAuditedModel
 from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrApiException400
-from mainsite.models import ApplicationInfo, EmailBlacklist, BadgrApp
+from mainsite.models import ApplicationInfo, EmailBlacklist
 from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
 from rest_framework.authtoken.models import Token
 from signing.models import AssertionTimeStamp
+from badgeuser.utils import generate_badgr_username
 
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
@@ -516,9 +514,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
 
     def save(self, *args, **kwargs):
         if not self.username:
-            # md5 hash the email and then encode as base64 to take up only 25 characters
-            hashed = md5(self.email + ''.join(random.choice(string.lowercase) for i in range(64))).digest().encode('base64')[:-1]  # strip last character because its a newline
-            self.username = "badgr{}".format(hashed[:25])
+            self.username = generate_badgr_username(self.email)
 
         if getattr(settings, 'BADGEUSER_SKIP_LAST_LOGIN_TIME', True):
             # skip saving last_login to the database
