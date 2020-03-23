@@ -27,6 +27,7 @@ class PermissionedRelationshipMixin(models.Model):
                                              'may_update',
                                              'may_delete',
                                              'may_award',
+                                             'may_sign',
                                              'may_administrate_users'])
 
     def has_permissions(self, permissions):
