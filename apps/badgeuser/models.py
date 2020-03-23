@@ -182,7 +182,7 @@ class UserCachedObjectGetterMixin(object):
         return permissioned_objects
 
     def get_all_objects_with_permissions(self, permissions):
-        return self._get_objects(permissions)
+        return self._get_objects_with_permissions(permissions)
 
     def get_all_badgeclasses_with_permissions(self, permissions):
         return self._get_objects_with_permissions(permissions, 'BadgeClass')
