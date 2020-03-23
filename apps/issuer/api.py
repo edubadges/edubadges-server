@@ -9,6 +9,7 @@ from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObject
 from issuer.models import Issuer, BadgeClass, BadgeInstance
 from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    BadgeInstanceSerializerV1)
+from mainsite.exceptions import BadgrApiException400
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -266,9 +267,9 @@ class BadgeInstanceDetail(BaseEntityDetailView):
         try:
             assertion = self.get_object(request, **kwargs)
         except Http404 as e:
-            return Response({'error': 'You do not have permission. Check your assigned role in the Issuer'}, status=HTTP_404_NOT_FOUND)
+            raise BadgrApiException400('You do not have permission. Check your assigned role in the Issuer')
         if not self.has_object_permissions(request, assertion):
-            return Response({'error': 'You do not have permission. Check your assigned role in the Issuer'}, status=HTTP_404_NOT_FOUND)
+            raise BadgrApiException400('You do not have permission. Check your assigned role in the Issuer')
         revocation_reason = request.data.get('revocation_reason', None)
         if not revocation_reason:
             raise ValidationError({'revocation_reason': "This field is required"})

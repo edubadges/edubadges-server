@@ -2,7 +2,7 @@ import json
 import os
 import uuid
 
-from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserIdentifierFieldV1
+from badgeuser.serializers_v1 import BadgeUserIdentifierFieldV1
 from django.apps import apps
 from django.core.validators import URLValidator
 from django.urls import reverse
@@ -16,11 +16,10 @@ from mainsite.models import BadgrApp
 from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField, \
     OriginalJsonSerializerMixin
 from mainsite.utils import OriginSetting
-from mainsite.validators import ChoicesValidator
 from rest_framework import serializers
 
 from . import utils
-from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension  #, IssuerStaff
+from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension
 
 
 class ExtensionsSaverMixin(object):
@@ -48,11 +47,6 @@ class ExtensionsSaverMixin(object):
         self.remove_extensions(instance, remove_these_extensions)
         self.update_extensions(instance, update_these_extensions, extension_items)
         self.add_extensions(instance, add_these_extensions, extension_items)
-
-
-class CachedListSerializer(serializers.ListSerializer):
-    def to_representation(self, data):
-        return [self.child.to_representation(item) for item in data]
 
 
 class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serializers.Serializer):

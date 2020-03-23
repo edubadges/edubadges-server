@@ -2,10 +2,7 @@
 
 import base64
 import datetime
-import random
 import re
-import string
-from hashlib import md5
 from itertools import chain
 
 import cachemodel
@@ -14,26 +11,23 @@ from backpack.models import BackpackCollection
 from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager, EmailAddressCacheModelManager
 from basic_models.models import IsActive
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser, Permission, Group
-from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models, transaction
-from django.db.models.signals import post_save, pre_save
-from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from entity.models import BaseVersionedEntity
-from issuer.models import Issuer, BadgeInstance, BaseAuditedModel
+from issuer.models import BadgeInstance, BaseAuditedModel
 from lti_edu.models import StudentsEnrolled
-from mainsite.models import ApplicationInfo, EmailBlacklist, BadgrApp
-from mainsite.utils import generate_entity_uri
+from mainsite.exceptions import BadgrApiException400
+from mainsite.models import ApplicationInfo, EmailBlacklist
 from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
 from rest_framework.authtoken.models import Token
 from signing.models import AssertionTimeStamp
+from badgeuser.utils import generate_badgr_username
 
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
@@ -257,7 +251,7 @@ class UserPermissionsMixin(object):
         perms = badgeinstance.badgeclass.get_permissions(self)
         return perms['may_sign']
 
-    def may_enroll(self, badge_class):
+    def may_enroll(self, badge_class, raise_exception=False):
         """
         Checks to see if user may enroll
             no enrollments: May enroll
@@ -269,16 +263,22 @@ class UserPermissionsMixin(object):
         if social_account.provider == 'edu_id' or social_account.provider == 'surfconext_ala':
             enrollments = StudentsEnrolled.objects.filter(user=social_account.user, badge_class_id=badge_class.pk)
             if not enrollments:
-                return True # no enrollments
+                return True  # no enrollments
             else:
                 for enrollment in enrollments:
                     if not bool(enrollment.badge_instance):  # has never been awarded
+                        if raise_exception:
+                            raise BadgrApiException400('May not enroll: already enrolled')
                         return False
                     else:  # has been awarded
                         if not enrollment.assertion_is_revoked():
+                            if raise_exception:
+                                raise BadgrApiException400('May not enroll: you already have been awarded this badge')
                             return False
                 return True  # all have been awarded and revoked
         else:  # no eduID
+            if raise_exception:
+                raise BadgrApiException400("May not enroll: you don't have a student account")
             return False
 
 
@@ -386,12 +386,6 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
     def current_symmetric_key(self):
         return self.symmetrickey_set.get(current=True)
 
-    def get_badgr_app(self):
-        if self.badgrapp:
-            return self.badgrapp
-        else:
-            return BadgrApp.objects.all().first()
-
     def get_full_name(self):
         return "%s %s" % (self.first_name, self.last_name)
 
@@ -486,18 +480,6 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
         social_account = self.get_social_account()
         return social_account.provider == 'surf_conext'
 
-    def is_email_verified(self, email):
-        if email in [e.email for e in self.verified_emails]:
-            return True
-
-        try:
-            app_infos = ApplicationInfo.objects.filter(application__user=self)
-            if any(app_info.trust_email_verification for app_info in app_infos):
-                return True
-        except ApplicationInfo.DoesNotExist:
-            return False
-
-        return False
 
     def get_assertions_ready_for_signing(self):
         assertion_timestamps = AssertionTimeStamp.objects.filter(signer=self).exclude(proof='')
@@ -532,9 +514,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
 
     def save(self, *args, **kwargs):
         if not self.username:
-            # md5 hash the email and then encode as base64 to take up only 25 characters
-            hashed = md5(self.email + ''.join(random.choice(string.lowercase) for i in range(64))).digest().encode('base64')[:-1]  # strip last character because its a newline
-            self.username = "badgr{}".format(hashed[:25])
+            self.username = generate_badgr_username(self.email)
 
         if getattr(settings, 'BADGEUSER_SKIP_LAST_LOGIN_TIME', True):
             # skip saving last_login to the database

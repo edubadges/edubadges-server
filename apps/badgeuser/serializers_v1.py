@@ -1,13 +1,11 @@
 import json
-from collections import OrderedDict
 
-from django.contrib.auth.models import Permission #, Group
-# from institution.models import Faculty
-from institution.serializers_v1 import FacultySerializerV1, InstitutionSerializerV1
-from mainsite.serializers import StripTagsCharField
-from mainsite.validators import PasswordValidator
-# from management.serializers import GroupSerializer
+from django.contrib.auth.models import Permission
 from rest_framework import serializers
+
+from institution.serializers_v1 import FacultySerializerV1, InstitutionSerializerV1
+from mainsite.serializers import StripTagsCharField, BadgrBaseModelSerializer
+from mainsite.validators import PasswordValidator
 
 from .models import BadgeUser, CachedEmailAddress, TermsVersion
 from .utils import notify_on_password_change
@@ -29,14 +27,6 @@ class BadgeUserTokenSerializerV1(serializers.Serializer):
     def update(self, instance, validated_data):
         # noop
         return instance
-
-
-class VerifiedEmailsField(serializers.Field):
-    def to_representation(self, obj):
-        addresses = []
-        for emailaddress in obj.all():
-            addresses.append(emailaddress.email)
-        return addresses
 
 
 class BadgeUserProfileSerializerV1(serializers.Serializer):
@@ -116,7 +106,7 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
         return representation
 
 
-class EmailSerializerV1(serializers.ModelSerializer):
+class EmailSerializerV1(BadgrBaseModelSerializer):
     variants = serializers.ListField(
         child=serializers.EmailField(required=False),
         required=False, source='cached_variants', allow_null=True, read_only=True

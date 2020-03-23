@@ -10,7 +10,7 @@ from badgeuser.serializers_v1 import EmailSerializerV1
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from mainsite.exceptions import BadgrApiException400
 
 RATE_LIMIT_DELTA = datetime.timedelta(minutes=5)
 
@@ -42,13 +42,13 @@ class BadgeUserEmailList(APIView):
     def post(self, request, **kwargs):
         serializer = EmailSerializerV1(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-        try: # check if email already exists
+        try:  # check if email already exists
             CachedEmailAddress.objects.get(email=request.data.get('email'), verified=1)
-            return Response({'error': "Could not register email address. Address already in use."}, status=status.HTTP_400_BAD_REQUEST)
+            raise BadgrApiException400("Could not register email address. Address already in use.")
         except CachedEmailAddress.DoesNotExist:
             try:
                 CachedEmailAddress.objects.get(email=request.data.get('email'), verified=0, user_id=request.user.pk)
-                return Response({'error': "You have already added this address. Verify it."}, status=status.HTTP_400_BAD_REQUEST)
+                raise BadgrApiException400("You have already added this address. Verify it.")
             except CachedEmailAddress.DoesNotExist:
                 pass
         email_address = serializer.save(user=request.user)
@@ -95,10 +95,10 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         if email_address.primary:
-            return Response({'error': "Can not remove primary email address"}, status=status.HTTP_400_BAD_REQUEST)
+            raise BadgrApiException400("Can not remove primary email address")
 
         if self.request.user.emailaddress_set.count() == 1:
-            return Response({'error': "Can not remove only email address"}, status=status.HTTP_400_BAD_REQUEST)
+            raise BadgrApiException400("Can not remove only email address")
 
         email_address.delete()
         return Response(status.HTTP_200_OK)

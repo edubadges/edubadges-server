@@ -11,6 +11,7 @@ from issuer.models import BadgeInstance
 from mainsite.drf_fields import Base64FileField
 from mainsite.serializers import StripTagsCharField, MarkdownCharField
 from mainsite.utils import OriginSetting
+from mainsite.serializers import BadgrBaseModelSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 from rest_framework.fields import SkipField
@@ -138,7 +139,7 @@ class CollectionBadgesSerializerV1(serializers.ListSerializer):
         return [e for e in self.validated_data if e.pk in updated_ids]
 
 
-class CollectionBadgeSerializerV1(serializers.ModelSerializer):
+class CollectionBadgeSerializerV1(BadgrBaseModelSerializer):
     id = serializers.RelatedField(queryset=BadgeInstance.objects.all())
     collection = serializers.RelatedField(queryset=BackpackCollection.objects.all(), write_only=True, required=False)
 

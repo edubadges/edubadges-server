@@ -1,10 +1,8 @@
 # encoding: utf-8
 
 
-import badgrlog
 import dateutil
 import requests
-from celery.utils.log import get_task_logger
 from django.conf import settings
 from issuer.helpers import BadgeCheckHelper
 from issuer.managers import resolve_source_url_referencing_local_object
@@ -13,8 +11,6 @@ from issuer.utils import CURRENT_OBI_VERSION
 from mainsite.celery import app
 from requests import ConnectionError
 
-logger = get_task_logger(__name__)
-badgrLogger = badgrlog.BadgrLogger()
 
 background_task_queue_name = getattr(settings, 'BACKGROUND_TASK_QUEUE_NAME', 'default')
 badgerank_task_queue_name = getattr(settings, 'BADGERANK_TASK_QUEUE_NAME', 'default')
