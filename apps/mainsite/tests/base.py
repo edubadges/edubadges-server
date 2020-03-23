@@ -24,7 +24,8 @@ from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClass
 
 
 def name_randomiser(name):
-    return name.join(random.choices(string.ascii_lowercase, k=10))
+    s = ''.join(random.choices(string.ascii_lowercase, k=10))
+    return name + '_' + s
 
 class SetupOAuth2ApplicationHelper(object):
     def setup_oauth2_application(self,
