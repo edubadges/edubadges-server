@@ -27,39 +27,6 @@ def name_randomiser(name):
     s = ''.join(random.choices(string.ascii_lowercase, k=10))
     return name + '_' + s
 
-class SetupOAuth2ApplicationHelper(object):
-    def setup_oauth2_application(self,
-                                 client_id=None,
-                                 client_secret=None,
-                                 name='test client app',
-                                 allowed_scopes=None,
-                                 trust_email=False,
-                                 **kwargs):
-        if client_id is None:
-            client_id = "test"
-        if client_secret is None:
-            client_secret = "secret"
-
-        if 'authorization_grant_type' not in kwargs:
-            kwargs['authorization_grant_type'] = Application.GRANT_CLIENT_CREDENTIALS
-
-        application = Application.objects.create(
-            name=name,
-            client_id=client_id,
-            client_secret=client_secret,
-            **kwargs
-        )
-
-        if allowed_scopes:
-            application_info = ApplicationInfo.objects.create(
-                application=application,
-                name=name,
-                allowed_scopes=allowed_scopes,
-                trust_email_verification=trust_email
-            )
-
-        return application
-
 
 class SetupHelper(object):
 
@@ -192,54 +159,15 @@ class SetupHelper(object):
         staff.save()
         return staff
 
-    # def setup_badgeclasses(self, how_many=3, **kwargs):
-    #     for i in range(0, how_many):
-    #         yield self.setup_badgeclass(**kwargs)
-    #
-    # def get_testfiles_path(self, *args):
-    #     return os.path.join(TOP_DIR, 'apps', 'issuer', 'testfiles', *args)
-    #
-    # def get_test_image_path(self):
-    #     return os.path.join(self.get_testfiles_path(), 'guinea_pig_testing_badge.png')
-    #
-    # def get_test_svg_image_path(self):
-    #     return os.path.join(self.get_testfiles_path(), 'test_badgeclass.svg')
-
-
-
-
-
-
-
-
-@override_settings(
-    CACHES={
-        'default': {
-            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-            'LOCATION': os.path.join(TOP_DIR, 'test.cache'),
-        }
-    },
-)
-class CachingTestCase(TransactionTestCase):
-    @classmethod
-    def tearDownClass(cls):
-        test_cache = FileBasedCache(os.path.join(TOP_DIR, 'test.cache'), {})
-        test_cache.clear()
-
-    def setUp(self):
-        # scramble the cache key each time
-        cache.key_prefix = "test{}".format(str(time.time()))
-
 
 @override_settings(
     CELERY_ALWAYS_EAGER=True,
     SESSION_ENGINE='django.contrib.sessions.backends.cache',
     HTTP_ORIGIN="http://localhost:8000",
     BADGR_APP_ID=1,
-    CACHES={'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}
-}
+    CACHES={'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}}
 )
-class BadgrTestCase(SetupHelper, APITransactionTestCase, CachingTestCase):
+class BadgrTestCase(SetupHelper, APITransactionTestCase):
     def setUp(self):
         super(BadgrTestCase, self).setUp()
 
