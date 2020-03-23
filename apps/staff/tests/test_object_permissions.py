@@ -1,9 +1,8 @@
 import json
 from mainsite.tests import BadgrTestCase
-from mainsite.tests.base import SetupUserHelper, ObjectSetupHelper, SetupStaffHelper
 
 
-class ObjectPermissionTests(BadgrTestCase, SetupUserHelper, ObjectSetupHelper, SetupStaffHelper):
+class ObjectPermissionTests(BadgrTestCase):
 
     def test_may_not_administrate_user(self):
         teacher1 = self.setup_teacher(authenticate=True)

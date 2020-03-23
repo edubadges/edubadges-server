@@ -61,7 +61,7 @@ class SetupOAuth2ApplicationHelper(object):
         return application
 
 
-class SetupUserHelper(object):
+class SetupHelper(object):
 
     def _add_eduid_socialaccount(self, user):
         random_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:{}c14-b952-4d7e-85fd-{}ac5c6f18".format(random.randint(1, 99999), random.randint(1, 9999))
@@ -139,9 +139,6 @@ class SetupUserHelper(object):
                                         date_consent_given=timezone.now())
         return assertion_post_data
 
-
-class ObjectSetupHelper(object):
-
     def setup_institution(self):
         return Institution.objects.create(name=name_randomiser('Test Institution'))
 
@@ -172,24 +169,6 @@ class ObjectSetupHelper(object):
             criteria_text='Criteria text'
         )
 
-
-    def setup_badgeclasses(self, how_many=3, **kwargs):
-        for i in range(0, how_many):
-            yield self.setup_badgeclass(**kwargs)
-
-    def get_testfiles_path(self, *args):
-        return os.path.join(TOP_DIR, 'apps', 'issuer', 'testfiles', *args)
-
-    def get_test_image_path(self):
-        return os.path.join(self.get_testfiles_path(), 'guinea_pig_testing_badge.png')
-
-    def get_test_svg_image_path(self):
-        return os.path.join(self.get_testfiles_path(), 'test_badgeclass.svg')
-
-
-
-class SetupStaffHelper(object):
-
     def setup_staff_membership(self, user, object, may_create=False, may_read=False,
                                may_update=False, may_delete=False, may_award=False,
                                may_sign=False, may_administrate_users=False):
@@ -212,6 +191,21 @@ class SetupStaffHelper(object):
         staff.may_administrate_users = may_administrate_users
         staff.save()
         return staff
+
+    # def setup_badgeclasses(self, how_many=3, **kwargs):
+    #     for i in range(0, how_many):
+    #         yield self.setup_badgeclass(**kwargs)
+    #
+    # def get_testfiles_path(self, *args):
+    #     return os.path.join(TOP_DIR, 'apps', 'issuer', 'testfiles', *args)
+    #
+    # def get_test_image_path(self):
+    #     return os.path.join(self.get_testfiles_path(), 'guinea_pig_testing_badge.png')
+    #
+    # def get_test_svg_image_path(self):
+    #     return os.path.join(self.get_testfiles_path(), 'test_badgeclass.svg')
+
+
 
 
 
@@ -245,7 +239,7 @@ class CachingTestCase(TransactionTestCase):
     CACHES={'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}
 }
 )
-class BadgrTestCase(SetupUserHelper, APITransactionTestCase, CachingTestCase):
+class BadgrTestCase(SetupHelper, APITransactionTestCase, CachingTestCase):
     def setUp(self):
         super(BadgrTestCase, self).setUp()
 
