@@ -30,6 +30,14 @@ class IssuerTest(BadgrTestCase):
                                     json.dumps(issuer_json), content_type='application/json')
         self.assertEqual(201, response.status_code)
 
+    def test_may_not_create_issuer(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        response = self.client.post('/institution/faculties/{}/issuers'.format(faculty.entity_id),
+                                    json.dumps(issuer_json), content_type='application/json')
+        self.assertEqual(404, response.status_code)
+
     def test_create_badgeclass(self):
         teacher1 = self.setup_teacher(authenticate=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
@@ -38,5 +46,14 @@ class IssuerTest(BadgrTestCase):
         response = self.client.post("/v1/issuer/issuers/{}/badges".format(issuer.entity_id),
                                     json.dumps(badgeclass_json), content_type='application/json')
         self.assertEqual(201, response.status_code)
+
+    def test_may_not_create_badgeclass(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        self.setup_staff_membership(teacher1, issuer, may_read=True)
+        response = self.client.post("/v1/issuer/issuers/{}/badges".format(issuer.entity_id),
+                                    json.dumps(badgeclass_json), content_type='application/json')
+        self.assertEqual(404, response.status_code)
 
 
