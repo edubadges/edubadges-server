@@ -19,10 +19,10 @@ from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from entity.models import BaseVersionedEntity
-from issuer.models import BadgeInstance, BaseAuditedModel
+from issuer.models import BadgeInstance
 from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrApiException400
-from mainsite.models import ApplicationInfo, EmailBlacklist
+from mainsite.models import ApplicationInfo, EmailBlacklist, BaseAuditedModel
 from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
 from rest_framework.authtoken.models import Token

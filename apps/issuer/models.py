@@ -24,13 +24,13 @@ from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManag
 from jsonfield import JSONField
 from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage
-from mainsite.models import (BadgrApp, EmailBlacklist)
+from mainsite.models import BadgrApp, EmailBlacklist, BaseAuditedModel
 from mainsite.utils import OriginSetting, generate_entity_uri
 from openbadges_bakery import bake
 from rest_framework import serializers
 from signing import tsob
 from signing.models import AssertionTimeStamp, PublicKeyIssuer
-from signing.models import PublicKey, SymmetricKey
+from signing.models import PublicKey
 from staff.models import BadgeClassStaff, IssuerStaff
 from staff.mixins import PermissionedModelMixin
 
@@ -58,20 +58,6 @@ class ImageUrlGetterMixin(object):
             return default_storage.url(self.image.name)
         else:
             return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
-
-class BaseAuditedModel(cachemodel.CacheModel):
-    created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
-    updated_at = models.DateTimeField(auto_now=True)
-    updated_by = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
-
-    class Meta:
-        abstract = True
-
-    @property
-    def cached_creator(self):
-        from badgeuser.models import BadgeUser
-        return BadgeUser.cached.get(id=self.created_by_id)
 
 
 class OriginalJsonMixin(models.Model):

@@ -1,11 +1,12 @@
 import cachemodel
 from django.db import models
 from entity.models import BaseVersionedEntity
+from mainsite.models import BaseAuditedModel
 from staff.mixins import PermissionedModelMixin
 from staff.models import FacultyStaff, InstitutionStaff
 
 
-class Institution(PermissionedModelMixin, BaseVersionedEntity, cachemodel.CacheModel):
+class Institution(PermissionedModelMixin, BaseVersionedEntity, BaseAuditedModel):
     
     def __str__(self):
         return self.name
@@ -43,7 +44,7 @@ class Institution(PermissionedModelMixin, BaseVersionedEntity, cachemodel.CacheM
         return r
 
 
-class Faculty(PermissionedModelMixin, BaseVersionedEntity, cachemodel.CacheModel):
+class Faculty(PermissionedModelMixin, BaseVersionedEntity, BaseAuditedModel):
 
     def __str__(self):
         return self.name
