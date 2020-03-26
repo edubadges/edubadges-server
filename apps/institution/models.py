@@ -59,6 +59,7 @@ class Faculty(PermissionedModelMixin, BaseVersionedEntity, BaseAuditedModel):
     name = models.CharField(max_length=512)
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, blank=False, null=False)
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.FacultyStaff")
+    description = models.TextField(blank=True, null=True, default=None)
 
     def get_issuers(self, user, permissions):
         return [issuer for issuer in self.cached_issuers() if issuer.has_permissions(user, permissions)]

@@ -11,9 +11,11 @@ class InstitutionSerializerV1(serializers.Serializer):
     class Meta:
         model = Institution
 
+
 class FacultySerializerV1(serializers.Serializer):
     id = serializers.ReadOnlyField()
     name = serializers.CharField(max_length=512)
+    description = StripTagsCharField(max_length=16384, required=False)
     slug = StripTagsCharField(max_length=255, read_only=True, source='entity_id')
 
 
@@ -22,6 +24,7 @@ class FacultySerializerV1(serializers.Serializer):
         
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name')
+        instance.description = validated_data.get('description')
         instance.save()
         return instance
 
