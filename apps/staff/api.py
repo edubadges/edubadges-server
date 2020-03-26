@@ -11,9 +11,8 @@ from staff.permissions import HasObjectPermission, StaffMembershipWithinScope
 
 
 class StaffListViewBase(VersionedObjectMixin, BaseEntityListView):
-    allowed_methods = ('POST',)
+    http_method_names = ['post']
     permission_map = {'POST': 'may_administrate_users'}
-
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
 
     def post(self, request, **kwargs):

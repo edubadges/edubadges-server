@@ -11,7 +11,7 @@ class FacultyDetail(BaseEntityDetailView):
     model = Faculty
     v1_serializer_class = FacultySerializerV1
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, IssuedAssertionsBlock)
-    allowed_methods = ('PUT', 'DELETE')
+    http_method_names = ['put', 'delete']
 
     def put(self, request, **kwargs):
         return super(FacultyDetail, self).put(request, **kwargs)
@@ -27,7 +27,7 @@ class FacultyIssuerList(VersionedObjectMixin, BaseEntityListView):
     model = Faculty
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     v1_serializer_class = IssuerSerializerV1
-    allowed_methods = ('POST',)
+    http_method_names = ['post']
 
     def post(self, request, **kwargs):
         faculty = self.get_object(request, **kwargs)
@@ -41,7 +41,7 @@ class InstitutionFacultyList(VersionedObjectMixin, BaseEntityListView):
     # no need to declare model here
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     v1_serializer_class = FacultySerializerV1
-    allowed_methods = ('POST',)
+    http_method_names = ['post']
 
     def post(self, request, **kwargs):
         self.has_object_permissions(request, request.user.institution)
