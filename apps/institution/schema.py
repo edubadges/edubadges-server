@@ -35,7 +35,7 @@ class InstitutionType(StaffResolverMixin, DjangoObjectType):
 class Query(object):
     institutions = graphene.List(InstitutionType)
     faculties = graphene.List(FacultyType)
-    faculty = graphene.Field(FacultyType, id=graphene.ID())
+    faculty = graphene.Field(FacultyType, id=graphene.String())
 
     def resolve_institutions(self, info, **kwargs):
         return [inst for inst in Institution.objects.all() if inst.has_permissions(info.context.user, ['may_read'])]
@@ -46,6 +46,6 @@ class Query(object):
     def resolve_faculty(self, info, **kwargs):
         id = kwargs.get('id')
         if id is not None:
-            faculty = Faculty.objects.get(id=id)
+            faculty = Faculty.objects.get(entity_id=id)
             if faculty.has_permissions(info.context.user, ['may_read']):
                 return faculty

@@ -107,9 +107,9 @@ class Query(object):
     issuers = graphene.List(IssuerType)
     badge_classes = graphene.List(BadgeClassType)
     badge_instances = graphene.List(BadgeInstanceType)
-    issuer = graphene.Field(IssuerType, id=graphene.ID())
-    badge_class = graphene.Field(BadgeClassType, id=graphene.ID())
-    badge_instance = graphene.Field(BadgeInstanceType, id=graphene.ID())
+    issuer = graphene.Field(IssuerType, id=graphene.String())
+    badge_class = graphene.Field(BadgeClassType, id=graphene.String())
+    badge_instance = graphene.Field(BadgeInstanceType, id=graphene.String())
 
     def resolve_issuers(self, info, **kwargs):
         return [issuer for issuer in Issuer.objects.all() if issuer.has_permissions(info.context.user, ['may_read'])]
@@ -117,7 +117,7 @@ class Query(object):
     def resolve_issuer(self, info, **kwargs):
         id = kwargs.get('id')
         if id is not None:
-            issuer = Issuer.objects.get(id=id)
+            issuer = Issuer.objects.get(entity_id=id)
             if issuer.has_permissions(info.context.user, ['may_read']):
                 return issuer
 
@@ -127,7 +127,7 @@ class Query(object):
     def resolve_badge_class(self, info, **kwargs):
         id = kwargs.get('id')
         if id is not None:
-            bc = BadgeClass.objects.get(id=id)
+            bc = BadgeClass.objects.get(entity_id=id)
             if bc.has_permissions(info.context.user, ['may_read']):
                 return bc
 
