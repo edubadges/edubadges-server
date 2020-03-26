@@ -228,6 +228,8 @@ class UserPermissionsMixin(object):
         """
         See if user may administrate (add/remove/change as staff member) other user. i.e. is the other user in his/her scope.
         """
+        if self == user:
+            return False  # cannot administrate yourself
         all_administrable_objects = self.get_all_objects_with_permissions(['may_administrate_users'])
         for obj in all_administrable_objects:
             for staff in obj.staff_items:
