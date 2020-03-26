@@ -10,7 +10,7 @@ class FacultyType(StaffResolverMixin, DjangoObjectType):
 
     class Meta:
         model = Faculty
-        fields = ('name', 'entity_id', 'institution', 'staff')
+        fields = ('name', 'entity_id', 'institution', 'staff', 'created_at')
 
     issuers = graphene.List(IssuerType)
     staff = graphene.List(FacultyStaffType)
@@ -23,7 +23,7 @@ class InstitutionType(StaffResolverMixin, DjangoObjectType):
 
     class Meta:
         model = Institution
-        fields = ('name', 'staff')
+        fields = ('name', 'staff', 'created_at')
 
     faculties = graphene.List(FacultyType)
     staff = graphene.List(InstitutionStaffType)

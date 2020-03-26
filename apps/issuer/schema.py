@@ -59,7 +59,7 @@ class IssuerType(StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
     class Meta:
         model = Issuer
         fields = ('name', 'entity_id', 'badgeclasses', 'faculty',
-                  'image', 'description', 'url', 'email')
+                  'image', 'description', 'url', 'email', 'created_at')
 
     staff = graphene.List(IssuerStaffType)
     badgeclasses_count = graphene.Int()
@@ -77,7 +77,8 @@ class BadgeClassType(StaffResolverMixin, ImageResolverMixin, ExtensionResolverMi
     class Meta:
         model = BadgeClass
         fields = ('name', 'entity_id', 'issuer', 'image', 'staff',
-                  'description', 'criteria_url', 'criteria_text',)
+                  'description', 'criteria_url', 'criteria_text',
+                  'created_at')
 
     staff = graphene.List(BadgeClassStaffType)
     extensions = graphene.List(BadgeClassExtensionType)
