@@ -64,3 +64,28 @@ class ObjectPermissionTests(BadgrTestCase):
         response = self.client.post('/staff/issuer/{}/create'.format(issuer.entity_id),
                                     data, content_type='application/json')
         self.assertEqual(response.status_code, 201)
+
+    def test_permission_tree_cleanup_after_put(self):
+        raise NotImplementedError
+
+    def test_may_not_update_user(self):
+        raise NotImplementedError
+
+    def test_update_staff_membership(self):
+        raise NotImplementedError
+
+    def test_may_not_change_permissions_you_dont_have_yourself(self):
+        raise NotImplementedError
+
+    def test_may_not_assign_permissions_you_dont_have_yourself(self):
+        raise NotImplementedError
+
+    def test_may_not_remove_institution_staff_membership(self):
+        raise NotImplementedError
+
+    def test_may_not_change_user_outside_administrable_scope(self):
+        raise NotImplementedError
+
+    def test_may_not_change_staff_membership_outside_administrable_scope(self):
+        """user is in scope, but staff membership is not"""
+        raise NotImplementedError

@@ -1,10 +1,10 @@
-import cachemodel
 from django.db import models
 from django.forms.models import model_to_dict
+from entity.models import BaseVersionedEntity
 from signing.models import SymmetricKey
 
 
-class PermissionedRelationshipMixin(models.Model):
+class PermissionedRelationshipBase(BaseVersionedEntity):
     """
     Abstract base class used for inheritance in all the Staff Many2Many relationship models
     """
@@ -44,7 +44,7 @@ class PermissionedRelationshipMixin(models.Model):
         return len(permissions) == has_perm_count
 
 
-class InstitutionStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
+class InstitutionStaff(PermissionedRelationshipBase):
     """
     Many2Many realtionship between Institution and users, with permissions added to the relationship
     """
@@ -60,7 +60,7 @@ class InstitutionStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
         return self.institution
 
 
-class FacultyStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
+class FacultyStaff(PermissionedRelationshipBase):
     """
     Many2Many realtionship between Faculty and users, with permissions added to the relationship
     """
@@ -71,7 +71,7 @@ class FacultyStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
         return self.faculty
 
 
-class IssuerStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
+class IssuerStaff(PermissionedRelationshipBase):
     """
     Many2Many realtionship between Issuer and users, with permissions added to the relationship
     """
@@ -116,7 +116,7 @@ class IssuerStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
         return Issuer.cached.get(pk=self.issuer_id)
 
 
-class BadgeClassStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
+class BadgeClassStaff(PermissionedRelationshipBase):
 
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
 

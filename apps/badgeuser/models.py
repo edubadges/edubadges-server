@@ -224,9 +224,10 @@ class UserPermissionsMixin(object):
     """
     Base class to group all permission functionality of user, purely for readability
     """
-    def may_administrate_other(self, user):
+    def is_user_within_scope(self, user):
         """
-        See if user may administrate (add/remove/change as staff member) other user. i.e. is the other user in his/her scope.
+        See if user has other user in his scope, (i.e. is other user found in any of all related staff objects)
+        This is used when creating a new staff membership object, then this user must be in your scope.
         """
         if self == user:
             return False  # cannot administrate yourself
@@ -235,6 +236,19 @@ class UserPermissionsMixin(object):
             for staff in obj.staff_items:
                 if user == staff.user:
                     return True  # user is administrable
+        return False
+
+    def is_staff_membership_within_scope(self, staff_membership):
+        """
+        See if staff membership is in this user's scope. This is used when editing or removing staff membership objects.
+        """
+        if self == staff_membership.user:
+            return False  # cannot administrate yourself
+        all_administrable_objects = self.get_all_objects_with_permissions(['may_administrate_users'])
+        for obj in all_administrable_objects:
+            for staff in obj.staff_items:
+                if staff == staff_membership:
+                    return True  # staff membership is administrable
         return False
 
     def get_permissions(self, obj):
