@@ -4,10 +4,9 @@ from allauth.socialaccount.models import SocialAccount
 from allauth.account.models import EmailAddress
 from staff.models import InstitutionStaff
 
-
 # Institution
 [
-    Institution.objects.get_or_create(name=ins) for ins in [
+    Institution.objects.get_or_create(identifier=ins, name=ins) for ins in [
         'university-example.org',
         'diy.surfconext.nl'
     ]

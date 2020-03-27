@@ -123,8 +123,9 @@ def after_terms_agreement(request, **kwargs):
       
     ret = complete_social_login(request, login)
     if not request.user.is_anonymous: # the social login succeeded
-        institution_name = extra_data['schac_home_organization']
-        institution, created = Institution.objects.get_or_create(name=institution_name)
+        institution_identifier = extra_data['schac_home_organization']
+        institution, created = Institution.objects.get_or_create(identifier=institution_identifier,
+                                                                 name=institution_identifier)
         request.user.institution = institution
         request.user.save()
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)

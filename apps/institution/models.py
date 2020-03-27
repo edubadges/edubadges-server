@@ -11,7 +11,8 @@ class Institution(PermissionedModelMixin, ImageUrlGetterMixin, BaseVersionedEnti
     
     def __str__(self):
         return self.name
-    
+
+    identifier = models.CharField(max_length=255, null=True)
     name = models.CharField(max_length=255, unique=True)
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.InstitutionStaff")
     description = models.TextField(blank=True, null=True, default=None)

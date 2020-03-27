@@ -28,7 +28,7 @@ from oauthlib.common import generate_token
 from rest_framework.authtoken.models import Token
 from signing.models import AssertionTimeStamp
 from badgeuser.utils import generate_badgr_username
-
+from staff.models import InstitutionStaff
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
     objects = CachedEmailAddressManager()
@@ -342,8 +342,11 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
         :param value: Institution
         :return: None
         """
-        self.institution_set.add(value)
-
+        try:
+            InstitutionStaff.objects.get(user=self, institution=value)
+            raise ValueError('User already has an institution staff membership. Cannot have two.')
+        except:
+            InstitutionStaff.objects.create(user=self, institution=value)
 
     @property
     def email_items(self):
