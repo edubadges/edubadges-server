@@ -1,23 +1,28 @@
-from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
-from institution.models import Faculty
-from institution.serializers_v1 import FacultySerializerV1
+from entity.api import BaseEntityListView, VersionedObjectMixin, BaseEntityDetailView
+from institution.models import Faculty, Institution
+from institution.serializers_v1 import FacultySerializerV1, InstitutionSerializer
 from issuer.serializers_v1 import IssuerSerializerV1
-from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from mainsite.permissions import AuthenticatedWithVerifiedEmail, CannotDeleteWithChildren
 from staff.permissions import HasObjectPermission
 from issuer.permissions import IssuedAssertionsBlock
 
 
+class InstitutionDetail(BaseEntityDetailView):
+    model = Institution
+    v1_serializer_class = InstitutionSerializer
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, IssuedAssertionsBlock)
+    http_method_names = ['put']
+
+
 class FacultyDetail(BaseEntityDetailView):
+    """
+    PUT to edit a faculty
+    DELETE to remove it
+    """
     model = Faculty
     v1_serializer_class = FacultySerializerV1
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, IssuedAssertionsBlock)
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, IssuedAssertionsBlock, CannotDeleteWithChildren)
     http_method_names = ['put', 'delete']
-
-    def put(self, request, **kwargs):
-        return super(FacultyDetail, self).put(request, **kwargs)
-
-    def delete(self, request, **kwargs):
-        return super(FacultyDetail, self).delete(request, **kwargs)
 
 
 class FacultyIssuerList(VersionedObjectMixin, BaseEntityListView):

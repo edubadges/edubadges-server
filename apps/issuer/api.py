@@ -10,7 +10,7 @@ from issuer.models import Issuer, BadgeClass, BadgeInstance
 from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
                                    BadgeInstanceSerializerV1)
 from mainsite.exceptions import BadgrApiException400
-from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from mainsite.permissions import AuthenticatedWithVerifiedEmail, CannotDeleteWithChildren
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -26,7 +26,7 @@ logger = badgrlog.BadgrLogger()
 class IssuerDetail(BaseEntityDetailView):
     model = Issuer
     v1_serializer_class = IssuerSerializerV1
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, IssuedAssertionsBlock)
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, IssuedAssertionsBlock, CannotDeleteWithChildren)
     http_method_names = ['put', 'delete']
 
     @apispec_put_operation('Issuer',
@@ -74,7 +74,7 @@ class BadgeClassDetail(BaseEntityDetailView):
     PUT and DELETE are blocked if assertions have been issued
     """
     model = BadgeClass
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, IssuedAssertionsBlock)
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, IssuedAssertionsBlock, CannotDeleteWithChildren)
     v1_serializer_class = BadgeClassSerializerV1
     http_method_names = ['put', 'delete']
 

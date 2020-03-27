@@ -1,17 +1,40 @@
 import io
 from xml.etree import cElementTree as ET
+from django.core.files.storage import default_storage
+from rest_framework.response import Response
+from rest_framework.status import HTTP_204_NO_CONTENT
 
 from PIL import Image
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from mainsite.utils import verify_svg
+from mainsite.exceptions import BadgrApiException400
 from resizeimage.resizeimage import resize_contain
 
 
 def _decompression_bomb_check(image, max_pixels=Image.MAX_IMAGE_PIXELS):
     pixels = image.size[0] * image.size[1]
     return pixels > max_pixels
+
+
+class ImageResolverMixin(object):
+    """
+    Schema mixin to resolve image property
+    """
+    def resolve_image(self, info):
+        return self.image_url()
+
+
+class ImageUrlGetterMixin(object):
+    """
+    Model mixin to get image url
+    """
+    def image_url(self):
+        if getattr(settings, 'MEDIA_URL').startswith('http'):
+            return default_storage.url(self.image.name)
+        else:
+            return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
 
 
 class ResizeUploadedImage(object):

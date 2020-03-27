@@ -3,14 +3,8 @@ from graphene_django.types import DjangoObjectType
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
                     BadgeClassAlignment, BadgeClassTag
 from lti_edu.schema import StudentsEnrolledType
-from mainsite.mixins import StaffResolverMixin
+from mainsite.mixins import StaffResolverMixin, ImageResolverMixin
 from staff.schema import IssuerStaffType, BadgeClassStaffType
-
-
-class ImageResolverMixin(object):
-
-    def resolve_image(self, info):
-        return self.image_url()
 
 
 class ExtensionResolverMixin(object):

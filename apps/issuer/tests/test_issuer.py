@@ -56,4 +56,5 @@ class IssuerTest(BadgrTestCase):
                                     json.dumps(badgeclass_json), content_type='application/json')
         self.assertEqual(404, response.status_code)
 
-
+    def test_issuer_schema(self):
+        raise NotImplementedError

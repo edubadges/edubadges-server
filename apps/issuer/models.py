@@ -23,7 +23,7 @@ from entity.models import BaseVersionedEntity
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager
 from jsonfield import JSONField
 from mainsite.managers import SlugOrJsonIdCacheModelManager
-from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage
+from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage, ImageUrlGetterMixin
 from mainsite.models import BadgrApp, EmailBlacklist, BaseAuditedModel
 from mainsite.utils import OriginSetting, generate_entity_uri
 from openbadges_bakery import bake
@@ -49,15 +49,6 @@ def get_user_or_none(recipient_identifier):
         return soc_acc.user
     except SocialAccount.DoesNotExist:
         return None
-
-
-class ImageUrlGetterMixin(object):
-
-    def image_url(self):
-        if getattr(settings, 'MEDIA_URL').startswith('http'):
-            return default_storage.url(self.image.name)
-        else:
-            return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
 
 
 class OriginalJsonMixin(models.Model):

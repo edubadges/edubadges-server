@@ -8,6 +8,8 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from rest_framework.views import APIView
 
+from mainsite.exceptions import BadgrApiException400
+
 
 class BaseEntityView(APIView):
     create_event = None

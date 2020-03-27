@@ -2,7 +2,7 @@ import graphene
 from graphene_django.types import DjangoObjectType
 from .models import Institution, Faculty
 from issuer.schema import IssuerType
-from mainsite.mixins import StaffResolverMixin
+from mainsite.mixins import StaffResolverMixin, ImageResolverMixin
 from staff.schema import InstitutionStaffType, FacultyStaffType
 
 
@@ -19,11 +19,11 @@ class FacultyType(StaffResolverMixin, DjangoObjectType):
         return self.get_issuers(info.context.user, ['may_read'])
 
 
-class InstitutionType(StaffResolverMixin, DjangoObjectType):
+class InstitutionType(StaffResolverMixin, ImageResolverMixin, DjangoObjectType):
 
     class Meta:
         model = Institution
-        fields = ('name', 'staff', 'created_at')
+        fields = ('name', 'staff', 'created_at', 'description', 'image', 'grading_table', 'brin')
 
     faculties = graphene.List(FacultyType)
     staff = graphene.List(InstitutionStaffType)

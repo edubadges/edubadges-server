@@ -2,17 +2,22 @@ import cachemodel
 from django.db import models
 from entity.models import BaseVersionedEntity
 from mainsite.models import BaseAuditedModel
+from mainsite.mixins import ImageUrlGetterMixin
 from staff.mixins import PermissionedModelMixin
 from staff.models import FacultyStaff, InstitutionStaff
 
 
-class Institution(PermissionedModelMixin, BaseVersionedEntity, BaseAuditedModel):
+class Institution(PermissionedModelMixin, ImageUrlGetterMixin, BaseVersionedEntity, BaseAuditedModel):
     
     def __str__(self):
         return self.name
     
     name = models.CharField(max_length=255, unique=True)
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.InstitutionStaff")
+    description = models.TextField(blank=True, null=True, default=None)
+    image = models.FileField(upload_to='uploads/institution', blank=True, null=True)
+    grading_table = models.CharField(max_length=254, blank=True, null=True, default=None)
+    brin = models.CharField(max_length=254, blank=True, null=True, default=None)
 
     @property
     def children(self):
@@ -20,6 +25,13 @@ class Institution(PermissionedModelMixin, BaseVersionedEntity, BaseAuditedModel)
 
     def get_faculties(self, user, permissions):
         return [fac for fac in self.cached_faculties() if fac.has_permissions(user, permissions)]
+
+    @property
+    def assertions(self):
+        assertions = []
+        for faculty in self.faculty_set.all():
+            assertions += faculty.assertions
+        return assertions
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_staff(self):
