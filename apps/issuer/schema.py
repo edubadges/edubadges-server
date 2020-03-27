@@ -117,7 +117,7 @@ class Query(object):
     def resolve_issuer(self, info, **kwargs):
         id = kwargs.get('id')
         if id is not None:
-            issuer = Issuer.objects.get(id=id)
+            issuer = Issuer.objects.get(entity_id=id)
             if issuer.has_permissions(info.context.user, ['may_read']):
                 return issuer
 
@@ -127,7 +127,7 @@ class Query(object):
     def resolve_badge_class(self, info, **kwargs):
         id = kwargs.get('id')
         if id is not None:
-            bc = BadgeClass.objects.get(id=id)
+            bc = BadgeClass.objects.get(entity_id=id)
             if bc.has_permissions(info.context.user, ['may_read']):
                 return bc
 
