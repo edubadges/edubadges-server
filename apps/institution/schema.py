@@ -46,6 +46,6 @@ class Query(object):
     def resolve_faculty(self, info, **kwargs):
         id = kwargs.get('id')
         if id is not None:
-            faculty = Faculty.objects.get(id=id)
+            faculty = Faculty.objects.get(entity_id=id)
             if faculty.has_permissions(info.context.user, ['may_read']):
                 return faculty
