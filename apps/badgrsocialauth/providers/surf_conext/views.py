@@ -17,6 +17,7 @@ from ims.models import LTITenant
 from institution.models import Institution
 from lti_edu.models import LtiBadgeUserTennant, UserCurrentContextId
 from mainsite.models import BadgrApp
+from staff.models import InstitutionStaff
 
 from .provider import SurfConextProvider
 
@@ -126,8 +127,12 @@ def after_terms_agreement(request, **kwargs):
         institution_identifier = extra_data['schac_home_organization']
         institution, created = Institution.objects.get_or_create(identifier=institution_identifier,
                                                                  name=institution_identifier)
-        request.user.institution = institution
-        request.user.save()
+
+        try:
+            InstitutionStaff.objects.get(user=request.user, institution=institution)
+        except InstitutionStaff.DoesNotExist:
+            request.user.institution = institution
+            request.user.save()
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
 
     resign = True
