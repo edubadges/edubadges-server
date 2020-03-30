@@ -245,14 +245,9 @@ class Issuer(PermissionedModelMixin,
             return self.source_url
         return OriginSetting.HTTP + self.get_absolute_url()
 
-    # @property
-    # def editors(self):
-    #     return self.staff.filter(issuerstaff__role__in=(IssuerStaff.ROLE_EDITOR, IssuerStaff.ROLE_OWNER))
-    #
     @property
     def owners(self):
         return self.get_local_staff_members(['may_create', 'may_read', 'may_update', 'may_delete', 'may_award', 'may_administrate_users'])
-        # return self.staff.filter(issuerstaff__role=IssuerStaff.ROLE_OWNER)
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuerstaff(self):
