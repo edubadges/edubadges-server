@@ -325,6 +325,18 @@ class Issuer(PermissionedModelMixin,
             for extension in self.cached_extensions():
                 json[extension.name] = json_loads(extension.original_json)
 
+        # institution extensions
+        if self.faculty.institution.brin:
+            json['extensions:InstitutionIdentifierExtension'] = {
+                "type": ["Extension", "extensions: InstitutionIdentifierExtension"],
+                "BRIN": self.faculty.institution.brin
+            }
+        if self.faculty.institution.grading_table:
+            json['extensions:GradingTableExtension'] = {
+                "type": ["Extension", "extensions: GradingTableExtension"],
+                "gradingTable": self.faculty.institution.grading_table
+            }
+
         # pass through imported json
         if include_extra:
             extra = self.get_filtered_json()
