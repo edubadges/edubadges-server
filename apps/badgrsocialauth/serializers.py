@@ -14,11 +14,12 @@ class BadgrSocialAccountSerializerV1(serializers.Serializer):
         email = common_fields.get('email', None)
         if not email and 'userPrincipalName' in instance.extra_data:
             email = instance.extra_data['userPrincipalName']
-
+        verified_by_institution = instance.extra_data.get('eduperson_entitlement') == "urn:mace:eduid.nl:entitlement:verified-by-institution"
         representation.update({
             'firstName': common_fields.get('first_name', None),
             'lastName': common_fields.get('last_name', None),
             'primaryEmail': email,
+            'verified_by_institution': verified_by_institution
         })
 
         return representation

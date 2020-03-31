@@ -228,7 +228,8 @@ def callback(request):
 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
     if not check_agreed_term_and_conditions(social_account.user, badgr_app):
-        return HttpResponseRedirect(reverse('accept_terms_resign', kwargs=keyword_arguments))
+        redirect_to = reverse('accept_terms_resign', kwargs=keyword_arguments)
+        return HttpResponseRedirect(redirect_to)
 
     return after_terms_agreement(request, **keyword_arguments)
 
