@@ -1,17 +1,24 @@
 import cachemodel
 from django.db import models
 from entity.models import BaseVersionedEntity
+from mainsite.models import BaseAuditedModel
+from mainsite.mixins import ImageUrlGetterMixin
 from staff.mixins import PermissionedModelMixin
 from staff.models import FacultyStaff, InstitutionStaff
 
 
-class Institution(PermissionedModelMixin, BaseVersionedEntity, cachemodel.CacheModel):
+class Institution(PermissionedModelMixin, ImageUrlGetterMixin, BaseVersionedEntity, BaseAuditedModel):
     
     def __str__(self):
         return self.name
-    
+
+    identifier = models.CharField(max_length=255, null=True)
     name = models.CharField(max_length=255, unique=True)
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.InstitutionStaff")
+    description = models.TextField(blank=True, null=True, default=None)
+    image = models.FileField(upload_to='uploads/institution', blank=True, null=True)
+    grading_table = models.CharField(max_length=254, blank=True, null=True, default=None)
+    brin = models.CharField(max_length=254, blank=True, null=True, default=None)
 
     @property
     def children(self):
@@ -19,6 +26,13 @@ class Institution(PermissionedModelMixin, BaseVersionedEntity, cachemodel.CacheM
 
     def get_faculties(self, user, permissions):
         return [fac for fac in self.cached_faculties() if fac.has_permissions(user, permissions)]
+
+    @property
+    def assertions(self):
+        assertions = []
+        for faculty in self.faculty_set.all():
+            assertions += faculty.assertions
+        return assertions
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_staff(self):
@@ -43,7 +57,7 @@ class Institution(PermissionedModelMixin, BaseVersionedEntity, cachemodel.CacheM
         return r
 
 
-class Faculty(PermissionedModelMixin, BaseVersionedEntity, cachemodel.CacheModel):
+class Faculty(PermissionedModelMixin, BaseVersionedEntity, BaseAuditedModel):
 
     def __str__(self):
         return self.name
@@ -58,6 +72,7 @@ class Faculty(PermissionedModelMixin, BaseVersionedEntity, cachemodel.CacheModel
     name = models.CharField(max_length=512)
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, blank=False, null=False)
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.FacultyStaff")
+    description = models.TextField(blank=True, null=True, default=None)
 
     def get_issuers(self, user, permissions):
         return [issuer for issuer in self.cached_issuers() if issuer.has_permissions(user, permissions)]

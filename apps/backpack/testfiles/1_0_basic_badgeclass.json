@@ -1,7 +1,0 @@
-{
-  "name": "Basic Badge",
-  "description": "Basic as it gets. v1.0",
-  "image": "http://a.com/badgeclass_image",
-  "criteria": "http://a.com/badgeclass_criteria",
-  "issuer": "http://a.com/issuer"
-}

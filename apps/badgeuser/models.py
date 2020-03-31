@@ -19,16 +19,16 @@ from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from entity.models import BaseVersionedEntity
-from issuer.models import BadgeInstance, BaseAuditedModel
+from issuer.models import BadgeInstance
 from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrApiException400
-from mainsite.models import ApplicationInfo, EmailBlacklist
+from mainsite.models import ApplicationInfo, EmailBlacklist, BaseAuditedModel
 from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
 from rest_framework.authtoken.models import Token
 from signing.models import AssertionTimeStamp
 from badgeuser.utils import generate_badgr_username
-
+from staff.models import InstitutionStaff
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
     objects = CachedEmailAddressManager()
@@ -182,7 +182,7 @@ class UserCachedObjectGetterMixin(object):
         return permissioned_objects
 
     def get_all_objects_with_permissions(self, permissions):
-        return self._get_objects(permissions)
+        return self._get_objects_with_permissions(permissions)
 
     def get_all_badgeclasses_with_permissions(self, permissions):
         return self._get_objects_with_permissions(permissions, 'BadgeClass')
@@ -224,15 +224,31 @@ class UserPermissionsMixin(object):
     """
     Base class to group all permission functionality of user, purely for readability
     """
-    def may_administrate_other(self, user):
+    def is_user_within_scope(self, user):
         """
-        See if user may administrate (add/remove/change as staff member) other user. i.e. is the other user in his/her scope.
+        See if user has other user in his scope, (i.e. is other user found in any of all related staff objects)
+        This is used when creating a new staff membership object, then this user must be in your scope.
         """
+        if self == user:
+            return False  # cannot administrate yourself
         all_administrable_objects = self.get_all_objects_with_permissions(['may_administrate_users'])
         for obj in all_administrable_objects:
             for staff in obj.staff_items:
                 if user == staff.user:
                     return True  # user is administrable
+        return False
+
+    def is_staff_membership_within_scope(self, staff_membership):
+        """
+        See if staff membership is in this user's scope. This is used when editing or removing staff membership objects.
+        """
+        if self == staff_membership.user:
+            return False  # cannot administrate yourself
+        all_administrable_objects = self.get_all_objects_with_permissions(['may_administrate_users'])
+        for obj in all_administrable_objects:
+            for staff in obj.staff_items:
+                if staff == staff_membership:
+                    return True  # staff membership is administrable
         return False
 
     def get_permissions(self, obj):
@@ -326,8 +342,11 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
         :param value: Institution
         :return: None
         """
-        self.institution_set.add(value)
-
+        try:
+            InstitutionStaff.objects.get(user=self, institution=value)
+            raise ValueError('User already has an institution staff membership. Cannot have two.')
+        except:
+            InstitutionStaff.objects.create(user=self, institution=value)
 
     @property
     def email_items(self):

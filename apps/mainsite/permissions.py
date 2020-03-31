@@ -27,3 +27,12 @@ class LocalDevelopModePermissionMixin(PermissionRequiredMixin):
             return settings.LOCAL_DEVELOPMENT_MODE is True
         except AttributeError:
             return False
+
+
+class CannotDeleteWithChildren(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        if request.method == 'DELETE':
+            if obj.children:
+                return False
+        return True

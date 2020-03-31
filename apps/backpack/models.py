@@ -11,10 +11,10 @@ from django.conf import settings
 from django.db import models, transaction
 from django.urls import reverse
 from entity.models import BaseVersionedEntity
-from issuer.models import BaseAuditedModel, BadgeInstance
+from issuer.models import BadgeInstance
 from issuer.utils import CURRENT_OBI_VERSION, get_obi_context, add_obi_version_ifneeded
 from mainsite.managers import SlugOrJsonIdCacheModelManager
-from mainsite.models import BadgrApp
+from mainsite.models import BadgrApp, BaseAuditedModel
 from mainsite.utils import OriginSetting
 
 

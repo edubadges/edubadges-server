@@ -2,14 +2,9 @@ import graphene
 from graphene_django.types import DjangoObjectType
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
                     BadgeClassAlignment, BadgeClassTag
-from mainsite.mixins import StaffResolverMixin
+from lti_edu.schema import StudentsEnrolledType
+from mainsite.mixins import StaffResolverMixin, ImageResolverMixin
 from staff.schema import IssuerStaffType, BadgeClassStaffType
-
-
-class ImageResolverMixin(object):
-
-    def resolve_image(self, info):
-        return self.image_url()
 
 
 class ExtensionResolverMixin(object):
@@ -58,7 +53,7 @@ class IssuerType(StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
     class Meta:
         model = Issuer
         fields = ('name', 'entity_id', 'badgeclasses', 'faculty',
-                  'image', 'description', 'url', 'email')
+                  'image', 'description', 'url', 'email', 'created_at')
 
     staff = graphene.List(IssuerStaffType)
     badgeclasses_count = graphene.Int()
@@ -76,18 +71,23 @@ class BadgeClassType(StaffResolverMixin, ImageResolverMixin, ExtensionResolverMi
     class Meta:
         model = BadgeClass
         fields = ('name', 'entity_id', 'issuer', 'image', 'staff',
-                  'description', 'criteria_url', 'criteria_text',)
+                  'description', 'criteria_url', 'criteria_text',
+                  'created_at')
 
     staff = graphene.List(BadgeClassStaffType)
     extensions = graphene.List(BadgeClassExtensionType)
     tags = graphene.List(BadgeClassTagType)
     alignments = graphene.List(BadgeClassAlignmentType)
+    enrollments = graphene.List(StudentsEnrolledType)
 
     def resolve_tags(self, info, **kwargs):
         return self.cached_tags()
 
     def resolve_alignments(self, info, **kwargs):
         return self.cached_alignments()
+
+    def resolve_enrollments(self, info, **kwargs):
+        return self.cached_enrollments()
 
 
 class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):

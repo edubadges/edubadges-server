@@ -7,6 +7,7 @@ from badgeuser.models import TermsVersion, BadgeUser
 # BadgrApp
 BadgrApp.objects.get_or_create(
     is_active=1,
+    cors=settings.UI_URL,
     email_confirmation_redirect="{}/login/".format(settings.UI_URL),
     forgot_password_redirect="{}/change-password/".format(settings.UI_URL),
     signup_redirect="{}/signup/".format(settings.UI_URL),
