@@ -54,6 +54,8 @@ class BadgrSocialLogin(RedirectView):
             set_session_authcode(self.request, authcode)
             return set_url_query_params(redirect_url, process=AuthProcess.CONNECT)
         else:
+            is_registration = self.request.GET.get('isRegistration', None)
+            redirect_url = set_url_query_params(redirect_url, isRegistration=is_registration == 'true')
             return redirect_url
 
 
