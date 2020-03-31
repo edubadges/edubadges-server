@@ -1,3 +1,4 @@
+import json
 import graphene
 from graphene_django.types import DjangoObjectType
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
@@ -18,19 +19,25 @@ class ExtensionTypeMetaMixin(object):
     fields = ('name', 'original_json')
 
 
-class IssuerExtensionType(DjangoObjectType):
+class BaseExtensionMixin(object):
+
+    def resolve_original_json(self, info):
+        return json.loads(self.original_json)
+
+
+class IssuerExtensionType(BaseExtensionMixin, DjangoObjectType):
 
     class Meta(ExtensionTypeMetaMixin):
         model = IssuerExtension
 
 
-class BadgeClassExtensionType(DjangoObjectType):
+class BadgeClassExtensionType(BaseExtensionMixin, DjangoObjectType):
 
     class Meta(ExtensionTypeMetaMixin):
         model = BadgeClassExtension
 
 
-class BadgeInstanceExtensionType(DjangoObjectType):
+class BadgeInstanceExtensionType(BaseExtensionMixin, DjangoObjectType):
     class Meta(ExtensionTypeMetaMixin):
         model = BadgeInstanceExtension
 
