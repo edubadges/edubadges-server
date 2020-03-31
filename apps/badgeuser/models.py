@@ -284,17 +284,20 @@ class UserPermissionsMixin(object):
                 for enrollment in enrollments:
                     if not bool(enrollment.badge_instance):  # has never been awarded
                         if raise_exception:
-                            raise BadgrApiException400('May not enroll: already enrolled')
+                            fields = {'error_message': 'May not enroll: already enrolled', "error_code": 201}
+                            raise BadgrApiException400(fields)
                         return False
                     else:  # has been awarded
                         if not enrollment.assertion_is_revoked():
                             if raise_exception:
-                                raise BadgrApiException400('May not enroll: you already have been awarded this badge')
+                                fields = {'error_message': 'May not enroll: you already have been awarded this badge', "error_code": 202}
+                                raise BadgrApiException400(fields)
                             return False
                 return True  # all have been awarded and revoked
         else:  # no eduID
             if raise_exception:
-                raise BadgrApiException400("May not enroll: you don't have a student account")
+                fields = {'error_message': "May not enroll: you don't have a student account", "error_code": 203}
+                raise BadgrApiException400(fields)
             return False
 
 
