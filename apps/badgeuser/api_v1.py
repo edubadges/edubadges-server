@@ -44,11 +44,14 @@ class BadgeUserEmailList(APIView):
         serializer.is_valid(raise_exception=True)
         try:  # check if email already exists
             CachedEmailAddress.objects.get(email=request.data.get('email'), verified=1)
-            raise BadgrApiException400("Could not register email address. Address already in use.")
+            fields = {"error_message": "Could not register email address. Address already in use", 'error_code': 101}
+            raise BadgrApiException400(fields)
         except CachedEmailAddress.DoesNotExist:
             try:
                 CachedEmailAddress.objects.get(email=request.data.get('email'), verified=0, user_id=request.user.pk)
-                raise BadgrApiException400("You have already added this address. Verify it.")
+                fields = {"error_message": "You have already added this address. Verify it",
+                          'error_code': 102}
+                raise BadgrApiException400(fields)
             except CachedEmailAddress.DoesNotExist:
                 pass
         email_address = serializer.save(user=request.user)
@@ -95,10 +98,12 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         if email_address.primary:
-            raise BadgrApiException400("Can not remove primary email address")
+            fields = {"error_message": "Can not remove primary email address", 'error_code': 103}
+            raise BadgrApiException400(fields)
 
         if self.request.user.emailaddress_set.count() == 1:
-            raise BadgrApiException400("Can not remove only email address")
+            fields = {"error_message": "Can not remove only email address", 'error_code': 104}
+            raise BadgrApiException400(fields)
 
         email_address.delete()
         return Response(status.HTTP_200_OK)
@@ -118,32 +123,33 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
             if request.data.get('primary'):
                 email_address.set_as_primary()
                 email_address.publish()
-        else:
-            if request.data.get('resend'):
-                send_confirmation = False
-                current_time = datetime.datetime.now()
-                last_request_time = email_address.get_last_verification_sent_time()
+        elif request.data.get('resend'):
+            send_confirmation = False
+            current_time = datetime.datetime.now()
+            last_request_time = email_address.get_last_verification_sent_time()
 
-                if last_request_time is None:
-                    email_address.set_last_verification_sent_time(datetime.datetime.now())
+            if last_request_time is None:
+                email_address.set_last_verification_sent_time(datetime.datetime.now())
+                send_confirmation = True
+            else:
+                time_delta = current_time - last_request_time
+                if time_delta > RATE_LIMIT_DELTA:
                     send_confirmation = True
-                else:
-                    time_delta = current_time - last_request_time
-                    if time_delta > RATE_LIMIT_DELTA:
-                        send_confirmation = True
 
-                if send_confirmation:
-                    email_address.send_confirmation(request=request)
-                    email_address.set_last_verification_sent_time(datetime.datetime.now())
-                else:
-                    remaining_time_obj = RATE_LIMIT_DELTA - (datetime.datetime.now() - last_request_time)
-                    remaining_min = (remaining_time_obj.seconds//60)%60
-                    remaining_sec = remaining_time_obj.seconds%60
-                    remaining_time_rep = "{} minutes and {} seconds".format(remaining_min, remaining_sec)
+            if send_confirmation:
+                email_address.send_confirmation(request=request)
+                email_address.set_last_verification_sent_time(datetime.datetime.now())
+            else:
+                remaining_time_obj = RATE_LIMIT_DELTA - (datetime.datetime.now() - last_request_time)
+                remaining_min = (remaining_time_obj.seconds//60)%60
+                remaining_sec = remaining_time_obj.seconds%60
+                remaining_time_rep = "{} minutes and {} seconds".format(remaining_min, remaining_sec)
 
-                    return Response("Will be able to re-send verification email in %s." % (str(remaining_time_rep)),
-                     status=status.HTTP_429_TOO_MANY_REQUESTS)
-
+                return Response("Will be able to re-send verification email in %s." % (str(remaining_time_rep)),
+                 status=status.HTTP_429_TOO_MANY_REQUESTS)
+        else:
+            fields = {'error_message': "Can't make unverified email address the primary email address", "error_code": 105}
+            raise BadgrApiException400(fields)
 
         serializer = EmailSerializerV1(email_address, context={'request': request})
         serialized = serializer.data

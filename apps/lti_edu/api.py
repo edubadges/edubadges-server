@@ -48,14 +48,24 @@ class StudentEnrollmentList(BaseEntityListView):
         return super(StudentEnrollmentList, self).get(request, **kwargs)
 
     def delete(self, request, **kwargs):
-        enrollment = StudentsEnrolled.objects.get(id=request.data['enrollmentID'])
-        if enrollment.date_awarded:
-            return Response(data='Awarded enrollments cannot be withdrawn', status=403)
-        if request.user == enrollment.user:
-            enrollment.delete()
-            return Response(data='Enrollment withdrawn', status=200)
+        try:
+            enrollment = StudentsEnrolled.objects.get(id=request.data['enrollmentID'])
+        except ValueError:
+            fields = {"error_message": "Invalid enrollment id", "error_code": 204}
+            raise BadgrApiException400(fields)
+        except StudentsEnrolled.DoesNotExist:
+            fields = {"error_message": "Enrollment not found", "error_code": 205}
+            raise BadgrApiException400(fields)
         else:
-            return Response(data='Users can only withdraw their own enrollments', status=403)
+            if enrollment.date_awarded:
+                fields = {"error_message": "Awarded enrollments cannot be withdrawn", "error_code": 206}
+                raise BadgrApiException400(fields)
+            if request.user == enrollment.user:
+                enrollment.delete()
+                return Response(data='Enrollment withdrawn', status=200)
+            else:
+                fields = {"error_message": "Users can only withdraw their own enrollments", "error_code": 207}
+                raise BadgrApiException400(fields)
 
 
 class StudentsEnrolledList(BaseEntityListView):
@@ -73,18 +83,21 @@ class StudentsEnrolledList(BaseEntityListView):
                                                date_awarded=None)
 
     def post(self, request, **kwargs):
-        for field in ['badgeclass_slug']:
-            if field not in request.data:
-                return Response(data='field missing', status=401)
+        if 'badgeclass_slug' not in request.data:
+            fields = {"error_message": "Missing badgeclass id", "error_code": 208}
+            raise BadgrApiException400(fields)
         badge_class = get_object_or_404(BadgeClass, entity_id=request.data['badgeclass_slug'])
         if request.user.may_enroll(badge_class, raise_exception=True):
-            enrollment = StudentsEnrolled.objects.create(badge_class_id=badge_class.pk,
-                                                         user=request.user,
-                                                         date_consent_given=timezone.now())
+            StudentsEnrolled.objects.create(
+                badge_class_id=badge_class.pk,
+                user=request.user,
+                date_consent_given=timezone.now()
+            )
             message = EmailMessageMaker.create_student_badge_request_email(badge_class)
             request.user.email_user(subject='You have successfully requested a badge', message=message)
             return Response(data='enrolled', status=200)
-        raise BadgrApiException400('Cannot enroll')
+        fields = {"error_message": 'Cannot enroll', "error_code": 209}
+        raise BadgrApiException400(fields)
 
     def get(self, request, **kwargs):
         if 'badgeclass_slug' not in kwargs:

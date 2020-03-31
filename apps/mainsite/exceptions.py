@@ -3,6 +3,10 @@ from rest_framework.exceptions import APIException
 
 class BadgrApiException400(APIException):
 
+    def __init__(self, fields):
+        detail = {'detail': 'bad_request', 'fields': fields}
+        super(BadgrApiException400, self).__init__(detail)
+
     status_code = 400
 
 
