@@ -58,3 +58,20 @@ class IssuerTest(BadgrTestCase):
 
     def test_issuer_schema(self):
         raise NotImplementedError
+
+    def test_award_valid_badge(self):
+        raise NotImplementedError
+
+
+class ExtensionsTest(BadgrTestCase):
+
+    def test_create_edit_remove_issuer_extensions(self):
+        raise NotImplementedError
+
+    def test_create_edit_remove_badgeclass_extensions(self):
+        raise NotImplementedError
+
+    def test_validate_extensions_context(self):
+        raise NotImplementedError
+
+
