@@ -129,3 +129,4 @@ class ObjectPermissionTests(BadgrTestCase):
     def test_may_not_change_staff_membership_outside_administrable_scope(self):
         """user is in scope, but staff membership is not"""
         pass
+
