@@ -123,8 +123,25 @@ class ObjectPermissionTests(BadgrTestCase):
                                       content_type='application/json')
         self.assertEqual(response.status_code, 405)
 
-    def test_may_not_change_user_outside_administrable_scope(self):
-        pass
+    def test_may_not_create_staff_membership_for_user_outside_scope(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        teacher2 = self.setup_teacher()
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_administrate_users=True)
+        data = {
+            "may_create": 0,
+            "may_read": 1,
+            "may_update": 0,
+            "may_delete": 0,
+            "may_sign": 0,
+            "may_award": 0,
+            "may_administrate_users": 0,
+            "faculty": faculty.entity_id,
+            "user": teacher2.entity_id
+        }
+        response = self.client.post('/staff-membership/faculty/{}/create'.format(faculty.entity_id),
+                                    json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 400)
 
     def test_may_not_change_staff_membership_outside_administrable_scope(self):
         """user is in scope, but staff membership is not"""
