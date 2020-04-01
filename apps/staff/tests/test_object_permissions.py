@@ -115,7 +115,13 @@ class ObjectPermissionTests(BadgrTestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_may_not_remove_institution_staff_membership(self):
-        pass
+        teacher1 = self.setup_teacher(authenticate=True)
+        teacher2 = self.setup_teacher(institution=teacher1.institution)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_administrate_users=True)
+        staff = self.setup_staff_membership(teacher2, teacher2.institution, may_read=True)
+        response = self.client.delete('/staff-membership/institution/change/{}'.format(staff.entity_id),
+                                      content_type='application/json')
+        self.assertEqual(response.status_code, 405)
 
     def test_may_not_change_user_outside_administrable_scope(self):
         pass
