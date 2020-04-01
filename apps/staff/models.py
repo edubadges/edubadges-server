@@ -43,6 +43,11 @@ class PermissionedRelationshipBase(BaseVersionedEntity):
                 has_perm_count += 1
         return len(permissions) == has_perm_count
 
+    def publish(self):
+        super(PermissionedRelationshipBase, self).publish()
+        self.object.publish()
+        self.user.publish()
+
 
 class InstitutionStaff(PermissionedRelationshipBase):
     """
@@ -84,11 +89,6 @@ class IssuerStaff(PermissionedRelationshipBase):
     def object(self):
         return self.issuer
 
-    def publish(self):
-        super(IssuerStaff, self).publish()
-        self.issuer.publish()
-        self.user.publish()
-
     def delete(self, *args, **kwargs):
         publish_issuer = kwargs.pop('publish_issuer', True)
         super(IssuerStaff, self).delete()
@@ -103,17 +103,7 @@ class IssuerStaff(PermissionedRelationshipBase):
 
     @property
     def is_signer(self):
-        return self.sign
-
-    @property
-    def cached_user(self):
-        from badgeuser.models import BadgeUser
-        return BadgeUser.cached.get(pk=self.user_id)
-
-    @property
-    def cached_issuer(self):
-        from issuer.models import Issuer
-        return Issuer.cached.get(pk=self.issuer_id)
+        return self.may_sign
 
 
 class BadgeClassStaff(PermissionedRelationshipBase):
