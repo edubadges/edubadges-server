@@ -108,8 +108,6 @@ class ObjectPermissionTests(BadgrTestCase):
         self.assertEqual(response.status_code, 404)
         data["may_sign"] = 1
         data["may_create"] = 0
-
-    def test_may_not_assign_permissions_you_dont_have_yourself(self):
         response = self.client.put('/staff-membership/faculty/change/{}'.format(staff.entity_id),
                                    json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 404)
@@ -145,5 +143,27 @@ class ObjectPermissionTests(BadgrTestCase):
 
     def test_may_not_change_staff_membership_outside_administrable_scope(self):
         """user is in scope, but staff membership is not"""
+        teacher1 = self.setup_teacher(authenticate=True)
+        teacher2 = self.setup_teacher(institution=teacher1.institution)
+        faculty1 = self.setup_faculty(institution=teacher1.institution)
+        faculty2 = self.setup_faculty(institution=teacher1.institution)
+        issuer1 = self.setup_issuer(faculty=faculty1, created_by=teacher1)
+        self.setup_staff_membership(teacher1, faculty1, may_read=True, may_administrate_users=True)
+        self.setup_staff_membership(teacher2, issuer1, may_read=True, may_administrate_users=True)
+        staff = self.setup_staff_membership(teacher2, faculty2, may_read=True, may_administrate_users=True)
+        data = {
+            "may_create": 0,
+            "may_read": 1,
+            "may_update": 0,
+            "may_delete": 0,
+            "may_sign": 0,
+            "may_award": 0,
+            "may_administrate_users": 0,
+        }
+        response = self.client.put('/staff-membership/faculty/change/{}'.format(staff.entity_id),
+                                    json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 404)
+
+    def test_permission_tree_cleanup_after_change(self):
         pass
 
