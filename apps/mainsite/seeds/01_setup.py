@@ -53,3 +53,7 @@ superuser, _ = BadgeUser.objects.get_or_create(
 )
 superuser.set_password(settings.SUPERUSER_PWD)
 superuser.save()
+
+# Issuer SURF - TODO
+
+# Badge class eduID account - TODO
