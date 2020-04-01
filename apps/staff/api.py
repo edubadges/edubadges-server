@@ -80,7 +80,6 @@ class FacultyStaffDetail(StaffDetailViewBase):
     DELETE to delete faculty staff membership
     """
     model = FacultyStaff  # used by get_object()
-    # serializer_class = FacultyStaffSerializer
 
 
 class IssuerStaffList(StaffListViewBase):
@@ -98,7 +97,6 @@ class IssuerStaffDetail(StaffDetailViewBase):
     DELETE to delete issuer staff membership
     """
     model = IssuerStaff  # used by get_object()
-    serializer_class = IssuerStaffSerializer
 
 
 class BadgeClassStaffList(StaffListViewBase):
@@ -116,4 +114,4 @@ class BadgeClassStaffDetail(StaffDetailViewBase):
     DELETE to delete badgeclass staff membership
     """
     model = BadgeClassStaff  # used by get_object()
-    serializer_class = BadgeClassStaffSerializer
+
