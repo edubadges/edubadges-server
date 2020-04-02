@@ -1,15 +1,18 @@
-from entity.api import BaseEntityListView, VersionedObjectMixin
+from rest_framework.response import Response
+from rest_framework.status import HTTP_204_NO_CONTENT
+
+from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
 from institution.models import Faculty, Institution
 from issuer.models import Issuer, BadgeClass
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
 from staff.serializers import BadgeClassStaffSerializer, IssuerStaffSerializer, FacultyStaffSerializer, InstitutionStaffSerializer
-from staff.permissions import HasObjectPermission
+from staff.permissions import HasObjectPermission, StaffMembershipWithinScope
 
 
-class StaffListViewMixin(object):
-    allowed_methods = ('POST',)
+class StaffListViewBase(VersionedObjectMixin, BaseEntityListView):
+    http_method_names = ['post']
     permission_map = {'POST': 'may_administrate_users'}
-
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
 
     def post(self, request, **kwargs):
@@ -17,19 +20,51 @@ class StaffListViewMixin(object):
         create a new staff membership
         """
         object = self.get_object(request, **kwargs)  # trigger a has_object_permissions() check on the model instance
-        return super(StaffListViewMixin, self).post(request, **kwargs)
+        return super(StaffListViewBase, self).post(request, **kwargs)
 
 
-class InstitutionStaffList(VersionedObjectMixin, StaffListViewMixin, BaseEntityListView):
+class StaffDetailViewBase(BaseEntityDetailView):
     """
-    Get staff members you may administrate within a Faculty context
-    Post to add a new staff member within Faculty context
+    PUT to edit staffmembership
+    DELETE to delete staffmembership
+    """
+    http_method_names = ['put', 'delete']
+    permission_map = {'PUT': 'may_administrate_users'}
+    permission_classes = (AuthenticatedWithVerifiedEmail, StaffMembershipWithinScope)
+
+    def put(self, request, **kwargs):
+        object = self.get_object(request, **kwargs)  # triggers a has_object_permissions() check on the model instance
+        return super(StaffDetailViewBase, self).put(request, **kwargs)
+
+    def delete(self, request, **kwargs):
+        """
+        DELETE a single entity by identifier
+        """
+        obj = self.get_object(request, **kwargs)  # triggers a has_object_permissions() check on the model instance
+        obj.delete()
+        return Response(status=HTTP_204_NO_CONTENT)
+
+
+class InstitutionStaffList(StaffListViewBase):
+    """
+    Get staff members you may administrate within an Institution context
+    Post to add a new staff member within Institution context
     """
     model = Institution  # used by get_object()
     serializer_class = InstitutionStaffSerializer
 
 
-class FacultyStaffList(VersionedObjectMixin, StaffListViewMixin, BaseEntityListView):
+class InstitutionStaffDetail(StaffDetailViewBase):
+    """
+    PUT to edit institution staff membership
+    """
+
+    http_method_names = ['put']  # may not delete institutionstaff membership
+    model = InstitutionStaff  # used by get_object()
+    serializer_class = InstitutionStaffSerializer
+
+
+class FacultyStaffList(StaffListViewBase):
     """
     Get staff members you may administrate within a Faculty context
     Post to add a new staff member within Faculty context
@@ -38,7 +73,16 @@ class FacultyStaffList(VersionedObjectMixin, StaffListViewMixin, BaseEntityListV
     serializer_class = FacultyStaffSerializer
 
 
-class IssuerStaffList(VersionedObjectMixin, StaffListViewMixin, BaseEntityListView):
+class FacultyStaffDetail(StaffDetailViewBase):
+    """
+    PUT to edit faculty staff membership
+    DELETE to delete faculty staff membership
+    """
+    model = FacultyStaff  # used by get_object()
+    serializer_class = FacultyStaffSerializer
+
+
+class IssuerStaffList(StaffListViewBase):
     """
     Get staff members you may administrate within an Issuer context
     Post to add a new staff member within Issuer context
@@ -47,10 +91,28 @@ class IssuerStaffList(VersionedObjectMixin, StaffListViewMixin, BaseEntityListVi
     serializer_class = IssuerStaffSerializer
 
 
-class BadgeClassStaffList(VersionedObjectMixin, StaffListViewMixin, BaseEntityListView):
+class IssuerStaffDetail(StaffDetailViewBase):
     """
-    Get staff members you may administrate within an Issuer context
-    Post to add a new staff member within Issuer context
+    PUT to edit issuer staff membership
+    DELETE to delete issuer staff membership
+    """
+    model = IssuerStaff  # used by get_object()
+    serializer_class = IssuerStaffSerializer
+
+
+class BadgeClassStaffList(StaffListViewBase):
+    """
+    Get staff members you may administrate within a Badgeclass context
+    Post to add a new staff member within Badgeclass context
     """
     model = BadgeClass
+    serializer_class = BadgeClassStaffSerializer
+
+
+class BadgeClassStaffDetail(StaffDetailViewBase):
+    """
+    PUT to edit badgeclass staff membership
+    DELETE to delete badgeclass staff membership
+    """
+    model = BadgeClassStaff  # used by get_object()
     serializer_class = BadgeClassStaffSerializer

@@ -23,14 +23,14 @@ from entity.models import BaseVersionedEntity
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager
 from jsonfield import JSONField
 from mainsite.managers import SlugOrJsonIdCacheModelManager
-from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage
-from mainsite.models import (BadgrApp, EmailBlacklist)
+from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage, ImageUrlGetterMixin
+from mainsite.models import BadgrApp, EmailBlacklist, BaseAuditedModel
 from mainsite.utils import OriginSetting, generate_entity_uri
 from openbadges_bakery import bake
 from rest_framework import serializers
 from signing import tsob
 from signing.models import AssertionTimeStamp, PublicKeyIssuer
-from signing.models import PublicKey, SymmetricKey
+from signing.models import PublicKey
 from staff.models import BadgeClassStaff, IssuerStaff
 from staff.mixins import PermissionedModelMixin
 
@@ -49,29 +49,6 @@ def get_user_or_none(recipient_identifier):
         return soc_acc.user
     except SocialAccount.DoesNotExist:
         return None
-
-
-class ImageUrlGetterMixin(object):
-
-    def image_url(self):
-        if getattr(settings, 'MEDIA_URL').startswith('http'):
-            return default_storage.url(self.image.name)
-        else:
-            return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
-
-class BaseAuditedModel(cachemodel.CacheModel):
-    created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
-    updated_at = models.DateTimeField(auto_now=True)
-    updated_by = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
-
-    class Meta:
-        abstract = True
-
-    @property
-    def cached_creator(self):
-        from badgeuser.models import BadgeUser
-        return BadgeUser.cached.get(id=self.created_by_id)
 
 
 class OriginalJsonMixin(models.Model):
@@ -268,14 +245,9 @@ class Issuer(PermissionedModelMixin,
             return self.source_url
         return OriginSetting.HTTP + self.get_absolute_url()
 
-    # @property
-    # def editors(self):
-    #     return self.staff.filter(issuerstaff__role__in=(IssuerStaff.ROLE_EDITOR, IssuerStaff.ROLE_OWNER))
-    #
     @property
     def owners(self):
         return self.get_local_staff_members(['may_create', 'may_read', 'may_update', 'may_delete', 'may_award', 'may_administrate_users'])
-        # return self.staff.filter(issuerstaff__role=IssuerStaff.ROLE_OWNER)
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuerstaff(self):
@@ -347,6 +319,19 @@ class Issuer(PermissionedModelMixin,
         if len(self.cached_extensions()) > 0:
             for extension in self.cached_extensions():
                 json[extension.name] = json_loads(extension.original_json)
+
+        # institution extensions
+        if self.faculty:
+            if self.faculty.institution.brin:
+                json['extensions:InstitutionIdentifierExtension'] = {
+                    "type": ["Extension", "extensions: InstitutionIdentifierExtension"],
+                    "BRIN": self.faculty.institution.brin
+                }
+            if self.faculty.institution.grading_table:
+                json['extensions:GradingTableExtension'] = {
+                    "type": ["Extension", "extensions: GradingTableExtension"],
+                    "gradingTable": self.faculty.institution.grading_table
+                }
 
         # pass through imported json
         if include_extra:

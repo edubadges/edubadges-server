@@ -33,6 +33,9 @@ DATABASES = {
         'OPTIONS': {
 #            "init_command": "SET storage_engine=InnoDB",  # Uncomment when using MySQL to ensure consistency across servers
         },
+         'TEST': {
+            'CHARSET': 'utf8',
+        }
     }
 }
 

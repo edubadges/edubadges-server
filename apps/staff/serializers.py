@@ -43,7 +43,7 @@ class BaseStaffSerializer(serializers.Serializer):
 
     def _base_create(self, validated_data, object_name, object_class):
         created_by = validated_data.pop('created_by')
-        if created_by.may_administrate_other(validated_data['user']):
+        if created_by.is_user_within_scope(validated_data['user']):
             perms_allowed_to_assign = validated_data[object_name].get_permissions(created_by)
             for perm in perms_allowed_to_assign:
                 if not perms_allowed_to_assign[perm] and int(validated_data[perm]):
@@ -51,6 +51,23 @@ class BaseStaffSerializer(serializers.Serializer):
             return object_class.objects.create(**validated_data)
         else:
             raise serializers.ValidationError("You may not administrate this user.")
+
+    def update(self, instance, validated_data):
+        if instance.user.entity_id != validated_data['user'].entity_id:
+            raise serializers.ValidationError("Changing users of staff memberships is not allowed")
+        created_by = validated_data.pop('updated_by')
+        perms_allowed_to_change = validated_data[instance.object.__class__.__name__.lower()].get_permissions(created_by)
+        original_perms = instance.permissions
+        for permission in original_perms.keys():
+            new_value = bool(int(validated_data[permission]))
+            original_value = original_perms[permission]
+            if original_value != new_value:  # this permission is changed
+                if not perms_allowed_to_change[permission]:
+                    raise serializers.ValidationError("May not change permissions that you don't have yourself")
+                else:
+                    setattr(instance, permission, new_value)  # update the permission
+        instance.save()
+        return instance
 
 
 class InstitutionStaffSerializer(BaseStaffSerializer):

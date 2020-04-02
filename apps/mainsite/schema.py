@@ -6,9 +6,9 @@ import badgeuser.schema
 
 
 class Query(institution.schema.Query,
+            badgeuser.schema.Query,
             issuer.schema.Query,
             lti_edu.schema.Query,
-            badgeuser.schema.Query,
             graphene.ObjectType):
     pass
 

@@ -4,10 +4,9 @@ from allauth.socialaccount.models import SocialAccount
 from allauth.account.models import EmailAddress
 from staff.models import InstitutionStaff
 
-
 # Institution
 [
-    Institution.objects.get_or_create(name=ins) for ins in [
+    Institution.objects.get_or_create(identifier=ins, name=ins) for ins in [
         'university-example.org',
         'diy.surfconext.nl'
     ]
@@ -27,7 +26,7 @@ all_perms = {
 
 
 def create_teacher(username, email, institution_name, uid, perms = all_perms):
-    user, _ = BadgeUser.objects.get_or_create(is_staff=1, username=username, email=email)
+    user, _ = BadgeUser.objects.get_or_create(username=username, email=email)
 
     EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)
     SocialAccount.objects.get_or_create(provider='surf_conext', uid=uid, user=user)

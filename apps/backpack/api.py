@@ -203,7 +203,8 @@ class ShareBackpackAssertion(BaseEntityDetailView):
 
         provider = request.query_params.get('provider')
         if not provider:
-            raise BadgrApiException400("unspecified share provider")
+            fields = {'error_message': "Unspecified share provider", error_code: 701}
+            raise BadgrApiException400(fields)
         provider = provider.lower()
 
         source = request.query_params.get('source', 'unknown')
@@ -215,7 +216,8 @@ class ShareBackpackAssertion(BaseEntityDetailView):
         share = BackpackBadgeShare(provider=provider, badgeinstance=badge, source=source)
         share_url = share.get_share_url(provider)
         if not share_url:
-            raise BadgrApiException400("invalid share provider")
+            fields = {'error_message': "Invalid share provider", error_code: 702}
+            raise BadgrApiException400(fields)
 
         share.save()
 
@@ -247,7 +249,8 @@ class ShareBackpackCollection(BaseEntityDetailView):
 
         provider = request.query_params.get('provider')
         if not provider:
-            raise BadgrApiException400("unspecified share provider")
+            fields = {'error_message': "unspecified share provider", error_code: 701}
+            raise BadgrApiException400(fields)
         provider = provider.lower()
 
         source = request.query_params.get('source', 'unknown')
@@ -259,7 +262,8 @@ class ShareBackpackCollection(BaseEntityDetailView):
         share = BackpackCollectionShare(provider=provider, collection=collection, source=source)
         share_url = share.get_share_url(provider, title=collection.name, summary=collection.description)
         if not share_url:
-            raise BadgrApiException400("invalid share provider")
+            fields = {'error_message': "invalid share provider", error_code: 702}
+            raise BadgrApiException400(fields)
 
         share.save()
 

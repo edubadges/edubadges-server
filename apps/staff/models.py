@@ -1,10 +1,10 @@
-import cachemodel
 from django.db import models
 from django.forms.models import model_to_dict
+from entity.models import BaseVersionedEntity
 from signing.models import SymmetricKey
 
 
-class PermissionedRelationshipMixin(models.Model):
+class PermissionedRelationshipBase(BaseVersionedEntity):
     """
     Abstract base class used for inheritance in all the Staff Many2Many relationship models
     """
@@ -27,6 +27,7 @@ class PermissionedRelationshipMixin(models.Model):
                                              'may_update',
                                              'may_delete',
                                              'may_award',
+                                             'may_sign',
                                              'may_administrate_users'])
 
     def has_permissions(self, permissions):
@@ -42,8 +43,13 @@ class PermissionedRelationshipMixin(models.Model):
                 has_perm_count += 1
         return len(permissions) == has_perm_count
 
+    def publish(self):
+        super(PermissionedRelationshipBase, self).publish()
+        self.object.publish()
+        self.user.publish()
 
-class InstitutionStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
+
+class InstitutionStaff(PermissionedRelationshipBase):
     """
     Many2Many realtionship between Institution and users, with permissions added to the relationship
     """
@@ -59,7 +65,7 @@ class InstitutionStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
         return self.institution
 
 
-class FacultyStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
+class FacultyStaff(PermissionedRelationshipBase):
     """
     Many2Many realtionship between Faculty and users, with permissions added to the relationship
     """
@@ -70,7 +76,7 @@ class FacultyStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
         return self.faculty
 
 
-class IssuerStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
+class IssuerStaff(PermissionedRelationshipBase):
     """
     Many2Many realtionship between Issuer and users, with permissions added to the relationship
     """
@@ -82,11 +88,6 @@ class IssuerStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
     @property
     def object(self):
         return self.issuer
-
-    def publish(self):
-        super(IssuerStaff, self).publish()
-        self.issuer.publish()
-        self.user.publish()
 
     def delete(self, *args, **kwargs):
         publish_issuer = kwargs.pop('publish_issuer', True)
@@ -102,20 +103,10 @@ class IssuerStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
 
     @property
     def is_signer(self):
-        return self.sign
-
-    @property
-    def cached_user(self):
-        from badgeuser.models import BadgeUser
-        return BadgeUser.cached.get(pk=self.user_id)
-
-    @property
-    def cached_issuer(self):
-        from issuer.models import Issuer
-        return Issuer.cached.get(pk=self.issuer_id)
+        return self.may_sign
 
 
-class BadgeClassStaff(PermissionedRelationshipMixin, cachemodel.CacheModel):
+class BadgeClassStaff(PermissionedRelationshipBase):
 
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
 

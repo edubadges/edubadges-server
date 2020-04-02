@@ -1,5 +1,5 @@
 # Django stuff
-Django==2.2.9
+Django==2.2.10
 semver==2.6.0
 pytz==2017.2
 # PIL support
@@ -65,7 +65,7 @@ jsonfield==2.0.2
 # markdown support
 Markdown==2.6.8
 django-markdownify==0.1.0
-bleach==2.1.4
+bleach==3.1.4
 
 # Open Badges related utilities
 openbadges==1.1.0
