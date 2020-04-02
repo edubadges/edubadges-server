@@ -100,7 +100,6 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
         # set badgrapp
         if not instance.badgrapp_id:
             instance.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
-        self.save_extensions(validated_data, instance)
         instance.save()
         return instance
 
