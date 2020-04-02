@@ -81,6 +81,9 @@ CREATE DATABASE badgr DEFAULT CHARACTER SET utf8;
 ### Run a server locally for development
 * `./manage.py runserver`
 
+### See all url's
+* `./manage.py show_urls`
+
 ### Staff dashboard
 * `/staff/superlogin`
     * You can log in on the [staff dashboard](http://localhost:8000/staff/superlogin) with your superuser credentials (if you ran the seeds these will be username: superuser, password: secret).
