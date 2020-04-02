@@ -51,6 +51,13 @@ Note: some of these packages would introduce additional security considerations 
 
 * `git clone https://github.com/edubadges/edubadges-server.git`
 * `cd edubadges-server`
+* `git submodule update --init`
+
+### Create database
+```
+DROP DATABASE IF EXISTS badgr;
+CREATE DATABASE badgr DEFAULT CHARACTER SET utf8;
+```
 
 ### Install requirements
 *from within edubadges-server directory*
