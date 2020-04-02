@@ -1,16 +1,12 @@
 # encoding: utf-8
-
-
 import json
 import urllib.parse
-
 import dateutil.parser
 from django.conf import settings
 from django.core.files.storage import DefaultStorage
 from django.db import models, transaction
 from django.urls import resolve, Resolver404
 from mainsite.utils import fetch_remote_file_to_storage, list_of, OriginSetting
-from pathway.tasks import award_badges_for_pathway_completion
 
 
 def resolve_source_url_referencing_local_object(source_url):
@@ -110,17 +106,6 @@ class BadgeClassManager(BaseOpenBadgeObjectManager):
         )
 
 
-class BadgeInstanceEvidenceManager(models.Manager):
-    @transaction.atomic
-    def create_from_ob2(self, badgeinstance, evidence_obo):
-        return self.create(
-            badgeinstance=badgeinstance,
-            evidence_url=evidence_obo.get('id', None),
-            narrative=evidence_obo.get('narrative', None),
-            original_json=json.dumps(evidence_obo)
-        )
-
-
 def _fetch_image_and_get_file(url, upload_to=''):
     status_code, storage_name = fetch_remote_file_to_storage(url, upload_to=upload_to)
     if status_code == 200:
@@ -166,20 +151,6 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
                 issued_on=issued_on
             )
         )
-        if created:
-            evidence = list_of(assertion_obo.get('evidence', None))
-            if evidence:
-                from issuer.models import BadgeInstanceEvidence
-                for evidence_item in evidence:
-                    if isinstance(evidence_item, str):
-                        # we got an IRI as 'evidence' value
-                        BadgeInstanceEvidence.objects.create(
-                            badgeinstance=badgeinstance,
-                            evidence_url=evidence_item
-                        )
-                    else:
-                        # we got a single evidence item dict
-                        BadgeInstanceEvidence.objects.create_from_ob2(badgeinstance, evidence_item)
 
         return badgeinstance, created
 
@@ -221,15 +192,6 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
         with transaction.atomic():
             new_instance.save()
 
-            if evidence is not None:
-                from issuer.models import BadgeInstanceEvidence
-                for evidence_obj in evidence:
-                    evidence_url = evidence_obj.get('evidence_url')
-                    narrative = evidence_obj.get('narrative')
-                    new_evidence = BadgeInstanceEvidence(badgeinstance=new_instance, evidence_url=evidence_url)
-                    if narrative:
-                        new_evidence.narrative = narrative
-                    new_evidence.save()
 
             if extensions is not None:
                 for name, ext in list(extensions.items()):
@@ -237,9 +199,6 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
                         name=name,
                         original_json=json.dumps(ext)
                     )
-
-        if check_completions:
-            award_badges_for_pathway_completion.delay(badgeinstance_pk=new_instance.pk)
 
         if not notify:
             # always notify if this is the first time issuing to a recipient

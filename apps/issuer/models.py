@@ -12,7 +12,6 @@ import cachemodel
 from allauth.account.adapter import get_adapter
 from django.apps import apps
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -21,17 +20,19 @@ from django.db.models import ProtectedError
 from django.urls import reverse
 from django.utils import timezone
 from entity.models import BaseVersionedEntity
-from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager, BadgeInstanceEvidenceManager
+from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager
 from jsonfield import JSONField
 from mainsite.managers import SlugOrJsonIdCacheModelManager
-from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage
-from mainsite.models import (BadgrApp, EmailBlacklist)
+from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage, ImageUrlGetterMixin
+from mainsite.models import BadgrApp, EmailBlacklist, BaseAuditedModel
 from mainsite.utils import OriginSetting, generate_entity_uri
 from openbadges_bakery import bake
 from rest_framework import serializers
 from signing import tsob
 from signing.models import AssertionTimeStamp, PublicKeyIssuer
-from signing.models import PublicKey, SymmetricKey
+from signing.models import PublicKey
+from staff.models import BadgeClassStaff, IssuerStaff
+from staff.mixins import PermissionedModelMixin
 
 
 from .utils import generate_sha256_hashstring, CURRENT_OBI_VERSION, get_obi_context, add_obi_version_ifneeded, \
@@ -48,20 +49,6 @@ def get_user_or_none(recipient_identifier):
         return soc_acc.user
     except SocialAccount.DoesNotExist:
         return None
-
-class BaseAuditedModel(cachemodel.CacheModel):
-    created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
-    updated_at = models.DateTimeField(auto_now=True)
-    updated_by = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
-
-    class Meta:
-        abstract = True
-
-    @property
-    def cached_creator(self):
-        from badgeuser.models import BadgeUser
-        return BadgeUser.cached.get(id=self.created_by_id)
 
 
 class OriginalJsonMixin(models.Model):
@@ -139,24 +126,20 @@ class BaseOpenBadgeExtension(cachemodel.CacheModel):
         abstract = True
 
 
-
-class Issuer(ResizeUploadedImage,
+class Issuer(PermissionedModelMixin,
+             ImageUrlGetterMixin,
+             ResizeUploadedImage,
              ScrubUploadedSvgImage,
              BaseAuditedModel,
              BaseVersionedEntity,
              BaseOpenBadgeObjectModel):
     entity_class_name = 'Issuer'
 
-
-    staff = models.ManyToManyField(AUTH_USER_MODEL, through='IssuerStaff')
-
-    # slug has been deprecated for now, but preserve existing values
-    slug = models.CharField(max_length=255, blank=True, null=True, default=None)
-    #slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
+    staff = models.ManyToManyField('badgeuser.BadgeUser', through='staff.IssuerStaff')
 
     badgrapp = models.ForeignKey('mainsite.BadgrApp', on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
-    name = models.CharField(max_length=1024)
+    name = models.CharField(max_length=512)
     image = models.FileField(upload_to='uploads/issuers', blank=True, null=True)
     description = models.TextField(blank=True, null=True, default=None)
     url = models.CharField(max_length=254, blank=True, null=True, default=None)
@@ -166,6 +149,35 @@ class Issuer(ResizeUploadedImage,
     objects = IssuerManager()
     cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
     faculty = models.ForeignKey('institution.Faculty', on_delete=models.SET_NULL, blank=True, null=True, default=None)
+
+    class Meta:
+        unique_together = ('name', 'faculty')
+
+    @property
+    def parent(self):
+        return self.faculty
+
+    @property
+    def children(self):
+        return self.cached_badgeclasses()
+
+    @property
+    def assertions(self):
+        assertions = []
+        for bc in self.badgeclasses.all():
+            assertions += bc.assertions
+        return assertions
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_staff(self):
+        return list(IssuerStaff.objects.filter(issuer=self))
+
+    def get_badgeclasses(self, user, permissions):
+        return [bc for bc in self.cached_badgeclasses() if bc.has_permissions(user, permissions)]
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_badgeclasses(self):
+        return list(self.badgeclasses.all())
 
     def publish(self, *args, **kwargs):
         super(Issuer, self).publish(*args, **kwargs)
@@ -197,15 +209,6 @@ class Issuer(ResizeUploadedImage,
                     course_info.save()
             except ImportError:
                 pass
-
-        return ret
-
-    def save(self, *args, **kwargs):
-        ret = super(Issuer, self).save(*args, **kwargs)
-
-        # if no owner staff records exist, create one for created_by
-        if len(self.owners) < 1 and self.created_by_id:
-            IssuerStaff.objects.create(issuer=self, user=self.created_by, role=IssuerStaff.ROLE_OWNER)
 
         return ret
 
@@ -243,12 +246,8 @@ class Issuer(ResizeUploadedImage,
         return OriginSetting.HTTP + self.get_absolute_url()
 
     @property
-    def editors(self):
-        return self.staff.filter(issuerstaff__role__in=(IssuerStaff.ROLE_EDITOR, IssuerStaff.ROLE_OWNER))
-
-    @property
     def owners(self):
-        return self.staff.filter(issuerstaff__role=IssuerStaff.ROLE_OWNER)
+        return self.get_local_staff_members(['may_create', 'may_read', 'may_update', 'may_delete', 'may_award', 'may_administrate_users'])
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuerstaff(self):
@@ -258,58 +257,12 @@ class Issuer(ResizeUploadedImage,
     def current_signers(self):
         return [staff for staff in self.staff_items if staff.is_signer]
 
-    @property
-    def staff_items(self):
-        return self.cached_issuerstaff()
-
-    @staff_items.setter
-    def staff_items(self, value):
-        """
-        Update this issuers IssuerStaff from a list of IssuerStaffSerializerV2 data
-        """
-        existing_staff_idx = {s.cached_user: s for s in self.staff_items}
-        new_staff_idx = {s['cached_user']: s for s in value}
-
-        with transaction.atomic():
-            # add missing staff records
-            for staff_data in value:
-                if staff_data['cached_user'] not in existing_staff_idx:
-                    staff_record, created = IssuerStaff.cached.get_or_create(
-                        issuer=self,
-                        user=staff_data['cached_user'],
-                        defaults={
-                            'role': staff_data['role']
-                        })
-                    if not created:
-                        staff_record.role = staff_data['role']
-                        staff_record.save()
-
-            # remove old staff records -- but never remove the only OWNER role
-            for staff_record in self.staff_items:
-                if staff_record.cached_user not in new_staff_idx:
-                    if staff_record.role != IssuerStaff.ROLE_OWNER or len(self.owners) > 1:
-                        staff_record.delete()
-
     def get_extensions_manager(self):
         return self.issuerextension_set
 
     @cachemodel.cached_method(auto_publish=True)
-    def cached_editors(self):
-        UserModel = get_user_model()
-        return UserModel.objects.filter(issuerstaff__issuer=self, issuerstaff__role=IssuerStaff.ROLE_EDITOR)
-
-    @cachemodel.cached_method(auto_publish=True)
     def cached_badgeclasses(self):
         return self.badgeclasses.all()
-
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_pathways(self):
-        return self.pathway_set.filter(is_active=True)
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_recipient_groups(self):
-        return self.recipientgroup_set.all()
 
     @property
     def recipient_count(self):
@@ -367,6 +320,19 @@ class Issuer(ResizeUploadedImage,
             for extension in self.cached_extensions():
                 json[extension.name] = json_loads(extension.original_json)
 
+        # institution extensions
+        if self.faculty:
+            if self.faculty.institution.brin:
+                json['extensions:InstitutionIdentifierExtension'] = {
+                    "type": ["Extension", "extensions: InstitutionIdentifierExtension"],
+                    "BRIN": self.faculty.institution.brin
+                }
+            if self.faculty.institution.grading_table:
+                json['extensions:GradingTableExtension'] = {
+                    "type": ["Extension", "extensions: GradingTableExtension"],
+                    "gradingTable": self.faculty.institution.grading_table
+                }
+
         # pass through imported json
         if include_extra:
             extra = self.get_filtered_json()
@@ -401,51 +367,9 @@ class Issuer(ResizeUploadedImage,
     def __unicode__(self):
         return self.name
 
-
-class IssuerStaff(cachemodel.CacheModel):
-    ROLE_OWNER = 'owner'
-    ROLE_EDITOR = 'editor'
-    ROLE_STAFF = 'staff'
-    ROLE_CHOICES = (
-        (ROLE_OWNER, 'Owner'),
-        (ROLE_EDITOR, 'Editor'),
-        (ROLE_STAFF, 'Staff'),
-    )
-    issuer = models.ForeignKey(Issuer, on_delete=models.CASCADE)
-    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
-    role = models.CharField(max_length=254, choices=ROLE_CHOICES, default=ROLE_STAFF)
-    is_signer = models.BooleanField(default=False)
-
-    class Meta:
-        unique_together = ('issuer', 'user')
-
-    def publish(self):
-        super(IssuerStaff, self).publish()
-        self.issuer.publish()
-        self.user.publish()
-
-    def delete(self, *args, **kwargs):
-        publish_issuer = kwargs.pop('publish_issuer', True)
-        super(IssuerStaff, self).delete()
-        if publish_issuer:
-            self.issuer.publish()
-        self.user.publish()
-
-    @property
-    def may_become_signer(self):
-        return self.user.may_sign_assertions and SymmetricKey.objects.filter(user=self.user, current=True).exists()
-
-    @property
-    def cached_user(self):
-        from badgeuser.models import BadgeUser
-        return BadgeUser.cached.get(pk=self.user_id)
-
-    @property
-    def cached_issuer(self):
-        return Issuer.cached.get(pk=self.issuer_id)
-
-
-class BadgeClass(ResizeUploadedImage,
+class BadgeClass(PermissionedModelMixin,
+                 ImageUrlGetterMixin,
+                 ResizeUploadedImage,
                  ScrubUploadedSvgImage,
                  BaseAuditedModel,
                  BaseVersionedEntity,
@@ -453,10 +377,6 @@ class BadgeClass(ResizeUploadedImage,
     entity_class_name = 'BadgeClass'
 
     issuer = models.ForeignKey(Issuer, blank=False, null=False, on_delete=models.CASCADE, related_name="badgeclasses")
-
-    # slug has been deprecated for now, but preserve existing values
-    slug = models.CharField(max_length=255, blank=True, null=True, default=None)
-    #slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=False, editable=True)
 
     name = models.CharField(max_length=255)
     image = models.FileField(upload_to='uploads/badges', blank=True)
@@ -470,17 +390,22 @@ class BadgeClass(ResizeUploadedImage,
     objects = BadgeClassManager()
     cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
 
-    BADGECLASS_TYPE_FORMAL = 'formal'
-    BADGECLASS_TYPE_NON_FORMAL = 'non-formal'
-    BADGECLASS_TYPE_CHOICES = (
-        (BADGECLASS_TYPE_FORMAL, 'formal'),
-        (BADGECLASS_TYPE_NON_FORMAL, 'non-formal')
-    )
-
-    category = models.CharField(max_length=255, choices=BADGECLASS_TYPE_CHOICES, default=BADGECLASS_TYPE_FORMAL, blank=False, null=False)
+    staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.BadgeClassStaff")
 
     class Meta:
         verbose_name_plural = "Badge classes"
+
+    @property
+    def parent(self):
+        return self.issuer
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_staff(self):
+        return BadgeClassStaff.objects.filter(badgeclass=self)
+
+    @property
+    def assertions(self):
+        return list(self.badgeinstances.all())
 
     def publish(self):
         super(BadgeClass, self).publish()
@@ -492,9 +417,6 @@ class BadgeClass(ResizeUploadedImage,
 
         if self.pathway_element_count() > 0:
             raise ProtectedError("BadgeClass may only be deleted if all PathwayElementBadge have been removed.", self)
-
-        if len(self.cached_completion_elements()) > 0:
-            raise ProtectedError("Badge could not be deleted. It is being used as a pathway completion badge.", self)
 
         issuer = self.issuer
         super(BadgeClass, self).delete(*args, **kwargs)
@@ -536,10 +458,6 @@ class BadgeClass(ResizeUploadedImage,
         self.description = value
 
     @property
-    def owners(self):
-        return self.cached_issuer.owners
-
-    @property
     def cached_issuer(self):
         return Issuer.cached.get(pk=self.issuer_id)
 
@@ -547,7 +465,12 @@ class BadgeClass(ResizeUploadedImage,
     def recipient_count(self):
         return self.badgeinstances.filter(revoked=False).count()
 
-    # @cachemodel.cached_method(auto_publish=True)
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_enrollments(self):
+        from lti_edu.models import StudentsEnrolled
+        return StudentsEnrolled.objects.filter(badge_class=self)
+
     def enrollment_count(self):
         from lti_edu.models import StudentsEnrolled
         return StudentsEnrolled.objects.filter(badge_class=self,
@@ -629,30 +552,20 @@ class BadgeClass(ResizeUploadedImage,
     def get_extensions_manager(self):
         return self.badgeclassextension_set
 
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_pathway_elements(self):
-        return [peb.element for peb in self.pathwayelementbadge_set.all()]
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_completion_elements(self):
-        return [pce for pce in self.completion_elements.all()]
-
-    def issue(self, recipient_id=None, evidence=None, narrative=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None, **kwargs):
+    def issue(self, recipient_id=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None, **kwargs):
         return BadgeInstance.objects.create(
-            badgeclass=self, recipient_identifier=recipient_id, narrative=narrative, evidence=evidence,
+            badgeclass=self, recipient_identifier=recipient_id,
             notify=notify, created_by=created_by, allow_uppercase=allow_uppercase,
             badgr_app=badgr_app, user=get_user_or_none(recipient_id),
             **kwargs
         )
 
-    def issue_signed(self, recipient_id=None, evidence=None, narrative=None, created_by=None, allow_uppercase=False, badgr_app=None, signer=None, **kwargs):
-        if not signer.may_sign_assertions:
-            raise serializers.ValidationError('You do not have permission to sign badges.')
-        if not signer in [staff.user for staff in self.issuer.current_signers]:
-            raise serializers.ValidationError('You are not a signer for this issuer.')
+    def issue_signed(self, recipient_id=None, created_by=None, allow_uppercase=False, badgr_app=None, signer=None, **kwargs):
+        perms = self.get_permissions(signer)
+        if not perms['may_sign']:
+            raise serializers.ValidationError('You do not have permission to sign badges for this badgeclass.')
         assertion = BadgeInstance.objects.create(
-            badgeclass=self, recipient_identifier=recipient_id, narrative=narrative, evidence=evidence,
-            notify=False,  # notify after signing
+            badgeclass=self, recipient_identifier=recipient_id, notify=False,  # notify after signing
             created_by=created_by, allow_uppercase=allow_uppercase,
             badgr_app=badgr_app, user=get_user_or_none(recipient_id),
             **kwargs
@@ -743,6 +656,7 @@ class BadgeClass(ResizeUploadedImage,
 
 
 class BadgeInstance(BaseAuditedModel,
+                    ImageUrlGetterMixin,
                     BaseVersionedEntity,
                     BaseOpenBadgeObjectModel):
     entity_class_name = 'Assertion'
@@ -775,10 +689,6 @@ class BadgeInstance(BaseAuditedModel,
 
     image = models.FileField(upload_to='uploads/badges', blank=True)
 
-    # slug has been deprecated for now, but preserve existing values
-    slug = models.CharField(max_length=255, blank=True, null=True, default=None)
-    #slug = AutoSlugField(max_length=255, populate_from='get_new_slug', unique=True, blank=False, editable=False)
-
     revoked = models.BooleanField(default=False)
     revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
 
@@ -796,8 +706,6 @@ class BadgeInstance(BaseAuditedModel,
 
     hashed = models.BooleanField(default=True)
     salt = models.CharField(max_length=254, blank=True, null=True, default=None)
-
-    narrative = models.TextField(blank=True, null=True, default=None)
 
     old_json = JSONField()
 
@@ -821,12 +729,6 @@ class BadgeInstance(BaseAuditedModel,
 
         return extended_json
 
-    def image_url(self):
-        if getattr(settings, 'MEDIA_URL').startswith('http'):
-            return default_storage.url(self.image.name)
-        else:
-            return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
-
     @property
     def share_url(self):
         return self.public_url
@@ -842,6 +744,13 @@ class BadgeInstance(BaseAuditedModel,
 
     def get_absolute_url(self):
         return reverse('badgeinstance_json', kwargs={'entity_id': self.entity_id})
+
+    def get_permissions(self, user):
+        """
+        Function that equates permission for this BadgeInstance to that of the BadgeClass it belongs to.
+        Used in HasObjectPermission
+        """
+        return self.badgeclass.get_permissions(user)
 
     @property
     def jsonld_id(self):
@@ -861,9 +770,9 @@ class BadgeInstance(BaseAuditedModel,
     def public_url(self):
         return OriginSetting.HTTP+self.get_absolute_url()
 
-    @property
-    def owners(self):
-        return self.issuer.owners
+    # @property
+    # def owners(self):
+    #     return self.issuer.owners
 
     @property
     def signing_in_progress(self):
@@ -952,8 +861,6 @@ class BadgeInstance(BaseAuditedModel,
     def publish(self):
         super(BadgeInstance, self).publish()
         self.badgeclass.publish()
-        if self.cached_recipient_profile:
-            self.cached_recipient_profile.publish()
         if self.user:
             self.user.publish()
 
@@ -965,11 +872,8 @@ class BadgeInstance(BaseAuditedModel,
 
     def delete(self, *args, **kwargs):
         badgeclass = self.badgeclass
-        recipient_profile = self.cached_recipient_profile
         super(BadgeInstance, self).delete(*args, **kwargs)
         badgeclass.publish()
-        if recipient_profile:
-            recipient_profile.publish()
         if self.user:
             self.user.publish()
         self.publish_delete('entity_id', 'revoked')
@@ -1077,16 +981,6 @@ class BadgeInstance(BaseAuditedModel,
     def get_extensions_manager(self):
         return self.badgeinstanceextension_set
 
-    @property
-    def cached_recipient_profile(self):
-        from recipient.models import RecipientProfile
-        try:
-            return RecipientProfile.cached.get(recipient_identifier=self.recipient_identifier)
-        except RecipientProfile.MultipleObjectsReturned:
-            return RecipientProfile.objects.filter(recipient_identifier=self.recipient_identifier).first()
-        except RecipientProfile.DoesNotExist:
-            return None
-
     def get_json(self, obi_version=CURRENT_OBI_VERSION, expand_badgeclass=False, expand_issuer=False,
                  include_extra=True, use_canonical_id=False, signed=False, public_key_issuer=None):
 
@@ -1162,19 +1056,6 @@ class BadgeInstance(BaseAuditedModel,
                 json["sourceUrl"] = self.source_url
                 json["hostedUrl"] = OriginSetting.HTTP + self.get_absolute_url()
 
-        # evidence
-        if self.evidence_url:
-            if obi_version == '1_1':
-                # obi v1 single evidence url
-                json['evidence'] = self.evidence_url
-            elif obi_version == '2_0':
-                # obi v2 multiple evidence
-                json['evidence'] = [e.get_json(obi_version) for e in self.cached_evidence()]
-
-        # narrative
-        if self.narrative and obi_version == '2_0':
-            json['narrative'] = self.narrative
-
         # issuedOn / expires
         json['issuedOn'] = self.issued_on.isoformat()
         if self.expires_at:
@@ -1217,56 +1098,8 @@ class BadgeInstance(BaseAuditedModel,
     def json(self):
         return self.get_json()
 
-    def get_filtered_json(self, excluded_fields=('@context', 'id', 'type', 'uid', 'recipient', 'badge', 'issuedOn', 'image', 'evidence', 'narrative', 'revoked', 'revocationReason', 'verify', 'verification')):
+    def get_filtered_json(self, excluded_fields=('@context', 'id', 'type', 'uid', 'recipient', 'badge', 'issuedOn', 'image', 'revoked', 'revocationReason', 'verify', 'verification')):
         return super(BadgeInstance, self).get_filtered_json(excluded_fields=excluded_fields)
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_evidence(self):
-        return self.badgeinstanceevidence_set.all()
-
-
-    @property
-    def evidence_url(self):
-        """Exists for compliance with ob1.x badges"""
-        evidence_list = self.cached_evidence()
-        if len(evidence_list) > 1:
-            return self.public_url
-        if len(evidence_list) == 1 and evidence_list[0].evidence_url:
-            return evidence_list[0].evidence_url
-        elif len(evidence_list) == 1:
-            return self.public_url
-
-    @property
-    def evidence_items(self):
-        """exists to cajole EvidenceItemSerializer"""
-        return self.cached_evidence()
-
-    @evidence_items.setter
-    def evidence_items(self, value):
-        def _key(narrative, url):
-            return '{}-{}'.format(narrative, url)
-        existing_evidence_idx = {_key(e.narrative, e.evidence_url): e for e in self.evidence_items}
-        new_evidence_idx = {_key(v.get('narrative',''), v.get('evidence_url','')): v for v in value}
-
-        with transaction.atomic():
-            if not self.pk:
-                self.save()
-
-            # add missing
-            for evidence_data in value:
-                key = _key(evidence_data.get('narrative',''), evidence_data.get('evidence_url',''))
-                if key not in existing_evidence_idx:
-                    evidence_record, created = BadgeInstanceEvidence.cached.get_or_create(
-                        badgeinstance=self,
-                        narrative=evidence_data.get('narrative', None),
-                        evidence_url=evidence_data.get('evidence_url', None)
-                    )
-
-            # remove old
-            for evidence_record in self.evidence_items:
-                key = _key(evidence_record.narrative or '', evidence_record.evidence_url or '')
-                if key not in new_evidence_idx:
-                    evidence_record.delete()
 
     @property
     def cached_badgrapp(self):
@@ -1323,37 +1156,6 @@ class BadgeInstanceBakedImage(cachemodel.CacheModel):
     def delete(self, *args, **kwargs):
         self.publish_delete('badgeinstance', 'obi_version')
         return super(BadgeInstanceBakedImage, self).delete(*args, **kwargs)
-
-
-class BadgeInstanceEvidence(OriginalJsonMixin, cachemodel.CacheModel):
-    badgeinstance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE)
-    evidence_url = models.CharField(max_length=2083, blank=True, null=True, default=None)
-    narrative = models.TextField(blank=True, null=True, default=None)
-
-    objects = BadgeInstanceEvidenceManager()
-
-    def publish(self):
-        super(BadgeInstanceEvidence, self).publish()
-        self.badgeinstance.publish()
-
-    def delete(self, *args, **kwargs):
-        badgeinstance = self.badgeinstance
-        ret = super(BadgeInstanceEvidence, self).delete(*args, **kwargs)
-        badgeinstance.publish()
-        return ret
-
-    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_context=False):
-        json = OrderedDict()
-        if include_context:
-            obi_version, context_iri = get_obi_context(obi_version)
-            json['@context'] = context_iri
-
-        json['type'] = 'Evidence'
-        if self.evidence_url:
-            json['id'] = self.evidence_url
-        if self.narrative:
-            json['narrative'] = self.narrative
-        return json
 
 
 class BadgeClassAlignment(OriginalJsonMixin, cachemodel.CacheModel):

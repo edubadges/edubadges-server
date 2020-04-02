@@ -11,10 +11,10 @@ from django.conf import settings
 from django.db import models, transaction
 from django.urls import reverse
 from entity.models import BaseVersionedEntity
-from issuer.models import BaseAuditedModel, BadgeInstance
+from issuer.models import BadgeInstance
 from issuer.utils import CURRENT_OBI_VERSION, get_obi_context, add_obi_version_ifneeded
 from mainsite.managers import SlugOrJsonIdCacheModelManager
-from mainsite.models import BadgrApp
+from mainsite.models import BadgrApp, BaseAuditedModel
 from mainsite.utils import OriginSetting
 
 
@@ -23,9 +23,6 @@ class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
     name = models.CharField(max_length=128)
     description = models.CharField(max_length=255, blank=True)
     share_hash = models.CharField(max_length=255, null=False, blank=True)
-
-    # slug has been deprecated, but keep for legacy collections redirects
-    slug = models.CharField(max_length=254, blank=True, null=True, default=None)
 
     assertions = models.ManyToManyField('issuer.BadgeInstance', blank=True, through='backpack.BackpackCollectionBadgeInstance')
 

@@ -21,9 +21,6 @@ class SymmetricKey(models.Model):
     p = models.IntegerField()
     current = models.BooleanField()
 
-    class Meta:
-        permissions = (('may_sign_assertions', 'User may sign assertions'),)
-
     def get_params(self):
         return {'salt': self.salt, 'length': self.length, 'n': self.n, 'r': self.r, 'p': self.p}
 

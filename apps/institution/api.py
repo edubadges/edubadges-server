@@ -1,41 +1,54 @@
-from entity.api import BaseEntityListView, BaseEntityDetailView
-from institution.models import Faculty
-from institution.permissions import UserHasInstitutionScope
-from institution.serializers_v1 import FacultySerializerV1
-from mainsite.permissions import AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, ObjectWithinUserScope
+from entity.api import BaseEntityListView, VersionedObjectMixin, BaseEntityDetailView
+from institution.models import Faculty, Institution
+from institution.serializers_v1 import FacultySerializerV1, InstitutionSerializer
+from issuer.serializers_v1 import IssuerSerializerV1
+from mainsite.permissions import AuthenticatedWithVerifiedEmail, CannotDeleteWithChildren
+from staff.permissions import HasObjectPermission
+from issuer.permissions import IssuedAssertionsBlock
 
 
-class FacultyList(BaseEntityListView):
+class InstitutionDetail(BaseEntityDetailView):
+    model = Institution
+    v1_serializer_class = InstitutionSerializer
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, IssuedAssertionsBlock)
+    http_method_names = ['put']
+
+
+class FacultyDetail(BaseEntityDetailView):
     """
-    Faculty list
+    PUT to edit a faculty
+    DELETE to remove it
     """
     model = Faculty
-    permission_classes = (AuthenticatedWithVerifiedEmail, MayUseManagementDashboard)
-    serializer_class = FacultySerializerV1
-    
-    def get_objects(self, request, **kwargs):
-        if request.user.has_perm('badgeuser.has_institution_scope'):
-            return Faculty.objects.filter(institution=self.request.user.institution)
-        elif request.user.has_perm('badgeuser.has_faculty_scope'):
-            return request.user.faculty.all()
-        return Faculty.objects.none()
+    v1_serializer_class = FacultySerializerV1
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, IssuedAssertionsBlock, CannotDeleteWithChildren)
+    http_method_names = ['put', 'delete']
 
-    def get(self, request, **kwargs):
-        return super(FacultyList, self).get(request, **kwargs)
+
+class FacultyIssuerList(VersionedObjectMixin, BaseEntityListView):
+    """
+    POST to create an Issuer within the Faculty context
+    """
+    model = Faculty
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
+    v1_serializer_class = IssuerSerializerV1
+    http_method_names = ['post']
 
     def post(self, request, **kwargs):
-        return super(FacultyList, self).post(request, **kwargs)
-    
-class FacultyDetail(BaseEntityDetailView):
-    model = Faculty
-    permission_classes = (AuthenticatedWithVerifiedEmail, MayUseManagementDashboard, UserHasInstitutionScope, ObjectWithinUserScope)
-    serializer_class = FacultySerializerV1
-    
-    def get(self, request, **kwargs):
-        return super(FacultyDetail, self).get(request, **kwargs)
+        faculty = self.get_object(request, **kwargs)
+        return super(FacultyIssuerList, self).post(request, **kwargs)
 
-    def get_object(self, request, **kwargs):
-        return Faculty.objects.get(entity_id=kwargs.get('slug'))
 
-    def put(self, request, **kwargs):
-        return super(FacultyDetail, self).put(request, **kwargs)
+class InstitutionFacultyList(VersionedObjectMixin, BaseEntityListView):
+    """
+    POST to create a Faculty within the Institution context
+    """
+    # no need to declare model here
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
+    v1_serializer_class = FacultySerializerV1
+    http_method_names = ['post']
+
+    def post(self, request, **kwargs):
+        self.has_object_permissions(request, request.user.institution)
+        return super(InstitutionFacultyList, self).post(request, **kwargs)
+

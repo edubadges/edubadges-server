@@ -2,10 +2,7 @@
 
 import base64
 import datetime
-import random
 import re
-import string
-from hashlib import md5
 from itertools import chain
 
 import cachemodel
@@ -14,27 +11,24 @@ from backpack.models import BackpackCollection
 from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager, EmailAddressCacheModelManager
 from basic_models.models import IsActive
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser, Permission, Group
-from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models, transaction
-from django.db.models.signals import post_save, pre_save
-from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from entity.models import BaseVersionedEntity
-from issuer.models import Issuer, BadgeInstance, BaseAuditedModel
+from issuer.models import BadgeInstance
 from lti_edu.models import StudentsEnrolled
-from mainsite.models import ApplicationInfo, EmailBlacklist, BadgrApp
-from mainsite.utils import generate_entity_uri
+from mainsite.exceptions import BadgrApiException400
+from mainsite.models import ApplicationInfo, EmailBlacklist, BaseAuditedModel
 from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
 from rest_framework.authtoken.models import Token
 from signing.models import AssertionTimeStamp
-
+from badgeuser.utils import generate_badgr_username
+from staff.models import InstitutionStaff
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
     objects = CachedEmailAddressManager()
@@ -153,15 +147,167 @@ class EmailAddressVariant(models.Model):
         return True
 
 
-class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
+class UserCachedObjectGetterMixin(object):
+    """
+    Base class to group all cached object-getter functionality of user, purely for readability
+    """
+    def _get_objects_with_permissions(self, permissions, type=None):
+        """
+        :param permission: list of strings representing permissions
+        :param type: string that represent class.__name__ ('Institution', 'Faculty', 'Issuer', 'BadgeClass' or None)
+        :return: list of objects for which this user has the given permissions for.
+        """
+        permissioned_objects = []
+
+        def object_tree_walker(obj, permissions, looking_for=type, override_permissions=False):
+            """
+            Recursively walks the object tree to find objects of which the user has all the given permissions for.
+            """
+            if obj.check_local_permissions(self, permissions) or override_permissions:
+                if looking_for:
+                    if obj.__class__.__name__ == looking_for:
+                        permissioned_objects.append(obj)
+                else:
+                    permissioned_objects.append(obj)
+                override_permissions = True
+            try:
+                for child in obj.children:
+                    object_tree_walker(child, permissions, looking_for, override_permissions)
+            except AttributeError:  # no more kids
+                pass
+        if not self.is_teacher():
+            raise ValueError('User must be teacher to walk the permission tree')
+        tree_root = self.institution
+        object_tree_walker(tree_root, permissions)
+        return permissioned_objects
+
+    def get_all_objects_with_permissions(self, permissions):
+        return self._get_objects_with_permissions(permissions)
+
+    def get_all_badgeclasses_with_permissions(self, permissions):
+        return self._get_objects_with_permissions(permissions, 'BadgeClass')
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_badgeinstances(self):
+        return BadgeInstance.objects.filter(recipient_identifier=self.get_recipient_identifier())
+
+    # @cachemodel.cached_method(auto_publish=True)
+    # turned it off, because if user logs in for FIRST time, this caching will result in the user having no verified emails.
+    # This results in api calls responding with a 403 after the failure of the AuthenticatedWithVerifiedEmail permission check.
+    # Which will logout the user automatically with the error: Token expired.
+    def cached_emails(self):
+        return CachedEmailAddress.objects.filter(user=self)
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_backpackcollections(self):
+        return BackpackCollection.objects.filter(created_by=self)
+
+    def cached_email_variants(self):
+        return chain.from_iterable(email.cached_variants() for email in self.cached_emails())
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_token(self):
+        user_token, created = \
+                Token.objects.get_or_create(user=self)
+        return user_token.key
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_agreed_terms_version(self):
+        try:
+            return self.termsagreement_set.all().filter(valid=True).order_by('-terms_version')[0]
+        except IndexError:
+            pass
+        return None
+
+
+class UserPermissionsMixin(object):
+    """
+    Base class to group all permission functionality of user, purely for readability
+    """
+    def is_user_within_scope(self, user):
+        """
+        See if user has other user in his scope, (i.e. is other user found in any of all related staff objects)
+        This is used when creating a new staff membership object, then this user must be in your scope.
+        """
+        if self == user:
+            return False  # cannot administrate yourself
+        all_administrable_objects = self.get_all_objects_with_permissions(['may_administrate_users'])
+        for obj in all_administrable_objects:
+            for staff in obj.staff_items:
+                if user == staff.user:
+                    return True  # user is administrable
+        return False
+
+    def is_staff_membership_within_scope(self, staff_membership):
+        """
+        See if staff membership is in this user's scope. This is used when editing or removing staff membership objects.
+        """
+        if self == staff_membership.user:
+            return False  # cannot administrate yourself
+        all_administrable_objects = self.get_all_objects_with_permissions(['may_administrate_users'])
+        for obj in all_administrable_objects:
+            for staff in obj.staff_items:
+                if staff == staff_membership:
+                    return True  # staff membership is administrable
+        return False
+
+    def get_permissions(self, obj):
+        """
+        Convenience method to get permissions for this user & object combination
+        :param obj: Instance of Institution, Faculty, Issuer or Badgeclass
+        :return: dictionary
+        """
+        return obj.get_permissions(self)
+
+    @property
+    def may_sign_assertion(self, badgeinstance):
+        """
+        Method to check if user may sign the assertion
+        """
+        perms = badgeinstance.badgeclass.get_permissions(self)
+        return perms['may_sign']
+
+    def may_enroll(self, badge_class, raise_exception=False):
+        """
+        Checks to see if user may enroll
+            no enrollments: May enroll
+            any not awarded assertions: May not enroll
+            Any awarded and not revoked: May not enroll
+            All revoked: May enroll
+        """
+        social_account = self.get_social_account()
+        if social_account.provider == 'edu_id' or social_account.provider == 'surfconext_ala':
+            enrollments = StudentsEnrolled.objects.filter(user=social_account.user, badge_class_id=badge_class.pk)
+            if not enrollments:
+                return True  # no enrollments
+            else:
+                for enrollment in enrollments:
+                    if not bool(enrollment.badge_instance):  # has never been awarded
+                        if raise_exception:
+                            fields = {'error_message': 'May not enroll: already enrolled', "error_code": 201}
+                            raise BadgrApiException400(fields)
+                        return False
+                    else:  # has been awarded
+                        if not enrollment.assertion_is_revoked():
+                            if raise_exception:
+                                fields = {'error_message': 'May not enroll: you already have been awarded this badge', "error_code": 202}
+                                raise BadgrApiException400(fields)
+                            return False
+                return True  # all have been awarded and revoked
+        else:  # no eduID
+            if raise_exception:
+                fields = {'error_message': "May not enroll: you don't have a student account", "error_code": 203}
+                raise BadgrApiException400(fields)
+            return False
+
+
+class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     """
     A full-featured user model that can be an Earner, Issuer, or Consumer of Open Badges
     """
     entity_class_name = 'BadgeUser'
 
     badgrapp = models.ForeignKey('mainsite.BadgrApp', on_delete=models.SET_NULL, blank=True, null=True, default=None)
-    faculty = models.ManyToManyField('institution.Faculty', blank=True)
-    institution = models.ForeignKey('institution.Institution', on_delete=models.SET_NULL, blank=True, null=True, default=None)
     is_staff = models.BooleanField(
         _('Backend-staff member'),
         default=False,
@@ -189,91 +335,25 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     def __unicode__(self):
         return "{} <{}>".format(self.get_full_name(), self.email)
 
+    @property
+    def institution(self):
+        return self.institution_set.get()
 
-    def within_scope(self, object):
-        if object:
-            if self.has_perm('badgeuser.has_institution_scope'):
-                return object.institution == self.institution
-            if self.has_perm('badgeuser.has_faculty_scope'):
-                if object.faculty.__class__.__name__ == 'ManyRelatedManager':
-                    return bool(set(object.faculty.all()).intersection(set(self.faculty.all())))
-                else:
-                    return object.faculty in self.faculty.all()
-        return False
-
-    def get_badgr_app(self):
-        if self.badgrapp:
-            return self.badgrapp
-        else:
-            return BadgrApp.objects.all().first()
-
-    def get_full_name(self):
-        return "%s %s" % (self.first_name, self.last_name)
-
-    def gains_permission(self, permission_codename, model):
-        content_type = ContentType.objects.get_for_model(model)
-        permission = Permission.objects.get(codename=permission_codename, content_type=content_type)
-        self.user_permissions.add(permission)
-        # you still need to reload user from db to refresh permission cache if you want effect to be immediate
-
-    def loses_permission(self, permission_codename, model):
-        content_type = ContentType.objects.get_for_model(model)
-        permission = Permission.objects.get(codename=permission_codename, content_type=content_type)
-        self.user_permissions.remove(permission)
-        # you still need to reload user from db to refresh permission cache if you want effect to be immediate
-
-    def email_user(self, subject, message, from_email=None, attachments=None, **kwargs):
+    @institution.setter
+    def institution(self, value):
         """
-        Sends an email to this User.
+        :param value: Institution
+        :return: None
         """
         try:
-            EmailBlacklist.objects.get(email=self.primary_email)
-        except EmailBlacklist.DoesNotExist:
-            # Allow sending, as this email is not blacklisted.
-            if not attachments:
-                send_mail(subject, message, from_email, [self.primary_email], **kwargs)
-            else:
-                from django.core.mail import EmailMessage
-                email = EmailMessage(subject=subject,
-                                     body=message,
-                                     from_email=from_email,
-                                     to=[self.primary_email],
-                                     attachments=attachments)
-                email.send()
-        else:
-            return
-            # TODO: Report email non-delivery somewhere.
-
-    def publish(self):
-        super(BadgeUser, self).publish()
-        self.publish_by('username')
-
-    def delete(self, *args, **kwargs):
-        super(BadgeUser, self).delete(*args, **kwargs)
-        self.publish_delete('username')
-
-#     @cachemodel.cached_method(auto_publish=True)
-    # turned it off, because if user logs in for FIRST time, this caching will result in the user having no verified emails. 
-    # This results in api calls responding with a 403 after the failure of the AuthenticatedWithVerifiedEmail permission check.
-    # Which will logout the user automatically with the error: Token expired.
-    def cached_emails(self):
-        return CachedEmailAddress.objects.filter(user=self)
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_backpackcollections(self):
-        return BackpackCollection.objects.filter(created_by=self)
+            InstitutionStaff.objects.get(user=self, institution=value)
+            raise ValueError('User already has an institution staff membership. Cannot have two.')
+        except:
+            InstitutionStaff.objects.create(user=self, institution=value)
 
     @property
     def email_items(self):
         return self.cached_emails()
-
-    @property
-    def may_sign_assertions(self):
-        return self.has_perm('signing.may_sign_assertions')
-
-    @property
-    def current_symmetric_key(self):
-        return self.symmetrickey_set.get(current=True)
 
     @email_items.setter
     def email_items(self, value):
@@ -324,8 +404,42 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
                 if emailaddress.email not in new_email_idx:
                     emailaddress.delete()
 
-    def cached_email_variants(self):
-        return chain.from_iterable(email.cached_variants() for email in self.cached_emails())
+    @property
+    def current_symmetric_key(self):
+        return self.symmetrickey_set.get(current=True)
+
+    def get_full_name(self):
+        return "%s %s" % (self.first_name, self.last_name)
+
+    def email_user(self, subject, message, from_email=None, attachments=None, **kwargs):
+        """
+        Sends an email to this User.
+        """
+        try:
+            EmailBlacklist.objects.get(email=self.primary_email)
+        except EmailBlacklist.DoesNotExist:
+            # Allow sending, as this email is not blacklisted.
+            if not attachments:
+                send_mail(subject, message, from_email, [self.primary_email], **kwargs)
+            else:
+                from django.core.mail import EmailMessage
+                email = EmailMessage(subject=subject,
+                                     body=message,
+                                     from_email=from_email,
+                                     to=[self.primary_email],
+                                     attachments=attachments)
+                email.send()
+        else:
+            return
+            # TODO: Report email non-delivery somewhere.
+
+    def publish(self):
+        super(BadgeUser, self).publish()
+        self.publish_by('username')
+
+    def delete(self, *args, **kwargs):
+        super(BadgeUser, self).delete(*args, **kwargs)
+        self.publish_delete('username')
 
     def can_add_variant(self, email):
         try:
@@ -363,22 +477,12 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
     @property
     def all_recipient_identifiers(self):
         return [self.get_recipient_identifier()]
-#         return [e.email for e in self.cached_emails() if e.verified] + [e.email for e in self.cached_email_variants()]
-
-    @property
-    def highest_group(self):
-        groups = list(self.groups.filter(entity_rank__rank__gte=0))
-        groups.sort(key=lambda x: x.entity_rank.rank)
-        if groups:
-            return groups[0]
-        else:
-            return None
 
     def get_recipient_identifier(self):
         from allauth.socialaccount.models import SocialAccount
         try:
             account = SocialAccount.objects.get(user=self.pk)
-            return account.extra_data['sub']
+            return account.uid
         except SocialAccount.DoesNotExist:
             return None
 
@@ -390,85 +494,18 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         except SocialAccount.DoesNotExist:
             return None
 
-    def has_edu_id_social_account(self):
+    def is_student(self):
         social_account = self.get_social_account()
         return social_account.provider == 'edu_id' or social_account.provider == 'surfconext_ala'
 
-    def has_surf_conext_social_account(self):
+    def is_teacher(self):
         social_account = self.get_social_account()
         return social_account.provider == 'surf_conext'
 
-    def staff_memberships(self):
-        """
-        Returns all staff memberships
-        """
-        return Issuer.objects.filter(staff__id=self.id)
-
-    def is_email_verified(self, email):
-        if email in [e.email for e in self.verified_emails]:
-            return True
-
-        try:
-            app_infos = ApplicationInfo.objects.filter(application__user=self)
-            if any(app_info.trust_email_verification for app_info in app_infos):
-                return True
-        except ApplicationInfo.DoesNotExist:
-            return False
-
-        return False
 
     def get_assertions_ready_for_signing(self):
         assertion_timestamps = AssertionTimeStamp.objects.filter(signer=self).exclude(proof='')
         return [ts.badge_instance for ts in assertion_timestamps if ts.badge_instance.signature == None]
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_issuers(self):
-        '''
-        Creates a list of issuers belonging to the user's scope
-        '''
-        queryset = Issuer.objects.filter(staff__id=self.id) # personal issuers
-        if self.has_perm('badgeuser.has_institution_scope'):
-            institution = self.institution
-            if institution:
-                queryset = queryset | Issuer.objects.filter(faculty__institution=institution) # add insitution issuers
-        elif self.has_perm('badgeuser.has_faculty_scope'):
-            faculties = self.faculty.all()
-            if faculties:
-                queryset = queryset | Issuer.objects.filter(faculty__in=self.faculty.all()) # add faculty issuers
-        return queryset.distinct()
-
-    @property
-    def peers(self):
-        """
-        a BadgeUser is a Peer of another BadgeUser if they appear in an IssuerStaff together
-        """
-        return set(chain(*[[s.cached_user for s in i.cached_issuerstaff()] for i in self.cached_issuers()]))
-
-    def cached_badgeclasses(self):
-        return chain.from_iterable(issuer.cached_badgeclasses() for issuer in self.cached_issuers())
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_badgeinstances(self):
-#         return BadgeInstance.objects.filter(recipient_identifier__in=self.all_recipient_identifiers)
-        return BadgeInstance.objects.filter(recipient_identifier=self.get_recipient_identifier())
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_externaltools(self):
-        return [a.cached_externaltool for a in self.externaltooluseractivation_set.filter(is_active=True)]
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_token(self):
-        user_token, created = \
-                Token.objects.get_or_create(user=self)
-        return user_token.key
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_agreed_terms_version(self):
-        try:
-            return self.termsagreement_set.all().filter(valid=True).order_by('-terms_version')[0]
-        except IndexError:
-            pass
-        return None
 
     @property
     def agreed_terms_version(self):
@@ -490,7 +527,6 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
                     self.save()
                 self.termsagreement_set.get_or_create(terms_version=value, defaults=dict(agreed=True))
 
-
     def replace_token(self):
         Token.objects.filter(user=self).delete()
         # user_token, created = \
@@ -498,35 +534,9 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
         self.save()
         return self.cached_token()
 
-    def may_enroll(self, badge_class):
-        """
-        Checks to see if user may enroll
-            no enrollments: May enroll
-            any not awarded assertions: May not enroll
-            Any awarded and not revoked: May not enroll
-            All revoked: May enroll 
-        """
-        social_account = self.get_social_account()
-        if social_account.provider == 'edu_id' or social_account.provider == 'surfconext_ala':
-            enrollments = StudentsEnrolled.objects.filter(user=social_account.user, badge_class_id=badge_class.pk)
-            if not enrollments:
-                return True # no enrollments
-            else:
-                for enrollment in enrollments:
-                    if not bool(enrollment.badge_instance): # has never been awarded
-                        return False
-                    else: #has been awarded
-                        if not enrollment.assertion_is_revoked():
-                            return False
-                return True # all have been awarded and revoked
-        else: # no eduID
-            return False
-
     def save(self, *args, **kwargs):
         if not self.username:
-            # md5 hash the email and then encode as base64 to take up only 25 characters
-            hashed = md5(self.email + ''.join(random.choice(string.lowercase) for i in range(64))).digest().encode('base64')[:-1]  # strip last character because its a newline
-            self.username = "badgr{}".format(hashed[:25])
+            self.username = generate_badgr_username(self.email)
 
         if getattr(settings, 'BADGEUSER_SKIP_LAST_LOGIN_TIME', True):
             # skip saving last_login to the database
@@ -536,13 +546,6 @@ class BadgeUser(BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
                     # nothing to do, abort so we dont call .publish()
                     return
         return super(BadgeUser, self).save(*args, **kwargs)
-
-
-class BadgeUserProxy(BadgeUser):
-    class Meta:
-        proxy = True
-        verbose_name = 'Badge User Interface for SuperUser'
-
 
 class BadgrAccessTokenManager(models.Manager):
 
@@ -676,28 +679,3 @@ class TermsAgreement(BaseAuditedModel, cachemodel.CacheModel):
     class Meta:
         ordering = ('-terms_version',)
         unique_together = ('user', 'terms_version')
-
-
-# Group.add_to_class('entity_id', models.CharField(max_length=254, null=True, default=None))
-# Group.add_to_class('rank', models.PositiveIntegerField(null=True, default=None))
-class GroupEntity(models.Model):
-    group = models.OneToOneField(Group, on_delete=models.CASCADE, related_name='entity_rank')
-    entity_id = models.CharField(max_length=254, null=True, default=None)
-    rank = models.PositiveIntegerField(null=True, default=None)
-
-    def __str__(self):
-        return self.group.name
-
-@receiver(post_save, sender=Group)
-def generate_entity_id(sender, instance, **kwargs):
-    try:
-        instance.entity_rank
-    except ObjectDoesNotExist:
-        GroupEntity.objects.create(group=instance, entity_id=generate_entity_uri())
-
-@receiver(pre_save, sender=GroupEntity)
-def check_rank_uniqueness(sender, instance, **kwargs):
-    if instance.rank is not None:
-        instance_with_same_rank = sender.objects.filter(rank=instance.rank).first()
-        if bool(instance_with_same_rank) and instance_with_same_rank != instance:
-            raise ValidationError("Group rank already ascribed, choose another")

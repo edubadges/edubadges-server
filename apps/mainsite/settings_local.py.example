@@ -33,6 +33,9 @@ DATABASES = {
         'OPTIONS': {
 #            "init_command": "SET storage_engine=InnoDB",  # Uncomment when using MySQL to ensure consistency across servers
         },
+         'TEST': {
+            'CHARSET': 'utf8',
+        }
     }
 }
 
@@ -197,3 +200,17 @@ LOGGING = {
     },
 }
 
+
+ALLOW_SEEDS = False
+EDU_ID_SECRET = "secret"
+EDU_ID_CLIENT = "edubadges"
+
+SURF_CONEXT_SECRET = "secret"
+SURF_CONEXT_CLIENT = "http@//localhost.edubadges.nl"
+
+DOMAIN = "127.0.0.1"
+UI_URL = "http://{}:4000".format(DOMAIN)
+
+SUPERUSER_NAME = "superuser"
+SUPERUSER_EMAIL = "superuser@example.com"
+SUPERUSER_PWD = "secret"

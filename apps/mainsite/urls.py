@@ -2,6 +2,10 @@ from django.apps import apps
 from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib.auth import views as auth_views
+from django.views.decorators.csrf import csrf_exempt
+from django.urls import path
+
+from graphene_django.views import GraphQLView
 
 from ims.views import base
 from mainsite.admin import badgr_admin
@@ -18,6 +22,8 @@ from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation
 
 
 urlpatterns = [
+    path("graphql", csrf_exempt(GraphQLView.as_view(graphiql=True))),
+
     # Backup URLs in case the server isn't serving these directly
     url(r'^favicon\.png[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL, permanent=True)),
     url(r'^favicon\.ico[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL, permanent=True)),
@@ -62,7 +68,6 @@ urlpatterns = [
     url(r'^unsubscribe/(?P<email_encoded>[^/]+)/(?P<expiration>[^/]+)/(?P<signature>[^/]+)', email_unsubscribe, name='unsubscribe'),
 
     url(r'^public/', include('issuer.public_api_urls'), kwargs={'version': 'v2'}),
-    url(r'^public/', include('pathway.public_api_urls'), kwargs={'version': 'v2'}),
 
     # legacy share redirects
     url(r'', include('backpack.share_urls')),
@@ -78,36 +83,14 @@ urlpatterns = [
     url(r'^v1/issuer/', include('issuer.v1_api_urls'), kwargs={'version': 'v1'}),
     url(r'^v1/earner/', include('backpack.v1_api_urls'), kwargs={'version': 'v1'}),
 
-
-    # NOTE: pathway and recipient were written and deployed for beta testing at /v2/ before /v2/ was formalized
-    # they do not conform to new /v2/ conventions,  they need to appear before /v2/ to not collide
-    url(r'^v2/issuers/(?P<issuer_slug>[^/]+)/pathways', include('pathway.api_urls'), kwargs={'version': 'v1'}),
-
-    # recipient was refactored to /v2/, but for now keep the old "v1" API registered at /v2/issuers/<issuer_slug/recipient-groups
-    url(r'^v2/', include('recipient.v1_api_urls'), kwargs={'version': 'v1'}),
-    # url(r'^v2/', include('recipient.v2_api_urls'), kwargs={'version': 'v2'}),
-
-
-    # # v2 API endpoints
-    # url(r'^v2/', include('issuer.v2_api_urls'), kwargs={'version': 'v2'}),
-    # url(r'^v2/', include('badgeuser.v2_api_urls'), kwargs={'version': 'v2'}),
-    # url(r'^v2/backpack/', include('backpack.v2_api_urls'), kwargs={'version': 'v2'}),
-
-
-    # External Tools
-    url(r'^v1/externaltools/', include('externaltools.v1_api_urls'), kwargs={'version': 'v1'}),
-    # url(r'^v2/externaltools/', include('externaltools.v2_api_urls'), kwargs={'version': 'v2'}),
-
     # include LTI endpoints
-    # url(r'^v2/', include('lti_edu.urls'), kwargs={'version': 'v2'}),
     url(r'^lti_edu/', include('lti_edu.api_urls')),
 
-    # include Institution endpoints
+    # # include Institution endpoints
     url(r'^institution/', include('institution.api_urls')),
+
     url(r'^lti_issuer/', include('lti_edu.lti_urls')),
 
-    # include Institution endpoints
-    url(r'^institution/', include('institution.api_urls')),
 
     # include theming endpoints
     url(r'v1/', include('theming.api_urls'), kwargs={'version': 'v1'}),
@@ -117,14 +100,11 @@ urlpatterns = [
     url(r'^accept_terms_resign/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', TermsAndConditionsResignView.as_view(), name='accept_terms_resign'),
     url(r'^accept_terms_resign_accepted/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', AcceptTermsAndConditionsView.as_view(), name='accept_terms_resign_accepted'),
 
-    # url(r'^accept_terms/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', AcceptTermsView.as_view(), name='accept_terms'),
-
-    #  include management endpoints
-    url(r'^management/', include('management.api_urls')),
-
     #  include signing endpoints
     url(r'^signing/', include('signing.api_urls')),
 
+    # include staff endpoints
+    url(r'^staff-membership/', include('staff.api_urls')),
 ]
 
 urlpatterns += [

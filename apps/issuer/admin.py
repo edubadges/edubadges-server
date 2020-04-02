@@ -1,13 +1,10 @@
-
-
 from django.contrib.admin import ModelAdmin, StackedInline, TabularInline
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django_object_actions import DjangoObjectActions
-from institution.models import Faculty
-from mainsite.admin import badgr_admin, FilterByScopeMixin
+from mainsite.admin import badgr_admin
 
-from .models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceEvidence, BadgeClassAlignment, BadgeClassTag, \
+from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassAlignment, BadgeClassTag, \
     BadgeClassExtension, IssuerExtension, BadgeInstanceExtension
 
 
@@ -23,23 +20,16 @@ class IssuerExtensionInline(TabularInline):
     fields = ('name', 'original_json')
 
 
-class IssuerAdmin(DjangoObjectActions, FilterByScopeMixin, ModelAdmin):
-    
-    def filter_queryset_institution(self, queryset, request):
-        institution_id = request.user.institution.id
-        return queryset.filter(faculty__institution_id=institution_id).distinct()
-    
-    def filter_queryset_faculty(self, queryset, request):
-        return queryset.filter(faculty__in=request.user.faculty.all()).distinct()
-    
-    readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id', 'slug')
+class IssuerAdmin(DjangoObjectActions, ModelAdmin):
+
+    readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id')
     list_display = ('img', 'name', 'entity_id', 'created_by', 'created_at', 'faculty')
     list_display_links = ('img', 'name')
     list_filter = ('created_at',)
     search_fields = ('name', 'entity_id')
     fieldsets = (
         ('Metadata', {
-            'fields': ('created_by', 'created_at', 'source', 'source_url', 'entity_id', 'slug'),
+            'fields': ('created_by', 'created_at', 'source', 'source_url', 'entity_id'),
             'classes': ("collapse",)
         }),
         (None, {
@@ -72,17 +62,7 @@ class IssuerAdmin(DjangoObjectActions, FilterByScopeMixin, ModelAdmin):
         )
     redirect_badgeclasses.label = "BadgeClasses"
     redirect_badgeclasses.short_description = "See this issuer's defined BadgeClasses"
-    
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "faculty":
-            if not request.user.is_superuser:
-                if request.user.has_perm('badgeuser.has_institution_scope'):
-                    kwargs["queryset"] = Faculty.objects.filter(institution=request.user.institution)
-                elif request.user.has_perm('badgeuser.has_faculty_scope'):
-                    kwargs["queryset"] = request.user.faculty.get_queryset()
-                else:
-                    kwargs["queryset"] = Faculty.objects.none()              
-        return super(IssuerAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)    
+
 
 badgr_admin.register(Issuer, IssuerAdmin)
 
@@ -106,7 +86,7 @@ class BadgeClassExtensionInline(TabularInline):
 
 
 class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
-    readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id', 'slug')
+    readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id')
     list_display = ('badge_image', 'name', 'entity_id', 'issuer_link', 'recipient_count')
     list_display_links = ('badge_image', 'name',)
     list_filter = ('created_at',)
@@ -114,7 +94,7 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
     raw_id_fields = ('issuer',)
     fieldsets = (
         ('Metadata', {
-            'fields': ('created_by', 'created_at', 'source', 'source_url', 'entity_id', 'slug'),
+            'fields': ('created_by', 'created_at', 'source', 'source_url', 'entity_id'),
             'classes': ("collapse",)
         }),
         (None, {
@@ -167,19 +147,13 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
 badgr_admin.register(BadgeClass, BadgeClassAdmin)
 
 
-class BadgeEvidenceInline(StackedInline):
-    model = BadgeInstanceEvidence
-    fields = ('evidence_url', 'narrative',)
-    extra = 0
-
-
 class BadgeInstanceExtensionInline(TabularInline):
     model = BadgeInstanceExtension
     extra = 0
     fields = ('name', 'original_json')
 
 class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
-    readonly_fields = ('created_at', 'created_by', 'updated_at','updated_by', 'image', 'entity_id', 'old_json', 'salt', 'entity_id', 'slug', 'source', 'source_url')
+    readonly_fields = ('created_at', 'created_by', 'updated_at','updated_by', 'image', 'entity_id', 'old_json', 'salt', 'entity_id', 'source', 'source_url')
     list_display = ('badge_image', 'recipient_identifier', 'entity_id', 'badgeclass', 'issuer')
     list_display_links = ('badge_image', 'recipient_identifier', )
     list_filter = ('created_at',)
@@ -187,7 +161,7 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
     raw_id_fields = ('badgeclass', 'issuer')
     fieldsets = (
         ('Metadata', {
-            'fields': ('source', 'source_url', 'created_by', 'created_at', 'updated_by','updated_at', 'entity_id', 'slug', 'salt'),
+            'fields': ('source', 'source_url', 'created_by', 'created_at', 'updated_by','updated_at', 'entity_id','salt'),
             'classes': ("collapse",)
         }),
         ('Badgeclass', {
@@ -206,7 +180,6 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
     actions = ['rebake']
     change_actions = ['redirect_issuer', 'redirect_badgeclass']
     inlines = [
-        BadgeEvidenceInline,
         BadgeInstanceExtensionInline
     ]
 

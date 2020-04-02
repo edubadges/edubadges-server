@@ -2,11 +2,11 @@ import json
 from collections import OrderedDict
 
 from django.utils.html import strip_tags
-from entity.serializers import BaseSerializerV2
 from mainsite.pagination import EncryptedCursorPagination
 from rest_framework import serializers
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.exceptions import ValidationError
+from mainsite.exceptions import BadgrValidationError
 
 
 class HumanReadableBooleanField(serializers.BooleanField):
@@ -14,24 +14,13 @@ class HumanReadableBooleanField(serializers.BooleanField):
     FALSE_VALUES = serializers.BooleanField.FALSE_VALUES | set(('off', 'Off', 'OFF'))
 
 
-class ReadOnlyJSONField(serializers.CharField):
+class BadgrBaseModelSerializer(serializers.ModelSerializer):
 
-    def to_representation(self, value):
-        if isinstance(value, (dict, list)):
-            return value
-        else:
-            raise serializers.ValidationError("WriteableJsonField: Did not get a JSON-serializable datatype from storage for this item: " + str(value))
-
-
-class WritableJSONField(ReadOnlyJSONField):
-    def to_internal_value(self, data):
+    def is_valid(self, raise_exception=False):
         try:
-            internal_value = json.loads(data)
-        except Exception:
-            # TODO: this is going to choke on dict input, when it should be allowed in addition to JSON.
-            raise serializers.ValidationError("WriteableJsonField: Could not process input into a python dict for storage " + str(data))
-
-        return internal_value
+            return super(BadgrBaseModelSerializer, self).is_valid(raise_exception)
+        except ValidationError as e:
+            raise BadgrValidationError(fields=e.detail)
 
 
 class LinkedDataEntitySerializer(serializers.Serializer):
@@ -86,14 +75,6 @@ class LinkedDataReferenceField(serializers.Serializer):
                 "manager that implements get_by_id method."
             )
 
-class LinkedDataReferenceList(serializers.ListField):
-    # child must be declared in implementation.
-    def get_value(self, dictionary):
-        try:
-            return dictionary.getlist(self.field_name, serializers.empty)
-        except AttributeError:
-            return dictionary.get(self.field_name, serializers.empty)
-
 
 class JSONDictField(serializers.DictField):
     """
@@ -106,15 +87,6 @@ class JSONDictField(serializers.DictField):
             pass
 
         return super(JSONDictField, self).to_internal_value(data)
-
-
-class CachedUrlHyperlinkedRelatedField(serializers.HyperlinkedRelatedField):
-    def get_url(self, obj, view_name, request, format):
-        """
-        The value of this field is driven by a source argument that returns the actual URL,
-        so no need to reverse it from a value.
-        """
-        return obj
 
 
 class StripTagsCharField(serializers.CharField):
@@ -172,22 +144,3 @@ class OriginalJsonSerializerMixin(serializers.Serializer):
 
         return representation
 
-
-class CursorPaginatedListSerializer(serializers.ListSerializer):
-
-    def __init__(self, queryset, request, *args, **kwargs):
-        self.paginator = EncryptedCursorPagination()
-        self.page = self.paginator.paginate_queryset(queryset, request)
-        super(CursorPaginatedListSerializer, self).__init__(data=self.page, *args, **kwargs)
-
-    def to_representation(self, data):
-        representation = super(CursorPaginatedListSerializer, self).to_representation(data)
-        envelope = BaseSerializerV2.response_envelope(result=representation,
-                                                      success=True,
-                                                      description='ok')
-        envelope['pagination'] = self.paginator.get_page_info()
-        return envelope
-
-    @property
-    def data(self):
-        return super(serializers.ListSerializer, self).data

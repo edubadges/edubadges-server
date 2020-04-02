@@ -2,26 +2,23 @@
 
 
 from apispec_drf.decorators import apispec_list_operation, apispec_post_operation, apispec_get_operation, \
-    apispec_delete_operation, apispec_put_operation, apispec_operation
+    apispec_delete_operation, apispec_put_operation
 from backpack.models import BackpackCollection, BackpackBadgeShare, BackpackCollectionShare
 from backpack.serializers_v1 import CollectionSerializerV1, LocalBadgeInstanceUploadSerializerV1
-# from backpack.serializers_v2 import BackpackAssertionSerializerV2, BackpackCollectionSerializerV2, \
-#     BackpackImportSerializerV2
-from entity.api import BaseEntityListView, BaseEntityDetailView, LogPermissionsFailMixin
+from entity.api import BaseEntityListView, BaseEntityDetailView
 from issuer.models import BadgeInstance
 from issuer.permissions import AuditedModelOwner, RecipientIdentifiersMatch, BadgrOAuthTokenHasScope
 from issuer.public_api import ImagePropertyDetailView
+from mainsite.exceptions import BadgrApiException400
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from rest_framework import permissions
 from rest_framework.response import Response
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_302_FOUND, \
-    HTTP_204_NO_CONTENT
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_302_FOUND, HTTP_204_NO_CONTENT
 
 
-class BackpackAssertionList(LogPermissionsFailMixin, BaseEntityListView):
+class BackpackAssertionList(BaseEntityListView):
     model = BadgeInstance
     v1_serializer_class = LocalBadgeInstanceUploadSerializerV1
-    # v2_serializer_class = BackpackAssertionSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, RecipientIdentifiersMatch, BadgrOAuthTokenHasScope)
     http_method_names = ('get', 'post')
     valid_scopes = {
@@ -69,7 +66,6 @@ class BackpackAssertionList(LogPermissionsFailMixin, BaseEntityListView):
 class BackpackAssertionDetail(BaseEntityDetailView):
     model = BadgeInstance
     v1_serializer_class = LocalBadgeInstanceUploadSerializerV1
-    # v2_serializer_class = BackpackAssertionSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, RecipientIdentifiersMatch, BadgrOAuthTokenHasScope)
     http_method_names = ('get', 'delete', 'put')
     valid_scopes = {
@@ -129,7 +125,6 @@ class BackpackAssertionDetailImage(ImagePropertyDetailView, BadgrOAuthTokenHasSc
 class BackpackCollectionList(BaseEntityListView):
     model = BackpackCollection
     v1_serializer_class = CollectionSerializerV1
-    # v2_serializer_class = BackpackCollectionSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, AuditedModelOwner, BadgrOAuthTokenHasScope)
     valid_scopes = {
         'get': ['r:backpack', 'rw:backpack'],
@@ -157,7 +152,6 @@ class BackpackCollectionList(BaseEntityListView):
 class BackpackCollectionDetail(BaseEntityDetailView):
     model = BackpackCollection
     v1_serializer_class = CollectionSerializerV1
-    # v2_serializer_class = BackpackCollectionSerializerV2
     permission_classes = (AuthenticatedWithVerifiedEmail, AuditedModelOwner, BadgrOAuthTokenHasScope)
     valid_scopes = {
         'get': ['r:backpack', 'rw:backpack'],
@@ -187,49 +181,6 @@ class BackpackCollectionDetail(BaseEntityDetailView):
     def delete(self, request, **kwargs):
         return super(BackpackCollectionDetail, self).delete(request, **kwargs)
 
-#
-# class BackpackImportBadge(BaseEntityListView):
-#     v2_serializer_class = BackpackImportSerializerV2
-#     permission_classes = (AuthenticatedWithVerifiedEmail,BadgrOAuthTokenHasScope)
-#     http_method_names = ('post',)
-#     valid_scopes = ['rw:backpack']
-#
-#     @apispec_operation(
-#         summary="Import a new Assertion to the backpack",
-#         tags=['Backpack'],
-#         parameters=[
-#             {
-#                 "in": "body",
-#                 "name": "body",
-#                 "required": True,
-#                 "schema": {
-#                     "type": "object",
-#                     "properties": {
-#                         "url": {
-#                             "type": "string",
-#                             "format": "url",
-#                             "description": "URL to an OpenBadge compliant badge",
-#                             'required': False
-#                         },
-#                         "image": {
-#                             'type': "string",
-#                             'format': "data:image/png;base64",
-#                             'description': "base64 encoded Baked OpenBadge image",
-#                             'required': False
-#                         },
-#                         "assertion": {
-#                             'type': "json",
-#                             'description': "OpenBadge compliant json",
-#                             'required': False
-#                         },
-#                     }
-#                 },
-#             }
-#         ]
-#     )
-#     def post(self, request, **kwargs):
-#         return super(BackpackImportBadge, self).post(request, **kwargs)
-
 
 class ShareBackpackAssertion(BaseEntityDetailView):
     model = BadgeInstance
@@ -252,7 +203,8 @@ class ShareBackpackAssertion(BaseEntityDetailView):
 
         provider = request.query_params.get('provider')
         if not provider:
-            return Response({'error': "unspecified share provider"}, status=HTTP_400_BAD_REQUEST)
+            fields = {'error_message': "Unspecified share provider", error_code: 701}
+            raise BadgrApiException400(fields)
         provider = provider.lower()
 
         source = request.query_params.get('source', 'unknown')
@@ -264,7 +216,8 @@ class ShareBackpackAssertion(BaseEntityDetailView):
         share = BackpackBadgeShare(provider=provider, badgeinstance=badge, source=source)
         share_url = share.get_share_url(provider)
         if not share_url:
-            return Response({'error': "invalid share provider"}, status=HTTP_400_BAD_REQUEST)
+            fields = {'error_message': "Invalid share provider", error_code: 702}
+            raise BadgrApiException400(fields)
 
         share.save()
 
@@ -296,7 +249,8 @@ class ShareBackpackCollection(BaseEntityDetailView):
 
         provider = request.query_params.get('provider')
         if not provider:
-            return Response({'error': "unspecified share provider"}, status=HTTP_400_BAD_REQUEST)
+            fields = {'error_message': "unspecified share provider", error_code: 701}
+            raise BadgrApiException400(fields)
         provider = provider.lower()
 
         source = request.query_params.get('source', 'unknown')
@@ -308,7 +262,8 @@ class ShareBackpackCollection(BaseEntityDetailView):
         share = BackpackCollectionShare(provider=provider, collection=collection, source=source)
         share_url = share.get_share_url(provider, title=collection.name, summary=collection.description)
         if not share_url:
-            return Response({'error': "invalid share provider"}, status=HTTP_400_BAD_REQUEST)
+            fields = {'error_message': "invalid share provider", error_code: 702}
+            raise BadgrApiException400(fields)
 
         share.save()
 

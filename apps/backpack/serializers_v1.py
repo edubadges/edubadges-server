@@ -8,10 +8,10 @@ from django.urls import reverse
 from django.utils.dateparse import parse_datetime, parse_date
 from issuer.helpers import BadgeCheckHelper
 from issuer.models import BadgeInstance
-from issuer.serializers_v1 import EvidenceItemSerializer
 from mainsite.drf_fields import Base64FileField
 from mainsite.serializers import StripTagsCharField, MarkdownCharField
 from mainsite.utils import OriginSetting
+from mainsite.serializers import BadgrBaseModelSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 from rest_framework.fields import SkipField
@@ -27,7 +27,6 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
     acceptance = serializers.CharField(default='Accepted')
     public = serializers.BooleanField(required=False, default=False)
     narrative = MarkdownCharField(required=False, read_only=True)
-    evidence_items = EvidenceItemSerializer(many=True, required=False, read_only=True)
 
     extensions = serializers.DictField(source='extension_items', read_only=True)
 
@@ -43,7 +42,6 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
 
         representation['id'] = obj.entity_id
         representation['json'] = V1BadgeInstanceSerializer(obj, context=self.context).data
-        representation['json']['badge']['category'] = obj.cached_badgeclass.category
         representation['imagePreview'] = {
             "type": "image",
             "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('badgeclass_image', kwargs={'entity_id': obj.cached_badgeclass.entity_id}))
@@ -141,7 +139,7 @@ class CollectionBadgesSerializerV1(serializers.ListSerializer):
         return [e for e in self.validated_data if e.pk in updated_ids]
 
 
-class CollectionBadgeSerializerV1(serializers.ModelSerializer):
+class CollectionBadgeSerializerV1(BadgrBaseModelSerializer):
     id = serializers.RelatedField(queryset=BadgeInstance.objects.all())
     collection = serializers.RelatedField(queryset=BackpackCollection.objects.all(), write_only=True, required=False)
 
@@ -432,7 +430,6 @@ class V1InstanceSerializer(serializers.Serializer):
     issuedOn = BadgeDateTimeField(required=False) # missing in some translated v0.5.0
     expires = BadgeDateTimeField(required=False)
     image = BadgeImageURLField(required=False)
-    evidence = BadgeURLField(required=False)
 
 
 class V1BadgeInstanceSerializer(V1InstanceSerializer):
@@ -441,8 +438,6 @@ class V1BadgeInstanceSerializer(V1InstanceSerializer):
     """
     def to_representation(self, instance):
         localbadgeinstance_json = instance.json
-        if 'evidence' in localbadgeinstance_json:
-            localbadgeinstance_json['evidence'] = instance.evidence_url
         localbadgeinstance_json['uid'] = instance.entity_id
         localbadgeinstance_json['badge'] = instance.cached_badgeclass.json
         localbadgeinstance_json['badge']['criteria'] = instance.cached_badgeclass.get_criteria_url()

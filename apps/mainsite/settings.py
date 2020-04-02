@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django_object_actions',
     # 'django_extensions',
+    'graphene_django',
     'markdownify',
     'badgeuser',
     'allauth',
@@ -29,8 +30,6 @@ INSTALLED_APPS = [
     'badgrsocialauth.providers.eduid',
     'badgrsocialauth.providers.surf_conext',
     'badgrsocialauth.providers.surfconext_ala',
-    'badgrsocialauth.providers.kony',
-    'badgrsocialauth.providers.google',
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.azure',
     'allauth.socialaccount.providers.linkedin_oauth2',
@@ -48,12 +47,10 @@ INSTALLED_APPS = [
     'institution',
     'issuer',
     'backpack',
-    'pathway',
-    'recipient',
-    'externaltools',
     'lti_edu',
     'theming',
     'signing',
+    'staff',
 
     # api docs
     'apispec_drf',
@@ -185,11 +182,7 @@ ACCOUNT_SIGNUP_FORM_CLASS = 'badgeuser.forms.BadgeUserCreationForm'
 
 
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-SOCIALACCOUNT_PROVIDERS = {
-    'kony': {
-        'environment': 'dev'
-    }
-}
+
 SOCIALACCOUNT_ADAPTER = 'badgrsocialauth.adapter.BadgrSocialAccountAdapter'
 
 # Added property to allow auto signup on existing email address
@@ -491,3 +484,7 @@ AUTHCODE_SECRET_KEY = Fernet.generate_key()
 AUTHCODE_EXPIRES_SECONDS = 600  # needs to be long enough to fetch information from socialauth providers
 
 SESSION_COOKIE_SAMESITE = None
+
+GRAPHENE = {
+    'SCHEMA': 'apps.mainsite.schema.schema'
+}

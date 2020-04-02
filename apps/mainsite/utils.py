@@ -20,31 +20,10 @@ from django.core.files.storage import DefaultStorage
 from django.urls import get_callable
 
 
-class ObjectView(object):
-    """
-    A simple utility that allows Rest Framework Serializers to serialize dict-based input
-    when there is no appropriate model Class to instantiate.
-
-    Instantiate an ObjectView(source_dict) in the serializer's to_internal_value() method.
-    """
-    def __init__(self, d):
-        self.__dict__ = d
-
-    def __unicode__(self):
-        return str(self.__dict__)
-
-
 slugify_function_path = \
     getattr(settings, 'AUTOSLUG_SLUGIFY_FUNCTION', 'autoslug.utils.slugify')
 
 slugify = get_callable(slugify_function_path)
-
-def installed_apps_list():
-    installed_apps = []
-    for app in ('issuer', 'composition', 'badgebook'):
-        if apps.is_installed(app):
-            installed_apps.append(app)
-    return installed_apps
 
 
 def client_ip_from_request(request):
@@ -134,17 +113,6 @@ def first_node_match(graph, condition):
     for node in graph:
         if all(item in list(node.items()) for item in list(condition.items())):
             return node
-
-
-def get_tool_consumer_instance_guid():
-    guid = getattr(settings, 'EXTERNALTOOL_CONSUMER_INSTANCE_GUID', None)
-    if guid is None:
-        guid = cache.get("external_tool_consumer_instance_guid")
-        if guid is None:
-            guid = "badgr-tool-consumer:{}".format(generate_entity_uri())
-            cache.set("external_tool_consumer_instance_guid", guid, timeout=None)
-    return guid
-
 
 def list_of(value):
     if value is None:

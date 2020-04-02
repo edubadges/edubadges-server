@@ -9,15 +9,6 @@ def noop(apps, schema):
     pass
 
 
-def migrate_evidence_url_to_badgeinstanceevidence(apps, schema):
-    BadgeInstance = apps.get_model('issuer', 'BadgeInstance')
-    BadgeInstanceEvidence = apps.get_model('issuer', 'BadgeInstanceEvidence')
-    for assertion in BadgeInstance.objects.all():
-        if assertion.evidence_url:
-            evidence, created = BadgeInstanceEvidence.objects.get_or_create(
-                badgeinstance=assertion,
-                evidence_url=assertion.evidence_url)
-
 
 class Migration(migrations.Migration):
 
@@ -26,5 +17,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        RunPython(migrate_evidence_url_to_badgeinstanceevidence, reverse_code=noop)
+        RunPython(noop, reverse_code=noop)
     ]

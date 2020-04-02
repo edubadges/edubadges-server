@@ -1,7 +1,0 @@
-{
-  "uid":"123abc",
-  "recipient": {"identity": "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:27871c14-b952-4d7e-85fd-6329ac5c6f18",
-                    "hashed": false, "type": "id"},
-  "issuedOn": "2015-04-30",
-  "verify": {"type": "hosted", "url": "http://a.com/instance"}
-}
