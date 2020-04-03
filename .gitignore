@@ -6,7 +6,7 @@
 AppleDouble
 *.sqlite*
 *.sass-cache
-
+env_vars.sh
 staticfiles*
 mediafiles/*
 !mediafiles/uploads/badges/eduid.png
@@ -16,6 +16,7 @@ logs/*
 node_modules/*
 bower_components/*
 npm-debug.log
+
 
 .ropeproject
 .idea/*
