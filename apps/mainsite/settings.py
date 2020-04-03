@@ -1,7 +1,6 @@
 import os
 import sys
 
-from .settings_local import *
 from mainsite import TOP_DIR
 
 ##
