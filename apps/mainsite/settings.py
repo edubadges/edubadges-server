@@ -1,6 +1,7 @@
 import os
 import sys
 
+from .settings_local import *
 from mainsite import TOP_DIR
 
 ##
@@ -19,7 +20,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django_object_actions',
-    # 'django_extensions',
     'graphene_django',
     'markdownify',
     'badgeuser',
@@ -76,16 +76,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'mainsite.urls'
-
-# Hosts/domain names that are valid for this site.
-# "*" matches anything, ".example.com" matches example.com and all subdomains
-
-ALLOWED_HOSTS = ['*', ] # ['<your badgr server domain>', ]
-#X_FRAME_OPTIONS = 'ALLOW-FROM http://canvas.edubadges.nl/, https://canvas.edubadges.nl'
-# X_FRAME_OPTIONS = 'ALLOW-FROM https://canvas.edubadges.nl'
-
+ALLOWED_HOSTS = ['*', ]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
 
 ##
 #
@@ -105,9 +97,7 @@ TEMPLATES = [
                 'django.template.context_processors.media',
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
-                # 'django.template.context_processors.request',
                 'django.contrib.messages.context_processors.messages',
-
                 'mainsite.context_processors.extra_settings'
             ],
         },
@@ -126,8 +116,12 @@ TEMPLATE_LOADERS = [
 #
 ##
 
-HTTP_ORIGIN = os.environ.get('SERVER_PROTOCOL', '') + os.environ.get('SERVER_NAME', '')
-HTTP_ORIGIN = 'http://localhost:8000' if HTTP_ORIGIN is '' else HTTP_ORIGIN
+HTTP_ORIGIN = os.environ.get('SERVER_PROTOCOL', '') + os.environ.get('SERVER_NAME', '') or 'http://localhost:8000'
+HTTP_ORIGIN_MEDIA = HTTP_ORIGIN
+
+DOMAIN = os.environ['DOMAIN']
+UI_URL = os.environ['UI_URL']
+DEFAULT_DOMAIN = os.environ['DEFAULT_DOMAIN']
 
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -179,11 +173,24 @@ ACCOUNT_FORMS = {
     'add_email': 'badgeuser.account_forms.AddEmailForm'
 }
 ACCOUNT_SIGNUP_FORM_CLASS = 'badgeuser.forms.BadgeUserCreationForm'
-
+ACCOUNT_SALT = os.environ['ACCOUNT_SALT']
 
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-
 SOCIALACCOUNT_ADAPTER = 'badgrsocialauth.adapter.BadgrSocialAccountAdapter'
+
+SURFCONEXT_DOMAIN_URL = 'https://oidc.test.surfconext.nl'
+EDUID_RELYING_PARTY_HOST = os.environ['EDUID_RELYING_PARTY_HOST']
+EDUID_REDIRECT_URL = os.environ['EDUID_REDIRECT_URL']
+EDUID_PROVIDER_URL = "https://eduid.pilot.acc.eduid.nl"
+
+# If you have an informational front page outside the Django site that can link back to '/login', specify it here
+ROOT_INFO_REDIRECT = '/login'
+SECRET_KEY = os.environ['ROOT_INFO_SECRET_KEY']
+UNSUBSCRIBE_SECRET_KEY = os.environ['UNSUBSCRIBE_SECRET_KEY']
+
+
+STAFF_MEMBER_CONFIRMATION_EXPIRE_DAYS = 7
+
 
 # Added property to allow auto signup on existing email address
 # -> this is for the usecase that user logs in with existing email, for which
@@ -215,12 +222,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ##
 
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_URLS_REGEX = r'^.*$'
-CORS_MODEL = 'mainsite.BadgrApp'
-
-CORS_EXPOSE_HEADERS = (
-    'link',
-)
+CORS_ALLOW_CREDENTIALS = True
+CORS_EXPOSE_HEADERS = ('link',)
 
 ##
 #
@@ -250,6 +253,10 @@ FIXTURE_DIRS = [
 #
 ##
 
+LOGS_DIR = os.path.join(TOP_DIR, 'logs')
+if not os.path.exists(LOGS_DIR):
+    os.makedirs(LOGS_DIR)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -259,12 +266,10 @@ LOGGING = {
             'filters': [],
             'class': 'django.utils.log.AdminEmailHandler'
         },
-
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'stream': sys.stdout,
-
         },
     },
     'loggers': {
@@ -273,14 +278,6 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-
-        # Badgr.Events emits all badge related activity
-        'Badgr.Events': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': False,
-        }
-
     },
     'formatters': {
         'default': {
@@ -383,16 +380,21 @@ LINKED_DATA_DOCUMENT_FETCHER = 'badgeanalysis.utils.custom_docloader'
 ##
 
 LTI_STORE_IN_SESSION = False
-
+TIME_STAMPED_OPEN_BADGES_BASE_URL = os.environ['TIME_STAMPED_OPEN_BADGES_BASE_URL']
+# Optionally restrict issuer creation to accounts that have the 'issuer.add_issuer' permission
+# Niet elke issuer mag issuers aanmaken
+BADGR_APPROVED_ISSUERS_ONLY = True
 CAIROSVG_VERSION_SUFFIX = "2"
-
-SITE_ID = 1
 
 USE_I18N = True
 USE_L10N = False
 USE_TZ = True
 
+SITE_ID = 1
 BADGR_APP_ID = 1
+
+TIME_ZONE = 'Europe/Amsterdam'
+LANGUAGE_CODE = 'en-us'
 
 
 ##
@@ -470,6 +472,12 @@ os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
 
 # default celery to always_eager
 CELERY_ALWAYS_EAGER = True
+BROKER_URL = 'amqp://localhost:5672/'
+CELERY_RESULT_BACKEND = None
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULTS_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['json']
+
 
 # If enabled, notify badgerank about new badgeclasses
 BADGERANK_NOTIFY_ON_BADGECLASS_CREATE = True
@@ -488,3 +496,46 @@ SESSION_COOKIE_SAMESITE = None
 GRAPHENE = {
     'SCHEMA': 'apps.mainsite.schema.schema'
 }
+
+# Database
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ['BADGR_DB_NAME'],
+        'USER': os.environ['BADGR_DB_USER'],
+        'PASSWORD': os.environ['BADGR_DB_PASSWORD'],
+        'HOST': '',
+        'PORT': '',
+        'TEST': {
+            'CHARSET': 'utf8',
+        }
+    }
+}
+
+# Email
+EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.environ['EMAIL_HOST']
+EMAIL_PORT= os.environ['EMAIL_PORT']
+DEFAULT_FROM_EMAIL = os.environ['DEFAULT_FROM_EMAIL']
+
+
+# Seeds
+ALLOW_SEEDS = os.environ.get('ALLOW_SEEDS', False)
+EDU_ID_SECRET = os.environ['EDU_ID_SECRET']
+EDU_ID_CLIENT = "edubadges"
+
+SURF_CONEXT_SECRET = os.environ['SURF_CONEXT_SECRET']
+SURF_CONEXT_CLIENT = "http@//localhost.edubadges.nl"
+
+SUPERUSER_NAME = os.environ.get('SUPERUSER_NAME', '')
+SUPERUSER_EMAIL = os.environ.get('SUPERUSER_EMAIL', '')
+SUPERUSER_PWD = os.environ.get('SUPERUSER_PWD', '')
+
+
+# Debug
+DEBUG = os.environ.get('DEBUG', False)
+TEMPLATE_DEBUG = DEBUG
+DEBUG_ERRORS = DEBUG
+DEBUG_STATIC = DEBUG
+DEBUG_MEDIA = DEBUG

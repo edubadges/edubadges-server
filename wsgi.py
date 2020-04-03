@@ -23,7 +23,7 @@ sys.path.insert(0, APPS_DIR)
 from django.core.wsgi import get_wsgi_application
 
 # tell django to find settings entry point'
-os.environ['DJANGO_SETTINGS_MODULE'] = 'mainsite.settings_local'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'mainsite.settings'
 
 # hand off to the wsgi application
 application = get_wsgi_application()
