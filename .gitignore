@@ -9,7 +9,9 @@ AppleDouble
 *.sass-cache
 
 staticfiles*
-mediafiles*
+mediafiles/*
+!mediafiles/uploads/badges/eduid.png
+!mediafiles/uploads/issuers/surf.png
 emailfiles*
 logs/*
 node_modules/*
