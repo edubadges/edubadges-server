@@ -3,7 +3,7 @@ from rest_framework import permissions
 
 class MaySignAssertions(permissions.BasePermission):
     def has_permission(selfs, request, view):
-        raise NotImplementedError
+        pass
 
 
 class OwnsSymmetricKey(permissions.BasePermission):
