@@ -178,9 +178,7 @@ SOCIALACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 SOCIALACCOUNT_ADAPTER = 'badgrsocialauth.adapter.BadgrSocialAccountAdapter'
 
 SURFCONEXT_DOMAIN_URL = 'https://oidc.test.surfconext.nl'
-EDUID_RELYING_PARTY_HOST = os.environ['EDUID_RELYING_PARTY_HOST']
-EDUID_REDIRECT_URL = os.environ['EDUID_REDIRECT_URL']
-EDUID_PROVIDER_URL = "https://eduid.pilot.acc.eduid.nl"
+EDUID_PROVIDER_URL = os.environ['EDUID_PROVIDER_URL']
 
 # If you have an informational front page outside the Django site that can link back to '/login', specify it here
 ROOT_INFO_REDIRECT = '/login'
