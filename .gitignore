@@ -1,13 +1,12 @@
 *.pyc
 *.egg
-settings_local.py
 .*.sw*
 *~
 .DS_Store
 AppleDouble
 *.sqlite*
 *.sass-cache
-
+env_vars.sh
 staticfiles*
 mediafiles/*
 !mediafiles/uploads/badges/eduid.png
@@ -17,6 +16,7 @@ logs/*
 node_modules/*
 bower_components/*
 npm-debug.log
+
 
 .ropeproject
 .idea/*
@@ -40,3 +40,4 @@ test_data
 .project
 .pydevproject
 .settings
+
