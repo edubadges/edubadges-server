@@ -1,6 +1,6 @@
 *.pyc
 *.egg
-settings_local.py
+env_vars.sh
 .*.sw*
 *~
 .DS_Store
@@ -38,3 +38,4 @@ test_data
 .project
 .pydevproject
 .settings
+
