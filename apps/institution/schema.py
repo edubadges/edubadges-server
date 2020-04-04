@@ -23,7 +23,7 @@ class InstitutionType(StaffResolverMixin, ImageResolverMixin, DjangoObjectType):
 
     class Meta:
         model = Institution
-        fields = ('name', 'staff', 'created_at', 'description', 'image', 'grading_table', 'brin')
+        fields = ('entity_id', 'name', 'staff', 'created_at', 'description', 'image', 'grading_table', 'brin')
 
     faculties = graphene.List(FacultyType)
     staff = graphene.List(InstitutionStaffType)

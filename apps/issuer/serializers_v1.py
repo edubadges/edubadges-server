@@ -82,25 +82,11 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
         return new_issuer
 
     def update(self, instance, validated_data):
-        if self.context['request'].data.get('faculty', ''):
-            faculty_id = self.context['request'].data['faculty']['id']
-            faculty = Faculty.objects.get(pk=faculty_id)
-            validated_data['faculty'] = faculty
+        [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
 
-        instance.name = validated_data.get('name')
-
-        if 'image' in validated_data:
-            instance.image = validated_data.get('image')
-
-        instance.email = validated_data.get('email')
-        instance.description = validated_data.get('description')
-        instance.url = validated_data.get('url')
-        instance.faculty = validated_data.get('faculty')
-
-        # set badgrapp
         if not instance.badgrapp_id:
             instance.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
-        self.save_extensions(validated_data, instance)
+
         instance.save()
         return instance
 
