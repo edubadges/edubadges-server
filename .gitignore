@@ -1,20 +1,22 @@
 *.pyc
 *.egg
-env_vars.sh
 .*.sw*
 *~
 .DS_Store
 AppleDouble
 *.sqlite*
 *.sass-cache
-
+env_vars.sh
 staticfiles*
-mediafiles*
+mediafiles/*
+!mediafiles/uploads/badges/eduid.png
+!mediafiles/uploads/issuers/surf.png
 emailfiles*
 logs/*
 node_modules/*
 bower_components/*
 npm-debug.log
+
 
 .ropeproject
 .idea/*
