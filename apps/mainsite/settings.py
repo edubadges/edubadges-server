@@ -3,6 +3,9 @@ import sys
 
 from mainsite import TOP_DIR
 
+from mainsite.environment import env_settings
+
+env_settings()
 ##
 #
 #  Important Stuff
