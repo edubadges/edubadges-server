@@ -182,7 +182,7 @@ class Issuer(PermissionedModelMixin,
     def publish(self, *args, **kwargs):
         super(Issuer, self).publish(*args, **kwargs)
         for member in self.cached_issuerstaff():
-            member.cached_user.publish()
+            member.user.publish()
 
     def delete(self, *args, **kwargs):
         if self.recipient_count > 0:

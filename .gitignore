@@ -1,20 +1,22 @@
 *.pyc
 *.egg
-settings_local.py
 .*.sw*
 *~
 .DS_Store
 AppleDouble
 *.sqlite*
 *.sass-cache
-
+env_vars.sh
 staticfiles*
-mediafiles*
+mediafiles/*
+!mediafiles/uploads/badges/eduid.png
+!mediafiles/uploads/issuers/surf.png
 emailfiles*
 logs/*
 node_modules/*
 bower_components/*
 npm-debug.log
+
 
 .ropeproject
 .idea/*
@@ -32,8 +34,10 @@ api_spec_v1.json
 api_spec_v2.json
 api_docs_v1.json
 api_docs_v2.json
+test_data
 
 #eclipse
 .project
 .pydevproject
 .settings
+

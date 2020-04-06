@@ -1,11 +1,14 @@
-from django.conf import settings
-from mainsite.models import BadgrApp
 from allauth.socialaccount.models import SocialApp
+from django.conf import settings
 from django.contrib.sites.models import Site
+
 from badgeuser.models import TermsVersion, BadgeUser
+from institution.models import Institution, Faculty
+from issuer.models import Issuer, BadgeClass
+from mainsite.models import BadgrApp
 
 # BadgrApp
-BadgrApp.objects.get_or_create(
+main_badgr_app, _ = BadgrApp.objects.get_or_create(
     is_active=1,
     cors=settings.UI_URL,
     email_confirmation_redirect="{}/login/".format(settings.UI_URL),
@@ -54,3 +57,18 @@ superuser, _ = BadgeUser.objects.get_or_create(
 )
 superuser.set_password(settings.SUPERUSER_PWD)
 superuser.save()
+
+# SURF / eduBadges static
+surf_net_institution, _ = Institution.objects.get_or_create(name="surfnet.nl", identifier="surfnet.nl",
+                                                            description="surfnet.nl")
+
+edu_badges_faculty, _ = Faculty.objects.get_or_create(name="eduBadges", institution=surf_net_institution,
+                                                      description="eduBadges")
+
+surf_issuer, _ = Issuer.objects.get_or_create(name="SURF", image="uploads/issuers/surf.png", faculty=edu_badges_faculty,
+                                              description="SURF", email="info@surf.nl", url="https://surf.nl",
+                                              source="local", original_json="{}", badgrapp=main_badgr_app)
+
+BadgeClass.objects.get_or_create(name="eduID Account creation", issuer=surf_issuer, image="uploads/badges/eduid.png",
+                                 description="This is an example badge, please provide proof that you are eligible to receive more badges",
+                                 source="local", old_json="{}")
