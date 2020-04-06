@@ -22,7 +22,7 @@ issuers = {
     'Social and Behavioural Science': ['Psychology', 'Sociology', 'Political Science', 'Anthropology']
 }
 
-for fac in Faculty.objects.all():
+for fac in Faculty.objects.exclude(name="eduBadges"):
     [Issuer.objects.get_or_create(name=issuer, faculty=fac, old_json="{}") for issuer in issuers[fac.name]]
 
 
