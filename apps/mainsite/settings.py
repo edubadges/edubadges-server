@@ -6,6 +6,7 @@ from mainsite import TOP_DIR
 from mainsite.environment import env_settings
 
 env_settings()
+
 ##
 #
 #  Important Stuff
@@ -390,8 +391,8 @@ USE_I18N = True
 USE_L10N = False
 USE_TZ = True
 
-SITE_ID = 1
-BADGR_APP_ID = 1
+SITE_ID = int(os.environ.get('SITE_ID', 1))
+BADGR_APP_ID = int(os.environ.get('BADGR_APP_ID', 1))
 
 TIME_ZONE = 'Europe/Amsterdam'
 LANGUAGE_CODE = 'en-us'
@@ -534,7 +535,7 @@ SUPERUSER_PWD = os.environ.get('SUPERUSER_PWD', '')
 
 
 # Debug
-DEBUG = os.environ.get('DEBUG', False)
+DEBUG = os.environ.get('DEBUG', True)
 TEMPLATE_DEBUG = DEBUG
 DEBUG_ERRORS = DEBUG
 DEBUG_STATIC = DEBUG
