@@ -16,7 +16,7 @@ class UserSlugRelatedField(BaseSlugRelatedField):
     model = BadgeUser
 
 
-class BadgeUserTokenSerializerV1(serializers.Serializer):
+class BadgeUserTokenSerializer(serializers.Serializer):
     class Meta:
         apispec_definition = ('BadgeUserToken', {})
 
@@ -34,14 +34,14 @@ class BadgeUserTokenSerializerV1(serializers.Serializer):
         return instance
 
 
-class InstitutionForProfileSerializerV1(serializers.Serializer):
+class InstitutionForProfileSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=512)
 
     class Meta:
         model = Institution
 
 
-class BadgeUserProfileSerializerV1(serializers.Serializer):
+class BadgeUserProfileSerializer(serializers.Serializer):
     first_name = StripTagsCharField(max_length=30, allow_blank=True)
     last_name = StripTagsCharField(max_length=30, allow_blank=True)
     email = serializers.EmailField(source='primary_email', required=False)
@@ -52,7 +52,7 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
     marketing_opt_in = serializers.BooleanField(required=False)
     user_permissions = serializers.SerializerMethodField(required=False)
     faculty = FacultySerializer(many=True,  allow_null=True)
-    institution = InstitutionForProfileSerializerV1(read_only=True, )
+    institution = InstitutionForProfileSerializer(read_only=True, )
 
     class Meta:
         apispec_definition = ('BadgeUser', {})
@@ -107,7 +107,7 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
         return user
 
     def to_representation(self, instance):
-        representation = super(BadgeUserProfileSerializerV1, self).to_representation(instance)
+        representation = super(BadgeUserProfileSerializer, self).to_representation(instance)
 
         latest = TermsVersion.cached.cached_latest()
         if latest:
@@ -118,7 +118,7 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
         return representation
 
 
-class EmailSerializerV1(BadgrBaseModelSerializer):
+class EmailSerializer(BadgrBaseModelSerializer):
     variants = serializers.ListField(
         child=serializers.EmailField(required=False),
         required=False, source='cached_variants', allow_null=True, read_only=True
@@ -139,11 +139,11 @@ class EmailSerializerV1(BadgrBaseModelSerializer):
         try:
             email = CachedEmailAddress.objects.get(email=new_address)
         except CachedEmailAddress.DoesNotExist:
-            email = super(EmailSerializerV1, self).create(validated_data)
+            email = super(EmailSerializer, self).create(validated_data)
             created = True
         else:
             if not email.verified:
-                email = super(EmailSerializerV1, self).create(validated_data)
+                email = super(EmailSerializer, self).create(validated_data)
                 created = True
             elif email.user != self.context.get('request').user:
                 raise serializers.ValidationError("Could not register email address.")
@@ -164,13 +164,13 @@ class EmailSerializerV1(BadgrBaseModelSerializer):
         raise serializers.ValidationError("Could not register email address.")
 
 
-class BadgeUserIdentifierFieldV1(serializers.CharField):
+class BadgeUserIdentifierField(serializers.CharField):
     def __init__(self, *args, **kwargs):
         if 'source' not in kwargs:
             kwargs['source'] = 'created_by_id'
         if 'read_only' not in kwargs:
             kwargs['read_only'] = True
-        super(BadgeUserIdentifierFieldV1, self).__init__(*args, **kwargs)
+        super(BadgeUserIdentifierField, self).__init__(*args, **kwargs)
 
     def to_representation(self, value):
         try:

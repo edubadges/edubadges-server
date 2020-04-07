@@ -2,7 +2,7 @@ import json
 import os
 import uuid
 
-from badgeuser.serializers_v1 import BadgeUserIdentifierFieldV1
+from badgeuser.serializers import BadgeUserIdentifierField
 from django.apps import apps
 from django.core.validators import URLValidator
 from django.urls import reverse
@@ -60,7 +60,7 @@ class ExtensionsSaverMixin(object):
 
 class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
-    created_by = BadgeUserIdentifierFieldV1()
+    created_by = BadgeUserIdentifierField()
     name = StripTagsCharField(max_length=1024)
     slug = StripTagsCharField(max_length=255, source='entity_id', read_only=True)
     image = ValidImageField(required=False)
@@ -130,7 +130,7 @@ class AlignmentItemSerializer(serializers.Serializer):
 
 class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
-    created_by = BadgeUserIdentifierFieldV1()
+    created_by = BadgeUserIdentifierField()
     name = StripTagsCharField(max_length=255)
     image = ValidImageField(required=False)
     issuer = IssuerSlugRelatedField(slug_field='entity_id', required=True)
@@ -228,7 +228,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
 
 class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
-    created_by = BadgeUserIdentifierFieldV1(read_only=True)
+    created_by = BadgeUserIdentifierField(read_only=True)
     slug = serializers.CharField(max_length=255, read_only=True, source='entity_id')
     image = serializers.FileField(read_only=True)  # use_url=True, might be necessary
     email = serializers.EmailField(max_length=1024, required=False, write_only=True)
