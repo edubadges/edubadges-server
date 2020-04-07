@@ -69,6 +69,7 @@ surf_issuer, _ = Issuer.objects.get_or_create(name="SURF", image="uploads/issuer
                                               description="SURF", email="info@surf.nl", url="https://surf.nl",
                                               source="local", original_json="{}", badgrapp=main_badgr_app)
 
-BadgeClass.objects.get_or_create(name="eduID Account creation", issuer=surf_issuer, image="uploads/badges/eduid.png",
+BadgeClass.objects.get_or_create(name=settings.EDUID_BADGE_CLASS_NAME, issuer=surf_issuer,
+                                 image="uploads/badges/eduid.png",
                                  description="This is an example badge, please provide proof that you are eligible to receive more badges",
                                  source="local", old_json="{}")

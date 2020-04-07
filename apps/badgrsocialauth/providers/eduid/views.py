@@ -3,24 +3,26 @@ import logging
 import urllib.error
 import urllib.parse
 import urllib.request
+import uuid
 from base64 import b64encode
 from urllib.parse import urlparse
 
 import requests
 from allauth.socialaccount.helpers import render_authentication_error, complete_social_login
 from allauth.socialaccount.models import SocialApp
-from badgrsocialauth.utils import set_session_badgr_app, get_social_account, update_user_params, \
-    check_agreed_term_and_conditions
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
+
+from badgeuser.models import BadgeUser
+from badgrsocialauth.utils import set_session_badgr_app, get_social_account, update_user_params, \
+    check_agreed_term_and_conditions, get_session_badgr_app
 from ims.models import LTITenant
-from issuer.models import BadgeClass
+from issuer.models import BadgeClass, BadgeInstance
 from lti_edu.models import StudentsEnrolled, LtiBadgeUserTennant, UserCurrentContextId
 from mainsite.models import BadgrApp
-
 from .provider import EduIDProvider
 
 logger = logging.getLogger('Badgr.Debug')
@@ -116,6 +118,7 @@ def after_terms_agreement(request, **kwargs):
         error = 'Server error: User info endpoint error (http %s). Try alternative login methods' % response.status_code
         logger.debug(error)
         return render_authentication_error(request, EduIDProvider.id, error=error)
+
     userinfo_json = response.json()
 
     if 'sub' not in userinfo_json:
@@ -166,6 +169,10 @@ def after_terms_agreement(request, **kwargs):
     request.session['lti_user_id'] = lti_user_id
     request.session['lti_roles'] = lti_roles
 
+    if not social_account:
+        # Create an eduIDBadge
+        create_edu_id_badge_instance(request, login)
+
     # 4. Return the user to where she came from (ie the referer: public enrollment or main page)
     if 'public' in referer:
         if 'badges' in referer:
@@ -179,6 +186,19 @@ def after_terms_agreement(request, **kwargs):
         return ret
 
 
+def create_edu_id_badge_instance(request, social_login):
+    user = social_login.user
+    social_account = social_login.account
+    super_user = BadgeUser.objects.get(username=settings.SUPERUSER_NAME)
+    badge_class = BadgeClass.objects.get(name=settings.EDUID_BADGE_CLASS_NAME)
+
+    assertion = badge_class.issue(recipient_id=social_account.uid, created_by=super_user, allow_uppercase=True,
+                                  recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID,
+                                  badgr_app=get_session_badgr_app(request), expires_at=None, extensions=None,
+                                  identifier=uuid.uuid4().urn)
+    logger.info(f"Assertion created for {user.email} based on {badge_class.name}")
+
+
 def callback(request):
     if request.user.is_authenticated:
         get_account_adapter(request).logout(request)  # logging in while being authenticated breaks the login procedure
@@ -187,7 +207,7 @@ def callback(request):
     # extract state of redirect
     state = json.loads(request.GET.get('state'))
     referer, badgr_app_pk, lti_context_id, lti_user_id, lti_roles = state
-    lti_data = request.session.get('lti_data', None);
+    lti_data = request.session.get('lti_data', None)
     code = request.GET.get('code', None)  # access codes to access user info endpoint
     if code is None:  # check if code is given
         error = 'Server error: No userToken found in callback'
@@ -222,9 +242,9 @@ def callback(request):
                              json.loads(referer)]),
                          'after_terms_agreement_url_name': 'eduid_terms_accepted_callback'}
 
-    if not get_social_account(userinfo_json['sub']):
-        return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))
     social_account = get_social_account(userinfo_json['sub'])
+    if not social_account:
+        return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))
 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
     if not check_agreed_term_and_conditions(social_account.user, badgr_app):
