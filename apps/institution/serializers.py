@@ -27,6 +27,11 @@ class InstitutionSerializer(serializers.Serializer):
         model = Institution
 
     def update(self, instance, validated_data):
+        if instance.assertions:
+            if validated_data.get('grading_table') and instance.grading_table != validated_data.get('grading_table'):
+                raise BadgrValidationError('Cannot change grading table, assertions have already been issued')
+            if validated_data.get('brin') and instance.brin != validated_data.get('brin'):
+                raise BadgrValidationError('Cannot change brin, assertions have already been issued')
         instance.name = validated_data.get('name')
         instance.description = validated_data.get('description')
         instance.image = validated_data.get('image')

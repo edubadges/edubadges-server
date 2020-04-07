@@ -80,7 +80,7 @@ urlpatterns = [
     url(r'^v1/user/', include('badgeuser.v1_api_urls'), kwargs={'version': 'v1'}),
     url(r'^v1/user/', include('badgrsocialauth.v1_api_urls'), kwargs={'version': 'v1'}),
 
-    url(r'^v1/issuer/', include('issuer.v1_api_urls'), kwargs={'version': 'v1'}),
+    url(r'^issuer/', include('issuer.api_urls'), kwargs={'version': 'v1'}),
     url(r'^v1/earner/', include('backpack.v1_api_urls'), kwargs={'version': 'v1'}),
 
     # include LTI endpoints

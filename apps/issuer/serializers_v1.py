@@ -47,7 +47,7 @@ class ExtensionsSaverMixin(object):
                 ext.save()
 
     def save_extensions(self, validated_data, instance):
-        extension_items = validated_data.get('extension_items')
+        extension_items = validated_data.pop('extension_items')
         received_extensions = list(extension_items.keys())
         current_extension_names = list(instance.extension_items.keys())
         remove_these_extensions = set(current_extension_names) - set(received_extensions)
@@ -91,11 +91,11 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
             raise BadgrValidationError(fields="You don't have the necessary permissions")
 
     def update(self, instance, validated_data):
+        if instance.assertions:
+            raise BadgrValidationError('Cannot change any value, assertions have already been issued')
         [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
-
         if not instance.badgrapp_id:
             instance.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
-
         instance.save()
         return instance
 
@@ -131,7 +131,6 @@ class AlignmentItemSerializerV1(serializers.Serializer):
 class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1()
-    id = serializers.IntegerField(required=False, read_only=True)
     name = StripTagsCharField(max_length=255)
     image = ValidImageField(required=False)
     issuer = IssuerSlugRelatedField(slug_field='entity_id', required=True)
@@ -170,6 +169,12 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, 
             return criteria_url
         else:
             return None
+        
+    def validate_name(self, name):
+        return strip_tags(name)
+
+    def validate_description(self, description):
+        return strip_tags(description)
 
     def add_extensions(self, instance, add_these_extensions, extension_items):
         for extension_name in add_these_extensions:
@@ -180,31 +185,12 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, 
             extension.save()
 
     def update(self, instance, validated_data):
-
-        new_name = validated_data.get('name')
-        if new_name:
-            new_name = strip_tags(new_name)
-            instance.name = new_name
-
-        new_description = validated_data.get('description')
-        if new_description:
-            instance.description = strip_tags(new_description)
-
-        if 'criteria_text' in validated_data:
-            instance.criteria_text = validated_data.get('criteria_text')
-        if 'criteria_url' in validated_data:
-            instance.criteria_url = validated_data.get('criteria_url')
-
-        if 'image' in validated_data:
-            instance.image = validated_data.get('image')
-
-        instance.alignment_items = validated_data.get('alignment_items')
-        instance.tag_items = validated_data.get('tag_items')
-
+        if instance.assertions:
+            raise BadgrValidationError('Cannot change any value, assertions have already been issued')
         self.save_extensions(validated_data, instance)
-
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
         instance.save()
-
         return instance
 
     def validate(self, data):

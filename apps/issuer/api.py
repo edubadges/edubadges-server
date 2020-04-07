@@ -2,7 +2,6 @@ import datetime
 from collections import OrderedDict
 
 import badgrlog
-from issuer.permissions import IssuedAssertionsBlock
 from apispec_drf.decorators import apispec_put_operation, apispec_delete_operation, apispec_post_operation
 from django.http import Http404
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
@@ -26,7 +25,7 @@ logger = badgrlog.BadgrLogger()
 class IssuerDetail(BaseEntityDetailView):
     model = Issuer
     v1_serializer_class = IssuerSerializerV1
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, IssuedAssertionsBlock, CannotDeleteWithChildren)
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, CannotDeleteWithChildren)
     http_method_names = ['put', 'delete']
 
     @apispec_put_operation('Issuer',
@@ -79,7 +78,7 @@ class BadgeClassDetail(BaseEntityDetailView):
     PUT and DELETE are blocked if assertions have been issued
     """
     model = BadgeClass
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, IssuedAssertionsBlock, CannotDeleteWithChildren)
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, CannotDeleteWithChildren)
     v1_serializer_class = BadgeClassSerializerV1
     http_method_names = ['put', 'delete']
 

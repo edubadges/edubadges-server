@@ -3,7 +3,6 @@ from institution.models import Faculty, Institution
 from institution.serializers import FacultySerializer, InstitutionSerializer
 from mainsite.permissions import AuthenticatedWithVerifiedEmail, CannotDeleteWithChildren
 from staff.permissions import HasObjectPermission
-from issuer.permissions import IssuedAssertionsBlock
 
 
 class InstitutionDetail(BaseEntityDetailView):
@@ -12,7 +11,7 @@ class InstitutionDetail(BaseEntityDetailView):
     """
     model = Institution
     v1_serializer_class = InstitutionSerializer
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, IssuedAssertionsBlock)
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     http_method_names = ['put']
 
 
@@ -23,7 +22,7 @@ class FacultyDetail(BaseEntityDetailView):
     """
     model = Faculty
     v1_serializer_class = FacultySerializer
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, IssuedAssertionsBlock, CannotDeleteWithChildren)
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, CannotDeleteWithChildren)
     http_method_names = ['put', 'delete']
 
 
