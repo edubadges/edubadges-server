@@ -56,7 +56,7 @@ Note: some of these packages would introduce additional security considerations 
 ### Create database
 ```
 DROP DATABASE IF EXISTS badgr;
-CREATE DATABASE badgr DEFAULT CHARACTER SET utf8;
+CREATE DATABASE badgr CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
 ```
 
 ### Install requirements
