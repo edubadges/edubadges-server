@@ -8,18 +8,27 @@ from django.core.validators import URLValidator
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import strip_tags
-from institution.models import Faculty
-from institution.serializers_v1 import FacultySerializerV1
 from lti_edu.models import StudentsEnrolled
 from mainsite.drf_fields import ValidImageField
+from mainsite.exceptions import BadgrValidationError
 from mainsite.models import BadgrApp
 from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField, \
-    OriginalJsonSerializerMixin
+    OriginalJsonSerializerMixin, BaseSlugRelatedField
 from mainsite.utils import OriginSetting
 from rest_framework import serializers
 
+from institution.serializers_v1 import FacultySlugRelatedField
+
 from . import utils
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension
+
+
+class IssuerSlugRelatedField(BaseSlugRelatedField):
+    model = Issuer
+
+
+class BadgeClassSlugRelatedField(BaseSlugRelatedField):
+    model = BadgeClass
 
 
 class ExtensionsSaverMixin(object):
@@ -58,7 +67,7 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
     email = serializers.EmailField(max_length=255, required=True)
     description = StripTagsCharField(max_length=16384, required=False)
     url = serializers.URLField(max_length=1024, required=True)
-    faculty = FacultySerializerV1(required=False, allow_null=True)
+    faculty = FacultySlugRelatedField(slug_field='entity_id', required=True)
     extensions = serializers.DictField(source='extension_items', required=False)
 
     class Meta:
@@ -71,15 +80,15 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
         return image
 
     def create(self, validated_data, **kwargs):
-        if self.context['request'].data.get('faculty', None):
-            faculty_id = self.context['request'].data['faculty']['id']
-            faculty = Faculty.objects.get(pk=faculty_id)
-            validated_data['faculty'] = faculty
-        new_issuer = Issuer(**validated_data)
-        # set badgrapp
-        new_issuer.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
-        new_issuer.save()
-        return new_issuer
+        user_permissions = validated_data['faculty'].get_permissions(validated_data['created_by'])
+        if user_permissions['may_create']:
+            new_issuer = Issuer(**validated_data)
+            # set badgrapp
+            new_issuer.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
+            new_issuer.save()
+            return new_issuer
+        else:
+            raise BadgrValidationError(fields="You don't have the necessary permissions")
 
     def update(self, instance, validated_data):
         [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
@@ -125,6 +134,7 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, 
     id = serializers.IntegerField(required=False, read_only=True)
     name = StripTagsCharField(max_length=255)
     image = ValidImageField(required=False)
+    issuer = IssuerSlugRelatedField(slug_field='entity_id', required=True)
     criteria = MarkdownCharField(allow_blank=True, required=False, write_only=True)
     criteria_text = MarkdownCharField(required=False, allow_null=True, allow_blank=True)
     criteria_url = StripTagsCharField(required=False, allow_blank=True, allow_null=True, validators=[URLValidator()])
@@ -222,12 +232,12 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, 
         return data
 
     def create(self, validated_data, **kwargs):
-        if 'image' not in validated_data:
-            raise serializers.ValidationError({"image": ["This field is required"]})
-        if 'issuer' in self.context:
-            validated_data['issuer'] = self.context.get('issuer')
-        new_badgeclass = BadgeClass.objects.create(**validated_data)
-        return new_badgeclass
+        user_permissions = validated_data['issuer'].get_permissions(validated_data['created_by'])
+        if user_permissions['may_create']:
+            new_badgeclass = BadgeClass.objects.create(**validated_data)
+            return new_badgeclass
+        else:
+            raise BadgrValidationError(fields="You don't have the necessary permissions")
 
 
 class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):

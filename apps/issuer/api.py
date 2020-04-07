@@ -46,17 +46,11 @@ class IssuerDetail(BaseEntityDetailView):
 
 class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
     """
-    POST to create a new badgeclass within the issuer context
+    POST to create a new BadgeClass
     """
-    model = Issuer  # used by get_object()
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
     v1_serializer_class = BadgeClassSerializerV1
     http_method_names = ['post']
-
-    def get_context_data(self, **kwargs):
-        context = super(IssuerBadgeClassList, self).get_context_data(**kwargs)
-        context['issuer'] = self.get_object(self.request, **kwargs)
-        return context
 
     @apispec_post_operation('BadgeClass',
         summary="Create a new BadgeClass associated with an Issuer",
@@ -64,7 +58,6 @@ class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
         tags=["Issuers", "BadgeClasses"],
     )
     def post(self, request, **kwargs):
-        issuer = self.get_object(request, **kwargs)  # trigger a has_object_permissions() check
         return super(IssuerBadgeClassList, self).post(request, **kwargs)
 
 

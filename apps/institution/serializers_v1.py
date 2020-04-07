@@ -1,9 +1,18 @@
 from django.db import IntegrityError
 from mainsite.drf_fields import ValidImageField
-from mainsite.serializers import StripTagsCharField
+from mainsite.exceptions import BadgrValidationError
+from mainsite.serializers import StripTagsCharField, BaseSlugRelatedField
 from rest_framework import serializers
 
 from .models import Faculty, Institution
+
+
+class InstitutionSlugRelatedField(BaseSlugRelatedField):
+    model = Institution
+
+
+class FacultySlugRelatedField(BaseSlugRelatedField):
+    model = Faculty
 
 
 class InstitutionSerializer(serializers.Serializer):
@@ -33,7 +42,6 @@ class FacultySerializerV1(serializers.Serializer):
     description = StripTagsCharField(max_length=16384, required=False)
     slug = StripTagsCharField(max_length=255, read_only=True, source='entity_id')
 
-
     class Meta:
         model = Faculty
         
@@ -45,11 +53,15 @@ class FacultySerializerV1(serializers.Serializer):
 
     def create(self, validated_data, **kwargs):
         user_institution = self.context['request'].user.institution
-        validated_data['institution'] = user_institution
-        del validated_data['created_by']
-        new_faculty = Faculty(**validated_data)
-        try:
-            new_faculty.save()
-        except IntegrityError as e:
-            raise serializers.ValidationError("Faculty name already exists")
-        return new_faculty
+        user_permissions = user_institution.get_permissions(validated_data['created_by'])
+        if user_permissions['may_create']:
+            validated_data['institution'] = user_institution
+            del validated_data['created_by']
+            new_faculty = Faculty(**validated_data)
+            try:
+                new_faculty.save()
+            except IntegrityError as e:
+                raise serializers.ValidationError("Faculty name already exists")
+            return new_faculty
+        else:
+            BadgrValidationError(fields="You don't have the necessary permissions")

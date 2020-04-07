@@ -5,11 +5,15 @@ from rest_framework import serializers
 
 from institution.serializers_v1 import FacultySerializerV1
 from institution.models import Institution
-from mainsite.serializers import StripTagsCharField, BadgrBaseModelSerializer
+from mainsite.serializers import StripTagsCharField, BadgrBaseModelSerializer, BaseSlugRelatedField
 from mainsite.validators import PasswordValidator
 
 from .models import BadgeUser, CachedEmailAddress, TermsVersion
 from .utils import notify_on_password_change
+
+
+class UserSlugRelatedField(BaseSlugRelatedField):
+    model = BadgeUser
 
 
 class BadgeUserTokenSerializerV1(serializers.Serializer):

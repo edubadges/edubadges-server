@@ -1,34 +1,8 @@
 from rest_framework import serializers
-from rest_framework.serializers import SlugRelatedField
-from badgeuser.models import BadgeUser
-from institution.models import Institution, Faculty
-from issuer.models import Issuer, BadgeClass
+from badgeuser.serializers_v1 import UserSlugRelatedField
+from institution.serializers_v1 import InstitutionSlugRelatedField, FacultySlugRelatedField
+from issuer.serializers_v1 import IssuerSlugRelatedField, BadgeClassSlugRelatedField
 from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
-
-
-class BaseSlugRelatedField(SlugRelatedField):
-    def get_queryset(self):
-        return self.model.objects.all()
-
-
-class UserSlugRelatedField(BaseSlugRelatedField):
-    model = BadgeUser
-
-
-class InstitutionSlugRelatedField(BaseSlugRelatedField):
-    model = Institution
-
-
-class FacultySlugRelatedField(BaseSlugRelatedField):
-    model = Faculty
-
-
-class IssuerSlugRelatedField(BaseSlugRelatedField):
-    model = Issuer
-
-
-class BadgeClassSlugRelatedField(BaseSlugRelatedField):
-    model = BadgeClass
 
 
 class BaseStaffSerializer(serializers.Serializer):

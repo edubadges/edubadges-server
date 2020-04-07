@@ -27,28 +27,25 @@ class FacultyDetail(BaseEntityDetailView):
 
 class FacultyIssuerList(VersionedObjectMixin, BaseEntityListView):
     """
-    POST to create an Issuer within the Faculty context
+    POST to create a new Issuer
     """
-    model = Faculty
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
     v1_serializer_class = IssuerSerializerV1
     http_method_names = ['post']
 
     def post(self, request, **kwargs):
-        faculty = self.get_object(request, **kwargs)
         return super(FacultyIssuerList, self).post(request, **kwargs)
 
 
 class InstitutionFacultyList(VersionedObjectMixin, BaseEntityListView):
     """
-    POST to create a Faculty within the Institution context
+    POST to create a new Faculty
     """
     # no need to declare model here
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
     v1_serializer_class = FacultySerializerV1
     http_method_names = ['post']
 
     def post(self, request, **kwargs):
-        self.has_object_permissions(request, request.user.institution)
         return super(InstitutionFacultyList, self).post(request, **kwargs)
 
