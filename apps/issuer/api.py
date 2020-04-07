@@ -44,7 +44,7 @@ class IssuerDetail(BaseEntityDetailView):
         return super(IssuerDetail, self).delete(request, **kwargs)
 
 
-class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
+class BadgeClassList(VersionedObjectMixin, BaseEntityListView):
     """
     POST to create a new BadgeClass
     """
@@ -58,7 +58,19 @@ class IssuerBadgeClassList(VersionedObjectMixin, BaseEntityListView):
         tags=["Issuers", "BadgeClasses"],
     )
     def post(self, request, **kwargs):
-        return super(IssuerBadgeClassList, self).post(request, **kwargs)
+        return super(BadgeClassList, self).post(request, **kwargs)
+
+
+class IssuerList(VersionedObjectMixin, BaseEntityListView):
+    """
+    POST to create a new Issuer
+    """
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    v1_serializer_class = IssuerSerializerV1
+    http_method_names = ['post']
+
+    def post(self, request, **kwargs):
+        return super(IssuerList, self).post(request, **kwargs)
 
 
 class BadgeClassDetail(BaseEntityDetailView):
