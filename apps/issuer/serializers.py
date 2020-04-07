@@ -58,7 +58,7 @@ class ExtensionsSaverMixin(object):
         self.add_extensions(instance, add_these_extensions, extension_items)
 
 
-class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serializers.Serializer):
+class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1()
     name = StripTagsCharField(max_length=1024)
@@ -100,11 +100,11 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
         return instance
 
     def to_representation(self, obj):
-        representation = super(IssuerSerializerV1, self).to_representation(obj)
+        representation = super(IssuerSerializer, self).to_representation(obj)
         representation['json'] = obj.get_json(obi_version='1_1', use_canonical_id=True)
 
         if self.context.get('embed_badgeclasses', False):
-            representation['badgeclasses'] = BadgeClassSerializerV1(obj.badgeclasses.all(), many=True,
+            representation['badgeclasses'] = BadgeClassSerializer(obj.badgeclasses.all(), many=True,
                                                                     context=self.context).data
         return representation
 
@@ -117,7 +117,7 @@ class IssuerSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, seri
             extension.save()
 
 
-class AlignmentItemSerializerV1(serializers.Serializer):
+class AlignmentItemSerializer(serializers.Serializer):
     target_name = StripTagsCharField()
     target_url = serializers.URLField()
     target_description = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
@@ -128,7 +128,7 @@ class AlignmentItemSerializerV1(serializers.Serializer):
         apispec_definition = ('BadgeClassAlignment', {})
 
 
-class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serializers.Serializer):
+class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1()
     name = StripTagsCharField(max_length=255)
@@ -138,7 +138,7 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, 
     criteria_text = MarkdownCharField(required=False, allow_null=True, allow_blank=True)
     criteria_url = StripTagsCharField(required=False, allow_blank=True, allow_null=True, validators=[URLValidator()])
     description = StripTagsCharField(max_length=16384, required=True, convert_null=True)
-    alignment = AlignmentItemSerializerV1(many=True, source='alignment_items', required=False)
+    alignment = AlignmentItemSerializer(many=True, source='alignment_items', required=False)
     tags = serializers.ListField(child=StripTagsCharField(max_length=1024), source='tag_items', required=False)
     extensions = serializers.DictField(source='extension_items', required=False)
 
@@ -146,7 +146,7 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, 
         apispec_definition = ('BadgeClass', {})
 
     def to_representation(self, instance):
-        representation = super(BadgeClassSerializerV1, self).to_representation(instance)
+        representation = super(BadgeClassSerializer, self).to_representation(instance)
         representation['issuer'] = OriginSetting.HTTP + reverse('issuer_json',
                                                                 kwargs={'entity_id': instance.cached_issuer.entity_id})
         representation['json'] = instance.get_json(obi_version='1_1', use_canonical_id=True)
@@ -226,7 +226,7 @@ class BadgeClassSerializerV1(OriginalJsonSerializerMixin, ExtensionsSaverMixin, 
             raise BadgrValidationError(fields="You don't have the necessary permissions")
 
 
-class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Serializer):
+class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierFieldV1(read_only=True)
     slug = serializers.CharField(max_length=255, read_only=True, source='entity_id')
@@ -284,15 +284,15 @@ class BadgeInstanceSerializerV1(OriginalJsonSerializerMixin, serializers.Seriali
         # if self.context.get('extended_json'):
         #     self.fields['json'] = V1InstanceSerializer(source='extended_json')
 
-        representation = super(BadgeInstanceSerializerV1, self).to_representation(instance)
+        representation = super(BadgeInstanceSerializer, self).to_representation(instance)
         representation['json'] = instance.get_json(obi_version="1_1", use_canonical_id=True)
         if self.context.get('include_issuer', False):
-            representation['issuer'] = IssuerSerializerV1(instance.cached_badgeclass.cached_issuer).data
+            representation['issuer'] = IssuerSerializer(instance.cached_badgeclass.cached_issuer).data
         else:
             representation['issuer'] = OriginSetting.HTTP + reverse('issuer_json', kwargs={
                 'entity_id': instance.cached_issuer.entity_id})
         if self.context.get('include_badge_class', False):
-            representation['badge_class'] = BadgeClassSerializerV1(instance.cached_badgeclass,
+            representation['badge_class'] = BadgeClassSerializer(instance.cached_badgeclass,
                                                                    context=self.context).data
         else:
             representation['badge_class'] = OriginSetting.HTTP + reverse('badgeclass_json', kwargs={

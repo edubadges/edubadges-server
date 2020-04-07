@@ -77,7 +77,7 @@ urlpatterns = [
     url(r'^account/', include('badgrsocialauth.redirect_urls')),
 
     # v1 API endpoints
-    url(r'^v1/user/', include('badgeuser.v1_api_urls'), kwargs={'version': 'v1'}),
+    url(r'^v1/user/', include('badgeuser.api_urls'), kwargs={'version': 'v1'}),
     url(r'^v1/user/', include('badgrsocialauth.v1_api_urls'), kwargs={'version': 'v1'}),
 
     url(r'^issuer/', include('issuer.api_urls'), kwargs={'version': 'v1'}),

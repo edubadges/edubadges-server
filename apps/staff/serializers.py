@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from badgeuser.serializers_v1 import UserSlugRelatedField
 from institution.serializers import InstitutionSlugRelatedField, FacultySlugRelatedField
-from issuer.serializers_v1 import IssuerSlugRelatedField, BadgeClassSlugRelatedField
+from issuer.serializers import IssuerSlugRelatedField, BadgeClassSlugRelatedField
 from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
 
 

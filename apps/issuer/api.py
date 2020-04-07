@@ -6,8 +6,7 @@ from apispec_drf.decorators import apispec_put_operation, apispec_delete_operati
 from django.http import Http404
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
 from issuer.models import Issuer, BadgeClass, BadgeInstance
-from issuer.serializers_v1 import (IssuerSerializerV1, BadgeClassSerializerV1,
-                                   BadgeInstanceSerializerV1)
+from issuer.serializers import IssuerSerializer, BadgeClassSerializer, BadgeInstanceSerializer
 from mainsite.exceptions import BadgrApiException400
 from mainsite.permissions import AuthenticatedWithVerifiedEmail, CannotDeleteWithChildren
 from rest_framework import status
@@ -24,7 +23,7 @@ logger = badgrlog.BadgrLogger()
 
 class IssuerDetail(BaseEntityDetailView):
     model = Issuer
-    v1_serializer_class = IssuerSerializerV1
+    v1_serializer_class = IssuerSerializer
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, CannotDeleteWithChildren)
     http_method_names = ['put', 'delete']
 
@@ -48,7 +47,7 @@ class BadgeClassList(VersionedObjectMixin, BaseEntityListView):
     POST to create a new BadgeClass
     """
     permission_classes = (AuthenticatedWithVerifiedEmail,)
-    v1_serializer_class = BadgeClassSerializerV1
+    v1_serializer_class = BadgeClassSerializer
     http_method_names = ['post']
 
     @apispec_post_operation('BadgeClass',
@@ -65,7 +64,7 @@ class IssuerList(VersionedObjectMixin, BaseEntityListView):
     POST to create a new Issuer
     """
     permission_classes = (AuthenticatedWithVerifiedEmail,)
-    v1_serializer_class = IssuerSerializerV1
+    v1_serializer_class = IssuerSerializer
     http_method_names = ['post']
 
     def post(self, request, **kwargs):
@@ -79,7 +78,7 @@ class BadgeClassDetail(BaseEntityDetailView):
     """
     model = BadgeClass
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, CannotDeleteWithChildren)
-    v1_serializer_class = BadgeClassSerializerV1
+    v1_serializer_class = BadgeClassSerializer
     http_method_names = ['put', 'delete']
 
 
@@ -108,7 +107,7 @@ class BadgeClassDetail(BaseEntityDetailView):
 class TimestampedBadgeInstanceList(BaseEntityListView):
     http_method_names = ['get', 'delete']
     permission_classes = (AuthenticatedWithVerifiedEmail, MaySignAssertions)
-    serializer_class = BadgeInstanceSerializerV1
+    serializer_class = BadgeInstanceSerializer
 
     def get(self, request, **kwargs):
         return super(TimestampedBadgeInstanceList, self).get(request, **kwargs)
@@ -129,7 +128,7 @@ class TimestampedBadgeInstanceList(BaseEntityListView):
 class BatchSignAssertions(BaseEntityListView):
     http_method_names = ['post']
     permission_classes = (AuthenticatedWithVerifiedEmail, MaySignAssertions)
-    serializer_class = BadgeInstanceSerializerV1
+    serializer_class = BadgeInstanceSerializer
 
     def post(self, request, **kwargs):
         # post assertions to be signed
@@ -191,7 +190,7 @@ class BatchSignAssertions(BaseEntityListView):
 class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):
     model = BadgeClass  # used by .get_object()
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
-    v1_serializer_class = BadgeInstanceSerializerV1
+    v1_serializer_class = BadgeInstanceSerializer
     http_method_names = ['post']
     permission_map = {'POST': 'may_award'}
 
@@ -253,7 +252,7 @@ class BadgeInstanceDetail(BaseEntityDetailView):
     """
     model = BadgeInstance
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
-    v1_serializer_class = BadgeInstanceSerializerV1
+    v1_serializer_class = BadgeInstanceSerializer
     http_method_names = ['delete']
     permission_map = {'DELETE': 'may_award'}
 
