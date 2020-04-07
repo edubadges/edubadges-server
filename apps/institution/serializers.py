@@ -36,7 +36,7 @@ class InstitutionSerializer(serializers.Serializer):
         return instance
 
 
-class FacultySerializerV1(serializers.Serializer):
+class FacultySerializer(serializers.Serializer):
     id = serializers.ReadOnlyField()
     name = serializers.CharField(max_length=512)
     description = StripTagsCharField(max_length=16384, required=False)

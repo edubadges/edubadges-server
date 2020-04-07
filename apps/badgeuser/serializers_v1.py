@@ -3,7 +3,7 @@ import json
 from django.contrib.auth.models import Permission
 from rest_framework import serializers
 
-from institution.serializers_v1 import FacultySerializerV1
+from institution.serializers import FacultySerializer
 from institution.models import Institution
 from mainsite.serializers import StripTagsCharField, BadgrBaseModelSerializer, BaseSlugRelatedField
 from mainsite.validators import PasswordValidator
@@ -51,7 +51,7 @@ class BadgeUserProfileSerializerV1(serializers.Serializer):
     agreed_terms_version = serializers.IntegerField(required=False)
     marketing_opt_in = serializers.BooleanField(required=False)
     user_permissions = serializers.SerializerMethodField(required=False)
-    faculty = FacultySerializerV1(many=True,  allow_null=True)
+    faculty = FacultySerializer(many=True,  allow_null=True)
     institution = InstitutionForProfileSerializerV1(read_only=True, )
 
     class Meta:

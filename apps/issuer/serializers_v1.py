@@ -17,7 +17,7 @@ from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, 
 from mainsite.utils import OriginSetting
 from rest_framework import serializers
 
-from institution.serializers_v1 import FacultySlugRelatedField
+from institution.serializers import FacultySlugRelatedField
 
 from . import utils
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension
