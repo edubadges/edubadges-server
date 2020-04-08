@@ -86,6 +86,9 @@ class BadgeClassType(StaffResolverMixin, ImageResolverMixin, ExtensionResolverMi
     tags = graphene.List(BadgeClassTagType)
     alignments = graphene.List(BadgeClassAlignmentType)
     enrollments = graphene.List(StudentsEnrolledType)
+    request_count = graphene.Int()
+    recipient_count = graphene.Int()
+    revoked_count = graphene.Int()
 
     def resolve_tags(self, info, **kwargs):
         return self.cached_tags()
@@ -95,6 +98,15 @@ class BadgeClassType(StaffResolverMixin, ImageResolverMixin, ExtensionResolverMi
 
     def resolve_enrollments(self, info, **kwargs):
         return self.cached_enrollments()
+
+    def resolve_request_count(self, info, **kwargs):
+        return self.enrollment_count()
+
+    def resolve_recipient_count(self, info, **kwargs):
+        return self.recipient_count()
+
+    def resolve_revoked_count(self, info, **kwargs):
+        return self.revoked_count()
 
 
 class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
