@@ -47,15 +47,16 @@ class ExtensionsSaverMixin(object):
                 ext.save()
 
     def save_extensions(self, validated_data, instance):
-        extension_items = validated_data.pop('extension_items')
-        received_extensions = list(extension_items.keys())
-        current_extension_names = list(instance.extension_items.keys())
-        remove_these_extensions = set(current_extension_names) - set(received_extensions)
-        update_these_extensions = set(current_extension_names).intersection(set(received_extensions))
-        add_these_extensions = set(received_extensions) - set(current_extension_names)
-        self.remove_extensions(instance, remove_these_extensions)
-        self.update_extensions(instance, update_these_extensions, extension_items)
-        self.add_extensions(instance, add_these_extensions, extension_items)
+        if validated_data.get('extension_items', False):
+            extension_items = validated_data.pop('extension_items')
+            received_extensions = list(extension_items.keys())
+            current_extension_names = list(instance.extension_items.keys())
+            remove_these_extensions = set(current_extension_names) - set(received_extensions)
+            update_these_extensions = set(current_extension_names).intersection(set(received_extensions))
+            add_these_extensions = set(received_extensions) - set(current_extension_names)
+            self.remove_extensions(instance, remove_these_extensions)
+            self.update_extensions(instance, update_these_extensions, extension_items)
+            self.add_extensions(instance, add_these_extensions, extension_items)
 
 
 class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serializers.Serializer):
