@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from rest_framework.views import APIView
 from mainsite.exceptions import BadgrApiException400
+from entity.utils import get_form_error_code
 
 
 class BaseEntityView(APIView):
@@ -157,7 +158,12 @@ class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
         serializer.is_valid()
         errors = serializer.errors
         if errors:
-            fields = {"error_message": "my_error_message", "error_code": 0}
+            print(errors)
+            fields = {}
+            for key, value in errors.items():
+                error_code = get_form_error_code(vars(value[0])['code'])
+                fields[key] = {"error_message": f"{value[0]}", "error_code": error_code}
+            print(fields)
             raise BadgrApiException400(fields)
         serializer.save(updated_by=request.user)
         return Response(serializer.data)
