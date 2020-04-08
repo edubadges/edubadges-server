@@ -11,6 +11,7 @@ staticfiles*
 mediafiles/*
 !mediafiles/uploads/badges/eduid.png
 !mediafiles/uploads/issuers/surf.png
+!mediafiles/uploads/institution/surf.png
 emailfiles*
 logs/*
 node_modules/*

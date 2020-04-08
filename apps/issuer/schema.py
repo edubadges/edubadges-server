@@ -4,8 +4,8 @@ from graphene_django.types import DjangoObjectType
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
                     BadgeClassAlignment, BadgeClassTag
 from lti_edu.schema import StudentsEnrolledType
-from mainsite.mixins import StaffResolverMixin, ImageResolverMixin
-from staff.schema import IssuerStaffType, BadgeClassStaffType
+from mainsite.mixins import StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin
+from staff.schema import IssuerStaffType, BadgeClassStaffType, PermissionType
 
 
 class ExtensionResolverMixin(object):
@@ -54,8 +54,7 @@ class BadgeClassTagType(DjangoObjectType):
         model = BadgeClassTag
         fields = ('name',)
 
-
-class IssuerType(StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
+class IssuerType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
 
     class Meta:
         model = Issuer
@@ -65,6 +64,7 @@ class IssuerType(StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
     staff = graphene.List(IssuerStaffType)
     badgeclasses_count = graphene.Int()
     extensions = graphene.List(IssuerExtensionType)
+    permissions = graphene.Field(PermissionType)
 
     def resolve_badgeclasses(self, info):
         return self.get_badgeclasses(info.context.user, ['may_read'])
@@ -73,7 +73,7 @@ class IssuerType(StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
         return len(self.get_badgeclasses(info.context.user, ['read']))
 
 
-class BadgeClassType(StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
+class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
 
     class Meta:
         model = BadgeClass
@@ -86,6 +86,7 @@ class BadgeClassType(StaffResolverMixin, ImageResolverMixin, ExtensionResolverMi
     tags = graphene.List(BadgeClassTagType)
     alignments = graphene.List(BadgeClassAlignmentType)
     enrollments = graphene.List(StudentsEnrolledType)
+    permissions = graphene.Field(PermissionType)
     request_count = graphene.Int()
     recipient_count = graphene.Int()
     revoked_count = graphene.Int()

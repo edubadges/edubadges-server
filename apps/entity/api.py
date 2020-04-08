@@ -7,7 +7,6 @@ from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from rest_framework.views import APIView
-from mainsite.exceptions import BadgrApiException400
 
 
 class BaseEntityView(APIView):
@@ -154,11 +153,7 @@ class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
         context = self.get_context_data(**kwargs)
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(obj, data=data, partial=allow_partial, context=context)
-        serializer.is_valid()
-        errors = serializer.errors
-        if errors:
-            fields = {"error_message": "my_error_message", "error_code": 0}
-            raise BadgrApiException400(fields)
+        serializer.is_valid(raise_exception=True)
         serializer.save(updated_by=request.user)
         return Response(serializer.data)
 

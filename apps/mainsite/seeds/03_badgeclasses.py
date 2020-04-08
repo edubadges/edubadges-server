@@ -3,7 +3,7 @@ from issuer.models import Issuer, BadgeClass
 
 
 # Faculty
-for ins in Institution.objects.all():
+for ins in Institution.objects.exclude(name="surfnet.nl"):
     Faculty.objects.get_or_create(name="Law", institution=ins)
     Faculty.objects.get_or_create(name="Business", institution=ins)
     Faculty.objects.get_or_create(name="Humanities", institution=ins)
@@ -34,6 +34,7 @@ for iss in Issuer.objects.filter(name="Psychology"):
         issuer=iss,
         description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
         old_json="{}",
+        image="uploads/badges/eduid.png",
     ) for bc in ['Introduction to Psychology', 'Cognitive Psychology', 'Psychometrics', 'Group Dynamics']]
 
 ## Faculty: Social and Behavioural Science ## Issuer: Political Science
@@ -43,6 +44,7 @@ for iss in Issuer.objects.filter(name="Political Science"):
         issuer=iss,
         description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
         old_json="{}",
+        image="uploads/badges/eduid.png",
     ) for bc in ['Introduction to Political Science', 'Law and Politics', 'History of Political Thought', 'Research Methods']]
 
 ## Faculty: Medicine ## Issuer: Medicine
@@ -52,4 +54,5 @@ for iss in Issuer.objects.filter(name="Medicine"):
         issuer=iss,
         description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
         old_json="{}",
+        image="uploads/badges/eduid.png",
     ) for bc in ['Growth and Development', 'Circulation and Breathing', 'Regulation and Integration', 'Digestion and Defense']]
