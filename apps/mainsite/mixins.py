@@ -1,21 +1,25 @@
 import io
 from xml.etree import cElementTree as ET
 from django.core.files.storage import default_storage
-from rest_framework.response import Response
-from rest_framework.status import HTTP_204_NO_CONTENT
-
 from PIL import Image
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from mainsite.utils import verify_svg
-from mainsite.exceptions import BadgrApiException400
 from resizeimage.resizeimage import resize_contain
-
 
 def _decompression_bomb_check(image, max_pixels=Image.MAX_IMAGE_PIXELS):
     pixels = image.size[0] * image.size[1]
     return pixels > max_pixels
+
+
+
+class PermissionsResolverMixin(object):
+    """
+    Schema mixin to resolve entity pemissions
+    """
+    def resolve_permissions(self, info):
+        return self.get_permissions(info.context.user)
 
 
 class ImageResolverMixin(object):

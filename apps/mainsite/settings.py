@@ -371,9 +371,6 @@ LINKED_DATA_DOCUMENT_FETCHER = 'badgeanalysis.utils.custom_docloader'
 
 LTI_STORE_IN_SESSION = False
 TIME_STAMPED_OPEN_BADGES_BASE_URL = os.environ['TIME_STAMPED_OPEN_BADGES_BASE_URL']
-# Optionally restrict issuer creation to accounts that have the 'issuer.add_issuer' permission
-# Niet elke issuer mag issuers aanmaken
-BADGR_APPROVED_ISSUERS_ONLY = True
 CAIROSVG_VERSION_SUFFIX = "2"
 
 USE_I18N = True
@@ -507,7 +504,7 @@ EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 25))
 DEFAULT_FROM_EMAIL = os.environ['DEFAULT_FROM_EMAIL']
 
 # Seeds
-ALLOW_SEEDS = os.environ.get('ALLOW_SEEDS', False)
+ALLOW_SEEDS = bool(int(os.environ.get('ALLOW_SEEDS', '0')))
 EDU_ID_SECRET = os.environ['EDU_ID_SECRET']
 EDU_ID_CLIENT = "edubadges"
 
@@ -522,8 +519,9 @@ SUPERUSER_PWD = os.environ.get('SUPERUSER_PWD', '')
 EDUID_BADGE_CLASS_NAME = "eduID Account creation"
 
 # Debug
-DEBUG = os.environ.get('DEBUG', True)
+DEBUG = bool(int(os.environ.get('DEBUG', '0')))
 TEMPLATE_DEBUG = DEBUG
 DEBUG_ERRORS = DEBUG
 DEBUG_STATIC = DEBUG
 DEBUG_MEDIA = DEBUG
+LOCAL_DEVELOPMENT_MODE = bool(int(os.environ.get('LOCAL_DEVELOPMENT_MODE', '0')))

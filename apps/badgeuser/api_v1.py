@@ -6,7 +6,7 @@ import datetime
 from apispec_drf.decorators import apispec_list_operation, apispec_operation, \
     apispec_get_operation, apispec_delete_operation, apispec_put_operation
 from badgeuser.models import CachedEmailAddress
-from badgeuser.serializers_v1 import EmailSerializerV1
+from badgeuser.serializers import EmailSerializer
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -23,7 +23,7 @@ class BadgeUserEmailList(APIView):
     )
     def get(self, request, **kwargs):
         instances = request.user.cached_emails()
-        serializer = EmailSerializerV1(instances, many=True, context={'request': request})
+        serializer = EmailSerializer(instances, many=True, context={'request': request})
         return Response(serializer.data)
 
     @apispec_operation(
@@ -40,7 +40,7 @@ class BadgeUserEmailList(APIView):
         ]
     )
     def post(self, request, **kwargs):
-        serializer = EmailSerializerV1(data=request.data, context={'request': request})
+        serializer = EmailSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         try:  # check if email already exists
             CachedEmailAddress.objects.get(email=request.data.get('email'), verified=1)
@@ -83,7 +83,7 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
         if email_address is None or email_address.user_id != self.request.user.id:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        serializer = EmailSerializerV1(email_address, context={'request': request})
+        serializer = EmailSerializer(email_address, context={'request': request})
         return Response(serializer.data)
 
     @apispec_delete_operation('BadgeUserEmail',
@@ -151,6 +151,6 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
             fields = {'error_message': "Can't make unverified email address the primary email address", "error_code": 105}
             raise BadgrApiException400(fields)
 
-        serializer = EmailSerializerV1(email_address, context={'request': request})
+        serializer = EmailSerializer(email_address, context={'request': request})
         serialized = serializer.data
         return Response(serialized, status=status.HTTP_200_OK)
