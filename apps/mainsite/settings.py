@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django_object_actions',
     'graphene_django',
+    'django_extensions',
     'markdownify',
     'badgeuser',
     'allauth',
