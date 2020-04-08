@@ -371,9 +371,6 @@ LINKED_DATA_DOCUMENT_FETCHER = 'badgeanalysis.utils.custom_docloader'
 
 LTI_STORE_IN_SESSION = False
 TIME_STAMPED_OPEN_BADGES_BASE_URL = os.environ['TIME_STAMPED_OPEN_BADGES_BASE_URL']
-# Optionally restrict issuer creation to accounts that have the 'issuer.add_issuer' permission
-# Niet elke issuer mag issuers aanmaken
-BADGR_APPROVED_ISSUERS_ONLY = True
 CAIROSVG_VERSION_SUFFIX = "2"
 
 USE_I18N = True
