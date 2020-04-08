@@ -4,6 +4,13 @@ import sys
 from mainsite import TOP_DIR
 from mainsite.environment import env_settings
 
+
+def legacy_boolean_parsing(env_key, default_value):
+    val = os.environ.get(env_key, default_value)
+    val = '1' if val == 'True' else '0' if val == 'False' else val
+    return bool(int(val))
+
+
 env_settings()
 
 ##
@@ -504,7 +511,7 @@ EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 25))
 DEFAULT_FROM_EMAIL = os.environ['DEFAULT_FROM_EMAIL']
 
 # Seeds
-ALLOW_SEEDS = bool(int(os.environ.get('ALLOW_SEEDS', '0')))
+ALLOW_SEEDS = legacy_boolean_parsing('ALLOW_SEEDS', '0')
 EDU_ID_SECRET = os.environ['EDU_ID_SECRET']
 EDU_ID_CLIENT = "edubadges"
 
@@ -519,9 +526,9 @@ SUPERUSER_PWD = os.environ.get('SUPERUSER_PWD', '')
 EDUID_BADGE_CLASS_NAME = "eduID Account creation"
 
 # Debug
-DEBUG = bool(int(os.environ.get('DEBUG', '0')))
+DEBUG = legacy_boolean_parsing('DEBUG', '0')
 TEMPLATE_DEBUG = DEBUG
 DEBUG_ERRORS = DEBUG
 DEBUG_STATIC = DEBUG
 DEBUG_MEDIA = DEBUG
-LOCAL_DEVELOPMENT_MODE = bool(int(os.environ.get('LOCAL_DEVELOPMENT_MODE', '0')))
+LOCAL_DEVELOPMENT_MODE = legacy_boolean_parsing('LOCAL_DEVELOPMENT_MODE', '0')
