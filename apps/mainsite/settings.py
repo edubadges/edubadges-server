@@ -2,6 +2,9 @@ import os
 import sys
 
 from mainsite import TOP_DIR
+from mainsite.environment import env_settings
+
+env_settings()
 
 ##
 #
@@ -108,7 +111,6 @@ TEMPLATE_LOADERS = [
     'django.template.loaders.app_directories.Loader',
 ]
 
-
 ##
 #
 #  Static Files
@@ -128,7 +130,7 @@ STATICFILES_FINDERS = [
 ]
 
 STATIC_ROOT = os.path.join(TOP_DIR, 'staticfiles')
-STATIC_URL = HTTP_ORIGIN+'/static/'
+STATIC_URL = HTTP_ORIGIN + '/static/'
 STATICFILES_DIRS = [
     os.path.join(TOP_DIR, 'apps', 'mainsite', 'static'),
 ]
@@ -167,7 +169,7 @@ ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 ACCOUNT_LOGOUT_ON_GET = True
 ACCOUNT_AUTHENTICATION_METHOD = 'username'
 ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
-ACCOUNT_UNIQUE_EMAIL=False
+ACCOUNT_UNIQUE_EMAIL = False
 ACCOUNT_FORMS = {
     'add_email': 'badgeuser.account_forms.AddEmailForm'
 }
@@ -179,22 +181,20 @@ SOCIALACCOUNT_ADAPTER = 'badgrsocialauth.adapter.BadgrSocialAccountAdapter'
 
 SURFCONEXT_DOMAIN_URL = 'https://oidc.test.surfconext.nl'
 EDUID_PROVIDER_URL = os.environ['EDUID_PROVIDER_URL']
+EDUID_REGISTRATION_URL = os.environ['EDUID_REGISTRATION_URL']
 
 # If you have an informational front page outside the Django site that can link back to '/login', specify it here
 ROOT_INFO_REDIRECT = '/login'
 SECRET_KEY = os.environ['ROOT_INFO_SECRET_KEY']
 UNSUBSCRIBE_SECRET_KEY = os.environ['UNSUBSCRIBE_SECRET_KEY']
 
-
 STAFF_MEMBER_CONFIRMATION_EXPIRE_DAYS = 7
-
 
 # Added property to allow auto signup on existing email address
 # -> this is for the usecase that user logs in with existing email, for which
 # in the case of SurfConext we trust that the passed email address is verified.
 # Is used in badgrsocialauth.adapter and defaults to False
 SOCIALACCOUNT_AUTO_SIGNUP = True
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -210,7 +210,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 ##
 #
@@ -230,8 +229,7 @@ CORS_EXPOSE_HEADERS = ('link',)
 
 MEDIA_ROOT = os.path.join(TOP_DIR, 'mediafiles')
 MEDIA_URL = '/media/'
-ADMIN_MEDIA_PREFIX = STATIC_URL+'admin/'
-
+ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
 
 ##
 #
@@ -242,7 +240,6 @@ ADMIN_MEDIA_PREFIX = STATIC_URL+'admin/'
 FIXTURE_DIRS = [
     os.path.join(TOP_DIR, 'etc', 'fixtures'),
 ]
-
 
 ##
 #
@@ -288,7 +285,6 @@ LOGGING = {
     },
 }
 
-
 ##
 #
 #  Caching
@@ -314,7 +310,6 @@ CACHES = {
 MAINTENANCE_MODE = False
 MAINTENANCE_URL = '/maintenance'
 
-
 ##
 #
 #  Sphinx Search
@@ -328,7 +323,6 @@ SPHINX_API_VERSION = 0x116  # Sphinx 0.9.9
 # Testing
 ##
 TEST_RUNNER = 'mainsite.testrunner.BadgrRunner'
-
 
 ##
 #
@@ -355,10 +349,9 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',
     'DEFAULT_VERSION': 'v1',
-    'ALLOWED_VERSIONS': ['v1','v2'],
+    'ALLOWED_VERSIONS': ['v1', 'v2'],
     'EXCEPTION_HANDLER': 'entity.views.exception_handler'
 }
-
 
 ##
 #
@@ -368,7 +361,6 @@ REST_FRAMEWORK = {
 
 REMOTE_DOCUMENT_FETCHER = 'badgeanalysis.utils.get_document_direct'
 LINKED_DATA_DOCUMENT_FETCHER = 'badgeanalysis.utils.custom_docloader'
-
 
 ##
 #
@@ -387,12 +379,11 @@ USE_I18N = True
 USE_L10N = False
 USE_TZ = True
 
-SITE_ID = 1
-BADGR_APP_ID = 1
+SITE_ID = int(os.environ.get('SITE_ID', 1))
+BADGR_APP_ID = int(os.environ.get('BADGR_APP_ID', 1))
 
 TIME_ZONE = 'Europe/Amsterdam'
 LANGUAGE_CODE = 'en-us'
-
 
 ##
 #
@@ -401,7 +392,7 @@ LANGUAGE_CODE = 'en-us'
 ##
 
 MARKDOWNIFY_WHITELIST_TAGS = [
-    'h1','h2','h3','h4','h5','h6',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
     'a',
     'abbr',
     'acronym',
@@ -419,7 +410,6 @@ MARKDOWNIFY_WHITELIST_TAGS = [
     'hr'
 ]
 
-
 OAUTH2_PROVIDER = {
     'SCOPES': {
         'r:profile': 'See who you are',
@@ -435,7 +425,7 @@ OAUTH2_PROVIDER = {
     'DEFAULT_SCOPES': ['r:profile'],
 
     'OAUTH2_VALIDATOR_CLASS': 'mainsite.oauth_validator.BadgrRequestValidator',
-    'ACCESS_TOKEN_EXPIRE_SECONDS':  86400
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 86400
 
 }
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2_provider.Application'
@@ -445,11 +435,11 @@ OAUTH2_TOKEN_SESSION_TIMEOUT_SECONDS = OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECO
 
 API_DOCS_EXCLUDED_SCOPES = ['rw:issuer:*', 'r:assertions', '*']
 
-
 BADGR_PUBLIC_BOT_USERAGENTS = [
-    'LinkedInBot',   # 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'
-    'Twitterbot',    # 'Twitterbot/1.0'
-    'facebook',      # https://developers.facebook.com/docs/sharing/webmasters/crawler
+    'LinkedInBot',
+    # 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'
+    'Twitterbot',  # 'Twitterbot/1.0'
+    'facebook',  # https://developers.facebook.com/docs/sharing/webmasters/crawler
     'Facebot',
     'Slackbot',
 ]
@@ -460,11 +450,11 @@ BADGR_PUBLIC_BOT_USERAGENTS_WIDE = [
     'Facebot',
 ]
 
-
 # Allow use of weaker CAs (1024 bits) to avoid problem with chained certificates used by accounts.google.com
 # Ideally this environment variable would be set on a per-environment basis, only where needed
 import os
 import certifi
+
 os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
 
 # default celery to always_eager
@@ -475,14 +465,13 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULTS_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
 
-
 # If enabled, notify badgerank about new badgeclasses
 BADGERANK_NOTIFY_ON_BADGECLASS_CREATE = True
 BADGERANK_NOTIFY_ON_FIRST_ASSERTION = True
 BADGERANK_NOTIFY_URL = 'https://api.badgerank.org/v1/badgeclass/submit'
 
-
 from cryptography.fernet import Fernet
+
 PAGINATION_SECRET_KEY = Fernet.generate_key()
 AUTHCODE_SECRET_KEY = Fernet.generate_key()
 
@@ -511,11 +500,10 @@ DATABASES = {
 
 # Email
 EMAIL_USE_TLS = True
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = os.environ['EMAIL_HOST']
-EMAIL_PORT= os.environ['EMAIL_PORT']
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 25))
 DEFAULT_FROM_EMAIL = os.environ['DEFAULT_FROM_EMAIL']
-
 
 # Seeds
 ALLOW_SEEDS = os.environ.get('ALLOW_SEEDS', False)
@@ -529,9 +517,11 @@ SUPERUSER_NAME = os.environ.get('SUPERUSER_NAME', '')
 SUPERUSER_EMAIL = os.environ.get('SUPERUSER_EMAIL', '')
 SUPERUSER_PWD = os.environ.get('SUPERUSER_PWD', '')
 
+# Used in 01_setup sed
+EDUID_BADGE_CLASS_NAME = "eduID Account creation"
 
 # Debug
-DEBUG = os.environ.get('DEBUG', False)
+DEBUG = os.environ.get('DEBUG', True)
 TEMPLATE_DEBUG = DEBUG
 DEBUG_ERRORS = DEBUG
 DEBUG_STATIC = DEBUG
