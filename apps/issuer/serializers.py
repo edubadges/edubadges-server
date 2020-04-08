@@ -1,13 +1,18 @@
 import json
 import os
 import uuid
+from collections import OrderedDict
+from itertools import chain
 
-from badgeuser.serializers import BadgeUserIdentifierField
 from django.apps import apps
 from django.core.validators import URLValidator
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import strip_tags
+from rest_framework import serializers
+from rest_framework.exceptions import ErrorDetail
+
+from badgeuser.serializers import BadgeUserIdentifierField
 from lti_edu.models import StudentsEnrolled
 from mainsite.drf_fields import ValidImageField
 from mainsite.exceptions import BadgrValidationError
@@ -15,7 +20,7 @@ from mainsite.models import BadgrApp
 from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField, \
     OriginalJsonSerializerMixin, BaseSlugRelatedField
 from mainsite.utils import OriginSetting
-from rest_framework import serializers
+
 
 from institution.serializers import FacultySlugRelatedField
 
@@ -193,29 +198,25 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
         instance.save()
         return instance
 
-    def validate(self, data):
-        if 'criteria' in data:
-            if 'criteria_url' in data or 'criteria_text' in data:
-                raise serializers.ValidationError(
-                    "The criteria field is mutually-exclusive with the criteria_url and criteria_text fields"
-                )
-
-            if utils.is_probable_url(data.get('criteria')):
-                data['criteria_url'] = data.pop('criteria')
-            elif not isinstance(data.get('criteria'), str):
-                raise serializers.ValidationError(
-                    "Provided criteria text could not be properly processed as URL or plain text."
-                )
-            else:
-                data['criteria_text'] = data.pop('criteria')
-
+    def to_internal_value(self, data):
+        errors = OrderedDict()
+        if not data.get('criteria_text', False) and not data.get('criteria_url', False):
+            e = OrderedDict([('criteria_text', [ErrorDetail('Either criteria_url or criteria_text is required')]),
+                             ('criteria_url', [ErrorDetail('Either criteria_url or criteria_text is required')])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
+        if data.get('criteria_url', False):
+            if not utils.is_probable_url(data.get('criteria_url')):
+                e = OrderedDict([('criteria_url', [ErrorDetail('Must be a proper url.')])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+        if errors:
+            try:
+                super(BadgeClassSerializer, self).to_internal_value(data)
+                raise serializers.ValidationError(detail=errors)
+            except serializers.ValidationError as e:
+                e.detail = OrderedDict(chain(e.detail.items(), errors.items()))
+                raise e
         else:
-            if data.get('criteria_text', None) is None and data.get('criteria_url', None) is None:
-                raise serializers.ValidationError(
-                    "One or both of the criteria_text and criteria_url fields must be provided"
-                )
-
-        return data
+            return super(BadgeClassSerializer, self).to_internal_value(data)
 
     def create(self, validated_data, **kwargs):
         user_permissions = validated_data['issuer'].get_permissions(validated_data['created_by'])
