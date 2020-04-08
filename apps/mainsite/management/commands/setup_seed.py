@@ -29,6 +29,10 @@ def clear_data():
             'socialaccount_socialapp',
             'django_site',
             'mainsite_badgrapp',
+            'institution_institution',
+            'institution_faculty',
+            'issuer_issuer',
+            'issuer_badgeclass'
         )
 
         cursor.execute("SET FOREIGN_KEY_CHECKS=0")
