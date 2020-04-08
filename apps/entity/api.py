@@ -159,10 +159,14 @@ class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
         errors = serializer.errors
         if errors:
             fields = {}
-            for key, field_errors in errors.items():
-                for error_type in field_errors:
-                    error_code = get_form_error_code(vars(error_type)['code'])
-                    fields[key] = {"error_message": f"{error_type}", "error_code": error_code}
+            for attr, field_errors in errors.items():
+                fields[attr] = []
+                for error in field_errors:
+                    fields[attr].append({
+                        'error_code': get_form_error_code(vars(error)['code']),
+                        'error_message': error
+                    })
+
             raise BadgrApiException400(fields)
         serializer.save(updated_by=request.user)
         return Response(serializer.data)
