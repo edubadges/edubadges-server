@@ -2,11 +2,16 @@ import json
 from collections import OrderedDict
 
 from django.utils.html import strip_tags
-from mainsite.pagination import EncryptedCursorPagination
 from rest_framework import serializers
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.exceptions import ValidationError
+from rest_framework.serializers import SlugRelatedField
 from mainsite.exceptions import BadgrValidationError
+
+
+class BaseSlugRelatedField(SlugRelatedField):
+    def get_queryset(self):
+        return self.model.objects.all()
 
 
 class HumanReadableBooleanField(serializers.BooleanField):
