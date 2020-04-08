@@ -3,7 +3,7 @@ from issuer.models import Issuer, BadgeClass
 
 
 # Faculty
-for ins in Institution.objects.all():
+for ins in Institution.objects.exclude(name="surfnet.nl"):
     Faculty.objects.get_or_create(name="Law", institution=ins)
     Faculty.objects.get_or_create(name="Business", institution=ins)
     Faculty.objects.get_or_create(name="Humanities", institution=ins)
