@@ -1,12 +1,15 @@
 # encoding: utf-8
 
 
-import badgrlog
 from django.core.exceptions import FieldError
 from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from rest_framework.views import APIView
+
+import badgrlog
+from entity.utils import get_form_error_code, validate_errors
+from mainsite.exceptions import BadgrApiException400
 
 
 class BaseEntityView(APIView):
@@ -65,7 +68,7 @@ class BaseEntityListView(BaseEntityView):
             link_header = paginator.get_link_header()
             if link_header:
                 headers['Link'] = link_header
-                
+
         return Response(serializer.data, headers=headers)
 
     def post(self, request, **kwargs):
@@ -75,7 +78,8 @@ class BaseEntityListView(BaseEntityView):
         context = self.get_context_data(**kwargs)
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(data=request.data, context=context)
-        serializer.is_valid(raise_exception=True)
+        validate_errors(serializer)
+
         new_instance = serializer.save(created_by=request.user)
         self.log_create(new_instance)
         return Response(serializer.data, status=HTTP_201_CREATED)
@@ -153,7 +157,8 @@ class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
         context = self.get_context_data(**kwargs)
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(obj, data=data, partial=allow_partial, context=context)
-        serializer.is_valid(raise_exception=True)
+        validate_errors(serializer)
+
         serializer.save(updated_by=request.user)
         return Response(serializer.data)
 

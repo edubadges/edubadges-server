@@ -26,24 +26,26 @@ class IssuerTest(BadgrTestCase):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_create=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
-        response = self.client.post('/institution/faculties/{}/issuers'.format(faculty.entity_id),
-                                    json.dumps(issuer_json), content_type='application/json')
+        issuer_json['faculty'] = faculty.entity_id
+        response = self.client.post('/issuer/create', json.dumps(issuer_json), content_type='application/json')
         self.assertEqual(201, response.status_code)
 
     def test_may_not_create_issuer(self):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
-        response = self.client.post('/institution/faculties/{}/issuers'.format(faculty.entity_id),
-                                    json.dumps(issuer_json), content_type='application/json')
-        self.assertEqual(404, response.status_code)
+        issuer_json['faculty'] = faculty.entity_id
+        response = self.client.post('/issuer/create', json.dumps(issuer_json), content_type='application/json')
+        self.assertEqual(400, response.status_code)
+        self.assertEqual(str(response.data['fields']), "You don't have the necessary permissions")
 
     def test_create_badgeclass(self):
         teacher1 = self.setup_teacher(authenticate=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         self.setup_staff_membership(teacher1, issuer, may_create=True)
-        response = self.client.post("/v1/issuer/issuers/{}/badges".format(issuer.entity_id),
+        badgeclass_json['issuer'] = issuer.entity_id
+        response = self.client.post("/issuer/badgeclasses/create",
                                     json.dumps(badgeclass_json), content_type='application/json')
         self.assertEqual(201, response.status_code)
 
@@ -52,9 +54,11 @@ class IssuerTest(BadgrTestCase):
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         self.setup_staff_membership(teacher1, issuer, may_read=True)
-        response = self.client.post("/v1/issuer/issuers/{}/badges".format(issuer.entity_id),
-                                    json.dumps(badgeclass_json), content_type='application/json')
-        self.assertEqual(404, response.status_code)
+        badgeclass_json['issuer'] = issuer.entity_id
+        response = self.client.post("/issuer/badgeclasses/create", json.dumps(badgeclass_json), content_type='application/json')
+        self.assertEqual(400, response.status_code)
+        self.assertEqual(str(response.data['fields']), "You don't have the necessary permissions")
+
 
     def test_issuer_schema(self):
         pass

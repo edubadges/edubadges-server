@@ -10,7 +10,7 @@ class FacultyType(PermissionsResolverMixin, StaffResolverMixin, DjangoObjectType
 
     class Meta:
         model = Faculty
-        fields = ('name', 'entity_id', 'institution', 'staff', 'created_at', 'description')
+        fields = ('name', 'entity_id', 'institution', 'created_at', 'description')
 
     issuers = graphene.List(IssuerType)
     staff = graphene.List(FacultyStaffType)

@@ -48,6 +48,11 @@ class PermissionedRelationshipBase(BaseVersionedEntity):
         self.object.publish()
         self.user.publish()
 
+    @property
+    def cached_user(self):
+        from badgeuser.models import BadgeUser
+        return BadgeUser.cached.get(pk=self.user_id)
+
 
 class InstitutionStaff(PermissionedRelationshipBase):
     """

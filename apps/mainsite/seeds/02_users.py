@@ -1,17 +1,22 @@
-from institution.models import Institution
-from badgeuser.models import BadgeUser
-from allauth.socialaccount.models import SocialAccount
 from allauth.account.models import EmailAddress
+from allauth.socialaccount.models import SocialAccount
+
+from badgeuser.models import BadgeUser
+from institution.models import Institution
 from staff.models import InstitutionStaff
 
 # Institution
 [
-    Institution.objects.get_or_create(identifier=ins, name=ins) for ins in [
-        'university-example.org',
-        'diy.surfconext.nl'
-    ]
+    Institution.objects.get_or_create(identifier=ins['name'],
+                                      name=ins['name'],
+                                      description=ins['description'],
+                                      image="uploads/institution/surf.png",
+                                      grading_table="https://url.to.gradingtable/gradingtable.html",
+                                      brin="000-7777-11111") for ins in
+    [{'name': 'university-example.org', 'description': 'The university example is always a good place to hang out'},
+     {'name': 'diy.surfconext.nl', 'description': 'The university diy is also a good place to hang out'},
+     ]
 ]
-
 
 # Users - Teachers
 all_perms = {
@@ -25,8 +30,9 @@ all_perms = {
 }
 
 
-def create_teacher(username, email, institution_name, uid, perms = all_perms):
-    user, _ = BadgeUser.objects.get_or_create(username=username, email=email)
+def create_teacher(username, email, first_name, last_name, institution_name, uid, perms=all_perms):
+    user, _ = BadgeUser.objects.get_or_create(username=username, email=email, last_name=last_name,
+                                              first_name=first_name)
 
     EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)
     SocialAccount.objects.get_or_create(provider='surf_conext', uid=uid, user=user)
@@ -40,6 +46,8 @@ teachers = [
     {
         "username": "joseph+weeler",
         "email": "Joseph+Weeler@university-example.org",
+        "first_name": "Joseph",
+        "last_name": "Wheeler",
         "institution_name": "university-example.org",
         "uid": "74ea5d1e44a80547db8b0400debb2f340fabd215",
     }
