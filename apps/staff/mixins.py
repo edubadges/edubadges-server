@@ -103,3 +103,8 @@ class PermissionedModelMixin(object):
         for staff in self.staff_items:
             if staff.user == user:
                 return staff
+
+    def publish(self, *args, **kwargs):
+        super(PermissionedModelMixin, self).publish(*args, **kwargs)
+        for member in self.cached_staff():
+            member.cached_user.publish()

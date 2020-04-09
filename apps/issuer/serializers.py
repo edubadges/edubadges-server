@@ -52,22 +52,23 @@ class ExtensionsSaverMixin(object):
                 ext.save()
 
     def save_extensions(self, validated_data, instance):
-        extension_items = validated_data.pop('extension_items')
-        received_extensions = list(extension_items.keys())
-        current_extension_names = list(instance.extension_items.keys())
-        remove_these_extensions = set(current_extension_names) - set(received_extensions)
-        update_these_extensions = set(current_extension_names).intersection(set(received_extensions))
-        add_these_extensions = set(received_extensions) - set(current_extension_names)
-        self.remove_extensions(instance, remove_these_extensions)
-        self.update_extensions(instance, update_these_extensions, extension_items)
-        self.add_extensions(instance, add_these_extensions, extension_items)
+        if validated_data.get('extension_items', False):
+            extension_items = validated_data.pop('extension_items')
+            received_extensions = list(extension_items.keys())
+            current_extension_names = list(instance.extension_items.keys())
+            remove_these_extensions = set(current_extension_names) - set(received_extensions)
+            update_these_extensions = set(current_extension_names).intersection(set(received_extensions))
+            add_these_extensions = set(received_extensions) - set(current_extension_names)
+            self.remove_extensions(instance, remove_these_extensions)
+            self.update_extensions(instance, update_these_extensions, extension_items)
+            self.add_extensions(instance, add_these_extensions, extension_items)
 
 
 class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierField()
     name = StripTagsCharField(max_length=1024)
-    slug = StripTagsCharField(max_length=255, source='entity_id', read_only=True)
+    entity_id = StripTagsCharField(max_length=255, read_only=True)
     image = ValidImageField(required=False)
     email = serializers.EmailField(max_length=255, required=True)
     description = StripTagsCharField(max_length=16384, required=False)
@@ -138,6 +139,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
     created_by = BadgeUserIdentifierField()
     name = StripTagsCharField(max_length=255)
     image = ValidImageField(required=False)
+    entity_id = StripTagsCharField(max_length=255, read_only=True)
     issuer = IssuerSlugRelatedField(slug_field='entity_id', required=True)
     criteria = MarkdownCharField(allow_blank=True, required=False, write_only=True)
     criteria_text = MarkdownCharField(required=False, allow_null=True, allow_blank=True)
