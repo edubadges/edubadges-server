@@ -1,6 +1,9 @@
 ![Edubadges](logo.png)
 # Edubadges Server (Backend)
 
+[![Build Status](https://travis-ci.com/edubadges/edubadges-server.svg?branch=master)](https://travis-ci.com/edubadges/edubadges-server)
+[![codecov](https://codecov.io/gh/edubadges/edubadges-server/branch/master/graph/badge.svg)](https://codecov.io/gh/edubadges/edubadges-server)
+
 *Digital badge management for issuers, earners, and consumers*
 
 EduBadges server is the Python/Django API backend for issuing [Open Badges](http://openbadges.org). In addition to a powerful Issuer API and browser-based user interface for issuing, Edubadges offers integrated badge management and sharing for badge earners.
