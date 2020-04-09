@@ -102,8 +102,7 @@ class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolver
         return self.cached_enrollments()
 
     def resolve_assertions(self, info, **kwargs):
-        a = self.assertions
-        return a
+        return self.assertions
 
     def resolve_enrollment_count(self, info, **kwargs):
         return self.enrollment_count()
