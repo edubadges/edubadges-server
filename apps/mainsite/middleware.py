@@ -1,5 +1,8 @@
+import logging
 from django import http
 from mainsite import settings
+
+logger = logging.getLogger('Badgr.Debug')
 
 
 class MaintenanceMiddleware(object):
@@ -22,3 +25,15 @@ class TrailingSlashMiddleware(object):
             if request.path != '/' and request.path[-1] == '/':
                 return http.HttpResponsePermanentRedirect(request.path[:-1])
         return None
+
+
+class ExceptionHandlerMiddleware(object):
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        return self.get_response(request)
+
+    def process_exception(self, request, exception):
+        logger.exception(str(exception))
