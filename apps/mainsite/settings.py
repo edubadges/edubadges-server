@@ -77,8 +77,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'mainsite.middleware.MaintenanceMiddleware',
     'badgeuser.middleware.InactiveUserMiddleware',
+    'mainsite.middleware.ExceptionHandlerMiddleware',
+    # 'mainsite.middleware.MaintenanceMiddleware',
     # 'mainsite.middleware.TrailingSlashMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -268,11 +269,20 @@ LOGGING = {
             'filters': [],
             'class': 'django.utils.log.AdminEmailHandler'
         },
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'stream': sys.stdout,
+        'badgr_events': {
+            'level': 'INFO',
+            'formatter': 'json',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOGS_DIR, 'badgr_events.log')
         },
+        'badgr_debug' : {
+            'level': 'INFO',
+            'formatter': 'badgr',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'maxBytes': 15728640,  # 1024 * 1024 * 15B = 15MB
+            'backupCount': 40,
+            'filename': os.path.join(LOGS_DIR, 'badgr_debug.log')
+        }
     },
     'loggers': {
         'django.request': {
@@ -280,10 +290,23 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'Badgr.Events': {
+            'handlers': ['badgr_events'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+         'Badgr.Debug' : {
+            'handlers': ['badgr_debug'],
+            'level': 'INFO',
+            'propagate': True,
+        }
     },
     'formatters': {
         'default': {
             'format': '%(asctime)s %(levelname)s %(module)s %(message)s'
+        },
+        'badgr': {
+            'format': '%(asctime)s | %(levelname)s | %(message)s'
         },
         'json': {
             '()': 'mainsite.formatters.JsonFormatter',
