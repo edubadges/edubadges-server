@@ -6,7 +6,7 @@ from institution.models import Faculty, Institution
 from issuer.models import Issuer, BadgeClass
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
-from staff.serializers import BadgeClassStaffSerializer, IssuerStaffSerializer, FacultyStaffSerializer, InstitutionStaffSerializer
+from staff.serializers import BadgeClassStaffSerializer, IssuerStaffSerializer, FacultyStaffSerializer, InstitutionStaffSerializer, StaffUpdateSerializer
 from staff.permissions import HasObjectPermission, StaffMembershipWithinScope
 
 
@@ -31,6 +31,7 @@ class StaffDetailViewBase(BaseEntityDetailView):
     http_method_names = ['put', 'delete']
     permission_map = {'PUT': 'may_administrate_users'}
     permission_classes = (AuthenticatedWithVerifiedEmail, StaffMembershipWithinScope)
+    serializer_class = StaffUpdateSerializer
 
     def put(self, request, **kwargs):
         object = self.get_object(request, **kwargs)  # triggers a has_object_permissions() check on the model instance
@@ -79,7 +80,6 @@ class FacultyStaffDetail(StaffDetailViewBase):
     DELETE to delete faculty staff membership
     """
     model = FacultyStaff  # used by get_object()
-    serializer_class = FacultyStaffSerializer
 
 
 class IssuerStaffList(StaffListViewBase):
@@ -97,7 +97,6 @@ class IssuerStaffDetail(StaffDetailViewBase):
     DELETE to delete issuer staff membership
     """
     model = IssuerStaff  # used by get_object()
-    serializer_class = IssuerStaffSerializer
 
 
 class BadgeClassStaffList(StaffListViewBase):
@@ -115,4 +114,4 @@ class BadgeClassStaffDetail(StaffDetailViewBase):
     DELETE to delete badgeclass staff membership
     """
     model = BadgeClassStaff  # used by get_object()
-    serializer_class = BadgeClassStaffSerializer
+

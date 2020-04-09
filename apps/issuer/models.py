@@ -179,11 +179,6 @@ class Issuer(PermissionedModelMixin,
     def cached_badgeclasses(self):
         return list(self.badgeclasses.all())
 
-    def publish(self, *args, **kwargs):
-        super(Issuer, self).publish(*args, **kwargs)
-        for member in self.cached_issuerstaff():
-            member.user.publish()
-
     def delete(self, *args, **kwargs):
         if self.recipient_count > 0:
             raise ProtectedError("Issuer can not be deleted because it has previously issued badges.", self)
@@ -248,10 +243,6 @@ class Issuer(PermissionedModelMixin,
     @property
     def owners(self):
         return self.get_local_staff_members(['may_create', 'may_read', 'may_update', 'may_delete', 'may_award', 'may_administrate_users'])
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_issuerstaff(self):
-        return IssuerStaff.objects.filter(issuer=self)
 
     @property
     def current_signers(self):
