@@ -55,3 +55,5 @@ for iss in Issuer.objects.filter(name="Medicine"):
         image="uploads/badges/eduid.png",
     ) for bc in
         ['Growth and Development', 'Circulation and Breathing', 'Regulation and Integration', 'Digestion and Defense']]
+
+# TODO StudentsEnrolled - different statusses, BadgeInstances,
