@@ -1,0 +1,48 @@
+---
+language: 'python'
+
+services:
+  - 'mysql'
+
+dist: xenial
+
+# generic mysql init snippet for reuse below
+.mysql_init: &mysql_init
+  >
+    mysql -uroot -e "
+      DROP DATABASE IF EXISTS badgr;
+      CREATE DATABASE IF NOT EXISTS badgr;
+    "
+
+jobs:
+  include:
+    - &server
+      python: '3.7'
+      stage: 'Server tests'
+      language: 'python'
+      cache:
+        pip: true
+      install:
+        - 'git submodule update --init'
+        - 'pip install -r ./requirements.txt'
+        - 'pip install -r apps/ims/requirements.txt'
+      script:
+        - *mysql_init
+        - 'cp env_vars.sh.example env_vars.sh'
+        - 'source env_vars.sh'
+        - './manage.py test'
+
+    - stage: 'Server coverage'
+      language: 'python'
+      python: '3.7'
+      install:
+        - 'pip install -r ./requirements.txt'
+        - 'pip install codecov'
+      script:
+        - *mysql_init
+        - 'cp env_vars.sh.example env_vars.sh'
+        - 'source env_vars.sh'
+        - 'coverage run manage.py test'
+        - 'coverage report'
+      after_success:
+        - 'codecov'

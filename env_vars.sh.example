@@ -1,9 +1,9 @@
 export ACCOUNT_SALT="secret"
-export ALLOW_SEEDS=True
+export ALLOW_SEEDS=1
 export BADGR_DB_NAME="badgr"
 export BADGR_DB_USER="root"
 export BADGR_DB_PASSWORD=""
-export DEBUG=True
+export DEBUG=1
 export DEFAULT_DOMAIN="http://127.0.0.1:8000"
 export DEFAULT_FROM_EMAIL="noreply@surf.nl"
 export DOMAIN="localhost:4000"
