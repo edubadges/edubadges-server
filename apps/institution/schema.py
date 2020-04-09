@@ -35,9 +35,13 @@ class InstitutionType(PermissionsResolverMixin, StaffResolverMixin, ImageResolve
 
 
 class Query(object):
+    current_institution = graphene.Field(InstitutionType)
     institutions = graphene.List(InstitutionType)
     faculties = graphene.List(FacultyType)
     faculty = graphene.Field(FacultyType, id=graphene.String())
+
+    def resolve_current_institution(self, info, **kwargs):
+        return info.context.user.institution
 
     def resolve_institutions(self, info, **kwargs):
         return [inst for inst in Institution.objects.all() if inst.has_permissions(info.context.user, ['may_read'])]
@@ -51,3 +55,4 @@ class Query(object):
             faculty = Faculty.objects.get(entity_id=id)
             if faculty.has_permissions(info.context.user, ['may_read']):
                 return faculty
+
