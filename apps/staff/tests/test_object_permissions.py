@@ -42,7 +42,8 @@ class ObjectPermissionTests(BadgrTestCase):
         })
         response = self.client.post('/staff-membership/faculty/{}/create'.format(faculty.entity_id),
                                     data, content_type='application/json')
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(400, response.status_code)
+        self.assertEqual(str(response.data[0]), "May not assign permissions that you don't have yourself")
 
     def test_create_issuer_staff(self):
         teacher1 = self.setup_teacher(authenticate=True)
@@ -63,8 +64,7 @@ class ObjectPermissionTests(BadgrTestCase):
         })
         response = self.client.post('/staff-membership/issuer/{}/create'.format(issuer.entity_id),
                                     data, content_type='application/json')
-        # TODO - expected 201
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 201)
 
     def test_permission_tree_cleanup_after_put(self):
         pass
