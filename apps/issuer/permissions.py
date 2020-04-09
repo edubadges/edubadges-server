@@ -74,10 +74,3 @@ class BadgrOAuthTokenHasScope(permissions.BasePermission):
             return []
 
         return valid_scopes
-
-
-class IssuedAssertionsBlock(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if obj.assertions:
-            return False
-        return True

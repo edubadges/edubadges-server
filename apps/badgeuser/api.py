@@ -5,7 +5,7 @@ from allauth.account.utils import url_str_to_user_pk
 from apispec_drf.decorators import apispec_get_operation, apispec_put_operation, apispec_delete_operation, apispec_list_operation
 from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
-from badgeuser.serializers_v1 import BadgeUserProfileSerializerV1, BadgeUserTokenSerializerV1
+from badgeuser.serializers import BadgeUserProfileSerializer, BadgeUserTokenSerializer
 from badgeuser.tasks import process_email_verification
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -26,7 +26,7 @@ RATE_LIMIT_DELTA = datetime.timedelta(minutes=5)
 
 class BadgeUserDetail(BaseEntityDetailView):
     model = BadgeUser
-    v1_serializer_class = BadgeUserProfileSerializerV1
+    v1_serializer_class = BadgeUserProfileSerializer
     permission_classes = (permissions.AllowAny, BadgrOAuthTokenHasScope)
     valid_scopes = {
         "post": ["*"],
@@ -117,7 +117,7 @@ class BadgeUserDetail(BaseEntityDetailView):
 class BadgeUserToken(BaseEntityDetailView):
     model = BadgeUser
     permission_classes = (BadgeUserIsAuthenticatedUser,)
-    v1_serializer_class = BadgeUserTokenSerializerV1
+    v1_serializer_class = BadgeUserTokenSerializer
 
     def get_object(self, request, **kwargs):
         return request.user

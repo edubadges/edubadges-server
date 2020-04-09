@@ -1,16 +1,17 @@
 from entity.api import BaseEntityListView, VersionedObjectMixin, BaseEntityDetailView
 from institution.models import Faculty, Institution
-from institution.serializers_v1 import FacultySerializerV1, InstitutionSerializer
-from issuer.serializers_v1 import IssuerSerializerV1
+from institution.serializers import FacultySerializer, InstitutionSerializer
 from mainsite.permissions import AuthenticatedWithVerifiedEmail, CannotDeleteWithChildren
 from staff.permissions import HasObjectPermission
-from issuer.permissions import IssuedAssertionsBlock
 
 
 class InstitutionDetail(BaseEntityDetailView):
+    """
+    PUT to edit an institution
+    """
     model = Institution
     v1_serializer_class = InstitutionSerializer
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, IssuedAssertionsBlock)
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     http_method_names = ['put']
 
 
@@ -20,35 +21,19 @@ class FacultyDetail(BaseEntityDetailView):
     DELETE to remove it
     """
     model = Faculty
-    v1_serializer_class = FacultySerializerV1
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, IssuedAssertionsBlock, CannotDeleteWithChildren)
+    v1_serializer_class = FacultySerializer
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, CannotDeleteWithChildren)
     http_method_names = ['put', 'delete']
 
 
-class FacultyIssuerList(VersionedObjectMixin, BaseEntityListView):
+class FacultyList(VersionedObjectMixin, BaseEntityListView):
     """
-    POST to create an Issuer within the Faculty context
+    POST to create a new Faculty
     """
-    model = Faculty
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
-    v1_serializer_class = IssuerSerializerV1
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    v1_serializer_class = FacultySerializer
     http_method_names = ['post']
 
     def post(self, request, **kwargs):
-        faculty = self.get_object(request, **kwargs)
-        return super(FacultyIssuerList, self).post(request, **kwargs)
-
-
-class InstitutionFacultyList(VersionedObjectMixin, BaseEntityListView):
-    """
-    POST to create a Faculty within the Institution context
-    """
-    # no need to declare model here
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
-    v1_serializer_class = FacultySerializerV1
-    http_method_names = ['post']
-
-    def post(self, request, **kwargs):
-        self.has_object_permissions(request, request.user.institution)
-        return super(InstitutionFacultyList, self).post(request, **kwargs)
+        return super(FacultyList, self).post(request, **kwargs)
 

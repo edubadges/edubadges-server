@@ -1,9 +1,18 @@
 from django.db import IntegrityError
 from mainsite.drf_fields import ValidImageField
-from mainsite.serializers import StripTagsCharField
+from mainsite.exceptions import BadgrValidationError
+from mainsite.serializers import StripTagsCharField, BaseSlugRelatedField
 from rest_framework import serializers
 
 from .models import Faculty, Institution
+
+
+class InstitutionSlugRelatedField(BaseSlugRelatedField):
+    model = Institution
+
+
+class FacultySlugRelatedField(BaseSlugRelatedField):
+    model = Faculty
 
 
 class InstitutionSerializer(serializers.Serializer):
@@ -18,6 +27,11 @@ class InstitutionSerializer(serializers.Serializer):
         model = Institution
 
     def update(self, instance, validated_data):
+        if instance.assertions:
+            if validated_data.get('grading_table') and instance.grading_table != validated_data.get('grading_table'):
+                raise BadgrValidationError('Cannot change grading table, assertions have already been issued')
+            if validated_data.get('brin') and instance.brin != validated_data.get('brin'):
+                raise BadgrValidationError('Cannot change brin, assertions have already been issued')
         instance.name = validated_data.get('name')
         instance.description = validated_data.get('description')
         instance.image = validated_data.get('image')
@@ -27,12 +41,11 @@ class InstitutionSerializer(serializers.Serializer):
         return instance
 
 
-class FacultySerializerV1(serializers.Serializer):
+class FacultySerializer(serializers.Serializer):
     id = serializers.ReadOnlyField()
     name = serializers.CharField(max_length=512)
     description = StripTagsCharField(max_length=16384, required=False)
     slug = StripTagsCharField(max_length=255, read_only=True, source='entity_id')
-
 
     class Meta:
         model = Faculty
@@ -45,11 +58,15 @@ class FacultySerializerV1(serializers.Serializer):
 
     def create(self, validated_data, **kwargs):
         user_institution = self.context['request'].user.institution
-        validated_data['institution'] = user_institution
-        del validated_data['created_by']
-        new_faculty = Faculty(**validated_data)
-        try:
-            new_faculty.save()
-        except IntegrityError as e:
-            raise serializers.ValidationError("Faculty name already exists")
-        return new_faculty
+        user_permissions = user_institution.get_permissions(validated_data['created_by'])
+        if user_permissions['may_create']:
+            validated_data['institution'] = user_institution
+            del validated_data['created_by']
+            new_faculty = Faculty(**validated_data)
+            try:
+                new_faculty.save()
+            except IntegrityError as e:
+                raise serializers.ValidationError("Faculty name already exists")
+            return new_faculty
+        else:
+            BadgrValidationError(fields="You don't have the necessary permissions")

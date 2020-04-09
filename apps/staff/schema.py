@@ -1,3 +1,4 @@
+import graphene
 from graphene_django.types import DjangoObjectType
 from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
 
@@ -31,4 +32,12 @@ class BadgeClassStaffType(DjangoObjectType):
     class Meta(StaffTypeMeta):
         model = BadgeClassStaff
 
+class PermissionType(graphene.ObjectType):
+    may_create = graphene.Boolean()
+    may_read = graphene.Boolean()
+    may_update = graphene.Boolean()
+    may_delete = graphene.Boolean()
+    may_award = graphene.Boolean()
+    may_sign = graphene.Boolean()
+    may_administrate_users = graphene.Boolean()
 
