@@ -86,6 +86,7 @@ class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolver
     tags = graphene.List(BadgeClassTagType)
     alignments = graphene.List(BadgeClassAlignmentType)
     enrollments = graphene.List(StudentsEnrolledType)
+    badge_assertions = graphene.List(StudentsEnrolledType)
     permissions = graphene.Field(PermissionType)
 
     def resolve_tags(self, info, **kwargs):
@@ -96,6 +97,9 @@ class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolver
 
     def resolve_enrollments(self, info, **kwargs):
         return self.cached_enrollments()
+
+    def resolve_badge_assertions(self, info, **kwargs):
+        return self.assertions
 
 
 class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
