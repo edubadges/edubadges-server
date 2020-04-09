@@ -88,9 +88,6 @@ class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolver
     enrollments = graphene.List(StudentsEnrolledType)
     badge_assertions = graphene.List(StudentsEnrolledType)
     permissions = graphene.Field(PermissionType)
-    enrollment_count = graphene.Int()
-    recipient_count = graphene.Int()
-    revoked_count = graphene.Int()
 
     def resolve_tags(self, info, **kwargs):
         return self.cached_tags()
@@ -103,15 +100,6 @@ class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolver
 
     def resolve_badge_assertions(self, info, **kwargs):
         return self.assertions
-
-    def resolve_enrollment_count(self, info, **kwargs):
-        return self.enrollment_count()
-
-    def resolve_recipient_count(self, info, **kwargs):
-        return self.recipient_count()
-
-    def resolve_revoked_count(self, info, **kwargs):
-        return self.revoked_count()
 
 
 class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
