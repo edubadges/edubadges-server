@@ -36,4 +36,4 @@ class ExceptionHandlerMiddleware(object):
         return self.get_response(request)
 
     def process_exception(self, request, exception):
-        logger.error(str(exception))
+        logger.exception(str(exception))
