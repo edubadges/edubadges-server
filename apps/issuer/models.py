@@ -465,9 +465,6 @@ class BadgeClass(PermissionedModelMixin,
     def recipient_count(self):
         return self.badgeinstances.filter(revoked=False).count()
 
-    @cachemodel.cached_method(auto_publish=True)
-    def revoked_count(self):
-        return self.badgeinstances.filter(revoked=True).count()
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_enrollments(self):
