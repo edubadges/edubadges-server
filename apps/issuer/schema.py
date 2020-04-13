@@ -1,6 +1,8 @@
 import json
 import graphene
 from graphene_django.types import DjangoObjectType
+
+
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
                     BadgeClassAlignment, BadgeClassTag
 from lti_edu.schema import StudentsEnrolledType
@@ -54,6 +56,7 @@ class BadgeClassTagType(DjangoObjectType):
         model = BadgeClassTag
         fields = ('name',)
 
+
 class IssuerType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
 
     class Meta:
@@ -73,6 +76,28 @@ class IssuerType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixi
         return len(self.get_badgeclasses(info.context.user, ['read']))
 
 
+def badge_user_type():
+    from badgeuser.schema import BadgeUserType
+    return BadgeUserType
+
+
+class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
+
+    share_url = graphene.String()
+    extensions = graphene.List(BadgeInstanceExtensionType)
+    user = graphene.Field(badge_user_type)
+
+    class Meta:
+        model = BadgeInstance
+        fields = ('entity_id', 'badgeclass', 'identifier', 'image',
+                  'recipient_identifier', 'recipient_type', 'revoked',
+                  'revocation_reason', 'expires_at', 'acceptance', 'created_at',
+                   'public')
+
+
+
+
+
 class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
 
     class Meta:
@@ -86,7 +111,7 @@ class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolver
     tags = graphene.List(BadgeClassTagType)
     alignments = graphene.List(BadgeClassAlignmentType)
     enrollments = graphene.List(StudentsEnrolledType)
-    badge_assertions = graphene.List(StudentsEnrolledType)
+    badge_assertions = graphene.List(BadgeInstanceType)
     permissions = graphene.Field(PermissionType)
 
     def resolve_tags(self, info, **kwargs):
@@ -100,19 +125,6 @@ class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolver
 
     def resolve_badge_assertions(self, info, **kwargs):
         return self.assertions
-
-
-class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
-
-    share_url = graphene.String()
-    extensions = graphene.List(BadgeInstanceExtensionType)
-
-    class Meta:
-        model = BadgeInstance
-        fields = ('entity_id', 'badgeclass', 'identifier', 'image',
-                  'recipient_identifier', 'recipient_type', 'revoked',
-                  'revocation_reason', 'expires_at', 'acceptance',
-                   'public')
 
 
 class Query(object):

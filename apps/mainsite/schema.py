@@ -1,6 +1,6 @@
 import graphene
-import institution.schema
 import issuer.schema
+import institution.schema
 import lti_edu.schema
 import badgeuser.schema
 

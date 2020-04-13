@@ -1,15 +1,16 @@
 import graphene
-from graphene_django.types import DjangoObjectType
-from badgeuser.models import BadgeUser
-from institution.schema import InstitutionType
+from graphene_django import DjangoObjectType
+
+import institution.schema
+import badgeuser.models
+
 
 class BadgeUserType(DjangoObjectType):
-
     class Meta:
-        model = BadgeUser
+        model = badgeuser.models.BadgeUser
         fields = ('first_name', 'last_name', 'email', 'entity_id')
 
-    institution = graphene.Field(InstitutionType)
+    institution = graphene.Field(institution.schema.InstitutionType)
 
 
 class Query(object):
@@ -17,4 +18,3 @@ class Query(object):
 
     def resolve_current_user(self, info, **kwargs):
         return info.context.user
-

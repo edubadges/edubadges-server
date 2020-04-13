@@ -1,7 +1,7 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 from .models import Institution, Faculty
-from issuer.schema import IssuerType
+import issuer.schema
 from mainsite.mixins import StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin
 from staff.schema import InstitutionStaffType, FacultyStaffType, PermissionType
 
@@ -12,7 +12,7 @@ class FacultyType(PermissionsResolverMixin, StaffResolverMixin, DjangoObjectType
         model = Faculty
         fields = ('name', 'entity_id', 'institution', 'created_at', 'description')
 
-    issuers = graphene.List(IssuerType)
+    issuers = graphene.List(issuer.schema.IssuerType)
     staff = graphene.List(FacultyStaffType)
     permissions = graphene.Field(PermissionType)
 

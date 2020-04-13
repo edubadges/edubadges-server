@@ -904,6 +904,9 @@ class BadgeInstance(BaseAuditedModel,
         the notification model instance (which would link through to the OpenBadge)
         """
 
+        if getattr(settings, 'SUPPRESS_EMAILS', 0):
+            return
+
         email_address = self.get_email_address()
         
         try:
