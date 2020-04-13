@@ -20,6 +20,8 @@ from staff.permissions import HasObjectPermission
 
 logger = badgrlog.BadgrLogger()
 
+from lti_edu.models import StudentsEnrolled
+from rest_framework import serializers
 
 class IssuerDetail(BaseEntityDetailView):
     model = Issuer
@@ -187,39 +189,19 @@ class BatchSignAssertions(BaseEntityListView):
         return Response(status=status.HTTP_201_CREATED, data=response)
 
 
-class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):
+class BatchAwardEnrollments(VersionedObjectMixin, BaseEntityView):
     model = BadgeClass  # used by .get_object()
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     v1_serializer_class = BadgeInstanceSerializer
     http_method_names = ['post']
     permission_map = {'POST': 'may_award'}
 
-    def get_context_data(self, **kwargs):
-        context = super(BatchAssertionsIssue, self).get_context_data(**kwargs)
-        context['badgeclass'] = self.get_object(self.request, **kwargs)
-        return context
-
-    @apispec_post_operation('Assertion',
-        summary='Issue multiple copies of the same BadgeClass to multiple recipients',
-        tags=['Assertions'],
-        parameters=[
-            {
-                "in": "body",
-                "name": "body",
-                "required": True,
-                'schema': {
-                    "type": "array",
-                    'items': { '$ref': '#/definitions/Assertion' }
-                },
-            }
-        ]
-    )
     def post(self, request, **kwargs):
         # verify the user has permission to the badgeclass
         badgeclass = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, badgeclass):
             return Response(status=HTTP_404_NOT_FOUND)
-
+        request.data['badgeclass'] = badgeclass
         try:
             create_notification = request.data.get('create_notification', False)
         except AttributeError:
@@ -231,12 +213,12 @@ class BatchAssertionsIssue(VersionedObjectMixin, BaseEntityView):
             if request.data.get('expires_at'):  # include expiry too
                 a['expires'] = datetime.datetime.strptime(request.data['expires_at'], '%d/%m/%Y')
             return a
-        recipients = list(map(_include_extras, request.data.get('recipients')))
+        enrollments = list(map(_include_extras, request.data.get('enrollments')))
 
         # save serializers
         context = self.get_context_data(**kwargs)
         serializer_class = self.get_serializer_class()
-        serializer = serializer_class(many=True, data=recipients, context=context)
+        serializer = serializer_class(many=True, data=enrollments, context=context)
         if not serializer.is_valid(raise_exception=False):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         new_instances = serializer.save(created_by=request.user)

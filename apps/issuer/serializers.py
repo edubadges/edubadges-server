@@ -247,7 +247,7 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
     expires = serializers.DateTimeField(source='expires_at', required=False, allow_null=True)
     issue_signed = serializers.BooleanField(required=False)
     signing_password = serializers.CharField(max_length=1024, required=False)
-    enrollment_slug = serializers.CharField(max_length=1024, required=False)
+    enrollment_entity_id = serializers.CharField(max_length=1024, required=False)
 
     create_notification = HumanReadableBooleanField(write_only=True, required=False, default=False)
 
@@ -325,9 +325,15 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         and badgeclass: issuer.models.BadgeClass.
         """
         # ob2 evidence items
+        enrollment = StudentsEnrolled.objects.get(entity_id=validated_data.get('enrollment_entity_id'))
+        recipient_id = enrollment.user.get_recipient_identifier()
+        if enrollment.badge_instance:
+            raise BadgrValidationError(fields="Can't award enrollment {}, it has already been awarded"
+                                       .format(validated_data.get('enrollment_entity_id')))
+
         if self.context['request'].data.get('issue_signed', False):
-            assertion = self.context.get('badgeclass').issue_signed(
-                recipient_id=validated_data.get('recipient_identifier'),
+            assertion = self.context['request'].data.get('badgeclass').issue_signed(
+                recipient_id=recipient_id,
                 created_by=self.context.get('request').user,
                 allow_uppercase=validated_data.get('allow_uppercase'),
                 recipient_type=validated_data.get('recipient_type', BadgeInstance.RECIPIENT_TYPE_EDUID),
@@ -338,8 +344,8 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
                 signer=validated_data.get('created_by'),
             )
         else:
-            assertion = self.context.get('badgeclass').issue(
-                recipient_id=validated_data.get('recipient_identifier'),
+            assertion = self.context['request'].data.get('badgeclass').issue(
+                recipient_id=recipient_id,
                 notify=validated_data.get('create_notification'),
                 created_by=self.context.get('request').user,
                 allow_uppercase=validated_data.get('allow_uppercase'),
@@ -349,11 +355,9 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
                 extensions=validated_data.get('extension_items', None)
             )
 
-        related_enrollment = StudentsEnrolled.objects.get(entity_id=validated_data.get('enrollment_slug'))
-        related_enrollment.date_awarded = timezone.now()
-        related_enrollment.badge_instance = assertion
-        related_enrollment.save()
-
+        enrollment.date_awarded = timezone.now()
+        enrollment.badge_instance = assertion
+        enrollment.save()
         return assertion
 
     def update(self, instance, validated_data):
