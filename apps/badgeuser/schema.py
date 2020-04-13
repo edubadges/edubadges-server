@@ -1,16 +1,15 @@
 import graphene
-from graphene_django import DjangoObjectType
-
-import institution.schema
-import badgeuser.models
-
+from graphene_django.types import DjangoObjectType
+from badgeuser.models import BadgeUser
+from institution.schema import InstitutionType
 
 class BadgeUserType(DjangoObjectType):
+
     class Meta:
-        model = badgeuser.models.BadgeUser
+        model = BadgeUser
         fields = ('first_name', 'last_name', 'email', 'entity_id')
 
-    institution = graphene.Field(institution.schema.InstitutionType)
+    institution = graphene.Field(InstitutionType)
 
 
 class Query(object):
