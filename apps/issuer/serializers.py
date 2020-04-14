@@ -13,6 +13,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ErrorDetail
 
 from badgeuser.serializers import BadgeUserIdentifierField
+from institution.serializers import FacultySlugRelatedField
 from lti_edu.models import StudentsEnrolled
 from mainsite.drf_fields import ValidImageField
 from mainsite.exceptions import BadgrValidationError
@@ -20,10 +21,6 @@ from mainsite.models import BadgrApp
 from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField, \
     OriginalJsonSerializerMixin, BaseSlugRelatedField
 from mainsite.utils import OriginSetting
-
-
-from institution.serializers import FacultySlugRelatedField
-
 from . import utils
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension
 
@@ -94,11 +91,14 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serial
             new_issuer.save()
             return new_issuer
         else:
-            raise BadgrValidationError(fields="You don't have the necessary permissions")
+            raise BadgrValidationError(
+                fields={"instance": [{"error_code": 999, "error_message": "You don't have the necessary permissions"}]})
 
     def update(self, instance, validated_data):
         if instance.assertions:
-            raise BadgrValidationError('Cannot change any value, assertions have already been issued')
+            raise BadgrValidationError(
+                fields={"instance": [{"error_code": 999,
+                                      "error_message": "Cannot change any value, assertions have already been issued"}]})
         [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
         if not instance.badgrapp_id:
             instance.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
@@ -111,7 +111,7 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serial
 
         if self.context.get('embed_badgeclasses', False):
             representation['badgeclasses'] = BadgeClassSerializer(obj.badgeclasses.all(), many=True,
-                                                                    context=self.context).data
+                                                                  context=self.context).data
         return representation
 
     def add_extensions(self, instance, add_these_extensions, extension_items):
@@ -176,7 +176,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
             return criteria_url
         else:
             return None
-        
+
     def validate_name(self, name):
         return strip_tags(name)
 
@@ -193,7 +193,9 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
 
     def update(self, instance, validated_data):
         if instance.assertions:
-            raise BadgrValidationError('Cannot change any value, assertions have already been issued')
+            raise BadgrValidationError(
+                fields={"instance": [{"error_code": 999,
+                                      "error_message": "Cannot change any value, assertions have already been issued"}]})
         self.save_extensions(validated_data, instance)
         for key, value in validated_data.items():
             setattr(instance, key, value)
@@ -226,7 +228,8 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
             new_badgeclass = BadgeClass.objects.create(**validated_data)
             return new_badgeclass
         else:
-            raise BadgrValidationError(fields="You don't have the necessary permissions")
+            raise BadgrValidationError(fields = {"instance": [{"error_code": 999,
+                                    "error_message": "You don't have the necessary permissions"}]})
 
 
 class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serializer):
@@ -296,7 +299,7 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
                 'entity_id': instance.cached_issuer.entity_id})
         if self.context.get('include_badge_class', False):
             representation['badge_class'] = BadgeClassSerializer(instance.cached_badgeclass,
-                                                                   context=self.context).data
+                                                                 context=self.context).data
         else:
             representation['badge_class'] = OriginSetting.HTTP + reverse('badgeclass_json', kwargs={
                 'entity_id': instance.cached_badgeclass.entity_id})
