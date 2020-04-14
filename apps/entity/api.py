@@ -86,7 +86,6 @@ class BaseEntityListView(BaseEntityView):
 
 
 class VersionedObjectMixin(object):
-    entity_id_field_name = 'entity_id'
 
     def has_object_permissions(self, request, obj):
         for permission in self.get_permissions():
@@ -95,14 +94,9 @@ class VersionedObjectMixin(object):
         return True
 
     def get_object(self, request, **kwargs):
-        version = getattr(request, 'version', 'v1')
-        if version == 'v1':
-            identifier = kwargs.get('slug')
-        elif version == 'v2':
-            identifier = kwargs.get('entity_id')
-
+        identifier = kwargs.get('entity_id')
         try:
-            self.object = self.model.cached.get(**{self.get_entity_id_field_name(): identifier})
+            self.object = self.model.cached.get(**{'entity_id': identifier})
         except self.model.DoesNotExist:
             pass
         else:
@@ -110,22 +104,9 @@ class VersionedObjectMixin(object):
                 raise Http404
             return self.object
 
-        if version == 'v1':
-            # try a lookup by legacy slug if its v1
-            try:
-                self.object = self.model.cached.get(slug=identifier)
-            except (self.model.DoesNotExist, FieldError):
-                raise Http404
-            else:
-                if not self.has_object_permissions(request, self.object):
-                    raise Http404
-                return self.object
-
         # nothing found
         raise Http404
 
-    def get_entity_id_field_name(self):
-        return self.entity_id_field_name
 
 
 class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):

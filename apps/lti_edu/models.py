@@ -136,3 +136,10 @@ class StudentsEnrolled(BaseVersionedEntity, models.Model):
             return self.badge_instance.revoked
         else:
             return False    
+
+    def get_permissions(self, user):
+        """
+        Function that equates permission for this Enrollment to that of the BadgeClass it belongs to.
+        Used in HasObjectPermission
+        """
+        return self.badge_class.get_permissions(user)

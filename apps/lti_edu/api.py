@@ -4,42 +4,24 @@ from django.utils import timezone
 from entity.api import BaseEntityListView, BaseEntityDetailView
 from issuer.models import BadgeClass
 from lti_edu.models import StudentsEnrolled, BadgeClassLtiContext, UserCurrentContextId
-from lti_edu.serializers import StudentsEnrolledSerializer, StudentsEnrolledSerializerWithRelations, \
-    BadgeClassLtiContextSerializer, BadgeClassLtiContextStudentSerializer
+from lti_edu.serializers import StudentsEnrolledSerializerWithRelations, BadgeClassLtiContextSerializer, BadgeClassLtiContextStudentSerializer
 from mainsite.exceptions import BadgrApiException400
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from mainsite.utils import EmailMessageMaker
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
-
-
-class CheckIfStudentIsEnrolled(BaseEntityListView):
-    """
-    POST to check if student is enrolled
-    """
-    permission_classes = (AuthenticatedWithVerifiedEmail, )
-    model = StudentsEnrolled
-    serializer_class = StudentsEnrolledSerializer
-
-    def post(self, request, **kwargs):
-        badge_class = get_object_or_404(BadgeClass, entity_id=request.data['badgeclass_slug'])
-        if request.data.get('edu_id'):
-            if request.user.may_enroll(badge_class):
-                return Response(data='notEnrolled', status=200)
-            else:
-                return Response(data='enrolled', status=200)
-        else:
-            return Response(data='noEduID', status=200)
+from rest_framework.status import HTTP_200_OK
+from staff.permissions import HasObjectPermission
 
 
 class StudentEnrollmentList(BaseEntityListView):
     """
     GET a list of enrollments for a student
-    DELETE to delete enrollment
+    DELETE for a student to delete your own enrollment
     """
     permission_classes = (AuthenticatedWithVerifiedEmail, )
     model = StudentsEnrolled
     serializer_class = StudentsEnrolledSerializerWithRelations
+    http_method_names = ['get', 'delete']
 
     def get_objects(self, request, **kwargs):
         return StudentsEnrolled.objects.filter(user=request.user)
@@ -49,7 +31,7 @@ class StudentEnrollmentList(BaseEntityListView):
 
     def delete(self, request, **kwargs):
         try:
-            enrollment = StudentsEnrolled.objects.get(id=request.data['enrollmentID'])
+            enrollment = StudentsEnrolled.objects.get(entity_id=request.data['enrollmentID'])
         except ValueError:
             fields = {"error_message": "Invalid enrollment id", "error_code": 204}
             raise BadgrApiException400(fields)
@@ -70,17 +52,11 @@ class StudentEnrollmentList(BaseEntityListView):
 
 class StudentsEnrolledList(BaseEntityListView):
     """
-    GET: get  list of not-awarded enrollments for a badgeclass
-    POST: to enroll student
+    POST: for a student to enroll himself
     """
     permission_classes = (AuthenticatedWithVerifiedEmail, )
     model = StudentsEnrolled
-    serializer_class = StudentsEnrolledSerializer
-
-    def get_objects(self, request, **kwargs):
-        badge_class = get_object_or_404(BadgeClass, entity_id=kwargs['badgeclass_slug'])
-        return StudentsEnrolled.objects.filter(badge_class_id=badge_class.pk,
-                                               date_awarded=None)
+    http_method_names = ['post']
 
     def post(self, request, **kwargs):
         if 'badgeclass_slug' not in request.data:
@@ -99,32 +75,27 @@ class StudentsEnrolledList(BaseEntityListView):
         fields = {"error_message": 'Cannot enroll', "error_code": 209}
         raise BadgrApiException400(fields)
 
-    def get(self, request, **kwargs):
-        if 'badgeclass_slug' not in kwargs:
-            return Response(data='field missing', status=500)
-        return super(StudentsEnrolledList, self).get(request, **kwargs)
 
-
-class StudentsEnrolledDetail(BaseEntityDetailView):
+class EnrollmentDetail(BaseEntityDetailView):
     """
     PUT: update enrollment
     """
-    permission_classes = (AuthenticatedWithVerifiedEmail, )
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     model = StudentsEnrolled
-    serializer_class = StudentsEnrolledSerializer
+    http_method_names = ['put']
 
     def put(self, request, **kwargs):
-        enrollment = request.data['enrollment']
-        current_badgeclass = BadgeClass.objects.get(entity_id=request.data['badge_class'])
-        if not self.has_object_permissions(request, current_badgeclass):
-            return Response(data= 'You do not have permission', status=HTTP_404_NOT_FOUND)
-        if enrollment:
-            enrollment_object = StudentsEnrolled.objects.get(entity_id=enrollment['enrollment_slug'])
-            enrollment_object.denied = enrollment['denied']
-            enrollment_object.save()
-            message = 'Succesfully updated enrollment of {}'.format(enrollment['recipient_name'].encode('utf-8'))
-            return Response(data=message, status=HTTP_200_OK)
-        return Response(data='No enrollment to deny', status=HTTP_400_BAD_REQUEST)
+        enrollment = self.get_object(request, **kwargs)
+        if not self.has_object_permissions(request, enrollment):
+            fields = {"error_message": "You do not have permission", "error_code": 210}
+            raise BadgrApiException400(fields)
+        if enrollment.denied:
+            fields = {"error_message": "Enrollment already denied", "error_code": 211}
+            raise BadgrApiException400(fields)
+        enrollment.denied = True
+        enrollment.save()
+        message = 'Succesfully denied enrollment'
+        return Response(data=message, status=HTTP_200_OK)
 
 
 class BadgeClassLtiContextListView(BaseEntityListView):
