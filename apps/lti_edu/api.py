@@ -92,6 +92,9 @@ class EnrollmentDetail(BaseEntityDetailView):
         if enrollment.denied:
             fields = {"error_message": "Enrollment already denied", "error_code": 211}
             raise BadgrApiException400(fields)
+        if enrollment.badge_instance:
+            fields = {"error_message": "Awarded enrollments cannot be denied", "error_code": 212}
+            raise BadgrApiException400(fields)
         enrollment.denied = True
         enrollment.save()
         message = 'Succesfully denied enrollment'
