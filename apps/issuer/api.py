@@ -207,18 +207,10 @@ class BatchAwardEnrollments(VersionedObjectMixin, BaseEntityView):
         except AttributeError:
             return Response(status=HTTP_400_BAD_REQUEST)
 
-        # update passed in assertions to include create_notification
-        def _include_extras(a):
-            a['create_notification'] = create_notification
-            if request.data.get('expires_at'):  # include expiry too
-                a['expires'] = datetime.datetime.strptime(request.data['expires_at'], '%d/%m/%Y')
-            return a
-        enrollments = list(map(_include_extras, request.data.get('enrollments')))
-
         # save serializers
         context = self.get_context_data(**kwargs)
         serializer_class = self.get_serializer_class()
-        serializer = serializer_class(many=True, data=enrollments, context=context)
+        serializer = serializer_class(many=True, data=request.data.get('enrollments'), context=context)
         if not serializer.is_valid(raise_exception=False):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         new_instances = serializer.save(created_by=request.user)
