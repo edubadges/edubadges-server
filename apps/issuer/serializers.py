@@ -34,6 +34,16 @@ class BadgeClassSlugRelatedField(BaseSlugRelatedField):
     model = BadgeClass
 
 
+class PeriodField(serializers.Field):
+    """Period represented in days"""
+
+    def to_internal_value(self, value):
+        return datetime.timedelta(days=value)
+
+    def to_representation(self, value):
+        return value.days
+
+
 class ExtensionsSaverMixin(object):
     def remove_extensions(self, instance, extensions_to_remove):
         extensions = instance.cached_extensions()
@@ -149,9 +159,14 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
     alignment = AlignmentItemSerializer(many=True, source='alignment_items', required=False)
     tags = serializers.ListField(child=StripTagsCharField(max_length=1024), source='tag_items', required=False)
     extensions = serializers.DictField(source='extension_items', required=False)
+    expiration_period = PeriodField()
 
     class Meta:
         apispec_definition = ('BadgeClass', {})
+
+    def get_expiration_period(self, instance):
+        if instance.expiration_period:
+            return instance.expiration_period.days
 
     def to_representation(self, instance):
         representation = super(BadgeClassSerializer, self).to_representation(instance)
@@ -328,17 +343,17 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         Requires self.context to include request (with authenticated request.user)
         and badgeclass: issuer.models.BadgeClass.
         """
-        # ob2 evidence items
+        badgeclass = self.context['request'].data.get('badgeclass')
         enrollment = StudentsEnrolled.objects.get(entity_id=validated_data.get('enrollment_entity_id'))
         recipient_id = enrollment.user.get_recipient_identifier()
-        expires_at = self.context['request'].data.get('expires_at', None)
-        if expires_at:
-            expires_at = datetime.datetime.strptime(expires_at,  '%d/%m/%Y')
+        expires_at = None
+        if badgeclass.expiration_period:
+            expires_at = datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0) + badgeclass.expiration_period
         if enrollment.badge_instance:
             raise BadgrValidationError(fields="Can't award enrollment {}, it has already been awarded"
                                        .format(validated_data.get('enrollment_entity_id')))
         if self.context['request'].data.get('issue_signed', False):
-            assertion = self.context['request'].data.get('badgeclass').issue_signed(
+            assertion = badgeclass.issue_signed(
                 recipient_id=recipient_id,
                 created_by=self.context.get('request').user,
                 allow_uppercase=validated_data.get('allow_uppercase'),
@@ -350,7 +365,7 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
                 signer=validated_data.get('created_by'),
             )
         else:
-            assertion = self.context['request'].data.get('badgeclass').issue(
+            assertion = badgeclass.issue(
                 recipient_id=recipient_id,
                 notify=self.context['request'].data.get('create_notification'),
                 created_by=self.context.get('request').user,

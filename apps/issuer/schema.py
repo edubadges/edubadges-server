@@ -113,6 +113,7 @@ class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolver
     enrollments = graphene.List(StudentsEnrolledType)
     badge_assertions = graphene.List(BadgeInstanceType)
     permissions = graphene.Field(PermissionType)
+    expiration_period = graphene.Int()
 
     def resolve_tags(self, info, **kwargs):
         return self.cached_tags()
@@ -125,6 +126,10 @@ class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolver
 
     def resolve_badge_assertions(self, info, **kwargs):
         return self.assertions
+
+    def resolve_expiration_period(self, info, **kwargs):
+        if self.expiration_period:
+            return self.expiration_period.days
 
 
 class Query(object):

@@ -66,6 +66,9 @@ class IssuerTest(BadgrTestCase):
     def test_award_valid_badge(self):
         pass
 
+    def test_award_badge_expiration_date(self):
+        pass
+
 
 class ExtensionsTest(BadgrTestCase):
 

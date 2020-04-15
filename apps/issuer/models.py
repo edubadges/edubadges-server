@@ -358,6 +358,7 @@ class Issuer(PermissionedModelMixin,
     def __unicode__(self):
         return self.name
 
+
 class BadgeClass(PermissionedModelMixin,
                  ImageUrlGetterMixin,
                  ResizeUploadedImage,
@@ -366,22 +367,17 @@ class BadgeClass(PermissionedModelMixin,
                  BaseVersionedEntity,
                  BaseOpenBadgeObjectModel):
     entity_class_name = 'BadgeClass'
-
     issuer = models.ForeignKey(Issuer, blank=False, null=False, on_delete=models.CASCADE, related_name="badgeclasses")
-
     name = models.CharField(max_length=255)
     image = models.FileField(upload_to='uploads/badges', blank=True)
     description = models.TextField(blank=True, null=True, default=None)
-
     criteria_url = models.CharField(max_length=254, blank=True, null=True, default=None)
     criteria_text = models.TextField(blank=True, null=True)
-
     old_json = JSONField()
-
     objects = BadgeClassManager()
     cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
-
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.BadgeClassStaff")
+    expiration_period = models.DurationField(null=True)
 
     class Meta:
         verbose_name_plural = "Badge classes"
@@ -931,7 +927,7 @@ class BadgeInstance(BaseAuditedModel,
                 'badge_name': self.badgeclass.name,
                 'badge_id': self.entity_id,
                 'badge_description': self.badgeclass.description,
-                'expiration_date': self.expires_at.date() if self.expires_at else self.expires_at,
+                'expiration_date': self.expires_at,
                 'help_email': getattr(settings, 'HELP_EMAIL', 'help@badgr.io'),
                 'issuer_name': re.sub(r'[^\w\s]+', '', self.issuer.name, 0, re.I),
                 'issuer_url': self.issuer.url,
