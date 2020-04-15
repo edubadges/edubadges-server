@@ -9,6 +9,7 @@ from graphene_django.views import GraphQLView
 
 from ims.views import base
 from mainsite.admin import badgr_admin
+from mainsite.graphql_view import ExtendedGraphQLView
 from mainsite.oauth2_api import AuthorizationApiView, TokenView, AuthCodeExchange
 
 badgr_admin.autodiscover()
@@ -22,7 +23,7 @@ from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation
 
 
 urlpatterns = [
-    path("graphql", csrf_exempt(GraphQLView.as_view(graphiql=True))),
+    path("graphql", csrf_exempt(ExtendedGraphQLView.as_view(graphiql=True))),
 
     # Backup URLs in case the server isn't serving these directly
     url(r'^favicon\.png[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL, permanent=True)),

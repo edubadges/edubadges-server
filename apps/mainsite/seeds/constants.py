@@ -5,6 +5,7 @@ INSTITUTION_UNIVERSITY_EXAMPLE_ORG = "university-example.org"
 
 ENROLLED_STUDENT_EMAIL = "edubadges.surf+enrolled@gmail.com"
 REVOKED_STUDENT_EMAIL = "edubadges.surf+revoked@gmail.com"
+# Password1!
 
 BADGE_CLASS_INTRODUCTION_TO_PSYCHOLOGY = 'Introduction to Psychology'
 BADGE_CLASS_COGNITIVE_PSYCHOLOGY = 'Cognitive Psychology'
