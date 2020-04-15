@@ -1,13 +1,13 @@
 import json
+
 import graphene
 from graphene_django.types import DjangoObjectType
 
-
-from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
-                    BadgeClassAlignment, BadgeClassTag
 from lti_edu.schema import StudentsEnrolledType
 from mainsite.mixins import StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin
 from staff.schema import IssuerStaffType, BadgeClassStaffType, PermissionType
+from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
+    BadgeClassAlignment, BadgeClassTag
 
 
 class ExtensionResolverMixin(object):
@@ -17,7 +17,6 @@ class ExtensionResolverMixin(object):
 
 
 class ExtensionTypeMetaMixin(object):
-
     fields = ('name', 'original_json')
 
 
@@ -28,13 +27,11 @@ class BaseExtensionMixin(object):
 
 
 class IssuerExtensionType(BaseExtensionMixin, DjangoObjectType):
-
     class Meta(ExtensionTypeMetaMixin):
         model = IssuerExtension
 
 
 class BadgeClassExtensionType(BaseExtensionMixin, DjangoObjectType):
-
     class Meta(ExtensionTypeMetaMixin):
         model = BadgeClassExtension
 
@@ -57,8 +54,8 @@ class BadgeClassTagType(DjangoObjectType):
         fields = ('name',)
 
 
-class IssuerType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
-
+class IssuerType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
+                 DjangoObjectType):
     class Meta:
         model = Issuer
         fields = ('name', 'entity_id', 'badgeclasses', 'faculty',
@@ -82,7 +79,6 @@ def badge_user_type():
 
 
 class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
-
     share_url = graphene.String()
     extensions = graphene.List(BadgeInstanceExtensionType)
     user = graphene.Field(badge_user_type)
@@ -92,14 +88,11 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
         fields = ('entity_id', 'badgeclass', 'identifier', 'image',
                   'recipient_identifier', 'recipient_type', 'revoked',
                   'revocation_reason', 'expires_at', 'acceptance', 'created_at',
-                   'public')
+                  'public')
 
 
-
-
-
-class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
-
+class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
+                     DjangoObjectType):
     class Meta:
         model = BadgeClass
         fields = ('name', 'entity_id', 'issuer', 'image', 'staff',
