@@ -31,6 +31,7 @@ jobs:
         - *mysql_init
         - 'cp env_vars.sh.example env_vars.sh'
         - 'source env_vars.sh'
+        - './manage.py migrate'
         - './manage.py test'
         - 'coverage run manage.py test'
         - 'coverage report'
