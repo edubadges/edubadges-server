@@ -30,6 +30,12 @@ class PermissionedRelationshipBase(BaseVersionedEntity):
                                              'may_award',
                                              'may_sign',
                                              'may_administrate_users'])
+    @property
+    def has_a_permission(self):
+        """check to see if at least one permission set to True"""
+        return self.may_create or self.may_read or self.may_update or self.may_delete \
+               or self.may_award or self.may_sign or self.may_administrate_users
+
 
     def has_permissions(self, permissions):
         """

@@ -28,7 +28,7 @@ from oauthlib.common import generate_token
 from rest_framework.authtoken.models import Token
 from signing.models import AssertionTimeStamp
 from badgeuser.utils import generate_badgr_username
-from staff.models import InstitutionStaff
+from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
     objects = CachedEmailAddressManager()
@@ -218,6 +218,22 @@ class UserCachedObjectGetterMixin(object):
         except IndexError:
             pass
         return None
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_institution_staff(self):
+        return InstitutionStaff.objects.get(user=self)
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_faculty_staffs(self):
+        return list(FacultyStaff.objects.filter(user=self))
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_issuer_staffs(self):
+        return list(IssuerStaff.objects.filter(user=self))
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_badgeclass_staffs(self):
+        return list(BadgeClassStaff.objects.filter(user=self))
 
 
 class UserPermissionsMixin(object):
@@ -537,6 +553,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
                     # nothing to do, abort so we dont call .publish()
                     return
         return super(BadgeUser, self).save(*args, **kwargs)
+
 
 class BadgrAccessTokenManager(models.Manager):
 
