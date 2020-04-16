@@ -189,7 +189,7 @@ class UserCachedObjectGetterMixin(object):
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeinstances(self):
-        return BadgeInstance.objects.filter(recipient_identifier=self.get_recipient_identifier())
+        return BadgeInstance.objects.filter(user=self)
 
     # @cachemodel.cached_method(auto_publish=True)
     # turned it off, because if user logs in for FIRST time, this caching will result in the user having no verified emails.
