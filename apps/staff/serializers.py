@@ -19,17 +19,12 @@ class BaseStaffSerializer(serializers.Serializer):
 class StaffUpdateSerializer(BaseStaffSerializer):
 
     def update(self, instance, validated_data):
-        created_by = validated_data.pop('updated_by')
-        perms_allowed_to_change = instance.object.get_permissions(created_by)
         original_perms = instance.permissions
         for permission in original_perms.keys():
             new_value = bool(int(validated_data[permission]))
             original_value = original_perms[permission]
             if original_value != new_value:  # this permission is changed
-                if not perms_allowed_to_change[permission]:
-                    raise serializers.ValidationError("May not change permissions that you don't have yourself")
-                else:
-                    setattr(instance, permission, new_value)  # update the permission
+                setattr(instance, permission, new_value)  # update the permission
         instance.save()
         return instance
 
