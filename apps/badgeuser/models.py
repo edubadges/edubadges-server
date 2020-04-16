@@ -226,17 +226,12 @@ class UserPermissionsMixin(object):
     """
     def is_user_within_scope(self, user):
         """
-        See if user has other user in his scope, (i.e. is other user found in any of all related staff objects)
+        See if user has other user in his scope, (i.e. is other user found in your institution)
         This is used when creating a new staff membership object, then this user must be in your scope.
         """
         if self == user:
             return False  # cannot administrate yourself
-        all_administrable_objects = self.get_all_objects_with_permissions(['may_administrate_users'])
-        for obj in all_administrable_objects:
-            for staff in obj.staff_items:
-                if user == staff.user:
-                    return True  # user is administrable
-        return False
+        return self.institution == user.institution
 
     def is_staff_membership_within_scope(self, staff_membership):
         """

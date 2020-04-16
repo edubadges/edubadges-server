@@ -66,9 +66,6 @@ class ObjectPermissionTests(BadgrTestCase):
                                     data, content_type='application/json')
         self.assertEqual(response.status_code, 201)
 
-    def test_permission_tree_cleanup_after_put(self):
-        pass
-
     def test_update_staff_membership(self):
         teacher1 = self.setup_teacher(authenticate=True)
         teacher2 = self.setup_teacher(institution=teacher1.institution)
@@ -121,7 +118,8 @@ class ObjectPermissionTests(BadgrTestCase):
                                       content_type='application/json')
         self.assertEqual(response.status_code, 405)
 
-    def test_may_not_create_staff_membership_for_user_outside_scope(self):
+
+    def test_may_not_create_staff_membership_for_user_outside_institution(self):
         teacher1 = self.setup_teacher(authenticate=True)
         teacher2 = self.setup_teacher()
         faculty = self.setup_faculty(institution=teacher1.institution)
