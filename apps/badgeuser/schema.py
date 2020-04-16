@@ -17,4 +17,3 @@ class Query(object):
 
     def resolve_current_user(self, info, **kwargs):
         return info.context.user
-

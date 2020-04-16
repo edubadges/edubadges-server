@@ -1,6 +1,7 @@
 import json
 import os
 import uuid
+import datetime
 from collections import OrderedDict
 from itertools import chain
 
@@ -13,6 +14,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ErrorDetail
 
 from badgeuser.serializers import BadgeUserIdentifierField
+from institution.serializers import FacultySlugRelatedField
 from lti_edu.models import StudentsEnrolled
 from mainsite.drf_fields import ValidImageField
 from mainsite.exceptions import BadgrValidationError
@@ -20,10 +22,6 @@ from mainsite.models import BadgrApp
 from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField, \
     OriginalJsonSerializerMixin, BaseSlugRelatedField
 from mainsite.utils import OriginSetting
-
-
-from institution.serializers import FacultySlugRelatedField
-
 from . import utils
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension
 
@@ -34,6 +32,16 @@ class IssuerSlugRelatedField(BaseSlugRelatedField):
 
 class BadgeClassSlugRelatedField(BaseSlugRelatedField):
     model = BadgeClass
+
+
+class PeriodField(serializers.Field):
+    """Period represented in days"""
+
+    def to_internal_value(self, value):
+        return datetime.timedelta(days=value)
+
+    def to_representation(self, value):
+        return value.days
 
 
 class ExtensionsSaverMixin(object):
@@ -94,11 +102,14 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serial
             new_issuer.save()
             return new_issuer
         else:
-            raise BadgrValidationError(fields="You don't have the necessary permissions")
+            raise BadgrValidationError(
+                fields={"instance": [{"error_code": 999, "error_message": "You don't have the necessary permissions"}]})
 
     def update(self, instance, validated_data):
         if instance.assertions:
-            raise BadgrValidationError('Cannot change any value, assertions have already been issued')
+            raise BadgrValidationError(
+                fields={"instance": [{"error_code": 999,
+                                      "error_message": "Cannot change any value, assertions have already been issued"}]})
         [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
         if not instance.badgrapp_id:
             instance.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
@@ -111,7 +122,7 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serial
 
         if self.context.get('embed_badgeclasses', False):
             representation['badgeclasses'] = BadgeClassSerializer(obj.badgeclasses.all(), many=True,
-                                                                    context=self.context).data
+                                                                  context=self.context).data
         return representation
 
     def add_extensions(self, instance, add_these_extensions, extension_items):
@@ -148,9 +159,14 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
     alignment = AlignmentItemSerializer(many=True, source='alignment_items', required=False)
     tags = serializers.ListField(child=StripTagsCharField(max_length=1024), source='tag_items', required=False)
     extensions = serializers.DictField(source='extension_items', required=False)
+    expiration_period = PeriodField()
 
     class Meta:
         apispec_definition = ('BadgeClass', {})
+
+    def get_expiration_period(self, instance):
+        if instance.expiration_period:
+            return instance.expiration_period.days
 
     def to_representation(self, instance):
         representation = super(BadgeClassSerializer, self).to_representation(instance)
@@ -176,7 +192,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
             return criteria_url
         else:
             return None
-        
+
     def validate_name(self, name):
         return strip_tags(name)
 
@@ -193,7 +209,9 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
 
     def update(self, instance, validated_data):
         if instance.assertions:
-            raise BadgrValidationError('Cannot change any value, assertions have already been issued')
+            raise BadgrValidationError(
+                fields={"instance": [{"error_code": 999,
+                                      "error_message": "Cannot change any value, assertions have already been issued"}]})
         self.save_extensions(validated_data, instance)
         for key, value in validated_data.items():
             setattr(instance, key, value)
@@ -226,7 +244,8 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
             new_badgeclass = BadgeClass.objects.create(**validated_data)
             return new_badgeclass
         else:
-            raise BadgrValidationError(fields="You don't have the necessary permissions")
+            raise BadgrValidationError(fields = {"instance": [{"error_code": 999,
+                                    "error_message": "You don't have the necessary permissions"}]})
 
 
 class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serializer):
@@ -247,7 +266,7 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
     expires = serializers.DateTimeField(source='expires_at', required=False, allow_null=True)
     issue_signed = serializers.BooleanField(required=False)
     signing_password = serializers.CharField(max_length=1024, required=False)
-    enrollment_slug = serializers.CharField(max_length=1024, required=False)
+    enrollment_entity_id = serializers.CharField(max_length=1024, required=False)
 
     create_notification = HumanReadableBooleanField(write_only=True, required=False, default=False)
 
@@ -296,7 +315,7 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
                 'entity_id': instance.cached_issuer.entity_id})
         if self.context.get('include_badge_class', False):
             representation['badge_class'] = BadgeClassSerializer(instance.cached_badgeclass,
-                                                                   context=self.context).data
+                                                                 context=self.context).data
         else:
             representation['badge_class'] = OriginSetting.HTTP + reverse('badgeclass_json', kwargs={
                 'entity_id': instance.cached_badgeclass.entity_id})
@@ -324,36 +343,42 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         Requires self.context to include request (with authenticated request.user)
         and badgeclass: issuer.models.BadgeClass.
         """
-        # ob2 evidence items
+        badgeclass = self.context['request'].data.get('badgeclass')
+        enrollment = StudentsEnrolled.objects.get(entity_id=validated_data.get('enrollment_entity_id'))
+        recipient_id = enrollment.user.get_recipient_identifier()
+        expires_at = None
+        if badgeclass.expiration_period:
+            expires_at = datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0) + badgeclass.expiration_period
+        if enrollment.badge_instance:
+            raise BadgrValidationError(fields="Can't award enrollment {}, it has already been awarded"
+                                       .format(validated_data.get('enrollment_entity_id')))
         if self.context['request'].data.get('issue_signed', False):
-            assertion = self.context.get('badgeclass').issue_signed(
-                recipient_id=validated_data.get('recipient_identifier'),
+            assertion = badgeclass.issue_signed(
+                recipient_id=recipient_id,
                 created_by=self.context.get('request').user,
                 allow_uppercase=validated_data.get('allow_uppercase'),
                 recipient_type=validated_data.get('recipient_type', BadgeInstance.RECIPIENT_TYPE_EDUID),
                 badgr_app=BadgrApp.objects.get_current(self.context.get('request')),
-                expires_at=validated_data.get('expires_at', None),
+                expires_at=expires_at,
                 extensions=validated_data.get('extension_items', None),
                 identifier=uuid.uuid4().urn,
                 signer=validated_data.get('created_by'),
             )
         else:
-            assertion = self.context.get('badgeclass').issue(
-                recipient_id=validated_data.get('recipient_identifier'),
-                notify=validated_data.get('create_notification'),
+            assertion = badgeclass.issue(
+                recipient_id=recipient_id,
+                notify=self.context['request'].data.get('create_notification'),
                 created_by=self.context.get('request').user,
                 allow_uppercase=validated_data.get('allow_uppercase'),
                 recipient_type=validated_data.get('recipient_type', BadgeInstance.RECIPIENT_TYPE_EDUID),
                 badgr_app=BadgrApp.objects.get_current(self.context.get('request')),
-                expires_at=validated_data.get('expires_at', None),
+                expires_at=expires_at,
                 extensions=validated_data.get('extension_items', None)
             )
 
-        related_enrollment = StudentsEnrolled.objects.get(entity_id=validated_data.get('enrollment_slug'))
-        related_enrollment.date_awarded = timezone.now()
-        related_enrollment.badge_instance = assertion
-        related_enrollment.save()
-
+        enrollment.date_awarded = timezone.now()
+        enrollment.badge_instance = assertion
+        enrollment.save()
         return assertion
 
     def update(self, instance, validated_data):

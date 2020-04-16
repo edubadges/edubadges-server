@@ -4,6 +4,7 @@ from mainsite.drf_fields import ValidImageField
 from mainsite.serializers import StripTagsCharField, BadgrBaseModelSerializer
 from rest_framework import serializers
 
+
 class BadgeClassSerializer(BadgrBaseModelSerializer):
     """
     Used by LTI
@@ -32,14 +33,6 @@ class BadgeClassLtiContextSerializer(BadgrBaseModelSerializer):
                     [IssuerStaff.ROLE_OWNER ,IssuerStaff.ROLE_EDITOR,IssuerStaff.ROLE_STAFF]:
                 return True
         return False
-    # def to_representation(self, instance):
-    #     data = {
-    #         'badgeClassEntityId': instance.badge_class.entity_id,
-    #         'contextId': instance.context_id,
-    #         'name': instance.badge_class.name,
-    #         'image':instance.badge_class.image,
-    #     }
-    #     return data
 
 
 class BadgeClassLtiContextStudentSerializer(BadgrBaseModelSerializer):
@@ -93,24 +86,6 @@ class BadgeClassLtiContextStudentSerializer(BadgrBaseModelSerializer):
                 return True
         return False
 
-
-
-
-class StudentsEnrolledSerializer(BadgrBaseModelSerializer):
-    """
-    Used by LTI
-    """
-    email = serializers.ReadOnlyField()
-    first_name = serializers.ReadOnlyField()
-    last_name = serializers.ReadOnlyField()
-    edu_id = serializers.ReadOnlyField()
-    slug = StripTagsCharField(max_length=255, read_only=True, source='entity_id')
-
-
-    class Meta:
-        model = StudentsEnrolled
-        fields = '__all__'
-        
 
 class IssuerSerializer(BadgrBaseModelSerializer):
 

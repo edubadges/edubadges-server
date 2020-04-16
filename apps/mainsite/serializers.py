@@ -6,6 +6,7 @@ from rest_framework import serializers
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import SlugRelatedField
+
 from mainsite.exceptions import BadgrValidationError
 
 
@@ -25,7 +26,7 @@ class BadgrBaseModelSerializer(serializers.ModelSerializer):
         try:
             return super(BadgrBaseModelSerializer, self).is_valid(raise_exception)
         except ValidationError as e:
-            raise BadgrValidationError(fields=e.detail)
+            raise BadgrValidationError(fields={"instance":[{"error_code": 999, "error_message": e.detail}]})
 
 
 class LinkedDataEntitySerializer(serializers.Serializer):
@@ -47,6 +48,7 @@ class LinkedDataReferenceField(serializers.Serializer):
     Includes their @id by default and any additional identifier keys that are the named
     properties on the instance.
     """
+
     def __init__(self, keys=[], model=None, read_only=True, field_names=None, **kwargs):
         kwargs.pop('many', None)
         super(LinkedDataReferenceField, self).__init__(read_only=read_only, **kwargs)
@@ -85,6 +87,7 @@ class JSONDictField(serializers.DictField):
     """
     A DictField that also accepts JSON strings as input
     """
+
     def to_internal_value(self, data):
         try:
             data = json.loads(data)
@@ -148,4 +151,3 @@ class OriginalJsonSerializerMixin(serializers.Serializer):
                 representation.update(extra_properties)
 
         return representation
-

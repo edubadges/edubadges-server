@@ -1,9 +1,10 @@
-from django.core.management.base import BaseCommand
-from django.db import connection
 import traceback
 from os import listdir, environ
 from os.path import dirname, basename, isfile, join
+
 from django.conf import settings
+from django.core.management.base import BaseCommand
+from django.db import connection
 
 
 class Command(BaseCommand):
@@ -19,11 +20,12 @@ class Command(BaseCommand):
 
 def clear_data():
     with connection.cursor() as cursor:
-        print("Wiping data... ", end = "")
+        print("Wiping data... ", end="")
 
         dbname = environ.get("BADGR_DB_NAME")
         migration_filled_tables = ('auth_permission', 'django_content_type', 'django_migrations')
-        sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = '{dbname}' AND table_name NOT IN {tables}".format(dbname=dbname, tables=migration_filled_tables)
+        sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = '{dbname}' AND table_name NOT IN {tables}".format(
+            dbname=dbname, tables=migration_filled_tables)
 
         cursor.execute("SET FOREIGN_KEY_CHECKS=0")
         try:
@@ -42,13 +44,13 @@ def run_seeds():
         basename(x)[:-3]
         for x in listdir(seedsdir)
         if x.endswith(".py")
-        if x != "__init__.py"
+        if x not in ["__init__.py", "constants.py"]
         if isfile(join(seedsdir, x))
     ]
 
 
     for seed in sorted(seeds):
-        print("Seeding %s... " % seed, end = "")
+        print("Seeding %s... " % seed, end="")
 
         try:
             __import__("mainsite.seeds." + seed)

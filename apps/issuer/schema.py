@@ -1,11 +1,13 @@
 import json
+
 import graphene
 from graphene_django.types import DjangoObjectType
-from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
-                    BadgeClassAlignment, BadgeClassTag
+
 from lti_edu.schema import StudentsEnrolledType
 from mainsite.mixins import StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin
 from staff.schema import IssuerStaffType, BadgeClassStaffType, PermissionType
+from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
+    BadgeClassAlignment, BadgeClassTag
 
 
 class ExtensionResolverMixin(object):
@@ -15,7 +17,6 @@ class ExtensionResolverMixin(object):
 
 
 class ExtensionTypeMetaMixin(object):
-
     fields = ('name', 'original_json')
 
 
@@ -26,13 +27,11 @@ class BaseExtensionMixin(object):
 
 
 class IssuerExtensionType(BaseExtensionMixin, DjangoObjectType):
-
     class Meta(ExtensionTypeMetaMixin):
         model = IssuerExtension
 
 
 class BadgeClassExtensionType(BaseExtensionMixin, DjangoObjectType):
-
     class Meta(ExtensionTypeMetaMixin):
         model = BadgeClassExtension
 
@@ -54,8 +53,9 @@ class BadgeClassTagType(DjangoObjectType):
         model = BadgeClassTag
         fields = ('name',)
 
-class IssuerType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
 
+class IssuerType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
+                 DjangoObjectType):
     class Meta:
         model = Issuer
         fields = ('name', 'entity_id', 'badgeclasses', 'faculty',
@@ -73,8 +73,26 @@ class IssuerType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixi
         return len(self.get_badgeclasses(info.context.user, ['read']))
 
 
-class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
+def badge_user_type():
+    from badgeuser.schema import BadgeUserType
+    return BadgeUserType
 
+
+class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
+    share_url = graphene.String()
+    extensions = graphene.List(BadgeInstanceExtensionType)
+    user = graphene.Field(badge_user_type)
+
+    class Meta:
+        model = BadgeInstance
+        fields = ('entity_id', 'badgeclass', 'identifier', 'image',
+                  'recipient_identifier', 'recipient_type', 'revoked',
+                  'revocation_reason', 'expires_at', 'acceptance', 'created_at',
+                  'public')
+
+
+class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
+                     DjangoObjectType):
     class Meta:
         model = BadgeClass
         fields = ('name', 'entity_id', 'issuer', 'image', 'staff',
@@ -86,8 +104,9 @@ class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolver
     tags = graphene.List(BadgeClassTagType)
     alignments = graphene.List(BadgeClassAlignmentType)
     enrollments = graphene.List(StudentsEnrolledType)
-    badge_assertions = graphene.List(StudentsEnrolledType)
+    badge_assertions = graphene.List(BadgeInstanceType)
     permissions = graphene.Field(PermissionType)
+    expiration_period = graphene.Int()
 
     def resolve_tags(self, info, **kwargs):
         return self.cached_tags()
@@ -101,18 +120,9 @@ class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolver
     def resolve_badge_assertions(self, info, **kwargs):
         return self.assertions
 
-
-class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
-
-    share_url = graphene.String()
-    extensions = graphene.List(BadgeInstanceExtensionType)
-
-    class Meta:
-        model = BadgeInstance
-        fields = ('entity_id', 'badgeclass', 'identifier', 'image',
-                  'recipient_identifier', 'recipient_type', 'revoked',
-                  'revocation_reason', 'expires_at', 'acceptance',
-                   'public')
+    def resolve_expiration_period(self, info, **kwargs):
+        if self.expiration_period:
+            return self.expiration_period.days
 
 
 class Query(object):

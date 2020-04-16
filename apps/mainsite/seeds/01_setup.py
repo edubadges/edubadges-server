@@ -6,8 +6,11 @@ from badgeuser.models import TermsVersion, BadgeUser
 from institution.models import Institution, Faculty
 from issuer.models import Issuer, BadgeClass
 from mainsite.models import BadgrApp
-
 # BadgrApp
+from mainsite.seeds.constants import EDU_BADGES_FACULTY_NAME, SURF_INSTITUTION_NAME
+
+setattr(settings, 'SUPPRESS_EMAILS', 1)
+
 main_badgr_app, _ = BadgrApp.objects.get_or_create(
     is_active=1,
     cors=settings.UI_URL,
@@ -59,11 +62,12 @@ superuser.set_password(settings.SUPERUSER_PWD)
 superuser.save()
 
 # SURF / eduBadges static
-surf_net_institution, _ = Institution.objects.get_or_create(name="surfnet.nl", identifier="surfnet.nl",
-                                                            description="surfnet.nl")
+surf_net_institution, _ = Institution.objects.get_or_create(name=SURF_INSTITUTION_NAME,
+                                                            identifier=SURF_INSTITUTION_NAME,
+                                                            description=SURF_INSTITUTION_NAME)
 
-edu_badges_faculty, _ = Faculty.objects.get_or_create(name="eduBadges", institution=surf_net_institution,
-                                                      description="eduBadges")
+edu_badges_faculty, _ = Faculty.objects.get_or_create(name=EDU_BADGES_FACULTY_NAME, institution=surf_net_institution,
+                                                      description=EDU_BADGES_FACULTY_NAME)
 
 surf_issuer, _ = Issuer.objects.get_or_create(name="SURF", image="uploads/issuers/surf.png", faculty=edu_badges_faculty,
                                               description="SURF", email="info@surf.nl", url="https://surf.nl",
