@@ -175,7 +175,7 @@ class UserCachedObjectGetterMixin(object):
                     object_tree_walker(child, permissions, looking_for, override_permissions)
             except AttributeError:  # no more kids
                 pass
-        if not self.is_teacher():
+        if not self.is_teacher:
             raise ValueError('User must be teacher to walk the permission tree')
         tree_root = self.institution
         object_tree_walker(tree_root, permissions)
@@ -306,6 +306,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
     A full-featured user model that can be an Earner, Issuer, or Consumer of Open Badges
     """
     entity_class_name = 'BadgeUser'
+    is_teacher = models.BooleanField(default=False)
 
     badgrapp = models.ForeignKey('mainsite.BadgrApp', on_delete=models.SET_NULL, blank=True, null=True, default=None)
     is_staff = models.BooleanField(
@@ -494,14 +495,9 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
         except SocialAccount.DoesNotExist:
             return None
 
+    @property
     def is_student(self):
-        social_account = self.get_social_account()
-        return social_account.provider == 'edu_id' or social_account.provider == 'surfconext_ala'
-
-    def is_teacher(self):
-        social_account = self.get_social_account()
-        return social_account.provider == 'surf_conext'
-
+        return not self.is_teacher
 
     def get_assertions_ready_for_signing(self):
         assertion_timestamps = AssertionTimeStamp.objects.filter(signer=self).exclude(proof='')
