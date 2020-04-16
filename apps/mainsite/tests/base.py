@@ -85,6 +85,8 @@ class SetupHelper(object):
     def setup_teacher(self, first_name='', last_name='', authenticate=False, institution=None):
         user = self._setup_user(first_name, last_name, authenticate, institution=institution)
         self._add_surfconext_socialaccount(user)
+        user.is_teacher = True
+        user.save()
         return user
 
     def setup_student(self, first_name='', last_name='', authenticate=False, institution=None):
