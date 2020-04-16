@@ -167,3 +167,11 @@ class ObjectPermissionTests(BadgrTestCase):
     def test_permission_tree_cleanup_after_change(self):
         pass
 
+    def test_student_may_not_access_fields_through_graphql(self):
+        """certain fields are blocked for students"""
+        pass
+
+    def test_student_may_query_entity_lists_through_graphql(self):
+        """queries like all institutions / faculties should result in empty values"""
+        pass
+

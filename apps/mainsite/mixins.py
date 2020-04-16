@@ -6,18 +6,31 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from mainsite.utils import verify_svg
+from mainsite.exceptions import GraphQLException
 from resizeimage.resizeimage import resize_contain
+
 
 def _decompression_bomb_check(image, max_pixels=Image.MAX_IMAGE_PIXELS):
     pixels = image.size[0] * image.size[1]
     return pixels > max_pixels
 
 
+def resolver_blocker_for_students(f):
+    """Decorator to block students from using graphql resolver functions"""
+    def wrapper(*args):
+        info = args[1]
+        if info.context.user.is_student:
+            raise GraphQLException('Student may not retrieve {} of {}'.format(info.field_name, info.parent_type))
+        return f(*args)
+    return wrapper
+
 
 class PermissionsResolverMixin(object):
     """
     Schema mixin to resolve entity pemissions
     """
+
+    @resolver_blocker_for_students
     def resolve_permissions(self, info):
         return self.get_permissions(info.context.user)
 
@@ -113,6 +126,7 @@ class ScrubUploadedSvgImage(object):
 
 class StaffResolverMixin(object):
 
+    @resolver_blocker_for_students
     def resolve_staff(self, info):
         if self.has_permissions(info.context.user, ['may_administrate_users']):
             return self.staff_items
