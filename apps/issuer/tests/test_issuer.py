@@ -37,7 +37,8 @@ class IssuerTest(BadgrTestCase):
         issuer_json['faculty'] = faculty.entity_id
         response = self.client.post('/issuer/create', json.dumps(issuer_json), content_type='application/json')
         self.assertEqual(400, response.status_code)
-        self.assertEqual(str(response.data['fields']), "You don't have the necessary permissions")
+        error_message = str(response.data['fields']['instance'][0]['error_message'])
+        self.assertEqual(error_message, "You don't have the necessary permissions")
 
     def test_create_badgeclass(self):
         teacher1 = self.setup_teacher(authenticate=True)
@@ -57,7 +58,8 @@ class IssuerTest(BadgrTestCase):
         badgeclass_json['issuer'] = issuer.entity_id
         response = self.client.post("/issuer/badgeclasses/create", json.dumps(badgeclass_json), content_type='application/json')
         self.assertEqual(400, response.status_code)
-        self.assertEqual(str(response.data['fields']), "You don't have the necessary permissions")
+        error_message = str(response.data['fields']['instance'][0]['error_message'])
+        self.assertEqual(error_message, "You don't have the necessary permissions")
 
 
     def test_issuer_schema(self):
