@@ -18,3 +18,6 @@ class BadgrValidationError(APIException):
         detail = {'detail': 'validation_error', 'fields': fields}
         super(BadgrValidationError, self).__init__(detail)
 
+
+class GraphQLException(Exception):
+    pass

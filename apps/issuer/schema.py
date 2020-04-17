@@ -4,7 +4,8 @@ import graphene
 from graphene_django.types import DjangoObjectType
 
 from lti_edu.schema import StudentsEnrolledType
-from mainsite.mixins import StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin
+from mainsite.mixins import StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin, resolver_blocker_for_students
+from mainsite.exceptions import GraphQLException
 from staff.schema import IssuerStaffType, BadgeClassStaffType, PermissionType
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
     BadgeClassAlignment, BadgeClassTag
@@ -114,9 +115,11 @@ class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolver
     def resolve_alignments(self, info, **kwargs):
         return self.cached_alignments()
 
+    @resolver_blocker_for_students
     def resolve_enrollments(self, info, **kwargs):
         return self.cached_enrollments()
 
+    @resolver_blocker_for_students
     def resolve_badge_assertions(self, info, **kwargs):
         return self.assertions
 
