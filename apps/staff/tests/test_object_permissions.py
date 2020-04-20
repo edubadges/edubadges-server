@@ -149,3 +149,9 @@ class ObjectPermissionTests(BadgrTestCase):
         """queries like all institutions / faculties should result in empty values"""
         pass
 
+    def test_delete_staff_memebership(self):
+        pass
+
+    def cannot_delete_institution_staff_memebership(self):
+        pass
+
