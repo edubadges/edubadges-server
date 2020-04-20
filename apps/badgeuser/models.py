@@ -221,7 +221,10 @@ class UserCachedObjectGetterMixin(object):
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_institution_staff(self):
-        return InstitutionStaff.objects.get(user=self)
+        try:
+            return InstitutionStaff.objects.get(user=self)
+        except InstitutionStaff.DoesNotExist:
+            return None
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_faculty_staffs(self):
@@ -360,7 +363,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
         try:
             InstitutionStaff.objects.get(user=self, institution=value)
             raise ValueError('User already has an institution staff membership. Cannot have two.')
-        except:
+        except InstitutionStaff.DoesNotExist:
             InstitutionStaff.objects.create(user=self, institution=value)
 
     @property
