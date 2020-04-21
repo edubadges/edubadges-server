@@ -31,6 +31,9 @@ test.cache/
 build/
 dist/
 htmlcov/
+.coverage.*
+coverage.xml
+*.cover
 api_spec_v1.json
 api_spec_v2.json
 api_docs_v1.json
@@ -41,4 +44,5 @@ test_data
 .project
 .pydevproject
 .settings
+
 

@@ -49,7 +49,7 @@ badge_class_extensions = {
         "type": ["Extension", "extensions:LearningOutcomeExtension"],
         "LearningOutcome": "Will appreciate the benefits of learning a foreign language."
     },
-    "extensions:InstitutionNameExtension": {
+    "extensions:EducationProgramIdentifierExtension": {
         "@context": "https://openbadgespec.org/extensions/EducationProgramIdentifierExtension/context.json",
         "type": ["Extension", "extensions:EducationProgramIdentifierExtension"],
         "EducationProgramIdentifier": 56823

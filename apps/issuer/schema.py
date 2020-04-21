@@ -98,7 +98,7 @@ class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolver
         model = BadgeClass
         fields = ('name', 'entity_id', 'issuer', 'image', 'staff',
                   'description', 'criteria_url', 'criteria_text',
-                  'created_at')
+                  'created_at', 'expiration_period', 'public_url')
 
     staff = graphene.List(BadgeClassStaffType)
     extensions = graphene.List(BadgeClassExtensionType)
@@ -108,6 +108,7 @@ class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolver
     badge_assertions = graphene.List(BadgeInstanceType)
     permissions = graphene.Field(PermissionType)
     expiration_period = graphene.Int()
+    public_url = graphene.String()
 
     def resolve_tags(self, info, **kwargs):
         return self.cached_tags()
