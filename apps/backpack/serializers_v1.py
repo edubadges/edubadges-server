@@ -392,6 +392,10 @@ class BadgeDateTimeField(VerifierBadgeDateTimeField):
             return value
 
 
+class V1FacultySerializer(serializers.Serializer):
+    name = serializers.CharField()
+
+
 class V1IssuerSerializer(serializers.Serializer):
     id = serializers.URLField(required=False)  # v0.5 Badge Classes have none
     type = serializers.CharField()
@@ -400,6 +404,7 @@ class V1IssuerSerializer(serializers.Serializer):
     description = BadgeStringField(required=False)
     image = BadgeImageURLField(required=False)
     email = BadgeEmailField(required=False)
+    faculty = V1FacultySerializer()
 
 
 class V1BadgeClassSerializer(serializers.Serializer):
@@ -446,6 +451,7 @@ class V1BadgeInstanceSerializer(V1InstanceSerializer):
         if instance.cached_badgeclass.criteria_url:
             localbadgeinstance_json['badge']['criteria_url'] = instance.cached_badgeclass.criteria_url
         localbadgeinstance_json['badge']['issuer'] = instance.cached_issuer.json
+        localbadgeinstance_json['badge']['issuer']['faculty'] = instance.cached_issuer.faculty
 
         # clean up recipient to match V1InstanceSerializer
         localbadgeinstance_json['recipient'] = {
