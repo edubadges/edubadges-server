@@ -656,7 +656,7 @@ class BadgeInstance(BaseAuditedModel,
 
     badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.PROTECT, related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, on_delete=models.PROTECT, blank=False, null=False)
-    user = models.ForeignKey('badgeuser.BadgeUser', blank=True, null=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey('badgeuser.BadgeUser', blank=True, null=True, on_delete=models.CASCADE)
 
     RECIPIENT_TYPE_EMAIL = 'email'
     RECIPIENT_TYPE_ID = 'openBadgeId'
