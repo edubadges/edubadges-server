@@ -19,6 +19,8 @@ from mainsite.utils import OriginSetting
 
 
 class BackpackCollection(BaseAuditedModel, BaseVersionedEntity):
+    created_by = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE, blank=True, null=True,
+                                   related_name="+")
     entity_class_name = 'BackpackCollection'
     name = models.CharField(max_length=128)
     description = models.CharField(max_length=255, blank=True)
