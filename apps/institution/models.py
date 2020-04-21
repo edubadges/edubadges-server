@@ -36,7 +36,13 @@ class Institution(PermissionedModelMixin, ImageUrlGetterMixin, BaseVersionedEnti
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_staff(self):
+        """returns all staff members"""
         return list(InstitutionStaff.objects.filter(institution=self))
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_permissioned_staff(self):
+        """returns only staff members with at least one permission"""
+        return [staff for staff in self.cached_staff() if staff.has_a_permission]
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_faculties(self):

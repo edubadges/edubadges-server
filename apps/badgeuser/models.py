@@ -28,7 +28,7 @@ from oauthlib.common import generate_token
 from rest_framework.authtoken.models import Token
 from signing.models import AssertionTimeStamp
 from badgeuser.utils import generate_badgr_username
-from staff.models import InstitutionStaff
+from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
     objects = CachedEmailAddressManager()
@@ -219,6 +219,25 @@ class UserCachedObjectGetterMixin(object):
             pass
         return None
 
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_institution_staff(self):
+        try:
+            return InstitutionStaff.objects.get(user=self)
+        except InstitutionStaff.DoesNotExist:
+            return None
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_faculty_staffs(self):
+        return list(FacultyStaff.objects.filter(user=self))
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_issuer_staffs(self):
+        return list(IssuerStaff.objects.filter(user=self))
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_badgeclass_staffs(self):
+        return list(BadgeClassStaff.objects.filter(user=self))
+
 
 class UserPermissionsMixin(object):
     """
@@ -226,17 +245,12 @@ class UserPermissionsMixin(object):
     """
     def is_user_within_scope(self, user):
         """
-        See if user has other user in his scope, (i.e. is other user found in any of all related staff objects)
+        See if user has other user in his scope, (i.e. is other user found in your institution)
         This is used when creating a new staff membership object, then this user must be in your scope.
         """
         if self == user:
             return False  # cannot administrate yourself
-        all_administrable_objects = self.get_all_objects_with_permissions(['may_administrate_users'])
-        for obj in all_administrable_objects:
-            for staff in obj.staff_items:
-                if user == staff.user:
-                    return True  # user is administrable
-        return False
+        return self.institution == user.institution
 
     def is_staff_membership_within_scope(self, staff_membership):
         """
@@ -349,7 +363,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
         try:
             InstitutionStaff.objects.get(user=self, institution=value)
             raise ValueError('User already has an institution staff membership. Cannot have two.')
-        except:
+        except InstitutionStaff.DoesNotExist:
             InstitutionStaff.objects.create(user=self, institution=value)
 
     @property
@@ -542,6 +556,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersioned
                     # nothing to do, abort so we dont call .publish()
                     return
         return super(BadgeUser, self).save(*args, **kwargs)
+
 
 class BadgrAccessTokenManager(models.Manager):
 
