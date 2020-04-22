@@ -157,5 +157,12 @@ class Query(object):
             if bc.has_permissions(info.context.user, ['may_read']):
                 return bc
 
+    def resolve_badge_instance(self, info, **kwargs):
+        id = kwargs.get('id')
+        if id is not None:
+            bc = BadgeInstance.objects.get(entity_id=id)
+            if bc.user_id == info.context.user.id:
+                return bc
+
     def resolve_badge_instances(self, info, **kwargs):
         return list(info.context.user.cached_badgeinstances())
