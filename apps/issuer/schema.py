@@ -87,7 +87,7 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
     class Meta:
         model = BadgeInstance
         fields = ('entity_id', 'badgeclass', 'identifier', 'image',
-                  'recipient_identifier', 'recipient_type', 'revoked',
+                  'recipient_identifier', 'recipient_type', 'revoked', 'issued_on',
                   'revocation_reason', 'expires_at', 'acceptance', 'created_at',
                   'public')
 
@@ -155,6 +155,13 @@ class Query(object):
         if id is not None:
             bc = BadgeClass.objects.get(entity_id=id)
             if bc.has_permissions(info.context.user, ['may_read']):
+                return bc
+
+    def resolve_badge_instance(self, info, **kwargs):
+        id = kwargs.get('id')
+        if id is not None:
+            bc = BadgeInstance.objects.get(entity_id=id)
+            if bc.user_id == info.context.user.id:
                 return bc
 
     def resolve_badge_instances(self, info, **kwargs):
