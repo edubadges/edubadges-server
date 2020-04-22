@@ -2,24 +2,24 @@ import datetime
 
 from allauth.account.models import EmailConfirmationHMAC
 from allauth.account.utils import url_str_to_user_pk
-from apispec_drf.decorators import apispec_get_operation, apispec_put_operation, apispec_delete_operation, apispec_list_operation
+from apispec_drf.decorators import apispec_get_operation, apispec_delete_operation, apispec_list_operation
 from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
 from badgeuser.serializers import BadgeUserProfileSerializer, BadgeUserTokenSerializer
 from badgeuser.tasks import process_email_verification
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db.models import ProtectedError
 from django.http import Http404
 from django.utils import timezone
 from entity.api import BaseEntityDetailView, BaseEntityListView
 from issuer.permissions import BadgrOAuthTokenHasScope
 from mainsite.models import BadgrApp
+from mainsite.exceptions import BadgrApiException400
 from rest_framework import permissions
-from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
-from rest_framework.status import HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED
+from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND
 
 RATE_LIMIT_DELTA = datetime.timedelta(minutes=5)
 
@@ -27,91 +27,23 @@ RATE_LIMIT_DELTA = datetime.timedelta(minutes=5)
 class BadgeUserDetail(BaseEntityDetailView):
     model = BadgeUser
     v1_serializer_class = BadgeUserProfileSerializer
-    permission_classes = (permissions.AllowAny, BadgrOAuthTokenHasScope)
-    valid_scopes = {
-        "post": ["*"],
-        "get": ["r:profile", "rw:profile"],
-        "put": ["rw:profile"],
-    }
-
-    def post(self, request, **kwargs):
-        """
-        Signup for a new account
-        """
-        if request.version == 'v1':
-            serializer_cls = self.get_serializer_class()
-            serializer = serializer_cls(
-                data=request.data, context={'request': request}
-            )
-            serializer.is_valid(raise_exception=True)
-            try:
-                new_user = serializer.save()
-            except DjangoValidationError as e:
-                raise RestframeworkValidationError(e.message)
-            return Response(serializer.data, status=HTTP_201_CREATED)
-
-        return Response(status=HTTP_404_NOT_FOUND)
-
-    @apispec_get_operation('BadgeUser',
-        summary="Get a single BadgeUser profile",
-        description="Use the entityId 'self' to retrieve the authenticated user's profile",
-        tags=['BadgeUsers']
-    )
-    def get(self, request, **kwargs):
-        return super(BadgeUserDetail, self).get(request, **kwargs)
-
-    @apispec_put_operation('BadgeUser',
-        summary="Update a BadgeUser",
-        description="Use the entityId 'self' to update the authenticated user's profile",
-        tags=['BadgeUsers']
-    )
-    def put(self, request, **kwargs):
-        return super(BadgeUserDetail, self).put(request, allow_partial=True, **kwargs)
+    permission_classes = (BadgeUserIsAuthenticatedUser,)
+    http_method_names = ('get', 'delete')
 
     def get_object(self, request, **kwargs):
-        version = getattr(request, 'version', 'v1')
-        if version == 'v2':
-            entity_id = kwargs.get('entity_id')
-            if entity_id == 'self':
-                self.object = request.user
-                return self.object
-            try:
-                self.object = BadgeUser.cached.get(entity_id=entity_id)
-            except BadgeUser.DoesNotExist:
-                pass
-            else:
-                return self.object
-        elif version == 'v1':
-            if request.user.is_authenticated:
-                self.object = request.user
-                return self.object
-        raise Http404
+        if request.user.is_authenticated:
+            self.object = request.user
+            self.has_object_permissions(request, self.object)
+            return self.object
+        raise BadgrApiException400(fields={'error_message': "You do not have permission", "error_code": 210})
 
-    def has_object_permissions(self, request, obj):
-        method = request.method.lower()
-        if method == 'post':
-            return True
-
-        if isinstance(obj, BadgeUser):
-
-            if method == 'get':
-                if request.user.id == obj.id:
-                    # always have access to your own user
-                    return True
-                # peers is obsolete
-                # if obj in request.user.peers:
-                #     # you can see some info about users you know about
-                #     return True
-
-            if method == 'put':
-                # only current user can update their own profile
-                return request.user.id == obj.id
-        return False
-
-    def get_context_data(self, **kwargs):
-        context = super(BadgeUserDetail, self).get_context_data(**kwargs)
-        context['isSelf'] = (self.object.id == self.request.user.id)
-        return context
+    def delete(self, request, **kwargs):
+        obj = self.get_object(request, **kwargs)
+        try:
+            obj.delete()
+        except ProtectedError as e:
+            raise BadgrApiException400(fields={'error_message': e.args[0], "error_code": 999})
+        return Response(status=HTTP_204_NO_CONTENT)
 
 
 class BadgeUserToken(BaseEntityDetailView):
@@ -122,20 +54,6 @@ class BadgeUserToken(BaseEntityDetailView):
     def get_object(self, request, **kwargs):
         return request.user
 
-    # deprecate from public API docs in favor of oauth2
-    # @apispec_get_operation('BadgeUserToken',
-    #     summary="Get the authenticated user's auth token",
-    #     description="A new auth token will be created if none already exist for this user",
-    #     tags=['Authentication'],
-    # )
-    def get(self, request, **kwargs):
-        return super(BadgeUserToken, self).get(request, **kwargs)
-
-    # deprecate from public API docs in favor of oauth2
-    # @apispec_operation(
-    #     summary="Invalidate the old token and create a new one",
-    #     tags=['Authentication'],
-    # )
     def put(self, request, **kwargs):
         request.user.replace_token()  # generate new token first
         self.token_replaced = True

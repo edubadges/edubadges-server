@@ -1,15 +1,12 @@
 # encoding: utf-8
 
-
-from django.core.exceptions import FieldError
 from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from rest_framework.views import APIView
 
 import badgrlog
-from entity.utils import get_form_error_code, validate_errors
-from mainsite.exceptions import BadgrApiException400
+from entity.utils import validate_errors
 
 
 class BaseEntityView(APIView):

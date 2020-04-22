@@ -1,15 +1,7 @@
-import json
-
-from django.contrib.auth.models import Permission
 from rest_framework import serializers
-
-from institution.serializers import FacultySerializer
 from institution.models import Institution
 from mainsite.serializers import StripTagsCharField, BadgrBaseModelSerializer, BaseSlugRelatedField
-from mainsite.validators import PasswordValidator
-
 from .models import BadgeUser, CachedEmailAddress, TermsVersion
-from .utils import notify_on_password_change
 
 
 class UserSlugRelatedField(BaseSlugRelatedField):
@@ -45,76 +37,21 @@ class BadgeUserProfileSerializer(serializers.Serializer):
     first_name = StripTagsCharField(max_length=30, allow_blank=True)
     last_name = StripTagsCharField(max_length=30, allow_blank=True)
     email = serializers.EmailField(source='primary_email', required=False)
-    current_password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False)
-    password = serializers.CharField(style={'input_type': 'password'}, write_only=True, required=False, validators=[PasswordValidator()])
-    slug = serializers.CharField(source='entity_id', read_only=True)
+    entity_id = serializers.CharField(read_only=True)
     agreed_terms_version = serializers.IntegerField(required=False)
     marketing_opt_in = serializers.BooleanField(required=False)
-    user_permissions = serializers.SerializerMethodField(required=False)
-    faculty = FacultySerializer(many=True,  allow_null=True)
     institution = InstitutionForProfileSerializer(read_only=True, )
 
     class Meta:
         apispec_definition = ('BadgeUser', {})
 
-    def get_user_permissions(self, obj):
-        perms = obj.user_permissions.all() | Permission.objects.filter(group__user=obj)
-        perms = list(x.codename for x in perms)
-        if obj.is_staff:
-            perms.insert(0, 'is_staff')
-        if obj.is_superuser:
-            perms.insert(0,'is_superuser')
-        return json.dumps(perms)
-
-    def create(self, validated_data):
-        user = BadgeUser.objects.create(
-            email=validated_data['primary_email'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name'],
-            plaintext_password=validated_data['password'],
-            marketing_opt_in=validated_data.get('marketing_opt_in', False),
-            request=self.context.get('request', None),
-        )
-        return user
-
-    def update(self, user, validated_data):
-        first_name = validated_data.get('first_name')
-        last_name = validated_data.get('last_name')
-        password = validated_data.get('password')
-        current_password = validated_data.get('current_password')
-
-        if first_name:
-            user.first_name = first_name
-        if last_name:
-            user.last_name = last_name
-
-        if password:
-            if not current_password:
-                raise serializers.ValidationError({'currrent_password': "Field is required"})
-            if user.check_password(current_password):
-                user.set_password(password)
-                notify_on_password_change(user)
-            else:
-                raise serializers.ValidationError({'currrent_password': "Incorrect password"})
-
-        if 'agreed_terms_version' in validated_data:
-            user.agreed_terms_version = validated_data.get('agreed_terms_version')
-
-        if 'marketing_opt_in' in validated_data:
-            user.marketing_opt_in = validated_data.get('marketing_opt_in')
-
-        user.save()
-        return user
-
     def to_representation(self, instance):
         representation = super(BadgeUserProfileSerializer, self).to_representation(instance)
-
         latest = TermsVersion.cached.cached_latest()
         if latest:
             representation['latest_terms_version'] = latest.version
             if latest.version != instance.agreed_terms_version:
                 representation['latest_terms_description'] = latest.short_description
-
         return representation
 
 
