@@ -120,7 +120,7 @@ class BadgeUserEmailConfirm(BaseUserRecoveryView):
 
         process_email_verification.delay(email_address.pk)
 
-        redirect_url = badgrapp.ui_login_redirect
+        redirect_url = badgrapp.ui_connect_success_redirect
 
         return Response(status=HTTP_302_FOUND, headers={'Location': redirect_url})
 
