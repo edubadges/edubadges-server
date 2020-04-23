@@ -17,7 +17,7 @@ class Query(object):
 
     def resolve_enrollments(self, info, **kwargs):
         badge_classes = info.context.user.get_all_badgeclasses_with_permissions(['may_award'])
-        enrollements = []
+        enrollments = []
         for bc in badge_classes:
-            enrollements += bc.cached_enrollments()
-        return enrollements
+            enrollments += bc.cached_enrollments()
+        return enrollments

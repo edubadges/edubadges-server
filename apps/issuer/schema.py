@@ -105,6 +105,7 @@ class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolver
     tags = graphene.List(BadgeClassTagType)
     alignments = graphene.List(BadgeClassAlignmentType)
     enrollments = graphene.List(StudentsEnrolledType)
+    pending_enrollments = graphene.List(StudentsEnrolledType)
     badge_assertions = graphene.List(BadgeInstanceType)
     permissions = graphene.Field(PermissionType)
     expiration_period = graphene.Int()
@@ -119,6 +120,10 @@ class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolver
     @resolver_blocker_for_students
     def resolve_enrollments(self, info, **kwargs):
         return self.cached_enrollments()
+
+    @resolver_blocker_for_students
+    def resolve_pending_enrollments(self, info, **kwargs):
+        return self.cached_pending_enrollments()
 
     @resolver_blocker_for_students
     def resolve_badge_assertions(self, info, **kwargs):
