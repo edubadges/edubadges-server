@@ -52,5 +52,5 @@ awarded_user = BadgeUser.objects.get(email=AWARDED_STUDENT_EMAIL)
 create_enrollments_badge_instances(awarded_user,
                                    [BADGE_CLASS_COGNITIVE_PSYCHOLOGY, BADGE_CLASS_INTRODUCTION_TO_PSYCHOLOGY,
                                     BADGE_CLASS_GROUP_DYNAMICS],
-                                   True,
+                                   False,
                                    acceptance="Accepted")

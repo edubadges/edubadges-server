@@ -81,24 +81,32 @@ def create_student(username, email, uid, verify):
 students = [
     {
         "username": "user",
+        "first_name" : "John",
+        "last_name" : "Doe",
         "email": "edubadges.surf@gmail.com",
         "uid": "5acb63239f298a0a7de0081cd4a603d807178846",
         "verify": True
     },
     {
         "username": "mary",
+        "first_name" : "Mary",
+        "last_name" : "Doe",
         "email": ENROLLED_STUDENT_EMAIL,
         "uid": "7ec1acf9ce98835e29c337077491b4ba6d1ed21d",
         "verify": True
     },
     {
         "username": "sarah",
+        "first_name" : "Sarah",
+        "last_name" : "Doe",
         "email": REVOKED_STUDENT_EMAIL,
         "uid": "7fc994786c9e7815da17f5e97f796f67e891509e",
         "verify": True
     },
     {
         "username": "carl",
+        "first_name" : "Carl",
+        "last_name" : "Doolittle",
         "email": AWARDED_STUDENT_EMAIL,
         "uid": "78b9ec1bb8731ec04b42137faf6a3c7068c89212",
         "verify": True

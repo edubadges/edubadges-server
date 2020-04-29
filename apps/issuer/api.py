@@ -244,10 +244,10 @@ class BadgeInstanceDetail(BaseEntityDetailView):
         try:
             assertion = self.get_object(request, **kwargs)
         except Http404 as e:
-            fields = {'error_message': 'You do not have permission. Check your assigned role in the Issuer', error_code: 601}
+            fields = {'error_message': 'You do not have permission. Check your assigned role in the Issuer', 'error_code': 601}
             raise BadgrApiException400(fields)
         if not self.has_object_permissions(request, assertion):
-            fields = {'error_message': 'You do not have permission. Check your assigned role in the Issuer', error_code: 601}
+            fields = {'error_message': 'You do not have permission. Check your assigned role in the Issuer', 'error_code': 601}
             raise BadgrApiException400(fields)
         revocation_reason = request.data.get('revocation_reason', None)
         if not revocation_reason:
