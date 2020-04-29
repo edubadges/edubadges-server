@@ -21,7 +21,6 @@ class LocalDevelopModePermissionMixin(PermissionRequiredMixin):
     """
     Checks to see if LOCAL_DEVELOPMENT_MODE is set to true
     """
-
     def has_permission(self):
         try:
             return settings.LOCAL_DEVELOPMENT_MODE is True

@@ -30,6 +30,12 @@ def name_randomiser(name):
 
 class SetupHelper(object):
 
+    def get_testfiles_path(self, *args):
+        return os.path.join(TOP_DIR, 'apps', 'issuer', 'testfiles', *args)
+
+    def get_test_image_path(self):
+        return os.path.join(self.get_testfiles_path(), 'guinea_pig_testing_badge.png')
+
     def _add_eduid_socialaccount(self, user):
         random_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:{}c14-b952-4d7e-85fd-{}ac5c6f18".format(random.randint(1, 99999), random.randint(1, 9999))
         extra_data = {"family_name": user.last_name,
@@ -161,13 +167,20 @@ class SetupHelper(object):
         staff.save()
         return staff
 
+    def instance_is_removed(self, instance):
+        try:
+            instance.__class__.objects.get(pk=instance.pk)
+            return False
+        except instance.__class__.DoesNotExist:
+            return True
+
 
 @override_settings(
     CELERY_ALWAYS_EAGER=True,
     SESSION_ENGINE='django.contrib.sessions.backends.cache',
     HTTP_ORIGIN="http://localhost:8000",
     BADGR_APP_ID=1,
-    CACHES={'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}}
+    # CACHES={'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}}
 )
 class BadgrTestCase(SetupHelper, APITransactionTestCase):
     def setUp(self):
