@@ -5,7 +5,8 @@ from allauth.socialaccount.models import SocialAccount
 
 from badgeuser.models import BadgeUser, TermsAgreement
 from institution.models import Institution
-from mainsite.seeds.constants import ENROLLED_STUDENT_EMAIL, REVOKED_STUDENT_EMAIL, INSTITUTION_UNIVERSITY_EXAMPLE_ORG
+from mainsite.seeds.constants import ENROLLED_STUDENT_EMAIL, REVOKED_STUDENT_EMAIL, INSTITUTION_UNIVERSITY_EXAMPLE_ORG, \
+    AWARDED_STUDENT_EMAIL
 from staff.models import InstitutionStaff
 
 # Institution
@@ -94,6 +95,12 @@ students = [
         "username": "sarah",
         "email": REVOKED_STUDENT_EMAIL,
         "uid": "7fc994786c9e7815da17f5e97f796f67e891509e",
+        "verify": True
+    },
+    {
+        "username": "carl",
+        "email": AWARDED_STUDENT_EMAIL,
+        "uid": "78b9ec1bb8731ec04b42137faf6a3c7068c89212",
         "verify": True
     }
 ]

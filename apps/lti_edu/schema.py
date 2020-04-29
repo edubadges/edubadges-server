@@ -7,8 +7,8 @@ from .models import StudentsEnrolled
 class StudentsEnrolledType(DjangoObjectType):
     class Meta:
         model = StudentsEnrolled
-        fields = ('entity_id', 'badge_class', 'date_created', 'date_consent_given',
-                  'user', 'badge_instance', 'date_awarded', 'denied')
+        fields = ('date_created', 'date_consent_given', 'date_awarded', 'badge_class', 'denied',
+                  'user', 'badge_instance', 'entity_id')
 
 
 class Query(object):
