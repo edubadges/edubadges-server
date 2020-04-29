@@ -1,7 +1,6 @@
 from django.db import models
 from django.forms.models import model_to_dict
 from entity.models import BaseVersionedEntity
-from mainsite.exceptions import BadgrValidationError
 from signing.models import SymmetricKey
 
 
@@ -36,7 +35,6 @@ class PermissionedRelationshipBase(BaseVersionedEntity):
         return self.may_create or self.may_read or self.may_update or self.may_delete \
                or self.may_award or self.may_sign or self.may_administrate_users
 
-
     def has_permissions(self, permissions):
         """
         checks to see if all permissions are there
@@ -54,6 +52,13 @@ class PermissionedRelationshipBase(BaseVersionedEntity):
         super(PermissionedRelationshipBase, self).publish()
         self.object.publish()
         self.user.publish()
+
+    def delete(self, *args, **kwargs):
+        publish_object = kwargs.pop('publish_object', True)
+        super(PermissionedRelationshipBase, self).delete()
+        if publish_object:
+            self.object.publish()  # update permissions instantly
+        self.user.publish()  # update permissions instantly
 
     @property
     def cached_user(self):
@@ -100,13 +105,6 @@ class IssuerStaff(PermissionedRelationshipBase):
     @property
     def object(self):
         return self.issuer
-
-    def delete(self, *args, **kwargs):
-        publish_issuer = kwargs.pop('publish_issuer', True)
-        super(IssuerStaff, self).delete()
-        if publish_issuer:
-            self.issuer.publish()
-        self.user.publish()
 
     @property
     def may_become_signer(self):

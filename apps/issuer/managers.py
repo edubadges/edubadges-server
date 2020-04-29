@@ -208,10 +208,4 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
         if notify:
             new_instance.notify_earner(badgr_app=badgr_app)
 
-        if badgeclass.recipient_count() == 1 and (
-                not getattr(settings, 'BADGERANK_NOTIFY_ON_BADGECLASS_CREATE', True) and
-                getattr(settings, 'BADGERANK_NOTIFY_ON_FIRST_ASSERTION', True)):
-            from issuer.tasks import notify_badgerank_of_badgeclass
-            notify_badgerank_of_badgeclass.delay(badgeclass_pk=badgeclass.pk)
-
         return new_instance

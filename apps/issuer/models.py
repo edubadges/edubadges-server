@@ -179,34 +179,6 @@ class Issuer(PermissionedModelMixin,
     def cached_badgeclasses(self):
         return list(self.badgeclasses.all())
 
-    def delete(self, *args, **kwargs):
-        if self.recipient_count > 0:
-            raise ProtectedError("Issuer can not be deleted because it has previously issued badges.", self)
-
-        # remove any unused badgeclasses owned by issuer
-        for bc in self.cached_badgeclasses():
-            bc.delete()
-
-        staff = self.cached_issuerstaff()
-        ret = super(Issuer, self).delete(*args, **kwargs)
-
-        # remove membership records
-        for membership in staff:
-            membership.delete(publish_issuer=False)
-
-        if apps.is_installed('badgebook'):
-            # badgebook shim
-            try:
-                from badgebook.models import LmsCourseInfo
-                # update LmsCourseInfo's that were using this issuer as the default_issuer
-                for course_info in LmsCourseInfo.objects.filter(default_issuer=self):
-                    course_info.default_issuer = None
-                    course_info.save()
-            except ImportError:
-                pass
-
-        return ret
-
     def get_absolute_url(self):
         return reverse('issuer_json', kwargs={'entity_id': self.entity_id})
 
@@ -254,10 +226,6 @@ class Issuer(PermissionedModelMixin,
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeclasses(self):
         return self.badgeclasses.all()
-
-    @property
-    def recipient_count(self):
-        return sum(bc.recipient_count() for bc in self.cached_badgeclasses())
 
     @property
     def image_preview(self):
@@ -391,23 +359,13 @@ class BadgeClass(PermissionedModelMixin,
         return BadgeClassStaff.objects.filter(badgeclass=self)
 
     @property
+    @cachemodel.cached_method(auto_publish=True)
     def assertions(self):
         return list(self.badgeinstances.all())
 
     def publish(self):
         super(BadgeClass, self).publish()
         self.issuer.publish()
-
-    def delete(self, *args, **kwargs):
-        if self.recipient_count() > 0:
-            raise ProtectedError("BadgeClass may only be deleted if all BadgeInstances have been revoked.", self)
-
-        if self.pathway_element_count() > 0:
-            raise ProtectedError("BadgeClass may only be deleted if all PathwayElementBadge have been removed.", self)
-
-        issuer = self.issuer
-        super(BadgeClass, self).delete(*args, **kwargs)
-        issuer.publish()
 
     def get_absolute_url(self):
         return reverse('badgeclass_json', kwargs={'entity_id': self.entity_id})
@@ -449,11 +407,6 @@ class BadgeClass(PermissionedModelMixin,
         return Issuer.cached.get(pk=self.issuer_id)
 
     @cachemodel.cached_method(auto_publish=True)
-    def recipient_count(self):
-        return self.badgeinstances.filter(revoked=False).count()
-
-
-    @cachemodel.cached_method(auto_publish=True)
     def cached_enrollments(self):
         from lti_edu.models import StudentsEnrolled
         return StudentsEnrolled.objects.filter(badge_class=self)
@@ -468,9 +421,6 @@ class BadgeClass(PermissionedModelMixin,
         return StudentsEnrolled.objects.filter(badge_class=self,
                                                denied=False,
                                                date_awarded=None).count()
-
-    def pathway_element_count(self):
-        return len(self.cached_pathway_elements())
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_alignments(self):

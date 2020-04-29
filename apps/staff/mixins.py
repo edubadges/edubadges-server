@@ -1,3 +1,6 @@
+from django.db.models import ProtectedError
+
+
 class PermissionedModelMixin(object):
     """
     Abstract class used for inheritance by all the Models (Badgeclass, Issuer, Faculty & Institution that have a related
@@ -108,3 +111,36 @@ class PermissionedModelMixin(object):
         super(PermissionedModelMixin, self).publish(*args, **kwargs)
         for member in self.cached_staff():
             member.cached_user.publish()
+
+    def save(self, *args, **kwargs):
+        super(PermissionedModelMixin, self).save(*args, **kwargs)
+        try:
+            self.parent.publish()
+        except AttributeError:
+            pass
+
+    def delete(self, *args, **kwargs):
+        """
+        Recursive delete function that
+            - deletes all children
+            - only publishes the parent of the initially deleted entity
+            - removes all associated staff memberships without publishing the associated object (the one that is deleted)
+        """
+        publish_parent = kwargs.pop('publish_parent', True)
+        if self.assertions:
+            raise ProtectedError("{} may only be deleted if there are no awarded Assertions.".format(self.__class__.__name__), self)
+        try:  # first the children
+            kids = self.children
+            for child in kids:
+                child.delete(publish_parent=False)
+        except AttributeError:  # no kids
+            pass
+        for membership in self.staff_items:
+            membership.delete(publish_object=False)
+        ret = super(PermissionedModelMixin, self).delete(*args, **kwargs)
+        if publish_parent:
+            try:
+                self.parent.publish()
+            except AttributeError:  # no parent
+                pass
+        return ret

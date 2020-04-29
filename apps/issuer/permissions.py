@@ -7,6 +7,12 @@ logger = logging.getLogger('Badgr.Debug')
 SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
 
 
+class AwardedAssertionsBlock(permissions.BasePermission):
+    """Checks to see if there are assertions"""
+    def has_object_permission(self, request, view, obj):
+        return not obj.assertions
+
+
 class AuditedModelOwner(permissions.BasePermission):
     """
     Request user matches .created_by
