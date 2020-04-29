@@ -3,8 +3,8 @@ from django.db.models import ProtectedError
 
 class PermissionedModelMixin(object):
     """
-    Abstract class used for inheritance by all the Models (Badgeclass, Issuer, Faculty & Institution that have a related
-    Staff model. Used for retrieving permissions and staff members.
+    Abstract class used for inheritance by all the Models (Badgeclass, Issuer, Faculty & Institution) that have a related
+    Staff model. Used for retrieving permissions and staff members. And instant caching when changes happen.
     """
 
     def _get_local_permissions(self, user):
