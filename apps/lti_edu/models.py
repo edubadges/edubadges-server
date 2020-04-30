@@ -105,6 +105,10 @@ class StudentsEnrolled(BaseVersionedEntity, models.Model):
     def __str__(self):
         return self.email
 
+    def save(self, *args, **kwargs):
+        self.badge_class.publish_delete_methods(['cached_enrollments', 'cached_pending_enrollments'])
+        return super(StudentsEnrolled, self).save(*args, **kwargs)
+
     @property
     def assertion_slug(self):
         return self.badge_instance.entity_id
