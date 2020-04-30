@@ -1,3 +1,4 @@
+import requests
 import datetime
 import io
 import logging
@@ -7,6 +8,7 @@ import re
 from collections import OrderedDict
 from json import dumps as json_dumps
 from json import loads as json_loads
+from urllib.parse import urljoin
 
 import cachemodel
 from allauth.account.adapter import get_adapter
@@ -666,6 +668,13 @@ class BadgeInstance(BaseAuditedModel,
         index_together = (
                 ('recipient_identifier', 'badgeclass', 'revoked'),
         )
+
+    def validate(self):
+        data = {'profile': {'id': self.recipient_identifier}, 'data': self.get_json()}
+        response = requests.post(json=data,
+                                 url=urljoin(settings.VALIDATOR_URL, 'results'),
+                                 headers={'Accept': 'application/json'})
+        return response.json()
 
     @property
     def extended_json(self):

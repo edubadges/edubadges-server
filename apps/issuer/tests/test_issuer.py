@@ -77,6 +77,16 @@ class IssuerAPITest(BadgrTestCase):
     def test_award_badge_expiration_date(self):
         pass
 
+    def test_validate_assertion(self):
+        teacher1 = self.setup_teacher()
+        student = self.setup_student()
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        assertion = self.setup_assertion(recipient=student, badgeclass=badgeclass, created_by=teacher1)
+        validation = assertion.validate()
+        self.assertTrue(type(validation['graph']) == list)
+
 
 class IssuerExtensionsTest(BadgrTestCase):
 
