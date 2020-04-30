@@ -29,7 +29,7 @@ def create_badge_instance(user, badge_class, revoked, acceptance="Unaccepted"):
 def create_enrollments_badge_instances(user, bc_names, revoked, acceptance="Unaccepted", include_badge_instances=True):
     for bc_name in bc_names:
         for bc in BadgeClass.objects.filter(name=bc_name):
-            StudentsEnrolled.objects.get_or_create(badge_class=bc, user=enrolled_user)
+            StudentsEnrolled.objects.get_or_create(badge_class=bc, user=user)
             if include_badge_instances:
                 create_badge_instance(user, bc, revoked, acceptance)
 
