@@ -63,11 +63,6 @@ class BadgeClassManager(BaseOpenBadgeObjectManager):
     def create(self, **kwargs):
         obj = self.model(**kwargs)
         obj.save()
-
-        if getattr(settings, 'BADGERANK_NOTIFY_ON_BADGECLASS_CREATE', True):
-            from issuer.tasks import notify_badgerank_of_badgeclass
-            notify_badgerank_of_badgeclass.delay(badgeclass_pk=obj.pk)
-
         return obj
 
     @transaction.atomic
