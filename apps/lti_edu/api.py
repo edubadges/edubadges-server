@@ -64,14 +64,14 @@ class StudentsEnrolledList(BaseEntityListView):
             raise BadgrApiException400(fields)
         badge_class = get_object_or_404(BadgeClass, entity_id=request.data['badgeclass_slug'])
         if request.user.may_enroll(badge_class, raise_exception=True):
-            StudentsEnrolled.objects.create(
+            enrollment = StudentsEnrolled.objects.create(
                 badge_class_id=badge_class.pk,
                 user=request.user,
                 date_consent_given=timezone.now()
             )
             message = EmailMessageMaker.create_student_badge_request_email(badge_class)
             request.user.email_user(subject='You have successfully requested a badge', message=message)
-            return Response(data='enrolled', status=200)
+            return Response(data={'status': 'enrolled', 'entity_id': enrollment.entity_id}, status=200)
         fields = {"error_message": 'Cannot enroll', "error_code": 209}
         raise BadgrApiException400(fields)
 
