@@ -5,7 +5,8 @@ from allauth.socialaccount.models import SocialAccount
 
 from badgeuser.models import BadgeUser, TermsAgreement
 from institution.models import Institution
-from mainsite.seeds.constants import ENROLLED_STUDENT_EMAIL, REVOKED_STUDENT_EMAIL, INSTITUTION_UNIVERSITY_EXAMPLE_ORG
+from mainsite.seeds.constants import ENROLLED_STUDENT_EMAIL, REVOKED_STUDENT_EMAIL, INSTITUTION_UNIVERSITY_EXAMPLE_ORG, \
+    AWARDED_STUDENT_EMAIL
 from staff.models import InstitutionStaff
 
 # Institution
@@ -16,7 +17,8 @@ from staff.models import InstitutionStaff
                                       image="uploads/institution/surf.png",
                                       grading_table="https://url.to.gradingtable/gradingtable.html",
                                       brin="000-7777-11111") for ins in
-    [{'name': INSTITUTION_UNIVERSITY_EXAMPLE_ORG, 'description': 'The university example is always a good place to hang out'},
+    [{'name': INSTITUTION_UNIVERSITY_EXAMPLE_ORG,
+      'description': 'The university example is always a good place to hang out'},
      {'name': 'diy.surfconext.nl', 'description': 'The university diy is also a good place to hang out'},
      ]
 ]
@@ -68,8 +70,8 @@ extra_data = json.dumps({"eduperson_entitlement": ["urn:mace:eduid.nl:entitlemen
 
 
 # Users - Students
-def create_student(username, email, uid, verify):
-    user, _ = BadgeUser.objects.get_or_create(username=username, email=email)
+def create_student(username, first_name, last_name, email, uid, verify):
+    user, _ = BadgeUser.objects.get_or_create(username=username, email=email, first_name=first_name, last_name=last_name)
     accept_terms(user)
 
     EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)
@@ -80,20 +82,34 @@ def create_student(username, email, uid, verify):
 students = [
     {
         "username": "user",
+        "first_name": "John",
+        "last_name": "Doe",
         "email": "edubadges.surf@gmail.com",
         "uid": "5acb63239f298a0a7de0081cd4a603d807178846",
         "verify": True
     },
     {
         "username": "mary",
+        "first_name": "Mary",
+        "last_name": "Doe",
         "email": ENROLLED_STUDENT_EMAIL,
         "uid": "7ec1acf9ce98835e29c337077491b4ba6d1ed21d",
         "verify": True
     },
     {
         "username": "sarah",
+        "first_name": "Sarah",
+        "last_name": "Doe",
         "email": REVOKED_STUDENT_EMAIL,
         "uid": "7fc994786c9e7815da17f5e97f796f67e891509e",
+        "verify": True
+    },
+    {
+        "username": "carl",
+        "first_name": "Carl",
+        "last_name": "Doolittle",
+        "email": AWARDED_STUDENT_EMAIL,
+        "uid": "78b9ec1bb8731ec04b42137faf6a3c7068c89212",
         "verify": True
     }
 ]

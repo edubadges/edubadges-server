@@ -181,6 +181,7 @@ class BadgeInstanceDetail(BaseEntityDetailView):
     def delete(self, request, **kwargs):
         # verify the user has permission to the assertion
         try:
+            kwargs['bypass_cache'] = True
             assertion = self.get_object(request, **kwargs)
         except Http404 as e:
             fields = {'error_message': 'You do not have permission. Check your assigned role in the Issuer', 'error_code': 601}

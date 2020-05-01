@@ -92,8 +92,10 @@ class VersionedObjectMixin(object):
 
     def get_object(self, request, **kwargs):
         identifier = kwargs.get('entity_id')
+        bypass_cache = kwargs.get('bypass_cache', False)
         try:
-            self.object = self.model.cached.get(**{'entity_id': identifier})
+            self.object = self.model.objects.get(
+                **{'entity_id': identifier}) if bypass_cache else self.model.cached.get(**{'entity_id': identifier})
         except self.model.DoesNotExist:
             pass
         else:
@@ -103,7 +105,6 @@ class VersionedObjectMixin(object):
 
         # nothing found
         raise Http404
-
 
 
 class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
