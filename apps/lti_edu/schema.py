@@ -13,12 +13,15 @@ class StudentsEnrolledType(DjangoObjectType):
 
 class Query(object):
     enrollments = graphene.List(StudentsEnrolledType)
-    enrollment = graphene.Field(StudentsEnrolledType, id=graphene.String())
+    enrollment = graphene.Field(StudentsEnrolledType, id=graphene.String(), badge_class_id=graphene.String())
 
     def resolve_enrollments(self, info, **kwargs):
         return StudentsEnrolled.objects.filter(user=info.context.user)
 
     def resolve_enrollment(self, info, **kwargs):
         id = kwargs.get('id')
-        if id is not None:
-            return StudentsEnrolled.objects.get(entity_id=id, user=info.context.user)
+        badge_class_id = kwargs.get('badge_class_id')
+        if badge_class_id:
+            return StudentsEnrolled.objects \
+                .filter(user=info.context.user, badge_class__entity_id=badge_class_id).first()
+        return StudentsEnrolled.objects.get(entity_id=id, user=info.context.user)
