@@ -784,6 +784,7 @@ class BadgeInstance(BaseAuditedModel,
 
         super(BadgeInstance, self).save(*args, **kwargs)
         self.badgeclass.remove_cached_data(['cached_assertions'])
+        self.user.remove_cached_data(['cached_badgeinstances'])
 
     def rebake(self, obi_version=CURRENT_OBI_VERSION, save=True, signature=None, replace_image=False):
         if self.source_url:
