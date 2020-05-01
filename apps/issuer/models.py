@@ -820,10 +820,6 @@ class BadgeInstance(BaseAuditedModel,
         if self.user:
             self.user.publish()
 
-        # publish all collections this instance was in
-        for collection in self.backpackcollection_set.all():
-            collection.publish()
-
         self.publish_by('entity_id', 'revoked')
 
     def delete(self, *args, **kwargs):

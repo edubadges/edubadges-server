@@ -1,17 +1,14 @@
 import datetime
-from collections import OrderedDict
 
 import badgrlog
-from backpack.models import BackpackCollection, BackpackCollectionBadgeInstance
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.urls import reverse
 from django.utils.dateparse import parse_datetime, parse_date
 from issuer.helpers import BadgeCheckHelper
 from issuer.models import BadgeInstance
 from mainsite.drf_fields import Base64FileField
-from mainsite.serializers import StripTagsCharField, MarkdownCharField
+from mainsite.serializers import MarkdownCharField
 from mainsite.utils import OriginSetting
-from mainsite.serializers import BadgrBaseModelSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 from rest_framework.fields import SkipField
@@ -106,151 +103,6 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
         if public != None:
             instance.public = public
             instance.save()
-        return instance
-
-
-class CollectionBadgesSerializerV1(serializers.ListSerializer):
-
-
-    def to_representation(self, data):
-        filtered_data = [b for b in data if b.cached_badgeinstance.acceptance is not BadgeInstance.ACCEPTANCE_REJECTED and b.cached_badgeinstance.revoked is False]
-        filtered_data = [c for c in filtered_data if c.cached_badgeinstance.recipient_identifier in c.cached_collection.owner.all_recipient_identifiers]
-
-        representation = super(CollectionBadgesSerializerV1, self).to_representation(filtered_data)
-        return representation
-
-    def save(self, **kwargs):
-        collection = self.context.get('collection')
-        updated_ids = set()
-
-        # get all referenced badges in validated_data
-        for entry in self.validated_data:
-            if not entry.pk or getattr(entry, '_dirty', False):
-                entry.save()
-            updated_ids.add(entry.pk)
-
-        if not self.context.get('add_only', False):
-            for old_entry in collection.cached_collects():
-                if old_entry.pk not in updated_ids:
-                    old_entry.delete()
-
-        self.instance = self.validated_data
-        # return a list of the new entries added (which is all of the final list in case of update)
-        return [e for e in self.validated_data if e.pk in updated_ids]
-
-
-class CollectionBadgeSerializerV1(BadgrBaseModelSerializer):
-    id = serializers.RelatedField(queryset=BadgeInstance.objects.all())
-    collection = serializers.RelatedField(queryset=BackpackCollection.objects.all(), write_only=True, required=False)
-
-    class Meta:
-        model = BackpackCollectionBadgeInstance
-        list_serializer_class = CollectionBadgesSerializerV1
-        fields = ('id', 'collection', 'badgeinstance')
-        apispec_definition = ('CollectionBadgeSerializerV1', {})
-
-    def get_validators(self):
-        return []
-
-    def to_internal_value(self, data):
-        # populate collection from various methods
-        collection = data.get('collection')
-        if not collection:
-            collection = self.context.get('collection')
-        if not collection and self.parent.parent:
-            collection = self.parent.parent.instance
-        elif not collection and self.parent.instance:
-            collection = self.parent.instance
-        if not collection:
-            return BackpackCollectionBadgeInstance(
-                badgeinstance=BadgeInstance.cached.get(entity_id=data.get('id'))
-            )
-
-        try:
-            badgeinstance = BadgeInstance.cached.get(entity_id=data.get('id'))
-        except BadgeInstance.DoesNotExist:
-            raise RestframeworkValidationError("Assertion not found")
-        if badgeinstance.recipient_identifier not in collection.owner.all_recipient_identifiers:
-            raise serializers.ValidationError("Cannot add badge to a collection created by a different recipient.")
-
-        collect, created = BackpackCollectionBadgeInstance.objects.get_or_create(
-            collection=collection,
-            badgeinstance=badgeinstance)
-        return collect
-
-    def to_representation(self, instance):
-        ret = OrderedDict()
-        ret['id'] = instance.cached_badgeinstance.entity_id
-        ret['description'] = ""
-        return ret
-
-
-class CollectionSerializerV1(serializers.Serializer):
-    name = StripTagsCharField(required=True, max_length=128)
-    slug = StripTagsCharField(required=False, max_length=128, source='entity_id')
-    description = StripTagsCharField(required=False, allow_blank=True, allow_null=True, max_length=255)
-    share_hash = serializers.CharField(read_only=True)
-    share_url = serializers.CharField(read_only=True, max_length=1024)
-    badges = CollectionBadgeSerializerV1(
-        read_only=False, many=True, required=False, source='cached_collects'
-    )
-    published = serializers.BooleanField(required=False)
-
-    class Meta:
-        apispec_definition = ('Collection', {})
-
-    def to_representation(self, instance):
-        representation = super(CollectionSerializerV1, self).to_representation(instance)
-        if representation.get('share_url', None) is None:
-            #  V1 api expects share_url to be an empty string and not null if unpublished
-            representation['share_url'] = ""
-        return representation
-
-    def create(self, validated_data):
-        owner = validated_data.get('created_by', self.context.get('user', None))
-        new_collection = BackpackCollection.objects.create(
-            name=validated_data.get('name'),
-            description=validated_data.get('description', ''),
-            created_by=owner
-        )
-        published = validated_data.get('published', False)
-        if published:
-            new_collection.published = published
-            new_collection.save()
-
-        for collect in validated_data.get('cached_collects', []):
-            collect.collection = new_collection
-            collect.badgeuser = new_collection.created_by
-            collect.save()
-
-        return new_collection
-
-    def update(self, instance, validated_data):
-        instance.name = validated_data.get('name', instance.name)
-        instance.description = validated_data.get('description', instance.description)
-
-        if instance.published == False and validated_data['published'] == True:
-            for badge in instance.badge_items:
-                badge.public = True
-                badge.save()
-        instance.published = validated_data.get('published', instance.published)
-
-        if 'cached_collects' in validated_data\
-                and validated_data['cached_collects'] is not None:
-
-            existing_entries = list(instance.cached_collects())
-            updated_ids = set()
-
-            for entry in validated_data['cached_collects']:
-                if not entry.pk:
-                    entry.save()
-                updated_ids.add(entry.pk)
-
-            for old_entry in existing_entries:
-                if old_entry.pk not in updated_ids:
-                    old_entry.delete()
-
-        instance.save()
         return instance
 
 
