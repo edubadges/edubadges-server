@@ -88,6 +88,9 @@ class SetupHelper(object):
             self.client.force_authenticate(user=user)
         return user
 
+    def authenticate(self, user):
+        self.client.force_authenticate(user=user)
+
     def setup_teacher(self, first_name='', last_name='', authenticate=False, institution=None):
         user = self._setup_user(first_name, last_name, authenticate, institution=institution)
         self._add_surfconext_socialaccount(user)
