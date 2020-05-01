@@ -315,7 +315,7 @@ class UserPermissionsMixin(object):
             return False
 
 
-class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
+class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser, BaseVersionedEntity):
     """
     A full-featured user model that can be an Earner, Issuer, or Consumer of Open Badges
     """

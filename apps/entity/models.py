@@ -12,7 +12,7 @@ class BadgrCacheModel(cachemodel.CacheModel):
     class Meta:
         abstract = True
 
-    def publish_delete_methods(self, method_names):
+    def remove_cached_data(self, method_names):
         """
         Deletes the cached values for the given method names
         """

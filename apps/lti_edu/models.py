@@ -106,7 +106,7 @@ class StudentsEnrolled(BaseVersionedEntity, models.Model):
         return self.email
 
     def save(self, *args, **kwargs):
-        self.badge_class.publish_delete_methods(['cached_enrollments', 'cached_pending_enrollments'])
+        self.badge_class.remove_cached_data(['cached_enrollments', 'cached_pending_enrollments'])
         return super(StudentsEnrolled, self).save(*args, **kwargs)
 
     @property

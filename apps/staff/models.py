@@ -53,12 +53,24 @@ class PermissionedRelationshipBase(BaseVersionedEntity):
         self.object.publish()
         self.user.publish()
 
+    def _empty_user_cached_staff(self):
+        object_class_name = self.object.__class__.__name__.lower()
+        if object_class_name == 'institution':
+            self.user.remove_cached_data(['cached_institution_staff'])
+        else:
+            self.user.remove_cached_data(['cached_{}_staffs'.format(object_class_name)])
+
+    def save(self, *args, **kwargs):
+        super(PermissionedRelationshipBase, self).save()
+        self.object.remove_cached_data(['cached_staff'])
+        self._empty_user_cached_staff()
+
     def delete(self, *args, **kwargs):
         publish_object = kwargs.pop('publish_object', True)
         super(PermissionedRelationshipBase, self).delete()
         if publish_object:
-            self.object.publish()  # update permissions instantly
-        self.user.publish()  # update permissions instantly
+            self.object.remove_cached_data(['cached_staff'])  # update permissions instantly
+        self._empty_user_cached_staff()
 
     @property
     def cached_user(self):
