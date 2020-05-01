@@ -360,10 +360,13 @@ class BadgeClass(PermissionedModelMixin,
     def cached_staff(self):
         return BadgeClassStaff.objects.filter(badgeclass=self)
 
-    @property
     @cachemodel.cached_method(auto_publish=True)
-    def assertions(self):
+    def cached_assertions(self):
         return list(self.badgeinstances.all())
+
+    @property
+    def assertions(self):
+        return self.cached_assertions()
 
     def publish(self):
         super(BadgeClass, self).publish()
@@ -780,6 +783,7 @@ class BadgeInstance(BaseAuditedModel,
             self.revocation_reason = None
 
         super(BadgeInstance, self).save(*args, **kwargs)
+        self.badgeclass.remove_cached_data(['cached_assertions'])
 
     def rebake(self, obi_version=CURRENT_OBI_VERSION, save=True, signature=None, replace_image=False):
         if self.source_url:
