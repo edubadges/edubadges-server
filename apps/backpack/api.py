@@ -3,11 +3,11 @@
 
 from apispec_drf.decorators import apispec_list_operation, apispec_post_operation, apispec_get_operation, \
     apispec_delete_operation, apispec_put_operation
-from backpack.models import BackpackCollection, BackpackBadgeShare, BackpackCollectionShare
-from backpack.serializers_v1 import CollectionSerializerV1, LocalBadgeInstanceUploadSerializerV1
+from backpack.models import BackpackBadgeShare
+from backpack.serializers_v1 import LocalBadgeInstanceUploadSerializerV1
 from entity.api import BaseEntityListView, BaseEntityDetailView
 from issuer.models import BadgeInstance
-from issuer.permissions import AuditedModelOwner, RecipientIdentifiersMatch, BadgrOAuthTokenHasScope
+from issuer.permissions import RecipientIdentifiersMatch, BadgrOAuthTokenHasScope
 from issuer.public_api import ImagePropertyDetailView
 from mainsite.exceptions import BadgrApiException400
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
@@ -122,66 +122,6 @@ class BackpackAssertionDetailImage(ImagePropertyDetailView, BadgrOAuthTokenHasSc
     valid_scopes = ['r:backpack', 'rw:backpack']
 
 
-class BackpackCollectionList(BaseEntityListView):
-    model = BackpackCollection
-    v1_serializer_class = CollectionSerializerV1
-    permission_classes = (AuthenticatedWithVerifiedEmail, AuditedModelOwner, BadgrOAuthTokenHasScope)
-    valid_scopes = {
-        'get': ['r:backpack', 'rw:backpack'],
-        'post': ['rw:backpack'],
-    }
-
-    def get_objects(self, request, **kwargs):
-        return self.request.user.cached_backpackcollections()
-
-    @apispec_get_operation('Collection',
-        summary='Get a list of Collections',
-        tags=['Backpack']
-    )
-    def get(self, request, **kwargs):
-        return super(BackpackCollectionList, self).get(request, **kwargs)
-
-    @apispec_post_operation('Collection',
-        summary='Create a new Collection',
-        tags=['Backpack']
-    )
-    def post(self, request, **kwargs):
-        return super(BackpackCollectionList, self).post(request, **kwargs)
-
-
-class BackpackCollectionDetail(BaseEntityDetailView):
-    model = BackpackCollection
-    v1_serializer_class = CollectionSerializerV1
-    permission_classes = (AuthenticatedWithVerifiedEmail, AuditedModelOwner, BadgrOAuthTokenHasScope)
-    valid_scopes = {
-        'get': ['r:backpack', 'rw:backpack'],
-        'post': ['rw:backpack'],
-        'put': ['rw:backpack'],
-        'delete': ['rw:backpack']
-    }
-
-    @apispec_get_operation('Collection',
-        summary='Get a single Collection',
-        tags=['Backpack']
-    )
-    def get(self, request, **kwargs):
-        return super(BackpackCollectionDetail, self).get(request, **kwargs)
-
-    @apispec_put_operation('Collection',
-        summary='Update a Collection',
-        tags=['Backpack']
-    )
-    def put(self, request, **kwargs):
-        return super(BackpackCollectionDetail, self).put(request, **kwargs)
-
-    @apispec_delete_operation('Collection',
-        summary='Delete a collection',
-        tags=['Backpack']
-    )
-    def delete(self, request, **kwargs):
-        return super(BackpackCollectionDetail, self).delete(request, **kwargs)
-
-
 class ShareBackpackAssertion(BaseEntityDetailView):
     model = BadgeInstance
     permission_classes = (permissions.AllowAny,)  # this is AllowAny to support tracking sharing links in emails
@@ -203,7 +143,7 @@ class ShareBackpackAssertion(BaseEntityDetailView):
 
         provider = request.query_params.get('provider')
         if not provider:
-            fields = {'error_message': "Unspecified share provider", error_code: 701}
+            fields = {'error_message': "Unspecified share provider", 'error_code': 701}
             raise BadgrApiException400(fields)
         provider = provider.lower()
 
@@ -216,53 +156,7 @@ class ShareBackpackAssertion(BaseEntityDetailView):
         share = BackpackBadgeShare(provider=provider, badgeinstance=badge, source=source)
         share_url = share.get_share_url(provider)
         if not share_url:
-            fields = {'error_message': "Invalid share provider", error_code: 702}
-            raise BadgrApiException400(fields)
-
-        share.save()
-
-        if redirect:
-            headers = {'Location': share_url}
-            return Response(status=HTTP_302_FOUND, headers=headers)
-        else:
-            return Response({'url': share_url})
-
-
-class ShareBackpackCollection(BaseEntityDetailView):
-    model = BackpackCollection
-    permission_classes = (permissions.AllowAny,)  # this is AllowAny to support tracking sharing links in emails
-    http_method_names = ('get',)
-
-    def get(self, request, **kwargs):
-        """
-        Share a collection to a supported share provider
-        ---
-        parameters:
-            - name: provider
-              description: The identifier of the provider to use. Supports 'facebook', 'linkedin'
-              required: true
-              type: string
-              paramType: query
-        """
-        from recipient.api import _scrub_boolean
-        redirect = _scrub_boolean(request.query_params.get('redirect', "1"))
-
-        provider = request.query_params.get('provider')
-        if not provider:
-            fields = {'error_message': "unspecified share provider", error_code: 701}
-            raise BadgrApiException400(fields)
-        provider = provider.lower()
-
-        source = request.query_params.get('source', 'unknown')
-
-        collection = self.get_object(request, **kwargs)
-        if not collection:
-            return Response(status=HTTP_404_NOT_FOUND)
-
-        share = BackpackCollectionShare(provider=provider, collection=collection, source=source)
-        share_url = share.get_share_url(provider, title=collection.name, summary=collection.description)
-        if not share_url:
-            fields = {'error_message': "invalid share provider", error_code: 702}
+            fields = {'error_message': "Invalid share provider", 'error_code': 702}
             raise BadgrApiException400(fields)
 
         share.save()

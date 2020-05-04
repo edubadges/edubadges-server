@@ -7,7 +7,6 @@ from itertools import chain
 
 import cachemodel
 from allauth.account.models import EmailAddress, EmailConfirmation
-from backpack.models import BackpackCollection
 from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager, EmailAddressCacheModelManager
 from basic_models.models import IsActive
 from django.conf import settings
@@ -198,10 +197,6 @@ class UserCachedObjectGetterMixin(object):
     def cached_emails(self):
         return CachedEmailAddress.objects.filter(user=self)
 
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_backpackcollections(self):
-        return BackpackCollection.objects.filter(created_by=self)
-
     def cached_email_variants(self):
         return chain.from_iterable(email.cached_variants() for email in self.cached_emails())
 
@@ -315,7 +310,7 @@ class UserPermissionsMixin(object):
             return False
 
 
-class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, BaseVersionedEntity, AbstractUser, cachemodel.CacheModel):
+class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser, BaseVersionedEntity):
     """
     A full-featured user model that can be an Earner, Issuer, or Consumer of Open Badges
     """

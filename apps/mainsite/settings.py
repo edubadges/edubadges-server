@@ -493,10 +493,6 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULTS_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
 
-# If enabled, notify badgerank about new badgeclasses
-BADGERANK_NOTIFY_ON_BADGECLASS_CREATE = True
-BADGERANK_NOTIFY_ON_FIRST_ASSERTION = True
-BADGERANK_NOTIFY_URL = 'https://api.badgerank.org/v1/badgeclass/submit'
 
 from cryptography.fernet import Fernet
 
@@ -555,3 +551,6 @@ DEBUG_ERRORS = DEBUG
 DEBUG_STATIC = DEBUG
 DEBUG_MEDIA = DEBUG
 LOCAL_DEVELOPMENT_MODE = legacy_boolean_parsing('LOCAL_DEVELOPMENT_MODE', '0')
+
+
+VALIDATOR_URL = os.environ.get('VALIDATOR_URL', 'http://localhost:5000')

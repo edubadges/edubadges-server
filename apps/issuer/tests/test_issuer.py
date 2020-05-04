@@ -71,8 +71,25 @@ class IssuerAPITest(BadgrTestCase):
     def test_issuer_schema(self):
         pass
 
-    def test_award_valid_badge(self):
-        pass
+    def test_enroll_and_award_badge(self):
+        teacher1 = self.setup_teacher()
+        student = self.setup_student(authenticate=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_award=True, may_read=True)
+        enroll_body = {"badgeclass_slug": badgeclass.entity_id}
+        enrollment_response = self.client.post("/lti_edu/enroll", json.dumps(enroll_body),
+                                               content_type='application/json')
+        self.assertEqual(enrollment_response.status_code, 200)
+        self.authenticate(teacher1)
+        award_body = {"issue_signed": False, "create_notification": True,
+                      "enrollments": [{"enrollment_entity_id": enrollment_response.data['entity_id']}]}
+        award_response = self.client.post('/issuer/badgeclasses/award-enrollments/{}'.format(badgeclass.entity_id),
+                                          json.dumps(award_body), content_type='application/json')
+        self.assertEqual(len(student.cached_badgeinstances()), 1)  # test cache update
+        self.assertEqual(len(badgeclass.cached_assertions()), 1)  # test cache update
+        self.assertEqual(award_response.status_code, 201)
 
     def test_award_badge_expiration_date(self):
         pass

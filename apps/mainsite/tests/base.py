@@ -88,6 +88,9 @@ class SetupHelper(object):
             self.client.force_authenticate(user=user)
         return user
 
+    def authenticate(self, user):
+        self.client.force_authenticate(user=user)
+
     def setup_teacher(self, first_name='', last_name='', authenticate=False, institution=None):
         user = self._setup_user(first_name, last_name, authenticate, institution=institution)
         self._add_surfconext_socialaccount(user)
@@ -130,12 +133,10 @@ class SetupHelper(object):
                                      created_by=created_by,
                                      faculty=faculty)
 
-    def setup_badgeclass(self, issuer=None, image=None):
+    def setup_badgeclass(self, issuer, image=None):
         name = 'Test Badgeclass #{}'.format(random.random)
         if image is None:
             image = open(self.get_test_image_path(), 'r')
-        if not issuer:
-            issuer = self.setup_issuer()
         return BadgeClass.objects.create(
             issuer=issuer,
             image=image,
@@ -143,6 +144,10 @@ class SetupHelper(object):
             description='Description',
             criteria_text='Criteria text'
         )
+
+    def setup_assertion(self, recipient, badgeclass, created_by):
+        recipient_id = recipient.get_recipient_identifier()
+        return badgeclass.issue(recipient_id=recipient_id, created_by=created_by)
 
     def setup_staff_membership(self, user, object, may_create=False, may_read=False,
                                may_update=False, may_delete=False, may_award=False,
