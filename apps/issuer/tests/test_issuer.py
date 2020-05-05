@@ -1,7 +1,7 @@
 import json
-from mainsite.tests import BadgrTestCase
+from issuer.models import Issuer, BadgeClass
 from issuer.testfiles.helper import issuer_json, badgeclass_json
-
+from mainsite.tests import BadgrTestCase
 
 class IssuerAPITest(BadgrTestCase):
 
@@ -98,10 +98,36 @@ class IssuerAPITest(BadgrTestCase):
 class IssuerExtensionsTest(BadgrTestCase):
 
     def test_create_edit_remove_issuer_extensions(self):
-        pass
+        teacher1 = self.setup_teacher(authenticate=True)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_create=True, may_read=True, may_update=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer_json['faculty'] = faculty.entity_id
+        response = self.client.post('/issuer/create', json.dumps(issuer_json), content_type='application/json')
+        issuer = Issuer.objects.get(entity_id=response.data['entity_id'])
+        self.assertEqual(issuer.extension_items.__len__(), 1)
+        extensions = issuer_json.pop('extensions')
+        issuer_json['extensions'] = {}
+        response = self.client.put('/issuer/edit/{}'.format(issuer.entity_id), json.dumps(issuer_json), content_type='application/json')
+        self.assertEqual(issuer.extension_items.__len__(), 0)
+        issuer_json['extensions'] = extensions
+        response = self.client.put('/issuer/edit/{}'.format(issuer.entity_id), json.dumps(issuer_json), content_type='application/json')
+        self.assertEqual(issuer.extension_items.__len__(), 1)
 
     def test_create_edit_remove_badgeclass_extensions(self):
-        pass
+        teacher1 = self.setup_teacher(authenticate=True)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_create=True, may_read=True, may_update=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        badgeclass_json['issuer'] = issuer.entity_id
+        response = self.client.post('/issuer/badgeclasses/create', json.dumps(badgeclass_json), content_type='application/json')
+        badgeclass = BadgeClass.objects.get(entity_id=response.data['entity_id'])
+        self.assertEqual(badgeclass.extension_items.__len__(), 3)
+        ects_extension = badgeclass_json['extensions'].pop('extensions:ECTSExtension')
+        response = self.client.put('/issuer/badgeclasses/edit/{}'.format(badgeclass.entity_id), json.dumps(badgeclass_json), content_type='application/json')
+        self.assertEqual(badgeclass.extension_items.__len__(), 2)
+        badgeclass_json['extensions']['extensions:ECTSExtension'] = ects_extension
+        response = self.client.put('/issuer/badgeclasses/edit/{}'.format(badgeclass.entity_id), json.dumps(badgeclass_json), content_type='application/json')
+        self.assertEqual(badgeclass.extension_items.__len__(), 3)
 
     def test_validate_extensions_context(self):
         pass
