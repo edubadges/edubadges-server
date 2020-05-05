@@ -42,47 +42,6 @@ class LinkedDataEntitySerializer(serializers.Serializer):
         return representation
 
 
-class LinkedDataReferenceField(serializers.Serializer):
-    """
-    A read-only field for embedding representations of entities that have Linked Data identifiers.
-    Includes their @id by default and any additional identifier keys that are the named
-    properties on the instance.
-    """
-
-    def __init__(self, keys=[], model=None, read_only=True, field_names=None, **kwargs):
-        kwargs.pop('many', None)
-        super(LinkedDataReferenceField, self).__init__(read_only=read_only, **kwargs)
-        self.included_keys = keys
-        self.model = model
-        self.field_names = field_names
-
-    def to_representation(self, obj):
-        output = OrderedDict()
-        output['@id'] = obj.jsonld_id
-
-        for key in self.included_keys:
-            field_name = key
-            if self.field_names is not None and key in self.field_names:
-                field_name = self.field_names.get(key)
-            output[key] = getattr(obj, field_name, None)
-
-        return output
-
-    def to_internal_value(self, data):
-        if not isinstance(data, str):
-            idstring = data.get('@id')
-        else:
-            idstring = data
-
-        try:
-            return self.model.cached.get_by_id(idstring)
-        except AttributeError:
-            raise TypeError(
-                "LinkedDataReferenceField model must be declared and use cache " +
-                "manager that implements get_by_id method."
-            )
-
-
 class JSONDictField(serializers.DictField):
     """
     A DictField that also accepts JSON strings as input
