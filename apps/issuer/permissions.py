@@ -13,17 +13,6 @@ class AwardedAssertionsBlock(permissions.BasePermission):
         return not obj.assertions
 
 
-class AuditedModelOwner(permissions.BasePermission):
-    """
-    Request user matches .created_by
-    ---
-    model: BaseAuditedModel
-    """
-    def has_object_permission(self, request, view, obj):
-        created_by_id = getattr(obj, 'created_by_id', None)
-        return created_by_id and request.user.id == created_by_id
-
-
 class RecipientIdentifiersMatch(permissions.BasePermission):
     """
     one of request user's verified emails matches obj.recipient_identifier
