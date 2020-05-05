@@ -3,23 +3,19 @@
 
 import os
 import random
-import time
 import uuid
 import string
-from oauth2_provider.models import AccessToken, Application
 from rest_framework.test import APITransactionTestCase
 
 from allauth.socialaccount.models import SocialAccount
 from badgeuser.models import BadgeUser, TermsVersion
-from django.core.cache import cache
-from django.core.cache.backends.filebased import FileBasedCache
-from django.test import override_settings, TransactionTestCase
+from django.test import override_settings
 from django.utils import timezone
 from institution.models import Institution, Faculty
 from issuer.models import Issuer, BadgeClass
 from lti_edu.models import StudentsEnrolled
 from mainsite import TOP_DIR
-from mainsite.models import BadgrApp, ApplicationInfo
+from mainsite.models import BadgrApp
 from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
 
 
