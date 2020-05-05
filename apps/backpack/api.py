@@ -138,8 +138,8 @@ class ShareBackpackAssertion(BaseEntityDetailView):
               type: string
               paramType: query
         """
-        from recipient.api import _scrub_boolean
-        redirect = _scrub_boolean(request.query_params.get('redirect', "1"))
+        # from recipient.api import _scrub_boolean
+        redirect = request.query_params.get('redirect', "1")
 
         provider = request.query_params.get('provider')
         if not provider:
