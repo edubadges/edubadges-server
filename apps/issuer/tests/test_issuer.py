@@ -132,6 +132,9 @@ class IssuerExtensionsTest(BadgrTestCase):
     def test_validate_extensions_context(self):
         pass
 
+    def test_institution_vars_end_up_in_issuer_json_as_extensions(self):
+        pass
+
 
 class IssuerModelsTest(BadgrTestCase):
 
@@ -149,4 +152,3 @@ class IssuerModelsTest(BadgrTestCase):
         self.assertTrue(self.instance_is_removed(staff))
         self.assertEqual(teacher1.cached_badgeclass_staffs().__len__(), 0)
         self.assertEqual(faculty.cached_issuers().__len__(), 0)
-
