@@ -670,7 +670,7 @@ class BadgeInstance(BaseAuditedModel,
 
     def validate(self):
         data = {'profile': {'id': self.recipient_identifier}, 'data': self.get_json()}
-        response = requests.post(data=data,
+        response = requests.post(json=data,
                                  url=urljoin(settings.VALIDATOR_URL, 'results'),
                                  headers={'Accept': 'application/json'})
         return response.json()
@@ -679,9 +679,7 @@ class BadgeInstance(BaseAuditedModel,
         data = {'data': self.get_json()["id"]}
         data = {'data': f"https://api-test.edubadges.nl/public/assertions/xU3c1ce4S26x3jQZ457ymA"}
         # data = {'data': ''}
-        response = requests.post(data=data,
-                                 url='https://validate-test.edubadges.nl/results',
-                                 headers={'Accept': 'application/json'})
+        response = requests.post(data=data, url='https://validate-test.edubadges.nl/results', headers={'Accept': 'application/json'})
         return response.json()
 
     @property
