@@ -5,7 +5,9 @@ import os
 import random
 import uuid
 import string
+from graphene.test import Client as GrapheneClient
 from rest_framework.test import APITransactionTestCase
+
 
 from allauth.socialaccount.models import SocialAccount
 from badgeuser.models import BadgeUser, TermsVersion
@@ -16,8 +18,13 @@ from issuer.models import Issuer, BadgeClass
 from lti_edu.models import StudentsEnrolled
 from mainsite import TOP_DIR
 from mainsite.models import BadgrApp
+from mainsite.schema import schema
 from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
 
+
+class GrapheneMockContext(object):
+    def __init__(self, user):
+        self.user = user
 
 def name_randomiser(name):
     s = ''.join(random.choices(string.ascii_lowercase, k=10))
@@ -25,6 +32,10 @@ def name_randomiser(name):
 
 
 class SetupHelper(object):
+
+    def graphene_post(self, user, query):
+        client = GrapheneClient(schema)
+        return client.execute(query, context_value=GrapheneMockContext(user))
 
     def get_testfiles_path(self, *args):
         return os.path.join(TOP_DIR, 'apps', 'issuer', 'testfiles', *args)
