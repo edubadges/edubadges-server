@@ -17,12 +17,8 @@ from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_302_FOUND, HTTP_204_N
 class BackpackAssertionList(BaseEntityListView):
     model = BadgeInstance
     v1_serializer_class = LocalBadgeInstanceUploadSerializerV1
-    permission_classes = (AuthenticatedWithVerifiedEmail, RecipientIdentifiersMatch, BadgrOAuthTokenHasScope)
+    permission_classes = (AuthenticatedWithVerifiedEmail, RecipientIdentifiersMatch)
     http_method_names = ('post',)
-    valid_scopes = {
-        'get': ['r:backpack', 'rw:backpack'],
-        'post': ['rw:backpack'],
-    }
 
     def post(self, request, **kwargs):
         """Upload a new Assertion to the backpack"""
@@ -34,10 +30,6 @@ class BackpackAssertionDetail(BaseEntityDetailView):
     v1_serializer_class = LocalBadgeInstanceUploadSerializerV1
     permission_classes = (AuthenticatedWithVerifiedEmail, RecipientIdentifiersMatch)
     http_method_names = ('delete', 'put')
-    valid_scopes = {
-        'put': ['rw:backpack'],
-        'delete': ['rw:backpack'],
-    }
 
     def delete(self, request, **kwargs):
         """Remove an assertion from the backpack"""
