@@ -670,14 +670,15 @@ class BadgeInstance(BaseAuditedModel,
 
     def validate(self):
         data = {'profile': {'id': self.recipient_identifier}, 'data': self.get_json()}
-        response = requests.post(json=data,
+        response = requests.post(data=data,
                                  url=urljoin(settings.VALIDATOR_URL, 'results'),
                                  headers={'Accept': 'application/json'})
         return response.json()
 
     def validate_url(self):
         data = {'data': self.get_json()["id"]}
-        response = requests.post(json=data,
+        data = {'data': f"https://api-test.edubadges.nl/public/assertions/{self.entity_id}"}
+        response = requests.post(data=data,
                                  url=urljoin(settings.VALIDATOR_URL, 'results'),
                                  headers={'Accept': 'application/json'})
         return response.json()
