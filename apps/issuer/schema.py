@@ -90,7 +90,6 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
     extensions = graphene.List(BadgeInstanceExtensionType)
     user = graphene.Field(badge_user_type)
     validation = graphene.Field(AnyType)
-    validation_url = graphene.Field(AnyType)
 
     class Meta:
         model = BadgeInstance
@@ -101,9 +100,6 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
 
     def resolve_validation(self, info, **kwargs):
         return self.validate()
-
-    def resolve_validation_url(self, info, **kwargs):
-        return self.validate_url()
 
 class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
                      DjangoObjectType):

@@ -675,13 +675,6 @@ class BadgeInstance(BaseAuditedModel,
                                  headers={'Accept': 'application/json'})
         return response.json()
 
-    def validate_url(self):
-        data = {'data': self.get_json()["id"]}
-        data = {'data': f"https://api-test.edubadges.nl/public/assertions/xU3c1ce4S26x3jQZ457ymA"}
-        # data = {'data': ''}
-        response = requests.post(data=data, url='https://validate-test.edubadges.nl/results', headers={'Accept': 'application/json'})
-        return response.json()
-
     @property
     def extended_json(self):
         extended_json = self.json
