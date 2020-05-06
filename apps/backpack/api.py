@@ -1,8 +1,6 @@
 # encoding: utf-8
 
 
-from apispec_drf.decorators import apispec_list_operation, apispec_post_operation, apispec_get_operation, \
-    apispec_delete_operation, apispec_put_operation
 from backpack.models import BackpackBadgeShare
 from backpack.serializers_v1 import LocalBadgeInstanceUploadSerializerV1
 from entity.api import BaseEntityListView, BaseEntityDetailView
@@ -20,97 +18,37 @@ class BackpackAssertionList(BaseEntityListView):
     model = BadgeInstance
     v1_serializer_class = LocalBadgeInstanceUploadSerializerV1
     permission_classes = (AuthenticatedWithVerifiedEmail, RecipientIdentifiersMatch, BadgrOAuthTokenHasScope)
-    http_method_names = ('get', 'post')
+    http_method_names = ('post',)
     valid_scopes = {
         'get': ['r:backpack', 'rw:backpack'],
         'post': ['rw:backpack'],
     }
 
-    def get_objects(self, request, **kwargs):
-        return [a for a in self.request.user.cached_badgeinstances() if (not a.revoked)
-                                and a.acceptance != BadgeInstance.ACCEPTANCE_REJECTED
-                                and not a.signing_in_progress]
-
-    @apispec_list_operation('Assertion',
-        summary="Get a list of Assertions in authenticated user's backpack ",
-        tags=['Backpack']
-    )
-    def get(self, request, **kwargs):
-        mykwargs = kwargs.copy()
-        mykwargs['expands'] = []
-        expands = request.GET.getlist('expand', [])
-
-        if 'badgeclass' in expands:
-            mykwargs['expands'].append('badgeclass')
-        if 'issuer' in expands:
-            mykwargs['expands'].append('issuer')
-
-        return super(BackpackAssertionList, self).get(request, **mykwargs)
-
-    @apispec_post_operation('Assertion',
-        summary="Upload a new Assertion to the backpack",
-        tags=['Backpack']
-    )
     def post(self, request, **kwargs):
-        if kwargs.get('version', 'v1') == 'v1':
-            return super(BackpackAssertionList, self).post(request, **kwargs)
-
-        raise NotImplementedError("use BackpackImportBadge.post instead")
-
-    def get_context_data(self, **kwargs):
-        context = super(BackpackAssertionList, self).get_context_data(**kwargs)
-        context['format'] = self.request.query_params.get('json_format', 'v1')  # for /v1/earner/badges compat
-        return context
+        """Upload a new Assertion to the backpack"""
+        return super(BackpackAssertionList, self).post(request, **kwargs)
 
 
 class BackpackAssertionDetail(BaseEntityDetailView):
     model = BadgeInstance
     v1_serializer_class = LocalBadgeInstanceUploadSerializerV1
-    permission_classes = (AuthenticatedWithVerifiedEmail, RecipientIdentifiersMatch, BadgrOAuthTokenHasScope)
-    http_method_names = ('get', 'delete', 'put')
+    permission_classes = (AuthenticatedWithVerifiedEmail, RecipientIdentifiersMatch)
+    http_method_names = ('delete', 'put')
     valid_scopes = {
-        'get': ['r:backpack', 'rw:backpack'],
         'put': ['rw:backpack'],
         'delete': ['rw:backpack'],
     }
 
-    def get_context_data(self, **kwargs):
-        context = super(BackpackAssertionDetail, self).get_context_data(**kwargs)
-        context['format'] = self.request.query_params.get('json_format', 'v1')  # for /v1/earner/badges compat
-        return context
-
-    @apispec_get_operation('Assertion',
-        summary="Get detail on an Assertion in the user's Backpack",
-        tags=['Backpack']
-    )
-    def get(self, request, **kwargs):
-        mykwargs = kwargs.copy()
-        mykwargs['expands'] = []
-        expands = request.GET.getlist('expand', [])
-
-        if 'badgeclass' in expands:
-            mykwargs['expands'].append('badgeclass')
-        if 'issuer' in expands:
-            mykwargs['expands'].append('issuer')
-
-        return super(BackpackAssertionDetail, self).get(request, **mykwargs)
-
-    @apispec_delete_operation('Assertion',
-        summary='Remove an assertion from the backpack',
-        tags=['Backpack']
-    )
     def delete(self, request, **kwargs):
+        """Remove an assertion from the backpack"""
         obj = self.get_object(request, **kwargs)
         obj.acceptance = BadgeInstance.ACCEPTANCE_REJECTED
         obj.public = False
         obj.save()
         return Response(status=HTTP_204_NO_CONTENT)
 
-    @apispec_put_operation('Assertion',
-        summary="Update acceptance of an Assertion in the user's Backpack",
-        tags=['Backpack']
-    )
     def put(self, request, **kwargs):
+        """Update acceptance of an Assertion in the user's Backpack and make public / private """
         fields_whitelist = ('acceptance', 'public')
         data = {k: v for k, v in list(request.data.items()) if k in fields_whitelist}
         return super(BackpackAssertionDetail, self).put(request, data=data, **kwargs)
