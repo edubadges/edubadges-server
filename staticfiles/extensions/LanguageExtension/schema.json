@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Language Extension",
+  "description": "An extension that allows you to add a single string Language to a badgeclass object that represents the language of the course.",
+  "type": "object",
+  "properties": {
+    "Language": {
+      "type": "string"
+    }
+  },
+  "required": ["Language"]
+}

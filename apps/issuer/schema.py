@@ -101,7 +101,6 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
     def resolve_validation(self, info, **kwargs):
         return self.validate()
 
-
 class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
                      DjangoObjectType):
     class Meta:
