@@ -286,13 +286,13 @@ class Issuer(PermissionedModelMixin,
             if self.faculty.institution.brin:
                 json['extensions:InstitutionIdentifierExtension'] = {
                     "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/InstitutionIdentifierExtension/context.json",
-                    "type": ["Extension", "extensions: InstitutionIdentifierExtension"],
+                    "type": ["Extension", "extensions:InstitutionIdentifierExtension"],
                     "InstitutionIdentifier": self.faculty.institution.brin
                 }
             if self.faculty.institution.grading_table:
                 json['extensions:GradingTableExtension'] = {
-                    "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/InstitutionNameExtension/context.json",
-                    "type": ["Extension", "extensions: GradingTableExtension"],
+                    "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/GradingTableExtension/context.json",
+                    "type": ["Extension", "extensions:GradingTableExtension"],
                     "GradingTableURL": self.faculty.institution.grading_table
                 }
 
