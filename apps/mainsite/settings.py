@@ -554,4 +554,4 @@ LOCAL_DEVELOPMENT_MODE = legacy_boolean_parsing('LOCAL_DEVELOPMENT_MODE', '0')
 
 
 VALIDATOR_URL = os.environ.get('VALIDATOR_URL', 'http://localhost:5000')
-EXTENSIONS_ROOT_URL = os.environ.get('EXTENSIONS_ROOT_URL', 'http://localhost:8000/static/')
+EXTENSIONS_ROOT_URL = os.environ.get('EXTENSIONS_ROOT_URL', 'http://localhost:8000/static')
