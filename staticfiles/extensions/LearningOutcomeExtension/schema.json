@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "LearningOutcome Extension",
+  "description": "An extension that allows you to add a single string LearningOutcome to a badgeclass object.",
+  "type": "object",
+  "properties": {
+    "LearningOutcome": {
+      "type": "string"
+    }
+  },
+  "required": ["LearningOutcome"]
+}

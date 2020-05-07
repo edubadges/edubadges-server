@@ -7,7 +7,7 @@
   "obi:validation": [
     {
       "obi:validatesType": "extensions:ECTSExtension",
-      "obi:validationSchema": "https://openbadgespec.org/extensions/ECTSExtension/schema.json"
+      "obi:validationSchema": "https://api-test.edubadges.nl/static/extensions/ECTSExtension/schema.json"
     }
   ]
 }

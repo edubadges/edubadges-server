@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "EQF Extension",
+  "description": "An extension that allows you to add a single number EQF to a badgeclass object.",
+  "type": "object",
+  "properties": {
+    "EQF": {
+      "type": "number"
+    }
+  },
+  "required": ["EQF"]
+}
