@@ -169,7 +169,6 @@ class ImagePropertyDetailView(APIView, SlugToEntityIdRedirectMixin):
         except self.model.DoesNotExist:
             return None
         else:
-            self.log(current_object)
             return current_object
 
     def get(self, request, **kwargs):
