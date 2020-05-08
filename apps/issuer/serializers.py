@@ -60,8 +60,8 @@ class ExtensionsSaverMixin(object):
                 ext.save()
 
     def save_extensions(self, validated_data, instance):
-        if validated_data.get('extension_items', False):
-            extension_items = validated_data.pop('extension_items')
+        if validated_data.get('extensions', False):
+            extension_items = validated_data.pop('extensions')
             received_extensions = list(extension_items.keys())
             current_extension_names = list(instance.extension_items.keys())
             remove_these_extensions = set(current_extension_names) - set(received_extensions)
@@ -111,6 +111,7 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serial
                 fields={"instance": [{"error_code": 999,
                                       "error_message": "Cannot change any value, assertions have already been issued"}]})
         [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
+        self.save_extensions(validated_data, instance)
         if not instance.badgrapp_id:
             instance.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
         instance.save()

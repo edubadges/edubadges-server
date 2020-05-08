@@ -3,15 +3,33 @@ issuer_json = {"name": "test issuer",
                 "description": "test description",
                 "email": "testtest@testies.test",
                 "url": "http://www.surfnet.nl",
-                "extensions":
-                    {"gradingTable": "http://www.surfnet.nl"},
+               "extensions":
+                   {"extensions:GradingTableExtension": {
+                       "@context": "https://openbadgespec.org/extensions/GradingTableExtension/context.json",
+                       "type": ["Extension", "extensions:GradingTableExtension"],
+                       "GradingTableURL": "https://www.eur.nl/onderwijs/praktische-zaken/afstuderen/ects-grading-table"
+                   }},
                 "image": png_string}
 
 badgeclass_json = {"name": "test badgeclass", "description": "test description",
                    "image": png_string,
                    "criteria_text": "test criteria", "criteria_url": "http://www.surfnet.nl",
-                   "extensions": {"LanguageExtension": {"language": "af"},
-                                  "EducationProgramIdentifierExtension": {"identifierType": "ISAT",
-                                                                          "identifierValue": "isat"},
-                                  "NiveauExtension": {"EQF": "4"}, "ECTSExtension": {"ECTS": "4"},
-                                  "LearningOutcomeExtension": {"learningOutcome": "test learning outcome"}}}
+                   "extensions": {
+                       "extensions:ECTSExtension": {
+                           "@context": "https://openbadgespec.org/extensions/ECTSExtension/context.json",
+                           "type": ["Extension", "extensions:ECTSExtension"],
+                           "ECTS": 2.5
+                       },
+                       "extensions:StudyLoadExtension": {
+                           "@context": "https://openbadgespec.org/extensions/StudyLoadExtension/context.json",
+                           "type": ["Extension", "extensions:StudyLoadExtension"],
+                           "StudyLoadHours": 24
+                       },
+                       "extensions:LanguageExtension": {
+                           "@context": "https://openbadgespec.org/extensions/LanguageExtension/context.json",
+                           "type": ["Extension", "extensions:LanguageExtension"],
+                           "Language": "nl_NL"
+                       }
+
+                   }
+                   }

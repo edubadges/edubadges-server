@@ -18,13 +18,11 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db import models, transaction
-from django.db.models import ProtectedError
 from django.urls import reverse
 from django.utils import timezone
 from entity.models import BaseVersionedEntity
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager
 from jsonfield import JSONField
-from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage, ImageUrlGetterMixin
 from mainsite.models import BadgrApp, EmailBlacklist, BaseAuditedModel
 from mainsite.utils import OriginSetting, generate_entity_uri
@@ -149,7 +147,7 @@ class Issuer(PermissionedModelMixin,
     old_json = JSONField()
 
     objects = IssuerManager()
-    cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
+    cached = cachemodel.CacheModelManager()
     faculty = models.ForeignKey('institution.Faculty', on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
     class Meta:
@@ -353,7 +351,7 @@ class BadgeClass(PermissionedModelMixin,
     criteria_text = models.TextField(blank=True, null=True)
     old_json = JSONField()
     objects = BadgeClassManager()
-    cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
+    cached = cachemodel.CacheModelManager()
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.BadgeClassStaff")
     expiration_period = models.DurationField(null=True)
 
@@ -669,7 +667,7 @@ class BadgeInstance(BaseAuditedModel,
     public = models.BooleanField(default=False)
 
     objects = BadgeInstanceManager()
-    cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
+    cached = cachemodel.CacheModelManager()
 
     class Meta:
         index_together = (

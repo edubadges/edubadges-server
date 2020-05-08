@@ -93,12 +93,7 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
         # Only locally issued badges will ever have an acceptance status other than 'Accepted'
         if instance.acceptance == 'Unaccepted' and validated_data.get('acceptance') == 'Accepted':
             instance.acceptance = 'Accepted'
-
             instance.save()
-            owner = validated_data.get('created_by', None)
-            if owner:
-                owner.publish()
-
         public = validated_data.get('public', None)
         if public != None:
             instance.public = public
