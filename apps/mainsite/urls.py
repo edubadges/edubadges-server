@@ -11,6 +11,7 @@ from ims.views import base
 from mainsite.admin import badgr_admin
 from mainsite.graphql_view import ExtendedGraphQLView
 from mainsite.oauth2_api import AuthorizationApiView, TokenView, AuthCodeExchange
+from mainsite.views import serve_protected_document
 
 badgr_admin.autodiscover()
 # make sure that any view/model/form imports occur AFTER admin.autodiscover
@@ -106,6 +107,7 @@ urlpatterns = [
 
     # include staff endpoints
     url(r'^staff-membership/', include('staff.api_urls')),
+
 ]
 
 urlpatterns += [
@@ -170,6 +172,12 @@ if settings.DEBUG and apps.is_installed('debug_toolbar'):
         ]
     except ImportError:
         pass
+
+
+# protected assertion media files
+urlpatterns.insert(0,
+    url(r'^media/(?P<path>.*)$', serve_protected_document, {'document_root': settings.MEDIA_ROOT}, name='serve_protected_document'),
+)
 
 handler404 = error404
 handler500 = error500
