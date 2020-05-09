@@ -248,6 +248,6 @@ def serve_protected_document(request, path, document_root):
 
     if 'assertion-' in path:
         filename = os.path.splitext(os.path.basename(path))[0]
-        if user_is_authorized(request, filename):
-            return serve(request, path, document_root)
-    return HttpResponseForbidden()
+        if not user_is_authorized(request, filename):
+            return HttpResponseForbidden()
+    return serve(request, path, document_root)
