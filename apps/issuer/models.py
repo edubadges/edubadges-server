@@ -283,13 +283,21 @@ class Issuer(PermissionedModelMixin,
         if self.faculty:
             if self.faculty.institution.brin:
                 json['extensions:InstitutionIdentifierExtension'] = {
-                    "type": ["Extension", "extensions: InstitutionIdentifierExtension"],
-                    "BRIN": self.faculty.institution.brin
+                    "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/InstitutionIdentifierExtension/context.json",
+                    "type": ["Extension", "extensions:InstitutionIdentifierExtension"],
+                    "InstitutionIdentifier": self.faculty.institution.brin
                 }
             if self.faculty.institution.grading_table:
                 json['extensions:GradingTableExtension'] = {
-                    "type": ["Extension", "extensions: GradingTableExtension"],
-                    "gradingTable": self.faculty.institution.grading_table
+                    "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/GradingTableExtension/context.json",
+                    "type": ["Extension", "extensions:GradingTableExtension"],
+                    "GradingTableURL": self.faculty.institution.grading_table
+                }
+            if self.faculty.institution.name:
+                json['extensions:InstitutionNameExtension'] = {
+                    "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/InstitutionNameExtension/context.json",
+                    "type": ["Extension", "extensions:InstitutionNameExtension"],
+                    "InstitutionName": self.faculty.institution.name
                 }
 
         # pass through imported json

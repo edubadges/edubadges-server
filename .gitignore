@@ -8,7 +8,6 @@ AppleDouble
 *.sass-cache
 env_vars.sh
 staticfiles*
-!staticfiles/extensions*
 mediafiles/*
 !mediafiles/uploads/badges/eduid.png
 !mediafiles/uploads/issuers/surf.png

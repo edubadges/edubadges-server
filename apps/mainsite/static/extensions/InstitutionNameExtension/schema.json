@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Institution Name Extension",
+  "description": "An extension that allows you to add a single string InstitutionName to an issuer object.",
+  "type": "object",
+  "properties": {
+    "InstitutionName": {
+      "type": "string"
+    }
+  },
+  "required": ["InstitutionName"]
+}

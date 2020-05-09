@@ -7,7 +7,7 @@
   "obi:validation": [
     {
       "obi:validatesType": "extensions:ECTSExtension",
-      "obi:validationSchema": "https://api-test.edubadges.nl/static/extensions/ECTSExtension/schema.json"
+      "obi:validationSchema": "http://localhost:8000/static/extensions/ECTSExtension/schema.json"
     }
   ]
 }
