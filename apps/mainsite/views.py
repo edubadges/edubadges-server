@@ -234,20 +234,13 @@ class AcceptTermsAndConditionsView(View):
 
 
 def serve_protected_document(request, path, document_root):
-
-    def user_is_authorized(request, filename):
-        entity_id = filename.replace('assertion-', '')
-        assertion = BadgeInstance.objects.get(entity_id=entity_id)
+    if 'assertion-' in path:
+        assertion = BadgeInstance.objects.get(image=path)
         if assertion.public:
-            return True
+            return serve(request, path, document_root)
         else:
             if request.user.is_authenticated:
                 if request.user is assertion.user or request.user.get_permissions(assertion)['may_read']:
-                    return True
-        return False
-
-    if 'assertion-' in path:
-        filename = os.path.splitext(os.path.basename(path))[0]
-        if not user_is_authorized(request, filename):
-            return HttpResponseForbidden()
+                    return serve(request, path, document_root)
+        return HttpResponseForbidden()
     return serve(request, path, document_root)
