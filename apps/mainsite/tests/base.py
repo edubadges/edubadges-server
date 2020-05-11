@@ -95,9 +95,6 @@ class SetupHelper(object):
             self.client.force_authenticate(user=user)
         return user
 
-    # def authenticate(self, user):
-    #     self.client.force_authenticate(user=user)
-
     def authenticate(self, user):
         return self.client._login(user, backend='oauth2_provider.backends.OAuth2Backend')
 
