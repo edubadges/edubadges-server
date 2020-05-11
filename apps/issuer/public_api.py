@@ -11,7 +11,7 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import redirect, render_to_response
 from django.urls import resolve, reverse, Resolver404, NoReverseMatch
 from django.views.generic import RedirectView
-from entity.api import VersionedObjectMixin
+from entity.api import VersionedObjectMixin, BaseEntityDetailView
 from mainsite.models import BadgrApp
 from mainsite.utils import OriginSetting
 from rest_framework import status, permissions
@@ -24,6 +24,22 @@ from . import utils
 from .models import Issuer, BadgeClass, BadgeInstance
 
 logger = badgrlog.BadgrLogger()
+
+
+class AssertionValidate(BaseEntityDetailView):
+    """
+    Endpoint for validating a badge (GET)
+    """
+    model = BadgeInstance
+    permission_classes = (permissions.AllowAny,)
+    http_method_names = ['get']
+
+    def get(self, request, **kwargs):
+        assertion = self.get_object(request, **kwargs)
+        if assertion.public:
+            return Response(assertion.validate(), status=status.HTTP_200_OK)
+        else:
+            raise Http404
 
 
 class SlugToEntityIdRedirectMixin(object):

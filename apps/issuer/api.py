@@ -170,7 +170,7 @@ class BatchAwardEnrollments(VersionedObjectMixin, BaseEntityView):
 
 class BadgeInstanceDetail(BaseEntityDetailView):
     """
-    Endpoints for revoking a badge (DELETE)
+    Endpoint for revoking a badge (DELETE)
     """
     model = BadgeInstance
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
