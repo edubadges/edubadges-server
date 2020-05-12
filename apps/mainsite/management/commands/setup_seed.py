@@ -1,28 +1,38 @@
+import traceback
+
 from django.core.management.base import BaseCommand
 from django.db import connection
-import traceback
+
+from mainsite.models import BadgrApp
+
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('-c', '--clean', action="store_true")
-
+        parser.add_argument('-i', '--init', action="store_true")
 
     def handle(self, *args, **options):
         if options['clean']:
             clear_data()
+        run_seed = True
+        if options['init']:
+            run_seed = BadgrApp.objects.count() == 0
 
-        print("Running setup seeds... ", end = "")
-        try:
-            __import__("mainsite.seeds.01_setup")
-            print("\033[92mdone!\033[0m")
-        except:
-            print("\033[91mFAILED!\033[0m")
-            traceback.print_exc()
+        if run_seed:
+            print("Running setup seeds... ", end="")
+            try:
+                __import__("mainsite.seeds.01_setup")
+                print("\033[92mdone!\033[0m")
+            except:
+                print("\033[91mFAILED!\033[0m")
+                traceback.print_exc()
+        else:
+            print("Skipping setup seeds... ", end="")
 
 
 def clear_data():
     with connection.cursor() as cursor:
-        print("Wiping data... ", end = "")
+        print("Wiping data... ", end="")
 
         seed_filled_tables = (
             'badgeuser_termsversion',
