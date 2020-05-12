@@ -60,7 +60,7 @@ teachers = [
         "first_name": "Joseph",
         "last_name": "Wheeler",
         "institution_name": "university-example.org",
-        "uid": "74ea5d1e44a80547db8b0400debb2f340fabd215",
+        "uid": "4b8c7b23bb0c99c85b5a0cbe63a826f45e147787",
     }
 ]
 
