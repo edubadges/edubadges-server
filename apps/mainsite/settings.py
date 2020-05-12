@@ -188,7 +188,7 @@ ACCOUNT_SALT = os.environ['ACCOUNT_SALT']
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 SOCIALACCOUNT_ADAPTER = 'badgrsocialauth.adapter.BadgrSocialAccountAdapter'
 
-SURFCONEXT_DOMAIN_URL = 'https://oidc.test.surfconext.nl'
+SURFCONEXT_DOMAIN_URL = os.environ.get('SURFCONEXT_DOMAIN_URL', 'https://oidc.test.surfconext.nl')
 EDUID_PROVIDER_URL = os.environ['EDUID_PROVIDER_URL']
 EDUID_REGISTRATION_URL = os.environ['EDUID_REGISTRATION_URL']
 
@@ -535,7 +535,7 @@ EDU_ID_SECRET = os.environ['EDU_ID_SECRET']
 EDU_ID_CLIENT = "edubadges"
 
 SURF_CONEXT_SECRET = os.environ['SURF_CONEXT_SECRET']
-SURF_CONEXT_CLIENT = "http@//localhost.edubadges.nl"
+SURF_CONEXT_CLIENT = os.environ.get('SURF_CONEXT_CLIENT', "http@//localhost.edubadges.nl")
 
 SUPERUSER_NAME = os.environ.get('SUPERUSER_NAME', '')
 SUPERUSER_EMAIL = os.environ.get('SUPERUSER_EMAIL', '')

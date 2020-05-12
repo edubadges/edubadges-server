@@ -197,16 +197,19 @@ def callback(request):
 
     # 1. Exchange callback Token for access token
     _current_app = SocialApp.objects.get_current(provider='surf_conext')
-    data = {'redirect_uri': '%s/account/openid/login/callback/' % settings.HTTP_ORIGIN,
-            'client_id': _current_app.client_id,
-            'client_secret': _current_app.secret,
-            'scope': 'openid',
-            'grant_type': 'authorization_code',
-            'code': code}
-
-    url =  settings.SURFCONEXT_DOMAIN_URL + '/token?%s' % (urllib.parse.urlencode(data))
-
-    response = requests.post(url)
+    payload = {
+        "grant_type": "authorization_code",
+        "redirect_uri": '%s/account/openid/login/callback/' % settings.HTTP_ORIGIN,
+        "code": code,
+        "scope": "openid",
+        "client_id": _current_app.client_id,
+        "client_secret": _current_app.secret,
+    }
+    headers = {'Content-Type': "application/x-www-form-urlencoded",
+               'Cache-Control': "no-cache"
+               }
+    response = requests.post(f"{settings.SURFCONEXT_DOMAIN_URL}/token", data=urllib.parse.urlencode(payload),
+                             headers=headers)
 
     if response.status_code != 200:
         error = 'Server error: Token endpoint error (http %s) try alternative login methods' % response.status_code
@@ -219,8 +222,7 @@ def callback(request):
         return render_authentication_error(request, SurfConextProvider.id, error=error)
 
     # 2. Retrieve user information with the access token
-    headers = {'Authorization': 'bearer %s' % data['access_token']}
-
+    headers = {"Authorization": f"Bearer {data['access_token']}" }
     url = settings.SURFCONEXT_DOMAIN_URL + '/userinfo'
 
     response = requests.get(url, headers=headers)
