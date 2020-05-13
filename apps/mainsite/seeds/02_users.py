@@ -17,9 +17,12 @@ from staff.models import InstitutionStaff
                                       image="uploads/institution/surf.png",
                                       grading_table="https://url.to.gradingtable/gradingtable.html",
                                       brin="000-7777-11111") for ins in
-    [{'name': INSTITUTION_UNIVERSITY_EXAMPLE_ORG, 'description': 'The university example is always a good place to hang out'},
-     {'name': 'diy.surfconext.nl', 'description': 'The university diy is also a good place to hang out'},
-     ]
+    [
+        {'name': INSTITUTION_UNIVERSITY_EXAMPLE_ORG, 'description': 'The university example is always a good place to hang out'},
+        {'name': 'diy.surfconext.nl', 'description': 'The university diy is also a good place to hang out'},
+        {'name': 'university1', 'description': 'University1 description'},
+        {'name': 'university2', 'description': 'University2 description'},
+    ]
 ]
 
 
@@ -38,8 +41,18 @@ all_perms = {
     'may_administrate_users': True
 }
 
+no_perms = {
+    'may_create': True,
+    'may_read': True,
+    'may_update': True,
+    'may_delete': True,
+    'may_award': True,
+    'may_sign': True,
+    'may_administrate_users': True
+}
 
-def create_teacher(username, email, first_name, last_name, institution_name, uid, perms=all_perms):
+
+def create_admin(username, email, first_name, last_name, institution_name, uid, perms=all_perms):
     user, _ = BadgeUser.objects.get_or_create(username=username, email=email, last_name=last_name,
                                               first_name=first_name, is_teacher=True)
     accept_terms(user)
@@ -52,7 +65,20 @@ def create_teacher(username, email, first_name, last_name, institution_name, uid
     InstitutionStaff.objects.filter(user=user, institution=institution).update(**perms)
 
 
-teachers = [
+def create_teacher(username, email, first_name, last_name, institution_name, uid, perms=no_perms):
+    user, _ = BadgeUser.objects.get_or_create(username=username, email=email, last_name=last_name,
+                                              first_name=first_name, is_teacher=True)
+    accept_terms(user)
+
+    EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)
+    SocialAccount.objects.get_or_create(provider='surf_conext', uid=uid, user=user)
+
+    institution = Institution.objects.get(name=institution_name)
+    user.institution = institution
+    InstitutionStaff.objects.filter(user=user, institution=institution).update(**perms)
+
+
+institution_admins = [
     {
         "username": "joseph+weeler",
         "email": "Joseph+Weeler@university-example.org",
@@ -60,15 +86,117 @@ teachers = [
         "last_name": "Wheeler",
         "institution_name": "university-example.org",
         "uid": "74ea5d1e44a80547db8b0400debb2f340fabd215",
-    }
+    },
+    {
+        "username": "test12345",
+        "email": "thisisa@valid.email",
+        "first_name": "Firster",
+        "last_name": "LastNamer",
+        "institution_name": "university-example.org",
+        "uid": "5d0584e3bf178ab4f6d6c9e02ebbd195afd10853",
+    },
+    {
+        "username": "test123456",
+        "email": "thisisanother@valid.email",
+        "first_name": "Seconder",
+        "last_name": "LastNamer2",
+        "institution_name": "university-example.org",
+        "uid": "",
+    },
+    {
+        "username": "p1u1",
+        "email": "professor1@university1.org",
+        "first_name": "professor1",
+        "last_name": "university1",
+        "institution_name": "university1",
+        "uid": "00010001",
+    },
+    {
+        "username": "p2u1",
+        "email": "professor2@university1.org",
+        "first_name": "professor2",
+        "last_name": "university1",
+        "institution_name": "university1",
+        "uid": "00010002",
+    },
+    {
+        "username": "p1u2",
+        "email": "professor1@university2.org",
+        "first_name": "professor1",
+        "last_name": "university2",
+        "institution_name": "university2",
+        "uid": "00020001",
+    },
 ]
+
+teachers = [
+    {
+        "username": "p3u1",
+        "email": "professor3@university1.org",
+        "first_name": "professor3",
+        "last_name": "university1",
+        "institution_name": "university1",
+        "uid": "00010003",
+    },
+    {
+        "username": "p4u1",
+        "email": "professor4@university1.org",
+        "first_name": "professor4",
+        "last_name": "university1",
+        "institution_name": "university1",
+        "uid": "00010004",
+    },
+    {
+        "username": "p5u1",
+        "email": "professor5@university1.org",
+        "first_name": "professor5",
+        "last_name": "university1",
+        "institution_name": "university1",
+        "uid": "00010005",
+    },
+    {
+        "username": "p6u1",
+        "email": "professor6@university1.org",
+        "first_name": "professor6",
+        "last_name": "university1",
+        "institution_name": "university1",
+        "uid": "00010006",
+    },
+    {
+        "username": "p7u1",
+        "email": "professor7@university1.org",
+        "first_name": "professor7",
+        "last_name": "university1",
+        "institution_name": "university1",
+        "uid": "00010007",
+    },
+    {
+        "username": "p8u1",
+        "email": "professor8@university1.org",
+        "first_name": "professor8",
+        "last_name": "university1",
+        "institution_name": "university1",
+        "uid": "00010008",
+    },
+    {
+        "username": "p2u2",
+        "email": "professor2@university2.org",
+        "first_name": "professor2",
+        "last_name": "university2",
+        "institution_name": "university2",
+        "uid": "00020002",
+    },
+]
+
+[create_admin(**a) for a in institution_admins]
 
 [create_teacher(**t) for t in teachers]
 
+
+# Users - Students
 extra_data = json.dumps({"eduperson_entitlement": ["urn:mace:eduid.nl:entitlement:verified-by-institution"]})
 
 
-# Users - Students
 def create_student(username, email, uid, verify):
     user, _ = BadgeUser.objects.get_or_create(username=username, email=email)
     accept_terms(user)
