@@ -2,13 +2,19 @@ import json
 
 import graphene
 from graphene_django.types import DjangoObjectType
+from graphene.types.json import JSONString
 
 from lti_edu.schema import StudentsEnrolledType
 from mainsite.mixins import StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin, resolver_blocker_for_students
-from mainsite.exceptions import GraphQLException
 from staff.schema import IssuerStaffType, BadgeClassStaffType, PermissionType
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
     BadgeClassAlignment, BadgeClassTag
+
+
+class AnyType(JSONString):
+    @staticmethod
+    def serialize(dt):
+        return dt
 
 
 class ExtensionResolverMixin(object):
@@ -83,6 +89,7 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
     share_url = graphene.String()
     extensions = graphene.List(BadgeInstanceExtensionType)
     user = graphene.Field(badge_user_type)
+    validation = graphene.Field(AnyType)
 
     class Meta:
         model = BadgeInstance
@@ -91,6 +98,8 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
                   'revocation_reason', 'expires_at', 'acceptance', 'created_at',
                   'public')
 
+    def resolve_validation(self, info, **kwargs):
+        return self.validate()
 
 class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
                      DjangoObjectType):

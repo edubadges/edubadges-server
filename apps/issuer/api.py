@@ -1,4 +1,3 @@
-import datetime
 from collections import OrderedDict
 
 import badgrlog
@@ -6,6 +5,7 @@ from apispec_drf.decorators import apispec_put_operation, apispec_delete_operati
 from django.http import Http404
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
 from issuer.models import Issuer, BadgeClass, BadgeInstance
+from issuer.permissions import AwardedAssertionsBlock
 from issuer.serializers import IssuerSerializer, BadgeClassSerializer, BadgeInstanceSerializer
 from mainsite.exceptions import BadgrApiException400
 from mainsite.permissions import AuthenticatedWithVerifiedEmail, CannotDeleteWithChildren
@@ -20,29 +20,6 @@ from staff.permissions import HasObjectPermission
 
 logger = badgrlog.BadgrLogger()
 
-from lti_edu.models import StudentsEnrolled
-from rest_framework import serializers
-
-class IssuerDetail(BaseEntityDetailView):
-    model = Issuer
-    v1_serializer_class = IssuerSerializer
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, CannotDeleteWithChildren)
-    http_method_names = ['put', 'delete']
-
-    @apispec_put_operation('Issuer',
-       summary="Update a single Issuer",
-       tags=["Issuers"],
-   )
-    def put(self, request, **kwargs):
-        return super(IssuerDetail, self).put(request, **kwargs)
-
-    @apispec_delete_operation('Issuer',
-        summary="Delete a single Issuer",
-        tags=["Issuers"],
-    )
-    def delete(self, request, **kwargs):
-        return super(IssuerDetail, self).delete(request, **kwargs)
-
 
 class BadgeClassList(VersionedObjectMixin, BaseEntityListView):
     """
@@ -51,14 +28,6 @@ class BadgeClassList(VersionedObjectMixin, BaseEntityListView):
     permission_classes = (AuthenticatedWithVerifiedEmail,)
     v1_serializer_class = BadgeClassSerializer
     http_method_names = ['post']
-
-    @apispec_post_operation('BadgeClass',
-        summary="Create a new BadgeClass associated with an Issuer",
-        description="Authenticated user must have owner, editor, or staff status on the Issuer",
-        tags=["Issuers", "BadgeClasses"],
-    )
-    def post(self, request, **kwargs):
-        return super(BadgeClassList, self).post(request, **kwargs)
 
 
 class IssuerList(VersionedObjectMixin, BaseEntityListView):
@@ -69,41 +38,20 @@ class IssuerList(VersionedObjectMixin, BaseEntityListView):
     v1_serializer_class = IssuerSerializer
     http_method_names = ['post']
 
-    def post(self, request, **kwargs):
-        return super(IssuerList, self).post(request, **kwargs)
-
 
 class BadgeClassDetail(BaseEntityDetailView):
-    """
-    GET details on one BadgeClass.
-    PUT and DELETE are blocked if assertions have been issued
-    """
     model = BadgeClass
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, CannotDeleteWithChildren)
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, AwardedAssertionsBlock)
     v1_serializer_class = BadgeClassSerializer
     http_method_names = ['put', 'delete']
 
 
-    @apispec_delete_operation('BadgeClass',
-        summary="Delete a BadgeClass",
-        description="Restricted to owners or editors (not staff) of the corresponding Issuer.",
-        tags=['BadgeClasses'],
-        responses=OrderedDict([
-            ("400", {
-                'description': "BadgeClass couldn't be deleted. It may have already been issued."
-            }),
+class IssuerDetail(BaseEntityDetailView):
+    model = Issuer
+    v1_serializer_class = IssuerSerializer
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, CannotDeleteWithChildren)
+    http_method_names = ['put', 'delete']
 
-        ])
-    )
-    def delete(self, request, **kwargs):
-        return super(BadgeClassDetail, self).delete(request, **kwargs)
-
-    @apispec_put_operation('BadgeClass',
-        summary='Update an existing BadgeClass.  Previously issued BadgeInstances will NOT be updated',
-        tags=['BadgeClasses'],
-    )
-    def put(self, request, **kwargs):
-        return super(BadgeClassDetail, self).put(request, **kwargs)
 
 
 class TimestampedBadgeInstanceList(BaseEntityListView):
@@ -222,7 +170,7 @@ class BatchAwardEnrollments(VersionedObjectMixin, BaseEntityView):
 
 class BadgeInstanceDetail(BaseEntityDetailView):
     """
-    Endpoints for (GET)ting a single assertion or revoking a badge (DELETE)
+    Endpoint for revoking a badge (DELETE)
     """
     model = BadgeInstance
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
@@ -230,24 +178,15 @@ class BadgeInstanceDetail(BaseEntityDetailView):
     http_method_names = ['delete']
     permission_map = {'DELETE': 'may_award'}
 
-    @apispec_delete_operation('Assertion',
-        summary="Revoke an Assertion",
-        tags=['Assertions'],
-        responses=OrderedDict([
-            ('400', {
-                'description': "Assertion is already revoked"
-            })
-        ])
-    )
     def delete(self, request, **kwargs):
         # verify the user has permission to the assertion
         try:
             assertion = self.get_object(request, **kwargs)
         except Http404 as e:
-            fields = {'error_message': 'You do not have permission. Check your assigned role in the Issuer', error_code: 601}
+            fields = {'error_message': 'You do not have permission. Check your assigned role in the Issuer', 'error_code': 601}
             raise BadgrApiException400(fields)
         if not self.has_object_permissions(request, assertion):
-            fields = {'error_message': 'You do not have permission. Check your assigned role in the Issuer', error_code: 601}
+            fields = {'error_message': 'You do not have permission. Check your assigned role in the Issuer', 'error_code': 601}
             raise BadgrApiException400(fields)
         revocation_reason = request.data.get('revocation_reason', None)
         if not revocation_reason:

@@ -72,6 +72,7 @@ class ObjectPermissionTests(BadgrTestCase):
         faculty = self.setup_faculty(institution=teacher1.institution)
         self.setup_staff_membership(teacher1, faculty, may_read=True, may_administrate_users=True)
         staff = self.setup_staff_membership(teacher2, faculty, may_read=True, may_administrate_users=False)
+        self.assertEqual(len(teacher2.cached_faculty_staffs()), 1)
         data = json.dumps({
             "may_create": 0,
             "may_read": 1,
@@ -84,6 +85,7 @@ class ObjectPermissionTests(BadgrTestCase):
         response = self.client.put('/staff-membership/faculty/change/{}'.format(staff.entity_id),
                                     data, content_type='application/json')
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(teacher2.cached_faculty_staffs()[0].permissions, json.loads(data))  # perms updated instantly
 
     def test_may_not_remove_institution_staff_membership(self):
         teacher1 = self.setup_teacher(authenticate=True)
@@ -149,9 +151,23 @@ class ObjectPermissionTests(BadgrTestCase):
         """queries like all institutions / faculties should result in empty values"""
         pass
 
-    def test_delete_staff_memebership(self):
-        pass
+    def test_delete_staff_membership(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        teacher2 = self.setup_teacher(institution=teacher1.institution)
+        faculty1 = self.setup_faculty(institution=teacher1.institution)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_administrate_users=True)
+        staff = self.setup_staff_membership(teacher2, faculty1, may_read=True, may_administrate_users=True)
+        response = self.client.delete('/staff-membership/faculty/change/{}'.format(staff.entity_id),
+                                      content_type='application/json')
+        self.assertTrue(response.status_code == 204)
+        self.assertEqual(faculty1.staff_items.__len__(), 0)
 
-    def cannot_delete_institution_staff_memebership(self):
-        pass
+    def test_cannot_delete_institution_staff_membership(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        teacher2 = self.setup_teacher(institution=teacher1.institution)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_administrate_users=True)
+        staff = self.setup_staff_membership(teacher2, teacher1.institution, may_administrate_users=True)
+        response = self.client.delete('/staff-membership/faculty/change/{}'.format(staff.entity_id),
+                                      content_type='application/json')
+        self.assertTrue(response.status_code == 404)
 

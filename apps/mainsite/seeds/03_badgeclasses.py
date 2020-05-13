@@ -1,5 +1,5 @@
 import json
-
+from django.conf import settings
 from institution.models import Institution, Faculty
 from issuer.models import Issuer, BadgeClass, BadgeClassExtension
 from mainsite.seeds.constants import EDU_BADGES_FACULTY_NAME, SURF_INSTITUTION_NAME, \
@@ -30,27 +30,27 @@ for fac in Faculty.objects.exclude(name=EDU_BADGES_FACULTY_NAME):
 
 badge_class_extensions = {
     "extensions:LanguageExtension": {
-        "@context": "https://openbadgespec.org/extensions/LanguageExtension/context.json",
+        "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/LanguageExtension/context.json",
         "type": ["Extension", "extensions:LanguageExtension"],
         "Language": "nl_NL"
     },
     "extensions:ECTSExtension": {
-        "@context": "https://openbadgespec.org/extensions/ECTSExtension/context.json",
+        "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/ECTSExtension/context.json",
         "type": ["Extension", "extensions:ECTSExtension"],
         "ECTS": 2.5
     },
     "extensions:EQFExtension": {
-        "@context": "https://openbadgespec.org/extensions/EQFExtension/context.json",
+        "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/EQFExtension/context.json",
         "type": ["Extension", "extensions:EQFExtension"],
         "EQF": 7
     },
     "extensions:LearningOutcomeExtension": {
-        "@context": "https://openbadgespec.org/extensions/LearningOutcomeExtension/context.json",
+        "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/LearningOutcomeExtension/context.json",
         "type": ["Extension", "extensions:LearningOutcomeExtension"],
         "LearningOutcome": "Will appreciate the benefits of learning a foreign language."
     },
     "extensions:EducationProgramIdentifierExtension": {
-        "@context": "https://openbadgespec.org/extensions/EducationProgramIdentifierExtension/context.json",
+        "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/EducationProgramIdentifierExtension/context.json",
         "type": ["Extension", "extensions:EducationProgramIdentifierExtension"],
         "EducationProgramIdentifier": 56823
     }

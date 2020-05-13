@@ -188,7 +188,7 @@ ACCOUNT_SALT = os.environ['ACCOUNT_SALT']
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 SOCIALACCOUNT_ADAPTER = 'badgrsocialauth.adapter.BadgrSocialAccountAdapter'
 
-SURFCONEXT_DOMAIN_URL = 'https://oidc.test.surfconext.nl'
+SURFCONEXT_DOMAIN_URL = os.environ.get('SURFCONEXT_DOMAIN_URL', 'https://oidc.test.surfconext.nl/oidc')
 EDUID_PROVIDER_URL = os.environ['EDUID_PROVIDER_URL']
 EDUID_REGISTRATION_URL = os.environ['EDUID_REGISTRATION_URL']
 
@@ -493,10 +493,6 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULTS_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
 
-# If enabled, notify badgerank about new badgeclasses
-BADGERANK_NOTIFY_ON_BADGECLASS_CREATE = True
-BADGERANK_NOTIFY_ON_FIRST_ASSERTION = True
-BADGERANK_NOTIFY_URL = 'https://api.badgerank.org/v1/badgeclass/submit'
 
 from cryptography.fernet import Fernet
 
@@ -538,8 +534,8 @@ ALLOW_SEEDS = legacy_boolean_parsing('ALLOW_SEEDS', '0')
 EDU_ID_SECRET = os.environ['EDU_ID_SECRET']
 EDU_ID_CLIENT = "edubadges"
 
-SURF_CONEXT_SECRET = os.environ['SURF_CONEXT_SECRET']
-SURF_CONEXT_CLIENT = "http@//localhost.edubadges.nl"
+SURF_CONEXT_SECRET = os.environ.get('SURF_CONEXT_SECRET', 'secret')
+SURF_CONEXT_CLIENT = os.environ.get('SURF_CONEXT_CLIENT', "test.edubadges.nl")
 
 SUPERUSER_NAME = os.environ.get('SUPERUSER_NAME', '')
 SUPERUSER_EMAIL = os.environ.get('SUPERUSER_EMAIL', '')
@@ -555,3 +551,7 @@ DEBUG_ERRORS = DEBUG
 DEBUG_STATIC = DEBUG
 DEBUG_MEDIA = DEBUG
 LOCAL_DEVELOPMENT_MODE = legacy_boolean_parsing('LOCAL_DEVELOPMENT_MODE', '0')
+
+
+VALIDATOR_URL = os.environ.get('VALIDATOR_URL', 'http://localhost:5000')
+EXTENSIONS_ROOT_URL = os.environ.get('EXTENSIONS_ROOT_URL', 'http://localhost:8000/static')

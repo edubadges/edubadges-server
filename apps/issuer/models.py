@@ -1,3 +1,4 @@
+import requests
 import datetime
 import io
 import logging
@@ -7,6 +8,7 @@ import re
 from collections import OrderedDict
 from json import dumps as json_dumps
 from json import loads as json_loads
+from urllib.parse import urljoin
 
 import cachemodel
 from allauth.account.adapter import get_adapter
@@ -16,13 +18,11 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db import models, transaction
-from django.db.models import ProtectedError
 from django.urls import reverse
 from django.utils import timezone
 from entity.models import BaseVersionedEntity
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager
 from jsonfield import JSONField
-from mainsite.managers import SlugOrJsonIdCacheModelManager
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage, ImageUrlGetterMixin
 from mainsite.models import BadgrApp, EmailBlacklist, BaseAuditedModel
 from mainsite.utils import OriginSetting, generate_entity_uri
@@ -147,7 +147,7 @@ class Issuer(PermissionedModelMixin,
     old_json = JSONField()
 
     objects = IssuerManager()
-    cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
+    cached = cachemodel.CacheModelManager()
     faculty = models.ForeignKey('institution.Faculty', on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
     class Meta:
@@ -178,34 +178,6 @@ class Issuer(PermissionedModelMixin,
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeclasses(self):
         return list(self.badgeclasses.all())
-
-    def delete(self, *args, **kwargs):
-        if self.recipient_count > 0:
-            raise ProtectedError("Issuer can not be deleted because it has previously issued badges.", self)
-
-        # remove any unused badgeclasses owned by issuer
-        for bc in self.cached_badgeclasses():
-            bc.delete()
-
-        staff = self.cached_issuerstaff()
-        ret = super(Issuer, self).delete(*args, **kwargs)
-
-        # remove membership records
-        for membership in staff:
-            membership.delete(publish_issuer=False)
-
-        if apps.is_installed('badgebook'):
-            # badgebook shim
-            try:
-                from badgebook.models import LmsCourseInfo
-                # update LmsCourseInfo's that were using this issuer as the default_issuer
-                for course_info in LmsCourseInfo.objects.filter(default_issuer=self):
-                    course_info.default_issuer = None
-                    course_info.save()
-            except ImportError:
-                pass
-
-        return ret
 
     def get_absolute_url(self):
         return reverse('issuer_json', kwargs={'entity_id': self.entity_id})
@@ -254,10 +226,6 @@ class Issuer(PermissionedModelMixin,
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeclasses(self):
         return self.badgeclasses.all()
-
-    @property
-    def recipient_count(self):
-        return sum(bc.recipient_count() for bc in self.cached_badgeclasses())
 
     @property
     def image_preview(self):
@@ -315,13 +283,21 @@ class Issuer(PermissionedModelMixin,
         if self.faculty:
             if self.faculty.institution.brin:
                 json['extensions:InstitutionIdentifierExtension'] = {
-                    "type": ["Extension", "extensions: InstitutionIdentifierExtension"],
-                    "BRIN": self.faculty.institution.brin
+                    "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/InstitutionIdentifierExtension/context.json",
+                    "type": ["Extension", "extensions:InstitutionIdentifierExtension"],
+                    "InstitutionIdentifier": self.faculty.institution.brin
                 }
             if self.faculty.institution.grading_table:
                 json['extensions:GradingTableExtension'] = {
-                    "type": ["Extension", "extensions: GradingTableExtension"],
-                    "gradingTable": self.faculty.institution.grading_table
+                    "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/GradingTableExtension/context.json",
+                    "type": ["Extension", "extensions:GradingTableExtension"],
+                    "GradingTableURL": self.faculty.institution.grading_table
+                }
+            if self.faculty.institution.name:
+                json['extensions:InstitutionNameExtension'] = {
+                    "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/InstitutionNameExtension/context.json",
+                    "type": ["Extension", "extensions:InstitutionNameExtension"],
+                    "InstitutionName": self.faculty.institution.name
                 }
 
         # pass through imported json
@@ -375,7 +351,7 @@ class BadgeClass(PermissionedModelMixin,
     criteria_text = models.TextField(blank=True, null=True)
     old_json = JSONField()
     objects = BadgeClassManager()
-    cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
+    cached = cachemodel.CacheModelManager()
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.BadgeClassStaff")
     expiration_period = models.DurationField(null=True)
 
@@ -390,24 +366,17 @@ class BadgeClass(PermissionedModelMixin,
     def cached_staff(self):
         return BadgeClassStaff.objects.filter(badgeclass=self)
 
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_assertions(self):
+        return list(self.badgeinstances.all())
+
     @property
     def assertions(self):
-        return list(self.badgeinstances.all())
+        return self.cached_assertions()
 
     def publish(self):
         super(BadgeClass, self).publish()
         self.issuer.publish()
-
-    def delete(self, *args, **kwargs):
-        if self.recipient_count() > 0:
-            raise ProtectedError("BadgeClass may only be deleted if all BadgeInstances have been revoked.", self)
-
-        if self.pathway_element_count() > 0:
-            raise ProtectedError("BadgeClass may only be deleted if all PathwayElementBadge have been removed.", self)
-
-        issuer = self.issuer
-        super(BadgeClass, self).delete(*args, **kwargs)
-        issuer.publish()
 
     def get_absolute_url(self):
         return reverse('badgeclass_json', kwargs={'entity_id': self.entity_id})
@@ -449,11 +418,6 @@ class BadgeClass(PermissionedModelMixin,
         return Issuer.cached.get(pk=self.issuer_id)
 
     @cachemodel.cached_method(auto_publish=True)
-    def recipient_count(self):
-        return self.badgeinstances.filter(revoked=False).count()
-
-
-    @cachemodel.cached_method(auto_publish=True)
     def cached_enrollments(self):
         from lti_edu.models import StudentsEnrolled
         return StudentsEnrolled.objects.filter(badge_class=self)
@@ -468,9 +432,6 @@ class BadgeClass(PermissionedModelMixin,
         return StudentsEnrolled.objects.filter(badge_class=self,
                                                denied=False,
                                                date_awarded=None).count()
-
-    def pathway_element_count(self):
-        return len(self.cached_pathway_elements())
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_alignments(self):
@@ -679,7 +640,7 @@ class BadgeInstance(BaseAuditedModel,
     recipient_identifier = models.CharField(max_length=512, blank=False, null=False, db_index=True)
     recipient_type = models.CharField(max_length=255, choices=RECIPIENT_TYPE_CHOICES, default=RECIPIENT_TYPE_EDUID, blank=False, null=False)
 
-    image = models.FileField(upload_to='uploads/badges', blank=True)
+    image = models.FileField(upload_to='uploads/badges', blank=True, db_index=True)
 
     revoked = models.BooleanField(default=False)
     revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
@@ -706,12 +667,19 @@ class BadgeInstance(BaseAuditedModel,
     public = models.BooleanField(default=False)
 
     objects = BadgeInstanceManager()
-    cached = SlugOrJsonIdCacheModelManager(slug_kwarg_name='entity_id', slug_field_name='entity_id')
+    cached = cachemodel.CacheModelManager()
 
     class Meta:
         index_together = (
                 ('recipient_identifier', 'badgeclass', 'revoked'),
         )
+
+    def validate(self):
+        data = {'profile': {'id': self.recipient_identifier}, 'data': self.get_json()}
+        response = requests.post(json=data,
+                                 url=urljoin(settings.VALIDATOR_URL, 'results'),
+                                 headers={'Accept': 'application/json'})
+        return response.json()
 
     @property
     def extended_json(self):
@@ -821,6 +789,8 @@ class BadgeInstance(BaseAuditedModel,
             self.revocation_reason = None
 
         super(BadgeInstance, self).save(*args, **kwargs)
+        self.badgeclass.remove_cached_data(['cached_assertions'])
+        self.user.remove_cached_data(['cached_badgeinstances'])
 
     def rebake(self, obi_version=CURRENT_OBI_VERSION, save=True, signature=None, replace_image=False):
         if self.source_url:
@@ -855,10 +825,6 @@ class BadgeInstance(BaseAuditedModel,
         self.badgeclass.publish()
         if self.user:
             self.user.publish()
-
-        # publish all collections this instance was in
-        for collection in self.backpackcollection_set.all():
-            collection.publish()
 
         self.publish_by('entity_id', 'revoked')
 

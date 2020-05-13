@@ -1,8 +1,8 @@
 import base64
 import json
 import time
+import os
 
-from badgrsocialauth.utils import get_privacy_content
 from django import forms
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
@@ -17,15 +17,19 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import FormView, RedirectView, TemplateView
-from issuer.tasks import rebake_all_assertions, update_issuedon_all_assertions
-from mainsite.admin_actions import clear_cache
-from mainsite.models import EmailBlacklist, BadgrApp
-from mainsite.serializers import VerifiedAuthTokenSerializer
+from django.views.static import serve
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import AllowAny
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from badgrsocialauth.utils import get_privacy_content
+from issuer.tasks import rebake_all_assertions, update_issuedon_all_assertions
+from issuer.models import BadgeInstance
+from mainsite.admin_actions import clear_cache
+from mainsite.models import EmailBlacklist, BadgrApp
+from mainsite.serializers import VerifiedAuthTokenSerializer
 
 
 ##
@@ -219,6 +223,7 @@ class TermsAndConditionsView(TemplateView):
 class TermsAndConditionsResignView(TermsAndConditionsView):
     template_name = 'terms_of_service/accept_terms_resign.html'
 
+
 class AcceptTermsAndConditionsView(View):
 
     def post(self, request, **kwargs):
@@ -228,3 +233,14 @@ class AcceptTermsAndConditionsView(View):
         pass
 
 
+def serve_protected_document(request, path, document_root):
+    if 'assertion-' in path:
+        assertion = BadgeInstance.objects.get(image=path)
+        if assertion.public:
+            return serve(request, path, document_root)
+        else:
+            if request.user.is_authenticated:
+                if request.user is assertion.user or request.user.get_permissions(assertion)['may_read']:
+                    return serve(request, path, document_root)
+        return HttpResponseForbidden()
+    return serve(request, path, document_root)

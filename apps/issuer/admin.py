@@ -87,7 +87,7 @@ class BadgeClassExtensionInline(TabularInline):
 
 class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
     readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id')
-    list_display = ('badge_image', 'name', 'entity_id', 'issuer_link', 'recipient_count')
+    list_display = ('badge_image', 'name', 'entity_id', 'issuer_link')
     list_display_links = ('badge_image', 'name',)
     list_filter = ('created_at',)
     search_fields = ('name', 'entity_id', 'issuer__name',)
@@ -168,7 +168,7 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
             'fields': ('badgeclass', 'issuer')
         }),
         ('Assertion', {
-            'fields': ('acceptance', 'recipient_type', 'recipient_identifier', 'image', 'issued_on', 'expires_at', 'narrative')
+            'fields': ('public', 'acceptance', 'recipient_type', 'recipient_identifier', 'image', 'issued_on', 'expires_at')
         }),
         ('Revocation', {
             'fields': ('revoked', 'revocation_reason')

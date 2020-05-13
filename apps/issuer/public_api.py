@@ -5,14 +5,13 @@ import re
 import badgrlog
 import cairosvg
 from PIL import Image
-from backpack.models import BackpackCollection
 from django.conf import settings
 from django.core.files.storage import DefaultStorage
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import redirect, render_to_response
 from django.urls import resolve, reverse, Resolver404, NoReverseMatch
 from django.views.generic import RedirectView
-from entity.api import VersionedObjectMixin
+from entity.api import VersionedObjectMixin, BaseEntityDetailView
 from mainsite.models import BadgrApp
 from mainsite.utils import OriginSetting
 from rest_framework import status, permissions
@@ -25,6 +24,22 @@ from . import utils
 from .models import Issuer, BadgeClass, BadgeInstance
 
 logger = badgrlog.BadgrLogger()
+
+
+class AssertionValidate(BaseEntityDetailView):
+    """
+    Endpoint for validating a badge (GET)
+    """
+    model = BadgeInstance
+    permission_classes = (permissions.AllowAny,)
+    http_method_names = ['get']
+
+    def get(self, request, **kwargs):
+        assertion = self.get_object(request, **kwargs)
+        if assertion.public:
+            return Response(assertion.validate(), status=status.HTTP_200_OK)
+        else:
+            raise Http404
 
 
 class SlugToEntityIdRedirectMixin(object):
@@ -170,7 +185,6 @@ class ImagePropertyDetailView(APIView, SlugToEntityIdRedirectMixin):
         except self.model.DoesNotExist:
             return None
         else:
-            self.log(current_object)
             return current_object
 
     def get(self, request, **kwargs):
@@ -424,40 +438,6 @@ class BadgeInstanceImage(ImagePropertyDetailView):
         if obj and obj.revoked:
             return None
         return obj
-
-
-class BackpackCollectionJson(JSONComponentView):
-    permission_classes = (permissions.AllowAny,)
-    model = BackpackCollection
-    entity_id_field_name = 'share_hash'
-
-    def get_context_data(self, **kwargs):
-        chosen_assertion = sorted(self.current_object.cached_badgeinstances(), lambda a,b: cmp(a.issued_on, b.issued_on))[0]
-        image_url = "{}{}?type=png".format(
-            OriginSetting.HTTP,
-            reverse('badgeinstance_image', kwargs={'entity_id': chosen_assertion.entity_id})
-        )
-        if self.is_wide_bot():
-            image_url = "{}&fmt=wide".format(image_url)
-
-        return dict(
-            title=self.current_object.name,
-            description=self.current_object.description,
-            public_url=self.current_object.share_url,
-            image_url=image_url
-        )
-
-    def get_json(self, request):
-        expands = request.GET.getlist('expand', [])
-        if not self.current_object.published:
-            raise Http404
-
-        json = self.current_object.get_json(
-            obi_version=self._get_request_obi_version(request),
-            expand_badgeclass=('badges.badge' in expands),
-            expand_issuer=('badges.badge.issuer' in expands)
-        )
-        return json
 
 
 class BakedBadgeInstanceImage(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMixin):

@@ -48,7 +48,6 @@ def run_seeds():
         if isfile(join(seedsdir, x))
     ]
 
-
     for seed in sorted(seeds):
         print("Seeding %s... " % seed, end="")
 

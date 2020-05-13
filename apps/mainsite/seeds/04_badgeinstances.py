@@ -29,7 +29,7 @@ def create_badge_instance(user, badge_class, revoked, acceptance="Unaccepted"):
 def create_enrollments_badge_instances(user, bc_names, revoked, acceptance="Unaccepted", include_badge_instances=True):
     for bc_name in bc_names:
         for bc in BadgeClass.objects.filter(name=bc_name):
-            StudentsEnrolled.objects.get_or_create(badge_class=bc, user=enrolled_user)
+            StudentsEnrolled.objects.get_or_create(badge_class=bc, user=user)
             if include_badge_instances:
                 create_badge_instance(user, bc, revoked, acceptance)
 
@@ -52,5 +52,5 @@ awarded_user = BadgeUser.objects.get(email=AWARDED_STUDENT_EMAIL)
 create_enrollments_badge_instances(awarded_user,
                                    [BADGE_CLASS_COGNITIVE_PSYCHOLOGY, BADGE_CLASS_INTRODUCTION_TO_PSYCHOLOGY,
                                     BADGE_CLASS_GROUP_DYNAMICS],
-                                   True,
+                                   False,
                                    acceptance="Accepted")

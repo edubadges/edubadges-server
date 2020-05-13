@@ -59,7 +59,8 @@ class ResizeUploadedImage(object):
     def save(self, *args, **kwargs):
         if self.pk is None and self.image:
             try:
-                image = Image.open(self.image)
+                f = open(self.image.name, 'rb')
+                image = Image.open(f)
                 if _decompression_bomb_check(image):
                     raise ValidationError("Invalid image")
             except IOError:

@@ -3,25 +3,28 @@
 
 import os
 import random
-import time
 import uuid
 import string
-from oauth2_provider.models import AccessToken, Application
+from graphene.test import Client as GrapheneClient
 from rest_framework.test import APITransactionTestCase
+
 
 from allauth.socialaccount.models import SocialAccount
 from badgeuser.models import BadgeUser, TermsVersion
-from django.core.cache import cache
-from django.core.cache.backends.filebased import FileBasedCache
-from django.test import override_settings, TransactionTestCase
+from django.test import override_settings
 from django.utils import timezone
 from institution.models import Institution, Faculty
 from issuer.models import Issuer, BadgeClass
 from lti_edu.models import StudentsEnrolled
 from mainsite import TOP_DIR
-from mainsite.models import BadgrApp, ApplicationInfo
+from mainsite.models import BadgrApp
+from mainsite.schema import schema
 from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
 
+
+class GrapheneMockContext(object):
+    def __init__(self, user):
+        self.user = user
 
 def name_randomiser(name):
     s = ''.join(random.choices(string.ascii_lowercase, k=10))
@@ -29,6 +32,16 @@ def name_randomiser(name):
 
 
 class SetupHelper(object):
+
+    def graphene_post(self, user, query):
+        client = GrapheneClient(schema)
+        return client.execute(query, context_value=GrapheneMockContext(user))
+
+    def get_testfiles_path(self, *args):
+        return os.path.join(TOP_DIR, 'apps', 'issuer', 'testfiles', *args)
+
+    def get_test_image_path(self):
+        return os.path.join(self.get_testfiles_path(), 'guinea_pig_testing_badge.png')
 
     def _add_eduid_socialaccount(self, user):
         random_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:{}c14-b952-4d7e-85fd-{}ac5c6f18".format(random.randint(1, 99999), random.randint(1, 9999))
@@ -82,6 +95,9 @@ class SetupHelper(object):
             self.client.force_authenticate(user=user)
         return user
 
+    def authenticate(self, user):
+        return self.client._login(user, backend='oauth2_provider.backends.OAuth2Backend')
+
     def setup_teacher(self, first_name='', last_name='', authenticate=False, institution=None):
         user = self._setup_user(first_name, last_name, authenticate, institution=institution)
         self._add_surfconext_socialaccount(user)
@@ -124,12 +140,10 @@ class SetupHelper(object):
                                      created_by=created_by,
                                      faculty=faculty)
 
-    def setup_badgeclass(self, issuer=None, image=None):
+    def setup_badgeclass(self, issuer, image=None):
         name = 'Test Badgeclass #{}'.format(random.random)
         if image is None:
             image = open(self.get_test_image_path(), 'r')
-        if not issuer:
-            issuer = self.setup_issuer()
         return BadgeClass.objects.create(
             issuer=issuer,
             image=image,
@@ -137,6 +151,10 @@ class SetupHelper(object):
             description='Description',
             criteria_text='Criteria text'
         )
+
+    def setup_assertion(self, recipient, badgeclass, created_by):
+        recipient_id = recipient.get_recipient_identifier()
+        return badgeclass.issue(recipient_id=recipient_id, created_by=created_by)
 
     def setup_staff_membership(self, user, object, may_create=False, may_read=False,
                                may_update=False, may_delete=False, may_award=False,
@@ -161,13 +179,20 @@ class SetupHelper(object):
         staff.save()
         return staff
 
+    def instance_is_removed(self, instance):
+        try:
+            instance.__class__.objects.get(pk=instance.pk)
+            return False
+        except instance.__class__.DoesNotExist:
+            return True
+
 
 @override_settings(
     CELERY_ALWAYS_EAGER=True,
     SESSION_ENGINE='django.contrib.sessions.backends.cache',
     HTTP_ORIGIN="http://localhost:8000",
     BADGR_APP_ID=1,
-    CACHES={'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}}
+    # CACHES={'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}}
 )
 class BadgrTestCase(SetupHelper, APITransactionTestCase):
     def setUp(self):

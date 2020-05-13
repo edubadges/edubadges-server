@@ -1,0 +1,13 @@
+{
+  "@context": {
+    "obi": "https://w3id.org/openbadges#",
+    "extensions": "https://w3id.org/openbadges/extensions#",
+    "GradingTableURL": "extensions:GradingTableExtension"
+  },
+  "obi:validation": [
+    {
+      "obi:validatesType": "extensions:GradingTableExtension",
+      "obi:validationSchema": "http://localhost:8000/static/extensions/GradingTableExtension/schema.json"
+    }
+  ]
+}
