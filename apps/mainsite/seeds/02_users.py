@@ -42,13 +42,13 @@ all_perms = {
 }
 
 no_perms = {
-    'may_create': True,
-    'may_read': True,
-    'may_update': True,
-    'may_delete': True,
-    'may_award': True,
-    'may_sign': True,
-    'may_administrate_users': True
+    'may_create': False,
+    'may_read': False,
+    'may_update': False,
+    'may_delete': False,
+    'may_award': False,
+    'may_sign': False,
+    'may_administrate_users': False
 }
 
 
@@ -96,20 +96,12 @@ institution_admins = [
         "uid": "5d0584e3bf178ab4f6d6c9e02ebbd195afd10853",
     },
     {
-        "username": "test123456",
-        "email": "thisisanother@valid.email",
-        "first_name": "Seconder",
-        "last_name": "LastNamer2",
-        "institution_name": "university-example.org",
-        "uid": "",
-    },
-    {
         "username": "p1u1",
         "email": "professor1@university1.org",
         "first_name": "professor1",
         "last_name": "university1",
         "institution_name": "university1",
-        "uid": "00010001",
+        "uid": "45dde4bb279010c0c2826794b1b248770e962ff3",
     },
     {
         "username": "p2u1",
@@ -117,7 +109,7 @@ institution_admins = [
         "first_name": "professor2",
         "last_name": "university1",
         "institution_name": "university1",
-        "uid": "00010002",
+        "uid": "b40d3e0abe239e22c84605231de16a9ddea9698b",
     },
     {
         "username": "p1u2",
@@ -131,12 +123,20 @@ institution_admins = [
 
 teachers = [
     {
+        "username": "test123456",
+        "email": "test123456@university-example.org",
+        "first_name": "Seconder",
+        "last_name": "LastNamer2",
+        "institution_name": "university-example.org",
+        "uid": "847292f4f83cfc3835d9f367c4ec659a4c844a0a",
+    },
+    {
         "username": "p3u1",
         "email": "professor3@university1.org",
         "first_name": "professor3",
         "last_name": "university1",
         "institution_name": "university1",
-        "uid": "00010003",
+        "uid": "e1d42cb2da86d8763053ea7c9e29ad87fcbc73aa",
     },
     {
         "username": "p4u1",
@@ -144,7 +144,7 @@ teachers = [
         "first_name": "professor4",
         "last_name": "university1",
         "institution_name": "university1",
-        "uid": "00010004",
+        "uid": "52622709ca4e5590a611d5f6f49f0712c7e513a8",
     },
     {
         "username": "p5u1",
@@ -152,7 +152,7 @@ teachers = [
         "first_name": "professor5",
         "last_name": "university1",
         "institution_name": "university1",
-        "uid": "00010005",
+        "uid": "aaf4dda63707f0b2a59fdfaee75df0ce7579bbe0",
     },
     {
         "username": "p6u1",
@@ -160,7 +160,7 @@ teachers = [
         "first_name": "professor6",
         "last_name": "university1",
         "institution_name": "university1",
-        "uid": "00010006",
+        "uid": "72ca9407474db806cfb457ac00a12dc601865591",
     },
     {
         "username": "p7u1",
@@ -168,7 +168,7 @@ teachers = [
         "first_name": "professor7",
         "last_name": "university1",
         "institution_name": "university1",
-        "uid": "00010007",
+        "uid": "02ffce96ae4a9c318ae074054429a8fed7784442",
     },
     {
         "username": "p8u1",
@@ -176,7 +176,7 @@ teachers = [
         "first_name": "professor8",
         "last_name": "university1",
         "institution_name": "university1",
-        "uid": "00010008",
+        "uid": "9a988eab38ad87ee4398e0af6f5807d63255cf6a",
     },
     {
         "username": "p2u2",
