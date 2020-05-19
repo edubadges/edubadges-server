@@ -10,7 +10,7 @@ class BadgeUserType(DjangoObjectType):
 
     class Meta:
         model = BadgeUser
-        fields = ('first_name', 'last_name', 'email', 'entity_id')
+        fields = ('first_name', 'last_name', 'email', 'date_joined', 'entity_id')
 
     institution = graphene.Field(InstitutionType)
     institution_staff = graphene.Field(InstitutionStaffType)
