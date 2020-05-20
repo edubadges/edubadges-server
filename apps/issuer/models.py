@@ -172,6 +172,9 @@ class Issuer(PermissionedModelMixin,
     def cached_staff(self):
         return list(IssuerStaff.objects.filter(issuer=self))
 
+    def create_staff_membership(self, user, permissions):
+        return IssuerStaff.objects.create(user=user, issuer=self, **permissions)
+
     def get_badgeclasses(self, user, permissions):
         return [bc for bc in self.cached_badgeclasses() if bc.has_permissions(user, permissions)]
 
@@ -359,6 +362,11 @@ class BadgeClass(PermissionedModelMixin,
         verbose_name_plural = "Badge classes"
 
     @property
+    def institution(self):
+        if self.issuer:
+            return self.issuer.institution
+
+    @property
     def parent(self):
         return self.issuer
 
@@ -385,6 +393,9 @@ class BadgeClass(PermissionedModelMixin,
         if public_key_issuer.issuer != self.issuer:
             raise ValueError('Public key issuer does not belong to this Issuer.')
         return self.jsonld_id + '/pubkey/{}'.format(public_key_issuer.entity_id)
+
+    def create_staff_membership(self, user, permissions):
+        return BadgeClassStaff.objects.create(user=user, badgeclass=self, **permissions)
 
     @property
     def public_url(self):

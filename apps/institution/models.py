@@ -62,6 +62,15 @@ class Institution(PermissionedModelMixin, ImageUrlGetterMixin, BaseVersionedEnti
             r += list(issuer.cached_badgeclasses())
         return r
 
+    def create_staff_membership(self, user, permissions):
+        try:
+            staff = InstitutionStaff.objects.get(user=user)
+            for key in permissions.keys():
+                value = permissions[key]
+                setattr(staff, key, value)
+            staff.save()
+        except InstitutionStaff.DoesNotExist:
+            return InstitutionStaff.objects.create(user=user, faculty=self, **permissions)
 
 class Faculty(PermissionedModelMixin, BaseVersionedEntity, BaseAuditedModel):
 
@@ -79,6 +88,9 @@ class Faculty(PermissionedModelMixin, BaseVersionedEntity, BaseAuditedModel):
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, blank=False, null=False)
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.FacultyStaff")
     description = models.TextField(blank=True, null=True, default=None)
+
+    def create_staff_membership(self, user, permissions):
+        return FacultyStaff.objects.create(user=user, faculty=self, **permissions)
 
     def get_issuers(self, user, permissions):
         return [issuer for issuer in self.cached_issuers() if issuer.has_permissions(user, permissions)]

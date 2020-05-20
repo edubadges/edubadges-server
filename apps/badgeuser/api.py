@@ -3,23 +3,26 @@ import datetime
 from allauth.account.models import EmailConfirmationHMAC
 from allauth.account.utils import url_str_to_user_pk
 from apispec_drf.decorators import apispec_get_operation, apispec_delete_operation, apispec_list_operation
-from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken
-from badgeuser.permissions import BadgeUserIsAuthenticatedUser
-from badgeuser.serializers import BadgeUserProfileSerializer, BadgeUserTokenSerializer
-from badgeuser.tasks import process_email_verification
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import ProtectedError
 from django.http import Http404
 from django.utils import timezone
-from entity.api import BaseEntityDetailView, BaseEntityListView
-from issuer.permissions import BadgrOAuthTokenHasScope
-from mainsite.models import BadgrApp
-from mainsite.exceptions import BadgrApiException400
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND
+
+from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken, UserProvisionment
+from badgeuser.permissions import BadgeUserIsAuthenticatedUser
+from badgeuser.serializers import BadgeUserProfileSerializer, BadgeUserTokenSerializer, UserProvisionmentSerializer
+from badgeuser.tasks import process_email_verification
+from entity.api import BaseEntityDetailView, BaseEntityListView
+from issuer.permissions import BadgrOAuthTokenHasScope
+from mainsite.exceptions import BadgrApiException400
+from mainsite.models import BadgrApp
+from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from staff.permissions import HasObjectPermission
 
 RATE_LIMIT_DELTA = datetime.timedelta(minutes=5)
 
@@ -166,4 +169,67 @@ class AccessTokenDetail(BaseEntityDetailView):
     def delete(self, request, **kwargs):
         return super(AccessTokenDetail, self).delete(request, **kwargs)
 
+
+class UserProvisionmentList(BaseEntityListView):
+    """
+    Endpoint used for provisioning
+    GET to get provisions that have been matched to you as user
+    """
+    model = UserProvisionment
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    v1_serializer_class = UserProvisionmentSerializer
+    http_method_names = ['get']
+
+    def get_objects(self, request, **kwargs):
+        return self.model.objects.filter(user=request.user)
+
+
+class UserCreateProvisionment(BaseEntityListView):
+    """
+    Endpoint used for provisioning
+    POST to create one for another
+    """
+    model = UserProvisionment
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    v1_serializer_class = UserProvisionmentSerializer
+    http_method_names = ['post']
+    permission_map = {'POST': 'may_administrate_users'}
+
+
+# class UserEditProvisionment(BaseEntityDetailView):
+#     """
+#     Endpoint used for provisioning
+#     PUT to edit a provisionment for another'
+#     """
+#     model = UserProvisionment
+#     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
+#     v1_serializer_class = UserProvisionmentSerializer
+#     http_method_names = ['put']
+#     permission_map = {'PUT': 'may_administrate_users'}
+
+
+class AcceptProvisionmentDetail(BaseEntityDetailView):
+    """
+    Endpoint used for provisioning
+    POST to accept or deny your own provisionment'
+    """
+    model = UserProvisionment
+    permission_classes = (AuthenticatedWithVerifiedEmail, )
+    v1_serializer_class = UserProvisionmentSerializer
+    http_method_names = ['post']
+    # permission_map = {'GET': 'may_administrate_users'}
+
+    def post(self, request, **kwargs):
+        obj = self.get_object(request, **kwargs)
+        if not self.has_object_permissions(request, obj):  # checks if obj is owned by request.user
+            return Response(status=HTTP_404_NOT_FOUND)
+
+        if request.data.get('accept', None):
+            obj.accept()
+            obj.delete()
+        else:
+            obj.reject()
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(obj)
+        return Response(serializer.data)
 

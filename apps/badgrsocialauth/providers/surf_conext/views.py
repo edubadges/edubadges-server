@@ -130,10 +130,12 @@ def after_terms_agreement(request, **kwargs):
 
         try:
             InstitutionStaff.objects.get(user=request.user, institution=institution)
-        except InstitutionStaff.DoesNotExist:
+        except InstitutionStaff.DoesNotExist:  #first login ever
             request.user.institution = institution
             request.user.is_teacher = True
+            request.user.match_provisionments()
             request.user.save()
+
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
 
     resign = True

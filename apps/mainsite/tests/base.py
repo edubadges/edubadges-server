@@ -80,8 +80,9 @@ class SetupHelper(object):
         email.primary = True
         email.save()
 
-    def _setup_user(self, first_name='firsty', last_name='lastington', authenticate=False, institution=None):
-        email = 'setup_user_{}@email.test'.format(random.random())
+    def _setup_user(self, first_name='firsty', last_name='lastington', authenticate=False, institution=None, email=None):
+        if not email:
+            email = 'setup_user_{}@email.test'.format(random.random())
         if not institution:
             institution = self.setup_institution()
         user = BadgeUser.objects.create(email=email,
@@ -96,10 +97,11 @@ class SetupHelper(object):
         return user
 
     def authenticate(self, user):
+        self.client.logout()
         return self.client._login(user, backend='oauth2_provider.backends.OAuth2Backend')
 
-    def setup_teacher(self, first_name='', last_name='', authenticate=False, institution=None):
-        user = self._setup_user(first_name, last_name, authenticate, institution=institution)
+    def setup_teacher(self, first_name='', last_name='', authenticate=False, institution=None, email=None):
+        user = self._setup_user(first_name, last_name, authenticate, institution=institution, email=email)
         self._add_surfconext_socialaccount(user)
         user.is_teacher = True
         user.save()
@@ -130,7 +132,7 @@ class SetupHelper(object):
     def setup_faculty(self, institution=None):
         if not institution:
             institution = self.setup_institution()
-        return Faculty.objects.create(name=name_randomiser('Test Issuer'), institution=institution)
+        return Faculty.objects.create(name=name_randomiser('Test Faculty'), institution=institution)
 
     def setup_issuer(self, created_by, faculty=None):
         if not faculty:

@@ -4,6 +4,7 @@ import base64
 import datetime
 import re
 from itertools import chain
+from jsonfield import JSONField
 
 import cachemodel
 from allauth.account.models import EmailAddress, EmailConfirmation
@@ -11,6 +12,8 @@ from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager, Emai
 from basic_models.models import IsActive
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
@@ -20,7 +23,7 @@ from django.utils.translation import ugettext_lazy as _
 from entity.models import BaseVersionedEntity
 from issuer.models import BadgeInstance
 from lti_edu.models import StudentsEnrolled
-from mainsite.exceptions import BadgrApiException400
+from mainsite.exceptions import BadgrApiException400, BadgrValidationError
 from mainsite.models import ApplicationInfo, EmailBlacklist, BaseAuditedModel
 from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
@@ -28,6 +31,57 @@ from rest_framework.authtoken.models import Token
 from signing.models import AssertionTimeStamp
 from badgeuser.utils import generate_badgr_username
 from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
+
+
+class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
+    user = models.ForeignKey('badgeuser.BadgeUser', null=True, on_delete=models.CASCADE)
+    email = models.EmailField()
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()  # id of the related object the invitation was for
+    entity = GenericForeignKey('content_type', 'object_id')
+    data = JSONField(null=True)
+    for_teacher = models.BooleanField()
+    rejected = models.BooleanField(default=False)
+
+    def get_permissions(self, user):
+        return self.entity.get_permissions(user)
+
+    def match_user(self, user):
+        if user.institution != self.entity.institution:
+            raise BadgrValidationError(fields='May not invite user from other institution')
+        if user.is_teacher and not self.for_teacher:
+            raise BadgrValidationError(fields='This invite is for a student')
+        if not user.is_teacher and self.for_teacher:
+            raise BadgrValidationError(fields='This invite is for a teacher')
+        self.user = user
+        self.save()
+
+    def find_and_match_user(self):
+        try:
+            user = BadgeUser.objects.get(email=self.email, is_teacher=self.for_teacher)
+            self.match_user(user)
+        except BadgeUser.DoesNotExist:
+            pass
+
+    def send_email(self):
+        try:
+            EmailBlacklist.objects.get(email=self.email)
+        except EmailBlacklist.DoesNotExist:
+            subject = 'Invite'
+            message = '{}'.format(self.entity_id)
+            send_mail(subject, message, None, [self.email])
+
+    def perform_provisioning(self):
+        permissions = self.data
+        return self.entity.create_staff_membership(self.user, permissions)
+
+    def accept(self):
+        return self.perform_provisioning()
+
+    def reject(self):
+        self.rejected = True
+        self.save()
+
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
     objects = CachedEmailAddressManager()
@@ -420,6 +474,12 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
 
     def get_full_name(self):
         return "%s %s" % (self.first_name, self.last_name)
+
+    def match_provisionments(self):
+        """Used to match provisions on initial login"""
+        provisions = UserProvisionment.objects.filter(email=self.email, for_teacher=self.is_teacher)
+        for provision in provisions:
+            provision.match_user(self)
 
     def email_user(self, subject, message, from_email=None, attachments=None, **kwargs):
         """
