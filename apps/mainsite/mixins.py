@@ -1,8 +1,10 @@
 import io
+import graphene
 from xml.etree import cElementTree as ET
 from django.core.files.storage import default_storage
 from PIL import Image
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from mainsite.utils import verify_svg
@@ -133,3 +135,10 @@ class StaffResolverMixin(object):
             return self.staff_items
         else:
             return []
+
+
+class ContentTypeIdResolverMixin(object):
+    content_type_id = graphene.Field(graphene.Int)
+
+    def resolve_content_type_id(self, info):
+        return ContentType.objects.get_for_model(self).pk

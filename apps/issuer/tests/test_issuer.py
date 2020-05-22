@@ -69,10 +69,6 @@ class IssuerAPITest(BadgrTestCase):
         self.assertTrue(self.instance_is_removed(faculty))
         self.assertEqual(teacher1.institution.cached_faculties().__len__(), 0)
 
-
-    def test_issuer_schema(self):
-        pass
-
     def test_enroll_and_award_badge(self):
         teacher1 = self.setup_teacher()
         student = self.setup_student(authenticate=True)
@@ -176,3 +172,24 @@ class IssuerModelsTest(BadgrTestCase):
         self.assertTrue(self.instance_is_removed(staff))
         self.assertEqual(teacher1.cached_badgeclass_staffs().__len__(), 0)
         self.assertEqual(faculty.cached_issuers().__len__(), 0)
+
+    def test_issuer_schema(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
+        faculty = self.setup_faculty(teacher1.institution)
+        self.setup_issuer(teacher1, faculty)
+        query = 'query foo {issuers {entityId contentTypeId}}'
+        response = self.graphene_post(teacher1, query)
+        self.assertTrue(bool(response['data']['issuers'][0]['contentTypeId']))
+        self.assertTrue(bool(response['data']['issuers'][0]['entityId']))
+
+    def test_badgeclass_schema(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
+        faculty = self.setup_faculty(teacher1.institution)
+        issuer = self.setup_issuer(teacher1, faculty)
+        self.setup_badgeclass(issuer)
+        query = 'query foo {badgeClasses {entityId contentTypeId}}'
+        response = self.graphene_post(teacher1, query)
+        self.assertTrue(bool(response['data']['badgeClasses'][0]['contentTypeId']))
+        self.assertTrue(bool(response['data']['badgeClasses'][0]['entityId']))

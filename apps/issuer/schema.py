@@ -5,7 +5,8 @@ from graphene_django.types import DjangoObjectType
 from graphene.types.json import JSONString
 
 from lti_edu.schema import StudentsEnrolledType
-from mainsite.mixins import StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin, resolver_blocker_for_students
+from mainsite.mixins import StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin, ContentTypeIdResolverMixin,\
+    resolver_blocker_for_students
 from staff.schema import IssuerStaffType, BadgeClassStaffType, PermissionType
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
     BadgeClassAlignment, BadgeClassTag
@@ -18,6 +19,8 @@ class AnyType(JSONString):
 
 
 class ExtensionResolverMixin(object):
+
+    permissions = graphene.Field(PermissionType)
 
     def resolve_extensions(self, info):
         return self.cached_extensions()
@@ -61,17 +64,17 @@ class BadgeClassTagType(DjangoObjectType):
         fields = ('name',)
 
 
-class IssuerType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
+class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
                  DjangoObjectType):
     class Meta:
         model = Issuer
         fields = ('name', 'entity_id', 'badgeclasses', 'faculty',
-                  'image', 'description', 'url', 'email', 'created_at')
+                  'image', 'description', 'url', 'email', 'created_at',
+                  'content_type_id')
 
     staff = graphene.List(IssuerStaffType)
     badgeclasses_count = graphene.Int()
     extensions = graphene.List(IssuerExtensionType)
-    permissions = graphene.Field(PermissionType)
 
     def resolve_badgeclasses(self, info):
         return self.get_badgeclasses(info.context.user, ['may_read'])
@@ -101,13 +104,15 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
     def resolve_validation(self, info, **kwargs):
         return self.validate()
 
-class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
+
+class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
                      DjangoObjectType):
     class Meta:
         model = BadgeClass
         fields = ('name', 'entity_id', 'issuer', 'image', 'staff',
                   'description', 'criteria_url', 'criteria_text',
-                  'created_at', 'expiration_period', 'public_url')
+                  'created_at', 'expiration_period', 'public_url',
+                  'content_type_id')
 
     staff = graphene.List(BadgeClassStaffType)
     extensions = graphene.List(BadgeClassExtensionType)
@@ -116,7 +121,6 @@ class BadgeClassType(PermissionsResolverMixin, StaffResolverMixin, ImageResolver
     enrollments = graphene.List(StudentsEnrolledType)
     pending_enrollments = graphene.List(StudentsEnrolledType)
     badge_assertions = graphene.List(BadgeInstanceType)
-    permissions = graphene.Field(PermissionType)
     expiration_period = graphene.Int()
     public_url = graphene.String()
 

@@ -2,34 +2,32 @@ import graphene
 from graphene_django.types import DjangoObjectType
 from .models import Institution, Faculty
 from issuer.schema import IssuerType
-from mainsite.mixins import StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin
-from staff.schema import InstitutionStaffType, FacultyStaffType, PermissionType
+from mainsite.mixins import StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin, ContentTypeIdResolverMixin
+from staff.schema import InstitutionStaffType, FacultyStaffType
 
 
-class FacultyType(PermissionsResolverMixin, StaffResolverMixin, DjangoObjectType):
+class FacultyType(PermissionsResolverMixin, StaffResolverMixin, ContentTypeIdResolverMixin, DjangoObjectType):
 
     class Meta:
         model = Faculty
-        fields = ('name', 'entity_id', 'institution', 'created_at', 'description')
+        fields = ('name', 'entity_id', 'institution', 'created_at', 'description', 'content_type_id')
 
     issuers = graphene.List(IssuerType)
     staff = graphene.List(FacultyStaffType)
-    permissions = graphene.Field(PermissionType)
 
     def resolve_issuers(self, info):
         return self.get_issuers(info.context.user, ['may_read'])
 
 
-class InstitutionType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, DjangoObjectType):
+class InstitutionType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ContentTypeIdResolverMixin, DjangoObjectType):
 
     class Meta:
         model = Institution
-        fields = ('entity_id', 'name', 'staff', 'created_at', 'description', 'image', 'grading_table', 'brin')
+        fields = ('entity_id', 'name', 'staff', 'created_at', 'description', 'image', 'grading_table', 'brin', 'content_type_id')
 
     faculties = graphene.List(FacultyType)
     staff = graphene.List(InstitutionStaffType)
     permissioned_staff = graphene.List(InstitutionStaffType)
-    permissions = graphene.Field(PermissionType)
 
     def resolve_faculties(self, info):
         return self.get_faculties(info.context.user, ['may_read'])
