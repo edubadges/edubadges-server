@@ -47,7 +47,11 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
         return self.entity.get_permissions(user)
 
     def match_user(self, user):
-        if user.institution != self.entity.institution:
+        try:
+            entity_institution = self.entity.institution
+        except AttributeError:
+            entity_institution = self.entity
+        if user.institution != entity_institution:
             raise BadgrValidationError(fields='May not invite user from other institution')
         if user.is_teacher and not self.for_teacher:
             raise BadgrValidationError(fields='This invite is for a student')
