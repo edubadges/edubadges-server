@@ -129,3 +129,20 @@ class BadgeuserTest(BadgrTestCase):
         self.client.post('/v1/user/provision/accept/{}'.format(provisionment_entity_id),
                          data=json.dumps({'accept': True}), content_type='application/json')
         self.assertTrue(new_teacher.get_permissions(institution)['may_sign'])
+
+    def test_user_graphql(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_administrate_users=True)
+        institution = teacher1.institution
+        new_teacher = self.setup_teacher(institution=teacher1.institution)
+        invitation_json = {'content_type': ContentType.objects.get_for_model(institution).pk,
+                           'object_id': institution.entity_id,
+                           'email': new_teacher.email,
+                           'for_teacher': True,
+                           'data': {'may_sign': True}}
+        response = self.client.post('/v1/user/provision/create', json.dumps(invitation_json),
+                                    content_type='application/json')
+        self.authenticate(new_teacher)
+        query = 'query foo {currentUser {entityId userprovisionments {entityId contentType {id}}}}'
+        response = self.graphene_post(new_teacher, query)
+        self.assertTrue(bool(response['data']['currentUser']['userprovisionments'][0]['contentType']['id']))

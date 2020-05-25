@@ -27,6 +27,17 @@ def resolver_blocker_for_students(f):
     return wrapper
 
 
+def resolver_blocker_only_for_current_user(f):
+    """Decorator for BadgeUserType for fields allowed only for the current user"""
+    def wrapper(*args):
+        instance = args[0]
+        info = args[1]
+        if info.context.user is not instance:
+            raise GraphQLException('This call is only for the current user')
+        return f(*args)
+    return wrapper
+
+
 class PermissionsResolverMixin(object):
     """
     Schema mixin to resolve entity pemissions
