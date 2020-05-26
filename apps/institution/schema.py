@@ -2,11 +2,11 @@ import graphene
 from graphene_django.types import DjangoObjectType
 from .models import Institution, Faculty
 from issuer.schema import IssuerType
-from mainsite.mixins import StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin, ContentTypeIdResolverMixin
+from mainsite.graphql_utils import UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin
 from staff.schema import InstitutionStaffType, FacultyStaffType
 
 
-class FacultyType(PermissionsResolverMixin, StaffResolverMixin, ContentTypeIdResolverMixin, DjangoObjectType):
+class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, StaffResolverMixin, ContentTypeIdResolverMixin, DjangoObjectType):
 
     class Meta:
         model = Faculty
@@ -19,7 +19,7 @@ class FacultyType(PermissionsResolverMixin, StaffResolverMixin, ContentTypeIdRes
         return self.get_issuers(info.context.user, ['may_read'])
 
 
-class InstitutionType(PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ContentTypeIdResolverMixin, DjangoObjectType):
+class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ContentTypeIdResolverMixin, DjangoObjectType):
 
     class Meta:
         model = Institution

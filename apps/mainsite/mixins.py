@@ -1,59 +1,17 @@
 import io
-import graphene
 from xml.etree import cElementTree as ET
 from django.core.files.storage import default_storage
 from PIL import Image
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from mainsite.utils import verify_svg
-from mainsite.exceptions import GraphQLException
 from resizeimage.resizeimage import resize_contain
 
 
 def _decompression_bomb_check(image, max_pixels=Image.MAX_IMAGE_PIXELS):
     pixels = image.size[0] * image.size[1]
     return pixels > max_pixels
-
-
-def resolver_blocker_for_students(f):
-    """Decorator to block students from using graphql resolver functions"""
-    def wrapper(*args):
-        info = args[1]
-        if info.context.user.is_student:
-            raise GraphQLException('Student may not retrieve {} of {}'.format(info.field_name, info.parent_type))
-        return f(*args)
-    return wrapper
-
-
-def resolver_blocker_only_for_current_user(f):
-    """Decorator for BadgeUserType for fields allowed only for the current user"""
-    def wrapper(*args):
-        instance = args[0]
-        info = args[1]
-        if info.context.user is not instance:
-            raise GraphQLException('This call is only for the current user')
-        return f(*args)
-    return wrapper
-
-
-class PermissionsResolverMixin(object):
-    """
-    Schema mixin to resolve entity pemissions
-    """
-
-    @resolver_blocker_for_students
-    def resolve_permissions(self, info):
-        return self.get_permissions(info.context.user)
-
-
-class ImageResolverMixin(object):
-    """
-    Schema mixin to resolve image property
-    """
-    def resolve_image(self, info):
-        return self.image_url()
 
 
 class ImageUrlGetterMixin(object):
@@ -136,20 +94,3 @@ class ScrubUploadedSvgImage(object):
             tree.write(buf)
             self.image = InMemoryUploadedFile(buf, 'image', self.image.name, 'image/svg+xml', buf.len, 'utf8')
         return super(ScrubUploadedSvgImage, self).save(*args, **kwargs)
-
-
-class StaffResolverMixin(object):
-
-    @resolver_blocker_for_students
-    def resolve_staff(self, info):
-        if self.has_permissions(info.context.user, ['may_administrate_users']):
-            return self.staff_items
-        else:
-            return []
-
-
-class ContentTypeIdResolverMixin(object):
-    content_type_id = graphene.Field(graphene.Int)
-
-    def resolve_content_type_id(self, info):
-        return ContentType.objects.get_for_model(self).pk

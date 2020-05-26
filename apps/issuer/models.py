@@ -20,7 +20,7 @@ from django.core.files.storage import default_storage
 from django.db import models, transaction
 from django.urls import reverse
 from django.utils import timezone
-from entity.models import BaseVersionedEntity
+from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager
 from jsonfield import JSONField
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage, ImageUrlGetterMixin
@@ -126,7 +126,8 @@ class BaseOpenBadgeExtension(cachemodel.CacheModel):
         abstract = True
 
 
-class Issuer(PermissionedModelMixin,
+class Issuer(EntityUserProvisionmentMixin,
+             PermissionedModelMixin,
              ImageUrlGetterMixin,
              ResizeUploadedImage,
              ScrubUploadedSvgImage,
@@ -338,7 +339,8 @@ class Issuer(PermissionedModelMixin,
         return self.name
 
 
-class BadgeClass(PermissionedModelMixin,
+class BadgeClass(EntityUserProvisionmentMixin,
+                 PermissionedModelMixin,
                  ImageUrlGetterMixin,
                  ResizeUploadedImage,
                  ScrubUploadedSvgImage,

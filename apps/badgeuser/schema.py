@@ -1,22 +1,11 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 
-from badgeuser.models import BadgeUser, UserProvisionment
+from badgeuser.models import BadgeUser
 from institution.schema import InstitutionType
 from mainsite.exceptions import GraphQLException
-from mainsite.graphene_types import JSONType, ContentTypeType
-from mainsite.mixins import resolver_blocker_only_for_current_user
 from staff.schema import InstitutionStaffType, FacultyStaffType, IssuerStaffType, BadgeClassStaffType
-
-
-class UserProvisionmentType(DjangoObjectType):
-
-    class Meta:
-        model = UserProvisionment
-        fields = ('email', 'entity', 'entity_id', 'content_type', 'object_id', 'data', 'for_teacher', 'rejected')
-
-    content_type = graphene.Field(ContentTypeType)
-    data = graphene.Field(JSONType)
+from mainsite.graphql_utils import UserProvisionmentType, resolver_blocker_only_for_current_user
 
 
 class BadgeUserType(DjangoObjectType):

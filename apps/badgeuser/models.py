@@ -86,6 +86,10 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
         self.rejected = True
         self.save()
 
+    def save(self, *args, **kwargs):
+        self.entity.remove_cached_data(['cached_userprovisionments'])
+        return super(UserProvisionment, self).save(*args, **kwargs)
+
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
     objects = CachedEmailAddressManager()

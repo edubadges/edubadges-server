@@ -1,13 +1,13 @@
 import cachemodel
 from django.db import models
-from entity.models import BaseVersionedEntity
+from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from mainsite.models import BaseAuditedModel
 from mainsite.mixins import ImageUrlGetterMixin
 from staff.mixins import PermissionedModelMixin
 from staff.models import FacultyStaff, InstitutionStaff
 
 
-class Institution(PermissionedModelMixin, ImageUrlGetterMixin, BaseVersionedEntity, BaseAuditedModel):
+class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrlGetterMixin, BaseVersionedEntity, BaseAuditedModel):
     
     def __str__(self):
         return self.name
@@ -72,7 +72,8 @@ class Institution(PermissionedModelMixin, ImageUrlGetterMixin, BaseVersionedEnti
         except InstitutionStaff.DoesNotExist:
             return InstitutionStaff.objects.create(user=user, faculty=self, **permissions)
 
-class Faculty(PermissionedModelMixin, BaseVersionedEntity, BaseAuditedModel):
+
+class Faculty(EntityUserProvisionmentMixin, PermissionedModelMixin, BaseVersionedEntity, BaseAuditedModel):
 
     def __str__(self):
         return self.name

@@ -4,13 +4,11 @@ import graphene
 from graphene_django.types import DjangoObjectType
 
 from lti_edu.schema import StudentsEnrolledType
-from mainsite.mixins import StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin, ContentTypeIdResolverMixin,\
-    resolver_blocker_for_students
-from mainsite.graphene_types import JSONType
+from mainsite.graphql_utils import JSONType, UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, \
+    StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin, resolver_blocker_for_students
 from staff.schema import IssuerStaffType, BadgeClassStaffType, PermissionType
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
     BadgeClassAlignment, BadgeClassTag
-
 
 
 class ExtensionResolverMixin(object):
@@ -59,8 +57,8 @@ class BadgeClassTagType(DjangoObjectType):
         fields = ('name',)
 
 
-class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
-                 DjangoObjectType):
+class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin,
+                 ExtensionResolverMixin, UserProvisionmentResolverMixin, DjangoObjectType):
     class Meta:
         model = Issuer
         fields = ('name', 'entity_id', 'badgeclasses', 'faculty',
@@ -100,8 +98,8 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
         return self.validate()
 
 
-class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
-                     DjangoObjectType):
+class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffResolverMixin,
+                     UserProvisionmentResolverMixin, ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
     class Meta:
         model = BadgeClass
         fields = ('name', 'entity_id', 'issuer', 'image', 'staff',
