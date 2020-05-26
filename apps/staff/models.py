@@ -100,6 +100,9 @@ class FacultyStaff(PermissionedRelationshipBase):
     """
     faculty = models.ForeignKey('institution.Faculty', on_delete=models.CASCADE)
 
+    class Meta:
+        unique_together = ('faculty', 'user')
+
     @property
     def object(self):
         return self.faculty
@@ -131,6 +134,9 @@ class IssuerStaff(PermissionedRelationshipBase):
 class BadgeClassStaff(PermissionedRelationshipBase):
 
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('badgeclass', 'user')
 
     @property
     def object(self):
