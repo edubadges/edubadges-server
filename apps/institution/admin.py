@@ -4,12 +4,13 @@ from .models import Institution, Faculty
 
 
 class InstitutionAdmin(admin.ModelAdmin):
-    pass
+    readonly_fields = ('identifier', 'entity_id', 'created_by', 'updated_by')
 
 
 class FacultyAdmin(admin.ModelAdmin):
     
-    list_display = ('name', 'institution')
+    list_display = ('name',)
+    readonly_fields = ('entity_id', 'created_by', 'updated_by', 'institution')
 
 
 badgr_admin.register(Institution, InstitutionAdmin)

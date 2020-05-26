@@ -16,7 +16,6 @@ class FacultySlugRelatedField(BaseSlugRelatedField):
 
 
 class InstitutionSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=255)
     description = StripTagsCharField(max_length=16384, required=False)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
     image = ValidImageField(required=False)
@@ -36,7 +35,6 @@ class InstitutionSerializer(serializers.Serializer):
                 raise BadgrValidationError(
                     {"brin": [{"error_code": 802,
                                "error_message": "Cannot change brin, assertions have already been issued"}]})
-        instance.name = validated_data.get('name')
         instance.description = validated_data.get('description')
         if 'image' in validated_data:
             instance.image = validated_data.get('image')
