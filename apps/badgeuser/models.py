@@ -18,6 +18,7 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models, transaction
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from entity.models import BaseVersionedEntity
@@ -25,6 +26,7 @@ from issuer.models import BadgeInstance
 from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrApiException400, BadgrValidationError
 from mainsite.models import ApplicationInfo, EmailBlacklist, BaseAuditedModel
+from mainsite.utils import OriginSetting
 from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
 from rest_framework.authtoken.models import Token
@@ -67,12 +69,16 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
         except BadgeUser.DoesNotExist:
             pass
 
+    @property
+    def acceptance_link(self):
+        return OriginSetting.HTTP + reverse('user_provision_accept', kwargs={'entity_id': self.entity_id})
+
     def send_email(self):
         try:
             EmailBlacklist.objects.get(email=self.email)
         except EmailBlacklist.DoesNotExist:
-            subject = 'Invite'
-            message = '{}'.format(self.entity_id)
+            subject = 'You have been invited'
+            message = 'Please click on the following link to accept: {}'.format(self.acceptance_link)
             send_mail(subject, message, None, [self.email])
 
     def perform_provisioning(self):
