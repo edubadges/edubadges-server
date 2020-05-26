@@ -176,11 +176,9 @@ class UserCreateProvisionment(BaseEntityListView):
     Endpoint used for provisioning
     POST to create one for another
     """
-    model = UserProvisionment
-    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    permission_classes = (AuthenticatedWithVerifiedEmail,)  # permissioned in serializer
     v1_serializer_class = UserProvisionmentSerializer
     http_method_names = ['post']
-    permission_map = {'POST': 'may_administrate_users'}
 
 
 class UserProvisionmentDetail(BaseEntityDetailView):
