@@ -170,20 +170,6 @@ class AccessTokenDetail(BaseEntityDetailView):
         return super(AccessTokenDetail, self).delete(request, **kwargs)
 
 
-class UserProvisionmentList(BaseEntityListView):
-    """
-    Endpoint used for provisioning
-    GET to get provisions that have been matched to you as user
-    """
-    model = UserProvisionment
-    permission_classes = (AuthenticatedWithVerifiedEmail,)
-    v1_serializer_class = UserProvisionmentSerializer
-    http_method_names = ['get']
-
-    def get_objects(self, request, **kwargs):
-        return self.model.objects.filter(user=request.user)
-
-
 class UserCreateProvisionment(BaseEntityListView):
     """
     Endpoint used for provisioning
