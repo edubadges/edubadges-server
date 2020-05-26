@@ -15,7 +15,8 @@ from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_302_FOUND, HTTP_200_
 
 from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken, UserProvisionment
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
-from badgeuser.serializers import BadgeUserProfileSerializer, BadgeUserTokenSerializer, UserProvisionmentSerializer
+from badgeuser.serializers import BadgeUserProfileSerializer, BadgeUserTokenSerializer, UserProvisionmentSerializer, \
+    UserProvisionmentSerializerForEdit
 from badgeuser.tasks import process_email_verification
 from entity.api import BaseEntityDetailView, BaseEntityListView
 from issuer.permissions import BadgrOAuthTokenHasScope
@@ -182,16 +183,16 @@ class UserCreateProvisionment(BaseEntityListView):
     permission_map = {'POST': 'may_administrate_users'}
 
 
-# class UserEditProvisionment(BaseEntityDetailView):
-#     """
-#     Endpoint used for provisioning
-#     PUT to edit a provisionment for another'
-#     """
-#     model = UserProvisionment
-#     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
-#     v1_serializer_class = UserProvisionmentSerializer
-#     http_method_names = ['put']
-#     permission_map = {'PUT': 'may_administrate_users'}
+class UserEditProvisionment(BaseEntityDetailView):
+    """
+    Endpoint used for provisioning
+    PUT to edit a provisionment for another'
+    """
+    model = UserProvisionment
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
+    v1_serializer_class = UserProvisionmentSerializerForEdit
+    http_method_names = ['put']
+    permission_map = {'PUT': 'may_administrate_users'}
 
 
 class AcceptProvisionmentDetail(BaseEntityDetailView):

@@ -143,9 +143,20 @@ class UserProvisionmentSerializer(serializers.Serializer):
         prov.send_email()
         return prov
 
-    def update(self, instance, validated_data):
-        # check for perms here
-        raise NotImplementedError
-
     def to_representation(self, instance):
         return super(UserProvisionmentSerializer, self).to_representation(instance)
+
+
+class UserProvisionmentSerializerForEdit(serializers.Serializer):
+
+    data = serializers.JSONField()
+
+    def update(self, instance, validated_data):
+        if instance.rejected:
+            raise BadgrValidationError(fields='You cannot edit an invitation that has been rejected.')
+        if not instance.entity.has_permissions(self.context['request'].user, ['may_administrate_users']):
+            raise BadgrValidationError(fields='You do not have permission to invite user for this entity.')
+        [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
+        instance.save()
+        return instance
+
