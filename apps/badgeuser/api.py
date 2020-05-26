@@ -183,16 +183,17 @@ class UserCreateProvisionment(BaseEntityListView):
     permission_map = {'POST': 'may_administrate_users'}
 
 
-class UserEditProvisionment(BaseEntityDetailView):
+class UserProvisionmentDetail(BaseEntityDetailView):
     """
     Endpoint used for provisioning
     PUT to edit a provisionment for another'
+    DELETE to remove a provisionment for another'
     """
     model = UserProvisionment
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     v1_serializer_class = UserProvisionmentSerializerForEdit
-    http_method_names = ['put']
-    permission_map = {'PUT': 'may_administrate_users'}
+    http_method_names = ['put', 'delete']
+    permission_map = {'PUT': 'may_administrate_users', 'DELETE': 'may_administrate_users'}
 
 
 class AcceptProvisionmentDetail(BaseEntityDetailView):
@@ -204,7 +205,6 @@ class AcceptProvisionmentDetail(BaseEntityDetailView):
     permission_classes = (AuthenticatedWithVerifiedEmail, )
     v1_serializer_class = UserProvisionmentSerializer
     http_method_names = ['post']
-    # permission_map = {'GET': 'may_administrate_users'}
 
     def post(self, request, **kwargs):
         obj = self.get_object(request, **kwargs)

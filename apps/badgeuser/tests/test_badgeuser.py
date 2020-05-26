@@ -203,9 +203,9 @@ class BadgeuserTest(BadgrTestCase):
         response = self.graphene_post(teacher1, query)
         self.assertTrue(bool(response['data']['badgeClasses'][0]['userprovisionments'][0]['entityId']))
 
-
-    def test_edit_provisionment(self):
+    def test_edit_delete_provisionment(self):
         teacher1 = self.setup_teacher(authenticate=True)
+        unauthorized_teacher = self.setup_teacher()
         self.setup_staff_membership(teacher1, teacher1.institution, may_administrate_users=True)
         institution = teacher1.institution
         email = 'eenof@anderemail5.adres'
@@ -219,11 +219,24 @@ class BadgeuserTest(BadgrTestCase):
         new_teacher = self.setup_teacher(institution=teacher1.institution, email=email)
         new_teacher.match_provisionments()
         invitation_edit = {'data': {'may_sign': False}, 'email': 'kjajajaj'}
-        response = self.client.put('/v1/user/provision/edit/{}'.format(response.data['entity_id']), json.dumps(invitation_edit), content_type='application/json')
+        # test unauthorized
+        self.authenticate(unauthorized_teacher)
+        invitation_entity_id = response.data['entity_id']
+        failed_response = self.client.put('/v1/user/provision/edit/{}'.format(invitation_entity_id), json.dumps(invitation_edit), content_type='application/json')
+        self.assertEqual(failed_response.status_code, 404)
+        failed_response = self.client.delete('/v1/user/provision/edit/{}'.format(invitation_entity_id))
+        self.assertEqual(failed_response.status_code, 404)
+        self.authenticate(teacher1)
+        response = self.client.put('/v1/user/provision/edit/{}'.format(invitation_entity_id), json.dumps(invitation_edit), content_type='application/json')
         self.assertEqual(response.data['data']['may_sign'], False)
-        query = 'query foo {currentUser {entityId userprovisionments {data}}}'
+        query = 'query foo {currentUser {entityId userprovisionments {data, entityId}}}'
         response = self.graphene_post(new_teacher, query)
         self.assertEqual(response['data']['currentUser']['userprovisionments'][0]['data']['may_sign'], False)  # check instant cache update
+        userprovisionment_entity_id = response['data']['currentUser']['userprovisionments'][0]['entityId']
+        response = self.client.delete('/v1/user/provision/edit/{}'.format(userprovisionment_entity_id))
+        self.assertEqual(response.status_code, 204)
+        response = self.graphene_post(new_teacher, query)
+        self.assertEqual(response['data']['currentUser']['userprovisionments'], [])
 
-    # def test_multiple_overlapping_staff_invites_for_one_user_failure(self):
-    #     pass
+    def test_multiple_overlapping_staff_invites_for_one_user_failure(self):
+        pass
