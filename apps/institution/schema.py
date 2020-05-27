@@ -1,13 +1,15 @@
 import graphene
 from graphene_django.types import DjangoObjectType
-from .models import Institution, Faculty
+
 from issuer.schema import IssuerType
-from mainsite.graphql_utils import UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin
+from mainsite.graphql_utils import UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, StaffResolverMixin, \
+    ImageResolverMixin, PermissionsResolverMixin
 from staff.schema import InstitutionStaffType, FacultyStaffType
+from .models import Institution, Faculty
 
 
-class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, StaffResolverMixin, ContentTypeIdResolverMixin, DjangoObjectType):
-
+class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, StaffResolverMixin,
+                  ContentTypeIdResolverMixin, DjangoObjectType):
     class Meta:
         model = Faculty
         fields = ('name', 'entity_id', 'institution', 'created_at', 'description', 'content_type_id')
@@ -19,11 +21,12 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
         return self.get_issuers(info.context.user, ['may_read'])
 
 
-class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin, ContentTypeIdResolverMixin, DjangoObjectType):
-
+class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin,
+                      ContentTypeIdResolverMixin, DjangoObjectType):
     class Meta:
         model = Institution
-        fields = ('entity_id', 'name', 'staff', 'created_at', 'description', 'image', 'grading_table', 'brin', 'content_type_id')
+        fields = (
+        'entity_id', 'name', 'staff', 'created_at', 'description', 'image', 'grading_table', 'brin', 'content_type_id')
 
     faculties = graphene.List(FacultyType)
     staff = graphene.List(InstitutionStaffType)
@@ -57,4 +60,3 @@ class Query(object):
             faculty = Faculty.objects.get(entity_id=id)
             if faculty.has_permissions(info.context.user, ['may_read']):
                 return faculty
-
