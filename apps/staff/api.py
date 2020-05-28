@@ -62,7 +62,6 @@ class InstitutionStaffDetail(StaffDetailViewBase):
 
     http_method_names = ['put']  # may not delete institutionstaff membership
     model = InstitutionStaff  # used by get_object()
-    serializer_class = InstitutionStaffSerializer
 
 
 class FacultyStaffList(StaffListViewBase):
