@@ -6,6 +6,7 @@ from graphene_django.types import DjangoObjectType
 
 from badgeuser.models import UserProvisionment
 from mainsite.exceptions import GraphQLException
+from staff.schema import PermissionType
 
 
 def resolver_blocker_for_students(f):
@@ -71,6 +72,8 @@ class PermissionsResolverMixin(object):
     """
     Schema mixin to resolve entity pemissions
     """
+
+    permissions = graphene.Field(PermissionType)
 
     @resolver_blocker_for_students
     def resolve_permissions(self, info):
