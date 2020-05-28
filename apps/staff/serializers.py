@@ -16,7 +16,7 @@ class BaseStaffSerializer(serializers.Serializer):
     may_administrate_users = serializers.CharField(allow_blank=False, required=True)
 
 
-class StaffUpdateSerializerMixin(object):
+class StaffUpdateSerializer(BaseStaffSerializer):
 
     def update(self, instance, validated_data):
         original_perms = instance.permissions
@@ -44,28 +44,28 @@ class BaseStaffCreateSerializer(BaseStaffSerializer):
             raise serializers.ValidationError("You may not administrate this user.")
 
 
-class InstitutionStaffSerializer(StaffUpdateSerializerMixin, BaseStaffCreateSerializer):
+class InstitutionStaffSerializer(BaseStaffCreateSerializer):
     institution = InstitutionSlugRelatedField(slug_field='entity_id', required=True)
 
     def create(self, validated_data):
         return self._base_create(validated_data, 'institution', InstitutionStaff)
 
 
-class FacultyStaffSerializer(StaffUpdateSerializerMixin, BaseStaffCreateSerializer):
+class FacultyStaffSerializer(BaseStaffCreateSerializer):
     faculty = FacultySlugRelatedField(slug_field='entity_id', required=True)
 
     def create(self, validated_data):
         return self._base_create(validated_data, 'faculty', FacultyStaff)
 
 
-class IssuerStaffSerializer(StaffUpdateSerializerMixin, BaseStaffCreateSerializer):
+class IssuerStaffSerializer(BaseStaffCreateSerializer):
     issuer = IssuerSlugRelatedField(slug_field='entity_id', required=True)
 
     def create(self, validated_data):
         return self._base_create(validated_data, 'issuer', IssuerStaff)
 
 
-class BadgeClassStaffSerializer(StaffUpdateSerializerMixin, BaseStaffCreateSerializer):
+class BadgeClassStaffSerializer(BaseStaffCreateSerializer):
     badgeclass = BadgeClassSlugRelatedField(slug_field='entity_id', required=True)
 
     def create(self, validated_data):
