@@ -101,7 +101,7 @@ institution_admins = [
         "first_name": "professor1",
         "last_name": "university1",
         "institution_name": "university1",
-        "uid": "45dde4bb279010c0c2826794b1b248770e962ff3",
+        "uid": "a20ccd72975606f20a05772182482b0eeb88dc09",
     },
     {
         "username": "p2u1",
