@@ -6,14 +6,12 @@ from graphene_django.types import DjangoObjectType
 from lti_edu.schema import StudentsEnrolledType
 from mainsite.graphql_utils import JSONType, UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, \
     StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin, resolver_blocker_for_students
-from staff.schema import IssuerStaffType, BadgeClassStaffType, PermissionType
+from staff.schema import IssuerStaffType, BadgeClassStaffType
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
     BadgeClassAlignment, BadgeClassTag
 
 
 class ExtensionResolverMixin(object):
-
-    permissions = graphene.Field(PermissionType)
 
     def resolve_extensions(self, info):
         return self.cached_extensions()
