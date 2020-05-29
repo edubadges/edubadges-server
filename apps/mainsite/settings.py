@@ -328,7 +328,8 @@ CACHES = {
         'KEY_PREFIX': 'badgr_',
         'KEY_PREFIX': 'badgr_',
         'VERSION': 10,
-        'TIMEOUT': None,
+#        'TIMEOUT': None,
+        'TIMEOUT': 300,
     }
 }
 
