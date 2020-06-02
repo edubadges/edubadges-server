@@ -128,6 +128,7 @@ class UserProvisionmentSerializer(serializers.Serializer):
     object_id = serializers.CharField(required=True)
     data = serializers.JSONField()
     for_teacher = serializers.BooleanField(required=True)
+    type = serializers.CharField(required=True)
 
     def validate(self, attrs):
         validated_data = super(UserProvisionmentSerializer, self).validate(attrs)

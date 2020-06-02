@@ -13,6 +13,8 @@ from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
+
+from badgeuser.models import UserProvisionment
 from ims.models import LTITenant
 from institution.models import Institution
 from lti_edu.models import LtiBadgeUserTennant, UserCurrentContextId
@@ -43,21 +45,20 @@ def login(request):
 
     # state contains the data required for the redirect after the login via SURFconext,
     # it contains the user token, type of process and which badge_app
-    
-    referer = request.META['HTTP_REFERER'].split('/')[3]
 
+    referer = request.META['HTTP_REFERER'].split('/')[3]
     badgr_app_pk = request.session.get('badgr_app_pk', None)
     try:
         badgr_app_pk = int(badgr_app_pk)
     except:
         badgr_app_pk = settings.BADGR_APP_ID
     state = json.dumps([request.GET.get('process', 'login'),
-                          get_session_authcode(request),
-                          badgr_app_pk,
-                          lti_context_id,
-                          lti_user_id,
-                          lti_roles,
-                          referer])
+                        get_session_authcode(request),
+                        badgr_app_pk,
+                        lti_context_id,
+                        lti_user_id,
+                        lti_roles,
+                        referer])
 
     data = {'client_id': _current_app.client_id,
             'redirect_uri': '%s/account/openid/login/callback/' % settings.HTTP_ORIGIN,
@@ -66,8 +67,8 @@ def login(request):
             'scope': 'openid',
             'state': state
             }
-            
-    redirect_url = settings.SURFCONEXT_DOMAIN_URL + '/authorize?%s' %  (urllib.parse.urlencode(data))
+
+    redirect_url = settings.SURFCONEXT_DOMAIN_URL + '/authorize?%s' % (urllib.parse.urlencode(data))
 
     return HttpResponseRedirect(redirect_url)
 
@@ -77,9 +78,10 @@ def after_terms_agreement(request, **kwargs):
     if not access_token:
         error = 'Sorry, we could not find you SURFconext credentials.'
         return render_authentication_error(request, SurfConextProvider.id, error)
-    
+
     headers = {'Authorization': 'Bearer %s' % access_token}
-    badgr_app_pk, login_type, process, auth_token, lti_context_id,lti_user_id,lti_roles, referer = json.loads(kwargs['state'])
+    badgr_app_pk, login_type, process, auth_token, lti_context_id, lti_user_id, lti_roles, referer = json.loads(
+        kwargs['state'])
     try:
         badgr_app_pk = int(badgr_app_pk)
     except:
@@ -103,7 +105,7 @@ def after_terms_agreement(request, **kwargs):
     if "schac_home_organization" not in extra_data:
         error = 'Sorry, your account has no home organization attached from SURFconext, try another login method.'
         return render_authentication_error(request, SurfConextProvider.id, error)
-  
+
     if 'family_name' in extra_data:
         extra_data['family_name'] = ''
     if 'given_name' in extra_data:
@@ -112,29 +114,40 @@ def after_terms_agreement(request, **kwargs):
     # 3. Complete social login and return to frontend
     provider = SurfConextProvider(request)
     login = provider.sociallogin_from_response(request, extra_data)
-  
+
     # Reset the badgr app id after login as django overturns it
 
     # connect process in which OpenID connects with, either login or connect, if you connect then login user with token
     login.state = {'process': process}
-  
+
     # login for connect because socialLogin can only connect to request.user
     if process == 'connect' and request.user.is_anonymous and auth_token:
         request.user = get_verified_user(auth_token=auth_token)
-      
+
     ret = complete_social_login(request, login)
-    if not request.user.is_anonymous: # the social login succeeded
+    if not request.user.is_anonymous:  # the social login succeeded
         institution_identifier = extra_data['schac_home_organization']
         institution, created = Institution.objects.get_or_create(identifier=institution_identifier,
                                                                  name=institution_identifier)
 
         try:
             InstitutionStaff.objects.get(user=request.user, institution=institution)
-        except InstitutionStaff.DoesNotExist:  #first login ever
+            provisions = request.user.match_provisionments()
+            for provision in provisions:
+                provision.perform_provisioning()
+        except InstitutionStaff.DoesNotExist:  # first login ever
             request.user.institution = institution
             request.user.is_teacher = True
-            request.user.match_provisionments()
-            request.user.save()
+            try:
+                provisionment = request.user.match_provisionments().get()
+                request.user.save()
+                provisionment.match_user(request.user)
+                provisionment.perform_provisioning()
+            except UserProvisionment.DoesNotExist:
+                request.user.save()
+                # request.user.delete()
+                # error = 'Sorry, you can not register without an invite. Please contact your administrator to receive an invitation or check that it was sent to the right email address.'
+                # return render_authentication_error(request, SurfConextProvider.id, error)
 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
 
@@ -145,10 +158,10 @@ def after_terms_agreement(request, **kwargs):
         if not request.user.is_anonymous:
             tenant = LTITenant.objects.get(client_key=lti_data['lti_tenant'])
             badgeuser_tennant, _ = LtiBadgeUserTennant.objects.get_or_create(lti_user_id=lti_data['lti_user_id'],
-                                                                            badge_user=request.user,
-                                                                            lti_tennant=tenant,
-                                                                            staff=True)
-            user_current_context_id,_ = UserCurrentContextId.objects.get_or_create(badge_user=request.user)
+                                                                             badge_user=request.user,
+                                                                             lti_tennant=tenant,
+                                                                             staff=True)
+            user_current_context_id, _ = UserCurrentContextId.objects.get_or_create(badge_user=request.user)
             user_current_context_id.context_id = lti_data['lti_context_id']
             user_current_context_id.save()
 
@@ -161,6 +174,7 @@ def after_terms_agreement(request, **kwargs):
         return HttpResponseRedirect(reverse('admin:index'))
     else:
         return ret
+
 
 @csrf_exempt
 def callback(request):
@@ -187,7 +201,7 @@ def callback(request):
     if request.user.is_authenticated:
         get_account_adapter(request).logout(request)  # logging in while being authenticated breaks the login procedure
 
-    process, auth_token, badgr_app_pk,lti_data,lti_user_id,lti_roles, referer = json.loads(request.GET.get('state'))
+    process, auth_token, badgr_app_pk, lti_data, lti_user_id, lti_roles, referer = json.loads(request.GET.get('state'))
 
     if badgr_app_pk is None:
         print('none here')
@@ -225,7 +239,7 @@ def callback(request):
         return render_authentication_error(request, SurfConextProvider.id, error=error)
 
     # 2. Retrieve user information with the access token
-    headers = {"Authorization": f"Bearer {data['access_token']}" }
+    headers = {"Authorization": f"Bearer {data['access_token']}"}
     url = settings.SURFCONEXT_DOMAIN_URL + '/userinfo'
 
     response = requests.get(url, headers=headers)
@@ -237,9 +251,11 @@ def callback(request):
     extra_data = response.json()
 
     keyword_arguments = {'access_token': access_token,
-                         'state': json.dumps([badgr_app_pk, 'surf_conext' ,process, auth_token,lti_data, lti_user_id,lti_roles,referer]),
+                         'state': json.dumps(
+                             [badgr_app_pk, 'surf_conext', process, auth_token, lti_data, lti_user_id, lti_roles,
+                              referer]),
                          'after_terms_agreement_url_name': 'surf_conext_terms_accepted_callback'}
-     
+
     if not get_social_account(extra_data['sub']):
         return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))
     social_account = get_social_account(extra_data['sub'])

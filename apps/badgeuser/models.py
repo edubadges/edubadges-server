@@ -18,15 +18,13 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models, transaction
-from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from entity.models import BaseVersionedEntity
 from issuer.models import BadgeInstance
 from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrApiException400, BadgrValidationError
-from mainsite.models import ApplicationInfo, EmailBlacklist, BaseAuditedModel
-from mainsite.utils import OriginSetting
+from mainsite.models import ApplicationInfo, EmailBlacklist, BaseAuditedModel, BadgrApp
 from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
 from rest_framework.authtoken.models import Token
@@ -44,6 +42,18 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
     data = JSONField(null=True)
     for_teacher = models.BooleanField()
     rejected = models.BooleanField(default=False)
+    TYPE_INVITATION = 'Invitation'  # invitation to the application
+    TYPE_CHOICES = (
+        (TYPE_INVITATION, 'Invitation'),
+    )
+    type = models.CharField(max_length=254, choices=TYPE_CHOICES)
+
+    def validate_unique(self, exclude=None):
+        if self.type == self.TYPE_INVITATION and UserProvisionment.objects.filter(type=self.type,
+                                                                                  for_teacher=self.for_teacher,
+                                                                                  email=self.email).exclude(pk=self.pk).exists():
+            raise ValidationError('There may be only one invite per email address.')
+        return super(UserProvisionment, self).validate_unique(exclude=exclude)
 
     def get_permissions(self, user):
         return self.entity.get_permissions(user)
@@ -69,21 +79,25 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
         except BadgeUser.DoesNotExist:
             pass
 
-    @property
-    def acceptance_link(self):
-        return OriginSetting.HTTP + reverse('user_provision_accept', kwargs={'entity_id': self.entity_id})
+    # @property
+    # def acceptance_link(self):
+    #     return OriginSetting.HTTP + reverse('user_provision_accept', kwargs={'entity_id': self.entity_id})
 
     def send_email(self):
         try:
             EmailBlacklist.objects.get(email=self.email)
         except EmailBlacklist.DoesNotExist:
             subject = 'You have been invited'
-            message = 'Please click on the following link to accept: {}'.format(self.acceptance_link)
+            # message = 'Please click on the following link to accept: {}'.format(self.acceptance_link)
+            login_link = BadgrApp.objects.get(pk=1).ui_login_redirect
+            message = "You have been invited to the EduBadges Issuer Platform. Please signup to accept. \n {}".format(login_link)
             send_mail(subject, message, None, [self.email])
 
     def perform_provisioning(self):
         permissions = self.data
-        return self.entity.create_staff_membership(self.user, permissions)
+        prov = self.entity.create_staff_membership(self.user, permissions)
+        self.delete()
+        return prov
 
     def accept(self):
         return self.perform_provisioning()
@@ -93,6 +107,7 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
         self.save()
 
     def save(self, *args, **kwargs):
+        self.validate_unique()
         self.entity.remove_cached_data(['cached_userprovisionments'])
         return super(UserProvisionment, self).save(*args, **kwargs)
 
@@ -494,6 +509,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         provisions = UserProvisionment.objects.filter(email=self.email, for_teacher=self.is_teacher)
         for provision in provisions:
             provision.match_user(self)
+        return provisions
 
     def email_user(self, subject, message, from_email=None, attachments=None, **kwargs):
         """

@@ -208,10 +208,8 @@ class AcceptProvisionmentDetail(BaseEntityDetailView):
         obj = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, obj):  # checks if obj is owned by request.user
             return Response(status=HTTP_404_NOT_FOUND)
-
         if request.data.get('accept', None):
             obj.accept()
-            obj.delete()
         else:
             obj.reject()
         serializer_class = self.get_serializer_class()

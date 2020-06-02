@@ -1,6 +1,7 @@
 import json
 from django.contrib.contenttypes.models import ContentType
 from mainsite.tests import BadgrTestCase
+from badgeuser.models import UserProvisionment
 
 
 class BadgeuserTest(BadgrTestCase):
@@ -17,7 +18,8 @@ class BadgeuserTest(BadgrTestCase):
                            'object_id': faculty.entity_id,
                            'email': teacher4.email,
                            'for_teacher': True,
-                           'data': {'may_administrate_users': True}}
+                           'data': {'may_administrate_users': True},
+                           'type': UserProvisionment.TYPE_INVITATION}
         response = self.client.post('/v1/user/provision/create', json.dumps(invitation_json), content_type='application/json')
         self.assertTrue(response.data['fields'].__str__() == 'May not invite user from other institution')
 
@@ -46,7 +48,8 @@ class BadgeuserTest(BadgrTestCase):
                            'object_id': faculty.entity_id,
                            'email': email,
                            'for_teacher': True,
-                           'data': {'may_administrate_users': True}}
+                           'data': {'may_administrate_users': True},
+                           'type': UserProvisionment.TYPE_INVITATION}
         response = self.client.post('/v1/user/provision/create', json.dumps(invitation_json), content_type='application/json')
         self.assertTrue(not response.data['user'])
 
@@ -61,7 +64,7 @@ class BadgeuserTest(BadgrTestCase):
                          data=json.dumps({'accept': True}), content_type='application/json')
         self.assertTrue(new_teacher.get_permissions(faculty)['may_administrate_users'])
 
-    def test_provision_issuer_badgeclass_entities(self):
+    def test_provision_issuer(self):
         # test for issuer & badgeclass
         teacher1 = self.setup_teacher(authenticate=True)
         new_teacher = self.setup_teacher(institution=teacher1.institution)
@@ -74,12 +77,8 @@ class BadgeuserTest(BadgrTestCase):
                            'object_id': issuer.entity_id,
                            'email': new_teacher.email,
                            'for_teacher': True,
-                           'data': {'may_sign': True}}
-        response = self.client.post('/v1/user/provision/create', json.dumps(invitation_json),
-                                    content_type='application/json')
-        invitation_json['object_id'] = badgeclass.entity_id
-        invitation_json['content_type'] = ContentType.objects.get_for_model(badgeclass).pk
-        invitation_json['data'] = {'may_update': True}
+                           'data': {'may_sign': True},
+                           'type': UserProvisionment.TYPE_INVITATION}
         response = self.client.post('/v1/user/provision/create', json.dumps(invitation_json),
                                     content_type='application/json')
         query = 'query foo {currentUser {entityId userprovisionments {entityId}}}'
@@ -89,8 +88,34 @@ class BadgeuserTest(BadgrTestCase):
         for provision in userprovisionments:
             self.client.post('/v1/user/provision/accept/{}'.format(provision['entityId']),
                              data=json.dumps({'accept': True}), content_type='application/json')
-        self.assertTrue(new_teacher.get_permissions(badgeclass)['may_sign']
-                        and new_teacher.get_permissions(badgeclass)['may_update'])
+        self.assertTrue(new_teacher.get_permissions(badgeclass)['may_sign'])
+
+    def test_provision_badgeclass(self):
+        # test for issuer & badgeclass
+        teacher1 = self.setup_teacher(authenticate=True)
+        new_teacher = self.setup_teacher(institution=teacher1.institution)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_administrate_users=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        self.authenticate(teacher1)
+        issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        invitation_json = {'content_type': ContentType.objects.get_for_model(badgeclass).pk,
+                           'object_id': badgeclass.entity_id,
+                           'email': new_teacher.email,
+                           'for_teacher': True,
+                           'data': {'may_sign': True},
+                           'type': UserProvisionment.TYPE_INVITATION}
+        response = self.client.post('/v1/user/provision/create', json.dumps(invitation_json),
+                                    content_type='application/json')
+        query = 'query foo {currentUser {entityId userprovisionments {entityId}}}'
+        response_userprovisionments = self.graphene_post(new_teacher, query)
+        userprovisionments = response_userprovisionments['data']['currentUser']['userprovisionments']
+        self.authenticate(new_teacher)
+        for provision in userprovisionments:
+            self.client.post('/v1/user/provision/accept/{}'.format(provision['entityId']),
+                             data=json.dumps({'accept': True}), content_type='application/json')
+        self.assertTrue(new_teacher.get_permissions(badgeclass)['may_sign'])
+
 
     def test_provision_non_exitisting_user_for_institution_staff(self):
         teacher1 = self.setup_teacher(authenticate=True)
@@ -102,7 +127,8 @@ class BadgeuserTest(BadgrTestCase):
                            'object_id': institution.entity_id,
                            'email': email,
                            'for_teacher': True,
-                           'data': {'may_sign': True}}
+                           'data': {'may_sign': True},
+                           'type': UserProvisionment.TYPE_INVITATION}
         response = self.client.post('/v1/user/provision/create', json.dumps(invitation_json),
                                     content_type='application/json')
         self.assertTrue(not response.data['user'])
@@ -125,7 +151,8 @@ class BadgeuserTest(BadgrTestCase):
                            'object_id': institution.entity_id,
                            'email': new_teacher.email,
                            'for_teacher': True,
-                           'data': {'may_sign': True}}
+                           'data': {'may_sign': True},
+                           'type': UserProvisionment.TYPE_INVITATION}
         response = self.client.post('/v1/user/provision/create', json.dumps(invitation_json),
                                     content_type='application/json')
         query = 'query foo {currentUser {entityId userprovisionments {entityId}}}'
@@ -145,7 +172,8 @@ class BadgeuserTest(BadgrTestCase):
                            'object_id': institution.entity_id,
                            'email': new_teacher.email,
                            'for_teacher': True,
-                           'data': {'may_sign': True}}
+                           'data': {'may_sign': True},
+                           'type': UserProvisionment.TYPE_INVITATION}
         response = self.client.post('/v1/user/provision/create', json.dumps(invitation_json),
                                     content_type='application/json')
         self.authenticate(new_teacher)
@@ -169,7 +197,8 @@ class BadgeuserTest(BadgrTestCase):
                            'object_id': institution.entity_id,
                            'email': new_teacher.email,
                            'for_teacher': True,
-                           'data': {'may_sign': True}}
+                           'data': {'may_sign': True},
+                           'type': UserProvisionment.TYPE_INVITATION}
         self.client.post('/v1/user/provision/create', json.dumps(invitation_json), content_type='application/json')
         new_teacher2 = self.setup_teacher(institution=teacher1.institution)
         invitation_json['content_type'] = ContentType.objects.get_for_model(faculty).pk
@@ -213,7 +242,9 @@ class BadgeuserTest(BadgrTestCase):
                            'object_id': institution.entity_id,
                            'email': email,
                            'for_teacher': True,
-                           'data': {'may_sign': True}}
+                           'data': {'may_sign': True},
+                           'type': UserProvisionment.TYPE_INVITATION
+                           }
         response = self.client.post('/v1/user/provision/create', json.dumps(invitation_json),
                                     content_type='application/json')
         new_teacher = self.setup_teacher(institution=teacher1.institution, email=email)
