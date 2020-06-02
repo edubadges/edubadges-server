@@ -329,7 +329,7 @@ CACHES = {
         'KEY_PREFIX': 'badgr_',
         'VERSION': 10,
 #        'TIMEOUT': None,
-        'TIMEOUT': 300,
+        'TIMEOUT': 0,
     }
 }
 
