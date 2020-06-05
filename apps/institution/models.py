@@ -15,7 +15,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
     identifier = models.CharField(max_length=255, null=True)
     name = models.CharField(max_length=255, unique=True)
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.InstitutionStaff")
-    description = models.TextField(blank=True, null=True, default=None)
+    description = models.TextField(max_length=512, blank=True, null=True, default=None)
     image = models.FileField(upload_to='uploads/institution', blank=True, null=True)
     grading_table = models.CharField(max_length=254, blank=True, null=True, default=None)
     brin = models.CharField(max_length=254, blank=True, null=True, default=None)
