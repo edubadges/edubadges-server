@@ -29,7 +29,7 @@ class StaffDetailViewBase(BaseEntityDetailView):
     DELETE to delete staffmembership
     """
     http_method_names = ['put', 'delete']
-    permission_map = {'PUT': 'may_administrate_users'}
+    permission_map = {'PUT': 'may_administrate_users', 'DELETE': 'may_administrate_users'}
     permission_classes = (AuthenticatedWithVerifiedEmail, StaffMembershipWithinScope)
     serializer_class = StaffUpdateSerializer
 
