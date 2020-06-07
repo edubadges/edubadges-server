@@ -58,9 +58,8 @@ class InstitutionStaffList(StaffListViewBase):
 class InstitutionStaffDetail(StaffDetailViewBase):
     """
     PUT to edit institution staff membership
+    DELETE to delete institution staff membership
     """
-
-    http_method_names = ['put']  # may not delete institutionstaff membership
     model = InstitutionStaff  # used by get_object()
 
 

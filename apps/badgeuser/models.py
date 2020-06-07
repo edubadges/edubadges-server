@@ -414,6 +414,8 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
 
     objects = BadgeUserManager()
 
+    institution = models.ForeignKey('institution.Institution', on_delete=models.CASCADE, null=True)
+
     class Meta:
         verbose_name = _('badge user')
         verbose_name_plural = _('badge users')
@@ -427,22 +429,6 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
 
     def __unicode__(self):
         return "{} <{}>".format(self.get_full_name(), self.email)
-
-    @property
-    def institution(self):
-        return self.institution_set.get()
-
-    @institution.setter
-    def institution(self, value):
-        """
-        :param value: Institution
-        :return: None
-        """
-        try:
-            InstitutionStaff.objects.get(user=self, institution=value)
-            raise ValueError('User already has an institution staff membership. Cannot have two.')
-        except InstitutionStaff.DoesNotExist:
-            InstitutionStaff.objects.create(user=self, institution=value)
 
     @property
     def email_items(self):

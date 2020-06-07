@@ -162,15 +162,16 @@ class SetupHelper(object):
                                may_update=False, may_delete=False, may_award=False,
                                may_sign=False, may_administrate_users=False):
         if object.__class__.__name__ == 'Institution':
-            staff = InstitutionStaff.objects.get(user=user, institution=object)
+            staff = InstitutionStaff(institution=object)
         elif object.__class__.__name__ == 'Faculty':
-            staff, created = FacultyStaff.objects.get_or_create(user=user, faculty=object)
+            staff = FacultyStaff(faculty=object)
         elif object.__class__.__name__ == 'Issuer':
-            staff, created = IssuerStaff.objects.get_or_create(user=user, issuer=object)
+            staff = IssuerStaff(issuer=object)
         elif object.__class__.__name__ == 'BadgeClass':
-            staff, created = BadgeClassStaff.objects.get_or_create(user=user, badgeclass = object)
+            staff = BadgeClassStaff(badgeclass = object)
         else:
             raise ValueError('Object class not valid choice')
+        staff.user = user
         staff.may_create = may_create
         staff.may_update = may_update
         staff.may_read = may_read

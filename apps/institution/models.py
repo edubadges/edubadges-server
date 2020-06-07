@@ -14,7 +14,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
 
     identifier = models.CharField(max_length=255, null=True)
     name = models.CharField(max_length=255, unique=True)
-    staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.InstitutionStaff")
+    staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.InstitutionStaff", related_name='+')
     description = models.TextField(blank=True, null=True, default=None)
     image = models.FileField(upload_to='uploads/institution', blank=True, null=True)
     grading_table = models.CharField(max_length=254, blank=True, null=True, default=None)
@@ -38,11 +38,6 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
     def cached_staff(self):
         """returns all staff members"""
         return list(InstitutionStaff.objects.filter(institution=self))
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_permissioned_staff(self):
-        """returns only staff members with at least one permission"""
-        return [staff for staff in self.cached_staff() if staff.has_a_permission]
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_faculties(self):
@@ -70,7 +65,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
                 setattr(staff, key, value)
             staff.save()
         except InstitutionStaff.DoesNotExist:
-            return InstitutionStaff.objects.create(user=user, faculty=self, **permissions)
+            return InstitutionStaff.objects.create(user=user, institution=self, **permissions)
 
 
 class Faculty(EntityUserProvisionmentMixin, PermissionedModelMixin, BaseVersionedEntity, BaseAuditedModel):
