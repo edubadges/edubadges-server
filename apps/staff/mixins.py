@@ -66,8 +66,11 @@ class PermissionedModelMixin(object):
             for key in local_perms:
                 combined_perms[key] = local_perms[key] if local_perms[key] > parent_perms[key] else parent_perms[key]
             return combined_perms
-        except AttributeError:  # recursive base case
-            return self._get_local_permissions(user)
+        except AttributeError:  # recursive base case (reached root of permission tree, i.e. the Institution)
+            perms = self._get_local_permissions(user)
+            if user.is_teacher and self == user.institution:  # if at the recursive base case the institution is the same as user's institution
+                perms['may_read'] = True  # then add may_read, everyone in institution is a reader
+            return perms
 
     def has_permissions(self, user, permissions):
         """

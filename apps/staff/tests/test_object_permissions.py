@@ -217,3 +217,16 @@ class ObjectPermissionTests(BadgrTestCase):
                                       content_type='application/json')
         self.assertTrue(response.status_code == 404)
 
+    def test_all_teachers_in_institution_may_read(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        outside_teacher = self.setup_teacher()        
+        student = self.setup_student()
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        response = self.client.get('/instituion/staff')
+        query = 'query foo {faculty(id: "'+faculty.entity_id+'") {entityId}}'
+        response_ok = self.graphene_post(teacher1, query)
+        self.assertEqual(response_ok['data']['faculty']['entityId'], faculty.entity_id)
+        response_empty = self.graphene_post(outside_teacher, query)
+        self.assertEqual(response_empty['data']['faculty'], None)
+        response_empty = self.graphene_post(student, query)
+        self.assertEqual(response_empty['data']['faculty'], None)
