@@ -89,10 +89,12 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
             EmailBlacklist.objects.get(email=self.email)
         except EmailBlacklist.DoesNotExist:
             subject = 'You have been invited'
-            # message = 'Please click on the following link to accept: {}'.format(self.acceptance_link)
             login_link = BadgrApp.objects.get(pk=1).ui_login_redirect
-            message = "You have been invited to the EduBadges Issuer Platform. Please signup to accept. \n {}".format(login_link)
-            send_mail(subject, message, None, [self.email])
+            if self.user:
+                message = "You have been invited for a staff membership. Please login to accept. \n {}".format(login_link)
+            if not self.user:
+                message = "You have been invited to the EduBadges Issuer Platform. Please signup to accept. \n {}".format(login_link)
+                send_mail(subject, message, None, [self.email])
 
     def perform_provisioning(self):
         permissions = self.data
