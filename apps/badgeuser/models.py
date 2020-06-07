@@ -1,5 +1,3 @@
-
-
 import base64
 import datetime
 import re
@@ -8,7 +6,6 @@ from jsonfield import JSONField
 
 import cachemodel
 from allauth.account.models import EmailAddress, EmailConfirmation
-from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager, EmailAddressCacheModelManager
 from basic_models.models import IsActive
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -20,14 +17,17 @@ from django.core.mail import send_mail
 from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from oauth2_provider.models import AccessToken, Application
+from oauthlib.common import generate_token
+from rest_framework import serializers
+from rest_framework.authtoken.models import Token
+
+from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager, EmailAddressCacheModelManager
 from entity.models import BaseVersionedEntity
 from issuer.models import BadgeInstance
 from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrApiException400, BadgrValidationError
 from mainsite.models import ApplicationInfo, EmailBlacklist, BaseAuditedModel, BadgrApp
-from oauth2_provider.models import AccessToken, Application
-from oauthlib.common import generate_token
-from rest_framework.authtoken.models import Token
 from signing.models import AssertionTimeStamp
 from badgeuser.utils import generate_badgr_username
 from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
@@ -50,9 +50,10 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
 
     def validate_unique(self, exclude=None):
         if self.type == self.TYPE_INVITATION and UserProvisionment.objects.filter(type=self.type,
+                                                                                  rejected=False,
                                                                                   for_teacher=self.for_teacher,
                                                                                   email=self.email).exclude(pk=self.pk).exists():
-            raise ValidationError('There may be only one invite per email address.')
+            raise serializers.ValidationError('There may be only one invite per email address.')
         return super(UserProvisionment, self).validate_unique(exclude=exclude)
 
     def get_permissions(self, user):

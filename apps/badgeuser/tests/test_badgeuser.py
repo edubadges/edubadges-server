@@ -270,4 +270,23 @@ class BadgeuserTest(BadgrTestCase):
         self.assertEqual(response['data']['currentUser']['userprovisionments'], [])
 
     def test_multiple_overlapping_staff_invites_for_one_user_failure(self):
-        pass
+        teacher1 = self.setup_teacher(authenticate=True)
+        institution = teacher1.institution
+        email = 'eenof@anderemail6.adres'
+        self.setup_staff_membership(teacher1, institution, may_read=True, may_administrate_users=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
+        invitation_json = {'content_type': ContentType.objects.get_for_model(institution).pk,
+                           'object_id': institution.entity_id,
+                           'email': email,
+                           'for_teacher': True,
+                           'data': {'may_sign': True},
+                           'type': UserProvisionment.TYPE_INVITATION}
+        self.client.post('/v1/user/provision/create', json.dumps(invitation_json), content_type='application/json')
+
+        invitation_json['content_type'] = ContentType.objects.get_for_model(faculty).pk
+        invitation_json['object_id'] = faculty.entity_id
+        invitation_json['email'] = email
+        response = self.client.post('/v1/user/provision/create', json.dumps(invitation_json), content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data[0].__str__(), 'There may be only one invite per email address.')
