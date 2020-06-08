@@ -1,4 +1,5 @@
 import json
+import collections
 from mainsite.tests import BadgrTestCase
 
 
@@ -106,15 +107,6 @@ class ObjectPermissionTests(BadgrTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(teacher2.cached_institution_staff().permissions, json.loads(data))  # perms updated instantly
 
-    def test_may_not_remove_institution_staff_membership(self):
-        teacher1 = self.setup_teacher(authenticate=True)
-        teacher2 = self.setup_teacher(institution=teacher1.institution)
-        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_administrate_users=True)
-        staff = self.setup_staff_membership(teacher2, teacher2.institution, may_read=True)
-        response = self.client.delete('/staff-membership/institution/change/{}'.format(staff.entity_id),
-                                      content_type='application/json')
-        self.assertEqual(response.status_code, 405)
-
 
     def test_may_not_create_staff_membership_for_user_outside_institution(self):
         teacher1 = self.setup_teacher(authenticate=True)
@@ -160,7 +152,42 @@ class ObjectPermissionTests(BadgrTestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_permission_tree_cleanup_after_change(self):
-        pass
+        # create entities outside branch
+        outside_teacher = self.setup_teacher()
+        outside_faculty = self.setup_faculty(institution=outside_teacher.institution)
+        outside_issuer = self.setup_issuer(faculty=outside_faculty, created_by=outside_teacher)
+        outside_badgeclass = self.setup_badgeclass(issuer=outside_issuer)
+        # create entities inside  branch
+        teacher1 = self.setup_teacher(authenticate=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer0 = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        issuer1 = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        badgeclass = self.setup_badgeclass(issuer=issuer1)
+        badgeclass1 = self.setup_badgeclass(issuer=issuer1)
+        # test branch returns
+        branchfrom_issuer1_viewpoint = [teacher1.institution, issuer1, faculty, badgeclass, badgeclass1]
+        branch = issuer1._get_all_entities_in_branch()
+        # returned branch and expected branch are similar
+        self.assertEqual(collections.Counter(branch), collections.Counter(branchfrom_issuer1_viewpoint))
+        # test staff member duplicates in branch throws exception
+        teacher2 = self.setup_teacher(institution=teacher1.institution)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_update=True, may_administrate_users=True)
+        self.setup_staff_membership(teacher2, teacher2.institution, may_read=True)
+        data = json.dumps({
+            "may_create": 0,
+            "may_read": 0,
+            "may_update": 1,
+            "may_delete": 0,
+            "may_sign": 0,
+            "may_award": 0,
+            "may_administrate_users": 0,
+            "user": teacher2.entity_id,
+            "issuer": issuer1.entity_id
+        })
+        response = self.client.post('/staff-membership/issuer/{}/create'.format(issuer1.entity_id),
+                                    data, content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data[0].__str__(), 'Cannot save staff membership, there is a conflicting staff membership.')
 
     def test_student_may_not_access_fields_through_graphql(self):
         """certain fields are blocked for students"""
@@ -190,3 +217,16 @@ class ObjectPermissionTests(BadgrTestCase):
                                       content_type='application/json')
         self.assertTrue(response.status_code == 404)
 
+    def test_all_teachers_in_institution_may_read(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        outside_teacher = self.setup_teacher()        
+        student = self.setup_student()
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        response = self.client.get('/instituion/staff')
+        query = 'query foo {faculty(id: "'+faculty.entity_id+'") {entityId}}'
+        response_ok = self.graphene_post(teacher1, query)
+        self.assertEqual(response_ok['data']['faculty']['entityId'], faculty.entity_id)
+        response_empty = self.graphene_post(outside_teacher, query)
+        self.assertEqual(response_empty['data']['faculty'], None)
+        response_empty = self.graphene_post(student, query)
+        self.assertEqual(response_empty['data']['faculty'], None)

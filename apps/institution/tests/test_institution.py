@@ -1,6 +1,8 @@
 import json
+
 from mainsite.tests import BadgrTestCase
 from institution.testfiles.helper import faculty_json, institution_json
+from institution.models import Institution
 
 
 class InstitutionTest(BadgrTestCase):
@@ -20,11 +22,11 @@ class InstitutionTest(BadgrTestCase):
         response = self.client.put("/institution/edit/{}".format(teacher1.institution.entity_id),
                                     data=json.dumps(institution_json), content_type='application/json')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(teacher1.institution.description, description)
+        institution = Institution.objects.get(pk=teacher1.institution.pk)
+        self.assertEqual(institution.description, description)
         response = self.client.delete("/institution/edit/".format(teacher1.institution.entity_id),
                                       content_type='application/json')
         self.assertEqual(response.status_code, 404)
-
 
     def test_institution_schema(self):
         teacher1 = self.setup_teacher(authenticate=True)

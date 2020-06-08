@@ -1,5 +1,7 @@
 from django.db import models
 from django.forms.models import model_to_dict
+from rest_framework import serializers
+
 from entity.models import BaseVersionedEntity
 from signing.models import SymmetricKey
 
@@ -19,6 +21,17 @@ class PermissionedRelationshipBase(BaseVersionedEntity):
 
     class Meta:
         abstract = True
+
+    @classmethod
+    def empty_permissions(cls):
+        """convenience class method to represent NO permissions"""
+        return {'may_create': False,
+                'may_read': False,
+                'may_update': False,
+                'may_delete': False,
+                'may_award': False,
+                'may_sign': False,
+                'may_administrate_users': False}
 
     @property
     def permissions(self):
@@ -60,7 +73,17 @@ class PermissionedRelationshipBase(BaseVersionedEntity):
         else:
             self.user.remove_cached_data(['cached_{}_staffs'.format(object_class_name)])
 
+    def _user_has_other_membership_in_branch(self, user):
+        """check to see if given user already has another staff membership in the current branch"""
+        all_entities_in_my_branch = self.object._get_all_entities_in_branch()
+        all_staff_memberships_in_my_branch = []
+        for entity in all_entities_in_my_branch:
+            all_staff_memberships_in_my_branch += entity.cached_staff()
+        return bool([staff for staff in all_staff_memberships_in_my_branch if staff.user == user and staff != self])
+
     def save(self, *args, **kwargs):
+        if self._user_has_other_membership_in_branch(self.user):
+            raise serializers.ValidationError('Cannot save staff membership, there is a conflicting staff membership.')
         super(PermissionedRelationshipBase, self).save()
         self.object.remove_cached_data(['cached_staff'])
         self._empty_user_cached_staff()

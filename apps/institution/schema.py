@@ -25,18 +25,14 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
                       ContentTypeIdResolverMixin, DjangoObjectType):
     class Meta:
         model = Institution
-        fields = (
-        'entity_id', 'name', 'staff', 'created_at', 'description', 'image', 'grading_table', 'brin', 'content_type_id')
+        fields = ('entity_id', 'name', 'staff', 'created_at', 'description',
+                  'image', 'grading_table', 'brin', 'content_type_id')
 
     faculties = graphene.List(FacultyType)
     staff = graphene.List(InstitutionStaffType)
-    permissioned_staff = graphene.List(InstitutionStaffType)
 
     def resolve_faculties(self, info):
         return self.get_faculties(info.context.user, ['may_read'])
-
-    def resolve_permissioned_staff(self, info):
-        return self.cached_permissioned_staff()
 
 
 class Query(object):
