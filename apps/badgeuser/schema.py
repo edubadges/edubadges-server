@@ -50,7 +50,7 @@ class Query(object):
         return user
 
     def resolve_users(self, info, **kwargs):
-        return [staff.cached_user for staff in info.context.user.institution.cached_staff()]
+        return list(BadgeUser.objects.filter(institution=info.context.user.institution))
 
     def resolve_current_user(self, info, **kwargs):
         return info.context.user
