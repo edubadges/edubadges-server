@@ -319,6 +319,10 @@ class UserCachedObjectGetterMixin(object):
     def cached_badgeclass_staffs(self):
         return list(BadgeClassStaff.objects.filter(user=self))
 
+    @cachemodel.cached_method()
+    def cached_colleagues(self):
+        return list(BadgeUser.objects.filter(institution=self.institution))
+
 
 class UserPermissionsMixin(object):
     """
