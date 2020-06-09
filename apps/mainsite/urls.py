@@ -20,7 +20,7 @@ from django.views.generic.base import RedirectView, TemplateView
 
 from mainsite.views import SitewideActionFormView, DocsAuthorizeRedirect, \
     TermsAndConditionsView, TermsAndConditionsResignView, AcceptTermsAndConditionsView
-from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation, error404, error500
+from mainsite.views import info_view, email_unsubscribe, error404, error500
 
 
 urlpatterns = [
@@ -33,9 +33,6 @@ urlpatterns = [
 
     # legacy logo url redirect
     url(r'^static/images/header-logo-120.png$', RedirectView.as_view(url='{}images/logo.png'.format(settings.STATIC_URL), permanent=True)),
-
-    # Apple app universal URL endpoint
-    url(r'^apple-app-site-association', AppleAppSiteAssociation.as_view(), name="apple-app-site-association"),
 
     # OAuth2 provider URLs
     url(r'^o/authorize/?$', AuthorizationApiView.as_view(), name='oauth2_api_authorize'),

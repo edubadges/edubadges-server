@@ -86,25 +86,6 @@ def email_unsubscribe(request, *args, **kwargs):
     return HttpResponse("You will no longer receive email notifications for \
                         earned badges from this domain.")
 
-
-class AppleAppSiteAssociation(APIView):
-    renderer_classes = (JSONRenderer,)
-    permission_classes = (AllowAny,)
-
-    def get(self, request):
-        data = {
-            "applinks": {
-                "apps": [],
-                "details": []
-            }
-        }
-
-        for app_id in getattr(settings, 'APPLE_APP_IDS', []):
-            data['applinks']['details'].append(app_id)
-
-        return Response(data=data)
-
-
 class SitewideActionForm(forms.Form):
     ACTION_CLEAR_CACHE = 'CLEAR_CACHE'
     ACTION_RESAVE_ELEMENTS = 'RESAVE_ELEMENTS'
