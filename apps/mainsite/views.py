@@ -157,12 +157,6 @@ class SitewideActionFormView(FormView):
         return super(SitewideActionFormView, self).form_valid(form)
 
 
-class RedirectToUiLogin(RedirectView):
-    def get_redirect_url(self, *args, **kwargs):
-        badgrapp = BadgrApp.objects.get_current()
-        return badgrapp.ui_login_redirect if badgrapp.ui_login_redirect is not None else badgrapp.email_confirmation_redirect
-
-
 class DocsAuthorizeRedirect(RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         badgrapp = BadgrApp.objects.get_current(request=self.request)

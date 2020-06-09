@@ -18,7 +18,7 @@ badgr_admin.autodiscover()
 
 from django.views.generic.base import RedirectView, TemplateView
 
-from mainsite.views import SitewideActionFormView, LoginAndObtainAuthToken, RedirectToUiLogin, DocsAuthorizeRedirect, \
+from mainsite.views import SitewideActionFormView, LoginAndObtainAuthToken, DocsAuthorizeRedirect, \
     TermsAndConditionsView, TermsAndConditionsResignView, AcceptTermsAndConditionsView
 from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation, error404, error500
 
@@ -45,7 +45,6 @@ urlpatterns = [
 
     # Home
     url(r'^$', info_view, name='index'),
-    url(r'^accounts/login/$', RedirectToUiLogin.as_view(), name='legacy_login_redirect'),
 
     # Admin URLs
     url(r'^staff/sidewide-actions$', SitewideActionFormView.as_view(), name='badgr_admin_sitewide_actions'),
