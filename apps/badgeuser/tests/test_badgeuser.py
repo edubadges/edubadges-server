@@ -4,6 +4,7 @@ from mainsite.tests import BadgrTestCase
 from badgeuser.models import UserProvisionment
 from mainsite.exceptions import BadgrValidationError
 
+
 class BadgeuserTest(BadgrTestCase):
 
     def test_provision_existing_user(self):
@@ -218,6 +219,7 @@ class BadgeuserTest(BadgrTestCase):
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_administrate_users=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
         existing_non_colleague = self.setup_teacher()
+        # test sending invite for own institution, but accepted by someone outside
         invitation_json = {'content_type': ContentType.objects.get_for_model(faculty).pk,
                            'object_id': faculty.entity_id,
                            'email': existing_non_colleague.email,
@@ -230,12 +232,21 @@ class BadgeuserTest(BadgrTestCase):
         invitation_json['email'] = new_non_colleague_email
         response_success = self.client.post('/v1/user/provision/create', json.dumps(invitation_json), content_type='application/json')
         new_non_colleague = self.setup_teacher(email=new_non_colleague_email)
-        failing_provisionment = UserProvisionment.objects.get(entity_id = response_success.data['entity_id'])
+        failing_provisionment = UserProvisionment.objects.get(entity_id=response_success.data['entity_id'])
         try:
             failing_provisionment.match_user(new_non_colleague)
             self.assertTrue(False)
         except BadgrValidationError:
             self.assertTrue(True)
+        # test sending invite for own institution, but accepted by someone outside
+        teacher2 = self.setup_teacher()
+        other_insitution = teacher2.institution
+        invitation_json['content_type'] = ContentType.objects.get_for_model(other_insitution).pk
+        invitation_json['object_id'] = other_insitution.entity_id
+        invitation_json['email'] = 'some@randomemail.dontmatter'
+        response_failure = self.client.post('/v1/user/provision/create', json.dumps(invitation_json), content_type='application/json')
+        self.assertEqual(response_failure.data['fields'].__str__(), 'You do not have permission to invite user for this entity.')
+
 
 
 class BadgeuserGraphqlTest(BadgrTestCase):
