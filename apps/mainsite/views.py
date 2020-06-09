@@ -29,7 +29,7 @@ from issuer.tasks import rebake_all_assertions, update_issuedon_all_assertions
 from issuer.models import BadgeInstance
 from mainsite.admin_actions import clear_cache
 from mainsite.models import EmailBlacklist, BadgrApp
-from mainsite.serializers import VerifiedAuthTokenSerializer
+
 
 
 ##
@@ -103,10 +103,6 @@ class AppleAppSiteAssociation(APIView):
             data['applinks']['details'].append(app_id)
 
         return Response(data=data)
-
-
-class LoginAndObtainAuthToken(ObtainAuthToken):
-    serializer_class = VerifiedAuthTokenSerializer
 
 
 class SitewideActionForm(forms.Form):

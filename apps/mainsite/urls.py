@@ -18,7 +18,7 @@ badgr_admin.autodiscover()
 
 from django.views.generic.base import RedirectView, TemplateView
 
-from mainsite.views import SitewideActionFormView, LoginAndObtainAuthToken, DocsAuthorizeRedirect, \
+from mainsite.views import SitewideActionFormView, DocsAuthorizeRedirect, \
     TermsAndConditionsView, TermsAndConditionsResignView, AcceptTermsAndConditionsView
 from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation, error404, error500
 
@@ -74,7 +74,6 @@ urlpatterns = [
     url(r'', include('backpack.share_urls')),
 
     # REST Framework
-    url(r'^api-auth/token$', LoginAndObtainAuthToken.as_view()),
     url(r'^account/', include('badgrsocialauth.redirect_urls')),
 
     # v1 API endpoints

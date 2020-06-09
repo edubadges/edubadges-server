@@ -85,20 +85,6 @@ class MarkdownCharField(StripTagsCharField):
     default_validators = [MarkdownCharFieldValidator()]
 
 
-class VerifiedAuthTokenSerializer(AuthTokenSerializer):
-    def validate(self, attrs):
-        attrs = super(VerifiedAuthTokenSerializer, self).validate(attrs)
-        user = attrs.get('user')
-        if not user.verified:
-            try:
-                email = user.cached_emails()[0]
-                email.send_confirmation()
-            except IndexError as e:
-                pass
-            raise ValidationError('You must verify your primary email address before you can sign in.')
-        return attrs
-
-
 class OriginalJsonSerializerMixin(serializers.Serializer):
     def to_representation(self, instance):
         representation = super(OriginalJsonSerializerMixin, self).to_representation(instance)
