@@ -2,7 +2,7 @@ import json
 from django.contrib.contenttypes.models import ContentType
 from mainsite.tests import BadgrTestCase
 from badgeuser.models import UserProvisionment
-
+from mainsite.exceptions import BadgrValidationError
 
 class BadgeuserTest(BadgrTestCase):
 
@@ -11,21 +11,13 @@ class BadgeuserTest(BadgrTestCase):
         self.setup_staff_membership(teacher1, teacher1.institution, may_administrate_users=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
         content_type = ContentType.objects.get_for_model(faculty)
-
-        # failure
-        teacher4 = self.setup_teacher()  # different institution
+        teacher2 = self.setup_teacher(institution=teacher1.institution)
         invitation_json = {'content_type': content_type.pk,
                            'object_id': faculty.entity_id,
-                           'email': teacher4.email,
+                           'email': teacher2.email,
                            'for_teacher': True,
                            'data': {'may_administrate_users': True},
                            'type': UserProvisionment.TYPE_INVITATION}
-        response = self.client.post('/v1/user/provision/create', json.dumps(invitation_json), content_type='application/json')
-        self.assertTrue(response.data['fields'].__str__() == 'May not invite user from other institution')
-
-        # success for existing user
-        teacher2 = self.setup_teacher(institution=teacher1.institution)
-        invitation_json['email'] = teacher2.email
         response = self.client.post('/v1/user/provision/create', json.dumps(invitation_json), content_type='application/json')
         self.assertTrue(not not response.data['user'])
         teacher2.match_provisionments()  # happens at login
@@ -221,24 +213,34 @@ class BadgeuserTest(BadgrTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data[0].__str__(), 'There may be only one invite per email address.')
 
+    def test_provisionment_for_other_institution_failure(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_administrate_users=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        existing_non_colleague = self.setup_teacher()
+        invitation_json = {'content_type': ContentType.objects.get_for_model(faculty).pk,
+                           'object_id': faculty.entity_id,
+                           'email': existing_non_colleague.email,
+                           'for_teacher': True,
+                           'data': {'may_sign': True},
+                           'type': UserProvisionment.TYPE_INVITATION}
+        response_failure = self.client.post('/v1/user/provision/create', json.dumps(invitation_json), content_type='application/json')
+        self.assertEqual(response_failure.data['fields'].__str__(), 'May not invite user from other institution')
+        new_non_colleague_email = 'new_non_colleague@mail.adres'
+        invitation_json['email'] = new_non_colleague_email
+        response_success = self.client.post('/v1/user/provision/create', json.dumps(invitation_json), content_type='application/json')
+        new_non_colleague = self.setup_teacher(email=new_non_colleague_email)
+        failing_provisionment = UserProvisionment.objects.get(entity_id = response_success.data['entity_id'])
+        try:
+            failing_provisionment.match_user(new_non_colleague)
+            self.assertTrue(False)
+        except BadgrValidationError:
+            self.assertTrue(True)
+
 
 class BadgeuserGraphqlTest(BadgrTestCase):
 
-    def test_user_query(self):
-        teacher1 = self.setup_teacher()
-        colleague1 = self.setup_teacher(institution=teacher1.institution)
-        colleague2 = self.setup_teacher(institution=teacher1.institution)
-        colleague3 = self.setup_teacher(institution=teacher1.institution)
-        not_colleague = self.setup_teacher()
-        query = 'query foo { users {entityId} }'
-        response = self.graphene_post(teacher1, query)
-        self.assertEqual(len(response['data']['users']), 4)
-        student1 = self.setup_student()
-        student2 = self.setup_student()
-        response = self.graphene_post(student1, query)
-        self.assertEqual(response['errors'][0]['message'], 'Student may not retrieve users of Query')
-
-    def test_currentuser(self):
+    def test_current_user(self):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_administrate_users=True)
         institution = teacher1.institution
