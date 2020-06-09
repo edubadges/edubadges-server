@@ -18,11 +18,6 @@ from django.views import View
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import FormView, RedirectView, TemplateView
 from django.views.static import serve
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.permissions import AllowAny
-from rest_framework.renderers import JSONRenderer
-from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from badgrsocialauth.utils import get_privacy_content
 from issuer.tasks import rebake_all_assertions, update_issuedon_all_assertions
@@ -85,6 +80,7 @@ def email_unsubscribe(request, *args, **kwargs):
 
     return HttpResponse("You will no longer receive email notifications for \
                         earned badges from this domain.")
+
 
 class SitewideActionForm(forms.Form):
     ACTION_CLEAR_CACHE = 'CLEAR_CACHE'
