@@ -95,6 +95,7 @@ class IssuerAPITest(BadgrTestCase):
 
     def test_assertion_image_privacy(self):
         teacher1 = self.setup_teacher()
+        outside_teacher = self.setup_teacher()
         student = self.setup_student()
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
@@ -102,9 +103,12 @@ class IssuerAPITest(BadgrTestCase):
         assertion = self.setup_assertion(student, badgeclass, teacher1)
         response = self.client.get('/media/uploads/badges/{}'.format(os.path.basename(assertion.image.path)))
         self.assertEqual(response.status_code, 403)
-        self.authenticate(teacher1)
+        self.authenticate(outside_teacher)
         response = self.client.get('/media/uploads/badges/{}'.format(os.path.basename(assertion.image.path)))
         self.assertEqual(response.status_code, 403)
+        self.authenticate(teacher1)
+        response = self.client.get('/media/uploads/badges/{}'.format(os.path.basename(assertion.image.path)))
+        self.assertEqual(response.status_code, 200)  # teacher belongs to assertion institution
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
         response = self.client.get('/media/uploads/badges/{}'.format(os.path.basename(assertion.image.path)))
         self.assertEqual(response.status_code, 200)

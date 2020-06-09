@@ -1,5 +1,5 @@
 from django.db.models import ProtectedError
-
+from staff.models import PermissionedRelationshipBase
 
 class PermissionedModelMixin(object):
     """
@@ -16,7 +16,7 @@ class PermissionedModelMixin(object):
         if staff:
             return staff.permissions
         else:
-            return None
+            return PermissionedRelationshipBase.empty_permissions()
 
     def check_local_permissions(self, user, required_permissions):
         """
@@ -34,6 +34,25 @@ class PermissionedModelMixin(object):
             return perm_count == len(required_permissions)
         return False
 
+    def _get_all_entities_in_branch(self, check_parents=True, check_children=True):
+        """
+        Recursively walks the tree up and down to get all the entities of the current branch (where self is a node).
+        returns self, all the parents and all the children
+        """
+        entities = [self]
+        if check_parents:
+            try:
+                entities += self.parent._get_all_entities_in_branch(check_children=False)
+            except AttributeError:
+                return entities
+        if check_children:
+            try:
+                for child in self.children:
+                    entities += child._get_all_entities_in_branch(check_parents=False)
+            except AttributeError:
+                return entities
+        return entities
+
     def get_permissions(self, user):
         """
         This method returns (inherited or local) permissions for the instance by climbing the permission tree.
@@ -43,17 +62,15 @@ class PermissionedModelMixin(object):
         try:
             parent_perms = self.parent.get_permissions(user)
             local_perms = self._get_local_permissions(user)
-            if not parent_perms:
-                return local_perms
-            elif not local_perms:
-                return parent_perms
-            else:
-                combined_perms = {}
-                for key in local_perms:
-                    combined_perms[key] = local_perms[key] if local_perms[key] > parent_perms[key] else parent_perms[key]
-                return combined_perms
-        except AttributeError:  # recursive base case
-            return self._get_local_permissions(user)
+            combined_perms = {}
+            for key in local_perms:
+                combined_perms[key] = local_perms[key] if local_perms[key] > parent_perms[key] else parent_perms[key]
+            return combined_perms
+        except AttributeError:  # recursive base case (reached root of permission tree, i.e. the Institution)
+            perms = self._get_local_permissions(user)
+            if user.is_teacher and self == user.institution:  # if at the recursive base case the institution is the same as user's institution
+                perms['may_read'] = True  # then add may_read, everyone in institution is a reader
+            return perms
 
     def has_permissions(self, user, permissions):
         """

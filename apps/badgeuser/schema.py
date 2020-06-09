@@ -5,7 +5,7 @@ from badgeuser.models import BadgeUser
 from institution.schema import InstitutionType
 from mainsite.exceptions import GraphQLException
 from staff.schema import InstitutionStaffType, FacultyStaffType, IssuerStaffType, BadgeClassStaffType
-from mainsite.graphql_utils import UserProvisionmentType, resolver_blocker_only_for_current_user
+from mainsite.graphql_utils import UserProvisionmentType, resolver_blocker_only_for_current_user, resolver_blocker_for_students
 
 
 class BadgeUserType(DjangoObjectType):
@@ -49,8 +49,9 @@ class Query(object):
             raise GraphQLException('Cannot query user outside your institution')
         return user
 
+    @resolver_blocker_for_students
     def resolve_users(self, info, **kwargs):
-        return [staff.cached_user for staff in info.context.user.institution.cached_staff()]
+        return info.context.user.cached_colleagues()
 
     def resolve_current_user(self, info, **kwargs):
         return info.context.user

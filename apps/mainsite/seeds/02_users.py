@@ -62,7 +62,8 @@ def create_admin(username, email, first_name, last_name, institution_name, uid, 
 
     institution = Institution.objects.get(name=institution_name)
     user.institution = institution
-    InstitutionStaff.objects.filter(user=user, institution=institution).update(**perms)
+    user.save()
+    InstitutionStaff.objects.get_or_create(user=user, institution=institution, **perms)
 
 
 def create_teacher(username, email, first_name, last_name, institution_name, uid, perms=no_perms):
@@ -75,7 +76,7 @@ def create_teacher(username, email, first_name, last_name, institution_name, uid
 
     institution = Institution.objects.get(name=institution_name)
     user.institution = institution
-    InstitutionStaff.objects.filter(user=user, institution=institution).update(**perms)
+    user.save()
 
 
 institution_admins = [

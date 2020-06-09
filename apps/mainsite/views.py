@@ -18,18 +18,13 @@ from django.views import View
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import FormView, RedirectView, TemplateView
 from django.views.static import serve
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.permissions import AllowAny
-from rest_framework.renderers import JSONRenderer
-from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from badgrsocialauth.utils import get_privacy_content
 from issuer.tasks import rebake_all_assertions, update_issuedon_all_assertions
 from issuer.models import BadgeInstance
 from mainsite.admin_actions import clear_cache
 from mainsite.models import EmailBlacklist, BadgrApp
-from mainsite.serializers import VerifiedAuthTokenSerializer
+
 
 
 ##
@@ -87,28 +82,6 @@ def email_unsubscribe(request, *args, **kwargs):
                         earned badges from this domain.")
 
 
-class AppleAppSiteAssociation(APIView):
-    renderer_classes = (JSONRenderer,)
-    permission_classes = (AllowAny,)
-
-    def get(self, request):
-        data = {
-            "applinks": {
-                "apps": [],
-                "details": []
-            }
-        }
-
-        for app_id in getattr(settings, 'APPLE_APP_IDS', []):
-            data['applinks']['details'].append(app_id)
-
-        return Response(data=data)
-
-
-class LoginAndObtainAuthToken(ObtainAuthToken):
-    serializer_class = VerifiedAuthTokenSerializer
-
-
 class SitewideActionForm(forms.Form):
     ACTION_CLEAR_CACHE = 'CLEAR_CACHE'
     ACTION_RESAVE_ELEMENTS = 'RESAVE_ELEMENTS'
@@ -155,12 +128,6 @@ class SitewideActionFormView(FormView):
             action()
 
         return super(SitewideActionFormView, self).form_valid(form)
-
-
-class RedirectToUiLogin(RedirectView):
-    def get_redirect_url(self, *args, **kwargs):
-        badgrapp = BadgrApp.objects.get_current()
-        return badgrapp.ui_login_redirect if badgrapp.ui_login_redirect is not None else badgrapp.email_confirmation_redirect
 
 
 class DocsAuthorizeRedirect(RedirectView):

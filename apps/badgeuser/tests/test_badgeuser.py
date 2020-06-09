@@ -116,7 +116,6 @@ class BadgeuserTest(BadgrTestCase):
                              data=json.dumps({'accept': True}), content_type='application/json')
         self.assertTrue(new_teacher.get_permissions(badgeclass)['may_sign'])
 
-
     def test_provision_non_exitisting_user_for_institution_staff(self):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_administrate_users=True)
@@ -163,7 +162,83 @@ class BadgeuserTest(BadgrTestCase):
                          data=json.dumps({'accept': True}), content_type='application/json')
         self.assertTrue(new_teacher.get_permissions(institution)['may_sign'])
 
-    def test_user_graphql(self):
+    def test_edit_delete_provisionment(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        unauthorized_teacher = self.setup_teacher()
+        self.setup_staff_membership(teacher1, teacher1.institution, may_administrate_users=True)
+        institution = teacher1.institution
+        email = 'eenof@anderemail5.adres'
+        invitation_json = {'content_type': ContentType.objects.get_for_model(institution).pk,
+                           'object_id': institution.entity_id,
+                           'email': email,
+                           'for_teacher': True,
+                           'data': {'may_sign': True},
+                           'type': UserProvisionment.TYPE_INVITATION
+                           }
+        response = self.client.post('/v1/user/provision/create', json.dumps(invitation_json),
+                                    content_type='application/json')
+        new_teacher = self.setup_teacher(institution=teacher1.institution, email=email)
+        new_teacher.match_provisionments()
+        invitation_edit = {'data': {'may_sign': False}, 'email': 'kjajajaj'}
+        # test unauthorized
+        self.authenticate(unauthorized_teacher)
+        invitation_entity_id = response.data['entity_id']
+        failed_response = self.client.put('/v1/user/provision/edit/{}'.format(invitation_entity_id), json.dumps(invitation_edit), content_type='application/json')
+        self.assertEqual(failed_response.status_code, 404)
+        failed_response = self.client.delete('/v1/user/provision/edit/{}'.format(invitation_entity_id))
+        self.assertEqual(failed_response.status_code, 404)
+        self.authenticate(teacher1)
+        response = self.client.put('/v1/user/provision/edit/{}'.format(invitation_entity_id), json.dumps(invitation_edit), content_type='application/json')
+        self.assertEqual(response.data['data']['may_sign'], False)
+        query = 'query foo {currentUser {entityId userprovisionments {data, entityId}}}'
+        response = self.graphene_post(new_teacher, query)
+        self.assertEqual(response['data']['currentUser']['userprovisionments'][0]['data']['may_sign'], False)  # check instant cache update
+        userprovisionment_entity_id = response['data']['currentUser']['userprovisionments'][0]['entityId']
+        response = self.client.delete('/v1/user/provision/edit/{}'.format(userprovisionment_entity_id))
+        self.assertEqual(response.status_code, 204)
+        response = self.graphene_post(new_teacher, query)
+        self.assertEqual(response['data']['currentUser']['userprovisionments'], [])
+
+    def test_multiple_overlapping_staff_invites_for_one_user_failure(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        institution = teacher1.institution
+        email = 'eenof@anderemail6.adres'
+        self.setup_staff_membership(teacher1, institution, may_read=True, may_administrate_users=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
+        invitation_json = {'content_type': ContentType.objects.get_for_model(institution).pk,
+                           'object_id': institution.entity_id,
+                           'email': email,
+                           'for_teacher': True,
+                           'data': {'may_sign': True},
+                           'type': UserProvisionment.TYPE_INVITATION}
+        self.client.post('/v1/user/provision/create', json.dumps(invitation_json), content_type='application/json')
+
+        invitation_json['content_type'] = ContentType.objects.get_for_model(faculty).pk
+        invitation_json['object_id'] = faculty.entity_id
+        invitation_json['email'] = email
+        response = self.client.post('/v1/user/provision/create', json.dumps(invitation_json), content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data[0].__str__(), 'There may be only one invite per email address.')
+
+
+class BadgeuserGraphqlTest(BadgrTestCase):
+
+    def test_user_query(self):
+        teacher1 = self.setup_teacher()
+        colleague1 = self.setup_teacher(institution=teacher1.institution)
+        colleague2 = self.setup_teacher(institution=teacher1.institution)
+        colleague3 = self.setup_teacher(institution=teacher1.institution)
+        not_colleague = self.setup_teacher()
+        query = 'query foo { users {entityId} }'
+        response = self.graphene_post(teacher1, query)
+        self.assertEqual(len(response['data']['users']), 4)
+        student1 = self.setup_student()
+        student2 = self.setup_student()
+        response = self.graphene_post(student1, query)
+        self.assertEqual(response['errors'][0]['message'], 'Student may not retrieve users of Query')
+
+    def test_currentuser(self):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_administrate_users=True)
         institution = teacher1.institution
@@ -176,12 +251,11 @@ class BadgeuserTest(BadgrTestCase):
                            'type': UserProvisionment.TYPE_INVITATION}
         response = self.client.post('/v1/user/provision/create', json.dumps(invitation_json),
                                     content_type='application/json')
-        self.authenticate(new_teacher)
         query = 'query foo {currentUser {entityId userprovisionments {entityId contentType {id}}}}'
         response = self.graphene_post(new_teacher, query)
         self.assertTrue(bool(response['data']['currentUser']['userprovisionments'][0]['contentType']['id']))
 
-    def test_userprovisionment_exposed_in_entities_graphql(self):
+    def test_userprovisionment_exposed_in_entities(self):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_administrate_users=True)
         new_teacher = self.setup_teacher(institution=teacher1.institution)
@@ -231,43 +305,3 @@ class BadgeuserTest(BadgrTestCase):
         query = 'query foo {badgeClasses {userprovisionments {entityId}}}'
         response = self.graphene_post(teacher1, query)
         self.assertTrue(bool(response['data']['badgeClasses'][0]['userprovisionments'][0]['entityId']))
-
-    def test_edit_delete_provisionment(self):
-        teacher1 = self.setup_teacher(authenticate=True)
-        unauthorized_teacher = self.setup_teacher()
-        self.setup_staff_membership(teacher1, teacher1.institution, may_administrate_users=True)
-        institution = teacher1.institution
-        email = 'eenof@anderemail5.adres'
-        invitation_json = {'content_type': ContentType.objects.get_for_model(institution).pk,
-                           'object_id': institution.entity_id,
-                           'email': email,
-                           'for_teacher': True,
-                           'data': {'may_sign': True},
-                           'type': UserProvisionment.TYPE_INVITATION
-                           }
-        response = self.client.post('/v1/user/provision/create', json.dumps(invitation_json),
-                                    content_type='application/json')
-        new_teacher = self.setup_teacher(institution=teacher1.institution, email=email)
-        new_teacher.match_provisionments()
-        invitation_edit = {'data': {'may_sign': False}, 'email': 'kjajajaj'}
-        # test unauthorized
-        self.authenticate(unauthorized_teacher)
-        invitation_entity_id = response.data['entity_id']
-        failed_response = self.client.put('/v1/user/provision/edit/{}'.format(invitation_entity_id), json.dumps(invitation_edit), content_type='application/json')
-        self.assertEqual(failed_response.status_code, 404)
-        failed_response = self.client.delete('/v1/user/provision/edit/{}'.format(invitation_entity_id))
-        self.assertEqual(failed_response.status_code, 404)
-        self.authenticate(teacher1)
-        response = self.client.put('/v1/user/provision/edit/{}'.format(invitation_entity_id), json.dumps(invitation_edit), content_type='application/json')
-        self.assertEqual(response.data['data']['may_sign'], False)
-        query = 'query foo {currentUser {entityId userprovisionments {data, entityId}}}'
-        response = self.graphene_post(new_teacher, query)
-        self.assertEqual(response['data']['currentUser']['userprovisionments'][0]['data']['may_sign'], False)  # check instant cache update
-        userprovisionment_entity_id = response['data']['currentUser']['userprovisionments'][0]['entityId']
-        response = self.client.delete('/v1/user/provision/edit/{}'.format(userprovisionment_entity_id))
-        self.assertEqual(response.status_code, 204)
-        response = self.graphene_post(new_teacher, query)
-        self.assertEqual(response['data']['currentUser']['userprovisionments'], [])
-
-    def test_multiple_overlapping_staff_invites_for_one_user_failure(self):
-        pass

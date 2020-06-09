@@ -1,18 +1,16 @@
-from collections import OrderedDict
-
 import badgrlog
-from apispec_drf.decorators import apispec_put_operation, apispec_delete_operation, apispec_post_operation
 from django.http import Http404
+from rest_framework import status
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST
+
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
 from issuer.models import Issuer, BadgeClass, BadgeInstance
 from issuer.permissions import AwardedAssertionsBlock
 from issuer.serializers import IssuerSerializer, BadgeClassSerializer, BadgeInstanceSerializer
 from mainsite.exceptions import BadgrApiException400
 from mainsite.permissions import AuthenticatedWithVerifiedEmail, CannotDeleteWithChildren
-from rest_framework import status
-from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST
 from signing import tsob
 from signing.models import AssertionTimeStamp
 from signing.permissions import MaySignAssertions
@@ -25,7 +23,7 @@ class BadgeClassList(VersionedObjectMixin, BaseEntityListView):
     """
     POST to create a new BadgeClass
     """
-    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    permission_classes = (AuthenticatedWithVerifiedEmail,)  # permissioned in serializer
     v1_serializer_class = BadgeClassSerializer
     http_method_names = ['post']
 
@@ -34,7 +32,7 @@ class IssuerList(VersionedObjectMixin, BaseEntityListView):
     """
     POST to create a new Issuer
     """
-    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    permission_classes = (AuthenticatedWithVerifiedEmail,)   # permissioned in serializer
     v1_serializer_class = IssuerSerializer
     http_method_names = ['post']
 

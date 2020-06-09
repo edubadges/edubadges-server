@@ -18,9 +18,9 @@ badgr_admin.autodiscover()
 
 from django.views.generic.base import RedirectView, TemplateView
 
-from mainsite.views import SitewideActionFormView, LoginAndObtainAuthToken, RedirectToUiLogin, DocsAuthorizeRedirect, \
+from mainsite.views import SitewideActionFormView, DocsAuthorizeRedirect, \
     TermsAndConditionsView, TermsAndConditionsResignView, AcceptTermsAndConditionsView
-from mainsite.views import info_view, email_unsubscribe, AppleAppSiteAssociation, error404, error500
+from mainsite.views import info_view, email_unsubscribe, error404, error500
 
 
 urlpatterns = [
@@ -34,9 +34,6 @@ urlpatterns = [
     # legacy logo url redirect
     url(r'^static/images/header-logo-120.png$', RedirectView.as_view(url='{}images/logo.png'.format(settings.STATIC_URL), permanent=True)),
 
-    # Apple app universal URL endpoint
-    url(r'^apple-app-site-association', AppleAppSiteAssociation.as_view(), name="apple-app-site-association"),
-
     # OAuth2 provider URLs
     url(r'^o/authorize/?$', AuthorizationApiView.as_view(), name='oauth2_api_authorize'),
     url(r'^o/token/?$', TokenView.as_view(), name='oauth2_provider_token'),
@@ -45,7 +42,6 @@ urlpatterns = [
 
     # Home
     url(r'^$', info_view, name='index'),
-    url(r'^accounts/login/$', RedirectToUiLogin.as_view(), name='legacy_login_redirect'),
 
     # Admin URLs
     url(r'^staff/sidewide-actions$', SitewideActionFormView.as_view(), name='badgr_admin_sitewide_actions'),
@@ -75,7 +71,6 @@ urlpatterns = [
     url(r'', include('backpack.share_urls')),
 
     # REST Framework
-    url(r'^api-auth/token$', LoginAndObtainAuthToken.as_view()),
     url(r'^account/', include('badgrsocialauth.redirect_urls')),
 
     # v1 API endpoints
