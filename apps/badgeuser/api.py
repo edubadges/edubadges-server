@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import ProtectedError
 from django.http import Http404
 from django.utils import timezone
-from rest_framework import permissions
+from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND
@@ -19,6 +19,7 @@ from badgeuser.serializers import BadgeUserProfileSerializer, BadgeUserTokenSeri
     UserProvisionmentSerializerForEdit
 from badgeuser.tasks import process_email_verification
 from entity.api import BaseEntityDetailView, BaseEntityListView
+from entity.utils import validate_errors
 from issuer.permissions import BadgrOAuthTokenHasScope
 from mainsite.exceptions import BadgrApiException400
 from mainsite.models import BadgrApp
@@ -174,11 +175,18 @@ class AccessTokenDetail(BaseEntityDetailView):
 class UserCreateProvisionment(BaseEntityListView):
     """
     Endpoint used for provisioning
-    POST to create one for another
+    POST to create a provisionment for another
     """
     permission_classes = (AuthenticatedWithVerifiedEmail,)  # permissioned in serializer
     v1_serializer_class = UserProvisionmentSerializer
     http_method_names = ['post']
+
+    def post(self, request, **kwargs):
+        context = self.get_context_data(**kwargs)
+        serializer = self.v1_serializer_class(many=True, data=request.data, context=context)
+        serializer.is_valid()
+        new_instances = serializer.save(created_by=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class UserProvisionmentDetail(BaseEntityDetailView):
