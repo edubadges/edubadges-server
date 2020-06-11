@@ -140,8 +140,9 @@ class UserProvisionmentSerializer(serializers.Serializer):
         return attrs
 
     def create(self, validated_data):
-        prov = UserProvisionment.objects.create(**validated_data)
+        prov = UserProvisionment(**validated_data)
         prov.find_and_match_user()
+        prov.save()
         prov.send_email()
         return prov
 

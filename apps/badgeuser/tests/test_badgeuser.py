@@ -5,7 +5,7 @@ from badgeuser.models import UserProvisionment
 from mainsite.exceptions import BadgrValidationError
 
 
-class BadgeuserTest(BadgrTestCase):
+class BadgeuserProvisionmentTest(BadgrTestCase):
 
     def test_provision_existing_user(self):
         teacher1 = self.setup_teacher(authenticate=True)
@@ -247,7 +247,20 @@ class BadgeuserTest(BadgrTestCase):
         response_failure = self.client.post('/v1/user/provision/create', json.dumps(invitation_json), content_type='application/json')
         self.assertEqual(response_failure.data['fields'].__str__(), 'You do not have permission to invite user for this entity.')
 
-
+    def test_provisionment_invite_staff_collision_throws_exception(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        colleague = self.setup_teacher(institution=teacher1.institution)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_administrate_users=True)
+        self.setup_staff_membership(colleague, teacher1.institution, may_read=True, may_administrate_users=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        invitation_json = {'content_type': ContentType.objects.get_for_model(faculty).pk,
+                           'object_id': faculty.entity_id,
+                           'email': colleague.email,
+                           'for_teacher': True,
+                           'data': {'may_sign': True},
+                           'type': UserProvisionment.TYPE_INVITATION}
+        response_failure = self.client.post('/v1/user/provision/create', json.dumps(invitation_json), content_type='application/json')
+        self.assertEqual(response_failure.data[0].__str__(), 'Cannot invite user for this entity. There is a conflicting staff membership.')
 
 class BadgeuserGraphqlTest(BadgrTestCase):
 

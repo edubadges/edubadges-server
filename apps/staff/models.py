@@ -75,11 +75,7 @@ class PermissionedRelationshipBase(BaseVersionedEntity):
 
     def _user_has_other_membership_in_branch(self, user):
         """check to see if given user already has another staff membership in the current branch"""
-        all_entities_in_my_branch = self.object._get_all_entities_in_branch()
-        all_staff_memberships_in_my_branch = []
-        for entity in all_entities_in_my_branch:
-            all_staff_memberships_in_my_branch += entity.cached_staff()
-        return bool([staff for staff in all_staff_memberships_in_my_branch if staff.user == user and staff != self])
+        return self.object.user_has_a_staff_membership_in_this_branch(user)
 
     def save(self, *args, **kwargs):
         if self._user_has_other_membership_in_branch(self.user):

@@ -49,7 +49,7 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
     type = models.CharField(max_length=254, choices=TYPE_CHOICES)
     notes = models.TextField(blank=True, null=True, default=None)
 
-    def validate_unique(self, exclude=None):
+    def _validate_unique(self, exclude=None):
         """Custom uniqueness validation of the provisionment, used before save"""
         if self.type == self.TYPE_INVITATION and UserProvisionment.objects.filter(type=self.type,
                                                                                   rejected=False,
@@ -57,6 +57,11 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
                                                                                   email=self.email).exclude(pk=self.pk).exists():
             raise serializers.ValidationError('There may be only one invite per email address.')
         return super(UserProvisionment, self).validate_unique(exclude=exclude)
+
+    def _validate_staff_collision(self):
+        """validate to see if there is a conflicting staff membership for the entity"""
+        if self.user and self.entity.user_has_a_staff_membership_in_this_branch(self.user):
+            raise serializers.ValidationError('Cannot invite user for this entity. There is a conflicting staff membership.')
 
     def get_permissions(self, user):
         return self.entity.get_permissions(user)
@@ -117,9 +122,12 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
         self.rejected = True
         self.save()
 
+    def _run_validations(self):
+        self._validate_unique()
+        self._validate_staff_collision()
+
     def save(self, *args, **kwargs):
-        """custom save method"""
-        self.validate_unique()
+        self._run_validations()
         self.entity.remove_cached_data(['cached_userprovisionments'])
         return super(UserProvisionment, self).save(*args, **kwargs)
 
