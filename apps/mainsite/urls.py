@@ -5,12 +5,9 @@ from django.contrib.auth import views as auth_views
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import path
 
-from graphene_django.views import GraphQLView
-
 from ims.views import base
 from mainsite.admin import badgr_admin
 from mainsite.graphql_view import ExtendedGraphQLView
-from mainsite.oauth2_api import AuthorizationApiView, TokenView, AuthCodeExchange
 from mainsite.views import serve_protected_document
 
 badgr_admin.autodiscover()
@@ -33,12 +30,6 @@ urlpatterns = [
 
     # legacy logo url redirect
     url(r'^static/images/header-logo-120.png$', RedirectView.as_view(url='{}images/logo.png'.format(settings.STATIC_URL), permanent=True)),
-
-    # OAuth2 provider URLs
-    url(r'^o/authorize/?$', AuthorizationApiView.as_view(), name='oauth2_api_authorize'),
-    url(r'^o/token/?$', TokenView.as_view(), name='oauth2_provider_token'),
-    url(r'^o/code/?$', AuthCodeExchange.as_view(), name='oauth2_code_exchange'),
-    url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 
     # Home
     url(r'^$', info_view, name='index'),
