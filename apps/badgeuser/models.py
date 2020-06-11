@@ -47,6 +47,7 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
         (TYPE_INVITATION, 'Invitation'),
     )
     type = models.CharField(max_length=254, choices=TYPE_CHOICES)
+    notes = models.TextField(blank=True, null=True, default=None)
 
     def validate_unique(self, exclude=None):
         if self.type == self.TYPE_INVITATION and UserProvisionment.objects.filter(type=self.type,

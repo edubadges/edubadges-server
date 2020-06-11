@@ -18,6 +18,7 @@ from badgeuser.models import UserProvisionment
 from ims.models import LTITenant
 from institution.models import Institution
 from lti_edu.models import LtiBadgeUserTennant, UserCurrentContextId
+from mainsite.exceptions import BadgrValidationError
 from mainsite.models import BadgrApp
 from staff.models import InstitutionStaff
 
@@ -139,15 +140,14 @@ def after_terms_agreement(request, **kwargs):
             request.user.institution = institution
             request.user.is_teacher = True
             try:
-                provisionment = request.user.match_provisionments().get()
+                provisionment = request.user.match_provisionments().get()  # get the initial provisioning for the first login, there can only be one
                 request.user.save()
                 provisionment.match_user(request.user)
                 provisionment.perform_provisioning()
-            except UserProvisionment.DoesNotExist:
-                request.user.save()
-                # request.user.delete()
-                # error = 'Sorry, you can not register without an invite. Please contact your administrator to receive an invitation or check that it was sent to the right email address.'
-                # return render_authentication_error(request, SurfConextProvider.id, error)
+            except (UserProvisionment.DoesNotExist, BadgrValidationError):  # there is no provisionment
+                request.user.delete()
+                error = 'Sorry, you can not register without an invite. Please contact your administrator to receive an invitation or check that it was sent to the right email address.'
+                return render_authentication_error(request, SurfConextProvider.id, error)
 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
 
