@@ -46,7 +46,7 @@ class UserProvisionmentType(DjangoObjectType):
 
     class Meta:
         model = UserProvisionment
-        fields = ('email', 'entity_id', 'content_type', 'object_id', 'data', 'for_teacher', 'rejected')
+        fields = ('email', 'entity_id', 'content_type', 'object_id', 'data', 'for_teacher', 'rejected', 'created_at')
 
     content_type = graphene.Field(ContentTypeType)
     data = graphene.Field(JSONType)
