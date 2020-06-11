@@ -18,5 +18,4 @@ class Command(BaseCommand):
             output=os.path.join(dirname, 'api_spec_{version}.json'),
             preamble=os.path.join(dirname, "API_DESCRIPTION_{version}.md"),
             versions=['v1', 'v2'],
-            include_oauth2_security=True
         )
