@@ -50,6 +50,7 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
     notes = models.TextField(blank=True, null=True, default=None)
 
     def validate_unique(self, exclude=None):
+        """Custom uniqueness validation of the provisionment, used before save"""
         if self.type == self.TYPE_INVITATION and UserProvisionment.objects.filter(type=self.type,
                                                                                   rejected=False,
                                                                                   for_teacher=self.for_teacher,
@@ -61,6 +62,7 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
         return self.entity.get_permissions(user)
 
     def match_user(self, user):
+        '''Sets given user as the matched user'''
         try:
             entity_institution = self.entity.institution
         except AttributeError:
@@ -75,6 +77,7 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
         self.save()
 
     def find_and_match_user(self):
+        """Finds a user with the same emailadress and sets it as the matched user"""
         try:
             user = BadgeUser.objects.get(email=self.email, is_teacher=self.for_teacher)
             self.match_user(user)
@@ -86,6 +89,7 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
     #     return OriginSetting.HTTP + reverse('user_provision_accept', kwargs={'entity_id': self.entity_id})
 
     def send_email(self):
+        """Send the invitation email to the recipient"""
         try:
             EmailBlacklist.objects.get(email=self.email)
         except EmailBlacklist.DoesNotExist:
@@ -98,19 +102,23 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
                 send_mail(subject, message, None, [self.email])
 
     def perform_provisioning(self):
+        '''Actually create the objects that form the provisionment'''
         permissions = self.data
         prov = self.entity.create_staff_membership(self.user, permissions)
         self.delete()
         return prov
 
     def accept(self):
+        """Accept the provsionment"""
         return self.perform_provisioning()
 
     def reject(self):
+        """reject the provisionment"""
         self.rejected = True
         self.save()
 
     def save(self, *args, **kwargs):
+        """custom save method"""
         self.validate_unique()
         self.entity.remove_cached_data(['cached_userprovisionments'])
         return super(UserProvisionment, self).save(*args, **kwargs)
