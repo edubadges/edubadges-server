@@ -33,6 +33,17 @@ class PermissionedRelationshipBase(BaseVersionedEntity):
                 'may_sign': False,
                 'may_administrate_users': False}
 
+    @classmethod
+    def full_permissions(cls):
+        """convenience class method to represent FULL permissions"""
+        return {'may_create': True,
+                'may_read': True,
+                'may_update': True,
+                'may_delete': True,
+                'may_award': True,
+                'may_sign': True,
+                'may_administrate_users': True}
+
     @property
     def permissions(self):
         return model_to_dict(self, fields = ['may_create',

@@ -124,7 +124,7 @@ class UserProvisionmentSerializer(serializers.Serializer):
     created_by = BadgeUserIdentifierField()
     email = serializers.EmailField(required=True)
     entity_id = serializers.CharField(read_only=True)
-    content_type = serializers.PrimaryKeyRelatedField(queryset=ContentType.objects.all())
+    content_type = serializers.PrimaryKeyRelatedField(queryset=ContentType.objects.all(), required=True)
     object_id = serializers.CharField(required=True)
     data = serializers.JSONField()
     for_teacher = serializers.BooleanField(required=True)

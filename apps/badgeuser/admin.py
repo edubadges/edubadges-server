@@ -1,8 +1,10 @@
 from django.contrib.admin import ModelAdmin, TabularInline
 from django.contrib.auth.admin import UserAdmin
+from django.forms import ModelForm
 from mainsite.admin import badgr_admin
+from staff.models import PermissionedRelationshipBase
 from .models import BadgeUser, EmailAddressVariant, TermsVersion, TermsAgreement, \
-    CachedEmailAddress
+    CachedEmailAddress, UserProvisionment
 
 
 class TermsAgreementInline(TabularInline):
@@ -70,3 +72,21 @@ class TermsVersionAdmin(ModelAdmin):
 badgr_admin.register(TermsVersion, TermsVersionAdmin)
 
 
+class UserProvisionmentCreateForm(ModelForm):
+
+    class Meta:
+        model = UserProvisionment
+        fields = ('email',)
+
+
+class UserProvisionmentAdmin(ModelAdmin):
+    form = UserProvisionmentCreateForm
+
+    def save_model(self, request, obj, form, change):
+        obj.created_by = request.user
+        obj.data = PermissionedRelationshipBase.full_permissions()
+        obj.for_teacher = True
+        obj.type = obj.TYPE_FIRST_ADMIN_INVITATION
+        obj.save()
+
+badgr_admin.register(UserProvisionment, UserProvisionmentAdmin)

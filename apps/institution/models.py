@@ -12,7 +12,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
     def __str__(self):
         return self.name
 
-    identifier = models.CharField(max_length=255, null=True)
+    identifier = models.CharField(max_length=255, unique=True, null=True)
     name = models.CharField(max_length=255, unique=True)
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.InstitutionStaff", related_name='+')
     description = models.CharField(max_length=256, blank=True, null=True, default=None)

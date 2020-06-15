@@ -36,15 +36,17 @@ from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClass
 class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
     user = models.ForeignKey('badgeuser.BadgeUser', null=True, on_delete=models.CASCADE)
     email = models.EmailField()
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()  # id of the related object the invitation was for
+    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField(null=True)  # id of the related object the invitation was for
     entity = GenericForeignKey('content_type', 'object_id')
     data = JSONField(null=True)
     for_teacher = models.BooleanField()
     rejected = models.BooleanField(default=False)
     TYPE_INVITATION = 'Invitation'  # invitation to the application
+    TYPE_FIRST_ADMIN_INVITATION = 'FirstAdminInvitation'  # invitation to the application
     TYPE_CHOICES = (
         (TYPE_INVITATION, 'Invitation'),
+        (TYPE_FIRST_ADMIN_INVITATION, 'FirstAdminInvitation'),
     )
     type = models.CharField(max_length=254, choices=TYPE_CHOICES)
     notes = models.TextField(blank=True, null=True, default=None)
@@ -89,6 +91,12 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
         except BadgeUser.DoesNotExist:
             pass
 
+
+    def add_entity(self, entity):
+        self.content_type = ContentType.objects.get_for_model(entity)
+        self.object_id = entity.pk
+        self.save()
+
     # @property
     # def acceptance_link(self):
     #     return OriginSetting.HTTP + reverse('user_provision_accept', kwargs={'entity_id': self.entity_id})
@@ -128,7 +136,8 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
 
     def save(self, *args, **kwargs):
         self._run_validations()
-        self.entity.remove_cached_data(['cached_userprovisionments'])
+        if self.entity:
+            self.entity.remove_cached_data(['cached_userprovisionments'])
         return super(UserProvisionment, self).save(*args, **kwargs)
 
 
