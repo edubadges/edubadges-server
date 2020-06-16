@@ -186,11 +186,7 @@ def after_terms_agreement(request, **kwargs):
     request.session['lti_roles'] = lti_roles
     if not request.user.is_authenticated:
         print((request.__dict__))
-    # override the response with a redirect to staff dashboard if the login came from there
-    if referer == 'staff':
-        return HttpResponseRedirect(reverse('admin:index'))
-    else:
-        return ret
+    return ret
 
 
 @csrf_exempt
