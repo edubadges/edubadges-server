@@ -20,7 +20,7 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
                            'data': {'may_administrate_users': True},
                            'type': UserProvisionment.TYPE_INVITATION}
         response = self.client.post('/v1/user/provision/create', json.dumps([invitation_json]), content_type='application/json')
-        self.assertTrue(not not response.data[0]['user'])
+        self.assertTrue(not not response.data[0]['message']['user'])
         teacher2.match_provisionments()  # happens at login
         self.assertTrue(not teacher2.get_permissions(faculty)['may_administrate_users'])
         query = 'query foo {currentUser {entityId userprovisionments {entityId}}}'
@@ -44,7 +44,7 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
                            'data': {'may_administrate_users': True},
                            'type': UserProvisionment.TYPE_INVITATION}
         response = self.client.post('/v1/user/provision/create', json.dumps([invitation_json]), content_type='application/json')
-        self.assertTrue(not response.data[0]['user'])
+        self.assertTrue(not response.data[0]['message']['user'])
 
         # success for non existing user
         new_teacher = self.setup_teacher(institution=teacher1.institution, email=email)
@@ -123,7 +123,7 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
                            'type': UserProvisionment.TYPE_INVITATION}
         response = self.client.post('/v1/user/provision/create', json.dumps([invitation_json]),
                                     content_type='application/json')
-        self.assertTrue(not response.data[0]['user'])
+        self.assertTrue(not response.data[0]['message']['user'])
         new_teacher = self.setup_teacher(institution=teacher1.institution, email=email)
         new_teacher.match_provisionments()
         query = 'query foo {currentUser {entityId userprovisionments {entityId}}}'
@@ -175,7 +175,7 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
         invitation_edit = {'data': {'may_sign': False}, 'email': 'kjajajaj'}
         # test unauthorized
         self.authenticate(unauthorized_teacher)
-        invitation_entity_id = response.data[0]['entity_id']
+        invitation_entity_id = response.data[0]['message']['entity_id']
         failed_response = self.client.put('/v1/user/provision/edit/{}'.format(invitation_entity_id), json.dumps(invitation_edit), content_type='application/json')
         self.assertEqual(failed_response.status_code, 404)
         failed_response = self.client.delete('/v1/user/provision/edit/{}'.format(invitation_entity_id))
@@ -211,8 +211,7 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
         invitation_json['object_id'] = faculty.entity_id
         invitation_json['email'] = email
         response = self.client.post('/v1/user/provision/create', json.dumps([invitation_json]), content_type='application/json')
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data[0].__str__(), 'There may be only one invite per email address.')
+        self.assertEqual(response.data[0]['message'][0].__str__(), 'There may be only one invite per email address.')
 
     def test_provisionment_for_other_institution_failure(self):
         teacher1 = self.setup_teacher(authenticate=True)
@@ -232,7 +231,7 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
         invitation_json['email'] = new_non_colleague_email
         response_success = self.client.post('/v1/user/provision/create', json.dumps([invitation_json]), content_type='application/json')
         new_non_colleague = self.setup_teacher(email=new_non_colleague_email)
-        failing_provisionment = UserProvisionment.objects.get(entity_id=response_success.data[0]['entity_id'])
+        failing_provisionment = UserProvisionment.objects.get(entity_id=response_success.data[0]['message']['entity_id'])
         try:
             failing_provisionment.match_user(new_non_colleague)
             self.assertTrue(False)
@@ -260,7 +259,7 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
                            'data': {'may_sign': True},
                            'type': UserProvisionment.TYPE_INVITATION}
         response_failure = self.client.post('/v1/user/provision/create', json.dumps([invitation_json]), content_type='application/json')
-        self.assertEqual(response_failure.data[0].__str__(), 'Cannot invite user for this entity. There is a conflicting staff membership.')
+        self.assertEqual(response_failure.data[0]['message'][0].__str__(), 'Cannot invite user for this entity. There is a conflicting staff membership.')
 
     def test_provision_multiple_users(self):
         teacher1 = self.setup_teacher(authenticate=True)
@@ -280,10 +279,20 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
                        'for_teacher': True,
                        'data': {'may_administrate_users': True},
                        'type': UserProvisionment.TYPE_INVITATION}
-        response = self.client.post('/v1/user/provision/create', json.dumps([invitation1, invitation2]),
+        failing_post_on_validation = {'content_type': ContentType.objects.get_for_model(faculty).pk,
+                                      'object_id': faculty.entity_id,
+                                      'email': 'invalid',
+                                      'for_teacher': True,
+                                      'data': {'may_administrate_users': True},
+                                      'type': UserProvisionment.TYPE_INVITATION}
+        failing_post_on_save = invitation1
+        response = self.client.post('/v1/user/provision/create',
+                                    json.dumps([invitation1, invitation2, failing_post_on_save,
+                                                failing_post_on_validation]),
                                     content_type='application/json')
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.data.__len__(), 2)
+        self.assertEqual(response.data.__len__(), 4)
+
 
 class BadgeuserGraphqlTest(BadgrTestCase):
 

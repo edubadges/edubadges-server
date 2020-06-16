@@ -10,7 +10,7 @@ from django.http import Http404
 from django.utils import timezone
 from rest_framework import permissions, status
 from rest_framework.response import Response
-from rest_framework.serializers import BaseSerializer
+from rest_framework.serializers import BaseSerializer, ValidationError
 from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND
 
 from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken, UserProvisionment
@@ -183,10 +183,20 @@ class UserCreateProvisionment(BaseEntityListView):
 
     def post(self, request, **kwargs):
         context = self.get_context_data(**kwargs)
-        serializer = self.v1_serializer_class(many=True, data=request.data, context=context)
-        serializer.is_valid()
-        new_instances = serializer.save(created_by=request.user)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        response = []
+        for provisionment in request.data:
+            serializer = self.v1_serializer_class(data=provisionment, context=context)
+            try:
+                serializer.is_valid(raise_exception=True)
+                serializer.save(created_by=request.user)
+                message = {'status': 'success',
+                           'message': serializer.data}
+            except ValidationError as e:
+                message = {'status': 'failure',
+                           'message': e.detail}
+            message['email'] = provisionment['email']
+            response.append(message)
+        return Response(response, status=status.HTTP_201_CREATED)
 
 
 class UserProvisionmentDetail(BaseEntityDetailView):
