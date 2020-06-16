@@ -34,13 +34,17 @@ class PermissionedModelMixin(object):
             return perm_count == len(required_permissions)
         return False
 
-    def user_has_a_staff_membership_in_this_branch(self, user):
-        """check to see if given user already has another staff membership in the current branch"""
+    def get_all_staff_memberships_in_current_branch(self, user):
+        """
+        returns all staff memberships beloning to this user in the branch that this entity is part of
+        :param user: BadgeUser
+        :return: required_permissions: a list of staff memberships
+        """
         all_entities_in_my_branch = self._get_all_entities_in_branch()
         all_staff_memberships_in_my_branch = []
         for entity in all_entities_in_my_branch:
             all_staff_memberships_in_my_branch += entity.cached_staff()
-        return bool([staff for staff in all_staff_memberships_in_my_branch if staff.user == user and staff != self])
+        return [staff for staff in all_staff_memberships_in_my_branch if staff.user == user]
 
 
     def _get_all_entities_in_branch(self, check_parents=True, check_children=True):

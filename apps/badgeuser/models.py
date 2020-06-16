@@ -62,7 +62,7 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
 
     def _validate_staff_collision(self):
         """validate to see if there is a conflicting staff membership for the entity"""
-        if self.user and self.entity.user_has_a_staff_membership_in_this_branch(self.user):
+        if self.user and self.entity.get_all_staff_memberships_in_current_branch(self.user):
             raise serializers.ValidationError('Cannot invite user for this entity. There is a conflicting staff membership.')
 
     def get_permissions(self, user):
