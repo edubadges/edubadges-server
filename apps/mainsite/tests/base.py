@@ -108,10 +108,11 @@ class SetupHelper(object):
         return user
 
     def setup_student(self, first_name='', last_name='', authenticate=False, institution=None):
+        first_name = name_randomiser('student_first_name') if not first_name else first_name
+        last_name = name_randomiser('student_last_name') if not last_name else last_name
         user = self._setup_user(first_name, last_name, authenticate, institution=institution)
         self._add_eduid_socialaccount(user)
         return user
-
 
     def enroll_user(self, recipient, badgeclass):
         assertion_post_data = {"email": "test@example.com",

@@ -23,6 +23,7 @@ from django.utils import timezone
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager
 from jsonfield import JSONField
+from mainsite.exceptions import BadgrValidationError
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage, ImageUrlGetterMixin
 from mainsite.models import BadgrApp, EmailBlacklist, BaseAuditedModel
 from mainsite.utils import OriginSetting, generate_entity_uri
@@ -40,15 +41,6 @@ from .utils import generate_sha256_hashstring, CURRENT_OBI_VERSION, get_obi_cont
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 logger = logging.getLogger('Badgr.Debug')
-
-
-def get_user_or_none(recipient_identifier):
-    from allauth.socialaccount.models import SocialAccount
-    try:
-        soc_acc = SocialAccount.objects.get(uid=recipient_identifier)
-        return soc_acc.user
-    except SocialAccount.DoesNotExist:
-        return None
 
 
 class OriginalJsonMixin(models.Model):
@@ -518,22 +510,39 @@ class BadgeClass(EntityUserProvisionmentMixin,
     def get_extensions_manager(self):
         return self.badgeclassextension_set
 
-    def issue(self, recipient_id=None, notify=False, created_by=None, allow_uppercase=False, badgr_app=None, **kwargs):
-        return BadgeInstance.objects.create(
-            badgeclass=self, recipient_identifier=recipient_id,
+    def add_recipient_profile_extension(self, extensions, user):
+        full_name = user.get_full_name()
+        if full_name:
+            recipient_profile_extension = {"@context": "https://openbadgespec.org/extensions/recipientProfile/context.json",
+                                           "type": ["Extension", "extensions:RecipientProfile"],
+                                           "name": full_name}
+            if extensions:
+                extensions["extensions:recipientProfile"] = recipient_profile_extension
+            else:
+                extensions = {"extensions:recipientProfile": recipient_profile_extension}
+            return extensions
+        else:
+            raise BadgrValidationError(fields="User has no full name, cannot create recipientProfile extension")
+
+    def issue(self, recipient, notify=False, created_by=None, allow_uppercase=False, badgr_app=None, extensions=None, **kwargs):
+        extensions = self.add_recipient_profile_extension(extensions, recipient)
+        instance = BadgeInstance.objects.create(
+            badgeclass=self, recipient_identifier=recipient.get_recipient_identifier(),
             notify=notify, created_by=created_by, allow_uppercase=allow_uppercase,
-            badgr_app=badgr_app, user=get_user_or_none(recipient_id),
+            badgr_app=badgr_app, user=recipient, extensions=extensions,
             **kwargs
         )
+        return instance
 
-    def issue_signed(self, recipient_id=None, created_by=None, allow_uppercase=False, badgr_app=None, signer=None, **kwargs):
+    def issue_signed(self, recipient, created_by=None, allow_uppercase=False, badgr_app=None, signer=None, extensions=None, **kwargs):
         perms = self.get_permissions(signer)
         if not perms['may_sign']:
             raise serializers.ValidationError('You do not have permission to sign badges for this badgeclass.')
+        extensions = self.add_recipient_profile_extension(extensions, recipient)
         assertion = BadgeInstance.objects.create(
-            badgeclass=self, recipient_identifier=recipient_id, notify=False,  # notify after signing
+            badgeclass=self, recipient_identifier=recipient.get_recipient_identifier(), notify=False,  # notify after signing
             created_by=created_by, allow_uppercase=allow_uppercase,
-            badgr_app=badgr_app, user=get_user_or_none(recipient_id),
+            badgr_app=badgr_app, user=recipient, extensions=extensions,
             **kwargs
         )
         assertion.submit_for_timestamping(signer=signer)

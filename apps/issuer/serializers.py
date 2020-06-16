@@ -346,7 +346,6 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         """
         badgeclass = self.context['request'].data.get('badgeclass')
         enrollment = StudentsEnrolled.objects.get(entity_id=validated_data.get('enrollment_entity_id'))
-        recipient_id = enrollment.user.get_recipient_identifier()
         expires_at = None
         if badgeclass.expiration_period:
             expires_at = datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0) + badgeclass.expiration_period
@@ -355,7 +354,7 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
                                        .format(validated_data.get('enrollment_entity_id')))
         if self.context['request'].data.get('issue_signed', False):
             assertion = badgeclass.issue_signed(
-                recipient_id=recipient_id,
+                recipient=enrollment.user,
                 created_by=self.context.get('request').user,
                 allow_uppercase=validated_data.get('allow_uppercase'),
                 recipient_type=validated_data.get('recipient_type', BadgeInstance.RECIPIENT_TYPE_EDUID),
@@ -367,7 +366,7 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
             )
         else:
             assertion = badgeclass.issue(
-                recipient_id=recipient_id,
+                recipient=enrollment.user,
                 notify=self.context['request'].data.get('create_notification'),
                 created_by=self.context.get('request').user,
                 allow_uppercase=validated_data.get('allow_uppercase'),

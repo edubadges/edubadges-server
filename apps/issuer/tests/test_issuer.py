@@ -86,6 +86,7 @@ class IssuerAPITest(BadgrTestCase):
                       "enrollments": [{"enrollment_entity_id": enrollment_response.data['entity_id']}]}
         award_response = self.client.post('/issuer/badgeclasses/award-enrollments/{}'.format(badgeclass.entity_id),
                                           json.dumps(award_body), content_type='application/json')
+        self.assertTrue(bool(award_response.data[0]['extensions']['extensions:recipientProfile']['name']))
         self.assertEqual(len(student.cached_badgeinstances()), 1)  # test cache update
         self.assertEqual(len(badgeclass.cached_assertions()), 1)  # test cache update
         self.assertEqual(award_response.status_code, 201)

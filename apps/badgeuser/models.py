@@ -521,7 +521,10 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         return self.symmetrickey_set.get(current=True)
 
     def get_full_name(self):
-        return "%s %s" % (self.first_name, self.last_name)
+        if self.first_name and self.last_name:
+            return "%s %s" % (self.first_name, self.last_name)
+        else:
+            return ''
 
     def match_provisionments(self):
         """Used to match provisions on initial login"""
