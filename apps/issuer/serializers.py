@@ -379,6 +379,7 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         enrollment.date_awarded = timezone.now()
         enrollment.badge_instance = assertion
         enrollment.save()
+        enrollment.user.remove_cached_data(['cached_pending_enrollments'])
         return assertion
 
     def update(self, instance, validated_data):

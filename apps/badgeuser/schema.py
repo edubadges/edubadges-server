@@ -6,7 +6,8 @@ from institution.schema import InstitutionType
 from mainsite.exceptions import GraphQLException
 from staff.schema import InstitutionStaffType, FacultyStaffType, IssuerStaffType, BadgeClassStaffType
 from mainsite.graphql_utils import UserProvisionmentType, resolver_blocker_only_for_current_user, resolver_blocker_for_students
-
+from lti_edu.schema import StudentsEnrolledType
+from lti_edu.models import StudentsEnrolled
 
 class BadgeUserType(DjangoObjectType):
 
@@ -20,6 +21,7 @@ class BadgeUserType(DjangoObjectType):
     issuer_staffs = graphene.List(IssuerStaffType)
     badgeclass_staffs = graphene.List(BadgeClassStaffType)
     userprovisionments = graphene.List(UserProvisionmentType)
+    pending_enrollments = graphene.List(StudentsEnrolledType)
 
     def resolve_institution_staff(self, info):
         return self.cached_institution_staff()
@@ -36,6 +38,10 @@ class BadgeUserType(DjangoObjectType):
     @resolver_blocker_only_for_current_user
     def resolve_userprovisionments(self, info):
         return list(self.userprovisionment_set.all())
+
+    @resolver_blocker_only_for_current_user
+    def resolve_pending_enrollments(self, info):
+        return info.context.user.cached_pending_enrollments()
 
 
 class Query(object):

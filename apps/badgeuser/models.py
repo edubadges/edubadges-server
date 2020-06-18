@@ -302,6 +302,10 @@ class UserCachedObjectGetterMixin(object):
     def cached_badgeinstances(self):
         return BadgeInstance.objects.filter(user=self)
 
+    @cachemodel.cached_method()
+    def cached_pending_enrollments(self):
+        return StudentsEnrolled.objects.filter(user=self, badge_instance=None)
+
     # @cachemodel.cached_method(auto_publish=True)
     # turned it off, because if user logs in for FIRST time, this caching will result in the user having no verified emails.
     # This results in api calls responding with a 403 after the failure of the AuthenticatedWithVerifiedEmail permission check.
