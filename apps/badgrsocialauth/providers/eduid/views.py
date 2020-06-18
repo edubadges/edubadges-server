@@ -188,14 +188,12 @@ def after_terms_agreement(request, **kwargs):
 
 def create_edu_id_badge_instance(request, social_login):
     user = social_login.user
-    social_account = social_login.account
     super_user = BadgeUser.objects.get(username=settings.SUPERUSER_NAME)
     badge_class = BadgeClass.objects.get(name=settings.EDUID_BADGE_CLASS_NAME)
 
-    assertion = badge_class.issue(recipient_id=social_account.uid, created_by=super_user, allow_uppercase=True,
+    assertion = badge_class.issue(recipient=user, created_by=super_user, allow_uppercase=True,
                                   recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID,
-                                  badgr_app=get_session_badgr_app(request), expires_at=None, extensions=None,
-                                  identifier=uuid.uuid4().urn)
+                                  badgr_app=get_session_badgr_app(request), expires_at=None, extensions=None)
     logger.info(f"Assertion created for {user.email} based on {badge_class.name}")
 
 
