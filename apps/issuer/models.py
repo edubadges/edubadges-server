@@ -525,7 +525,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
             raise BadgrValidationError(fields="User has no full name, cannot create recipientProfile extension")
 
     def issue(self, recipient, notify=False, created_by=None, allow_uppercase=False, badgr_app=None, extensions=None, **kwargs):
-        extensions = self.add_recipient_profile_extension(extensions, recipient)
+        # extensions = self.add_recipient_profile_extension(extensions, recipient)
         instance = BadgeInstance.objects.create(
             badgeclass=self, recipient_identifier=recipient.get_recipient_identifier(),
             notify=notify, created_by=created_by, allow_uppercase=allow_uppercase,
@@ -538,7 +538,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
         perms = self.get_permissions(signer)
         if not perms['may_sign']:
             raise serializers.ValidationError('You do not have permission to sign badges for this badgeclass.')
-        extensions = self.add_recipient_profile_extension(extensions, recipient)
+        # extensions = self.add_recipient_profile_extension(extensions, recipient)
         assertion = BadgeInstance.objects.create(
             badgeclass=self, recipient_identifier=recipient.get_recipient_identifier(), notify=False,  # notify after signing
             created_by=created_by, allow_uppercase=allow_uppercase,
