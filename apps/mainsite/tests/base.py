@@ -156,8 +156,7 @@ class SetupHelper(object):
         )
 
     def setup_assertion(self, recipient, badgeclass, created_by):
-        recipient_id = recipient.get_recipient_identifier()
-        return badgeclass.issue(recipient_id=recipient_id, created_by=created_by)
+        return badgeclass.issue(recipient=recipient, created_by=created_by)
 
     def setup_staff_membership(self, user, object, may_create=False, may_read=False,
                                may_update=False, may_delete=False, may_award=False,
