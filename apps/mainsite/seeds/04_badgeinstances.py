@@ -18,9 +18,8 @@ badgr_app = BadgrApp.objects.get(id=1)
 def create_badge_instance(user, badge_class, revoked, acceptance="Unaccepted"):
     social_account = SocialAccount.objects.get(user=user)
 
-    badge_class.issue(recipient_id=social_account.uid, created_by=super_user, allow_uppercase=True,
-                      recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID, acceptance=acceptance,
-                      badgr_app=badgr_app, identifier=uuid.uuid4().urn, revoked=revoked)
+    badge_class.issue(recipient=user, created_by=super_user, allow_uppercase=True,
+                      acceptance=acceptance, badgr_app=badgr_app, identifier=uuid.uuid4().urn, revoked=revoked)
 
 
 # Create enrollments
