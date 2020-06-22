@@ -146,16 +146,13 @@ class IssuerExtensionsTest(BadgrTestCase):
         badgeclass_json['issuer'] = issuer.entity_id
         response = self.client.post('/issuer/badgeclasses/create', json.dumps(badgeclass_json), content_type='application/json')
         badgeclass = BadgeClass.objects.get(entity_id=response.data['entity_id'])
-        self.assertEqual(badgeclass.extension_items.__len__(), 3)
+        self.assertEqual(badgeclass.extension_items.__len__(), 2)
         ects_extension = badgeclass_json['extensions'].pop('extensions:ECTSExtension')
         response = self.client.put('/issuer/badgeclasses/edit/{}'.format(badgeclass.entity_id), json.dumps(badgeclass_json), content_type='application/json')
-        self.assertEqual(badgeclass.extension_items.__len__(), 2)
+        self.assertEqual(badgeclass.extension_items.__len__(), 1)
         badgeclass_json['extensions']['extensions:ECTSExtension'] = ects_extension
         response = self.client.put('/issuer/badgeclasses/edit/{}'.format(badgeclass.entity_id), json.dumps(badgeclass_json), content_type='application/json')
-        self.assertEqual(badgeclass.extension_items.__len__(), 3)
-
-    def test_validate_extensions_context(self):
-        pass
+        self.assertEqual(badgeclass.extension_items.__len__(), 2)
 
     def test_institution_vars_end_up_in_issuer_json_as_extensions(self):
         pass

@@ -5,7 +5,7 @@ issuer_json = {"name": "test issuer",
                 "url": "http://www.surfnet.nl",
                "extensions":
                    {"extensions:GradingTableExtension": {
-                       "@context": "https://openbadgespec.org/extensions/GradingTableExtension/context.json",
+                       "@context": "https://api-test.edubadges.nl/static/extensions/GradingTableExtension/context.json",
                        "type": ["Extension", "extensions:GradingTableExtension"],
                        "GradingTableURL": "https://www.eur.nl/onderwijs/praktische-zaken/afstuderen/ects-grading-table"
                    }},
@@ -16,17 +16,17 @@ badgeclass_json = {"name": "test badgeclass", "description": "test description",
                    "criteria_text": "test criteria", "criteria_url": "http://www.surfnet.nl",
                    "extensions": {
                        "extensions:ECTSExtension": {
-                           "@context": "https://openbadgespec.org/extensions/ECTSExtension/context.json",
+                           "@context": "https://api-test.edubadges.nl/static/extensions/ECTSExtension/context.json",
                            "type": ["Extension", "extensions:ECTSExtension"],
                            "ECTS": 2.5
                        },
-                       "extensions:StudyLoadExtension": {
-                           "@context": "https://openbadgespec.org/extensions/StudyLoadExtension/context.json",
-                           "type": ["Extension", "extensions:StudyLoadExtension"],
-                           "StudyLoadHours": 24
-                       },
+                       # "extensions:StudyLoadExtension": {
+                       #     "@context": "https://api-test.edubadges.nl/static/extensions/StudyLoadExtension/context.json",
+                       #     "type": ["Extension", "extensions:StudyLoadExtension"],
+                       #     "StudyLoadHours": 24
+                       # },
                        "extensions:LanguageExtension": {
-                           "@context": "https://openbadgespec.org/extensions/LanguageExtension/context.json",
+                           "@context": "https://api-test.edubadges.nl/static/extensions/LanguageExtension/context.json",
                            "type": ["Extension", "extensions:LanguageExtension"],
                            "Language": "nl_NL"
                        }

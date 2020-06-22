@@ -22,6 +22,7 @@ from mainsite.models import BadgrApp
 from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField, \
     OriginalJsonSerializerMixin, BaseSlugRelatedField
 from mainsite.utils import OriginSetting
+from mainsite.validators import BadgeExtensionValidator
 from . import utils
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension
 
@@ -82,7 +83,7 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serial
     description = StripTagsCharField(max_length=16384, required=False)
     url = serializers.URLField(max_length=1024, required=True)
     faculty = FacultySlugRelatedField(slug_field='entity_id', required=True)
-    extensions = serializers.DictField(source='extension_items', required=False)
+    extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
 
     class Meta:
         apispec_definition = ('Issuer', {})
@@ -159,7 +160,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
     description = StripTagsCharField(max_length=16384, required=True, convert_null=True)
     alignment = AlignmentItemSerializer(many=True, source='alignment_items', required=False)
     tags = serializers.ListField(child=StripTagsCharField(max_length=1024), source='tag_items', required=False)
-    extensions = serializers.DictField(source='extension_items', required=False)
+    extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
     expiration_period = PeriodField(required=False)
 
     class Meta:
@@ -272,7 +273,7 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
     create_notification = HumanReadableBooleanField(write_only=True, required=False, default=False)
 
     hashed = serializers.NullBooleanField(default=None, required=False)
-    extensions = serializers.DictField(source='extension_items', required=False)
+    extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
 
     class Meta:
         apispec_definition = ('Assertion', {})
