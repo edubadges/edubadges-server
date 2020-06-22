@@ -6,7 +6,7 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework.exceptions import ValidationError
 
 from mainsite.utils import verify_svg
-from issuer.helpers import DjangoCacheRequestsCacheBackend
+
 
 class ValidImageValidator(object):
     """
