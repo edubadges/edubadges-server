@@ -166,7 +166,7 @@ class ObjectPermissionTests(BadgrTestCase):
         badgeclass1 = self.setup_badgeclass(issuer=issuer1)
         # test branch returns
         branchfrom_issuer1_viewpoint = [teacher1.institution, issuer1, faculty, badgeclass, badgeclass1]
-        branch = issuer1._get_all_entities_in_branch()
+        branch = issuer1.get_all_entities_in_branch()
         # returned branch and expected branch are similar
         self.assertEqual(collections.Counter(branch), collections.Counter(branchfrom_issuer1_viewpoint))
         # test staff member duplicates in branch throws exception

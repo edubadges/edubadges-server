@@ -40,14 +40,14 @@ class PermissionedModelMixin(object):
         :param user: BadgeUser
         :return: required_permissions: a list of staff memberships
         """
-        all_entities_in_my_branch = self._get_all_entities_in_branch()
+        all_entities_in_my_branch = self.get_all_entities_in_branch()
         all_staff_memberships_in_my_branch = []
         for entity in all_entities_in_my_branch:
             all_staff_memberships_in_my_branch += entity.cached_staff()
         return [staff for staff in all_staff_memberships_in_my_branch if staff.user == user]
 
 
-    def _get_all_entities_in_branch(self, check_parents=True, check_children=True):
+    def get_all_entities_in_branch(self, check_parents=True, check_children=True):
         """
         Recursively walks the tree up and down to get all the entities of the current branch (where self is a node).
         returns self, all the parents and all the children
@@ -55,13 +55,13 @@ class PermissionedModelMixin(object):
         entities = [self]
         if check_parents:
             try:
-                entities += self.parent._get_all_entities_in_branch(check_children=False)
+                entities += self.parent.get_all_entities_in_branch(check_children=False)
             except AttributeError:
                 return entities
         if check_children:
             try:
                 for child in self.children:
-                    entities += child._get_all_entities_in_branch(check_parents=False)
+                    entities += child.get_all_entities_in_branch(check_parents=False)
             except AttributeError:
                 return entities
         return entities

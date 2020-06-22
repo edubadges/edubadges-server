@@ -53,17 +53,28 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
 
     def _validate_unique(self, exclude=None):
         """Custom uniqueness validation of the provisionment, used before save"""
-        if self.type == self.TYPE_INVITATION and UserProvisionment.objects.filter(type=self.type,
-                                                                                  rejected=False,
-                                                                                  for_teacher=self.for_teacher,
-                                                                                  email=self.email).exclude(pk=self.pk).exists():
+        if self.type == self.TYPE_FIRST_ADMIN_INVITATION and UserProvisionment.objects.filter(
+                type=self.type,
+                rejected=False,
+                for_teacher=self.for_teacher,
+                email=self.email).exclude(pk=self.pk).exists():
             raise serializers.ValidationError('There may be only one invite per email address.')
         return super(UserProvisionment, self).validate_unique(exclude=exclude)
 
     def _validate_staff_collision(self):
-        """validate to see if there is a conflicting staff membership for the entity"""
+        """validate to see if there is a existing staff membership that conflicts for the entity of this invite"""
         if self.user and self.entity.get_all_staff_memberships_in_current_branch(self.user):
             raise serializers.ValidationError('Cannot invite user for this entity. There is a conflicting staff membership.')
+
+    def _validate_invite_collision(self):
+        """validate to see if the there is another invite that collides with this one
+         (i.e. if noth are created the staff memberships will collide"""
+        if self.user:
+            all_entities_in_same_branch = self.entity.get_all_entities_in_branch()
+            all_invites_for_user = self.user.get_invites()
+            for invite in all_invites_for_user:
+                if invite != self and invite.entity in all_entities_in_same_branch:
+                    raise serializers.ValidationError('Cannot invite user for this entity. There is a conflicting invite.')
 
     def get_permissions(self, user):
         return self.entity.get_permissions(user)
@@ -133,6 +144,7 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
     def _run_validations(self):
         self._validate_unique()
         self._validate_staff_collision()
+        self._validate_invite_collision()
 
     def save(self, *args, **kwargs):
         self._run_validations()
@@ -619,6 +631,9 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
             return account
         except SocialAccount.DoesNotExist:
             return None
+
+    def get_invites(self):
+        return UserProvisionment.objects.filter(user=self)
 
     @property
     def is_student(self):
