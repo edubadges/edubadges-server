@@ -3,6 +3,7 @@ from django.forms.models import model_to_dict
 from rest_framework import serializers
 
 from entity.models import BaseVersionedEntity
+from mainsite.exceptions import BadgrValidationError
 from signing.models import SymmetricKey
 
 
@@ -123,6 +124,16 @@ class InstitutionStaff(PermissionedRelationshipBase):
     @property
     def object(self):
         return self.institution
+
+    def _is_last_staff_membership(self):
+        there_are_other_staffs = bool(InstitutionStaff.objects.filter(institution=self.institution,
+                                                                      may_administrate_users=True).exclude(pk=self.pk))
+        return not there_are_other_staffs
+
+    def delete(self, *args, **kwargs):
+        if self._is_last_staff_membership():
+            raise BadgrValidationError(fields='Cannot remove the last staff membership of this institution.')
+        return super(InstitutionStaff, self).delete(*args, **kwargs)
 
 
 class FacultyStaff(PermissionedRelationshipBase):
