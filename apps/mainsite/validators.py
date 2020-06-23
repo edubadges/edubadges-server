@@ -2,7 +2,6 @@
 
 import openbadges.verifier
 
-from django.contrib.auth.password_validation import validate_password
 from rest_framework.exceptions import ValidationError
 
 from mainsite.utils import verify_svg
@@ -24,11 +23,6 @@ class ValidImageValidator(object):
             else:
                 if img.format != "PNG":
                     raise ValidationError('Invalid PNG')
-
-
-class PasswordValidator(object):
-    def __call__(self, value):
-        validate_password(value)
 
 
 class BadgeExtensionValidator(object):
