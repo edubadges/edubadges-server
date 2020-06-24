@@ -77,18 +77,12 @@ def login(request):
         "client_id": current_app.client_id,
         "response_type": "code",
         "scope": "openid",
+        "acr_values": "https://eduid.nl/trust/validate-names",
         'redirect_uri': '%s/account/eduid/login/callback/' % settings.HTTP_ORIGIN,
 
     }
     args = urllib.parse.urlencode(params)
-    is_registration = request.GET.get('isRegistration', None)
-    if is_registration == 'True':
-        # Request an new eduID
-        location = f"{settings.EDUID_PROVIDER_URL}/authorize?{args}"
-        registration_url = f"{settings.EDUID_REGISTRATION_URL}?location={urllib.parse.quote(location)}"
-        return redirect(registration_url)
-
-    # Login with existing eduID
+    # Redirect to eduID and enforce a linked SURFconext user with validated names
     login_url = f"{settings.EDUID_PROVIDER_URL}/authorize?{args}"
     return redirect(login_url)
 
