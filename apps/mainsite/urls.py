@@ -85,6 +85,8 @@ urlpatterns = [
 
     # Accept Terms View
     url(r'^accept_terms/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', TermsAndConditionsView.as_view(), name='accept_terms'),
+    # TODO we want to work with id_token pre-populated with user_claims
+    url(r'^accept_terms/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<id_token>[^/]+)', TermsAndConditionsView.as_view(), name='accept_terms'),
     url(r'^accept_terms_resign/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', TermsAndConditionsResignView.as_view(), name='accept_terms_resign'),
     url(r'^accept_terms_resign_accepted/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', AcceptTermsAndConditionsView.as_view(), name='accept_terms_resign_accepted'),
 

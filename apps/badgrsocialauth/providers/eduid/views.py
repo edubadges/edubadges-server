@@ -3,7 +3,7 @@ import logging
 import urllib.error
 import urllib.parse
 import urllib.request
-import uuid
+
 from base64 import b64encode
 from urllib.parse import urlparse
 
@@ -15,6 +15,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
+from jose import jwt
 
 from badgeuser.models import BadgeUser
 from badgrsocialauth.utils import set_session_badgr_app, get_social_account, update_user_params, \
@@ -78,8 +79,9 @@ def login(request):
         "response_type": "code",
         "scope": "openid",
         "acr_values": "https://eduid.nl/trust/validate-names",
-        'redirect_uri': '%s/account/eduid/login/callback/' % settings.HTTP_ORIGIN,
-
+        "redirect_uri": f"{settings.HTTP_ORIGIN}/account/eduid/login/callback/",
+        "claims": "{\"id_token\":{\"preferred_username\":null,\"given_name\":null,\"family_name\":null,\"email\":null,"
+                  "\"eduid\":null}}"
     }
     args = urllib.parse.urlencode(params)
     # Redirect to eduID and enforce a linked SURFconext user with validated names
@@ -101,47 +103,34 @@ def after_terms_agreement(request, **kwargs):
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
     set_session_badgr_app(request, badgr_app)
 
-    access_token = kwargs.get('access_token', None)
-    if not access_token:
+    id_token = kwargs.get('id_token', None)
+    payload = jwt.get_unverified_claims(id_token)
+    if not id_token:
         error = 'Sorry, we could not find your eduID credentials.'
         return render_authentication_error(request, EduIDProvider.id, error)
 
-    headers = {"Authorization": "Bearer " + access_token}
-    response = requests.get("{}/userinfo".format(settings.EDUID_PROVIDER_URL), headers=headers)
-    if response.status_code != 200:
-        error = 'Server error: User info endpoint error (http %s). Try alternative login methods' % response.status_code
-        logger.debug(error)
-        return render_authentication_error(request, EduIDProvider.id, error=error)
-
-    userinfo_json = response.json()
-
-    if 'sub' not in userinfo_json:
-        error = 'Sorry, your eduID account has no identifier.'
-        logger.debug(error)
-        return render_authentication_error(request, EduIDProvider.id, error)
-
-    social_account = get_social_account(userinfo_json['sub'])
+    social_account = get_social_account(payload['sub'])
     if not social_account:  # user does not exist
         # ensure that email & names are in extra_data
-        if 'email' not in userinfo_json:
+        if 'email' not in payload:
             error = 'Sorry, your eduID account does not have your institution mail. Login to eduID and link your institution account, then try again.'
             logger.debug(error)
             return render_authentication_error(request, EduIDProvider.id, error)
-        if 'family_name' not in userinfo_json:
+        if 'family_name' not in payload:
             error = 'Sorry, your eduID account has no family_name attached from SURFconext. Login to eduID and link your institution account, then try again.'
             logger.debug(error)
             return render_authentication_error(request, EduIDProvider.id, error)
-        if 'given_name' not in userinfo_json:
+        if 'given_name' not in payload:
             error = 'Sorry, your eduID account has no first_name attached from SURFconext. Login to eduID and link your institution account, then try again.'
             logger.debug(error)
             return render_authentication_error(request, EduIDProvider.id, error)
     else:  # user already exists
-        update_user_params(social_account.user, userinfo_json)
+        update_user_params(social_account.user, payload)
 
     # 3. Complete social login 
 
     provider = EduIDProvider(request)
-    login = provider.sociallogin_from_response(request, userinfo_json)
+    login = provider.sociallogin_from_response(request, payload)
 
     ret = complete_social_login(request, login)
     set_session_badgr_app(request, badgr_app)
@@ -172,7 +161,7 @@ def after_terms_agreement(request, **kwargs):
         if 'badges' in referer:
             badgeclass_slug = referer[-1]
             if badgeclass_slug:
-                edu_id = userinfo_json['sub']
+                edu_id = payload['sub']
                 enrolled = enroll_student(request.user, edu_id, badgeclass_slug)
         url = ret.url + '&public=true' + '&badgeclassSlug=' + badgeclass_slug + '&enrollmentStatus=' + enrolled
         return HttpResponseRedirect(url)
@@ -185,7 +174,8 @@ def create_edu_id_badge_instance(request, social_login):
     super_user = BadgeUser.objects.get(username=settings.SUPERUSER_NAME)
     badge_class = BadgeClass.objects.get(name=settings.EDUID_BADGE_CLASS_NAME)
 
-    assertion = badge_class.issue(recipient=user, created_by=super_user, allow_uppercase=True,
+    #Issue first badge for user
+    badge_class.issue(recipient=user, created_by=super_user, allow_uppercase=True,
                                   recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID,
                                   badgr_app=get_session_badgr_app(request), expires_at=None, extensions=None)
     logger.info(f"Assertion created for {user.email} based on {badge_class.name}")
@@ -218,28 +208,33 @@ def callback(request):
                }
     response = requests.post("{}/token".format(settings.EDUID_PROVIDER_URL), data=urllib.parse.urlencode(payload),
                              headers=headers)
-    token_json = response.json()
-
-    # 2. now with access token we can request userinfo
-    headers = {"Authorization": "Bearer " + token_json['access_token']}
-    response = requests.get("{}/userinfo".format(settings.EDUID_PROVIDER_URL), headers=headers)
     if response.status_code != 200:
         error = 'Server error: User info endpoint error (http %s). Try alternative login methods' % response.status_code
         logger.debug(error)
         return render_authentication_error(request, EduIDProvider.id, error=error)
-    userinfo_json = response.json()
 
-    keyword_arguments = {'access_token': token_json['access_token'],
+    token_json = response.json()
+    id_token = token_json['id_token']
+    payload = jwt.get_unverified_claims(id_token)
+
+    keyword_arguments = {'id_token': id_token,
                          'state': json.dumps([str(badgr_app_pk), 'edu_id', lti_context_id, lti_user_id, lti_roles] + [
                              json.loads(referer)]),
                          'after_terms_agreement_url_name': 'eduid_terms_accepted_callback'}
 
-    social_account = get_social_account(userinfo_json['sub'])
+    social_account = get_social_account(payload['sub'])
     if not social_account:
-        return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))
+        # Here we redirect to client
+        badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
+        signup_redirect = badgr_app.signup_redirect
+        # return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))
+        args = urllib.parse.urlencode(keyword_arguments)
+        return HttpResponseRedirect(f"{signup_redirect}?{args}")
 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
     if not check_agreed_term_and_conditions(social_account.user, badgr_app):
+        # Here we go the client
+
         redirect_to = reverse('accept_terms_resign', kwargs=keyword_arguments)
         return HttpResponseRedirect(redirect_to)
 

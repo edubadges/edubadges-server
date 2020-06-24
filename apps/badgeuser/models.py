@@ -417,7 +417,7 @@ class UserPermissionsMixin(object):
             All revoked: May enroll
         """
         social_account = self.get_social_account()
-        if social_account.provider == 'edu_id' or social_account.provider == 'surfconext_ala':
+        if social_account.provider == 'edu_id':
             enrollments = StudentsEnrolled.objects.filter(user=social_account.user, badge_class_id=badge_class.pk)
             if not enrollments:
                 return True  # no enrollments
