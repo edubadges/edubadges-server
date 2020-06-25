@@ -1,4 +1,5 @@
 from rest_framework.exceptions import APIException
+from rest_framework.serializers import ValidationError
 
 
 class BadgrApiException400(APIException):
@@ -10,7 +11,7 @@ class BadgrApiException400(APIException):
     status_code = 400
 
 
-class BadgrValidationError(APIException):
+class BadgrValidationError(ValidationError):
 
     status_code = 400
 

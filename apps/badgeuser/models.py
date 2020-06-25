@@ -19,7 +19,6 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
-from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
 from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager, EmailAddressCacheModelManager
@@ -58,23 +57,25 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
                 rejected=False,
                 for_teacher=self.for_teacher,
                 email=self.email).exclude(pk=self.pk).exists():
-            raise serializers.ValidationError('There may be only one invite per email address.')
+            raise BadgrValidationError(fields='There may be only one invite per email address.')
         return super(UserProvisionment, self).validate_unique(exclude=exclude)
 
     def _validate_staff_collision(self):
         """validate to see if there is a existing staff membership that conflicts for the entity of this invite"""
         if self.user and self.entity.get_all_staff_memberships_in_current_branch(self.user):
-            raise serializers.ValidationError('Cannot invite user for this entity. There is a conflicting staff membership.')
+            raise BadgrValidationError(fields='Cannot invite user for this entity. There is a conflicting staff membership.')
 
     def _validate_invite_collision(self):
         """validate to see if the there is another invite that collides with this one
-         (i.e. if noth are created the staff memberships will collide"""
-        if self.user:
-            all_entities_in_same_branch = self.entity.get_all_entities_in_branch()
-            all_invites_for_user = self.user.get_invites()
-            for invite in all_invites_for_user:
-                if invite != self and invite.entity in all_entities_in_same_branch:
-                    raise serializers.ValidationError('Cannot invite user for this entity. There is a conflicting invite.')
+         (i.e. if both are created the staff memberships will collide"""
+        all_entities_in_same_branch = self.entity.get_all_entities_in_branch()
+        # all_invites_for_user = self.user.get_invites()
+        all_invites_for_same_user = UserProvisionment.objects.filter(email=self.email)
+        for invite in all_invites_for_same_user:
+            if invite != self and invite.entity in all_entities_in_same_branch:
+                raise BadgrValidationError(fields='Cannot invite user for this entity. There is a conflicting invite.')
+                # from rest_framework import serializers
+                # raise serializers.ValidationError('Cannot invite user for this entity. There is a conflicting invite.')
 
     def get_permissions(self, user):
         return self.entity.get_permissions(user)
@@ -631,9 +632,6 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
             return account
         except SocialAccount.DoesNotExist:
             return None
-
-    def get_invites(self):
-        return UserProvisionment.objects.filter(user=self)
 
     @property
     def is_student(self):
