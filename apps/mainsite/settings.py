@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'badgrsocialauth.providers.eduid',
     'badgrsocialauth.providers.surf_conext',
-    'badgrsocialauth.providers.surfconext_ala',
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.azure',
     'allauth.socialaccount.providers.linkedin_oauth2',
@@ -542,7 +541,7 @@ SUPERUSER_EMAIL = os.environ.get('SUPERUSER_EMAIL', '')
 SUPERUSER_PWD = os.environ.get('SUPERUSER_PWD', '')
 
 # Used in 01_setup sed
-EDUID_BADGE_CLASS_NAME = "eduID Account creation"
+EDUID_BADGE_CLASS_NAME = "Edubadge account complete"
 
 # Debug
 DEBUG = legacy_boolean_parsing('DEBUG', '0')

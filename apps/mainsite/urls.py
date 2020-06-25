@@ -84,9 +84,9 @@ urlpatterns = [
     url(r'v1/', include('theming.api_urls'), kwargs={'version': 'v1'}),
 
     # Accept Terms View
-    url(r'^accept_terms/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', TermsAndConditionsView.as_view(), name='accept_terms'),
-    url(r'^accept_terms_resign/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', TermsAndConditionsResignView.as_view(), name='accept_terms_resign'),
-    url(r'^accept_terms_resign_accepted/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<access_token>[^/]+)', AcceptTermsAndConditionsView.as_view(), name='accept_terms_resign_accepted'),
+    url(r'^accept_terms/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<id_token>[^/]+)', TermsAndConditionsView.as_view(), name='accept_terms'),
+    url(r'^accept_terms_resign/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<id_token>[^/]+)', TermsAndConditionsResignView.as_view(), name='accept_terms_resign'),
+    url(r'^accept_terms_resign_accepted/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<id_token>[^/]+)', AcceptTermsAndConditionsView.as_view(), name='accept_terms_resign_accepted'),
 
     #  include signing endpoints
     url(r'^signing/', include('signing.api_urls')),
