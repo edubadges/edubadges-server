@@ -208,6 +208,14 @@ class ObjectPermissionTests(BadgrTestCase):
         self.assertTrue(response.status_code == 204)
         self.assertEqual(faculty1.staff_items.__len__(), 0)
 
+    def test_may_not_remove_last_institution_staff_membership(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        staff = self.setup_staff_membership(teacher1, teacher1.institution, may_administrate_users=True)
+        response = self.client.delete('/staff-membership/institution/change/{}'.format(staff.entity_id),
+                                      content_type='application/json')
+        self.assertTrue(response.status_code == 400)
+        self.assertEqual(response.data['fields'].__str__(), 'Cannot remove the last staff membership of this institution.')
+
     def test_cannot_delete_institution_staff_membership(self):
         teacher1 = self.setup_teacher(authenticate=True)
         teacher2 = self.setup_teacher(institution=teacher1.institution)
