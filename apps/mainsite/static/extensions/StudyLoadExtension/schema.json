@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Study Load Extension",
+  "description": "An extension that allows you to add the study load in hours to a badgeclass object.",
+  "type": "object",
+  "properties": {
+    "StudyLoad": {
+      "type": "number"
+    }
+  },
+  "required": ["StudyLoad"]
+}
