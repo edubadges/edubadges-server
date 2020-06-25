@@ -68,7 +68,7 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
 
     def _validate_invite_collision(self):
         """validate to see if the there is another invite that collides with this one
-         (i.e. if noth are created the staff memberships will collide"""
+         (i.e. if both are created the staff memberships will collide"""
         if self.user:
             all_entities_in_same_branch = self.entity.get_all_entities_in_branch()
             all_invites_for_user = self.user.get_invites()

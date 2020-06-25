@@ -3,7 +3,6 @@ import logging
 import urllib.error
 import urllib.parse
 import urllib.request
-
 from base64 import b64encode
 from urllib.parse import urlparse
 
@@ -32,7 +31,7 @@ from allauth.account.adapter import get_adapter as get_account_adapter
 
 def enroll_student(user, edu_id, badgeclass_slug):
     badge_class = get_object_or_404(BadgeClass, entity_id=badgeclass_slug)
-    # consent given wehen enrolling
+    # consent given when enrolling
     if user.may_enroll(badge_class):
         # consent given when enrolling
         StudentsEnrolled.objects.create(badge_class=badge_class,
@@ -89,6 +88,61 @@ def login(request):
     return redirect(login_url)
 
 
+def callback(request):
+    if request.user.is_authenticated:
+        get_account_adapter(request).logout(request)  # logging in while being authenticated breaks the login procedure
+
+    current_app = SocialApp.objects.get_current(provider='edu_id')
+    # extract state of redirect
+    state = json.loads(request.GET.get('state'))
+    referer, badgr_app_pk, lti_context_id, lti_user_id, lti_roles = state
+    lti_data = request.session.get('lti_data', None)
+    code = request.GET.get('code', None)  # access codes to access user info endpoint
+    if code is None:  # check if code is given
+        error = 'Server error: No userToken found in callback'
+        logger.debug(error)
+        return render_authentication_error(request, EduIDProvider.id, error=error)
+    # 1. Exchange callback Token for access token
+    payload = {
+        "grant_type": "authorization_code",
+        "redirect_uri": '%s/account/eduid/login/callback/' % settings.HTTP_ORIGIN,
+        "code": code,
+        "client_id": current_app.client_id,
+        "client_secret": current_app.secret,
+    }
+    headers = {'Content-Type': "application/x-www-form-urlencoded",
+               'Cache-Control': "no-cache"
+               }
+    response = requests.post("{}/token".format(settings.EDUID_PROVIDER_URL), data=urllib.parse.urlencode(payload),
+                             headers=headers)
+    if response.status_code != 200:
+        error = 'Server error: User info endpoint error (http %s). Try alternative login methods' % response.status_code
+        logger.debug(error)
+        return render_authentication_error(request, EduIDProvider.id, error=error)
+
+    token_json = response.json()
+    id_token = token_json['id_token']
+    payload = jwt.get_unverified_claims(id_token)
+
+    keyword_arguments = {'id_token': id_token,
+                         'provider': "eduid",
+                         'state': json.dumps([str(badgr_app_pk), 'edu_id', lti_context_id, lti_user_id, lti_roles] + [
+                             json.loads(referer)]),
+                         'after_terms_agreement_url_name': 'eduid_terms_accepted_callback'}
+
+    badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
+
+    social_account = get_social_account(payload['sub'])
+    if not social_account or not check_agreed_term_and_conditions(social_account.user, badgr_app):
+        # Here we redirect to client
+        keyword_arguments["resign"] = False if not social_account else True
+        signup_redirect = badgr_app.signup_redirect
+        args = urllib.parse.urlencode(keyword_arguments)
+        return HttpResponseRedirect(f"{signup_redirect}?{args}")
+
+    return after_terms_agreement(request, **keyword_arguments)
+
+
 def after_terms_agreement(request, **kwargs):
     '''
     this is the second part of the callback, after consent has been given, or is user already exists
@@ -104,10 +158,10 @@ def after_terms_agreement(request, **kwargs):
     set_session_badgr_app(request, badgr_app)
 
     id_token = kwargs.get('id_token', None)
-    payload = jwt.get_unverified_claims(id_token)
     if not id_token:
         error = 'Sorry, we could not find your eduID credentials.'
         return render_authentication_error(request, EduIDProvider.id, error)
+    payload = jwt.get_unverified_claims(id_token)
 
     social_account = get_social_account(payload['sub'])
     if not social_account:  # user does not exist
@@ -174,71 +228,11 @@ def create_edu_id_badge_instance(request, social_login):
     super_user = BadgeUser.objects.get(username=settings.SUPERUSER_NAME)
     badge_class = BadgeClass.objects.get(name=settings.EDUID_BADGE_CLASS_NAME)
 
-    #Issue first badge for user
+    # Issue first badge for user
     badge_class.issue(recipient=user, created_by=super_user, allow_uppercase=True,
-                                  recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID,
-                                  badgr_app=get_session_badgr_app(request), expires_at=None, extensions=None)
+                      recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID,
+                      badgr_app=get_session_badgr_app(request), expires_at=None, extensions=None)
     logger.info(f"Assertion created for {user.email} based on {badge_class.name}")
-
-
-def callback(request):
-    if request.user.is_authenticated:
-        get_account_adapter(request).logout(request)  # logging in while being authenticated breaks the login procedure
-
-    current_app = SocialApp.objects.get_current(provider='edu_id')
-    # extract state of redirect
-    state = json.loads(request.GET.get('state'))
-    referer, badgr_app_pk, lti_context_id, lti_user_id, lti_roles = state
-    lti_data = request.session.get('lti_data', None)
-    code = request.GET.get('code', None)  # access codes to access user info endpoint
-    if code is None:  # check if code is given
-        error = 'Server error: No userToken found in callback'
-        logger.debug(error)
-        return render_authentication_error(request, EduIDProvider.id, error=error)
-    # 1. Exchange callback Token for access token
-    payload = {
-        "grant_type": "authorization_code",
-        "redirect_uri": '%s/account/eduid/login/callback/' % settings.HTTP_ORIGIN,
-        "code": code,
-        "client_id": current_app.client_id,
-        "client_secret": current_app.secret,
-    }
-    headers = {'Content-Type': "application/x-www-form-urlencoded",
-               'Cache-Control': "no-cache"
-               }
-    response = requests.post("{}/token".format(settings.EDUID_PROVIDER_URL), data=urllib.parse.urlencode(payload),
-                             headers=headers)
-    if response.status_code != 200:
-        error = 'Server error: User info endpoint error (http %s). Try alternative login methods' % response.status_code
-        logger.debug(error)
-        return render_authentication_error(request, EduIDProvider.id, error=error)
-
-    token_json = response.json()
-    id_token = token_json['id_token']
-    payload = jwt.get_unverified_claims(id_token)
-
-    keyword_arguments = {'id_token': id_token,
-                         'state': json.dumps([str(badgr_app_pk), 'edu_id', lti_context_id, lti_user_id, lti_roles] + [
-                             json.loads(referer)]),
-                         'after_terms_agreement_url_name': 'eduid_terms_accepted_callback'}
-
-    social_account = get_social_account(payload['sub'])
-    if not social_account:
-        # Here we redirect to client
-        badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
-        signup_redirect = badgr_app.signup_redirect
-        # return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))
-        args = urllib.parse.urlencode(keyword_arguments)
-        return HttpResponseRedirect(f"{signup_redirect}?{args}")
-
-    badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
-    if not check_agreed_term_and_conditions(social_account.user, badgr_app):
-        # Here we go the client
-
-        redirect_to = reverse('accept_terms_resign', kwargs=keyword_arguments)
-        return HttpResponseRedirect(redirect_to)
-
-    return after_terms_agreement(request, **keyword_arguments)
 
 
 from django.contrib.auth.signals import user_logged_out, user_logged_in
