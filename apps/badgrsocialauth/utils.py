@@ -6,26 +6,32 @@ import urllib.request
 
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.providers.base import ProviderAccount
+from rest_framework.authentication import TokenAuthentication
+
 from badgeuser.models import TermsVersion
 from mainsite.models import BadgrApp
-from rest_framework.authentication import TokenAuthentication
 # from mainsite.views import TermsAndConditionsView
 from theming.models import Theme
+
+
+class AuthErrorCode(object):
+    UNKNOWN_CODE = 1  # The default - something unexpected
+    REGISTER_WITHOUT_INVITE = 2  # register without an invite
 
 
 class BadgrSocialAuthProviderMixin:
     """
     Overrides common patterns that assist in callback function
     """
- 
+
     account_class = ProviderAccount
- 
+
     def extract_uid(self, response):
         return response['sub']
- 
+
     def extract_extra_data(self, response):
         return response
- 
+
     def extract_email_addresses(self, data, user=None):
         # Force verification of email addresses because SurfConext will only transmit verified emails
         if data.get('email'):
@@ -34,14 +40,14 @@ class BadgrSocialAuthProviderMixin:
                                  primary=True)]
         else:
             return []
- 
+
     def extract_common_fields(self, data):
         # extracts data required to build user model
-        return dict( # email=data['email'],
-                    email = data.get('email', None),
-                    first_name=data.get('given_name', None),
-                    last_name=data.get('family_name', None)
-                    )
+        return dict(  # email=data['email'],
+            email=data.get('email', None),
+            first_name=data.get('given_name', None),
+            last_name=data.get('family_name', None)
+        )
 
 
 def get_social_account(sociallogin_identifier):
@@ -51,6 +57,7 @@ def get_social_account(sociallogin_identifier):
         return social_account
     except SocialAccount.DoesNotExist:
         return None
+
 
 def set_url_query_params(url, **kwargs):
     """
@@ -98,6 +105,7 @@ def get_verified_user(auth_token):
     verified_user, _ = authenticator.authenticate_credentials(auth_token)
     return verified_user
 
+
 def update_user_params(user, userinfo):
     if userinfo.get('given_name'):
         user.first_name = userinfo['given_name']
@@ -110,16 +118,17 @@ def update_user_params(user, userinfo):
         email_found = False
         for email in user_emails:
             email_and_variants = [email] + list(email.cached_variants())
-            if userinfo['email'] in [email_variant.email for email_variant in email_and_variants]: # the email is already there, make it verified
+            if userinfo['email'] in [email_variant.email for email_variant in
+                                     email_and_variants]:  # the email is already there, make it verified
                 email.verified = True
                 email.save()
                 email_found = True
                 break
-        if not email_found: # no email, make a new verified one
+        if not email_found:  # no email, make a new verified one
             new_email = EmailAddress.objects.create(email=userinfo['email'],
-                                                    verified = True,
-                                                    primary = False,
-                                                    user = user)
+                                                    verified=True,
+                                                    primary=False,
+                                                    user=user)
 
 
 def get_privacy_content(name):
@@ -156,12 +165,15 @@ def check_agreed_term_and_conditions(user, badgr_app, resign=False):
             if TermsVersion.objects.filter(
                     terms_and_conditions_template=badgr_app.theme.terms_and_conditions_template).exists():
                 latest_terms_and_conditions = TermsVersion.objects.filter(
-                    terms_and_conditions_template=badgr_app.theme.terms_and_conditions_template).order_by('-version').all()[0]
+                    terms_and_conditions_template=badgr_app.theme.terms_and_conditions_template).order_by(
+                    '-version').all()[0]
         except Theme.DoesNotExist as e:
             if TermsVersion.objects.filter(
-                terms_and_conditions_template='terms_of_service/accept_terms_versioned.html').order_by('-version').exists():
+                    terms_and_conditions_template='terms_of_service/accept_terms_versioned.html').order_by(
+                '-version').exists():
                 latest_terms_and_conditions = TermsVersion.objects.filter(
-                    terms_and_conditions_template='terms_of_service/accept_terms_versioned.html').order_by('-version').all()[0]
+                    terms_and_conditions_template='terms_of_service/accept_terms_versioned.html').order_by(
+                    '-version').all()[0]
 
         user.agreed_terms_version = latest_terms_and_conditions.version
         user.save()

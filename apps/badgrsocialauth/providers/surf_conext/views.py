@@ -7,7 +7,6 @@ import requests
 from allauth.account.adapter import get_adapter as get_account_adapter
 from allauth.socialaccount.helpers import render_authentication_error, complete_social_login
 from allauth.socialaccount.models import SocialApp
-from allauth.socialaccount.providers.base import AuthErrorCode
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
@@ -16,7 +15,7 @@ from jose import jwt
 
 from badgeuser.models import UserProvisionment
 from badgrsocialauth.utils import set_session_badgr_app, get_session_authcode, get_verified_user, get_social_account, \
-    check_agreed_term_and_conditions
+    check_agreed_term_and_conditions, AuthErrorCode
 from ims.models import LTITenant
 from institution.models import Institution
 from lti_edu.models import LtiBadgeUserTennant, UserCurrentContextId
