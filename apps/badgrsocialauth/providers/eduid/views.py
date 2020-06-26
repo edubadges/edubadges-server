@@ -128,7 +128,7 @@ def callback(request):
                          'provider': "eduid",
                          'state': json.dumps([str(badgr_app_pk), 'edu_id', lti_context_id, lti_user_id, lti_roles] + [
                              json.loads(referer)]),
-                         'after_terms_agreement_url_name': 'eduid_terms_accepted_callback'}
+                         'role': 'student'}
 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
 
