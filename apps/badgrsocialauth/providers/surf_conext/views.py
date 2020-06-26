@@ -138,7 +138,7 @@ def callback(request):
                          'state': json.dumps(
                              [badgr_app_pk, 'surf_conext', process, auth_token, lti_data, lti_user_id, lti_roles,
                               referer]),
-                         'after_terms_agreement_url_name': 'surf_conext_terms_accepted_callback'}
+                         'role': 'teacher'}
 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
 
