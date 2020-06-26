@@ -12,7 +12,8 @@ from django.http import HttpResponseForbidden, HttpResponseRedirect
 from rest_framework.exceptions import AuthenticationFailed
 
 from badgeuser.authcode import accesstoken_for_authcode
-from badgrsocialauth.utils import set_session_verification_email, get_session_badgr_app, get_session_authcode
+from badgrsocialauth.utils import set_session_verification_email, get_session_badgr_app, get_session_authcode, \
+    AuthErrorCode
 
 
 class BadgrSocialAccountAdapter(DefaultSocialAccountAdapter):
@@ -20,6 +21,8 @@ class BadgrSocialAccountAdapter(DefaultSocialAccountAdapter):
     def authentication_error(self, request, provider_id, error=None, exception=None, extra_context={}):
         badgr_app = get_session_badgr_app(self.request)
         extra_context["authError"] = error
+        if "code" not in extra_context:
+            extra_context["code"] = AuthErrorCode.UNKNOWN_CODE
         args = urllib.parse.urlencode(extra_context)
         redirect_url = f"{badgr_app.ui_login_redirect}?{args}"
         raise ImmediateHttpResponse(HttpResponseRedirect(redirect_to=redirect_url))

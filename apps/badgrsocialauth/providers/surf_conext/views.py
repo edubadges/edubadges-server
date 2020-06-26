@@ -221,8 +221,8 @@ def after_terms_agreement(request, **kwargs):
                             extra_context["admin_email"] = admins[0].user.email
 
                     error = 'Sorry, you can not register without an invite.'
+                    extra_context["code"] = AuthErrorCode.REGISTER_WITHOUT_INVITE
                     return render_authentication_error(request, SurfConextProvider.id, error,
-                                                       code=AuthErrorCode.REGISTER_WITHOUT_INVITE,
                                                        extra_context=extra_context)
 
         except Institution.DoesNotExist:  # no institution yet, and therefore also first login ever
@@ -240,12 +240,11 @@ def after_terms_agreement(request, **kwargs):
                 request.user.delete()
                 error = 'Sorry, you can not register without an invite.'
                 return render_authentication_error(request, SurfConextProvider.id, error,
-                                                   code=AuthErrorCode.REGISTER_WITHOUT_INVITE)
+                                                   extra_context={"code": AuthErrorCode.REGISTER_WITHOUT_INVITE})
 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
 
-    resign = True
-    check_agreed_term_and_conditions(request.user, badgr_app, resign=resign)
+    check_agreed_term_and_conditions(request.user, badgr_app, resign=True)
 
     if lti_data is not None and 'lti_user_id' in lti_data:
         if not request.user.is_anonymous:
@@ -260,6 +259,4 @@ def after_terms_agreement(request, **kwargs):
 
     request.session['lti_user_id'] = lti_user_id
     request.session['lti_roles'] = lti_roles
-    if not request.user.is_authenticated:
-        print((request.__dict__))
     return ret
