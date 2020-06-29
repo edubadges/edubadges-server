@@ -7,30 +7,28 @@ import requests
 from allauth.account.adapter import get_adapter as get_account_adapter
 from allauth.socialaccount.helpers import render_authentication_error, complete_social_login
 from allauth.socialaccount.models import SocialApp
-from badgrsocialauth.utils import set_session_badgr_app, get_session_authcode, get_verified_user, get_social_account, \
-    check_agreed_term_and_conditions
+from allauth.socialaccount.providers.base import AuthErrorCode
 from django.conf import settings
 from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
+from jose import jwt
 
 from badgeuser.models import UserProvisionment
+from badgrsocialauth.utils import set_session_badgr_app, get_session_authcode, get_verified_user, get_social_account, \
+    check_agreed_term_and_conditions
 from ims.models import LTITenant
 from institution.models import Institution
 from lti_edu.models import LtiBadgeUserTennant, UserCurrentContextId
 from mainsite.exceptions import BadgrValidationError
 from mainsite.models import BadgrApp
 from staff.models import InstitutionStaff
-
 from .provider import SurfConextProvider
 
 
 def login(request):
     """
     Redirect to login page of SURFconext openID, this is "Where are you from" page
-
-    Note: core differences in OpenID and SURFconext is authentication method and incomplete autodiscovery endpoint.
-
     :return: HTTP redirect to WAYF
     """
     lti_data = request.session.get('lti_data', None)
@@ -61,60 +59,130 @@ def login(request):
                         lti_roles,
                         referer])
 
-    data = {'client_id': _current_app.client_id,
-            'redirect_uri': '%s/account/openid/login/callback/' % settings.HTTP_ORIGIN,
-            'response_type': 'code',
-            # SURFconext does not support other scopes, as such the complete OpenID flow is not supported
-            'scope': 'openid',
-            'state': state
-            }
+    params = {
+        "state": state,
+        "client_id": _current_app.client_id,
+        "response_type": "code",
+        "scope": "openid",
+        "redirect_uri": f"{settings.HTTP_ORIGIN}/account/openid/login/callback/",
+        "claims": "{\"id_token\":{\"preferred_username\":null,\"given_name\":null,"
+                  "\"family_name\":null,\"email\":null,\"schac_home_organization\":null}}"
+    }
+    args = urllib.parse.urlencode(params)
+    # Redirect to eduID and enforce a linked SURFconext user with validated names
+    login_url = f"{settings.SURFCONEXT_DOMAIN_URL}/authorize?{args}"
+    return redirect(login_url)
 
-    redirect_url = settings.SURFCONEXT_DOMAIN_URL + '/authorize?%s' % (urllib.parse.urlencode(data))
 
-    return HttpResponseRedirect(redirect_url)
+@csrf_exempt
+def callback(request):
+    """
+        Callback page, after user returns from "Where are you from" page.
+
+        Steps:
+        1. Exchange callback Token for id token
+        2. Decode id_token with the user info in the claims
+        3. Complete social login and return to frontend
+
+        Retrieved information:
+        - email: required, if not available will fail request
+        - sub: required, string, user code
+        - given_name: optional, string
+        - family_name: optional, string
+        - schac_home_organization: required
+
+    :return: Either renders authentication error, or completes the social login
+    """
+    # extract the state of the redirect
+    if request.user.is_authenticated:
+        get_account_adapter(request).logout(request)  # logging in while being authenticated breaks the login procedure
+
+    process, auth_token, badgr_app_pk, lti_data, lti_user_id, lti_roles, referer = json.loads(request.GET.get('state'))
+
+    code = request.GET.get('code', None)
+    if code is None:
+        error = 'Server error: No userToken found in callback'
+        return render_authentication_error(request, SurfConextProvider.id, error=error)
+
+    # 1. Exchange callback Token for id token
+    _current_app = SocialApp.objects.get_current(provider='surf_conext')
+    payload = {
+        "grant_type": "authorization_code",
+        "redirect_uri": f"{settings.HTTP_ORIGIN}/account/openid/login/callback/",
+        "code": code,
+        "scope": "openid",
+        "client_id": _current_app.client_id,
+        "client_secret": _current_app.secret,
+    }
+    headers = {'Content-Type': "application/x-www-form-urlencoded",
+               'Cache-Control': "no-cache"
+               }
+    response = requests.post(f"{settings.SURFCONEXT_DOMAIN_URL}/token", data=urllib.parse.urlencode(payload),
+                             headers=headers)
+
+    if response.status_code != 200:
+        error = 'Server error: Token endpoint error (http %s) try alternative login methods' % response.status_code
+        return render_authentication_error(request, SurfConextProvider.id, error=error)
+
+    data = response.json()
+    id_token = data.get('id_token', None)
+
+    if id_token is None:
+        error = 'Server error: No id_token token, try alternative login methods.'
+        return render_authentication_error(request, SurfConextProvider.id, error=error)
+
+    payload = jwt.get_unverified_claims(id_token)
+
+    keyword_arguments = {'id_token': id_token,
+                         'provider': "openid",
+                         'state': json.dumps(
+                             [badgr_app_pk, 'surf_conext', process, auth_token, lti_data, lti_user_id, lti_roles,
+                              referer]),
+                         'role': 'teacher'}
+
+    badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
+
+    social_account = get_social_account(payload['sub'])
+    if not social_account or not check_agreed_term_and_conditions(social_account.user, badgr_app):
+        # Here we redirect to client
+        keyword_arguments["resign"] = False if not social_account else True
+        signup_redirect = badgr_app.signup_redirect
+        args = urllib.parse.urlencode(keyword_arguments)
+        return HttpResponseRedirect(f"{signup_redirect}?{args}")
+
+    set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app.pk))
+    return after_terms_agreement(request, **keyword_arguments)
 
 
 def after_terms_agreement(request, **kwargs):
-    access_token = kwargs.get('access_token', None)
-    if not access_token:
-        error = 'Sorry, we could not find you SURFconext credentials.'
-        return render_authentication_error(request, SurfConextProvider.id, error)
-
-    headers = {'Authorization': 'Bearer %s' % access_token}
     badgr_app_pk, login_type, process, auth_token, lti_context_id, lti_user_id, lti_roles, referer = json.loads(
         kwargs['state'])
+    lti_data = request.session.get('lti_data', None)
     try:
         badgr_app_pk = int(badgr_app_pk)
     except:
         badgr_app_pk = settings.BADGR_APP_ID
-    set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app_pk))
 
-    lti_data = request.session.get('lti_data', None)
-    url = settings.SURFCONEXT_DOMAIN_URL + '/userinfo'
+    badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
+    set_session_badgr_app(request, badgr_app)
 
-    response = requests.get(url, headers=headers)
-    if response.status_code != 200:
-        error = 'Server error: User info endpoint error (http %s). Try alternative login methods' % response.status_code
-        return render_authentication_error(request, SurfConextProvider.id, error=error)
+    id_token = kwargs.get('id_token', None)
+    if not id_token:
+        error = 'Sorry, we could not find you SURFconext credentials.'
+        return render_authentication_error(request, SurfConextProvider.id, error)
 
-    # retrieved data in fields and ensure that email & sud are in extra_data
-    extra_data = response.json()
+    payload = jwt.get_unverified_claims(id_token)
 
-    if 'email' not in extra_data or 'sub' not in extra_data:
+    if 'email' not in payload or 'sub' not in payload:
         error = 'Sorry, your account has no email attached from SURFconext, try another login method.'
         return render_authentication_error(request, SurfConextProvider.id, error)
-    if "schac_home_organization" not in extra_data:
+    if "schac_home_organization" not in payload:
         error = 'Sorry, your account has no home organization attached from SURFconext, try another login method.'
         return render_authentication_error(request, SurfConextProvider.id, error)
 
-    if 'family_name' in extra_data:
-        extra_data['family_name'] = ''
-    if 'given_name' in extra_data:
-        extra_data['given_name'] = ''
-      
     # 3. Complete social login and return to frontend
     provider = SurfConextProvider(request)
-    login = provider.sociallogin_from_response(request, extra_data)
+    login = provider.sociallogin_from_response(request, payload)
 
     # Reset the badgr app id after login as django overturns it
 
@@ -127,8 +195,8 @@ def after_terms_agreement(request, **kwargs):
 
     ret = complete_social_login(request, login)
     if not request.user.is_anonymous:  # the social login succeeded
-        institution_identifier = extra_data['schac_home_organization']
-        
+        institution_identifier = payload['schac_home_organization']
+
         try:
             institution = Institution.objects.get(identifier=institution_identifier)
             try:
@@ -146,25 +214,34 @@ def after_terms_agreement(request, **kwargs):
                     provisionment.perform_provisioning()
                 except (UserProvisionment.DoesNotExist, BadgrValidationError):  # there is no provisionment
                     request.user.delete()
-                    error = 'Sorry, you can not register without an invite. Please contact your administrator to receive an invitation or check that it was sent to the right email address.'
-                    return render_authentication_error(request, SurfConextProvider.id, error)
-        
+                    extra_context = {}
+                    if institution and institution.cached_staff():
+                        cached_staff = institution.cached_staff()
+                        admins = list(filter(lambda u: u.may_administrate_users, cached_staff))
+                        if len(admins) > 0:
+                            extra_context["admin_email"] = admins[0].user.email
+
+                    error = 'Sorry, you can not register without an invite.'
+                    return render_authentication_error(request, SurfConextProvider.id, error,
+                                                       code=AuthErrorCode.REGISTER_WITHOUT_INVITE,
+                                                       extra_context=extra_context)
+
         except Institution.DoesNotExist:  # no institution yet, and therefore also first login ever
             try:
+                provisionment = UserProvisionment.objects.get(email=request.user.email,
+                                                              for_teacher=request.user.is_teacher)
                 institution = Institution.objects.create(identifier=institution_identifier)
                 request.user.is_teacher = True
                 request.user.institution = institution
                 request.user.save()
-                provisionment = UserProvisionment.objects.get(email=request.user.email,
-                                                              for_teacher=request.user.is_teacher)
                 provisionment.add_entity(institution)
                 provisionment.match_user(request.user)
                 provisionment.perform_provisioning()
             except (UserProvisionment.DoesNotExist, BadgrValidationError):  # there is no provisionment
                 request.user.delete()
-                institution.delete()
-                error = 'Sorry, you can not register without an invite. Please contact your administrator to receive an invitation or check that it was sent to the right email address.'
-                return render_authentication_error(request, SurfConextProvider.id, error)
+                error = 'Sorry, you can not register without an invite.'
+                return render_authentication_error(request, SurfConextProvider.id, error,
+                                                   code=AuthErrorCode.REGISTER_WITHOUT_INVITE)
 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
 
@@ -187,100 +264,3 @@ def after_terms_agreement(request, **kwargs):
     if not request.user.is_authenticated:
         print((request.__dict__))
     return ret
-
-
-@csrf_exempt
-def callback(request):
-    """
-        Callback page, after user returns from "Where are you from" page.
-        Due to limited scope support (without tokenized user information) the OpenID workflow is extended.
-
-        Steps:
-        1. Exchange callback Token for access token
-        2. Retrieve user information with the access token
-        3. Complete social login and return to frontend
-
-        Retrieved information:
-        - email: Obligated, if not available will fail request
-        - sub: optional, string, user code
-        - given_name: optional, string
-        - family_name: optional, string
-        - edu_person_targeted_id: optional
-        - schac_home_organization: optional
-
-    :return: Either renders authentication error, or completes the social login
-    """
-    # extract the state of the redirect
-    if request.user.is_authenticated:
-        get_account_adapter(request).logout(request)  # logging in while being authenticated breaks the login procedure
-
-    process, auth_token, badgr_app_pk, lti_data, lti_user_id, lti_roles, referer = json.loads(request.GET.get('state'))
-
-    if badgr_app_pk is None:
-        print('none here')
-    # check if code is given
-
-    code = request.GET.get('code', None)
-    if code is None:
-        error = 'Server error: No userToken found in callback'
-        return render_authentication_error(request, SurfConextProvider.id, error=error)
-
-    # 1. Exchange callback Token for access token
-    _current_app = SocialApp.objects.get_current(provider='surf_conext')
-    payload = {
-        "grant_type": "authorization_code",
-        "redirect_uri": '%s/account/openid/login/callback/' % settings.HTTP_ORIGIN,
-        "code": code,
-        "scope": "openid",
-        "client_id": _current_app.client_id,
-        "client_secret": _current_app.secret,
-    }
-    headers = {'Content-Type': "application/x-www-form-urlencoded",
-               'Cache-Control': "no-cache"
-               }
-    response = requests.post(f"{settings.SURFCONEXT_DOMAIN_URL}/token", data=urllib.parse.urlencode(payload),
-                             headers=headers)
-
-    if response.status_code != 200:
-        error = 'Server error: Token endpoint error (http %s) try alternative login methods' % response.status_code
-        return render_authentication_error(request, SurfConextProvider.id, error=error)
-
-    data = response.json()
-    access_token = data.get('access_token', None)
-    if access_token is None:
-        error = 'Server error: No access token, try alternative login methods.'
-        return render_authentication_error(request, SurfConextProvider.id, error=error)
-
-    # 2. Retrieve user information with the access token
-    headers = {"Authorization": f"Bearer {data['access_token']}"}
-    url = settings.SURFCONEXT_DOMAIN_URL + '/userinfo'
-
-    response = requests.get(url, headers=headers)
-    if response.status_code != 200:
-        error = 'Server error: User info endpoint error (http %s). Try alternative login methods' % response.status_code
-        return render_authentication_error(request, SurfConextProvider.id, error=error)
-
-    # retrieved data in fields and ensure that email & sud are in extra_data
-    extra_data = response.json()
-
-    keyword_arguments = {'access_token': access_token,
-                         'state': json.dumps(
-                             [badgr_app_pk, 'surf_conext', process, auth_token, lti_data, lti_user_id, lti_roles,
-                              referer]),
-                         'after_terms_agreement_url_name': 'surf_conext_terms_accepted_callback'}
-
-    if not get_social_account(extra_data['sub']):
-        return HttpResponseRedirect(reverse('accept_terms', kwargs=keyword_arguments))
-    social_account = get_social_account(extra_data['sub'])
-    badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
-
-    set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app.pk))
-    if 'edu_person_affiliations' in extra_data:
-        if not ('employee' in extra_data['edu_person_affiliations'] or 'faculty' in extra_data['edu_person_affiliations']):
-            error = 'Must be employee or faculty member to login. If You are a student, please login with EduID'
-            return render_authentication_error(request, SurfConextProvider.id, error)
-
-    if not check_agreed_term_and_conditions(social_account.user, badgr_app):
-        return HttpResponseRedirect(reverse('accept_terms_resign', kwargs=keyword_arguments))
-
-    return after_terms_agreement(request, **keyword_arguments)

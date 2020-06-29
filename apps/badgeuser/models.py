@@ -69,13 +69,10 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
         """validate to see if the there is another invite that collides with this one
          (i.e. if both are created the staff memberships will collide"""
         all_entities_in_same_branch = self.entity.get_all_entities_in_branch()
-        # all_invites_for_user = self.user.get_invites()
         all_invites_for_same_user = UserProvisionment.objects.filter(email=self.email)
         for invite in all_invites_for_same_user:
             if invite != self and invite.entity in all_entities_in_same_branch:
                 raise BadgrValidationError('Cannot invite user for this entity. There is a conflicting invite.', 503)
-                # from rest_framework import serializers
-                # raise serializers.ValidationError('Cannot invite user for this entity. There is a conflicting invite.')
 
     def get_permissions(self, user):
         return self.entity.get_permissions(user)
@@ -425,7 +422,7 @@ class UserPermissionsMixin(object):
             All revoked: May enroll
         """
         social_account = self.get_social_account()
-        if social_account.provider == 'edu_id' or social_account.provider == 'surfconext_ala':
+        if social_account.provider == 'edu_id':
             enrollments = StudentsEnrolled.objects.filter(user=social_account.user, badge_class_id=badge_class.pk)
             if not enrollments:
                 return True  # no enrollments

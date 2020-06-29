@@ -1,10 +1,12 @@
+import json
+
 from allauth.socialaccount.models import SocialApp
 from django.conf import settings
 from django.contrib.sites.models import Site
 
 from badgeuser.models import TermsVersion, BadgeUser
 from institution.models import Institution, Faculty
-from issuer.models import Issuer, BadgeClass
+from issuer.models import Issuer, BadgeClass, BadgeClassExtension
 from mainsite.models import BadgrApp
 # BadgrApp
 from mainsite.seeds.constants import EDU_BADGES_FACULTY_NAME, SURF_INSTITUTION_NAME
@@ -64,16 +66,46 @@ superuser.save()
 # SURF / eduBadges static
 surf_net_institution, _ = Institution.objects.get_or_create(name=SURF_INSTITUTION_NAME,
                                                             identifier=SURF_INSTITUTION_NAME,
-                                                            description=SURF_INSTITUTION_NAME)
+                                                            description=SURF_INSTITUTION_NAME,
+                                                            image="uploads/issuers/surf.png")
 
 edu_badges_faculty, _ = Faculty.objects.get_or_create(name=EDU_BADGES_FACULTY_NAME, institution=surf_net_institution,
                                                       description=EDU_BADGES_FACULTY_NAME)
 
-surf_issuer, _ = Issuer.objects.get_or_create(name="SURF", image="uploads/issuers/surf.png", faculty=edu_badges_faculty,
-                                              description="SURF", email="info@surf.nl", url="https://surf.nl",
+surf_issuer, _ = Issuer.objects.get_or_create(name="Team edubadges", image="uploads/issuers/surf.png",
+                                              faculty=edu_badges_faculty,
+                                              description="Team edubadges", email="info@surf.nl",
+                                              url="www.surf.nl/edubadges",
                                               source="local", original_json="{}", badgrapp=main_badgr_app)
 
-BadgeClass.objects.get_or_create(name=settings.EDUID_BADGE_CLASS_NAME, issuer=surf_issuer,
-                                 image="uploads/badges/eduid.png",
-                                 description="This is an example badge, please provide proof that you are eligible to receive more badges",
-                                 source="local", old_json="{}")
+badge_class_extensions = {
+    "extensions:LanguageExtension": {
+        "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/LanguageExtension/context.json",
+        "type": ["Extension", "extensions:LanguageExtension"],
+        "Language": "en_EN"
+    },
+    "extensions:LearningOutcomeExtension": {
+        "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/LearningOutcomeExtension/context.json",
+        "type": ["Extension", "extensions:LearningOutcomeExtension"],
+        "LearningOutcome": "You successfully created an eduID. "
+                           "You successfully linked your institution to your eduID. "
+                           "You are now ready to collect badges and use your backpack."
+    }
+}
+badge_class, _ = BadgeClass.objects.get_or_create(
+    name=settings.EDUID_BADGE_CLASS_NAME, issuer=surf_issuer,
+    description="Welcome to edubadges. Let your lifelong learning begin! You are now ready to collect all your "
+                "badges in your backpack where you can store and manage them safely. "
+                "Share them anytime you like and with whomever you like. "
+                "Badges are visual representations of your knowledge, skills and competences.",
+    source="local",
+    criteria_url="www.surf.nl/edubadges",
+    old_json="{}",
+    image="uploads/badges/edubadge_student.png",
+)
+for key, value in badge_class_extensions.items():
+    BadgeClassExtension.objects.get_or_create(
+        name=key,
+        original_json=json.dumps(value),
+        badgeclass_id=badge_class.id
+    )
