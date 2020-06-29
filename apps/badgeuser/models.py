@@ -147,11 +147,18 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
         self._validate_staff_collision()
         self._validate_invite_collision()
 
-    def save(self, *args, **kwargs):
-        self._run_validations()
+    def _remove_cache(self):
         if self.entity:
             self.entity.remove_cached_data(['cached_userprovisionments'])
+
+    def save(self, *args, **kwargs):
+        self._run_validations()
+        self._remove_cache()
         return super(UserProvisionment, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self._remove_cache()
+        return super(UserProvisionment, self).delete(*args, **kwargs)
 
 
 class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
