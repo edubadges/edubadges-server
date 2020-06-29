@@ -135,7 +135,7 @@ class UserProvisionmentSerializer(serializers.Serializer):
         validated_data = super(UserProvisionmentSerializer, self).validate(attrs)
         entity = validated_data['content_type'].get_object_for_this_type(entity_id=validated_data['object_id'])
         if not entity.has_permissions(self.context['request'].user, ['may_administrate_users']):
-            raise BadgrValidationError(fields='You do not have permission to invite user for this entity.')
+            raise BadgrValidationError('You do not have permission to invite user for this entity.', 507)
         validated_data['object_id'] = entity.id
         return attrs
 
@@ -156,9 +156,9 @@ class UserProvisionmentSerializerForEdit(serializers.Serializer):
 
     def update(self, instance, validated_data):
         if instance.rejected:
-            raise BadgrValidationError(fields='You cannot edit an invitation that has been rejected.')
+            raise BadgrValidationError('You cannot edit an invitation that has been rejected.', 508)
         if not instance.entity.has_permissions(self.context['request'].user, ['may_administrate_users']):
-            raise BadgrValidationError(fields='You do not have permission to invite user for this entity.')
+            raise BadgrValidationError('You do not have permission to invite user for this entity.', 507)
         [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
         instance.save()
         return instance

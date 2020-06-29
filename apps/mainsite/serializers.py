@@ -26,7 +26,7 @@ class BadgrBaseModelSerializer(serializers.ModelSerializer):
         try:
             return super(BadgrBaseModelSerializer, self).is_valid(raise_exception)
         except ValidationError as e:
-            raise BadgrValidationError(fields={"instance":[{"error_code": 999, "error_message": e.detail}]})
+            raise BadgrValidationError(error_message=e.detail, error_code=999)
 
 
 class LinkedDataEntitySerializer(serializers.Serializer):

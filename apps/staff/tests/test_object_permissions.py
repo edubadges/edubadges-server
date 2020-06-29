@@ -214,7 +214,7 @@ class ObjectPermissionTests(BadgrTestCase):
         response = self.client.delete('/staff-membership/institution/change/{}'.format(staff.entity_id),
                                       content_type='application/json')
         self.assertTrue(response.status_code == 400)
-        self.assertEqual(response.data['fields'].__str__(), 'Cannot remove the last staff membership of this institution.')
+        self.assertEqual(response.data['fields']['error_message'].__str__(), 'Cannot remove the last staff membership of this institution.')
 
     def test_cannot_delete_institution_staff_membership(self):
         teacher1 = self.setup_teacher(authenticate=True)
@@ -230,7 +230,6 @@ class ObjectPermissionTests(BadgrTestCase):
         outside_teacher = self.setup_teacher()
         student = self.setup_student()
         faculty = self.setup_faculty(institution=teacher1.institution)
-        response = self.client.get('/instituion/staff')
         query = 'query foo {faculty(id: "'+faculty.entity_id+'") {entityId}}'
         response_ok = self.graphene_post(teacher1, query)
         self.assertEqual(response_ok['data']['faculty']['entityId'], faculty.entity_id)

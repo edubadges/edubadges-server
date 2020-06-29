@@ -57,13 +57,13 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
                 rejected=False,
                 for_teacher=self.for_teacher,
                 email=self.email).exclude(pk=self.pk).exists():
-            raise BadgrValidationError(fields='There may be only one invite per email address.')
+            raise BadgrValidationError('There may be only one invite per email address.', 501)
         return super(UserProvisionment, self).validate_unique(exclude=exclude)
 
     def _validate_staff_collision(self):
         """validate to see if there is a existing staff membership that conflicts for the entity of this invite"""
         if self.user and self.entity.get_all_staff_memberships_in_current_branch(self.user):
-            raise BadgrValidationError(fields='Cannot invite user for this entity. There is a conflicting staff membership.')
+            raise BadgrValidationError('Cannot invite user for this entity. There is a conflicting staff membership.', 502)
 
     def _validate_invite_collision(self):
         """validate to see if the there is another invite that collides with this one
@@ -73,7 +73,7 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
         all_invites_for_same_user = UserProvisionment.objects.filter(email=self.email)
         for invite in all_invites_for_same_user:
             if invite != self and invite.entity in all_entities_in_same_branch:
-                raise BadgrValidationError(fields='Cannot invite user for this entity. There is a conflicting invite.')
+                raise BadgrValidationError('Cannot invite user for this entity. There is a conflicting invite.', 503)
                 # from rest_framework import serializers
                 # raise serializers.ValidationError('Cannot invite user for this entity. There is a conflicting invite.')
 
@@ -87,11 +87,11 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
         except AttributeError:
             entity_institution = self.entity
         if user.institution != entity_institution:
-            raise BadgrValidationError(fields='May not invite user from other institution')
+            raise BadgrValidationError('May not invite user from other institution', 504)
         if user.is_teacher and not self.for_teacher:
-            raise BadgrValidationError(fields='This invite is for a student')
+            raise BadgrValidationError('This invite is for a student', 505)
         if not user.is_teacher and self.for_teacher:
-            raise BadgrValidationError(fields='This invite is for a teacher')
+            raise BadgrValidationError('This invite is for a teacher', 506)
         self.user = user
         self.save()
 
@@ -433,20 +433,17 @@ class UserPermissionsMixin(object):
                 for enrollment in enrollments:
                     if not bool(enrollment.badge_instance):  # has never been awarded
                         if raise_exception:
-                            fields = {'error_message': 'May not enroll: already enrolled', "error_code": 201}
-                            raise BadgrApiException400(fields)
+                            raise BadgrApiException400('May not enroll: already enrolled', 201)
                         return False
                     else:  # has been awarded
                         if not enrollment.assertion_is_revoked():
                             if raise_exception:
-                                fields = {'error_message': 'May not enroll: you already have been awarded this badge', "error_code": 202}
-                                raise BadgrApiException400(fields)
+                                raise BadgrApiException400('May not enroll: you already have been awarded this badge', 202)
                             return False
                 return True  # all have been awarded and revoked
         else:  # no eduID
             if raise_exception:
-                fields = {'error_message': "May not enroll: you don't have a student account", "error_code": 203}
-                raise BadgrApiException400(fields)
+                raise BadgrApiException400("May not enroll: you don't have a student account", 203)
             return False
 
 

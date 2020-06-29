@@ -1,4 +1,4 @@
-from mainsite.exceptions import BadgrApiException400
+from mainsite.exceptions import BadgrValidationError
 
 
 def get_form_error_code(error_type):
@@ -34,6 +34,4 @@ def validate_errors(serializer):
                                 'error_message': sub_error
                             })
                     fields[attr].append(sub_fields)
-
-
-        raise BadgrApiException400(fields)
+        raise BadgrValidationError(error_message=fields, error_code=999)

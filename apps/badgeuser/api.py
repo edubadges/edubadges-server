@@ -40,14 +40,14 @@ class BadgeUserDetail(BaseEntityDetailView):
             self.object = request.user
             self.has_object_permissions(request, self.object)
             return self.object
-        raise BadgrApiException400(fields={'error_message': "You do not have permission", "error_code": 210})
+        raise BadgrApiException400("You do not have permission", 100)
 
     def delete(self, request, **kwargs):
         obj = self.get_object(request, **kwargs)
         try:
             obj.delete()
         except ProtectedError as e:
-            raise BadgrApiException400(fields={'error_message': e.args[0], "error_code": 999})
+            raise BadgrApiException400(error_message=e.args[0], error_code=999)
         return Response(status=HTTP_204_NO_CONTENT)
 
 

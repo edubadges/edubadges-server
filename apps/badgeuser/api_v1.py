@@ -44,14 +44,11 @@ class BadgeUserEmailList(APIView):
         serializer.is_valid(raise_exception=True)
         try:  # check if email already exists
             CachedEmailAddress.objects.get(email=request.data.get('email'), verified=1)
-            fields = {"error_message": "Could not register email address. Address already in use", 'error_code': 101}
-            raise BadgrApiException400(fields)
+            raise BadgrApiException400("Could not register email address. Address already in use", 101)
         except CachedEmailAddress.DoesNotExist:
             try:
                 CachedEmailAddress.objects.get(email=request.data.get('email'), verified=0, user_id=request.user.pk)
-                fields = {"error_message": "You have already added this address. Verify it",
-                          'error_code': 102}
-                raise BadgrApiException400(fields)
+                raise BadgrApiException400("You have already added this address. Verify it", 102)
             except CachedEmailAddress.DoesNotExist:
                 pass
         email_address = serializer.save(user=request.user)
@@ -98,12 +95,10 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         if email_address.primary:
-            fields = {"error_message": "Can not remove primary email address", 'error_code': 103}
-            raise BadgrApiException400(fields)
+            raise BadgrApiException400("Can not remove primary email address", 103)
 
         if self.request.user.emailaddress_set.count() == 1:
-            fields = {"error_message": "Can not remove only email address", 'error_code': 104}
-            raise BadgrApiException400(fields)
+            raise BadgrApiException400("Can not remove only email address", 104)
 
         email_address.delete()
         return Response(status.HTTP_200_OK)
@@ -148,8 +143,7 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
                 return Response("Will be able to re-send verification email in %s." % (str(remaining_time_rep)),
                  status=status.HTTP_429_TOO_MANY_REQUESTS)
         else:
-            fields = {'error_message': "Can't make unverified email address the primary email address", "error_code": 105}
-            raise BadgrApiException400(fields)
+            raise BadgrApiException400("Can't make unverified email address the primary email address", 105)
 
         serializer = EmailSerializer(email_address, context={'request': request})
         serialized = serializer.data

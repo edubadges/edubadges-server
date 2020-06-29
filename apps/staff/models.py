@@ -132,7 +132,7 @@ class InstitutionStaff(PermissionedRelationshipBase):
 
     def delete(self, *args, **kwargs):
         if self._is_last_staff_membership():
-            raise BadgrValidationError(fields='Cannot remove the last staff membership of this institution.')
+            raise BadgrValidationError('Cannot remove the last staff membership of this institution.', 500)
         return super(InstitutionStaff, self).delete(*args, **kwargs)
 
 

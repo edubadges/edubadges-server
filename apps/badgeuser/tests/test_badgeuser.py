@@ -211,7 +211,7 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
         invitation_json['object_id'] = faculty.entity_id
         invitation_json['email'] = email
         response = self.client.post('/v1/user/provision/create', json.dumps([invitation_json]), content_type='application/json')
-        self.assertEqual(response.data[0]['message']['fields'].__str__(), 'There may be only one invite per email address.')
+        self.assertEqual(response.data[0]['message']['fields']['error_message'].__str__(), 'There may be only one invite per email address.')
 
     def test_provisionment_for_other_institution_failure(self):
         teacher1 = self.setup_teacher(authenticate=True)
@@ -226,7 +226,7 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
                            'data': {'may_sign': True},
                            'type': UserProvisionment.TYPE_INVITATION}
         response_failure = self.client.post('/v1/user/provision/create', json.dumps([invitation_json]), content_type='application/json')
-        self.assertEqual(response_failure.data[0]['message']['fields'].__str__(), 'May not invite user from other institution')
+        self.assertEqual(response_failure.data[0]['message']['fields']['error_message'].__str__(), 'May not invite user from other institution')
         new_non_colleague_email = 'new_non_colleague@mail.adres'
         invitation_json['email'] = new_non_colleague_email
         response_success = self.client.post('/v1/user/provision/create', json.dumps([invitation_json]), content_type='application/json')
@@ -244,7 +244,7 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
         invitation_json['object_id'] = other_insitution.entity_id
         invitation_json['email'] = 'some@randomemail.dontmatter'
         response_failure = self.client.post('/v1/user/provision/create', json.dumps([invitation_json]), content_type='application/json')
-        self.assertEqual(response_failure.data[0]['message']['fields'][0].__str__(), 'You do not have permission to invite user for this entity.')
+        self.assertEqual(response_failure.data[0]['message']['fields']['error_message'].__str__(), 'You do not have permission to invite user for this entity.')
 
     def test_provisionment_invite_staff_collision_throws_exception(self):
         teacher1 = self.setup_teacher(authenticate=True)
@@ -259,7 +259,7 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
                            'data': {'may_sign': True},
                            'type': UserProvisionment.TYPE_INVITATION}
         response_failure = self.client.post('/v1/user/provision/create', json.dumps([invitation_json]), content_type='application/json')
-        self.assertEqual(response_failure.data[0]['message']['fields'].__str__(), 'Cannot invite user for this entity. There is a conflicting staff membership.')
+        self.assertEqual(response_failure.data[0]['message']['fields']['error_message'].__str__(), 'Cannot invite user for this entity. There is a conflicting staff membership.')
 
     def test_provisionment_invite_collides_with_other_invitation(self):
         teacher1 = self.setup_teacher(authenticate=True)
@@ -282,7 +282,7 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
         response_failure = self.client.post('/v1/user/provision/create',
                                             json.dumps([invitation_faculty, invitation_issuer]),
                                             content_type='application/json')
-        self.assertEqual(response_failure.data[1]['message']['fields'].__str__(), 'Cannot invite user for this entity. There is a conflicting invite.')
+        self.assertEqual(response_failure.data[1]['message']['fields']['error_message'].__str__(), 'Cannot invite user for this entity. There is a conflicting invite.')
 
     def test_provision_multiple_users(self):
         teacher1 = self.setup_teacher(authenticate=True)

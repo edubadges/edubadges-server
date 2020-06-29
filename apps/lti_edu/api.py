@@ -33,21 +33,17 @@ class StudentEnrollmentList(BaseEntityListView):
         try:
             enrollment = StudentsEnrolled.objects.get(entity_id=request.data['enrollmentID'])
         except ValueError:
-            fields = {"error_message": "Invalid enrollment id", "error_code": 204}
-            raise BadgrApiException400(fields)
+            raise BadgrApiException400("Invalid enrollment id", 204)
         except StudentsEnrolled.DoesNotExist:
-            fields = {"error_message": "Enrollment not found", "error_code": 205}
-            raise BadgrApiException400(fields)
+            raise BadgrApiException400("Enrollment not found", 205)
         else:
             if enrollment.date_awarded:
-                fields = {"error_message": "Awarded enrollments cannot be withdrawn", "error_code": 206}
-                raise BadgrApiException400(fields)
+                raise BadgrApiException400("Awarded enrollments cannot be withdrawn", 206)
             if request.user == enrollment.user:
                 enrollment.delete()
                 return Response(data='Enrollment withdrawn', status=200)
             else:
-                fields = {"error_message": "Users can only withdraw their own enrollments", "error_code": 207}
-                raise BadgrApiException400(fields)
+                raise BadgrApiException400("Users can only withdraw their own enrollments", 207)
 
 
 class StudentsEnrolledList(BaseEntityListView):
@@ -60,8 +56,7 @@ class StudentsEnrolledList(BaseEntityListView):
 
     def post(self, request, **kwargs):
         if 'badgeclass_slug' not in request.data:
-            fields = {"error_message": "Missing badgeclass id", "error_code": 208}
-            raise BadgrApiException400(fields)
+            raise BadgrApiException400("Missing badgeclass id", 208)
         badge_class = get_object_or_404(BadgeClass, entity_id=request.data['badgeclass_slug'])
         if request.user.may_enroll(badge_class, raise_exception=True):
             enrollment = StudentsEnrolled.objects.create(
@@ -72,8 +67,7 @@ class StudentsEnrolledList(BaseEntityListView):
             message = EmailMessageMaker.create_student_badge_request_email(badge_class)
             request.user.email_user(subject='You have successfully requested a badge', message=message)
             return Response(data={'status': 'enrolled', 'entity_id': enrollment.entity_id}, status=200)
-        fields = {"error_message": 'Cannot enroll', "error_code": 209}
-        raise BadgrApiException400(fields)
+        raise BadgrApiException400('Cannot enroll', 209)
 
 
 class EnrollmentDetail(BaseEntityDetailView):
@@ -87,14 +81,11 @@ class EnrollmentDetail(BaseEntityDetailView):
     def put(self, request, **kwargs):
         enrollment = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, enrollment):
-            fields = {"error_message": "You do not have permission", "error_code": 210}
-            raise BadgrApiException400(fields)
+            raise BadgrApiException400("You do not have permission", 210)
         if enrollment.denied:
-            fields = {"error_message": "Enrollment already denied", "error_code": 211}
-            raise BadgrApiException400(fields)
+            raise BadgrApiException400("Enrollment already denied", 211)
         if enrollment.badge_instance:
-            fields = {"error_message": "Awarded enrollments cannot be denied", "error_code": 212}
-            raise BadgrApiException400(fields)
+            raise BadgrApiException400("Awarded enrollments cannot be denied", 212)
         enrollment.denied = True
         enrollment.save()
         message = 'Succesfully denied enrollment'

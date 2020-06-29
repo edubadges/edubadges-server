@@ -522,7 +522,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
                 extensions = {"extensions:recipientProfile": recipient_profile_extension}
             return extensions
         else:
-            raise BadgrValidationError(fields="User has no full name, cannot create recipientProfile extension")
+            raise BadgrValidationError("You have no full name, cannot create recipientProfile extension", error_code=0)
 
     def issue(self, recipient, notify=False, created_by=None, allow_uppercase=False, badgr_app=None, extensions=None, **kwargs):
         # extensions = self.add_recipient_profile_extension(extensions, recipient)

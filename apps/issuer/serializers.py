@@ -103,14 +103,11 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serial
             new_issuer.save()
             return new_issuer
         else:
-            raise BadgrValidationError(
-                fields={"instance": [{"error_code": 999, "error_message": "You don't have the necessary permissions"}]})
+            raise BadgrValidationError("You don't have the necessary permissions", 100)
 
     def update(self, instance, validated_data):
         if instance.assertions:
-            raise BadgrValidationError(
-                fields={"instance": [{"error_code": 999,
-                                      "error_message": "Cannot change any value, assertions have already been issued"}]})
+            raise BadgrValidationError("Cannot change any value, assertions have already been issued within this entity", 214)
         [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
         self.save_extensions(validated_data, instance)
         if not instance.badgrapp_id:
@@ -246,8 +243,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
             new_badgeclass = BadgeClass.objects.create(**validated_data)
             return new_badgeclass
         else:
-            raise BadgrValidationError(fields = {"instance": [{"error_code": 999,
-                                    "error_message": "You don't have the necessary permissions"}]})
+            raise BadgrValidationError("You don't have the necessary permissions", 100)
 
 
 class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serializer):
@@ -351,8 +347,7 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         if badgeclass.expiration_period:
             expires_at = datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0) + badgeclass.expiration_period
         if enrollment.badge_instance:
-            raise BadgrValidationError(fields="Can't award enrollment {}, it has already been awarded"
-                                       .format(validated_data.get('enrollment_entity_id')))
+            raise BadgrValidationError("Can't award enrollment, it has already been awarded", 213)
         if self.context['request'].data.get('issue_signed', False):
             assertion = badgeclass.issue_signed(
                 recipient=enrollment.user,

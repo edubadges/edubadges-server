@@ -72,4 +72,4 @@ class FacultySerializer(serializers.Serializer):
                 raise serializers.ValidationError("Faculty name already exists")
             return new_faculty
         else:
-            BadgrValidationError(fields="You don't have the necessary permissions")
+            BadgrValidationError("You don't have the necessary permissions", 100)
