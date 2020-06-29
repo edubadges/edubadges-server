@@ -511,21 +511,21 @@ class BadgeClass(EntityUserProvisionmentMixin,
         return self.badgeclassextension_set
 
     def add_recipient_profile_extension(self, extensions, user):
-        full_name = user.get_full_name()
-        if full_name:
+        eduid = user.get_eduid()
+        if eduid:
             recipient_profile_extension = {"@context": "https://openbadgespec.org/extensions/recipientProfile/context.json",
                                            "type": ["Extension", "extensions:RecipientProfile"],
-                                           "name": full_name}
+                                           "name": eduid}
             if extensions:
                 extensions["extensions:recipientProfile"] = recipient_profile_extension
             else:
                 extensions = {"extensions:recipientProfile": recipient_profile_extension}
             return extensions
         else:
-            raise BadgrValidationError("You have no full name, cannot create recipientProfile extension", error_code=0)
+            raise BadgrValidationError("You have no eduid, cannot create recipientProfile extension", error_code=0)
 
     def issue(self, recipient, notify=False, created_by=None, allow_uppercase=False, badgr_app=None, extensions=None, **kwargs):
-        # extensions = self.add_recipient_profile_extension(extensions, recipient)
+        extensions = self.add_recipient_profile_extension(extensions, recipient)
         instance = BadgeInstance.objects.create(
             badgeclass=self, recipient_identifier=recipient.get_recipient_identifier(),
             notify=notify, created_by=created_by, allow_uppercase=allow_uppercase,
@@ -538,7 +538,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
         perms = self.get_permissions(signer)
         if not perms['may_sign']:
             raise serializers.ValidationError('You do not have permission to sign badges for this badgeclass.')
-        # extensions = self.add_recipient_profile_extension(extensions, recipient)
+        extensions = self.add_recipient_profile_extension(extensions, recipient)
         assertion = BadgeInstance.objects.create(
             badgeclass=self, recipient_identifier=recipient.get_recipient_identifier(), notify=False,  # notify after signing
             created_by=created_by, allow_uppercase=allow_uppercase,

@@ -618,6 +618,11 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
     def all_recipient_identifiers(self):
         return [self.get_recipient_identifier()]
 
+    def get_eduid(self):
+        identififer = self.get_recipient_identifier()
+        if identififer.startswith('urn:mace:eduid.nl'):
+            return identififer
+
     def get_recipient_identifier(self):
         from allauth.socialaccount.models import SocialAccount
         try:
