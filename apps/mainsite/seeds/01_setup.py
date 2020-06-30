@@ -75,7 +75,7 @@ edu_badges_faculty, _ = Faculty.objects.get_or_create(name=EDU_BADGES_FACULTY_NA
 surf_issuer, _ = Issuer.objects.get_or_create(name="Team edubadges", image="uploads/issuers/surf.png",
                                               faculty=edu_badges_faculty,
                                               description="Team edubadges", email="info@surf.nl",
-                                              url="www.surf.nl/edubadges",
+                                              url="https://www.surf.nl/edubadges",
                                               source="local", original_json="{}", badgrapp=main_badgr_app)
 
 badge_class_extensions = {
@@ -99,7 +99,7 @@ badge_class, _ = BadgeClass.objects.get_or_create(
                 "Share them anytime you like and with whomever you like. "
                 "Badges are visual representations of your knowledge, skills and competences.",
     source="local",
-    criteria_url="www.surf.nl/edubadges",
+    criteria_url="https://www.surf.nl/edubadges",
     old_json="{}",
     image="uploads/badges/edubadge_student.png",
 )
