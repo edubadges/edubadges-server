@@ -195,7 +195,7 @@ teachers = [
 [create_teacher(**t) for t in teachers]
 
 # Users - Students
-extra_data = json.dumps({"eduid": uuid.uuid4()})
+extra_data = json.dumps({"eduid": str(uuid.uuid4())})
 
 
 def create_student(username, first_name, last_name, email, uid):
