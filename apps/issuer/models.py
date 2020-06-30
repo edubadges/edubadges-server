@@ -680,7 +680,7 @@ class BadgeInstance(BaseAuditedModel,
     acceptance = models.CharField(max_length=254, choices=ACCEPTANCE_CHOICES, default=ACCEPTANCE_UNACCEPTED)
 
     hashed = models.BooleanField(default=True)
-    salt = models.CharField(max_length=254, blank=True, null=True, default=None)
+    salt = models.CharField(max_length=254, blank=True, null=True, default=None, db_index=True)
 
     old_json = JSONField()
 
@@ -964,6 +964,9 @@ class BadgeInstance(BaseAuditedModel,
     def get_extensions_manager(self):
         return self.badgeinstanceextension_set
 
+    def get_hashed_identity(self):
+        return generate_sha256_hashstring(self.recipient_identifier.lower(), self.salt)
+
     def get_json(self, obi_version=CURRENT_OBI_VERSION, expand_badgeclass=False, expand_issuer=False,
                  include_extra=True, use_canonical_id=False, signed=False, public_key_issuer=None):
 
@@ -1049,7 +1052,7 @@ class BadgeInstance(BaseAuditedModel,
             json['recipient'] = {
                 "hashed": True,
                 "type": self.recipient_type,
-                "identity": generate_sha256_hashstring(self.recipient_identifier.lower(), self.salt),
+                "identity": self.get_hashed_identity()
             }
             if self.salt:
                 json['recipient']['salt'] = self.salt

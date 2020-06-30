@@ -117,6 +117,26 @@ class IssuerAPITest(BadgrTestCase):
         response = self.client.get('/media/uploads/badges/{}'.format(os.path.basename(assertion.image.path)))
         self.assertEqual(response.status_code, 200)
 
+
+class IssuerPublicAPITest(BadgrTestCase):
+
+    def test_get_name_from_recipient_identifer(self):
+        teacher1 = self.setup_teacher()
+        student = self.setup_student()
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(teacher1, faculty)
+        badgeclas = self.setup_badgeclass(issuer)
+        assertion = self.setup_assertion(student, badgeclas, teacher1)
+        eduid_hash = assertion.get_json()['recipient']['identity']
+        salt = assertion.get_json()['recipient']['salt']
+        response = self.client.get('/public/assertions/identity/{}/{}'.format(eduid_hash, salt))
+        self.assertEqual(response.status_code, 404)
+        assertion.public = True
+        assertion.save()
+        response = self.client.get('/public/assertions/identity/{}/{}'.format(eduid_hash, salt))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['name'], assertion.get_recipient_name())
+
 # class IssuerExtensionsTest(BadgrTestCase):
 #
 #     TODO: this test cannot run, because you cannot verify extensions as their @context is hosted on the same machine
