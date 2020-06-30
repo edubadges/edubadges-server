@@ -12,6 +12,7 @@ from django.shortcuts import redirect, render_to_response
 from django.urls import resolve, reverse, Resolver404, NoReverseMatch
 from django.views.generic import RedirectView
 from entity.api import VersionedObjectMixin, BaseEntityDetailView
+from mainsite.exceptions import BadgrApiException400
 from mainsite.models import BadgrApp
 from mainsite.utils import OriginSetting
 from rest_framework import status, permissions
@@ -462,3 +463,19 @@ class BakedBadgeInstanceImage(VersionedObjectMixin, APIView, SlugToEntityIdRedir
         redirect_url = assertion.get_baked_image_url(obi_version=requested_version)
 
         return redirect(redirect_url, permanent=True)
+
+
+class AssertionRecipientName(APIView):
+    permission_classes = (permissions.AllowAny,)
+    http_method_names = ('get',)
+
+    def get(self, request, *args, **kwargs):
+        identity = kwargs.get('identity', None)
+        salt = kwargs.get('salt', None)
+        if not identity or not salt:
+            raise BadgrApiException400('Cannot query name: salt and identity needed', 0)
+        instance = BadgeInstance.objects.get(salt=salt)
+        if instance.public:
+            if identity == instance.get_hashed_identity():
+                return Response({'name': instance.get_recipient_name()})
+        return Response(status=status.HTTP_404_NOT_FOUND)
