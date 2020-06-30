@@ -155,7 +155,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
     criteria_text = MarkdownCharField(required=False, allow_null=True, allow_blank=True)
     criteria_url = StripTagsCharField(required=False, allow_blank=True, allow_null=True, validators=[URLValidator()])
     description = StripTagsCharField(max_length=16384, required=True, convert_null=True)
-    alignment = AlignmentItemSerializer(many=True, source='alignment_items', required=False)
+    alignments = AlignmentItemSerializer(many=True, source='alignment_items', required=False)
     tags = serializers.ListField(child=StripTagsCharField(max_length=1024), source='tag_items', required=False)
     extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
     expiration_period = PeriodField(required=False)
