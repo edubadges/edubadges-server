@@ -91,11 +91,11 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
     def update(self, instance, validated_data):
         """ Updating acceptance status (to 'Accepted') is permitted as well as changing public status. """
         # Only locally issued badges will ever have an acceptance status other than 'Accepted'
-        if instance.acceptance == 'Unaccepted' and validated_data.get('acceptance') == 'Accepted':
+        if instance.acceptance in ['Unaccepted', 'Rejected'] and validated_data.get('acceptance') == 'Accepted':
             instance.acceptance = 'Accepted'
             instance.save()
         public = validated_data.get('public', None)
-        if public != None:
+        if public is not None:
             instance.public = public
             instance.save()
         return instance
