@@ -52,7 +52,7 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
 
     def _validate_unique(self, exclude=None):
         """Custom uniqueness validation of the provisionment, used before save"""
-        if self.type == self.TYPE_FIRST_ADMIN_INVITATION and UserProvisionment.objects.filter(
+        if UserProvisionment.objects.filter(
                 type=self.type,
                 rejected=False,
                 for_teacher=self.for_teacher,
@@ -140,9 +140,11 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
         self.save()
 
     def _run_validations(self):
-        self._validate_unique()
-        self._validate_staff_collision()
-        self._validate_invite_collision()
+        if self.type == UserProvisionment.TYPE_FIRST_ADMIN_INVITATION:
+            self._validate_unique()
+        else:
+            self._validate_staff_collision()
+            self._validate_invite_collision()
 
     def _remove_cache(self):
         if self.entity:

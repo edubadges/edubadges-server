@@ -69,6 +69,7 @@ class TermsVersionAdmin(ModelAdmin):
 
     latest_terms_version.short_description = "Current Terms Version"
 
+
 badgr_admin.register(TermsVersion, TermsVersionAdmin)
 
 
@@ -81,6 +82,8 @@ class UserProvisionmentCreateForm(ModelForm):
 
 class UserProvisionmentAdmin(ModelAdmin):
     form = UserProvisionmentCreateForm
+    list_display = ('created_at', 'email', 'type', 'rejected')
+    add_form_template = 'admin/custom/userprovisionment_add_form.html'
 
     def save_model(self, request, obj, form, change):
         obj.created_by = request.user
@@ -88,5 +91,6 @@ class UserProvisionmentAdmin(ModelAdmin):
         obj.for_teacher = True
         obj.type = obj.TYPE_FIRST_ADMIN_INVITATION
         obj.save()
+
 
 badgr_admin.register(UserProvisionment, UserProvisionmentAdmin)
