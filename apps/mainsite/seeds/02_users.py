@@ -1,4 +1,5 @@
 import json
+import uuid
 
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount
@@ -194,16 +195,15 @@ teachers = [
 [create_teacher(**t) for t in teachers]
 
 # Users - Students
-extra_data = json.dumps({"eduperson_entitlement": ["urn:mace:eduid.nl:entitlement:verified-by-institution"]})
+extra_data = json.dumps({"eduid": str(uuid.uuid4())})
 
 
-def create_student(username, first_name, last_name, email, uid, verify):
+def create_student(username, first_name, last_name, email, uid):
     user, _ = BadgeUser.objects.get_or_create(username=username, email=email, first_name=first_name, last_name=last_name)
     accept_terms(user)
 
     EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)
-    SocialAccount.objects.get_or_create(provider='edu_id', uid=uid, user=user,
-                                        extra_data=extra_data if verify else '{}')
+    SocialAccount.objects.get_or_create(provider='edu_id', uid=uid, user=user, extra_data=extra_data)
 
 
 students = [
@@ -212,32 +212,28 @@ students = [
         "first_name": "John",
         "last_name": "Doe",
         "email": "edubadges.surf@gmail.com",
-        "uid": "5acb63239f298a0a7de0081cd4a603d807178846",
-        "verify": True
+        "uid": "5acb63239f298a0a7de0081cd4a603d807178846"
     },
     {
         "username": "mary",
         "first_name": "Mary",
         "last_name": "Doe",
         "email": ENROLLED_STUDENT_EMAIL,
-        "uid": "7ec1acf9ce98835e29c337077491b4ba6d1ed21d",
-        "verify": True
+        "uid": "7ec1acf9ce98835e29c337077491b4ba6d1ed21d"
     },
     {
         "username": "sarah",
         "first_name": "Sarah",
         "last_name": "Doe",
         "email": REVOKED_STUDENT_EMAIL,
-        "uid": "7fc994786c9e7815da17f5e97f796f67e891509e",
-        "verify": True
+        "uid": "7fc994786c9e7815da17f5e97f796f67e891509e"
     },
     {
         "username": "carl",
         "first_name": "Carl",
         "last_name": "Doolittle",
         "email": AWARDED_STUDENT_EMAIL,
-        "uid": "78b9ec1bb8731ec04b42137faf6a3c7068c89212",
-        "verify": True
+        "uid": "78b9ec1bb8731ec04b42137faf6a3c7068c89212"
     }
 ]
 
