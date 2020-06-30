@@ -7,7 +7,6 @@ import requests
 from allauth.account.adapter import get_adapter as get_account_adapter
 from allauth.socialaccount.helpers import render_authentication_error, complete_social_login
 from allauth.socialaccount.models import SocialApp
-from allauth.socialaccount.providers.base import AuthErrorCode
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
@@ -16,7 +15,7 @@ from jose import jwt
 
 from badgeuser.models import UserProvisionment
 from badgrsocialauth.utils import set_session_badgr_app, get_session_authcode, get_verified_user, get_social_account, \
-    check_agreed_term_and_conditions
+    check_agreed_term_and_conditions, AuthErrorCode
 from ims.models import LTITenant
 from institution.models import Institution
 from lti_edu.models import LtiBadgeUserTennant, UserCurrentContextId
@@ -222,8 +221,8 @@ def after_terms_agreement(request, **kwargs):
                             extra_context["admin_email"] = admins[0].user.email
 
                     error = 'Sorry, you can not register without an invite.'
+                    extra_context["code"] = AuthErrorCode.REGISTER_WITHOUT_INVITE
                     return render_authentication_error(request, SurfConextProvider.id, error,
-                                                       code=AuthErrorCode.REGISTER_WITHOUT_INVITE,
                                                        extra_context=extra_context)
 
         except Institution.DoesNotExist:  # no institution yet, and therefore also first login ever
@@ -241,12 +240,11 @@ def after_terms_agreement(request, **kwargs):
                 request.user.delete()
                 error = 'Sorry, you can not register without an invite.'
                 return render_authentication_error(request, SurfConextProvider.id, error,
-                                                   code=AuthErrorCode.REGISTER_WITHOUT_INVITE)
+                                                   extra_context={"code": AuthErrorCode.REGISTER_WITHOUT_INVITE})
 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
 
-    resign = True
-    check_agreed_term_and_conditions(request.user, badgr_app, resign=resign)
+    check_agreed_term_and_conditions(request.user, badgr_app, resign=True)
 
     if lti_data is not None and 'lti_user_id' in lti_data:
         if not request.user.is_anonymous:
@@ -261,6 +259,4 @@ def after_terms_agreement(request, **kwargs):
 
     request.session['lti_user_id'] = lti_user_id
     request.session['lti_roles'] = lti_roles
-    if not request.user.is_authenticated:
-        print((request.__dict__))
     return ret
