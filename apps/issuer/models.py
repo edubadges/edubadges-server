@@ -1044,6 +1044,7 @@ class BadgeInstance(BaseAuditedModel,
 
         # issuedOn / expires
         json['issuedOn'] = self.issued_on.isoformat()
+        json['updatedAt'] = self.updated_at.isoformat()
         if self.expires_at:
             json['expires'] = self.expires_at.isoformat()
 
