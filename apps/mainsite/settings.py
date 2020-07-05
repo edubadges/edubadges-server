@@ -322,10 +322,15 @@ LOGGING = {
 ##
 
 CACHES = {
+    # 'default': {
+    #     'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    #     'KEY_PREFIX': 'badgr_',
+    #     'KEY_PREFIX': 'badgr_',
+    #     'VERSION': 10,
+    #     'TIMEOUT': None,
+    # }
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'KEY_PREFIX': 'badgr_',
-        'KEY_PREFIX': 'badgr_',
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
         'VERSION': 10,
         'TIMEOUT': None,
     }
