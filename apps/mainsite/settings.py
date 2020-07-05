@@ -329,10 +329,14 @@ CACHES = {
     #     'VERSION': 10,
     #     'TIMEOUT': None,
     # }
+    # 'default': {
+    #     'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    #     'VERSION': 10,
+    #     'TIMEOUT': None,
+    # }
     'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-        'VERSION': 10,
-        'TIMEOUT': None,
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
     }
 }
 
