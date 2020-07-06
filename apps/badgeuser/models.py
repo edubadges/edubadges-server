@@ -116,7 +116,7 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
             EmailBlacklist.objects.get(email=self.email)
         except EmailBlacklist.DoesNotExist:
             subject = 'You have been invited'
-            login_link = BadgrApp.objects.get(pk=1).ui_login_redirect
+            login_link = BadgrApp.objects.get(pk=1).email_confirmation_redirect
             if self.user:
                 message = "You have been invited for a staff membership. Please login to accept. \n {}".format(login_link)
             if not self.user:
