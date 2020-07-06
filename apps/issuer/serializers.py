@@ -78,7 +78,7 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serial
     created_by = BadgeUserIdentifierField()
     name = StripTagsCharField(max_length=1024)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
-    image = ValidImageField(required=False)
+    image = ValidImageField(required=True)
     email = serializers.EmailField(max_length=255, required=True)
     description = StripTagsCharField(max_length=16384, required=False)
     url = serializers.URLField(max_length=1024, required=True)
