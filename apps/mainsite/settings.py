@@ -1,5 +1,4 @@
 import os
-import sys
 
 from mainsite import TOP_DIR
 from mainsite.environment import env_settings
@@ -274,7 +273,7 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': os.path.join(LOGS_DIR, 'badgr_events.log')
         },
-        'badgr_debug' : {
+        'badgr_debug': {
             'level': 'INFO',
             'formatter': 'badgr',
             'class': 'logging.handlers.RotatingFileHandler',
@@ -294,7 +293,7 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
-         'Badgr.Debug' : {
+        'Badgr.Debug': {
             'handlers': ['badgr_debug'],
             'level': 'INFO',
             'propagate': True,
@@ -321,19 +320,13 @@ LOGGING = {
 #
 ##
 
-CACHES = {
-    # 'default': {
-    #     'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-    #     'KEY_PREFIX': 'badgr_',
-    #     'KEY_PREFIX': 'badgr_',
-    #     'VERSION': 10,
-    #     'TIMEOUT': None,
-    # }
-    # 'default': {
-    #     'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-    #     'VERSION': 10,
-    #     'TIMEOUT': None,
-    # }
+CI = legacy_boolean_parsing('CI', '0')
+CACHES = {'default': {
+    'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    'KEY_PREFIX': 'badgr_',
+    'VERSION': 10,
+    'TIMEOUT': None,
+}} if CI else {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
         'LOCATION': 'localhost:11211',
@@ -500,7 +493,6 @@ CELERY_RESULT_BACKEND = None
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULTS_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
-
 
 from cryptography.fernet import Fernet
 
