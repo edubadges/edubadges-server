@@ -23,4 +23,3 @@ export SURF_CONEXT_SECRET="secret"
 export TIME_STAMPED_OPEN_BADGES_BASE_URL="http://127.0.0.1:3000/"
 export UI_URL="http://localhost:4000"
 export UNSUBSCRIBE_SECRET_KEY="secret"
-export CI=1

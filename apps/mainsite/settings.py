@@ -320,13 +320,7 @@ LOGGING = {
 #
 ##
 
-CI = legacy_boolean_parsing('CI', '0')
-CACHES = {'default': {
-    'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-    'KEY_PREFIX': 'badgr_',
-    'VERSION': 10,
-    'TIMEOUT': None,
-}} if CI else {
+CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
         'LOCATION': 'localhost:11211',
