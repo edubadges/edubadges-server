@@ -190,13 +190,6 @@ class SetupHelper(object):
             return True
 
 
-@override_settings(
-    CELERY_ALWAYS_EAGER=True,
-    SESSION_ENGINE='django.contrib.sessions.backends.cache',
-    HTTP_ORIGIN="http://localhost:8000",
-    BADGR_APP_ID=1,
-    # CACHES={'default': {'BACKEND': 'django.core.cache.backends.dummy.DummyCache'}}
-)
 class BadgrTestCase(SetupHelper, APITransactionTestCase):
     def setUp(self):
         super(BadgrTestCase, self).setUp()
