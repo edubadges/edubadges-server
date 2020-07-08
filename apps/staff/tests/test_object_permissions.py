@@ -46,13 +46,17 @@ class ObjectPermissionTests(BadgrTestCase):
         self.assertEqual(400, response.status_code)
         self.assertEqual(str(response.data[0]), "May not assign permissions that you don't have yourself")
 
-    def test_create_issuer_staff(self):
+    def test_create_all_staffs(self):
         teacher1 = self.setup_teacher(authenticate=True)
         teacher2 = self.setup_teacher(institution=teacher1.institution)
+        teacher3 = self.setup_teacher(institution=teacher1.institution)
+        teacher4 = self.setup_teacher(institution=teacher1.institution)
+        teacher5 = self.setup_teacher(institution=teacher1.institution)
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        badgeclass = self.setup_badgeclass(issuer)
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_administrate_users=True)
-        data = json.dumps({
+        data = {
             "may_create": 0,
             "may_read": 1,
             "may_update": 0,
@@ -61,10 +65,28 @@ class ObjectPermissionTests(BadgrTestCase):
             "may_award": 0,
             "may_administrate_users": 1,
             "user": teacher2.entity_id,
-            "issuer": issuer.entity_id
-        })
+            "badgeclass": badgeclass.entity_id
+        }
+        response = self.client.post('/staff-membership/badgeclass/{}/create'.format(badgeclass.entity_id),
+                                    json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 201)
+        data['user'] = teacher3.entity_id
+        data['issuer'] = issuer.entity_id
+        del data['badgeclass']
         response = self.client.post('/staff-membership/issuer/{}/create'.format(issuer.entity_id),
-                                    data, content_type='application/json')
+                                    json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 201)
+        data['user'] = teacher4.entity_id
+        data['faculty'] = faculty.entity_id
+        del data['issuer']
+        response = self.client.post('/staff-membership/faculty/{}/create'.format(faculty.entity_id),
+                                    json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 201)
+        data['user'] = teacher5.entity_id
+        data['institution'] = teacher1.institution.entity_id
+        del data['faculty']
+        response = self.client.post('/staff-membership/institution/{}/create'.format(teacher1.institution.entity_id),
+                                    json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 201)
 
     def test_update_faculty_staff_membership(self):
