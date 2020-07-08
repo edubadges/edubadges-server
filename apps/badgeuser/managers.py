@@ -13,7 +13,6 @@ class BadgeUserManager(UserManager):
                first_name,
                last_name,
                request=None,
-               plaintext_password=None,
                send_confirmation=True,
                create_email_address=True,
                marketing_opt_in=False
@@ -21,26 +20,6 @@ class BadgeUserManager(UserManager):
         from badgeuser.models import CachedEmailAddress, TermsVersion
 
         user = None
-
-        # Do we know about this email address yet?
-        try:
-            existing_email = CachedEmailAddress.cached.get(email=email)
-        except CachedEmailAddress.DoesNotExist:
-            # nope
-            pass
-        else:
-            if not existing_email.user.password:
-                # yes, its owned by an auto-created user trying to set a password
-                user = existing_email.user
-            elif existing_email.verified:
-                raise ValidationError(self.duplicate_email_error)
-            else:
-                # yes, its an unverified email address owned by a claimed user
-                # remove the email
-                existing_email.delete()
-                # if the user no longer has any emails, remove it
-                if len(existing_email.user.cached_emails()) == 0:
-                    existing_email.user.delete()
 
         badgrapp = BadgrApp.objects.get_current(request=request)
 
@@ -52,8 +31,6 @@ class BadgeUserManager(UserManager):
         user.badgrapp = badgrapp
         user.marketing_opt_in = marketing_opt_in
         user.agreed_terms_version = TermsVersion.cached.latest_version()
-        if plaintext_password:
-            user.set_password(plaintext_password)
         user.save()
 
         # create email address record as needed
