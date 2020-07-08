@@ -30,11 +30,11 @@ class InstitutionSerializer(serializers.Serializer):
             if validated_data.get('grading_table') and instance.grading_table != validated_data.get('grading_table'):
                 raise BadgrValidationError(
                     {"grading_table": [{"error_code": 801,
-                               "error_message": "Cannot change grading table, assertions have already been issued"}]})
+                               "error_message": "Cannot change grading table, assertions have already been issued"}]}, 801)
             if validated_data.get('brin') and instance.brin != validated_data.get('brin'):
                 raise BadgrValidationError(
                     {"brin": [{"error_code": 802,
-                               "error_message": "Cannot change brin, assertions have already been issued"}]})
+                               "error_message": "Cannot change brin, assertions have already been issued"}]}, 802)
         instance.description = validated_data.get('description')
         if 'image' in validated_data:
             instance.image = validated_data.get('image')
