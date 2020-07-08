@@ -27,6 +27,7 @@ from issuer.models import BadgeInstance
 from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrApiException400, BadgrValidationError
 from mainsite.models import ApplicationInfo, EmailBlacklist, BaseAuditedModel, BadgrApp
+from mainsite.utils import open_mail_in_browser
 from signing.models import AssertionTimeStamp
 from badgeuser.utils import generate_badgr_username
 from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
@@ -562,15 +563,21 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         except EmailBlacklist.DoesNotExist:
             # Allow sending, as this email is not blacklisted.
             if not attachments:
-                send_mail(subject, message, from_email, [self.primary_email], **kwargs)
+                if settings.LOCAL_DEVELOPMENT_MODE:
+                    open_mail_in_browser(message)
+                else:
+                    send_mail(subject, message, from_email, [self.primary_email], **kwargs)
             else:
                 from django.core.mail import EmailMessage
-                email = EmailMessage(subject=subject,
-                                     body=message,
-                                     from_email=from_email,
-                                     to=[self.primary_email],
-                                     attachments=attachments)
-                email.send()
+                if settings.LOCAL_DEVELOPMENT_MODE:
+                    open_mail_in_browser(message)
+                else:
+                    email = EmailMessage(subject=subject,
+                                         body=message,
+                                         from_email=from_email,
+                                         to=[self.primary_email],
+                                         attachments=attachments)
+                    email.send()
         else:
             return
             # TODO: Report email non-delivery somewhere.

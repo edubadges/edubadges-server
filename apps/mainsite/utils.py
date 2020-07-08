@@ -8,15 +8,16 @@ import hashlib
 import io
 import os
 import re
+import tempfile
 import urllib.parse
 import uuid
+import webbrowser
 from xml.etree import cElementTree as ET
 
 import requests
-from django.apps import apps
 from django.conf import settings
-from django.core.cache import cache
 from django.core.files.storage import DefaultStorage
+from django.template.loader import render_to_string
 from django.urls import get_callable
 
 
@@ -122,58 +123,33 @@ def list_of(value):
     return [value]
 
 
+def open_mail_in_browser(html):
+    tmp = tempfile.NamedTemporaryFile(delete=False)
+    path = tmp.name + ".html"
+    f = open(path, "w")
+    f.write(html)
+    f.close()
+    webbrowser.open("file://" + path)
+
+
 class EmailMessageMaker:
 
     @staticmethod
-    def create_student_badge_request_email(badge_class):
-        mail_template = 'Dear student, \n\n ' \
-                        '\tYou have successfully requested the following badge. \n\n' \
-                        '\t{}, {} \n\n' \
-                        '\tPlease wait for the issuer of this badge to accept your request. \n\n' \
-                        'Regards, \n\n' \
-                        'The Edubadges team'
-        return mail_template.format(badge_class.name, badge_class.public_url)
+    def create_student_badge_request_email(user, badge_class):
+        template = 'email/requested_badge.html'
+        email_vars = {'public_badge_url': badge_class.public_url,
+                      'badge_name': badge_class.name,
+                      'user_name': user.get_full_name()}
+        return render_to_string(template, email_vars)
 
     @staticmethod
-    def create_issuer_staff_badge_request_email(badge_classes_new_enrollments, badge_classes_old_enrollments):
-
-        def create_string(badge_class_dict):
-            return ''.join(['\t- {name} (issuer: {issuer}), has {counter} badge request(s).\n\n'
-                           .format(name=badge_class.name,
-                                   counter=counter,
-                                   issuer=badge_class.issuer.name)
-                            for badge_class, counter in list(badge_class_dict.items())])
-
-        plural = 'es' if len(badge_classes_new_enrollments) > 1 else ''
-        new_badge_classes_message = '\tIn the past 24 hours new badge requests have been made for the following badge class{0}. \n\n'.format(plural) + create_string(badge_classes_new_enrollments)
-        if badge_classes_old_enrollments:
-            old_badge_classes_message = '\tYou also have older unprocessed badge request(s) waiting for you. \n\n' + create_string(badge_classes_old_enrollments)
-        else:
-            old_badge_classes_message = ''
-        mail_template = 'Dear staff member, \n\n ' \
-                        '{0}' \
-                        '{1}' \
-                        'Regards, \n\n' \
-                        'The Edubadges team'
-        return mail_template.format(new_badge_classes_message, old_badge_classes_message)
-
-    @staticmethod
-    def create_staff_member_addition_email(url, issuer, role, expiration=None):
-        mail_template = 'Dear Sir/Madam, \n\n' \
-                        'You have been asked to join the issuer {issuer_name} as staff member\n\n' \
-                        'with the role: {role}. If you accept please click on the link below. \n\n' \
-                        '{url} \n\n' \
-                        '{expires}' \
-                        'If you do not want to accept, then ignore this email.' \
-                        '\n\n' \
-                        'Kind regards, \n\n' \
-                        'The Edubadges team'
-        if expiration:
-            expires = 'This link expires in {} days \n'.format(expiration)
-        else:
-            expires = ''
-
-        return mail_template.format(**{'issuer_name': issuer.name,
-                                       'role': role,
-                                       'url': url,
-                                       'expires': expires})
+    def create_staff_member_addition_email(new_staff_membership):
+        template = 'email/new_role.html'
+        entity = new_staff_membership.object
+        entity_type = entity.__class__.__name__
+        determiner = 'an' if entity_type[0] in 'aeiouAEIOU' else 'a'
+        email_vars = {'staff_page_url': new_staff_membership.staff_page_url,
+                      'entity_type': entity_type,
+                      'entity_name': entity.name,
+                      'determiner': determiner}
+        return render_to_string(template, email_vars)

@@ -1,3 +1,6 @@
+import urllib
+
+from django.conf import settings
 from django.db import models
 from django.forms.models import model_to_dict
 from rest_framework import serializers
@@ -109,6 +112,13 @@ class PermissionedRelationshipBase(BaseVersionedEntity):
         from badgeuser.models import BadgeUser
         return BadgeUser.cached.get(pk=self.user_id)
 
+    @property
+    def staff_page_url(self):
+        entity = self.object
+        return urllib.parse.urljoin(settings.UI_URL, 'manage/'+
+                                    entity.__class__.__name__+'/'+
+                                    entity.entity_id+'/user-management')
+
 
 class InstitutionStaff(PermissionedRelationshipBase):
     """
@@ -134,6 +144,10 @@ class InstitutionStaff(PermissionedRelationshipBase):
         if self._is_last_staff_membership():
             raise BadgrValidationError('Cannot remove the last staff membership of this institution.', 500)
         return super(InstitutionStaff, self).delete(*args, **kwargs)
+
+    @property
+    def staff_page_url(self):
+        return urllib.parse.urljoin(settings.UI_URL, 'manage/institution/user-management')
 
 
 class FacultyStaff(PermissionedRelationshipBase):

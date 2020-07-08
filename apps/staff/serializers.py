@@ -2,6 +2,7 @@ from rest_framework import serializers
 from badgeuser.serializers import UserSlugRelatedField
 from institution.serializers import InstitutionSlugRelatedField, FacultySlugRelatedField
 from issuer.serializers import IssuerSlugRelatedField, BadgeClassSlugRelatedField
+from mainsite.utils import EmailMessageMaker
 from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
 
 
@@ -39,7 +40,13 @@ class BaseStaffCreateSerializer(BaseStaffSerializer):
             for perm in perms_allowed_to_assign:
                 if not perms_allowed_to_assign[perm] and int(validated_data[perm]):
                     raise serializers.ValidationError("May not assign permissions that you don't have yourself")
-            return object_class.objects.create(**validated_data)
+            new_staff_membership = object_class.objects.create(**validated_data)
+            message = EmailMessageMaker.create_staff_member_addition_email(new_staff_membership)
+            entity_name = new_staff_membership.object.__class__.__name__
+            determiner = 'an' if entity_name[0] in 'aeiouAEIOU' else 'a'
+            new_staff_membership.user.email_user(subject='You have been added to {} {}'.format(determiner, entity_name),
+                                                 message=message)
+            return new_staff_membership
         else:
             raise serializers.ValidationError("You may not administrate this user.")
 
