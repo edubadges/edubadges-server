@@ -144,7 +144,7 @@ class SetupHelper(object):
                                      faculty=faculty)
 
     def setup_badgeclass(self, issuer, image=None):
-        name = 'Test Badgeclass #{}'.format(random.random)
+        name = 'Test Badgeclass #{}'.format(random.random())
         if image is None:
             image = open(self.get_test_image_path(), 'r')
         return BadgeClass.objects.create(
