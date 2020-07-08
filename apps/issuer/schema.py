@@ -87,7 +87,7 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
 
     class Meta:
         model = BadgeInstance
-        fields = ('entity_id', 'badgeclass', 'identifier', 'image',
+        fields = ('entity_id', 'badgeclass', 'identifier', 'image', 'updated_at',
                   'recipient_identifier', 'recipient_type', 'revoked', 'issued_on',
                   'revocation_reason', 'expires_at', 'acceptance', 'created_at',
                   'public')
