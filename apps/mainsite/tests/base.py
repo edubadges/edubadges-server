@@ -138,10 +138,12 @@ class SetupHelper(object):
     def setup_issuer(self, created_by, faculty=None):
         if not faculty:
             faculty = self.setup_faculty()
+        image = open(self.get_test_image_path(), 'r')
         return Issuer.objects.create(name=name_randomiser('Test Issuer'),
                                      description='description',
                                      created_by=created_by,
-                                     faculty=faculty)
+                                     faculty=faculty,
+                                     image=image)
 
     def setup_badgeclass(self, issuer, image=None):
         name = 'Test Badgeclass #{}'.format(random.random())
