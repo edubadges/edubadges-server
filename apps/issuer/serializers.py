@@ -220,12 +220,12 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
     def to_internal_value(self, data):
         errors = OrderedDict()
         if not data.get('criteria_text', False) and not data.get('criteria_url', False):
-            e = OrderedDict([('criteria_text', [ErrorDetail('Either criteria_url or criteria_text is required')]),
-                             ('criteria_url', [ErrorDetail('Either criteria_url or criteria_text is required')])])
+            e = OrderedDict([('criteria_text', [ErrorDetail('Either criteria_url or criteria_text is required', code=905)]),
+                             ('criteria_url', [ErrorDetail('Either criteria_url or criteria_text is required', code=905)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
         if data.get('criteria_url', False):
             if not utils.is_probable_url(data.get('criteria_url')):
-                e = OrderedDict([('criteria_url', [ErrorDetail('Must be a proper url.')])])
+                e = OrderedDict([('criteria_url', [ErrorDetail('Must be a proper url.', code=902)])])
                 errors = OrderedDict(chain(errors.items(), e.items()))
         if errors:
             try:
