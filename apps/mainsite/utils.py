@@ -147,8 +147,8 @@ class EmailMessageMaker:
     def create_staff_member_addition_email(new_staff_membership):
         template = 'email/new_role.html'
         entity = new_staff_membership.object
-        entity_type = entity.__class__.__name__
-        determiner = 'an' if entity_type[0] in 'aeiouAEIOU' else 'a'
+        entity_type = entity.__class__.__name__.lower()
+        determiner = 'an' if entity_type[0] in 'aeiou' else 'a'
         email_vars = {'staff_page_url': new_staff_membership.staff_page_url,
                       'entity_type': entity_type,
                       'entity_name': entity.name,

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        .text {
+            text-align: left;
+            margin: 0px;
+        }
+        .footer {
+            text-align: center;
+            font-size:12px;
+            width: 280px;
+            margin: auto;
+            margin-top: 10px;
+            color: grey;
+        }
+        .text_footer {
+            display: inline-block;
+            margin: 0px;
+        }
+        .blue-button {
+            border-radius: px;
+            color: white;
+            background-color:
+            #0077c8;
+            text-decoration: none;
+            display: inline-block;
+            margin: 15px 0;
+            cursor:pointer;
+            padding: 14px 26px;
+            font-size: 18px;"
+        }
+        .mail_subcontainer{
+            margin-bottom: 20px;
+        }
+        .middle p{
+            margin: 20px 0px 20px 0px;
+        }
+        .mail_container{
+            width: 70%;
+            margin: auto;
+            margin-bottom: 30px;
+            max_width: 600px;
+        }
+        .mail_title{
+            font-weight: 600;
+            font-size: 42px;
+            line-height: 50px;
+            margin-bottom: 10px;
+        }
+        .mail_subtitle{
+            font-weight: 300;
+            font-size: 26px;
+            line-height: 30px;
+        }
+    </style>
+    {% block style %}{% endblock %}
+    <meta charset="UTF-8">
+    {% block title %}{% endblock %}
+</head>
+<body>
+    <div class="main" style="font-family: Helvetica, Arial, sans-serif;line-height: 18px;font-size: 14px;color: #353535;">
+        {% block content %}{% endblock %}
+        <div class="footer">
+            <a class="text text_footer" target="_blank" href="https://www.surf.nl">About edubadges</a>
+            <span>&#183;</span>
+            <a class="text text_footer" target="_blank" href="https://www.surf.nl">Privacy Policy</a>
+            <span>&#183;</span>
+            <a class="text text_footer" target="_blank" href="https://www.surf.nl">Terms of Use</a>
+            <p class="text text_footer">Powered by <a target="_blank" href="https://www.surf.nl">SURF</a></p>
+        </div>
+    </div>
+</body>
+</html>
