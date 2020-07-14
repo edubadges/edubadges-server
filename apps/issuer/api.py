@@ -127,7 +127,7 @@ class BatchSignAssertions(BaseEntityListView):
             matching_assertion.public_key_issuer.save()
             matching_assertion.save()
             AssertionTimeStamp.objects.get(badge_instance=matching_assertion).delete()
-            matching_assertion.notify_earner(attach_image=True)
+            # matching_assertion.notify_earner(attach_image=True)
             successful_assertions.append(matching_assertion)
         serializer_class = self.get_serializer_class()
         serializer_instance = serializer_class()

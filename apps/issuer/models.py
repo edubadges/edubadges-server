@@ -23,10 +23,9 @@ from django.utils import timezone
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager
 from jsonfield import JSONField
-from mainsite.exceptions import BadgrValidationError
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage, ImageUrlGetterMixin
 from mainsite.models import BadgrApp, EmailBlacklist, BaseAuditedModel
-from mainsite.utils import OriginSetting, generate_entity_uri
+from mainsite.utils import OriginSetting, generate_entity_uri, EmailMessageMaker
 from openbadges_bakery import bake
 from rest_framework import serializers
 from signing import tsob
@@ -510,24 +509,25 @@ class BadgeClass(EntityUserProvisionmentMixin,
     def get_extensions_manager(self):
         return self.badgeclassextension_set
 
-    def issue(self, recipient, notify=False, created_by=None, allow_uppercase=False, badgr_app=None, extensions=None, **kwargs):
-        instance = BadgeInstance.objects.create(
-            badgeclass=self, recipient_identifier=recipient.get_recipient_identifier(),
-            notify=notify, created_by=created_by, allow_uppercase=allow_uppercase,
-            badgr_app=badgr_app, user=recipient, extensions=extensions,
+    def issue(self, recipient, created_by=None, allow_uppercase=False, extensions=None, **kwargs):
+        assertion = BadgeInstance.objects.create(
+            badgeclass=self, recipient_identifier=recipient.get_recipient_identifier(), created_by=created_by,
+            allow_uppercase=allow_uppercase,
+            user=recipient, extensions=extensions,
             **kwargs
         )
-        return instance
+        message = EmailMessageMaker.create_earned_badge_mail(recipient, assertion)
+        recipient.email_user(subject='Congratulations, you earned a badge!', message=message)
+        return assertion
 
     def issue_signed(self, recipient, created_by=None, allow_uppercase=False, badgr_app=None, signer=None, extensions=None, **kwargs):
         perms = self.get_permissions(signer)
         if not perms['may_sign']:
             raise serializers.ValidationError('You do not have permission to sign badges for this badgeclass.')
         assertion = BadgeInstance.objects.create(
-            badgeclass=self, recipient_identifier=recipient.get_recipient_identifier(), notify=False,  # notify after signing
+            badgeclass=self, recipient_identifier=recipient.get_recipient_identifier(),
             created_by=created_by, allow_uppercase=allow_uppercase,
-            badgr_app=badgr_app, user=recipient, extensions=extensions,
-            **kwargs
+            user=recipient, extensions=extensions, **kwargs
         )
         assertion.submit_for_timestamping(signer=signer)
         return assertion
@@ -736,10 +736,6 @@ class BadgeInstance(BaseAuditedModel,
     def public_url(self):
         return OriginSetting.HTTP+self.get_absolute_url()
 
-    # @property
-    # def owners(self):
-    #     return self.issuer.owners
-
     @property
     def signing_in_progress(self):
         return not self.signature and self.public_key_issuer
@@ -866,84 +862,6 @@ class BadgeInstance(BaseAuditedModel,
                     award.delete()
             except ImportError:
                 pass
-
-    def notify_earner(self, badgr_app=None, attach_image=False):
-        """
-        Sends an email notification to the badge earner.
-        This process involves creating a badgeanalysis.models.OpenBadge
-        returns the EarnerNotification instance.
-
-        TODO: consider making this an option on initial save and having a foreign key to
-        the notification model instance (which would link through to the OpenBadge)
-        """
-
-        if getattr(settings, 'SUPPRESS_EMAILS', 0):
-            return
-
-        email_address = self.get_email_address()
-        
-        try:
-            EmailBlacklist.objects.get(email=email_address)
-        except EmailBlacklist.DoesNotExist:
-            # Allow sending, as this email is not blacklisted.
-            pass
-        else:
-            return
-            # TODO: Report email non-delivery somewhere.
-
-        if badgr_app is None:
-            badgr_app = BadgrApp.objects.get_current(None)
-
-        try:
-            if self.issuer.image:
-                issuer_image_url = self.issuer.public_url + '/image'
-            else:
-                issuer_image_url = None
-
-            email_context = {
-                'badge_name': self.badgeclass.name,
-                'badge_id': self.entity_id,
-                'badge_description': self.badgeclass.description,
-                'expiration_date': self.expires_at,
-                'help_email': getattr(settings, 'HELP_EMAIL', 'help@badgr.io'),
-                'issuer_name': re.sub(r'[^\w\s]+', '', self.issuer.name, 0, re.I),
-                'issuer_url': self.issuer.url,
-                'issuer_email': self.issuer.email,
-                'issuer_detail': self.issuer.public_url,
-                'issuer_image_url': issuer_image_url,
-                'badge_instance_url': self.public_url,
-                'image_url': self.public_url + '/image',
-                'download_url': self.public_url + "?action=download",
-                'unsubscribe_url': getattr(settings, 'HTTP_ORIGIN') + EmailBlacklist.generate_email_signature(
-                    email_address),
-                'site_name': badgr_app.name,
-                'site_url': badgr_app.signup_redirect,
-                'badgr_app': badgr_app,
-            }
-            if badgr_app.cors == 'badgr.io':
-                email_context['promote_mobile'] = True
-        except KeyError as e:
-            # A property isn't stored right in json
-            raise e
-
-        template_name = 'issuer/email/notify_earner'
-        try:
-            from badgeuser.models import CachedEmailAddress
-            email = CachedEmailAddress.cached.get_student_email(email_address)
-            template_name = 'issuer/email/notify_account_holder'
-            email_context['site_url'] = badgr_app.email_confirmation_redirect
-        except CachedEmailAddress.DoesNotExist:
-            pass
-
-        adapter = get_adapter()
-        try:
-            if not attach_image:
-                adapter.send_mail(template_name, email_address, context=email_context)
-            else:
-                adapter.send_mail(template_name, email_address, context=email_context, attachment=self.image)
-
-        except Exception as e:
-            logger.exception('Mail failure with error {} : {}'.format(type(e), e.message))      
 
     def get_extensions_manager(self):
         return self.badgeinstanceextension_set

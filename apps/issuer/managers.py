@@ -150,13 +150,8 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
         return badgeinstance, created
 
     def create(self,
-        public=False,
-        evidence=None,
         extensions=None,
-        notify=False,
-        check_completions=True,
         allow_uppercase=False,
-        badgr_app=None,
         **kwargs
     ):
 
@@ -165,9 +160,6 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
         :param allow_uppercase: bool
         :type badgeclass: BadgeClass
         :type issuer: Issuer
-        :type notify: bool
-        :type check_completions: bool
-        :type evidence: list of dicts(url=string, narrative=string)
         """
         recipient_identifier = kwargs.pop('recipient_identifier')
         recipient_identifier = recipient_identifier if allow_uppercase else recipient_identifier.lower()
@@ -187,20 +179,11 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
         with transaction.atomic():
             new_instance.save()
 
-
             if extensions is not None:
                 for name, ext in list(extensions.items()):
                     new_instance.badgeinstanceextension_set.create(
                         name=name,
                         original_json=json.dumps(ext)
                     )
-
-        if not notify:
-            # always notify if this is the first time issuing to a recipient
-            if self.filter(recipient_identifier=recipient_identifier).count() == 1:
-                notify = True
-
-        if notify:
-            new_instance.notify_earner(badgr_app=badgr_app)
 
         return new_instance

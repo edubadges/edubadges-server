@@ -354,7 +354,6 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
                 created_by=self.context.get('request').user,
                 allow_uppercase=validated_data.get('allow_uppercase'),
                 recipient_type=validated_data.get('recipient_type', BadgeInstance.RECIPIENT_TYPE_EDUID),
-                badgr_app=BadgrApp.objects.get_current(self.context.get('request')),
                 expires_at=expires_at,
                 extensions=validated_data.get('extension_items', None),
                 identifier=uuid.uuid4().urn,
@@ -363,11 +362,9 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         else:
             assertion = badgeclass.issue(
                 recipient=enrollment.user,
-                notify=self.context['request'].data.get('create_notification'),
                 created_by=self.context.get('request').user,
                 allow_uppercase=validated_data.get('allow_uppercase'),
                 recipient_type=validated_data.get('recipient_type', BadgeInstance.RECIPIENT_TYPE_EDUID),
-                badgr_app=BadgrApp.objects.get_current(self.context.get('request')),
                 expires_at=expires_at,
                 extensions=validated_data.get('extension_items', None)
             )
