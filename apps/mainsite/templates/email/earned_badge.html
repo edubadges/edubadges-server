@@ -1,10 +1,156 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Congratulations, you earned a badge!</title>
+    <style>
+        .main{
+            text-align:center;
+            style=font-family: "Proxima Nova", sans-serif;
+            line-height: 18px;
+            font-size: 14px;
+            color: #353535;
+        }
+        .head{
+            width: 600px;
+            height: 100px;
+            padding: 30px 0 20px 60px;
+            margin: auto;
+        }
+        .title{
+            color: grey;
+            font-size:33px;
+            line-height: 50px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .message_container{
+            width: 280px;
+            margin: auto;
+            margin-top: 40px;
+            overflow: auto;
+        }
+        .text {
+            text-align: left;
+            margin: 0px;
+        }
+        .text_header{
+            font-size: 14px;
+            line-height: 30px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .button {
+            font-family: "Proxima Nova", sans-serif;
+            border-radius: 5px;
+            color: white;
+            background-color: #772583;
+            text-decoration: none;
+            display: inline-block;
+            cursor:pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 30px;
+            margin: 15px 0;
+            padding: 14px 0px;
+        }
+        .footer {
+            font-size:12px;
+            width: 280px;
+            margin: auto;
+            margin-top: 10px;
+            color: grey;
+        }
+        .text_footer {
+            display: inline-block;
+            margin: 0px;
+        }
+        .example_container{
+            padding: 10px;
+            box-shadow: 1px 3px #b9b9b9;
+            border-style: solid;
+            border-width: 1px;
+            border-radius: 10px;
+            border-color: #b9b9b9;
+            overflow: auto;
+        }
+        .issuer_image{
+            display: inline-block;
+            height: 50px;
+            width: 50px;
+            float: left;
+            margin: 15px 0px 0px 10px;
+        }
+        .issuer_container {
+            margin-top: 10px;
+        }
+        .issuer_description{
+            text-align: left;
+            padding: 10px 0px 10px 10px;
+            float: left;
+        }
+        .issuer_description p {
+            margin: 0px;
+        }
+        .issuer_description p:nth-of-type(1){
+            color: #772583;
+            font-weight: bold;
+        }
+        .issuer_description p:nth-of-type(3){
+            color: grey;
+        }
+        .badge_name {
+            font-size: 23px;
+            font-weight: bold;
+        }
+        .footer a:link, .footer a:visited  {
+            color: grey;
+        }
+        .footer a:hover, .footer a:active {
+            color: #772583;
+        }
+
+
+    </style>
 </head>
 <body>
+    <div class="main" style="font-family: Helvetica, Arial, sans-serif;line-height: 18px;font-size: 14px;color: #353535;">
+        <div class="head">
+            <p class="title">Congratulations, you earned a badge!</p>
+            <div class="message_container">
+                <div class="example_container">
+                    <img src={{badgeclass_image}}>
+                    <p class="text badge_name">Badgeclass Name</p>
+                    <div class="issuer_container">
+                        <img class="issuer_image" src={{issuer_image}}>
+                        <div class="issuer_description">
+                            <p>Issued by</p>
+                            <p>{{issuer_name}}</p>
+                            <p>({{faculty_name}})</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="text text_header">About this badge</p>
+                <p class="text">Some short descriptionSome short descriptionSome short descriptionSome short descriptionSome short description
+                Some short descriptionSome short descriptionSome short descriptionSome short descriptionSome </p>
+
+                <p class="text text_header">View your badge!</p>
+                <p class="text">The above image is an example, the real personalised digital openbadge is available for you in your
+                    Backpack. Go there to view this badge.</p>
+                <a class="button" target="_blank" href="{{staff_page_url}}">
+                    View your badge</a>
+            </div>
+            <div class="footer">
+                <a class="text text_footer" target="_blank" href="https://www.surf.nl">About edubadges</a>
+                <span>&#183;</span>
+                <a class="text text_footer" target="_blank" href="https://www.surf.nl">Privacy Policy</a>
+                <span>&#183;</span>
+                <a class="text text_footer" target="_blank" href="https://www.surf.nl">Terms of Use</a>
+                <p class="text text_footer">Powered by <a target="_blank" href="https://www.surf.nl">SURF</a></p>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>
