@@ -14,7 +14,6 @@
         .head{
             width: 600px;
             height: 100px;
-            padding: 30px 0 20px 60px;
             margin: auto;
         }
         .title{
@@ -67,7 +66,6 @@
             margin: 0px;
         }
         .example_container{
-            padding: 10px;
             box-shadow: 1px 3px #b9b9b9;
             border-style: solid;
             border-width: 1px;
@@ -82,8 +80,12 @@
             float: left;
             margin: 15px 0px 0px 10px;
         }
+        .badgeclass_image{
+            width: -webkit-fill-available;
+        }
         .issuer_container {
             margin-top: 10px;
+            margin-left: 10px;
         }
         .issuer_description{
             text-align: left;
@@ -103,6 +105,10 @@
         .badge_name {
             font-size: 23px;
             font-weight: bold;
+            margin-left: 10px;
+        }
+        .footer {
+            margin-bottom: 25px;
         }
         .footer a:link, .footer a:visited  {
             color: grey;
@@ -120,7 +126,7 @@
             <p class="title">Congratulations, you earned a badge!</p>
             <div class="message_container">
                 <div class="example_container">
-                    <img src={{badgeclass_image}}>
+                    <img class="badgeclass_image" src={{badgeclass_image}}>
                     <p class="text badge_name">Badgeclass Name</p>
                     <div class="issuer_container">
                         <img class="issuer_image" src={{issuer_image}}>

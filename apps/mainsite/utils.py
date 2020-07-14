@@ -2,7 +2,6 @@
 Utility functions and constants that might be used across the project.
 """
 
-
 import base64
 import hashlib
 import io
@@ -12,14 +11,16 @@ import tempfile
 import urllib.parse
 import uuid
 import webbrowser
+from io import BytesIO
+from PIL import Image
 from xml.etree import cElementTree as ET
 
 import requests
 from django.conf import settings
+from django.contrib.staticfiles import finders
 from django.core.files.storage import DefaultStorage
 from django.template.loader import render_to_string
 from django.urls import get_callable
-
 
 slugify_function_path = \
     getattr(settings, 'AUTOSLUG_SLUGIFY_FUNCTION', 'autoslug.utils.slugify')
@@ -157,10 +158,19 @@ class EmailMessageMaker:
     @staticmethod
     def create_earned_badge_mail(recipient, badgeclass):
         template = 'email/earned_badge.html'
-        email_vars = {'badgeclass_image': badgeclass.image_url(),
-                      'issuer_image': badgeclass.issuer.image_url(),
-                      'issuer_name': badgeclass.issuer.name,
-                      'faculty_name': badgeclass.issuer.faculty.name
-                      }
+        background = Image.open(badgeclass.image.path).convert("RGBA")
+        overlay = Image.open(finders.find('images/example_overlay.png')).convert("RGBA")
+        if overlay.width != background.width:
+            overlay.thumbnail(size=background.size)
+        position = (0, background.height//4)
+        background.paste(overlay, position, overlay)
+        buffered = BytesIO()
+        background.save(buffered, format="PNG")
+        encoded_string = base64.b64encode(buffered.getvalue()).decode()
+        email_vars = {
+            'badgeclass_image': 'data:image/png;base64,{}'.format(encoded_string),
+            'issuer_image': badgeclass.issuer.image_url(),
+            'issuer_name': badgeclass.issuer.name,
+            'faculty_name': badgeclass.issuer.faculty.name
+        }
         return render_to_string(template, email_vars)
-
