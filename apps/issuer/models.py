@@ -520,7 +520,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
         recipient.email_user(subject='Congratulations, you earned a badge!', message=message)
         return assertion
 
-    def issue_signed(self, recipient, created_by=None, allow_uppercase=False, badgr_app=None, signer=None, extensions=None, **kwargs):
+    def issue_signed(self, recipient, created_by=None, allow_uppercase=False, signer=None, extensions=None, **kwargs):
         perms = self.get_permissions(signer)
         if not perms['may_sign']:
             raise serializers.ValidationError('You do not have permission to sign badges for this badgeclass.')
