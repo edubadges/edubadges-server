@@ -227,10 +227,10 @@ def after_terms_agreement(request, **kwargs):
 
         except Institution.DoesNotExist:  # no institution yet, and therefore also first login ever
             try:
+                request.user.is_teacher = True
                 provisionment = UserProvisionment.objects.get(email=request.user.email,
                                                               for_teacher=request.user.is_teacher)
                 institution = Institution.objects.create(identifier=institution_identifier)
-                request.user.is_teacher = True
                 request.user.institution = institution
                 request.user.save()
                 provisionment.add_entity(institution)
