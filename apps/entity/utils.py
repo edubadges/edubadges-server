@@ -6,6 +6,12 @@ def get_form_error_code(error_type):
         return 901
     elif error_type is 'invalid':
         return 902
+    elif error_type is 'blank':
+        return 903
+    elif error_type is 'required':
+        return 904
+    elif isinstance(error_type, int):
+        return error_type
     else:
         print(f'no error_code for {error_type}')
         return 999

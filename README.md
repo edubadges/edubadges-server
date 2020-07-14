@@ -47,8 +47,8 @@ Note: some of these packages would introduce additional security considerations 
 ### Create project directory and environment
 
 * `mkdir edubadges && cd edubadges`
-* `virtualenv env`
-* `source env/bin/activate` *Activate the environment (each time you start a session working with the code)*
+* `virtualenv .venv`
+* `source .venv/bin/activate` *Activate the environment (each time you start a session working with the code)*
 
 *Obtain source code and clone into code directory*
 
@@ -67,6 +67,11 @@ CREATE DATABASE badgr CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
 
 * `pip install -r requirements.txt`
 * `pip install -r apps/ims/requirements.txt`
+
+if on a mac mysqlclient does not build, try:
+```
+LDFLAGS=-L/usr/local/opt/openssl/lib pip install mysqlclient
+```
 
 ### Customize local settings to your environment
 * `cp apps/mainsite/settings_local.py.example apps/mainsite/settings_local.py`
