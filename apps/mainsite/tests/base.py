@@ -101,6 +101,10 @@ class SetupHelper(object):
         return self.client._login(user, backend='oauth2_provider.backends.OAuth2Backend')
 
     def setup_teacher(self, first_name='', last_name='', authenticate=False, institution=None, email=None):
+        if not first_name:
+            first_name = name_randomiser('FirstName')
+        if not last_name:
+            last_name = name_randomiser('LastName')
         user = self._setup_user(first_name, last_name, authenticate, institution=institution, email=email)
         self._add_surfconext_socialaccount(user)
         user.is_teacher = True
