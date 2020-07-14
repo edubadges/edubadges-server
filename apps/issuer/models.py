@@ -516,7 +516,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
             user=recipient, extensions=extensions,
             **kwargs
         )
-        message = EmailMessageMaker.create_earned_badge_mail(recipient, assertion)
+        message = EmailMessageMaker.create_earned_badge_mail(recipient, assertion.badgeclass)
         recipient.email_user(subject='Congratulations, you earned a badge!', message=message)
         return assertion
 

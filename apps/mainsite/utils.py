@@ -155,12 +155,12 @@ class EmailMessageMaker:
         return render_to_string(template, email_vars)
 
     @staticmethod
-    def create_earned_badge_mail(recipient, assertion):
+    def create_earned_badge_mail(recipient, badgeclass):
         template = 'email/earned_badge.html'
-        email_vars = {'badgeclass_image': assertion.badgeclass.image_url(),
-                      'issuer_image': assertion.badgeclass.issuer.image_url(),
-                      'issuer_name': assertion.badgeclass.issuer.name,
-                      'faculty_name': assertion.badgeclass.issuer.faculty.name
+        email_vars = {'badgeclass_image': badgeclass.image_url(),
+                      'issuer_image': badgeclass.issuer.image_url(),
+                      'issuer_name': badgeclass.issuer.name,
+                      'faculty_name': badgeclass.issuer.faculty.name
                       }
         return render_to_string(template, email_vars)
 
