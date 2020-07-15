@@ -55,7 +55,7 @@ no_perms = {
 
 def create_admin(username, email, first_name, last_name, institution_name, uid, perms=all_perms):
     user, _ = BadgeUser.objects.get_or_create(username=username, email=email, last_name=last_name,
-                                              first_name=first_name, is_teacher=True)
+                                              first_name=first_name, is_teacher=True, invited=True)
     accept_terms(user)
 
     EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)
@@ -69,7 +69,7 @@ def create_admin(username, email, first_name, last_name, institution_name, uid, 
 
 def create_teacher(username, email, first_name, last_name, institution_name, uid, perms=no_perms):
     user, _ = BadgeUser.objects.get_or_create(username=username, email=email, last_name=last_name,
-                                              first_name=first_name, is_teacher=True)
+                                              first_name=first_name, is_teacher=True, invited=True)
     accept_terms(user)
 
     EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)
