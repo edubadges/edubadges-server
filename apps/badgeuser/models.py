@@ -453,6 +453,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
     """
     entity_class_name = 'BadgeUser'
     is_teacher = models.BooleanField(default=False)
+    invited = models.BooleanField(default=False)
 
     badgrapp = models.ForeignKey('mainsite.BadgrApp', on_delete=models.SET_NULL, blank=True, null=True, default=None)
     is_staff = models.BooleanField(

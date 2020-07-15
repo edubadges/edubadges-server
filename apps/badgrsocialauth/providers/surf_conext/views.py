@@ -1,3 +1,4 @@
+import datetime
 import json
 import urllib.error
 import urllib.parse
@@ -21,7 +22,6 @@ from institution.models import Institution
 from lti_edu.models import LtiBadgeUserTennant, UserCurrentContextId
 from mainsite.exceptions import BadgrValidationError
 from mainsite.models import BadgrApp
-from staff.models import InstitutionStaff
 from .provider import SurfConextProvider
 
 
@@ -167,7 +167,7 @@ def after_terms_agreement(request, **kwargs):
 
     id_token = kwargs.get('id_token', None)
     if not id_token:
-        error = 'Sorry, we could not find you SURFconext credentials.'
+        error = 'Sorry, we could not find your SURFconext credentials.'
         return render_authentication_error(request, SurfConextProvider.id, error)
 
     payload = jwt.get_unverified_claims(id_token)
@@ -195,24 +195,23 @@ def after_terms_agreement(request, **kwargs):
     ret = complete_social_login(request, login)
     if not request.user.is_anonymous:  # the social login succeeded
         institution_identifier = payload['schac_home_organization']
-
         try:
             institution = Institution.objects.get(identifier=institution_identifier)
-            try:
-                InstitutionStaff.objects.get(user=request.user, institution=institution)
+            # the institution exists
+            if request.user.invited:  # this user has been invited in the past
                 provisions = request.user.match_provisionments()
                 for provision in provisions:
                     provision.perform_provisioning()
-            except InstitutionStaff.DoesNotExist:  # first login ever
+            else:  # user has not been invited, check for invitations
                 request.user.institution = institution
                 request.user.is_teacher = True
+                request.user.invited = True
                 try:
                     provisionment = request.user.match_provisionments().get()  # get the initial provisioning for the first login, there can only be one
                     request.user.save()
                     provisionment.match_user(request.user)
                     provisionment.perform_provisioning()
                 except (UserProvisionment.DoesNotExist, BadgrValidationError):  # there is no provisionment
-                    request.user.delete()
                     extra_context = {}
                     if institution and institution.cached_staff():
                         cached_staff = institution.cached_staff()
@@ -222,6 +221,8 @@ def after_terms_agreement(request, **kwargs):
 
                     error = 'Sorry, you can not register without an invite.'
                     extra_context["code"] = AuthErrorCode.REGISTER_WITHOUT_INVITE
+                    if request.user.date_joined.today().date() == datetime.datetime.today().date():  # extra protection before deletion
+                        request.user.delete()
                     return render_authentication_error(request, SurfConextProvider.id, error,
                                                        extra_context=extra_context)
 

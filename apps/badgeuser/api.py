@@ -184,6 +184,8 @@ class UserCreateProvisionment(BaseEntityListView):
     def post(self, request, **kwargs):
         context = self.get_context_data(**kwargs)
         response = []
+        if not request.data:
+            raise BadgrApiException400('No provisionments sent', 0)
         for provisionment in request.data:
             serializer = self.v1_serializer_class(data=provisionment, context=context)
             try:
