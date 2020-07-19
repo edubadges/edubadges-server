@@ -193,7 +193,7 @@ class UserCreateProvisionment(BaseEntityListView):
                 message = {'status': 'success',
                            'message': serializer.data}
             except ValidationError as e:
-                if not isinstance(e, BadgrValidationError):
+                if not isinstance(e, BadgrValidationError) and 'email' in e.detail:
                     # Consistency with other BadgrValidationErrors
                     e = BadgrValidationError("Enter a valid email address", 509)
                 message = {'status': 'failure',
