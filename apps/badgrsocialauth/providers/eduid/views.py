@@ -80,8 +80,11 @@ def login(request):
         "acr_values": "https://eduid.nl/trust/validate-names",
         "redirect_uri": f"{settings.HTTP_ORIGIN}/account/eduid/login/callback/",
         "claims": "{\"id_token\":{\"preferred_username\":null,\"given_name\":null,\"family_name\":null,\"email\":null,"
-                  "\"eduid\":null, \"eduperson_scoped_affiliation\":null}}"
+                  "\"eduid\":null, \"eduperson_scoped_affiliation\":null, \"preferred_username\":null}}"
     }
+    if request.GET.get("forceAuthn") == "True":
+        params["prompt"] = "login"
+
     args = urllib.parse.urlencode(params)
     # Redirect to eduID and enforce a linked SURFconext user with validated names
     login_url = f"{settings.EDUID_PROVIDER_URL}/authorize?{args}"
@@ -231,7 +234,7 @@ def create_edu_id_badge_instance(request, social_login):
     # Issue first badge for user
     badge_class.issue(recipient=user, created_by=super_user, allow_uppercase=True,
                       recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID,
-                      badgr_app=get_session_badgr_app(request), expires_at=None, extensions=None)
+                      expires_at=None, extensions=None)
     logger.info(f"Assertion created for {user.email} based on {badge_class.name}")
 
 
