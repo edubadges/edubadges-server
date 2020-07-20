@@ -1,5 +1,7 @@
 from django.db.models import ProtectedError
+
 from staff.models import PermissionedRelationshipBase
+
 
 class PermissionedModelMixin(object):
     """
@@ -34,18 +36,20 @@ class PermissionedModelMixin(object):
             return perm_count == len(required_permissions)
         return False
 
-    def get_all_staff_memberships_in_current_branch(self, user):
+    def get_all_staff_memberships_in_current_branch(self, user, check_parents=True, check_children=True):
         """
         returns all staff memberships beloning to this user in the branch that this entity is part of
         :param user: BadgeUser
+        :param check_parents: bool
+        :param check_children: bool
         :return: required_permissions: a list of staff memberships
         """
-        all_entities_in_my_branch = self.get_all_entities_in_branch()
+        all_entities_in_my_branch = self.get_all_entities_in_branch(check_parents=check_parents,
+                                                                    check_children=check_children)
         all_staff_memberships_in_my_branch = []
         for entity in all_entities_in_my_branch:
             all_staff_memberships_in_my_branch += entity.cached_staff()
         return [staff for staff in all_staff_memberships_in_my_branch if staff.user == user]
-
 
     def get_all_entities_in_branch(self, check_parents=True, check_children=True):
         """
@@ -158,7 +162,8 @@ class PermissionedModelMixin(object):
         """
         publish_parent = kwargs.pop('publish_parent', True)
         if self.assertions:
-            raise ProtectedError("{} may only be deleted if there are no awarded Assertions.".format(self.__class__.__name__), self)
+            raise ProtectedError(
+                "{} may only be deleted if there are no awarded Assertions.".format(self.__class__.__name__), self)
         try:  # first the children
             kids = self.children
             for child in kids:
