@@ -230,8 +230,7 @@ def create_edu_id_badge_instance(request, social_login):
 
     # Issue first badge for user
     badge_class.issue(recipient=user, created_by=super_user, allow_uppercase=True,
-                      recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID,
-                      badgr_app=get_session_badgr_app(request), expires_at=None, extensions=None)
+                      recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID, expires_at=None, extensions=None)
     logger.info(f"Assertion created for {user.email} based on {badge_class.name}")
 
 
