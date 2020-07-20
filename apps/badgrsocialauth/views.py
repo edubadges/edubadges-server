@@ -48,13 +48,13 @@ class BadgrSocialLogin(RedirectView):
             redirect_url = reverse('{}_login'.format(self.request.GET.get('provider')))
         except NoReverseMatch:
             raise ValidationError('No {} provider found'.format(provider_name))
-
         authcode = self.request.GET.get('authCode', None)
         if authcode is not None:
             set_session_authcode(self.request, authcode)
             return set_url_query_params(redirect_url, process=AuthProcess.CONNECT)
         else:
-            return redirect_url
+            force_authn = self.request.GET.get('forceAuthn', "false").lower() == "true"
+            return set_url_query_params(redirect_url, forceAuthn=force_authn)
 
 
 class BadgrSocialLoginCancel(RedirectView):
