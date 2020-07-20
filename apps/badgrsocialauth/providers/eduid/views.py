@@ -80,7 +80,7 @@ def login(request):
         "acr_values": "https://eduid.nl/trust/validate-names",
         "redirect_uri": f"{settings.HTTP_ORIGIN}/account/eduid/login/callback/",
         "claims": "{\"id_token\":{\"preferred_username\":null,\"given_name\":null,\"family_name\":null,\"email\":null,"
-                  "\"eduid\":null}}"
+                  "\"eduid\":null, \"eduperson_scoped_affiliation\":null}}"
     }
     args = urllib.parse.urlencode(params)
     # Redirect to eduID and enforce a linked SURFconext user with validated names
