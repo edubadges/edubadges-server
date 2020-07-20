@@ -19,9 +19,8 @@ from badgeuser.serializers import BadgeUserProfileSerializer, BadgeUserTokenSeri
     UserProvisionmentSerializerForEdit
 from badgeuser.tasks import process_email_verification
 from entity.api import BaseEntityDetailView, BaseEntityListView
-from entity.utils import validate_errors
 from issuer.permissions import BadgrOAuthTokenHasScope
-from mainsite.exceptions import BadgrApiException400
+from mainsite.exceptions import BadgrApiException400, BadgrValidationError
 from mainsite.models import BadgrApp
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from staff.permissions import HasObjectPermission
@@ -115,9 +114,9 @@ class BadgeUserEmailConfirm(BaseUserRecoveryView):
         # We allow multiple users to add the same (unverified) email address.
         # A user can claim the address by verifying it.
         # If a user verifies an email address, all other users who had added that address will have that address deleted
-        CachedEmailAddress.objects\
-            .filter(email__iexact=emailconfirmation.email_address.email)\
-            .exclude(pk=emailconfirmation.email_address.pk)\
+        CachedEmailAddress.objects \
+            .filter(email__iexact=emailconfirmation.email_address.email) \
+            .exclude(pk=emailconfirmation.email_address.pk) \
             .delete()
 
         email_address.verified = True
@@ -139,9 +138,9 @@ class AccessTokenList(BaseEntityListView):
         return BadgrAccessToken.objects.filter(user=request.user, expires__gt=timezone.now())
 
     @apispec_list_operation('AccessToken',
-        summary='Get a list of access tokens for authenticated user',
-        tags=['Authentication']
-    )
+                            summary='Get a list of access tokens for authenticated user',
+                            tags=['Authentication']
+                            )
     def get(self, request, **kwargs):
         return super(AccessTokenList, self).get(request, **kwargs)
 
@@ -158,16 +157,16 @@ class AccessTokenDetail(BaseEntityDetailView):
         return self.object
 
     @apispec_get_operation('AccessToken',
-        summary='Get a single AccessToken',
-        tags=['Authentication']
-    )
+                           summary='Get a single AccessToken',
+                           tags=['Authentication']
+                           )
     def get(self, request, **kwargs):
         return super(AccessTokenDetail, self).get(request, **kwargs)
 
     @apispec_delete_operation('AccessToken',
-        summary='Revoke an AccessToken',
-        tags=['Authentication']
-    )
+                              summary='Revoke an AccessToken',
+                              tags=['Authentication']
+                              )
     def delete(self, request, **kwargs):
         return super(AccessTokenDetail, self).delete(request, **kwargs)
 
@@ -194,6 +193,9 @@ class UserCreateProvisionment(BaseEntityListView):
                 message = {'status': 'success',
                            'message': serializer.data}
             except ValidationError as e:
+                if not isinstance(e, BadgrValidationError) and 'email' in e.detail:
+                    # Consistency with other BadgrValidationErrors
+                    e = BadgrValidationError("Enter a valid email address", 509)
                 message = {'status': 'failure',
                            'message': e.detail}
             message['email'] = provisionment['email']
@@ -220,7 +222,7 @@ class AcceptProvisionmentDetail(BaseEntityDetailView):
     POST to accept or deny your own provisionment'
     """
     model = UserProvisionment
-    permission_classes = (AuthenticatedWithVerifiedEmail, )
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
     v1_serializer_class = UserProvisionmentSerializer
     http_method_names = ['post']
 
@@ -235,4 +237,3 @@ class AcceptProvisionmentDetail(BaseEntityDetailView):
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(obj)
         return Response(serializer.data)
-

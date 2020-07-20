@@ -55,21 +55,41 @@ class InstitutionStaffSerializer(BaseStaffCreateSerializer):
     institution = InstitutionSlugRelatedField(slug_field='entity_id', required=True)
 
     def create(self, validated_data):
-        return self._base_create(validated_data, 'institution', InstitutionStaff)
+        institution_staff_membership = self._base_create(validated_data, 'institution', InstitutionStaff)
+        # Clean up lower permissions - we only support institution admin's so we don't need to check any permissions
+        user = validated_data['user']
+        # Trigger cache deletion
+        [staff.delete() for staff in user.badgeclassstaff_set.all()]
+        [staff.delete() for staff in user.issuerstaff_set.all()]
+        [staff.delete() for staff in user.facultystaff_set.all()]
+        return institution_staff_membership
 
 
 class FacultyStaffSerializer(BaseStaffCreateSerializer):
     faculty = FacultySlugRelatedField(slug_field='entity_id', required=True)
 
     def create(self, validated_data):
-        return self._base_create(validated_data, 'faculty', FacultyStaff)
+        faculty_staff_membership = self._base_create(validated_data, 'faculty', FacultyStaff)
+        fac = faculty_staff_membership.faculty
+        # Clean up lower permissions for this faculty - we only support faculty admin's so we can delete all
+        user = validated_data['user']
+        # Trigger cache deletion
+        [staff.delete() for staff in user.badgeclassstaff_set.all() if staff.badgeclass.issuer.faculty == fac]
+        [staff.delete() for staff in user.issuerstaff_set.all() if staff.issuer.faculty == fac]
+        return faculty_staff_membership
 
 
 class IssuerStaffSerializer(BaseStaffCreateSerializer):
     issuer = IssuerSlugRelatedField(slug_field='entity_id', required=True)
 
     def create(self, validated_data):
-        return self._base_create(validated_data, 'issuer', IssuerStaff)
+        issuer_staff_membership = self._base_create(validated_data, 'issuer', IssuerStaff)
+        iss = issuer_staff_membership.issuer
+        # Clean up lower permissions for this issuer - we only support issuer admin's so we can delete all
+        user = validated_data['user']
+        # Trigger cache deletion
+        [staff.delete() for staff in user.badgeclassstaff_set.all() if staff.badgeclass.issuer == iss]
+        return issuer_staff_membership
 
 
 class BadgeClassStaffSerializer(BaseStaffCreateSerializer):

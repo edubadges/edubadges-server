@@ -70,7 +70,7 @@ class ContentTypeIdResolverMixin(object):
 
 class PermissionsResolverMixin(object):
     """
-    Schema mixin to resolve entity pemissions
+    Schema mixin to resolve entity permissions
     """
 
     permissions = graphene.Field(PermissionType)
