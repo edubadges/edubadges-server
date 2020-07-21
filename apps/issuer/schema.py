@@ -163,7 +163,8 @@ class Query(object):
         id = kwargs.get('id')
         if id is not None:
             bc = BadgeClass.objects.get(entity_id=id)
-            if bc.has_permissions(info.context.user, ['may_read']):
+            # Student's who are logged in need to access this to start the enrollment
+            if info.context.user.is_student or bc.has_permissions(info.context.user, ['may_read']):
                 return bc
 
     def resolve_badge_instance(self, info, **kwargs):
