@@ -213,17 +213,7 @@ def after_terms_agreement(request, **kwargs):
         # Create an eduIDBadge
         create_edu_id_badge_instance(request, login)
 
-    # 4. Return the user to where she came from (ie the referer: public enrollment or main page)
-    if 'public' in referer:
-        if 'badges' in referer:
-            badgeclass_slug = referer[-1]
-            if badgeclass_slug:
-                edu_id = payload['sub']
-                enrolled = enroll_student(request.user, edu_id, badgeclass_slug)
-        url = ret.url + '&public=true' + '&badgeclassSlug=' + badgeclass_slug + '&enrollmentStatus=' + enrolled
-        return HttpResponseRedirect(url)
-    else:
-        return ret
+    return ret
 
 
 def create_edu_id_badge_instance(request, social_login):
