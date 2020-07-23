@@ -1,8 +1,8 @@
 import json
 
-from mainsite.tests import BadgrTestCase
-from institution.testfiles.helper import faculty_json, institution_json
 from institution.models import Institution
+from institution.testfiles.helper import faculty_json, institution_json
+from mainsite.tests import BadgrTestCase
 
 
 class InstitutionTest(BadgrTestCase):
@@ -11,7 +11,7 @@ class InstitutionTest(BadgrTestCase):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_create=True)
         response = self.client.post("/institution/faculties/create", data=json.dumps(faculty_json),
-                                      content_type='application/json')
+                                    content_type='application/json')
         self.assertEqual(response.status_code, 201)
 
     def test_edit_institution(self):
@@ -20,7 +20,7 @@ class InstitutionTest(BadgrTestCase):
         description = 'description'
         institution_json['description'] = description
         response = self.client.put("/institution/edit/{}".format(teacher1.institution.entity_id),
-                                    data=json.dumps(institution_json), content_type='application/json')
+                                   data=json.dumps(institution_json), content_type='application/json')
         self.assertEqual(response.status_code, 200)
         institution = Institution.objects.get(pk=teacher1.institution.pk)
         self.assertEqual(institution.description, description)
@@ -35,7 +35,6 @@ class InstitutionTest(BadgrTestCase):
         response = self.graphene_post(teacher1, query)
         self.assertTrue(bool(response['data']['institutions'][0]['contentTypeId']))
         self.assertTrue(bool(response['data']['institutions'][0]['entityId']))
-
 
     def test_faculty_schema(self):
         teacher1 = self.setup_teacher(authenticate=True)
