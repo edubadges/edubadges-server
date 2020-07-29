@@ -197,6 +197,7 @@ class SetupHelper(object):
         return BadgeClass.objects.create(
             issuer=issuer,
             image=image,
+            formal=False,
             name=name,
             description='Description',
             criteria_text='Criteria text'
