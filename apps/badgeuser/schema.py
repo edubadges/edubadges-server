@@ -1,7 +1,7 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 
-from badgeuser.models import BadgeUser, Terms, TermsAgreement
+from badgeuser.models import BadgeUser, Terms, TermsAgreement, TermsUrl
 from institution.schema import InstitutionType
 from mainsite.exceptions import GraphQLException
 from staff.schema import InstitutionStaffType, FacultyStaffType, IssuerStaffType, BadgeClassStaffType
@@ -9,13 +9,20 @@ from mainsite.graphql_utils import UserProvisionmentType, resolver_blocker_only_
 from lti_edu.schema import StudentsEnrolledType
 
 
+class TermsUrlType(DjangoObjectType):
+    class Meta:
+        model = TermsUrl
+        fields = ('url', 'language')
+
+
 class TermsType(DjangoObjectType):
 
     class Meta:
         model = Terms
-        fields = ('entity_id', 'url', 'language', 'terms_type', 'version', 'institution')
+        fields = ('entity_id', 'terms_type', 'version', 'institution')
 
     institution = graphene.Field(InstitutionType)
+    terms_url = graphene.List(TermsUrlType)
 
 
 class TermsAgreementType(DjangoObjectType):
@@ -45,7 +52,7 @@ class BadgeUserType(DjangoObjectType):
 
     @resolver_blocker_only_for_current_user
     def resolve_general_terms(self, info):
-        return Terms.get_general_terms(info.user)
+        return Terms.get_general_terms(info.context.user)
 
     def resolve_institution_staff(self, info):
         return self.cached_institution_staff()

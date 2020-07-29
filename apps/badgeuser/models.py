@@ -800,11 +800,11 @@ class Terms(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
     @classmethod
     def get_general_terms(cls, user):
         if user.is_student:
-            return Terms.objects.filter(terms_type__in=(Terms.TYPE_SERVICE_AGREEMENT_STUDENT,
-                                                        Terms.TYPE_TERMS_OF_SERVICE))
+            return list(Terms.objects.filter(terms_type__in=(Terms.TYPE_SERVICE_AGREEMENT_STUDENT,
+                                                             Terms.TYPE_TERMS_OF_SERVICE)))
         elif user.is_teacher:
-            return Terms.objects.filter(terms_type__in=(Terms.TYPE_SERVICE_AGREEMENT_EMPLOYEE,
-                                                        Terms.TYPE_TERMS_OF_SERVICE))
+            return list(Terms.objects.filter(terms_type__in=(Terms.TYPE_SERVICE_AGREEMENT_EMPLOYEE,
+                                                             Terms.TYPE_TERMS_OF_SERVICE)))
         raise BadgrValidationError('Cannot get general terms user is neither teacher nor student', 0)
 
     def has_been_accepted_by(self, user):

@@ -316,6 +316,9 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data.__len__(), 4)
 
+
+class BadgeuserTermsTest(BadgrTestCase):
+
     def test_user_accept_general_terms(self):
         teacher1 = self.setup_teacher(authenticate=True)
         self.assertFalse(teacher1.general_terms_accepted())
@@ -370,7 +373,16 @@ class BadgeuserGraphqlTest(BadgrTestCase):
                            'type': UserProvisionment.TYPE_INVITATION}
         response = self.client.post('/v1/user/provision/create', json.dumps([invitation_json]),
                                     content_type='application/json')
-        query = 'query foo {currentUser {entityId generalTerms {entityId} userprovisionments {entityId contentType {id}}}}'
+        query = 'query foo {currentUser {' \
+                'entityId ' \
+                'generalTerms {entityId} ' \
+                'termsAgreements {agreed agreedVersion ' \
+                    'terms {entityId, termsType, version, ' \
+                    'institution {entityId}' \
+                    'termsUrl {url, language}}}'\
+                'userprovisionments {entityId ' \
+                    'contentType {id}' \
+                '}}}'
         response = self.graphene_post(new_teacher, query)
         self.assertTrue(bool(response['data']['currentUser']['userprovisionments'][0]['contentType']['id']))
 
