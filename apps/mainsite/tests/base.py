@@ -10,8 +10,7 @@ from rest_framework.test import APITransactionTestCase
 
 
 from allauth.socialaccount.models import SocialAccount
-from badgeuser.models import BadgeUser, TermsVersion
-from django.test import override_settings
+from badgeuser.models import BadgeUser, Terms, TermsUrl
 from django.utils import timezone
 from institution.models import Institution, Faculty
 from issuer.models import Issuer, BadgeClass
@@ -69,11 +68,6 @@ class SetupHelper(object):
                                       user=user)
         socialaccount.save()
 
-    def _user_accept_terms(self, user):
-        terms, created = TermsVersion.objects.get_or_create(version=1)
-        user.agreed_terms_version = terms.version
-        user.save()
-
     def _make_email_primary(self, user):
         email = user.cached_emails()[0]
         email.verified = True
@@ -90,7 +84,6 @@ class SetupHelper(object):
                                         last_name=last_name)
         user.institution = institution
         user.save()
-        self._user_accept_terms(user)
         self._make_email_primary(user)
         if authenticate:
             self.client.force_authenticate(user=user)
@@ -131,8 +124,56 @@ class SetupHelper(object):
                                         date_consent_given=timezone.now())
         return assertion_post_data
 
+    def _setup_institution_terms(self, institution):
+        formal_badge, _ = Terms.objects.get_or_create(institution=institution, terms_type=Terms.TYPE_FORMAL_BADGE)
+        TermsUrl.objects.get_or_create(terms=formal_badge, language=TermsUrl.LANGUAGE_ENGLISH,
+                                       url="https://raw.githubusercontent.com/edubadges/privacy/master/university-example.org/formal-edubadges-principles-en.md")
+        TermsUrl.objects.get_or_create(terms=formal_badge, language=TermsUrl.LANGUAGE_DUTCH,
+                                       url="https://raw.githubusercontent.com/edubadges/privacy/master/university-example.org/formal-edubadges-principles-en.md")
+        informal_badge, _ = Terms.objects.get_or_create(institution=institution, terms_type=Terms.TYPE_INFORMAL_BADGE)
+        TermsUrl.objects.get_or_create(terms=informal_badge, language=TermsUrl.LANGUAGE_ENGLISH,
+                                       url="https://raw.githubusercontent.com/edubadges/privacy/master/university-example.org/formal-edubadges-principles-en.md")
+        TermsUrl.objects.get_or_create(terms=informal_badge, language=TermsUrl.LANGUAGE_DUTCH,
+                                       url="https://raw.githubusercontent.com/edubadges/privacy/master/university-example.org/formal-edubadges-principles-nl.md")
+        institution.remove_cached_data(['cached_terms'])
+
+    def increment_general_terms_version(self, user):
+        general_terms = Terms.get_general_terms(user)
+        for general_term in general_terms:
+            general_term.version += general_term.version
+            general_term.save()
+
+    def setup_general_terms(self):
+        terms_of_service, _ = Terms.objects.get_or_create(version=1, institution=None,
+                                                          terms_type=Terms.TYPE_TERMS_OF_SERVICE)
+        TermsUrl.objects.get_or_create(terms=terms_of_service,
+                                       url="https://raw.githubusercontent.com/edubadges/privacy/master/university-example.org/formal-edubadges-principles-en.md",
+                                       language=TermsUrl.LANGUAGE_DUTCH)
+        TermsUrl.objects.get_or_create(terms=terms_of_service,
+                                       url="https://raw.githubusercontent.com/edubadges/privacy/master/university-example.org/formal-edubadges-principles-en.md",
+                                       language=TermsUrl.LANGUAGE_ENGLISH)
+        terms_service_agreement_student, _ = Terms.objects.get_or_create(version=1, institution=None,
+                                                                         terms_type=Terms.TYPE_SERVICE_AGREEMENT_STUDENT)
+        TermsUrl.objects.get_or_create(terms=terms_service_agreement_student,
+                                       url="https://raw.githubusercontent.com/edubadges/privacy/master/university-example.org/formal-edubadges-principles-en.md",
+                                       language=TermsUrl.LANGUAGE_DUTCH)
+        TermsUrl.objects.get_or_create(terms=terms_service_agreement_student,
+                                       url="https://raw.githubusercontent.com/edubadges/privacy/master/university-example.org/formal-edubadges-principles-en.md",
+                                       language=TermsUrl.LANGUAGE_ENGLISH)
+        terms_service_agreement_employee, _ = Terms.objects.get_or_create(version=1, institution=None,
+                                                                          terms_type=Terms.TYPE_SERVICE_AGREEMENT_EMPLOYEE)
+        TermsUrl.objects.get_or_create(terms=terms_service_agreement_employee,
+                                       url="https://raw.githubusercontent.com/edubadges/privacy/master/university-example.org/formal-edubadges-principles-en.md",
+                                       language=TermsUrl.LANGUAGE_DUTCH)
+        TermsUrl.objects.get_or_create(terms=terms_service_agreement_employee,
+                                       url="https://raw.githubusercontent.com/edubadges/privacy/master/university-example.org/formal-edubadges-principles-en.md",
+                                       language=TermsUrl.LANGUAGE_ENGLISH)
+
     def setup_institution(self):
-        return Institution.objects.create(name=name_randomiser('Test Institution'))
+        name = name_randomiser('Test Institution')
+        institution = Institution.objects.create(name=name, identifier=name)
+        self._setup_institution_terms(institution)
+        return institution
 
     def setup_faculty(self, institution=None):
         if not institution:
@@ -208,5 +249,6 @@ class BadgrTestCase(SetupHelper, APITransactionTestCase):
             self.badgr_app = BadgrApp.objects.create(
                 name='test cors',
                 cors='localhost:8000')
+        self.setup_general_terms()
 
         self.assertEqual(self.badgr_app.pk, badgr_app_id)

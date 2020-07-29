@@ -11,12 +11,13 @@ from django.utils import timezone
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer, ValidationError
-from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND
+from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED
+from rest_framework.views import APIView
 
-from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken, UserProvisionment
+from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken, UserProvisionment, Terms
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
 from badgeuser.serializers import BadgeUserProfileSerializer, BadgeUserTokenSerializer, UserProvisionmentSerializer, \
-    UserProvisionmentSerializerForEdit
+    UserProvisionmentSerializerForEdit, TermsAgreementSerializer
 from badgeuser.tasks import process_email_verification
 from entity.api import BaseEntityDetailView, BaseEntityListView
 from issuer.permissions import BadgrOAuthTokenHasScope
@@ -237,3 +238,22 @@ class AcceptProvisionmentDetail(BaseEntityDetailView):
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(obj)
         return Response(serializer.data)
+
+
+class AcceptTermsView(APIView):
+    """
+    Endpoint used for accepting terms
+    POST to accept terms
+    """
+    model = Terms
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    http_method_names = ['post']
+
+    def post(self, request, **kwargs):
+        if request.data:
+            serializer = TermsAgreementSerializer(data=request.data,
+                                                  many=True,
+                                                  context={'request': request})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+        return Response(serializer.data, status=HTTP_201_CREATED)

@@ -20,6 +20,7 @@ from django.core.files.storage import default_storage
 from django.db import models, transaction
 from django.urls import reverse
 from django.utils import timezone
+
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager
 from jsonfield import JSONField
@@ -345,6 +346,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
     description = models.TextField(blank=True, null=True, default=None)
     criteria_url = models.CharField(max_length=254, blank=True, null=True, default=None)
     criteria_text = models.TextField(blank=True, null=True)
+    formal = models.BooleanField(null=True, default=None)
     old_json = JSONField()
     objects = BadgeClassManager()
     cached = cachemodel.CacheModelManager()
@@ -378,6 +380,22 @@ class BadgeClass(EntityUserProvisionmentMixin,
     def publish(self):
         super(BadgeClass, self).publish()
         self.issuer.publish()
+
+    def _get_terms(self):
+        terms = self.institution.cached_terms()
+        if self.formal:
+            return [term for term in terms if term.terms_type == term.__class__.TYPE_FORMAL_BADGE][0]
+        return [term for term in terms if term.terms_type == term.__class__.TYPE_INFORMAL_BADGE][0]
+
+    def terms_accepted(self, user):
+        '''returns true if the user accepted the required terms'''
+        terms = self._get_terms()
+        return terms.has_been_accepted_by(user)
+
+    def accept_terms(self, user):
+        '''accepts the required terms for user'''
+        terms = self._get_terms()
+        return terms.accept(user)
 
     def get_absolute_url(self):
         return reverse('badgeclass_json', kwargs={'entity_id': self.entity_id})

@@ -57,6 +57,10 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
             r += list(issuer.cached_badgeclasses())
         return r
 
+    @cachemodel.cached_method()
+    def cached_terms(self):
+        return list(self.terms.all())
+
     def create_staff_membership(self, user, permissions):
         try:
             staff = InstitutionStaff.objects.get(user=user)

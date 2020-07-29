@@ -1,6 +1,7 @@
 from django.db import IntegrityError
 from rest_framework import serializers
 
+from badgeuser.serializers import TermsSerializer
 from mainsite.drf_fields import ValidImageField
 from mainsite.exceptions import BadgrValidationError
 from mainsite.serializers import StripTagsCharField, BaseSlugRelatedField
@@ -77,7 +78,16 @@ class FacultySerializer(serializers.Serializer):
 
 class PublicInstitutionSerializer(serializers.Serializer):
 
-    image = ValidImageField(required=False)
+    terms = TermsSerializer(many=True, read_only=True)
+    name = serializers.CharField(read_only=True)
+    image_url = serializers.SerializerMethodField()
+    entity_id = serializers.CharField(read_only=True)
 
     class Meta:
         model = Institution
+
+    def get_image_url(self, institution):
+        return institution.image_url()
+
+    def to_representation(self, instance):
+        return super(PublicInstitutionSerializer, self).to_representation(instance)

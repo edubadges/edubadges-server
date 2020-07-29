@@ -77,7 +77,7 @@ class IssuerAPITest(BadgrTestCase):
         enroll_body = {"badgeclass_slug": badgeclass.entity_id}
         enrollment_response = self.client.post("/lti_edu/enroll", json.dumps(enroll_body),
                                                content_type='application/json')
-        self.assertEqual(enrollment_response.status_code, 200)
+        self.assertEqual(enrollment_response.status_code, 201)
         self.client.logout()
         self.authenticate(teacher1)
         award_body = {"issue_signed": False, "create_notification": True,
@@ -210,7 +210,7 @@ class IssuerModelsTest(BadgrTestCase):
         faculty = self.setup_faculty(teacher1.institution)
         issuer = self.setup_issuer(teacher1, faculty)
         self.setup_badgeclass(issuer)
-        query = 'query foo {badgeClasses {entityId contentTypeId}}'
+        query = 'query foo {badgeClasses {entityId contentTypeId terms {entityId}}}'
         response = self.graphene_post(teacher1, query)
         self.assertTrue(bool(response['data']['badgeClasses'][0]['contentTypeId']))
         self.assertTrue(bool(response['data']['badgeClasses'][0]['entityId']))

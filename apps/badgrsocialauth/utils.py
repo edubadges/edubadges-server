@@ -8,7 +8,7 @@ from allauth.account.models import EmailAddress
 from allauth.socialaccount.providers.base import ProviderAccount
 from rest_framework.authentication import TokenAuthentication
 
-from badgeuser.models import TermsVersion
+# from badgeuser.models import TermsVersion
 from mainsite.models import BadgrApp
 # from mainsite.views import TermsAndConditionsView
 from theming.models import Theme

@@ -79,6 +79,11 @@ def badge_user_type():
     return BadgeUserType
 
 
+def terms_type():
+    from badgeuser.schema import TermsType
+    return TermsType
+
+
 class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
     share_url = graphene.String()
     extensions = graphene.List(BadgeInstanceExtensionType)
@@ -103,7 +108,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
         fields = ('name', 'entity_id', 'issuer', 'image', 'staff',
                   'description', 'criteria_url', 'criteria_text',
                   'created_at', 'expiration_period', 'public_url',
-                  'content_type_id')
+                  'content_type_id', 'formal')
 
     staff = graphene.List(BadgeClassStaffType)
     extensions = graphene.List(BadgeClassExtensionType)
@@ -114,6 +119,10 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     badge_assertions = graphene.List(BadgeInstanceType)
     expiration_period = graphene.Int()
     public_url = graphene.String()
+    terms = graphene.Field(terms_type())
+
+    def resolve_terms(self, info, **kwargs):
+        return self._get_terms()
 
     def resolve_tags(self, info, **kwargs):
         return self.cached_tags()

@@ -3,18 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.forms import ModelForm
 from mainsite.admin import badgr_admin
 from staff.models import PermissionedRelationshipBase
-from .models import BadgeUser, EmailAddressVariant, TermsVersion, TermsAgreement, \
-    CachedEmailAddress, UserProvisionment
-
-
-class TermsAgreementInline(TabularInline):
-    model = TermsAgreement
-    fk_name = 'user'
-    extra = 0
-    max_num = 0
-    can_delete = False
-    readonly_fields = ('created_at', 'terms_version')
-    fields = ('created_at', 'terms_version')
+from .models import BadgeUser, EmailAddressVariant, Terms, CachedEmailAddress, UserProvisionment
 
 
 class EmailAddressInline(TabularInline):
@@ -25,7 +14,7 @@ class EmailAddressInline(TabularInline):
 
 
 class BadgeUserAdmin(UserAdmin):
-    readonly_fields = ('email', 'first_name', 'last_name', 'entity_id', 'date_joined', 'last_login', 'username', 'entity_id', 'agreed_terms_version')
+    readonly_fields = ('email', 'first_name', 'last_name', 'entity_id', 'date_joined', 'last_login', 'username', 'entity_id')
     list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'date_joined', 'institution')
     list_filter = ('is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')
     search_fields = ('email', 'first_name', 'last_name', 'username', 'entity_id')
@@ -38,7 +27,6 @@ class BadgeUserAdmin(UserAdmin):
     filter_horizontal = ('groups', 'user_permissions', 'faculty',)
     inlines = [
         EmailAddressInline,
-        TermsAgreementInline,
     ]
 
 badgr_admin.register(BadgeUser, BadgeUserAdmin)
@@ -51,26 +39,11 @@ class EmailAddressVariantAdmin(ModelAdmin):
 badgr_admin.register(EmailAddressVariant, EmailAddressVariantAdmin)
 
 
-class TermsVersionAdmin(ModelAdmin):
-    list_display = ('version','created_at','is_active')
-    readonly_fields = ('created_at','created_by','updated_at','updated_by', 'latest_terms_version')
-    fieldsets = (
-        ('Metadata', {
-            'fields': ('created_at','created_by','updated_at','updated_by'),
-            'classes': ('collapse',)
-        }),
-        (None, {'fields': (
-            'latest_terms_version', 'is_active','version','teacher','short_description',
-        )})
-    )
+class TermsAdmin(ModelAdmin):
+    list_display = ('institution', 'terms_type', 'created_at')
+    readonly_fields = ('created_at', 'created_by', 'updated_at', 'updated_by')
 
-    def latest_terms_version(self, obj):
-        return TermsVersion.cached.latest_version()
-
-    latest_terms_version.short_description = "Current Terms Version"
-
-
-badgr_admin.register(TermsVersion, TermsVersionAdmin)
+badgr_admin.register(Terms, TermsAdmin)
 
 
 class UserProvisionmentCreateForm(ModelForm):

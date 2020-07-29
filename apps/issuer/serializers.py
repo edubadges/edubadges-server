@@ -149,6 +149,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
     created_by = BadgeUserIdentifierField()
     name = StripTagsCharField(max_length=255)
     image = ValidImageField(required=True)
+    formal = serializers.BooleanField(required=True)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
     issuer = IssuerSlugRelatedField(slug_field='entity_id', required=True)
     criteria = MarkdownCharField(allow_blank=True, required=False, write_only=True)

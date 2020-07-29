@@ -1,7 +1,6 @@
 from allauth.account.managers import EmailAddressManager
 from cachemodel.managers import CacheModelManager
 from django.contrib.auth.models import UserManager
-from django.core.exceptions import ValidationError
 from mainsite.models import BadgrApp
 
 
@@ -17,7 +16,7 @@ class BadgeUserManager(UserManager):
                create_email_address=True,
                marketing_opt_in=False
                ):
-        from badgeuser.models import CachedEmailAddress, TermsVersion
+        from badgeuser.models import CachedEmailAddress
 
         user = None
 
@@ -30,7 +29,6 @@ class BadgeUserManager(UserManager):
         user.last_name = last_name
         user.badgrapp = badgrapp
         user.marketing_opt_in = marketing_opt_in
-        user.agreed_terms_version = TermsVersion.cached.latest_version()
         user.save()
 
         # create email address record as needed

@@ -1,13 +1,31 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 
-from badgeuser.models import BadgeUser
+from badgeuser.models import BadgeUser, Terms, TermsAgreement
 from institution.schema import InstitutionType
 from mainsite.exceptions import GraphQLException
 from staff.schema import InstitutionStaffType, FacultyStaffType, IssuerStaffType, BadgeClassStaffType
 from mainsite.graphql_utils import UserProvisionmentType, resolver_blocker_only_for_current_user, resolver_blocker_for_students
 from lti_edu.schema import StudentsEnrolledType
-from lti_edu.models import StudentsEnrolled
+
+
+class TermsType(DjangoObjectType):
+
+    class Meta:
+        model = Terms
+        fields = ('entity_id', 'url', 'language', 'terms_type', 'version', 'institution')
+
+    institution = graphene.Field(InstitutionType)
+
+
+class TermsAgreementType(DjangoObjectType):
+
+    class Meta:
+        model = TermsAgreement
+        fields = ('agreed', 'agreed_version', 'terms')
+
+    terms = graphene.Field(TermsType)
+
 
 class BadgeUserType(DjangoObjectType):
 
@@ -22,6 +40,7 @@ class BadgeUserType(DjangoObjectType):
     badgeclass_staffs = graphene.List(BadgeClassStaffType)
     userprovisionments = graphene.List(UserProvisionmentType)
     pending_enrollments = graphene.List(StudentsEnrolledType)
+    terms_agreements = graphene.List(TermsAgreementType)
 
     def resolve_institution_staff(self, info):
         return self.cached_institution_staff()
@@ -42,6 +61,10 @@ class BadgeUserType(DjangoObjectType):
     @resolver_blocker_only_for_current_user
     def resolve_pending_enrollments(self, info):
         return info.context.user.cached_pending_enrollments()
+
+    @resolver_blocker_only_for_current_user
+    def resolve_terms_agreements(self, info):
+        return info.context.user.cached_terms_agreements()
 
 
 class Query(object):
