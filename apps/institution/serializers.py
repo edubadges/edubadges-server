@@ -74,20 +74,3 @@ class FacultySerializer(serializers.Serializer):
             return new_faculty
         else:
             BadgrValidationError("You don't have the necessary permissions", 100)
-
-
-class PublicInstitutionSerializer(serializers.Serializer):
-
-    terms = TermsSerializer(many=True, read_only=True)
-    name = serializers.CharField(read_only=True)
-    image_url = serializers.SerializerMethodField()
-    entity_id = serializers.CharField(read_only=True)
-
-    class Meta:
-        model = Institution
-
-    def get_image_url(self, institution):
-        return institution.image_url()
-
-    def to_representation(self, instance):
-        return super(PublicInstitutionSerializer, self).to_representation(instance)
