@@ -642,6 +642,15 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
     def all_recipient_identifiers(self):
         return [self.get_recipient_identifier()]
 
+    def get_all_associated_institutions_identifiers(self):
+        '''returns self.institution and all institutions in the social account '''
+        if self.is_teacher:
+            return [self.institution.identifier]
+        else:
+            social_account = self.get_social_account()
+            extra_data = social_account.extra_data
+            return [affiliation.replace('affiliate@', '') for affiliation in extra_data['eduperson_scoped_affiliation']]
+
     def get_recipient_identifier(self):
         from allauth.socialaccount.models import SocialAccount
         try:

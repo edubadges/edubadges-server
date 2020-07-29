@@ -339,7 +339,7 @@ class BadgeuserTermsTest(BadgrTestCase):
 
     def test_student_accept_badge_terms(self):
         teacher1 = self.setup_teacher()
-        student1 = self.setup_student(authenticate=True)
+        student1 = self.setup_student(authenticate=True, affiliated_institutions=[teacher1.institution])
         issuer = self.setup_issuer(teacher1)
         badgeclass = self.setup_badgeclass(issuer)
         enroll_body = {"badgeclass_slug": badgeclass.entity_id}
