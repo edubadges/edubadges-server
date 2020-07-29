@@ -119,6 +119,7 @@ badge_class, _ = BadgeClass.objects.get_or_create(
     source="local",
     criteria_url="https://www.surf.nl/edubadges",
     old_json="{}",
+    formal=True,
     image="uploads/badges/edubadge_student.png",
 )
 for key, value in badge_class_extensions.items():
