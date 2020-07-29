@@ -68,23 +68,23 @@ surf_net_institution, _ = Institution.objects.get_or_create(name=SURF_INSTITUTIO
                                                             description=SURF_INSTITUTION_NAME,
                                                             image="uploads/issuers/surf.png")
 # Terms general
-terms_service_agreement_student, _ = Terms.objects.get_or_create(institution=None, terms_type=Terms.TYPE_SERVICE_AGREEMENT_STUDENT)
-TermsUrl.objects.get_or_create(terms=terms_service_agreement_student, version=1, language=TermsUrl.LANGUAGE_ENGLISH, url="https://github.com/edubadges/privacy/blob/master/service-agreement-student-en.md")
-TermsUrl.objects.get_or_create(terms=terms_service_agreement_student, version=1, language=TermsUrl.LANGUAGE_DUTCH, url="https://github.com/edubadges/privacy/blob/master/service-agreement-student-nl.md")
-terms_service_agreement_employee, _ = Terms.objects.get_or_create(institution=None, terms_type=Terms.TYPE_SERVICE_AGREEMENT_EMPLOYEE)
-TermsUrl.objects.get_or_create(terms=terms_service_agreement_employee, version=1, language=TermsUrl.LANGUAGE_ENGLISH, url="https://github.com/edubadges/privacy/blob/master/service-agreement-employee-en.md")
-TermsUrl.objects.get_or_create(terms=terms_service_agreement_employee, version=1, language=TermsUrl.LANGUAGE_DUTCH, url="https://github.com/edubadges/privacy/blob/master/service-agreement-employee-nl.md")
-terms_of_service, _ = Terms.objects.get_or_create(institution=None, terms_type=Terms.TYPE_TERMS_OF_SERVICE)
-TermsUrl.objects.get_or_create(terms=terms_of_service, version=1, language=TermsUrl.LANGUAGE_ENGLISH, url="https://github.com/edubadges/privacy/blob/master/edubadges-termsofservice-en.md")
-TermsUrl.objects.get_or_create(terms=terms_of_service, version=1, language=TermsUrl.LANGUAGE_DUTCH, url="https://github.com/edubadges/privacy/blob/master/edubadges-termsofservice-nl.md")
+terms_service_agreement_student, _ = Terms.objects.get_or_create(institution=None, version=1, terms_type=Terms.TYPE_SERVICE_AGREEMENT_STUDENT)
+TermsUrl.objects.get_or_create(terms=terms_service_agreement_student, language=TermsUrl.LANGUAGE_ENGLISH, url="https://github.com/edubadges/privacy/blob/master/service-agreement-student-en.md")
+TermsUrl.objects.get_or_create(terms=terms_service_agreement_student, language=TermsUrl.LANGUAGE_DUTCH, url="https://github.com/edubadges/privacy/blob/master/service-agreement-student-nl.md")
+terms_service_agreement_employee, _ = Terms.objects.get_or_create(institution=None, version=1, terms_type=Terms.TYPE_SERVICE_AGREEMENT_EMPLOYEE)
+TermsUrl.objects.get_or_create(terms=terms_service_agreement_employee, language=TermsUrl.LANGUAGE_ENGLISH, url="https://github.com/edubadges/privacy/blob/master/service-agreement-employee-en.md")
+TermsUrl.objects.get_or_create(terms=terms_service_agreement_employee, language=TermsUrl.LANGUAGE_DUTCH, url="https://github.com/edubadges/privacy/blob/master/service-agreement-employee-nl.md")
+terms_of_service, _ = Terms.objects.get_or_create(institution=None, version=1, terms_type=Terms.TYPE_TERMS_OF_SERVICE)
+TermsUrl.objects.get_or_create(terms=terms_of_service, language=TermsUrl.LANGUAGE_ENGLISH, url="https://github.com/edubadges/privacy/blob/master/edubadges-termsofservice-en.md")
+TermsUrl.objects.get_or_create(terms=terms_of_service, language=TermsUrl.LANGUAGE_DUTCH, url="https://github.com/edubadges/privacy/blob/master/edubadges-termsofservice-nl.md")
 
 # Terms institution
-formal_badge_terms, _ = Terms.objects.get_or_create(institution=surf_net_institution, terms_type=Terms.TYPE_FORMAL_BADGE)
-TermsUrl.objects.get_or_create(terms=formal_badge_terms, version=1, language=TermsUrl.LANGUAGE_ENGLISH, url="https://github.com/edubadges/privacy/blob/master/university-example.org/formal-edubadges-agreement-en.md")
-TermsUrl.objects.get_or_create(terms=formal_badge_terms, version=1, language=TermsUrl.LANGUAGE_DUTCH, url="https://github.com/edubadges/privacy/blob/master/university-example.org/formal-edubadges-agreement-nl.md")
-informal_badge_terms, _ = Terms.objects.get_or_create(institution=surf_net_institution, terms_type=Terms.TYPE_INFORMAL_BADGE)
-TermsUrl.objects.get_or_create(terms=informal_badge_terms, version=1, language=TermsUrl.LANGUAGE_ENGLISH, url="https://github.com/edubadges/privacy/blob/master/university-example.org/informal-edubadges-agreement-en.md")
-TermsUrl.objects.get_or_create(terms=informal_badge_terms, version=1, language=TermsUrl.LANGUAGE_DUTCH, url="https://github.com/edubadges/privacy/blob/master/university-example.org/informal-edubadges-agreement-nl.md")
+formal_badge_terms, _ = Terms.objects.get_or_create(institution=surf_net_institution, version=1, terms_type=Terms.TYPE_FORMAL_BADGE)
+TermsUrl.objects.get_or_create(terms=formal_badge_terms, language=TermsUrl.LANGUAGE_ENGLISH, url="https://github.com/edubadges/privacy/blob/master/university-example.org/formal-edubadges-agreement-en.md")
+TermsUrl.objects.get_or_create(terms=formal_badge_terms, language=TermsUrl.LANGUAGE_DUTCH, url="https://github.com/edubadges/privacy/blob/master/university-example.org/formal-edubadges-agreement-nl.md")
+informal_badge_terms, _ = Terms.objects.get_or_create(institution=surf_net_institution, version=1, terms_type=Terms.TYPE_INFORMAL_BADGE)
+TermsUrl.objects.get_or_create(terms=informal_badge_terms, language=TermsUrl.LANGUAGE_ENGLISH, url="https://github.com/edubadges/privacy/blob/master/university-example.org/informal-edubadges-agreement-en.md")
+TermsUrl.objects.get_or_create(terms=informal_badge_terms, language=TermsUrl.LANGUAGE_DUTCH, url="https://github.com/edubadges/privacy/blob/master/university-example.org/informal-edubadges-agreement-nl.md")
 
 
 edu_badges_faculty, _ = Faculty.objects.get_or_create(name=EDU_BADGES_FACULTY_NAME, institution=surf_net_institution,
