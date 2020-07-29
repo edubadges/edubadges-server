@@ -370,7 +370,7 @@ class BadgeuserGraphqlTest(BadgrTestCase):
                            'type': UserProvisionment.TYPE_INVITATION}
         response = self.client.post('/v1/user/provision/create', json.dumps([invitation_json]),
                                     content_type='application/json')
-        query = 'query foo {currentUser {entityId userprovisionments {entityId contentType {id}}}}'
+        query = 'query foo {currentUser {entityId generalTerms {entityId} userprovisionments {entityId contentType {id}}}}'
         response = self.graphene_post(new_teacher, query)
         self.assertTrue(bool(response['data']['currentUser']['userprovisionments'][0]['contentType']['id']))
 

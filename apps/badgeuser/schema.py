@@ -41,6 +41,11 @@ class BadgeUserType(DjangoObjectType):
     userprovisionments = graphene.List(UserProvisionmentType)
     pending_enrollments = graphene.List(StudentsEnrolledType)
     terms_agreements = graphene.List(TermsAgreementType)
+    general_terms = graphene.List(TermsType)
+
+    @resolver_blocker_only_for_current_user
+    def resolve_general_terms(self, info):
+        return Terms.get_general_terms(info.user)
 
     def resolve_institution_staff(self, info):
         return self.cached_institution_staff()
