@@ -19,6 +19,15 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
     image = models.FileField(upload_to='uploads/institution', blank=True, null=True)
     grading_table = models.CharField(max_length=254, blank=True, null=True, default=None)
     brin = models.CharField(max_length=254, blank=True, null=True, default=None)
+    GRONDSLAG_UITVOERING_OVEREENKOMST = 'uitvoering_overeenkomst'
+    GRONDSLAG_GERECHTVAARDIGD_BELANG = 'gerechtvaardigd_belang'
+    GRONDSLAG_WETTELIJKE_VERPLICHTING = 'wettelijke_verplichting'
+    GRONDSLAG_CHOICES = (
+        (GRONDSLAG_UITVOERING_OVEREENKOMST, 'uitvoering_overeenkomst'),
+        (GRONDSLAG_GERECHTVAARDIGD_BELANG, 'gerechtvaardigd_belang'),
+        (GRONDSLAG_WETTELIJKE_VERPLICHTING, 'wettelijke_verplichting'),
+    )
+    grondslag = models.CharField(max_length=254, choices=GRONDSLAG_CHOICES, default=GRONDSLAG_UITVOERING_OVEREENKOMST)
 
     @property
     def children(self):
