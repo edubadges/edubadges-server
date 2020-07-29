@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.forms import ModelForm
 from mainsite.admin import badgr_admin
 from staff.models import PermissionedRelationshipBase
-from .models import BadgeUser, EmailAddressVariant, Terms, CachedEmailAddress, UserProvisionment
+from .models import BadgeUser, EmailAddressVariant, Terms, CachedEmailAddress, UserProvisionment, TermsUrl
 
 
 class EmailAddressInline(TabularInline):
@@ -40,10 +40,16 @@ badgr_admin.register(EmailAddressVariant, EmailAddressVariantAdmin)
 
 
 class TermsAdmin(ModelAdmin):
-    list_display = ('institution', 'terms_type', 'created_at')
+    list_display = ('institution', 'terms_type', 'version', 'created_at')
     readonly_fields = ('created_at', 'created_by', 'updated_at', 'updated_by')
 
 badgr_admin.register(Terms, TermsAdmin)
+
+
+class TermsUrlAdmin(ModelAdmin):
+    list_display = ('language', 'terms')
+
+badgr_admin.register(TermsUrl, TermsUrlAdmin)
 
 
 class UserProvisionmentCreateForm(ModelForm):
