@@ -46,12 +46,12 @@ class InstitutionTest(BadgrTestCase):
         self.assertTrue(bool(response['data']['faculties'][0]['contentTypeId']))
         self.assertTrue(bool(response['data']['faculties'][0]['entityId']))
 
-    def test_check_institution_validity(self):
+    def test_check_institutions_validity(self):
         teacher1 = self.setup_teacher(authenticate=True)
         teacher1.institution.identifier
-        response = self.client.post("/institution/check", data=json.dumps(teacher1.institution.identifier),
+        response = self.client.post("/institution/check", data=json.dumps([teacher1.institution.identifier]),
                                     content_type='application/json')
-        self.assertTrue(response.data['valid'])
-        response = self.client.post("/institution/check", data=json.dumps('NOT EXIST'),
+        self.assertTrue(response.data[0]['valid'])
+        response = self.client.post("/institution/check", data=json.dumps(['NOT EXIST']),
                                     content_type='application/json')
-        self.assertFalse(response.data['valid'])
+        self.assertFalse(response.data[0]['valid'])

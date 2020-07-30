@@ -9,7 +9,7 @@ from mainsite.permissions import AuthenticatedWithVerifiedEmail, CannotDeleteWit
 from staff.permissions import HasObjectPermission
 
 
-class CheckInstitutionValidity(APIView):
+class CheckInstitutionsValidity(APIView):
     """
     Endpoint used to check if the institution is represented in the db
     POST to check, expects a shac_home string
@@ -18,14 +18,17 @@ class CheckInstitutionValidity(APIView):
     http_method_names = ['post']
 
     def post(self, request, **kwargs):
-        data = {'valid': False}
-        schac_home = request.data
-        if schac_home:
-            try:
-                Institution.objects.get(identifier=schac_home)
-                data['valid'] = True
-            except Institution.DoesNotExist:
-                pass
+        data = []
+        schac_homes = request.data
+        if schac_homes:
+            for schac_home in schac_homes:
+                valid = {'schac_home': schac_home, 'valid': False}
+                try:
+                    Institution.objects.get(identifier=schac_home)
+                    valid['valid'] = True
+                except Institution.DoesNotExist:
+                    pass
+                data.append(valid)
         return Response(data, status=HTTP_200_OK)
 
 
