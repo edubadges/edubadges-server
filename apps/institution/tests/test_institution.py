@@ -30,7 +30,7 @@ class InstitutionTest(BadgrTestCase):
 
     def test_institution_schema(self):
         teacher1 = self.setup_teacher(authenticate=True)
-        query = 'query foo {institutions {entityId contentTypeId}}'
+        query = 'query foo {institutions {entityId identifier contentTypeId}}'
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
         response = self.graphene_post(teacher1, query)
         self.assertTrue(bool(response['data']['institutions'][0]['contentTypeId']))
