@@ -132,6 +132,7 @@ def callback(request):
 
     keyword_arguments = {'id_token': id_token,
                          'provider': "eduid",
+                         "eduperson_scoped_affiliation": payload['eduperson_scoped_affiliation'],
                          'state': json.dumps([str(badgr_app_pk), 'edu_id', lti_context_id, lti_user_id, lti_roles] + [
                              json.loads(referer)]),
                          'role': 'student'}
