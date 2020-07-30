@@ -788,7 +788,7 @@ class TermsUrl(cachemodel.CacheModel):
 
 class Terms(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
     version = models.PositiveIntegerField(default=1)
-    institution = models.ForeignKey('institution.Institution', on_delete=models.CASCADE, related_name='terms', null=True)
+    institution = models.ForeignKey('institution.Institution', on_delete=models.CASCADE, related_name='terms', null=True, blank=True)
 
     TYPE_FORMAL_BADGE = 'formal_badge'
     TYPE_INFORMAL_BADGE = 'informal_badge'
