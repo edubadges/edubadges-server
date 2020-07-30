@@ -10,6 +10,8 @@ from issuer.models import Issuer, BadgeClass, BadgeClassExtension
 from mainsite.models import BadgrApp
 # BadgrApp
 from mainsite.seeds.constants import EDU_BADGES_FACULTY_NAME, SURF_INSTITUTION_NAME
+from .util import add_terms_instiution
+
 
 setattr(settings, 'SUPPRESS_EMAILS', 1)
 
@@ -78,15 +80,11 @@ terms_of_service, _ = Terms.objects.get_or_create(institution=None, version=1, t
 TermsUrl.objects.get_or_create(terms=terms_of_service, language=TermsUrl.LANGUAGE_ENGLISH, url="https://github.com/edubadges/privacy/blob/master/edubadges-termsofservice-en.md")
 TermsUrl.objects.get_or_create(terms=terms_of_service, language=TermsUrl.LANGUAGE_DUTCH, url="https://github.com/edubadges/privacy/blob/master/edubadges-termsofservice-nl.md")
 
-# Terms institution
-formal_badge_terms, _ = Terms.objects.get_or_create(institution=surf_net_institution, version=1, terms_type=Terms.TYPE_FORMAL_BADGE)
-TermsUrl.objects.get_or_create(terms=formal_badge_terms, language=TermsUrl.LANGUAGE_ENGLISH, url="https://github.com/edubadges/privacy/blob/master/university-example.org/formal-edubadges-agreement-en.md")
-TermsUrl.objects.get_or_create(terms=formal_badge_terms, language=TermsUrl.LANGUAGE_DUTCH, url="https://github.com/edubadges/privacy/blob/master/university-example.org/formal-edubadges-agreement-nl.md")
-informal_badge_terms, _ = Terms.objects.get_or_create(institution=surf_net_institution, version=1, terms_type=Terms.TYPE_INFORMAL_BADGE)
-TermsUrl.objects.get_or_create(terms=informal_badge_terms, language=TermsUrl.LANGUAGE_ENGLISH, url="https://github.com/edubadges/privacy/blob/master/university-example.org/informal-edubadges-agreement-en.md")
-TermsUrl.objects.get_or_create(terms=informal_badge_terms, language=TermsUrl.LANGUAGE_DUTCH, url="https://github.com/edubadges/privacy/blob/master/university-example.org/informal-edubadges-agreement-nl.md")
 
 
+
+add_terms_instiution(surf_net_institution)
+# surf_net_institution.remove_cached_data(['cached_terms'])
 edu_badges_faculty, _ = Faculty.objects.get_or_create(name=EDU_BADGES_FACULTY_NAME, institution=surf_net_institution,
                                                       description=EDU_BADGES_FACULTY_NAME)
 
