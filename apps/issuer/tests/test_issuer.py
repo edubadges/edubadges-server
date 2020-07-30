@@ -14,6 +14,11 @@ class IssuerAPITest(BadgrTestCase):
         issuer_json['faculty'] = faculty.entity_id
         response = self.client.post('/issuer/create', json.dumps(issuer_json), content_type='application/json')
         self.assertEqual(201, response.status_code)
+        del issuer_json['image']
+        issuer_json['name'] = 'other_name'
+        response = self.client.post('/issuer/create', json.dumps(issuer_json), content_type='application/json')
+        created_no_image_issuer = Issuer.objects.get(entity_id=response.data['entity_id'])
+        self.assertEqual(response.data['image'], created_no_image_issuer.institution.image_url())
 
     def test_may_not_create_issuer(self):
         teacher1 = self.setup_teacher(authenticate=True)
