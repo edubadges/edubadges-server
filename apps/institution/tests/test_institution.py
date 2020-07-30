@@ -45,3 +45,13 @@ class InstitutionTest(BadgrTestCase):
         response = self.graphene_post(teacher1, query)
         self.assertTrue(bool(response['data']['faculties'][0]['contentTypeId']))
         self.assertTrue(bool(response['data']['faculties'][0]['entityId']))
+
+    def test_check_institution_validity(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        teacher1.institution.identifier
+        response = self.client.post("/institution/check", data=json.dumps(teacher1.institution.identifier),
+                                    content_type='application/json')
+        self.assertTrue(response.data['valid'])
+        response = self.client.post("/institution/check", data=json.dumps('NOT EXIST'),
+                                    content_type='application/json')
+        self.assertFalse(response.data['valid'])
