@@ -74,7 +74,7 @@ class IssuerAPITest(BadgrTestCase):
 
     def test_enroll_and_award_badge(self):
         teacher1 = self.setup_teacher()
-        student = self.setup_student(authenticate=True)
+        student = self.setup_student(authenticate=True, affiliated_institutions=[teacher1.institution])
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
