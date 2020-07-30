@@ -134,7 +134,7 @@ def callback(request):
     social_account = get_social_account(payload['sub'])
     if not social_account or not social_account.user.general_terms_accepted():
         # Here we redirect to client
-        keyword_arguments["resign"] = False if not social_account else True
+        keyword_arguments["re_sign"] = False if not social_account else True
         signup_redirect = badgr_app.signup_redirect
         args = urllib.parse.urlencode(keyword_arguments)
         return HttpResponseRedirect(f"{signup_redirect}?{args}")
