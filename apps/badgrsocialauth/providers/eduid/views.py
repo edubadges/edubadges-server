@@ -123,15 +123,17 @@ def callback(request):
     id_token = token_json['id_token']
     payload = jwt.get_unverified_claims(id_token)
 
+    social_account = get_social_account(payload['sub'])
+
+    badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
+
     keyword_arguments = {'id_token': id_token,
                          'provider': "eduid",
+                         'eduperson_scoped_affiliations': social_account.user.get_eduperson_scoped_affiliations(),
                          'state': json.dumps([str(badgr_app_pk), 'edu_id', lti_context_id, lti_user_id, lti_roles] + [
                              json.loads(referer)]),
                          'role': 'student'}
 
-    badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
-
-    social_account = get_social_account(payload['sub'])
     if not social_account or not social_account.user.general_terms_accepted():
         # Here we redirect to client
         keyword_arguments["re_sign"] = False if not social_account else True
