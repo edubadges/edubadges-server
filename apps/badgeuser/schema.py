@@ -24,6 +24,9 @@ class TermsType(DjangoObjectType):
     institution = graphene.Field(InstitutionType)
     terms_url = graphene.List(TermsUrlType)
 
+    def resolve_terms_url(self, info):
+        return list(self.terms_urls.all())
+
 
 class TermsAgreementType(DjangoObjectType):
 
@@ -48,11 +51,6 @@ class BadgeUserType(DjangoObjectType):
     userprovisionments = graphene.List(UserProvisionmentType)
     pending_enrollments = graphene.List(StudentsEnrolledType)
     terms_agreements = graphene.List(TermsAgreementType)
-    general_terms = graphene.List(TermsType)
-
-    @resolver_blocker_only_for_current_user
-    def resolve_general_terms(self, info):
-        return Terms.get_general_terms(info.context.user)
 
     def resolve_institution_staff(self, info):
         return self.cached_institution_staff()

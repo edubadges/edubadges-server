@@ -219,7 +219,8 @@ class IssuerModelsTest(BadgrTestCase):
         faculty = self.setup_faculty(teacher1.institution)
         issuer = self.setup_issuer(teacher1, faculty)
         self.setup_badgeclass(issuer)
-        query = 'query foo {badgeClasses {entityId contentTypeId terms {entityId}}}'
+        query = 'query foo {badgeClasses {entityId contentTypeId terms {entityId termsUrl {url language}}}}'
         response = self.graphene_post(teacher1, query)
         self.assertTrue(bool(response['data']['badgeClasses'][0]['contentTypeId']))
         self.assertTrue(bool(response['data']['badgeClasses'][0]['entityId']))
+        self.assertTrue(bool(response['data']['badgeClasses'][0]['terms']['termsUrl'][0]['language']))
