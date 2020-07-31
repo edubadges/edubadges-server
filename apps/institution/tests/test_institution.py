@@ -46,7 +46,7 @@ class InstitutionTest(BadgrTestCase):
         self.assertTrue(bool(response['data']['faculties'][0]['entityId']))
 
     def test_check_institutions_validity(self):
-        teacher1 = self.setup_teacher(authenticate=True)
+        teacher1 = self.setup_teacher()
         teacher1.institution.identifier
         response = self.client.post("/institution/check", data=json.dumps([teacher1.institution.identifier]),
                                     content_type='application/json')
