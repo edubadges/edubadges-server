@@ -10,7 +10,7 @@ from mainsite.permissions import AuthenticatedWithVerifiedEmail, CannotDeleteWit
 from staff.permissions import HasObjectPermission
 
 
-class CheckInstitutionsValidity(APIView):
+class PublicCheckInstitutionsValidity(APIView):
     """
     Endpoint used to check if the institution is represented in the db
     POST to check, expects a shac_home string

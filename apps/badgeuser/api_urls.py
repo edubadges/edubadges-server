@@ -1,5 +1,5 @@
 from badgeuser.api import BadgeUserToken, BadgeUserEmailConfirm, BadgeUserDetail, \
-    UserCreateProvisionment, AcceptProvisionmentDetail, UserProvisionmentDetail, AcceptTermsView
+    UserCreateProvisionment, AcceptProvisionmentDetail, UserProvisionmentDetail, AcceptTermsView, PublicTermsView
 from badgeuser.api_v1 import BadgeUserEmailList, BadgeUserEmailDetail
 from django.conf.urls import url
 
@@ -13,5 +13,7 @@ urlpatterns = [
     url(r'^provision/edit/(?P<entity_id>[^/]+)$', UserProvisionmentDetail.as_view(), name='user_provision_detail'),
     url(r'^provision/accept/(?P<entity_id>[^/]+)$$', AcceptProvisionmentDetail.as_view(), name='user_provision_accept'),
     url(r'^terms/accept$', AcceptTermsView.as_view(), name='user_terms_accept'),
+    # public endpoints
+    url(r'^terms/(?P<user_type>[^/]+)$', PublicTermsView.as_view(), name='public_terms_view'),
 
 ]

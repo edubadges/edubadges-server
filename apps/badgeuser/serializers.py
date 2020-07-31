@@ -154,16 +154,19 @@ class UserProvisionmentSerializerForEdit(serializers.Serializer):
         return instance
 
 
-class TermsSerializer(serializers.Serializer):
-    entity_id = serializers.CharField(read_only=True)
+class TermsUrlSerializer(serializers.Serializer):
     url = serializers.CharField(read_only=True)
     language = serializers.CharField(read_only=True)
+
+
+class TermsSerializer(serializers.Serializer):
+    entity_id = serializers.CharField(read_only=True)
+    terms_urls = TermsUrlSerializer(many=True)
     terms_type = serializers.CharField(read_only=True)
     version = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Terms
-
 
 class TermsAgreementSerializer(serializers.Serializer):
     agreed = serializers.CharField(required=False)

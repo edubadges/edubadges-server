@@ -17,7 +17,7 @@ from rest_framework.views import APIView
 from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken, UserProvisionment, Terms
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
 from badgeuser.serializers import BadgeUserProfileSerializer, BadgeUserTokenSerializer, UserProvisionmentSerializer, \
-    UserProvisionmentSerializerForEdit, TermsAgreementSerializer
+    UserProvisionmentSerializerForEdit, TermsAgreementSerializer, TermsSerializer
 from badgeuser.tasks import process_email_verification
 from entity.api import BaseEntityDetailView, BaseEntityListView
 from issuer.permissions import BadgrOAuthTokenHasScope
@@ -257,3 +257,27 @@ class AcceptTermsView(APIView):
             serializer.is_valid(raise_exception=True)
             serializer.save()
         return Response(serializer.data, status=HTTP_201_CREATED)
+
+
+class PublicTermsView(APIView):
+    """
+    Public endpoint used for getting general terms
+    GET to get terms
+    """
+    model = Terms
+    permission_classes = (permissions.AllowAny,)
+    http_method_names = ['get']
+
+    def get(self, request, **kwargs):
+        user_type = kwargs.get('user_type', None)
+        data = []
+        if user_type == 'student':
+            data = list(Terms.objects.filter(terms_type__in=(Terms.TYPE_SERVICE_AGREEMENT_STUDENT,
+                                                             Terms.TYPE_TERMS_OF_SERVICE)))
+        elif user_type == 'teacher':
+            data = list(Terms.objects.filter(terms_type__in=(Terms.TYPE_SERVICE_AGREEMENT_EMPLOYEE,
+                                                             Terms.TYPE_TERMS_OF_SERVICE)))
+        if data:
+            serializer = TermsSerializer(data=data, many=True)
+            serializer.is_valid(raise_exception=True)
+        return Response(serializer.to_representation(), status=HTTP_201_CREATED)
