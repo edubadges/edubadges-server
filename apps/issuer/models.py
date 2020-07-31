@@ -395,6 +395,10 @@ class BadgeClass(EntityUserProvisionmentMixin,
         return OriginSetting.HTTP+self.get_absolute_url()
 
     @property
+    def student_url(self):
+        return urljoin(settings.UI_URL, 'details/{}'.format(self.entity_id))
+
+    @property
     def jsonld_id(self):
         if self.source_url:
             return self.source_url

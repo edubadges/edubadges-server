@@ -171,6 +171,7 @@ class EmailMessageMaker:
             'badgeclass_image': 'data:image/png;base64,{}'.format(encoded_string),
             'issuer_image': badgeclass.issuer.image_url(),
             'issuer_name': badgeclass.issuer.name,
-            'faculty_name': badgeclass.issuer.faculty.name
+            'faculty_name': badgeclass.issuer.faculty.name,
+            'badgeclass_url': badgeclass.student_url,
         }
         return render_to_string(template, email_vars)
