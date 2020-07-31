@@ -840,10 +840,10 @@ class TermsAgreement(cachemodel.CacheModel):
     terms = models.ForeignKey('badgeuser.Terms', on_delete=models.CASCADE)
     agreed = models.BooleanField(default=True)
     agreed_version = models.PositiveIntegerField(null=True)
-    LANGUAGE_ENGLISH = 'english'
-    LANGUAGE_DUTCH = 'dutch'
+    LANGUAGE_ENGLISH = 'en'
+    LANGUAGE_DUTCH = 'nl'
     LANGUAGE_CHOICES = (
-        (LANGUAGE_ENGLISH, 'english'),
-        (LANGUAGE_DUTCH, 'dutch')
+        (LANGUAGE_ENGLISH, 'en'),
+        (LANGUAGE_DUTCH, 'nl')
     )
     agreed_language = models.CharField(max_length=255, choices=LANGUAGE_CHOICES, default=LANGUAGE_ENGLISH, blank=False, null=False)
