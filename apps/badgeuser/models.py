@@ -779,11 +779,11 @@ class BadgrAccessToken(AccessToken, cachemodel.CacheModel):
 class TermsUrl(cachemodel.CacheModel):
     terms = models.ForeignKey('badgeuser.Terms', on_delete=models.CASCADE, related_name='terms_urls')
     url = models.URLField(max_length=200, null=True)
-    LANGUAGE_ENGLISH = 'english'
-    LANGUAGE_DUTCH = 'dutch'
+    LANGUAGE_ENGLISH = 'en'
+    LANGUAGE_DUTCH = 'nl'
     LANGUAGE_CHOICES = (
-        (LANGUAGE_ENGLISH, 'english'),
-        (LANGUAGE_DUTCH, 'dutch')
+        (LANGUAGE_ENGLISH, 'en'),
+        (LANGUAGE_DUTCH, 'nl')
     )
     language = models.CharField(max_length=255, choices=LANGUAGE_CHOICES, default=LANGUAGE_ENGLISH, blank=False, null=False)
 
