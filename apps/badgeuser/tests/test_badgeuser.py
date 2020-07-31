@@ -355,8 +355,15 @@ class BadgeuserTermsTest(BadgrTestCase):
         enrollment_response_success = self.client.post("/lti_edu/enroll", json.dumps(enroll_body),
                                                        content_type='application/json')
         self.assertEqual(enrollment_response_success.status_code, 201)
-        self.assertTrue(badgeclass.terms_accepted(student1))
+#         self.assertTrue(badgeclass.terms_accepted(student1))
 
+    def test_public_terms_view(self):
+        response = terms_accept_response = self.client.get("/v1/user/terms/teacher")
+        self.assertTrue(response.status_code == 200)
+        response = terms_accept_response = self.client.get("/v1/user/terms/student")
+        self.assertTrue(response.status_code == 200)
+        response = terms_accept_response = self.client.get("/v1/user/terms/makes_no_sense")
+        self.assertTrue(response.status_code == 404)
 
 class BadgeuserGraphqlTest(BadgrTestCase):
 

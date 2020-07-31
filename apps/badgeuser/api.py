@@ -278,6 +278,6 @@ class PublicTermsView(APIView):
             data = list(Terms.objects.filter(terms_type__in=(Terms.TYPE_SERVICE_AGREEMENT_EMPLOYEE,
                                                              Terms.TYPE_TERMS_OF_SERVICE)))
         if data:
-            serializer = TermsSerializer(data=data, many=True)
-            serializer.is_valid(raise_exception=True)
-        return Response(serializer.to_representation(), status=HTTP_201_CREATED)
+            return Response(TermsSerializer(many=True).to_representation(data), status=HTTP_200_OK)
+        else:
+            return Response(status=HTTP_404_NOT_FOUND)
