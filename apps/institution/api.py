@@ -1,3 +1,4 @@
+from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
@@ -14,7 +15,7 @@ class CheckInstitutionsValidity(APIView):
     Endpoint used to check if the institution is represented in the db
     POST to check, expects a shac_home string
     """
-    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    permission_classes = (permissions.AllowAny,)
     http_method_names = ['post']
 
     def post(self, request, **kwargs):
