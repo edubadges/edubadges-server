@@ -527,7 +527,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
     def get_extensions_manager(self):
         return self.badgeclassextension_set
 
-    def issue(self, recipient, created_by=None, allow_uppercase=False, extensions=None, **kwargs):
+    def issue(self, recipient, created_by=None, allow_uppercase=False, extensions=None, send_email=True, **kwargs):
         assertion = BadgeInstance.objects.create(
             badgeclass=self, recipient_identifier=recipient.get_recipient_identifier(), created_by=created_by,
             allow_uppercase=allow_uppercase,
@@ -535,7 +535,8 @@ class BadgeClass(EntityUserProvisionmentMixin,
             **kwargs
         )
         message = EmailMessageMaker.create_earned_badge_mail(recipient, assertion.badgeclass)
-        recipient.email_user(subject='Congratulations, you earned a badge!', message=message)
+        if send_email:
+            recipient.email_user(subject='Congratulations, you earned a badge!', message=message)
         return assertion
 
     def issue_signed(self, recipient, created_by=None, allow_uppercase=False, signer=None, extensions=None, **kwargs):
