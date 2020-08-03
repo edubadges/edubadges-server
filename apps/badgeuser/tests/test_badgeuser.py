@@ -317,6 +317,54 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
         self.assertEqual(response.data.__len__(), 4)
 
 
+class BadgeuserTermsTest(BadgrTestCase):
+
+    def test_user_accept_general_terms(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        self.assertFalse(teacher1.general_terms_accepted())
+        teacher1.accept_general_terms()
+        self.assertTrue(teacher1.general_terms_accepted())
+        student1 = self.setup_student()
+        self.assertFalse(student1.general_terms_accepted())
+        student1.accept_general_terms()
+        self.assertTrue(student1.general_terms_accepted())
+        self.increment_general_terms_version(student1)  # update terms
+        self.increment_general_terms_version(teacher1)
+        self.assertFalse(teacher1.general_terms_accepted())
+        self.assertFalse(student1.general_terms_accepted())
+        student1.accept_general_terms()
+        teacher1.accept_general_terms()
+        self.assertTrue(teacher1.general_terms_accepted())
+        self.assertTrue(student1.general_terms_accepted())
+
+    def test_student_accept_badge_terms(self):
+        teacher1 = self.setup_teacher()
+        student1 = self.setup_student(authenticate=True, affiliated_institutions=[teacher1.institution])
+        issuer = self.setup_issuer(teacher1)
+        badgeclass = self.setup_badgeclass(issuer)
+        enroll_body = {"badgeclass_slug": badgeclass.entity_id}
+        enrollment_response_failure = self.client.post("/lti_edu/enroll", json.dumps(enroll_body),
+                                                       content_type='application/json')
+        self.assertEqual(enrollment_response_failure.status_code, 400)
+        self.assertFalse(badgeclass.terms_accepted(student1))
+        terms = badgeclass._get_terms()
+        accept_terms_body = [{'terms_entity_id': terms.entity_id, 'accepted': True}]
+        terms_accept_response = self.client.post("/v1/user/terms/accept", json.dumps(accept_terms_body),
+                                                 content_type='application/json')
+        self.assertEqual(terms_accept_response.status_code, 201)
+        enrollment_response_success = self.client.post("/lti_edu/enroll", json.dumps(enroll_body),
+                                                       content_type='application/json')
+        self.assertEqual(enrollment_response_success.status_code, 201)
+#         self.assertTrue(badgeclass.terms_accepted(student1))
+
+    def test_public_terms_view(self):
+        response = terms_accept_response = self.client.get("/v1/user/terms/teacher")
+        self.assertTrue(response.status_code == 200)
+        response = terms_accept_response = self.client.get("/v1/user/terms/student")
+        self.assertTrue(response.status_code == 200)
+        response = terms_accept_response = self.client.get("/v1/user/terms/makes_no_sense")
+        self.assertTrue(response.status_code == 404)
+
 class BadgeuserGraphqlTest(BadgrTestCase):
 
     def test_current_user(self):
@@ -332,7 +380,16 @@ class BadgeuserGraphqlTest(BadgrTestCase):
                            'type': UserProvisionment.TYPE_INVITATION}
         response = self.client.post('/v1/user/provision/create', json.dumps([invitation_json]),
                                     content_type='application/json')
-        query = 'query foo {currentUser {entityId userprovisionments {entityId contentType {id}}}}'
+        query = 'query foo {currentUser {' \
+                'entityId ' \
+                'generalTerms {entityId} ' \
+                'termsAgreements {agreed agreedVersion ' \
+                    'terms {entityId, termsType, version, ' \
+                    'institution {entityId}' \
+                    'termsUrl {url, language}}}'\
+                'userprovisionments {entityId ' \
+                    'contentType {id}' \
+                '}}}'
         response = self.graphene_post(new_teacher, query)
         self.assertTrue(bool(response['data']['currentUser']['userprovisionments'][0]['contentType']['id']))
 

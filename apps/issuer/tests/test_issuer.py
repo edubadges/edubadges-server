@@ -14,6 +14,11 @@ class IssuerAPITest(BadgrTestCase):
         issuer_json['faculty'] = faculty.entity_id
         response = self.client.post('/issuer/create', json.dumps(issuer_json), content_type='application/json')
         self.assertEqual(201, response.status_code)
+        del issuer_json['image']
+        issuer_json['name'] = 'other_name'
+        response = self.client.post('/issuer/create', json.dumps(issuer_json), content_type='application/json')
+        created_no_image_issuer = Issuer.objects.get(entity_id=response.data['entity_id'])
+        self.assertEqual(response.data['image'], created_no_image_issuer.institution.image_url())
 
     def test_may_not_create_issuer(self):
         teacher1 = self.setup_teacher(authenticate=True)
@@ -69,15 +74,19 @@ class IssuerAPITest(BadgrTestCase):
 
     def test_enroll_and_award_badge(self):
         teacher1 = self.setup_teacher()
-        student = self.setup_student(authenticate=True)
+        student = self.setup_student(authenticate=True, affiliated_institutions=[teacher1.institution])
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
         self.setup_staff_membership(teacher1, teacher1.institution, may_award=True, may_read=True)
         enroll_body = {"badgeclass_slug": badgeclass.entity_id}
+        terms = badgeclass._get_terms()
+        accept_terms_body = [{'terms_entity_id': terms.entity_id, 'accepted': True}]
+        terms_accept_response = self.client.post("/v1/user/terms/accept", json.dumps(accept_terms_body),
+                                                 content_type='application/json')
         enrollment_response = self.client.post("/lti_edu/enroll", json.dumps(enroll_body),
                                                content_type='application/json')
-        self.assertEqual(enrollment_response.status_code, 200)
+        self.assertEqual(enrollment_response.status_code, 201)
         self.client.logout()
         self.authenticate(teacher1)
         award_body = {"issue_signed": False, "create_notification": True,
@@ -210,7 +219,8 @@ class IssuerModelsTest(BadgrTestCase):
         faculty = self.setup_faculty(teacher1.institution)
         issuer = self.setup_issuer(teacher1, faculty)
         self.setup_badgeclass(issuer)
-        query = 'query foo {badgeClasses {entityId contentTypeId}}'
+        query = 'query foo {badgeClasses {entityId contentTypeId terms {entityId termsUrl {url language}}}}'
         response = self.graphene_post(teacher1, query)
         self.assertTrue(bool(response['data']['badgeClasses'][0]['contentTypeId']))
         self.assertTrue(bool(response['data']['badgeClasses'][0]['entityId']))
+        self.assertTrue(bool(response['data']['badgeClasses'][0]['terms']['termsUrl'][0]['language']))

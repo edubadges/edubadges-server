@@ -19,6 +19,15 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
     image = models.FileField(upload_to='uploads/institution', blank=True, null=True)
     grading_table = models.CharField(max_length=254, blank=True, null=True, default=None)
     brin = models.CharField(max_length=254, blank=True, null=True, default=None)
+    GRONDSLAG_UITVOERING_OVEREENKOMST = 'uitvoering_overeenkomst'
+    GRONDSLAG_GERECHTVAARDIGD_BELANG = 'gerechtvaardigd_belang'
+    GRONDSLAG_WETTELIJKE_VERPLICHTING = 'wettelijke_verplichting'
+    GRONDSLAG_CHOICES = (
+        (GRONDSLAG_UITVOERING_OVEREENKOMST, 'uitvoering_overeenkomst'),
+        (GRONDSLAG_GERECHTVAARDIGD_BELANG, 'gerechtvaardigd_belang'),
+        (GRONDSLAG_WETTELIJKE_VERPLICHTING, 'wettelijke_verplichting'),
+    )
+    grondslag = models.CharField(max_length=254, choices=GRONDSLAG_CHOICES, default=GRONDSLAG_UITVOERING_OVEREENKOMST)
 
     @property
     def children(self):
@@ -56,6 +65,10 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
         for issuer in self.cached_issuers():
             r += list(issuer.cached_badgeclasses())
         return r
+
+    @cachemodel.cached_method()
+    def cached_terms(self):
+        return list(self.terms.all())
 
     def create_staff_membership(self, user, permissions):
         try:

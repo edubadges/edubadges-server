@@ -6,7 +6,6 @@ from jsonfield import JSONField
 
 import cachemodel
 from allauth.account.models import EmailAddress, EmailConfirmation
-from basic_models.models import IsActive
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -343,12 +342,8 @@ class UserCachedObjectGetterMixin(object):
         return user_token.key
 
     @cachemodel.cached_method(auto_publish=True)
-    def cached_agreed_terms_version(self):
-        try:
-            return self.termsagreement_set.all().filter(valid=True).order_by('-terms_version')[0]
-        except IndexError:
-            pass
-        return None
+    def cached_terms_agreements(self):
+        return list(self.termsagreement_set.all())
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_institution_staff(self):
@@ -542,6 +537,25 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
     def current_symmetric_key(self):
         return self.symmetrickey_set.get(current=True)
 
+    def accept_terms(self, terms):
+        agreement, _ = TermsAgreement.objects.get_or_create(user=self, terms=terms)
+        agreement.agreed_version = terms.version
+        agreement.save()
+
+    def accept_general_terms(self):
+        general_terms = Terms.get_general_terms(self)
+        for terms in general_terms:
+            self.accept_terms(terms)
+        self.remove_cached_data(['cached_terms_agreements'])
+
+    def general_terms_accepted(self):
+        nr_accepted = 0
+        general_terms = Terms.get_general_terms(self)
+        for general_term in general_terms:
+            if general_term.has_been_accepted_by(self):
+                nr_accepted += 1
+        return general_terms.__len__() == nr_accepted
+
     def get_full_name(self):
         if self.first_name and self.last_name:
             return "%s %s" % (self.first_name, self.last_name)
@@ -628,6 +642,17 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
     def all_recipient_identifiers(self):
         return [self.get_recipient_identifier()]
 
+    def get_eduperson_scoped_affiliations(self):
+        social_account = self.get_social_account()
+        return social_account.extra_data['eduperson_scoped_affiliation']
+
+    def get_all_associated_institutions_identifiers(self):
+        '''returns self.institution and all institutions in the social account '''
+        if self.is_teacher:
+            return [self.institution.identifier]
+        else:
+            return [affiliation.replace('affiliate@', '') for affiliation in self.get_eduperson_scoped_affiliations()]
+
     def get_recipient_identifier(self):
         from allauth.socialaccount.models import SocialAccount
         try:
@@ -651,26 +676,6 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
     def get_assertions_ready_for_signing(self):
         assertion_timestamps = AssertionTimeStamp.objects.filter(signer=self).exclude(proof='')
         return [ts.badge_instance for ts in assertion_timestamps if ts.badge_instance.signature == None]
-
-    @property
-    def agreed_terms_version(self):
-        v = self.cached_agreed_terms_version()
-        if v is None:
-            return 0
-        return v.terms_version
-
-    @agreed_terms_version.setter
-    def agreed_terms_version(self, value):
-        try:
-            value = int(value)
-        except ValueError as e:
-            return
-
-        if value > self.agreed_terms_version:
-            if TermsVersion.active_objects.filter(version=value).exists():
-                if not self.pk:
-                    self.save()
-                self.termsagreement_set.get_or_create(terms_version=value, defaults=dict(agreed=True))
 
     def replace_token(self):
         Token.objects.filter(user=self).delete()
@@ -771,57 +776,74 @@ class BadgrAccessToken(AccessToken, cachemodel.CacheModel):
             return ApplicationInfo()
 
 
-class TermsVersionManager(cachemodel.CacheModelManager):
-    latest_version_key = "badgr_server_cached_latest_version"
-
-    def latest_version(self):
-        latest = self.cached_latest()
-        if latest is not None:
-            return latest.version
-        return 0
-
-    def latest(self):
-        try:
-            return self.filter(is_active=True).order_by('-version')[0]
-        except IndexError:
-            pass
-
-    def cached_latest(self):
-        latest = cache.get(self.latest_version_key)
-        if latest is None:
-            return self.publish_latest()
-        return latest
-
-    def publish_latest(self):
-        latest = self.latest()
-        if latest is not None:
-            cache.set(self.latest_version_key, latest, timeout=None)
-        return latest
+class TermsUrl(cachemodel.CacheModel):
+    terms = models.ForeignKey('badgeuser.Terms', on_delete=models.CASCADE, related_name='terms_urls')
+    url = models.URLField(max_length=200, null=True)
+    LANGUAGE_ENGLISH = 'en'
+    LANGUAGE_DUTCH = 'nl'
+    LANGUAGE_CHOICES = (
+        (LANGUAGE_ENGLISH, 'en'),
+        (LANGUAGE_DUTCH, 'nl')
+    )
+    language = models.CharField(max_length=255, choices=LANGUAGE_CHOICES, default=LANGUAGE_ENGLISH, blank=False, null=False)
 
 
-class TermsVersion(IsActive, BaseAuditedModel, cachemodel.CacheModel):
-    version = models.PositiveIntegerField(unique=True)
-    short_description = models.TextField(blank=True)
+class Terms(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
+    version = models.PositiveIntegerField(default=1)
+    institution = models.ForeignKey('institution.Institution', on_delete=models.CASCADE, related_name='terms', null=True, blank=True)
 
-    terms_and_conditions_template = models.CharField('Terms and conditions template',
-                                                     null=True,
-                                                     max_length=512
-                                                     )
-    accepted_terms_and_conditions_hash = models.CharField('Term and conditions hash',max_length=32,null=True)
-    teacher = models.BooleanField(default=False)
-    cached = TermsVersionManager()
+    TYPE_FORMAL_BADGE = 'formal_badge'
+    TYPE_INFORMAL_BADGE = 'informal_badge'
+    TYPE_SERVICE_AGREEMENT_STUDENT = 'service_agreement_student'
+    TYPE_SERVICE_AGREEMENT_EMPLOYEE = 'service_agreement_employee'
+    # TYPE_GENERAL_PRIVACY_STATEMENT = 'general_privacy_statement'
+    TYPE_TERMS_OF_SERVICE = 'terms_of_service'
+    TYPE_CHOICES = (
+        (TYPE_FORMAL_BADGE, 'formal_badge'),
+        (TYPE_INFORMAL_BADGE, 'informal_badge'),
+        # (TYPE_GENERAL_PRIVACY_STATEMENT, 'general_privacy_statement'),
+        (TYPE_SERVICE_AGREEMENT_STUDENT, 'service_agreement_student'),
+        (TYPE_SERVICE_AGREEMENT_EMPLOYEE, 'service_agreement_employee'),
+        (TYPE_TERMS_OF_SERVICE, 'terms_of_service')
+    )
+    terms_type = models.CharField(max_length=254, choices=TYPE_CHOICES, default=TYPE_TERMS_OF_SERVICE)
 
-    def publish(self):
-        super(TermsVersion, self).publish()
-        TermsVersion.cached.publish_latest()
+    @classmethod
+    def get_general_terms(cls, user):
+        if user.is_student:
+            return list(Terms.objects.filter(terms_type__in=(Terms.TYPE_SERVICE_AGREEMENT_STUDENT,
+                                                             Terms.TYPE_TERMS_OF_SERVICE)))
+        elif user.is_teacher:
+            return list(Terms.objects.filter(terms_type__in=(Terms.TYPE_SERVICE_AGREEMENT_EMPLOYEE,
+                                                             Terms.TYPE_TERMS_OF_SERVICE)))
+        raise BadgrValidationError('Cannot get general terms user is neither teacher nor student', 0)
 
+    def has_been_accepted_by(self, user):
+        for agreement in user.cached_terms_agreements():
+            if agreement.terms == self:
+                return self.version == agreement.agreed_version
+        return False
 
-class TermsAgreement(BaseAuditedModel, cachemodel.CacheModel):
+    def accept(self, user):
+        ''' make user accept terms
+            returns: TermsAgreement'''
+        # must work for updating increment and for accepting the first time
+        terms_agreement, created = TermsAgreement.objects.get_or_create(user=user, terms=self)
+        terms_agreement.agreed_version = self.version
+        terms_agreement.save()
+        user.remove_cached_data(['cached_terms_agreements'])
+        return terms_agreement
+                
+
+class TermsAgreement(cachemodel.CacheModel):
     user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE)
-    terms_version = models.PositiveIntegerField()
+    terms = models.ForeignKey('badgeuser.Terms', on_delete=models.CASCADE)
     agreed = models.BooleanField(default=True)
-    valid = models.BooleanField(default=True)
-
-    class Meta:
-        ordering = ('-terms_version',)
-        unique_together = ('user', 'terms_version')
+    agreed_version = models.PositiveIntegerField(null=True)
+    LANGUAGE_ENGLISH = 'en'
+    LANGUAGE_DUTCH = 'nl'
+    LANGUAGE_CHOICES = (
+        (LANGUAGE_ENGLISH, 'en'),
+        (LANGUAGE_DUTCH, 'nl')
+    )
+    agreed_language = models.CharField(max_length=255, choices=LANGUAGE_CHOICES, default=LANGUAGE_ENGLISH, blank=False, null=False)

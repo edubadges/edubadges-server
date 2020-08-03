@@ -1,8 +1,36 @@
+from rest_framework import permissions
+from rest_framework.response import Response
+from rest_framework.status import HTTP_200_OK
+from rest_framework.views import APIView
+
 from entity.api import BaseEntityListView, VersionedObjectMixin, BaseEntityDetailView
 from institution.models import Faculty, Institution
 from institution.serializers import FacultySerializer, InstitutionSerializer
 from mainsite.permissions import AuthenticatedWithVerifiedEmail, CannotDeleteWithChildren
 from staff.permissions import HasObjectPermission
+
+
+class PublicCheckInstitutionsValidity(APIView):
+    """
+    Endpoint used to check if the institution is represented in the db
+    POST to check, expects a shac_home string
+    """
+    permission_classes = (permissions.AllowAny,)
+    http_method_names = ['post']
+
+    def post(self, request, **kwargs):
+        data = []
+        schac_homes = request.data
+        if schac_homes:
+            for schac_home in schac_homes:
+                valid = {'schac_home': schac_home, 'valid': False}
+                try:
+                    Institution.objects.get(identifier=schac_home)
+                    valid['valid'] = True
+                except Institution.DoesNotExist:
+                    pass
+                data.append(valid)
+        return Response(data, status=HTTP_200_OK)
 
 
 class InstitutionDetail(BaseEntityDetailView):

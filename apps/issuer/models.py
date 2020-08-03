@@ -20,6 +20,7 @@ from django.core.files.storage import default_storage
 from django.db import models, transaction
 from django.urls import reverse
 from django.utils import timezone
+
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager
 from jsonfield import JSONField
@@ -345,6 +346,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
     description = models.TextField(blank=True, null=True, default=None)
     criteria_url = models.CharField(max_length=254, blank=True, null=True, default=None)
     criteria_text = models.TextField(blank=True, null=True)
+    formal = models.BooleanField()
     old_json = JSONField()
     objects = BadgeClassManager()
     cached = cachemodel.CacheModelManager()
@@ -378,6 +380,22 @@ class BadgeClass(EntityUserProvisionmentMixin,
     def publish(self):
         super(BadgeClass, self).publish()
         self.issuer.publish()
+
+    def _get_terms(self):
+        terms = self.institution.cached_terms()
+        if self.formal:
+            return [term for term in terms if term.terms_type == term.__class__.TYPE_FORMAL_BADGE][0]
+        return [term for term in terms if term.terms_type == term.__class__.TYPE_INFORMAL_BADGE][0]
+
+    def terms_accepted(self, user):
+        '''returns true if the user accepted the required terms'''
+        terms = self._get_terms()
+        return terms.has_been_accepted_by(user)
+
+    def accept_terms(self, user):
+        '''accepts the required terms for user'''
+        terms = self._get_terms()
+        return terms.accept(user)
 
     def get_absolute_url(self):
         return reverse('badgeclass_json', kwargs={'entity_id': self.entity_id})
@@ -513,7 +531,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
     def get_extensions_manager(self):
         return self.badgeclassextension_set
 
-    def issue(self, recipient, created_by=None, allow_uppercase=False, extensions=None, **kwargs):
+    def issue(self, recipient, created_by=None, allow_uppercase=False, extensions=None, send_email=True, **kwargs):
         assertion = BadgeInstance.objects.create(
             badgeclass=self, recipient_identifier=recipient.get_recipient_identifier(), created_by=created_by,
             allow_uppercase=allow_uppercase,
@@ -521,7 +539,8 @@ class BadgeClass(EntityUserProvisionmentMixin,
             **kwargs
         )
         message = EmailMessageMaker.create_earned_badge_mail(recipient, assertion.badgeclass)
-        recipient.email_user(subject='Congratulations, you earned a badge!', message=message)
+        if send_email:
+            recipient.email_user(subject='Congratulations, you earned a badge!', message=message)
         return assertion
 
     def issue_signed(self, recipient, created_by=None, allow_uppercase=False, signer=None, extensions=None, **kwargs):

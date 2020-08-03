@@ -78,7 +78,7 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serial
     created_by = BadgeUserIdentifierField()
     name = StripTagsCharField(max_length=1024)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
-    image = ValidImageField(required=True)
+    image = ValidImageField(required=False)
     email = serializers.EmailField(max_length=255, required=True)
     description = StripTagsCharField(max_length=16384, required=False)
     url = serializers.URLField(max_length=1024, required=True)
@@ -122,6 +122,8 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serial
         if self.context.get('embed_badgeclasses', False):
             representation['badgeclasses'] = BadgeClassSerializer(obj.badgeclasses.all(), many=True,
                                                                   context=self.context).data
+        if not representation['image']:
+            representation['image'] = obj.institution.image_url()
         return representation
 
     def add_extensions(self, instance, add_these_extensions, extension_items):
@@ -149,6 +151,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
     created_by = BadgeUserIdentifierField()
     name = StripTagsCharField(max_length=255)
     image = ValidImageField(required=True)
+    formal = serializers.BooleanField(required=True)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
     issuer = IssuerSlugRelatedField(slug_field='entity_id', required=True)
     criteria = MarkdownCharField(allow_blank=True, required=False, write_only=True)

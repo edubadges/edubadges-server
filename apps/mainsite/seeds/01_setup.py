@@ -4,12 +4,14 @@ from allauth.socialaccount.models import SocialApp
 from django.conf import settings
 from django.contrib.sites.models import Site
 
-from badgeuser.models import TermsVersion, BadgeUser
+from badgeuser.models import Terms, BadgeUser, TermsUrl
 from institution.models import Institution, Faculty
 from issuer.models import Issuer, BadgeClass, BadgeClassExtension
 from mainsite.models import BadgrApp
 # BadgrApp
 from mainsite.seeds.constants import EDU_BADGES_FACULTY_NAME, SURF_INSTITUTION_NAME
+from .util import add_terms_instiution
+
 
 setattr(settings, 'SUPPRESS_EMAILS', 1)
 
@@ -50,8 +52,7 @@ surf_conext_app, _ = SocialApp.objects.get_or_create(
 edu_id_app.sites.add(site)
 surf_conext_app.sites.add(site)
 
-# TermsVersion
-TermsVersion.objects.get_or_create(version=1, is_active=1)
+
 
 # Superuser
 superuser, _ = BadgeUser.objects.get_or_create(
@@ -68,7 +69,22 @@ surf_net_institution, _ = Institution.objects.get_or_create(name=SURF_INSTITUTIO
                                                             identifier=SURF_INSTITUTION_NAME,
                                                             description=SURF_INSTITUTION_NAME,
                                                             image="uploads/issuers/surf.png")
+# Terms general
+terms_service_agreement_student, _ = Terms.objects.get_or_create(institution=None, version=1, terms_type=Terms.TYPE_SERVICE_AGREEMENT_STUDENT)
+TermsUrl.objects.get_or_create(terms=terms_service_agreement_student, language=TermsUrl.LANGUAGE_ENGLISH, url="https://raw.githubusercontent.com/edubadges/privacy/master/service-agreement-student-en.md")
+TermsUrl.objects.get_or_create(terms=terms_service_agreement_student, language=TermsUrl.LANGUAGE_DUTCH, url="https://raw.githubusercontent.com/edubadges/privacy/master/service-agreement-student-nl.md")
+terms_service_agreement_employee, _ = Terms.objects.get_or_create(institution=None, version=1, terms_type=Terms.TYPE_SERVICE_AGREEMENT_EMPLOYEE)
+TermsUrl.objects.get_or_create(terms=terms_service_agreement_employee, language=TermsUrl.LANGUAGE_ENGLISH, url="https://raw.githubusercontent.com/edubadges/privacy/master/service-agreement-employee-en.md")
+TermsUrl.objects.get_or_create(terms=terms_service_agreement_employee, language=TermsUrl.LANGUAGE_DUTCH, url="https://raw.githubusercontent.com/edubadges/privacy/master/service-agreement-employee-nl.md")
+terms_of_service, _ = Terms.objects.get_or_create(institution=None, version=1, terms_type=Terms.TYPE_TERMS_OF_SERVICE)
+TermsUrl.objects.get_or_create(terms=terms_of_service, language=TermsUrl.LANGUAGE_ENGLISH, url="https://raw.githubusercontent.com/edubadges/privacy/master/edubadges-termsofservice-en.md")
+TermsUrl.objects.get_or_create(terms=terms_of_service, language=TermsUrl.LANGUAGE_DUTCH, url="https://raw.githubusercontent.com/edubadges/privacy/master/edubadges-termsofservice-nl.md")
 
+
+
+
+add_terms_instiution(surf_net_institution)
+# surf_net_institution.remove_cached_data(['cached_terms'])
 edu_badges_faculty, _ = Faculty.objects.get_or_create(name=EDU_BADGES_FACULTY_NAME, institution=surf_net_institution,
                                                       description=EDU_BADGES_FACULTY_NAME)
 
@@ -101,6 +117,7 @@ badge_class, _ = BadgeClass.objects.get_or_create(
     source="local",
     criteria_url="https://www.surf.nl/edubadges",
     old_json="{}",
+    formal=True,
     image="uploads/badges/edubadge_student.png",
 )
 for key, value in badge_class_extensions.items():

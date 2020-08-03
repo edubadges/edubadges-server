@@ -17,8 +17,7 @@ from django.utils import timezone
 from jose import jwt
 
 from badgeuser.models import BadgeUser
-from badgrsocialauth.utils import set_session_badgr_app, get_social_account, update_user_params, \
-    check_agreed_term_and_conditions, get_session_badgr_app
+from badgrsocialauth.utils import set_session_badgr_app, get_social_account, update_user_params, check_agreed_term_and_conditions
 from ims.models import LTITenant
 from issuer.models import BadgeClass, BadgeInstance
 from lti_edu.models import StudentsEnrolled, LtiBadgeUserTennant, UserCurrentContextId
@@ -127,18 +126,20 @@ def callback(request):
     id_token = token_json['id_token']
     payload = jwt.get_unverified_claims(id_token)
 
+    social_account = get_social_account(payload['sub'])
+
+    badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
+
     keyword_arguments = {'id_token': id_token,
                          'provider': "eduid",
+                         "eduperson_scoped_affiliation": payload.get('eduperson_scoped_affiliation', []),
                          'state': json.dumps([str(badgr_app_pk), 'edu_id', lti_context_id, lti_user_id, lti_roles] + [
                              json.loads(referer)]),
                          'role': 'student'}
 
-    badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
-
-    social_account = get_social_account(payload['sub'])
-    if not social_account or not check_agreed_term_and_conditions(social_account.user, badgr_app):
+    if not social_account or not social_account.user.general_terms_accepted():
         # Here we redirect to client
-        keyword_arguments["resign"] = False if not social_account else True
+        keyword_arguments["re_sign"] = False if not social_account else True
         signup_redirect = badgr_app.signup_redirect
         args = urllib.parse.urlencode(keyword_arguments)
         return HttpResponseRedirect(f"{signup_redirect}?{args}")
@@ -191,8 +192,8 @@ def after_terms_agreement(request, **kwargs):
 
     ret = complete_social_login(request, login)
     set_session_badgr_app(request, badgr_app)
-    resign = True
-    check_agreed_term_and_conditions(request.user, badgr_app, resign=resign)
+
+    request.user.accept_general_terms()
 
     # create lti_connection
     if lti_data is not None and 'lti_user_id' in lti_data:

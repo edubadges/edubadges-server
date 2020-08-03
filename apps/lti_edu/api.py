@@ -5,7 +5,7 @@ from entity.api import BaseEntityListView, BaseEntityDetailView
 from issuer.models import BadgeClass
 from lti_edu.models import StudentsEnrolled, BadgeClassLtiContext, UserCurrentContextId
 from lti_edu.serializers import StudentsEnrolledSerializerWithRelations, BadgeClassLtiContextSerializer, BadgeClassLtiContextStudentSerializer
-from mainsite.exceptions import BadgrApiException400
+from mainsite.exceptions import BadgrApiException400, BadgrValidationError
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from mainsite.utils import EmailMessageMaker
 from rest_framework.response import Response
@@ -58,6 +58,8 @@ class StudentsEnrolledList(BaseEntityListView):
         if 'badgeclass_slug' not in request.data:
             raise BadgrApiException400("Missing badgeclass id", 208)
         badge_class = get_object_or_404(BadgeClass, entity_id=request.data['badgeclass_slug'])
+        if not badge_class.terms_accepted(request.user):
+            raise BadgrValidationError("Cannot enroll, must accept terms first", 0)
         if request.user.may_enroll(badge_class, raise_exception=True):
             enrollment = StudentsEnrolled.objects.create(
                 badge_class_id=badge_class.pk,
@@ -66,7 +68,7 @@ class StudentsEnrolledList(BaseEntityListView):
             )
             message = EmailMessageMaker.create_student_badge_request_email(request.user, badge_class)
             request.user.email_user(subject='You have successfully requested a badge', message=message)
-            return Response(data={'status': 'enrolled', 'entity_id': enrollment.entity_id}, status=200)
+            return Response(data={'status': 'enrolled', 'entity_id': enrollment.entity_id}, status=201)
         raise BadgrApiException400('Cannot enroll', 209)
 
 

@@ -9,27 +9,34 @@ from institution.models import Institution
 from mainsite.seeds.constants import ENROLLED_STUDENT_EMAIL, REVOKED_STUDENT_EMAIL, INSTITUTION_UNIVERSITY_EXAMPLE_ORG, \
     AWARDED_STUDENT_EMAIL
 from staff.models import InstitutionStaff
+from .util import add_terms_instiution
 
 # Institution
-[
-    Institution.objects.get_or_create(identifier=ins['name'],
+institutions = [
+    {'name': INSTITUTION_UNIVERSITY_EXAMPLE_ORG,
+     'description': 'The university example is always a good place to hang out'},
+    {'name': 'diy.surfconext.nl', 'description': 'The university diy is also a good place to hang out'},
+    {'name': 'university1', 'description': 'University1 description'},
+    {'name': 'university2', 'description': 'University2 description'},
+]
+for ins in institutions:
+    institution, _ = Institution.objects.get_or_create(identifier=ins['name'],
                                       name=ins['name'],
                                       description=ins['description'],
                                       image="uploads/institution/surf.png",
                                       grading_table="https://url.to.gradingtable/gradingtable.html",
-                                      brin="000-7777-11111") for ins in
-    [
-        {'name': INSTITUTION_UNIVERSITY_EXAMPLE_ORG, 'description': 'The university example is always a good place to hang out'},
-        {'name': 'diy.surfconext.nl', 'description': 'The university diy is also a good place to hang out'},
-        {'name': 'university1', 'description': 'University1 description'},
-        {'name': 'university2', 'description': 'University2 description'},
-    ]
-]
+                                      brin="000-7777-11111")
+    add_terms_instiution(institution)
 
 
 def accept_terms(user):
-    TermsAgreement.objects.get_or_create(user=user, terms_version=1, agreed=True, valid=True)
-
+    if user.is_teacher:
+        terms = user.institution.cached_terms()
+        for term in terms:
+            terms_agreement, _ = TermsAgreement.objects.get_or_create(user=user, terms=term)
+            terms_agreement.agreed_version = term.version
+            terms_agreement.agreed = True
+            terms_agreement.save()
 
 # Users - Teachers
 all_perms = {
@@ -56,13 +63,13 @@ no_perms = {
 def create_admin(username, email, first_name, last_name, institution_name, uid, perms=all_perms):
     user, _ = BadgeUser.objects.get_or_create(username=username, email=email, last_name=last_name,
                                               first_name=first_name, is_teacher=True, invited=True)
-    accept_terms(user)
 
     EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)
     SocialAccount.objects.get_or_create(provider='surf_conext', uid=uid, user=user)
 
     institution = Institution.objects.get(name=institution_name)
     user.institution = institution
+    accept_terms(user)
     user.save()
     InstitutionStaff.objects.get_or_create(user=user, institution=institution, **perms)
 
@@ -70,13 +77,14 @@ def create_admin(username, email, first_name, last_name, institution_name, uid, 
 def create_teacher(username, email, first_name, last_name, institution_name, uid, perms=no_perms):
     user, _ = BadgeUser.objects.get_or_create(username=username, email=email, last_name=last_name,
                                               first_name=first_name, is_teacher=True, invited=True)
-    accept_terms(user)
+
 
     EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)
     SocialAccount.objects.get_or_create(provider='surf_conext', uid=uid, user=user)
 
     institution = Institution.objects.get(name=institution_name)
     user.institution = institution
+    accept_terms(user)
     user.save()
 
 

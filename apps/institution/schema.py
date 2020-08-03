@@ -25,7 +25,7 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
                       ContentTypeIdResolverMixin, DjangoObjectType):
     class Meta:
         model = Institution
-        fields = ('entity_id', 'name', 'staff', 'identifier', 'created_at', 'description',
+        fields = ('entity_id', 'identifier', 'name', 'staff', 'created_at', 'description',
                   'image', 'grading_table', 'brin', 'content_type_id')
 
     faculties = graphene.List(FacultyType)

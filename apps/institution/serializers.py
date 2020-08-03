@@ -1,6 +1,7 @@
 from django.db import IntegrityError
 from rest_framework import serializers
 
+from badgeuser.serializers import TermsSerializer
 from mainsite.drf_fields import ValidImageField
 from mainsite.exceptions import BadgrValidationError
 from mainsite.serializers import StripTagsCharField, BaseSlugRelatedField

@@ -4,7 +4,7 @@ from rest_framework import serializers
 from institution.models import Institution
 from mainsite.exceptions import BadgrValidationError
 from mainsite.serializers import StripTagsCharField, BadgrBaseModelSerializer, BaseSlugRelatedField
-from .models import BadgeUser, CachedEmailAddress, TermsVersion, UserProvisionment
+from .models import BadgeUser, CachedEmailAddress, UserProvisionment, Terms
 
 
 class UserSlugRelatedField(BaseSlugRelatedField):
@@ -41,21 +41,11 @@ class BadgeUserProfileSerializer(serializers.Serializer):
     last_name = StripTagsCharField(max_length=30, allow_blank=True)
     email = serializers.EmailField(source='primary_email', required=False)
     entity_id = serializers.CharField(read_only=True)
-    agreed_terms_version = serializers.IntegerField(required=False)
     marketing_opt_in = serializers.BooleanField(required=False)
     institution = InstitutionForProfileSerializer(read_only=True, )
 
     class Meta:
         apispec_definition = ('BadgeUser', {})
-
-    def to_representation(self, instance):
-        representation = super(BadgeUserProfileSerializer, self).to_representation(instance)
-        latest = TermsVersion.cached.cached_latest()
-        if latest:
-            representation['latest_terms_version'] = latest.version
-            if latest.version != instance.agreed_terms_version:
-                representation['latest_terms_description'] = latest.short_description
-        return representation
 
 
 class EmailSerializer(BadgrBaseModelSerializer):
@@ -163,3 +153,35 @@ class UserProvisionmentSerializerForEdit(serializers.Serializer):
         instance.save()
         return instance
 
+
+class TermsUrlSerializer(serializers.Serializer):
+    url = serializers.CharField(read_only=True)
+    language = serializers.CharField(read_only=True)
+
+
+class TermsSerializer(serializers.Serializer):
+    entity_id = serializers.CharField(read_only=True)
+    terms_urls = TermsUrlSerializer(many=True)
+    terms_type = serializers.CharField(read_only=True)
+    version = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Terms
+
+class TermsAgreementSerializer(serializers.Serializer):
+    agreed = serializers.CharField(required=False)
+    agreed_version = serializers.BooleanField(required=False)
+    terms = TermsSerializer(required=False)
+    terms_entity_id = serializers.CharField(required=False)
+    accepted = serializers.BooleanField(required=False)
+
+    def create(self, validated_data):
+        terms = Terms.objects.get(entity_id=validated_data['terms_entity_id'])
+        if terms.institution:
+            if not terms.institution.identifier in self.context['request'].user.get_all_associated_institutions_identifiers():
+                raise BadgrValidationError('You cannot accept terms that are not from your institution', 0)
+        if validated_data['accepted']:
+            return terms.accept(self.context['request'].user)
+
+    def to_representation(self, instance):
+        return super(TermsAgreementSerializer, self).to_representation(instance)

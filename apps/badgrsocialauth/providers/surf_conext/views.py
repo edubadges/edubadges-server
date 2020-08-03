@@ -142,9 +142,9 @@ def callback(request):
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
 
     social_account = get_social_account(payload['sub'])
-    if not social_account or not check_agreed_term_and_conditions(social_account.user, badgr_app):
+    if not social_account or not social_account.user.general_terms_accepted():
         # Here we redirect to client
-        keyword_arguments["resign"] = False if not social_account else True
+        keyword_arguments["re_sign"] = False if not social_account else True
         signup_redirect = badgr_app.signup_redirect
         args = urllib.parse.urlencode(keyword_arguments)
         return HttpResponseRedirect(f"{signup_redirect}?{args}")
@@ -245,7 +245,8 @@ def after_terms_agreement(request, **kwargs):
 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
 
-    check_agreed_term_and_conditions(request.user, badgr_app, resign=True)
+    request.user.accept_general_terms()
+    # check_agreed_term_and_conditions(request.user, badgr_app, resign=True)
 
     if lti_data is not None and 'lti_user_id' in lti_data:
         if not request.user.is_anonymous:
