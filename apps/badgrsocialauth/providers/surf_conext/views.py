@@ -193,6 +193,8 @@ def after_terms_agreement(request, **kwargs):
         request.user = get_verified_user(auth_token=auth_token)
 
     ret = complete_social_login(request, login)
+    new_url = ret.url+'&role=teacher'
+    ret = HttpResponseRedirect(new_url)
     if not request.user.is_anonymous:  # the social login succeeded
         institution_identifier = payload['schac_home_organization']
         try:
