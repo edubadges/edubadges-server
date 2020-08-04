@@ -39,9 +39,17 @@ class EmailAddressVariantAdmin(ModelAdmin):
 badgr_admin.register(EmailAddressVariant, EmailAddressVariantAdmin)
 
 
+
+class TermsUrlInline(TabularInline):
+    model = TermsUrl
+    extra = 0
+
+
 class TermsAdmin(ModelAdmin):
     list_display = ('institution', 'terms_type', 'version', 'created_at')
-    readonly_fields = ('created_at', 'created_by', 'updated_at', 'updated_by')
+    readonly_fields = ('created_at', 'created_by', 'updated_at', 'updated_by', 'entity_id')
+
+    inlines = [TermsUrlInline]
 
 badgr_admin.register(Terms, TermsAdmin)
 
