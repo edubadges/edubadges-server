@@ -191,6 +191,9 @@ def after_terms_agreement(request, **kwargs):
     login = provider.sociallogin_from_response(request, payload)
 
     ret = complete_social_login(request, login)
+    new_url = ret.url+'&role=student'
+    ret = HttpResponseRedirect(new_url)
+    
     set_session_badgr_app(request, badgr_app)
 
     request.user.accept_general_terms()
