@@ -27,7 +27,8 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
         (GRONDSLAG_GERECHTVAARDIGD_BELANG, 'gerechtvaardigd_belang'),
         (GRONDSLAG_WETTELIJKE_VERPLICHTING, 'wettelijke_verplichting'),
     )
-    grondslag = models.CharField(max_length=254, choices=GRONDSLAG_CHOICES, default=GRONDSLAG_UITVOERING_OVEREENKOMST)
+    grondslag_formeel = models.CharField(max_length=254, choices=GRONDSLAG_CHOICES, default=GRONDSLAG_UITVOERING_OVEREENKOMST)
+    grondslag_informeel = models.CharField(max_length=254, choices=GRONDSLAG_CHOICES, default=GRONDSLAG_UITVOERING_OVEREENKOMST)
 
     @property
     def children(self):
