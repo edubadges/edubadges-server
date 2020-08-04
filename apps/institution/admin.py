@@ -4,7 +4,8 @@ from .models import Institution, Faculty
 
 
 class InstitutionAdmin(admin.ModelAdmin):
-    readonly_fields = ('identifier', 'entity_id', 'created_by', 'updated_by')
+    readonly_fields = ('entity_id', 'created_by', 'updated_by')
+    list_display = ('name', 'identifier', 'brin')
 
 
 class FacultyAdmin(admin.ModelAdmin):
