@@ -229,21 +229,9 @@ def after_terms_agreement(request, **kwargs):
                                                        extra_context=extra_context)
 
         except Institution.DoesNotExist:  # no institution yet, and therefore also first login ever
-            try:
-                request.user.is_teacher = True
-                provisionment = UserProvisionment.objects.get(email=request.user.email,
-                                                              for_teacher=request.user.is_teacher)
-                institution = Institution.objects.create(identifier=institution_identifier)
-                request.user.institution = institution
-                request.user.save()
-                provisionment.add_entity(institution)
-                provisionment.match_user(request.user)
-                provisionment.perform_provisioning()
-            except (UserProvisionment.DoesNotExist, BadgrValidationError):  # there is no provisionment
-                request.user.delete()
-                error = 'Sorry, you can not register without an invite.'
-                return render_authentication_error(request, SurfConextProvider.id, error,
-                                                   extra_context={"code": AuthErrorCode.REGISTER_WITHOUT_INVITE})
+            error = 'Sorry, your institution has not been created yet.'
+            return render_authentication_error(request, SurfConextProvider.id, error,
+                                               extra_context={"code": AuthErrorCode.REGISTER_WITHOUT_INVITE})
 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
 

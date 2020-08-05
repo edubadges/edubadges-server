@@ -64,7 +64,7 @@ class UserProvisionmentCreateForm(ModelForm):
 
     class Meta:
         model = UserProvisionment
-        fields = ('email',)
+        fields = ('email', 'object_id', 'content_type')
 
 
 class UserProvisionmentAdmin(ModelAdmin):
