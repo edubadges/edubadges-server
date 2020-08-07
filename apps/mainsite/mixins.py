@@ -19,10 +19,11 @@ class ImageUrlGetterMixin(object):
     Model mixin to get image url
     """
     def image_url(self):
-        if getattr(settings, 'MEDIA_URL').startswith('http'):
-            return default_storage.url(self.image.name)
-        else:
-            return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
+        if self.image.name:
+            if getattr(settings, 'MEDIA_URL').startswith('http'):
+                return default_storage.url(self.image.name)
+            else:
+                return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(self.image.name)
 
 
 class ResizeUploadedImage(object):
