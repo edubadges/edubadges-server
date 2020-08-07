@@ -22,7 +22,6 @@ class InstitutionSerializer(serializers.Serializer):
     image = ValidImageField(required=True)
     name = serializers.CharField(max_length=254, required=True)
     grading_table = serializers.URLField(max_length=254, required=False)
-    brin = serializers.CharField(max_length=254, required=True)
 
     class Meta:
         model = Institution
@@ -32,7 +31,6 @@ class InstitutionSerializer(serializers.Serializer):
         if 'image' in validated_data:
             instance.image = validated_data.get('image')
         instance.grading_table = validated_data.get('grading_table')
-        instance.brin = validated_data.get('brin')
         instance.save()
         return instance
 
