@@ -19,6 +19,8 @@ import requests
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.core.files.storage import DefaultStorage
+from django.core import mail
+
 from django.template.loader import render_to_string
 from django.urls import get_callable
 
@@ -175,3 +177,12 @@ class EmailMessageMaker:
             'badgeclass_url': badgeclass.student_url,
         }
         return render_to_string(template, email_vars)
+
+
+def send_mail(subject, message, from_email, recipient_list, html_message=None, **kwargs):
+    if html_message:
+        msg = mail.EmailMessage(subject=subject, body=html_message, from_email=from_email, to=recipient_list)
+        msg.content_subtype = "html"
+        msg.send()
+    else:
+        mail.send_mail(subject, message, from_email, recipient_list, html_message=html_message, **kwargs)

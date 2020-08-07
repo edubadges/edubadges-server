@@ -12,7 +12,6 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
-from django.core.mail import send_mail
 from django.db import models, transaction
 from django.utils import timezone
 from django.utils.html import strip_tags
@@ -27,7 +26,7 @@ from issuer.models import BadgeInstance
 from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrApiException400, BadgrValidationError
 from mainsite.models import ApplicationInfo, EmailBlacklist, BaseAuditedModel, BadgrApp
-from mainsite.utils import open_mail_in_browser
+from mainsite.utils import open_mail_in_browser, send_mail
 from signing.models import AssertionTimeStamp
 from badgeuser.utils import generate_badgr_username
 from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
