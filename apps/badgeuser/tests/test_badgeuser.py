@@ -382,7 +382,6 @@ class BadgeuserGraphqlTest(BadgrTestCase):
                                     content_type='application/json')
         query = 'query foo {currentUser {' \
                 'entityId ' \
-                'generalTerms {entityId} ' \
                 'termsAgreements {agreed agreedVersion ' \
                     'terms {entityId, termsType, version, ' \
                     'institution {entityId}' \
