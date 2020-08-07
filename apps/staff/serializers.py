@@ -45,7 +45,7 @@ class BaseStaffCreateSerializer(BaseStaffSerializer):
             entity_name = new_staff_membership.object.__class__.__name__
             determiner = 'an' if entity_name[0] in 'aeiouAEIOU' else 'a'
             new_staff_membership.user.email_user(subject='You have been added to {} {}'.format(determiner, entity_name),
-                                                 message=message)
+                                                 html_message=message)
             return new_staff_membership
         else:
             raise serializers.ValidationError("You may not administrate this user.")

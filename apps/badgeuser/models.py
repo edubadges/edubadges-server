@@ -15,6 +15,7 @@ from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models, transaction
 from django.utils import timezone
+from django.utils.html import strip_tags
 from django.utils.translation import ugettext_lazy as _
 from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
@@ -569,7 +570,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
             provision.match_user(self)
         return provisions
 
-    def email_user(self, subject, message, from_email=None, attachments=None, **kwargs):
+    def email_user(self, subject, html_message=None, from_email=None, **kwargs):
         """
         Sends an email to this User.
         """
@@ -577,22 +578,12 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
             EmailBlacklist.objects.get(email=self.primary_email)
         except EmailBlacklist.DoesNotExist:
             # Allow sending, as this email is not blacklisted.
-            if not attachments:
-                if settings.LOCAL_DEVELOPMENT_MODE:
-                    open_mail_in_browser(message)
-                else:
-                    send_mail(subject, message, from_email, [self.primary_email], **kwargs)
+            if settings.LOCAL_DEVELOPMENT_MODE:
+                open_mail_in_browser(html_message)
             else:
-                from django.core.mail import EmailMessage
-                if settings.LOCAL_DEVELOPMENT_MODE:
-                    open_mail_in_browser(message)
-                else:
-                    email = EmailMessage(subject=subject,
-                                         body=message,
-                                         from_email=from_email,
-                                         to=[self.primary_email],
-                                         attachments=attachments)
-                    email.send()
+                plain_text = strip_tags(html_message)
+                send_mail(subject, message=plain_text, from_email=from_email,
+                          html_message=html_message, recipient_list=[self.primary_email], **kwargs)
         else:
             return
             # TODO: Report email non-delivery somewhere.

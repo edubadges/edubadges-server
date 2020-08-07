@@ -67,7 +67,7 @@ class StudentsEnrolledList(BaseEntityListView):
                 date_consent_given=timezone.now()
             )
             message = EmailMessageMaker.create_student_badge_request_email(request.user, badge_class)
-            request.user.email_user(subject='You have successfully requested a badge', message=message)
+            request.user.email_user(subject='You have successfully requested a badge', html_message=message)
             return Response(data={'status': 'enrolled', 'entity_id': enrollment.entity_id}, status=201)
         raise BadgrApiException400('Cannot enroll', 209)
 
