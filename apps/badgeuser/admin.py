@@ -1,6 +1,7 @@
 from django.contrib.admin import ModelAdmin, TabularInline
 from django.contrib.auth.admin import UserAdmin
 from django.forms import ModelForm
+
 from mainsite.admin import badgr_admin
 from staff.models import PermissionedRelationshipBase
 from .models import BadgeUser, EmailAddressVariant, Terms, CachedEmailAddress, UserProvisionment, TermsUrl
@@ -29,15 +30,42 @@ class BadgeUserAdmin(UserAdmin):
         EmailAddressInline,
     ]
 
+
 badgr_admin.register(BadgeUser, BadgeUserAdmin)
+
 
 class EmailAddressVariantAdmin(ModelAdmin):
     search_fields = ('canonical_email', 'email',)
     list_display = ('email', 'canonical_email',)
     raw_id_fields = ('canonical_email',)
 
+
 badgr_admin.register(EmailAddressVariant, EmailAddressVariantAdmin)
 
+
+class TermsInlineForm(ModelForm):
+    class Meta:
+        model = Terms
+        fields = ('terms_type', 'version', 'entity_id')
+
+
+    def __init__(self, *args, **kwargs):
+        initial = kwargs.pop('initial', {})
+        # add a default rating if one hasn't been passed in
+        initial['terms_type'] = initial.get('terms_type', None)
+        initial['version'] = initial.get('version', 1)
+        kwargs['initial'] = initial
+        super(TermsInlineForm, self).__init__(
+            *args, **kwargs
+        )
+
+
+class TermsInline(TabularInline):
+    model = Terms
+    extra = 0
+
+    form = TermsInlineForm
+    readonly_fields = ('entity_id',)
 
 
 class TermsUrlInline(TabularInline):
@@ -46,16 +74,21 @@ class TermsUrlInline(TabularInline):
 
 
 class TermsAdmin(ModelAdmin):
-    list_display = ('institution', 'terms_type', 'version', 'created_at')
+    list_display = ('institution', 'terms_type', 'version', 'created_at', 'terms_url_count')
     readonly_fields = ('created_at', 'created_by', 'updated_at', 'updated_by', 'entity_id')
 
     inlines = [TermsUrlInline]
+
+    def terms_url_count(self, obj):
+        return len(obj.terms_urls.all())
+
 
 badgr_admin.register(Terms, TermsAdmin)
 
 
 class TermsUrlAdmin(ModelAdmin):
     list_display = ('language', 'terms')
+
 
 badgr_admin.register(TermsUrl, TermsUrlAdmin)
 
