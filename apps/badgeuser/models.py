@@ -641,6 +641,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         if self.is_teacher:
             return [self.institution.identifier]
         else:
+            # TODO - there can be subdomains and the first term can be anything
             return [affiliation.replace('affiliate@', '') for affiliation in self.get_eduperson_scoped_affiliations()]
 
     def get_recipient_identifier(self):
