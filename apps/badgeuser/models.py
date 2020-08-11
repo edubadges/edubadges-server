@@ -641,8 +641,12 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         if self.is_teacher:
             return [self.institution.identifier]
         else:
-            # TODO - there can be subdomains and the first term can be anything
-            return [affiliation.replace('affiliate@', '') for affiliation in self.get_eduperson_scoped_affiliations()]
+            affiliations = []
+            for affiliation in self.get_eduperson_scoped_affiliations():
+                domain = affiliation.split("@", 1)[-1]
+                parts = domain.split(".")[-2:]
+                affiliations.append(".".join(parts[-2:]))
+            return affiliations
 
     def get_recipient_identifier(self):
         from allauth.socialaccount.models import SocialAccount
