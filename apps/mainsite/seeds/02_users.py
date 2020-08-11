@@ -211,7 +211,9 @@ def create_student(username, first_name, last_name, email, uid):
     accept_terms(user)
 
     EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)
-    SocialAccount.objects.get_or_create(provider='edu_id', uid=uid, user=user, extra_data=extra_data)
+    social_account, _ = SocialAccount.objects.get_or_create(provider='edu_id', uid=uid, user=user)
+    social_account.extra_data = extra_data
+    social_account.save()
 
 
 students = [
