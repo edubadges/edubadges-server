@@ -70,13 +70,13 @@ surf_net_institution, _ = Institution.objects.get_or_create(name=SURF_INSTITUTIO
                                                             description=SURF_INSTITUTION_NAME,
                                                             image="uploads/issuers/surf.png")
 # Terms general
-terms_service_agreement_student, _ = Terms.objects.get_or_create(institution=None, version=1, terms_type=Terms.TYPE_SERVICE_AGREEMENT_STUDENT)
+terms_service_agreement_student, _ = Terms.objects.get_or_create(institution=None, terms_type=Terms.TYPE_SERVICE_AGREEMENT_STUDENT)
 TermsUrl.objects.get_or_create(terms=terms_service_agreement_student, language=TermsUrl.LANGUAGE_ENGLISH, url="https://raw.githubusercontent.com/edubadges/privacy/master/service-agreement-student-en.md")
 TermsUrl.objects.get_or_create(terms=terms_service_agreement_student, language=TermsUrl.LANGUAGE_DUTCH, url="https://raw.githubusercontent.com/edubadges/privacy/master/service-agreement-student-nl.md")
-terms_service_agreement_employee, _ = Terms.objects.get_or_create(institution=None, version=1, terms_type=Terms.TYPE_SERVICE_AGREEMENT_EMPLOYEE)
+terms_service_agreement_employee, _ = Terms.objects.get_or_create(institution=None, terms_type=Terms.TYPE_SERVICE_AGREEMENT_EMPLOYEE)
 TermsUrl.objects.get_or_create(terms=terms_service_agreement_employee, language=TermsUrl.LANGUAGE_ENGLISH, url="https://raw.githubusercontent.com/edubadges/privacy/master/service-agreement-employee-en.md")
 TermsUrl.objects.get_or_create(terms=terms_service_agreement_employee, language=TermsUrl.LANGUAGE_DUTCH, url="https://raw.githubusercontent.com/edubadges/privacy/master/service-agreement-employee-nl.md")
-terms_of_service, _ = Terms.objects.get_or_create(institution=None, version=1, terms_type=Terms.TYPE_TERMS_OF_SERVICE)
+terms_of_service, _ = Terms.objects.get_or_create(institution=None, terms_type=Terms.TYPE_TERMS_OF_SERVICE)
 TermsUrl.objects.get_or_create(terms=terms_of_service, language=TermsUrl.LANGUAGE_ENGLISH, url="https://raw.githubusercontent.com/edubadges/privacy/master/edubadges-termsofservice-en.md")
 TermsUrl.objects.get_or_create(terms=terms_of_service, language=TermsUrl.LANGUAGE_DUTCH, url="https://raw.githubusercontent.com/edubadges/privacy/master/edubadges-termsofservice-nl.md")
 
