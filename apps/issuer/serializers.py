@@ -9,6 +9,7 @@ from django.apps import apps
 from django.core.validators import URLValidator
 from django.urls import reverse
 from django.utils import timezone
+from django.conf import settings
 from django.utils.html import strip_tags
 from rest_framework import serializers
 from rest_framework.exceptions import ErrorDetail
@@ -200,6 +201,15 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
 
     def validate_description(self, description):
         return strip_tags(description)
+
+    def validate_extensions(self, extensions):
+        if extensions:
+            for val in extensions.values():
+                if "@context" in val and not val['@context'].startswith(settings.EXTENSIONS_ROOT_URL):
+                    raise BadgrValidationError(
+                        fields={"extensions": [{"error_code": 999,
+                                              "error_message": f"extensions @conext invalid {val['@context']}"}]})
+        return extensions
 
     def add_extensions(self, instance, add_these_extensions, extension_items):
         for extension_name in add_these_extensions:
