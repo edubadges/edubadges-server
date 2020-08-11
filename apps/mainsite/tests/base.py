@@ -42,7 +42,7 @@ class SetupHelper(object):
     def get_test_image_path(self):
         return os.path.join(self.get_testfiles_path(), 'guinea_pig_testing_badge.png')
 
-    def _add_eduid_socialaccount(self, user, affiliations):
+    def add_eduid_socialaccount(self, user, affiliations):
         random_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:{}c14-b952-4d7e-85fd-{}ac5c6f18".format(random.randint(1, 99999), random.randint(1, 9999))
         extra_data = {"family_name": user.last_name,
                       "sub": random_eduid,
@@ -75,7 +75,7 @@ class SetupHelper(object):
         email.primary = True
         email.save()
 
-    def _setup_user(self, first_name='firsty', last_name='lastington', authenticate=False, institution=None, email=None):
+    def setup_user(self, first_name='firsty', last_name='lastington', authenticate=False, institution=None, email=None):
         if not email:
             email = 'setup_user_{}@email.test'.format(random.random())
         if not institution:
@@ -99,7 +99,7 @@ class SetupHelper(object):
             first_name = name_randomiser('FirstName')
         if not last_name:
             last_name = name_randomiser('LastName')
-        user = self._setup_user(first_name, last_name, authenticate, institution=institution, email=email)
+        user = self.setup_user(first_name, last_name, authenticate, institution=institution, email=email)
         self._add_surfconext_socialaccount(user)
         user.is_teacher = True
         user.save()
@@ -108,9 +108,9 @@ class SetupHelper(object):
     def setup_student(self, first_name='', last_name='', authenticate=False, affiliated_institutions=[]):
         first_name = name_randomiser('student_first_name') if not first_name else first_name
         last_name = name_randomiser('student_last_name') if not last_name else last_name
-        user = self._setup_user(first_name, last_name, authenticate, institution=None)
+        user = self.setup_user(first_name, last_name, authenticate, institution=None)
         affiliations = ['affiliate@'+institution.identifier for institution in affiliated_institutions]
-        self._add_eduid_socialaccount(user, affiliations=affiliations)
+        self.add_eduid_socialaccount(user, affiliations=affiliations)
         return user
 
     def enroll_user(self, recipient, badgeclass):
