@@ -163,7 +163,10 @@ class EmailMessageMaker:
         background = Image.open(badgeclass.image.path).convert("RGBA")
         overlay = Image.open(finders.find('images/example_overlay.png')).convert("RGBA")
         if overlay.width != background.width:
-            overlay.thumbnail(size=background.size)
+            width_ratio = background.width/overlay.width
+            new_background_height = background.height*width_ratio
+            new_background_size = (overlay.width, new_background_height)
+            background.thumbnail((new_background_size), Image.ANTIALIAS)
         position = (0, background.height//4)
         background.paste(overlay, position, overlay)
         buffered = BytesIO()
@@ -175,6 +178,8 @@ class EmailMessageMaker:
             'issuer_name': badgeclass.issuer.name,
             'faculty_name': badgeclass.issuer.faculty.name,
             'badgeclass_url': badgeclass.student_url,
+            'badgeclass_description': badgeclass.description,
+            'badgeclass_name': badgeclass.name,
         }
         return render_to_string(template, email_vars)
 
