@@ -9,7 +9,7 @@ from institution.models import Institution
 from mainsite.seeds.constants import ENROLLED_STUDENT_EMAIL, REVOKED_STUDENT_EMAIL, INSTITUTION_UNIVERSITY_EXAMPLE_ORG, \
     AWARDED_STUDENT_EMAIL
 from staff.models import InstitutionStaff
-from .util import add_terms_instiution
+from .util import add_terms_institution
 
 # Institution
 institutions = [
@@ -26,7 +26,7 @@ for ins in institutions:
                                       image="uploads/institution/surf.png",
                                       grading_table="https://url.to.gradingtable/gradingtable.html",
                                       brin="000-7777-11111")
-    add_terms_instiution(institution)
+    add_terms_institution(institution)
 
 
 def accept_terms(user):

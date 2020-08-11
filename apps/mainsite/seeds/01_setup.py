@@ -10,7 +10,7 @@ from issuer.models import Issuer, BadgeClass, BadgeClassExtension
 from mainsite.models import BadgrApp
 # BadgrApp
 from mainsite.seeds.constants import EDU_BADGES_FACULTY_NAME, SURF_INSTITUTION_NAME
-from .util import add_terms_instiution
+from .util import add_terms_institution
 
 
 setattr(settings, 'SUPPRESS_EMAILS', 1)
@@ -83,7 +83,7 @@ TermsUrl.objects.get_or_create(terms=terms_of_service, language=TermsUrl.LANGUAG
 
 
 
-add_terms_instiution(surf_net_institution)
+add_terms_institution(surf_net_institution)
 # surf_net_institution.remove_cached_data(['cached_terms'])
 edu_badges_faculty, _ = Faculty.objects.get_or_create(name=EDU_BADGES_FACULTY_NAME, institution=surf_net_institution,
                                                       description=EDU_BADGES_FACULTY_NAME)

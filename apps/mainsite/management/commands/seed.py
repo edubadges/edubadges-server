@@ -24,8 +24,8 @@ def clear_data():
 
         dbname = environ.get("BADGR_DB_NAME")
         migration_filled_tables = ('auth_permission', 'django_content_type', 'django_migrations')
-        sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = '{dbname}' AND table_name NOT IN {tables}".format(
-            dbname=dbname, tables=migration_filled_tables)
+        sql = f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{dbname}' " \
+              f"AND table_name NOT IN {migration_filled_tables}"
 
         cursor.execute("SET FOREIGN_KEY_CHECKS=0")
         try:
@@ -44,7 +44,7 @@ def run_seeds():
         basename(x)[:-3]
         for x in listdir(seedsdir)
         if x.endswith(".py")
-        if x not in ["__init__.py", "constants.py"]
+        if x not in ["__init__.py", "constants.py", "util.py"]
         if isfile(join(seedsdir, x))
     ]
 
