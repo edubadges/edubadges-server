@@ -107,8 +107,8 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serial
             raise BadgrValidationError("You don't have the necessary permissions", 100)
 
     def update(self, instance, validated_data):
-        if instance.assertions:
-            raise BadgrValidationError("Cannot change any value, assertions have already been issued within this entity", 214)
+        if instance.assertions and instance.name != validated_data["name"]:
+            raise BadgrValidationError("Cannot change the name, assertions have already been issued within this entity", 214)
         [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
         self.save_extensions(validated_data, instance)
         if not instance.badgrapp_id:
