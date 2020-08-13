@@ -13,6 +13,7 @@ import uuid
 import webbrowser
 from io import BytesIO
 from PIL import Image
+from premailer import transform
 from xml.etree import cElementTree as ET
 
 import requests
@@ -186,7 +187,8 @@ class EmailMessageMaker:
 
 def send_mail(subject, message, from_email, recipient_list, html_message=None, **kwargs):
     if html_message:
-        msg = mail.EmailMessage(subject=subject, body=html_message, from_email=from_email, to=recipient_list)
+        html_with_inline_css = transform(html_message)
+        msg = mail.EmailMessage(subject=subject, body=html_with_inline_css, from_email=from_email, to=recipient_list)
         msg.content_subtype = "html"
         msg.send()
     else:
