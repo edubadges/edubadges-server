@@ -92,7 +92,7 @@ class StaffResolverMixin(object):
 
     @resolver_blocker_for_students
     def resolve_staff(self, info):
-        if self.has_permissions(info.context.user, ['may_administrate_users']):
+        if self.has_permissions(info.context.user, ['may_read']):
             return self.staff_items
         else:
             return []
