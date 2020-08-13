@@ -9,6 +9,7 @@ from django.apps import apps
 from django.core.validators import URLValidator
 from django.urls import reverse
 from django.utils import timezone
+from django.conf import settings
 from django.utils.html import strip_tags
 from rest_framework import serializers
 from rest_framework.exceptions import ErrorDetail
@@ -106,8 +107,8 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serial
             raise BadgrValidationError("You don't have the necessary permissions", 100)
 
     def update(self, instance, validated_data):
-        if instance.assertions:
-            raise BadgrValidationError("Cannot change any value, assertions have already been issued within this entity", 214)
+        if instance.assertions and instance.name != validated_data["name"]:
+            raise BadgrValidationError("Cannot change the name, assertions have already been issued within this entity", 214)
         [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
         self.save_extensions(validated_data, instance)
         if not instance.badgrapp_id:
@@ -200,6 +201,15 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
 
     def validate_description(self, description):
         return strip_tags(description)
+
+    def validate_extensions(self, extensions):
+        if extensions:
+            for val in extensions.values():
+                if "@context" in val and not val['@context'].startswith(settings.EXTENSIONS_ROOT_URL):
+                    raise BadgrValidationError(
+                        fields={"extensions": [{"error_code": 999,
+                                              "error_message": f"extensions @conext invalid {val['@context']}"}]})
+        return extensions
 
     def add_extensions(self, instance, add_these_extensions, extension_items):
         for extension_name in add_these_extensions:
