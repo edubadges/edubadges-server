@@ -3,6 +3,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django_object_actions import DjangoObjectActions
 from mainsite.admin import badgr_admin
+from mainsite.utils import admin_list_linkify
 
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassAlignment, BadgeClassTag, \
     BadgeClassExtension, IssuerExtension, BadgeInstanceExtension
@@ -23,7 +24,8 @@ class IssuerExtensionInline(TabularInline):
 class IssuerAdmin(DjangoObjectActions, ModelAdmin):
 
     readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id')
-    list_display = ('name', 'img', 'entity_id', 'created_by', 'created_at', 'faculty')
+    list_display = ('name', 'img', 'entity_id', 'created_by', 'created_at',
+                    admin_list_linkify('faculty', 'name'), admin_list_linkify('institution', 'name'))
     list_display_links = ('name',)
     list_filter = ('created_at',)
     search_fields = ('name', 'entity_id')
@@ -87,7 +89,7 @@ class BadgeClassExtensionInline(TabularInline):
 
 class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
     readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id')
-    list_display = ('name', 'badge_image', 'entity_id', 'issuer')
+    list_display = ('name', 'badge_image', 'entity_id', admin_list_linkify('issuer', 'name'), admin_list_linkify('institution', 'name'))
     list_display_links = ('badge_image', 'name',)
     list_filter = ('created_at',)
     search_fields = ('name', 'entity_id', 'issuer__name',)
@@ -152,9 +154,10 @@ class BadgeInstanceExtensionInline(TabularInline):
     extra = 0
     fields = ('name', 'original_json')
 
+
 class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
     readonly_fields = ('created_at', 'created_by', 'updated_at','updated_by', 'image', 'entity_id', 'old_json', 'salt', 'entity_id', 'source', 'source_url')
-    list_display = ('badge_image', 'user', 'entity_id', 'badgeclass', 'issuer')
+    list_display = ('badge_image', 'user', 'entity_id', admin_list_linkify('badgeclass', 'name'), admin_list_linkify('issuer', 'name'))
     list_display_links = ('badge_image',)
     list_filter = ('created_at',)
     search_fields = ('recipient_identifier', 'entity_id', 'badgeclass__name', 'issuer__name')
@@ -213,13 +216,25 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
     redirect_issuer.label = "Issuer"
     redirect_issuer.short_description = "See this Issuer"
 
+
 badgr_admin.register(BadgeInstance, BadgeInstanceAdmin)
 
 
-class ExtensionAdmin(ModelAdmin):
-    list_display = ('name',)
+class BadgeclassExtensionAdmin(ModelAdmin):
+    list_display = ('name', admin_list_linkify('badgeclass', 'name'))
     search_fields = ('name', 'original_json')
 
-badgr_admin.register(IssuerExtension, ExtensionAdmin)
-badgr_admin.register(BadgeClassExtension, ExtensionAdmin)
-badgr_admin.register(BadgeInstanceExtension, ExtensionAdmin)
+
+class IssuerExtensionAdmin(ModelAdmin):
+    list_display = ('name', admin_list_linkify('issuer', 'name'))
+    search_fields = ('name', 'original_json')
+
+
+class BadgeInstanceExtensionAdmin(ModelAdmin):
+    list_display = ('name', admin_list_linkify('badge_instance'))
+    search_fields = ('name', 'original_json')
+
+
+badgr_admin.register(IssuerExtension, IssuerExtensionAdmin)
+badgr_admin.register(BadgeClassExtension, BadgeclassExtensionAdmin)
+badgr_admin.register(BadgeInstanceExtension, BadgeInstanceExtensionAdmin)
