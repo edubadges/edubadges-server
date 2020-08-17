@@ -1,5 +1,6 @@
 from django.contrib.admin import ModelAdmin, TabularInline
 from django.contrib.auth.admin import UserAdmin
+from django.contrib.contenttypes.models import ContentType
 from django.forms import ModelForm
 
 from mainsite.admin import badgr_admin
@@ -47,7 +48,6 @@ class TermsInlineForm(ModelForm):
     class Meta:
         model = Terms
         fields = ('terms_type', 'version', 'entity_id')
-
 
     def __init__(self, *args, **kwargs):
         initial = kwargs.pop('initial', {})
@@ -111,6 +111,15 @@ class UserProvisionmentAdmin(ModelAdmin):
         obj.for_teacher = True
         obj.type = obj.TYPE_FIRST_ADMIN_INVITATION
         obj.save()
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(UserProvisionmentAdmin, self).get_form(request, obj, **kwargs)
+        content_type = ContentType.objects.get(model='institution')
+        form.base_fields['content_type'].initial = content_type.id
+        form.base_fields['content_type'].disabled = True
+        form.base_fields['content_type'].help_text = "This field is not editable"
+        form.base_fields['object_id'].help_text = "Set the ID of the institution the invite is for"
+        return form
 
 
 badgr_admin.register(UserProvisionment, UserProvisionmentAdmin)
