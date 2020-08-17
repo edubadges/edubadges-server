@@ -12,7 +12,7 @@ from lti_edu.schema import StudentsEnrolledType
 class TermsUrlType(DjangoObjectType):
     class Meta:
         model = TermsUrl
-        fields = ('url', 'language')
+        fields = ('url', 'language', 'excerpt')
 
 
 class TermsType(DjangoObjectType):

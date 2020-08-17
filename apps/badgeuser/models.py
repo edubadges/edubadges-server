@@ -785,6 +785,7 @@ class TermsUrl(cachemodel.CacheModel):
         (LANGUAGE_DUTCH, 'nl')
     )
     language = models.CharField(max_length=255, choices=LANGUAGE_CHOICES, default=LANGUAGE_ENGLISH, blank=False, null=False)
+    excerpt = models.BooleanField(default=False)
 
 
 class Terms(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):

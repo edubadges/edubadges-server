@@ -378,8 +378,6 @@ class BadgeuserTermsTest(BadgrTestCase):
                                                        content_type='application/json')
         self.assertEqual(enrollment_response_success.status_code, 201)
 
-    #         self.assertTrue(badgeclass.terms_accepted(student1))
-
     def test_public_terms_view(self):
         response = terms_accept_response = self.client.get("/v1/user/terms/teacher")
         self.assertTrue(response.status_code == 200)

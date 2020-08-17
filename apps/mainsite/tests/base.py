@@ -128,15 +128,23 @@ class SetupHelper(object):
 
     def _setup_institution_terms(self, institution):
         formal_badge, _ = Terms.objects.get_or_create(institution=institution, terms_type=Terms.TYPE_FORMAL_BADGE)
-        TermsUrl.objects.get_or_create(terms=formal_badge, language=TermsUrl.LANGUAGE_ENGLISH,
+        TermsUrl.objects.get_or_create(terms=formal_badge, language=TermsUrl.LANGUAGE_ENGLISH, excerpt=False,
                                        url="https://raw.githubusercontent.com/edubadges/privacy/master/university-example.org/formal-edubadges-principles-en.md")
-        TermsUrl.objects.get_or_create(terms=formal_badge, language=TermsUrl.LANGUAGE_DUTCH,
+        TermsUrl.objects.get_or_create(terms=formal_badge, language=TermsUrl.LANGUAGE_DUTCH, excerpt=False,
                                        url="https://raw.githubusercontent.com/edubadges/privacy/master/university-example.org/formal-edubadges-principles-en.md")
+        TermsUrl.objects.get_or_create(terms=formal_badge, language=TermsUrl.LANGUAGE_ENGLISH, excerpt=True,
+                                       url="https://raw.githubusercontent.com/edubadges/privacy/master/university-example.org/formal-edubadges-excerpt-en.md")
+        TermsUrl.objects.get_or_create(terms=formal_badge, language=TermsUrl.LANGUAGE_DUTCH, excerpt=True,
+                                       url="https://raw.githubusercontent.com/edubadges/privacy/master/university-example.org/formal-edubadges-excerpt-en.md")
         informal_badge, _ = Terms.objects.get_or_create(institution=institution, terms_type=Terms.TYPE_INFORMAL_BADGE)
-        TermsUrl.objects.get_or_create(terms=informal_badge, language=TermsUrl.LANGUAGE_ENGLISH,
+        TermsUrl.objects.get_or_create(terms=informal_badge, language=TermsUrl.LANGUAGE_ENGLISH, excerpt=False,
                                        url="https://raw.githubusercontent.com/edubadges/privacy/master/university-example.org/formal-edubadges-principles-en.md")
-        TermsUrl.objects.get_or_create(terms=informal_badge, language=TermsUrl.LANGUAGE_DUTCH,
+        TermsUrl.objects.get_or_create(terms=informal_badge, language=TermsUrl.LANGUAGE_DUTCH, excerpt=False,
                                        url="https://raw.githubusercontent.com/edubadges/privacy/master/university-example.org/formal-edubadges-principles-nl.md")
+        TermsUrl.objects.get_or_create(terms=informal_badge, language=TermsUrl.LANGUAGE_ENGLISH, excerpt=True,
+                                       url="https://raw.githubusercontent.com/edubadges/privacy/master/university-example.org/formal-edubadges-excerpt-en.md")
+        TermsUrl.objects.get_or_create(terms=informal_badge, language=TermsUrl.LANGUAGE_DUTCH, excerpt=True,
+                                       url="https://raw.githubusercontent.com/edubadges/privacy/master/university-example.org/formal-edubadges-excerpt-nl.md")
         institution.remove_cached_data(['cached_terms'])
 
     def increment_general_terms_version(self, user):
