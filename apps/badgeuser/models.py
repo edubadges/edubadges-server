@@ -556,6 +556,10 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
                 nr_accepted += 1
         return general_terms.__len__() == nr_accepted
 
+    @property
+    def full_name(self):
+        return self.get_full_name()
+
     def get_full_name(self):
         if self.first_name and self.last_name:
             return "%s %s" % (self.first_name, self.last_name)
