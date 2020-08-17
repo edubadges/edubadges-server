@@ -15,6 +15,7 @@ class FacultyAdmin(admin.ModelAdmin):
     
     list_display = ('name',)
     readonly_fields = ('entity_id', 'created_by', 'updated_by', 'institution')
+    list_display = ('name', 'institution', 'entity_id')
 
 
 badgr_admin.register(Institution, InstitutionAdmin)
