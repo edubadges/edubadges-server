@@ -807,6 +807,9 @@ class Terms(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
     )
     terms_type = models.CharField(max_length=254, choices=TYPE_CHOICES, default=TYPE_TERMS_OF_SERVICE)
 
+    class Meta:
+        unique_together = ('institution', 'terms_type')
+
     @classmethod
     def get_general_terms(cls, user):
         if user.is_student:

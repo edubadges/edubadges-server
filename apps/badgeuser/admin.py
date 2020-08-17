@@ -51,16 +51,6 @@ class TermsInlineForm(ModelForm):
         model = Terms
         fields = ('terms_type', 'version', 'entity_id')
 
-    def __init__(self, *args, **kwargs):
-        initial = kwargs.pop('initial', {})
-        # add a default rating if one hasn't been passed in
-        initial['terms_type'] = initial.get('terms_type', None)
-        initial['version'] = initial.get('version', 1)
-        kwargs['initial'] = initial
-        super(TermsInlineForm, self).__init__(
-            *args, **kwargs
-        )
-
 
 class TermsInline(TabularInline):
     model = Terms
