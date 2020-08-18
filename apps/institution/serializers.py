@@ -20,7 +20,7 @@ class InstitutionSerializer(serializers.Serializer):
     description = StripTagsCharField(max_length=256, required=True)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
     image = ValidImageField(required=True)
-    brin =  serializers.CharField(read_only=True)
+    brin = serializers.CharField(read_only=True)
     name = serializers.CharField(max_length=254, required=True)
     grading_table = serializers.URLField(max_length=254, required=False)
 
@@ -32,6 +32,7 @@ class InstitutionSerializer(serializers.Serializer):
         if 'image' in validated_data:
             instance.image = validated_data.get('image')
         instance.grading_table = validated_data.get('grading_table')
+        instance.name = validated_data.get('name')
         instance.save()
         return instance
 
