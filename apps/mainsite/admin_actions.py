@@ -80,3 +80,8 @@ delete_selected.short_description = ugettext_lazy("Delete selected %(verbose_nam
 
 def clear_cache():
     cache.clear()
+
+
+def send_application_report():
+    from django.core.management import call_command
+    call_command('send_app_report')

@@ -20,11 +20,9 @@ from django.views.generic import FormView, RedirectView, TemplateView
 from django.views.static import serve
 
 from badgrsocialauth.utils import get_privacy_content
-from issuer.tasks import rebake_all_assertions, update_issuedon_all_assertions
 from issuer.models import BadgeInstance
-from mainsite.admin_actions import clear_cache
+from mainsite.admin_actions import clear_cache, send_application_report
 from mainsite.models import EmailBlacklist, BadgrApp
-
 
 
 ##
@@ -84,20 +82,15 @@ def email_unsubscribe(request, *args, **kwargs):
 
 class SitewideActionForm(forms.Form):
     ACTION_CLEAR_CACHE = 'CLEAR_CACHE'
-    ACTION_RESAVE_ELEMENTS = 'RESAVE_ELEMENTS'
-    ACTION_REBAKE_ALL_ASSERTIONS = "REBAKE_ALL_ASSERTIONS"
-    ACTION_FIX_ISSUEDON = 'FIX_ISSUEDON'
+    ACTION_SEND_APP_REPORT = 'SEND_APP_REPORT'
 
     ACTIONS = {
         ACTION_CLEAR_CACHE: clear_cache,
-        ACTION_REBAKE_ALL_ASSERTIONS: rebake_all_assertions,
-        ACTION_FIX_ISSUEDON: update_issuedon_all_assertions,
+        ACTION_SEND_APP_REPORT: send_application_report,
     }
     CHOICES = (
-        (ACTION_CLEAR_CACHE, 'Clear Cache',),
-        (ACTION_RESAVE_ELEMENTS, 'Re-save Pathway Elements',),
-        (ACTION_REBAKE_ALL_ASSERTIONS, 'Rebake all assertions',),
-        (ACTION_FIX_ISSUEDON, 'Re-process issuedOn for backpack assertions',),
+        (ACTION_CLEAR_CACHE, 'Clear Cache'),
+        (ACTION_SEND_APP_REPORT, 'Send application Report')
     )
 
     action = forms.ChoiceField(choices=CHOICES, required=True, label="Pick an action")
