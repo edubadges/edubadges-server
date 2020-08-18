@@ -208,7 +208,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
                 if "@context" in val and not val['@context'].startswith(settings.EXTENSIONS_ROOT_URL):
                     raise BadgrValidationError(
                         error_code=999,
-                        error_message=f"extensions @conext invalid {val['@context']}")
+                        error_message=f"extensions @context invalid {val['@context']}")
         return extensions
 
     def add_extensions(self, instance, add_these_extensions, extension_items):
