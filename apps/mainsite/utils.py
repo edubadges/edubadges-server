@@ -21,9 +21,9 @@ from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.core.files.storage import DefaultStorage
 from django.core import mail
-
 from django.template.loader import render_to_string
-from django.urls import get_callable
+from django.urls import get_callable, reverse
+from django.utils.html import format_html
 
 slugify_function_path = \
     getattr(settings, 'AUTOSLUG_SLUGIFY_FUNCTION', 'autoslug.utils.slugify')
@@ -193,3 +193,26 @@ def send_mail(subject, message, from_email, recipient_list, html_message=None, *
         msg.send()
     else:
         mail.send_mail(subject, message, from_email, recipient_list, html_message=html_message, **kwargs)
+
+
+def admin_list_linkify(field_name, label_param=None):
+    """
+    Converts a foreign key value into clickable links for the admin list view.
+
+    field_name is the column name of the foreignkey
+    label_param is the param you want to show in the list as label of the referenced object
+    """
+    def _linkify(obj):
+        linked_obj = getattr(obj, field_name)
+        if linked_obj is None:
+            return '-'
+        app_label = linked_obj._meta.app_label
+        model_name = linked_obj._meta.model_name
+        view_name = f'admin:{app_label}_{model_name}_change'
+        link_url = reverse(view_name, args=[linked_obj.pk])
+        if label_param:
+            linked_obj = getattr(linked_obj, label_param)
+        return format_html('<a href="{}">{}</a>', link_url, linked_obj)
+
+    _linkify.short_description = field_name  # Sets column name
+    return _linkify

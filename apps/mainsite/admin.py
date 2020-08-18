@@ -3,8 +3,6 @@ import badgrlog
 from allauth.socialaccount.models import SocialToken, SocialAccount
 from badgeuser.models import CachedEmailAddress, ProxyEmailConfirmation
 from django.contrib.admin import AdminSite, ModelAdmin, StackedInline
-from django.http import HttpResponseRedirect
-from django.urls import reverse
 from django.utils.module_loading import autodiscover_modules
 from django.utils.translation import ugettext_lazy
 from mainsite.models import BadgrApp, EmailBlacklist, ApplicationInfo, AccessTokenProxy, LegacyTokenProxy

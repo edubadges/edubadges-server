@@ -556,6 +556,10 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
                 nr_accepted += 1
         return general_terms.__len__() == nr_accepted
 
+    @property
+    def full_name(self):
+        return self.get_full_name()
+
     def get_full_name(self):
         if self.first_name and self.last_name:
             return "%s %s" % (self.first_name, self.last_name)
@@ -781,6 +785,7 @@ class TermsUrl(cachemodel.CacheModel):
         (LANGUAGE_DUTCH, 'nl')
     )
     language = models.CharField(max_length=255, choices=LANGUAGE_CHOICES, default=LANGUAGE_ENGLISH, blank=False, null=False)
+    excerpt = models.BooleanField(default=False)
 
 
 class Terms(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
@@ -802,6 +807,9 @@ class Terms(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
         (TYPE_TERMS_OF_SERVICE, 'terms_of_service')
     )
     terms_type = models.CharField(max_length=254, choices=TYPE_CHOICES, default=TYPE_TERMS_OF_SERVICE)
+
+    class Meta:
+        unique_together = ('institution', 'terms_type')
 
     @classmethod
     def get_general_terms(cls, user):

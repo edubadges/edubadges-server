@@ -1,8 +1,10 @@
 from django.contrib.admin import ModelAdmin, TabularInline
 from django.contrib.auth.admin import UserAdmin
+from django.contrib.contenttypes.models import ContentType
 from django.forms import ModelForm
 
 from mainsite.admin import badgr_admin
+from mainsite.utils import admin_list_linkify
 from staff.models import PermissionedRelationshipBase
 from .models import BadgeUser, EmailAddressVariant, Terms, CachedEmailAddress, UserProvisionment, TermsUrl
 
@@ -16,7 +18,8 @@ class EmailAddressInline(TabularInline):
 
 class BadgeUserAdmin(UserAdmin):
     readonly_fields = ('email', 'first_name', 'last_name', 'entity_id', 'date_joined', 'last_login', 'username', 'entity_id')
-    list_display = ('email', 'first_name', 'last_name', 'is_active', 'is_staff', 'date_joined', 'institution')
+    list_display = ('last_name', 'first_name', 'email', 'is_active', 'is_staff', 'date_joined',
+                    admin_list_linkify('institution', 'name'))
     list_filter = ('is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')
     search_fields = ('email', 'first_name', 'last_name', 'username', 'entity_id')
     fieldsets = (
@@ -49,17 +52,6 @@ class TermsInlineForm(ModelForm):
         fields = ('terms_type', 'version', 'entity_id')
 
 
-    def __init__(self, *args, **kwargs):
-        initial = kwargs.pop('initial', {})
-        # add a default rating if one hasn't been passed in
-        initial['terms_type'] = initial.get('terms_type', None)
-        initial['version'] = initial.get('version', 1)
-        kwargs['initial'] = initial
-        super(TermsInlineForm, self).__init__(
-            *args, **kwargs
-        )
-
-
 class TermsInline(TabularInline):
     model = Terms
     extra = 0
@@ -74,7 +66,8 @@ class TermsUrlInline(TabularInline):
 
 
 class TermsAdmin(ModelAdmin):
-    list_display = ('institution', 'terms_type', 'version', 'created_at', 'terms_url_count')
+    list_display = ('terms_type', admin_list_linkify('institution', 'name'),
+                    'version', 'created_at', 'terms_url_count')
     readonly_fields = ('created_at', 'created_by', 'updated_at', 'updated_by', 'entity_id')
 
     inlines = [TermsUrlInline]
@@ -87,7 +80,7 @@ badgr_admin.register(Terms, TermsAdmin)
 
 
 class TermsUrlAdmin(ModelAdmin):
-    list_display = ('language', 'terms')
+    list_display = ('url', 'language', admin_list_linkify('terms', 'terms_type'))
 
 
 badgr_admin.register(TermsUrl, TermsUrlAdmin)
@@ -111,6 +104,15 @@ class UserProvisionmentAdmin(ModelAdmin):
         obj.for_teacher = True
         obj.type = obj.TYPE_FIRST_ADMIN_INVITATION
         obj.save()
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(UserProvisionmentAdmin, self).get_form(request, obj, **kwargs)
+        content_type = ContentType.objects.get(model='institution')
+        form.base_fields['content_type'].initial = content_type.id
+        form.base_fields['content_type'].disabled = True
+        form.base_fields['content_type'].help_text = "This field is not editable"
+        form.base_fields['object_id'].help_text = "Set the ID of the institution the invite is for"
+        return form
 
 
 badgr_admin.register(UserProvisionment, UserProvisionmentAdmin)
