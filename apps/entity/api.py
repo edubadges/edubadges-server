@@ -84,17 +84,8 @@ class BaseEntityListView(BaseEntityView):
 
 class VersionedObjectMixin(object):
 
-    @staticmethod
-    def _is_owned(request, obj):
-        user = getattr(request, "user", None)
-        user_id = user.id if user else None
-        user_id_object = getattr(obj, "user_id", None)
-        return user_id and user_id_object and user_id == user_id_object
 
     def has_object_permissions(self, request, obj):
-        if self._is_owned(request, obj):
-            return True
-
         for permission in self.get_permissions():
             if not permission.has_object_permission(request, self, obj):
                 return False
@@ -107,13 +98,12 @@ class VersionedObjectMixin(object):
         except self.model.DoesNotExist:
             pass
         else:
-            if not self._is_owned(request, self.object) and not self.has_object_permissions(request, self.object):
+            if not self.has_object_permissions(request, self.object):
                 raise Http404
             return self.object
 
         # nothing found
         raise Http404
-
 
 
 class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):

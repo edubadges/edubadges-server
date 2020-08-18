@@ -5,6 +5,26 @@ from mainsite.tests import BadgrTestCase
 
 class ObjectPermissionTests(BadgrTestCase):
 
+    def test_may_not_escalate_your_own_perms(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        staff = self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_administrate_users=False)
+        data = json.dumps({
+            "may_create": 0,
+            "may_read": 1,
+            "may_update": 0,
+            "may_delete": 0,
+            "may_sign": 0,
+            "may_award": 0,
+            "may_administrate_users": 1,
+        })
+        response = self.client.put('/staff-membership/faculty/change/{}'.format(staff.entity_id),
+                                   data, content_type='application/json')
+        self.assertEqual(response.status_code, 404)
+        response = self.client.delete('/staff-membership/institution/change/{}'.format(staff.entity_id),
+                                      content_type='application/json')
+        self.assertEqual(response.status_code, 404)
+
     def test_may_not_administrate_user(self):
         teacher1 = self.setup_teacher(authenticate=True)
         teacher2 = self.setup_teacher(institution=teacher1.institution)

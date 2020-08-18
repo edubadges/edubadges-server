@@ -386,8 +386,6 @@ class UserPermissionsMixin(object):
         """
         See if staff membership is in this user's scope. This is used when editing or removing staff membership objects.
         """
-        if self == staff_membership.user:
-            return False  # cannot administrate yourself
         all_administrable_objects = self.get_all_objects_with_permissions(['may_administrate_users'])
         for obj in all_administrable_objects:
             for staff in obj.staff_items:
