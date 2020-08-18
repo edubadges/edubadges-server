@@ -29,5 +29,5 @@ class Command(BaseCommand):
             email = EmailMessage(subject='Your Edubadges report is here!',
                                  body=body,
                                  to=[superuser.primary_email],
-                                 attachments=[(filename, report_file.read(), 'text/csv')])
+                                 attachments=[(filename, report_file.getvalue(), 'text/csv')])
             email.send()
