@@ -595,7 +595,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
 
     def delete(self, *args, **kwargs):
         super(BadgeUser, self).delete(*args, **kwargs)
-        self.publish_delete('username')
+        cache.clear()
 
     def can_add_variant(self, email):
         try:
