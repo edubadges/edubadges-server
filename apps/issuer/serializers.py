@@ -207,8 +207,8 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
             for val in extensions.values():
                 if "@context" in val and not val['@context'].startswith(settings.EXTENSIONS_ROOT_URL):
                     raise BadgrValidationError(
-                        fields={"extensions": [{"error_code": 999,
-                                              "error_message": f"extensions @conext invalid {val['@context']}"}]})
+                        error_code=999,
+                        error_message=f"extensions @conext invalid {val['@context']}")
         return extensions
 
     def add_extensions(self, instance, add_these_extensions, extension_items):
@@ -222,8 +222,8 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
     def update(self, instance, validated_data):
         if instance.assertions:
             raise BadgrValidationError(
-                fields={"instance": [{"error_code": 999,
-                                      "error_message": "Cannot change any value, assertions have already been issued"}]})
+                error_code=999,
+                error_message="Cannot change any value, assertions have already been issued")
         self.save_extensions(validated_data, instance)
         for key, value in validated_data.items():
             setattr(instance, key, value)
