@@ -28,6 +28,6 @@ class Command(BaseCommand):
         for superuser in superusers:
             email = EmailMessage(subject='Your Edubadges report is here!',
                                  body=body,
-                                 to=[superuser.email],
+                                 to=[superuser.primary_email],
                                  attachments=[(filename, report_file.read(), 'text/csv')])
             email.send()
