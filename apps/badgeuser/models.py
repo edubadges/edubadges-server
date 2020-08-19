@@ -834,6 +834,11 @@ class Terms(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
         terms_agreement.save()
         user.remove_cached_data(['cached_terms_agreements'])
         return terms_agreement
+
+    def save(self, *args, **kwargs):
+        super(Terms, self).save()
+        if self.institution:
+            self.institution.remove_cached_data(['cached_terms'])
                 
 
 class TermsAgreement(cachemodel.CacheModel):
