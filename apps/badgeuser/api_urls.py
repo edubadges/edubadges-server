@@ -1,5 +1,6 @@
 from badgeuser.api import BadgeUserToken, BadgeUserEmailConfirm, BadgeUserDetail, \
-    UserCreateProvisionment, AcceptProvisionmentDetail, UserProvisionmentDetail, AcceptTermsView, PublicTermsView
+    UserCreateProvisionment, AcceptProvisionmentDetail, UserProvisionmentDetail, \
+    AcceptTermsView, PublicTermsView
 from badgeuser.api_v1 import BadgeUserEmailList, BadgeUserEmailDetail
 from django.conf.urls import url
 

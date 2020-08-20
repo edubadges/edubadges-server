@@ -359,6 +359,22 @@ class BadgeuserTermsTest(BadgrTestCase):
         self.assertTrue(teacher1.general_terms_accepted())
         self.assertTrue(student1.general_terms_accepted())
 
+    def test_user_revoke_terms(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        self.assertFalse(teacher1.general_terms_accepted())
+        teacher1.accept_general_terms()
+        self.assertTrue(teacher1.general_terms_accepted())
+        query = 'query foo {currentUser {termsAgreements { agreedVersion entityId}}}'
+        response = self.graphene_post(teacher1, query)
+        agreement_entity_id = response['data']['currentUser']['termsAgreements'][0]['entityId']
+        response_revoke = self.client.delete("/v1/user/terms/accept",
+                                             json.dumps({'terms_agreement_entity_id': agreement_entity_id}),
+                                             content_type='application/json')
+        self.assertEqual(response_revoke.status_code, 200)
+        self.assertFalse(teacher1.general_terms_accepted())
+        teacher1.accept_general_terms()
+        self.assertTrue(teacher1.general_terms_accepted())
+
     def test_student_accept_badge_terms(self):
         teacher1 = self.setup_teacher()
         student1 = self.setup_student(authenticate=True, affiliated_institutions=[teacher1.institution])

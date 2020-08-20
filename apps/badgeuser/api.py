@@ -14,7 +14,7 @@ from rest_framework.serializers import BaseSerializer, ValidationError
 from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED
 from rest_framework.views import APIView
 
-from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken, UserProvisionment, Terms
+from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken, UserProvisionment, Terms, TermsAgreement
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
 from badgeuser.serializers import BadgeUserProfileSerializer, BadgeUserTokenSerializer, UserProvisionmentSerializer, \
     UserProvisionmentSerializerForEdit, TermsAgreementSerializer, TermsSerializer
@@ -247,7 +247,7 @@ class AcceptTermsView(APIView):
     """
     model = Terms
     permission_classes = (AuthenticatedWithVerifiedEmail,)
-    http_method_names = ['post']
+    http_method_names = ['post', 'delete']
 
     def post(self, request, **kwargs):
         if request.data:
@@ -256,8 +256,17 @@ class AcceptTermsView(APIView):
                                                   context={'request': request})
             serializer.is_valid(raise_exception=True)
             serializer.save()
-        return Response(serializer.data, status=HTTP_201_CREATED)
+            return Response(serializer.data, status=HTTP_201_CREATED)
+        raise BadgrApiException400('Cannot accept terms, no data sent')
 
+    def delete(self, request, **kwargs):
+        if request.data:
+            term_agreement = TermsAgreement.objects.get(entity_id=request.data['terms_agreement_entity_id'])
+            term_agreement.agreed = False
+            term_agreement.save()
+            request.user.remove_cached_data(['cached_terms_agreements'])
+            return Response(status=HTTP_200_OK)
+        raise BadgrApiException400('Cannot revoke consent, no data sent')
 
 class PublicTermsView(APIView):
     """

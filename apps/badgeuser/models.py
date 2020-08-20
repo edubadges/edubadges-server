@@ -538,6 +538,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
     def accept_terms(self, terms):
         agreement, _ = TermsAgreement.objects.get_or_create(user=self, terms=terms)
         agreement.agreed_version = terms.version
+        agreement.agreed = True
         agreement.save()
 
     def accept_general_terms(self):
@@ -822,7 +823,7 @@ class Terms(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
     def has_been_accepted_by(self, user):
         for agreement in user.cached_terms_agreements():
             if agreement.terms == self:
-                return self.version == agreement.agreed_version
+                return agreement.agreed and self.version == agreement.agreed_version
         return False
 
     def accept(self, user):
@@ -841,7 +842,7 @@ class Terms(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
             self.institution.remove_cached_data(['cached_terms'])
                 
 
-class TermsAgreement(BaseAuditedModel, cachemodel.CacheModel):
+class TermsAgreement(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
     user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE)
     terms = models.ForeignKey('badgeuser.Terms', on_delete=models.CASCADE)
     agreed = models.BooleanField(default=True)
