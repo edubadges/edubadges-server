@@ -266,7 +266,7 @@ class AcceptTermsView(APIView):
             term_agreement.save()
             request.user.remove_cached_data(['cached_terms_agreements'])
             return Response(status=HTTP_200_OK)
-        raise BadgrApiException400('Cannot revoke consent, no data sent')
+        raise BadgrApiException400('Cannot revoke consent, no data sent', 999)
 
 class PublicTermsView(APIView):
     """
