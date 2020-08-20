@@ -32,7 +32,7 @@ class TermsAgreementType(DjangoObjectType):
 
     class Meta:
         model = TermsAgreement
-        fields = ('agreed', 'agreed_version', 'terms')
+        fields = ('agreed', 'agreed_version', 'terms', 'updated_at')
 
     terms = graphene.Field(TermsType)
 

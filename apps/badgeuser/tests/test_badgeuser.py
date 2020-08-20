@@ -479,3 +479,14 @@ class BadgeuserGraphqlTest(BadgrTestCase):
         self.add_eduid_socialaccount(user, affiliations=affiliations)
         schac_homes = user.get_all_associated_institutions_identifiers()
         self.assertListEqual(schac_homes, list(map(lambda _: "fontys.nl", affiliations)))
+
+    def test_termagreements_graphene_exposure(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        teacher1.accept_general_terms()
+        query = 'query foo {currentUser {termsAgreements {updatedAt agreedVersion agreed terms {version}}}}'
+        response = self.graphene_post(teacher1, query)
+        agreement = response['data']['currentUser']['termsAgreements'][0]
+        self.assertTrue(bool(agreement['updatedAt']))
+        self.assertTrue(bool(agreement['agreedVersion']))
+        self.assertTrue(bool(agreement['agreed']))
+        self.assertTrue(bool(agreement['terms']['version']))
