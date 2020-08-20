@@ -841,7 +841,7 @@ class Terms(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
             self.institution.remove_cached_data(['cached_terms'])
                 
 
-class TermsAgreement(cachemodel.CacheModel):
+class TermsAgreement(BaseAuditedModel, cachemodel.CacheModel):
     user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE)
     terms = models.ForeignKey('badgeuser.Terms', on_delete=models.CASCADE)
     agreed = models.BooleanField(default=True)
