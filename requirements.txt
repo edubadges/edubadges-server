@@ -33,7 +33,7 @@ djangorestframework==3.9.1
 django-allauth==0.37.1
 ## FW oauthlib==2.1.0
 oauthlib==3.1.0
-requests==2.20.0
+requests==2.24.0
 ## FW requests-oauthlib==0.4.2
 requests-oauthlib==1.3.0
 # Permissions framework
