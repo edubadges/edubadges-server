@@ -6,7 +6,8 @@ from collections import OrderedDict
 from itertools import chain
 
 from django.apps import apps
-from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator, EmailValidator
 from django.urls import reverse
 from django.utils import timezone
 from django.conf import settings
@@ -20,6 +21,7 @@ from lti_edu.models import StudentsEnrolled
 from mainsite.drf_fields import ValidImageField
 from mainsite.exceptions import BadgrValidationError
 from mainsite.models import BadgrApp
+from mainsite.mixins import InternalValueErrorOverrideMixin
 from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField, \
     OriginalJsonSerializerMixin, BaseSlugRelatedField
 from mainsite.utils import OriginSetting
@@ -74,7 +76,11 @@ class ExtensionsSaverMixin(object):
             self.add_extensions(instance, add_these_extensions, extension_items)
 
 
-class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serializers.Serializer):
+
+
+
+class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
+                       InternalValueErrorOverrideMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierField()
     name = StripTagsCharField(max_length=1024)
@@ -127,6 +133,18 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serial
             representation['image'] = obj.institution.image_url()
         return representation
 
+    def to_internal_value_error_override(self, data):
+        """Function used in combination with the InternalValueErrorOverrideMixin to override serializer excpetions when
+        data is internalised (i.e. the to_internal_value() method is called)"""
+        errors = OrderedDict()
+        if data.get('email', False):
+            try:
+                EmailValidator().__call__(data.get('email'))
+            except ValidationError:
+                e = OrderedDict([('email', [ErrorDetail('Enter a valid email address.', code=509)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+        return errors
+
     def add_extensions(self, instance, add_these_extensions, extension_items):
         for extension_name in add_these_extensions:
             original_json = extension_items[extension_name]
@@ -147,7 +165,8 @@ class AlignmentItemSerializer(serializers.Serializer):
         apispec_definition = ('BadgeClassAlignment', {})
 
 
-class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, serializers.Serializer):
+class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
+                           InternalValueErrorOverrideMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierField()
     name = StripTagsCharField(max_length=255)
@@ -230,7 +249,9 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
         instance.save()
         return instance
 
-    def to_internal_value(self, data):
+    def to_internal_value_error_override(self, data):
+        """Function used in combination with the InternalValueErrorOverrideMixin to override serializer excpetions when
+        data is internalised (i.e. the to_internal_value() method is called)"""
         errors = OrderedDict()
         if not data.get('criteria_text', False) and not data.get('criteria_url', False):
             e = OrderedDict([('criteria_text', [ErrorDetail('Either criteria_url or criteria_text is required', code=905)]),
@@ -240,15 +261,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin, se
             if not utils.is_probable_url(data.get('criteria_url')):
                 e = OrderedDict([('criteria_url', [ErrorDetail('Must be a proper url.', code=902)])])
                 errors = OrderedDict(chain(errors.items(), e.items()))
-        if errors:
-            try:
-                super(BadgeClassSerializer, self).to_internal_value(data)
-                raise serializers.ValidationError(detail=errors)
-            except serializers.ValidationError as e:
-                e.detail = OrderedDict(chain(e.detail.items(), errors.items()))
-                raise e
-        else:
-            return super(BadgeClassSerializer, self).to_internal_value(data)
+        return errors
 
     def create(self, validated_data, **kwargs):
         user_permissions = validated_data['issuer'].get_permissions(validated_data['created_by'])

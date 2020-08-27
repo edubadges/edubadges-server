@@ -1,12 +1,17 @@
 import io
-from xml.etree import cElementTree as ET
-from django.core.files.storage import default_storage
-from PIL import Image
+
+from itertools import chain
+from collections import OrderedDict
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from mainsite.utils import verify_svg
+from PIL import Image
 from resizeimage.resizeimage import resize_contain
+from rest_framework import serializers
+from xml.etree import cElementTree as ET
+
+from mainsite.utils import verify_svg
 
 
 def _decompression_bomb_check(image, max_pixels=Image.MAX_IMAGE_PIXELS):
@@ -95,3 +100,21 @@ class ScrubUploadedSvgImage(object):
             tree.write(buf)
             self.image = InMemoryUploadedFile(buf, 'image', self.image.name, 'image/svg+xml', buf.len, 'utf8')
         return super(ScrubUploadedSvgImage, self).save(*args, **kwargs)
+
+
+class InternalValueErrorOverrideMixin(object):
+    """
+    Mixin used to override errors created when to_internal_value() Serializer method is called
+    create your own to_internal_value_error_override() method to go along with this mixin.
+    """
+    def to_internal_value(self, data):
+        errors = self.to_internal_value_error_override(data)
+        if errors:
+            try:
+                super(InternalValueErrorOverrideMixin, self).to_internal_value(data)
+                raise serializers.ValidationError(detail=errors)
+            except serializers.ValidationError as e:
+                e.detail = OrderedDict(chain(e.detail.items(), errors.items()))
+                raise e
+        else:
+            return super(InternalValueErrorOverrideMixin, self).to_internal_value(data)
