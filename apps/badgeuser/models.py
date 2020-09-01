@@ -832,6 +832,7 @@ class Terms(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
         # must work for updating increment and for accepting the first time
         terms_agreement, created = TermsAgreement.objects.get_or_create(user=user, terms=self)
         terms_agreement.agreed_version = self.version
+        terms_agreement.agreed = True
         terms_agreement.save()
         user.remove_cached_data(['cached_terms_agreements'])
         return terms_agreement
