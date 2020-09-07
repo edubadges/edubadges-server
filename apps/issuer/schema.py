@@ -24,7 +24,7 @@ class ExtensionTypeMetaMixin(object):
 class BaseExtensionMixin(object):
 
     def resolve_original_json(self, info):
-        return json.loads(self.original_json)
+        return self.original_json
 
 
 class IssuerExtensionType(BaseExtensionMixin, DjangoObjectType):
