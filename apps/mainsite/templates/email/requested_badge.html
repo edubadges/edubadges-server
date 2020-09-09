@@ -1,22 +1,22 @@
 {% extends 'email/base.html' %}
 
 {% block title %}
-<title>You have succesfully requested a badge</title>
+<title>You have succesfully requested an edubadge</title>
 {% endblock %}
 
 {% block content %}
 <div class="mail_container">
     <div class="mail_subcontainer">
-        <p class="mail_title">You have successfully requested a badge</p>
-        <p class="mail_subtitle">Click the button to go view it on edubadges.</p>
-        <a class="button blue-button" href="{{public_badge_url}}">View badge page</a>
+        <p class="mail_title">You have successfully requested an edubadge.</p>
+        <p class="mail_subtitle">Click the button to view it in edubadges.</p>
+        <a class="button blue-button" href="{{public_badge_url}}">View the public badge class.</a>
     </div>
     <div class="mail_subcontainer middle">
         <p>Hi <strong>{{user_name}}</strong>,</p>
-        <p>You have successfully requested the badge: {{badge_name}}</p>
-        <p>Please wait for the issuer of this badge to accept your request.</p>
+        <p>You have successfully requested the edubadge: {{badge_name}}.</p>
+        <p>Please wait for the issuer of this edubadge to accept your request.</p>
         <p>Regards,</p>
-        <p>The Edubadges team</p>
+        <p>Team Edubadges</p>
     </div>
 </div>
 {% endblock %}
