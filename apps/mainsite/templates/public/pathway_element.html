@@ -24,6 +24,7 @@
 							{% if pathway_element.get_absolute_url not in pathway_element.get_alignment_url %}
 								<a href="{{ pathway_element.alignment_url }}"
 								   class="button button-primaryghost l-offsetleft"
+									 rel="noopener noreferrer"
 								   target="_blank"
 								>Alignment URL</a>
 							{% endif %}
