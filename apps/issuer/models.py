@@ -413,10 +413,6 @@ class BadgeClass(EntityUserProvisionmentMixin,
         return OriginSetting.HTTP+self.get_absolute_url()
 
     @property
-    def student_url(self):
-        return urljoin(settings.UI_URL, 'details/{}'.format(self.entity_id))
-
-    @property
     def jsonld_id(self):
         if self.source_url:
             return self.source_url
@@ -538,7 +534,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
             user=recipient, extensions=extensions,
             **kwargs
         )
-        message = EmailMessageMaker.create_earned_badge_mail(recipient, assertion.badgeclass)
+        message = EmailMessageMaker.create_earned_badge_mail(assertion)
         if send_email:
             recipient.email_user(subject='Congratulations, you earned an edubadge!', html_message=message)
         return assertion
@@ -733,6 +729,10 @@ class BadgeInstance(BaseAuditedModel,
 
     def get_absolute_url(self):
         return reverse('badgeinstance_json', kwargs={'entity_id': self.entity_id})
+
+    @property
+    def student_url(self):
+        return urljoin(settings.UI_URL, f"details/{self.entity_id}")
 
     def get_permissions(self, user):
         """

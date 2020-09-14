@@ -159,7 +159,8 @@ class EmailMessageMaker:
         return render_to_string(template, email_vars)
 
     @staticmethod
-    def create_earned_badge_mail(recipient, badgeclass):
+    def create_earned_badge_mail(assertion):
+        badgeclass = assertion.badgeclass
         template = 'email/earned_badge.html'
         background = Image.open(badgeclass.image.path).convert("RGBA")
         overlay = Image.open(finders.find('images/example_overlay.png')).convert("RGBA")
@@ -178,7 +179,7 @@ class EmailMessageMaker:
             'issuer_image': badgeclass.issuer.image_url(),
             'issuer_name': badgeclass.issuer.name,
             'faculty_name': badgeclass.issuer.faculty.name,
-            'badgeclass_url': badgeclass.student_url,
+            'assertion_url': assertion.student_url,
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
         }
