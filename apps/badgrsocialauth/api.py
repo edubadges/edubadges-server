@@ -6,6 +6,7 @@ from badgrsocialauth.serializers import BadgrSocialAccountSerializerV1
 from django.core.exceptions import ValidationError
 from django.http import Http404
 from django.urls import reverse
+from django.contrib.auth import logout
 from entity.api import BaseEntityListView, BaseEntityDetailView
 from issuer.permissions import BadgrOAuthTokenHasScope
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
@@ -50,6 +51,11 @@ class BadgrSocialAccountConnect(APIView):
             code=authcode)
 
         return Response(dict(url=redirect_url))
+
+    def post(self, request, **kwargs):
+        if request.user.is_authenticated:
+            logout(request)
+        return Response(status=HTTP_204_NO_CONTENT)
 
 
 class BadgrSocialAccountDetail(BaseEntityDetailView):
