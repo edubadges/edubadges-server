@@ -448,6 +448,10 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
     is_teacher = models.BooleanField(default=False)
     invited = models.BooleanField(default=False)
 
+    # Override from AbstractUser
+    first_name = models.CharField(_('first name'), max_length=254, blank=True)
+    last_name = models.CharField(_('last name'), max_length=254, blank=True)
+
     badgrapp = models.ForeignKey('mainsite.BadgrApp', on_delete=models.SET_NULL, blank=True, null=True, default=None)
     is_staff = models.BooleanField(
         _('Backend-staff member'),
