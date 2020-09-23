@@ -6,14 +6,17 @@
 
 *Digital badge management for issuers, earners, and consumers*
 
-EduBadges server is the Python/Django API backend for issuing [Open Badges](http://openbadges.org). In addition to a powerful Issuer API and browser-based user interface for issuing, Edubadges offers integrated badge management and sharing for badge earners.
+Edubadges server is the Python/Django API backend for issuing edubadges. Edubadges are digital credentials that use the [Open Badges](https://openbadges.org/) standard. In addition to a powerful issuer API and browser-based user interface for issuing, Edubadges offers integrated badge management and sharing for badge earners.
 
-See also [edubadges-ui](https://github.com/edubadges/edubadges-ui), the Svelte front end that serves as users' interface for this project.
+See also [edubadges-ui](https://github.com/edubadges/edubadges-ui), the Svelte frontend that serves as the user interface for this project.
 
 This software is based on the Badgr software from [Concentric Sky](https://github.com/concentricsky/).
 
+## What are (edu)badges?
+A badge is a digital piece of evidence with which a student demonstrates that he or she has mastered certain skills or knowledge. In the context of lifelong development, students and employees are increasingly being educated or gaining experience at various institutions, both in their own country and abroad. Badges are a great instrument to make acquired knowledge and skills visible and 'portable'.
+
 ## Edubadges and microcredentialing
-Institutions are looking into the possibilities of using digital certification for (partial) results obtained by their students. In 2019, SURF will work with various institutions to continue to build a digital infrastructure with the purpose to be able to issue such digital certificates, or 'edubadges'.
+Institutions are looking into the possibilities of using digital certification for (partial) results obtained by their students. Since 2018 SURF works with various educational institutions to build a digital infrastructure with the purpose to be able to issue such digital certificates, or 'edubadges'.
 
 ## Edubadges: tool for flexible education
 An increasing number of students have − whether previously or elsewhere − acquired skills and knowledge relevant to their study, and they wish to receive recognition or exemption for this in their study programme. A number of institutions are looking into the possibility of providing courses in accredited units that are smaller than a diploma (micro-credentials). Digital badges are the tools to achieve this. As these badges are issued in an educational context, they are called 'edubadges'.
