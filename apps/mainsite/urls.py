@@ -37,15 +37,12 @@ urlpatterns = [
     # Admin URLs
     url(r'^staff/sidewide-actions$', SitewideActionFormView.as_view(), name='badgr_admin_sitewide_actions'),
     url(r'^staff/', badgr_admin.urls),
-    url(r'^staff/superlogin', auth_views.LoginView.as_view(), name ='badgr_admin_super_login'),
+    url(r'^staff/superlogin', badgr_admin.login, name='badgr_admin_super_login'),  # legacy superlogin is now a duplicate of /staff/login
 
     # Service health endpoint
     url(r'^health', include('health.urls')),
 
-    # Swagger Docs
-    #
     # api docs
-    #
     url(r'^docs/oauth2/authorize$', DocsAuthorizeRedirect.as_view(), name='docs_authorize_redirect'),
     url(r'^docs/?$', RedirectView.as_view(url='/docs/v2/', permanent=True)),  # default redirect to /v2/
     url(r'^docs/', include('apispec_drf.urls')),
