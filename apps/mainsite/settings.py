@@ -526,7 +526,7 @@ DEFAULT_FROM_EMAIL = os.environ['DEFAULT_FROM_EMAIL']
 # Seeds
 ALLOW_SEEDS = legacy_boolean_parsing('ALLOW_SEEDS', '0')
 EDU_ID_SECRET = os.environ['EDU_ID_SECRET']
-EDU_ID_CLIENT = "edubadges"
+EDU_ID_CLIENT = os.environ.get('EDU_ID_CLIENT', "edubadges")
 
 SURF_CONEXT_SECRET = os.environ.get('SURF_CONEXT_SECRET', 'secret')
 SURF_CONEXT_CLIENT = os.environ.get('SURF_CONEXT_CLIENT', "test.edubadges.nl")
