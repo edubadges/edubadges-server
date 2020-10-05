@@ -91,7 +91,7 @@ class EnrollmentDetail(BaseEntityDetailView):
         enrollment.denied = True
         enrollment.save()
         html_message = EmailMessageMaker.create_enrollment_denied_email(enrollment)
-        subject = 'You enrollment for the badgeclass {} has been denied.'.format(enrollment.badge_class.name)
+        subject = 'Your request for the badgeclass {} has been denied by the issuer.'.format(enrollment.badge_class.name)
         enrollment.user.email_user(subject=subject, html_message=html_message)
         return Response(data='Succesfully denied enrollment', status=HTTP_200_OK)
 

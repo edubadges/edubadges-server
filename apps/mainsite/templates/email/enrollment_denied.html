@@ -1,20 +1,20 @@
 {% extends 'email/base.html' %}
 
 {% block title %}
-<title>Your enrollment for the badgeclass {{badgeclass_name}} has been denied</title>
+<title>Your request for the badgeclass {{badgeclass_name}} has been denied by the issuer</title>
 {% endblock %}
 
 {% block content %}
 <div class="mail_container">
     <div class="mail_subcontainer">
-        <p class="mail_title">Your enrollment for the badgeclass {{badgeclass_name}} has been denied.</p>
+        <p class="mail_title">Your request for the badgeclass {{badgeclass_name}} has been denied by the issuer.</p>
         <p class="mail_subtitle">Click the button to view the badgeclass in edubadges.</p>
-        <a class="button blue-button" href="{{public_badge_url}}">View the public badge class.</a>
+        <a class="button blue-button" href="{{public_badge_url}}">View the public badgeclass.</a>
     </div>
     <div class="mail_subcontainer middle">
-        <p>Dear {{recipient_name}},</p>
-        <p>Your enrollment for the badgeclass {{badgeclass_name}} has been denied.</p>
-        <p>Regards,</p>
+        <p>{{recipient_name}},</p>
+        <p>Your request for the badgeclass {{badgeclass_name}} has been denied by the issuer.</p>
+        <p>Kind regards,</p>
         <p>Team Edubadges</p>
     </div>
 </div>
