@@ -26,7 +26,7 @@ from issuer.models import BadgeInstance
 from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrApiException400, BadgrValidationError
 from mainsite.models import ApplicationInfo, EmailBlacklist, BaseAuditedModel, BadgrApp
-from mainsite.utils import open_mail_in_browser, send_mail
+from mainsite.utils import open_mail_in_browser, send_mail, EmailMessageMaker
 from signing.models import AssertionTimeStamp
 from badgeuser.utils import generate_badgr_username
 from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
@@ -115,13 +115,17 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
         try:
             EmailBlacklist.objects.get(email=self.email)
         except EmailBlacklist.DoesNotExist:
-            subject = 'You have been invited'
             login_link = BadgrApp.objects.get(pk=1).email_confirmation_redirect
-            if self.user:
-                message = "You have been invited for a staff membership. Please login to accept. \n {}".format(login_link)
+            html_message = EmailMessageMaker.create_user_invited_email(provisionment=self, login_link=login_link)
+            subject = 'You have been invited to accept a new role for the {entity_type} {entity_name}'.format(
+                entity_type=self.entity.__class__.__name__.lower(),
+                entity_name=self.entity.name
+            )
             if not self.user:
-                message = "You have been invited to the EduBadges Issuer Platform. Please signup to accept. \n {}".format(login_link)
-                send_mail(subject, message, None, [self.email])
+                plain_text = strip_tags(html_message)
+                send_mail(subject, message=plain_text, recipient_list=[self.email], html_message=html_message)
+            else:
+                self.user.email_user(subject=subject, html_message=html_message)
 
     def perform_provisioning(self):
         '''Actually create the objects that form the provisionment'''
@@ -576,7 +580,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
             provision.match_user(self)
         return provisions
 
-    def email_user(self, subject, html_message=None, from_email=None, **kwargs):
+    def email_user(self, subject, html_message):
         """
         Sends an email to this User.
         """
@@ -584,12 +588,8 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
             EmailBlacklist.objects.get(email=self.primary_email)
         except EmailBlacklist.DoesNotExist:
             # Allow sending, as this email is not blacklisted.
-            if settings.LOCAL_DEVELOPMENT_MODE:
-                open_mail_in_browser(html_message)
-            else:
-                plain_text = strip_tags(html_message)
-                send_mail(subject, message=plain_text, from_email=from_email,
-                          html_message=html_message, recipient_list=[self.primary_email], **kwargs)
+            plain_text = strip_tags(html_message)
+            send_mail(subject, message=plain_text, html_message=html_message, recipient_list=[self.primary_email])
         else:
             return
             # TODO: Report email non-delivery somewhere.

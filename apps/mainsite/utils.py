@@ -139,6 +139,19 @@ def open_mail_in_browser(html):
 class EmailMessageMaker:
 
     @staticmethod
+    def create_user_invited_email(provisionment, login_link):
+        template = 'email/staff_invitation.html'
+        invitee_name = 'Sir/Madam'
+        if provisionment.user:
+            invitee_name = provisionment.user.full_name
+        email_vars = {'login_link': login_link,
+                      'invited_by_name': provisionment.created_by.full_name,
+                      'invitee_name': invitee_name,
+                      'entity_type': provisionment.entity.__class__.__name__.lower(),
+                      'entity_name': provisionment.entity.name, 'support_email_address': 'support@edubadges.nl'}
+        return render_to_string(template, email_vars)
+
+    @staticmethod
     def create_student_badge_request_email(user, badge_class):
         template = 'email/requested_badge.html'
         email_vars = {'public_badge_url': badge_class.public_url,
@@ -186,14 +199,16 @@ class EmailMessageMaker:
         return render_to_string(template, email_vars)
 
 
-def send_mail(subject, message, from_email, recipient_list, html_message=None, **kwargs):
+def send_mail(subject, message, recipient_list, html_message=None):
+    if settings.LOCAL_DEVELOPMENT_MODE:
+        open_mail_in_browser(html_message)
     if html_message:
         html_with_inline_css = transform(html_message)
-        msg = mail.EmailMessage(subject=subject, body=html_with_inline_css, from_email=from_email, to=recipient_list)
+        msg = mail.EmailMessage(subject=subject, body=html_with_inline_css, from_email=None, to=recipient_list)
         msg.content_subtype = "html"
         msg.send()
     else:
-        mail.send_mail(subject, message, from_email, recipient_list, html_message=html_message, **kwargs)
+        mail.send_mail(subject, message, from_email=None, recipient_list=recipient_list, html_message=html_message)
 
 
 def admin_list_linkify(field_name, label_param=None):

@@ -1,0 +1,24 @@
+{% extends 'email/base.html' %}
+
+{% block title %}
+<title>{{invited_by_name}} invited you for a staff membership</title>
+{% endblock %}
+
+{% block content %}
+<div class="mail_container">
+    <div class="mail_subcontainer">
+        <p class="mail_title">{{invited_by_name}} invited you for a staff membership on Edubadges</p>
+        <p class="mail_subtitle">Please log in or sign up to the issuer portal to accept your new role</p>
+        <a class="button blue-button" href="{{login_link}}">Login/Signup</a>
+    </div>
+    <div class="mail_subcontainer middle">
+        <p>Dear {{invitee_name}},</p>
+        <p>Accepting this invitation gives you the appropriate permissions for the {{entity_type}} <strong>{{entity_name}}</strong>.</p>
+        <p>This grants you access to the Edubadges-platform and enables you to work with Edubadges.</p>
+        Click the button to view your new role.</p>
+        <p>If you have any questions, don't hesitate to contact us at {{support_email_address}}.</p>
+        <p>Regards,</p>
+        <p>Team Edubadges</p>
+    </div>
+</div>
+{% endblock %}
