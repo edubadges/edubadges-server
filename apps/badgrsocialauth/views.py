@@ -53,8 +53,8 @@ class BadgrSocialLogin(RedirectView):
             set_session_authcode(self.request, authcode)
             return set_url_query_params(redirect_url, process=AuthProcess.CONNECT)
         else:
-            force_authn = self.request.GET.get('forceAuthn', "false").lower() == "true"
-            return set_url_query_params(redirect_url, forceAuthn=force_authn)
+            validate_name = self.request.GET.get('validateName', "false").lower() == "true"
+            return set_url_query_params(redirect_url, validateName=validate_name)
 
 
 class BadgrSocialLoginCancel(RedirectView):

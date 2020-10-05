@@ -527,7 +527,10 @@ class BadgeClass(EntityUserProvisionmentMixin,
     def get_extensions_manager(self):
         return self.badgeclassextension_set
 
-    def issue(self, recipient, created_by=None, allow_uppercase=False, extensions=None, send_email=True, **kwargs):
+    def issue(self, recipient, created_by=None, allow_uppercase=False, extensions=None, send_email=True,
+              enforce_validated_name=True, **kwargs):
+        if not recipient.validated_name and enforce_validated_name:
+            raise serializers.ValidationError('You need a validated_name from an Institution to issue badges.')
         assertion = BadgeInstance.objects.create(
             badgeclass=self, recipient_identifier=recipient.get_recipient_identifier(), created_by=created_by,
             allow_uppercase=allow_uppercase,
@@ -769,7 +772,7 @@ class BadgeInstance(BaseAuditedModel,
 
     def get_recipient_name(self):
         if self.user:
-            return self.user.get_full_name()
+            return self.user.validated_name
         else:
             return None
 
