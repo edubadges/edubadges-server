@@ -2,6 +2,7 @@
 import badgrlog
 from allauth.socialaccount.models import SocialToken, SocialAccount
 from badgeuser.models import CachedEmailAddress, ProxyEmailConfirmation
+from django.conf import settings
 from django.contrib.admin import AdminSite, ModelAdmin, StackedInline
 from django.utils.module_loading import autodiscover_modules
 from django.utils.translation import ugettext_lazy
@@ -11,10 +12,12 @@ from oauth2_provider.models import get_application_model, get_grant_model, get_a
 
 badgrlogger = badgrlog.BadgrLogger()
 
+
 class BadgrAdminSite(AdminSite):
     site_header = ugettext_lazy('Badgr')
     index_title = ugettext_lazy('Staff Dashboard')
     site_title = 'Badgr'
+    login_template = 'admin/superlogin.html' if settings.SUPERUSER_LOGIN_WITH_SURFCONEXT else None
 
     def autodiscover(self):
         autodiscover_modules('admin', register_to=self)
