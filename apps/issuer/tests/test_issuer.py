@@ -1,8 +1,9 @@
 import os
 import json
-from issuer.models import Issuer, BadgeClass
+from issuer.models import Issuer
 from issuer.testfiles.helper import issuer_json, badgeclass_json
 from mainsite.tests import BadgrTestCase
+from django.urls import reverse
 
 
 class IssuerAPITest(BadgrTestCase):
@@ -97,6 +98,18 @@ class IssuerAPITest(BadgrTestCase):
         self.assertEqual(len(student.cached_badgeinstances()), 1)  # test cache update
         self.assertEqual(len(badgeclass.cached_assertions()), 1)  # test cache update
         self.assertEqual(award_response.status_code, 201)
+
+    def test_enrollment_denial(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        student = self.setup_student(affiliated_institutions=[teacher1.institution])
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_award=True, may_read=True,
+                                    may_create=True, may_update=True)
+        enrollment = self.enroll_user(student, badgeclass)
+        response = self.client.put(reverse('api_lti_edu_update_enrollment', kwargs={'entity_id': enrollment.entity_id}))
+        self.assertEqual(response.status_code, 200)
 
     def test_award_badge_expiration_date(self):
         pass

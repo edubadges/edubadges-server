@@ -90,8 +90,10 @@ class EnrollmentDetail(BaseEntityDetailView):
             raise BadgrApiException400("Awarded enrollments cannot be denied", 212)
         enrollment.denied = True
         enrollment.save()
-        message = 'Succesfully denied enrollment'
-        return Response(data=message, status=HTTP_200_OK)
+        html_message = EmailMessageMaker.create_enrollment_denied_email(enrollment)
+        subject = 'You enrollment for the badgeclass {} has been denied.'.format(enrollment.badge_class.name)
+        enrollment.user.email_user(subject=subject, html_message=html_message)
+        return Response(data='Succesfully denied enrollment', status=HTTP_200_OK)
 
 
 class BadgeClassLtiContextListView(BaseEntityListView):

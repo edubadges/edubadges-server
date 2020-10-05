@@ -139,6 +139,14 @@ def open_mail_in_browser(html):
 class EmailMessageMaker:
 
     @staticmethod
+    def create_enrollment_denied_email(enrollment):
+        template = 'email/enrollment_denied.html'
+        email_vars = {'public_badge_url': enrollment.badge_class.public_url,
+                      'badgeclass_name': enrollment.badge_class.name,
+                      'recipient_name': enrollment.user.full_name}
+        return render_to_string(template, email_vars)
+
+    @staticmethod
     def create_staff_rights_changed_email(staff_membership):
         template = 'email/staff_rights_changed.html'
         email_vars = {'recipient_name': staff_membership.user.full_name,

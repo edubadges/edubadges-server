@@ -121,10 +121,9 @@ class SetupHelper(object):
                                                'recipient_type': 'id',
                                                'recipient_identifier': recipient.get_recipient_identifier()
                                                }]}
-        StudentsEnrolled.objects.create(user=recipient,
+        return StudentsEnrolled.objects.create(user=recipient,
                                         badge_class_id=badgeclass.pk,
                                         date_consent_given=timezone.now())
-        return assertion_post_data
 
     def _setup_institution_terms(self, institution):
         formal_badge, _ = Terms.objects.get_or_create(institution=institution, terms_type=Terms.TYPE_FORMAL_BADGE)
