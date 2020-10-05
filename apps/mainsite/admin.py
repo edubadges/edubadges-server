@@ -17,7 +17,7 @@ class BadgrAdminSite(AdminSite):
     site_header = ugettext_lazy('Badgr')
     index_title = ugettext_lazy('Staff Dashboard')
     site_title = 'Badgr'
-    login_template = None if settings.LOCAL_DEVELOPMENT_MODE else 'admin/superlogin.html'
+    login_template = 'admin/superlogin.html' if settings.SUPERUSER_LOGIN_WITH_SURFCONEXT else None
 
     def autodiscover(self):
         autodiscover_modules('admin', register_to=self)
