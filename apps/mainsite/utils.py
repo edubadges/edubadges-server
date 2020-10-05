@@ -139,6 +139,14 @@ def open_mail_in_browser(html):
 class EmailMessageMaker:
 
     @staticmethod
+    def create_staff_rights_changed_email(staff_membership):
+        template = 'email/staff_rights_changed.html'
+        email_vars = {'recipient_name': staff_membership.user.full_name,
+                      'entity_type': staff_membership.object.__class__.__name__.lower(),
+                      'entity_name': staff_membership.object.name}
+        return render_to_string(template, email_vars)
+
+    @staticmethod
     def create_user_invited_email(provisionment, login_link):
         template = 'email/staff_invitation.html'
         invitee_name = 'Sir/Madam'
@@ -148,7 +156,8 @@ class EmailMessageMaker:
                       'invited_by_name': provisionment.created_by.full_name,
                       'invitee_name': invitee_name,
                       'entity_type': provisionment.entity.__class__.__name__.lower(),
-                      'entity_name': provisionment.entity.name, 'support_email_address': 'support@edubadges.nl'}
+                      'entity_name': provisionment.entity.name,
+                      'support_email_address': 'support@edubadges.nl'}
         return render_to_string(template, email_vars)
 
     @staticmethod

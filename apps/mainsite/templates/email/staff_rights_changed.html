@@ -1,0 +1,22 @@
+{% extends 'email/base.html' %}
+
+{% block title %}
+<title>Your role has changed for the {{entity_type}} {{entity_name}}</title>
+{% endblock %}
+
+{% block content %}
+<div class="mail_container">
+    <div class="mail_subcontainer">
+        <p class="mail_title">Your role has changed for the {{entity_type}} {{entity_name}}.</p>
+        <p class="mail_subtitle">Click the button to view your new role.</p>
+        <a class="button blue-button" href="{{staff_page_url}}">View new role</a>
+    </div>
+    <div class="mail_subcontainer middle">
+        <p>Dear {{recipient_name}},</p>
+        <p>Your role has changed for the {{entity_type}} <strong>{{entity_name}}</strong>.</p>
+        Click the button to view your new role.</p>
+        <p>Regards,</p>
+        <p>Team Edubadges</p>
+    </div>
+</div>
+{% endblock %}

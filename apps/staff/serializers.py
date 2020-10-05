@@ -27,6 +27,12 @@ class StaffUpdateSerializer(BaseStaffSerializer):
             if original_value != new_value:  # this permission is changed
                 setattr(instance, permission, new_value)  # update the permission
         instance.save()
+        html_message = EmailMessageMaker.create_staff_rights_changed_email(instance)
+        subject = 'You role has changed for you staff membership for the {entity_type} {entity_name}'.format(
+            entity_type=instance.object.__class__.__name__.lower(),
+            entity_name=instance.object.name
+            )
+        instance.user.email_user(subject=subject, html_message=html_message)
         return instance
 
 
