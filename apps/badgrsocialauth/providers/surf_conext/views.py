@@ -11,12 +11,13 @@ from allauth.socialaccount.models import SocialApp
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from jose import jwt
 
 from badgeuser.models import UserProvisionment
 from badgrsocialauth.utils import set_session_badgr_app, get_session_authcode, get_verified_user, get_social_account, \
-    check_agreed_term_and_conditions, AuthErrorCode
+    AuthErrorCode
 from ims.models import LTITenant
 from institution.models import Institution
 from lti_edu.models import LtiBadgeUserTennant, UserCurrentContextId
@@ -251,4 +252,7 @@ def after_terms_agreement(request, **kwargs):
 
     request.session['lti_user_id'] = lti_user_id
     request.session['lti_roles'] = lti_roles
+    # override the response with a redirect to staff dashboard if the login came from there
+    if referer == 'staff':
+        return HttpResponseRedirect(reverse('admin:index'))
     return ret
