@@ -89,6 +89,7 @@ def create_teacher(username, email, first_name, last_name, institution_name, uid
 
 
 institution_admins = [
+    #staff1
     {
         "username": "joseph+weeler",
         "email": "Joseph+Weeler@university-example.org",
@@ -96,6 +97,15 @@ institution_admins = [
         "last_name": "Wheeler",
         "institution_name": "university-example.org",
         "uid": "4b8c7b23bb0c99c85b5a0cbe63a826f45e147787",
+    },
+    #staff2
+    {
+        "username": "anthony+west",
+        "email": "Anthony_West@university-example.org",
+        "first_name": "Anthony",
+        "last_name": "West",
+        "institution_name": "university-example.org",
+        "uid": "b57dc8a602a198b8f75f4a427e0464cd1029869a",
     },
     {
         "username": "test12345",
