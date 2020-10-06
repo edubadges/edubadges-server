@@ -261,6 +261,10 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             if not utils.is_probable_url(data.get('criteria_url')):
                 e = OrderedDict([('criteria_url', [ErrorDetail('Must be a proper url.', code=902)])])
                 errors = OrderedDict(chain(errors.items(), e.items()))
+        if data.get('name') == settings.EDUID_BADGE_CLASS_NAME:
+            e = OrderedDict([('name', [ErrorDetail(f"{settings.EDUID_BADGE_CLASS_NAME} is a reserved name for badgeclasses",
+                                                   code=907)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
         return errors
 
     def create(self, validated_data, **kwargs):

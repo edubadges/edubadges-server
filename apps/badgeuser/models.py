@@ -422,6 +422,10 @@ class UserPermissionsMixin(object):
             All revoked: May enroll
         """
         social_account = self.get_social_account()
+        if not social_account.user.validated_name:
+            if raise_exception:
+                raise BadgrApiException400('May not enroll: no validated name', 209)
+            return False
         if social_account.provider == 'edu_id':
             enrollments = StudentsEnrolled.objects.filter(user=social_account.user, badge_class_id=badge_class.pk)
             if not enrollments:
@@ -451,6 +455,9 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
     entity_class_name = 'BadgeUser'
     is_teacher = models.BooleanField(default=False)
     invited = models.BooleanField(default=False)
+
+    # The validated name from eduID
+    validated_name = models.CharField(_('validated name'), max_length=254, blank=True, null=True)
 
     # Override from AbstractUser
     first_name = models.CharField(_('first name'), max_length=254, blank=True)
@@ -641,7 +648,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
 
     def get_eduperson_scoped_affiliations(self):
         social_account = self.get_social_account()
-        return social_account.extra_data['eduperson_scoped_affiliation']
+        return social_account.extra_data.get('eduperson_scoped_affiliation', [])
 
     def get_all_associated_institutions_identifiers(self):
         '''returns self.institution and all institutions in the social account '''

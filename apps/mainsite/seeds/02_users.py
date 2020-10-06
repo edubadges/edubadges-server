@@ -217,7 +217,8 @@ extra_data = json.dumps({"eduid": str(uuid.uuid4())})
 
 
 def create_student(username, first_name, last_name, email, uid):
-    user, _ = BadgeUser.objects.get_or_create(username=username, email=email, first_name=first_name, last_name=last_name)
+    user, _ = BadgeUser.objects.get_or_create(username=username, email=email, first_name=first_name,
+                                              last_name=last_name, validated_name=f"{first_name} {last_name}")
     accept_terms(user)
 
     EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)
