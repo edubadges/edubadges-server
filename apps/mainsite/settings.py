@@ -270,15 +270,19 @@ LOGGING = {
         'badgr_events': {
             'level': 'INFO',
             'formatter': 'json',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'when': 'D',
+            'interval': 1,
+            'backupCount': 30,
             'filename': os.path.join(LOGS_DIR, 'badgr_events.log')
         },
         'badgr_debug': {
             'level': 'INFO',
             'formatter': 'badgr',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'maxBytes': 15728640,  # 1024 * 1024 * 15B = 15MB
-            'backupCount': 40,
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'when': 'D',
+            'interval': 1,
+            'backupCount': 30,
             'filename': os.path.join(LOGS_DIR, 'badgr_debug.log')
         }
     },
