@@ -76,13 +76,13 @@ def login(request):
         "client_id": current_app.client_id,
         "response_type": "code",
         "scope": "openid",
-        "acr_values": "https://eduid.nl/trust/validate-names",
         "redirect_uri": f"{settings.HTTP_ORIGIN}/account/eduid/login/callback/",
         "claims": "{\"id_token\":{\"preferred_username\":null,\"given_name\":null,\"family_name\":null,\"email\":null,"
                   "\"eduid\":null, \"eduperson_scoped_affiliation\":null, \"preferred_username\":null}}"
     }
-    if request.GET.get("forceAuthn") == "True":
-        params["prompt"] = "login"
+    validate_name = request.GET.get("validateName")
+    if validate_name and validate_name.lower() == "true":
+        params["acr_values"] = "https://eduid.nl/trust/validate-names"
 
     args = urllib.parse.urlencode(params)
     # Redirect to eduID and enforce a linked SURFconext user with validated names
@@ -197,6 +197,9 @@ def after_terms_agreement(request, **kwargs):
     set_session_badgr_app(request, badgr_app)
 
     request.user.accept_general_terms()
+    if "acr" in payload and payload["acr"] == "https://eduid.nl/trust/validate-names":
+        request.user.validated_name = f"{payload['given_name']} {payload['family_name']}"
+        request.user.save()
 
     # create lti_connection
     if lti_data is not None and 'lti_user_id' in lti_data:
@@ -215,18 +218,18 @@ def after_terms_agreement(request, **kwargs):
 
     if not social_account:
         # Create an eduIDBadge
-        create_edu_id_badge_instance(request, login)
+        create_edu_id_badge_instance(login)
 
     return ret
 
 
-def create_edu_id_badge_instance(request, social_login):
+def create_edu_id_badge_instance(social_login):
     user = social_login.user
     super_user = BadgeUser.objects.get(username=settings.SUPERUSER_NAME)
     badge_class = BadgeClass.objects.get(name=settings.EDUID_BADGE_CLASS_NAME)
 
     # Issue first badge for user
-    badge_class.issue(recipient=user, created_by=super_user, allow_uppercase=True,
+    badge_class.issue(recipient=user, created_by=super_user, allow_uppercase=True, enforce_validated_name=False,
                       recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID, expires_at=None, extensions=None)
     logger.info(f"Assertion created for {user.email} based on {badge_class.name}")
 

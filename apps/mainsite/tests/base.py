@@ -84,6 +84,7 @@ class SetupHelper(object):
                                         first_name=first_name,
                                         last_name=last_name)
         user.institution = institution
+        user.validated_name = f"{first_name} {last_name}"
         user.save()
         self._make_email_primary(user)
         if authenticate:
