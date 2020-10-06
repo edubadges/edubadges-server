@@ -43,6 +43,7 @@ class StaffDetailViewBase(BaseEntityDetailView):
         """
         obj = self.get_object(request, **kwargs)  # triggers a has_object_permissions() check on the model instance
         obj.delete()
+        obj.object.remove_cached_data(['cached_staff'])
         return Response(status=HTTP_204_NO_CONTENT)
 
 
