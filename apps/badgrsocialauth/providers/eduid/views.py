@@ -172,15 +172,15 @@ def after_terms_agreement(request, **kwargs):
         # ensure that email & names are in extra_data
         if 'email' not in payload:
             error = 'Sorry, your eduID account does not have your institution mail. Login to eduID and link your institution account, then try again.'
-            logger.debug(error)
+            logger.error(error)
             return render_authentication_error(request, EduIDProvider.id, error)
         if 'family_name' not in payload:
             error = 'Sorry, your eduID account has no family_name attached from SURFconext. Login to eduID and link your institution account, then try again.'
-            logger.debug(error)
+            logger.error(error)
             return render_authentication_error(request, EduIDProvider.id, error)
         if 'given_name' not in payload:
             error = 'Sorry, your eduID account has no first_name attached from SURFconext. Login to eduID and link your institution account, then try again.'
-            logger.debug(error)
+            logger.error(error)
             return render_authentication_error(request, EduIDProvider.id, error)
     else:  # user already exists
         update_user_params(social_account.user, payload)
@@ -197,9 +197,13 @@ def after_terms_agreement(request, **kwargs):
     set_session_badgr_app(request, badgr_app)
 
     request.user.accept_general_terms()
+
+    logger.info(f"payload from surfconext {json.dumps(payload)}")
+
     if "acr" in payload and payload["acr"] == "https://eduid.nl/trust/validate-names":
         request.user.validated_name = f"{payload['given_name']} {payload['family_name']}"
         request.user.save()
+        logger.info(f"Stored validated name {payload['given_name']} {payload['family_name']}")
 
     # create lti_connection
     if lti_data is not None and 'lti_user_id' in lti_data:
