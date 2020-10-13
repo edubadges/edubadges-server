@@ -40,6 +40,4 @@ class FailedLoginAttempt(BaseBadgrEvent):
         return {
             'username': self.username,
             'endpoint': self.endpoint,
-            'ipAddress': client_ip_from_request(self.request)
-
         }
