@@ -258,6 +258,8 @@ LOGS_DIR = os.path.join(TOP_DIR, 'logs')
 if not os.path.exists(LOGS_DIR):
     os.makedirs(LOGS_DIR)
 
+LOG_STORAGE_DURATION = 30  # days
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
