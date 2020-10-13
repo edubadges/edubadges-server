@@ -5,3 +5,4 @@ from .badgeuser import *
 from .composition import *
 from .issuer import *
 from .public import *
+from .staff import *

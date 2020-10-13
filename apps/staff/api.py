@@ -1,6 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.status import HTTP_204_NO_CONTENT
 
+import badgrlog
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
 from institution.models import Faculty, Institution
 from issuer.models import Issuer, BadgeClass
@@ -8,6 +9,8 @@ from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
 from staff.serializers import BadgeClassStaffSerializer, IssuerStaffSerializer, FacultyStaffSerializer, InstitutionStaffSerializer, StaffUpdateSerializer
 from staff.permissions import HasObjectPermission, StaffMembershipWithinScope
+
+logger = badgrlog.BadgrLogger()
 
 
 class StaffListViewBase(VersionedObjectMixin, BaseEntityListView):
@@ -42,6 +45,8 @@ class StaffDetailViewBase(BaseEntityDetailView):
         DELETE a single entity by identifier
         """
         obj = self.get_object(request, **kwargs)  # triggers a has_object_permissions() check on the model instance
+        logger.event(badgrlog.PermissionDeletedEvent(staff_instance=obj,
+                                                     request=request))
         obj.delete()
         obj.object.remove_cached_data(['cached_staff'])
         return Response(status=HTTP_204_NO_CONTENT)

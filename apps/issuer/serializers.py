@@ -76,9 +76,6 @@ class ExtensionsSaverMixin(object):
             self.add_extensions(instance, add_these_extensions, extension_items)
 
 
-
-
-
 class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
                        InternalValueErrorOverrideMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)

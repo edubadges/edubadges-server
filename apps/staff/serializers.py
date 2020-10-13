@@ -1,9 +1,13 @@
 from rest_framework import serializers
+
+import badgrlog
 from badgeuser.serializers import UserSlugRelatedField
 from institution.serializers import InstitutionSlugRelatedField, FacultySlugRelatedField
 from issuer.serializers import IssuerSlugRelatedField, BadgeClassSlugRelatedField
 from mainsite.utils import EmailMessageMaker
 from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
+
+logger = badgrlog.BadgrLogger()
 
 
 class BaseStaffSerializer(serializers.Serializer):
@@ -27,6 +31,9 @@ class StaffUpdateSerializer(BaseStaffSerializer):
             if original_value != new_value:  # this permission is changed
                 setattr(instance, permission, new_value)  # update the permission
         instance.save()
+        logger.event(badgrlog.PermissionChangedEvent(staff_instance=instance,
+                                                     previous_permissions=original_perms,
+                                                     request=self.context['request']))
         html_message = EmailMessageMaker.create_staff_rights_changed_email(instance)
         subject = 'You role has changed for you staff membership for the {entity_type} {entity_name}'.format(
             entity_type=instance.object.__class__.__name__.lower(),
@@ -52,6 +59,8 @@ class BaseStaffCreateSerializer(BaseStaffSerializer):
             determiner = 'an' if entity_name[0] in 'aeiouAEIOU' else 'a'
             new_staff_membership.user.email_user(subject='You have been added to {} {}'.format(determiner, entity_name),
                                                  html_message=message)
+            logger.event(badgrlog.PermissionCreatedEvent(staff_instance=new_staff_membership,
+                                                         request=self.context['request']))
             return new_staff_membership
         else:
             raise serializers.ValidationError("You may not administrate this user.")
