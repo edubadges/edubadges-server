@@ -555,3 +555,7 @@ SUPERUSER_LOGIN_WITH_SURFCONEXT = legacy_boolean_parsing('SUPERUSER_LOGIN_WITH_S
 
 VALIDATOR_URL = os.environ.get('VALIDATOR_URL', 'http://localhost:5000')
 EXTENSIONS_ROOT_URL = os.environ.get('EXTENSIONS_ROOT_URL', 'http://127.0.0.1:8000/static')
+
+
+MAX_IMAGE_UPLOAD_SIZE = 256000  # 256Kb
+MAX_IMAGE_UPLOAD_SIZE_LABEL = '256 kB'  # used in error messaging

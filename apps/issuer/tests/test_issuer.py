@@ -1,3 +1,4 @@
+import copy
 import os
 import json
 from issuer.models import Issuer
@@ -35,18 +36,35 @@ class IssuerAPITest(BadgrTestCase):
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         self.setup_staff_membership(teacher1, issuer, may_create=True)
-        badgeclass_json['issuer'] = issuer.entity_id
+        badgeclass_json_copy = copy.deepcopy(badgeclass_json)
+        badgeclass_json_copy['issuer'] = issuer.entity_id
         response = self.client.post("/issuer/badgeclasses/create",
-                                    json.dumps(badgeclass_json), content_type='application/json')
+                                    json.dumps(badgeclass_json_copy), content_type='application/json')
         self.assertEqual(201, response.status_code)
+
+    def test_create_badgeclass_image_too_large(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        self.setup_staff_membership(teacher1, issuer, may_create=True)
+        badgeclass_json_copy = copy.deepcopy(badgeclass_json)
+        badgeclass_json_copy['issuer'] = issuer.entity_id
+        image_path = self.get_test_image_path_too_large()
+        image_base64 = self.get_image_data(image_path)
+        badgeclass_json_copy['image'] = image_base64
+        response = self.client.post("/issuer/badgeclasses/create",
+                                    json.dumps(badgeclass_json_copy), content_type='application/json')
+        self.assertEqual(400, response.status_code)
+        self.assertTrue(bool(str(response.data['fields']['error_message']['image'][0]['error_message'])))
 
     def test_may_not_create_badgeclass(self):
         teacher1 = self.setup_teacher(authenticate=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         self.setup_staff_membership(teacher1, issuer, may_read=True)
-        badgeclass_json['issuer'] = issuer.entity_id
-        response = self.client.post("/issuer/badgeclasses/create", json.dumps(badgeclass_json), content_type='application/json')
+        badgeclass_json_copy = copy.deepcopy(badgeclass_json)
+        badgeclass_json_copy['issuer'] = issuer.entity_id
+        response = self.client.post("/issuer/badgeclasses/create", json.dumps(badgeclass_json_copy), content_type='application/json')
         self.assertEqual(400, response.status_code)
         self.assertEqual(str(response.data['fields']['error_message']), "You don't have the necessary permissions")
 

@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-
+import base64
 import os
 import random
 import uuid
@@ -42,6 +42,10 @@ class SetupHelper(object):
     def get_test_image_path(self):
         return os.path.join(self.get_testfiles_path(), 'guinea_pig_testing_badge.png')
 
+    def get_test_image_path_too_large(self):
+        return os.path.join(self.get_testfiles_path(),'too_large_test_image.png')
+
+
     def add_eduid_socialaccount(self, user, affiliations):
         random_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:{}c14-b952-4d7e-85fd-{}ac5c6f18".format(random.randint(1, 99999), random.randint(1, 9999))
         extra_data = {"family_name": user.last_name,
@@ -68,6 +72,10 @@ class SetupHelper(object):
                                       provider='surf_conext',
                                       user=user)
         socialaccount.save()
+
+    def get_image_data(self, path):
+        with open(path, 'rb') as file:
+            return "data:image/jpg;base64,%s" % base64.b64encode(file.read()).decode()
 
     def _make_email_primary(self, user):
         email = user.cached_emails()[0]

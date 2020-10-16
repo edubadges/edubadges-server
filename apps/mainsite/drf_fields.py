@@ -1,14 +1,18 @@
+import sys
 import base64
 import binascii
 import mimetypes
 import urllib.parse
 import uuid
 
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import UploadedFile
 from django.utils.translation import ugettext as _
 from mainsite.validators import ValidImageValidator
+
 from rest_framework.fields import FileField, SkipField
+from rest_framework.exceptions import ValidationError
 
 
 class Base64FileField(FileField):
@@ -29,6 +33,9 @@ class Base64FileField(FileField):
             extension = self._MIME_MAPPING[mime] if mime in list(self._MIME_MAPPING.keys()) else mimetypes.guess_extension(mime)
             ret = ContentFile(base64.b64decode(encoded_data), name='{name}{extension}'.format(name=str(uuid.uuid4()),
                                                                                               extension=extension))
+            filesize = sys.getsizeof(ret.file)
+            if filesize > settings.MAX_IMAGE_UPLOAD_SIZE:
+                raise ValidationError('Image too large, max file size is {}'.format(settings.MAX_IMAGE_UPLOAD_SIZE_LABEL), 999)
             return ret
         except (ValueError, binascii.Error):
             return super(Base64FileField, self).to_internal_value(data)
