@@ -4,7 +4,6 @@
 {% block content %}
 
 	<article class="emptyillustration" *ngIf="! issuers.length">
-		<img srcset="{% static 'badgr-ui/images/500-badgr-2x.png' %} 2x, {% static 'badgr-ui/images/500-badgr.png' %}" src="{% static 'badgr-ui/images/500-badgr.png' %}" alt="Badgr is sorry :(" width="312" height="317">
 		{% block error_content %}
 			<p>We're sorry, an error has occurred.<p>
 		{% endblock %}
