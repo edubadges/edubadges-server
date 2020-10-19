@@ -4,6 +4,7 @@
 {% block content %}
 
 	<article class="emptyillustration" *ngIf="! issuers.length">
+		<img src="{% static 'badgr-ui/images/super_woman.png' %}" alt="Edubadges is sorry :(" width="312" height="317">
 		{% block error_content %}
 			<p>We're sorry, an error has occurred.<p>
 		{% endblock %}
