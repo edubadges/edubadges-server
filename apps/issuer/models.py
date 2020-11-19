@@ -134,7 +134,8 @@ class Issuer(EntityUserProvisionmentMixin,
 
     name = models.CharField(max_length=512)
     image = models.FileField(upload_to='uploads/issuers', blank=True, null=True)
-    description = models.TextField(blank=True, null=True, default=None)
+    description_english = models.TextField(blank=True, null=True, default=None)
+    description_dutch = models.TextField(blank=True, null=True, default=None)
     url = models.CharField(max_length=254, blank=True, null=True, default=None)
     email = models.CharField(max_length=254, blank=True, null=True, default=None)
     old_json = JSONField()

@@ -60,7 +60,7 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
     class Meta:
         model = Issuer
         fields = ('name', 'entity_id', 'badgeclasses', 'faculty',
-                  'image', 'description', 'url', 'email', 'created_at',
+                  'image', 'description_english', 'description_dutch', 'url', 'email', 'created_at',
                   'content_type_id')
 
     staff = graphene.List(IssuerStaffType)
