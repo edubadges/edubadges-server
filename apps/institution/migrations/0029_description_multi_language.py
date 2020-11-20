@@ -25,7 +25,8 @@ def noop(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('institution', 'issuer'),
+        ('institution', '0028_auto_20200808_1221'),
+        ('issuer', '0074_auto_20201013_1219')
     ]
 
     operations = [
