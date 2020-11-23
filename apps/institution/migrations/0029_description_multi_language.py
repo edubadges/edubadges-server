@@ -7,7 +7,7 @@ def copy_description_to_new_columns(apps, schema_editor):
         institution.description_english = institution.description
         institution.description_dutch = institution.description
         institution.save()
-    Faculty = apps.get_model('faculty', 'Faculty')
+    Faculty = apps.get_model('institution', 'Faculty')
     for faculty in Faculty.objects.all():
         faculty.description_english = faculty.description
         faculty.description_dutch = faculty.description
@@ -25,8 +25,6 @@ def noop(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('institution', '0028_auto_20200808_1221'),
-        ('issuer', '0074_auto_20201013_1219')
     ]
 
     operations = [
