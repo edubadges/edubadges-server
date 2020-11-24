@@ -11,7 +11,12 @@ faculties = ["Law", "Business", "Humanities", "Medicine", "Science", "Social and
 # Faculty
 for ins in Institution.objects.exclude(name=SURF_INSTITUTION_NAME):
     for fac in faculties:
-        Faculty.objects.get_or_create(name=fac, description=f"Description for {fac}", institution=ins)
+        Faculty.objects.get_or_create(
+            name=fac,
+            description_english=f"Description for {fac}",
+            description_dutch=f"Beschrijving voor {fac}",
+            institution=ins
+        )
 
 # Issuer
 issuers = [['Notarial Law', 'Tax Law', 'Criminology'],
@@ -24,7 +29,10 @@ issuers = [['Notarial Law', 'Tax Law', 'Criminology'],
 issuers = dict(zip(faculties, issuers))
 
 for fac in Faculty.objects.exclude(name=EDU_BADGES_FACULTY_NAME):
-    [Issuer.objects.get_or_create(name=issuer, description=f"Description for {issuer}", faculty=fac, old_json="{}",
+    [Issuer.objects.get_or_create(name=issuer,
+                                  description_english=f"Description for {issuer}",
+                                  description_dutch=f"Beschrijving voor {issuer}",
+                                  faculty=fac, old_json="{}",
                                   url=f"https://issuer", email="issuer@info.nl", image="uploads/issuers/surf.png") for
      issuer in issuers[fac.name]]
 

@@ -247,7 +247,9 @@ class Issuer(EntityUserProvisionmentMixin,
             name=self.name,
             url=self.url,
             email=self.email,
-            description=self.description))
+            description_english=self.description_english,
+            description_dutch=self.description_dutch,
+        ))
         if not signed:
             json['id'] = self.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.jsonld_id, obi_version)
         elif signed:
