@@ -67,7 +67,8 @@ superuser.save()
 # SURF / eduBadges static
 surf_net_institution, _ = Institution.objects.get_or_create(name=SURF_INSTITUTION_NAME,
                                                             identifier=SURF_INSTITUTION_NAME,
-                                                            description=SURF_INSTITUTION_NAME,
+                                                            description_english=SURF_INSTITUTION_NAME,
+                                                            description_dutch=SURF_INSTITUTION_NAME,
                                                             image="uploads/issuers/surf.png")
 # Terms general
 terms_service_agreement_student, _ = Terms.objects.get_or_create(institution=None, terms_type=Terms.TYPE_SERVICE_AGREEMENT_STUDENT)
@@ -85,12 +86,17 @@ TermsUrl.objects.get_or_create(terms=terms_of_service, language=TermsUrl.LANGUAG
 
 add_terms_institution(surf_net_institution)
 # surf_net_institution.remove_cached_data(['cached_terms'])
-edu_badges_faculty, _ = Faculty.objects.get_or_create(name=EDU_BADGES_FACULTY_NAME, institution=surf_net_institution,
-                                                      description=EDU_BADGES_FACULTY_NAME)
+edu_badges_faculty, _ = Faculty.objects.get_or_create(name=EDU_BADGES_FACULTY_NAME,
+                                                      institution=surf_net_institution,
+                                                      description_english=EDU_BADGES_FACULTY_NAME,
+                                                      description_dutch=EDU_BADGES_FACULTY_NAME,
+                                                      )
 
 surf_issuer, _ = Issuer.objects.get_or_create(name="Team edubadges", image="uploads/issuers/surf.png",
                                               faculty=edu_badges_faculty,
-                                              description="Team edubadges", email="info@surf.nl",
+                                              description_english="Team edubadges",
+                                              description_dutch="Team edubadges",
+                                              email="info@surf.nl",
                                               url="https://www.surf.nl/edubadges",
                                               source="local", original_json="{}", badgrapp=main_badgr_app)
 

@@ -14,15 +14,17 @@ from .util import add_terms_institution
 # Institution
 institutions = [
     {'name': INSTITUTION_UNIVERSITY_EXAMPLE_ORG,
-     'description': 'The university example is always a good place to hang out'},
-    {'name': 'diy.surfconext.nl', 'description': 'The university diy is also a good place to hang out'},
-    {'name': 'university1', 'description': 'University1 description'},
-    {'name': 'university2', 'description': 'University2 description'},
+     'description_english': 'The university example is always a good place to hang out',
+     'description_dutch': 'De university example is altijd een goede plek om rond te hangen (wat een vertaling)'},
+    {'name': 'diy.surfconext.nl', 'description_english': 'The university diy is also a good place to hang out', 'description_dutch': 'De university diy is ook een mooie plek'},
+    {'name': 'university1', 'description_english': 'University1 description', 'description_dutch': 'University1 beschrijving'},
+    {'name': 'university2', 'description_english': 'University1 description', 'description_dutch': 'University1 beschrijving'},
 ]
 for ins in institutions:
     institution, _ = Institution.objects.get_or_create(identifier=ins['name'],
                                       name=ins['name'],
-                                      description=ins['description'],
+                                      description_english=ins['description_english'],
+                                      description_dutch=ins['description_dutch'],
                                       image="uploads/institution/surf.png",
                                       grading_table="https://url.to.gradingtable/gradingtable.html",
                                       brin="000-7777-11111")

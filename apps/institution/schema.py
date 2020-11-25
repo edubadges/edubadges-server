@@ -12,7 +12,8 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
                   ContentTypeIdResolverMixin, DjangoObjectType):
     class Meta:
         model = Faculty
-        fields = ('name', 'entity_id', 'institution', 'created_at', 'description', 'content_type_id')
+        fields = ('name', 'entity_id', 'institution', 'created_at', 'description_english', 'description_dutch',
+                  'content_type_id')
 
     issuers = graphene.List(IssuerType)
     staff = graphene.List(FacultyStaffType)
@@ -25,7 +26,7 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
                       ContentTypeIdResolverMixin, DjangoObjectType):
     class Meta:
         model = Institution
-        fields = ('entity_id', 'identifier', 'name', 'staff', 'created_at', 'description',
+        fields = ('entity_id', 'identifier', 'name', 'staff', 'created_at', 'description_english', 'description_dutch',
                   'image', 'grading_table', 'brin', 'content_type_id', 'grondslag_formeel',
                   'grondslag_informeel')
 

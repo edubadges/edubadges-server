@@ -134,7 +134,8 @@ class Issuer(EntityUserProvisionmentMixin,
 
     name = models.CharField(max_length=512)
     image = models.FileField(upload_to='uploads/issuers', blank=True, null=True)
-    description = models.TextField(blank=True, null=True, default=None)
+    description_english = models.TextField(blank=True, null=True, default=None)
+    description_dutch = models.TextField(blank=True, null=True, default=None)
     url = models.CharField(max_length=254, blank=True, null=True, default=None)
     email = models.CharField(max_length=254, blank=True, null=True, default=None)
     old_json = JSONField()
@@ -246,7 +247,9 @@ class Issuer(EntityUserProvisionmentMixin,
             name=self.name,
             url=self.url,
             email=self.email,
-            description=self.description))
+            description_english=self.description_english,
+            description_dutch=self.description_dutch,
+        ))
         if not signed:
             json['id'] = self.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.jsonld_id, obi_version)
         elif signed:

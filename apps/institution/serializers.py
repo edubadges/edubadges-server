@@ -17,7 +17,8 @@ class FacultySlugRelatedField(BaseSlugRelatedField):
 
 
 class InstitutionSerializer(serializers.Serializer):
-    description = StripTagsCharField(max_length=256, required=True)
+    description_english = StripTagsCharField(max_length=256, required=True)
+    description_dutch = StripTagsCharField(max_length=256, required=True)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
     image = ValidImageField(required=True)
     brin = serializers.CharField(read_only=True)
@@ -28,7 +29,8 @@ class InstitutionSerializer(serializers.Serializer):
         model = Institution
 
     def update(self, instance, validated_data):
-        instance.description = validated_data.get('description')
+        instance.description_english = validated_data.get('description_english')
+        instance.description_dutch = validated_data.get('description_dutch')
         if 'image' in validated_data:
             instance.image = validated_data.get('image')
         instance.grading_table = validated_data.get('grading_table')
@@ -40,7 +42,8 @@ class InstitutionSerializer(serializers.Serializer):
 class FacultySerializer(serializers.Serializer):
     id = serializers.ReadOnlyField()
     name = serializers.CharField(max_length=512)
-    description = StripTagsCharField(max_length=16384, required=False)
+    description_english = StripTagsCharField(max_length=16384, required=False)
+    description_dutch = StripTagsCharField(max_length=16384, required=False)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
 
     class Meta:
@@ -48,7 +51,8 @@ class FacultySerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name')
-        instance.description = validated_data.get('description')
+        instance.description_english = validated_data.get('description_english')
+        instance.description_dutch = validated_data.get('description_dutch')
         instance.save()
         return instance
 

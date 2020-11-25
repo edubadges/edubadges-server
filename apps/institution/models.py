@@ -15,7 +15,8 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
     identifier = models.CharField(max_length=255, unique=True, null=True, help_text="This is the schac_home, must be set when creating")
     name = models.CharField(max_length=255, unique=True, help_text="Must be set when creating")
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.InstitutionStaff", related_name='+')
-    description = models.TextField(blank=True, null=True, default=None)
+    description_english = models.TextField(blank=True, null=True, default=None)
+    description_dutch = models.TextField(blank=True, null=True, default=None)
     image = models.FileField(upload_to='uploads/institution', blank=True, null=True)
     grading_table = models.CharField(max_length=254, blank=True, null=True, default=None)
     brin = models.CharField(max_length=254, blank=True, null=True, default=None)
@@ -97,7 +98,8 @@ class Faculty(EntityUserProvisionmentMixin, PermissionedModelMixin, BaseVersione
     name = models.CharField(max_length=512)
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, blank=False, null=False)
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.FacultyStaff")
-    description = models.TextField(blank=True, null=True, default=None)
+    description_english = models.TextField(blank=True, null=True, default=None)
+    description_dutch = models.TextField(blank=True, null=True, default=None)
 
     def create_staff_membership(self, user, permissions):
         return FacultyStaff.objects.create(user=user, faculty=self, **permissions)
