@@ -337,6 +337,7 @@ class BadgeClassJson(JSONComponentView):
 
         if 'issuer' in expands:
             json['issuer'] = self.current_object.cached_issuer.get_json(obi_version=obi_version)
+            json['issuer']['faculty'] = {'institution': {'name': self.current_object.cached_issuer.institution.name}}
 
         return json
 

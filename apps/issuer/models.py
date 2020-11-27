@@ -937,6 +937,7 @@ class BadgeInstance(BaseAuditedModel,
             if expand_issuer:
                 json['badge']['issuer'] = self.cached_issuer.get_json(obi_version=obi_version, include_extra=include_extra, signed=signed,
                                                                       expand_public_key=False, public_key_issuer=public_key_issuer)
+                json['badge']['issuer']['faculty'] = {'institution': {'name': self.cached_issuer.institution.name}}
 
         if self.revoked:
             return OrderedDict([
