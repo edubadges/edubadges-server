@@ -304,7 +304,7 @@ class Issuer(EntityUserProvisionmentMixin,
                 raise ValueError('issuer is not assigned to a faculty')
             if not self.faculty.institution:
                 raise ValueError('issuer is not assigned to an institution')
-            json['faculty'] = {'institution': self.faculty.institution.get_json(obi_version=CURRENT_OBI_VERSION)}
+            json['faculty'] = {'name':  self.faculty.name, 'institution': self.faculty.institution.get_json(obi_version=CURRENT_OBI_VERSION)}
 
         # pass through imported json
         if include_extra:

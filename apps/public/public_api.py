@@ -304,7 +304,7 @@ class IssuerJson(JSONComponentView):
         obi_version = self._get_request_obi_version(request)
 
         if 'institution' in expands:
-            json['faculty'] = {'institution': self.current_object.faculty.institution.get_json(obi_version=obi_version)}
+            json['faculty'] = {'name': self.current_object.faculty.name, 'institution': self.current_object.faculty.institution.get_json(obi_version=obi_version)}
 
         return json
 
