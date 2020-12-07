@@ -203,7 +203,8 @@ class SetupHelper(object):
             faculty = self.setup_faculty(institution=created_by.institution)
         image = open(self.get_test_image_path(), 'r')
         return Issuer.objects.create(name=name_randomiser('Test Issuer'),
-                                     description='description',
+                                     description_english='description',
+                                     description_dutch='description',
                                      created_by=created_by,
                                      faculty=faculty,
                                      image=image)

@@ -50,7 +50,7 @@ urlpatterns = [
     # unversioned public endpoints
     url(r'^unsubscribe/(?P<email_encoded>[^/]+)/(?P<expiration>[^/]+)/(?P<signature>[^/]+)', email_unsubscribe, name='unsubscribe'),
 
-    url(r'^public/', include('issuer.public_api_urls'), kwargs={'version': 'v2'}),
+    url(r'^public/', include('public.public_api_urls'), kwargs={'version': 'v2'}),
 
     # legacy share redirects
     url(r'', include('backpack.share_urls')),

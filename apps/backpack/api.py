@@ -6,7 +6,7 @@ from backpack.serializers_v1 import LocalBadgeInstanceUploadSerializerV1
 from entity.api import BaseEntityListView, BaseEntityDetailView
 from issuer.models import BadgeInstance
 from issuer.permissions import RecipientIdentifiersMatch, BadgrOAuthTokenHasScope
-from issuer.public_api import ImagePropertyDetailView
+from public.public_api import ImagePropertyDetailView
 from mainsite.exceptions import BadgrApiException400
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from rest_framework import permissions

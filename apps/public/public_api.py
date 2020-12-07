@@ -21,8 +21,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from signing.models import PublicKeyIssuer
 
-from . import utils
-from .models import Issuer, BadgeClass, BadgeInstance
+from institution.models import Institution
+from issuer import utils
+from issuer.models import Issuer, BadgeClass, BadgeInstance
 
 logger = badgrlog.BadgrLogger()
 
@@ -264,12 +265,48 @@ class ImagePropertyDetailView(APIView, SlugToEntityIdRedirectMixin):
         return redirect(image_url)
 
 
+class InstitutionJson(JSONComponentView):
+    permission_classes = (permissions.AllowAny,)
+    model = Institution
+
+    def get_context_data(self, **kwargs):
+        image_url = "{}{}?type=png".format(
+            OriginSetting.HTTP,
+            reverse('institution_image', kwargs={'entity_id': self.current_object.entity_id})
+        )
+        if self.is_wide_bot():
+            image_url = "{}&fmt=wide".format(image_url)
+
+        return dict(
+            title=self.current_object.name,
+            image_url=image_url,
+        )
+
+
+class InstitutionImage(ImagePropertyDetailView):
+    model = Institution
+    prop = 'image'
+
+    def log(self, obj):
+        logger.event(badgrlog.InstitutionImageRetrievedEvent(obj, self.request))
+
+
 class IssuerJson(JSONComponentView):
     permission_classes = (permissions.AllowAny,)
     model = Issuer
 
     def log(self, obj):
         logger.event(badgrlog.IssuerRetrievedEvent(obj, self.request))
+
+    def get_json(self, request):
+        expands = request.GET.getlist('expand', [])
+        json = super(IssuerJson, self).get_json(request)
+        obi_version = self._get_request_obi_version(request)
+
+        if 'institution' in expands:
+            json['faculty'] = {'name': self.current_object.faculty.name, 'institution': self.current_object.faculty.institution.get_json(obi_version=obi_version)}
+
+        return json
 
     def get_context_data(self, **kwargs):
         image_url = "{}{}?type=png".format(
@@ -336,7 +373,7 @@ class BadgeClassJson(JSONComponentView):
         obi_version = self._get_request_obi_version(request)
 
         if 'issuer' in expands:
-            json['issuer'] = self.current_object.cached_issuer.get_json(obi_version=obi_version)
+            json['issuer'] = self.current_object.cached_issuer.get_json(obi_version=obi_version, expand_institution=True)
 
         return json
 

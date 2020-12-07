@@ -2,12 +2,13 @@ from django.conf.urls import url
 from django.views.decorators.clickjacking import xframe_options_exempt
 from rest_framework.urlpatterns import format_suffix_patterns
 
-from .public_api import (IssuerJson, IssuerBadgesJson, IssuerImage, BadgeClassJson,
+from .public_api import (InstitutionJson, InstitutionImage, IssuerJson, IssuerBadgesJson, IssuerImage, BadgeClassJson,
                          BadgeClassImage, BadgeClassCriteria, BadgeInstanceJson,
                          BadgeInstanceImage, BakedBadgeInstanceImage,
                          BadgeClassPublicKeyJson, IssuerPublicKeyJson, AssertionValidate, AssertionRecipientName)
 
 json_patterns = [
+    url(r'^institutions/(?P<entity_id>[^/.]+)$', xframe_options_exempt(InstitutionJson.as_view(slugToEntityIdRedirect=True)), name='institution_json'),
     url(r'^issuers/(?P<entity_id>[^/.]+)$', xframe_options_exempt(IssuerJson.as_view(slugToEntityIdRedirect=True)), name='issuer_json'),
     url(r'^issuers/(?P<entity_id>[^/.]+)/pubkey/(?P<public_key_id>[^/.]+)$', xframe_options_exempt(IssuerPublicKeyJson.as_view(slugToEntityIdRedirect=True)), name='issuer_public_key_json'),
     url(r'^issuers/(?P<entity_id>[^/.]+)/badges$', xframe_options_exempt(IssuerBadgesJson.as_view(slugToEntityIdRedirect=True)), name='issuer_badges_json'),
@@ -19,6 +20,7 @@ json_patterns = [
 ]
 
 image_patterns = [
+    url(r'^institution/(?P<entity_id>[^/]+)/image$', InstitutionImage.as_view(slugToEntityIdRedirect=True), name='institution_image'),
     url(r'^issuers/(?P<entity_id>[^/]+)/image$', IssuerImage.as_view(slugToEntityIdRedirect=True), name='issuer_image'),
     url(r'^badges/(?P<entity_id>[^/]+)/image', BadgeClassImage.as_view(slugToEntityIdRedirect=True), name='badgeclass_image'),
     url(r'^badges/(?P<entity_id>[^/]+)/criteria', BadgeClassCriteria.as_view(slugToEntityIdRedirect=True), name='badgeclass_criteria'),

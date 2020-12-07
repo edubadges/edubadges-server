@@ -61,11 +61,12 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
         model = Issuer
         fields = ('name', 'entity_id', 'badgeclasses', 'faculty',
                   'image', 'description_english', 'description_dutch', 'url', 'email', 'created_at',
-                  'content_type_id')
+                  'content_type_id', 'public_url')
 
     staff = graphene.List(IssuerStaffType)
     badgeclasses_count = graphene.Int()
     extensions = graphene.List(IssuerExtensionType)
+    public_url = graphene.String()
 
     def resolve_badgeclasses(self, info):
         return self.get_badgeclasses(info.context.user, ['may_read'])
