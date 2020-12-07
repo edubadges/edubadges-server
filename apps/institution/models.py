@@ -1,6 +1,7 @@
 from collections import OrderedDict
 import cachemodel
 from django.db import models
+from django.urls import reverse
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from mainsite.models import BaseAuditedModel
 from mainsite.mixins import ImageUrlGetterMixin
@@ -87,7 +88,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
     def get_json(self, obi_version):
         json = OrderedDict()
 
-        image_url = str(OriginSetting.HTTP) + "/" + str(self.image)
+        image_url = OriginSetting.HTTP + reverse('institution_image', kwargs={'entity_id': self.entity_id})
 
         json.update(OrderedDict(
             type='Institution',

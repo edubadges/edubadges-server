@@ -283,6 +283,14 @@ class InstitutionJson(JSONComponentView):
         )
 
 
+class InstitutionImage(ImagePropertyDetailView):
+    model = Institution
+    prop = 'image'
+
+    def log(self, obj):
+        logger.event(badgrlog.InstitutionImageRetrievedEvent(obj, self.request))
+
+
 class IssuerJson(JSONComponentView):
     permission_classes = (permissions.AllowAny,)
     model = Issuer
