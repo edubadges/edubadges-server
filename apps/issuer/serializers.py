@@ -8,6 +8,7 @@ from itertools import chain
 from django.apps import apps
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator, EmailValidator
+from django.db import IntegrityError
 from django.urls import reverse
 from django.utils import timezone
 from django.conf import settings
@@ -105,7 +106,13 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             new_issuer = Issuer(**validated_data)
             # set badgrapp
             new_issuer.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
-            new_issuer.save()
+            try:
+                new_issuer.save()
+            except IntegrityError as e:
+                raise BadgrValidationError(
+                    "Cannot create Issuer, there is already an Issuer with the name {} in the faculty {}".format(
+                        new_issuer.name, validated_data['faculty'].name), 908
+                )
             return new_issuer
         else:
             raise BadgrValidationError("You don't have the necessary permissions", 100)
