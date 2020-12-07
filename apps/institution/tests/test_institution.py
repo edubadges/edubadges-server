@@ -18,12 +18,13 @@ class InstitutionTest(BadgrTestCase):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_create=True, may_update=True)
         description = 'description'
-        institution_json['description'] = description
+        institution_json['description_english'] = description
+        institution_json['description_dutch'] = description
         response = self.client.put("/institution/edit/{}".format(teacher1.institution.entity_id),
                                    data=json.dumps(institution_json), content_type='application/json')
         self.assertEqual(response.status_code, 200)
         institution = Institution.objects.get(pk=teacher1.institution.pk)
-        self.assertEqual(institution.description, description)
+        self.assertEqual(institution.description_english, description)
         response = self.client.delete("/institution/edit/".format(teacher1.institution.entity_id),
                                       content_type='application/json')
         self.assertEqual(response.status_code, 404)

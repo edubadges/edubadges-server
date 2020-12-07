@@ -1,8 +1,10 @@
+from collections import OrderedDict
 import cachemodel
 from django.db import models
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from mainsite.models import BaseAuditedModel
 from mainsite.mixins import ImageUrlGetterMixin
+from mainsite.utils import OriginSetting
 from staff.mixins import PermissionedModelMixin
 from staff.models import FacultyStaff, InstitutionStaff
 
@@ -82,6 +84,20 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
         except InstitutionStaff.DoesNotExist:
             return InstitutionStaff.objects.create(user=user, institution=self, **permissions)
 
+    def get_json(self, obi_version):
+        json = OrderedDict()
+
+        image_url = str(OriginSetting.HTTP) + "/" + str(self.image)
+
+        json.update(OrderedDict(
+            type='Institution',
+            name=self.name,
+            entityId=self.entity_id,
+            description_english=self.description_english,
+            description_dutch=self.description_dutch,
+            image=image_url
+        ))
+        return json
 
 class Faculty(EntityUserProvisionmentMixin, PermissionedModelMixin, BaseVersionedEntity, BaseAuditedModel):
 

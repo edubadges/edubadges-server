@@ -233,7 +233,7 @@ class Issuer(EntityUserProvisionmentMixin,
         return tsob.create_new_private_key(password, symmetric_key, self)
 
     def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True, use_canonical_id=False, signed=False,
-                 public_key_issuer=None, expand_public_key=False):
+                 public_key_issuer=None, expand_public_key=False, expand_institution=False):
         if signed and not public_key_issuer:
             raise ValueError('Cannot return signed issuer json without knowing which public key address is going to be used.')
         if public_key_issuer:
@@ -298,6 +298,13 @@ class Issuer(EntityUserProvisionmentMixin,
                     "type": ["Extension", "extensions:InstitutionNameExtension"],
                     "InstitutionName": self.faculty.institution.name
                 }
+
+        if expand_institution:
+            if not self.faculty:
+                raise ValueError('issuer is not assigned to a faculty')
+            if not self.faculty.institution:
+                raise ValueError('issuer is not assigned to an institution')
+            json['faculty'] = {'institution': self.faculty.institution.get_json(obi_version=CURRENT_OBI_VERSION)}
 
         # pass through imported json
         if include_extra:
@@ -936,8 +943,8 @@ class BadgeInstance(BaseAuditedModel,
                 json['badge']['id'] = self.cached_badgeclass.get_url_with_public_key(public_key_issuer)
             if expand_issuer:
                 json['badge']['issuer'] = self.cached_issuer.get_json(obi_version=obi_version, include_extra=include_extra, signed=signed,
-                                                                      expand_public_key=False, public_key_issuer=public_key_issuer)
-                json['badge']['issuer']['faculty'] = {'institution': {'name': self.cached_issuer.institution.name}}
+                                                                      expand_public_key=False, public_key_issuer=public_key_issuer,
+                                                                      expand_institution=True)
 
         if self.revoked:
             return OrderedDict([
