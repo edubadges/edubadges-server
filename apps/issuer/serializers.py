@@ -20,7 +20,7 @@ from badgeuser.serializers import BadgeUserIdentifierField
 from institution.serializers import FacultySlugRelatedField
 from lti_edu.models import StudentsEnrolled
 from mainsite.drf_fields import ValidImageField
-from mainsite.exceptions import BadgrValidationError
+from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError
 from mainsite.models import BadgrApp
 from mainsite.mixins import InternalValueErrorOverrideMixin
 from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField, \
@@ -108,11 +108,11 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             new_issuer.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
             try:
                 new_issuer.save()
-            except IntegrityError as e:
-                raise BadgrValidationError(
-                    "Cannot create Issuer, there is already an Issuer with the name {} in the faculty {}".format(
-                        new_issuer.name, validated_data['faculty'].name), 908
-                )
+            except IntegrityError:
+                raise BadgrValidationFieldError('name',
+                                                "There is already an Issuer with this name".format(
+                                                    new_issuer.name, validated_data['faculty'].name),
+                                                908)
             return new_issuer
         else:
             raise BadgrValidationError("You don't have the necessary permissions", 100)

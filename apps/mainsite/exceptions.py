@@ -28,5 +28,16 @@ class BadgrValidationError(ValidationError):
         super(BadgrValidationError, self).__init__(detail)
 
 
+class BadgrValidationFieldError(BadgrValidationError):
+    """Error to use when throwing an exception on a specific field in the form."""
+
+    status_code = 400
+
+    def __init__(self, field_name, error_message, error_code):
+        error_message = {field_name: [{'error_message': error_message,
+                                       'error_code': error_code}]}
+        super(BadgrValidationFieldError, self).__init__(error_message, 999)
+
+
 class GraphQLException(Exception):
     pass
