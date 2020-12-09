@@ -9,6 +9,7 @@ from django.db.models import ProtectedError
 from django.http import Http404
 from django.utils import timezone
 from rest_framework import permissions, status
+from rest_framework.exceptions import ErrorDetail
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer, ValidationError
 from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED
@@ -199,6 +200,12 @@ class UserCreateProvisionment(BaseEntityListView):
                     e = BadgrValidationError("Enter a valid email address", 509)
                 message = {'status': 'failure',
                            'message': e.detail}
+                # check if email address was a duplicate
+                duplicate_with_success = [x for x in response if x['status'] == 'success' and x['email'] == provisionment['email']]
+                if duplicate_with_success:
+                    e = ErrorDetail('You already entered this address.', code=510)
+                    message['message']['fields']['error_message'] = e
+                    message['message']['fields']['error_code'] = '510'
             message['email'] = provisionment['email']
             response.append(message)
         return Response(response, status=status.HTTP_201_CREATED)
