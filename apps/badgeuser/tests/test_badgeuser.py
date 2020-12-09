@@ -282,7 +282,7 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
         self.assertEqual(response_failure.data[0]['message']['fields']['error_message'].__str__(),
                          'Cannot invite user for this entity. There is a conflicting staff membership.')
 
-    def test_provisionment_invite_collides_with_other_invitation(self):
+    def test_provisionment_duplicate_invite(self):
         teacher1 = self.setup_teacher(authenticate=True)
         colleague = self.setup_teacher(institution=teacher1.institution)
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_administrate_users=True)
@@ -304,7 +304,35 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
                                             json.dumps([invitation_faculty, invitation_issuer]),
                                             content_type='application/json')
         self.assertEqual(response_failure.data[1]['message']['fields']['error_message'].__str__(),
+                         'You entered this email address multiple times.')
+
+    def test_provisionment_invite_collides_with_other_invitation(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        colleague = self.setup_teacher(institution=teacher1.institution)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_administrate_users=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
+        invitation_faculty = {'content_type': ContentType.objects.get_for_model(faculty).pk,
+                              'object_id': faculty.entity_id,
+                              'email': colleague.email,
+                              'for_teacher': True,
+                              'data': {'may_sign': True},
+                              'type': UserProvisionment.TYPE_INVITATION}
+        invitation_issuer = {'content_type': ContentType.objects.get_for_model(issuer).pk,
+                             'object_id': issuer.entity_id,
+                             'email': colleague.email,
+                             'for_teacher': True,
+                             'data': {'may_sign': True},
+                             'type': UserProvisionment.TYPE_INVITATION}
+        self.client.post('/v1/user/provision/create',
+                                            json.dumps([invitation_faculty]),
+                                            content_type='application/json')
+        response_failure = self.client.post('/v1/user/provision/create',
+                                            json.dumps([invitation_issuer]),
+                                            content_type='application/json')
+        self.assertEqual(response_failure.data[0]['message']['fields']['error_message'].__str__(),
                          'Cannot invite user for this entity. There is a conflicting invite.')
+
 
     def test_provision_multiple_users(self):
         teacher1 = self.setup_teacher(authenticate=True)
