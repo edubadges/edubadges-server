@@ -77,6 +77,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'badgeuser.middleware.InactiveUserMiddleware',
     'mainsite.middleware.ExceptionHandlerMiddleware',
+    'mainsite.middleware.RequestResponseLoggerMiddleware',
     # 'mainsite.middleware.MaintenanceMiddleware',
     # 'mainsite.middleware.TrailingSlashMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -273,18 +274,18 @@ LOGGING = {
             'level': 'INFO',
             'formatter': 'json',
             'class': 'logging.handlers.TimedRotatingFileHandler',
-            'when': 'D',
+            'when': 'H',
             'interval': 1,
-            'backupCount': 30,
+            'backupCount': 30*24,  # 30 days times 24 hours
             'filename': os.path.join(LOGS_DIR, 'badgr_events.log')
         },
         'badgr_debug': {
             'level': 'INFO',
             'formatter': 'badgr',
             'class': 'logging.handlers.TimedRotatingFileHandler',
-            'when': 'D',
+            'when': 'H',
             'interval': 1,
-            'backupCount': 30,
+            'backupCount': 30*24,  # 30 days times 24 hours
             'filename': os.path.join(LOGS_DIR, 'badgr_debug.log')
         }
     },
