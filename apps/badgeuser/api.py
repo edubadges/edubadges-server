@@ -9,7 +9,6 @@ from django.db.models import ProtectedError
 from django.http import Http404
 from django.utils import timezone
 from rest_framework import permissions, status
-from rest_framework.exceptions import ErrorDetail
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer, ValidationError
 from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED
