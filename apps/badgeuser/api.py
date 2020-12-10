@@ -197,6 +197,10 @@ class UserCreateProvisionment(BaseEntityListView):
                 if not isinstance(e, BadgrValidationError) and 'email' in e.detail:
                     # Consistency with other BadgrValidationErrors
                     e = BadgrValidationError("Enter a valid email address", 509)
+                # check if email address was a duplicate
+                duplicate_with_success = [x for x in response if x['status'] == 'success' and x['email'] == provisionment['email']]
+                if duplicate_with_success:
+                    e = BadgrValidationError('You entered this email address multiple times.', 510)
                 message = {'status': 'failure',
                            'message': e.detail}
             message['email'] = provisionment['email']
