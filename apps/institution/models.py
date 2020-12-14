@@ -26,13 +26,15 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
     GRONDSLAG_UITVOERING_OVEREENKOMST = 'uitvoering_overeenkomst'
     GRONDSLAG_GERECHTVAARDIGD_BELANG = 'gerechtvaardigd_belang'
     GRONDSLAG_WETTELIJKE_VERPLICHTING = 'wettelijke_verplichting'
+    GEEN_GRONDSLAG = None
     GRONDSLAG_CHOICES = (
         (GRONDSLAG_UITVOERING_OVEREENKOMST, 'uitvoering_overeenkomst'),
         (GRONDSLAG_GERECHTVAARDIGD_BELANG, 'gerechtvaardigd_belang'),
         (GRONDSLAG_WETTELIJKE_VERPLICHTING, 'wettelijke_verplichting'),
+        (GEEN_GRONDSLAG, None),
     )
-    grondslag_formeel = models.CharField(max_length=254, choices=GRONDSLAG_CHOICES, default=GRONDSLAG_UITVOERING_OVEREENKOMST)
-    grondslag_informeel = models.CharField(max_length=254, choices=GRONDSLAG_CHOICES, default=GRONDSLAG_UITVOERING_OVEREENKOMST)
+    grondslag_formeel = models.CharField(max_length=254, null=True, blank=True, choices=GRONDSLAG_CHOICES, default=GRONDSLAG_UITVOERING_OVEREENKOMST)
+    grondslag_informeel = models.CharField(max_length=254, null=True, blank=True, choices=GRONDSLAG_CHOICES, default=GRONDSLAG_UITVOERING_OVEREENKOMST)
 
     @property
     def children(self):
