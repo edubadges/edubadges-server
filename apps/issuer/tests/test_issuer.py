@@ -1,6 +1,7 @@
 import copy
 import os
 import json
+from institution.models import Institution
 from issuer.models import Issuer
 from issuer.testfiles.helper import issuer_json, badgeclass_json
 from mainsite.tests import BadgrTestCase
@@ -40,6 +41,30 @@ class IssuerAPITest(BadgrTestCase):
         badgeclass_json_copy['issuer'] = issuer.entity_id
         response = self.client.post("/issuer/badgeclasses/create",
                                     json.dumps(badgeclass_json_copy), content_type='application/json')
+        self.assertEqual(201, response.status_code)
+
+    def test_create_badgeclass_grondslag_failure(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        teacher1.institution.grondslag_formeel = None
+        teacher1.institution.save()
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        self.setup_staff_membership(teacher1, issuer, may_create=True)
+        badgeclass_json_copy = copy.deepcopy(badgeclass_json)
+        badgeclass_json_copy['formal'] = True
+        badgeclass_json_copy['issuer'] = issuer.entity_id
+        response = self.client.post("/issuer/badgeclasses/create", json.dumps(badgeclass_json_copy), content_type='application/json')
+        self.assertEqual('215', str(response.data['fields']['error_code']))
+        badgeclass_json_copy['formal'] = False
+        response = self.client.post("/issuer/badgeclasses/create", json.dumps(badgeclass_json_copy), content_type='application/json')
+        self.assertEqual(201, response.status_code)
+        teacher1.institution.grondslag_formeel = Institution.GRONDSLAG_GERECHTVAARDIGD_BELANG
+        teacher1.institution.grondslag_informeel = None
+        teacher1.institution.save()
+        response = self.client.post("/issuer/badgeclasses/create", json.dumps(badgeclass_json_copy), content_type='application/json')
+        self.assertEqual('216', str(response.data['fields']['error_code']))
+        badgeclass_json_copy['formal'] = True
+        response = self.client.post("/issuer/badgeclasses/create", json.dumps(badgeclass_json_copy), content_type='application/json')
         self.assertEqual(201, response.status_code)
 
     def test_create_badgeclass_image_too_large(self):

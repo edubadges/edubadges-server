@@ -63,13 +63,16 @@ class RequestResponseLoggerMiddleware(MiddlewareMixin):
                 if request.path.startswith('/graphql'):
                     request_log['body'] = request.req_body
                 else:
-                    if request.req_body.startswith(b'------WebKitFormBoundary'):
+                    body = request.req_body
+                    if body.startswith(b'------WebKitFormBoundary'):
                         body = 'Multipart message, removed from logging'
                     else:
-                        body = json.loads(request.req_body)
-                        image = body.get('image', None)
-                        if image and image.startswith('data:image'):
-                            body['image'] = 'Image string removed for logging purposes'
+                        if body:
+                            body = json.loads(body)
+                            if dict == type(body):
+                                image = body.get('image', None)
+                                if image and image.startswith('data:image'):
+                                    body['image'] = 'Image string removed for logging purposes'
                     request_log['body'] = body
                     response_log['content'] = response.content
             logger.info({'Request/Response Cycle': {'request': request_log, 'response': response_log}})

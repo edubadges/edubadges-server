@@ -275,6 +275,10 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     def create(self, validated_data, **kwargs):
         user_permissions = validated_data['issuer'].get_permissions(validated_data['created_by'])
         if user_permissions['may_create']:
+            if validated_data['formal'] and not validated_data['issuer'].faculty.institution.grondslag_formeel:
+                raise BadgrValidationError("Cannot create a formal badgeclass for an institution without the judicial basis for formal badges", 215)
+            if not validated_data['formal'] and not validated_data['issuer'].faculty.institution.grondslag_informeel:
+                raise BadgrValidationError("Cannot create an informal badgeclass for an institution without the judicial basis for informal badges", 216)
             new_badgeclass = BadgeClass.objects.create(**validated_data)
             return new_badgeclass
         else:
