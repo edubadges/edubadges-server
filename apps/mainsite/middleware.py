@@ -1,8 +1,10 @@
 import json
 import logging
+
 from django import http
-from mainsite import settings
 from django.utils.deprecation import MiddlewareMixin
+from json.decoder import JSONDecodeError
+from mainsite import settings
 
 logger = logging.getLogger('Badgr.Debug')
 
@@ -63,17 +65,21 @@ class RequestResponseLoggerMiddleware(MiddlewareMixin):
                 if request.path.startswith('/graphql'):
                     request_log['body'] = request.req_body
                 else:
-                    body = request.req_body
-                    if body.startswith(b'------WebKitFormBoundary'):
-                        body = 'Multipart message, removed from logging'
-                    else:
-                        if body:
-                            body = json.loads(body)
-                            if dict == type(body):
-                                image = body.get('image', None)
-                                if image and image.startswith('data:image'):
-                                    body['image'] = 'Image string removed for logging purposes'
-                    request_log['body'] = body
                     response_log['content'] = response.content
+                    if not hasattr(request, 'sensitive_post_parameters'):
+                        body = request.req_body
+                        if body.startswith(b'------WebKitFormBoundary'):
+                            body = 'Multipart message, removed from logging'
+                        else:
+                            if body:
+                                try:
+                                    body = json.loads(body)
+                                    if dict == type(body):
+                                        image = body.get('image', None)
+                                        if image and image.startswith('data:image'):
+                                            body['image'] = 'Image string removed for logging purposes'
+                                except JSONDecodeError:
+                                    pass  # is not json, copy the entire string
+                        request_log['body'] = body
             logger.info({'Request/Response Cycle': {'request': request_log, 'response': response_log}})
         return response
