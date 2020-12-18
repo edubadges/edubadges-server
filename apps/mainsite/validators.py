@@ -35,7 +35,7 @@ class BadgeExtensionValidator(object):
             if not report.get('valid', False):
                 messages = report.get('messages', [])
                 if len(messages) > 0:
-                    msg = messages[0].get('result', self.message)
+                    msg = [message.get('result', self.message) for message in messages]
                 else:
                     msg = self.message
                 raise ValidationError(msg)
