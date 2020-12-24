@@ -151,6 +151,7 @@ class EmailMessageMaker:
         template = 'email/staff_rights_changed.html'
         email_vars = {'recipient_name': staff_membership.user.full_name,
                       'entity_type': staff_membership.object.__class__.__name__.lower(),
+                      'entity_type_dutch': staff_membership.object.DUTCH_NAME.lower(),
                       'entity_name': staff_membership.object.name}
         return render_to_string(template, email_vars)
 
@@ -164,6 +165,7 @@ class EmailMessageMaker:
                       'invited_by_name': provisionment.created_by.full_name,
                       'invitee_name': invitee_name,
                       'entity_type': provisionment.entity.__class__.__name__.lower(),
+                      'entity_type_dutch': provisionment.entity.DUTCH_NAME.lower(),
                       'entity_name': provisionment.entity.name,
                       'support_email_address': 'support@edubadges.nl'}
         return render_to_string(template, email_vars)
@@ -184,6 +186,7 @@ class EmailMessageMaker:
         determiner = 'an' if entity_type[0] in 'aeiou' else 'a'
         email_vars = {'staff_page_url': new_staff_membership.staff_page_url,
                       'entity_type': entity_type,
+                      'entity_type_dutch': entity_type.DUTCH_NAME.lower(),
                       'entity_name': entity.name,
                       'determiner': determiner}
         return render_to_string(template, email_vars)

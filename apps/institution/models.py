@@ -15,6 +15,8 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
     def __str__(self):
         return self.name
 
+    DUTCH_NAME = "instelling"
+
     identifier = models.CharField(max_length=255, unique=True, null=True, help_text="This is the schac_home, must be set when creating")
     name = models.CharField(max_length=255, unique=True, help_text="Must be set when creating")
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.InstitutionStaff", related_name='+')
@@ -113,6 +115,8 @@ class Faculty(EntityUserProvisionmentMixin, PermissionedModelMixin, BaseVersione
     class Meta:
         verbose_name_plural = 'faculties'
         unique_together = ('name', 'institution')
+
+    DUTCH_NAME = "issuer group"
 
     name = models.CharField(max_length=512)
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, blank=False, null=False)

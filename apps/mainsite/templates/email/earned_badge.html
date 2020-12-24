@@ -108,6 +108,30 @@
 
 {% block content %}
 
+<div><p>For the English version, see below.</p></div>
+
+<p class="title">Gefeliciteerd, je hebt een edubadge ontvangen!</p>
+<div class="message_container">
+    <div class="example_container">
+        <img class="badgeclass_image" src={{badgeclass_image}}>
+        <p class="text badge_name">{{badgeclass_name}}</p>
+        <div class="issuer_container">
+            <img class="issuer_image" src={{issuer_image}}>
+            <div class="issuer_description">
+                <p>Uitgegeven door</p>
+                <p>{{issuer_name}}</p>
+                <p>({{faculty_name}})</p>
+            </div>
+        </div>
+    </div>
+    <p class="text text_header">Over deze edubadge</p>
+    <p class="text">{{badgeclass_description}}</p>
+
+    <p class="text text_header">Bekijk jouw edubadge!</p>
+    <p class="text">Het plaatje hierboven is een voorbeeld, de echte gepersonaliseerde edubadge is beschikbaar in jouw backpack.</p>
+    <a class="button" target="_blank" rel="noopener noreferrer" href="{{assertion_url}}">
+        Bekijk jouw edubadge</a>
+</div>
 <p class="title">Congratulations, you earned an edubadge!</p>
 <div class="message_container">
     <div class="example_container">

@@ -127,6 +127,7 @@ class Issuer(EntityUserProvisionmentMixin,
              BaseVersionedEntity,
              BaseOpenBadgeObjectModel):
     entity_class_name = 'Issuer'
+    DUTCH_NAME = "issuer"
 
     staff = models.ManyToManyField('badgeuser.BadgeUser', through='staff.IssuerStaff')
 
@@ -350,6 +351,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
                  BaseVersionedEntity,
                  BaseOpenBadgeObjectModel):
     entity_class_name = 'BadgeClass'
+    DUTCH_NAME = "badge class"
     issuer = models.ForeignKey(Issuer, blank=False, null=False, on_delete=models.CASCADE, related_name="badgeclasses")
     name = models.CharField(max_length=255)
     image = models.FileField(upload_to='uploads/badges', blank=True)
