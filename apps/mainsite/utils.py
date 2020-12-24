@@ -159,11 +159,14 @@ class EmailMessageMaker:
     def create_user_invited_email(provisionment, login_link):
         template = 'email/staff_invitation.html'
         invitee_name = 'Sir/Madam'
+        invitee_name_dutch = 'Heer/Mevrouw'
         if provisionment.user:
             invitee_name = provisionment.user.full_name
+            invitee_name_dutch = provisionment.user.full_name
         email_vars = {'login_link': login_link,
                       'invited_by_name': provisionment.created_by.full_name,
                       'invitee_name': invitee_name,
+                      'invitee_name_dutch': invitee_name_dutch,
                       'entity_type': provisionment.entity.__class__.__name__.lower(),
                       'entity_type_dutch': provisionment.entity.DUTCH_NAME.lower(),
                       'entity_name': provisionment.entity.name,
