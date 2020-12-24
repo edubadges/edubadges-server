@@ -591,6 +591,8 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         """
         Sends an email to this User.
         """
+        if settings.LOCAL_DEVELOPMENT_MODE:
+            open_mail_in_browser(html_message)
         try:
             EmailBlacklist.objects.get(email=self.primary_email)
         except EmailBlacklist.DoesNotExist:
