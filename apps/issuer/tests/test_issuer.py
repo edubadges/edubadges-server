@@ -93,6 +93,31 @@ class IssuerAPITest(BadgrTestCase):
         self.assertEqual(400, response.status_code)
         self.assertEqual(str(response.data['fields']['error_message']), "You don't have the necessary permissions")
 
+
+    def test_archive_entity(self):
+        """Test archiving of Issuer and Badgeclasses and it's failures"""
+        teacher1 = self.setup_teacher(authenticate=True)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_delete=True)
+        student = self.setup_student(affiliated_institutions=[teacher1.institution])
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        assertion = self.setup_assertion(recipient=student, badgeclass=badgeclass, created_by=teacher1)
+        # cannot archive when unrevoked assertion present
+        badgeclass_response = self.client.delete("/issuer/badgeclasses/archive/{}".format(badgeclass.entity_id), content_type='application/json')
+        self.assertEqual(badgeclass_response.status_code, 404)
+        issuer_response = self.client.delete("/issuer/archive/{}".format(issuer.entity_id), content_type='application/json')
+        self.assertEqual(issuer_response.status_code, 404)
+        assertion.revoke('For test reasons')
+        # after revoking it should work
+        issuer_response = self.client.delete("/issuer/archive/{}".format(issuer.entity_id),
+                                             content_type='application/json')
+        self.assertEqual(issuer_response.status_code, 204)
+        # and its child badgeclass is not gettable, as it has been archived
+        query = 'query foo{badgeClass(id: "'+badgeclass.entity_id+'") { entityId name } }'
+        response = self.graphene_post(teacher1, query)
+        self.assertEqual(response['data']['badgeClass'], None)
+
     def test_cannot_delete_when_there_are_assertions(self):
         teacher1 = self.setup_teacher(authenticate=True)
         student = self.setup_student(affiliated_institutions=[teacher1.institution])

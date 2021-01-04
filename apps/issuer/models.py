@@ -140,10 +140,10 @@ class Issuer(EntityUserProvisionmentMixin,
     url = models.CharField(max_length=254, blank=True, null=True, default=None)
     email = models.CharField(max_length=254, blank=True, null=True, default=None)
     old_json = JSONField()
-
     objects = IssuerManager()
     cached = cachemodel.CacheModelManager()
     faculty = models.ForeignKey('institution.Faculty', on_delete=models.SET_NULL, blank=True, null=True, default=None)
+    archived = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('name', 'faculty')
@@ -155,6 +155,13 @@ class Issuer(EntityUserProvisionmentMixin,
     @property
     def children(self):
         return self.cached_badgeclasses()
+
+    @transaction.atomic
+    def archive(self):
+        for badgeclass in self.cached_badgeclasses():
+            badgeclass.archive()
+        self.archived = True
+        self.save()
 
     @property
     def assertions(self):
@@ -364,6 +371,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
     cached = cachemodel.CacheModelManager()
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.BadgeClassStaff")
     expiration_period = models.DurationField(null=True)
+    archived = models.BooleanField(default=False)
 
     class Meta:
         verbose_name_plural = "Badge classes"
@@ -388,6 +396,10 @@ class BadgeClass(EntityUserProvisionmentMixin,
     @property
     def assertions(self):
         return self.cached_assertions()
+
+    def archive(self):
+        self.archived = True
+        self.save()
 
     def publish(self):
         super(BadgeClass, self).publish()

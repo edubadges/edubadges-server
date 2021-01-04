@@ -157,22 +157,24 @@ class Query(object):
     badge_instance = graphene.Field(BadgeInstanceType, id=graphene.String())
 
     def resolve_issuers(self, info, **kwargs):
-        return [issuer for issuer in Issuer.objects.all() if issuer.has_permissions(info.context.user, ['may_read'])]
+        return [issuer for issuer in Issuer.objects.filter(archived=False)
+                if issuer.has_permissions(info.context.user, ['may_read'])]
 
     def resolve_issuer(self, info, **kwargs):
         id = kwargs.get('id')
         if id is not None:
-            issuer = Issuer.objects.get(entity_id=id)
+            issuer = Issuer.objects.get(entity_id=id, archived=False)
             if issuer.has_permissions(info.context.user, ['may_read']):
                 return issuer
 
     def resolve_badge_classes(self, info, **kwargs):
-        return [bc for bc in BadgeClass.objects.all() if bc.has_permissions(info.context.user, ['may_read'])]
+        return [bc for bc in BadgeClass.objects.filter(archived=False)
+                if bc.has_permissions(info.context.user, ['may_read'])]
 
     def resolve_badge_class(self, info, **kwargs):
         id = kwargs.get('id')
         if id is not None:
-            bc = BadgeClass.objects.get(entity_id=id)
+            bc = BadgeClass.objects.get(entity_id=id, archived=False)
             # Student's who are logged in need to access this to start the enrollment
             if info.context.user.is_student or bc.has_permissions(info.context.user, ['may_read']):
                 return bc
