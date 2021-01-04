@@ -93,6 +93,20 @@ class IssuerAPITest(BadgrTestCase):
         self.assertEqual(400, response.status_code)
         self.assertEqual(str(response.data['fields']['error_message']), "You don't have the necessary permissions")
 
+    def test_cannot_delete_when_there_are_assertions(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        student = self.setup_student(affiliated_institutions=[teacher1.institution])
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        assertion = self.setup_assertion(recipient=student, badgeclass=badgeclass, created_by=teacher1)
+        response = self.client.delete("/issuer/badgeclasses/edit/{}".format(badgeclass.entity_id),
+                                      content_type='application/json')
+        self.assertEqual(response.status_code, 404)
+        response = self.client.delete("/issuer/edit/{}".format(issuer.entity_id),
+                                      content_type='application/json')
+        self.assertEqual(response.status_code, 404)
+
     def test_delete(self):
         teacher1 = self.setup_teacher(authenticate=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
