@@ -1,17 +1,17 @@
 import badgrlog
+from django.db.models import ProtectedError
 from django.http import Http404
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_204_NO_CONTENT
-from rest_framework.views import APIView
 
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
 from issuer.models import Issuer, BadgeClass, BadgeInstance
-from issuer.permissions import AwardedAssertionsBlock, UnrevokedAssertionsBlock
+from issuer.permissions import NoUnrevokedAssertionsPermission
 from issuer.serializers import IssuerSerializer, BadgeClassSerializer, BadgeInstanceSerializer
 from mainsite.exceptions import BadgrApiException400
-from mainsite.permissions import AuthenticatedWithVerifiedEmail, CannotDeleteWithChildren
+from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from signing import tsob
 from signing.models import AssertionTimeStamp
 from signing.permissions import MaySignAssertions
@@ -38,42 +38,32 @@ class IssuerList(VersionedObjectMixin, BaseEntityListView):
     http_method_names = ['post']
 
 
-class BadgeClassDetail(BaseEntityDetailView):
-    model = BadgeClass
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, AwardedAssertionsBlock)
-    v1_serializer_class = BadgeClassSerializer
-    http_method_names = ['put', 'delete']
-
-
-class IssuerDetail(BaseEntityDetailView):
-    model = Issuer
-    v1_serializer_class = IssuerSerializer
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, CannotDeleteWithChildren)
-    http_method_names = ['put', 'delete']
-
-
-class ArchiveView(APIView, VersionedObjectMixin):
-
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, UnrevokedAssertionsBlock)
-    permission_map = {'DELETE': 'may_delete'}
-    http_method_names = ['delete']
-
+class ArchiveEntityMixin(object):
+    """Mixin that overrides detele method of API to
+    archive in stead of delete when there are badges"""
     def delete(self, request, **kwargs):
         obj = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, obj):
             return Response(status=HTTP_404_NOT_FOUND)
-        obj.archive()
+        try:
+            obj.delete()
+        except ProtectedError:
+            obj.archive()
         return Response(status=HTTP_204_NO_CONTENT)
 
 
-class BadgeClassArchiveView(ArchiveView):
+class BadgeClassDetail(ArchiveEntityMixin, BaseEntityDetailView):
     model = BadgeClass
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, NoUnrevokedAssertionsPermission)
     v1_serializer_class = BadgeClassSerializer
+    http_method_names = ['put', 'delete']
 
 
-class IssuerArchiveView(ArchiveView):
+class IssuerDetail(ArchiveEntityMixin, BaseEntityDetailView):
     model = Issuer
     v1_serializer_class = IssuerSerializer
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, NoUnrevokedAssertionsPermission)
+    http_method_names = ['put', 'delete']
 
 
 class TimestampedBadgeInstanceList(BaseEntityListView):

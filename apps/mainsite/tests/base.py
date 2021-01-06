@@ -222,8 +222,8 @@ class SetupHelper(object):
             criteria_text='Criteria text'
         )
 
-    def setup_assertion(self, recipient, badgeclass, created_by):
-        return badgeclass.issue(recipient=recipient, created_by=created_by)
+    def setup_assertion(self, recipient, badgeclass, created_by, **kwargs):
+        return badgeclass.issue(recipient=recipient, created_by=created_by, **kwargs)
 
     def setup_staff_membership(self, user, object, may_create=False, may_read=False,
                                may_update=False, may_delete=False, may_award=False,
@@ -255,6 +255,9 @@ class SetupHelper(object):
             return False
         except instance.__class__.DoesNotExist:
             return True
+
+    def reload_from_db(self, instance):
+        return instance.__class__.objects.get(pk=instance.pk)
 
 
 class BadgrTestCase(SetupHelper, APITransactionTestCase):
