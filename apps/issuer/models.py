@@ -183,8 +183,14 @@ class Issuer(EntityUserProvisionmentMixin,
     cached = cachemodel.CacheModelManager()
     faculty = models.ForeignKey('institution.Faculty', on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
-    class Meta:
-        unique_together = ('name', 'faculty')
+    def validate_unique(self, exclude=None):
+        if not self.archived:
+            if self.__class__.objects\
+                    .filter(name=self.name, faculty=self.faculty, archived=False)\
+                    .exclude(pk=self.pk)\
+                    .exists():
+                raise ValidationError(message="Issuer with this name already exists in the same faculty.")
+        super(Issuer, self).validate_unique(exclude=exclude)
 
     @property
     def parent(self):

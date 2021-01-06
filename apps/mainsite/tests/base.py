@@ -198,28 +198,29 @@ class SetupHelper(object):
             institution = self.setup_institution()
         return Faculty.objects.create(name=name_randomiser('Test Faculty'), institution=institution)
 
-    def setup_issuer(self, created_by, faculty=None):
-        if not faculty:
-            faculty = self.setup_faculty(institution=created_by.institution)
+    def setup_issuer(self, created_by, **kwargs):
+        if not kwargs.get('faculty', False):
+            kwargs['faculty'] = self.setup_faculty(institution=created_by.institution)
+        if not kwargs.get('name', False):
+            kwargs['name'] = name_randomiser('Test Issuer'),
         image = open(self.get_test_image_path(), 'r')
-        return Issuer.objects.create(name=name_randomiser('Test Issuer'),
-                                     description_english='description',
+        return Issuer.objects.create(description_english='description',
                                      description_dutch='description',
                                      created_by=created_by,
-                                     faculty=faculty,
-                                     image=image)
+                                     image=image,
+                                     **kwargs)
 
-    def setup_badgeclass(self, issuer, image=None):
-        name = 'Test Badgeclass #{}'.format(random.random())
-        if image is None:
-            image = open(self.get_test_image_path(), 'r')
+    def setup_badgeclass(self, issuer, **kwargs):
+        if not kwargs.get('name', False):
+            kwargs['name'] = 'Test Badgeclass #{}'.format(random.random())
+        if not kwargs.get('image', False):
+            kwargs['image'] = open(self.get_test_image_path(), 'r')
         return BadgeClass.objects.create(
             issuer=issuer,
-            image=image,
             formal=False,
-            name=name,
             description='Description',
-            criteria_text='Criteria text'
+            criteria_text='Criteria text',
+            **kwargs
         )
 
     def setup_assertion(self, recipient, badgeclass, created_by, **kwargs):
