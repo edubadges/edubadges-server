@@ -8,7 +8,7 @@ from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_
 
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
 from issuer.models import Issuer, BadgeClass, BadgeInstance
-from issuer.permissions import NoUnrevokedAssertionsPermission
+from issuer.permissions import NoUnrevokedAssertionsPermission, AwardedAssertionsBlock
 from issuer.serializers import IssuerSerializer, BadgeClassSerializer, BadgeInstanceSerializer
 from mainsite.exceptions import BadgrApiException400
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
@@ -38,9 +38,10 @@ class IssuerList(VersionedObjectMixin, BaseEntityListView):
     http_method_names = ['post']
 
 
-class ArchiveEntityMixin(object):
-    """Mixin that overrides detele method of API to
-    archive in stead of delete when there are badges"""
+class BaseArchiveView(BaseEntityDetailView):
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, NoUnrevokedAssertionsPermission)
+    http_method_names = ['delete']
+
     def delete(self, request, **kwargs):
         obj = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, obj):
@@ -52,18 +53,28 @@ class ArchiveEntityMixin(object):
         return Response(status=HTTP_204_NO_CONTENT)
 
 
-class BadgeClassDetail(ArchiveEntityMixin, BaseEntityDetailView):
+class BadgeClassDeleteView(BaseArchiveView):
     model = BadgeClass
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, NoUnrevokedAssertionsPermission)
     v1_serializer_class = BadgeClassSerializer
-    http_method_names = ['put', 'delete']
 
 
-class IssuerDetail(ArchiveEntityMixin, BaseEntityDetailView):
+class IssuerDeleteView(BaseArchiveView):
     model = Issuer
     v1_serializer_class = IssuerSerializer
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, NoUnrevokedAssertionsPermission)
-    http_method_names = ['put', 'delete']
+
+
+class BadgeClassDetail(BaseEntityDetailView):
+    model = BadgeClass
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, AwardedAssertionsBlock)
+    v1_serializer_class = BadgeClassSerializer
+    http_method_names = ['put']
+
+
+class IssuerDetail(BaseEntityDetailView):
+    model = Issuer
+    v1_serializer_class = IssuerSerializer
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, AwardedAssertionsBlock)
+    http_method_names = ['put']
 
 
 class TimestampedBadgeInstanceList(BaseEntityListView):

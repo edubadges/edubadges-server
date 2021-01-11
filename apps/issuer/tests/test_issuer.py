@@ -105,13 +105,13 @@ class IssuerAPITest(BadgrTestCase):
         badgeclass = self.setup_badgeclass(issuer=issuer)
         assertion = self.setup_assertion(recipient=student, badgeclass=badgeclass, created_by=teacher1)
         # cannot archive when unrevoked assertion present
-        badgeclass_response = self.client.delete("/issuer/badgeclasses/edit/{}".format(badgeclass.entity_id), content_type='application/json')
+        badgeclass_response = self.client.delete("/issuer/badgeclasses/delete/{}".format(badgeclass.entity_id), content_type='application/json')
         self.assertEqual(badgeclass_response.status_code, 404)
-        issuer_response = self.client.delete("/issuer/edit/{}".format(issuer.entity_id), content_type='application/json')
+        issuer_response = self.client.delete("/issuer/delete/{}".format(issuer.entity_id), content_type='application/json')
         self.assertEqual(issuer_response.status_code, 404)
         assertion.revoke('For test reasons')
         # after revoking it should work
-        issuer_response = self.client.delete("/issuer/edit/{}".format(issuer.entity_id),
+        issuer_response = self.client.delete("/issuer/delete/{}".format(issuer.entity_id),
                                              content_type='application/json')
         self.assertEqual(issuer_response.status_code, 204)
         # and its child badgeclass is not gettable, as it has been archived
@@ -128,10 +128,10 @@ class IssuerAPITest(BadgrTestCase):
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
         assertion = self.setup_assertion(recipient=student, badgeclass=badgeclass, created_by=teacher1)
-        response = self.client.delete("/issuer/badgeclasses/edit/{}".format(badgeclass.entity_id),
+        response = self.client.delete("/issuer/badgeclasses/delete/{}".format(badgeclass.entity_id),
                                       content_type='application/json')
         self.assertEqual(response.status_code, 404)
-        response = self.client.delete("/issuer/edit/{}".format(issuer.entity_id),
+        response = self.client.delete("/issuer/delete/{}".format(issuer.entity_id),
                                       content_type='application/json')
         self.assertEqual(response.status_code, 404)
 
@@ -141,13 +141,13 @@ class IssuerAPITest(BadgrTestCase):
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
         self.setup_staff_membership(teacher1, teacher1.institution, may_delete=True)
-        badgeclass_response = self.client.delete("/issuer/badgeclasses/edit/{}".format(badgeclass.entity_id),
+        badgeclass_response = self.client.delete("/issuer/badgeclasses/delete/{}".format(badgeclass.entity_id),
                                                  content_type='application/json')
         self.assertEqual(badgeclass_response.status_code, 204)
         faculty_response = self.client.delete("/institution/faculties/edit/{}".format(faculty.entity_id),
                                               content_type='application/json')
         self.assertEqual(faculty_response.status_code, 404)
-        issuer_response = self.client.delete("/issuer/edit/{}".format(issuer.entity_id),
+        issuer_response = self.client.delete("/issuer/delete/{}".format(issuer.entity_id),
                                              content_type='application/json')
         self.assertEqual(issuer_response.status_code, 204)
         faculty_response2 = self.client.delete("/institution/faculties/edit/{}".format(faculty.entity_id),
