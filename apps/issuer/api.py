@@ -73,7 +73,7 @@ class BadgeClassDetail(BaseEntityDetailView):
 class IssuerDetail(BaseEntityDetailView):
     model = Issuer
     v1_serializer_class = IssuerSerializer
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, AwardedAssertionsBlock)
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     http_method_names = ['put']
 
 
