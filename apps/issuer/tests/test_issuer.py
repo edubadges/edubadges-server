@@ -66,6 +66,7 @@ class IssuerAPITest(BadgrTestCase):
         response = self.client.post("/issuer/badgeclasses/create", json.dumps(badgeclass_json_copy), content_type='application/json')
         self.assertEqual('216', str(response.data['fields']['error_code']))
         badgeclass_json_copy['formal'] = True
+        badgeclass_json_copy['name'] = 'And now for something completely different'
         response = self.client.post("/issuer/badgeclasses/create", json.dumps(badgeclass_json_copy), content_type='application/json')
         self.assertEqual(201, response.status_code)
 
@@ -296,6 +297,18 @@ class IssuerModelsTest(BadgrTestCase):
         setup_issuer_kwargs['archived'] = True
         self.setup_issuer(**setup_issuer_kwargs)
         issuer.archive()
+
+    def test_badgeclass_uniqueness_constraints_when_archiving(self):
+        """Checks if uniquness constraints on name dont trigger for archived Badgeclasses"""
+        teacher1 = self.setup_teacher(authenticate=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
+        setup_badgeclass_kwargs = {'created_by': teacher1, 'issuer': issuer, 'name': 'The same'}
+        badgeclass = self.setup_badgeclass(**setup_badgeclass_kwargs)
+        self.assertRaises(ValidationError, self.setup_badgeclass, **setup_badgeclass_kwargs)
+        setup_badgeclass_kwargs['archived'] = True
+        self.setup_badgeclass(**setup_badgeclass_kwargs)
+        badgeclass.archive()
 
 
     def test_recursive_deletion(self):

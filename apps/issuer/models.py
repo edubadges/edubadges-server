@@ -192,6 +192,10 @@ class Issuer(EntityUserProvisionmentMixin,
                 raise ValidationError(message="Issuer with this name already exists in the same faculty.")
         super(Issuer, self).validate_unique(exclude=exclude)
 
+    def save(self, *args, **kwargs):
+        self.validate_unique()
+        return super(Issuer, self).save(*args, **kwargs)
+
     @property
     def parent(self):
         return self.faculty
@@ -408,6 +412,19 @@ class BadgeClass(EntityUserProvisionmentMixin,
 
     class Meta:
         verbose_name_plural = "Badge classes"
+
+    def validate_unique(self, exclude=None):
+        if not self.archived:
+            if self.__class__.objects\
+                    .filter(name=self.name, issuer=self.issuer, archived=False)\
+                    .exclude(pk=self.pk)\
+                    .exists():
+                raise ValidationError(message="Badgeclass with this name already exists in the same issuer.")
+        super(BadgeClass, self).validate_unique(exclude=exclude)
+
+    def save(self, *args, **kwargs):
+        self.validate_unique()
+        return super(BadgeClass, self).save(*args, **kwargs)
 
     @property
     def institution(self):
