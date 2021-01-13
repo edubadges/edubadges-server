@@ -1,16 +1,17 @@
 import badgrlog
+from django.db.models import ProtectedError
 from django.http import Http404
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_204_NO_CONTENT
 
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
 from issuer.models import Issuer, BadgeClass, BadgeInstance
-from issuer.permissions import AwardedAssertionsBlock
+from issuer.permissions import NoUnrevokedAssertionsPermission, AwardedAssertionsBlock
 from issuer.serializers import IssuerSerializer, BadgeClassSerializer, BadgeInstanceSerializer
 from mainsite.exceptions import BadgrApiException400
-from mainsite.permissions import AuthenticatedWithVerifiedEmail, CannotDeleteWithChildren
+from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from signing import tsob
 from signing.models import AssertionTimeStamp
 from signing.permissions import MaySignAssertions
@@ -37,19 +38,43 @@ class IssuerList(VersionedObjectMixin, BaseEntityListView):
     http_method_names = ['post']
 
 
+class BaseArchiveView(BaseEntityDetailView):
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, NoUnrevokedAssertionsPermission)
+    http_method_names = ['delete']
+
+    def delete(self, request, **kwargs):
+        obj = self.get_object(request, **kwargs)
+        if not self.has_object_permissions(request, obj):
+            return Response(status=HTTP_404_NOT_FOUND)
+        try:
+            obj.delete()
+        except ProtectedError:
+            obj.archive()
+        return Response(status=HTTP_204_NO_CONTENT)
+
+
+class BadgeClassDeleteView(BaseArchiveView):
+    model = BadgeClass
+    v1_serializer_class = BadgeClassSerializer
+
+
+class IssuerDeleteView(BaseArchiveView):
+    model = Issuer
+    v1_serializer_class = IssuerSerializer
+
+
 class BadgeClassDetail(BaseEntityDetailView):
     model = BadgeClass
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, AwardedAssertionsBlock)
     v1_serializer_class = BadgeClassSerializer
-    http_method_names = ['put', 'delete']
+    http_method_names = ['put']
 
 
 class IssuerDetail(BaseEntityDetailView):
     model = Issuer
     v1_serializer_class = IssuerSerializer
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, CannotDeleteWithChildren)
-    http_method_names = ['put', 'delete']
-
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
+    http_method_names = ['put']
 
 
 class TimestampedBadgeInstanceList(BaseEntityListView):

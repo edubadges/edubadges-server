@@ -1,3 +1,4 @@
+from django.db import models, transaction
 from django.db.models import ProtectedError
 
 from staff.models import PermissionedRelationshipBase
@@ -153,6 +154,7 @@ class PermissionedModelMixin(object):
         except AttributeError:
             pass
 
+    @transaction.atomic
     def delete(self, *args, **kwargs):
         """
         Recursive delete function that

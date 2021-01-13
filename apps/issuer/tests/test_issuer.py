@@ -5,6 +5,8 @@ from institution.models import Institution
 from issuer.models import Issuer
 from issuer.testfiles.helper import issuer_json, badgeclass_json
 from mainsite.tests import BadgrTestCase
+from django.core.exceptions import ValidationError
+from django.db.models import ProtectedError
 from django.urls import reverse
 
 
@@ -64,6 +66,7 @@ class IssuerAPITest(BadgrTestCase):
         response = self.client.post("/issuer/badgeclasses/create", json.dumps(badgeclass_json_copy), content_type='application/json')
         self.assertEqual('216', str(response.data['fields']['error_code']))
         badgeclass_json_copy['formal'] = True
+        badgeclass_json_copy['name'] = 'And now for something completely different'
         response = self.client.post("/issuer/badgeclasses/create", json.dumps(badgeclass_json_copy), content_type='application/json')
         self.assertEqual(201, response.status_code)
 
@@ -93,19 +96,59 @@ class IssuerAPITest(BadgrTestCase):
         self.assertEqual(400, response.status_code)
         self.assertEqual(str(response.data['fields']['error_message']), "You don't have the necessary permissions")
 
+    def test_archive_entity(self):
+        """Test archiving of Issuer and Badgeclasses and it's failures"""
+        teacher1 = self.setup_teacher(authenticate=True)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_delete=True)
+        student = self.setup_student(affiliated_institutions=[teacher1.institution])
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        assertion = self.setup_assertion(recipient=student, badgeclass=badgeclass, created_by=teacher1)
+        # cannot archive when unrevoked assertion present
+        badgeclass_response = self.client.delete("/issuer/badgeclasses/delete/{}".format(badgeclass.entity_id), content_type='application/json')
+        self.assertEqual(badgeclass_response.status_code, 404)
+        issuer_response = self.client.delete("/issuer/delete/{}".format(issuer.entity_id), content_type='application/json')
+        self.assertEqual(issuer_response.status_code, 404)
+        assertion.revoke('For test reasons')
+        # after revoking it should work
+        issuer_response = self.client.delete("/issuer/delete/{}".format(issuer.entity_id),
+                                             content_type='application/json')
+        self.assertEqual(issuer_response.status_code, 204)
+        # and its child badgeclass is not gettable, as it has been archived
+        query = 'query foo{badgeClass(id: "'+badgeclass.entity_id+'") { entityId name } }'
+        response = self.graphene_post(teacher1, query)
+        self.assertEqual(response['data']['badgeClass'], None)
+        self.assertTrue(self.reload_from_db(issuer).archived)
+        self.assertTrue(self.reload_from_db(badgeclass).archived)
+
+    def test_cannot_delete_when_there_are_assertions(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        student = self.setup_student(affiliated_institutions=[teacher1.institution])
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        assertion = self.setup_assertion(recipient=student, badgeclass=badgeclass, created_by=teacher1)
+        response = self.client.delete("/issuer/badgeclasses/delete/{}".format(badgeclass.entity_id),
+                                      content_type='application/json')
+        self.assertEqual(response.status_code, 404)
+        response = self.client.delete("/issuer/delete/{}".format(issuer.entity_id),
+                                      content_type='application/json')
+        self.assertEqual(response.status_code, 404)
+
     def test_delete(self):
         teacher1 = self.setup_teacher(authenticate=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
         self.setup_staff_membership(teacher1, teacher1.institution, may_delete=True)
-        badgeclass_response = self.client.delete("/issuer/badgeclasses/edit/{}".format(badgeclass.entity_id),
+        badgeclass_response = self.client.delete("/issuer/badgeclasses/delete/{}".format(badgeclass.entity_id),
                                                  content_type='application/json')
         self.assertEqual(badgeclass_response.status_code, 204)
         faculty_response = self.client.delete("/institution/faculties/edit/{}".format(faculty.entity_id),
                                               content_type='application/json')
         self.assertEqual(faculty_response.status_code, 404)
-        issuer_response = self.client.delete("/issuer/edit/{}".format(issuer.entity_id),
+        issuer_response = self.client.delete("/issuer/delete/{}".format(issuer.entity_id),
                                              content_type='application/json')
         self.assertEqual(issuer_response.status_code, 204)
         faculty_response2 = self.client.delete("/institution/faculties/edit/{}".format(faculty.entity_id),
@@ -189,7 +232,7 @@ class IssuerPublicAPITest(BadgrTestCase):
         teacher1 = self.setup_teacher()
         student = self.setup_student()
         faculty = self.setup_faculty(institution=teacher1.institution)
-        issuer = self.setup_issuer(teacher1, faculty)
+        issuer = self.setup_issuer(teacher1, faculty=faculty)
         badgeclas = self.setup_badgeclass(issuer)
         assertion = self.setup_assertion(student, badgeclas, teacher1)
         eduid_hash = assertion.get_json()['recipient']['identity']
@@ -244,6 +287,30 @@ class IssuerPublicAPITest(BadgrTestCase):
 
 class IssuerModelsTest(BadgrTestCase):
 
+    def test_issuer_uniqueness_constraints_when_archiving(self):
+        """Checks if uniquness constraints on name dont trigger for archived Issuers"""
+        teacher1 = self.setup_teacher(authenticate=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        setup_issuer_kwargs = {'created_by': teacher1, 'faculty': faculty, 'name': 'The same'}
+        issuer = self.setup_issuer(**setup_issuer_kwargs)
+        self.assertRaises(ValidationError, self.setup_issuer, **setup_issuer_kwargs)
+        setup_issuer_kwargs['archived'] = True
+        self.setup_issuer(**setup_issuer_kwargs)
+        issuer.archive()
+
+    def test_badgeclass_uniqueness_constraints_when_archiving(self):
+        """Checks if uniquness constraints on name dont trigger for archived Badgeclasses"""
+        teacher1 = self.setup_teacher(authenticate=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
+        setup_badgeclass_kwargs = {'created_by': teacher1, 'issuer': issuer, 'name': 'The same'}
+        badgeclass = self.setup_badgeclass(**setup_badgeclass_kwargs)
+        self.assertRaises(ValidationError, self.setup_badgeclass, **setup_badgeclass_kwargs)
+        setup_badgeclass_kwargs['archived'] = True
+        self.setup_badgeclass(**setup_badgeclass_kwargs)
+        badgeclass.archive()
+
+
     def test_recursive_deletion(self):
         """tests removal of entities and subsequent cache updates"""
         teacher1 = self.setup_teacher(authenticate=True)
@@ -259,6 +326,28 @@ class IssuerModelsTest(BadgrTestCase):
         self.assertEqual(teacher1.cached_badgeclass_staffs().__len__(), 0)
         self.assertEqual(faculty.cached_issuers().__len__(), 0)
 
+    def test_recursive_archiving(self):
+        """test archiving of multiple objects and the uniqueness constraints on .name that go with it"""
+        teacher1 = self.setup_teacher(authenticate=True)
+        student = self.setup_student(affiliated_institutions=[teacher1.institution])
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        assertion = self.setup_assertion(student, badgeclass, teacher1, revoked=True)
+        staff = self.setup_staff_membership(teacher1, badgeclass)
+        self.assertEqual(teacher1.cached_badgeclass_staffs(), [staff])
+        self.assertRaises(ProtectedError, teacher1.institution.delete)
+        self.assertRaises(ProtectedError, faculty.delete)
+        self.assertRaises(ProtectedError, issuer.delete)
+        self.assertRaises(ProtectedError, badgeclass.delete)
+        issuer.archive()
+        self.assertTrue(self.reload_from_db(issuer).archived)
+        self.assertTrue(self.reload_from_db(badgeclass).archived)
+        self.assertTrue(self.instance_is_removed(staff))
+        self.assertEqual(teacher1.cached_badgeclass_staffs().__len__(), 0)
+        self.assertEqual(faculty.cached_issuers().__len__(), 0)
+        self.assertEqual(issuer.cached_badgeclasses().__len__(), 0)
+
 
 class IssuerSchemaTest(BadgrTestCase):
 
@@ -266,7 +355,7 @@ class IssuerSchemaTest(BadgrTestCase):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
         faculty = self.setup_faculty(teacher1.institution)
-        self.setup_issuer(teacher1, faculty)
+        self.setup_issuer(teacher1, faculty=faculty)
         query = 'query foo {issuers {entityId contentTypeId}}'
         response = self.graphene_post(teacher1, query)
         self.assertTrue(bool(response['data']['issuers'][0]['contentTypeId']))
@@ -276,7 +365,7 @@ class IssuerSchemaTest(BadgrTestCase):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
         faculty = self.setup_faculty(teacher1.institution)
-        issuer = self.setup_issuer(teacher1, faculty)
+        issuer = self.setup_issuer(teacher1, faculty=faculty)
         self.setup_badgeclass(issuer)
         query = 'query foo {badgeClasses {entityId contentTypeId terms {entityId termsUrl {url excerpt language}}}}'
         response = self.graphene_post(teacher1, query)

@@ -65,7 +65,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
     def cached_issuers(self):
         r = []
         for faculty in self.cached_faculties():
-            r += list(faculty.issuer_set.all())
+            r += list(faculty.cached_issuers())
         return r
 
     @cachemodel.cached_method(auto_publish=True)
@@ -104,6 +104,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
         ))
         return json
 
+
 class Faculty(EntityUserProvisionmentMixin, PermissionedModelMixin, BaseVersionedEntity, BaseAuditedModel):
 
     def __str__(self):
@@ -140,14 +141,11 @@ class Faculty(EntityUserProvisionmentMixin, PermissionedModelMixin, BaseVersione
 
     @property
     def assertions(self):
+        """return all assertions, also assertions belonging to archived entities"""
         assertions = []
-        for issuer in self.issuers:
+        for issuer in self.issuer_set.all():
             assertions += issuer.assertions
         return assertions
-
-    @property
-    def issuers(self):
-        return self.issuer_set.all()
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_staff(self):
@@ -155,7 +153,7 @@ class Faculty(EntityUserProvisionmentMixin, PermissionedModelMixin, BaseVersione
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):
-        return self.issuers
+        return list(self.issuer_set.filter(archived=False))
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeclasses(self):

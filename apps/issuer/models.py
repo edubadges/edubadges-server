@@ -4,20 +4,19 @@ import io
 import logging
 import os
 import uuid
-import re
 from collections import OrderedDict
 from json import dumps as json_dumps
 from json import loads as json_loads
 from urllib.parse import urljoin
-
 import cachemodel
-from allauth.account.adapter import get_adapter
+
 from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db import models, transaction
+from django.db.models import ProtectedError
 from django.urls import reverse
 from django.utils import timezone
 
@@ -25,7 +24,7 @@ from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager
 from jsonfield import JSONField
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage, ImageUrlGetterMixin
-from mainsite.models import BadgrApp, EmailBlacklist, BaseAuditedModel
+from mainsite.models import BadgrApp, BaseAuditedModel
 from mainsite.utils import OriginSetting, generate_entity_uri, EmailMessageMaker
 from openbadges_bakery import bake
 from rest_framework import serializers
@@ -118,7 +117,47 @@ class BaseOpenBadgeExtension(cachemodel.CacheModel):
         abstract = True
 
 
+class ArchiveMixin(cachemodel.CacheModel):
+
+    archived = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+
+    @property
+    def may_archive(self):
+        if not self.assertions:
+            return True
+        return all([assertion.revoked for assertion in self.assertions])
+
+    @transaction.atomic
+    def archive(self, **kwargs):
+        """
+        Recursive archive function that
+            - archives all children
+            - only publishes the parent of the initially archived entity
+            - removes all associated staff memberships without publishing the associated object (the one that is archived)
+        """
+        publish_parent = kwargs.pop('publish_parent', True)
+        if not self.may_archive:
+            raise ProtectedError(
+                "{} may only be deleted if there are no awarded Assertions.".format(self.__class__.__name__), self)
+        if hasattr(self, 'children'):
+            for child in self.children:
+                child.archive(publish_parent=False)
+        for membership in self.staff_items:
+            membership.delete(publish_object=False)
+        self.archived = True
+        self.save()
+        if publish_parent:
+            try:
+                self.parent.publish()
+            except AttributeError:  # no parent
+                pass
+
+
 class Issuer(EntityUserProvisionmentMixin,
+             ArchiveMixin,
              PermissionedModelMixin,
              ImageUrlGetterMixin,
              ResizeUploadedImage,
@@ -140,13 +179,22 @@ class Issuer(EntityUserProvisionmentMixin,
     url = models.CharField(max_length=254, blank=True, null=True, default=None)
     email = models.CharField(max_length=254, blank=True, null=True, default=None)
     old_json = JSONField()
-
     objects = IssuerManager()
     cached = cachemodel.CacheModelManager()
     faculty = models.ForeignKey('institution.Faculty', on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
-    class Meta:
-        unique_together = ('name', 'faculty')
+    def validate_unique(self, exclude=None):
+        if not self.archived:
+            if self.__class__.objects\
+                    .filter(name=self.name, faculty=self.faculty, archived=False)\
+                    .exclude(pk=self.pk)\
+                    .exists():
+                raise ValidationError(message="Issuer with this name already exists in the same faculty.")
+        super(Issuer, self).validate_unique(exclude=exclude)
+
+    def save(self, *args, **kwargs):
+        self.validate_unique()
+        return super(Issuer, self).save(*args, **kwargs)
 
     @property
     def parent(self):
@@ -175,7 +223,7 @@ class Issuer(EntityUserProvisionmentMixin,
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeclasses(self):
-        return list(self.badgeclasses.all())
+        return list(self.badgeclasses.filter(archived=False))
 
     def get_absolute_url(self):
         return reverse('issuer_json', kwargs={'entity_id': self.entity_id})
@@ -220,10 +268,6 @@ class Issuer(EntityUserProvisionmentMixin,
 
     def get_extensions_manager(self):
         return self.issuerextension_set
-
-    @cachemodel.cached_method(auto_publish=True)
-    def cached_badgeclasses(self):
-        return self.badgeclasses.all()
 
     @property
     def image_preview(self):
@@ -343,6 +387,7 @@ class Issuer(EntityUserProvisionmentMixin,
 
 
 class BadgeClass(EntityUserProvisionmentMixin,
+                 ArchiveMixin,
                  PermissionedModelMixin,
                  ImageUrlGetterMixin,
                  ResizeUploadedImage,
@@ -367,6 +412,19 @@ class BadgeClass(EntityUserProvisionmentMixin,
 
     class Meta:
         verbose_name_plural = "Badge classes"
+
+    def validate_unique(self, exclude=None):
+        if not self.archived:
+            if self.__class__.objects\
+                    .filter(name=self.name, issuer=self.issuer, archived=False)\
+                    .exclude(pk=self.pk)\
+                    .exists():
+                raise ValidationError(message="Badgeclass with this name already exists in the same issuer.")
+        super(BadgeClass, self).validate_unique(exclude=exclude)
+
+    def save(self, *args, **kwargs):
+        self.validate_unique()
+        return super(BadgeClass, self).save(*args, **kwargs)
 
     @property
     def institution(self):

@@ -6,11 +6,18 @@ from rest_framework import permissions
 logger = logging.getLogger('Badgr.Debug')
 SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
 
-
 class AwardedAssertionsBlock(permissions.BasePermission):
-    """Checks to see if there are assertions"""
+    """Object can't have any assertions"""
     def has_object_permission(self, request, view, obj):
         return not obj.assertions
+
+
+class NoUnrevokedAssertionsPermission(permissions.BasePermission):
+    """Object must have no unrevoked assertions"""
+    def has_object_permission(self, request, view, obj):
+        if not obj.assertions:
+            return True
+        return all([assertion.revoked for assertion in obj.assertions])
 
 
 class RecipientIdentifiersMatch(permissions.BasePermission):
