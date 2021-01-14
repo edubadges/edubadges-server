@@ -5,7 +5,7 @@ from institution.models import Institution
 from issuer.models import Issuer
 from issuer.testfiles.helper import issuer_json, badgeclass_json
 from mainsite.tests import BadgrTestCase
-from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.db.models import ProtectedError
 from django.urls import reverse
 
@@ -293,7 +293,7 @@ class IssuerModelsTest(BadgrTestCase):
         faculty = self.setup_faculty(institution=teacher1.institution)
         setup_issuer_kwargs = {'created_by': teacher1, 'faculty': faculty, 'name': 'The same'}
         issuer = self.setup_issuer(**setup_issuer_kwargs)
-        self.assertRaises(ValidationError, self.setup_issuer, **setup_issuer_kwargs)
+        self.assertRaises(IntegrityError, self.setup_issuer, **setup_issuer_kwargs)
         setup_issuer_kwargs['archived'] = True
         self.setup_issuer(**setup_issuer_kwargs)
         issuer.archive()
@@ -305,11 +305,10 @@ class IssuerModelsTest(BadgrTestCase):
         issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
         setup_badgeclass_kwargs = {'created_by': teacher1, 'issuer': issuer, 'name': 'The same'}
         badgeclass = self.setup_badgeclass(**setup_badgeclass_kwargs)
-        self.assertRaises(ValidationError, self.setup_badgeclass, **setup_badgeclass_kwargs)
+        self.assertRaises(IntegrityError, self.setup_badgeclass, **setup_badgeclass_kwargs)
         setup_badgeclass_kwargs['archived'] = True
         self.setup_badgeclass(**setup_badgeclass_kwargs)
         badgeclass.archive()
-
 
     def test_recursive_deletion(self):
         """tests removal of entities and subsequent cache updates"""
