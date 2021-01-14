@@ -123,7 +123,12 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         self.save_extensions(validated_data, instance)
         if not instance.badgrapp_id:
             instance.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
-        instance.save()
+        try:
+            instance.save()
+        except IntegrityError:
+            raise BadgrValidationFieldError('name',
+                                            "There is already an Issuer with this name inside this Issuer group",
+                                            908)
         return instance
 
     def to_representation(self, obj):
@@ -250,7 +255,12 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         self.save_extensions(validated_data, instance)
         for key, value in validated_data.items():
             setattr(instance, key, value)
-        instance.save()
+        try:
+            instance.save()
+        except IntegrityError:
+            raise BadgrValidationFieldError('name',
+                                            "There is already a Badgeclass with this name inside this Issuer",
+                                            909)
         return instance
 
     def to_internal_value_error_override(self, data):
