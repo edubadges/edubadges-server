@@ -23,8 +23,8 @@ class IssuerExtensionInline(TabularInline):
 
 class IssuerAdmin(DjangoObjectActions, ModelAdmin):
 
-    readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id')
-    list_display = ('name', 'img', 'entity_id', 'created_by', 'created_at',
+    readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id', 'archived')
+    list_display = ('name', 'img', 'entity_id', 'created_by', 'created_at', 'archived',
                     admin_list_linkify('faculty', 'name'), admin_list_linkify('institution', 'name'))
     list_display_links = ('name',)
     list_filter = ('created_at',)
@@ -35,7 +35,7 @@ class IssuerAdmin(DjangoObjectActions, ModelAdmin):
             'classes': ("collapse",)
         }),
         (None, {
-            'fields': ('image', 'name', 'url', 'email', 'description', 'badgrapp')
+            'fields': ('image', 'name', 'url', 'email', 'description_english', 'description_dutch', 'badgrapp', 'archived')
         }),
         ('JSON', {
             'fields': ('old_json',)
@@ -89,7 +89,8 @@ class BadgeClassExtensionInline(TabularInline):
 
 class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
     readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id')
-    list_display = ('name', 'badge_image', 'entity_id', admin_list_linkify('issuer', 'name'), admin_list_linkify('institution', 'name'))
+    list_display = ('name', 'badge_image', 'entity_id', 'archived',
+                    admin_list_linkify('issuer', 'name'), admin_list_linkify('institution', 'name'))
     list_display_links = ('badge_image', 'name',)
     list_filter = ('created_at',)
     search_fields = ('name', 'entity_id', 'issuer__name',)
@@ -100,7 +101,7 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
             'classes': ("collapse",)
         }),
         (None, {
-            'fields': ('issuer', 'image', 'name', 'description')
+            'fields': ('issuer', 'image', 'name', 'description', 'archived')
         }),
         ('Criteria', {
             'fields': ('criteria_url', 'criteria_text',)
