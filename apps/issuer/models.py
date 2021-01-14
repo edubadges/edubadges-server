@@ -15,7 +15,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from django.db import models, transaction
+from django.db import models, transaction, IntegrityError
 from django.db.models import ProtectedError
 from django.urls import reverse
 from django.utils import timezone
@@ -189,7 +189,7 @@ class Issuer(EntityUserProvisionmentMixin,
                     .filter(name=self.name, faculty=self.faculty, archived=False)\
                     .exclude(pk=self.pk)\
                     .exists():
-                raise ValidationError(message="Issuer with this name already exists in the same faculty.")
+                raise IntegrityError("Issuer with this name already exists in the same faculty.")
         super(Issuer, self).validate_unique(exclude=exclude)
 
     def save(self, *args, **kwargs):
@@ -419,7 +419,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
                     .filter(name=self.name, issuer=self.issuer, archived=False)\
                     .exclude(pk=self.pk)\
                     .exists():
-                raise ValidationError(message="Badgeclass with this name already exists in the same issuer.")
+                raise IntegrityError("Badgeclass with this name already exists in the same issuer.")
         super(BadgeClass, self).validate_unique(exclude=exclude)
 
     def save(self, *args, **kwargs):

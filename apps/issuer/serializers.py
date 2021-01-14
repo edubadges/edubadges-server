@@ -110,8 +110,7 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
                 new_issuer.save()
             except IntegrityError:
                 raise BadgrValidationFieldError('name',
-                                                "There is already an Issuer with this name".format(
-                                                    new_issuer.name, validated_data['faculty'].name),
+                                                "There is already an Issuer with this name inside this Issuer group",
                                                 908)
             return new_issuer
         else:
@@ -279,7 +278,12 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
                 raise BadgrValidationError("Cannot create a formal badgeclass for an institution without the judicial basis for formal badges", 215)
             if not validated_data['formal'] and not validated_data['issuer'].faculty.institution.grondslag_informeel:
                 raise BadgrValidationError("Cannot create an informal badgeclass for an institution without the judicial basis for informal badges", 216)
-            new_badgeclass = BadgeClass.objects.create(**validated_data)
+            try:
+                new_badgeclass = BadgeClass.objects.create(**validated_data)
+            except IntegrityError:
+                raise BadgrValidationFieldError('name',
+                                                "There is already a Badgeclass with this name inside this Issuer",
+                                                909)
             return new_badgeclass
         else:
             raise BadgrValidationError("You don't have the necessary permissions", 100)
