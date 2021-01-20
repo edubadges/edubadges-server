@@ -155,16 +155,8 @@ LOGIN_REDIRECT_URL = '/docs'
 
 AUTHENTICATION_BACKENDS = [
     'oauth2_provider.backends.OAuth2Backend',
-
-    # Object permissions for issuing badges
-    'rules.permissions.ObjectPermissionBackend',
-
     # Needed to login by username in Django admin, regardless of `allauth`
     "badgeuser.backends.CachedModelBackend",
-
-    # `allauth` specific authentication methods, such as login by e-mail
-    "badgeuser.backends.CachedAuthenticationBackend"
-
 ]
 
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'

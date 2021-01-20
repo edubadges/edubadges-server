@@ -11,7 +11,3 @@ class CachedModelBackend(ModelBackend):
         except BadgeUser.DoesNotExist:
             return None
 
-
-class CachedAuthenticationBackend(CachedModelBackend, AuthenticationBackend):
-    pass
-
