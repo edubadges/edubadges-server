@@ -1,9 +1,9 @@
 from collections import OrderedDict
 import cachemodel
-from django.db import models
+from django.db import models, IntegrityError
 from django.urls import reverse
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
-from mainsite.models import BaseAuditedModel
+from mainsite.models import BaseAuditedModel, ArchiveMixin
 from mainsite.mixins import ImageUrlGetterMixin
 from mainsite.utils import OriginSetting
 from staff.mixins import PermissionedModelMixin
@@ -47,6 +47,9 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
 
     @property
     def assertions(self):
+        """return all assertions, also assertions belonging to archived entities
+        this is used to check if an entity can be archived / deleted
+        """
         assertions = []
         for faculty in self.faculty_set.all():
             assertions += faculty.assertions
@@ -59,7 +62,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_faculties(self):
-        return list(self.faculty_set.all())
+        return list(self.faculty_set.filter(archived=False))
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):
@@ -105,7 +108,9 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
         return json
 
 
-class Faculty(EntityUserProvisionmentMixin, PermissionedModelMixin, BaseVersionedEntity, BaseAuditedModel):
+class Faculty(EntityUserProvisionmentMixin,
+              ArchiveMixin,
+              PermissionedModelMixin, BaseVersionedEntity, BaseAuditedModel):
 
     def __str__(self):
         return self.name
@@ -115,15 +120,26 @@ class Faculty(EntityUserProvisionmentMixin, PermissionedModelMixin, BaseVersione
 
     class Meta:
         verbose_name_plural = 'faculties'
-        unique_together = ('name', 'institution')
 
     DUTCH_NAME = "issuer group"
-
     name = models.CharField(max_length=512)
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, blank=False, null=False)
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.FacultyStaff")
     description_english = models.TextField(blank=True, null=True, default=None)
     description_dutch = models.TextField(blank=True, null=True, default=None)
+
+    def validate_unique(self, exclude=None):
+        if not self.archived:
+            if self.__class__.objects\
+                    .filter(name=self.name, institution=self.institution, archived=False)\
+                    .exclude(pk=self.pk)\
+                    .exists():
+                raise IntegrityError("Faculty with this name already exists in the same institution.")
+        super(Faculty, self).validate_unique(exclude=exclude)
+
+    def save(self, *args, **kwargs):
+        self.validate_unique()
+        return super(Faculty, self).save(*args, **kwargs)
 
     def create_staff_membership(self, user, permissions):
         return FacultyStaff.objects.create(user=user, faculty=self, **permissions)
@@ -141,7 +157,9 @@ class Faculty(EntityUserProvisionmentMixin, PermissionedModelMixin, BaseVersione
 
     @property
     def assertions(self):
-        """return all assertions, also assertions belonging to archived entities"""
+        """return all assertions, also assertions belonging to archived entities
+        this is used to check if an entity can be archived / deleted
+        """
         assertions = []
         for issuer in self.issuer_set.all():
             assertions += issuer.assertions

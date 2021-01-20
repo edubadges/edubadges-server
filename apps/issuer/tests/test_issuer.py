@@ -145,19 +145,12 @@ class IssuerAPITest(BadgrTestCase):
         badgeclass_response = self.client.delete("/issuer/badgeclasses/delete/{}".format(badgeclass.entity_id),
                                                  content_type='application/json')
         self.assertEqual(badgeclass_response.status_code, 204)
-        faculty_response = self.client.delete("/institution/faculties/edit/{}".format(faculty.entity_id),
-                                              content_type='application/json')
-        self.assertEqual(faculty_response.status_code, 404)
         issuer_response = self.client.delete("/issuer/delete/{}".format(issuer.entity_id),
                                              content_type='application/json')
         self.assertEqual(issuer_response.status_code, 204)
-        faculty_response2 = self.client.delete("/institution/faculties/edit/{}".format(faculty.entity_id),
-                                              content_type='application/json')
-        self.assertEqual(faculty_response2.status_code, 204)
         self.assertTrue(self.instance_is_removed(badgeclass))
         self.assertTrue(self.instance_is_removed(issuer))
-        self.assertTrue(self.instance_is_removed(faculty))
-        self.assertEqual(teacher1.institution.cached_faculties().__len__(), 0)
+        self.assertEqual(faculty.cached_issuers().__len__(), 0)
 
     def test_enroll_and_award_badge(self):
         teacher1 = self.setup_teacher()
@@ -326,26 +319,28 @@ class IssuerModelsTest(BadgrTestCase):
         self.assertEqual(faculty.cached_issuers().__len__(), 0)
 
     def test_recursive_archiving(self):
-        """test archiving of multiple objects and the uniqueness constraints on .name that go with it"""
+        """test archiving from Faculty down to Badgeclass and the uniqueness constraints on name that go with it"""
         teacher1 = self.setup_teacher(authenticate=True)
         student = self.setup_student(affiliated_institutions=[teacher1.institution])
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
-        assertion = self.setup_assertion(student, badgeclass, teacher1, revoked=True)
+        self.setup_assertion(student, badgeclass, teacher1, revoked=True)
         staff = self.setup_staff_membership(teacher1, badgeclass)
         self.assertEqual(teacher1.cached_badgeclass_staffs(), [staff])
         self.assertRaises(ProtectedError, teacher1.institution.delete)
         self.assertRaises(ProtectedError, faculty.delete)
         self.assertRaises(ProtectedError, issuer.delete)
         self.assertRaises(ProtectedError, badgeclass.delete)
-        issuer.archive()
+        faculty.archive()
+        self.assertTrue(self.reload_from_db(faculty).archived)
         self.assertTrue(self.reload_from_db(issuer).archived)
         self.assertTrue(self.reload_from_db(badgeclass).archived)
         self.assertTrue(self.instance_is_removed(staff))
         self.assertEqual(teacher1.cached_badgeclass_staffs().__len__(), 0)
         self.assertEqual(faculty.cached_issuers().__len__(), 0)
         self.assertEqual(issuer.cached_badgeclasses().__len__(), 0)
+        self.assertEqual(teacher1.institution.cached_faculties().__len__(), 0)
 
 
 class IssuerSchemaTest(BadgrTestCase):
@@ -353,7 +348,7 @@ class IssuerSchemaTest(BadgrTestCase):
     def test_issuer_schema(self):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
-        faculty = self.setup_faculty(teacher1.institution)
+        faculty = self.setup_faculty(institution=teacher1.institution)
         self.setup_issuer(teacher1, faculty=faculty)
         query = 'query foo {issuers {entityId contentTypeId}}'
         response = self.graphene_post(teacher1, query)
@@ -363,7 +358,7 @@ class IssuerSchemaTest(BadgrTestCase):
     def test_badgeclass_schema(self):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
-        faculty = self.setup_faculty(teacher1.institution)
+        faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(teacher1, faculty=faculty)
         self.setup_badgeclass(issuer)
         query = 'query foo {badgeClasses {entityId contentTypeId terms {entityId termsUrl {url excerpt language}}}}'

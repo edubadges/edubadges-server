@@ -1,12 +1,16 @@
 # encoding: utf-8
+import badgrlog
 
+from django.db.models import ProtectedError
 from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from rest_framework.views import APIView
 
-import badgrlog
 from entity.utils import validate_errors
+from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from issuer.permissions import NoUnrevokedAssertionsPermission
+from staff.permissions import HasObjectPermission
 
 
 class BaseEntityView(APIView):
@@ -148,4 +152,19 @@ class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
         if not self.has_object_permissions(request, obj):
             return Response(status=HTTP_404_NOT_FOUND)
         obj.delete()
+        return Response(status=HTTP_204_NO_CONTENT)
+
+
+class BaseArchiveView(BaseEntityDetailView):
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, NoUnrevokedAssertionsPermission)
+    http_method_names = ['delete']
+
+    def delete(self, request, **kwargs):
+        obj = self.get_object(request, **kwargs)
+        if not self.has_object_permissions(request, obj):
+            return Response(status=HTTP_404_NOT_FOUND)
+        try:
+            obj.delete()
+        except ProtectedError:
+            obj.archive()
         return Response(status=HTTP_204_NO_CONTENT)

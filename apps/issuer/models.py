@@ -16,7 +16,6 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db import models, transaction, IntegrityError
-from django.db.models import ProtectedError
 from django.urls import reverse
 from django.utils import timezone
 
@@ -24,7 +23,7 @@ from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager
 from jsonfield import JSONField
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage, ImageUrlGetterMixin
-from mainsite.models import BadgrApp, BaseAuditedModel
+from mainsite.models import BadgrApp, BaseAuditedModel, ArchiveMixin
 from mainsite.utils import OriginSetting, generate_entity_uri, EmailMessageMaker
 from openbadges_bakery import bake
 from rest_framework import serializers
@@ -117,45 +116,6 @@ class BaseOpenBadgeExtension(cachemodel.CacheModel):
         abstract = True
 
 
-class ArchiveMixin(cachemodel.CacheModel):
-
-    archived = models.BooleanField(default=False)
-
-    class Meta:
-        abstract = True
-
-    @property
-    def may_archive(self):
-        if not self.assertions:
-            return True
-        return all([assertion.revoked for assertion in self.assertions])
-
-    @transaction.atomic
-    def archive(self, **kwargs):
-        """
-        Recursive archive function that
-            - archives all children
-            - only publishes the parent of the initially archived entity
-            - removes all associated staff memberships without publishing the associated object (the one that is archived)
-        """
-        publish_parent = kwargs.pop('publish_parent', True)
-        if not self.may_archive:
-            raise ProtectedError(
-                "{} may only be deleted if there are no awarded Assertions.".format(self.__class__.__name__), self)
-        if hasattr(self, 'children'):
-            for child in self.children:
-                child.archive(publish_parent=False)
-        for membership in self.staff_items:
-            membership.delete(publish_object=False)
-        self.archived = True
-        self.save()
-        if publish_parent:
-            try:
-                self.parent.publish()
-            except AttributeError:  # no parent
-                pass
-
-
 class Issuer(EntityUserProvisionmentMixin,
              ArchiveMixin,
              PermissionedModelMixin,
@@ -206,6 +166,9 @@ class Issuer(EntityUserProvisionmentMixin,
 
     @property
     def assertions(self):
+        """return all assertions, also assertions belonging to archived entities
+        this is used to check if an entity can be archived / deleted
+        """
         assertions = []
         for bc in self.badgeclasses.all():
             assertions += bc.assertions
@@ -445,6 +408,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
 
     @property
     def assertions(self):
+        """return all assertions this is used to check if an entity can be archived / deleted"""
         return self.cached_assertions()
 
     def publish(self):

@@ -3,10 +3,10 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 
-from entity.api import BaseEntityListView, VersionedObjectMixin, BaseEntityDetailView
+from entity.api import BaseEntityListView, VersionedObjectMixin, BaseEntityDetailView, BaseArchiveView
 from institution.models import Faculty, Institution
 from institution.serializers import FacultySerializer, InstitutionSerializer
-from mainsite.permissions import AuthenticatedWithVerifiedEmail, CannotDeleteWithChildren
+from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from staff.permissions import HasObjectPermission
 
 
@@ -43,6 +43,11 @@ class InstitutionDetail(BaseEntityDetailView):
     http_method_names = ['put']
 
 
+class FacultyDeleteView(BaseArchiveView):
+    model = Faculty
+    v1_serializer_class = FacultySerializer
+
+
 class FacultyDetail(BaseEntityDetailView):
     """
     PUT to edit a faculty
@@ -50,8 +55,8 @@ class FacultyDetail(BaseEntityDetailView):
     """
     model = Faculty
     v1_serializer_class = FacultySerializer
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, CannotDeleteWithChildren)
-    http_method_names = ['put', 'delete']
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
+    http_method_names = ['put']
 
 
 class FacultyList(VersionedObjectMixin, BaseEntityListView):
