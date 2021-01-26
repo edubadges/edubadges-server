@@ -37,6 +37,15 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
     )
     grondslag_formeel = models.CharField(max_length=254, null=True, blank=True, choices=GRONDSLAG_CHOICES, default=GRONDSLAG_UITVOERING_OVEREENKOMST)
     grondslag_informeel = models.CharField(max_length=254, null=True, blank=True, choices=GRONDSLAG_CHOICES, default=GRONDSLAG_UITVOERING_OVEREENKOMST)
+    TYPE_WO = 'WO'
+    TYPE_HBO = 'HBO'
+    TYPE_MBO = 'MBO'
+    TYPE_CHOICES = (
+        (TYPE_WO, 'WO'),
+        (TYPE_HBO, 'HBO'),
+        (TYPE_MBO, 'MBO'),
+    )
+    institution_type = models.CharField(max_length=254, null=True, blank=True, choices=TYPE_CHOICES)
 
     @property
     def children(self):
