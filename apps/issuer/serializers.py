@@ -165,7 +165,7 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
 
 class AlignmentItemSerializer(serializers.Serializer):
     target_name = StripTagsCharField()
-    target_url = serializers.URLField()
+    target_url = serializers.URLField(required=False, allow_blank=True, allow_null=True)
     target_description = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
     target_framework = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
     target_code = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
