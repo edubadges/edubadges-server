@@ -1,28 +1,18 @@
 import datetime
 
-from allauth.account.models import EmailConfirmationHMAC
-from allauth.account.utils import url_str_to_user_pk
-from apispec_drf.decorators import apispec_get_operation, apispec_delete_operation, apispec_list_operation
-from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.db.models import ProtectedError
-from django.http import Http404
-from django.utils import timezone
 from rest_framework import permissions, status
 from rest_framework.response import Response
-from rest_framework.serializers import BaseSerializer, ValidationError
-from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_302_FOUND, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED
+from rest_framework.serializers import ValidationError
+from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED
 from rest_framework.views import APIView
 
-from badgeuser.models import BadgeUser, CachedEmailAddress, BadgrAccessToken, UserProvisionment, Terms, TermsAgreement
+from badgeuser.models import BadgeUser, UserProvisionment, Terms, TermsAgreement
 from badgeuser.permissions import BadgeUserIsAuthenticatedUser
-from badgeuser.serializers import BadgeUserProfileSerializer, BadgeUserTokenSerializer, UserProvisionmentSerializer, \
+from badgeuser.serializers import BadgeUserProfileSerializer, UserProvisionmentSerializer, \
     UserProvisionmentSerializerForEdit, TermsAgreementSerializer, TermsSerializer
-from badgeuser.tasks import process_email_verification
 from entity.api import BaseEntityDetailView, BaseEntityListView
-from issuer.permissions import BadgrOAuthTokenHasScope
 from mainsite.exceptions import BadgrApiException400, BadgrValidationError
-from mainsite.models import BadgrApp
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from staff.permissions import HasObjectPermission
 
@@ -49,127 +39,6 @@ class BadgeUserDetail(BaseEntityDetailView):
         except ProtectedError as e:
             raise BadgrApiException400(error_message=e.args[0], error_code=999)
         return Response(status=HTTP_204_NO_CONTENT)
-
-
-class BadgeUserToken(BaseEntityDetailView):
-    model = BadgeUser
-    permission_classes = (BadgeUserIsAuthenticatedUser,)
-    v1_serializer_class = BadgeUserTokenSerializer
-
-    def get_object(self, request, **kwargs):
-        return request.user
-
-    def put(self, request, **kwargs):
-        request.user.replace_token()  # generate new token first
-        self.token_replaced = True
-        return super(BadgeUserToken, self).put(request, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super(BadgeUserToken, self).get_context_data(**kwargs)
-        context['tokenReplaced'] = getattr(self, 'token_replaced', False)
-        return context
-
-
-class BaseUserRecoveryView(BaseEntityDetailView):
-    def _get_user(self, uidb36):
-        User = get_user_model()
-        try:
-            pk = url_str_to_user_pk(uidb36)
-            return User.objects.get(pk=pk)
-        except (ValueError, User.DoesNotExist):
-            return None
-
-    def get_response(self, obj={}, status=HTTP_200_OK):
-        context = self.get_context_data()
-        serializer_class = self.get_serializer_class()
-        serializer = serializer_class(obj, context=context)
-        return Response(serializer.data, status=status)
-
-
-class BadgeUserEmailConfirm(BaseUserRecoveryView):
-    permission_classes = (permissions.AllowAny,)
-    v1_serializer_class = BaseSerializer
-
-    def get(self, request, **kwargs):
-        """
-        Confirm an email address
-        """
-
-        badgrapp_id = request.query_params.get('a', None)
-        if badgrapp_id is None:
-            badgrapp_id = getattr(settings, 'BADGR_APP_ID', 1)
-        try:
-            badgrapp = BadgrApp.objects.get(id=badgrapp_id)
-        except BadgrApp.DoesNotExist:
-            return Response(status=HTTP_404_NOT_FOUND)
-
-        emailconfirmation = EmailConfirmationHMAC.from_key(kwargs.get('confirm_id'))
-        if emailconfirmation is None:
-            return Response(status=HTTP_404_NOT_FOUND)
-
-        try:
-            email_address = CachedEmailAddress.cached.get(pk=emailconfirmation.email_address.pk)
-        except CachedEmailAddress.DoesNotExist:
-            return Response(status=HTTP_404_NOT_FOUND)
-
-        # We allow multiple users to add the same (unverified) email address.
-        # A user can claim the address by verifying it.
-        # If a user verifies an email address, all other users who had added that address will have that address deleted
-        CachedEmailAddress.objects \
-            .filter(email__iexact=emailconfirmation.email_address.email) \
-            .exclude(pk=emailconfirmation.email_address.pk) \
-            .delete()
-
-        email_address.verified = True
-        email_address.save()
-
-        process_email_verification.delay(email_address.pk)
-
-        redirect_url = badgrapp.ui_connect_success_redirect
-
-        return Response(status=HTTP_302_FOUND, headers={'Location': redirect_url})
-
-
-class AccessTokenList(BaseEntityListView):
-    model = BadgrAccessToken
-    permission_classes = (permissions.IsAuthenticated, BadgrOAuthTokenHasScope)
-    valid_scopes = ['rw:profile']
-
-    def get_objects(self, request, **kwargs):
-        return BadgrAccessToken.objects.filter(user=request.user, expires__gt=timezone.now())
-
-    @apispec_list_operation('AccessToken',
-                            summary='Get a list of access tokens for authenticated user',
-                            tags=['Authentication']
-                            )
-    def get(self, request, **kwargs):
-        return super(AccessTokenList, self).get(request, **kwargs)
-
-
-class AccessTokenDetail(BaseEntityDetailView):
-    model = BadgrAccessToken
-    permission_classes = (permissions.IsAuthenticated, BadgrOAuthTokenHasScope)
-    valid_scopes = ['rw:profile']
-
-    def get_object(self, request, **kwargs):
-        self.object = BadgrAccessToken.objects.get_from_entity_id(kwargs.get('entity_id'))
-        if not self.has_object_permissions(request, self.object):
-            raise Http404
-        return self.object
-
-    @apispec_get_operation('AccessToken',
-                           summary='Get a single AccessToken',
-                           tags=['Authentication']
-                           )
-    def get(self, request, **kwargs):
-        return super(AccessTokenDetail, self).get(request, **kwargs)
-
-    @apispec_delete_operation('AccessToken',
-                              summary='Revoke an AccessToken',
-                              tags=['Authentication']
-                              )
-    def delete(self, request, **kwargs):
-        return super(AccessTokenDetail, self).delete(request, **kwargs)
 
 
 class UserCreateProvisionment(BaseEntityListView):
@@ -271,6 +140,7 @@ class AcceptTermsView(APIView):
             request.user.remove_cached_data(['cached_terms_agreements'])
             return Response(status=HTTP_200_OK)
         raise BadgrApiException400('Cannot revoke consent, no data sent', 999)
+
 
 class PublicTermsView(APIView):
     """
