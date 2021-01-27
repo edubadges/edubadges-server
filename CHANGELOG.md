@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [2.1.2] 
 - Adds archiving option to Issuer Group
+- Adds swagger api documentation
 
 ## [2.1.1] - 2021-01-18
  - Added bilangual email (NL/EN).
