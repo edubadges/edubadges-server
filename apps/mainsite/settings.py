@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_celery_results',
+    'rest_framework_swagger',
 
     # OAuth 2 provider
     'oauth2_provider',

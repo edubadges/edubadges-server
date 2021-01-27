@@ -14,7 +14,7 @@ class BackpackAPITest(BadgrTestCase):
         assertion = self.setup_assertion(student, badgeclass, teacher1)
         self.assertTrue(not assertion.public)
         body = {"public": True}  # make_assertion_public_private
-        response = self.client.put('/v1/earner/badges/{}'.format(assertion.entity_id),
+        response = self.client.put('/earner/badges/{}'.format(assertion.entity_id),
                                    data=json.dumps(body), content_type='application/json')
         self.assertTrue(response.status_code == 200)
         self.assertTrue(student.cached_badgeinstances()[0].public)  # instant cache update
@@ -26,7 +26,7 @@ class BackpackAPITest(BadgrTestCase):
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
         assertion = self.setup_assertion(student, badgeclass, teacher1)
-        response = self.client.delete('/v1/earner/badges/{}'.format(assertion.entity_id), content_type='application/json')
+        response = self.client.delete('/earner/badges/{}'.format(assertion.entity_id), content_type='application/json')
         self.assertEqual(response.status_code, 204)
         cached_assertion = student.cached_badgeinstances()[0]
         self.assertEqual(cached_assertion.acceptance, cached_assertion.ACCEPTANCE_REJECTED)

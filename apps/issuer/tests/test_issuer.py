@@ -162,7 +162,7 @@ class IssuerAPITest(BadgrTestCase):
         enroll_body = {"badgeclass_slug": badgeclass.entity_id}
         terms = badgeclass._get_terms()
         accept_terms_body = [{'terms_entity_id': terms.entity_id, 'accepted': True}]
-        terms_accept_response = self.client.post("/v1/user/terms/accept", json.dumps(accept_terms_body),
+        terms_accept_response = self.client.post("/user/terms/accept", json.dumps(accept_terms_body),
                                                  content_type='application/json')
         enrollment_response = self.client.post("/lti_edu/enroll", json.dumps(enroll_body),
                                                content_type='application/json')

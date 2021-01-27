@@ -48,11 +48,6 @@ def error500(request):
         'STATIC_URL': getattr(settings, 'STATIC_URL', '/static/'),
     }))
 
-
-def info_view(request):
-    return redirect(getattr(settings, 'LOGIN_REDIRECT_URL'))
-
-
 def email_unsubscribe(request, *args, **kwargs):
     if time.time() > int(kwargs['expiration']):
         return HttpResponse('Your unsubscription link has expired.')
@@ -116,19 +111,6 @@ class SitewideActionFormView(FormView):
             action()
 
         return super(SitewideActionFormView, self).form_valid(form)
-
-
-class DocsAuthorizeRedirect(RedirectView):
-    def get_redirect_url(self, *args, **kwargs):
-        badgrapp = BadgrApp.objects.get_current(request=self.request)
-        url = badgrapp.oauth_authorization_redirect
-        if not url:
-            url = 'https://{cors}/auth/oauth2/authorize'.format(cors=badgrapp.cors)
-
-        query = self.request.META.get('QUERY_STRING', '')
-        if query:
-            url = "{}?{}".format(url, query)
-        return url
 
 
 def serve_protected_document(request, path, document_root):
