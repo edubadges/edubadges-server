@@ -23,9 +23,6 @@ python-resize-image==1.1.19
 
 
 # DOCS
-# apispec-djangorestframework==1.0.6 # python3 incompatible
-# -e git://github.com/edubadges/apispec-djangorestframework.git#egg=apispec_drf
-# apispec==0.22.0
 django-rest-swagger==2.2.0
 
 
