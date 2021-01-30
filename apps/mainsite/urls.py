@@ -1,7 +1,6 @@
 from django.apps import apps
 from django.conf import settings
 from django.conf.urls import include, url
-from django.contrib.auth import views as auth_views
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import path
 
@@ -15,8 +14,7 @@ badgr_admin.autodiscover()
 
 from django.views.generic.base import RedirectView, TemplateView
 
-from mainsite.views import SitewideActionFormView, DocsAuthorizeRedirect, \
-    TermsAndConditionsView, TermsAndConditionsResignView, AcceptTermsAndConditionsView
+from mainsite.views import SitewideActionFormView, DocsAuthorizeRedirect
 from mainsite.views import info_view, email_unsubscribe, error404, error500
 
 
@@ -76,11 +74,6 @@ urlpatterns = [
 
     # include theming endpoints
     url(r'v1/', include('theming.api_urls'), kwargs={'version': 'v1'}),
-
-    # Accept Terms View - TODO remove them as the client now renders them
-    url(r'^accept_terms/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<id_token>[^/]+)', TermsAndConditionsView.as_view(), name='accept_terms'),
-    url(r'^accept_terms_resign/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<id_token>[^/]+)', TermsAndConditionsResignView.as_view(), name='accept_terms_resign'),
-    url(r'^accept_terms_resign_accepted/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<id_token>[^/]+)', AcceptTermsAndConditionsView.as_view(), name='accept_terms_resign_accepted'),
 
     #  include signing endpoints
     url(r'^signing/', include('signing.api_urls')),
