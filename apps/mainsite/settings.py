@@ -456,8 +456,6 @@ OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'oauth2_provider.AccessToken'
 
 OAUTH2_TOKEN_SESSION_TIMEOUT_SECONDS = OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
 
-API_DOCS_EXCLUDED_SCOPES = ['rw:issuer:*', 'r:assertions', '*']
-
 BADGR_PUBLIC_BOT_USERAGENTS = [
     'LinkedInBot',
     # 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'
