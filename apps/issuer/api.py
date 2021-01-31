@@ -166,8 +166,7 @@ class BatchAwardEnrollments(VersionedObjectMixin, BaseEntityView):
         context = self.get_context_data(**kwargs)
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(many=True, data=request.data.get('enrollments'), context=context)
-        if not serializer.is_valid(raise_exception=False):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         new_instances = serializer.save(created_by=request.user)
         for new_instance in new_instances:
             self.log_create(new_instance)

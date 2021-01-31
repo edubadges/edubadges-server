@@ -172,11 +172,16 @@ class IssuerAPITest(BadgrTestCase):
         award_body = {"issue_signed": False, "create_notification": True,
                       "enrollments": [{"enrollment_entity_id": enrollment_response.data['entity_id'],
                                        "evidence_items": [
-                                           {'evidence_url': 'https://www.valid.com',
+                                           {'evidence_url': 'invalid.com',
                                             'narrative': 'Some evidence narrative'}],
                                        "narrative": "Some assertion narrative"
                                        }]
                       }
+        failure_response = self.client.post('/issuer/badgeclasses/award-enrollments/{}'.format(badgeclass.entity_id),
+                                            json.dumps(award_body), content_type='application/json')
+        self.assertEqual(failure_response.status_code, 400)
+        self.assertEqual(str(failure_response.data[0]['evidence_items'][0]['evidence_url'][0]), 'Enter a valid URL.')
+        award_body['enrollments'][0]['evidence_items'][0]['evidence_url'] = 'https://www.valid.com'
         award_response = self.client.post('/issuer/badgeclasses/award-enrollments/{}'.format(badgeclass.entity_id),
                                           json.dumps(award_body), content_type='application/json')
         assertion = student.cached_badgeinstances().first()
