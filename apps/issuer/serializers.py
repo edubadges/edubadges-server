@@ -312,35 +312,14 @@ class EvidenceItemSerializer(serializers.Serializer):
 
 
 class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serializer):
-    created_at = serializers.DateTimeField(read_only=True)
-    created_by = BadgeUserIdentifierField(read_only=True)
-    entity_id = serializers.CharField(max_length=255, read_only=True)
-    image = serializers.FileField(read_only=True)  # use_url=True, might be necessary
-    email = serializers.EmailField(max_length=1024, required=False, write_only=True)
-    recipient_identifier = serializers.CharField(max_length=1024, required=False)
-    recipient_email = serializers.SerializerMethodField()
-    recipient_name = serializers.SerializerMethodField()
-    recipient_type = serializers.CharField(default=BadgeInstance.RECIPIENT_TYPE_EDUID)
     allow_uppercase = serializers.BooleanField(default=False, required=False, write_only=True)
-
-    revoked = HumanReadableBooleanField(read_only=True)
-    revocation_reason = serializers.CharField(read_only=True)
-
-    expires = serializers.DateTimeField(source='expires_at', required=False, allow_null=True)
     issue_signed = serializers.BooleanField(required=False)
     signing_password = serializers.CharField(max_length=1024, required=False)
     enrollment_entity_id = serializers.CharField(max_length=1024, required=False)
-
-    create_notification = HumanReadableBooleanField(write_only=True, required=False, default=False)
-
-    hashed = serializers.NullBooleanField(default=None, required=False)
     extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
 
     narrative = MarkdownCharField(required=False, allow_blank=True, allow_null=True)
     evidence_items = EvidenceItemSerializer(many=True, required=False)
-
-    class Meta:
-        apispec_definition = ('Assertion', {})
 
     def get_recipient_email(self, obj):
         return obj.get_email_address()
@@ -369,9 +348,6 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
             return data
 
     def to_representation(self, instance):
-        # if self.context.get('extended_json'):
-        #     self.fields['json'] = V1InstanceSerializer(source='extended_json')
-
         representation = super(BadgeInstanceSerializer, self).to_representation(instance)
         representation['json'] = instance.get_json(obi_version="1_1", use_canonical_id=True)
         if self.context.get('include_issuer', False):
