@@ -170,11 +170,20 @@ class IssuerAPITest(BadgrTestCase):
         self.client.logout()
         self.authenticate(teacher1)
         award_body = {"issue_signed": False, "create_notification": True,
-                      "enrollments": [{"enrollment_entity_id": enrollment_response.data['entity_id']}]}
+                      "enrollments": [{"enrollment_entity_id": enrollment_response.data['entity_id'],
+                                       "evidence_items": [
+                                           {'evidence_url': 'https://www.valid.com',
+                                            'narrative': 'Some evidence narrative'}],
+                                       "narrative": "Some assertion narrative"
+                                       }]
+                      }
         award_response = self.client.post('/issuer/badgeclasses/award-enrollments/{}'.format(badgeclass.entity_id),
                                           json.dumps(award_body), content_type='application/json')
-        # self.assertTrue(bool(award_response.data[0]['extensions']['extensions:recipientProfile']['name']))
-        self.assertEqual(len(student.cached_badgeinstances()), 1)  # test cache update
+        assertion = student.cached_badgeinstances().first()
+        evidence = assertion.cached_evidence().first()  # test cache update
+        self.assertEqual(evidence.evidence_url, 'https://www.valid.com')
+        self.assertEqual(evidence.narrative, 'Some evidence narrative')
+        self.assertEqual(assertion.narrative, 'Some assertion narrative')
         self.assertEqual(len(badgeclass.cached_assertions()), 1)  # test cache update
         self.assertEqual(award_response.status_code, 201)
 

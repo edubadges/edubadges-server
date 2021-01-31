@@ -20,7 +20,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
-from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager
+from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager, BadgeInstanceEvidenceManager
 from jsonfield import JSONField
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage, ImageUrlGetterMixin
 from mainsite.models import BadgrApp, BaseAuditedModel, ArchiveMixin
@@ -718,6 +718,7 @@ class BadgeInstance(BaseAuditedModel,
         (ACCEPTANCE_REJECTED, 'Rejected'),
     )
     acceptance = models.CharField(max_length=254, choices=ACCEPTANCE_CHOICES, default=ACCEPTANCE_UNACCEPTED)
+    narrative = models.TextField(blank=True, null=True, default=None)
 
     hashed = models.BooleanField(default=True)
     salt = models.CharField(max_length=254, blank=True, null=True, default=None, db_index=True)
@@ -763,6 +764,10 @@ class BadgeInstance(BaseAuditedModel,
     @property
     def cached_badgeclass(self):
         return BadgeClass.cached.get(pk=self.badgeclass_id)
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_evidence(self):
+        return self.badgeinstanceevidence_set.all()
 
     def get_absolute_url(self):
         return reverse('badgeinstance_json', kwargs={'entity_id': self.entity_id})
@@ -996,6 +1001,9 @@ class BadgeInstance(BaseAuditedModel,
                     "type": "HostedBadge"
                 }
 
+        # evidence
+        json['evidence'] = [e.get_json(obi_version) for e in self.cached_evidence()]
+
         # source url
         if self.source_url:
             if obi_version == '1_1':
@@ -1085,6 +1093,31 @@ class BadgeInstance(BaseAuditedModel,
             baked_image.save()
 
         return baked_image.image.url
+
+
+class BadgeInstanceEvidence(OriginalJsonMixin, cachemodel.CacheModel):
+    badgeinstance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE)
+    evidence_url = models.CharField(max_length=2083, blank=True, null=True, default=None)
+    narrative = models.TextField(blank=True, null=True, default=None)
+
+    objects = BadgeInstanceEvidenceManager()
+
+    def publish(self):
+        super(BadgeInstanceEvidence, self).publish()
+        self.badgeinstance.publish()
+
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_context=False):
+        json = OrderedDict()
+        if include_context:
+            obi_version, context_iri = get_obi_context(obi_version)
+            json['@context'] = context_iri
+
+        json['type'] = 'Evidence'
+        if self.evidence_url:
+            json['id'] = self.evidence_url
+        if self.narrative:
+            json['narrative'] = self.narrative
+        return json
 
 
 def _baked_badge_instance_filename_generator(instance, filename):

@@ -146,10 +146,17 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
                 issued_on=issued_on
             )
         )
+        if created:
+            evidence = list_of(assertion_obo.get('evidence', None))
+            if evidence:
+                from issuer.models import BadgeInstanceEvidence
+                for evidence_item in evidence:
+                    BadgeInstanceEvidence.objects.create_from_ob2(badgeinstance, evidence_item)
 
         return badgeinstance, created
 
     def create(self,
+        evidence=None,
         extensions=None,
         allow_uppercase=False,
         **kwargs
@@ -179,6 +186,12 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
         with transaction.atomic():
             new_instance.save()
 
+            if evidence is not None:
+                from issuer.models import BadgeInstanceEvidence
+                for evidence_obj in evidence:
+                    BadgeInstanceEvidence.objects.create(badgeinstance=new_instance,
+                                                         evidence_url=evidence_obj.get('evidence_url'),
+                                                         narrative=evidence_obj.get('narrative'))
             if extensions is not None:
                 for name, ext in list(extensions.items()):
                     new_instance.badgeinstanceextension_set.create(
@@ -187,3 +200,15 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
                     )
 
         return new_instance
+
+
+class BadgeInstanceEvidenceManager(models.Manager):
+    @transaction.atomic
+    def create_from_ob2(self, badgeinstance, evidence_obo):
+        return self.create(
+            badgeinstance=badgeinstance,
+            evidence_url=evidence_obo.get('id', None),
+            narrative=evidence_obo.get('narrative', None),
+            original_json=json.dumps(evidence_obo)
+        )
+

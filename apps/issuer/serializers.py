@@ -299,6 +299,18 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             raise BadgrValidationError("You don't have the necessary permissions", 100)
 
 
+class EvidenceItemSerializer(serializers.Serializer):
+    evidence_url = serializers.URLField(max_length=1024, required=False, allow_blank=True)
+    narrative = MarkdownCharField(required=False, allow_blank=True)
+
+    def validate(self, attrs):
+        if not (attrs.get('evidence_url', None) or attrs.get('narrative', None)):
+            raise BadgrValidationFieldError('narrative',
+                                            "Either url or narrative is required",
+                                            910)
+        return attrs
+
+
 class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierField(read_only=True)
@@ -323,6 +335,9 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
 
     hashed = serializers.NullBooleanField(default=None, required=False)
     extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
+
+    narrative = MarkdownCharField(required=False, allow_blank=True, allow_null=True)
+    evidence_items = EvidenceItemSerializer(many=True, required=False)
 
     class Meta:
         apispec_definition = ('Assertion', {})
@@ -411,6 +426,8 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
                 extensions=validated_data.get('extension_items', None),
                 identifier=uuid.uuid4().urn,
                 signer=validated_data.get('created_by'),
+                # evidence=validated_data.get('evidence_items', None)  # Dont forget this one when you re-implement signing
+                # narrative=validated_data.get('narrative', None)  # idem
             )
         else:
             assertion = badgeclass.issue(
@@ -419,7 +436,9 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
                 allow_uppercase=validated_data.get('allow_uppercase'),
                 recipient_type=validated_data.get('recipient_type', BadgeInstance.RECIPIENT_TYPE_EDUID),
                 expires_at=expires_at,
-                extensions=validated_data.get('extension_items', None)
+                extensions=validated_data.get('extension_items', None),
+                evidence=validated_data.get('evidence_items', None),
+                narrative=validated_data.get('narrative', None)
             )
 
         enrollment.date_awarded = timezone.now()
