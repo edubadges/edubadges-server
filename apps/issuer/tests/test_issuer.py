@@ -363,9 +363,12 @@ class IssuerModelsTest(BadgrTestCase):
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
         evidence_items = [{'evidence_url': 'http://valid.com', 'narrative': 'Some narrative'}]
-        assertion = self.setup_assertion(student, badgeclass, teacher1, evidence=evidence_items)
+        assertion = self.setup_assertion(student, badgeclass, teacher1,
+                                         evidence=evidence_items,
+                                         narrative='assertion narrative')
         assertion_data = assertion.get_json()
         self.assertEqual(assertion_data['evidence'][0]['id'], 'http://valid.com')
+        self.assertEqual(assertion_data['narrative'], 'assertion narrative')
 
 
 class IssuerSchemaTest(BadgrTestCase):

@@ -1004,6 +1004,10 @@ class BadgeInstance(BaseAuditedModel,
         # evidence
         json['evidence'] = [e.get_json(obi_version) for e in self.cached_evidence()]
 
+        # narrative
+        if self.narrative and obi_version == '2_0':
+            json['narrative'] = self.narrative
+
         # source url
         if self.source_url:
             if obi_version == '1_1':
