@@ -356,6 +356,17 @@ class IssuerModelsTest(BadgrTestCase):
         self.assertEqual(issuer.cached_badgeclasses().__len__(), 0)
         self.assertEqual(teacher1.institution.cached_faculties().__len__(), 0)
 
+    def test_badgeinstance_get_json(self):
+        teacher1 = self.setup_teacher()
+        student = self.setup_student(affiliated_institutions=[teacher1.institution])
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        evidence_items = [{'evidence_url': 'http://valid.com', 'narrative': 'Some narrative'}]
+        assertion = self.setup_assertion(student, badgeclass, teacher1, evidence=evidence_items)
+        assertion_data = assertion.get_json()
+        self.assertEqual(assertion_data['evidence'][0]['id'], 'http://valid.com')
+
 
 class IssuerSchemaTest(BadgrTestCase):
 
