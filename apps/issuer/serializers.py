@@ -422,22 +422,3 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         enrollment.save()
         enrollment.user.remove_cached_data(['cached_pending_enrollments'])
         return assertion
-
-    def update(self, instance, validated_data):
-        updateable_fields = [
-            'evidence_items',
-            'expires_at',
-            'extension_items',
-            'hashed',
-            'issued_on',
-            'recipient_identifier',
-            'recipient_type'
-        ]
-
-        for field_name in updateable_fields:
-            if field_name in validated_data:
-                setattr(instance, field_name, validated_data.get(field_name))
-        instance.rebake(save=False)
-        instance.save()
-
-        return instance
