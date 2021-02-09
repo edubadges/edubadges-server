@@ -47,6 +47,35 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
     )
     institution_type = models.CharField(max_length=254, null=True, blank=True, choices=TYPE_CHOICES)
 
+    def get_report(self):
+        total_assertions_formal = 0
+        total_assertions_informal = 0
+        total_assertions_revoked = 0
+        total_enrollments = 0
+        unique_recipients = set()
+        for badgeclass in self.cached_badgeclasses():
+            for assertion in badgeclass.cached_assertions():
+                if badgeclass.formal:
+                    total_assertions_formal += 1
+                else:
+                    total_assertions_informal += 1
+                if assertion.revoked:
+                    total_assertions_revoked += 1
+                unique_recipients.add(assertion.user)
+            total_enrollments += badgeclass.cached_enrollments().__len__()
+        return {'name': self.name,
+                'type': self.__class__.__name__.capitalize(),
+                'id': self.pk,
+                'total_badgeclasss': self.cached_badgeclasses().__len__(),
+                'total_issuers': self.cached_issuers().__len__(),
+                'total_faculties': self.cached_faculties().__len__(),
+                'total_enrollments': total_enrollments,
+                'total_recipients': unique_recipients.__len__(),
+                'total_admins': [staff for staff in self.cached_staff() if staff.permissions == staff.full_permissions()].__len__(),
+                'total_assertions_formal': total_assertions_formal,
+                'total_assertions_informal': total_assertions_informal,
+                'total_assertions_revoked': total_assertions_revoked}
+
     @property
     def children(self):
         return self.cached_faculties()
@@ -137,6 +166,34 @@ class Faculty(EntityUserProvisionmentMixin,
     description_english = models.TextField(blank=True, null=True, default=None)
     description_dutch = models.TextField(blank=True, null=True, default=None)
 
+    def get_report(self):
+        total_assertions_formal = 0
+        total_assertions_informal = 0
+        total_assertions_revoked = 0
+        total_enrollments = 0
+        unique_recipients = set()
+        for badgeclass in self.cached_badgeclasses():
+            for assertion in badgeclass.cached_assertions():
+                if badgeclass.formal:
+                    total_assertions_formal += 1
+                else:
+                    total_assertions_informal += 1
+                if assertion.revoked:
+                    total_assertions_revoked += 1
+                unique_recipients.add(assertion.user)
+            total_enrollments += badgeclass.cached_enrollments().__len__()
+        return {'name': self.name,
+                'type': self.__class__.__name__.capitalize(),
+                'id': self.pk,
+                'total_badgeclasss': self.cached_badgeclasses().__len__(),
+                'total_issuers': self.cached_issuers().__len__(),
+                'total_enrollments': total_enrollments,
+                'total_recipients': unique_recipients.__len__(),
+                'total_assertions_formal': total_assertions_formal,
+                'total_assertions_informal': total_assertions_informal,
+                'total_assertions_revoked': total_assertions_revoked}
+
+
     def validate_unique(self, exclude=None):
         if not self.archived:
             if self.__class__.objects\
@@ -186,5 +243,7 @@ class Faculty(EntityUserProvisionmentMixin,
     def cached_badgeclasses(self):
         r = []
         for issuer in self.cached_issuers():
-            r.append(issuer.cached_badgeclasses())
+            badgeclasses = issuer.cached_badgeclasses()
+            if badgeclasses:
+                r += badgeclasses
         return r

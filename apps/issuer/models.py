@@ -143,6 +143,35 @@ class Issuer(EntityUserProvisionmentMixin,
     cached = cachemodel.CacheModelManager()
     faculty = models.ForeignKey('institution.Faculty', on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
+    def get_report(self):
+        total_assertions_formal = 0
+        total_assertions_informal = 0
+        total_assertions_revoked = 0
+        total_enrollments = 0
+        total_recipients = 0
+        unique_recipients = set()
+        for badgeclass in self.cached_badgeclasses():
+            for assertion in badgeclass.cached_assertions():
+                if badgeclass.formal:
+                    total_assertions_formal += 1
+                else:
+                    total_assertions_informal += 1
+                if assertion.revoked:
+                    total_assertions_revoked += 1
+                unique_recipients.add(assertion.user)
+            total_enrollments += badgeclass.cached_enrollments().__len__()
+        return {'name': self.name,
+                'type': self.__class__.__name__.capitalize(),
+                'id': self.pk,
+                'total_badgeclasses': self.cached_badgeclasses().__len__(),
+                'total_enrollments': total_enrollments,
+                'total_recipients': unique_recipients.__len__(),
+                'total_assertions_formal': total_assertions_formal,
+                'total_assertions_informal': total_assertions_informal,
+                'total_assertions_revoked': total_assertions_revoked}
+
+
+
     def validate_unique(self, exclude=None):
         if not self.archived:
             if self.__class__.objects\
@@ -375,6 +404,28 @@ class BadgeClass(EntityUserProvisionmentMixin,
 
     class Meta:
         verbose_name_plural = "Badge classes"
+
+    def get_report(self):
+        total_assertions_formal = 0
+        total_assertions_informal = 0
+        total_assertions_revoked = 0
+        unique_recipients = set()
+        for assertion in self.cached_assertions():
+            if self.formal:
+                total_assertions_formal += 1
+            else:
+                total_assertions_informal += 1
+            if assertion.revoked:
+                total_assertions_revoked += 1
+            unique_recipients.add(assertion.user)
+        return {'name': self.name,
+                'type': self.__class__.__name__.capitalize(),
+                'id': self.pk,
+                'total_recipients': unique_recipients.__len__(),
+                'total_enrollments': self.cached_enrollments().__len__(),
+                'total_assertions_formal': total_assertions_formal,
+                'total_assertions_informal': total_assertions_informal,
+                'total_assertions_revoked': total_assertions_revoked}
 
     def validate_unique(self, exclude=None):
         if not self.archived:

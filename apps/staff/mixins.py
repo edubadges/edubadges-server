@@ -62,7 +62,8 @@ class PermissionedModelMixin(object):
             try:
                 entities += self.parent.get_all_entities_in_branch(check_children=False)
             except AttributeError:
-                return entities
+                if not check_children:
+                    return entities
         if check_children:
             try:
                 for child in self.children:
