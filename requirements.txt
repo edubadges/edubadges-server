@@ -6,7 +6,8 @@ pytz==2017.2
 Pillow==7.1.0
 python-dateutil==2.6.1
 
-# mysql database
+# reporting
+pandas==1.1.5
 
 # MySQL-python==1.2.5 # python3 incompatible
 mysqlclient==2.0.1
