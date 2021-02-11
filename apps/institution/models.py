@@ -46,6 +46,13 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
         (TYPE_MBO, 'MBO'),
     )
     institution_type = models.CharField(max_length=254, null=True, blank=True, choices=TYPE_CHOICES)
+    DEFAULT_LANGUAGE_DUTCH = "nl-NL"
+    DEFAULT_LANGUAGE_ENGLISH = "en-US"
+    DEFAULT_LANGUAGE_CHOICES = (
+        (DEFAULT_LANGUAGE_DUTCH, "nl-NL"),
+        (DEFAULT_LANGUAGE_ENGLISH, "en-US")
+    )
+    default_language = models.CharField(max_length=254, choices=DEFAULT_LANGUAGE_CHOICES, default=DEFAULT_LANGUAGE_DUTCH)
 
     def get_report(self):
         total_assertions_formal = 0
