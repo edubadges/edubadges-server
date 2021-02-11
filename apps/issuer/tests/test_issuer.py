@@ -145,19 +145,12 @@ class IssuerAPITest(BadgrTestCase):
         badgeclass_response = self.client.delete("/issuer/badgeclasses/delete/{}".format(badgeclass.entity_id),
                                                  content_type='application/json')
         self.assertEqual(badgeclass_response.status_code, 204)
-        faculty_response = self.client.delete("/institution/faculties/edit/{}".format(faculty.entity_id),
-                                              content_type='application/json')
-        self.assertEqual(faculty_response.status_code, 404)
         issuer_response = self.client.delete("/issuer/delete/{}".format(issuer.entity_id),
                                              content_type='application/json')
         self.assertEqual(issuer_response.status_code, 204)
-        faculty_response2 = self.client.delete("/institution/faculties/edit/{}".format(faculty.entity_id),
-                                              content_type='application/json')
-        self.assertEqual(faculty_response2.status_code, 204)
         self.assertTrue(self.instance_is_removed(badgeclass))
         self.assertTrue(self.instance_is_removed(issuer))
-        self.assertTrue(self.instance_is_removed(faculty))
-        self.assertEqual(teacher1.institution.cached_faculties().__len__(), 0)
+        self.assertEqual(faculty.cached_issuers().__len__(), 0)
 
     def test_enroll_and_award_badge(self):
         teacher1 = self.setup_teacher()
@@ -169,7 +162,7 @@ class IssuerAPITest(BadgrTestCase):
         enroll_body = {"badgeclass_slug": badgeclass.entity_id}
         terms = badgeclass._get_terms()
         accept_terms_body = [{'terms_entity_id': terms.entity_id, 'accepted': True}]
-        terms_accept_response = self.client.post("/v1/user/terms/accept", json.dumps(accept_terms_body),
+        terms_accept_response = self.client.post("/user/terms/accept", json.dumps(accept_terms_body),
                                                  content_type='application/json')
         enrollment_response = self.client.post("/lti_edu/enroll", json.dumps(enroll_body),
                                                content_type='application/json')
@@ -177,11 +170,25 @@ class IssuerAPITest(BadgrTestCase):
         self.client.logout()
         self.authenticate(teacher1)
         award_body = {"issue_signed": False, "create_notification": True,
-                      "enrollments": [{"enrollment_entity_id": enrollment_response.data['entity_id']}]}
+                      "enrollments": [{"enrollment_entity_id": enrollment_response.data['entity_id'],
+                                       "evidence_items": [
+                                           {'evidence_url': 'invalid.com',
+                                            'narrative': 'Some evidence narrative'}],
+                                       "narrative": "Some assertion narrative"
+                                       }]
+                      }
+        failure_response = self.client.post('/issuer/badgeclasses/award-enrollments/{}'.format(badgeclass.entity_id),
+                                            json.dumps(award_body), content_type='application/json')
+        self.assertEqual(failure_response.status_code, 400)
+        self.assertEqual(str(failure_response.data[0]['evidence_items'][0]['evidence_url'][0]), 'Enter a valid URL.')
+        award_body['enrollments'][0]['evidence_items'][0]['evidence_url'] = 'https://www.valid.com'
         award_response = self.client.post('/issuer/badgeclasses/award-enrollments/{}'.format(badgeclass.entity_id),
                                           json.dumps(award_body), content_type='application/json')
-        # self.assertTrue(bool(award_response.data[0]['extensions']['extensions:recipientProfile']['name']))
-        self.assertEqual(len(student.cached_badgeinstances()), 1)  # test cache update
+        assertion = student.cached_badgeinstances().first()
+        evidence = assertion.cached_evidence().first()  # test cache update
+        self.assertEqual(evidence.evidence_url, 'https://www.valid.com')
+        self.assertEqual(evidence.narrative, 'Some evidence narrative')
+        self.assertEqual(assertion.narrative, 'Some assertion narrative')
         self.assertEqual(len(badgeclass.cached_assertions()), 1)  # test cache update
         self.assertEqual(award_response.status_code, 201)
 
@@ -326,26 +333,42 @@ class IssuerModelsTest(BadgrTestCase):
         self.assertEqual(faculty.cached_issuers().__len__(), 0)
 
     def test_recursive_archiving(self):
-        """test archiving of multiple objects and the uniqueness constraints on .name that go with it"""
+        """test archiving from Faculty down to Badgeclass and the uniqueness constraints on name that go with it"""
         teacher1 = self.setup_teacher(authenticate=True)
         student = self.setup_student(affiliated_institutions=[teacher1.institution])
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
-        assertion = self.setup_assertion(student, badgeclass, teacher1, revoked=True)
+        self.setup_assertion(student, badgeclass, teacher1, revoked=True)
         staff = self.setup_staff_membership(teacher1, badgeclass)
         self.assertEqual(teacher1.cached_badgeclass_staffs(), [staff])
         self.assertRaises(ProtectedError, teacher1.institution.delete)
         self.assertRaises(ProtectedError, faculty.delete)
         self.assertRaises(ProtectedError, issuer.delete)
         self.assertRaises(ProtectedError, badgeclass.delete)
-        issuer.archive()
+        faculty.archive()
+        self.assertTrue(self.reload_from_db(faculty).archived)
         self.assertTrue(self.reload_from_db(issuer).archived)
         self.assertTrue(self.reload_from_db(badgeclass).archived)
         self.assertTrue(self.instance_is_removed(staff))
         self.assertEqual(teacher1.cached_badgeclass_staffs().__len__(), 0)
         self.assertEqual(faculty.cached_issuers().__len__(), 0)
         self.assertEqual(issuer.cached_badgeclasses().__len__(), 0)
+        self.assertEqual(teacher1.institution.cached_faculties().__len__(), 0)
+
+    def test_badgeinstance_get_json(self):
+        teacher1 = self.setup_teacher()
+        student = self.setup_student(affiliated_institutions=[teacher1.institution])
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        evidence_items = [{'evidence_url': 'http://valid.com', 'narrative': 'Some narrative'}]
+        assertion = self.setup_assertion(student, badgeclass, teacher1,
+                                         evidence=evidence_items,
+                                         narrative='assertion narrative')
+        assertion_data = assertion.get_json()
+        self.assertEqual(assertion_data['evidence'][0]['id'], 'http://valid.com')
+        self.assertEqual(assertion_data['narrative'], 'assertion narrative')
 
 
 class IssuerSchemaTest(BadgrTestCase):
@@ -353,7 +376,7 @@ class IssuerSchemaTest(BadgrTestCase):
     def test_issuer_schema(self):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
-        faculty = self.setup_faculty(teacher1.institution)
+        faculty = self.setup_faculty(institution=teacher1.institution)
         self.setup_issuer(teacher1, faculty=faculty)
         query = 'query foo {issuers {entityId contentTypeId}}'
         response = self.graphene_post(teacher1, query)
@@ -363,7 +386,7 @@ class IssuerSchemaTest(BadgrTestCase):
     def test_badgeclass_schema(self):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
-        faculty = self.setup_faculty(teacher1.institution)
+        faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(teacher1, faculty=faculty)
         self.setup_badgeclass(issuer)
         query = 'query foo {badgeClasses {entityId contentTypeId terms {entityId termsUrl {url excerpt language}}}}'

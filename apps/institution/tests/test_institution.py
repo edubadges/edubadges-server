@@ -1,4 +1,5 @@
 import json
+from django.db import IntegrityError
 
 from institution.models import Institution
 from institution.testfiles.helper import faculty_json, institution_json
@@ -39,6 +40,42 @@ class InstitutionTest(BadgrTestCase):
                                     content_type='application/json')
         self.assertFalse(response.data[0]['valid'])
 
+    def test_faculty_delete(self):
+        """Test recursive faculty deletion"""
+        teacher1 = self.setup_teacher(authenticate=True)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_delete=True)
+        student = self.setup_student(affiliated_institutions=[teacher1.institution])
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        assertion = self.setup_assertion(recipient=student,
+                                         badgeclass=badgeclass,
+                                         created_by=teacher1)
+        response_fail = self.client.delete("/issuer/faculty/delete/{}".format(faculty.entity_id),
+                                                 content_type='application/json')
+        self.assertEqual(response_fail.status_code, 404)
+        assertion.delete()
+        response_success = self.client.delete("/institution/faculties/delete/{}".format(faculty.entity_id),
+                                      content_type='application/json')
+        self.assertEqual(response_success.status_code, 204)
+        self.assertTrue(self.instance_is_removed(faculty))
+        self.assertTrue(self.instance_is_removed(issuer))
+        self.assertTrue(self.instance_is_removed(badgeclass))
+        self.assertEqual(teacher1.institution.cached_faculties().__len__(), 0)
+
+
+class InstitutionModelsTest(BadgrTestCase):
+
+    def test_faculty_uniqueness_constraints_when_archiving(self):
+        """Checks if uniquness constraints on name dont trigger for archived Faculties"""
+        teacher1 = self.setup_teacher(authenticate=True)
+        setup_faculty_kwargs = {'institution': teacher1.institution, 'name': 'The same'}
+        faculty = self.setup_faculty(**setup_faculty_kwargs)
+        self.assertRaises(IntegrityError, self.setup_faculty, **setup_faculty_kwargs)
+        setup_faculty_kwargs['archived'] = True
+        self.setup_faculty(**setup_faculty_kwargs)
+        faculty.archive()
+
 
 class TestInstitutionSchema(BadgrTestCase):
 
@@ -56,7 +93,7 @@ class TestInstitutionSchema(BadgrTestCase):
         teacher1 = self.setup_teacher(authenticate=True)
         query = 'query foo {faculties {entityId contentTypeId}}'
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
-        self.setup_faculty(teacher1.institution)
+        self.setup_faculty(institution=teacher1.institution)
         response = self.graphene_post(teacher1, query)
         self.assertTrue(bool(response['data']['faculties'][0]['contentTypeId']))
         self.assertTrue(bool(response['data']['faculties'][0]['entityId']))

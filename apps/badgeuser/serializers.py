@@ -44,9 +44,6 @@ class BadgeUserProfileSerializer(serializers.Serializer):
     marketing_opt_in = serializers.BooleanField(required=False)
     institution = InstitutionForProfileSerializer(read_only=True, )
 
-    class Meta:
-        apispec_definition = ('BadgeUser', {})
-
 
 class EmailSerializer(BadgrBaseModelSerializer):
     variants = serializers.ListField(
@@ -59,9 +56,6 @@ class EmailSerializer(BadgrBaseModelSerializer):
         model = CachedEmailAddress
         fields = ('id', 'email', 'verified', 'primary', 'variants')
         read_only_fields = ('id', 'verified', 'primary', 'variants')
-        apispec_definition = ('BadgeUserEmail', {
-
-        })
 
     def create(self, validated_data):
         new_address = validated_data.get('email')

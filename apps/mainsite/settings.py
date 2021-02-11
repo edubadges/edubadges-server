@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_celery_results',
+    'rest_framework_swagger',
 
     # OAuth 2 provider
     'oauth2_provider',
@@ -155,16 +156,8 @@ LOGIN_REDIRECT_URL = '/docs'
 
 AUTHENTICATION_BACKENDS = [
     'oauth2_provider.backends.OAuth2Backend',
-
-    # Object permissions for issuing badges
-    'rules.permissions.ObjectPermissionBackend',
-
     # Needed to login by username in Django admin, regardless of `allauth`
     "badgeuser.backends.CachedModelBackend",
-
-    # `allauth` specific authentication methods, such as login by e-mail
-    "badgeuser.backends.CachedAuthenticationBackend"
-
 ]
 
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
@@ -463,8 +456,6 @@ OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'oauth2_provider.AccessToken'
 
 OAUTH2_TOKEN_SESSION_TIMEOUT_SECONDS = OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
 
-API_DOCS_EXCLUDED_SCOPES = ['rw:issuer:*', 'r:assertions', '*']
-
 BADGR_PUBLIC_BOT_USERAGENTS = [
     'LinkedInBot',
     # 'LinkedInBot/1.0 (compatible; Mozilla/5.0; Jakarta Commons-HttpClient/3.1 +http://www.linkedin.com)'
@@ -560,3 +551,5 @@ EXTENSIONS_ROOT_URL = os.environ.get('EXTENSIONS_ROOT_URL', 'http://127.0.0.1:80
 
 MAX_IMAGE_UPLOAD_SIZE = 256000  # 256Kb
 MAX_IMAGE_UPLOAD_SIZE_LABEL = '256 kB'  # used in error messaging
+
+REPORT_RECEIVER_EMAIL = os.environ.get('REPORT_RECEIVER_EMAIL', '')

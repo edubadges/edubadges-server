@@ -193,10 +193,12 @@ class SetupHelper(object):
         self._setup_institution_terms(institution)
         return institution
 
-    def setup_faculty(self, institution=None):
-        if not institution:
-            institution = self.setup_institution()
-        return Faculty.objects.create(name=name_randomiser('Test Faculty'), institution=institution)
+    def setup_faculty(self, **kwargs):
+        if not kwargs.get('institution', False):
+            kwargs['institution'] = self.setup_institution()
+        if not kwargs.get('name', False):
+            kwargs['name'] = name_randomiser('Test Faculty')
+        return Faculty.objects.create(**kwargs)
 
     def setup_issuer(self, created_by, **kwargs):
         if not kwargs.get('faculty', False):

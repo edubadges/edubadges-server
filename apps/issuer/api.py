@@ -1,14 +1,13 @@
 import badgrlog
-from django.db.models import ProtectedError
 from django.http import Http404
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_204_NO_CONTENT
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST
 
-from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView
+from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView, BaseArchiveView
 from issuer.models import Issuer, BadgeClass, BadgeInstance
-from issuer.permissions import NoUnrevokedAssertionsPermission, AwardedAssertionsBlock
+from issuer.permissions import AwardedAssertionsBlock
 from issuer.serializers import IssuerSerializer, BadgeClassSerializer, BadgeInstanceSerializer
 from mainsite.exceptions import BadgrApiException400
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
@@ -36,21 +35,6 @@ class IssuerList(VersionedObjectMixin, BaseEntityListView):
     permission_classes = (AuthenticatedWithVerifiedEmail,)   # permissioned in serializer
     v1_serializer_class = IssuerSerializer
     http_method_names = ['post']
-
-
-class BaseArchiveView(BaseEntityDetailView):
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, NoUnrevokedAssertionsPermission)
-    http_method_names = ['delete']
-
-    def delete(self, request, **kwargs):
-        obj = self.get_object(request, **kwargs)
-        if not self.has_object_permissions(request, obj):
-            return Response(status=HTTP_404_NOT_FOUND)
-        try:
-            obj.delete()
-        except ProtectedError:
-            obj.archive()
-        return Response(status=HTTP_204_NO_CONTENT)
 
 
 class BadgeClassDeleteView(BaseArchiveView):
@@ -182,8 +166,7 @@ class BatchAwardEnrollments(VersionedObjectMixin, BaseEntityView):
         context = self.get_context_data(**kwargs)
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(many=True, data=request.data.get('enrollments'), context=context)
-        if not serializer.is_valid(raise_exception=False):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         new_instances = serializer.save(created_by=request.user)
         for new_instance in new_instances:
             self.log_create(new_instance)

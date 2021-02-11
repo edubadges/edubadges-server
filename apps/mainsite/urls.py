@@ -1,7 +1,6 @@
 from django.apps import apps
 from django.conf import settings
 from django.conf.urls import include, url
-from django.contrib.auth import views as auth_views
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import path
 
@@ -15,10 +14,10 @@ badgr_admin.autodiscover()
 
 from django.views.generic.base import RedirectView, TemplateView
 
-from mainsite.views import SitewideActionFormView, DocsAuthorizeRedirect, \
-    TermsAndConditionsView, TermsAndConditionsResignView, AcceptTermsAndConditionsView
-from mainsite.views import info_view, email_unsubscribe, error404, error500
+from mainsite.views import SitewideActionFormView
+from mainsite.views import email_unsubscribe, error404, error500
 
+from rest_framework_swagger.views import get_swagger_view
 
 urlpatterns = [
     path("graphql", csrf_exempt(ExtendedGraphQLView.as_view(graphiql=True))),
@@ -32,7 +31,7 @@ urlpatterns = [
     url(r'^static/images/header-logo-120.png$', RedirectView.as_view(url='{}images/logo.png'.format(settings.STATIC_URL), permanent=True)),
 
     # Home
-    url(r'^$', info_view, name='index'),
+    url(r'^$', RedirectView.as_view(url='/docs/', permanent=True)),
 
     # Admin URLs
     url(r'^staff/sidewide-actions$', SitewideActionFormView.as_view(), name='badgr_admin_sitewide_actions'),
@@ -42,15 +41,10 @@ urlpatterns = [
     # Service health endpoint
     url(r'^health', include('health.urls')),
 
-    # api docs
-    url(r'^docs/oauth2/authorize$', DocsAuthorizeRedirect.as_view(), name='docs_authorize_redirect'),
-    url(r'^docs/?$', RedirectView.as_view(url='/docs/v2/', permanent=True)),  # default redirect to /v2/
-    url(r'^docs/', include('apispec_drf.urls')),
-
     # unversioned public endpoints
     url(r'^unsubscribe/(?P<email_encoded>[^/]+)/(?P<expiration>[^/]+)/(?P<signature>[^/]+)', email_unsubscribe, name='unsubscribe'),
 
-    url(r'^public/', include('public.public_api_urls'), kwargs={'version': 'v2'}),
+    url(r'^public/', include('public.public_api_urls')),
 
     # legacy share redirects
     url(r'', include('backpack.share_urls')),
@@ -59,11 +53,11 @@ urlpatterns = [
     url(r'^account/', include('badgrsocialauth.redirect_urls')),
 
     # v1 API endpoints
-    url(r'^v1/user/', include('badgeuser.api_urls'), kwargs={'version': 'v1'}),
-    url(r'^v1/user/', include('badgrsocialauth.v1_api_urls'), kwargs={'version': 'v1'}),
+    url(r'^user/', include('badgeuser.api_urls')),
+    url(r'^user/', include('badgrsocialauth.v1_api_urls')),
 
-    url(r'^issuer/', include('issuer.api_urls'), kwargs={'version': 'v1'}),
-    url(r'^v1/earner/', include('backpack.v1_api_urls'), kwargs={'version': 'v1'}),
+    url(r'^issuer/', include('issuer.api_urls')),
+    url(r'^earner/', include('backpack.v1_api_urls')),
 
     # include LTI endpoints
     url(r'^lti_edu/', include('lti_edu.api_urls')),
@@ -73,17 +67,11 @@ urlpatterns = [
 
     url(r'^lti_issuer/', include('lti_edu.lti_urls')),
 
-
     # include theming endpoints
-    url(r'v1/', include('theming.api_urls'), kwargs={'version': 'v1'}),
-
-    # Accept Terms View - TODO remove them as the client now renders them
-    url(r'^accept_terms/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<id_token>[^/]+)', TermsAndConditionsView.as_view(), name='accept_terms'),
-    url(r'^accept_terms_resign/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<id_token>[^/]+)', TermsAndConditionsResignView.as_view(), name='accept_terms_resign'),
-    url(r'^accept_terms_resign_accepted/(?P<after_terms_agreement_url_name>[^/]+)/(?P<state>[^/]+)/(?P<id_token>[^/]+)', AcceptTermsAndConditionsView.as_view(), name='accept_terms_resign_accepted'),
+    url(r'', include('theming.api_urls')),
 
     #  include signing endpoints
-    url(r'^signing/', include('signing.api_urls')),
+    url(r'^signing/', include(('signing.api_urls', 'signing'), namespace='signing_apis')),
 
     # include staff endpoints
     url(r'^staff-membership/', include('staff.api_urls')),
@@ -161,3 +149,7 @@ urlpatterns.insert(0,
 
 handler404 = error404
 handler500 = error500
+
+urlpatterns += [
+    url(r'^docs/', get_swagger_view(title='Edubadges API'))
+]

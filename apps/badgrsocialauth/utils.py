@@ -146,35 +146,3 @@ def get_privacy_content(name):
         data = myfile.read()
     return data
 
-
-def check_agreed_term_and_conditions(user, badgr_app, resign=False):
-    latest_terms_and_conditions = TermsVersion.objects.filter(
-        terms_and_conditions_template__isnull=True).order_by('-version').all()[0]
-    if user.is_anonymous:
-        return False
-    if user.agreed_terms_version == latest_terms_and_conditions.version:
-        return True
-    if user.agreed_terms_version != latest_terms_and_conditions.version and not resign:
-        for term_agreement in user.termsagreement_set.all():
-            term_agreement.valid = False
-            term_agreement.save()
-
-        return False
-    else:
-        try:
-            if TermsVersion.objects.filter(
-                    terms_and_conditions_template=badgr_app.theme.terms_and_conditions_template).exists():
-                latest_terms_and_conditions = TermsVersion.objects.filter(
-                    terms_and_conditions_template=badgr_app.theme.terms_and_conditions_template).order_by(
-                    '-version').all()[0]
-        except Theme.DoesNotExist as e:
-            if TermsVersion.objects.filter(
-                    terms_and_conditions_template='terms_of_service/accept_terms_versioned.html').order_by(
-                '-version').exists():
-                latest_terms_and_conditions = TermsVersion.objects.filter(
-                    terms_and_conditions_template='terms_of_service/accept_terms_versioned.html').order_by(
-                    '-version').all()[0]
-
-        user.agreed_terms_version = latest_terms_and_conditions.version
-        user.save()
-        return True

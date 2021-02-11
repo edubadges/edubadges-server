@@ -12,12 +12,11 @@ from allauth.socialaccount.models import SocialApp
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, get_object_or_404
-from django.urls import reverse
 from django.utils import timezone
 from jose import jwt
 
 from badgeuser.models import BadgeUser
-from badgrsocialauth.utils import set_session_badgr_app, get_social_account, update_user_params, check_agreed_term_and_conditions
+from badgrsocialauth.utils import set_session_badgr_app, get_social_account, update_user_params
 from ims.models import LTITenant
 from issuer.models import BadgeClass, BadgeInstance
 from lti_edu.models import StudentsEnrolled, LtiBadgeUserTennant, UserCurrentContextId

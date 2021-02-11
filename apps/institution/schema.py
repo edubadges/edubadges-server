@@ -1,7 +1,7 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 
-from issuer.schema import IssuerType
+from issuer.schema import IssuerType, BadgeInstanceType
 from mainsite.graphql_utils import UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, StaffResolverMixin, \
     ImageResolverMixin, PermissionsResolverMixin
 from staff.schema import InstitutionStaffType, FacultyStaffType
@@ -17,9 +17,13 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
 
     issuers = graphene.List(IssuerType)
     staff = graphene.List(FacultyStaffType)
+    has_unrevoked_assertions = graphene.Boolean()
 
     def resolve_issuers(self, info):
         return self.get_issuers(info.context.user, ['may_read'])
+
+    def resolve_has_unrevoked_assertions(self, info):
+        return any([assertion.revoked is False for assertion in self.assertions])
 
 
 class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin,

@@ -16,15 +16,14 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db import models, transaction, IntegrityError
-from django.db.models import ProtectedError
 from django.urls import reverse
 from django.utils import timezone
 
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
-from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager
+from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager, BadgeInstanceEvidenceManager
 from jsonfield import JSONField
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage, ImageUrlGetterMixin
-from mainsite.models import BadgrApp, BaseAuditedModel
+from mainsite.models import BadgrApp, BaseAuditedModel, ArchiveMixin
 from mainsite.utils import OriginSetting, generate_entity_uri, EmailMessageMaker
 from openbadges_bakery import bake
 from rest_framework import serializers
@@ -117,45 +116,6 @@ class BaseOpenBadgeExtension(cachemodel.CacheModel):
         abstract = True
 
 
-class ArchiveMixin(cachemodel.CacheModel):
-
-    archived = models.BooleanField(default=False)
-
-    class Meta:
-        abstract = True
-
-    @property
-    def may_archive(self):
-        if not self.assertions:
-            return True
-        return all([assertion.revoked for assertion in self.assertions])
-
-    @transaction.atomic
-    def archive(self, **kwargs):
-        """
-        Recursive archive function that
-            - archives all children
-            - only publishes the parent of the initially archived entity
-            - removes all associated staff memberships without publishing the associated object (the one that is archived)
-        """
-        publish_parent = kwargs.pop('publish_parent', True)
-        if not self.may_archive:
-            raise ProtectedError(
-                "{} may only be deleted if there are no awarded Assertions.".format(self.__class__.__name__), self)
-        if hasattr(self, 'children'):
-            for child in self.children:
-                child.archive(publish_parent=False)
-        for membership in self.staff_items:
-            membership.delete(publish_object=False)
-        self.archived = True
-        self.save()
-        if publish_parent:
-            try:
-                self.parent.publish()
-            except AttributeError:  # no parent
-                pass
-
-
 class Issuer(EntityUserProvisionmentMixin,
              ArchiveMixin,
              PermissionedModelMixin,
@@ -183,6 +143,35 @@ class Issuer(EntityUserProvisionmentMixin,
     cached = cachemodel.CacheModelManager()
     faculty = models.ForeignKey('institution.Faculty', on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
+    def get_report(self):
+        total_assertions_formal = 0
+        total_assertions_informal = 0
+        total_assertions_revoked = 0
+        total_enrollments = 0
+        total_recipients = 0
+        unique_recipients = set()
+        for badgeclass in self.cached_badgeclasses():
+            for assertion in badgeclass.cached_assertions():
+                if badgeclass.formal:
+                    total_assertions_formal += 1
+                else:
+                    total_assertions_informal += 1
+                if assertion.revoked:
+                    total_assertions_revoked += 1
+                unique_recipients.add(assertion.user)
+            total_enrollments += badgeclass.cached_enrollments().__len__()
+        return {'name': self.name,
+                'type': self.__class__.__name__.capitalize(),
+                'id': self.pk,
+                'total_badgeclasses': self.cached_badgeclasses().__len__(),
+                'total_enrollments': total_enrollments,
+                'total_recipients': unique_recipients.__len__(),
+                'total_assertions_formal': total_assertions_formal,
+                'total_assertions_informal': total_assertions_informal,
+                'total_assertions_revoked': total_assertions_revoked}
+
+
+
     def validate_unique(self, exclude=None):
         if not self.archived:
             if self.__class__.objects\
@@ -206,6 +195,9 @@ class Issuer(EntityUserProvisionmentMixin,
 
     @property
     def assertions(self):
+        """return all assertions, also assertions belonging to archived entities
+        this is used to check if an entity can be archived / deleted
+        """
         assertions = []
         for bc in self.badgeclasses.all():
             assertions += bc.assertions
@@ -413,6 +405,28 @@ class BadgeClass(EntityUserProvisionmentMixin,
     class Meta:
         verbose_name_plural = "Badge classes"
 
+    def get_report(self):
+        total_assertions_formal = 0
+        total_assertions_informal = 0
+        total_assertions_revoked = 0
+        unique_recipients = set()
+        for assertion in self.cached_assertions():
+            if self.formal:
+                total_assertions_formal += 1
+            else:
+                total_assertions_informal += 1
+            if assertion.revoked:
+                total_assertions_revoked += 1
+            unique_recipients.add(assertion.user)
+        return {'name': self.name,
+                'type': self.__class__.__name__.capitalize(),
+                'id': self.pk,
+                'total_recipients': unique_recipients.__len__(),
+                'total_enrollments': self.cached_enrollments().__len__(),
+                'total_assertions_formal': total_assertions_formal,
+                'total_assertions_informal': total_assertions_informal,
+                'total_assertions_revoked': total_assertions_revoked}
+
     def validate_unique(self, exclude=None):
         if not self.archived:
             if self.__class__.objects\
@@ -445,6 +459,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
 
     @property
     def assertions(self):
+        """return all assertions this is used to check if an entity can be archived / deleted"""
         return self.cached_assertions()
 
     def publish(self):
@@ -754,6 +769,7 @@ class BadgeInstance(BaseAuditedModel,
         (ACCEPTANCE_REJECTED, 'Rejected'),
     )
     acceptance = models.CharField(max_length=254, choices=ACCEPTANCE_CHOICES, default=ACCEPTANCE_UNACCEPTED)
+    narrative = models.TextField(blank=True, null=True, default=None)
 
     hashed = models.BooleanField(default=True)
     salt = models.CharField(max_length=254, blank=True, null=True, default=None, db_index=True)
@@ -799,6 +815,10 @@ class BadgeInstance(BaseAuditedModel,
     @property
     def cached_badgeclass(self):
         return BadgeClass.cached.get(pk=self.badgeclass_id)
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_evidence(self):
+        return self.badgeinstanceevidence_set.all()
 
     def get_absolute_url(self):
         return reverse('badgeinstance_json', kwargs={'entity_id': self.entity_id})
@@ -1032,6 +1052,13 @@ class BadgeInstance(BaseAuditedModel,
                     "type": "HostedBadge"
                 }
 
+        # evidence
+        json['evidence'] = [e.get_json(obi_version) for e in self.cached_evidence()]
+
+        # narrative
+        if self.narrative and obi_version == '2_0':
+            json['narrative'] = self.narrative
+
         # source url
         if self.source_url:
             if obi_version == '1_1':
@@ -1121,6 +1148,31 @@ class BadgeInstance(BaseAuditedModel,
             baked_image.save()
 
         return baked_image.image.url
+
+
+class BadgeInstanceEvidence(OriginalJsonMixin, cachemodel.CacheModel):
+    badgeinstance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE)
+    evidence_url = models.CharField(max_length=2083, blank=True, null=True, default=None)
+    narrative = models.TextField(blank=True, null=True, default=None)
+
+    objects = BadgeInstanceEvidenceManager()
+
+    def publish(self):
+        super(BadgeInstanceEvidence, self).publish()
+        self.badgeinstance.publish()
+
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_context=False):
+        json = OrderedDict()
+        if include_context:
+            obi_version, context_iri = get_obi_context(obi_version)
+            json['@context'] = context_iri
+
+        json['type'] = 'Evidence'
+        if self.evidence_url:
+            json['id'] = self.evidence_url
+        if self.narrative:
+            json['narrative'] = self.narrative
+        return json
 
 
 def _baked_badge_instance_filename_generator(instance, filename):

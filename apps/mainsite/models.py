@@ -9,8 +9,8 @@ import cachemodel
 from basic_models.models import CreatedUpdatedBy, CreatedUpdatedAt, IsActive
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ValidationError
-from django.db import models
-from django.db.models import Manager
+from django.db import models, transaction
+from django.db.models import Manager, ProtectedError
 from django.urls import reverse
 from django.utils.deconstruct import deconstructible
 from oauth2_provider.models import AccessToken
@@ -187,3 +187,42 @@ class LegacyTokenProxy(Token):
     def obscured_token(self):
         if self.key:
             return "{}***".format(self.key[:4])
+
+
+class ArchiveMixin(cachemodel.CacheModel):
+
+    archived = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+
+    @property
+    def may_archive(self):
+        if not self.assertions:
+            return True
+        return all([assertion.revoked for assertion in self.assertions])
+
+    @transaction.atomic
+    def archive(self, **kwargs):
+        """
+        Recursive archive function that
+            - archives all children
+            - only publishes the parent of the initially archived entity
+            - removes all associated staff memberships without publishing the associated object (the one that is archived)
+        """
+        publish_parent = kwargs.pop('publish_parent', True)
+        if not self.may_archive:
+            raise ProtectedError(
+                "{} may only be deleted if there are no awarded Assertions.".format(self.__class__.__name__), self)
+        if hasattr(self, 'children'):
+            for child in self.children:
+                child.archive(publish_parent=False)
+        for membership in self.staff_items:
+            membership.delete(publish_object=False)
+        self.archived = True
+        self.save()
+        if publish_parent:
+            try:
+                self.parent.publish()
+            except AttributeError:  # no parent
+                pass

@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.1.2] 
+- Adds archiving option to Issuer Group
+- Adds swagger api documentation
+- Adds evidence and narrative to assertion data
+
 ## [2.1.1] - 2021-01-18
  - Added bilangual email (NL/EN).
  - Adds archiving option to Badgeclass and Issuer
