@@ -260,7 +260,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         except IntegrityError:
             raise BadgrValidationFieldError('name',
                                             "There is already a Badgeclass with this name inside this Issuer",
-                                            909)
+                                            911)
         return instance
 
     def to_internal_value_error_override(self, data):
@@ -293,7 +293,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             except IntegrityError:
                 raise BadgrValidationFieldError('name',
                                                 "There is already a Badgeclass with this name inside this Issuer",
-                                                909)
+                                                911)
             return new_badgeclass
         else:
             raise BadgrValidationError("You don't have the necessary permissions", 100)
