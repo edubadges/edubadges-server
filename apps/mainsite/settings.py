@@ -183,6 +183,7 @@ SOCIALACCOUNT_ADAPTER = 'badgrsocialauth.adapter.BadgrSocialAccountAdapter'
 SURFCONEXT_DOMAIN_URL = os.environ.get('SURFCONEXT_DOMAIN_URL', 'https://oidc.test.surfconext.nl/oidc')
 EDUID_PROVIDER_URL = os.environ['EDUID_PROVIDER_URL']
 EDUID_REGISTRATION_URL = os.environ['EDUID_REGISTRATION_URL']
+EDUID_IDENTIFIER = os.environ.get('EDUID_IDENTIFIER', 'eduid')
 
 # If you have an informational front page outside the Django site that can link back to '/login', specify it here
 ROOT_INFO_REDIRECT = '/login'

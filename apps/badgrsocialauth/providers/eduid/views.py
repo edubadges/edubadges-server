@@ -125,7 +125,7 @@ def callback(request):
     id_token = token_json['id_token']
     payload = jwt.get_unverified_claims(id_token)
 
-    social_account = get_social_account(payload['sub'])
+    social_account = get_social_account(payload[settings.EDUID_IDENTIFIER])
 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
 
@@ -166,9 +166,15 @@ def after_terms_agreement(request, **kwargs):
         return render_authentication_error(request, EduIDProvider.id, error)
     payload = jwt.get_unverified_claims(id_token)
 
-    social_account = get_social_account(payload['sub'])
+    logger.info(f"Using payload attribute {settings.EDUID_IDENTIFIER} for unique identifier")
+
+    social_account = get_social_account(payload[settings.EDUID_IDENTIFIER])
     if not social_account:  # user does not exist
         # ensure that email & names are in extra_data
+        if settings.EDUID_IDENTIFIER not in payload:
+            error = 'Sorry, your eduID account does not have an eduid. Login to eduID and link your institution account, then try again.'
+            logger.error(error)
+            return render_authentication_error(request, EduIDProvider.id, error)
         if 'email' not in payload:
             error = 'Sorry, your eduID account does not have your institution mail. Login to eduID and link your institution account, then try again.'
             logger.error(error)
