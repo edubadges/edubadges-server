@@ -62,7 +62,7 @@ INSTALLED_APPS = [
     'staff',
 
     # api docs
-    'apispec_drf',
+    # 'apispec_drf',
 
     # deprecated
     'composition',
