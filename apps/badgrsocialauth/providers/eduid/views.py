@@ -170,23 +170,12 @@ def after_terms_agreement(request, **kwargs):
 
     social_account = get_social_account(payload[settings.EDUID_IDENTIFIER])
     if not social_account:  # user does not exist
-        # ensure that email & names are in extra_data
-        if settings.EDUID_IDENTIFIER not in payload:
-            error = 'Sorry, your eduID account does not have an eduid. Login to eduID and link your institution account, then try again.'
-            logger.error(error)
-            return render_authentication_error(request, EduIDProvider.id, error)
-        if 'email' not in payload:
-            error = 'Sorry, your eduID account does not have your institution mail. Login to eduID and link your institution account, then try again.'
-            logger.error(error)
-            return render_authentication_error(request, EduIDProvider.id, error)
-        if 'family_name' not in payload:
-            error = 'Sorry, your eduID account has no family_name attached from SURFconext. Login to eduID and link your institution account, then try again.'
-            logger.error(error)
-            return render_authentication_error(request, EduIDProvider.id, error)
-        if 'given_name' not in payload:
-            error = 'Sorry, your eduID account has no first_name attached from SURFconext. Login to eduID and link your institution account, then try again.'
-            logger.error(error)
-            return render_authentication_error(request, EduIDProvider.id, error)
+        # Fail fast if not all required attribbutes are there
+        for attr in [settings.EDUID_IDENTIFIER, 'email', 'family_name', 'given_name']:
+            if attr not in payload:
+                error = f"Sorry, your eduID account does not have a {attr} attribute. Login to eduID and then try again"
+                logger.error(error)
+                return render_authentication_error(request, EduIDProvider.id, error)
     else:  # user already exists
         update_user_params(social_account.user, payload)
 
