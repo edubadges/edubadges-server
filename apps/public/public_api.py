@@ -368,6 +368,9 @@ class BadgeClassJson(JSONComponentView):
         logger.event(badgrlog.BadgeClassRetrievedEvent(obj, self.request))
 
     def get_json(self, request):
+        if self.current_object.is_private:
+            raise Http404
+
         expands = request.GET.getlist('expand', [])
         json = super(BadgeClassJson, self).get_json(request)
         obi_version = self._get_request_obi_version(request)

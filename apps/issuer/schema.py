@@ -107,7 +107,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     class Meta:
         model = BadgeClass
         fields = ('name', 'entity_id', 'issuer', 'image', 'staff',
-                  'description', 'criteria_url', 'criteria_text',
+                  'description', 'criteria_url', 'criteria_text', 'is_private',
                   'created_at', 'expiration_period', 'public_url',
                   'content_type_id', 'formal')
 
@@ -119,6 +119,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     pending_enrollments = graphene.List(StudentsEnrolledType)
     badge_assertions = graphene.List(BadgeInstanceType)
     expiration_period = graphene.Int()
+    is_private = graphene.Boolean()
     public_url = graphene.String()
     terms = graphene.Field(terms_type())
 

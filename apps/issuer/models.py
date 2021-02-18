@@ -396,6 +396,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
     criteria_url = models.CharField(max_length=254, blank=True, null=True, default=None)
     criteria_text = models.TextField(blank=True, null=True)
     formal = models.BooleanField()
+    is_private = models.BooleanField(default=False)
     old_json = JSONField()
     objects = BadgeClassManager()
     cached = cachemodel.CacheModelManager()
