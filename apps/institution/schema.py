@@ -31,8 +31,8 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
     class Meta:
         model = Institution
         fields = ('entity_id', 'identifier', 'name', 'staff', 'created_at', 'description_english', 'description_dutch',
-                  'image', 'grading_table', 'brin', 'content_type_id', 'grondslag_formeel',
-                  'grondslag_informeel')
+                  'image', 'grading_table', 'brin', 'content_type_id', 'grondslag_formeel', 'grondslag_informeel',
+                  'institution_type')
 
     faculties = graphene.List(FacultyType)
     staff = graphene.List(InstitutionStaffType)
