@@ -16,6 +16,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db import models, transaction, IntegrityError
+from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
 
@@ -187,12 +188,11 @@ class Issuer(EntityUserProvisionmentMixin,
 
     def validate_unique(self, exclude=None):
         if not self.archived:
-            if self.__class__.objects\
-                    .filter(name_english=self.name_english,
-                            name_dutch=self.name_dutch,
-                            faculty=self.faculty, 
-                            archived=False)\
-                    .exclude(pk=self.pk)\
+            if self.__class__.objects \
+                    .filter(Q(name_english=self.name_english) | Q(name_dutch=self.name_dutch),
+                            faculty=self.faculty,
+                            archived=False) \
+                    .exclude(pk=self.pk) \
                     .exists():
                 raise IntegrityError("Issuer with this name already exists in the same faculty.")
         super(Issuer, self).validate_unique(exclude=exclude)

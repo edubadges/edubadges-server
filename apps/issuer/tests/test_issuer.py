@@ -294,6 +294,16 @@ class IssuerPublicAPITest(BadgrTestCase):
 
 class IssuerModelsTest(BadgrTestCase):
 
+    def test_issuer_uniqueness_constraint(self):
+        """Checks if uniquness constraints on name trigger for Issuers"""
+        teacher1 = self.setup_teacher(authenticate=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        setup_issuer_kwargs = {'created_by': teacher1, 'faculty': faculty, 'name_english': 'EN', 'name_dutch': 'NL'}
+        issuer = self.setup_issuer(**setup_issuer_kwargs)
+        self.assertRaises(IntegrityError, self.setup_issuer, **setup_issuer_kwargs)
+        del setup_issuer_kwargs['name_english']
+        self.assertRaises(IntegrityError, self.setup_issuer, **setup_issuer_kwargs)
+
     def test_issuer_uniqueness_constraints_when_archiving(self):
         """Checks if uniquness constraints on name dont trigger for archived Issuers"""
         teacher1 = self.setup_teacher(authenticate=True)
