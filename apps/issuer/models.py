@@ -129,16 +129,15 @@ class Issuer(EntityUserProvisionmentMixin,
     DUTCH_NAME = "issuer"
 
     staff = models.ManyToManyField('badgeuser.BadgeUser', through='staff.IssuerStaff')
-
     badgrapp = models.ForeignKey('mainsite.BadgrApp', on_delete=models.SET_NULL, blank=True, null=True, default=None)
-
     name_english = models.CharField(max_length=512, null=True)  # either this name,
     name_dutch = models.CharField(max_length=512, null=True)  # or this one, must be supplied to pass save() method
     image_english = models.FileField(upload_to='uploads/issuers', blank=True, null=True)
     image_dutch = models.FileField(upload_to='uploads/issuers', blank=True, null=True)
     description_english = models.TextField(blank=True, null=True, default=None)
     description_dutch = models.TextField(blank=True, null=True, default=None)
-    url = models.CharField(max_length=254, blank=True, null=True, default=None)
+    url_english = models.CharField(max_length=254, blank=True, null=True, default=None)
+    url_dutch = models.CharField(max_length=254, blank=True, null=True, default=None)
     email = models.CharField(max_length=254, blank=True, null=True, default=None)
     old_json = JSONField()
     objects = IssuerManager()
@@ -159,6 +158,10 @@ class Issuer(EntityUserProvisionmentMixin,
         if not image:
             return self.institution.image
         return image
+
+    @property
+    def url(self):
+        return self.url_english if self.url_english else self.url_dutch
 
     def get_report(self):
         total_assertions_formal = 0

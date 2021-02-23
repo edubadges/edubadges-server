@@ -64,8 +64,9 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
                   'badgeclasses', 'faculty',
                   'name_english', 'name_dutch',
                   'image_dutch', 'image_english',
+                  'url_english', 'url_dutch',
                   'description_english', 'description_dutch',
-                  'url', 'email', 'created_at', 'content_type_id', 'public_url')
+                  'email', 'created_at', 'content_type_id', 'public_url')
 
     staff = graphene.List(IssuerStaffType)
     badgeclasses_count = graphene.Int()
@@ -74,6 +75,7 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
     name = graphene.String()
     image = graphene.String()
     description = graphene.String()
+    url = graphene.String()
 
     def resolve_image_english(self, info):
         return generate_image_url(self.image_english)
@@ -86,6 +88,9 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
 
     def resolve_name(self, info):
         return self.name
+
+    def resolve_url(self, info):
+        return self.url
 
     def resolve_description(self, info):
         return self.description

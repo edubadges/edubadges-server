@@ -87,9 +87,10 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     image_english = ValidImageField(required=False)
     image_dutch = ValidImageField(required=False)
     email = serializers.EmailField(max_length=255, required=True)
-    description_english = StripTagsCharField(max_length=16384, required=False, allow_null=True)
-    description_dutch = StripTagsCharField(max_length=16384, required=False, allow_null=True)
-    url = serializers.URLField(max_length=1024, required=True)
+    description_english = StripTagsCharField(max_length=16384, required=False, allow_null=True, allow_blank=True)
+    description_dutch = StripTagsCharField(max_length=16384, required=False, allow_null=True, allow_blank=True)
+    url_english = serializers.URLField(max_length=1024, required=False, allow_null=True, allow_blank=True)
+    url_dutch = serializers.URLField(max_length=1024, required=False, allow_null=True, allow_blank=True)
     faculty = FacultySlugRelatedField(slug_field='entity_id', required=True)
     extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
 
@@ -157,6 +158,10 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         if not data.get('description_english', False) and not data.get('description_dutch', False):
             e = OrderedDict([('description_english', [ErrorDetail('Either Dutch or English description is required', code=913)]),
                              ('description_dutch', [ErrorDetail('Either Dutch or English description is required', code=913)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
+        if not data.get('url_english', False) and not data.get('url_dutch', False):
+            e = OrderedDict([('url_english', [ErrorDetail('Either Dutch or English url is required', code=915)]),
+                             ('url_dutch', [ErrorDetail('Either Dutch or English url is required', code=915)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
         return errors
 
