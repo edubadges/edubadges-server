@@ -23,7 +23,7 @@ from django.utils import timezone
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager, BadgeInstanceEvidenceManager
 from jsonfield import JSONField
-from mainsite.exceptions import BadgrValidationError
+from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError, BadgrValidationMultipleFieldError
 from mainsite.mixins import ImageUrlGetterMixin
 from mainsite.models import BadgrApp, BaseAuditedModel, ArchiveMixin
 from mainsite.utils import OriginSetting, generate_entity_uri, EmailMessageMaker, generate_image_url
@@ -188,13 +188,39 @@ class Issuer(EntityUserProvisionmentMixin,
 
     def validate_unique(self, exclude=None):
         if not self.archived:
-            if self.__class__.objects \
-                    .filter(Q(name_english=self.name_english) | Q(name_dutch=self.name_dutch),
-                            faculty=self.faculty,
-                            archived=False) \
-                    .exclude(pk=self.pk) \
-                    .exists():
-                raise IntegrityError("Issuer with this name already exists in the same faculty.")
+            if self.name_dutch and self.name_english:
+                query = Q(name_english=self.name_english) | Q(name_dutch=self.name_dutch)
+            elif self.name_english:
+                query = Q(name_english=self.name_english)
+            elif self.name_dutch:
+                query = Q(name_english=self.name_english)
+            else:
+                raise BadgrValidationMultipleFieldError([
+                    ['name_english', "There is already an Issuer with this English name inside this Issuer group", 908],
+                    ['name_dutch', "There is already an Issuer with this Dutch name inside this Issuer group", 914]
+                ])
+            issuer_same_name = self.__class__.objects \
+                .filter(query,
+                        faculty=self.faculty,
+                        archived=False) \
+                .exclude(pk=self.pk).first()
+            if issuer_same_name:
+                name_english_the_same = issuer_same_name.name_english == self.name_english and bool(issuer_same_name.name_english)
+                name_dutch_the_same = issuer_same_name.name_dutch == self.name_dutch and bool(issuer_same_name.name_dutch)
+                both_the_same = name_english_the_same and name_dutch_the_same
+                if both_the_same:
+                    raise BadgrValidationMultipleFieldError([
+                        ['name_english', "There is already an Issuer with this English name inside this Issuer group", 908],
+                        ['name_dutch', "There is already an Issuer with this Dutch name inside this Issuer group", 914]
+                    ])
+                elif name_dutch_the_same:
+                    raise BadgrValidationFieldError('name_dutch',
+                                                    "There is already an Issuer with this Dutch name inside this Issuer group",
+                                                    914)
+                elif name_english_the_same:
+                    raise BadgrValidationFieldError('name_english',
+                                                    "There is already an Issuer with this English name inside this Issuer group",
+                                                    908)
         super(Issuer, self).validate_unique(exclude=exclude)
 
     def save(self, *args, **kwargs):

@@ -20,7 +20,7 @@ from badgeuser.serializers import BadgeUserIdentifierField
 from institution.serializers import FacultySlugRelatedField
 from lti_edu.models import StudentsEnrolled
 from mainsite.drf_fields import ValidImageField
-from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError
+from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError, BadgrValidationMultipleFieldError
 from mainsite.models import BadgrApp
 from mainsite.mixins import InternalValueErrorOverrideMixin
 from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField, \
@@ -81,8 +81,8 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
                        InternalValueErrorOverrideMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierField()
-    name_english = StripTagsCharField(max_length=1024, required=False, allow_null=True)
-    name_dutch = StripTagsCharField(max_length=1024, required=False, allow_null=True)
+    name_english = StripTagsCharField(max_length=1024, required=False, allow_null=True, allow_blank=True)
+    name_dutch = StripTagsCharField(max_length=1024, required=False, allow_null=True, allow_blank=True)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
     image_english = ValidImageField(required=False)
     image_dutch = ValidImageField(required=False)
@@ -105,12 +105,7 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             new_issuer = Issuer(**validated_data)
             # set badgrapp
             new_issuer.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
-            try:
-                new_issuer.save()
-            except IntegrityError:
-                raise BadgrValidationFieldError('name',
-                                                "There is already an Issuer with this name inside this Issuer group",
-                                                908)
+            new_issuer.save()
             return new_issuer
         else:
             raise BadgrValidationError("You don't have the necessary permissions", 100)
