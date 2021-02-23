@@ -5,6 +5,7 @@ from institution.models import Institution
 from issuer.models import Issuer
 from issuer.testfiles.helper import issuer_json, badgeclass_json
 from mainsite.tests import BadgrTestCase
+from mainsite.exceptions import BadgrValidationFieldError, BadgrValidationMultipleFieldError
 from django.db import IntegrityError
 from django.db.models import ProtectedError
 from django.urls import reverse
@@ -300,9 +301,9 @@ class IssuerModelsTest(BadgrTestCase):
         faculty = self.setup_faculty(institution=teacher1.institution)
         setup_issuer_kwargs = {'created_by': teacher1, 'faculty': faculty, 'name_english': 'EN', 'name_dutch': 'NL'}
         issuer = self.setup_issuer(**setup_issuer_kwargs)
-        self.assertRaises(IntegrityError, self.setup_issuer, **setup_issuer_kwargs)
+        self.assertRaises(BadgrValidationMultipleFieldError, self.setup_issuer, **setup_issuer_kwargs)
         del setup_issuer_kwargs['name_english']
-        self.assertRaises(IntegrityError, self.setup_issuer, **setup_issuer_kwargs)
+        self.assertRaises(BadgrValidationFieldError, self.setup_issuer, **setup_issuer_kwargs)
 
     def test_issuer_uniqueness_constraints_when_archiving(self):
         """Checks if uniquness constraints on name dont trigger for archived Issuers"""
@@ -310,7 +311,7 @@ class IssuerModelsTest(BadgrTestCase):
         faculty = self.setup_faculty(institution=teacher1.institution)
         setup_issuer_kwargs = {'created_by': teacher1, 'faculty': faculty, 'name_english': 'The same'}
         issuer = self.setup_issuer(**setup_issuer_kwargs)
-        self.assertRaises(IntegrityError, self.setup_issuer, **setup_issuer_kwargs)
+        self.assertRaises(BadgrValidationFieldError, self.setup_issuer, **setup_issuer_kwargs)
         setup_issuer_kwargs['archived'] = True
         self.setup_issuer(**setup_issuer_kwargs)
         issuer.archive()
