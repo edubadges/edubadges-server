@@ -76,6 +76,7 @@ class ExtensionsSaverMixin(object):
             self.update_extensions(instance, update_these_extensions, extension_items)
             self.add_extensions(instance, add_these_extensions, extension_items)
 
+from mainsite.utils import scrub_svg_image, resize_image, verify_svg
 
 class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
                        InternalValueErrorOverrideMixin, serializers.Serializer):
@@ -94,11 +95,23 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     faculty = FacultySlugRelatedField(slug_field='entity_id', required=True)
     extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
 
-    def validate_image(self, image):
-        if image is not None:
-            img_name, img_ext = os.path.splitext(image.name)
-            image.name = 'issuer_logo_' + str(uuid.uuid4()) + img_ext
+    def _validate_image(self, image):
+        img_name, img_ext = os.path.splitext(image.name)
+        image.name = 'issuer_logo_' + str(uuid.uuid4()) + img_ext
+        image = resize_image(image)
+        if verify_svg(image):
+            image = scrub_svg_image(image)
         return image
+
+    def validate_image_english(self, image_english):
+        if image_english is not None:
+            image_english = self._validate_image(image_english)
+        return image_english
+
+    def validate_image_dutch(self, image_dutch):
+        if image_dutch is not None:
+            image_dutch = self._validate_image(image_dutch)
+        return image_dutch
 
     def create(self, validated_data, **kwargs):
         user_permissions = validated_data['faculty'].get_permissions(validated_data['created_by'])

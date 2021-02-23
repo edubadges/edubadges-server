@@ -328,4 +328,4 @@ def scrub_svg_image(uploaded_image):
     # write out scrubbed svg
     buf = io.BytesIO()
     tree.write(buf)
-    return InMemoryUploadedFile(buf, 'image', uploaded_image.name, 'image/svg+xml', buf.len, 'utf8')
+    return InMemoryUploadedFile(buf, 'image', uploaded_image.name, 'image/svg+xml', buf.getbuffer().nbytes, 'utf8')
