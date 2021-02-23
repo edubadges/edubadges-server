@@ -6,6 +6,7 @@ from graphene_django.types import DjangoObjectType
 from lti_edu.schema import StudentsEnrolledType
 from mainsite.graphql_utils import JSONType, UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, \
     StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin, resolver_blocker_for_students
+from mainsite.utils import generate_image_url
 from staff.schema import IssuerStaffType, BadgeClassStaffType
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
     BadgeClassAlignment, BadgeClassTag
@@ -59,14 +60,35 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
                  ExtensionResolverMixin, UserProvisionmentResolverMixin, DjangoObjectType):
     class Meta:
         model = Issuer
-        fields = ('name', 'entity_id', 'badgeclasses', 'faculty',
-                  'image', 'description_english', 'description_dutch', 'url', 'email', 'created_at',
-                  'content_type_id', 'public_url')
+        fields = ('entity_id',
+                  'badgeclasses', 'faculty',
+                  'name_english', 'name_dutch',
+                  'image_dutch', 'image_english',
+                  'description_english', 'description_dutch',
+                  'url', 'email', 'created_at', 'content_type_id', 'public_url')
 
     staff = graphene.List(IssuerStaffType)
     badgeclasses_count = graphene.Int()
     extensions = graphene.List(IssuerExtensionType)
     public_url = graphene.String()
+    name = graphene.String()
+    image = graphene.String()
+    description = graphene.String()
+
+    def resolve_image_english(self, info):
+        return generate_image_url(self.image_english)
+
+    def resolve_image_dutch(self, info):
+        return generate_image_url(self.image_dutch)
+
+    def resolve_image(self, info):
+        return generate_image_url(self.image)
+
+    def resolve_name(self, info):
+        return self.name
+
+    def resolve_description(self, info):
+        return self.description
 
     def resolve_badgeclasses(self, info):
         return self.get_badgeclasses(info.context.user, ['may_read'])

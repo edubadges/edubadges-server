@@ -18,6 +18,7 @@ from lti_edu.models import StudentsEnrolled
 from mainsite import TOP_DIR
 from mainsite.models import BadgrApp
 from mainsite.schema import schema
+from mainsite.utils import resize_image
 from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
 
 
@@ -203,20 +204,20 @@ class SetupHelper(object):
     def setup_issuer(self, created_by, **kwargs):
         if not kwargs.get('faculty', False):
             kwargs['faculty'] = self.setup_faculty(institution=created_by.institution)
-        if not kwargs.get('name', False):
-            kwargs['name'] = name_randomiser('Test Issuer'),
-        image = open(self.get_test_image_path(), 'r')
+        if not kwargs.get('name_english', False):
+            kwargs['name_english'] = name_randomiser('Test Issuer'),
+        image_english = resize_image(open(self.get_test_image_path(), 'r'))
         return Issuer.objects.create(description_english='description',
                                      description_dutch='description',
                                      created_by=created_by,
-                                     image=image,
+                                     image_english=image_english,
                                      **kwargs)
 
     def setup_badgeclass(self, issuer, **kwargs):
         if not kwargs.get('name', False):
             kwargs['name'] = 'Test Badgeclass #{}'.format(random.random())
         if not kwargs.get('image', False):
-            kwargs['image'] = open(self.get_test_image_path(), 'r')
+            kwargs['image'] = resize_image(open(self.get_test_image_path(), 'r'))
         return BadgeClass.objects.create(
             issuer=issuer,
             formal=False,

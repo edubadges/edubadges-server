@@ -24,9 +24,9 @@ class IssuerExtensionInline(TabularInline):
 class IssuerAdmin(DjangoObjectActions, ModelAdmin):
 
     readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id', 'archived')
-    list_display = ('name', 'img', 'entity_id', 'created_by', 'created_at', 'archived',
+    list_display = ('name_english', 'name_dutch', 'img', 'entity_id', 'created_by', 'created_at', 'archived',
                     admin_list_linkify('faculty', 'name'), admin_list_linkify('institution', 'name'))
-    list_display_links = ('name',)
+    list_display_links = ('name_english',)
     list_filter = ('created_at',)
     search_fields = ('name', 'entity_id')
     fieldsets = (

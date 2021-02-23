@@ -22,9 +22,10 @@ from django.utils import timezone
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager, BadgeInstanceEvidenceManager
 from jsonfield import JSONField
-from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage, ImageUrlGetterMixin
+from mainsite.exceptions import BadgrValidationError
+from mainsite.mixins import ImageUrlGetterMixin
 from mainsite.models import BadgrApp, BaseAuditedModel, ArchiveMixin
-from mainsite.utils import OriginSetting, generate_entity_uri, EmailMessageMaker
+from mainsite.utils import OriginSetting, generate_entity_uri, EmailMessageMaker, generate_image_url
 from openbadges_bakery import bake
 from rest_framework import serializers
 from signing import tsob
@@ -120,8 +121,6 @@ class Issuer(EntityUserProvisionmentMixin,
              ArchiveMixin,
              PermissionedModelMixin,
              ImageUrlGetterMixin,
-             ResizeUploadedImage,
-             ScrubUploadedSvgImage,
              BaseAuditedModel,
              BaseVersionedEntity,
              BaseOpenBadgeObjectModel):
@@ -132,8 +131,10 @@ class Issuer(EntityUserProvisionmentMixin,
 
     badgrapp = models.ForeignKey('mainsite.BadgrApp', on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
-    name = models.CharField(max_length=512)
-    image = models.FileField(upload_to='uploads/issuers', blank=True, null=True)
+    name_english = models.CharField(max_length=512, null=True)  # either this name,
+    name_dutch = models.CharField(max_length=512, null=True)  # or this one, must be supplied to pass save() method
+    image_english = models.FileField(upload_to='uploads/issuers', blank=True, null=True)
+    image_dutch = models.FileField(upload_to='uploads/issuers', blank=True, null=True)
     description_english = models.TextField(blank=True, null=True, default=None)
     description_dutch = models.TextField(blank=True, null=True, default=None)
     url = models.CharField(max_length=254, blank=True, null=True, default=None)
@@ -143,12 +144,26 @@ class Issuer(EntityUserProvisionmentMixin,
     cached = cachemodel.CacheModelManager()
     faculty = models.ForeignKey('institution.Faculty', on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
+    @property
+    def description(self):
+        return self.description_english if self.description_english else self.description_dutch
+
+    @property
+    def name(self):
+        return self.name_english if self.name_english else self.name_dutch
+
+    @property
+    def image(self):
+        image = self.image_english if self.image_english else self.image_dutch
+        if not image:
+            return self.institution.image
+        return image
+
     def get_report(self):
         total_assertions_formal = 0
         total_assertions_informal = 0
         total_assertions_revoked = 0
         total_enrollments = 0
-        total_recipients = 0
         unique_recipients = set()
         for badgeclass in self.cached_badgeclasses():
             for assertion in badgeclass.cached_assertions():
@@ -170,18 +185,21 @@ class Issuer(EntityUserProvisionmentMixin,
                 'total_assertions_informal': total_assertions_informal,
                 'total_assertions_revoked': total_assertions_revoked}
 
-
-
     def validate_unique(self, exclude=None):
         if not self.archived:
             if self.__class__.objects\
-                    .filter(name=self.name, faculty=self.faculty, archived=False)\
+                    .filter(name_english=self.name_english,
+                            name_dutch=self.name_dutch,
+                            faculty=self.faculty, 
+                            archived=False)\
                     .exclude(pk=self.pk)\
                     .exists():
                 raise IntegrityError("Issuer with this name already exists in the same faculty.")
         super(Issuer, self).validate_unique(exclude=exclude)
 
     def save(self, *args, **kwargs):
+        if not self.name_english and not self.name_dutch:
+            raise BadgrValidationError('Either English or Dutch name must be supplied')
         self.validate_unique()
         return super(Issuer, self).save(*args, **kwargs)
 
@@ -382,8 +400,6 @@ class BadgeClass(EntityUserProvisionmentMixin,
                  ArchiveMixin,
                  PermissionedModelMixin,
                  ImageUrlGetterMixin,
-                 ResizeUploadedImage,
-                 ScrubUploadedSvgImage,
                  BaseAuditedModel,
                  BaseVersionedEntity,
                  BaseOpenBadgeObjectModel):

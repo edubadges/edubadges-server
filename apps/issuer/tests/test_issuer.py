@@ -19,11 +19,11 @@ class IssuerAPITest(BadgrTestCase):
         issuer_json['faculty'] = faculty.entity_id
         response = self.client.post('/issuer/create', json.dumps(issuer_json), content_type='application/json')
         self.assertEqual(201, response.status_code)
-        del issuer_json['image']
-        issuer_json['name'] = 'other_name'
+        del issuer_json['image_english']
+        issuer_json['name_english'] = 'other_name'
         response = self.client.post('/issuer/create', json.dumps(issuer_json), content_type='application/json')
         created_no_image_issuer = Issuer.objects.get(entity_id=response.data['entity_id'])
-        self.assertEqual(response.data['image'], created_no_image_issuer.institution.image_url())
+        self.assertEqual(response.data['image_english'], created_no_image_issuer.institution.image_url())
 
     def test_may_not_create_issuer(self):
         teacher1 = self.setup_teacher(authenticate=True)
@@ -298,7 +298,7 @@ class IssuerModelsTest(BadgrTestCase):
         """Checks if uniquness constraints on name dont trigger for archived Issuers"""
         teacher1 = self.setup_teacher(authenticate=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
-        setup_issuer_kwargs = {'created_by': teacher1, 'faculty': faculty, 'name': 'The same'}
+        setup_issuer_kwargs = {'created_by': teacher1, 'faculty': faculty, 'name_english': 'The same'}
         issuer = self.setup_issuer(**setup_issuer_kwargs)
         self.assertRaises(IntegrityError, self.setup_issuer, **setup_issuer_kwargs)
         setup_issuer_kwargs['archived'] = True

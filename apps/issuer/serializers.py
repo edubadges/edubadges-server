@@ -81,18 +81,17 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
                        InternalValueErrorOverrideMixin, serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierField()
-    name = StripTagsCharField(max_length=1024)
+    name_english = StripTagsCharField(max_length=1024, required=False, allow_null=True)
+    name_dutch = StripTagsCharField(max_length=1024, required=False, allow_null=True)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
-    image = ValidImageField(required=False)
+    image_english = ValidImageField(required=False)
+    image_dutch = ValidImageField(required=False)
     email = serializers.EmailField(max_length=255, required=True)
-    description_english = StripTagsCharField(max_length=16384, required=False)
-    description_dutch = StripTagsCharField(max_length=16384, required=False)
+    description_english = StripTagsCharField(max_length=16384, required=False, allow_null=True)
+    description_dutch = StripTagsCharField(max_length=16384, required=False, allow_null=True)
     url = serializers.URLField(max_length=1024, required=True)
     faculty = FacultySlugRelatedField(slug_field='entity_id', required=True)
     extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
-
-    class Meta:
-        apispec_definition = ('Issuer', {})
 
     def validate_image(self, image):
         if image is not None:
@@ -117,7 +116,9 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             raise BadgrValidationError("You don't have the necessary permissions", 100)
 
     def update(self, instance, validated_data):
-        if instance.assertions and instance.name != validated_data["name"]:
+        if instance.assertions and instance.name_english != validated_data["name_english"]:
+            raise BadgrValidationError("Cannot change the name, assertions have already been issued within this entity", 214)
+        if instance.assertions and instance.name_dutch != validated_data["name_dutch"]:
             raise BadgrValidationError("Cannot change the name, assertions have already been issued within this entity", 214)
         [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
         self.save_extensions(validated_data, instance)
@@ -138,12 +139,14 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         if self.context.get('embed_badgeclasses', False):
             representation['badgeclasses'] = BadgeClassSerializer(obj.badgeclasses.all(), many=True,
                                                                   context=self.context).data
-        if not representation['image']:
-            representation['image'] = obj.institution.image_url()
+        if not representation['image_english']:
+            representation['image_english'] = obj.institution.image_url()
+        if not representation['image_dutch']:
+            representation['image_dutch'] = obj.institution.image_url()
         return representation
 
     def to_internal_value_error_override(self, data):
-        """Function used in combination with the InternalValueErrorOverrideMixin to override serializer excpetions when
+        """Function used in combination with the InternalValueErrorOverrideMixin to override serializer exceptions when
         data is internalised (i.e. the to_internal_value() method is called)"""
         errors = OrderedDict()
         if data.get('email', False):
@@ -152,6 +155,14 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             except ValidationError:
                 e = OrderedDict([('email', [ErrorDetail('Enter a valid email address.', code=509)])])
                 errors = OrderedDict(chain(errors.items(), e.items()))
+        if not data.get('name_english', False) and not data.get('name_dutch', False):
+            e = OrderedDict([('name_english', [ErrorDetail('Either Dutch or English name is required', code=912)]),
+                             ('name_dutch', [ErrorDetail('Either Dutch or English name is required', code=912)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
+        if not data.get('description_english', False) and not data.get('description_dutch', False):
+            e = OrderedDict([('description_english', [ErrorDetail('Either Dutch or English description is required', code=913)]),
+                             ('description_dutch', [ErrorDetail('Either Dutch or English description is required', code=913)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
         return errors
 
     def add_extensions(self, instance, add_these_extensions, extension_items):
