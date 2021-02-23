@@ -196,8 +196,8 @@ class Issuer(EntityUserProvisionmentMixin,
                 query = Q(name_english=self.name_english)
             else:
                 raise BadgrValidationMultipleFieldError([
-                    ['name_english', "There is already an Issuer with this English name inside this Issuer group", 908],
-                    ['name_dutch', "There is already an Issuer with this Dutch name inside this Issuer group", 914]
+                    ['name_english', 'Either Dutch or English description is required', 913],
+                    ['name_dutch', 'Either Dutch or English description is required', 913]
                 ])
             issuer_same_name = self.__class__.objects \
                 .filter(query,
