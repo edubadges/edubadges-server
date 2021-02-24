@@ -1,5 +1,3 @@
-import json
-
 import graphene
 from graphene_django.types import DjangoObjectType
 
@@ -118,7 +116,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
         fields = ('name', 'entity_id', 'issuer', 'image', 'staff',
                   'description', 'criteria_url', 'criteria_text', 'is_private',
                   'created_at', 'expiration_period', 'public_url', 'assertions_count'
-                  'content_type_id', 'formal')
+                                                                   'content_type_id', 'formal')
 
     staff = graphene.List(BadgeClassStaffType)
     extensions = graphene.List(BadgeClassExtensionType)
@@ -170,6 +168,7 @@ class Query(object):
     issuer = graphene.Field(IssuerType, id=graphene.String())
     badge_class = graphene.Field(BadgeClassType, id=graphene.String())
     badge_instance = graphene.Field(BadgeInstanceType, id=graphene.String())
+    badge_instances_count = graphene.Int()
 
     def resolve_issuers(self, info, **kwargs):
         return [issuer for issuer in Issuer.objects.filter(archived=False)
@@ -206,3 +205,6 @@ class Query(object):
 
     def resolve_badge_instances(self, info, **kwargs):
         return list(info.context.user.cached_badgeinstances())
+
+    def resolve_badge_instances_count(self, info):
+        return BadgeInstance.objects.count()
