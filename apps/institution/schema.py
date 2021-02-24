@@ -16,11 +16,15 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
                   'content_type_id')
 
     issuers = graphene.List(IssuerType)
+    public_issuers = graphene.List(IssuerType)
     staff = graphene.List(FacultyStaffType)
     has_unrevoked_assertions = graphene.Boolean()
 
     def resolve_issuers(self, info):
         return self.get_issuers(info.context.user, ['may_read'])
+
+    def resolve_public_issuers(self, info):
+        return self.cached_issuers()
 
     def resolve_has_unrevoked_assertions(self, info):
         return any([assertion.revoked is False for assertion in self.assertions])
@@ -35,15 +39,20 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
                   'institution_type')
 
     faculties = graphene.List(FacultyType)
+    public_faculties = graphene.List(FacultyType)
     staff = graphene.List(InstitutionStaffType)
 
     def resolve_faculties(self, info):
         return self.get_faculties(info.context.user, ['may_read'])
 
+    def resolve_public_faculties(self, info):
+        return self.cached_faculties()
+
 
 class Query(object):
     current_institution = graphene.Field(InstitutionType)
     institutions = graphene.List(InstitutionType)
+    public_institutions = graphene.List(InstitutionType)
     faculties = graphene.List(FacultyType)
     faculty = graphene.Field(FacultyType, id=graphene.String())
 
@@ -52,6 +61,9 @@ class Query(object):
 
     def resolve_institutions(self, info, **kwargs):
         return [inst for inst in Institution.objects.all() if inst.has_permissions(info.context.user, ['may_read'])]
+
+    def resolve_public_institutions(self, info, **kwargs):
+        return Institution.objects.all()
 
     def resolve_faculties(self, info, **kwargs):
         return [fac for fac in Faculty.objects.all() if fac.has_permissions(info.context.user, ['may_read'])]

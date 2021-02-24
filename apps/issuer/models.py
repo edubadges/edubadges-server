@@ -1,4 +1,3 @@
-import requests
 import datetime
 import io
 import logging
@@ -8,8 +7,9 @@ from collections import OrderedDict
 from json import dumps as json_dumps
 from json import loads as json_loads
 from urllib.parse import urljoin
-import cachemodel
 
+import cachemodel
+import requests
 from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -18,22 +18,20 @@ from django.core.files.storage import default_storage
 from django.db import models, transaction, IntegrityError
 from django.urls import reverse
 from django.utils import timezone
+from jsonfield import JSONField
+from openbadges_bakery import bake
+from rest_framework import serializers
 
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager, BadgeInstanceEvidenceManager
-from jsonfield import JSONField
 from mainsite.mixins import ResizeUploadedImage, ScrubUploadedSvgImage, ImageUrlGetterMixin
 from mainsite.models import BadgrApp, BaseAuditedModel, ArchiveMixin
 from mainsite.utils import OriginSetting, generate_entity_uri, EmailMessageMaker
-from openbadges_bakery import bake
-from rest_framework import serializers
 from signing import tsob
 from signing.models import AssertionTimeStamp, PublicKeyIssuer
 from signing.models import PublicKey
-from staff.models import BadgeClassStaff, IssuerStaff
 from staff.mixins import PermissionedModelMixin
-
-
+from staff.models import BadgeClassStaff, IssuerStaff
 from .utils import generate_sha256_hashstring, CURRENT_OBI_VERSION, get_obi_context, add_obi_version_ifneeded, \
     UNVERSIONED_BAKED_VERSION
 
@@ -170,13 +168,11 @@ class Issuer(EntityUserProvisionmentMixin,
                 'total_assertions_informal': total_assertions_informal,
                 'total_assertions_revoked': total_assertions_revoked}
 
-
-
     def validate_unique(self, exclude=None):
         if not self.archived:
-            if self.__class__.objects\
-                    .filter(name=self.name, faculty=self.faculty, archived=False)\
-                    .exclude(pk=self.pk)\
+            if self.__class__.objects \
+                    .filter(name=self.name, faculty=self.faculty, archived=False) \
+                    .exclude(pk=self.pk) \
                     .exists():
                 raise IntegrityError("Issuer with this name already exists in the same faculty.")
         super(Issuer, self).validate_unique(exclude=exclude)
@@ -242,7 +238,7 @@ class Issuer(EntityUserProvisionmentMixin,
 
     @property
     def public_url(self):
-        return OriginSetting.HTTP+self.get_absolute_url()
+        return OriginSetting.HTTP + self.get_absolute_url()
 
     @property
     def jsonld_id(self):
@@ -252,7 +248,8 @@ class Issuer(EntityUserProvisionmentMixin,
 
     @property
     def owners(self):
-        return self.get_local_staff_members(['may_create', 'may_read', 'may_update', 'may_delete', 'may_award', 'may_administrate_users'])
+        return self.get_local_staff_members(
+            ['may_create', 'may_read', 'may_update', 'may_delete', 'may_award', 'may_administrate_users'])
 
     @property
     def current_signers(self):
@@ -272,7 +269,8 @@ class Issuer(EntityUserProvisionmentMixin,
     def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True, use_canonical_id=False, signed=False,
                  public_key_issuer=None, expand_public_key=False, expand_institution=False):
         if signed and not public_key_issuer:
-            raise ValueError('Cannot return signed issuer json without knowing which public key address is going to be used.')
+            raise ValueError(
+                'Cannot return signed issuer json without knowing which public key address is going to be used.')
         if public_key_issuer:
             if public_key_issuer.issuer != self:
                 raise ValueError('Public key issuer does not belong to this issuer.')
@@ -341,13 +339,14 @@ class Issuer(EntityUserProvisionmentMixin,
                 raise ValueError('issuer is not assigned to a faculty')
             if not self.faculty.institution:
                 raise ValueError('issuer is not assigned to an institution')
-            json['faculty'] = {'name':  self.faculty.name, 'institution': self.faculty.institution.get_json(obi_version=CURRENT_OBI_VERSION)}
+            json['faculty'] = {'name': self.faculty.name,
+                               'institution': self.faculty.institution.get_json(obi_version=CURRENT_OBI_VERSION)}
 
         # pass through imported json
         if include_extra:
             extra = self.get_filtered_json()
             if extra is not None:
-                for k,v in list(extra.items()):
+                for k, v in list(extra.items()):
                     if k not in json:
                         json[k] = v
 
@@ -366,7 +365,8 @@ class Issuer(EntityUserProvisionmentMixin,
     def json(self):
         return self.get_json()
 
-    def get_filtered_json(self, excluded_fields=('@context', 'id', 'type', 'name', 'url', 'description', 'image', 'email')):
+    def get_filtered_json(self,
+                          excluded_fields=('@context', 'id', 'type', 'name', 'url', 'description', 'image', 'email')):
         return super(Issuer, self).get_filtered_json(excluded_fields=excluded_fields)
 
     @property
@@ -430,9 +430,9 @@ class BadgeClass(EntityUserProvisionmentMixin,
 
     def validate_unique(self, exclude=None):
         if not self.archived:
-            if self.__class__.objects\
-                    .filter(name=self.name, issuer=self.issuer, archived=False)\
-                    .exclude(pk=self.pk)\
+            if self.__class__.objects \
+                    .filter(name=self.name, issuer=self.issuer, archived=False) \
+                    .exclude(pk=self.pk) \
                     .exists():
                 raise IntegrityError("Badgeclass with this name already exists in the same issuer.")
         super(BadgeClass, self).validate_unique(exclude=exclude)
@@ -496,7 +496,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
 
     @property
     def public_url(self):
-        return OriginSetting.HTTP+self.get_absolute_url()
+        return OriginSetting.HTTP + self.get_absolute_url()
 
     @property
     def jsonld_id(self):
@@ -511,7 +511,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
     def get_criteria_url(self):
         if self.criteria_url:
             return self.criteria_url
-        return OriginSetting.HTTP+reverse('badgeclass_criteria', kwargs={'entity_id': self.entity_id})
+        return OriginSetting.HTTP + reverse('badgeclass_criteria', kwargs={'entity_id': self.entity_id})
 
     @property
     def description_nonnull(self):
@@ -535,11 +535,11 @@ class BadgeClass(EntityUserProvisionmentMixin,
         from lti_edu.models import StudentsEnrolled
         return StudentsEnrolled.objects.filter(badge_class=self, badge_instance=None, denied=False)
 
-    def enrollment_count(self):
-        from lti_edu.models import StudentsEnrolled
-        return StudentsEnrolled.objects.filter(badge_class=self,
-                                               denied=False,
-                                               date_awarded=None).count()
+    @property
+    def assertions_count(self):
+        return BadgeInstance.objects.filter(badgeclass=self,
+                                            revoked=False,
+                                            acceptance='Accepted').count()
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_alignments(self):
@@ -553,7 +553,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
     def alignment_items(self, value):
         if value is None:
             value = []
-        keys = ['target_name','target_url','target_description','target_framework', 'target_code']
+        keys = ['target_name', 'target_url', 'target_description', 'target_framework', 'target_code']
 
         def _identity(align):
             """build a unique identity from alignment json"""
@@ -640,9 +640,11 @@ class BadgeClass(EntityUserProvisionmentMixin,
         assertion.submit_for_timestamping(signer=signer)
         return assertion
 
-    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True, use_canonical_id=False, signed=False, public_key_issuer=None):
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True, use_canonical_id=False, signed=False,
+                 public_key_issuer=None):
         if not public_key_issuer and signed:
-            raise ValueError('Cannot returned signed version of json without knowing which public key address was used.')
+            raise ValueError(
+                'Cannot returned signed version of json without knowing which public key address was used.')
         obi_version, context_iri = get_obi_context(obi_version)
         json = OrderedDict({'@context': context_iri})
         json.update(OrderedDict(
@@ -655,7 +657,8 @@ class BadgeClass(EntityUserProvisionmentMixin,
 
         if not signed:
             json['id'] = self.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.jsonld_id, obi_version)
-            json['issuer'] = self.cached_issuer.jsonld_id if use_canonical_id else add_obi_version_ifneeded(self.cached_issuer.jsonld_id, obi_version)
+            json['issuer'] = self.cached_issuer.jsonld_id if use_canonical_id else add_obi_version_ifneeded(
+                self.cached_issuer.jsonld_id, obi_version)
         if signed:
             json['id'] = self.get_url_with_public_key(public_key_issuer)
             json['issuer'] = self.issuer.get_url_with_public_key(public_key_issuer)
@@ -693,7 +696,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
 
         # alignment / tags
         if obi_version == '2_0':
-            json['alignment'] = [ a.get_json(obi_version=obi_version) for a in self.cached_alignments() ]
+            json['alignment'] = [a.get_json(obi_version=obi_version) for a in self.cached_alignments()]
             json['tags'] = list(t.name for t in self.cached_tags())
 
         # extensions
@@ -705,7 +708,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
         if include_extra:
             extra = self.get_filtered_json()
             if extra is not None:
-                for k,v in list(extra.items()):
+                for k, v in list(extra.items()):
                     if k not in json:
                         json[k] = v
         return json
@@ -714,7 +717,8 @@ class BadgeClass(EntityUserProvisionmentMixin,
     def json(self):
         return self.get_json()
 
-    def get_filtered_json(self, excluded_fields=('@context', 'id', 'type', 'name', 'description', 'image', 'criteria', 'issuer')):
+    def get_filtered_json(self, excluded_fields=(
+    '@context', 'id', 'type', 'name', 'description', 'image', 'criteria', 'issuer')):
         return super(BadgeClass, self).get_filtered_json(excluded_fields=excluded_fields)
 
     @property
@@ -734,7 +738,8 @@ class BadgeInstance(BaseAuditedModel,
 
     identifier = models.CharField(max_length=255, null=True, default=None)  # the uuid used to ID signed assertions
 
-    badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.PROTECT, related_name='badgeinstances')
+    badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.PROTECT,
+                                   related_name='badgeinstances')
     issuer = models.ForeignKey(Issuer, on_delete=models.PROTECT, blank=False, null=False)
     user = models.ForeignKey('badgeuser.BadgeUser', blank=True, null=True, on_delete=models.CASCADE)
 
@@ -750,9 +755,10 @@ class BadgeInstance(BaseAuditedModel,
         (RECIPIENT_TYPE_URL, 'url'),
         (RECIPIENT_TYPE_EDUID, 'id'),
     )
-    
+
     recipient_identifier = models.CharField(max_length=512, blank=False, null=False, db_index=True)
-    recipient_type = models.CharField(max_length=255, choices=RECIPIENT_TYPE_CHOICES, default=RECIPIENT_TYPE_EDUID, blank=False, null=False)
+    recipient_type = models.CharField(max_length=255, choices=RECIPIENT_TYPE_CHOICES, default=RECIPIENT_TYPE_EDUID,
+                                      blank=False, null=False)
 
     image = models.FileField(upload_to='uploads/badges', blank=True, null=True, db_index=True)
 
@@ -786,7 +792,7 @@ class BadgeInstance(BaseAuditedModel,
 
     class Meta:
         index_together = (
-                ('recipient_identifier', 'badgeclass', 'revoked'),
+            ('recipient_identifier', 'badgeclass', 'revoked'),
         )
 
     def validate(self):
@@ -851,7 +857,7 @@ class BadgeInstance(BaseAuditedModel,
 
     @property
     def public_url(self):
-        return OriginSetting.HTTP+self.get_absolute_url()
+        return OriginSetting.HTTP + self.get_absolute_url()
 
     @property
     def signing_in_progress(self):
@@ -1023,8 +1029,10 @@ class BadgeInstance(BaseAuditedModel,
             if signed:
                 json['badge']['id'] = self.cached_badgeclass.get_url_with_public_key(public_key_issuer)
             if expand_issuer:
-                json['badge']['issuer'] = self.cached_issuer.get_json(obi_version=obi_version, include_extra=include_extra, signed=signed,
-                                                                      expand_public_key=False, public_key_issuer=public_key_issuer,
+                json['badge']['issuer'] = self.cached_issuer.get_json(obi_version=obi_version,
+                                                                      include_extra=include_extra, signed=signed,
+                                                                      expand_public_key=False,
+                                                                      public_key_issuer=public_key_issuer,
                                                                       expand_institution=True)
 
         if self.revoked:
@@ -1102,7 +1110,7 @@ class BadgeInstance(BaseAuditedModel,
         if include_extra:
             extra = self.get_filtered_json()
             if extra is not None:
-                for k,v in list(extra.items()):
+                for k, v in list(extra.items()):
                     if k not in json:
                         json[k] = v
 
@@ -1112,7 +1120,9 @@ class BadgeInstance(BaseAuditedModel,
     def json(self):
         return self.get_json()
 
-    def get_filtered_json(self, excluded_fields=('@context', 'id', 'type', 'uid', 'recipient', 'badge', 'issuedOn', 'image', 'revoked', 'revocationReason', 'verify', 'verification')):
+    def get_filtered_json(self, excluded_fields=(
+    '@context', 'id', 'type', 'uid', 'recipient', 'badge', 'issuedOn', 'image', 'revoked', 'revocationReason', 'verify',
+    'verification')):
         return super(BadgeInstance, self).get_filtered_json(excluded_fields=excluded_fields)
 
     @property
