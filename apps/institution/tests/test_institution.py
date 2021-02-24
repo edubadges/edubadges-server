@@ -4,6 +4,7 @@ from django.db import IntegrityError
 from institution.models import Institution
 from institution.testfiles.helper import faculty_json, institution_json
 from mainsite.tests import BadgrTestCase
+from mainsite.exceptions import BadgrValidationFieldError
 
 
 class InstitutionTest(BadgrTestCase):
@@ -69,9 +70,9 @@ class InstitutionModelsTest(BadgrTestCase):
     def test_faculty_uniqueness_constraints_when_archiving(self):
         """Checks if uniquness constraints on name dont trigger for archived Faculties"""
         teacher1 = self.setup_teacher(authenticate=True)
-        setup_faculty_kwargs = {'institution': teacher1.institution, 'name': 'The same'}
+        setup_faculty_kwargs = {'institution': teacher1.institution, 'name_english': 'The same'}
         faculty = self.setup_faculty(**setup_faculty_kwargs)
-        self.assertRaises(IntegrityError, self.setup_faculty, **setup_faculty_kwargs)
+        self.assertRaises(BadgrValidationFieldError, self.setup_faculty, **setup_faculty_kwargs)
         setup_faculty_kwargs['archived'] = True
         self.setup_faculty(**setup_faculty_kwargs)
         faculty.archive()

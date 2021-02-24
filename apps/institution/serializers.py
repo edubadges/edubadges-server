@@ -1,9 +1,13 @@
 from django.db import IntegrityError
 from rest_framework import serializers
+from collections import OrderedDict
+from itertools import chain
+from rest_framework.exceptions import ErrorDetail
 
 from badgeuser.serializers import TermsSerializer
 from mainsite.drf_fields import ValidImageField
 from mainsite.exceptions import BadgrValidationError
+from mainsite.mixins import InternalValueErrorOverrideMixin
 from mainsite.serializers import StripTagsCharField, BaseSlugRelatedField
 from .models import Faculty, Institution
 
@@ -39,20 +43,33 @@ class InstitutionSerializer(serializers.Serializer):
         return instance
 
 
-class FacultySerializer(serializers.Serializer):
+class FacultySerializer(InternalValueErrorOverrideMixin, serializers.Serializer):
     id = serializers.ReadOnlyField()
-    name = serializers.CharField(max_length=512)
-    description_english = StripTagsCharField(max_length=16384, required=False)
-    description_dutch = StripTagsCharField(max_length=16384, required=False)
+    name_english = serializers.CharField(max_length=512, required=False, allow_null=True, allow_blank=True)
+    name_dutch = serializers.CharField(max_length=512, required=False, allow_null=True, allow_blank=True)
+    description_english = StripTagsCharField(max_length=16384, required=False, allow_null=True, allow_blank=True)
+    description_dutch = StripTagsCharField(max_length=16384, required=False, allow_null=True, allow_blank=True)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
 
     class Meta:
         model = Faculty
 
+    def to_internal_value_error_override(self, data):
+        """Function used in combination with the InternalValueErrorOverrideMixin to override serializer exceptions when
+        data is internalised (i.e. the to_internal_value() method is called)"""
+        errors = OrderedDict()
+        if not data.get('name_english', False) and not data.get('name_dutch', False):
+            e = OrderedDict([('name_english', [ErrorDetail('Either Dutch or English name is required', code=912)]),
+                             ('name_dutch', [ErrorDetail('Either Dutch or English name is required', code=912)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
+        if not data.get('description_english', False) and not data.get('description_dutch', False):
+            e = OrderedDict([('description_english', [ErrorDetail('Either Dutch or English description is required', code=913)]),
+                             ('description_dutch', [ErrorDetail('Either Dutch or English description is required', code=913)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
+        return errors
+
     def update(self, instance, validated_data):
-        instance.name = validated_data.get('name')
-        instance.description_english = validated_data.get('description_english')
-        instance.description_dutch = validated_data.get('description_dutch')
+        [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
         instance.save()
         return instance
 

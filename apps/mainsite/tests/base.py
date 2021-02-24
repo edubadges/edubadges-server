@@ -197,8 +197,8 @@ class SetupHelper(object):
     def setup_faculty(self, **kwargs):
         if not kwargs.get('institution', False):
             kwargs['institution'] = self.setup_institution()
-        if not kwargs.get('name', False):
-            kwargs['name'] = name_randomiser('Test Faculty')
+        if not kwargs.get('name_english', False) and not kwargs.get('name_dutch', False):
+            kwargs['name_english'] = name_randomiser('Test Faculty')
         return Faculty.objects.create(**kwargs)
 
     def setup_issuer(self, created_by, **kwargs):

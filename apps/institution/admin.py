@@ -14,9 +14,9 @@ class InstitutionAdmin(admin.ModelAdmin):
 
 class FacultyAdmin(admin.ModelAdmin):
     
-    list_display = ('name',)
+    list_display = ('name_english', 'name_dutch')
     readonly_fields = ('entity_id', 'created_by', 'updated_by', 'institution')
-    list_display = ('name', 'entity_id', admin_list_linkify('institution', 'name'))
+    list_display = ('name_english', 'entity_id', admin_list_linkify('institution', 'name'))
 
 
 badgr_admin.register(Institution, InstitutionAdmin)

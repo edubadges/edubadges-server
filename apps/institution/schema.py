@@ -12,12 +12,16 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
                   ContentTypeIdResolverMixin, DjangoObjectType):
     class Meta:
         model = Faculty
-        fields = ('name', 'entity_id', 'institution', 'created_at', 'description_english', 'description_dutch',
+        fields = ('name_english', 'name_dutch', 'entity_id', 'institution', 'created_at', 'description_english', 'description_dutch',
                   'content_type_id')
 
     issuers = graphene.List(IssuerType)
     staff = graphene.List(FacultyStaffType)
+    name = graphene.String()
     has_unrevoked_assertions = graphene.Boolean()
+
+    def resolve_name(self, info):
+        return self.name
 
     def resolve_issuers(self, info):
         return self.get_issuers(info.context.user, ['may_read'])

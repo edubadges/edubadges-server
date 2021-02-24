@@ -2,7 +2,7 @@ png_string = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXMAAAFzCAYAAADMuumS
 issuer_json = {"name_english": "test issuer",
                 "description_english": "test description",
                 "email": "testtest@testies.test",
-                "url": "http://www.surfnet.nl",
+                "url_english": "http://www.surfnet.nl",
                # "extensions":
                #     {"extensions:GradingTableExtension": {
                #         "@context": "https://api-test.edubadges.nl/static/extensions/GradingTableExtension/context.json",

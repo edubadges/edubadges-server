@@ -199,8 +199,8 @@ class Issuer(EntityUserProvisionmentMixin,
                 query = Q(name_english=self.name_english)
             else:
                 raise BadgrValidationMultipleFieldError([
-                    ['name_english', 'Either Dutch or English description is required', 913],
-                    ['name_dutch', 'Either Dutch or English description is required', 913]
+                    ['name_english', 'Either Dutch or English name is required', 913],
+                    ['name_dutch', 'Either Dutch or English name is required', 913]
                 ])
             issuer_same_name = self.__class__.objects \
                 .filter(query,

@@ -6,4 +6,4 @@ institution_json = {
     "image": institution_image
 }
 
-faculty_json = {'name': 'FacultyName'}
+faculty_json = {'name_english': 'FacultyName', 'description_english': 'Descr Eng'}

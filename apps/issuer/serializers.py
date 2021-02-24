@@ -133,12 +133,7 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         self.save_extensions(validated_data, instance)
         if not instance.badgrapp_id:
             instance.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
-        try:
-            instance.save()
-        except IntegrityError:
-            raise BadgrValidationFieldError('name',
-                                            "There is already an Issuer with this name inside this Issuer group",
-                                            908)
+        instance.save()
         return instance
 
     def to_representation(self, obj):
