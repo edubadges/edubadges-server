@@ -62,7 +62,7 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
                  ExtensionResolverMixin, UserProvisionmentResolverMixin, DjangoObjectType):
     class Meta:
         model = Issuer
-        fields = ('name', 'entity_id', 'badgeclasses', 'faculty',
+        fields = ('name', 'entity_id', 'badgeclasses', 'faculty', 'badgeclasses_count',
                   'image', 'description_english', 'description_dutch', 'url', 'email', 'created_at',
                   'content_type_id', 'public_url')
 
@@ -79,7 +79,7 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
         return self.cached_badgeclasses()
 
     def resolve_badgeclasses_count(self, info):
-        return len(self.get_badgeclasses(info.context.user, ['read']))
+        return self.badgeclasses_count
 
 
 def badge_user_type():

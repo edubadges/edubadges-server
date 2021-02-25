@@ -1,7 +1,7 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 
-from issuer.schema import IssuerType, BadgeInstanceType
+from issuer.schema import IssuerType
 from mainsite.graphql_utils import UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, StaffResolverMixin, \
     ImageResolverMixin, PermissionsResolverMixin
 from staff.schema import InstitutionStaffType, FacultyStaffType
@@ -50,6 +50,7 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
 
 
 class Query(object):
+    public_institution = graphene.Field(InstitutionType, id=graphene.String())
     current_institution = graphene.Field(InstitutionType)
     institutions = graphene.List(InstitutionType)
     public_institutions = graphene.List(InstitutionType)
@@ -61,6 +62,12 @@ class Query(object):
 
     def resolve_institutions(self, info, **kwargs):
         return [inst for inst in Institution.objects.all() if inst.has_permissions(info.context.user, ['may_read'])]
+
+    def resolve_public_institution(self, info, **kwargs):
+        id = kwargs.get('id')
+        if id is not None:
+            institution = Institution.objects.get(entity_id=id)
+            return institution
 
     def resolve_public_institutions(self, info, **kwargs):
         return Institution.objects.all()

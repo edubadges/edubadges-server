@@ -209,6 +209,12 @@ class Issuer(EntityUserProvisionmentMixin,
     def get_badgeclasses(self, user, permissions):
         return [bc for bc in self.cached_badgeclasses() if bc.has_permissions(user, permissions)]
 
+    @property
+    def badgeclasses_count(self):
+        return BadgeClass.objects.filter(issuer=self,
+                                         archived=False).count()
+
+
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeclasses(self):
         return list(self.badgeclasses.filter(archived=False))
