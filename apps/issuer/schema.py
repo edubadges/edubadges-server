@@ -62,6 +62,7 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
                  ExtensionResolverMixin, UserProvisionmentResolverMixin, DjangoObjectType):
     class Meta:
         model = Issuer
+        #TODO extensions
         fields = ('name', 'entity_id', 'badgeclasses', 'faculty', 'badgeclasses_count',
                   'image', 'description_english', 'description_dutch', 'url', 'email', 'created_at',
                   'content_type_id', 'public_url')
@@ -166,6 +167,7 @@ class Query(object):
     public_badge_classes = graphene.List(BadgeClassType)
     badge_instances = graphene.List(BadgeInstanceType)
     issuer = graphene.Field(IssuerType, id=graphene.String())
+    public_issuer = graphene.Field(IssuerType, id=graphene.String())
     badge_class = graphene.Field(BadgeClassType, id=graphene.String())
     badge_instance = graphene.Field(BadgeInstanceType, id=graphene.String())
     badge_instances_count = graphene.Int()
@@ -180,6 +182,12 @@ class Query(object):
             issuer = Issuer.objects.get(entity_id=id, archived=False)
             if issuer.has_permissions(info.context.user, ['may_read']):
                 return issuer
+
+    def resolve_public_issuer(self, info, **kwargs):
+        id = kwargs.get('id')
+        if id is not None:
+            issuer = Issuer.objects.get(entity_id=id, archived=False)
+            return issuer
 
     def resolve_badge_classes(self, info, **kwargs):
         return [bc for bc in BadgeClass.objects.filter(archived=False)
