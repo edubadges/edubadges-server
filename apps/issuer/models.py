@@ -146,22 +146,22 @@ class Issuer(EntityUserProvisionmentMixin,
 
     @property
     def description(self):
-        return self.description_english if self.description_english else self.description_dutch
+        return self.return_value_according_to_language(self.description_english, self.description_dutch)
 
     @property
     def name(self):
-        return self.name_english if self.name_english else self.name_dutch
+        return self.return_value_according_to_language(self.name_english, self.name_dutch)
 
     @property
     def image(self):
-        image = self.image_english if self.image_english else self.image_dutch
+        image = self.return_value_according_to_language(self.image_english, self.image_dutch)
         if not image:
             return self.institution.image
         return image
 
     @property
     def url(self):
-        return self.url_english if self.url_english else self.url_dutch
+        return self.return_value_according_to_language(self.url_english, self.url_dutch)
 
     def get_report(self):
         total_assertions_formal = 0

@@ -20,12 +20,11 @@ from badgeuser.serializers import BadgeUserIdentifierField
 from institution.serializers import FacultySlugRelatedField
 from lti_edu.models import StudentsEnrolled
 from mainsite.drf_fields import ValidImageField
-from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError, BadgrValidationMultipleFieldError
+from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError
 from mainsite.models import BadgrApp
 from mainsite.mixins import InternalValueErrorOverrideMixin
-from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField, \
-    OriginalJsonSerializerMixin, BaseSlugRelatedField
-from mainsite.utils import OriginSetting
+from mainsite.serializers import StripTagsCharField, MarkdownCharField, OriginalJsonSerializerMixin, BaseSlugRelatedField
+from mainsite.utils import OriginSetting, scrub_svg_image, resize_image, verify_svg
 from mainsite.validators import BadgeExtensionValidator
 from . import utils
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension
@@ -76,7 +75,6 @@ class ExtensionsSaverMixin(object):
             self.update_extensions(instance, update_these_extensions, extension_items)
             self.add_extensions(instance, add_these_extensions, extension_items)
 
-from mainsite.utils import scrub_svg_image, resize_image, verify_svg
 
 class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
                        InternalValueErrorOverrideMixin, serializers.Serializer):

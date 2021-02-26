@@ -90,11 +90,15 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
 
     @property
     def name(self):
-        return self.name_english if self.name_english else self.name_dutch
+        return self.return_value_according_to_language(self.name_english, self.name_dutch)
 
     @property
     def image(self):
-        return self.image_english if self.image_english else self.image_dutch
+        return self.return_value_according_to_language(self.image_english, self.image_dutch)
+
+    @property
+    def description(self):
+        return self.return_value_according_to_language(self.description_english, self.description_dutch)
 
     @property
     def children(self):
@@ -227,11 +231,11 @@ class Faculty(EntityUserProvisionmentMixin,
 
     @property
     def name(self):
-        return self.name_english if self.name_english else self.name_dutch
+        return self.return_value_according_to_language(self.name_english, self.name_dutch)
 
     @property
     def description(self):
-        return self.description_english if self.description_english else self.description_dutch
+        return self.return_value_according_to_language(self.description_english, self.description_dutch)
 
     def get_report(self):
         total_assertions_formal = 0
