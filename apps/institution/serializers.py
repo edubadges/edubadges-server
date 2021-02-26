@@ -20,13 +20,15 @@ class FacultySlugRelatedField(BaseSlugRelatedField):
     model = Faculty
 
 
-class InstitutionSerializer(serializers.Serializer):
-    description_english = StripTagsCharField(max_length=256, required=True)
-    description_dutch = StripTagsCharField(max_length=256, required=True)
+class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Serializer):
+    description_english = StripTagsCharField(max_length=256, required=False, allow_null=True, allow_blank=True)
+    description_dutch = StripTagsCharField(max_length=256, required=False, allow_null=True, allow_blank=True)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
-    image = ValidImageField(required=True)
+    image_english = ValidImageField(required=False, allow_null=True)
+    image_dutch = ValidImageField(required=False, allow_null=True)
     brin = serializers.CharField(read_only=True)
-    name = serializers.CharField(max_length=254, required=True)
+    name_english = serializers.CharField(max_length=254, required=False, allow_null=True, allow_blank=True)
+    name_dutch = serializers.CharField(max_length=254, required=False, allow_null=True, allow_blank=True)
     grading_table = serializers.URLField(max_length=254, required=False)
 
     class Meta:
@@ -35,12 +37,33 @@ class InstitutionSerializer(serializers.Serializer):
     def update(self, instance, validated_data):
         instance.description_english = validated_data.get('description_english')
         instance.description_dutch = validated_data.get('description_dutch')
-        if 'image' in validated_data:
-            instance.image = validated_data.get('image')
+        if 'image_english' in validated_data:
+            instance.image_english = validated_data.get('image_english')
+        if 'image_dutch' in validated_data:
+            instance.image_dutch = validated_data.get('image_dutch')
         instance.grading_table = validated_data.get('grading_table')
-        instance.name = validated_data.get('name')
+        instance.name_english = validated_data.get('name_english')
+        instance.name_dutch = validated_data.get('name_dutch')
         instance.save()
         return instance
+
+    def to_internal_value_error_override(self, data):
+        """Function used in combination with the InternalValueErrorOverrideMixin to override serializer exceptions when
+        data is internalised (i.e. the to_internal_value() method is called)"""
+        errors = OrderedDict()
+        if not data.get('name_english', False) and not data.get('name_dutch', False):
+            e = OrderedDict([('name_english', [ErrorDetail('Either Dutch or English name is required', code=912)]),
+                             ('name_dutch', [ErrorDetail('Either Dutch or English name is required', code=912)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
+        if not data.get('image_english', False) and not data.get('image_dutch', False):
+            e = OrderedDict([('image_english', [ErrorDetail('Either Dutch or English image is required', code=918)]),
+                             ('image_dutch', [ErrorDetail('Either Dutch or English image is required', code=918)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
+        if not data.get('description_english', False) and not data.get('description_dutch', False):
+            e = OrderedDict([('description_english', [ErrorDetail('Either Dutch or English description is required', code=913)]),
+                             ('description_dutch', [ErrorDetail('Either Dutch or English description is required', code=913)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
+        return errors
 
 
 class FacultySerializer(InternalValueErrorOverrideMixin, serializers.Serializer):

@@ -188,9 +188,12 @@ class SetupHelper(object):
                                        url="https://raw.githubusercontent.com/edubadges/privacy/master/university-example.org/formal-edubadges-principles-en.md",
                                        language=TermsUrl.LANGUAGE_ENGLISH)
 
-    def setup_institution(self):
-        name = name_randomiser('Test Institution')
-        institution = Institution.objects.create(name=name, identifier=name)
+    def setup_institution(self, **kwargs):
+        if not kwargs.get('name_english', False):
+            kwargs['name_english'] = name_randomiser('Test Institution')
+        if not kwargs.get('identifier', False):
+            kwargs['identifier'] = kwargs['name_english']
+        institution = Institution.objects.create(**kwargs)
         self._setup_institution_terms(institution)
         return institution
 

@@ -4,7 +4,7 @@ from django.db import IntegrityError
 from institution.models import Institution
 from institution.testfiles.helper import faculty_json, institution_json
 from mainsite.tests import BadgrTestCase
-from mainsite.exceptions import BadgrValidationFieldError
+from mainsite.exceptions import BadgrValidationFieldError, BadgrValidationMultipleFieldError
 
 
 class InstitutionTest(BadgrTestCase):
@@ -76,6 +76,11 @@ class InstitutionModelsTest(BadgrTestCase):
         setup_faculty_kwargs['archived'] = True
         self.setup_faculty(**setup_faculty_kwargs)
         faculty.archive()
+
+    def test_institution_uniquenss_constraint(self):
+        setup_institution_kwargs = {'name_english': 'same'}
+        self.setup_institution(**setup_institution_kwargs)
+        self.assertRaises(BadgrValidationFieldError, self.setup_institution, **setup_institution_kwargs)
 
 
 class TestInstitutionSchema(BadgrTestCase):

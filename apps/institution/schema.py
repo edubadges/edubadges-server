@@ -4,6 +4,7 @@ from graphene_django.types import DjangoObjectType
 from issuer.schema import IssuerType, BadgeInstanceType
 from mainsite.graphql_utils import UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, StaffResolverMixin, \
     ImageResolverMixin, PermissionsResolverMixin
+from mainsite.utils import generate_image_url
 from staff.schema import InstitutionStaffType, FacultyStaffType
 from .models import Institution, Faculty
 
@@ -34,12 +35,26 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
                       ContentTypeIdResolverMixin, DjangoObjectType):
     class Meta:
         model = Institution
-        fields = ('entity_id', 'identifier', 'name', 'staff', 'created_at', 'description_english', 'description_dutch',
-                  'image', 'grading_table', 'brin', 'content_type_id', 'grondslag_formeel',
+        fields = ('entity_id', 'identifier', 'name_english', 'name_dutch', 'staff', 'created_at', 'description_english', 'description_dutch',
+                  'image_english', 'image_dutch', 'grading_table', 'brin', 'content_type_id', 'grondslag_formeel',
                   'grondslag_informeel', 'default_language')
 
     faculties = graphene.List(FacultyType)
     staff = graphene.List(InstitutionStaffType)
+    image = graphene.String()
+    name = graphene.String()
+
+    def resolve_image_english(self, info):
+        return generate_image_url(self.image_english)
+
+    def resolve_image_dutch(self, info):
+        return generate_image_url(self.image_dutch)
+
+    def resolve_name(self, info):
+        return self.name
+
+    def resolve_image(self, info):
+        return generate_image_url(self.image)
 
     def resolve_faculties(self, info):
         return self.get_faculties(info.context.user, ['may_read'])

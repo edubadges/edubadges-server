@@ -7,7 +7,7 @@ from mainsite.utils import admin_list_linkify
 
 class InstitutionAdmin(admin.ModelAdmin):
     readonly_fields = ('entity_id', 'created_by', 'updated_by')
-    list_display = ('name', 'identifier', 'brin')
+    list_display = ('name_english', 'name_dutch', 'identifier', 'brin')
 
     inlines = [TermsInline]
 

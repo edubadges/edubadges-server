@@ -224,7 +224,7 @@ class Issuer(EntityUserProvisionmentMixin,
                     raise BadgrValidationFieldError('name_english',
                                                     "There is already an Issuer with this English name inside this Issuer group",
                                                     908)
-        super(Issuer, self).validate_unique(exclude=exclude)
+        return super(Issuer, self).validate_unique(exclude=exclude)
 
     def save(self, *args, **kwargs):
         if not self.name_english and not self.name_dutch:
@@ -479,7 +479,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
                     .exclude(pk=self.pk)\
                     .exists():
                 raise IntegrityError("Badgeclass with this name already exists in the same issuer.")
-        super(BadgeClass, self).validate_unique(exclude=exclude)
+        return super(BadgeClass, self).validate_unique(exclude=exclude)
 
     def save(self, *args, **kwargs):
         self.validate_unique()
