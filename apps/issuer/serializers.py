@@ -227,6 +227,9 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         if image is not None:
             img_name, img_ext = os.path.splitext(image.name)
             image.name = 'issuer_badgeclass_' + str(uuid.uuid4()) + img_ext
+            image = resize_image(image)
+            if verify_svg(image):
+                image = scrub_svg_image(image)
         return image
 
     def validate_criteria_text(self, criteria_text):
