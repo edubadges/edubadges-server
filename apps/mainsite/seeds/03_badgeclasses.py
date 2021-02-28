@@ -9,10 +9,10 @@ from mainsite.seeds.constants import EDU_BADGES_FACULTY_NAME, SURF_INSTITUTION_N
 faculties = ["Law", "Business", "Humanities", "Medicine", "Science", "Social and Behavioural Science"]
 
 # Faculty
-for ins in Institution.objects.exclude(name=SURF_INSTITUTION_NAME):
+for ins in Institution.objects.exclude(identifier=SURF_INSTITUTION_NAME):
     for fac in faculties:
         Faculty.objects.get_or_create(
-            name=fac,
+            name_english=fac,
             description_english=f"Description for {fac}",
             description_dutch=f"Beschrijving voor {fac}",
             institution=ins
@@ -28,12 +28,12 @@ issuers = [['Notarial Law', 'Tax Law', 'Criminology'],
 
 issuers = dict(zip(faculties, issuers))
 
-for fac in Faculty.objects.exclude(name=EDU_BADGES_FACULTY_NAME):
-    [Issuer.objects.get_or_create(name=issuer,
+for fac in Faculty.objects.exclude(name_english=EDU_BADGES_FACULTY_NAME):
+    [Issuer.objects.get_or_create(name_english=issuer,
                                   description_english=f"Description for {issuer}",
                                   description_dutch=f"Beschrijving voor {issuer}",
                                   faculty=fac, old_json="{}",
-                                  url=f"https://issuer", email="issuer@info.nl", image="uploads/issuers/surf.png") for
+                                  url_english=f"https://issuer", email="issuer@info.nl", image_english="uploads/issuers/surf.png") for
      issuer in issuers[fac.name]]
 
 badge_class_extensions = {
@@ -87,17 +87,17 @@ def create_badge_class(name, issuer):
 
 # BadgeClass
 # Faculty: Social and Behavioural Science ## Issuer: Psychology
-for iss in Issuer.objects.filter(name="Psychology"):
+for iss in Issuer.objects.filter(name_english="Psychology"):
     [create_badge_class(bc, iss) for bc in
      [BADGE_CLASS_INTRODUCTION_TO_PSYCHOLOGY, BADGE_CLASS_COGNITIVE_PSYCHOLOGY, BADGE_CLASS_PSYCHOMETRICS,
       BADGE_CLASS_GROUP_DYNAMICS]]
 
 # Faculty: Social and Behavioural Science ## Issuer: Political Science
-for iss in Issuer.objects.filter(name="Political Science"):
+for iss in Issuer.objects.filter(name_english="Political Science"):
     [create_badge_class(bc, iss) for bc in
      ['Introduction to Political Science', 'Law and Politics', 'History of Political Thought', 'Research Methods']]
 
 # Faculty: Medicine ## Issuer: Medicine
-for iss in Issuer.objects.filter(name="Medicine"):
+for iss in Issuer.objects.filter(name_english="Medicine"):
     [create_badge_class(bc, iss) for bc in
      ['Growth and Development', 'Circulation and Breathing', 'Regulation and Integration', 'Digestion and Defense']]
