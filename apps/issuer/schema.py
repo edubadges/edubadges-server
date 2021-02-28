@@ -62,7 +62,6 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
                  ExtensionResolverMixin, UserProvisionmentResolverMixin, DjangoObjectType):
     class Meta:
         model = Issuer
-        #TODO extensions
         fields = ('name', 'entity_id', 'badgeclasses', 'faculty', 'badgeclasses_count',
                   'image', 'description_english', 'description_dutch', 'url', 'email', 'created_at',
                   'content_type_id', 'public_url')
