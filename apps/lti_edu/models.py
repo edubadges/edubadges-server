@@ -129,9 +129,9 @@ class StudentsEnrolled(BaseVersionedEntity, models.Model):
     def edu_id(self):
         social_account = self.user.get_social_account()
         if social_account.provider == 'edu_id':
-            return social_account.extra_data['sub']
+            return social_account.extra_data['eduid']
         else:
-            raise ValueError('User belonging to this enrollment has no sub')
+            raise ValueError('User belonging to this enrollment has no eduid')
         
     def assertion_is_revoked(self):
         if self.badge_instance:

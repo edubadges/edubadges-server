@@ -125,7 +125,7 @@ def callback(request):
     id_token = token_json['id_token']
     payload = jwt.get_unverified_claims(id_token)
 
-    social_account = get_social_account(payload['sub'])
+    social_account = get_social_account(payload[settings.EDUID_IDENTIFIER])
 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
 
@@ -166,21 +166,16 @@ def after_terms_agreement(request, **kwargs):
         return render_authentication_error(request, EduIDProvider.id, error)
     payload = jwt.get_unverified_claims(id_token)
 
-    social_account = get_social_account(payload['sub'])
+    logger.info(f"Using payload attribute {settings.EDUID_IDENTIFIER} for unique identifier")
+
+    social_account = get_social_account(payload[settings.EDUID_IDENTIFIER])
     if not social_account:  # user does not exist
-        # ensure that email & names are in extra_data
-        if 'email' not in payload:
-            error = 'Sorry, your eduID account does not have your institution mail. Login to eduID and link your institution account, then try again.'
-            logger.error(error)
-            return render_authentication_error(request, EduIDProvider.id, error)
-        if 'family_name' not in payload:
-            error = 'Sorry, your eduID account has no family_name attached from SURFconext. Login to eduID and link your institution account, then try again.'
-            logger.error(error)
-            return render_authentication_error(request, EduIDProvider.id, error)
-        if 'given_name' not in payload:
-            error = 'Sorry, your eduID account has no first_name attached from SURFconext. Login to eduID and link your institution account, then try again.'
-            logger.error(error)
-            return render_authentication_error(request, EduIDProvider.id, error)
+        # Fail fast if not all required attribbutes are there
+        for attr in [settings.EDUID_IDENTIFIER, 'email', 'family_name', 'given_name']:
+            if attr not in payload:
+                error = f"Sorry, your eduID account does not have a {attr} attribute. Login to eduID and then try again"
+                logger.error(error)
+                return render_authentication_error(request, EduIDProvider.id, error)
     else:  # user already exists
         update_user_params(social_account.user, payload)
 

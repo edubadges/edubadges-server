@@ -15,16 +15,31 @@ from .util import add_terms_institution
 institutions = [
     {'name_english': INSTITUTION_UNIVERSITY_EXAMPLE_ORG,
      'description_english': 'The university example is always a good place to hang out',
-     'description_dutch': 'De university example is altijd een goede plek om rond te hangen (wat een vertaling)'},
-    {'name_english': 'diy.surfconext.nl', 'description_english': 'The university diy is also a good place to hang out', 'description_dutch': 'De university diy is ook een mooie plek'},
-    {'name_english': 'university1', 'description_english': 'University1 description', 'description_dutch': 'University1 beschrijving'},
-    {'name_english': 'university2', 'description_english': 'University1 description', 'description_dutch': 'University1 beschrijving'},
+     'description_dutch': 'De university example is altijd een goede plek om rond te hangen (wat een vertaling)',
+     'institution_type': 'WO'
+     },
+    {'name_english': 'diy.surfconext.nl',
+     'description_english': 'The university diy is also a good place to hang out',
+     'description_dutch': 'De university diy is ook een mooie plek',
+     'institution_type': 'HBO'
+     },
+    {'name_english': 'university1',
+     'description_english': 'University1 description',
+     'description_dutch': 'University1 beschrijving',
+     'institution_type': 'MBO'
+     },
+    {'name_english': 'university2',
+     'description_english': 'University1 description',
+     'description_dutch': 'University1 beschrijving',
+     'institution_type': 'HBO'
+     },
 ]
 for ins in institutions:
     institution, _ = Institution.objects.get_or_create(identifier=ins['name_english'],
                                                        name_english=ins['name_english'],
                                                        description_english=ins['description_english'],
                                                        description_dutch=ins['description_dutch'],
+                                                       institution_type=ins['institution_type'],
                                                        image_english="uploads/institution/surf.png",
                                                        image_dutch="uploads/institution/surf.png",
                                                        grading_table="https://url.to.gradingtable/gradingtable.html",
@@ -40,6 +55,7 @@ def accept_terms(user):
             terms_agreement.agreed_version = term.version
             terms_agreement.agreed = True
             terms_agreement.save()
+
 
 # Users - Teachers
 all_perms = {
@@ -81,7 +97,6 @@ def create_teacher(username, email, first_name, last_name, institution_name, uid
     user, _ = BadgeUser.objects.get_or_create(username=username, email=email, last_name=last_name,
                                               first_name=first_name, is_teacher=True, invited=True)
 
-
     EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)
     SocialAccount.objects.get_or_create(provider='surf_conext', uid=uid, user=user)
 
@@ -92,7 +107,7 @@ def create_teacher(username, email, first_name, last_name, institution_name, uid
 
 
 institution_admins = [
-    #staff1
+    # staff1
     {
         "username": "joseph+weeler",
         "email": "Joseph+Weeler@university-example.org",
@@ -101,7 +116,7 @@ institution_admins = [
         "institution_name": "university-example.org",
         "uid": "4b8c7b23bb0c99c85b5a0cbe63a826f45e147787",
     },
-    #staff2
+    # staff2
     {
         "username": "anthony+west",
         "email": "Anthony_West@university-example.org",

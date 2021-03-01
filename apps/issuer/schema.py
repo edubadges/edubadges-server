@@ -1,5 +1,3 @@
-import json
-
 import graphene
 from graphene_django.types import DjangoObjectType
 
@@ -56,12 +54,17 @@ class BadgeClassTagType(DjangoObjectType):
         fields = ('name',)
 
 
+def badge_class_type():
+    from issuer.schema import BadgeClassType
+    return BadgeClassType
+
+
 class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin,
                  ExtensionResolverMixin, UserProvisionmentResolverMixin, DjangoObjectType):
     class Meta:
         model = Issuer
         fields = ('entity_id',
-                  'badgeclasses', 'faculty',
+                  'badgeclasses', 'faculty', 'badgeclasses_count',
                   'name_english', 'name_dutch',
                   'image_dutch', 'image_english',
                   'url_english', 'url_dutch',
@@ -69,6 +72,7 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
                   'email', 'created_at', 'content_type_id', 'public_url')
 
     staff = graphene.List(IssuerStaffType)
+    public_badgeclasses = graphene.List(badge_class_type)
     badgeclasses_count = graphene.Int()
     extensions = graphene.List(IssuerExtensionType)
     public_url = graphene.String()
@@ -98,8 +102,11 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
     def resolve_badgeclasses(self, info):
         return self.get_badgeclasses(info.context.user, ['may_read'])
 
+    def resolve_public_badgeclasses(self, info):
+        return self.cached_badgeclasses()
+
     def resolve_badgeclasses_count(self, info):
-        return len(self.get_badgeclasses(info.context.user, ['read']))
+        return self.badgeclasses_count
 
 
 def badge_user_type():
@@ -134,9 +141,9 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     class Meta:
         model = BadgeClass
         fields = ('name', 'entity_id', 'issuer', 'image', 'staff',
-                  'description', 'criteria_url', 'criteria_text',
-                  'created_at', 'expiration_period', 'public_url',
-                  'content_type_id', 'formal')
+                  'description', 'criteria_url', 'criteria_text', 'is_private',
+                  'created_at', 'expiration_period', 'public_url', 'assertions_count'
+                                                                   'content_type_id', 'formal')
 
     staff = graphene.List(BadgeClassStaffType)
     extensions = graphene.List(BadgeClassExtensionType)
@@ -146,6 +153,8 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     pending_enrollments = graphene.List(StudentsEnrolledType)
     badge_assertions = graphene.List(BadgeInstanceType)
     expiration_period = graphene.Int()
+    assertions_count = graphene.Int()
+    is_private = graphene.Boolean()
     public_url = graphene.String()
     terms = graphene.Field(terms_type())
 
@@ -174,14 +183,20 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
         if self.expiration_period:
             return self.expiration_period.days
 
+    def resolve_assertions_count(self, info):
+        return self.assertions_count
+
 
 class Query(object):
     issuers = graphene.List(IssuerType)
     badge_classes = graphene.List(BadgeClassType)
+    public_badge_classes = graphene.List(BadgeClassType)
     badge_instances = graphene.List(BadgeInstanceType)
     issuer = graphene.Field(IssuerType, id=graphene.String())
+    public_issuer = graphene.Field(IssuerType, id=graphene.String())
     badge_class = graphene.Field(BadgeClassType, id=graphene.String())
     badge_instance = graphene.Field(BadgeInstanceType, id=graphene.String())
+    badge_instances_count = graphene.Int()
 
     def resolve_issuers(self, info, **kwargs):
         return [issuer for issuer in Issuer.objects.filter(archived=False)
@@ -194,9 +209,18 @@ class Query(object):
             if issuer.has_permissions(info.context.user, ['may_read']):
                 return issuer
 
+    def resolve_public_issuer(self, info, **kwargs):
+        id = kwargs.get('id')
+        if id is not None:
+            issuer = Issuer.objects.get(entity_id=id, archived=False)
+            return issuer
+
     def resolve_badge_classes(self, info, **kwargs):
         return [bc for bc in BadgeClass.objects.filter(archived=False)
                 if bc.has_permissions(info.context.user, ['may_read'])]
+
+    def resolve_public_badge_classes(self, info, **kwargs):
+        return [bc for bc in BadgeClass.objects.filter(archived=False, is_private=False)]
 
     def resolve_badge_class(self, info, **kwargs):
         id = kwargs.get('id')
@@ -215,3 +239,6 @@ class Query(object):
 
     def resolve_badge_instances(self, info, **kwargs):
         return list(info.context.user.cached_badgeinstances())
+
+    def resolve_badge_instances_count(self, info):
+        return BadgeInstance.objects.count()

@@ -1,5 +1,6 @@
 import datetime
 import json
+import logging
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -25,6 +26,7 @@ from mainsite.exceptions import BadgrValidationError
 from mainsite.models import BadgrApp
 from .provider import SurfConextProvider
 
+logger = logging.getLogger('Badgr.Debug')
 
 def login(request):
     """
@@ -135,12 +137,11 @@ def callback(request):
     set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app.pk))
 
     payload = jwt.get_unverified_claims(id_token)
-    if 'email' not in payload or 'sub' not in payload:
-        error = 'Sorry, your account has no email attached from SURFconext, try another login method.'
-        return render_authentication_error(request, SurfConextProvider.id, error)
-    if "schac_home_organization" not in payload:
-        error = 'Sorry, your account has no home organization attached from SURFconext, try another login method.'
-        return render_authentication_error(request, SurfConextProvider.id, error)
+    for attr in ['sub', 'email', 'schac_home_organization']:
+        if attr not in payload:
+            error = f"Sorry, your account does not have a {attr} attribute. Login with SURFconext and then try again"
+            logger.error(error)
+            return render_authentication_error(request, SurfConextProvider.id, error)
 
     # 3. Complete social login and return to frontend
     provider = SurfConextProvider(request)

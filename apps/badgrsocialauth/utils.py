@@ -4,6 +4,7 @@ import urllib.parse
 import urllib.parse
 import urllib.request
 
+from django.conf import settings
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.providers.base import ProviderAccount
 from rest_framework.authentication import TokenAuthentication
@@ -27,7 +28,7 @@ class BadgrSocialAuthProviderMixin:
     account_class = ProviderAccount
 
     def extract_uid(self, response):
-        return response['sub']
+        return response[settings.EDUID_IDENTIFIER]
 
     def extract_extra_data(self, response):
         return response
