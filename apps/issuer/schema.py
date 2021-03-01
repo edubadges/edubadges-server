@@ -103,7 +103,7 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
         return self.get_badgeclasses(info.context.user, ['may_read'])
 
     def resolve_public_badgeclasses(self, info):
-        return self.cached_badgeclasses()
+        return [bc for bc in self.cached_badgeclasses() if not bc.is_private]
 
     def resolve_badgeclasses_count(self, info):
         return self.badgeclasses_count
