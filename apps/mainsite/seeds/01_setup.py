@@ -9,7 +9,7 @@ from institution.models import Institution, Faculty
 from issuer.models import Issuer, BadgeClass, BadgeClassExtension
 from mainsite.models import BadgrApp
 # BadgrApp
-from mainsite.seeds.constants import EDU_BADGES_FACULTY_NAME, SURF_INSTITUTION_NAME
+from mainsite.seeds.constants import EDU_BADGES_FACULTY_NAME, SURF_INSTITUTION_NAME, EDU_BADGES_ISSUER_NAME
 from .util import add_terms_institution
 
 
@@ -94,9 +94,8 @@ edu_badges_faculty, _ = Faculty.objects.get_or_create(name_english=EDU_BADGES_FA
                                                       description_english=EDU_BADGES_FACULTY_NAME,
                                                       description_dutch=EDU_BADGES_FACULTY_NAME,
                                                       )
-
-surf_issuer, _ = Issuer.objects.get_or_create(name_english="Team edubadges",
-                                              name_dutch="Team edubadges",
+surf_issuer, _ = Issuer.objects.get_or_create(name_english=EDU_BADGES_ISSUER_NAME,
+                                              name_dutch=EDU_BADGES_ISSUER_NAME,
                                               image_english="uploads/issuers/surf.png",
                                               faculty=edu_badges_faculty,
                                               description_english="Team edubadges",
