@@ -1221,6 +1221,8 @@ class BadgeInstanceEvidence(OriginalJsonMixin, cachemodel.CacheModel):
     badgeinstance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE)
     evidence_url = models.CharField(max_length=2083, blank=True, null=True, default=None)
     narrative = models.TextField(blank=True, null=True, default=None)
+    name = models.CharField(max_length=255, blank=True, null=True, default=None)
+    description = models.TextField(blank=True, null=True, default=None)
 
     objects = BadgeInstanceEvidenceManager()
 
