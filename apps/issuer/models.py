@@ -1241,6 +1241,10 @@ class BadgeInstanceEvidence(OriginalJsonMixin, cachemodel.CacheModel):
             json['id'] = self.evidence_url
         if self.narrative:
             json['narrative'] = self.narrative
+        if self.name:
+            json['name'] = self.name
+        if self.description:
+            json['description'] = self.description
         return json
 
 
