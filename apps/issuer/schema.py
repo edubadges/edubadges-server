@@ -152,8 +152,8 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
         model = BadgeClass
         fields = ('name', 'entity_id', 'issuer', 'image', 'staff',
                   'description', 'criteria_url', 'criteria_text', 'is_private',
-                  'created_at', 'expiration_period', 'public_url', 'assertions_count'
-                                                                   'content_type_id', 'formal')
+                  'created_at', 'expiration_period', 'public_url', 'assertions_count',
+                  'content_type_id', 'formal')
 
     staff = graphene.List(BadgeClassStaffType)
     extensions = graphene.List(BadgeClassExtensionType)
