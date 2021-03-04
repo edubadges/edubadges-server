@@ -7,7 +7,7 @@ from mainsite.graphql_utils import JSONType, UserProvisionmentResolverMixin, Con
 from mainsite.utils import generate_image_url
 from staff.schema import IssuerStaffType, BadgeClassStaffType
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
-    BadgeClassAlignment, BadgeClassTag
+    BadgeClassAlignment, BadgeClassTag, BadgeInstanceEvidence
 
 
 class ExtensionResolverMixin(object):
@@ -46,6 +46,12 @@ class BadgeClassAlignmentType(DjangoObjectType):
         model = BadgeClassAlignment
         fields = ('target_name', 'original_json', 'target_url',
                   'target_description', 'target_framework', 'target_code')
+
+
+class BadgeInstanceEvidenceType(DjangoObjectType):
+    class Meta:
+        model = BadgeInstanceEvidence
+        fields = ('evidence_url', 'narrative', 'name', 'description')
 
 
 class BadgeClassTagType(DjangoObjectType):
@@ -124,6 +130,7 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
     extensions = graphene.List(BadgeInstanceExtensionType)
     user = graphene.Field(badge_user_type)
     validation = graphene.Field(JSONType)
+    evidences = graphene.List(BadgeInstanceEvidenceType)
 
     class Meta:
         model = BadgeInstance
@@ -134,6 +141,9 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
 
     def resolve_validation(self, info, **kwargs):
         return self.validate()
+
+    def resolve_evidences(self, info, **kwargs):
+        return self.cached_evidence()
 
 
 class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffResolverMixin,

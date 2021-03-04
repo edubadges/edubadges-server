@@ -842,6 +842,8 @@ class BadgeInstance(BaseAuditedModel,
 
     public = models.BooleanField(default=False)
 
+    include_evidence = models.BooleanField(default=False)
+
     objects = BadgeInstanceManager()
     cached = cachemodel.CacheModelManager()
 
@@ -1117,7 +1119,7 @@ class BadgeInstance(BaseAuditedModel,
                 }
 
         # evidence
-        json['evidence'] = [e.get_json(obi_version) for e in self.cached_evidence()]
+        json['evidence'] = [e.get_json(obi_version) for e in self.cached_evidence()] if self.include_evidence else []
 
         # narrative
         if self.narrative and obi_version == '2_0':
