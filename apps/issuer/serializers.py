@@ -289,7 +289,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         if alignments.__len__() >= alignment_max:
             raise BadgrValidationFieldError('alignments',
                                             "There are too many Related educational framework objects, the maximum is {}.".format(str(alignment_max),
-                                            921)
+                                            922)
             )
         return alignments
 
