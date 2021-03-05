@@ -332,6 +332,8 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
 class EvidenceItemSerializer(serializers.Serializer):
     evidence_url = serializers.URLField(max_length=1024, required=False, allow_blank=True)
     narrative = MarkdownCharField(required=False, allow_blank=True)
+    name = serializers.CharField(max_length=255, required=False)
+    description = StripTagsCharField(max_length=16384, required=False, allow_null=True, allow_blank=True)
 
     def validate(self, attrs):
         if not (attrs.get('evidence_url', None) or attrs.get('narrative', None)):

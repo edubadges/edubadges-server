@@ -669,12 +669,12 @@ class BadgeClass(EntityUserProvisionmentMixin,
         return self.badgeclassextension_set
 
     def issue(self, recipient, created_by=None, allow_uppercase=False, extensions=None, send_email=True,
-              enforce_validated_name=True, **kwargs):
+              enforce_validated_name=True, include_evidence=True, **kwargs):
         if not recipient.validated_name and enforce_validated_name:
             raise serializers.ValidationError('You need a validated_name from an Institution to issue badges.')
         assertion = BadgeInstance.objects.create(
             badgeclass=self, recipient_identifier=recipient.get_recipient_identifier(), created_by=created_by,
-            allow_uppercase=allow_uppercase,
+            allow_uppercase=allow_uppercase, include_evidence=include_evidence,
             user=recipient, extensions=extensions,
             **kwargs
         )
@@ -841,6 +841,8 @@ class BadgeInstance(BaseAuditedModel,
     signature = models.TextField(blank=True, null=True, default=None)
 
     public = models.BooleanField(default=False)
+
+    include_evidence = models.BooleanField(default=False)
 
     objects = BadgeInstanceManager()
     cached = cachemodel.CacheModelManager()
@@ -1117,7 +1119,7 @@ class BadgeInstance(BaseAuditedModel,
                 }
 
         # evidence
-        json['evidence'] = [e.get_json(obi_version) for e in self.cached_evidence()]
+        json['evidence'] = [e.get_json(obi_version) for e in self.cached_evidence()] if self.include_evidence else []
 
         # narrative
         if self.narrative and obi_version == '2_0':
@@ -1221,6 +1223,8 @@ class BadgeInstanceEvidence(OriginalJsonMixin, cachemodel.CacheModel):
     badgeinstance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE)
     evidence_url = models.CharField(max_length=2083, blank=True, null=True, default=None)
     narrative = models.TextField(blank=True, null=True, default=None)
+    name = models.CharField(max_length=255, blank=True, null=True, default=None)
+    description = models.TextField(blank=True, null=True, default=None)
 
     objects = BadgeInstanceEvidenceManager()
 
@@ -1239,6 +1243,10 @@ class BadgeInstanceEvidence(OriginalJsonMixin, cachemodel.CacheModel):
             json['id'] = self.evidence_url
         if self.narrative:
             json['narrative'] = self.narrative
+        if self.name:
+            json['name'] = self.name
+        if self.description:
+            json['description'] = self.description
         return json
 
 
