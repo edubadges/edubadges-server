@@ -284,6 +284,15 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
                                             911)
         return instance
 
+    def validate_alignments(self, alignments):
+        alignment_max = 8
+        if alignments.__len__() >= alignment_max:
+            raise BadgrValidationFieldError('alignments',
+                                            "There are too many Related educational framework objects, the maximum is {}.".format(str(alignment_max),
+                                            921)
+            )
+        return alignments
+
     def to_internal_value_error_override(self, data):
         """Function used in combination with the InternalValueErrorOverrideMixin to override serializer excpetions when
         data is internalised (i.e. the to_internal_value() method is called)"""

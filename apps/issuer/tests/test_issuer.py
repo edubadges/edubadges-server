@@ -46,6 +46,23 @@ class IssuerAPITest(BadgrTestCase):
                                     json.dumps(badgeclass_json_copy), content_type='application/json')
         self.assertEqual(201, response.status_code)
 
+    def test_create_badgeclass_alignments(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        self.setup_staff_membership(teacher1, issuer, may_create=True)
+        badgeclass_json_copy = copy.deepcopy(badgeclass_json)
+        badgeclass_json_copy['issuer'] = issuer.entity_id
+        alignment_json = [{'target_name' :'name',
+                          'target_url': 'http://www.google.com',
+                          'target_description': 'descr',
+                          'target_framework': 'framework',
+                          'target_code': 'code'}]
+        badgeclass_json_copy['alignments'] = alignment_json
+        response = self.client.post("/issuer/badgeclasses/create",
+                                    json.dumps(badgeclass_json_copy), content_type='application/json')
+        self.assertEqual(201, response.status_code)
+
     def test_create_badgeclass_grondslag_failure(self):
         teacher1 = self.setup_teacher(authenticate=True)
         teacher1.institution.grondslag_formeel = None
