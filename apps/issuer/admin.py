@@ -25,17 +25,17 @@ class IssuerAdmin(DjangoObjectActions, ModelAdmin):
 
     readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id', 'archived')
     list_display = ('name_english', 'name_dutch', 'img', 'entity_id', 'created_by', 'created_at', 'archived',
-                    admin_list_linkify('faculty', 'name'), admin_list_linkify('institution', 'name'))
+                    admin_list_linkify('faculty', 'name_english'), admin_list_linkify('institution', 'name_english'))
     list_display_links = ('name_english',)
     list_filter = ('created_at',)
-    search_fields = ('name', 'entity_id')
+    search_fields = ('name_english', 'name_dutch', 'entity_id')
     fieldsets = (
         ('Metadata', {
             'fields': ('created_by', 'created_at', 'source', 'source_url', 'entity_id'),
             'classes': ("collapse",)
         }),
         (None, {
-            'fields': ('image', 'name', 'url', 'email', 'description_english', 'description_dutch', 'badgrapp', 'archived')
+            'fields': ('image', 'name_english', 'url_english', 'name_dutch', 'url_dutch', 'email', 'description_english', 'description_dutch', 'badgrapp', 'archived')
         }),
         ('JSON', {
             'fields': ('old_json',)
