@@ -229,7 +229,7 @@ class Issuer(EntityUserProvisionmentMixin,
 
     def save(self, *args, **kwargs):
         if not self.name_english and not self.name_dutch:
-            raise BadgrValidationError('Either English or Dutch name must be supplied')
+            raise BadgrValidationError('Either English or Dutch name must be supplied', 999)
         self.validate_unique()
         return super(Issuer, self).save(*args, **kwargs)
 

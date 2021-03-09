@@ -1,17 +1,9 @@
-import io
-
 from itertools import chain
 from collections import OrderedDict
-from django.conf import settings
-from django.core.exceptions import ValidationError
-from django.core.files.storage import default_storage
-from django.core.files.uploadedfile import InMemoryUploadedFile
 from PIL import Image
-from resizeimage.resizeimage import resize_contain
 from rest_framework import serializers
-from xml.etree import cElementTree as ET
 
-from mainsite.utils import verify_svg, generate_image_url
+from mainsite.utils import generate_image_url
 
 
 def _decompression_bomb_check(image, max_pixels=Image.MAX_IMAGE_PIXELS):

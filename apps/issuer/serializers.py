@@ -18,9 +18,10 @@ from rest_framework.exceptions import ErrorDetail
 
 from badgeuser.serializers import BadgeUserIdentifierField
 from institution.serializers import FacultySlugRelatedField
+from institution.models import Faculty
 from lti_edu.models import StudentsEnrolled
 from mainsite.drf_fields import ValidImageField
-from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError
+from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError, BadgrValidationMultipleFieldError
 from mainsite.models import BadgrApp
 from mainsite.mixins import InternalValueErrorOverrideMixin
 from mainsite.serializers import StripTagsCharField, MarkdownCharField, OriginalJsonSerializerMixin, BaseSlugRelatedField
@@ -76,8 +77,10 @@ class ExtensionsSaverMixin(object):
             self.add_extensions(instance, add_these_extensions, extension_items)
 
 
-class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
-                       InternalValueErrorOverrideMixin, serializers.Serializer):
+class IssuerSerializer(OriginalJsonSerializerMixin,
+                       ExtensionsSaverMixin,
+                       InternalValueErrorOverrideMixin,
+                       serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierField()
     name_english = StripTagsCharField(max_length=1024, required=False, allow_null=True, allow_blank=True)
@@ -148,27 +151,36 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         return representation
 
     def to_internal_value_error_override(self, data):
-        """Function used in combination with the InternalValueErrorOverrideMixin to override serializer exceptions when
-        data is internalised (i.e. the to_internal_value() method is called)"""
+        """Function used in combination with the InternalValueErrorOverrideMixin to override serializer exceptions
+        before the instance is saved (i.e. the save() method is called)"""
         errors = OrderedDict()
-        if data.get('email', False):
-            try:
-                EmailValidator().__call__(data.get('email'))
-            except ValidationError:
-                e = OrderedDict([('email', [ErrorDetail('Enter a valid email address.', code=509)])])
+        institution = Faculty.objects.get(entity_id=data['faculty']).institution
+        if institution.default_language == institution.DEFAULT_LANGUAGE_DUTCH:
+            if not data.get('name_dutch', False):
+                e = OrderedDict([('name_dutch', [ErrorDetail('Dutch name is required', code=912)])])
                 errors = OrderedDict(chain(errors.items(), e.items()))
-        if not data.get('name_english', False) and not data.get('name_dutch', False):
-            e = OrderedDict([('name_english', [ErrorDetail('Either Dutch or English name is required', code=912)]),
-                             ('name_dutch', [ErrorDetail('Either Dutch or English name is required', code=912)])])
-            errors = OrderedDict(chain(errors.items(), e.items()))
-        if not data.get('description_english', False) and not data.get('description_dutch', False):
-            e = OrderedDict([('description_english', [ErrorDetail('Either Dutch or English description is required', code=913)]),
-                             ('description_dutch', [ErrorDetail('Either Dutch or English description is required', code=913)])])
-            errors = OrderedDict(chain(errors.items(), e.items()))
-        if not data.get('url_english', False) and not data.get('url_dutch', False):
-            e = OrderedDict([('url_english', [ErrorDetail('Either Dutch or English url is required', code=915)]),
-                             ('url_dutch', [ErrorDetail('Either Dutch or English url is required', code=915)])])
-            errors = OrderedDict(chain(errors.items(), e.items()))
+            if not data.get('description_dutch', False):
+                e = OrderedDict([('description_dutch', [ErrorDetail('Dutch description is required', code=913)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+            if not data.get('url_dutch', False):
+                e = OrderedDict([('url_dutch', [ErrorDetail('Dutch url is required', code=915)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+            if not data.get('image_dutch', False):
+                e = OrderedDict([('image_dutch', [ErrorDetail('Dutch image is required', code=918)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+        if institution.default_language == institution.DEFAULT_LANGUAGE_ENGLISH:
+            if not data.get('name_english', False):
+                e = OrderedDict([('name_english', [ErrorDetail('English name is required', code=924)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+            if not data.get('description_english', False):
+                e = OrderedDict([('description_english', [ErrorDetail('English description is required', code=925)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+            if not data.get('url_english', False):
+                e = OrderedDict([('url_english', [ErrorDetail('English url is required', code=923)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+            if not data.get('image_english', False):
+                e = OrderedDict([('image_english', [ErrorDetail('English image is required', code=926)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
         return errors
 
     def add_extensions(self, instance, add_these_extensions, extension_items):

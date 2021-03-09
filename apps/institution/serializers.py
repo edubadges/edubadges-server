@@ -51,18 +51,27 @@ class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Seriali
         """Function used in combination with the InternalValueErrorOverrideMixin to override serializer exceptions when
         data is internalised (i.e. the to_internal_value() method is called)"""
         errors = OrderedDict()
-        if not data.get('name_english', False) and not data.get('name_dutch', False):
-            e = OrderedDict([('name_english', [ErrorDetail('Either Dutch or English name is required', code=912)]),
-                             ('name_dutch', [ErrorDetail('Either Dutch or English name is required', code=912)])])
-            errors = OrderedDict(chain(errors.items(), e.items()))
-        if not data.get('image_english', False) and not data.get('image_dutch', False):
-            e = OrderedDict([('image_english', [ErrorDetail('Either Dutch or English image is required', code=918)]),
-                             ('image_dutch', [ErrorDetail('Either Dutch or English image is required', code=918)])])
-            errors = OrderedDict(chain(errors.items(), e.items()))
-        if not data.get('description_english', False) and not data.get('description_dutch', False):
-            e = OrderedDict([('description_english', [ErrorDetail('Either Dutch or English description is required', code=913)]),
-                             ('description_dutch', [ErrorDetail('Either Dutch or English description is required', code=913)])])
-            errors = OrderedDict(chain(errors.items(), e.items()))
+        institution = Institution.objects.get(entity_id=data['entityId'])
+        if institution.default_language == institution.DEFAULT_LANGUAGE_ENGLISH:
+            if not data.get('name_english', False):
+                e = OrderedDict([('name_english', [ErrorDetail('English name is required', code=924)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+            if not data.get('image_english', False):
+                e = OrderedDict([('image_english', [ErrorDetail('English image is required', code=926)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+            if not data.get('description_english', False):
+                e = OrderedDict([('description_english', [ErrorDetail('English description is required', code=925)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+        if institution.default_language == institution.DEFAULT_LANGUAGE_DUTCH:
+            if not data.get('name_dutch', False):
+                e = OrderedDict([('name_dutch', [ErrorDetail('Dutch name is required', code=912)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+            if not data.get('image_dutch', False):
+                e = OrderedDict([('image_dutch', [ErrorDetail('Dutch image is required', code=918)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+            if not data.get('description_dutch', False):
+                e = OrderedDict([('description_dutch', [ErrorDetail('Dutch description is required', code=913)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
         return errors
 
 
@@ -81,14 +90,21 @@ class FacultySerializer(InternalValueErrorOverrideMixin, serializers.Serializer)
         """Function used in combination with the InternalValueErrorOverrideMixin to override serializer exceptions when
         data is internalised (i.e. the to_internal_value() method is called)"""
         errors = OrderedDict()
-        if not data.get('name_english', False) and not data.get('name_dutch', False):
-            e = OrderedDict([('name_english', [ErrorDetail('Either Dutch or English name is required', code=912)]),
-                             ('name_dutch', [ErrorDetail('Either Dutch or English name is required', code=912)])])
-            errors = OrderedDict(chain(errors.items(), e.items()))
-        if not data.get('description_english', False) and not data.get('description_dutch', False):
-            e = OrderedDict([('description_english', [ErrorDetail('Either Dutch or English description is required', code=913)]),
-                             ('description_dutch', [ErrorDetail('Either Dutch or English description is required', code=913)])])
-            errors = OrderedDict(chain(errors.items(), e.items()))
+        institution = Faculty.objects.get(entity_id=data['entityId']).institution
+        if institution.default_language == institution.DEFAULT_LANGUAGE_ENGLISH:
+            if not data.get('name_english', False):
+                e = OrderedDict([('name_english', [ErrorDetail('English name is required', code=924)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+            if not data.get('description_english', False):
+                e = OrderedDict([('description_english', [ErrorDetail('English description is required', code=925)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+        if institution.default_language == institution.DEFAULT_LANGUAGE_DUTCH:
+            if not data.get('name_dutch', False):
+                e = OrderedDict([('name_dutch', [ErrorDetail('Dutch name is required', code=912)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+            if not data.get('description_dutch', False):
+                e = OrderedDict([('description_dutch', [ErrorDetail('Dutch description is required', code=913)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
         return errors
 
     def update(self, instance, validated_data):
