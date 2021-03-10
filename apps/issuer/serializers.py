@@ -165,9 +165,6 @@ class IssuerSerializer(OriginalJsonSerializerMixin,
             if not data.get('url_dutch', False):
                 e = OrderedDict([('url_dutch', [ErrorDetail('Dutch url is required', code=915)])])
                 errors = OrderedDict(chain(errors.items(), e.items()))
-            if not data.get('image_dutch', False):
-                e = OrderedDict([('image_dutch', [ErrorDetail('Dutch image is required', code=918)])])
-                errors = OrderedDict(chain(errors.items(), e.items()))
         if institution.default_language == institution.DEFAULT_LANGUAGE_ENGLISH:
             if not data.get('name_english', False):
                 e = OrderedDict([('name_english', [ErrorDetail('English name is required', code=924)])])
@@ -177,9 +174,6 @@ class IssuerSerializer(OriginalJsonSerializerMixin,
                 errors = OrderedDict(chain(errors.items(), e.items()))
             if not data.get('url_english', False):
                 e = OrderedDict([('url_english', [ErrorDetail('English url is required', code=923)])])
-                errors = OrderedDict(chain(errors.items(), e.items()))
-            if not data.get('image_english', False):
-                e = OrderedDict([('image_english', [ErrorDetail('English image is required', code=926)])])
                 errors = OrderedDict(chain(errors.items(), e.items()))
         return errors
 

@@ -3,7 +3,10 @@ institution_image = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXMAAAFzCAYAA
 institution_json = {
     "name_english": "electrical-uni-example.eduY",
     "grading_table": "https://www.google.com",
-    "image_english": institution_image
+    "image_english": institution_image,
+    "name_dutch": "electrical-uni-voobeeld.eduY",
+    "image_dutch": institution_image
 }
 
-faculty_json = {'name_english': 'FacultyName', 'description_english': 'Descr Eng'}
+faculty_json = {'name_english': 'FacultyName', 'description_english': 'Descr Eng',
+                'name_dutch': 'FaculteitNaam', 'description_dutch': 'Beschr Nl'}

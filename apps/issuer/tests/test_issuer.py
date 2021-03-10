@@ -23,7 +23,9 @@ class IssuerAPITest(BadgrTestCase):
         response = self.client.post('/issuer/create', json.dumps(issuer_json), content_type='application/json')
         self.assertEqual(201, response.status_code)
         del issuer_json['image_english']
+        del issuer_json['image_dutch']
         issuer_json['name_english'] = 'other_name'
+        issuer_json['name_dutch'] = 'andere_naam'
         response = self.client.post('/issuer/create', json.dumps(issuer_json), content_type='application/json')
         created_no_image_issuer = Issuer.objects.get(entity_id=response.data['entity_id'])
         self.assertEqual(response.data['image_english'], created_no_image_issuer.institution.image_url())
