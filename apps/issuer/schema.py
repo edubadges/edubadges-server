@@ -3,7 +3,8 @@ from graphene_django.types import DjangoObjectType
 
 from lti_edu.schema import StudentsEnrolledType
 from mainsite.graphql_utils import JSONType, UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, \
-    StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin, resolver_blocker_for_students
+    StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin, resolver_blocker_for_students, \
+    DefaultLanguageResolverMixin
 from mainsite.utils import generate_image_url
 from staff.schema import IssuerStaffType, BadgeClassStaffType
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
@@ -66,7 +67,8 @@ def badge_class_type():
 
 
 class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin,
-                 ExtensionResolverMixin, UserProvisionmentResolverMixin, DjangoObjectType):
+                 ExtensionResolverMixin, UserProvisionmentResolverMixin, DefaultLanguageResolverMixin,
+                 DjangoObjectType):
     class Meta:
         model = Issuer
         fields = ('entity_id',
@@ -147,7 +149,8 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
 
 
 class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffResolverMixin,
-                     UserProvisionmentResolverMixin, ImageResolverMixin, ExtensionResolverMixin, DjangoObjectType):
+                     UserProvisionmentResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
+                     DefaultLanguageResolverMixin, DjangoObjectType):
     class Meta:
         model = BadgeClass
         fields = ('name', 'entity_id', 'issuer', 'image', 'staff',

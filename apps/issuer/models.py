@@ -26,7 +26,7 @@ from rest_framework import serializers
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager, BadgeInstanceEvidenceManager
 from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError, BadgrValidationMultipleFieldError
-from mainsite.mixins import ImageUrlGetterMixin
+from mainsite.mixins import ImageUrlGetterMixin, DefaultLanguageMixin
 from mainsite.models import BadgrApp, BaseAuditedModel, ArchiveMixin
 from mainsite.utils import OriginSetting, generate_entity_uri, EmailMessageMaker
 from signing import tsob
@@ -121,6 +121,7 @@ class Issuer(EntityUserProvisionmentMixin,
              PermissionedModelMixin,
              ImageUrlGetterMixin,
              BaseAuditedModel,
+             DefaultLanguageMixin,
              BaseVersionedEntity,
              BaseOpenBadgeObjectModel):
     entity_class_name = 'Issuer'
@@ -440,6 +441,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
                  PermissionedModelMixin,
                  ImageUrlGetterMixin,
                  BaseAuditedModel,
+                 DefaultLanguageMixin,
                  BaseVersionedEntity,
                  BaseOpenBadgeObjectModel):
     entity_class_name = 'BadgeClass'

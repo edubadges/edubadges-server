@@ -51,7 +51,7 @@ class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Seriali
         """Function used in combination with the InternalValueErrorOverrideMixin to override serializer exceptions when
         data is internalised (i.e. the to_internal_value() method is called)"""
         errors = OrderedDict()
-        institution = Institution.objects.get(entity_id=data['entityId'])
+        institution = self.context['request'].user.institution
         if institution.default_language == institution.DEFAULT_LANGUAGE_ENGLISH:
             if not data.get('name_english', False):
                 e = OrderedDict([('name_english', [ErrorDetail('English name is required', code=924)])])
@@ -90,7 +90,7 @@ class FacultySerializer(InternalValueErrorOverrideMixin, serializers.Serializer)
         """Function used in combination with the InternalValueErrorOverrideMixin to override serializer exceptions when
         data is internalised (i.e. the to_internal_value() method is called)"""
         errors = OrderedDict()
-        institution = Faculty.objects.get(entity_id=data['entityId']).institution
+        institution = self.context['request'].user.institution
         if institution.default_language == institution.DEFAULT_LANGUAGE_ENGLISH:
             if not data.get('name_english', False):
                 e = OrderedDict([('name_english', [ErrorDetail('English name is required', code=924)])])

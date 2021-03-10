@@ -19,6 +19,15 @@ class ImageUrlGetterMixin(object):
         return generate_image_url(self.image)
 
 
+class DefaultLanguageMixin(object):
+    """
+    Model mixin to get default language
+    """
+    @property
+    def default_language(self):
+        return self.institution.default_language
+
+
 class InternalValueErrorOverrideMixin(object):
     """
     Mixin used to override errors created when to_internal_value() Serializer method is called

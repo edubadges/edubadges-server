@@ -7,13 +7,14 @@ from django.urls import reverse
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from mainsite.exceptions import BadgrValidationFieldError, BadgrValidationMultipleFieldError
 from mainsite.models import BaseAuditedModel, ArchiveMixin
-from mainsite.mixins import ImageUrlGetterMixin
+from mainsite.mixins import ImageUrlGetterMixin, DefaultLanguageMixin
 from mainsite.utils import OriginSetting
 from staff.mixins import PermissionedModelMixin
 from staff.models import FacultyStaff, InstitutionStaff
 
 
-class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrlGetterMixin, BaseVersionedEntity, BaseAuditedModel):
+class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
+                  ImageUrlGetterMixin, BaseVersionedEntity, BaseAuditedModel):
     
     def __str__(self):
         return self.name
@@ -209,7 +210,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
 
 
 class Faculty(EntityUserProvisionmentMixin,
-              ArchiveMixin,
+              ArchiveMixin, DefaultLanguageMixin,
               PermissionedModelMixin, BaseVersionedEntity, BaseAuditedModel):
 
     def __str__(self):

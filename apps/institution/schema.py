@@ -3,14 +3,14 @@ from graphene_django.types import DjangoObjectType
 
 from issuer.schema import IssuerType
 from mainsite.graphql_utils import UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, StaffResolverMixin, \
-    ImageResolverMixin, PermissionsResolverMixin
+    ImageResolverMixin, PermissionsResolverMixin, DefaultLanguageResolverMixin
 from mainsite.utils import generate_image_url
 from staff.schema import InstitutionStaffType, FacultyStaffType
 from .models import Institution, Faculty
 
 
 class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, StaffResolverMixin,
-                  ContentTypeIdResolverMixin, DjangoObjectType):
+                  ContentTypeIdResolverMixin, DefaultLanguageResolverMixin, DjangoObjectType):
     class Meta:
         model = Faculty
         fields = ('name_english', 'name_dutch', 'entity_id', 'institution', 'created_at', 'description_english', 'description_dutch',
@@ -36,7 +36,7 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
 
 
 class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin,
-                      ContentTypeIdResolverMixin, DjangoObjectType):
+                      ContentTypeIdResolverMixin, DefaultLanguageResolverMixin, DjangoObjectType):
     class Meta:
         model = Institution
         fields = ('entity_id', 'identifier', 'name_english', 'name_dutch', 'staff', 'created_at', 'description_english',

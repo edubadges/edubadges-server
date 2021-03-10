@@ -80,6 +80,18 @@ class PermissionsResolverMixin(object):
         return self.get_permissions(info.context.user)
 
 
+class DefaultLanguageResolverMixin(object):
+    """
+    Schema mixin to resolve default language
+    """
+
+    default_language = graphene.String()
+
+    @resolver_blocker_for_students
+    def resolve_default_language(self, info):
+        return self.default_language
+
+
 class ImageResolverMixin(object):
     """
     Schema mixin to resolve image property

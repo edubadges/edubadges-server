@@ -154,7 +154,7 @@ class IssuerSerializer(OriginalJsonSerializerMixin,
         """Function used in combination with the InternalValueErrorOverrideMixin to override serializer exceptions
         before the instance is saved (i.e. the save() method is called)"""
         errors = OrderedDict()
-        institution = Faculty.objects.get(entity_id=data['faculty']).institution
+        institution = self.context['request'].user.institution
         if institution.default_language == institution.DEFAULT_LANGUAGE_DUTCH:
             if not data.get('name_dutch', False):
                 e = OrderedDict([('name_dutch', [ErrorDetail('Dutch name is required', code=912)])])
