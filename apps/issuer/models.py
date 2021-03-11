@@ -335,6 +335,7 @@ class Issuer(EntityUserProvisionmentMixin,
         obi_version, context_iri = get_obi_context(obi_version)
 
         json = OrderedDict({'@context': context_iri})
+        # TODO - can we add language specifics here?
         json.update(OrderedDict(
             type='Issuer',
             name=self.name,
@@ -397,6 +398,7 @@ class Issuer(EntityUserProvisionmentMixin,
                 raise ValueError('issuer is not assigned to a faculty')
             if not self.faculty.institution:
                 raise ValueError('issuer is not assigned to an institution')
+            # TODO - can we add language specifics here?
             json['faculty'] = {'name': self.faculty.name,
                                'institution': self.faculty.institution.get_json(obi_version=CURRENT_OBI_VERSION)}
 
