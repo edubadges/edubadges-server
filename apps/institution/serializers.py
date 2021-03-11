@@ -29,7 +29,7 @@ class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Seriali
     brin = serializers.CharField(read_only=True)
     name_english = serializers.CharField(max_length=254, required=False, allow_null=True, allow_blank=True)
     name_dutch = serializers.CharField(max_length=254, required=False, allow_null=True, allow_blank=True)
-    grading_table = serializers.URLField(max_length=254, required=False)
+    grading_table = serializers.URLField(max_length=254, required=False, allow_null=True, allow_blank=True)
 
     class Meta:
         model = Institution
@@ -72,6 +72,9 @@ class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Seriali
             if not data.get('description_dutch', False):
                 e = OrderedDict([('description_dutch', [ErrorDetail('Dutch description is required', code=913)])])
                 errors = OrderedDict(chain(errors.items(), e.items()))
+        if institution.institution_type != 'MBO' and not data.get('grading_table', False):
+            e = OrderedDict([('grading_table', [ErrorDetail('Grading Table is required', code=903)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
         return errors
 
 
