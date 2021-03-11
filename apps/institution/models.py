@@ -198,6 +198,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
 
         image_url = OriginSetting.HTTP + reverse('institution_image', kwargs={'entity_id': self.entity_id})
 
+        # TODO - can we add language specifics here?
         json.update(OrderedDict(
             type='Institution',
             name=self.name,
